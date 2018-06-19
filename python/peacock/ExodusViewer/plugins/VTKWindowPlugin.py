@@ -354,6 +354,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         # Clear any-existing VTK objects on the window
         self._window.clear()
+        self._initialized = True
 
         # Create the reader and result chigger objects
         self._reader = chigger.exodus.ExodusReader(self._filename, **self._reader_options)
@@ -362,9 +363,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
         self._result.update()
+        self.windowResult.emit(self._result)
 
         self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
-        #self._colorbar.update()
 
         # Set the interaction mode (2D/3D)
         bmin, bmax = self._result.getBounds()
@@ -385,10 +386,8 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self.onAddObserver(vtk.vtkCommand.RenderEvent, self._callbackRenderEvent)
 
         # Update the RenderWindow
-        self._initialized = True
-        self.windowResult.emit(self._result)
         self._window.update()
-        self.windowColorbar.emit(self._colorbar)
+        self.windowColorbar.emit(self._colorbar) # required after window update (see chigger Colorbar object)
         if camera is None:
             self._callbackRenderEvent() # store initial camera
         self._adjustTimers(start=['update'], stop=['initialize'])

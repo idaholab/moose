@@ -93,8 +93,19 @@ def main(size=None):
     from plugins.CameraPlugin import CameraPlugin
     from plugins.MediaControlPlugin import MediaControlPlugin
 
-    plugins = [lambda: VTKWindowPlugin(size=size), FilePlugin, BlockPlugin, MediaControlPlugin, GoldDiffPlugin,
-               ColorbarPlugin, MeshPlugin, ClipPlugin, ContourPlugin, CameraPlugin, BackgroundPlugin, OutputPlugin]
+    plugins = [lambda: VTKWindowPlugin(size=size),
+               FilePlugin,
+               BlockPlugin,
+               MediaControlPlugin,
+               GoldDiffPlugin,
+               ColorbarPlugin,
+               MeshPlugin,
+               ClipPlugin,
+               ContourPlugin,
+               CameraPlugin,
+               BackgroundPlugin,
+               OutputPlugin]
+
     widget = ExodusPluginManager(plugins=plugins)
     main_window = QtWidgets.QMainWindow()
     main_window.setCentralWidget(widget)

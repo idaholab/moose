@@ -152,7 +152,10 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Whenever the window is update the default ranges must be recalculated.
         """
-        self.updateOptions()
+        if self._result:
+            rng = self._result.getRange(local=self.ColorBarRangeType.isChecked())
+            self._setDefaultLimitHelper(self.RangeMinimumMode, self.RangeMinimum, rng[0])
+            self._setDefaultLimitHelper(self.RangeMaximumMode, self.RangeMaximum, rng[1])
 
     def updateOptions(self):
         """
@@ -169,9 +172,8 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         result_options = dict()
 
         # Min./Max. range
-        rng = self._result.getRange(local=self.ColorBarRangeType.isChecked())
-        self._setLimitHelper(self.RangeMinimumMode, self.RangeMinimum, rng[0], 'min', result_options)
-        self._setLimitHelper(self.RangeMaximumMode, self.RangeMaximum, rng[1], 'max', result_options)
+        result_options['min'] = self._setLimitHelper(self.RangeMinimumMode, self.RangeMinimum)
+        result_options['max'] = self._setLimitHelper(self.RangeMaximumMode, self.RangeMaximum)
 
         # Colormap
         result_options['cmap'] = str(self.ColorMapList.currentText())
@@ -185,34 +187,29 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.resultOptionsChanged.emit(result_options)
 
     @staticmethod
-    def _setLimitHelper(mode, qobject, default, name, options):
+    def _setLimitHelper(mode, qobject):
         """
-        Helper for min/max limit setting.
+        Helper for setting min/max to a user defined value.
         """
         if mode.isChecked():
             qobject.setEnabled(True)
             qobject.setStyleSheet('color:#000000')
             try:
                 value = float(qobject.text())
-                options[name] = value
+                return value
             except ValueError:
                 qobject.setStyleSheet('color:#ff0000')
+        return None
 
-        else:
-            qobject.setText(str(default))
+    @staticmethod
+    def _setDefaultLimitHelper(mode, qobject, default):
+        """
+        Helper for setting the default min/max values.
+        """
+        if not mode.isChecked():
             qobject.setEnabled(False)
-            qobject.setStyleSheet('color:#8C8C8C')
-            options[name] = default
-
-        # Use the default if the text is empty
-        text = qobject.text()
-        if not text:
-            options[name] = default
             qobject.setText(str(default))
-            if mode.isChecked():
-                qobject.setStyleSheet('color:#000000')
-            else:
-                qobject.setStyleSheet('color:#8C8C8C')
+            qobject.setStyleSheet('color:#8C8C8C')
 
     def _setupRangeMinimumMode(self, qobject):
         """
