@@ -335,7 +335,6 @@
 - /VectorPostprocessors/ElementsAlongLine
 - /VectorPostprocessors/ElementsAlongPlane
 - /VectorPostprocessors/IntersectionPointsAlongLine
-- /VectorPostprocessors/LeastSquaresFit
 - /VectorPostprocessors/LineFunctionSampler
 - /VectorPostprocessors/LineMaterialRealSampler
 - /VectorPostprocessors/LineValueSampler
