@@ -59,7 +59,7 @@ make PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3 PETSC_ARCH="" test
 Running the tests should produce some output like the following:
 
 ```bash
-[moose@centos-7 petsc-3.6.3]$ make PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3 PETSC_ARCH="" test
+[moose@centos-7 petsc-3.8.3]$ make PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3 PETSC_ARCH="" test
 Running test examples to verify correct installation
 Using PETSC_DIR=/opt/MOOSE/petsc-3.8.3 and PETSC_ARCH=
 C/C++ example src/snes/examples/tutorials/ex19 run successfully with 1 MPI process
