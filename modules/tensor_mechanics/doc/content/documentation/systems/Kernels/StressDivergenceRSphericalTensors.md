@@ -32,7 +32,7 @@ divergence reduces to
 In deriving the weak form of this equation, the second term in [eqn:strongformspherical]
 goes to zero and the residual contribution in the `StressDivergenceRSphericalTensors` kernel becomes
 \begin{equation}
-\mathbf{R} = \sigma_{rr} \frac{ \partial \phi_i }{ \partial r} + \frac{ \phi_i}{X_r} \left( \sigma_{\phi \phi} + \sigma_{\theta \theta} \right)
+\boldsymbol{R} = \sigma_{rr} \frac{ \partial \phi_i }{ \partial r} + \frac{ \phi_i}{X_r} \left( \sigma_{\phi \phi} + \sigma_{\theta \theta} \right)
 \end{equation}
 
 ## Example Input File syntax

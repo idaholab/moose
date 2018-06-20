@@ -3,7 +3,7 @@
 A material varies from its rest shape due to stress. This departure from the rest shape is called
 deformation or displacement, and the proportion of deformation to original size is called strain. To
 determine the deformed shape and the stress, a governing equation is solved to determine the
-displacement vector $\mathbf{u}$.
+displacement vector $\boldsymbol{u}$.
 
 ## Mathematical Introduction
 
@@ -11,26 +11,34 @@ The strong form of the governing equation on the domain $\Omega$ and boundary
 $\Gamma=\Gamma_{\mathit{t_i}}\cup\Gamma_{\mathit{g_i}}$ can be stated as follows:
 \begin{equation}
 \begin{aligned}
-\nabla \cdot (\mathbf{\sigma} + \mathbf{\sigma}_0) + \mathbf{b} =& \mathbf{0} \;\mathrm{in}\;\Omega \\
-\mathbf{u} =& \mathbf{g}\;\mathrm{in}\;\Gamma_{ \mathbf{g}} \\
-\mathbf{\sigma} \cdot \mathbf{n}=&\mathbf{t}\;\mathrm{in}\;\Gamma_{ \mathbf{t}}
+\nabla \cdot (\boldsymbol{\sigma} + \boldsymbol{\sigma}_0) + \boldsymbol{b} =& \boldsymbol{0} \;\mathrm{in}\;\Omega \\
+\boldsymbol{u} =& \boldsymbol{g}\;\mathrm{in}\;\Gamma_{ \boldsymbol{g}} \\
+\boldsymbol{\sigma} \cdot \boldsymbol{n}=&\boldsymbol{t}\;\mathrm{in}\;\Gamma_{ \boldsymbol{t}}
 \end{aligned}
 \end{equation}
-where $\mathbf{\sigma}$  is the Cauchy stress tensor, $\mathbf{\sigma}_0$ is an additional source of stress (such as pore pressure), $\mathbf{u}$ is the displacement vector, $\mathbf{b}$ is the body force, $\mathbf{n}$ is the unit normal to the boundary, $\mathbf{g}$ is the prescribed displacement on the boundary and $\mathbf{t}$ is the prescribed traction on the boundary. The weak form of the residual equation is expressed as:
+where $\boldsymbol{\sigma}$  is the Cauchy stress tensor, $\boldsymbol{\sigma}_0$
+is an additional source of stress (such as pore pressure), $\boldsymbol{u}$ is
+the displacement vector, $\boldsymbol{b}$ is the body force, $\boldsymbol{n}$ is
+the unit normal to the boundary, $\boldsymbol{g}$ is the prescribed displacement
+on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
+The weak form of the residual equation is expressed as:
 \begin{equation}
-  \mathbb{R} = \left( \mathbf{\sigma} + \mathbf{\sigma}_0), \nabla \phi_m \right) - \left< \mathbf{t}, \phi_m \right> - \left( \mathbf{b}, \phi_m \right)  = \mathbf{0}
+  \mathbb{R} = \left( \boldsymbol{\sigma} + \boldsymbol{\sigma}_0), \nabla \phi_m \right) - \left< \boldsymbol{t}, \phi_m \right> - \left( \boldsymbol{b}, \phi_m \right)  = \boldsymbol{0}
 \end{equation}
-where $(\cdot)$ and $\left< \cdot \right>$ represent volume and boundary integrals, respectively. The solution of the residual equation with Newton's method requires the Jacobian of the residual equation, which can be expressed as (ignoring boundary terms)
+where $(\cdot)$ and $\left< \cdot \right>$ represent volume and boundary integrals,
+respectively. The solution of the residual equation with Newton's method requires
+the Jacobian of the residual equation, which can be expressed as (ignoring boundary
+terms)
 \begin{equation}
-  \mathbb{J} = \left( \frac{\partial \mathbf{\sigma}}{\partial \nabla \mathbf{u}} , \nabla \phi_m \right),
+  \mathbb{J} = \left( \frac{\partial \boldsymbol{\sigma}}{\partial \nabla \boldsymbol{u}} , \nabla \phi_m \right),
 \end{equation}
-assuming $\mathbf{\sigma}_0$ is independent of the strain.
+assuming $\boldsymbol{\sigma}_0$ is independent of the strain.
 
 The material stress response is described by the constitutive model, where the stress is determined
-as a function of the strain, i.e. $\tilde{\mathbf{\sigma}}( \mathbf{\epsilon} -
-\mathbf{\epsilon}_0)$, where $\mathbf{\epsilon}$ is the strain and $\mathbf{\epsilon}_0$ is a stress
+as a function of the strain, i.e. $\tilde{\boldsymbol{\sigma}}( \boldsymbol{\epsilon} -
+\boldsymbol{\epsilon}_0)$, where $\boldsymbol{\epsilon}$ is the strain and $\boldsymbol{\epsilon}_0$ is a stress
 free strain. For example, in linear elasticity (only valid for small strains), the material response
-is linear, i.e.  $\mathbf{\sigma} = \mathbf{\mathcal{C}}(\mathbf{\epsilon} - \mathbf{\epsilon}_0)$.
+is linear, i.e.  $\boldsymbol{\sigma} = \boldsymbol{\mathcal{C}}(\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_0)$.
 
 ## Consistency Between Stress and Strain
 

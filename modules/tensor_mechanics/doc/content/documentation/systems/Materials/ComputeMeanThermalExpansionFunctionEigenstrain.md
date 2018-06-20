@@ -24,9 +24,9 @@ reference temperature, the total thermal expansion eigenstrain is computed as:
 
 \begin{equation}
 \boldsymbol{\epsilon}^{th} = \frac{\bar{\alpha}_{(T_{ref},T)}(T-T_{ref}) - \bar{\alpha}_{(T_{ref},T_{sf})}(T_{sf}-T_{ref})}
-{1 + \bar{\alpha}_{(T_{ref},T_{sf})}(T_{sf}-T_{ref})} \cdot \mathbf{I}
+{1 + \bar{\alpha}_{(T_{ref},T_{sf})}(T_{sf}-T_{ref})} \cdot \boldsymbol{I}
 \end{equation}
-where $T$ is the current temperature and $\mathbf{I}$ is the identity matrix.  Note that the
+where $T$ is the current temperature and $\boldsymbol{I}$ is the identity matrix.  Note that the
 denominator in this equation is a correction to account for the ratio of $L_{(T_{sf})}$ to
 $L_{(T_{ref})}$. As discussed in [cite:niffenegger2012proper], that ratio is very close to 1, so it
 is not strictly necessary to include that correction, but it is done here for completeness.

@@ -8,9 +8,9 @@ The `SumTensorIncrements` material updates a strain tensor by summing coupled
 strain increments as specified by the user.
 \begin{equation}
   \label{eqn:sum_increment_tensor}
-  \mathbf{T} = \mathbf{T}_old + \sum_n \Delta D_n
+  \boldsymbol{T} = \boldsymbol{T}_{old} + \sum_n \Delta D_n
 \end{equation}
-where $\mathbf{T}$ is the calcuated tensor and $\mathbf{D}_n$ are the coupled tensor
+where $\boldsymbol{T}$ is the calcuated tensor and $\boldsymbol{D}_n$ are the coupled tensor
 increments.
 
 ## Example Input File

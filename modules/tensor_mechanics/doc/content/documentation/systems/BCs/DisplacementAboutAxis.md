@@ -13,10 +13,10 @@ The rotating displacement value at the current node is calculated according to
 [eq:rotating_displacement]:
 \begin{equation}
 \label{eq:rotating_displacement}
-u_{rotation} = \mathbf{T}^{-1} \cdot \mathbf{R}_x^{-1} \cdot \mathbf{R}_y^{-1} \cdot \mathbf{R}_z \cdot \mathbf{R}_y \cdot \mathbf{R}_x \cdot \mathbf{T}
+u_{rotation} = \boldsymbol{T}^{-1} \cdot \boldsymbol{R}_x^{-1} \cdot \boldsymbol{R}_y^{-1} \cdot \boldsymbol{R}_z \cdot \boldsymbol{R}_y \cdot \boldsymbol{R}_x \cdot \boldsymbol{T}
 \end{equation}
-where $\mathbf{T}$ is the translation matrix for axes of rotation not centered at the coordinate
-system origin, and $\mathbf{R}_x$, $\mathbf{R}_y$, and $\mathbf{R}_z$ are rotation matrices about the
+where $\boldsymbol{T}$ is the translation matrix for axes of rotation not centered at the coordinate
+system origin, and $\boldsymbol{R}_x$, $\boldsymbol{R}_y$, and $\boldsymbol{R}_z$ are rotation matrices about the
 $\hat{x}$, $\hat{y}$, and $\hat{z}$ coordinate system axes, respectively.
 
 ## Example Input File Syntax

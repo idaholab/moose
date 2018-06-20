@@ -28,27 +28,27 @@ the $\theta$ direction.
 The small, total, strain increment is calculated with the form
 \begin{equation}
   \label{eqn:strain_increment}
-  \Delta \mathbf{\epsilon} = \frac{1}{2} \left( \mathbf{D} + \mathbf{D}^T \right)
-  \text{ where } \mathbf{D} = \mathbf{A} - \bar{\mathbf{F}} + \mathbf{I}
+  \Delta \boldsymbol{\epsilon} = \frac{1}{2} \left( \boldsymbol{D} + \boldsymbol{D}^T \right)
+  \text{ where } \boldsymbol{D} = \boldsymbol{A} - \bar{\boldsymbol{F}} + \boldsymbol{I}
 \end{equation}
-where $\mathbf{I}$ is the Rank-2 identity tensor and the deformation gradient,
-$\mathbf{A}$, and the old deformation gradient,
-$\bar{\mathbf{F}}$, are given as
+where $\boldsymbol{I}$ is the Rank-2 identity tensor and the deformation gradient,
+$\boldsymbol{A}$, and the old deformation gradient,
+$\bar{\boldsymbol{F}}$, are given as
 \begin{equation}
   \label{eqn:deform_grads}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 \epsilon_{rr} & 0 & 0 \\
                 0 & \epsilon_{zz} & 0 \\
                 0 & 0 & \epsilon_{\theta \theta}
               \end{bmatrix}
   \text{  and  }
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 \epsilon_{rr}|_{old} & 0 & 0 \\
                 0 & \epsilon_{zz}|_{old} & 0 \\
                 0 & 0 & \epsilon_{\theta \theta}|_{old}
               \end{bmatrix}
 \end{equation}
-Note that $\bar{\mathbf{F}}$ uses the values of the strain expressions from
+Note that $\bar{\boldsymbol{F}}$ uses the values of the strain expressions from
 the previous time step.
 The components of the tensors in [eqn:deform_grads] are given as
 \begin{equation}

@@ -46,11 +46,11 @@ problems use scalar variables.
 The small strain increment is calculated with the form
 \begin{equation}
   \label{eqn:strain_increment}
-  \Delta \mathbf{\epsilon} = \frac{1}{2} \left( \mathbf{D} + \mathbf{D}^T \right)
-  \text{ where } \mathbf{D} = \mathbf{A} - \bar{\mathbf{F}} + \mathbf{I}
+  \Delta \boldsymbol{\epsilon} = \frac{1}{2} \left( \boldsymbol{D} + \boldsymbol{D}^T \right)
+  \text{ where } \boldsymbol{D} = \boldsymbol{A} - \bar{\boldsymbol{F}} + \boldsymbol{I}
 \end{equation}
-where $\mathbf{I}$ is the Rank-2 identity tensor, $\mathbf{A}$ is the deformation
-gradient, and $\bar{\mathbf{F}}$ is the old deformation gradient.
+where $\boldsymbol{I}$ is the Rank-2 identity tensor, $\boldsymbol{A}$ is the deformation
+gradient, and $\bar{\boldsymbol{F}}$ is the old deformation gradient.
 
 #### $Z$-Direction of Out-of-Plane Strain (Default)
 
@@ -59,20 +59,20 @@ the current and old deformation gradient tensors, used in
 [eqn:strain_increment], are given as
 \begin{equation}
   \label{eqn:deform_grads}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 u_{x,x} & u_{x,y} & 0 \\
                 u_{y,x} & u_{y,y} & 0 \\
                 0 & 0 & F|^{dop}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
   \qquad \text{  and  } \qquad
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 u_{x,x}|_{old} & u_{x,y}|_{old} & 0 \\
                 u_{y,x}|_{old} & u_{y,y}|_{old} & 0 \\
                 0 & 0 & F|^{dop}_{old}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
 \end{equation}
 where $F|^{dop}$ is defined in [eqn:dop_deform_grad].
-Note that $\bar{\mathbf{F}}$ uses the values of the strain expressions from
+Note that $\bar{\boldsymbol{F}}$ uses the values of the strain expressions from
 the previous time step.
 As in the classical presentation of the strain tensor in plane strain problems,
 the components of the deformation tensor associated with the $z$-direction are
@@ -86,17 +86,17 @@ current and old deformation gradient tensors from [eqn:strain_increment] are
 formulated as
 \begin{equation}
   \label{eqn:deform_grads_xdirs}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 F|^{dop} & 0 & 0 \\
                 0 & u_{y,y} & u_{z,y} \\
                 0 & u_{y,z} & u_{z,z}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
   \qquad \text{  and  } \qquad
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 F|^{dop}_{old} & 0 & 0 \\
                 0 & u_{y,y}|_{old} & u_{y,z}|_{old} \\
                 0 & u_{z,y}|_{old}& u_{z,z}|_{old}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
 \end{equation}
 so that the off-diagonal components of the deformation tensors associated with
 the $x$-direction are zeros.
@@ -108,17 +108,17 @@ current and old deformation gradient tensors from [eqn:strain_increment] are
 formulated as
 \begin{equation}
   \label{eqn:deform_grads_ydirs}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 u_{x,x} & 0 & u_{z,x} \\
                 0 & F|^{dop} & 0 \\
                 u_{x,z} & 0 & u_{z,z}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
   \qquad \text{  and  } \qquad
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 u_{x,x}|_{old} & 0 & u_{x,z}|_{old} \\
                 0 & F|^{dop}_{old} & 0 \\
                 u_{z,x}|_{old} & 0 & u_{z,z}|_{old}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
 \end{equation}
 so that the off-diagonal components of the deformation tensors associated with
 the $y$-direction are zeros.
@@ -135,9 +135,9 @@ a $\bar{B}$ formulation to mitigate volumetric locking of the elements.
 The volumetric locking correction is applied to the total strain
 \begin{equation}
   \label{eqn:vlc_strain}
-  \Delta \mathbf{\epsilon}|_{vlc} = \mathbf{\epsilon} + \frac{\left( \mathbf{\epsilon}_V - tr(\mathbf{\Delta \epsilon}) \right)}{3} \cdot \mathbf{I}
+  \Delta \boldsymbol{\epsilon}|_{vlc} = \boldsymbol{\epsilon} + \frac{\left( \boldsymbol{\epsilon}_V - tr(\boldsymbol{\Delta \epsilon}) \right)}{3} \cdot \boldsymbol{I}
 \end{equation}
-where $\mathbf{\epsilon}_V$ is the volumetric strain and $\mathbf{I}$
+where $\boldsymbol{\epsilon}_V$ is the volumetric strain and $\boldsymbol{I}$
 is the Rank-2 identity tensor. For more details about the theory
 behind [eqn:vlc_strain] see the
 [Volumetric Locking Correction](/tensor_mechanics/VolumetricLocking.md)
