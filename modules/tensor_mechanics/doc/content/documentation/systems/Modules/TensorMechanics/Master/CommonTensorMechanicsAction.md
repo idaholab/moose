@@ -1,4 +1,4 @@
-# CommonTensorMechanicsAction
+# Common Tensor Mechanics Action
 
 ## Description
 

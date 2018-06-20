@@ -6,9 +6,9 @@ Tensor Mechanics module requires at least three separate classes to fully descri
 
 !alert note title=Three Tensors Are Required for a Mechanics Problem
 The three tensors that must be defined for any mechanics problem are the the strain
-$\mathbf{\epsilon}$ or strain increment, elasticity tensor $\mathbf{\mathcal{C}}$, and the stress
-$\mathbf{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain)
-$\mathbf{\epsilon}_0$ and additional stress $\mathbf{\sigma}_0$.
+$\boldsymbol{\epsilon}$ or strain increment, elasticity tensor $\boldsymbol{\mathcal{C}}$, and the stress
+$\boldsymbol{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain)
+$\boldsymbol{\epsilon}_0$ and additional stress $\boldsymbol{\sigma}_0$.
 
 !media media/tensor_mechanics-IntroPlugNPlay.png
        style=width:800;float:right;
@@ -20,7 +20,7 @@ reason, all material properties can be prepended by a name defined by the input 
 
 ## Strain Materials
 
-The base material class to create strains ($\mathbf{\epsilon}$) or strain increments is
+The base material class to create strains ($\boldsymbol{\epsilon}$) or strain increments is
 `ComputeStrainBase`; this class is a pure virtual class, requiring that all children override the
 `computeQpProperties()` method.  For all strains the base class defines the property `total_strain`.
 For incremental strains, both finite and small, the compute strain base class defines the properties
@@ -28,8 +28,8 @@ For incremental strains, both finite and small, the compute strain base class de
 the different types of strain formulations is available on the [Strains](tensor_mechanics/Strains.md)
 page.
 
-For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\mathbf{\epsilon} =
-(\nabla \mathbf{u} + \nabla \mathbf{u}^T)/2$. For finite strains, use
+For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\boldsymbol{\epsilon} =
+(\nabla \boldsymbol{u} + \nabla \boldsymbol{u}^T)/2$. For finite strains, use
 [ComputeFiniteStrain](/ComputeFiniteStrain.md) in which an incremental form is employed such that the
 strain_increment and rotation_increment are calculated.
 
@@ -41,7 +41,7 @@ FINITE` parameter, as shown below.
 
 ## Elasticity Tensor Materials
 
-The primary class for creating elasticity tensors ($\mathbf{\mathcal{C_{ijkl}}}$) is
+The primary class for creating elasticity tensors ($\boldsymbol{\mathcal{C_{ijkl}}}$) is
 [ComputeElasticityTensor](/ComputeElasticityTensor.md). This class defines the property
 `_elasticity_tensor`. Given the elastic constants required for the applicable symmetry, such as
 `symmetric9`, this material calculates the elasticity tensor. If you wish to rotate the elasticity
@@ -64,7 +64,7 @@ and for an orthotropic material, such as a metal crystal, is
 
 ## Stress Materials
 
-The base class for constitutive equations to compute a stress ($\mathbf{\sigma}$) is
+The base class for constitutive equations to compute a stress ($\boldsymbol{\sigma}$) is
 `ComputeStressBase`. The `ComputeStressBase` class defines the properties `stress` and
 `elastic_strain`. It is a pure virtual class, requiring all children to override the method
 `computeQpStress()`.
@@ -108,7 +108,7 @@ or intrinsic in English.  The term eigenstrain was introduced by
 
 Thermal strains are a volumetric change resulting from a change in temperature of the material.  The
 change in strains can be either a simple linear function of thermal change,
-e.g. ($\mathbf{\epsilon}_T = \alpha \Delta T$) or a more complex function of temperature.  The
+e.g. ($\boldsymbol{\epsilon}_T = \alpha \Delta T$) or a more complex function of temperature.  The
 thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md)
 computes the thermal strain as a linear function of temperature.  The input file syntax is
 
@@ -137,7 +137,7 @@ automatically generated derivatives, at each quadrature point.
 
 ## Extra Stress Materials
 
-Extra stresses ($\mathbf{\sigma}_0$) can also be pulled into the residual calculation after the
+Extra stresses ($\boldsymbol{\sigma}_0$) can also be pulled into the residual calculation after the
 constitutive model calculation of the stress. The extra stress material property, `extra_stress` is
 defined in the `ComputeExtraStressBase` class and is added to the stress value.
 

@@ -28,26 +28,26 @@ the $\theta$ direction.
 The incremental deformation gradient for the 1D axisymmetric system is defined as
 \begin{equation}
   \label{eqn:incremental_deformation_grad}
-  \hat{\mathbf{F}} = \mathbf{A} : \bar{\mathbf{F}}^{-1} + \mathbf{I}
+  \hat{\boldsymbol{F}} = \boldsymbol{A} : \bar{\boldsymbol{F}}^{-1} + \boldsymbol{I}
 \end{equation}
-where $\mathbf{I}$ is the Rank-2 identity tensor, and the deformation gradient,
-$\mathbf{A}$, and the old deformation gradient,
-$\bar{\mathbf{F}}$, are given as
+where $\boldsymbol{I}$ is the Rank-2 identity tensor, and the deformation gradient,
+$\boldsymbol{A}$, and the old deformation gradient,
+$\bar{\boldsymbol{F}}$, are given as
 \begin{equation}
   \label{eqn:deform_grads}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 \epsilon_{rr} & 0 & 0 \\
                 0 & \epsilon_{zz} & 0 \\
                 0 & 0 & \epsilon_{\theta \theta}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
   \qquad \text{  and  } \qquad
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 \epsilon_{rr}|_{old} & 0 & 0 \\
                 0 & \epsilon_{zz}|_{old} & 0 \\
                 0 & 0 & \epsilon_{\theta \theta}|_{old}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
 \end{equation}
-Note that $\bar{\mathbf{F}}$ uses the values of the strain expressions from
+Note that $\bar{\boldsymbol{F}}$ uses the values of the strain expressions from
 the previous time step.
 The components of the tensors in [eqn:deform_grads] are given as
 \begin{equation}

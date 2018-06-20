@@ -19,8 +19,8 @@ template <>
 InputParameters validParams<ComputeVariableEigenstrain>();
 
 /**
- * ComputeVariableEigenstrain computes an Eigenstrain that is a function of a single
- * variable defined by a base tensor and a scalar function defined in a Derivative Material.
+ * ComputeVariableEigenstrain computes an Eigenstrain that is a function of
+ * variables defined by a base tensor and a scalar function defined in a Derivative Material.
  */
 class ComputeVariableEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrain>
 {

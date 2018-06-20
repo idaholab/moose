@@ -13,7 +13,7 @@ The elastic strain is calculated by subtracting the computed inelastic strain
 increment tensor from the mechanical strain increment tensor.
 \begin{equation}
   \label{cmis_elastic_strain_definition}
-  \Delta \epsilon^{el} = \Delta \epsilon^{mech} - \Delta \epsilon^{inel}
+  \Delta \boldsymbol{\epsilon}^{el} = \Delta \boldsymbol{\epsilon}^{mech} - \Delta \boldsymbol{\epsilon}^{inel}
 \end{equation}
 Mechanical strain, $\epsilon^{mech}$, is considered to be the sum of the elastic
 and inelastic (e.g. plastic and creep) strains.
@@ -132,15 +132,15 @@ calculate the combined Jacobian multiplier: Elastic, Partial, and Nonlinear, whi
 are set by the individual elastic material models.
 \begin{equation}
   \label{eqn:combined_jacobian_mult}
-  \mathbf{J}_m = \begin{cases}
-                  \mathbf{C} & \text{Elastic option} \\
-                  \mathbf{A}^{-1} \cdot \mathbf{C} \text{, where }
-                      \mathbf{A} = \mathbf{I} + \sum_i \mathbf{H}^{cto}_i & \text{Partial option} \\
-                  \prod_i \mathbf{H}^{cto}_i \cdot \mathbf{C}^{-1}  & \text{Nonlinear option}
+  \boldsymbol{J}_m = \begin{cases}
+                  \boldsymbol{C} & \text{Elastic option} \\
+                  \boldsymbol{A}^{-1} \cdot \boldsymbol{C} \text{, where }
+                      \boldsymbol{A} = \boldsymbol{I} + \sum_i \boldsymbol{H}^{cto}_i & \text{Partial option} \\
+                  \prod_i \boldsymbol{H}^{cto}_i \cdot \boldsymbol{C}^{-1}  & \text{Nonlinear option}
                  \end{cases}
 \end{equation}
-where $\mathbf{J}_m$ is the Jacobian multiplier, $\mathbf{C}$ is the elasticity
-tensor, $\mathbf{I}$ is the Rank-4 identity tensor, and $\mathbf{H}^{cto}$ is the
+where $\boldsymbol{J}_m$ is the Jacobian multiplier, $\boldsymbol{C}$ is the elasticity
+tensor, $\boldsymbol{I}$ is the Rank-4 identity tensor, and $\boldsymbol{H}^{cto}$ is the
 consistent tangent operator.
 
 The consistent tangent operator, defined in [eqn:elastic_cto] provides the information
@@ -217,14 +217,14 @@ tangent operator implemented in each individual inelastic model with the
 The consistent tangent operator is then used to find the Jacobian multiplier with
 \begin{equation}
   \label{eqn:single_model_jacobian_mult}
-  \mathbf{J}_m = \begin{cases}
-                  \mathbf{C} & \text{Elastic option} \\
-                  \left(\mathbf{I} + \mathbf{H}^{cto}\right)^{-1} \cdot \mathbf{C} & \text{Partial option} \\
-                  \mathbf{H}^{cto}  & \text{Nonlinear option}
+  \boldsymbol{J}_m = \begin{cases}
+                  \boldsymbol{C} & \text{Elastic option} \\
+                  \left(\boldsymbol{I} + \boldsymbol{H}^{cto}\right)^{-1} \cdot \boldsymbol{C} & \text{Partial option} \\
+                  \boldsymbol{H}^{cto}  & \text{Nonlinear option}
                  \end{cases}
 \end{equation}
-where $\mathbf{J}_m$ is the Jacobian multiplier, $\mathbf{C}$ is the elasticity
-tensor, $\mathbf{I}$ is the Rank-4 identity tensor, and $\mathbf{H}^{cto}$ is the
+where $\boldsymbol{J}_m$ is the Jacobian multiplier, $\boldsymbol{C}$ is the elasticity
+tensor, $\boldsymbol{I}$ is the Rank-4 identity tensor, and $\boldsymbol{H}^{cto}$ is the
 consistent tangent operator, as discussed in the multiple inelastic material
 models section.
 
