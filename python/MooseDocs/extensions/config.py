@@ -22,7 +22,7 @@ class ConfigExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
         self.local_config = dict()
 
-    def reint(self):
+    def reinit(self):
         self.local_config.clear()
 
     def extend(self, reader, renderer):
