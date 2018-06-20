@@ -480,7 +480,7 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
   // The calculate of projection tensor follows
   // C. Miehe and M. Lambrecht, Commun. Numer. Meth. Engng 2001; 17:337~353
 
-  // Compute eigenvectors and eigenvalues of mechanical strain
+  // Compute eigenvectors and eigenvalues of *this
   (*this).symmetricEigenvaluesEigenvectors(eigval, eigvec);
 
   // Separate out positive and negative eigen values
