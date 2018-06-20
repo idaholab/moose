@@ -64,4 +64,10 @@
     command = colorbar_font.py
     imagediff = 'colorbar_font.png'
   [../]
+
+  [./zero_range]
+    type = ImageDiff
+    command = zero_range.py
+    imagediff = 'zero_range.png'
+  [../]
 []

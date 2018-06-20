@@ -124,6 +124,7 @@ class ColorBar(base.ChiggerResult):
         # Set the colormap for the bar
         rng = self.getOption('cmap_range')
         step = (rng[1] - rng[0]) / float(n)
+
         data = vtk.vtkFloatArray()
         data.SetNumberOfTuples(n+1)
         for i in xrange(n+1):
