@@ -40,7 +40,7 @@ public:
 protected:
   std::string _base_name;
 
-  const MaterialProperty<RankFourTensor> & _Cijkl;
+  const MaterialProperty<RankFourTensor> & _dstress_dstrain;
   const MaterialProperty<RankTwoTensor> & _stress;
 
   RankTwoTensor _applied_stress_tensor;
