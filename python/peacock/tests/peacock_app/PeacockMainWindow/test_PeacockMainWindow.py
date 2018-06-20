@@ -30,7 +30,7 @@ class Tests(Testing.PeacockTester):
         w._showConsole()
         self.assertEqual(w.console.isVisible(), True)
         w.setPythonVariable("foo", "bar")
-        w.tab_plugin.InputFileEditorWithMesh.MeshViewerPlugin.reset()
+        w.tab_plugin.InputFileEditorWithMesh.MeshViewerPlugin._reset()
 
     def testConnections(self):
         w = self.newWidget(args=[])
@@ -51,7 +51,7 @@ class Tests(Testing.PeacockTester):
         Testing.process_events(t=2)
         self.assertTrue(os.path.exists("out_transient.e"))
 
-        w.tab_plugin.InputFileEditorWithMesh.MeshViewerPlugin.reset()
+        w.tab_plugin.InputFileEditorWithMesh.MeshViewerPlugin._reset()
 
 
 if __name__ == '__main__':

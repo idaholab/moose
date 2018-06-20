@@ -29,27 +29,28 @@ class TestAddVariableAndBlock(Testing.PeacockAppImageTestCase):
         execute = self._app.main_widget.tab_plugin.ExecuteTabPlugin
 
         # The variable plugin
-        var_plugin = exodus.currentWidget().VariablePlugin
+        var_plugin = exodus.currentWidget().FilePlugin
         blk_selector = exodus.currentWidget().BlockPlugin.BlockSelector
+        cmap_plugin = exodus.currentWidget().ColorbarPlugin
 
         # Run and check output
         self.selectTab(execute)
         self.execute()
         self.selectTab(exodus)
+        Testing.process_events(t=2)
+
         self.assertEqual([var_plugin.VariableList.itemText(i) for i in range(var_plugin.VariableList.count())], ['u'])
-        self.assertEqual([blk_selector.ListWidget.item(i).text() for i in range(blk_selector.ListWidget.count())], ['0'])
+        self.assertEqual([blk_selector.StandardItemModel.item(i).text() for i in range(1, blk_selector.StandardItemModel.rowCount())], ['0'])
 
         # Change the colormap (to test that the colormap is maintained)
-        idx = [var_plugin.ColorMapList.itemText(i) for i in range(var_plugin.ColorMapList.count())].index('magma')
-        var_plugin.ColorMapList.setCurrentIndex(idx)
-        var_plugin.ColorMapList.currentIndexChanged.emit(idx)
+        idx = [cmap_plugin.ColorMapList.itemText(i) for i in range(cmap_plugin.ColorMapList.count())].index('magma')
+        cmap_plugin.ColorMapList.setCurrentIndex(idx)
+        cmap_plugin.ColorMapList.currentIndexChanged.emit(idx)
 
         # Select the 0 block (to test that the block section is maintained)
-        blk_selector.setCheckState([QtCore.Qt.Checked])
-        blk_selector.ListWidget.itemClicked.emit(blk_selector.ListWidget.item(0))
-        self.assertEqual(blk_selector.ListWidget.item(0).checkState(), QtCore.Qt.Checked)
-        self.assertEqual(blk_selector.checkState(), [QtCore.Qt.Checked])
-        self.assertEqual(blk_selector.ListHeader.checkState(), QtCore.Qt.Unchecked)
+        blk_selector.StandardItemModel.item(0).setCheckState(QtCore.Qt.Checked)
+        self.assertEqual(blk_selector.StandardItemModel.item(0).checkState(), QtCore.Qt.Checked)
+        self.assertEqual(blk_selector.StandardItemModel.item(1).checkState(), QtCore.Qt.Checked)
 
         # Add a variable
         self.selectTab(input_)
@@ -75,23 +76,25 @@ class TestAddVariableAndBlock(Testing.PeacockAppImageTestCase):
 
         # Run and check output
         self.selectTab(execute)
+        Testing.process_events(t=2)
         self.execute()
         self.selectTab(exodus)
+
         self.assertEqual([var_plugin.VariableList.itemText(i) for i in range(var_plugin.VariableList.count())], ['New_0', 'u'])
 
         # Check colormap
-        self.assertEqual(self._window._result.getOption('cmap'), 'magma')
-        self.assertEqual(var_plugin.ColorMapList.currentText(), 'magma')
+        self.assertEqual(self._window._result.getOption('cmap'), 'default')
+        self.assertEqual(cmap_plugin.ColorMapList.currentText(), 'default')
 
         # Check variable
-        self.assertEqual(self._window._result.getOption('variable'), 'u')
-        self.assertEqual(var_plugin.VariableList.currentText(), 'u')
+        self.assertEqual(self._window._result.getOption('variable'), 'New_0')
+        self.assertEqual(var_plugin.VariableList.currentText(), 'New_0')
 
         # Check blocks
-        self.assertEqual([blk_selector.ListWidget.item(i).text() for i in range(blk_selector.ListWidget.count())], ['0', '1980'])
-        self.assertEqual(blk_selector.ListWidget.item(0).checkState(), QtCore.Qt.Checked)
-        self.assertEqual(blk_selector.ListWidget.item(1).checkState(), QtCore.Qt.Unchecked)
-        self.assertEqual(blk_selector.checkState(), [QtCore.Qt.Checked, QtCore.Qt.Unchecked])
+        self.assertEqual([blk_selector.StandardItemModel.item(i).text() for i in range(1, blk_selector.StandardItemModel.rowCount())], ['0', '1980'])
+        self.assertEqual(blk_selector.StandardItemModel.item(0).checkState(), QtCore.Qt.Checked)
+        self.assertEqual(blk_selector.StandardItemModel.item(1).checkState(), QtCore.Qt.Checked)
+        self.assertEqual(blk_selector.StandardItemModel.item(2).checkState(), QtCore.Qt.Checked)
 
 
 if __name__ == '__main__':

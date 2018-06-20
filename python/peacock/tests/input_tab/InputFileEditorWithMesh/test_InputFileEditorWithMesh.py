@@ -27,6 +27,9 @@ class BaseTests(Testing.PeacockTester):
         self.highlight_nodes = "meshrender_highlight_nodes.png"
         self.highlight_dup = "meshrender_highlight_dup.png"
         self.basic_mesh = "meshrender_basic.png"
+        self.mesh_toggle = "meshrender_toggle.png"
+        self.mesh_toggle_disable = "meshrender_toggle_disable.png"
+
         Testing.remove_file(self.highlight_all)
         Testing.remove_file(self.highlight_right)
         Testing.remove_file(self.highlight_left)
@@ -34,6 +37,8 @@ class BaseTests(Testing.PeacockTester):
         Testing.remove_file(self.highlight_nodes)
         Testing.remove_file(self.highlight_dup)
         Testing.remove_file(self.basic_mesh)
+        Testing.remove_file(self.mesh_toggle)
+        Testing.remove_file(self.mesh_toggle_disable)
         Testing.clean_files()
         self.num_time_steps = None
         self.time_step_changed_count = 0
@@ -285,9 +290,33 @@ class Tests(BaseTests):
         camera = vtk.vtkCamera()
         camera.SetViewUp(-0.7786, 0.2277, 0.5847)
         camera.SetPosition(-2, -2, -1)
-        w.MeshViewerPlugin.onCameraChanged(camera)
+        w.MeshViewerPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847),(-2, -2, -1),(0,0,0))
         w.vtkwin.onWrite(self.highlight_dup)
         self.assertFalse(Testing.gold_diff(self.highlight_dup))
+
+    def testMeshToggle(self):
+        main_win, w = self.newWidget()
+        w.setInputFile(self.input_file)
+        tree = w.InputFileEditorPlugin.tree
+        b = tree.getBlockInfo("/Mesh")
+        self.assertNotEqual(b, None)
+        self.assertTrue(b.included)
+        w.blockChanged(b)
+
+        w.vtkwin.onWrite(self.mesh_toggle)
+        self.assertFalse(Testing.gold_diff(self.mesh_toggle))
+
+        b.included = False
+        self.assertFalse(b.included)
+        w.blockChanged(b)
+        w.vtkwin.onWrite(self.mesh_toggle_disable)
+        self.assertFalse(Testing.gold_diff(self.mesh_toggle_disable))
+
+        b.included = True
+        self.assertTrue(b.included)
+        w.blockChanged(b)
+        w.vtkwin.onWrite(self.mesh_toggle)
+        self.assertFalse(Testing.gold_diff(self.mesh_toggle))
 
 if __name__ == '__main__':
     Testing.run_tests()

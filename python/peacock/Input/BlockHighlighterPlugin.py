@@ -9,11 +9,10 @@
 
 from PyQt5 import QtCore, QtWidgets
 import chigger
-import peacock
 from peacock.ExodusViewer.plugins.ExodusPlugin import ExodusPlugin
 from MeshBlockSelectorWidget import MeshBlockSelectorWidget
 
-class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
+class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
     Widget for controlling the visible blocks/nodesets/sidesets of the mesh.
     Mirrored off of peaocock.Exodus.plugins.BlockPlugin
@@ -23,14 +22,14 @@ class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin
     windowRequiresUpdate = QtCore.pyqtSignal()
     highlight = QtCore.pyqtSignal(object, object, object)
 
-    def __init__(self, collapsible_layout=QtWidgets.QHBoxLayout, **kwargs):
-        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=collapsible_layout)
-        ExodusPlugin.__init__(self, **kwargs)
+    def __init__(self, **kwargs):
+        super(BlockHighlighterPlugin, self).__init__(**kwargs)
 
-        self.setTitle('Highlight')
+        self.setMainLayoutName('RightLayout')
+        self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        self.MainLayout = QtWidgets.QHBoxLayout(self)
+        self.MainLayout.setSpacing(10)
         self.setEnabled(False)
-
-        self.MainLayout = self.collapsibleLayout()
 
         # Block, nodeset, and sideset selector widgets
         self.BlockSelector = MeshBlockSelectorWidget(chigger.exodus.ExodusReader.BLOCK, 'Blocks:')
@@ -41,66 +40,23 @@ class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin
         self.MainLayout.addWidget(self.SidesetSelector)
         self.MainLayout.addWidget(self.NodesetSelector)
 
-        self.BlockSelector.selectionChanged.connect(self.setBlock)
-        self.SidesetSelector.selectionChanged.connect(self.setSideset)
-        self.NodesetSelector.selectionChanged.connect(self.setNodeset)
-
         self.setup()
 
-    def onWindowCreated(self, *args):
-        """
-        Initializes the selector widgets for the supplied reader/results.
-        """
-        super(BlockHighlighterPlugin, self).onWindowCreated(*args)
-        self.BlockSelector.updateBlocks(self._reader, True)
-        self.SidesetSelector.updateBlocks(self._reader, True)
-        self.NodesetSelector.updateBlocks(self._reader, True)
-        self.__updateVariableState()
-
-    def onWindowUpdated(self):
+    def onWindowReader(self, reader):
         """
         Update boundary/nodeset visibility when window is updated.
         """
-        if self._reader:
-            self.blockSignals(True)
-            self.BlockSelector.updateBlocks(self._reader)
-            self.SidesetSelector.updateBlocks(self._reader)
-            self.NodesetSelector.updateBlocks(self._reader)
-            self.blockSignals(False)
-            self.__updateVariableState()
+        self.blockSignals(True)
+        self.BlockSelector.updateBlocks(reader)
+        self.SidesetSelector.updateBlocks(reader)
+        self.NodesetSelector.updateBlocks(reader)
+        self.blockSignals(False)
 
-    def setBlock(self):
-        """
-        Highlights a block and resets nodesets/sidesets
-        """
-        block = self.BlockSelector.getBlocks()
-        self.SidesetSelector.reset()
-        self.NodesetSelector.reset()
-        self.highlight.emit(block, None, None)
-
-    def setSideset(self):
-        """
-        Highlights a sideset and resets nodesets/blocks
-        """
-        sideset = self.SidesetSelector.getBlocks()
-        self.BlockSelector.reset()
-        self.NodesetSelector.reset()
-        self.highlight.emit(None, sideset, None)
-
-    def setNodeset(self):
-        """
-        Highlights a nodeset and resets sidesets/blocks
-        """
-        nodeset = self.NodesetSelector.getBlocks()
-        self.BlockSelector.reset()
-        self.SidesetSelector.reset()
-        self.highlight.emit(None, None, nodeset)
-
-    def __updateVariableState(self):
+    def onWindowResult(self, result):
         """
         Enable/disable the nodeset/sidest selection based on variable type.
         """
-        varinfo = self._result[0].getCurrentVariableInformation()
+        varinfo = result[0].getCurrentVariableInformation()
         if varinfo:
             if varinfo.object_type == chigger.exodus.ExodusReader.ELEMENTAL:
                 self.SidesetSelector.setEnabled(False)
@@ -108,3 +64,30 @@ class BlockHighlighterPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin
             else:
                 self.SidesetSelector.setEnabled(True)
                 self.NodesetSelector.setEnabled(True)
+
+    def _setupBlockSelector(self, qobject):
+        qobject.selectionChanged.connect(self._callbackBlockSelector)
+
+    def _callbackBlockSelector(self):
+        block = self.BlockSelector.getBlocks()
+        self.SidesetSelector.reset()
+        self.NodesetSelector.reset()
+        self.highlight.emit(block, None, None)
+
+    def _setupSidesetSelector(self, qobject):
+        qobject.selectionChanged.connect(self._callbackSidesetSelector)
+
+    def _callbackSidesetSelector(self):
+        sideset = self.SidesetSelector.getBlocks()
+        self.BlockSelector.reset()
+        self.NodesetSelector.reset()
+        self.highlight.emit(None, sideset, None)
+
+    def _setupNodesetSelector(self, qobject):
+        qobject.selectionChanged.connect(self._callbackNodesetSelector)
+
+    def _callbackNodesetSelector(self):
+        nodeset = self.NodesetSelector.getBlocks()
+        self.BlockSelector.reset()
+        self.SidesetSelector.reset()
+        self.highlight.emit(None, None, nodeset)

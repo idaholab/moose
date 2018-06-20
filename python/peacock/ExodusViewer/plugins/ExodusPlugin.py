@@ -6,102 +6,84 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import peacock
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 class ExodusPlugin(peacock.base.Plugin):
     """
     Plugin class for the Exodus volume rendering portion of Peacock.
     """
 
-    def __init__(self, layout='LeftLayout', settings_key=""):
-        super(ExodusPlugin, self).__init__(layout=layout, settings_key=settings_key)
+    def __init__(self, layout='LeftLayout', settings_key="", **kwargs):
+        super(ExodusPlugin, self).__init__(layout=layout, settings_key=settings_key, **kwargs)
 
-        # The default layout name
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
 
         # Ubiquitous member variables
-        self._variable = None
         self._filename = None
-        self._reader = None
-        self._result = None
-        self._window = None
-
-        # Disable the widget (the onWindowCreated slot will enable)
+        self._variable = None
+        self._component = -1
         self.setEnabled(False)
 
+    @QtCore.pyqtSlot()
     def onPlayStart(self):
         """
         Disables the plugin when playing begins.
         """
         self.setEnabled(False)
 
+    @QtCore.pyqtSlot()
     def onPlayStop(self):
         """
         Enables widget when the playing stops.
         """
         self.setEnabled(True)
 
-    def onFileChanged(self, filename):
+    def onSetFilename(self, filename):
         """
-        Stores filename in the plugin.
+        Stores the current filename. (see FilePlugin)
+        """
+        self._filename = str(filename) if filename else None
 
-        Args:
-            filename[str]: The name of the current file being viewed.
+    def onSetVariable(self, variable):
         """
-        self._filename = filename
+        Stores the current variable. (see FilePlugin)
+        """
+        self._variable = str(variable) if variable else None
 
-    def onVariableChanged(self, variable):
+    def onSetComponent(self, component):
         """
-        Stores the current variable.
+        Stores the current variable component. (see FilePlugin)
+        """
+        self._component = component if (component is not None) else -1
 
-        Args:
-            variable[str]: The name of the current variable being viewed.
+    def onCurrentChanged(self, index):
         """
-        self._variable = variable
+        Called by ExodusViewer when the tab is changed.
+        """
+        pass
 
-    def onWindowCreated(self, reader, result, window):
+    def onSetEnableWidget(self, value):
         """
-        Stores the created chigger objects for use by the plugin.
+        Enables/disables the widget after the VTKRenderWindow is created or destroyed.
+        """
+        self.setEnabled(value)
 
-        Args:
-            reader[chigger.ExodusReader]: The exodus file reader.
-            result[chigger.ExodusResult]: The result renderer.
-        """
-        self.setEnabled(True)
-        self._reader = reader
-        self._result = result
-        self._window = window
-
-    def onWindowReset(self):
-        """
-        Clears the stored data and disables the widget
-        """
-        self.setEnabled(False)
-        self._reader = None
-        self._result = None
-        self._window = None
-
-    def stateKey(self, other=""):
+    def stateKey(self):
         """
         Generates a (mostly) unique key for use in saving state of a widget.
         """
-        s = self.__class__.__name__
-        if self._filename:
-            s += "_" + self._filename
-        s += str(other)
-        return s
+        return (self._filename, self._variable, self._component)
 
-    def onPreFileChanged(self):
+    def setup(self):
         """
-        Save the state of the widget before the file changes
+        Setup the Exodus widgets with a uniform margins and "flat" style.
         """
-        if self.isEnabled():
-            self.store(self.stateKey(), 'Filename')
+        super(ExodusPlugin, self).setup()
 
-    def onPostFileChanged(self):
-        """
-        Load the state of the widget based on the new file name.
-        """
-        self.load(self.stateKey(), 'Filename')
+        if hasattr(self, 'MainLayout'):
+            self.MainLayout.setContentsMargins(5,5,5,5)
+            self.MainLayout.setSpacing(5)
+
+        if isinstance(self, QtWidgets.QGroupBox):
+            self.setFlat(True)

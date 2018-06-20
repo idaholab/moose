@@ -10,7 +10,6 @@
 import os
 import sys
 import glob
-import vtk
 from PyQt5 import QtCore, QtWidgets
 import peacock
 from ExodusPlugin import ExodusPlugin
@@ -43,37 +42,55 @@ class ExodusComboBox(QtWidgets.QComboBox):
         """
         return [self.itemData(i) for i in range(self.count())].index(full_file)
 
+class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
-class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
-    Plugin for controlling the current file being visualized.
+    The plugin provides an interface for selecting the file, variable, and component to render.
+
+    This plugin provides a signal (stateChanged) when any of the three items change, this allows
+    other ExodusPlugin objects to load and store state of widgets based on what is being plotted.
     """
 
-    #: pyqtSignal: Emitted when a file is changed via the file select.
-    fileChanged = QtCore.pyqtSignal(str)
-    #: pyqtSignal: Emitted right before the fileChanged is emitted
-    preFileChanged = QtCore.pyqtSignal()
-    #: pyqtSignal: Emitted right after the fileChanged is emitted
-    postFileChanged = QtCore.pyqtSignal()
+    #: pyqtSignal: Emitted when the window needs to be updated
+    windowRequiresUpdate = QtCore.pyqtSignal()
 
-    #: pyqtSignal: Emitted when the file has changed and a camera has been stashed
-    cameraChanged = QtCore.pyqtSignal(vtk.vtkCamera)
+    #: pyqtSignal: Emitted when the filename is changed
+    setFilename = QtCore.pyqtSignal(str)
 
+    #: pyqtSignal: Emitted when the variable is changed
+    setVariable = QtCore.pyqtSignal(str)
 
-    def __init__(self):
+    #: pyqtSignal: Emitted when the variable component is changed
+    setComponent = QtCore.pyqtSignal(int)
+
+    def __init__(self, parent=None):
         super(FilePlugin, self).__init__()
-
-        # Setup this widget widget
-        self.setEnabled(True) # The base disables, this needs to be enabled so the open button is available
-        self.setTitle('Select File(s)')
-        self.MainLayout = self.collapsibleLayout()
+        self.MainLayout = QtWidgets.QVBoxLayout(self)
 
         self.OpenFiles = QtWidgets.QPushButton()
-        self.AvailableFiles = ExodusComboBox()
+        self.FileList = ExodusComboBox()
+        self.VariableList = QtWidgets.QComboBox()
+        self.ComponentList = QtWidgets.QComboBox()
 
-        self.MainLayout.addWidget(self.OpenFiles)
-        self.MainLayout.addWidget(self.AvailableFiles)
+        # The open button should always be available
+        self.setEnabled(True)
+        self.FileList.setEnabled(False)
+        self.VariableList.setEnabled(False)
+        self.ComponentList.setEnabled(False)
 
+        # Top
+        self.TopLayout = QtWidgets.QHBoxLayout()
+        self.TopLayout.addWidget(self.OpenFiles)
+        self.TopLayout.addWidget(self.FileList)
+        self.MainLayout.addLayout(self.TopLayout)
+
+        # Bottom
+        self.BottomLayout = QtWidgets.QHBoxLayout()
+        self.BottomLayout.addWidget(self.VariableList)
+        self.BottomLayout.addWidget(self.ComponentList)
+        self.MainLayout.addLayout(self.BottomLayout)
+
+        # File dialog
         self.FileOpenDialog = QtWidgets.QFileDialog()
         self.FileOpenDialog.setWindowTitle('Select ExodusII File(s)')
         self.FileOpenDialog.setNameFilter('ExodusII Files (*.e)')
@@ -83,62 +100,175 @@ class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
         self.FileOpenDialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
         self.FileOpenDialog.setProxyModel(ExodusFilterProxyModel())
 
-        # A cache for camera settings
-        self._cameras = dict()
+        self.MainLayout.setSpacing(0)
+        self.TopLayout.setSpacing(10)
+        self.BottomLayout.setSpacing(10)
 
         self.setup()
+        self._reader = None
 
     def getFilenames(self):
         """
-        Return the current filenames.
+        Return the list of available files. (see ExodusViewer)
         """
-        return [self.AvailableFiles.itemData(i) for i in range(self.AvailableFiles.count())]
+        return [self.FileList.itemData(i) for i in range(self.FileList.count())]
 
     def onSetFilenames(self, filenames):
         """
         Updates the list of available files for selection.
 
+        This is the entry point for loading a file via the FilePlugin.
+
         Args:
-            filenames[list]: The filenames to include in the AvailableFiles widget.
+            filenames[list]: The filenames to include in the FileList widget.
         """
 
         # Clear the existing list of files
-        self.AvailableFiles.blockSignals(True)
-        self.AvailableFiles.clear()
-        self.AvailableFiles.blockSignals(False)
+        self.FileList.clear()
 
         # Populate the list of files
         for full_file in filenames:
-            self.AvailableFiles.addItem(os.path.basename(full_file), full_file)
+            self.FileList.addItem(os.path.basename(full_file), full_file)
 
         # Reset the current index to the first item
-        self.AvailableFiles.setCurrentIndex(0)
+        self.FileList.blockSignals(True)
+        self.FileList.setCurrentIndex(0)
+        self.FileList.blockSignals(False)
 
-    def _setupAvailableFiles(self, qobject):
+    def onWindowReader(self, reader):
         """
-        The setup method for AvailableFiles widget.
+        This is called after the ExodusReader is first created, see VTKWindowPlugin.
+        """
+        self._reader = reader
+        self._initVariableList(reader)
+
+    def onWindowReset(self):
+        """
+        Remove the stored reader.
+        """
+        self._reader = None
+
+    def onWindowUpdated(self):
+        """
+        Check that the variable names have not changed, update if they have.
+        """
+        if self._reader is not None:
+            variables = self._reader.getVariableInformation(var_types=[self._reader.NODAL, self._reader.ELEMENTAL])
+            names = [var.name for var in variables.itervalues()]
+            current = [self.VariableList.itemText(i) for i in range(self.VariableList.count())]
+            if names != current:
+                self._initVariableList(self._reader)
+
+    def _initVariableList(self, reader):
+        """
+        Initialize the variable list from the supplied reader.
+        """
+        variables = reader.getVariableInformation(var_types=[reader.NODAL, reader.ELEMENTAL])
+        self.VariableList.blockSignals(True)
+        self.VariableList.clear()
+        for vinfo in variables.itervalues():
+            self.VariableList.addItem(vinfo.name, vinfo)
+
+        # Set the current variable from existing state or the first item
+        key = (self._filename, None, None)
+        if self.hasState(self.VariableList, key=key):
+            self.load(self.VariableList, key=key)
+        else:
+            self.VariableList.setCurrentIndex(0)
+        self.VariableList.blockSignals(False)
+        self._variable = str(self.VariableList.currentText())
+
+        # Set the current component from existing state or the first item
+        self.ComponentList.blockSignals(True)
+        key = (self._filename, self._variable, None)
+        if self.hasState(self.ComponentList, key=key):
+            self.load(self.ComponentList, key=key)
+        else:
+            self.ComponentList.setCurrentIndex(0)
+        self.ComponentList.blockSignals(False)
+        self._component = int(self.ComponentList.currentData())
+
+        # Enable the widget
+        self.FileList.setEnabled(True)
+        self.VariableList.setEnabled(True)
+        self.updateOptions()
+
+    def updateOptions(self):
+        """
+        Update the widget based on current selections.
+        """
+        # Update component widgets
+        index = self.VariableList.currentIndex()
+        data = self.VariableList.itemData(index)
+        if data is None:
+            self.ComponentList.setEnabled(False)
+        elif data and data.num_components == 1:
+            self._component = -1
+            self.ComponentList.blockSignals(True)
+            self.ComponentList.setCurrentIndex(0)
+            self.ComponentList.setEnabled(False)
+            self.ComponentList.blockSignals(False)
+        else:
+            self.ComponentList.setEnabled(True)
+
+        self.setVariable.emit(self._variable)
+        self.setComponent.emit(self._component)
+
+    def _setupFileList(self, qobject):
+        """
+        The setup method for FileList widget.
 
         Args:
             qobject: The widget being setup.
         """
-        qobject.currentIndexChanged.connect(self._callbackAvailableFiles)
+        qobject.currentIndexChanged.connect(self._callbackFileList)
 
-    def _callbackAvailableFiles(self, index):
+    def _callbackFileList(self, index):
         """
         Callback for file selection.
 
         Args:
             index[int]: The index of the selected item.
         """
-        full_file = str(self.AvailableFiles.itemData(index))
-        self.preFileChanged.emit()
-        self.fileChanged.emit(full_file)
-        self.postFileChanged.emit()
+        self._filename = str(self.FileList.itemData(index))
+        self.setFilename.emit(self._filename)
+        self.windowRequiresUpdate.emit()
 
-        if full_file in self._cameras:
-            self.cameraChanged.emit(self._cameras[full_file])
-        elif self._result:
-            self._cameras[full_file] = self._result.getVTKRenderer().GetActiveCamera()
+    def _setupVariableList(self, qobject):
+        """
+        Setup method for variable selection.
+        """
+        qobject.currentIndexChanged.connect(self._callbackVariableList)
+
+    def _callbackVariableList(self, index):
+        """
+        Called when a variable is selected.
+        """
+        self._variable = str(self.VariableList.currentText())
+        self.store(self.VariableList, key=(self._filename, None, None))
+        self.load(self.ComponentList, key=(self._filename, self._variable, None))
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _setupComponentList(self, qobject):
+        """
+        Setup for component selection.
+        """
+        qobject.addItem('Magnitude', -1)
+        qobject.addItem('x', 0)
+        qobject.addItem('y', 1)
+        qobject.addItem('z', 2)
+        qobject.setEnabled(False)
+        self.ComponentList.currentIndexChanged.connect(self._callbackComponentList)
+
+    def _callbackComponentList(self):
+        """
+        Called when the component is selected.
+        """
+        self._component = self.ComponentList.currentData()
+        self.store(self.ComponentList, key=(self._filename, self._variable, None))
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
 
     def _setupOpenFiles(self, qobject):
         """
@@ -162,38 +292,30 @@ class FilePlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
 
         if self.FileOpenDialog.exec_() == QtWidgets.QDialog.Accepted:
             filenames = [str(fname) for fname in list(self.FileOpenDialog.selectedFiles())]
-            if self.AvailableFiles.count() == 0:
+            if self.FileList.count() == 0:
                 self.onSetFilenames(filenames)
         else:
             return
 
         # Current index
-        index = self.AvailableFiles.currentIndex()
+        index = self.FileList.currentIndex()
 
         # Block signals so that the fileChanged signal is not emitted with each change
-        self.AvailableFiles.blockSignals(True)
+        self.FileList.blockSignals(True)
 
         # Append the list of available files
         for full_file in filenames:
-            if not self.AvailableFiles.hasItem(full_file):
-                self.AvailableFiles.addItem(os.path.basename(full_file), full_file)
+            if not self.FileList.hasItem(full_file):
+                self.FileList.addItem(os.path.basename(full_file), full_file)
 
             # If the file exists, then update the current index to this new file
             if os.path.exists(full_file):
-                index = self.AvailableFiles.itemIndex(full_file)
+                index = self.FileList.itemIndex(full_file)
 
         # Restore signals and update the index, if it changed
-        self.AvailableFiles.blockSignals(False)
-
-        if index != self.AvailableFiles.currentIndex():
-            self.AvailableFiles.setCurrentIndex(index)
-
-    def onWindowReset(self):
-        """
-        We want to the user to always be able to open files.
-        """
-        super(FilePlugin, self).onWindowReset()
-        self.setEnabled(True)
+        self.FileList.blockSignals(False)
+        if index != self.FileList.currentIndex():
+            self.FileList.setCurrentIndex(index)
 
 def main(size=None):
     """
@@ -209,7 +331,8 @@ def main(size=None):
 if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
+    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e', 'foo.e')
+    #filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
     widget, _ = main(size=[600,600])
-    widget.initialize(filenames)
+    widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

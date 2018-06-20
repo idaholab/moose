@@ -32,7 +32,7 @@ class ChiggerSource(ChiggerFilterSourceBase):
         opt.add('orientation', None, "The orientation of the object.", vtype=list)
         opt.add('rotation', [0, 0, 0], "The rotation of the object about x, y, z axes.", vtype=list)
         opt.add('edges', False, "Enable/disable display of object edges.")
-        opt.add('edge_color', [1, 1, 1], "Set the edge color.")
+        opt.add('edge_color', [0, 0, 1], "Set the edge color.")
         opt.add('edge_width', "The edge width.", vtype=int)
         opt.add('point_size', "The point size.", vtype=float)
         opt.add('opacity', 1, "The object opacity.", vtype=float)
