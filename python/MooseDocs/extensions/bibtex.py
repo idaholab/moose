@@ -193,10 +193,10 @@ class RenderBibtexBibliography(components.RenderComponent):
             msg = 'Unknown bibliography style "{}".'
             raise exceptions.RenderException(msg, token.style)
 
-        citations = set()
+        citations = list()
         for tok in anytree.PreOrderIter(token.root):
             if isinstance(tok, BibtexCite):
-                citations.update(tok.keys)
+                citations.extend(tok.keys)
 
         formatted_bibliography = style().format_bibliography(self.extension.database, citations)
         html_backend = find_plugin('pybtex.backends', 'html')
