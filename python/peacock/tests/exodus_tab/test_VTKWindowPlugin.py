@@ -39,7 +39,6 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestVTKWindowPlugin, cls).setUpClass()
-
         if os.path.exists(cls._temp_file):
             os.remove(cls._temp_file)
 
@@ -49,14 +48,14 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         """
         self.sleepIfSlow()
         self._widget, self._window = main(size=[600,600])
+        self._window.onSetFilename(self._filename)
+        self._window.onSetVariable('diffused')
+        self._window.onWindowRequiresUpdate()
 
     def testInitialize(self):
         """
         Test the result open and are initialized.
         """
-        self._window.onFileChanged(self._filename)
-        self._window.onResultOptionsChanged({'variable':'diffused'})
-        self._window.onWindowRequiresUpdate()
         self.assertTrue(self._window._initialized)
         self.assertImage('testInitialize.png', allowed=0.98)
 
@@ -64,24 +63,15 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         """
         Test that the camera can be modified.
         """
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onFileChanged(self._filename)
-        self._window.onCameraChanged(camera)
-        self._window.onResultOptionsChanged({'variable':'diffused'})
+        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
         self._window.onWindowRequiresUpdate()
-        self.assertEqual(camera.GetViewUp(), self._window._result.getVTKRenderer().GetActiveCamera().GetViewUp())
         self.assertImage('testCamera.png')
 
     def testReader(self):
         """
         Test that reader settings may be changed.
         """
-        self._window.onFileChanged(self._filename)
-        self._window._reader.setOptions(timestep=1)
-        self._window.onResultOptionsChanged({'variable':'diffused'})
+        self._window.onReaderOptionsChanged(dict(timestep=1))
         self._window.onWindowRequiresUpdate()
         tdata = self._window._reader.getTimeData()
         self.assertEqual(1, tdata.timestep)
@@ -92,26 +82,11 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         """
         Test that result settings may be changed.
         """
-        self._window.onFileChanged(self._filename)
-        self._window._result.setOptions(cmap='viridis')
-        self._window.onResultOptionsChanged({'variable':'diffused'})
+        self._window.onResultOptionsChanged(dict(cmap='viridis'))
         self._window.onWindowRequiresUpdate()
         self.assertEqual('viridis', self._window._result.getOption('cmap'))
         self.assertImage('testResult.png')
 
-    def testHighlight(self):
-        """
-        Test the highlighting is working.
-        """
-        self._window.onFileChanged(self._filename)
-        self._window.onResultOptionsChanged({'variable':'diffused'})
-        self._window.onWindowRequiresUpdate()
-
-        self._window.onHighlight(block=['76'])
-        self.assertImage('testHighlightOn.png')
-
-        self._window.onHighlight()
-        self.assertImage('testHighlightOff.png')
 
     def testFilename(self):
         """
@@ -127,7 +102,8 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
             os.remove(fname)
 
         # Supply a non-existent file
-        self._window.onFileChanged(newfile)
+        self._window.onSetFilename(newfile)
+        self._window.onWindowRequiresUpdate()
         self.assertImage('testFilenameEmpty.png')
 
         # Create the files and simulate the initialization timer timeout call
@@ -151,27 +127,46 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         # Remove the files and simulate a call to the update timer
         for fname in glob.glob(newfile + '*'):
             os.remove(fname)
+        time.sleep(1.5)
         self._window.onWindowRequiresUpdate()
         self.assertImage('testFilenameEmpty.png') # the window should be empty again
 
     def testIteractorStyle(self):
         """
-        Tests interaction style matches the mesh dimensionality
+        Tests interaction style matches the mesh dimension
         """
-        self._window.onFileChanged(self._filename)
         self.assertIsNone(self._window._window.getOption('style'))
-        self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(), chigger.base.KeyPressInteractorStyle)
+        self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(),
+                              chigger.base.KeyPressInteractorStyle)
 
-        self._window.onFileChanged(Testing.get_chigger_input('displace.e'))
+        self._window.onSetFilename(Testing.get_chigger_input('displace.e'))
+        self._window.onWindowRequiresUpdate()
         self.assertIsNone(self._window._window.getOption('style'))
-        self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(), vtk.vtkInteractorStyleImage)
+        self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(),
+                              vtk.vtkInteractorStyleImage)
 
     def testNoFile(self):
         """
         Test that window shows up with peacock image.
         """
-        self._window.onFileChanged()
+        self._window.onSetFilename(None)
+        self._window.onWindowRequiresUpdate()
         self.assertImage('testPeacockMessage.png')
+
+    def testLoadingMessage(self):
+        """
+        Test that the load message can be toggled.
+        """
+        self._window.onResultOptionsChanged(dict(cmap='viridis'))
+        self._window.onWindowRequiresUpdate()
+        self.assertEqual('viridis', self._window._result.getOption('cmap'))
+        self.assertImage('testResult.png')
+
+        self._window.onSetFilename(None)
+        self._window.onWindowRequiresUpdate()
+        self._window._setLoadingMessage("Testing...")
+        self.assertImage('testLoadingMessage.png')
+
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

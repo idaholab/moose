@@ -713,6 +713,9 @@ FEProblemBase::initialSetup()
     backupMultiApps(EXEC_INITIAL);
     Moose::perf_log.pop("execMultiApps()", "Setup");
 
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+      reinitScalars(tid);
+
     // TODO: user object evaluation could fail.
     computeUserObjects(EXEC_INITIAL, Moose::PRE_AUX);
 

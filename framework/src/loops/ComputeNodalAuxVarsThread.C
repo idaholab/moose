@@ -51,7 +51,7 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // Get a map of all active block restricted AuxKernel objects
   const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
 
-  // Loop over all SubdomainIDs for the curnent node, if an AuxKernel is active on this block then
+  // Loop over all SubdomainIDs for the current node, if an AuxKernel is active on this block then
   // compute it.
   const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)

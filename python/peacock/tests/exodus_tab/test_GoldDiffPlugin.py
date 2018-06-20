@@ -12,12 +12,11 @@ import os
 import sys
 import unittest
 from PyQt5 import QtCore, QtWidgets
-import vtk
 
 from peacock.ExodusViewer.plugins.GoldDiffPlugin import main
 from peacock.utils import Testing
 
-class TestGoldDiff(Testing.PeacockImageTestCase):
+class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
     """
     Testing for GoldDiffPlugin widget.
     """
@@ -34,7 +33,8 @@ class TestGoldDiff(Testing.PeacockImageTestCase):
         self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e')
         self._widget, self._window = main(size=[400,400])
         self._widget.FilePlugin.onSetFilenames(self._filenames)
-        self._widget.GoldDiffPlugin.onSetFilenames(self._filenames)
+        self._widget.FilePlugin.VariableList.setCurrentIndex(2)
+        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
 
     def write(self, filename, **kwargs):
         """
@@ -49,12 +49,9 @@ class TestGoldDiff(Testing.PeacockImageTestCase):
         """
         Test the initial state.
         """
-
-        # Test that things initialize correctly
-        self.assertEqual(2, self._widget.FilePlugin.AvailableFiles.count())
-        self.assertEqual(os.path.basename(self._filenames[0]), str(self._widget.FilePlugin.AvailableFiles.currentText()))
-        self._window.onResultOptionsChanged({'variable':'diffused'})
-        self._window.onWindowRequiresUpdate()
+        self.assertEqual(2, self._widget.FilePlugin.FileList.count())
+        self.assertEqual(os.path.basename(self._filenames[0]),
+                         str(self._widget.FilePlugin.FileList.currentText()))
         self.assertImage('testInitial.png')
 
     def testGold(self):
@@ -63,8 +60,6 @@ class TestGoldDiff(Testing.PeacockImageTestCase):
         """
         self.assertTrue(self._widget.GoldDiffPlugin.isEnabled())
         self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
-        self._window.onResultOptionsChanged({'variable':'diffused'})
-        self._window.onWindowRequiresUpdate()
         self._widget.GoldDiffPlugin.GoldToggle.clicked.emit(True)
         self.assertImage('testGold.png', window=self._widget.GoldDiffPlugin.GoldVTKWindow)
 
@@ -75,45 +70,53 @@ class TestGoldDiff(Testing.PeacockImageTestCase):
         self.assertTrue(self._widget.GoldDiffPlugin.isEnabled())
         self._widget.GoldDiffPlugin.DiffToggle.setChecked(QtCore.Qt.Checked)
         self._widget.GoldDiffPlugin.DiffToggle.clicked.emit(True)
-        self._window.onResultOptionsChanged({'variable':'diffused'})
-        self._window.onWindowRequiresUpdate()
         self.assertImage('testDiff.png', window=self._widget.GoldDiffPlugin.DiffVTKWindow)
 
     def testCameraLink(self):
         """
         Test the gold toggle is working.
         """
-        self.assertTrue(self._widget.GoldDiffPlugin.LinkToggle.isEnabled())
-        self._widget.GoldDiffPlugin.DiffToggle.setChecked(QtCore.Qt.Checked)
-        self._widget.GoldDiffPlugin.DiffToggle.clicked.emit(True)
-        self._window.onResultOptionsChanged({'variable':'diffused'})
-        self._window.onWindowRequiresUpdate()
-
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera)
-        self._window.cameraChanged.emit(self._window._result.getVTKRenderer().GetActiveCamera())
-        self.assertImage('testCameraLink.png', window=self._widget.GoldDiffPlugin.DiffVTKWindow)
-
-        # Disconnect link, move the main window, the diff shouldn't move
+        self.assertTrue(self._widget.GoldDiffPlugin.LinkToggle.isChecked())
+        self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
+        self._widget.GoldDiffPlugin.GoldToggle.clicked.emit(True)
+        self.assertIsNotNone(self._widget.GoldDiffPlugin._gold_observer)
         self._widget.GoldDiffPlugin.LinkToggle.setChecked(QtCore.Qt.Unchecked)
         self._widget.GoldDiffPlugin.LinkToggle.clicked.emit(False)
-        camera.SetViewUp(0.7786, -0.2277, 0.5847)
-        camera.SetPosition(9.2960, 0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera)
-        self._window.cameraChanged.emit(self._window._result.getVTKRenderer().GetActiveCamera())
-        self.assertImage('testCameraLink.png', window=self._widget.GoldDiffPlugin.DiffVTKWindow)
+        self._widget.GoldDiffPlugin.GoldVTKWindow._window.update()
+        self.assertIsNone(self._widget.GoldDiffPlugin._gold_observer)
 
     def testDisabled(self):
         """
-        Test the gold/diff window gets disabled when a file doesn't have gold.
+        TEST the gold/diff window gets disabled when a file doesn't have gold.
         """
-        self._widget.FilePlugin.AvailableFiles.setCurrentIndex(1)
-        self._widget.FilePlugin.AvailableFiles.currentIndexChanged.emit(1)
-        self.assertFalse(self._widget.GoldDiffPlugin.isEnabled())
+        self._widget.FilePlugin.FileList.setCurrentIndex(1)
+        self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
+        self.assertFalse(self._widget.GoldDiffPlugin.isVisible())
+
+    def testState(self):
+        """
+        Test the state storing of Gold/Diff windows.
+        """
+        self.assertTrue(self._widget.GoldDiffPlugin.LinkToggle.isChecked())
+        self.assertFalse(self._widget.GoldDiffPlugin.GoldToggle.isChecked())
+
+        self._widget.GoldDiffPlugin.LinkToggle.setChecked(QtCore.Qt.Unchecked)
+        self._widget.GoldDiffPlugin.LinkToggle.clicked.emit(False)
+        self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
+        self._widget.GoldDiffPlugin.GoldToggle.clicked.emit(True)
+
+        self.assertFalse(self._widget.GoldDiffPlugin.LinkToggle.isChecked())
+        self.assertTrue(self._widget.GoldDiffPlugin.GoldToggle.isChecked())
+
+        self._widget.FilePlugin.FileList.setCurrentIndex(1)
+        self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
+        self.assertFalse(self._widget.GoldDiffPlugin.isVisible())
+
+        self._widget.FilePlugin.FileList.setCurrentIndex(0)
+        self._widget.FilePlugin.FileList.currentIndexChanged.emit(0)
+        self.assertTrue(self._widget.GoldDiffPlugin.isVisible())
+        self.assertFalse(self._widget.GoldDiffPlugin.LinkToggle.isChecked())
+        self.assertTrue(self._widget.GoldDiffPlugin.GoldToggle.isChecked())
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

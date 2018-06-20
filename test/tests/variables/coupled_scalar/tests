@@ -24,4 +24,10 @@
     input = 'coupled_scalar_default.i'
     exodiff = 'coupled_scalar_default_out.e'
   [../]
+
+  [./from_ic]
+    type = 'Exodiff'
+    input = 'coupled_scalar_from_ic.i'
+    exodiff = 'coupled_scalar_from_ic_out.e'
+  [../]
 []

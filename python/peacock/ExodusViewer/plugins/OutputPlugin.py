@@ -8,52 +8,131 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
-import peacock
-from PyQt5 import QtWidgets
+import types
+import vtk
+
+from PyQt5 import QtWidgets, QtCore
 from ExodusPlugin import ExodusPlugin
 
-class OutputPlugin(peacock.base.OutputWidgetBase, ExodusPlugin):
+from peacock.utils.TextSubWindow import TextSubWindow
+
+class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
     Plugin responsible for triggering the creation of png/py files and live script viewing.
     """
 
+    #: pyqtSignal: Write the chigger script portions from this plugin
+    write = QtCore.pyqtSignal(str)
+
+    #: pyqtSignal: Create an observer for the given event with the supplied method callback function
+    addObserver = QtCore.pyqtSignal(type(vtk.vtkCommand.RenderEvent), types.MethodType)
+
     def __init__(self):
         super(OutputPlugin, self).__init__()
-        self.MainLayout.addStretch()
+        self.MainLayout = QtWidgets.QHBoxLayout(self)
+        self.LiveScriptWindow = TextSubWindow()
+        self.hide()
+
+        self.LiveScript = None
+        self.ExportPNG = None
+        self.ExportPython = None
+
         self.setup()
+        self._observer = None
 
-    def repr(self):
+    def addToMenu(self, menu):
         """
-        Return matplotlib scripting information.
+        Adds output options to the 'Results' menu.
         """
-        window_options, window_sub_options = self._window.options().toScriptString()
+        self.LiveScript = menu.addAction('Show live script')
+        self.LiveScript.setCheckable(True)
+        self.LiveScript.setChecked(False)
+        self.LiveScript.setEnabled(False)
+        self.LiveScript.toggled.connect(self._callbackLiveScript)
 
-        output = dict()
-        output['window'] = ['window = chigger.RenderWindow(result)']
-        output['window'] += ['window.setOptions({})'.format(', '.join(window_options))]
-        for key, value in window_sub_options.iteritems():
-            output['window'] += ['window.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+        export = menu.addMenu('Export')
 
-        output['window'] += ['window.start()']
-        return output
+        self.ExportPNG = export.addAction('PNG')
+        self.ExportPNG.triggered.connect(self._callbackExportPNG)
+        self.ExportPNG.setEnabled(False)
 
-    def onCameraChanged(self, *args):
-        """
-        Slot that is called when the camera is changed.
-        """
-        self.updateLiveScriptText()
+        self.ExportPython = export.addAction('Python')
+        self.ExportPython.triggered.connect(self._callbackExportPython)
+        self.ExportPython.setEnabled(False)
 
-    def onWindowUpdated(self):
+    def updateLiveScriptWindow(self, *args):
         """
-        Slot called when the window is changed.
+        Updates the chigger script live view.
         """
-        self.updateLiveScriptText()
+        if self.LiveScriptWindow.isVisible() and hasattr(self, "_plugin_manager"):
+            # don't reset the text if it is the same. This allows for easier select/copy
+            s = self._plugin_manager.repr()
+            if s != self.LiveScriptWindow.toPlainText():
+                self.LiveScriptWindow.setText(s)
 
-    def _setupPDFButton(self, qobject):
+    def onWindowReset(self):
         """
-        Remove the PDF button.
+        Disable the live view when there are no results.
         """
-        qobject.setVisible(False)
+        self.LiveScript.setEnabled(False)
+        self.ExportPNG.setEnabled(False)
+        self.ExportPython.setEnabled(False)
+
+    def onWindowResult(self, *args):
+        """
+        Adds an observer for the live window update to the VTK renderer.
+        """
+        self.addObserver.emit(vtk.vtkCommand.RenderEvent, self.updateLiveScriptWindow)
+        self.LiveScript.setEnabled(True)
+        self.ExportPNG.setEnabled(True)
+        self.ExportPython.setEnabled(True)
+
+    def _setupLiveScriptWindow(self, qobject):
+        qobject.setReadOnly(True)
+        qobject.hide()
+        qobject.windowClosed.connect(self._callbackCloseLiveScriptWindow)
+
+    def _callbackLiveScript(self, *args):
+        if self.LiveScript.isChecked() and hasattr(self, "_plugin_manager"):
+            self.LiveScriptWindow.show()
+            self.updateLiveScriptWindow()
+        else:
+            self.LiveScriptWindow.hide()
+
+    def _callbackExportPNG(self):
+        """
+        Write a png file of figure.
+        """
+        dialog = QtWidgets.QFileDialog()
+        dialog.setWindowTitle('Write *.png of figure')
+        dialog.setNameFilter('PNG files (*.png)')
+        dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
+        dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+        dialog.setDefaultSuffix("png")
+
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            filename = str(dialog.selectedFiles()[0])
+            self.write.emit(filename)
+
+    def _callbackExportPython(self):
+        """
+        Open dialog and write script.
+        """
+        dialog = QtWidgets.QFileDialog()
+        dialog.setWindowTitle('Write Python Script')
+        dialog.setNameFilter('Python Files (*.py)')
+        dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
+        dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            filename = str(dialog.selectedFiles()[0])
+            self.write.emit(filename)
+
+    def _callbackCloseLiveScriptWindow(self, *args):
+        self.LiveScript.setChecked(False)
+
 
 def main(size=None):
     """
@@ -62,14 +141,20 @@ def main(size=None):
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), OutputPlugin])
-    widget.show()
-
-    return widget, widget.VTKWindowPlugin
+    main_window = QtWidgets.QMainWindow()
+    main_window.setCentralWidget(widget)
+    menubar = main_window.menuBar()
+    menubar.setNativeMenuBar(False)
+    widget.addToMainMenu(menubar)
+    main_window.show()
+    return widget, widget.VTKWindowPlugin, main_window
 
 if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
-    widget, window = main()
-    window.onSetFilenames([filename])
+    widget, window, main_window = main()
+    window.onSetFilename(filename)
+    window.onSetVariable('diffused')
+    window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

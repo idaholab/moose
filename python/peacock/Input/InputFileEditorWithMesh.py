@@ -7,17 +7,15 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
-from peacock.ExodusViewer.plugins.MeshPlugin import MeshPlugin
+import os
+from plugins import InputMeshPlugin, MeshViewerPlugin
 from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
 from BlockHighlighterPlugin import BlockHighlighterPlugin
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
 from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import pyqtSignal
-from MeshViewerPlugin import MeshViewerPlugin
 from InputFileEditorPlugin import InputFileEditorPlugin
-import os
 import BCHighlighter
 import TimeStepEstimate
 
@@ -43,56 +41,47 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         if not plugins:
             plugins = [lambda: InputFileEditorPlugin(layout='LeftLayout'),
                        lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
-                       lambda: MeshPlugin(layout='BottomLayout', settings_key="input"),
-                       lambda: BackgroundPlugin(values=False, layout='BottomLayout', settings_key="input"),
-                       lambda: BlockHighlighterPlugin(layout='RightLayout', collapsible_layout=QVBoxLayout)]
+                       InputMeshPlugin,
+                       lambda: BackgroundPlugin(layout='RightLayout', settings_key="input", set_result_color=True),
+                       BlockHighlighterPlugin]
+
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
+        self.setTabName('Input file')
+
         # The layouts for this widget
         self.exe_info = None
 
-        # This should be set to the VTKWindowPlugin based plugin name
-        # in setupVTKWindow()
+        # This should be set to the VTKWindowPlugin based plugin name in setupVTKWindow()
         self.vtkwin = None
 
-        self.MainLayout = QHBoxLayout()
+        self.MainLayout = QHBoxLayout(self)
         self.LeftLayout = QVBoxLayout()
         self.WindowLayout = QVBoxLayout()
         self.RightLayout = QVBoxLayout()
-        self.BottomLayout = QHBoxLayout()
 
-        self.setLayout(self.MainLayout)
         self.MainLayout.addLayout(self.LeftLayout)
         self.MainLayout.addLayout(self.WindowLayout)
         self.MainLayout.addLayout(self.RightLayout)
 
         self.setup()
         self.setupVTKWindow()
-        self.RightLayout.addStretch()
-        self.BottomLayout.addStretch()
-        self.WindowLayout.addLayout(self.BottomLayout)
 
         self.InputFileEditorPlugin.blockChanged.connect(self.blockChanged)
         self.InputFileEditorPlugin.blockSelected.connect(self.highlightChanged)
         self.InputFileEditorPlugin.inputFileChanged.connect(self._updateFromInputFile)
 
         self.fixLayoutWidth('LeftLayout')
-        self.fixLayoutWidth('BottomLayout')
+        self.fixLayoutWidth('RightLayout')
+        self.RightLayout.addStretch(1)
 
     def setupVTKWindow(self):
         """
         Sets up the connections for the VTKWindow based plugin.
         """
         self.vtkwin = self.MeshViewerPlugin # very important!
-        self.MeshViewerPlugin.windowCreated.connect(self.setDefaultView)
         self.MeshViewerPlugin.needInputFile.connect(self.InputFileEditorPlugin.writeInputFile)
         self.updateView.connect(self.MeshViewerPlugin.meshChanged)
         self.MeshViewerPlugin.meshEnabled.connect(self.setViewerEnabled)
-
-    def tabName(self):
-        """
-        This will be used as the text on the tab.
-        """
-        return "Input file"
 
     def _updateFromInputFile(self, path):
         """
@@ -112,23 +101,6 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
             self.numTimeStepsChanged.emit(0)
             return
         self.blockChanged(exe_node)
-
-    def setDefaultView(self, reader, result, window):
-        """
-        Slot that creates chigger.ExodusReult objects for displaying data via VTK.
-
-        Args:
-            value[bool]: Visibility status.
-            name[str]: The name of the window ('main', 'gold', 'diff')
-            filename[str]: The name of the file to open.
-        """
-
-        m = self.MeshPlugin
-        m.ViewMeshToggle.setChecked(True)
-        idx = m.Representation.findText("Wireframe")
-        if idx >= 0:
-            m.Representation.setCurrentIndex(idx)
-        m.mesh()
 
     def onExecutableInfoChanged(self, exe_info):
         """
@@ -166,7 +138,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         Input:
             enabled[bool]: Whether to set them enabled or disabled
         """
-        self.MeshPlugin.setEnabled(enabled)
+        self.InputMeshPlugin.setEnabled(enabled)
         self.BlockHighlighterPlugin.setEnabled(enabled)
         self.BackgroundPlugin.setEnabled(enabled)
 
@@ -239,10 +211,12 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         """
         inputMenu = menubar.addMenu("Input File")
         self.InputFileEditorPlugin.addToMenu(inputMenu)
+        self.BackgroundPlugin.addToMenu(inputMenu)
 
     def clearRecentlyUsed(self):
         """
         Clears all the items in the recently used menu
+
         """
         self.InputFileEditorPlugin.clearRecentlyUsed()
 
@@ -253,6 +227,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.MeshViewerPlugin.useTestObjects(use_test_objs)
 
 if __name__ == "__main__":
+    import collections
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from ExecutableInfo import ExecutableInfo
     import sys
@@ -269,7 +244,8 @@ if __name__ == "__main__":
     exe_info.setPath(sys.argv[1])
     w.setInputFile(sys.argv[2])
     w.setEnabled(True)
-    w.initialize()
+    OptionsProxy = collections.namedtuple('Options', 'input_file arguments')
+    w.initialize(OptionsProxy(input_file=sys.argv[2], arguments=[]))
     w.onExecutableInfoChanged(exe_info)
     main_win.show()
     menubar = main_win.menuBar()

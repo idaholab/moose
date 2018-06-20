@@ -10,12 +10,10 @@
 import re
 import sys
 from PyQt5 import QtCore, QtWidgets
-import mooseutils
 import chigger
-import peacock
 from ExodusPlugin import ExodusPlugin
 
-class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
+class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
     Widget for enabling and controlling contours.
     """
@@ -29,89 +27,104 @@ class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     #: pyqtSignal: Emitted when the chigger objects options are changed
     resultOptionsChanged = QtCore.pyqtSignal(dict)
 
+    #: pyqtSignal: Emitted when adding a filter
+    addFilter = QtCore.pyqtSignal(chigger.filters.ChiggerFilterBase)
+
+    #: pyqtSignal: Emitted when removing a filter
+    removeFilter = QtCore.pyqtSignal(chigger.filters.ChiggerFilterBase)
+
     def __init__(self):
-        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QVBoxLayout)
-        ExodusPlugin.__init__(self)
+        super(ContourPlugin, self).__init__()
 
         self.setTitle('Contours')
-        self.setProperty('cache', ['Variable'])
+        self.setCheckable(True)
+        self.setChecked(False)
+        self.MainLayout = QtWidgets.QHBoxLayout(self)
+        #self.MainLayout.setSpacing(0)
 
-        self.MainLayout = self.collapsibleLayout()
-
-        self.CountLayout = QtWidgets.QHBoxLayout()
-        self.LevelLayout = QtWidgets.QHBoxLayout()
-
-        self.ContourToggle = QtWidgets.QCheckBox('Enable Contours')
         self.ContourCountLabel = QtWidgets.QLabel("Count:")
         self.ContourCount = QtWidgets.QSpinBox()
         self.ContourLevelsLabel = QtWidgets.QLabel("Levels:")
         self.ContourLevels = QtWidgets.QLineEdit()
 
-        self.MainLayout.addWidget(self.ContourToggle)
-        self.CountLayout.addWidget(self.ContourCountLabel)
-        self.CountLayout.addWidget(self.ContourCount)
-        self.CountLayout.addStretch()
-
-        self.LevelLayout.addWidget(self.ContourLevelsLabel)
-        self.LevelLayout.addWidget(self.ContourLevels)
-
-        self.MainLayout.addLayout(self.CountLayout)
-        self.MainLayout.addLayout(self.LevelLayout)
+        self.MainLayout.addWidget(self.ContourCountLabel)
+        self.MainLayout.addWidget(self.ContourCount)
+        self.MainLayout.addSpacing(10)
+        self.MainLayout.addWidget(self.ContourLevelsLabel)
+        self.MainLayout.addWidget(self.ContourLevels)
 
         self._contour = chigger.filters.ContourFilter()
+        self.clicked.connect(self._callbackClicked)
+
         self.setup()
-        self.setCollapsed(True)
+        self.store(key='default')
+        self._varinfo = None
 
-    def onSetFilenames(self, *args):
+    def onWindowReader(self, reader):
         """
-        The contour option should be disabled initially, because it depends on variable type.
+        Store variable information when the reader is created.
         """
-        self.setActive()
+        self._varinfo = reader.getVariableInformation([chigger.exodus.ExodusReader.NODAL])
 
-    def setActive(self):
-        status = False
-        if self._result:
-            varinfo = self._result[0].getCurrentVariableInformation()
-            if (self._variable) and (varinfo.object_type == chigger.exodus.ExodusReader.NODAL):
-                status = True
-
-        self.ContourToggle.setEnabled(status)
-        self.setEnabled(status)
-        return status
-
-    def onFileChanged(self, *args):
+    def onWindowReset(self):
         """
-        If the file changes, update the contours.
+        Remove variable information when the window is reset.
         """
-        super(ContourPlugin, self).onFileChanged(*args)
-        self.contour()
+        self._varinfo = None
 
-    def onVariableChanged(self, *args):
+    def onSetVariable(self, *args):
         """
-        When a variable changes, load the state of the clip.
+        Loads the selected items when the variable changes.
         """
-        super(ContourPlugin, self).onVariableChanged(*args)
-        self.load(self.stateKey(self._variable), 'Variable')
-        if self._result:
-            self.contour()
+        super(ContourPlugin, self).onSetVariable(*args)
+        self._loadPlugin()
+        self.updateOptions()
 
-    def contour(self):
+    def onSetComponent(self, *args):
+        """
+        Loads the selected items when the variable component changes.
+        """
+        super(ContourPlugin, self).onSetComponent(*args)
+        self._loadPlugin()
+        self.updateOptions()
+
+    def onWindowResult(self, *args):
+        """
+        Loads state when result is created.
+        """
+        self._loadPlugin()
+        self.updateOptions()
+
+    def _loadPlugin(self):
+        """
+        Helper for loading plugin state.
+        """
+        self.load()
+        if not self.hasState():
+            self.setChecked(False)
+
+    def updateOptions(self):
         """
         Called when contours are toggled or the count or levels are changed.
         """
-        # Disable for non-nodal variables
-        active = self.setActive()
-        if not active:
+
+        # Return if the variable information is not set
+        if self._varinfo is None:
             return
 
-        # Set the visibility of the contours
-        checked = self.ContourToggle.isChecked()
-        self.ContourLevels.setEnabled(checked)
-        self.ContourCount.setEnabled(checked)
-        filters = self._result.getOption('filters')
+        # Enable if the variable is valid for contours
+        if self._variable in self._varinfo:
+            self.setEnabled(True)
+        else:
+            self.setEnabled(False)
 
-        # If visible setup the contour interval/count
+        checked = self.isChecked()
+        self.ContourCount.setEnabled(checked)
+        self.ContourLevels.setEnabled(checked)
+
+        # Apply filter settings
         if checked:
+            # If visible setup the contour interval/count
             options = dict()
             text = self.ContourLevels.text()
             if len(text) > 0:
@@ -119,35 +132,27 @@ class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
                     options['levels'] = [float(item) for item in re.split('[;,\s]', str(text))]
                     self.ContourCount.setEnabled(False)
                 except:
-                    mooseutils.mooseError("Failed to convert supplied data to valid numeric contour levels.")
-                    self.ContourCount.setEnabled(True)
+                    self.ContourCount.setEnabled(False)
+                    self.ContourLevels.setStyleSheet('color:#ff0000')
+                    options['levels'] = None
+                    options['count'] = int(self.ContourCount.value())
             else:
                 self.ContourCount.setEnabled(True)
                 options['levels'] = None
                 options['count'] = int(self.ContourCount.value())
 
             self._contour.setOptions(**options)
-
-            if self._contour not in filters:
-                filters.append(self._contour)
+            self.addFilter.emit(self._contour)
 
         else:
-            if self._contour in filters:
-                filters.remove(self._contour)
-
-        # Emit the changes
-        if self._variable:
-            self.store(self.stateKey(self._variable), 'Variable')
-        self.resultOptionsChanged.emit({'filters':filters})
-        self.windowRequiresUpdate.emit()
-        self.contourClicked.emit(checked)
+            self.removeFilter.emit(self._contour)
 
     def repr(self):
         """
         Return python scripting content.
         """
         output = dict()
-        if self.ContourToggle.isChecked():
+        if self.isChecked():
             options, sub_options = self._contour.options().toScriptString()
             output['filters'] = ['contour = chigger.filters.ContourFilter()']
             output['filters'] += ['contour.setOptions({})'.format(', '.join(options))]
@@ -156,26 +161,46 @@ class ContourPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
 
         return output
 
-    def _setupContourToggle(self, qobject):
+    def _callbackClicked(self, status):
         """
-        Setup method for the contour toggle.
+        Called when groupbox level checkbox is selected.
         """
-        qobject.clicked.connect(self.contour)
+        self.store()
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
 
     def _setupContourCount(self, qobject):
         """
         Setup method for the contour counter spinbox.
         """
         qobject.setValue(10)
-        qobject.setEnabled(False)
-        qobject.valueChanged.connect(self.contour)
+        qobject.setMinimum(3)
+        qobject.setEnabled(True)
+        qobject.valueChanged.connect(self._callbackContourCount)
+
+    def _callbackContourCount(self):
+        """
+        Call with contour count spin box is changed.
+        """
+        self.store(self.ContourCount)
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
 
     def _setupContourLevels(self, qobject):
         """
         Setup method for the contour level edit.
         """
-        qobject.editingFinished.connect(self.contour)
+        qobject.setEnabled(True)
+        qobject.editingFinished.connect(self._callbackContourLevels)
+        qobject.textEdited.connect(lambda: qobject.setStyleSheet('color:#000000'))
 
+    def _callbackContourLevels(self):
+        """
+        Called when contour levels are changed.
+        """
+        self.store(self.ContourLevels)
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
 
 def main(size=None):
     """
@@ -183,8 +208,9 @@ def main(size=None):
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
-    from peacock.ExodusViewer.plugins.VariablePlugin import VariablePlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), ContourPlugin, VariablePlugin])
+    from peacock.ExodusViewer.plugins.FilePlugin import FilePlugin
+    from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
+    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, ContourPlugin, BlockPlugin])
     widget.show()
 
     return widget, widget.VTKWindowPlugin
@@ -192,9 +218,7 @@ def main(size=None):
 if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
-    filename = Testing.get_chigger_input('mug_blocks_out.e')
-    widget, window = main()
-    widget.initialize([filename])
-    window.onResultOptionsChanged({'variable':'diffused'})
-    window.onWindowRequiresUpdate()
+    filenames = Testing.get_chigger_input_list('mug_blocks_out.e')
+    widget, window = main(size=[600,600])
+    widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())
