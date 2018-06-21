@@ -276,6 +276,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _distributed_mesh_on_command_line(false),
     _recover(false),
     _restart(false),
+    _split_mesh(false),
 #ifdef DEBUG
     _trap_fpe(true),
 #else

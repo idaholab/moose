@@ -1865,6 +1865,9 @@ MooseMesh::clone() const
 void
 MooseMesh::init()
 {
+  if (_app.isSplitMesh() && _use_distributed_mesh)
+    mooseError("You cannot use the mesh splitter capability with DistributedMesh!");
+
   if (_custom_partitioner_requested)
   {
     // Check of partitioner is supplied (not allowed if custom partitioner is used)

@@ -318,6 +318,11 @@ public:
   bool isRestarting() const;
 
   /**
+   * Whether or not this is a split mesh operation.
+   */
+  bool isSplitMesh() const;
+
+  /**
    * Return true if the recovery file base is set
    */
   bool hasRecoverFileBase();
@@ -694,6 +699,9 @@ protected:
 
   /// Whether or not this is a restart run
   bool _restart;
+
+  /// Whether or not we are performing a split mesh operation (--split-mesh)
+  bool _split_mesh;
 
   /// Whether or not FPE trapping should be turned on.
   bool _trap_fpe;
