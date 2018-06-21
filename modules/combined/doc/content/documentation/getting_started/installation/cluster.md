@@ -63,24 +63,27 @@ users environment for MOOSE developement.
 
 - Add the following content to that file:
 
-  ```bash
-  #%Module1.0#####################################################################
-  ##
-  ## MOOSE module
 
-  ##
-  set base_path   INSERT PACKAGES_DIR HERE
+!package! code
+#%Module1.0#####################################################################
+##
+## MOOSE module
 
-  <some GCC MPI compiler>
+##
+set base_path   INSERT PACKAGES_DIR HERE
 
-  setenv CC       mpicc
-  setenv CXX      mpicxx
-  setenv F90      mpif90
-  setenv F77      mpif77
-  setenv FC       mpif90
+<some GCC MPI compiler>
 
-  setenv          PETSC_DIR       $base_path/petsc/petsc-3.8.3/gcc-opt
-  ```
+setenv CC       mpicc
+setenv CXX      mpicxx
+setenv F90      mpif90
+setenv F77      mpif77
+setenv FC       mpif90
+
+setenv          PETSC_DIR       $base_path/petsc/petsc-PETSC_DEFAULT/gcc-opt
+!package-end!
+
+
 
 !alert note
 You must replace 'INSERT PACKAGES_DIR HERE' with whatever you had set for $PACKAGES_DIR. The bit
@@ -143,13 +146,13 @@ you can group and display certain modules pertinent to your MOOSE users at the e
 
 !alert note
 Verify that the environment variable 'PETSC_DIR' is available and returning
-$PACKAGES_DIR/petsc/petsc-3.8.3. If not, something went wrong with creating the moose-dev-gcc module
+$PACKAGES_DIR/petsc/petsc-!!package petsc_default!!. If not, something went wrong with creating the moose-dev-gcc module
 above.
 
 - Download and extract PETSc:
 
-  ```bash
-  curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.8.3.tar.gz
+  !!package code
+  curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-PETSC_DEFAULT.tar.gz
   tar -xf petsc-3.8.3.tar.gz
   cd petsc-3.8.3
   ```

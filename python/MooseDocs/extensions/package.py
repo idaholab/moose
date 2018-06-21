@@ -19,10 +19,16 @@ class PackageExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
-        packages = yaml_load(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'packages.yml'))
-
+        packages_config = yaml_load(os.path.join(MooseDocs.MOOSE_DIR, 'modules', 'combined', 'doc', 'packages_config.yml'))
         config = command.CommandExtension.defaultConfig()
-        config['packages'] = (packages, "A dict of packages by name.")
+
+        # Assign a key/value for every item in packages_config.yml
+        for k, v in packages_config.iteritems():
+            if k != 'moose_packages':
+                config[k] = (v, 'Default version for %s' % (k))
+            else:
+                config[k] = (v, 'MOOSE Environment installer package')
+
         config['link'] = (r'http://www.mooseframework.org/moose_packages',
                           "Location of packages.")
         return config
@@ -30,6 +36,8 @@ class PackageExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(PackageCommand())
+        self.addCommand(PackageCodeReplace())
+        self.addCommand(PackageTextReplace())
 
 class PackageCommand(command.CommandComponent):
     COMMAND = 'package'
@@ -43,7 +51,7 @@ class PackageCommand(command.CommandComponent):
 
     def createToken(self, info, parent):
         arch = self.settings['arch']
-        packages = self.extension.get('packages')
+        packages = self.extension.get('moose_packages', dict())
 
         if arch not in packages:
             msg = "The supplied value for the 'arch' settings, {}, was not found."
@@ -51,4 +59,41 @@ class PackageCommand(command.CommandComponent):
 
         href = os.path.join(self.extension.get('link'), packages[arch])
         tokens.Link(parent, url=unicode(href), string=unicode(packages[arch]))
+        return parent
+
+class PackageCodeReplace(command.CommandComponent):
+    COMMAND = 'package'
+    SUBCOMMAND = 'code'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['max-height'] = (u'350px', "The default height for listing content.")
+        settings['language'] = (u'bash', "The language to use for highlighting, if not supplied it " \
+                                "will be inferred from the extension (if possible).")
+        return settings
+
+    def createToken(self, info, parent):
+        content = info['inline'] if 'inline' in info else info['block']
+
+        for package, version in self.extension.getConfig().iteritems():
+            if package is not 'moose_packages':
+                content = content.replace('__' + package.upper() + '__', unicode(version))
+
+        tokens.Code(parent, style="max-height:{};".format(self.settings['max-height']),
+                    language=self.settings['language'], code=content)
+        return parent
+
+class PackageTextReplace(command.CommandComponent):
+    COMMAND = 'package'
+    SUBCOMMAND = '*'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        return settings
+
+    def createToken(self, info, parent):
+        content = self.extension.get(info['subcommand'], dict())
+        tokens.String(parent, content=unicode(content))
         return parent
