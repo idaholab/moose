@@ -34,6 +34,8 @@
     petsc_version = '>=3.9.0'
     # chaco uses rand so that it is platform dependent
     platform = DARWIN
+    # work with 32-bit integers only
+    dof_id_bytes = 4
     min_parallel = 4
     max_parallel = 4
   [../]
