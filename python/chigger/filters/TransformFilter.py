@@ -40,6 +40,7 @@ class TransformFilter(ChiggerFilterBase):
             inverse = self.__transform.GetInverse().GetScale()
             scale = self.getOption('scale')
             scale = [scale[i]*inverse[i] for i in range(len(scale))]
+            print scale
             self.__transform.Scale(scale)
 
         if self.isOptionValid('translate'):

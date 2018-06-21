@@ -152,7 +152,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Whenever the window is update the default ranges must be recalculated.
         """
-        if self._result:
+        if self._result and self._result[0].getCurrentVariableInformation():
             rng = self._result.getRange(local=self.ColorBarRangeType.isChecked())
             self._setDefaultLimitHelper(self.RangeMinimumMode, self.RangeMinimum, rng[0])
             self._setDefaultLimitHelper(self.RangeMaximumMode, self.RangeMaximum, rng[1])

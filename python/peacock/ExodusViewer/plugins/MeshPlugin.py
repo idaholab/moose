@@ -300,7 +300,8 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setSingleStep(0.1)
         qobject.setValue(1.0)
-        qobject.valueChanged.connect(self._callbackScaleX)
+        #qobject.valueChanged.connect(self._callbackScaleX)
+        qobject.editingFinished.connect(self._callbackScaleX)
         qobject.setMaximum(1000)
 
     def _setupScaleY(self, qobject):

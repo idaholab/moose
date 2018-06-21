@@ -363,8 +363,8 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self.windowReader.emit(self._reader)
 
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
-        self._result.update()
         self._window.append(self._result)
+        self._result.update()
         self.windowResult.emit(self._result)
 
         if self._create_colorbar:
@@ -389,6 +389,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self.onAddObserver(vtk.vtkCommand.RenderEvent, self._callbackRenderEvent)
 
         # Update the RenderWindow
+        #self._window.setActive(self._result)
         self._window.update()
         if camera is None:
             self._callbackRenderEvent() # store initial camera

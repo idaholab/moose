@@ -78,6 +78,7 @@ def set_options(vtkaxis, opt):
             vtkaxis.RecalculateTickSpacing()
     else:
         vtkaxis.SetBehavior(vtk.vtkAxis.AUTO)
+        vtkaxis.SetCustomTickPositions(None, None)
 
     # Color
     if opt.isOptionValid('font_color'):

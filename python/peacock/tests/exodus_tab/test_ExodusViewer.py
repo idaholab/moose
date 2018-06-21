@@ -107,7 +107,7 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         self._widget.onSetFilenames([f0, f1])
         mesh = self._widget.currentWidget().MeshPlugin
         fp = self._widget.currentWidget().FilePlugin
-        fp._callbackFileList(0)
+        #fp._callbackFileList(0)
         mesh.ViewMeshToggle.setChecked(False)
         mesh.ScaleX.setValue(.9)
         mesh.ScaleY.setValue(.8)
