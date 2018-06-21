@@ -1,0 +1,9 @@
+day: 24
+month: 6
+year: 1980
+parents:
+  - Edward
+  - Bonnie
+level0:
+  level1:
+    - 1906
