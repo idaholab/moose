@@ -19,6 +19,7 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
     """
     Testing for MeshControl widget.
     """
+
     qapp = QtWidgets.QApplication(sys.argv)
 
     def setUp(self):
@@ -35,9 +36,9 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
     def createWidget(self):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
-        self._widget, self._window, self._main = main(size=[600,600])
-        self._window.onSetFilename(self._filename)
-        self._window.onSetVariable('diffused')
+        self._widget, self._window = main(size=[600,600])
+        self._window.onFileChanged(self._filename)
+        self._window.onResultOptionsChanged({'variable':'diffused'})
         self._window.onWindowRequiresUpdate()
 
     def testInitial(self):
@@ -63,8 +64,7 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         """
         self.createWidget()
         self._widget.BackgroundPlugin._top = QtGui.QColor(0,255,0)
-        self._widget.BackgroundPlugin.updateOptions()
-        self._widget.BackgroundPlugin.windowRequiresUpdate.emit()
+        self._widget.BackgroundPlugin.color()
         self.assertImage('testTopColor.png')
 
     def testChangeBottom(self):
@@ -73,8 +73,7 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         """
         self.createWidget()
         self._widget.BackgroundPlugin._bottom = QtGui.QColor(0,0,255)
-        self._widget.BackgroundPlugin.updateOptions()
-        self._widget.BackgroundPlugin.windowRequiresUpdate.emit()
+        self._widget.BackgroundPlugin.color()
         self.assertImage('testBottomColor.png')
 
     def testSolidColor(self):
@@ -83,11 +82,20 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         """
         self.createWidget()
         self._widget.BackgroundPlugin.GradientToggle.setChecked(False)
-        self._widget.BackgroundPlugin.GradientToggle.toggled.emit(False)
+        self.assertEqual(self._widget.BackgroundPlugin.TopLabel.text(), 'Background Color:')
         self._widget.BackgroundPlugin._solid = QtGui.QColor(255,0,0)
-        self._widget.BackgroundPlugin.updateOptions()
-        self._widget.BackgroundPlugin.windowRequiresUpdate.emit()
+        self._widget.BackgroundPlugin.color()
         self.assertImage('testSolidColor.png')
+
+    def testExtents(self):
+        """
+        Test the extents toggle.
+        """
+        self.createWidget()
+        self._widget.BackgroundPlugin.Extents.setChecked(True)
+        self.assertImage('testExtents.png')
+        self._widget.BackgroundPlugin.Extents.setChecked(False)
+        self.assertImage('testInitial.png')
 
     def testTopColorPrefs(self):
         """
@@ -118,33 +126,7 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         settings.setValue("exodus/backgroundGradient", False)
         settings.sync()
         self.createWidget()
-        self._widget.BackgroundPlugin.GradientToggle.setChecked(False)
-        self._widget.BackgroundPlugin.GradientToggle.toggled.emit(False)
-        self._widget.BackgroundPlugin.updateOptions()
-        self._widget.BackgroundPlugin.windowRequiresUpdate.emit()
         self.assertImage('testSolidColor.png')
-
-    def testPreset(self):
-        self.createWidget()
-        self._widget.BackgroundPlugin.BlackPreset.setChecked(True)
-        self._widget.BackgroundPlugin.BlackPreset.toggled.emit(True)
-        self.assertImage('testBlackToggle.png')
-
-        self._widget.BackgroundPlugin.WhitePreset.setChecked(True)
-        self._widget.BackgroundPlugin.WhitePreset.toggled.emit(True)
-        self.assertImage('testWhiteToggle.png')
-
-        self._widget.BackgroundPlugin.WhitePreset.setChecked(False)
-        self._widget.BackgroundPlugin.WhitePreset.toggled.emit(False)
-        self.assertImage('testInitial.png')
-
-    def testBlackFontToggle(self):
-        self.createWidget()
-        self._widget.BackgroundPlugin.ColorbarBlackFontToggle.setChecked(True)
-        self._widget.BackgroundPlugin.ColorbarBlackFontToggle.toggled.emit(True)
-        self.assertImage('testBlackFont.png')
-
-
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

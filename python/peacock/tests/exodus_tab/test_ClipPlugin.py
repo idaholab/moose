@@ -28,11 +28,11 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         Creates a window attached to FileControl widget.
         """
 
-        self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e')
+        # The file to open
+        self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.FilePlugin.onSetFilenames(self._filenames)
-        self._widget.FilePlugin.VariableList.setCurrentIndex(2)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
+        self._window.onFileChanged(self._filename)
+        self._window.onResultOptionsChanged({'variable':'diffused'})
         self._window.onWindowRequiresUpdate()
 
     def testInitial(self):
@@ -45,8 +45,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         self.assertFalse(self._widget.ClipPlugin.ClipSlider.isEnabled())
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
 
         # Test visibility
         self.assertTrue(self._widget.ClipPlugin.ClipDirection.isEnabled())
@@ -61,8 +60,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         """
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
 
         # y-axis
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
@@ -73,7 +71,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         camera.SetViewUp(-0.7786, 0.2277, 0.5847)
         camera.SetPosition(9.2960, -0.4218, 12.6685)
         camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint())
+        self._window.onCameraChanged(camera)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(2)
         self.assertImage('testSelectAxisZ.png')
 
@@ -83,22 +81,20 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         """
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
 
         # Update the slider
         self._widget.ClipPlugin.ClipSlider.setSliderPosition(15)
         self._widget.ClipPlugin.ClipSlider.sliderReleased.emit()
         self.assertImage('testSlide.png')
 
-    def testSliderState(self):
+    def testStoreSettings(self):
         """
         Test that slider position settings are saved when toggling between axis.
         """
 
         # Enable clipping
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
 
         # Test the initial slider position
         self.assertEqual(20, self._widget.ClipPlugin.ClipSlider.sliderPosition())
@@ -119,82 +115,35 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         # Test that the y-axis cut looks correct
         self.assertImage('testStoreSettings.png')
 
-    def testState(self):
+    def testVariableStoreSettings(self):
         """
         Test that settings are saved when toggling between axis.
         """
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
 
-        # Check initial state
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "X")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 20)
+        # Store an initial state of the GUI
+        self._widget.ClipPlugin.onVariableChanged('state0')
+        self._widget.ClipPlugin.ClipToggle.setChecked(False)
 
-        # Update slider
+        # Switch variables
+        self._widget.ClipPlugin.onVariableChanged('state1')
+
+        # Enable contours
+        self._widget.ClipPlugin.ClipToggle.setChecked(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
-        self._widget.ClipPlugin.ClipSlider.setSliderPosition(5)
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Y")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 5)
+        self._widget.ClipPlugin.ClipSlider.setSliderPosition(15)
+        self._widget.ClipPlugin.ClipSlider.sliderReleased.emit()
 
-        # Change variable
-        self._widget.FilePlugin.VariableList.setCurrentIndex(1)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
-        self.assertFalse(self._widget.ClipPlugin.isChecked())
-
-        # Change back
-        self._widget.FilePlugin.VariableList.setCurrentIndex(2)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
-        self.assertTrue(self._widget.ClipPlugin.isChecked())
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Y")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 5)
-
-        # Change back to again
-        self._widget.FilePlugin.VariableList.setCurrentIndex(1)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "X")
+        # Switch back to state0
+        self._widget.ClipPlugin.onVariableChanged('state0')
+        self.assertFalse(self._widget.ClipPlugin.ClipToggle.isChecked())
         self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 20)
-        self._widget.ClipPlugin.ClipDirection.setCurrentIndex(2)
-        self._widget.ClipPlugin.ClipSlider.setSliderPosition(30)
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Z")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 30)
+        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentIndex(), 0)
 
-        # Change variable back
-        self._widget.FilePlugin.VariableList.setCurrentIndex(2)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Y")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 5)
-
-        # Change again
-        self._widget.FilePlugin.VariableList.setCurrentIndex(1)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Z")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 30)
-
-    def testState2(self):
-        """
-        Test that settings are saved across files.
-        """
-        self._widget.ClipPlugin.setChecked(True)
-        self._widget.ClipPlugin.clicked.emit(True)
-        self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
-        self._widget.ClipPlugin.ClipSlider.setSliderPosition(5)
-        self.assertTrue(self._widget.ClipPlugin.isChecked())
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Y")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 5)
-
-        # Change files
-        self._widget.FilePlugin.FileList.setCurrentIndex(1)
-        self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
-        self.assertFalse(self._widget.ClipPlugin.isChecked())
-
-        # Change bakcg
-        self._widget.FilePlugin.FileList.setCurrentIndex(0)
-        self._widget.FilePlugin.FileList.currentIndexChanged.emit(0)
-        self.assertTrue(self._widget.ClipPlugin.isChecked())
-        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Y")
-        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 5)
+        # Switch back to state1
+        self._widget.ClipPlugin.onVariableChanged('state1')
+        self.assertTrue(self._widget.ClipPlugin.ClipToggle.isChecked())
+        self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 15)
+        self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentIndex(), 1)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

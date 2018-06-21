@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 import peacock
 import mooseutils
 from plugins.ExodusPlugin import ExodusPlugin
@@ -18,17 +18,43 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
     def __init__(self, plugins=[]):
         super(ExodusPluginManager, self).__init__(plugins=plugins, plugin_base=ExodusPlugin)
 
+        # The layouts for this widget
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        self.MainLayout = QtWidgets.QHBoxLayout(self)
+        self.MainLayout = QtWidgets.QHBoxLayout()
+
+        self.LeftScrollArea = QtWidgets.QScrollArea()
+        self.LeftScrollArea.setWidgetResizable(True)
+        self.LeftScrollArea.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.LeftScrollArea.setStyleSheet("QScrollArea { background: transparent; }");
+        self.LeftScrollArea.viewport().setStyleSheet(".QWidget { background: transparent; }");
+        self.LeftScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.LeftScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.LeftScrollContent = QtWidgets.QWidget()
+        self.LeftScrollArea.setWidget(self.LeftScrollContent)
         self.LeftLayout = QtWidgets.QVBoxLayout()
+        self.LeftScrollContent.setLayout(self.LeftLayout)
+        self.LeftLayout.setContentsMargins(0, 0, 0, 0)
         self.RightLayout = QtWidgets.QVBoxLayout()
-        self.MainLayout.addLayout(self.LeftLayout)
+        self.WindowLayout = QtWidgets.QHBoxLayout()
+
+        self.setLayout(self.MainLayout)
+        self.MainLayout.addWidget(self.LeftScrollArea)
         self.MainLayout.addLayout(self.RightLayout)
+        self.RightLayout.addLayout(self.WindowLayout)
         self.setup()
         self.LeftLayout.addStretch(1)
 
         # Set the width of the left-side widgets to that the VTK window gets the space
         self.fixLayoutWidth('LeftLayout')
+        self.LeftScrollContent.setFixedWidth(self.LeftLayout.sizeHint().width())
+        self.LeftScrollArea.setFixedWidth(self.LeftScrollContent.width() + 15) # This gets rid of the horizontal "wiggle"
+
+        if 'BlockPlugin' in self:
+            self['BlockPlugin'].setCollapsed(True)
+        if 'BackgroundPlugin' in self:
+            self['BackgroundPlugin'].setCollapsed(True)
+        if 'CameraPlugin' in self:
+            self['CameraPlugin'].setCollapsed(True)
 
     def repr(self):
         """
@@ -44,10 +70,6 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
                 else:
                     output[key] = value
 
-        # Add colorbar to window
-        if 'colorbar' in output:
-            output['window'][0] = 'window = chigger.RenderWindow(result, cbar)'
-
         # Make import unique
         mooseutils.unique_list(output['imports'], output['imports'])
 
@@ -60,7 +82,7 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
 
         # Build the script
         string = ''
-        for key in ['imports', 'camera', 'reader', 'filters', 'result', 'colorbar', 'window']:
+        for key in ['imports', 'camera', 'reader', 'filters', 'result', 'window']:
             if key in output:
                 string += '\n{}\n'.format('\n'.join(output.pop(key)))
 
@@ -70,21 +92,15 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
 
         return string
 
-    def addToMainMenu(self, menubar):
-        exodus_menu = menubar.addMenu("&Results")
-        for plugin in self._all_plugins:
-            plugin.addToMenu(exodus_menu)
 
 def main(size=None):
     """
     Run window widget alone
     """
-    from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from plugins.VTKWindowPlugin import VTKWindowPlugin
     from plugins.FilePlugin import FilePlugin
-    from plugins.BlockPlugin import BlockPlugin
     from plugins.GoldDiffPlugin import GoldDiffPlugin
-    from plugins.ColorbarPlugin import ColorbarPlugin
+    from plugins.VariablePlugin import VariablePlugin
     from plugins.MeshPlugin import MeshPlugin
     from plugins.BackgroundPlugin import BackgroundPlugin
     from plugins.ClipPlugin import ClipPlugin
@@ -92,35 +108,19 @@ def main(size=None):
     from plugins.OutputPlugin import OutputPlugin
     from plugins.CameraPlugin import CameraPlugin
     from plugins.MediaControlPlugin import MediaControlPlugin
+    from plugins.BlockPlugin import BlockPlugin
 
-    plugins = [lambda: VTKWindowPlugin(size=size),
-               FilePlugin,
-               BlockPlugin,
-               MediaControlPlugin,
-               GoldDiffPlugin,
-               ColorbarPlugin,
-               MeshPlugin,
-               ClipPlugin,
-               ContourPlugin,
-               CameraPlugin,
-               BackgroundPlugin,
-               OutputPlugin]
+    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), BlockPlugin, MediaControlPlugin, VariablePlugin, FilePlugin, GoldDiffPlugin,  MeshPlugin, BackgroundPlugin, ClipPlugin, ContourPlugin, CameraPlugin, OutputPlugin])
 
-    widget = ExodusPluginManager(plugins=plugins)
-    main_window = QtWidgets.QMainWindow()
-    main_window.setCentralWidget(widget)
-    menubar = main_window.menuBar()
-    menubar.setNativeMenuBar(False)
-    widget.addToMainMenu(menubar)
-    main_window.show()
+    widget.show()
 
-    return widget, main_window
+    return widget
 
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
     from peacock.utils import Testing
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'displace.e', 'vector_out.e', 'mesh_only.e')
-    widget, main_window = main()
+    filenames = Testing.get_chigger_input_list('mesh_only.e', 'mug_blocks_out.e', 'vector_out.e', 'displace.e')
+    widget = main()
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

@@ -11,7 +11,7 @@
 import sys
 import unittest
 import vtk
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from peacock.ExodusViewer.plugins.CameraPlugin import main
 from peacock.utils import Testing
 
@@ -30,21 +30,20 @@ class TestCameraPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._window.onSetFilename(self._filename)
-        self._window.onSetVariable('diffused')
-        self._window.onWindowRequiresUpdate()
-
+        self._window.onFileChanged(self._filename)
         camera = vtk.vtkCamera()
         camera.SetViewUp(0.2152, 0.4770, 0.8522)
         camera.SetPosition(22.5359, -61.7236, 28.9816)
         camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint())
+        self._window.onCameraChanged(camera)
+        self._window.onResultOptionsChanged({'variable':'diffused'})
+        self._window.onWindowRequiresUpdate()
 
     def testFillScreen(self):
         """
         Test 'Fill Screen' button
         """
-        self._widget.CameraPlugin.FillScreenButton.setChecked(QtCore.Qt.Checked)
+        self.assertImage('testInitial.png')
         self._widget.CameraPlugin.FillScreenButton.clicked.emit()
         self.assertImage('testFillScreen.png')
 
@@ -52,7 +51,6 @@ class TestCameraPlugin(Testing.PeacockImageTestCase):
         """
         Test 'Reset' button
         """
-        self._widget.CameraPlugin.ResetButton.setChecked(QtCore.Qt.Checked)
         self._widget.CameraPlugin.ResetButton.clicked.emit()
         self.assertImage('testReset.png')
 

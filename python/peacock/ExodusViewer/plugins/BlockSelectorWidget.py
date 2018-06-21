@@ -7,26 +7,19 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
 import peacock
-
-
-class BlockQStyledItemDelegate(QtWidgets.QStyledItemDelegate):
-    def paint(self, painter, option, index):
-        self.showDecorationSelected = False;
-        super(BlockQStyledItemDelegate, self).paint(painter, option, index)
 
 class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
     """
-    A generic widget for controlling visible blocks, nodesets, and sidesets of the current
-    Exodus result.
+    A generic widget for controlling visible blocks, nodesets, and sidesets of the current Exodus result.
 
     Args:
          type[int]: The block type from vtk (see BlockControls.py).
     """
 
-    #: pyqtSignal: Emitted when items changed
-    itemsChanged = QtCore.pyqtSignal()
+    #: pyqtSignal: Emitted when the "all" checkbox is pressed.
+    clicked = QtCore.pyqtSignal()
 
     def __init__(self, block_type, **kwargs):
         self._initial_status = kwargs.pop('enabled', True) # when true, all boxes are checked
@@ -45,15 +38,15 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         self.MainLayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.MainLayout)
 
-        self.StandardItemModel = None#QtGui.QStandardItemModel()
-        self.ListWidget = QtWidgets.QComboBox()
+        # Create the label and box
+        self.ListHeader = QtWidgets.QCheckBox(self)
+        self.MainLayout.addWidget(self.ListHeader)
+
+        self.ListWidget = QtWidgets.QListWidget(self)
         self.MainLayout.addWidget(self.ListWidget)
 
         # Call setup methods
         self.setup()
-
-        # This widget handles store/load manually, see BlockPlugin for use.
-        self._state = dict()
 
     def updateBlocks(self, reader):
         """
@@ -61,79 +54,122 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         Args:
             reader[chigger.ExodusReader]: The current reader object.
+
         """
-        # Clear the current model
-        self.StandardItemModel = QtGui.QStandardItemModel()
-        self.StandardItemModel.itemChanged.connect(self._callbackItemChanged)
-        self.StandardItemModel.blockSignals(True)
 
-        # Create the title item
-        title = QtGui.QStandardItem(self._title)
-        title.setFlags(QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-        title.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
-        title.setBackground(QtGui.QBrush(QtGui.QColor(200, 200, 200)))
-        if self._initial_status:
-            title.setCheckState(QtCore.Qt.Checked)
-        self.StandardItemModel.setItem(0, 0, title)
+        # Current state
+        state = dict()
+        for i in range(self.ListWidget.count()):
+            item = self.ListWidget.item(i)
+            state[item.data(QtCore.Qt.UserRole)] = item.checkState()
 
-        # Populate the items
+        self.ListWidget.clear()
         blocks = reader.getBlockInformation()[self._type]
         for i, block in enumerate(blocks.itervalues()):
-            item = QtGui.QStandardItem()
-            item.setFlags(QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
-            item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
-            item.setData(block.name, QtCore.Qt.UserRole)
-            if self._initial_status:
+            item = QtWidgets.QListWidgetItem(self.ListWidget)
+            item.setData(QtCore.Qt.UserRole, block.name)
+            if  block.name in state:
+                item.setCheckState(state[block.name])
+            elif self.ListHeader.checkState() == QtCore.Qt.Checked:
                 item.setCheckState(QtCore.Qt.Checked)
-
+            else:
+                item.setCheckState(QtCore.Qt.Unchecked)
             if block.name.isdigit():
                 item.setText(block.name)
             else:
                 item.setText('{} ({})'.format(block.name, block.number))
+            self.ListWidget.insertItem(i, item)
 
-            self.StandardItemModel.setItem(i+1, item)
-
-        self.ListWidget.setModel(self.StandardItemModel)
-        self.ListWidget.setItemDelegate(BlockQStyledItemDelegate())
-        self.StandardItemModel.blockSignals(False)
+        w = max(100, self.ListWidget.sizeHintForColumn(0) + 2 * self.ListWidget.frameWidth())
+        h = self.ListWidget.sizeHintForRow(0) * min(10, self.ListWidget.count()) + 2 * self.ListWidget.frameWidth()
+        self.ListWidget.setMaximumWidth(w)
+        self.ListWidget.setMaximumHeight(h)
 
     def getBlocks(self):
         """
         Callback when the list items are changed
         """
-
         blocks = []
-        for i in range(1, self.StandardItemModel.rowCount()):
-            item = self.StandardItemModel.item(i)
-            if item.checkState() == QtCore.Qt.Checked:
-                blocks.append(str(item.data(QtCore.Qt.UserRole)))
-
+        if self.isEnabled():
+            for i in range(self.ListWidget.count()):
+                item = self.ListWidget.item(i)
+                if item.checkState() == QtCore.Qt.Checked:
+                    blocks.append(str(item.data(QtCore.Qt.UserRole)))
         return blocks if blocks else None
 
-    def _callbackItemChanged(self, item):
+    def _setupListHeader(self, qobject):
+        """
+        Setup method for list title
+        """
+
+        if self._title:
+            qobject.setText(self._title)
+            qobject.font().setPointSize(6)
+            qobject.setChecked(self._initial_status)
+        qobject.clicked.connect(self._callbackListHeader)
+
+    @QtCore.pyqtSlot(bool)
+    def _callbackListHeader(self, value):
+        """
+        Callback for ListHeader widget.
+        """
+
+        if value:
+            state = QtCore.Qt.Checked
+        else:
+            state = QtCore.Qt.Unchecked
+
+        self.ListHeader.setCheckState(state)
+        for i in range(self.ListWidget.count()):
+            self.ListWidget.item(i).setCheckState(state)
+
+        self.clicked.emit()
+
+    def _setupListWidget(self, qobject):
+        """
+        Setup method for the list box.
+        """
+        qobject.itemClicked.connect(self._callbackListWidget)
+
+    @QtCore.pyqtSlot(QtWidgets.QListWidgetItem)
+    def _callbackListWidget(self, item):
         """
         Callback for list widget.
         """
-        self.StandardItemModel.blockSignals(True)
-        if item == self.StandardItemModel.item(0):
-            state = item.checkState()
-            for i in range(1, self.StandardItemModel.rowCount()):
-                self.StandardItemModel.item(i).setCheckState(state)
-        else:
-            self.StandardItemModel.item(0).setCheckState(QtCore.Qt.Unchecked)
-        self.StandardItemModel.blockSignals(False)
-        self.itemsChanged.emit()
+        self.ListHeader.setCheckState(QtCore.Qt.Unchecked)
+        self.clicked.emit()
 
-    def hasState(self, key):
-        return key in self._state
+    def checkState(self):
+        """
+        Inspects the items in the list widget.
+        """
+        state = []
+        for i in range(self.ListWidget.count()):
+            state.append(self.ListWidget.item(i).checkState())
+        return state
 
-    def store(self, key):
-        self._state[key] = [self.StandardItemModel.item(i).checkState() for i in range(self.StandardItemModel.rowCount())]
+    def setCheckState(self, state):
+        """
+        Sets the items in the list widget.
+        """
+        if (len(state) != self.ListWidget.count()):
+            return
 
-    def load(self, key):
-        state = self._state.get(key, None)
-        if state:
-            for i, checked in enumerate(state):
-                item = self.StandardItemModel.item(i)
-                if item is not None:
-                    item.setCheckState(checked)
+        for i in range(len(state)):
+            self.ListWidget.item(i).setCheckState(state[i])
+        self.clicked.emit()
+
+    def setAllChecked(self, on=True):
+        """
+        Set all items to the same check state
+        """
+        state = QtCore.Qt.Checked
+        if not on:
+            state = QtCore.Qt.Unchecked
+        self.ListHeader.setCheckState(state)
+        for i in range(self.ListWidget.count()):
+            self.ListWidget.item(i).setCheckState(state)
+        self.clicked.emit()
+
+# Update the store/load methods for this class
+peacock.utils.WidgetUtils.WIDGET_SETTINGS_CACHE[BlockSelectorWidget] = [('checkState', 'setCheckState')]

@@ -10,6 +10,7 @@
 
 import sys
 import unittest
+import vtk
 from PyQt5 import QtCore, QtWidgets
 from peacock.ExodusViewer.plugins.MeshPlugin import main
 from peacock.utils import Testing
@@ -27,12 +28,17 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         """
 
         # The file to open
-        self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
+        self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._widget.FilePlugin.onSetFilenames(self._filenames)
-        self._widget.FilePlugin.VariableList.setCurrentIndex(2)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
-        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
+        self._window.onFileChanged(self._filename)
+        self._window.onResultOptionsChanged({'variable':'diffused'})
+        self._window.onWindowRequiresUpdate()
+
+        camera = vtk.vtkCamera()
+        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
+        camera.SetPosition(9.2960, -0.4218, 12.6685)
+        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
+        self._window.onCameraChanged(camera)
 
     def testInitial(self):
         """
@@ -60,10 +66,14 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         # Test that toggling representation disable/enables mesh view
         self._widget.MeshPlugin.Representation.setCurrentIndex(1)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(1)
+        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
+        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
 
         # Return the index back, it should be re-enabled
         self._widget.MeshPlugin.Representation.setCurrentIndex(0)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(0)
+        self.assertTrue(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
+        self.assertTrue(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testViewMeshToggle.png', allowed=0.95) # lines are slightly different across platforms
 
     def testRepresentation(self):
@@ -74,16 +84,19 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         # Wirefreme
         self._widget.MeshPlugin.Representation.setCurrentIndex(1)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(1)
+        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testRepresentationWireframe.png', allowed=0.90) # lines are different across platforms
 
         # Points
         self._widget.MeshPlugin.Representation.setCurrentIndex(2)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(2)
+        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testRepresentationPoints.png', allowed=0.91)
 
         # Surface
         self._widget.MeshPlugin.Representation.setCurrentIndex(0)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(0)
+        self.assertTrue(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testInitial.png') # same as initial load
 
     def testScale(self):
@@ -103,27 +116,17 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self._widget.MeshPlugin.ScaleZ.valueChanged.emit(0.5)
         self.assertImage('testScaleZ.png')
 
-    def testExtents(self):
-        """
-        Test the extents toggle.
-        """
-        self._widget.MeshPlugin.Extents.setChecked(True)
-        self.assertImage('testExtents.png')
-        self._widget.MeshPlugin.Extents.setChecked(False)
-        self.assertImage('testInitial.png')
-
     def testDisplacements(self):
         """
         Test displacement toggle and magnitude.
         """
 
         # Change the file to something with displacements
-        self._widget.FilePlugin.FileList.setCurrentIndex(2)
-        self._widget.FilePlugin.FileList.currentIndexChanged.emit(2)
-        self._widget.FilePlugin.VariableList.setCurrentIndex(2) # distance
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
+        filename = Testing.get_chigger_input('displace.e')
+        self._window.onFileChanged(filename)
         self._window._reader.update(timestep=4)
         self._window._result.update(camera=None, colorbar={'visible':False}, block=['2'])
+        self._window.onResultOptionsChanged({'variable':'distance'})
         self._window.onWindowRequiresUpdate()
         self.assertImage('testDisplacementInitial.png')
 
@@ -137,75 +140,30 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self.assertFalse(self._widget.MeshPlugin.DisplacementMagnitude.isEnabled())
         self.assertImage('testDisplacementOff.png')
 
-    def testState(self):
+    def testVariableState(self):
         """
         Test that the variable state is stored/loaded.
         """
 
         # State0
-        self.assertTrue(self._widget.MeshPlugin.DisplacementToggle.isChecked())
-        self.assertTrue(self._widget.MeshPlugin.DisplacementMagnitude.isEnabled())
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
-        self.assertFalse(self._widget.MeshPlugin.Extents.isChecked())
-        self.assertEqual(self._widget.MeshPlugin.DisplacementMagnitude.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.Representation.currentText(), 'Surface')
-        self.assertEqual(self._widget.MeshPlugin.ScaleX.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.ScaleY.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.ScaleZ.value(), 1.0)
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentText(), 'diffused')
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentIndex(), 2)
+        self._widget.MeshPlugin.onVariableChanged('state0')
+        self._widget.MeshPlugin.mesh() # something must be done for state to be stored
         self.assertImage('testInitial.png')
 
-        # Change state
-        self._widget.MeshPlugin.Extents.setChecked(True)
-        self._widget.MeshPlugin.Representation.setCurrentIndex(1)
-        self._widget.MeshPlugin.ScaleX.setValue(1.1)
+        # State1
+        self._widget.MeshPlugin.onVariableChanged('state1')
+        self._widget.MeshPlugin.ScaleX.setValue(1.5)
+        self._widget.MeshPlugin.ScaleX.valueChanged.emit(1.5)
+        self._widget.MeshPlugin.ViewMeshToggle.setCheckState(QtCore.Qt.Checked)
+        self.assertImage('testState1.png', allowed=0.94) # lines are different across platforms
 
-        # Assert changes
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentText(), 'diffused')
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentIndex(), 2)
-        self.assertTrue(self._widget.MeshPlugin.DisplacementToggle.isChecked())
-        self.assertTrue(self._widget.MeshPlugin.DisplacementMagnitude.isEnabled())
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
-        self.assertTrue(self._widget.MeshPlugin.Extents.isChecked())
-        self.assertEqual(self._widget.MeshPlugin.DisplacementMagnitude.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.Representation.currentText(), 'Wireframe')
-        self.assertEqual(self._widget.MeshPlugin.ScaleX.value(), 1.1)
-        self.assertEqual(self._widget.MeshPlugin.ScaleY.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.ScaleZ.value(), 1.0)
+        # Return to state0
+        self._widget.MeshPlugin.onVariableChanged('state0')
+        self.assertImage('testInitial.png')
 
-        # Change to different variable and change scale
-        self._widget.FilePlugin.VariableList.setCurrentIndex(1)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentText(), 'convected')
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentIndex(), 1)
-        self.assertTrue(self._widget.MeshPlugin.DisplacementToggle.isChecked())
-        self.assertTrue(self._widget.MeshPlugin.DisplacementMagnitude.isEnabled())
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
-        self.assertFalse(self._widget.MeshPlugin.Extents.isChecked())
-        self.assertEqual(self._widget.MeshPlugin.DisplacementMagnitude.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.Representation.currentText(), 'Surface')
-        self.assertEqual(self._widget.MeshPlugin.ScaleX.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.ScaleY.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.ScaleZ.value(), 1.0)
-
-        self._widget.MeshPlugin.ScaleX.setValue(2.1)
-        self._widget.MeshPlugin.ScaleX.valueChanged.emit(2.1)
-
-        # Change back
-        self._widget.FilePlugin.VariableList.setCurrentIndex(2)
-        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentText(), 'diffused')
-        self.assertEqual(self._widget.FilePlugin.VariableList.currentIndex(), 2)
-        self.assertTrue(self._widget.MeshPlugin.DisplacementToggle.isChecked())
-        self.assertTrue(self._widget.MeshPlugin.DisplacementMagnitude.isEnabled())
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
-        self.assertTrue(self._widget.MeshPlugin.Extents.isChecked())
-        self.assertEqual(self._widget.MeshPlugin.DisplacementMagnitude.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.Representation.currentText(), 'Wireframe')
-        self.assertEqual(self._widget.MeshPlugin.ScaleX.value(), 1.1)
-        self.assertEqual(self._widget.MeshPlugin.ScaleY.value(), 1.0)
-        self.assertEqual(self._widget.MeshPlugin.ScaleZ.value(), 1.0)
+        # Return to state1
+        self._widget.MeshPlugin.onVariableChanged('state1')
+        self.assertImage('testState1.png', allowed=0.94) # lines are different across platforms
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

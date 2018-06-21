@@ -10,9 +10,11 @@
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
+import peacock
 from ExodusPlugin import ExodusPlugin
+from peacock.utils import WidgetUtils
 
-class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class ClipPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Controls for clipping data in x,y,z direction.
     """
@@ -23,14 +25,9 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     #: pyqtSignal: Emitted when the chigger objects options are changed
     resultOptionsChanged = QtCore.pyqtSignal(dict)
 
-    #: pyqtSignal: Emitted when adding a filter
-    addFilter = QtCore.pyqtSignal(chigger.filters.ChiggerFilterBase)
-
-    #: pyqtSignal: Emitted when removing a filter
-    removeFilter = QtCore.pyqtSignal(chigger.filters.ChiggerFilterBase)
-
-    def __init__(self):
-        super(ClipPlugin, self).__init__()
+    def __init__(self, **kwargs):
+        peacock.base.PeacockCollapsibleWidget.__init__(self)
+        ExodusPlugin.__init__(self, **kwargs)
 
         # Member variables
         self._origin = None
@@ -40,61 +37,28 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self._clipper = chigger.filters.PlaneClipper()
 
         # Setup this widget widget
-        self.setTitle('Clip')
-        self.setCheckable(True)
-        self.setChecked(False)
-        self.MainLayout = QtWidgets.QHBoxLayout(self)
-        self.MainLayout.setSpacing(0)
-        self.MainLayout.setContentsMargins(0,0,0,0)
+        self.setTitle('Clipping')
+
+        self.MainLayout = self.collapsibleLayout()
+
+        self.ClipToggle = QtWidgets.QCheckBox()
 
         self.ClipDirection = QtWidgets.QComboBox()
         self.ClipSlider = QtWidgets.QSlider()
 
+        self.MainLayout.addWidget(self.ClipToggle)
         self.MainLayout.addWidget(self.ClipDirection)
-        self.MainLayout.addSpacing(10)
         self.MainLayout.addWidget(self.ClipSlider)
-        self.clicked.connect(self._callbackClicked)
 
         self.setup()
-        self.store(key='default')
-
-    def onSetVariable(self, *args):
-        """
-        Loads the selected items when the variable changes.
-        """
-        super(ClipPlugin, self).onSetVariable(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onSetComponent(self, *args):
-        """
-        Loads the selected items when the variable component changes.
-        """
-        super(ClipPlugin, self).onSetComponent(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onWindowResult(self, *args):
-        """
-        Loads state when result is created.
-        """
-        self._loadPlugin()
-        self.updateOptions()
-
-    def _loadPlugin(self):
-        """
-        Helper for loading plugin state.
-        """
-        self.load()
-        if not self.hasState():
-            self.setChecked(False)
+        self.setCollapsed(True)
 
     def repr(self):
         """
         Return python scripting content.
         """
         output = dict()
-        if self.isChecked():
+        if self.ClipToggle.isChecked():
             options, sub_options = self._clipper.options().toScriptString()
             output['filters'] = ['clipper = chigger.filters.PlaneClipper()']
             output['filters'] += ['clipper.setOptions({})'.format(', '.join(options))]
@@ -103,17 +67,33 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         return output
 
-    def updateOptions(self):
+    def onVariableChanged(self, *args):
+        """
+        When a variable changes, load the state of the clip.
+        """
+        if self.isEnabled():
+            self.store(self.stateKey(self._variable), 'Variable')
+        super(ClipPlugin, self).onVariableChanged(*args)
+        self.load(self.stateKey(self._variable), 'Variable')
+
+    def clip(self):
         """
         Update the clipping settings.
         """
 
-        checked = self.isChecked()
+        # Update visibility status
+        checked = self.ClipToggle.isChecked()
         self.ClipDirection.setEnabled(checked)
         self.ClipSlider.setEnabled(checked)
+        filters = []
+        if self._result:
+            filters = self._result.getOption('filters')
 
+        # Clipping
         if checked:
+            # Get the current clip axis index
             index = self.ClipDirection.currentIndex()
+
             normal = [0, 0, 0]
             normal[index] = 1
 
@@ -121,17 +101,21 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             origin[index] = self.ClipSlider.sliderPosition()/float(self._increments-1)
 
             self._clipper.setOptions(normal=normal, origin=origin)
-            self.addFilter.emit(self._clipper)
-        else:
-            self.removeFilter.emit(self._clipper)
+            if self._clipper not in filters:
+                filters.append(self._clipper)
 
-    def _callbackClicked(self):
+        else:
+            if self._clipper in filters:
+                filters.remove(self._clipper)
+
+        self.resultOptionsChanged.emit({'filters':filters})
+        self.windowRequiresUpdate.emit()
+
+    def _setupClipToggle(self, qobject):
         """
         Setup method for the clip toggle.
         """
-        self.store()
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        qobject.stateChanged.connect(lambda val: self.clip())
 
     def _setupClipDirection(self, qobject):
         """
@@ -147,11 +131,9 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Callback for when clip direction is altered.
         """
-        self.store(self.ClipDirection)
-        key = (self._filename, self._variable, self._component, self.ClipDirection.currentIndex())
-        self.load(self.ClipSlider, key=key)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        index = self.ClipDirection.currentIndex()
+        WidgetUtils.loadWidget(self.ClipSlider, self.stateKey(index), 'ClipDirection')
+        self.clip()
 
     def _setupClipSlider(self, qobject):
         """
@@ -162,17 +144,27 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         qobject.setSliderPosition(self._increments/2)
         qobject.setProperty('cache', ['ClipDirection'])
         qobject.valueChanged.connect(self._callbackClipSlider)
+
+        # Store the initial state of the slide for index 0, why?
+        #
+        # Perform the following:
+        #   (1) Clipping enabled
+        #   (2) Change the axis to 'y'
+        #   (3) Move the slider
+        #   (4) Change the axis back to 'x'
+        #
+        # Without this 'x' would be at the 'y' position instead of at the midpoint.
+        qobject.setEnabled(True)
+        WidgetUtils.storeWidget(qobject, self.stateKey(0), 'ClipDirection')
         qobject.setEnabled(False)
 
     def _callbackClipSlider(self, value):
         """
         Callback for slider.
         """
-        self.store(self.ClipSlider)
-        key = (self._filename, self._variable, self._component, self.ClipDirection.currentIndex())
-        self.store(self.ClipSlider, key=key)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        index = self.ClipDirection.currentIndex()
+        WidgetUtils.storeWidget(self.ClipSlider, self.stateKey(index), 'ClipDirection')
+        self.clip()
 
 def main(size=None):
     """
@@ -180,8 +172,8 @@ def main(size=None):
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
-    from peacock.ExodusViewer.plugins.FilePlugin import FilePlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, ClipPlugin])
+    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), ClipPlugin])
+    widget.ClipPlugin.setCollapsed(False)
     widget.show()
 
     return widget, widget.VTKWindowPlugin
@@ -189,7 +181,7 @@ def main(size=None):
 if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e')
-    widget, window = main(size=[600,600])
-    widget.FilePlugin.onSetFilenames(filenames)
+    filename = Testing.get_chigger_input('mug_blocks_out.e')
+    widget, window = main()
+    widget.onFileChanged(filename)
     sys.exit(app.exec_())
