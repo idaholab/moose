@@ -106,6 +106,22 @@ LIBMESH_OPTIONS = {
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
+  'parmetis' :      { 're_option' : r'#define\s+LIBMESH_PETSC_HAVE_PARMETIS\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
+  'chaco' :      { 're_option' : r'#define\s+LIBMESH_PETSC_HAVE_CHACO\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
+  'party' :      { 're_option' : r'#define\s+LIBMESH_PETSC_HAVE_PARTY\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
+  'ptscotch' :      { 're_option' : r'#define\s+LIBMESH_PETSC_HAVE_PTSCOTCH\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
   'slepc' :        { 're_option' : r'#define\s+LIBMESH_HAVE_SLEPC\s+(\d+)',
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
