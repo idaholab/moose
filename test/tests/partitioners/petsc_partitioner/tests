@@ -1,0 +1,53 @@
+[Tests]
+  [./test]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch Outputs/file_base=petsc_partitioner_ptscotch_out'
+    ptscotch = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_out'
+    parmetis = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./chaco]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_chaco_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=chaco Outputs/file_base=petsc_partitioner_chaco_out'
+    chaco = true
+    petsc_version = '>=3.9.0'
+    # chaco uses rand so that it is platform dependent
+    platform = DARWIN
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./party]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_party_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=party Outputs/file_base=petsc_partitioner_party_out'
+    party = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+[]
