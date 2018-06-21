@@ -32,7 +32,7 @@ is non-zero. To solve for this out-of-plane strain, we invoke the approximation
 of the stretch rate tensor
 \begin{equation}
   \label{eqn:stretch_tensor_approx}
-  \mathbf{D} = \log \left( \sqrt{\hat{\mathbf{F}}^T \cdot \hat{\mathbf{F}}} \right) \cdot \frac{1}{dt}
+  \boldsymbol{D} = \log \left( \sqrt{\hat{\boldsymbol{F}}^T \cdot \hat{\boldsymbol{F}}} \right) \cdot \frac{1}{dt}
 \end{equation}
 and define the deformation gradient component in the out-of-plane direction as
 \begin{equation}
@@ -52,10 +52,10 @@ problems use scalar variables.
 The incremental deformation gradient for the 2D planar system is defined as
 \begin{equation}
   \label{eqn:incremental_deformation_grad}
-  \hat{\mathbf{F}} = \mathbf{A} : \bar{\mathbf{F}}^{-1} + \mathbf{I}
+  \hat{\boldsymbol{F}} = \boldsymbol{A} : \bar{\boldsymbol{F}}^{-1} + \boldsymbol{I}
 \end{equation}
-where $\mathbf{I}$ is the Rank-2 identity tensor, $\mathbf{A}$ is the deformation
-gradient, and $\bar{\mathbf{F}}$ is the old deformation gradient.
+where $\boldsymbol{I}$ is the Rank-2 identity tensor, $\boldsymbol{A}$ is the deformation
+gradient, and $\bar{\boldsymbol{F}}$ is the old deformation gradient.
 
 #### $Z$-Direction of Out-of-Plane Strain (Default)
 
@@ -64,20 +64,20 @@ the current and old deformation gradient tensors, used in
 [eqn:incremental_deformation_grad], are given as
 \begin{equation}
   \label{eqn:deform_grads}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 u_{x,x} & u_{x,y} & 0 \\
                 u_{y,x} & u_{y,y} & 0 \\
                 0 & 0 & F|^{dop}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
   \qquad \text{  and  } \qquad
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 u_{x,x}|_{old} & u_{x,y}|_{old} & 0 \\
                 u_{y,x}|_{old} & u_{y,y}|_{old} & 0 \\
                 0 & 0 & F|^{dop}_{old}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
 \end{equation}
 where $F|^{dop}$ is defined in [eqn:dop_deform_grad].
-Note that $\bar{\mathbf{F}}$ uses the values of the strain expressions from
+Note that $\bar{\boldsymbol{F}}$ uses the values of the strain expressions from
 the previous time step.
 As in the classical presentation of the strain tensor in plane strain problems,
 the components of the deformation tensor associated with the $z$-direction are
@@ -91,17 +91,17 @@ current and old deformation gradient tensors from [eqn:incremental_deformation_g
 are formulated as
 \begin{equation}
   \label{eqn:deform_grads_xdirs}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 F|^{dop} & 0 & 0 \\
                 0 & u_{y,y} & u_{z,y} \\
                 0 & u_{y,z} & u_{z,z}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
   \qquad \text{  and  } \qquad
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 F|^{dop}_{old} & 0 & 0 \\
                 0 & u_{y,y}|_{old} & u_{y,z}|_{old} \\
                 0 & u_{z,y}|_{old}& u_{z,z}|_{old}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
 \end{equation}
 so that the off-diagonal components of the deformation tensors associated with
 the $x$-direction are zeros.
@@ -113,17 +113,17 @@ current and old deformation gradient tensors from [eqn:incremental_deformation_g
 are formulated as
 \begin{equation}
   \label{eqn:deform_grads_ydirs}
-  \mathbf{A} = \begin{bmatrix}
+  \boldsymbol{A} = \begin{bmatrix}
                 u_{x,x} & 0 & u_{z,x} \\
                 0 & F|^{dop} & 0 \\
                 u_{x,z} & 0 & u_{z,z}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
   \qquad \text{  and  } \qquad
-  \bar{\mathbf{F}} = \begin{bmatrix}
+  \bar{\boldsymbol{F}} = \begin{bmatrix}
                 u_{x,x}|_{old} & 0 & u_{x,z}|_{old} \\
                 0 & F|^{dop}_{old} & 0 \\
                 u_{z,x}|_{old} & 0 & u_{z,z}|_{old}
-              \end{bmatrix} + \mathbf{I}
+              \end{bmatrix} + \boldsymbol{I}
 \end{equation}
 so that the off-diagonal components of the deformation tensors associated with
 the $y$-direction are zeros.
@@ -137,7 +137,7 @@ The volumetric locking correction is applied to both the incremental deformation
 gradient
 \begin{equation}
   \label{eqn:vlc_fhat}
-  \hat{\mathbf{F}}|_{vlc} = \left( \frac{1}{det(\hat{\mathbf{F}})} \frac{\hat{\mathbf{F}}_{avg}}{V_{elem}} \right)^{1/3}
+  \hat{\boldsymbol{F}}|_{vlc} = \left( \frac{1}{det(\hat{\boldsymbol{F}})} \frac{\hat{\boldsymbol{F}}_{avg}}{V_{elem}} \right)^{1/3}
 \end{equation}
 and the total deformation gradient. For more details about the theory behind
 [eqn:vlc_fhat] see the

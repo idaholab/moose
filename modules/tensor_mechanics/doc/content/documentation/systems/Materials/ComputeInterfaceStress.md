@@ -27,19 +27,19 @@ where the $\backslash$ operator represents integer modulo. The basis $\vec e_i$
 is then orthonormalized using the modified Gram-Schmidt procedure,
 holding $\vec e_1$ constant. We construct two matrices
 \begin{equation}
-\mathbf{M} = \left( \begin{matrix}
+\boldsymbol{M} = \left( \begin{matrix}
   0 & 0 & 0 \\
   0 & \sigma_i & 0 \\
   0 & 0 & \sigma_i
   \end{matrix}  \right),
-\mathbf{S}= \left( \begin{matrix}
+\boldsymbol{S}= \left( \begin{matrix}
   \vec e_1 & \vec e_2 & \vec e_3
   \end{matrix}
   \right),
 \end{equation}
-and set the stress tensor $\mathbf{\sigma}$ to
+and set the stress tensor $\boldsymbol{\sigma}$ to
 \begin{equation}
-\mathbf{\sigma} = \left(S\cdot M\cdot S^{-1}\right)\cdot|\nabla\eta|,
+\boldsymbol{\sigma} = \left(S\cdot M\cdot S^{-1}\right)\cdot|\nabla\eta|,
 \end{equation}
 which is a basis transformation from the Eigenvector basis into the cartesian basis.
 The $|\nabla\eta|$ factor causes the integral over the stress tensor across the interface

@@ -48,16 +48,16 @@ F =& \Psi + \gamma \\
 To be thermodynamically consistent, the stress is related to the deformation energy density according
 to
 \begin{equation}
-\mathbf{\sigma} = \frac{\partial \Psi}{\partial \mathbf{\epsilon}}.
+\boldsymbol{\sigma} = \frac{\partial \Psi}{\partial \boldsymbol{\epsilon}}.
 \end{equation}
 Thus,
 \begin{equation}
-\mathbf{\sigma}^{\pm} = \frac{\partial \Psi^{\pm}}{\partial \mathbf{\epsilon}} = \sum_{a=1}^3 \left( \lambda \left< \epsilon_1 + \epsilon_2 + \epsilon_3 \right>_{\pm} + 2 \mu \left< \epsilon_a \right>_{\pm} \right) \mathbf{n}_a \otimes \mathbf{n}_a,
+\boldsymbol{\sigma}^{\pm} = \frac{\partial \Psi^{\pm}}{\partial \boldsymbol{\epsilon}} = \sum_{a=1}^3 \left( \lambda \left< \epsilon_1 + \epsilon_2 + \epsilon_3 \right>_{\pm} + 2 \mu \left< \epsilon_a \right>_{\pm} \right) \boldsymbol{n}_a \otimes \boldsymbol{n}_a,
 \end{equation}
-where $\mathbf{n}_a$ is the $a$th eigenvector.
+where $\boldsymbol{n}_a$ is the $a$th eigenvector.
 The stress becomes
 \begin{equation}
-\mathbf{\sigma} = \left[(1-c)^2(1-k) + k \right] \mathbf{\sigma}^{+} - \mathbf{\sigma}^{-}.
+\boldsymbol{\sigma} = \left[(1-c)^2(1-k) + k \right] \boldsymbol{\sigma}^{+} - \boldsymbol{\sigma}^{-}.
 \end{equation}
 
 ## Evolution Equation and History Variable

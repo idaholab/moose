@@ -11,7 +11,7 @@ The AuxKernel will save the component of the tranformed Rank-2 tensor, $T^R$, as
 arguments for the `index_i` and `index_j` parameters.
 \begin{equation}
 \label{eq:cylindrical_rank_two_aux}
-T^R_{ij} = \mathbf{R} \cdot \mathbf{T} \cdot \mathbf{R}^T
+T^R_{ij} = \boldsymbol{R} \cdot \boldsymbol{T} \cdot \boldsymbol{R}^T
 \end{equation}
 The rotation tensor $R$ is defined as
 \begin{equation}

@@ -56,7 +56,7 @@ The default out-of-plane direction is along the $z$-axis. For this direction
 the strain tensor, [eqn:def_small_total_strain], is given as
 \begin{equation}
   \label{eqn:strain_tensor}
-  \mathbf{\epsilon} = \begin{bmatrix}
+  \boldsymbol{\epsilon} = \begin{bmatrix}
                 u_{x,x} & \frac{1}{2} \left(u_{x,y} + u_{y,x} \right) & 0 \\
                 \frac{1}{2} \left(u_{x,y} + u_{y,x} \right) & u_{y,y} & 0 \\
                 0 & 0 & \epsilon|^{dop}
@@ -75,7 +75,7 @@ $x$-direction, the strain tensor from [eqn:def_small_total_strain]
 is given as
 \begin{equation}
   \label{eqn:deform_grads_xdirs}
-  \mathbf{\epsilon} = \begin{bmatrix}
+  \boldsymbol{\epsilon} = \begin{bmatrix}
                 \epsilon|^{dop} & 0 & 0 \\
                 0 & u_{y,y} & \frac{1}{2} \left(u_{y,z} + u_{z,y} \right) \\
                 0 & \frac{1}{2} \left(u_{y,z} + u_{z,y} \right) & u_{z,z}
@@ -91,7 +91,7 @@ $y$-direction, the strain tensor from [eqn:def_small_total_strain]
 is given as
 \begin{equation}
   \label{eqn:deform_grads_ydirs}
-  \mathbf{\epsilon} = \begin{bmatrix}
+  \boldsymbol{\epsilon} = \begin{bmatrix}
                 u_{x,x} & 0 & \frac{1}{2} \left(u_{x,z} + u_{z,x} \right) \\
                 0 & \epsilon|^{dop} & 0 \\
                 \frac{1}{2} \left(u_{x,z} + u_{z,x} \right) & 0 & u_{z,z}
@@ -107,9 +107,9 @@ a $\bar{B}$ formulation to mitigate volumetric locking of the elements.
 The volumetric locking correction is applied to the total strain
 \begin{equation}
   \label{eqn:vlc_strain}
-  \mathbf{\epsilon}|_{vlc} = \mathbf{\epsilon} + \frac{\left( \mathbf{\epsilon}_V - tr(\mathbf{\epsilon}) \right)}{3} \cdot \mathbf{I}
+  \boldsymbol{\epsilon}|_{vlc} = \boldsymbol{\epsilon} + \frac{\left( \boldsymbol{\epsilon}_V - tr(\boldsymbol{\epsilon}) \right)}{3} \cdot \boldsymbol{I}
 \end{equation}
-where $\mathbf{\epsilon}_V$ is the volumetric strain and $\mathbf{I}$
+where $\boldsymbol{\epsilon}_V$ is the volumetric strain and $\boldsymbol{I}$
 is the Rank-2 identity tensor. For more details about the theory
 behind [eqn:vlc_strain] see the
 [Volumetric Locking Correction](/tensor_mechanics/VolumetricLocking.md)
