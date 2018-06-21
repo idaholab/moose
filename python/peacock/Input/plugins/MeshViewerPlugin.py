@@ -26,7 +26,7 @@ class MeshViewerPlugin(VTKWindowPlugin):
     meshEnabled = QtCore.pyqtSignal(bool)
 
     def __init__(self, **kwargs):
-        super(MeshViewerPlugin, self).__init__(**kwargs)
+        super(MeshViewerPlugin, self).__init__(colorbar=False, **kwargs)
         self.temp_input_file = "peacock_run_mesh_tmp.i"
         self.temp_mesh_file = "peacock_run_mesh_tmp.e"
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)

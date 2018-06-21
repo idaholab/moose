@@ -70,7 +70,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     #: pyqtSignal: Emitted when the camera for this window has changed
     cameraChanged = QtCore.pyqtSignal(tuple, tuple, tuple)
 
-    def __init__(self, size=None, **kwargs):
+    def __init__(self, size=None, colorbar=True, **kwargs):
         super(VTKWindowPlugin, self).__init__(**kwargs)
 
         # Setup widget
@@ -92,6 +92,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._colorbar_options = dict()
         self._reader = None
         self._result = None
+        self._create_colorbar = colorbar
         self._colorbar = None
         self._window = chigger.RenderWindow(vtkwindow=self.__qvtkinteractor.GetRenderWindow(),
                                             vtkinteractor=self.__qvtkinteractor.GetRenderWindow().GetInteractor(),
@@ -363,9 +364,14 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
         self._result.update()
+        self._window.append(self._result)
         self.windowResult.emit(self._result)
 
-        self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
+        if self._create_colorbar:
+            self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
+            self._window.append(self._colorbar)
+            if self._colorbar is not None:
+                self.windowColorbar.emit(self._colorbar)
 
         # Set the interaction mode (2D/3D)
         bmin, bmax = self._result.getBounds()
@@ -373,9 +379,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._window.setOption('style', 'interactive2D')
         else:
             self._window.setOption('style', 'interactive')
-
-        # Add results
-        self._window.append(self._result, self._colorbar)
 
         # Load saved cameras
         camera = self._cameras.get(self._filename, None)
@@ -387,7 +390,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         # Update the RenderWindow
         self._window.update()
-        self.windowColorbar.emit(self._colorbar) # required after window update (see chigger Colorbar object)
         if camera is None:
             self._callbackRenderEvent() # store initial camera
         self._adjustTimers(start=['update'], stop=['initialize'])
