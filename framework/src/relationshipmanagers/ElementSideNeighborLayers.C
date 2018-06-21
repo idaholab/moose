@@ -10,6 +10,7 @@
 #include "ElementSideNeighborLayers.h"
 #include "MooseMesh.h"
 #include "Conversion.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
@@ -38,7 +39,7 @@ ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & par
 void ElementSideNeighborLayers::attachRelationshipManagersInternal(
     Moose::RelationshipManagerType /*rm_type*/)
 {
-  if (_mesh.isDistributedMesh() && _element_side_neighbor_layers > 1)
+  if ((_app.isSplitMesh() || _mesh.isDistributedMesh()) && _element_side_neighbor_layers > 1)
   {
     _default_coupling = libmesh_make_unique<DefaultCoupling>();
     _default_coupling->set_n_levels(_element_side_neighbor_layers);
