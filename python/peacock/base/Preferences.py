@@ -10,16 +10,11 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from collections import OrderedDict
 
-class BasePreferenceWidget(QtWidgets.QWidget):
+class BasePreferenceWidget(object):
     """
     Base class for holding a single preference.
     """
-
-    # A generic signal capable of handling any python type
-    valueSaved = QtCore.pyqtSignal(object)
-
     def __init__(self, name, widget, label, tooltip, default, prekey=""):
-        super(BasePreferenceWidget, self).__init__()
         self._name = name
         self._label = QtWidgets.QLabel(label)
         self._widget = widget
@@ -54,7 +49,6 @@ class BasePreferenceWidget(QtWidgets.QWidget):
         Saves the value of the widget to disk
         """
         settings.setValue(self.key(), self.getValue())
-        self.valueSaved.emit(self.getValue())
 
     def key(self):
         """
@@ -90,7 +84,7 @@ class BoolPreferenceWidget(BasePreferenceWidget):
 
 class IntPreferenceWidget(BasePreferenceWidget):
     """
-    Holds an integer preference, represented by a spin box.
+    Holds an integer prefernce, represented by a spin box.
     """
     def __init__(self, name, caption, default, min_val, max_val, tooltip, prekey):
         spin = QtWidgets.QSpinBox()

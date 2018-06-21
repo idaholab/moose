@@ -30,25 +30,22 @@ class TestChangeInputFile(Testing.PeacockAppImageTestCase):
         execute = self._app.main_widget.tab_plugin.ExecuteTabPlugin
 
         # The variable plugin
-        var_plugin = exodus.currentWidget().FilePlugin
-        blk_selector = exodus.currentWidget().BlockPlugin.BlockSelector
-        cmap_plugin = exodus.currentWidget().ColorbarPlugin
+        var_plugin = exodus.currentWidget().VariablePlugin
+        blk_selector = exodus.currentWidget().BlockPlugin.BlockSelector.ListWidget
 
         # Run and check output
         self.selectTab(execute)
         execute.ExecuteOptionsPlugin.setWorkingDir(start_dir)
-        Testing.process_events(t=2)
         self.execute()
         self.selectTab(exodus)
-        Testing.process_events(t=2)
 
         self.assertEqual([var_plugin.VariableList.itemText(i) for i in range(var_plugin.VariableList.count())], ['u'])
-        self.assertEqual([blk_selector.StandardItemModel.item(i).text() for i in range(1, blk_selector.StandardItemModel.rowCount())], ['0'])
+        self.assertEqual([blk_selector.item(i).text() for i in range(blk_selector.count())], ['0'])
 
         # Change the colormap (to test that the colormap is maintained)
-        idx = [cmap_plugin.ColorMapList.itemText(i) for i in range(cmap_plugin.ColorMapList.count())].index('magma')
-        cmap_plugin.ColorMapList.setCurrentIndex(idx)
-        cmap_plugin.ColorMapList.currentIndexChanged.emit(idx)
+        idx = [var_plugin.ColorMapList.itemText(i) for i in range(var_plugin.ColorMapList.count())].index('magma')
+        var_plugin.ColorMapList.setCurrentIndex(idx)
+        var_plugin.ColorMapList.currentIndexChanged.emit(idx)
 
         # Change the input
         self.selectTab(input_)
@@ -60,15 +57,15 @@ class TestChangeInputFile(Testing.PeacockAppImageTestCase):
         self.execute()
         self.selectTab(exodus)
         self.assertEqual([var_plugin.VariableList.itemText(i) for i in range(var_plugin.VariableList.count())], ['aux', 'not_u', 'u'])
-        self.assertEqual([blk_selector.StandardItemModel.item(i).text() for i in range(1, blk_selector.StandardItemModel.rowCount())], ['0', '1980'])
+        self.assertEqual([blk_selector.item(i).text() for i in range(blk_selector.count())], ['0', '1980'])
 
         # Check colormap
-        self.assertEqual(self._window._result.getOption('cmap'), 'default')
-        self.assertEqual(cmap_plugin.ColorMapList.currentText(), 'default')
+        self.assertEqual(self._window._result.getOption('cmap'), 'magma')
+        self.assertEqual(var_plugin.ColorMapList.currentText(), 'magma')
 
         # Check variable
-        self.assertEqual(self._window._result.getOption('variable'), 'aux')
-        self.assertEqual(var_plugin.VariableList.currentText(), 'aux')
+        self.assertEqual(self._window._result.getOption('variable'), 'u')
+        self.assertEqual(var_plugin.VariableList.currentText(), 'u')
 
 if __name__ == '__main__':
     Testing.run_tests()

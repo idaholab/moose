@@ -11,8 +11,10 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
 from ExodusPlugin import ExodusPlugin
+import peacock
+from peacock.utils import WidgetUtils
 
-class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class MeshPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Controls for the mesh appearance.
     """
@@ -23,19 +25,11 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     #: pyqtSignal: Emitted when the chigger objects options are changed
     readerOptionsChanged = QtCore.pyqtSignal(dict)
     resultOptionsChanged = QtCore.pyqtSignal(dict)
-
-    #: pyqtSignal: Add/remove result objects
-    appendResult = QtCore.pyqtSignal(chigger.base.ChiggerResultBase)
-    removeResult = QtCore.pyqtSignal(chigger.base.ChiggerResultBase)
-
-    #: pyqtSignal: Emitted when adding a filter
-    addFilter = QtCore.pyqtSignal(chigger.filters.ChiggerFilterBase)
-
-    #: pyqtSignal: Emitted when removing a filter
-    removeFilter = QtCore.pyqtSignal(chigger.filters.ChiggerFilterBase)
+    transformOptionsChanged = QtCore.pyqtSignal(dict)
 
     def __init__(self, **kwargs):
-        super(MeshPlugin, self).__init__(**kwargs)
+        peacock.base.PeacockCollapsibleWidget.__init__(self, collapsible_layout=QtWidgets.QVBoxLayout)
+        ExodusPlugin.__init__(self, **kwargs)
 
         self._preferences.addBool("exodus/viewMesh",
                 "View the mesh",
@@ -43,14 +37,16 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
                 "View the mesh by default",
                 )
 
-        self._transform = None
-        self._extents = None
+        # Current variable (used for caching settings)
+        self._variable = None
+        self._transform = chigger.filters.TransformFilter()
 
         # QGroupBox settings
+        self.setTitle('Mesh')
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         # Main Layout
-        self.MainLayout = QtWidgets.QHBoxLayout(self)
+        self.MainLayout = self.collapsibleLayout()
 
         # Displacements
         self.DisplacementToggle = QtWidgets.QCheckBox("Displacements")
@@ -62,142 +58,68 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.ViewMeshToggle = QtWidgets.QCheckBox('View Mesh')
 
         # Scale
-        self.ScaleXLabel = QtWidgets.QLabel("Scale X:")
-        self.ScaleYLabel = QtWidgets.QLabel("Scale Y:")
-        self.ScaleZLabel = QtWidgets.QLabel("Scale Z:")
+        self.ScaleLabel = QtWidgets.QLabel("Scale")
+        self.ScaleXLabel = QtWidgets.QLabel("x:")
+        self.ScaleYLabel = QtWidgets.QLabel("y:")
+        self.ScaleZLabel = QtWidgets.QLabel("z:")
         self.ScaleX = QtWidgets.QDoubleSpinBox()
         self.ScaleY = QtWidgets.QDoubleSpinBox()
         self.ScaleZ = QtWidgets.QDoubleSpinBox()
 
-        # Extents
-        self.Extents = QtWidgets.QCheckBox("Extents")
-
         # Layouts
-        self.LeftLayout = QtWidgets.QVBoxLayout()
         self.DisplacementLayout = QtWidgets.QHBoxLayout()
         self.DisplacementLayout.addWidget(self.DisplacementToggle)
-        self.DisplacementLayout.addSpacing(5)
         self.DisplacementLayout.addWidget(self.DisplacementMagnitude)
 
-        # Toggles
         self.MeshViewLayout = QtWidgets.QHBoxLayout()
+        self.MeshViewLayout.addWidget(self.RepresentationLabel)
+        self.MeshViewLayout.addWidget(self.Representation)
         self.MeshViewLayout.addWidget(self.ViewMeshToggle)
-        self.MeshViewLayout.addSpacing(15)
-        self.MeshViewLayout.addWidget(self.Extents)
-        self.MeshViewLayout.addStretch(1)
 
-        # Representation
-        self.RepresentationLayout = QtWidgets.QHBoxLayout()
-        self.RepresentationLayout.addWidget(self.RepresentationLabel)
-        self.RepresentationLayout.addSpacing(5)
-        self.RepresentationLayout.addWidget(self.Representation)
+        self.ScaleLayout = QtWidgets.QHBoxLayout()
+        self.ScaleLayout.addWidget(self.ScaleLabel)
+        self.ScaleLayout.addWidget(self.ScaleXLabel)
+        self.ScaleLayout.addWidget(self.ScaleX)
+        self.ScaleLayout.addWidget(self.ScaleYLabel)
+        self.ScaleLayout.addWidget(self.ScaleY)
+        self.ScaleLayout.addWidget(self.ScaleZLabel)
+        self.ScaleLayout.addWidget(self.ScaleZ)
 
-        # Left column
-        self.LeftLayout.addLayout(self.MeshViewLayout)
-        self.LeftLayout.addLayout(self.DisplacementLayout)
-        self.LeftLayout.addLayout(self.RepresentationLayout)
+        self.MainLayout.addLayout(self.DisplacementLayout)
+        self.MainLayout.addLayout(self.MeshViewLayout)
+        self.MainLayout.addLayout(self.ScaleLayout)
 
-        # Right column (scale boxes)
-        self.RightLayout = QtWidgets.QGridLayout()
-        self.RightLayout.setHorizontalSpacing(5)
-        self.RightLayout.addWidget(self.ScaleXLabel, 0, 0)
-        self.RightLayout.addWidget(self.ScaleX, 0, 1)
-        self.RightLayout.addWidget(self.ScaleYLabel, 1, 0)
-        self.RightLayout.addWidget(self.ScaleY, 1, 1)
-        self.RightLayout.addWidget(self.ScaleZLabel, 2, 0)
-        self.RightLayout.addWidget(self.ScaleZ, 2, 1)
-
-        # Main
-        self.MainLayout.addLayout(self.LeftLayout)
-        self.MainLayout.addSpacing(15)
-        self.MainLayout.addLayout(self.RightLayout)
-        self.MainLayout.setSpacing(0)
-
+        # Call widget setup methods
         self.setup()
 
-    def onWindowResult(self, result):
+    def onVariableChanged(self, *args):
         """
-        Create the filters and load the stored state when the ExodusResult is created.
+        When a variable changes, load the state of the clip.
         """
-        self._extents = chigger.misc.VolumeAxes(result)
-        self._transform = chigger.filters.TransformFilter()
-        self.addFilter.emit(self._transform)
-        self._loadPlugin()
-        self.updateOptions()
+        if self.isEnabled():
+            self.store(self.stateKey(self._variable), 'Variable')
+        super(MeshPlugin, self).onVariableChanged(*args)
+        self.load(self.stateKey(self._variable), 'Variable')
+        if self._result:
+            self.mesh()
 
-    def onWindowReset(self):
+    def onWindowCreated(self, reader, result, window):
         """
-        Delete filters when the window is destroyed.
+        Reload the mesh options when the window gets created
         """
-        self._extents = None
-        self._transform = None
+        super(MeshPlugin, self).onWindowCreated(reader, result, window)
+        self.mesh()
 
-    def onSetVariable(self, *args):
-        """
-        Loads the selected items when the variable changes.
-        """
-        super(MeshPlugin, self).onSetVariable(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onSetComponent(self, *args):
-        """
-        Loads the selected items when the variable component changes.
-        """
-        super(MeshPlugin, self).onSetComponent(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def _loadPlugin(self):
-        """
-        Helper for loading plugin state.
-        """
-
-        if self._transform is None:
-            return
-
-        self.load(self.Extents)
-        if not self.hasState(self.Extents):
-            self.Extents.setChecked(False)
-
-        self.load(self.DisplacementToggle)
-        if not self.hasState(self.DisplacementToggle):
-            self.DisplacementToggle.setChecked(True)
-
-        self.load(self.DisplacementMagnitude)
-        if not self.hasState(self.DisplacementMagnitude):
-            self.DisplacementMagnitude.setValue(1.0)
-
-        self.load(self.Representation)
-        if not self.hasState(self.Representation):
-            self.Representation.setCurrentIndex(0)
-
-        self.load(self.ViewMeshToggle)
-        if not self.hasState(self.ViewMeshToggle):
-            self.ViewMeshToggle.setChecked(self._preferences.value("exodus/viewMesh"))
-
-        self.load(self.ScaleX)
-        if not self.hasState(self.ScaleX):
-            self.ScaleX.setValue(1.0)
-
-        self.load(self.ScaleY)
-        if not self.hasState(self.ScaleY):
-            self.ScaleY.setValue(1.0)
-
-        self.load(self.ScaleZ)
-        if not self.hasState(self.ScaleZ):
-            self.ScaleZ.setValue(1.0)
-
-    def updateOptions(self):
+    def mesh(self):
         """
         Updates the results for the changes to the mesh view.
         """
-        if self._transform is None:
-            return
-
         # Options to pass to ExodusResult
         reader_options = dict()
         result_options = dict()
+        filters = []
+        if self._result:
+            filters = self._result.getOption('filters')
 
         # Displacement toggle and magnitude
         reader_options['displacements'] = bool(self.DisplacementToggle.isChecked())
@@ -208,39 +130,31 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         result_options['representation'] = str(self.Representation.currentText()).lower()
 
         # Mesh Toggle
-        result_options['edges'] = self.ViewMeshToggle.isChecked()
-        result_options['edge_color'] = [0, 0, 0]
+        result_options['edges'] = bool(self.ViewMeshToggle.checkState())
+        result_options['edge_color'] = [0,0,0]
 
         # Scale
-        if self._transform is not None:
-            scale = [self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value()]
+        scale = [self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value()]
+        if any([s != 1 for s in scale]):
             self._transform.setOption('scale', scale)
-
-        ## Extents
-        if self._extents is not None:
-            value = self.Extents.isChecked()
-            if value:
-                self._extents.update()
-                self.appendResult.emit(self._extents)
-            else:
-                self._extents.reset()
-                self.removeResult.emit(self._extents)
+            if self._transform not in filters:
+                filters.append(self._transform)
+        else:
+            if self._transform in filters:
+                filters.remove(self._transform)
+        result_options['filters'] = filters
 
         # Emit the update signal with the new arguments
         self.readerOptionsChanged.emit(reader_options)
         self.resultOptionsChanged.emit(result_options)
+        self.windowRequiresUpdate.emit()
 
     def _setupDisplacementToggle(self, qobject):
         """
         Setup method for DisplacementToggle widget. (protected)
         """
         qobject.setChecked(True)
-        qobject.stateChanged.connect(self._callbackDisplacementToggle)
-
-    def _callbackDisplacementToggle(self, *args):
-        self.store(self.DisplacementToggle)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        qobject.stateChanged.connect(lambda value: self.mesh())
 
     def _setupDisplacementMagnitude(self, qobject):
         """
@@ -248,12 +162,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setSingleStep(0.1)
         qobject.setValue(1.0)
-        qobject.valueChanged.connect(self._callbackDisplacementMagnitude)
-
-    def _callbackDisplacementMagnitude(self, *args):
-        self.store(self.DisplacementMagnitude)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        qobject.valueChanged.connect(self.mesh)
 
     def _setupRepresentation(self, qobject):
         """
@@ -269,86 +178,44 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Callback for Representation widget. (protected)
         """
-        self.store(self.Representation)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+
+        WidgetUtils.loadWidget(self.ViewMeshToggle, self.stateKey(self.Representation.currentIndex()), 'Respresentation')
+
+        index = self.Representation.currentIndex()
+        if index == 0:
+            self.ViewMeshToggle.setEnabled(True)
+        else:
+            self.ViewMeshToggle.setEnabled(False)
+            self.ViewMeshToggle.setChecked(QtCore.Qt.Unchecked)
+
+        self.mesh()
 
     def _setupViewMeshToggle(self, qobject):
         """
         Setup for showing the ViewMeshToggle widget. (protected)
         """
-        qobject.setChecked(self._preferences.value("exodus/viewMesh"))
         qobject.stateChanged.connect(lambda value: self._callbackViewMeshToggle())
+        qobject.setChecked(self._preferences.value("exodus/viewMesh"))
 
     def _callbackViewMeshToggle(self):
         """
         Callback for ViewMeshToggle widget. (protected)
         """
-        self.store(self.ViewMeshToggle)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        WidgetUtils.storeWidget(self.ViewMeshToggle, self.stateKey(self.Representation.currentIndex()), 'Respresentation')
+        self.mesh()
 
-    def _prefCallbackViewMesh(self, value):
-        self.ViewMeshToggle.setChecked(value)
-        self.store(self.ViewMeshToggle)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
-
-    def _setupScaleX(self, qobject):
+    def _setupScaleLabel(self, qobject):
         """
         Helper method for adding various scale related widgets. (protected)
         """
-        qobject.setSingleStep(0.1)
-        qobject.setValue(1.0)
-        qobject.valueChanged.connect(self._callbackScaleX)
-        qobject.setMaximum(1000)
-
-    def _setupScaleY(self, qobject):
-        """
-        Helper method for adding various scale related widgets. (protected)
-        """
-        qobject.setSingleStep(0.1)
-        qobject.setValue(1.0)
-        qobject.valueChanged.connect(self._callbackScaleY)
-        qobject.setMaximum(1000)
-
-    def _setupScaleZ(self, qobject):
-        """
-        Helper method for adding various scale related widgets. (protected)
-        """
-        qobject.setSingleStep(0.1)
-        qobject.setValue(1.0)
-        qobject.valueChanged.connect(self._callbackScaleZ)
-        qobject.setMaximum(1000)
-
-    def _callbackScaleX(self):
-        self.store(self.ScaleX)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
-
-    def _callbackScaleY(self):
-        self.store(self.ScaleY)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
-
-    def _callbackScaleZ(self):
-        self.store(self.ScaleZ)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
-
-    def _setupExtents(self, qobject):
-        """
-        Setup method for the extents toggle.
-        """
-        qobject.stateChanged.connect(self._callbackExtents)
-
-    def _callbackExtents(self, value):
-        """
-        Enables/disables the extents on the VTKwindow.
-        """
-        self.store(self.Extents)
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        for id in ['X', 'Y', 'Z']:
+            label = getattr(self, 'Scale' + id + 'Label')
+            spinbox = getattr(self, 'Scale' + id)
+            spinbox.setSingleStep(0.1)
+            spinbox.setValue(1.0)
+            spinbox.valueChanged.connect(self.mesh)
+            spinbox.setMaximum(1000)
+            label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
     def repr(self):
         """
@@ -372,8 +239,7 @@ def main(size=None):
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
-    from peacock.ExodusViewer.plugins.FilePlugin import FilePlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, MeshPlugin])
+    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), MeshPlugin])
     widget.show()
 
     return widget, widget.VTKWindowPlugin
@@ -381,8 +247,7 @@ def main(size=None):
 if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'displace.e')
-    #filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
-    widget, window = main(size=[600,600])
-    widget.FilePlugin.onSetFilenames(filenames)
+    widget, window = main()
+    filename = Testing.get_chigger_input('mug_blocks_out.e')
+    window.initialize([filename])
     sys.exit(app.exec_())

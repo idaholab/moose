@@ -10,6 +10,7 @@
 
 import sys
 import unittest
+import vtk
 from PyQt5 import QtWidgets
 from peacock.ExodusViewer.plugins.MediaControlPlugin import main
 from peacock.utils import Testing
@@ -29,10 +30,15 @@ class TestMediaControlPlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
         self._widget, self._window = main(size=[600,600])
-        self._window.onSetFilename(self._filename)
-        self._window.onSetVariable('diffused')
+        self._window.onFileChanged(self._filename)
+        self._window.onResultOptionsChanged({'variable':'diffused'})
         self._window.onWindowRequiresUpdate()
-        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
+
+        camera = vtk.vtkCamera()
+        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
+        camera.SetPosition(9.2960, -0.4218, 12.6685)
+        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
+        self._window.onCameraChanged(camera)
 
     def testInitial(self):
         """
@@ -232,8 +238,7 @@ class TestMediaControlPlugin(Testing.PeacockImageTestCase):
         Test that mesh only disables media controls.
         """
         filename = Testing.get_chigger_input('mesh_only.e')
-        self._window.onSetFilename(filename)
-        self._window.onWindowRequiresUpdate()
+        self._window.onFileChanged(filename)
         #self.assertFalse(self._widget.MediaControlPlugin.isEnabled())
         self.assertImage('testMeshOnly.png')
 

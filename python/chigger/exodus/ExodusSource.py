@@ -115,15 +115,12 @@ class ExodusSource(base.ChiggerSource):
 
         return utils.get_bounds_min_max(*bnds)
 
-    def getRange(self, local=False):
+    def getRange(self):
         """
         Return range of the active variable and blocks.
         """
         self.checkUpdateState()
-        if not local:
-            return self.__getRange()
-        else:
-            return self.__getLocalRange()
+        return self.__getRange()
 
     def __getRange(self):
         """
@@ -145,19 +142,6 @@ class ExodusSource(base.ChiggerSource):
                         pairs.append(array.GetRange(component))
 
         return utils.get_min_max(*pairs)
-
-    def __getLocalRange(self):
-        """
-        Determine the range of visible items.
-        """
-        component = self.getOption('component')
-        self.getVTKMapper().Update() # required to have up-to-date ranges
-        data = self.getVTKMapper().GetInput()
-        out = self.__getActiveArray(data)
-        if out is not None:
-            return out.GetRange(component)
-        else:
-            return [None, None]
 
     def __getActiveArray(self, data):
         """

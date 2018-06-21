@@ -17,9 +17,9 @@
     separate = True
     display_required = True
   [../]
-  [./ColorbarPlugin]
+  [./VariablePlugin]
     type = PythonUnitTest
-    input = test_ColorbarPlugin.py
+    input = test_VariablePlugin.py
     separate = True
     display_required = True
   [../]

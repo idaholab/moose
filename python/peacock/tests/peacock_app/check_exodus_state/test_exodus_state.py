@@ -29,7 +29,6 @@ class TestExodusState(Testing.PeacockAppImageTestCase):
         # Run and check that basic results show up
         self.execute()
         self.selectTab(exodus)
-        Testing.process_events(1)
         self.assertImage("testDefault.png")
 
         # Select the mesh
