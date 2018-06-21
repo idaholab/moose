@@ -50,6 +50,7 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.LiveScript.setEnabled(False)
         self.LiveScript.toggled.connect(self._callbackLiveScript)
 
+        menu.addSeparator()
         export = menu.addMenu('Export')
 
         self.ExportPNG = export.addAction('PNG')
@@ -70,7 +71,7 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             if s != self.LiveScriptWindow.toPlainText():
                 self.LiveScriptWindow.setText(s)
 
-    def onWindowReset(self):
+    def onResetWindow(self):
         """
         Disable the live view when there are no results.
         """
@@ -78,7 +79,7 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.ExportPNG.setEnabled(False)
         self.ExportPython.setEnabled(False)
 
-    def onWindowResult(self, *args):
+    def onUpdateWindow(self, *args):
         """
         Adds an observer for the live window update to the VTK renderer.
         """

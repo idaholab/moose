@@ -25,8 +25,15 @@ class MeshViewerPlugin(VTKWindowPlugin):
     needInputFile = QtCore.pyqtSignal(str)
     meshEnabled = QtCore.pyqtSignal(bool)
 
+    @staticmethod
+    def getDefaultResultOptions():
+        """
+        Return the default options for the ExodusResult object.
+        """
+        return dict(representation='wireframe')
+
     def __init__(self, **kwargs):
-        super(MeshViewerPlugin, self).__init__(**kwargs)
+        super(MeshViewerPlugin, self).__init__(colorbar=False, **kwargs)
         self.temp_input_file = "peacock_run_mesh_tmp.i"
         self.temp_mesh_file = "peacock_run_mesh_tmp.e"
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
@@ -61,7 +68,8 @@ class MeshViewerPlugin(VTKWindowPlugin):
 
         if not self._highlight:
             self._highlight = chigger.exodus.ExodusResult(self._reader,
-                                                          renderer=self._result.getVTKRenderer(), color=[1,0,0])
+                                                          renderer=self._result.getVTKRenderer(),
+                                                          color=[1,0,0])
 
         if (block or boundary or nodeset):
             self._highlight.setOptions(block=block, boundary=boundary, nodeset=nodeset)
@@ -85,7 +93,6 @@ class MeshViewerPlugin(VTKWindowPlugin):
         The parameters of the mesh has changed.
         We need to update the view of the mesh by generating a new mesh file.
         """
-
         if reset:
             self._reset()
 
@@ -154,8 +161,7 @@ if __name__ == "__main__":
     from peacock.utils import Testing
     from PyQt5 import QtWidgets
     app = QtWidgets.QApplication(sys.argv)
-    filename = Testing.get_chigger_input('mug_blocks_out.e')
-    #filename = 'none.e'
+    filename = Testing.get_chigger_input('mesh_only.e')
     widget, window = main(size=[600,600])
     window.onSetFilename(filename)
     window.onSetVariable('diffused')

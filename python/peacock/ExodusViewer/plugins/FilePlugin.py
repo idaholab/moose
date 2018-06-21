@@ -105,7 +105,6 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.BottomLayout.setSpacing(10)
 
         self.setup()
-        self._reader = None
 
     def getFilenames(self):
         """
@@ -135,29 +134,22 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.FileList.setCurrentIndex(0)
         self.FileList.blockSignals(False)
 
-    def onWindowReader(self, reader):
+    def onSetupResult(self, result):
         """
-        This is called after the ExodusReader is first created, see VTKWindowPlugin.
+        Initialize the list of available variables from the reader.
         """
-        self._reader = reader
+        reader = result[0].getExodusReader()
         self._initVariableList(reader)
 
-    def onWindowReset(self):
-        """
-        Remove the stored reader.
-        """
-        self._reader = None
-
-    def onWindowUpdated(self):
+    def onUpdateWindow(self, window, reader, result):
         """
         Check that the variable names have not changed, update if they have.
         """
-        if self._reader is not None:
-            variables = self._reader.getVariableInformation(var_types=[self._reader.NODAL, self._reader.ELEMENTAL])
-            names = [var.name for var in variables.itervalues()]
-            current = [self.VariableList.itemText(i) for i in range(self.VariableList.count())]
-            if names != current:
-                self._initVariableList(self._reader)
+        variables = reader.getVariableInformation(var_types=[reader.NODAL, reader.ELEMENTAL])
+        names = [var.name for var in variables.itervalues()]
+        current = [self.VariableList.itemText(i) for i in range(self.VariableList.count())]
+        if names != current:
+            self._initVariableList(reader)
 
     def _initVariableList(self, reader):
         """

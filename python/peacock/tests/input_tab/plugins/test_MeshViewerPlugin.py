@@ -24,7 +24,7 @@ class TestMeshViewerPlugin(Testing.PeacockImageTestCase):
     qapp = QtWidgets.QApplication(sys.argv)
 
     #: str: The filename to load.
-    _filename = Testing.get_chigger_input('mug_blocks_out.e')
+    _filename = Testing.get_chigger_input('mesh_only.e')
 
     def setUp(self):
         """
@@ -33,14 +33,13 @@ class TestMeshViewerPlugin(Testing.PeacockImageTestCase):
         self.sleepIfSlow()
         self._widget, self._window = main(size=[600,600])
         self._window.onSetFilename(self._filename)
-        self._window.onSetVariable('diffused')
         self._window.onWindowRequiresUpdate()
 
     def testHighlight(self):
         """
         Test the highlighting is working.
         """
-        self._window.onHighlight(block=['76'])
+        self._window.onHighlight(block=['1'])
         self.assertImage('testHighlightOn.png')
 
         self._window.onHighlight()

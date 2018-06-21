@@ -33,7 +33,7 @@ class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self._result = None
 
-    def onWindowResult(self, result):
+    def onSetupResult(self, result):
         """
         Store the current camera.
         """

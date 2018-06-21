@@ -50,19 +50,24 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     """
 
     #: pyqtSignal: Emitted when the result is first rendered
-    windowResult = QtCore.pyqtSignal(chigger.exodus.ExodusResult)
+    setupResult = QtCore.pyqtSignal(chigger.exodus.ExodusResult)
 
     #: pyqtSignal: Emitted when the reader has been update, prior to creating result
-    windowReader = QtCore.pyqtSignal(chigger.exodus.ExodusReader)
+    setupReader = QtCore.pyqtSignal(chigger.exodus.ExodusReader)
 
     #: pyqtSignal: Emitted when the colorbar has been created
-    windowColorbar = QtCore.pyqtSignal(chigger.exodus.ExodusColorBar)
+    setupColorbar = QtCore.pyqtSignal(chigger.exodus.ExodusColorBar)
+
+    #: pyqtSignal: Emitted when the colorbar has been created
+    setupWindow = QtCore.pyqtSignal(chigger.RenderWindow)
 
     #: pyqtSignal: Emitted with the window has been updated
-    windowUpdated = QtCore.pyqtSignal()
+    updateWindow = QtCore.pyqtSignal(chigger.RenderWindow,
+                                     chigger.exodus.ExodusReader,
+                                     chigger.exodus.ExodusResult)
 
     #: pyqtSignal: Emitted when the window is reset/cleared
-    windowReset = QtCore.pyqtSignal()
+    resetWindow = QtCore.pyqtSignal()
 
     #: pyqtSignal: Emitted when the Exodus widgets should be enabled/disabled
     setEnableWidget = QtCore.pyqtSignal(bool)
@@ -70,7 +75,35 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     #: pyqtSignal: Emitted when the camera for this window has changed
     cameraChanged = QtCore.pyqtSignal(tuple, tuple, tuple)
 
-    def __init__(self, size=None, **kwargs):
+    @staticmethod
+    def getDefaultReaderOptions():
+        """
+        Return the default options for the ExodusReader object.
+        """
+        return dict()
+
+    @staticmethod
+    def getDefaultResultOptions():
+        """
+        Return the default options for the ExodusResult object.
+        """
+        return dict()
+
+    @staticmethod
+    def getDefaultWindowOptions():
+        """
+        Return the default options for the RenderWindow object.
+        """
+        return dict()
+
+    @staticmethod
+    def getDefaultColorbarOptions():
+        """
+        Return the default options for the ExodusColorBar object.
+        """
+        return dict()
+
+    def __init__(self, size=None, colorbar=True, **kwargs):
         super(VTKWindowPlugin, self).__init__(**kwargs)
 
         # Setup widget
@@ -87,15 +120,17 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._highlight = None
         self._initialized = False
         self._run_start_time = -1
-        self._reader_options = dict()
-        self._result_options = dict()
-        self._colorbar_options = dict()
+        self._create_colorbar = colorbar
         self._reader = None
         self._result = None
         self._colorbar = None
         self._window = chigger.RenderWindow(vtkwindow=self.__qvtkinteractor.GetRenderWindow(),
                                             vtkinteractor=self.__qvtkinteractor.GetRenderWindow().GetInteractor(),
                                             size=size)
+        self._reader_options = self.getDefaultReaderOptions()
+        self._result_options = self.getDefaultResultOptions()
+        self._window_options = self.getDefaultWindowOptions()
+        self._colorbar_options = self.getDefaultColorbarOptions()
 
         # If size is provided, restrict the window
         if size != None:
@@ -156,34 +191,25 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Update the options for ExodusReader object.
         """
-        if self._reader:
-            self.__setOptionsHelper(self._reader, options)
-        else:
-            self._reader_options.update(options)
+        self.__setOptionsHelper(self._reader, options, self._reader_options)
 
     def onResultOptionsChanged(self, options=dict()):
         """
         Update the options for ExodusResult object.
         """
-        if self._result:
-            self.__setOptionsHelper(self._result, options)
-        else:
-            self._result_options.update(options)
+        self.__setOptionsHelper(self._result, options, self._result_options)
 
     def onWindowOptionsChanged(self, options=dict()):
         """
         Update the options for RenderWindow object.
         """
-        self.__setOptionsHelper(self._window, options)
+        self.__setOptionsHelper(self._window, options, self._window_options)
 
     def onColorbarOptionsChanged(self, options=dict()):
         """
         Update the options for ExodusColorbar object.
         """
-        if self._colorbar:
-            self.__setOptionsHelper(self._colorbar, options)
-        else:
-            self._colorbar_options.update(options)
+        self.__setOptionsHelper(self._colorbar, options, self._colorbar_options)
 
     def onWindowRequiresUpdate(self):
         """
@@ -216,19 +242,20 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._reset()
             self._setLoadingMessage('No file selected.')
 
-        if self._window.needsUpdate():
-            # Update the result first to avoid another when colorbar updates:
-            if self._result and self._result.needsUpdate():
-                self._result.update()
+        if self._window.needsUpdate() and (self._reader is not None):
             self._window.update()
-            self.windowUpdated.emit()
+
+            for result in self._window:
+                result.getVTKRenderer().DrawOn()
+
+            self.updateWindow.emit(self._window, self._reader, self._result)
 
             if self._reader is not None:
                 err = self._reader.getErrorObserver()
                 if err:
                     mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
 
-    def onCameraChanged(self, view, position, focal, update=True):
+    def onCameraChanged(self, view, position, focal):
         """
         Accepts camera settings.
 
@@ -242,8 +269,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             camera.SetViewUp(view)
             camera.SetPosition(position)
             camera.SetFocalPoint(focal)
-            if update:
-                self._window.update()
+            self._result.getVTKRenderer().ResetCameraClippingRange()
 
     def onInputFileChanged(self, filename):
         """
@@ -331,6 +357,8 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         Clears the VTK windows and restarts the initialize timer.
         """
         if self._initialized:
+
+            # Clear all data
             self._window.reset()
             self._window.clear()
             self._adjustTimers(start=['initialize'], stop=['update'])
@@ -339,11 +367,12 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._colorbar = None
             self._initialized = False
             self._highlight = None
-            self._reader_options.clear()
-            self._result_options.clear()
-            self._colorbar_options.clear()
+            self._reader_options = self.getDefaultReaderOptions()
+            self._result_options = self.getDefaultResultOptions()
+            self._window_options = self.getDefaultWindowOptions()
+            self._colorbar_options = self.getDefaultColorbarOptions()
             self.setEnabled(False)
-            self.windowReset.emit()
+            self.resetWindow.emit()
             self.setEnableWidget.emit(False)
 
     def _renderResult(self):
@@ -356,16 +385,23 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._window.clear()
         self._initialized = True
 
-        # Create the reader and result chigger objects
+        # Read ExodusII file
         self._reader = chigger.exodus.ExodusReader(self._filename, **self._reader_options)
+        self.setupReader.emit(self._reader)
         self._reader.update()
-        self.windowReader.emit(self._reader)
 
+        # Create result (renderer)
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
+        self.setupResult.emit(self._result)
         self._result.update()
-        self.windowResult.emit(self._result)
+        self._window.append(self._result)
 
-        self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
+        # Colorbar renderer (optional)
+        if self._create_colorbar:
+            self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
+            self._window.append(self._colorbar)
+            self.setupColorbar.emit(self._colorbar)
+            self._colorbar.update()
 
         # Set the interaction mode (2D/3D)
         bmin, bmax = self._result.getBounds()
@@ -374,22 +410,19 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         else:
             self._window.setOption('style', 'interactive')
 
-        # Add results
-        self._window.append(self._result, self._colorbar)
-
-        # Load saved cameras
-        camera = self._cameras.get(self._filename, None)
-        if camera:
-            self.onCameraChanged(*camera, update=False)
-
         # Connect the camera to the render event
         self.onAddObserver(vtk.vtkCommand.RenderEvent, self._callbackRenderEvent)
 
         # Update the RenderWindow
+        self._window.setOptions(**self._window_options)
+        self.setupWindow.emit(self._window)
         self._window.update()
-        self.windowColorbar.emit(self._colorbar) # required after window update (see chigger Colorbar object)
-        if camera is None:
-            self._callbackRenderEvent() # store initial camera
+
+        # Store/load camera
+        data = self._cameras.get(self._filename, None)
+        if data is not None:
+            self.onCameraChanged(*data)
+
         self._adjustTimers(start=['update'], stop=['initialize'])
         self.setEnabled(True)
         self.setEnableWidget.emit(True)
@@ -472,11 +505,11 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
             # Ideally this would use the GetModelTransformMatrix(), but in python the set method
             # for this function does not appear to work.
-            data =  (camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint())
+            data = (camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint())
             self._cameras[self._filename] = data
             self.cameraChanged.emit(*data)
 
-    def __setOptionsHelper(self, chigger_object, options):
+    def __setOptionsHelper(self, chigger_object, options, fallback):
         """
         Private helper for setting chigger options.
 
@@ -492,6 +525,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             else:
                 raise mooseutils.MooseException('Options supplied must be a dict or utils.Options class.')
 
+        else:
+            fallback.update(options)
+
 def main(size=None):
     """
     Run the VTKWindowPlugin all by its lonesome.
@@ -505,7 +541,7 @@ if __name__ == "__main__":
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
-    #filename = 'none.e'
+    filename = 'none.e'
     widget, window = main(size=[600,600])
     window.onSetFilename(filename)
     window.onSetVariable('diffused')

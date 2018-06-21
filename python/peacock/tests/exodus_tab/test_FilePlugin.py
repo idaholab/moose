@@ -98,7 +98,6 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         self._widget.FilePlugin.FileList.setCurrentIndex(0)
         self._widget.FilePlugin.FileList.currentIndexChanged.emit(0)
         self._window.onWindowRequiresUpdate()
-        #self._window.onCameraChanged(camera)
         self.assertImage('testChangeFiles0.png')
 
     def testDelayedFile(self):
@@ -294,7 +293,7 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
 
 class TestFilePluginNewVariable(Testing.PeacockImageTestCase):
     """
-    Testing for FileControl widget when a new variable is added.
+    Testing for FilePlugin widget when a new variable is added.
     """
 
     qapp = QtWidgets.QApplication(sys.argv)

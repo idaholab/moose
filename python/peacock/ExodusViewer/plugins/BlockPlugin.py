@@ -46,10 +46,12 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.MainLayout.addWidget(self.NodesetSelector)
 
         self.setup()
+        self._varinfo = None  # current variable names
 
-        # Current variable names
-        self._reader = None
-        self._varinfo = None
+    def onSetFilename(self, *args):
+        super(BlockPlugin, self).onSetFilename(*args)
+        self._loadPlugin()
+        self.updateOptions()
 
     def onSetVariable(self, *args):
         """
@@ -67,50 +69,63 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self._loadPlugin()
         self.updateOptions()
 
-    def onWindowReset(self):
+    def onResetWindow(self):
         """
         Remove variable information when the window is reset.
         """
         self._varinfo = None
-        self._reader = None
 
-    def onWindowReader(self, reader):
-        """
-        Initializes the selector widgets for the supplied reader.
-        """
-        self.BlockSelector.updateBlocks(reader)
-        self.SidesetSelector.updateBlocks(reader)
-        self.NodesetSelector.updateBlocks(reader)
-        self._reader = reader
-        self._varinfo = reader.getVariableInformation([chigger.exodus.ExodusReader.NODAL])
-
-    def onWindowResult(self, *args):
+    def onSetupResult(self, result):
         """
         Update the block selections when the result object is created (i.e., when the file changes).
         """
+        reader = result[0].getExodusReader()
+        self.BlockSelector.updateBlocks(reader)
+        self.SidesetSelector.updateBlocks(reader)
+        self.NodesetSelector.updateBlocks(reader)
+        self._varinfo = reader.getVariableInformation([chigger.exodus.ExodusReader.NODAL])
+
         self._loadPlugin()
         self.updateOptions()
 
-    def onWindowUpdated(self):
+    def onUpdateWindow(self, window, reader, result):
         """
-        Update the blocks if needed.
+        Update the block list, if needed.
         """
-        blocks = self._blocksChanged(self.BlockSelector, chigger.exodus.ExodusReader.BLOCK)
-        sideset = self._blocksChanged(self.SidesetSelector, chigger.exodus.ExodusReader.SIDESET)
-        nodeset = self._blocksChanged(self.NodesetSelector, chigger.exodus.ExodusReader.NODESET)
+        blocks = self._blocksChanged(reader, self.BlockSelector, chigger.exodus.ExodusReader.BLOCK)
+        sideset = self._blocksChanged(reader, self.SidesetSelector, chigger.exodus.ExodusReader.SIDESET)
+        nodeset = self._blocksChanged(reader, self.NodesetSelector, chigger.exodus.ExodusReader.NODESET)
         if any([blocks, sideset, nodeset]):
-            self.onWindowReader(self._reader)
+            self.onSetupResult(result)
+
+    def updateReaderOptions(self):
+        """
+        Update the ExodusReader options.
+        """
+        options = self._getBlockOptions()
+        self.readerOptionsChanged.emit(options)
+        self.resultOptionsChanged.emit(options)
+
+    def updateResultOptions(self):
+        """
+        Update the ExodusResult options.
+        """
+        options = self._getBlockOptions()
+        self.resultOptionsChanged.emit(options)
 
     def updateOptions(self):
         """
         Updates the block, boundary, and nodeset settings for the reader/result objects.
         """
+        if self._varinfo:
+            options = self._getBlockOptions()
+            self.readerOptionsChanged.emit(options)
+            self.resultOptionsChanged.emit(options)
 
-        # Do nothing if the variable information does not exist
-        if self._varinfo is None:
-            return
-
-        # Nodal
+    def _getBlockOptions(self):
+        """
+        Helper to return the block/boundary/nodeset options for the reader and result objects.
+        """
         options = dict()
         if self._variable in self._varinfo:
             self.BlockSelector.setEnabled(True)
@@ -129,9 +144,16 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             self.BlockSelector.setEnabled(True)
             self.SidesetSelector.setEnabled(False)
             self.NodesetSelector.setEnabled(False)
+        return options
 
-        self.readerOptionsChanged.emit(options)
-        self.resultOptionsChanged.emit(options)
+    def _blocksChanged(self, reader, qobject, btype):
+        """
+        Check if current blocks on the widget are the same as exist on the reader.
+        """
+        blk_info = reader.getBlockInformation()[btype]
+        blocks = [blk.name for blk in blk_info.itervalues()]
+        current = [qobject.StandardItemModel.item(i).data(QtCore.Qt.UserRole) for i in range(1, qobject.StandardItemModel.rowCount())]
+        return set(blocks) != set(current)
 
     def _loadPlugin(self):
         """
@@ -154,17 +176,6 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if not self.NodesetSelector.hasState(self.stateKey()):
             self.NodesetSelector.StandardItemModel.item(0).setCheckState(QtCore.Qt.Unchecked)
             self.NodesetSelector.itemsChanged.emit()
-
-    def _blocksChanged(self, qobject, btype):
-        """
-        Check if current blocks on the widget are the same as exist on the reader.
-        """
-        if self._reader:
-            blk_info = self._reader.getBlockInformation()[btype]
-            blocks = [blk.name for blk in blk_info.itervalues()]
-            current = [qobject.StandardItemModel.item(i).data(QtCore.Qt.UserRole) for i in range(1, qobject.StandardItemModel.rowCount())]
-            return set(blocks) != set(current)
-        return False
 
     def _setupBlockSelector(self, qobject):
         qobject.itemsChanged.connect(self._callbackBlockSelector)

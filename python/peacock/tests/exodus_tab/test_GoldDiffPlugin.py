@@ -65,7 +65,7 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
 
     def testDiff(self):
         """
-        Test the gold toggle is working.
+        Test the diff toggle is working.
         """
         self.assertTrue(self._widget.GoldDiffPlugin.isEnabled())
         self._widget.GoldDiffPlugin.DiffToggle.setChecked(QtCore.Qt.Checked)
@@ -74,7 +74,7 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
 
     def testCameraLink(self):
         """
-        Test the gold toggle is working.
+        Test the camera link is working.
         """
         self.assertTrue(self._widget.GoldDiffPlugin.LinkToggle.isChecked())
         self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
@@ -87,7 +87,7 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
 
     def testDisabled(self):
         """
-        TEST the gold/diff window gets disabled when a file doesn't have gold.
+        Test the gold/diff window gets disabled when a file doesn't have gold.
         """
         self._widget.FilePlugin.FileList.setCurrentIndex(1)
         self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
@@ -117,6 +117,26 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
         self.assertTrue(self._widget.GoldDiffPlugin.isVisible())
         self.assertFalse(self._widget.GoldDiffPlugin.LinkToggle.isChecked())
         self.assertTrue(self._widget.GoldDiffPlugin.GoldToggle.isChecked())
+
+    def testVariable(self):
+        """
+        Test that changing variable propagates.
+        """
+        self._widget.FilePlugin.VariableList.setCurrentIndex(1)
+        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
+        self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
+        self._widget.GoldDiffPlugin.GoldToggle.clicked.emit(True)
+        self.assertImage('testChangeVariable.png', window=self._widget.GoldDiffPlugin.GoldVTKWindow)
+
+    def testChangeFileWhenSelected(self):
+        """
+        Test that window closes when file is toggled to a file w/o a gold
+        """
+        self._widget.GoldDiffPlugin.GoldToggle.setChecked(QtCore.Qt.Checked)
+        self._widget.GoldDiffPlugin.GoldToggle.clicked.emit(True)
+        self._widget.FilePlugin.FileList.setCurrentIndex(1)
+        self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
+        self.assertFalse(self._widget.GoldDiffPlugin.isVisible())
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

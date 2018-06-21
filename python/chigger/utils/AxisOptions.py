@@ -56,7 +56,6 @@ def set_options(vtkaxis, opt):
     # Limits
     if opt.isOptionValid('lim'):
         lim = opt['lim']
-        print lim, abs(lim[1] - lim[0])
         if abs(lim[1] - lim[0]) < opt['zero_tol']:
             vtkaxis.SetBehavior(vtk.vtkAxis.CUSTOM)
             vtkaxis.SetRange(0, 1)
@@ -79,6 +78,7 @@ def set_options(vtkaxis, opt):
             vtkaxis.RecalculateTickSpacing()
     else:
         vtkaxis.SetBehavior(vtk.vtkAxis.AUTO)
+        vtkaxis.SetCustomTickPositions(None, None)
 
     # Color
     if opt.isOptionValid('font_color'):

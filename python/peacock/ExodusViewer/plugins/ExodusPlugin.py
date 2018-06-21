@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import peacock
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 
 class ExodusPlugin(peacock.base.Plugin):
     """
@@ -25,14 +25,12 @@ class ExodusPlugin(peacock.base.Plugin):
         self._component = -1
         self.setEnabled(False)
 
-    @QtCore.pyqtSlot()
     def onPlayStart(self):
         """
         Disables the plugin when playing begins.
         """
         self.setEnabled(False)
 
-    @QtCore.pyqtSlot()
     def onPlayStop(self):
         """
         Enables widget when the playing stops.
@@ -44,18 +42,24 @@ class ExodusPlugin(peacock.base.Plugin):
         Stores the current filename. (see FilePlugin)
         """
         self._filename = str(filename) if filename else None
+        self._loadPlugin()
+        self.updateOptions()
 
     def onSetVariable(self, variable):
         """
         Stores the current variable. (see FilePlugin)
         """
         self._variable = str(variable) if variable else None
+        self._loadPlugin()
+        self.updateOptions()
 
     def onSetComponent(self, component):
         """
         Stores the current variable component. (see FilePlugin)
         """
         self._component = component if (component is not None) else -1
+        self._loadPlugin()
+        self.updateOptions()
 
     def onCurrentChanged(self, index):
         """
@@ -87,3 +91,15 @@ class ExodusPlugin(peacock.base.Plugin):
 
         if isinstance(self, QtWidgets.QGroupBox):
             self.setFlat(True)
+
+    def _loadPlugin(self):
+        """
+        This is called by onSetFilename/Variable/Component, use it to load the plugin state.
+        """
+        pass
+
+    def updateOptions(self):
+        """
+        All options for the Reader/Result/Window objects should be set for the plugin by this method.
+        """
+        pass

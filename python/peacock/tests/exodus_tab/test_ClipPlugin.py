@@ -189,7 +189,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
         self.assertFalse(self._widget.ClipPlugin.isChecked())
 
-        # Change bakcg
+        # Change back
         self._widget.FilePlugin.FileList.setCurrentIndex(0)
         self._widget.FilePlugin.FileList.currentIndexChanged.emit(0)
         self.assertTrue(self._widget.ClipPlugin.isChecked())

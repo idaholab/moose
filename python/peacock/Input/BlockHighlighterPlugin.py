@@ -25,7 +25,7 @@ class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     def __init__(self, **kwargs):
         super(BlockHighlighterPlugin, self).__init__(**kwargs)
 
-        self.setMainLayoutName('RightLayout')
+        self.setMainLayoutName('WindowLayout')
         self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         self.MainLayout = QtWidgets.QHBoxLayout(self)
         self.MainLayout.setSpacing(10)
@@ -42,20 +42,17 @@ class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self.setup()
 
-    def onWindowReader(self, reader):
+    def onSetupResult(self, result):
         """
-        Update boundary/nodeset visibility when window is updated.
+        Enable/disable the nodeset/sidest selection based on variable type.
         """
+        reader = result[0].getExodusReader()
         self.blockSignals(True)
         self.BlockSelector.updateBlocks(reader)
         self.SidesetSelector.updateBlocks(reader)
         self.NodesetSelector.updateBlocks(reader)
         self.blockSignals(False)
 
-    def onWindowResult(self, result):
-        """
-        Enable/disable the nodeset/sidest selection based on variable type.
-        """
         varinfo = result[0].getCurrentVariableInformation()
         if varinfo:
             if varinfo.object_type == chigger.exodus.ExodusReader.ELEMENTAL:

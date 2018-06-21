@@ -60,40 +60,17 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.store(key='default')
         self._varinfo = None
 
-    def onWindowReader(self, reader):
+    def onSetupResult(self, result):
         """
         Store variable information when the reader is created.
         """
-        self._varinfo = reader.getVariableInformation([chigger.exodus.ExodusReader.NODAL])
+        self._varinfo = result[0].getExodusReader().getVariableInformation([chigger.exodus.ExodusReader.NODAL])
 
     def onWindowReset(self):
         """
         Remove variable information when the window is reset.
         """
         self._varinfo = None
-
-    def onSetVariable(self, *args):
-        """
-        Loads the selected items when the variable changes.
-        """
-        super(ContourPlugin, self).onSetVariable(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onSetComponent(self, *args):
-        """
-        Loads the selected items when the variable component changes.
-        """
-        super(ContourPlugin, self).onSetComponent(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onWindowResult(self, *args):
-        """
-        Loads state when result is created.
-        """
-        self._loadPlugin()
-        self.updateOptions()
 
     def _loadPlugin(self):
         """

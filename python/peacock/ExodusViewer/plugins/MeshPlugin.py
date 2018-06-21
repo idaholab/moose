@@ -43,7 +43,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
                 "View the mesh by default",
                 )
 
-        self._transform = None
+        self._transform = chigger.filters.TransformFilter()
         self._extents = None
 
         # QGroupBox settings
@@ -115,47 +115,22 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self.setup()
 
-    def onWindowResult(self, result):
+    def onSetupResult(self, result):
         """
         Create the filters and load the stored state when the ExodusResult is created.
         """
         self._extents = chigger.misc.VolumeAxes(result)
-        self._transform = chigger.filters.TransformFilter()
-        self.addFilter.emit(self._transform)
-        self._loadPlugin()
-        self.updateOptions()
 
-    def onWindowReset(self):
+    def onResetWindow(self):
         """
         Delete filters when the window is destroyed.
         """
         self._extents = None
-        self._transform = None
-
-    def onSetVariable(self, *args):
-        """
-        Loads the selected items when the variable changes.
-        """
-        super(MeshPlugin, self).onSetVariable(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onSetComponent(self, *args):
-        """
-        Loads the selected items when the variable component changes.
-        """
-        super(MeshPlugin, self).onSetComponent(*args)
-        self._loadPlugin()
-        self.updateOptions()
 
     def _loadPlugin(self):
         """
         Helper for loading plugin state.
         """
-
-        if self._transform is None:
-            return
-
         self.load(self.Extents)
         if not self.hasState(self.Extents):
             self.Extents.setChecked(False)
@@ -188,47 +163,48 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if not self.hasState(self.ScaleZ):
             self.ScaleZ.setValue(1.0)
 
+    def updateReaderOptions(self):
+        """
+        Update ExodusReaderOptions
+        """
+        reader_options = dict()
+        reader_options['displacements'] = bool(self.DisplacementToggle.isChecked())
+        reader_options['displacement_magnitude'] = self.DisplacementMagnitude.value()
+        self.DisplacementMagnitude.setEnabled(reader_options['displacements'])
+        self.readerOptionsChanged.emit(reader_options)
+
+    def updateResultOptions(self):
+        """
+        Update ExodusResult options.
+        """
+        result_options = dict()
+        result_options['representation'] = str(self.Representation.currentText()).lower()
+        result_options['edges'] = self.ViewMeshToggle.isChecked()
+        result_options['edge_color'] = [0, 0, 0]
+        self.resultOptionsChanged.emit(result_options)
+
     def updateOptions(self):
         """
         Updates the results for the changes to the mesh view.
         """
-        if self._transform is None:
-            return
-
-        # Options to pass to ExodusResult
-        reader_options = dict()
-        result_options = dict()
-
-        # Displacement toggle and magnitude
-        reader_options['displacements'] = bool(self.DisplacementToggle.isChecked())
-        reader_options['displacement_magnitude'] = self.DisplacementMagnitude.value()
-        self.DisplacementMagnitude.setEnabled(reader_options['displacements'])
-
-        # Representation
-        result_options['representation'] = str(self.Representation.currentText()).lower()
-
-        # Mesh Toggle
-        result_options['edges'] = self.ViewMeshToggle.isChecked()
-        result_options['edge_color'] = [0, 0, 0]
-
-        # Scale
-        if self._transform is not None:
-            scale = [self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value()]
+        scale = [self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value()]
+        if scale != [1, 1, 1]:
             self._transform.setOption('scale', scale)
+            self.addFilter.emit(self._transform)
+        else:
+            self.removeFilter.emit(self._transform)
 
         ## Extents
         if self._extents is not None:
             value = self.Extents.isChecked()
             if value:
                 self._extents.update()
-                self.appendResult.emit(self._extents)
             else:
                 self._extents.reset()
-                self.removeResult.emit(self._extents)
 
         # Emit the update signal with the new arguments
-        self.readerOptionsChanged.emit(reader_options)
-        self.resultOptionsChanged.emit(result_options)
+        self.updateReaderOptions()
+        self.updateResultOptions()
 
     def _setupDisplacementToggle(self, qobject):
         """
@@ -300,6 +276,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setSingleStep(0.1)
         qobject.setValue(1.0)
+        qobject.setMinimum(0.1)
         qobject.valueChanged.connect(self._callbackScaleX)
         qobject.setMaximum(1000)
 
@@ -309,6 +286,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setSingleStep(0.1)
         qobject.setValue(1.0)
+        qobject.setMinimum(0.1)
         qobject.valueChanged.connect(self._callbackScaleY)
         qobject.setMaximum(1000)
 
@@ -318,6 +296,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setSingleStep(0.1)
         qobject.setValue(1.0)
+        qobject.setMinimum(0.1)
         qobject.valueChanged.connect(self._callbackScaleZ)
         qobject.setMaximum(1000)
 

@@ -9,7 +9,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-import mooseutils
 from AxisSource import AxisSource
 from .. import base
 from .. import geometric
@@ -63,13 +62,6 @@ class ColorBar(base.ChiggerResult):
         self.setOptions(**kwargs)
         if self.needsInitialize():
             self.initialize()
-
-        # Error if the vtkRenderWindow is not set
-        size = self._vtkrenderer.GetSize()
-        if size == (0, 0):
-            raise mooseutils.MooseException('Calling update() prior to calling '
-                                            'RenderWindow.update() is not supported for this '
-                                            'object.')
 
         # Convenience names for the various sources
         plane, axis0, axis1 = self._sources

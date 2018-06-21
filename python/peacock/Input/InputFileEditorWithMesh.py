@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-from plugins import InputMeshPlugin, MeshViewerPlugin
+from plugins import MeshViewerPlugin
 from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
 from BlockHighlighterPlugin import BlockHighlighterPlugin
 from peacock.base.PluginManager import PluginManager
@@ -41,8 +41,9 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         if not plugins:
             plugins = [lambda: InputFileEditorPlugin(layout='LeftLayout'),
                        lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
-                       InputMeshPlugin,
-                       lambda: BackgroundPlugin(layout='RightLayout', settings_key="input", set_result_color=True),
+                       lambda: BackgroundPlugin(layout='WindowLayout',
+                                                settings_key="input",
+                                                set_result_color=True),
                        BlockHighlighterPlugin]
 
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
@@ -57,12 +58,9 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.MainLayout = QHBoxLayout(self)
         self.LeftLayout = QVBoxLayout()
         self.WindowLayout = QVBoxLayout()
-        self.RightLayout = QVBoxLayout()
 
         self.MainLayout.addLayout(self.LeftLayout)
         self.MainLayout.addLayout(self.WindowLayout)
-        self.MainLayout.addLayout(self.RightLayout)
-
         self.setup()
         self.setupVTKWindow()
 
@@ -71,8 +69,6 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.InputFileEditorPlugin.inputFileChanged.connect(self._updateFromInputFile)
 
         self.fixLayoutWidth('LeftLayout')
-        self.fixLayoutWidth('RightLayout')
-        self.RightLayout.addStretch(1)
 
     def setupVTKWindow(self):
         """
@@ -138,7 +134,6 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         Input:
             enabled[bool]: Whether to set them enabled or disabled
         """
-        self.InputMeshPlugin.setEnabled(enabled)
         self.BlockHighlighterPlugin.setEnabled(enabled)
         self.BackgroundPlugin.setEnabled(enabled)
 
@@ -239,6 +234,9 @@ if __name__ == "__main__":
     main_win = QMainWindow()
     w = InputFileEditorWithMesh()
     main_win.setCentralWidget(w)
+    menubar = main_win.menuBar()
+    menubar.setNativeMenuBar(False)
+    w.addToMainMenu(menubar)
     exe_info = ExecutableInfo()
     #exe_info.clearCache()
     exe_info.setPath(sys.argv[1])
@@ -248,7 +246,4 @@ if __name__ == "__main__":
     w.initialize(OptionsProxy(input_file=sys.argv[2], arguments=[]))
     w.onExecutableInfoChanged(exe_info)
     main_win.show()
-    menubar = main_win.menuBar()
-    menubar.setNativeMenuBar(False)
-    w.addToMainMenu(menubar)
     sys.exit(qapp.exec_())

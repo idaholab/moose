@@ -58,29 +58,6 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.setup()
         self.store(key='default')
 
-    def onSetVariable(self, *args):
-        """
-        Loads the selected items when the variable changes.
-        """
-        super(ClipPlugin, self).onSetVariable(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onSetComponent(self, *args):
-        """
-        Loads the selected items when the variable component changes.
-        """
-        super(ClipPlugin, self).onSetComponent(*args)
-        self._loadPlugin()
-        self.updateOptions()
-
-    def onWindowResult(self, *args):
-        """
-        Loads state when result is created.
-        """
-        self._loadPlugin()
-        self.updateOptions()
-
     def _loadPlugin(self):
         """
         Helper for loading plugin state.

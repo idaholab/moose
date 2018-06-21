@@ -207,5 +207,43 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.MeshPlugin.ScaleY.value(), 1.0)
         self.assertEqual(self._widget.MeshPlugin.ScaleZ.value(), 1.0)
 
+
+class TestMeshPlugin2(Testing.PeacockImageTestCase):
+    """
+    Testing for MeshControl widget.
+    """
+
+    qapp = QtWidgets.QApplication(sys.argv)
+
+    def setUp(self):
+        """
+        Creates a window attached to BlockControls widget.
+        """
+
+        # The file to open
+        self._filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
+        self._widget, self._window = main(size=[600,600])
+        self._widget.FilePlugin.onSetFilenames(self._filenames)
+        self._window.onWindowRequiresUpdate()
+
+    def testState(self):
+        mesh = self._widget.MeshPlugin
+        file = self._widget.FilePlugin
+
+        self._window.onSetColorbarVisible(False)
+        mesh.ScaleX.setValue(0.5)
+        mesh.ScaleX.valueChanged.emit(0.5)
+        self.assertImage('testDiffusion1.png')
+
+        file.FileList.setCurrentIndex(1)
+        file.FileList.currentIndexChanged.emit(1)
+        self._window.onSetColorbarVisible(False)
+        self.assertImage('testDiffusion2.png')
+
+        file.FileList.setCurrentIndex(0)
+        file.FileList.currentIndexChanged.emit(0)
+        self._window.onSetColorbarVisible(False)
+        self.assertImage('testDiffusion1.png')
+
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

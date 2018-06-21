@@ -79,7 +79,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.MainLayout.addWidget(self.LinkToggle)
 
         self.GoldVTKWindow = ExternalVTKWindowPlugin(self.GoldToggle, size=size, text='GOLD')
-        self.DiffVTKWindow = None
+        self.DiffVTKWindow = None#ExternalVTKWindowPlugin(self.DiffToggle, size=size)
 
         # Locate MOOSE exodiff program
         self._exodiff = None
@@ -94,58 +94,43 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self._gold_observer = None
         self._diff_observer = None
         self._main_observer = None
-        self._initialized = False
 
-    def _initialize(self, *args, **kwargs):
+    def _loadPlugin(self):
         """
-        Initialize this widget.
-
-        All plugins are created at this point, so the link camera button can be connect if the
-        VTKWindowPlugin is available on the parent.
+        Loads plugin state.
         """
+        self.load(self.GoldToggle)
+        self.load(self.DiffToggle)
+        self.load(self.LinkToggle)
 
-        # Enable/disable the link camera toggle based on the existence of the main window.
-        if self._plugin_manager and 'VTKWindowPlugin' in self._plugin_manager:
-            self.LinkToggle.clicked.connect(self._callbackLinkToggle)
-            self.LinkToggle.setChecked(True)
-            self.LinkToggle.clicked.emit(True)
-        else:
-            self.LinkToggle.setEnabled(False)
-
-        # Disable exodiff button if program is not available
-        self.DiffToggle.setEnabled(bool(self._exodiff))
-        self._initialized = True
-
-    def onSetVariable(self, variable):
+    def onSetVariable(self, *args):
         """
-        Loads stored state and the toggles when the variable is changed.
+        Update variable for open Gold/Diff windows.
+        """
+        super(GoldDiffPlugin, self).onSetVariable(*args)
+        if self.hasGoldWindow():
+            self.GoldVTKWindow.onSetVariable(*args)
+        if self.hasDiffWindow():
+            self.DiffVTKWindow.onSetVariable(*args)
 
-        Notice that the state being loaded is based on the filename, which is what is stored (see callbacks
-        below). This is done when the variable is changed rather than filename to ensure that the self._variable
-        has the proper value so the gold/diff window is loaded with the correct variable.
+    def onSetComponent(self, *args):
         """
-        super(GoldDiffPlugin, self).onSetVariable(variable)
-        self.load(self.GoldToggle, key=(self._filename, None, None))
-        self.load(self.DiffToggle, key=(self._filename, None, None))
-        self.load(self.LinkToggle, key=(self._filename, None, None))
-        self.updateOptions()
-
-    def onWindowResult(self, *args):
+        Update component for open Gold/Diff windows.
         """
-        Initializes the widget on the first render and updates the widget.
-        """
-        if not self._initialized:
-            self._initialize()
-        self.updateOptions()
+        super(GoldDiffPlugin, self).onSetComponent(*args)
+        if self.hasGoldWindow():
+            self.GoldVTKWindow.onSetComponent(*args)
+        if self.hasDiffWindow():
+            self.DiffVTKWindow.onSetComponent(*args)
 
     def onReaderOptionsChanged(self, options):
         """
         Pass on the reader options to the gold/diff window(s).
         """
         self.updateOptions()
-        if self.GoldToggle.isChecked():
+        if self.hasGoldWindow():
             self.GoldVTKWindow.onReaderOptionsChanged(options)
-        if self.DiffToggle.isChecked():
+        if self.hasDiffWindow():
             self.DiffTKWindow.onReaderOptionsChanged(options)
 
     def onResultOptionsChanged(self, options):
@@ -153,10 +138,43 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Pass on the result options to the gold/diff window(s).
         """
         self.updateOptions()
-        if self.GoldToggle.isChecked():
+        if self.hasGoldWindow():
             self.GoldVTKWindow.onResultOptionsChanged(options)
-        if self.DiffToggle.isChecked():
+        if self.hasDiffWindow():
             self.DiffTKWindow.onResultOptionsChanged(options)
+
+    def onWindowOptionsChanged(self, options):
+        """
+        Pass on the window options to the gold/diff window(s).
+        """
+        self.updateOptions()
+        if self.hasGoldWindow():
+            self.GoldVTKWindow.onWindowOptionsChanged(options)
+        if self.hasDiffWindow():
+            self.DiffTKWindow.onWindowOptionsChanged(options)
+
+    def onCameraChanged(self, *args):
+        """
+        Slot for when camera is changed.
+        """
+        link = self.LinkToggle.isChecked()
+        if link and self.hasGoldWindow():
+            self.GoldVTKWindow.onCameraChanged(*args)
+        if link and self.hasDiffWindow():
+            self.DiffVTKWindow.onCameraChanged(*args)
+
+    def hasGoldWindow(self):
+        """
+        Return True if the Gold window is open.
+        """
+        return self.GoldToggle.isChecked() and self.GoldVTKWindow.isVisible()
+
+    def hasDiffWindow(self):
+        """
+        Return True if the Diff window is open.
+        """
+        diff = self.DiffToggle.isChecked() if self._exodiff else False
+        return diff and self.DiffVTKWindow.isVisible()
 
     def updateOptions(self):
         """
@@ -170,7 +188,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             self.DiffToggle.setChecked(False)
 
         # Gold window toggle
-        gold = self.GoldToggle.isChecked()
+        gold = self.GoldToggle.isChecked() if self.GoldVTKWindow else False
         goldname = mooseutils.gold(self._filename)
         if gold and (not self.GoldVTKWindow.isVisible()):
             self.GoldVTKWindow.show()
@@ -178,7 +196,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             self.GoldVTKWindow.onSetVariable(self._variable)
             self.GoldVTKWindow.onSetComponent(self._component)
             self.GoldVTKWindow.onWindowRequiresUpdate()
-        elif (not gold) and self.GoldVTKWindow.isVisible():
+        elif (not gold) and self.GoldVTKWindow and self.GoldVTKWindow.isVisible():
             self.GoldVTKWindow.hide()
 
         # Diff Window toggle
@@ -235,7 +253,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Args:
             value[bool]: True/False indicating the toggle state of the widget.
         """
-        self.store(self.GoldToggle, key=(self._filename, None, None))
+        self.store(self.GoldToggle)#, key=(self._filename, None, None))
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
@@ -246,6 +264,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Args:
             qobject: The widget being setup.
         """
+        self.DiffToggle.setEnabled(bool(self._exodiff))
         if self._exodiff:
             qobject.clicked.connect(self._callbackDiffToggle)
 
@@ -256,7 +275,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Args:
             value[bool]: True/False indicating the toggle state of the widget.
         """
-        self.store(self.DiffToggle, key=(self._filename, None, None))
+        self.store(self.DiffToggle)#, key=(self._filename, None, None))
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
@@ -274,19 +293,9 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         NOTE: This doesn't get called (b/c the button is disabled) if VTKWindowPlugin does not exist
         on the plugin manager, see initialization
         """
-        self.store(self.LinkToggle, key=(self._filename, None, None))
+        self.store(self.LinkToggle)#, key=(self._filename, None, None))
         self.updateOptions()
         self.windowRequiresUpdate.emit()
-
-    def onCameraChanged(self, *args):
-        """
-        Slot for when camera is changed.
-        """
-        link = self.LinkToggle.isChecked()
-        if link and self.GoldVTKWindow.isVisible():
-            self.GoldVTKWindow.onCameraChanged(*args)
-        if link and self._exodiff and self.DiffVTKWindow.isVisible():
-            self.DiffVTKWindow.onCameraChanged(*args)
 
     def _callbackGoldRenderEvent(self, *args):
         """

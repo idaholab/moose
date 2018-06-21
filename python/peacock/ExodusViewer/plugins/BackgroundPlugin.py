@@ -13,7 +13,9 @@ from ExodusPlugin import ExodusPlugin
 
 class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
     """
-    Plugin responsible for background and labels
+    Plugin responsible for background colors.
+
+    This plugin only contains menu items, see the addToMenu method.
     """
 
     #: Emitted when the window needs updated.
@@ -76,6 +78,9 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.setup()
 
     def _callbackGradientTopColor(self):
+        """
+        Callback of for selecting top color of gradient
+        """
         dialog = QtWidgets.QColorDialog()
         c = dialog.getColor(initial=self._top, title='Select top gradient color')
         if c.isValid():
@@ -91,6 +96,9 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.windowRequiresUpdate.emit()
 
     def _callbackGradientBottomColor(self):
+        """
+        Callback for selecting bottom color of gradient
+        """
         dialog = QtWidgets.QColorDialog()
         c = dialog.getColor(initial=self._bottom, title='Select bottom gradient color')
         if c.isValid():
@@ -106,6 +114,9 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.windowRequiresUpdate.emit()
 
     def _callbackSolidColor(self):
+        """
+        Callback for selecting solid color.
+        """
         dialog = QtWidgets.QColorDialog()
         c = dialog.getColor(initial=self._solid, title='Select solid color')
         if c.isValid():
@@ -128,18 +139,24 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
-    def onWindowResult(self, *args):
+    def onSetupWindow(self, *args):
         """
-        When the result is created apply the color to the RenderWindow object.
+        Update RenderWindow options.
         """
-        self.updateOptions()
-        self.windowRequiresUpdate.emit()
+        self.updateWindowOptions()
 
-    def onWindowColorbar(self, colorbar):
+    def onSetupResult(self, result):
         """
-        Called when colorbar is created.
+        Update ExodusResult options.
+        """
+        self.updateResultOptions()
+
+    def onSetupColorbar(self, colorbar):
+        """
+        Update ExodusColorbar options.
         """
         self.ColorbarBlackFontToggle.setVisible(colorbar[0].getOption('visible'))
+        self.updateOptions()
 
     def addToMenu(self, menu):
         """
@@ -153,6 +170,7 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.GradientToggle.setChecked(toggle)
         self.GradientToggle.toggled.connect(self._callbackGradientToggle)
 
+        submenu.addSeparator()
         self.BlackPreset = submenu.addAction('Black (preset)')
         self.BlackPreset.setCheckable(True)
         self.BlackPreset.setChecked(False)
@@ -163,25 +181,43 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.WhitePreset.setChecked(False)
         self.WhitePreset.toggled.connect(self._callbackWhitePreset)
 
-        self.ColorbarBlackFontToggle = submenu.addAction("Black Font/Mesh")
+        submenu.addSeparator()
+        self.ColorbarBlackFontToggle = submenu.addAction("Use Black Font/Mesh")
         self.ColorbarBlackFontToggle.setCheckable(True)
         self.ColorbarBlackFontToggle.setChecked(False)
         self.ColorbarBlackFontToggle.toggled.connect(self._callbackColorbarBlackFontToggle)
 
-        self.TopGradientColor = submenu.addAction("Top Gradient Color")
+        submenu.addSeparator()
+        self.TopGradientColor = submenu.addAction("Select Top Gradient Color")
         self.TopGradientColor.triggered.connect(self._callbackGradientTopColor)
 
-        self.BottomGradientColor = submenu.addAction("Bottom Gradient Color")
+        self.BottomGradientColor = submenu.addAction("Select Bottom Gradient Color")
         self.BottomGradientColor.triggered.connect(self._callbackGradientBottomColor)
 
-        self.SolidGradientColor = submenu.addAction("Solid Color")
+        self.SolidGradientColor = submenu.addAction("Select Solid Color")
         self.SolidGradientColor.triggered.connect(self._callbackSolidColor)
 
-        self.updateOptions()
-
-    def updateOptions(self):
+    def updateResultOptions(self):
         """
-        Apply the supplied colors to the window.
+        Apply ExodusResult options.
+        """
+        if self.ColorbarBlackFontToggle.isChecked() and self._set_result_color:
+            self.resultOptionsChanged.emit({'color':[0,0,0]})
+        elif self._set_result_color:
+            self.resultOptionsChanged.emit({'color':[1,1,1]})
+
+    def updateColorbarOptions(self):
+        """
+        Apply the ExodusColorbar options.
+        """
+        if self.ColorbarBlackFontToggle.isChecked():
+            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[0,0,0])})
+        else:
+            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[1,1,1])})
+
+    def updateWindowOptions(self):
+        """
+        Apply the RenderWindow options.
         """
         if self.GradientToggle.isChecked():
             top = self._top.getRgb()
@@ -201,18 +237,17 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
             background = [solid[0]/255., solid[1]/255., solid[2]/255.]
             background2 = None
 
-        if self.ColorbarBlackFontToggle.isChecked():
-            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[0,0,0])})
-            if self._set_result_color:
-                self.resultOptionsChanged.emit({'color':[0,0,0]})
-        else:
-            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[1,1,1])})
-            if self._set_result_color:
-                self.resultOptionsChanged.emit({'color':[1,1,1]})
-
         self.windowOptionsChanged.emit({'background':background,
                                         'background2':background2,
                                         'gradient_background':self.GradientToggle.isChecked()})
+
+    def updateOptions(self):
+        """
+        Apply options to all chigger objects.
+        """
+        self.updateResultOptions()
+        self.updateColorbarOptions()
+        self.updateWindowOptions()
 
     def _setupBackgroundSelect(self, qobject):
         """
