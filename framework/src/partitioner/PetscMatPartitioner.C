@@ -24,7 +24,7 @@ validParams<PetscMatPartitioner>()
 {
   InputParameters params = validParams<MoosePartitioner>();
 
-  MooseEnum partPackage("parmetis ptscotch chaco party", "ptscotch", false);
+  MooseEnum partPackage("parmetis ptscotch chaco party hierarch", "ptscotch", false);
 
   params.addParam<MooseEnum>("part_package",
                              partPackage,
