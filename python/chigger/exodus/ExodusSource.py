@@ -120,7 +120,9 @@ class ExodusSource(base.ChiggerSource):
         Return range of the active variable and blocks.
         """
         self.checkUpdateState()
-        if not local:
+        if self.__current_variable is None:
+            raise mooseutils.MooseException("There must be a current variable for getRange.")
+        elif not local:
             return self.__getRange()
         else:
             return self.__getLocalRange()
