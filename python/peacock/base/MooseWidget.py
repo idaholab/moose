@@ -64,64 +64,44 @@ class MooseWidget(object):
 
     def dumpQObjectTree(self):
         """
-        Dump the Qt object tree to the screen, this is available with Qt but only with a debug build.
+        Dump the Qt object tree to the screen, this is available with Qt but only with a
+        # debug build.
         """
         WidgetUtils.dumpQObjectTree(self)
 
-    def stateKey(self):
-        """
-        Return a unique "key" for saving widget state, see ExodusPlugin.
-        """
-        return 'default'
-
-    def hasState(self, *args, **kwargs):
-        key = kwargs.pop('key', self.stateKey())
-        if not args:
-            args = [self]
-
-        all_state = []
-        for widget in args:
-            state = widget.property('state')
-            all_state.append((key in state) if state else False)
-
-        return all(all_state)
-
-    def store(self, *args, **kwargs):
+    def store(self, key, cache, **kwargs):
         """
         Store the widget state.
 
         Args:
-            *args[list]: List of widgets to store, if not provided self is used.
+            key[str]: The key to which the current settings should be stored.
+            cache[str|list]: A list of cache(s) that the values should be stored.
 
         Kwargs:
             passed to peacock.utils.WidgetUtils.storeWidget
         """
-        self.blockSignals(True)
-        key = kwargs.pop('key', self.stateKey())
-        if args:
-            for widget in args:
-                WidgetUtils.storeWidget(widget, key, **kwargs)
-        else:
-            WidgetUtils.storeWidget(self, key, **kwargs)
-        self.blockSignals(False)
+        if not isinstance(cache, list):
+            cache = [cache]
 
-    def load(self, *args, **kwargs):
+        for c in cache:
+            WidgetUtils.storeWidget(self, str(key), c, **kwargs)
+
+    def load(self, key, cache, **kwargs):
         """
         Load the state of the widget.
 
         Args:
             key[str]: The key to which the current settings should be stored.
-            *args[list]: List of widgets to store, if not provided self is used.
+            cache[str|list]: A list of cache(s) that the values should be stored.
 
         Kwargs:
             passed to peacock.utils.WidgetUtils.storeWidget
         """
-        key = kwargs.pop('key', self.stateKey())
-        if args:
-            for widget in args:
-                WidgetUtils.loadWidget(widget, key, **kwargs)
-        else:
-            WidgetUtils.loadWidget(self, key, **kwargs)
+        if not isinstance(cache, list):
+            cache = [cache]
+
+        for c in cache:
+            WidgetUtils.loadWidget(self, str(key), c, **kwargs)
 
     def signals(self):
         """

@@ -10,9 +10,10 @@
 import sys
 import math
 from PyQt5 import QtCore, QtWidgets
+import peacock
 from ExodusPlugin import ExodusPlugin
 
-class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
+class CameraPlugin(peacock.base.PeacockCollapsibleWidget, ExodusPlugin):
     """
     Widget for adjusting the camera.
     """
@@ -21,7 +22,8 @@ class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     def __init__(self):
         super(CameraPlugin, self).__init__()
 
-        self.MainLayout = QtWidgets.QHBoxLayout(self)
+        self.setTitle('Camera')
+        self.MainLayout = self.collapsibleLayout()
 
         self.FillScreenButton = QtWidgets.QPushButton('Fill Screen')
         self.ResetButton = QtWidgets.QPushButton('Reset')
@@ -30,20 +32,6 @@ class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.MainLayout.addWidget(self.FillScreenButton)
         self.MainLayout.addWidget(self.ResetButton)
         self.setup()
-
-        self._result = None
-
-    def onWindowResult(self, result):
-        """
-        Store the current camera.
-        """
-        self._result = result
-
-    def onWindowReset(self):
-        """
-        Remove the stored ExodusResult object.
-        """
-        self._result = None
 
     def _setupFillScreenButton(self, qobject):
         """
@@ -83,6 +71,7 @@ class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             self._result.setNeedsUpdate(True)
             self.windowRequiresUpdate.emit()
 
+
 def main(size=None):
     """
     Run the CameraPlugin all by its lonesome.
@@ -99,7 +88,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main()
-    window.onSetFilename(filename)
-    window.onSetVariable("diffused")
-    window.onWindowRequiresUpdate()
+    window.onFileChanged(filename)
     sys.exit(app.exec_())

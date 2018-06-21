@@ -32,7 +32,6 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         self.setMainLayoutName('RightLayout')
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.setup()
-        self._reader = None
 
     def onWindowCreated(self, *args):
         """
@@ -40,18 +39,6 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         """
         super(MediaControlPlugin, self).onWindowCreated(*args)
         self.onWindowUpdated()
-
-    def onWindowReader(self, reader):
-        """
-        Store the ExodusReader when it is created.
-        """
-        self._reader = reader
-
-    def onWindowReset(self):
-        """
-        Remove the stored ExodusReader when the window is destroyed.
-        """
-        self._reader = None
 
     def onWindowUpdated(self):
         """
@@ -101,7 +88,5 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main()
-    window.onSetFilename(filename)
-    window.onSetVariable('diffused')
-    window.onWindowRequiresUpdate()
+    window.onFileChanged(filename)
     sys.exit(app.exec_())
