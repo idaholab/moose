@@ -32,6 +32,12 @@ class TestYamlLoad(unittest.TestCase):
         self.assertIn("Unknown include file 'unknown.yml' on line 5 of foo_error.yml",
                       str(e.exception))
 
+    def testIncludeWithKey(self):
+        data = yaml_load('foo.yml')
+        self.assertEqual(data['d'], 1980)
+        self.assertEqual(data['e'], ['Edward', 'Bonnie'])
+        self.assertEqual(data['f'], [1906])
+
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)
