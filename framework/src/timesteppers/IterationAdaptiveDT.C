@@ -62,6 +62,19 @@ validParams<IterationAdaptiveDT>()
                         "convergence (if 'optimal_iterations' is specified) "
                         "or if solution failed");
 
+  params.addParam<bool>("reject_large_step",
+                        false,
+                        "If 'true', time steps that are too large compared to the "
+                        "ideal time step will be rejected and repeated");
+  params.addRangeCheckedParam<Real>("reject_large_step_threshold",
+                                    0.1,
+                                    "reject_large_step_threshold > 0 "
+                                    "& reject_large_step_threshold < 1",
+                                    "Ratio between the the ideal time step size and the "
+                                    "current time step size below which a time step will "
+                                    "be rejected if 'reject_large_step' is 'true'");
+                
+
   params.declareControllable("growth_factor cutback_factor");
 
   return params;
@@ -94,7 +107,9 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
     _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
     _l_its(declareRestartableData<unsigned int>("l_its", 0)),
     _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
-    _at_function_point(false)
+    _at_function_point(false),
+    _reject_large_step(getParam<bool>("reject_large_step")),
+    _large_step_rejection_threshold(getParam<Real>("reject_large_step_threshold"))
 {
   if (isParamValid("optimal_iterations"))
   {
@@ -216,8 +231,15 @@ IterationAdaptiveDT::constrainStep(Real & dt)
 {
   bool at_sync_point = TimeStepper::constrainStep(dt);
 
-  // Limit the timestep to postprocessor value
+  limitDT(dt);
 
+  return at_sync_point;
+}
+
+void
+IterationAdaptiveDT::limitDT(Real & dt)
+{
+  // Limit the timestep to postprocessor value
   limitDTToPostprocessorValue(dt);
 
   // Limit the timestep to limit change in the function
@@ -234,8 +256,6 @@ IterationAdaptiveDT::constrainStep(Real & dt)
                << *_tfunc_times.begin() << " dt: " << std::setw(9) << dt << '\n';
     }
   }
-
-  return at_sync_point;
 }
 
 Real
@@ -258,14 +278,53 @@ IterationAdaptiveDT::computeFailedDT()
   return _dt * _cutback_factor;
 }
 
+bool
+IterationAdaptiveDT::converged()
+{
+  if (!_reject_large_step)
+    return TimeStepper::converged();
+
+  // the solver has not converged
+  if (!TimeStepper::converged())
+    return false;
+
+  // we are already at dt_min or at the start of the simulation
+  // in which case we can move on to the next step
+  if (_dt == _dt_min || _t_step < 2)
+    return true;
+
+  // we need to update the post-processor value
+  // this is the only way I could find to do it, maybe there is a cleaner way
+  // (otherwise, _pps_value is the value computed at the previous time step)
+  if (_pps_value)
+    _fe_problem.execute(EXEC_TIMESTEP_END);
+
+  // we get what the next time step should be
+  Real dt_test = _dt;
+  limitDT(dt_test);
+
+  // we cannot constrain the time step any further
+  if (dt_test == 0)
+    return true;
+
+  // if the time step is much smaller than the current time step
+  // we need to repeat the current iteration with a smaller time step
+  // (the 0.5 value needs to be defined by the user)
+  if (dt_test < _dt * _large_step_rejection_threshold)
+    return false;
+
+  // otherwise we move one
+  return true;
+}
+
 void
 IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT)
 {
-  if (_pps_value)
+  if (_pps_value && _t_step > 1)
   {
-    if (*_pps_value > _dt_min && limitedDT > *_pps_value)
+    if (/**_pps_value > _dt_min &&*/ limitedDT > *_pps_value)
     {
-      limitedDT = *_pps_value;
+      limitedDT = std::max(_dt_min, *_pps_value);
 
       if (_verbose)
         _console << "Limiting dt to postprocessor value. dt = " << limitedDT << '\n';
@@ -419,4 +478,5 @@ IterationAdaptiveDT::acceptStep()
   }
   else
     _dt_old = _dt;
+
 }
