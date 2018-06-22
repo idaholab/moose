@@ -73,7 +73,6 @@ validParams<IterationAdaptiveDT>()
                                     "Ratio between the the ideal time step size and the "
                                     "current time step size below which a time step will "
                                     "be rejected if 'reject_large_step' is 'true'");
-                
 
   params.declareControllable("growth_factor cutback_factor");
 
@@ -478,5 +477,4 @@ IterationAdaptiveDT::acceptStep()
   }
   else
     _dt_old = _dt;
-
 }
