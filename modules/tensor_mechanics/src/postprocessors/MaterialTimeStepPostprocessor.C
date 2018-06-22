@@ -57,8 +57,9 @@ validParams<MaterialTimeStepPostprocessor>()
 MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
     _use_material_timestep_limit(getParam<bool>("use_material_timestep_limit")),
-    _matl_time_step(_use_matl_time_step ? &getMaterialPropertyByName<Real>("matl_timestep_limit")
-                                        : nullptr),
+    _matl_time_step(_use_material_timestep_limit
+                    ? &getMaterialPropertyByName<Real>("matl_timestep_limit")
+                    : nullptr),
     _matl_value(std::numeric_limits<Real>::max()),
     _use_elements_changed(parameters.isParamSetByUser("elements_changed_property")),
     _changed_property(_use_elements_changed
@@ -80,7 +81,8 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
     paramError("elements_changed", "needs to be set when elements_changed_property is defined");
 
   if (!_use_material_timestep_limit && !_use_elements_changed)
-    mooseError("either use_matl_time_step needs to be true or elements_changed_property defined");
+    mooseError("either use_material_timestep_limit needs to be true or elements_changed_property "
+               "defined");
 }
 
 void

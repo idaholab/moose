@@ -117,9 +117,9 @@
   []
   [time_step_limit]
     type = MaterialTimeStepPostprocessor
-    use_matl_timestep_limit = false
+    use_material_timestep_limit = false
     elements_changed_property = damage_index_prop
-    elements_changed_number = 4
+    elements_changed = 4
   []
 []
 

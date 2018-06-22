@@ -18,7 +18,7 @@
     input = 'elements_changed_timestep_limit.i'
     exodiff = 'mixed_timestep_limit_out.e'
     abs_zero = 1.e-6
-    cli_args = 'Postprocessors/time_step_limit/use_matl_timestep_limit=true
+    cli_args = 'Postprocessors/time_step_limit/use_material_timestep_limit=true
                 Outputs/file_base=mixed_timestep_limit_out'
   [../]
 
@@ -34,8 +34,8 @@
     type = 'RunException'
     prereq = scalar_damage_material_limit
     input = 'scalar_material_damage_timestep_limit.i'
-    cli_args = 'Postprocessors/time_step_limit/use_matl_timestep_limit=false' #disable botg matl_timestep and elements count
-    expect_err = "either use_matl_time_step needs to be true or elements_changed_property defined"
+    cli_args = 'Postprocessors/time_step_limit/use_material_timestep_limit=false' #disable botg matl_timestep and elements count
+    expect_err = "either use_material_timestep_limit needs to be true or elements_changed_property defined"
   [../]
 
 []
