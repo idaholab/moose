@@ -1,8 +1,41 @@
 [Tests]
-  [./scalar_damage_material]
+  [./scalar_damage_material_limit]
     type = 'CSVDiff'
     input = 'scalar_material_damage_timestep_limit.i'
     csvdiff = 'scalar_material_damage_timestep_limit_out.csv'
     abs_zero = 1.e-6
   [../]
+
+  [./elements_damage_limit]
+    type = 'Exodiff'
+    input = 'elements_changed_timestep_limit.i'
+    exodiff = 'elements_changed_timestep_limit_out.e'
+    abs_zero = 1.e-6
+  [../]
+
+  [./mixed_timestep_limit]
+    type = 'Exodiff'
+    input = 'elements_changed_timestep_limit.i'
+    exodiff = 'mixed_timestep_limit_out.e'
+    abs_zero = 1.e-6
+    cli_args = 'Postprocessors/time_step_limit/use_material_timestep_limit=true
+                Outputs/file_base=mixed_timestep_limit_out'
+  [../]
+
+  [./elements_damage_limit_unknown_prop]
+    type = 'RunException'
+    prereq = elements_damage_limit
+    input = 'elements_changed_timestep_limit.i'
+    cli_args = 'Postprocessors/time_step_limit/elements_changed_property=unknown_property' #Point it to an unknown property
+    expect_err = "Material property 'unknown_property', requested by 'time_step_limit' is not defined on block 0"
+  [../]
+
+  [./e]
+    type = 'RunException'
+    prereq = scalar_damage_material_limit
+    input = 'scalar_material_damage_timestep_limit.i'
+    cli_args = 'Postprocessors/time_step_limit/use_material_timestep_limit=false' #disable botg matl_timestep and elements count
+    expect_err = "either use_material_timestep_limit needs to be true or elements_changed_property defined"
+  [../]
+
 []
