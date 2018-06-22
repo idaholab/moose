@@ -58,8 +58,8 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
   : ElementPostprocessor(parameters),
     _use_material_timestep_limit(getParam<bool>("use_material_timestep_limit")),
     _matl_time_step(_use_material_timestep_limit
-                    ? &getMaterialPropertyByName<Real>("matl_timestep_limit")
-                    : nullptr),
+                        ? &getMaterialPropertyByName<Real>("matl_timestep_limit")
+                        : nullptr),
     _matl_value(std::numeric_limits<Real>::max()),
     _use_elements_changed(parameters.isParamSetByUser("elements_changed_property")),
     _changed_property(_use_elements_changed
