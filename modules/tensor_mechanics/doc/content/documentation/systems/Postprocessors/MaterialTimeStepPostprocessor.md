@@ -69,7 +69,7 @@ continuum damage models.
 
 ### Minimum Time Step Size Based on Number of Elements in which a Property Changes
 
-The allowable time step size can also be controlled by the totalr of elements for which a 
+The allowable time step size can also be controlled by the total number of elements in which a 
 material property changes over the course of the time step. This can be used in the context 
 of continuum damage to limit the number of elements damaged at a single time step. To do so, 
 the user needs to define a scalar material property with the input parameter 
