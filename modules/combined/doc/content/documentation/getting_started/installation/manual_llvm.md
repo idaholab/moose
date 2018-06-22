@@ -2,7 +2,7 @@
 
 We will clone all the necessary repositories involved with building LLVM/Clang from source:
 
-!package! code
+!package! code max-height=500
 mkdir -p $STACK_SRC/llvm-src
 cd $STACK_SRC/llvm-src
 git clone https://github.com/llvm-mirror/llvm.git
@@ -54,5 +54,5 @@ make install
 !package-end!
 
 !alert! note
-The above configuration assumes you are using the custom version of GCC built in the previous section (note the several gcc-!!package __GCC__!! paths). If this is not the case, you will need to provide the correct paths to your current toolchain. It is also possible LLVM may build successfully if you omit the -D lines referencing gcc-!!package __GCC__!! entirely.
+The above configuration assumes you are using the custom version of GCC built in the previous section (note the several gcc-!!package gcc!! paths). If this is not the case, you will need to provide the correct paths to your current toolchain. It is also possible LLVM may build successfully if you omit the -D lines referencing gcc-!!package gcc!! entirely.
 !alert-end!

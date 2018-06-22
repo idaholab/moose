@@ -29,7 +29,7 @@ export CC=clang
 export CXX=clang++
 export PATH=$PACKAGES_DIR/llvm-__LLVM__/bin:$PATH
 export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$LD_LIBRARY_PATH
-
+!package-end!
 
 !alert-end!
 

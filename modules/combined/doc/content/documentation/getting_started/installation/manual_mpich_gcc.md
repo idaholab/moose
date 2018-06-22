@@ -1,16 +1,16 @@
 ## MPICH
 
-Download MPICH !!package __MPICH__!!
+Download MPICH !!package mpich!!
 
 !package! code
 cd $STACK_SRC
 curl -L -O http://www.mpich.org/static/downloads/__MPICH__/mpich-__MPICH__.tar.gz
 tar -xf mpich-__MPICH__.tar.gz -C .
-
+!package-end!
 
 Now we create an out-of-tree build location, configure, build, and install it
 
-!package! code
+!package! code max-height=500
 mkdir $STACK_SRC/mpich-__MPICH__/gcc-build
 cd $STACK_SRC/mpich-__MPICH__/gcc-build
 
@@ -38,6 +38,7 @@ make -j # (where # is the number of cores available)
 make install
 !package-end!
 
+
 !alert! note
 In order to utilize our newly built MPI wrapper, we need to set some variables:
 
@@ -52,5 +53,6 @@ export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$CPLUS_INCLUDE_P
 export FPATH=$PACKAGES_DIR/mpich-__MPICH__/include:$FPATH
 export MANPATH=$PACKAGES_DIR/mpich-__MPICH__/share/man:$MANPATH
 export LD_LIBRARY_PATH=$PACKAGES_DIR/mpich-__MPICH__/lib:$LD_LIBRARY_PATH
-```
+!package-end!
+
 !alert-end!

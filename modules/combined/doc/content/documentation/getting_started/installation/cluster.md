@@ -23,10 +23,9 @@ cd $CLUSTER_TEMP
 ```
 
 !alert note
-The terminal you used to run that command, should be the terminal you use from now on while following
-the instructions to completion
+The terminal you used to run that command, should be the terminal you use from now on while following the instructions to completion
 
-#### Set your umask
+## Set your umask
 
 Some systems have a secure umask set. We need to adjust our umask so that everything we are about
 to perform, is readable/executable by _<b>everyone</b>_ on your cluster:
@@ -35,8 +34,7 @@ to perform, is readable/executable by _<b>everyone</b>_ on your cluster:
 umask 0022
 ```
 
-
-#### Choose a base path
+## Choose a base path
 
 Export a base path variable which will be the home location for the compiler stack. All files
 related to MOOSE will be stored in this location (so choose carefully now):
@@ -49,20 +47,18 @@ export PACKAGES_DIR=/opt/moose-compilers
 You can change this path to whatever you want. The only exception, is this path must reside in a
 location where all your compute nodes have access (nfs|panfs share)
 
-#### Setup Modules
+## Setup Modules
 
-Even if you are not using Modules, the following step should give you an idea of what is needed in the
-users environment for MOOSE developement.
+Even if you are not using Modules, the following step should give you some idea as to what environment variables are needed for MOOSE developement.
 
-- Create a MOOSE module
+Create a MOOSE module:
 
-  ```bash
-  sudo mkdir -p $PACKAGES_DIR/modulefiles
-  sudo vi $PACKAGES_DIR/modulefiles/moose-dev-gcc
-  ```
+```bash
+sudo mkdir -p $PACKAGES_DIR/modulefiles
+sudo vi $PACKAGES_DIR/modulefiles/moose-dev-gcc
+```
 
-- Add the following content to that file:
-
+Add the following content to that file:
 
 !package! code
 #%Module1.0#####################################################################
@@ -72,7 +68,7 @@ users environment for MOOSE developement.
 ##
 set base_path   INSERT PACKAGES_DIR HERE
 
-<some GCC MPI compiler>
+GCC MPI PATHS
 
 setenv CC       mpicc
 setenv CXX      mpicxx
@@ -80,95 +76,64 @@ setenv F90      mpif90
 setenv F77      mpif77
 setenv FC       mpif90
 
-setenv          PETSC_DIR       $base_path/petsc/petsc-PETSC_DEFAULT/gcc-opt
+setenv          PETSC_DIR       $base_path/petsc/petsc-__PETSC_DEFAULT__/gcc-opt
 !package-end!
 
+!alert! note
+Replace `INSERT PACKAGES_DIR HERE` with whatever you had set for $PACKAGES_DIR.
 
+Replace `GCC MPI PATHS` with any additional information needed to make GCC/MPI work.
+!alert-end!
 
-!alert note
-You must replace 'INSERT PACKAGES_DIR HERE' with whatever you had set for $PACKAGES_DIR. The bit
-about 'some GCC MPI compiler', is referring to you having to add any additional environment changes
-in order make your cluster's MPI implementation work. Normally, this would be loading an additional
-module (example: module load mvapich2-gcc/1.7)
+To make the module available in your terminal session, export the following:
 
+```bash
+export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
+```
 
-- To make the module available in your terminal session throughout the rest of the instructions,
-  export the following:
-
-  ```bash
-  export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
-  ```
-
-- The above will have to be performed using a more permanent method so that it may be usable by everyone at anytime (including while on a node). Something on the oder of
-
-  1. Copy the moose-dev-gcc module file to where-ever the rest of the system's modules are located
-  2. Add the above export command to the system-wide bash profile (using absolute paths instead of $PACKAGES_DIR variable)
-  3. Inform the user how to add the above export command to their personal profile (using absolute paths instead of $PACKAGES_DIR variable)
-
-- On our systems, we prefer option 3. Option 3 will allow the moose-dev-gcc module to be easily found, while not being intrusive to other non-MOOSE users (because only your MOOSE user is exporting that MODULEPATH command) Example:
-
-  ```text
-  me@some_machine#>  module available
-
-  --------------------------------------- /usr/share/modules ---------------------------------------
-  3.2.10
-
-  ----------------------------- /usr/share/Modules/3.2.10/modulefiles ------------------------------
-  dot         module-git  module-info modules     null        use.own
-
-  -------------------------------- /apps/local/modules/modulefiles ---------------------------------
-  intel/12.1.2               python/2.7                 starccm+/7.05.026
-  intel/12.1.3               python/2.7-open            starccm+/7.05.067
-  intel-mkl/10.3.8           python/3.2                 starccm+/7.06.012(default)
-  intel-mkl/10.3.9           python/as-2.7.2            starccm+/8.02.008
-  mvapich2-gcc/1.7           python/as-3.2              totalview/8.11.0(default)
-  mvapich2-intel/1.7         starccm+/6.06.011          totalview/8.6.2
-  pbs                        starccm+/7.02.008          use.projects
-  pgi/12.4                   starccm+/7.04.006          vtk
-
-  -------------------------------- /apps/projects/moose/modulefiles --------------------------------
-  moose-dev-gcc      moose-dev-gcc-parmesh     moose-dev-clang    moose-tools
-  me@some_machine#>
-  ```
-
-The point being, some HPC clusters can have hundreds of available modules. While using this method,
-you can group and display certain modules pertinent to your MOOSE users at the end of stdout.
-
+The above should be performed using a more permanent method so that it is usable by everyone at anytime (including while on a node).
 
 ## Building PETSc
 
-- Now that we have our environment ready, we will load it up as a user would. This will ensure that everything we did above is going to work for our end-users.
+If you opted to build a moose-dev-gcc module, and if you have modules available on your cluster, we will load it as a user would. This will ensure that everything we did above is going to work for our end-users.
 
-  ```bash
-  module load moose-dev-gcc
-  echo $PETSC_DIR
-  ```
+```bash
+module load moose-dev-gcc
+echo $PETSC_DIR
+```
 
 !alert note
-Verify that the environment variable 'PETSC_DIR' is available and returning
-$PACKAGES_DIR/petsc/petsc-!!package petsc_default!!. If not, something went wrong with creating the moose-dev-gcc module
-above.
+Verify that the above `echo $PETSC_DIR` command is returning /the-packages_dir-path/petsc/petsc-!!package petsc_default!! you originally setup during the 'Choose a base path' step. If not, something went wrong with creating the moose-dev-gcc module in the previous step.
 
-- Download and extract PETSc:
+If you chose not to create a moose-dev-gcc module, you will instead need to export the PETSC_DIR manually before continuing:
 
-  !!package code
-  curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-PETSC_DEFAULT.tar.gz
-  tar -xf petsc-3.8.3.tar.gz
-  cd petsc-3.8.3
-  ```
-- Configure PETSc using the following options (see Info admonition below):
+!package! code
+export PETSC_DIR=$PACKAGES_DIR/petsc/petsc-__PETSC_DEFAULT__/gcc-opt
+!package-end!
 
-  !include getting_started/petsc_default.md
+Download and extract PETSc:
+
+!package! code
+curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-__PETSC_DEFAULT__.tar.gz
+tar -xf petsc-__PETSC_DEFAULT__.tar.gz
+cd petsc-__PETSC_DEFAULT__
+!package-end!
+
+Configure PETSc using the following options:
+
+!include getting_started/petsc_default.md
 
 During the configure/build process, you will be prompted to enter proper make commands. This can be different from system to system, so I leave that task to the reader.
 
 ## Clean Up
 
-- Clean all the temporary stuff:
+Clean all the temporary stuff:
 
-  ```bash
-  rm -rf $CLUSTER_TEMP
-  ```
+```bash
+rm -rf $CLUSTER_TEMP
+```
+
+This concludes setting up the environment for MOOSE development. While you, the admin of your cluster, may not be developing MOOSE based applications, it would be wise to proceed with the following steps, to insure the environment this document has helped you create, is working as intended.
 
 !include getting_started/installation/clone_moose.md
 

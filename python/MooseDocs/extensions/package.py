@@ -19,7 +19,12 @@ class PackageExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
-        packages_config = yaml_load(os.path.join(MooseDocs.MOOSE_DIR, 'modules', 'combined', 'doc', 'packages_config.yml'))
+        packages_config = yaml_load(os.path.join(MooseDocs.MOOSE_DIR,
+                                                 'modules',
+                                                 'combined',
+                                                 'doc',
+                                                 'packages_config.yml'))
+
         config = command.CommandExtension.defaultConfig()
 
         # Assign a key/value for every item in packages_config.yml
@@ -69,8 +74,8 @@ class PackageCodeReplace(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['max-height'] = (u'350px', "The default height for listing content.")
-        settings['language'] = (u'bash', "The language to use for highlighting, if not supplied it " \
-                                "will be inferred from the extension (if possible).")
+        settings['language'] = (u'bash', "The language to use for highlighting, if not supplied " \
+                                "it will be inferred from the extension (if possible).")
         return settings
 
     def createToken(self, info, parent):
