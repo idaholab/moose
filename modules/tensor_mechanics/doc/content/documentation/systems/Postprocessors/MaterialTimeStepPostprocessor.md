@@ -67,30 +67,32 @@ This material property can be set up either by the
 or plastic strains) or the [ComputeDamageStress](/Materials/ComputeDamageStress.md) for 
 continuum damage models.
 
-### Minimum Time Step Size Based on Number of Elements Changed
+### Minimum Time Step Size Based on Number of Elements in which a Property Changes
 
-The allowable time step size can also be controlled by the total number of elements changed
-over the course of the time step. This can be used in the context of continuum damage
-to limit the number of elements damaged at a single time step. To do so, the user needs to 
-define a scalar material property with the input parameter `elements_changed_property` as
-well as the maximum acceptable number of elements changed using the `elements_changed_number`
-input parameter. When these are defined, the `MaterialTimeStepPostprocessor` will swipe over
-the entire mesh and count the number of elements in which the selected property has changed.
+The allowable time step size can also be controlled by the totalr of elements for which a 
+material property changes over the course of the time step. This can be used in the context 
+of continuum damage to limit the number of elements damaged at a single time step. To do so, 
+the user needs to define a scalar material property with the input parameter 
+`elements_changed_property` as well as the maximum acceptable number of elements changed 
+using the `elements_changed` input parameter. When these are defined, the 
+`MaterialTimeStepPostprocessor` will sweep over the entire mesh and count the number of 
+elements in which the selected property has changed at at least one quadrature point.
 The limiting time step is then calculated using the ratio between the current number of
 elements changed $N_{changed}$ and the maximum value $N_{max}$.
 
 \begin{equation}
-  \label{eqn:limiting_ts}
+  \label{eqn:limiting_ts_count}
   \Delta t |_{limit} = \Delta t \cdot \frac{N_{changed}}{N_{max}}
 \end{equation}
 
-The user can define a `tolerance` to detect a change in property. This can be for example used
-to count the number of elements in which the damage increases by at least a specific amount.
+The user can define a `elements_changed_threshold` to detect a change in property. 
+This can be for example used to count the number of elements in which the damage increases 
+by at least a specific amount.
 
 This method is optional and is only active if both `elements_changed_property` 
-and `elements_changed_number` are defined. The `MaterialTimeStepPostprocessor` then uses the
+and `elements_changed` are defined. The `MaterialTimeStepPostprocessor` then uses the
 minimum between the value provided by the material model (see above) or by the number of elements
-changed. If the input parameter `use_matl_timestep_limit` is set to `false`, only the number
+changed. If the input parameter `use_material_timestep_limit` is set to `false`, only the number
 of elements changed is used.
 
 

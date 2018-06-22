@@ -28,29 +28,35 @@ validParams<MaterialTimeStepPostprocessor>()
   params.addClassDescription("This postprocessor estimates a timestep that reduces the increment "
                              "change in a material property below a given threshold.");
 
-  params.addParam<bool>("use_matl_timestep_limit",
+  params.addParam<bool>("use_material_timestep_limit",
                         true,
                         "if true, the time step is limited by the minimum value of the "
                         "matl_timestep_limit property");
 
   params.addParam<MaterialPropertyName>("elements_changed_property",
-                                        "name of the property used to evaluate if an"
-                                        "element have changed");
+                                        "Name of the material property used to limit the time step "
+                                        "if its value changes by more than "
+                                        "'elements_changed_threshold' in at least "
+                                        "'elements_changed' elements");
 
-  params.addRangeCheckedParam<int>("elements_changed_number",
-                                   "elements_changed_number > 0",
-                                   "number of elements used to determine if a change of"
-                                   "time step is required");
+  params.addRangeCheckedParam<int>("elements_changed",
+                                   "elements_changed > 0",
+                                   "Maximum number of elements within which the property named in "
+                                   "'elements_changed_property' is allowed to change by more than "
+                                   "'elements_changed_threshold' before the time step is limited.");
 
-  params.addRangeCheckedParam<Real>(
-      "tolerance", "tolerance > 0", "tolerance used to determine if an element has changed");
+  params.addRangeCheckedParam<Real>("elements_changed_threshold",
+                                    "elements_changed_threshold' > 0",
+                                    "Maximum permitted change in the value of "
+                                    "'elements_changed_property' in 'elements_changed' elements "
+                                    "before the time step is limited.");
 
   return params;
 }
 
 MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
-    _use_matl_time_step(getParam<bool>("use_matl_timestep_limit")),
+    _use_material_timestep_limit(getParam<bool>("use_material_timestep_limit")),
     _matl_time_step(_use_matl_time_step ? &getMaterialPropertyByName<Real>("matl_timestep_limit")
                                         : nullptr),
     _matl_value(std::numeric_limits<Real>::max()),
@@ -63,17 +69,17 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
                               ? &getMaterialPropertyOldByName<Real>(
                                     getParam<MaterialPropertyName>("elements_changed_property"))
                               : nullptr),
-    _target(isParamValid("elements_changed_number") ? getParam<int>("elements_changed_number") : 0),
+    _elements_changed(isParamValid("elements_changed") ? getParam<int>("elements_changed") : 0),
     _count(0),
-    _tolerance(parameters.isParamSetByUser("tolerance") ? getParam<Real>("tolerance")
+    _elements_changed_threshold(parameters.isParamSetByUser("elements_changed_threshold'") ? getParam<Real>("elements_changed_threshold'")
                                                         : TOLERANCE * TOLERANCE),
     _qp(0)
 {
-  if (_use_elements_changed && !parameters.isParamSetByUser("elements_changed_number"))
-    paramError("elements_changed_number",
+  if (_use_elements_changed && !parameters.isParamSetByUser("elements_changed"))
+    paramError("elements_changed",
                "needs to be set when elements_changed_property is defined");
 
-  if (!_use_matl_time_step && !_use_elements_changed)
+  if (!_use_material_timestep_limit && !_use_elements_changed)
     mooseError("either use_matl_time_step needs to be true or elements_changed_property defined");
 }
 
@@ -87,7 +93,7 @@ MaterialTimeStepPostprocessor::initialize()
 void
 MaterialTimeStepPostprocessor::execute()
 {
-  if (_use_matl_time_step)
+  if (_use_material_timestep_limit)
   {
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _matl_value = std::min(_matl_value, (*_matl_time_step)[_qp]);
@@ -98,7 +104,7 @@ MaterialTimeStepPostprocessor::execute()
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
       if (!MooseUtils::absoluteFuzzyEqual(
-              (*_changed_property)[_qp], (*_changed_property_old)[_qp], _tolerance))
+              (*_changed_property)[_qp], (*_changed_property_old)[_qp], _elements_changed_threshold))
       {
         ++_count;
         return;
@@ -116,14 +122,14 @@ MaterialTimeStepPostprocessor::getValue()
   if (_count == 0 || !_use_elements_changed)
     return _matl_value;
 
-  return std::min(_dt * (Real)_target / (Real)_count, _matl_value);
+  return std::min(_dt * (Real)_elements_changed / (Real)_count, _matl_value);
 }
 
 void
 MaterialTimeStepPostprocessor::threadJoin(const UserObject & y)
 {
   const MaterialTimeStepPostprocessor & pps = static_cast<const MaterialTimeStepPostprocessor &>(y);
-  if (_use_matl_time_step)
+  if (_use_material_timestep_limit)
     _matl_value = std::min(_matl_value, pps._matl_value);
   if (_use_elements_changed)
     _count += pps._count;

@@ -32,7 +32,7 @@ public:
 
 protected:
   /// Flag to find the time step limit from material properties
-  const bool _use_matl_time_step;
+  const bool _use_material_timestep_limit;
 
   /// Pointer to the material property containing the time step limit
   const MaterialProperty<Real> * _matl_time_step;
@@ -49,13 +49,13 @@ protected:
   ///@}
 
   /// Target number of changed elements used to determine if we need to change the time step
-  const int _target;
+  const int _elements_changed;
 
   /// Current number of elements changed
   int _count;
 
   /// Tolerance to determine if elements have changed
-  const Real _tolerance;
+  const Real _elements_changed_threshold;
 
   /// Current quadrature point
   unsigned int _qp;
