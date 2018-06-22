@@ -3,3 +3,6 @@ b:
     - 1.43
     - 543.55
 c: !include bar.yml
+d: !include other.yml year
+e: !include other.yml parents
+f: !include other.yml level0 level1

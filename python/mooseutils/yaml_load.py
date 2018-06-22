@@ -36,13 +36,18 @@ class Loader(yaml.Loader):
         """
         Allow for the embedding of yaml files.
         """
-        filename = eval_path(self.construct_scalar(node))
+        items = self.construct_scalar(node).split()
+        filename = eval_path(items[0])
+        keys = items[1:] if len(items) > 1 else []
         if not os.path.isabs(filename):
             filename = os.path.join(self._root, filename)
 
         if os.path.exists(filename):
             with open(filename, 'r') as f:
-                return yaml.load(f, Loader)
+                content = yaml.load(f, Loader)
+                for key in keys:
+                    content = content[key]
+                return content
         else:
             msg = "Unknown include file '{}' on line {} of {}"
             raise IOError(msg.format(filename, node.line, self._filename))
