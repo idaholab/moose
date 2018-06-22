@@ -71,13 +71,13 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
                               : nullptr),
     _elements_changed(isParamValid("elements_changed") ? getParam<int>("elements_changed") : 0),
     _count(0),
-    _elements_changed_threshold(parameters.isParamSetByUser("elements_changed_threshold'") ? getParam<Real>("elements_changed_threshold'")
-                                                        : TOLERANCE * TOLERANCE),
+    _elements_changed_threshold(parameters.isParamSetByUser("elements_changed_threshold'")
+                                    ? getParam<Real>("elements_changed_threshold'")
+                                    : TOLERANCE * TOLERANCE),
     _qp(0)
 {
   if (_use_elements_changed && !parameters.isParamSetByUser("elements_changed"))
-    paramError("elements_changed",
-               "needs to be set when elements_changed_property is defined");
+    paramError("elements_changed", "needs to be set when elements_changed_property is defined");
 
   if (!_use_material_timestep_limit && !_use_elements_changed)
     mooseError("either use_matl_time_step needs to be true or elements_changed_property defined");
@@ -103,8 +103,9 @@ MaterialTimeStepPostprocessor::execute()
   {
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
-      if (!MooseUtils::absoluteFuzzyEqual(
-              (*_changed_property)[_qp], (*_changed_property_old)[_qp], _elements_changed_threshold))
+      if (!MooseUtils::absoluteFuzzyEqual((*_changed_property)[_qp],
+                                          (*_changed_property_old)[_qp],
+                                          _elements_changed_threshold))
       {
         ++_count;
         return;
