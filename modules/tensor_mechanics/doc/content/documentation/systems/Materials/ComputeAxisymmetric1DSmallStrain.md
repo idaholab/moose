@@ -2,6 +2,8 @@
 
 !syntax description /Materials/ComputeAxisymmetric1DSmallStrain
 
+## Description
+
 The material `ComputeAxisymmetric1DSmallStrain` calculates the small total
 strain for 1D Axisymmetric systems and is intended for use with
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.

@@ -107,6 +107,22 @@ the rotation increment.
 
 ## Example Input File Syntax
 
+The finite strain calculator can be activated in the input file through the use of the
+TensorMechanics Master Action, as shown below.
+
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
+         block=Modules/TensorMechanics
+
+!alert note title=Use of the Tensor Mechanics Master Action Recommended
+The [TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md) is designed to
+automatically determine and set the strain and stress divergence parameters correctly for the
+selected strain formulation.  We recommend that users employ the
+[TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md) whenever possible
+to ensure consistency between the test function gradients and the strain formulation selected.
+
+Although not recommended, it is possible to directly use the `ComputeFiniteStrain` material
+in the input file.
+
 !listing modules/tensor_mechanics/test/tests/volumetric_deform_grad/elastic_stress.i
          block=Materials/strain
 
