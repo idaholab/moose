@@ -148,6 +148,14 @@ protected:
   virtual VariableValue & coupledScalarDot(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns the second time derivative of a scalar coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a time derivative VariableValue for the coupled variable
+   */
+  virtual VariableValue & coupledScalarDotdot(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Time derivative of a scalar coupled variable with respect to the coefficients
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -155,6 +163,16 @@ protected:
    * with respect to the coefficients
    */
   virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Second time derivative of a scalar coupled variable with respect to the coefficients
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * with respect to the coefficients
+   */
+  virtual VariableValue & coupledScalarDotdotDu(const std::string & var_name,
+                                                unsigned int comp = 0);
 
 protected:
   // Reference to FEProblemBase

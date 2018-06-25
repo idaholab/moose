@@ -45,7 +45,9 @@ MooseVariableScalar::~MooseVariableScalar()
   _u_older.release();
 
   _u_dot.release();
+  _u_dotdot.release();
   _du_dot_du.release();
+  _du_dotdot_du.release();
 
   for (auto & _tag_u : _vector_tag_u)
     _tag_u.release();
@@ -65,7 +67,9 @@ MooseVariableScalar::reinit()
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
   const NumericVector<Real> & u_dot = _sys.solutionUDot();
+  const NumericVector<Real> & u_dotdot = _sys.solutionUDotdot();
   const Real & du_dot_du = _sys.duDotDu();
+  const Real & du_dotdot_du = _sys.duDotdotDu();
   auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
   auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
   auto & active_coupleable_matrix_tags =
@@ -80,6 +84,7 @@ MooseVariableScalar::reinit()
   _u_old.resize(n);
   _u_older.resize(n);
   _u_dot.resize(n);
+  _u_dotdot.resize(n);
 
   for (auto & _tag_u : _vector_tag_u)
     _tag_u.resize(n);
@@ -89,6 +94,9 @@ MooseVariableScalar::reinit()
 
   _du_dot_du.clear();
   _du_dot_du.resize(n, du_dot_du);
+
+  _du_dotdot_du.clear();
+  _du_dotdot_du.resize(n, du_dotdot_du);
 
   // If we have an empty partition, or if we have a partition which
   // does not include any of the subdomains of a subdomain-restricted
@@ -100,6 +108,7 @@ MooseVariableScalar::reinit()
     solution_old.get(_dof_indices, &_u_old[0]);
     solution_older.get(_dof_indices, &_u_older[0]);
     u_dot.get(_dof_indices, &_u_dot[0]);
+    u_dotdot.get(_dof_indices, &_u_dotdot[0]);
 
     if (safe_access_tagged_vectors)
     {
@@ -133,6 +142,7 @@ MooseVariableScalar::reinit()
         solution_old.get(one_dof_index, &_u_old[i]);
         solution_older.get(one_dof_index, &_u_older[i]);
         u_dot.get(one_dof_index, &_u_dot[i]);
+        u_dotdot.get(one_dof_index, &_u_dotdot[i]);
 
         if (safe_access_tagged_vectors)
         {
@@ -161,6 +171,7 @@ MooseVariableScalar::reinit()
         _u_old.resize(i);
         _u_older.resize(i);
         _u_dot.resize(i);
+        _u_dotdot.resize(i);
 
         for (auto tag : active_coupleable_vector_tags)
           if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
@@ -177,6 +188,7 @@ MooseVariableScalar::reinit()
         _u_old[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_older[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_dot[i] = std::numeric_limits<Real>::quiet_NaN();
+        _u_dotdot[i] = std::numeric_limits<Real>::quiet_NaN();
 
         for (auto tag : active_coupleable_vector_tags)
           if (_sys.hasVector(tag) && _need_vector_tag_u[tag])

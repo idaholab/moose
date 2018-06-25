@@ -35,9 +35,14 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
     _current_solution(NULL),
+    _current_solution_dot(NULL),
+    _current_solution_dotdot(NULL),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
     _solution_previous_nl(NULL),
+    _solution_dot_previous_nl(NULL),
+    _solution_dotdot_previous_nl(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
+    _u_dotdot(addVector("u_dotdot", true, GHOSTED)),
     _need_serialized_solution(false),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
     _nodal_aux_storage(_app.getExecuteOnEnum()),
@@ -61,7 +66,11 @@ void
 AuxiliarySystem::addExtraVectors()
 {
   if (_fe_problem.needsPreviousNewtonIteration())
+  {
     _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
+    _solution_dot_previous_nl = &addVector("u_dot_previous_newton", true, GHOSTED);
+    _solution_dotdot_previous_nl = &addVector("u_dotdot_previous_newton", true, GHOSTED);
+  }
 }
 
 void
@@ -234,6 +243,12 @@ NumericVector<Number> &
 AuxiliarySystem::solutionUDot()
 {
   return _u_dot;
+}
+
+NumericVector<Number> &
+AuxiliarySystem::solutionUDotdot()
+{
+  return _u_dotdot;
 }
 
 NumericVector<Number> &

@@ -57,7 +57,9 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
     _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu())
+    _u_dotdot(_var.uDotdot()),
+    _du_dot_du(_var.duDotDu()),
+    _du_dotdot_du(_var.duDotdotDu())
 {
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)

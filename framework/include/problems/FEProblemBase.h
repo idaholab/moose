@@ -973,17 +973,20 @@ public:
    */
   void execTransfers(ExecFlagType type);
 
-  /// Evaluates transient residual G in canonical semidiscrete form G(t,U,Udot) = F(t,U)
+  /// Evaluates transient residual G in canonical semidiscrete form G(t,U,Udot,Udotdot) = F(t,U)
   void computeTransientImplicitResidual(Real time,
                                         const NumericVector<Number> & u,
                                         const NumericVector<Number> & udot,
+                                        const NumericVector<Number> & udotdot,
                                         NumericVector<Number> & residual);
 
   /// Evaluates transient Jacobian J_a = dG/dU + a*dG/dUdot from canonical semidiscrete form G(t,U,Udot) = F(t,U)
   void computeTransientImplicitJacobian(Real time,
                                         const NumericVector<Number> & u,
                                         const NumericVector<Number> & udot,
-                                        Real shift,
+                                        const NumericVector<Number> & udotdot,
+                                        Real duDotDu_shift,
+                                        Real duDotdotDu_shift,
                                         SparseMatrix<Number> & jacobian);
 
   ////

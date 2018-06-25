@@ -88,9 +88,12 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _name(name),
     _vars(libMesh::n_threads()),
     _var_map(),
-    _dummy_vec(nullptr),
-    _saved_old(nullptr),
-    _saved_older(nullptr),
+    _u_dot_dummy_vec(NULL),
+    _u_dotdot_dummy_vec(NULL),
+    _saved_old(NULL),
+    _saved_older(NULL),
+    _saved_dot_old(NULL),
+    _saved_dotdot_old(NULL),
     _var_kind(var_kind),
     _max_var_n_dofs_per_elem(0)
 {
@@ -459,8 +462,15 @@ SystemBase::saveOldSolutions()
     _saved_old = &addVector("save_solution_old", false, PARALLEL);
   if (!_saved_older)
     _saved_older = &addVector("save_solution_older", false, PARALLEL);
+  if (!_saved_dot_old)
+    _saved_dot_old = &addVector("save_solution_dot_old", false, PARALLEL);
+  if (!_saved_dotdot_old)
+    _saved_dotdot_old = &addVector("save_solution_dotdot_old", false, PARALLEL);
+
   *_saved_old = solutionOld();
   *_saved_older = solutionOlder();
+  *_saved_dot_old = solutionUDotOld();
+  *_saved_dotdot_old = solutionUDotdotOld();
 }
 
 /**
@@ -480,6 +490,18 @@ SystemBase::restoreOldSolutions()
     solutionOlder() = *_saved_older;
     removeVector("save_solution_older");
     _saved_older = nullptr;
+  }
+  if (_saved_dot_old)
+  {
+    solutionUDotOld() = *_saved_dot_old;
+    removeVector("save_solution_dot_old");
+    _saved_dot_old = NULL;
+  }
+  if (_saved_dotdot_old)
+  {
+    solutionUDotdotOld() = *_saved_dotdot_old;
+    removeVector("save_solution_dotdot_old");
+    _saved_dotdot_old = NULL;
   }
 }
 
@@ -932,8 +954,14 @@ SystemBase::copySolutionsBackwards()
   system().update();
   solutionOlder() = *currentSolution();
   solutionOld() = *currentSolution();
+  solutionUDotOld() = *currentSolutionUDot();
+  solutionUDotdotOld() = *currentSolutionUDotdot();
   if (solutionPreviousNewton())
+  {
     *solutionPreviousNewton() = *currentSolution();
+    *solutionUDotPreviousNewton() = *currentSolutionUDot();
+    *solutionUDotdotPreviousNewton() = *currentSolutionUDotdot();
+  }
 }
 
 /**
@@ -944,8 +972,14 @@ SystemBase::copyOldSolutions()
 {
   solutionOlder() = solutionOld();
   solutionOld() = *currentSolution();
+  solutionUDotOld() = *currentSolutionUDot();
+  solutionUDotdotOld() = *currentSolutionUDotdot();
   if (solutionPreviousNewton())
+  {
     *solutionPreviousNewton() = *currentSolution();
+    *solutionUDotPreviousNewton() = *currentSolutionUDot();
+    *solutionUDotdotPreviousNewton() = *currentSolutionUDotdot();
+  }
 }
 
 /**
@@ -955,9 +989,17 @@ void
 SystemBase::restoreSolutions()
 {
   *(const_cast<NumericVector<Number> *&>(currentSolution())) = solutionOld();
+  *(const_cast<NumericVector<Number> *&>(currentSolutionUDot())) = solutionUDotOld();
+  *(const_cast<NumericVector<Number> *&>(currentSolutionUDotdot())) = solutionUDotdotOld();
   solution() = solutionOld();
+  solutionUDot() = solutionUDotOld();
+  solutionUDotdot() = solutionUDotdotOld();
   if (solutionPreviousNewton())
+  {
     *solutionPreviousNewton() = solutionOld();
+    *solutionUDotPreviousNewton() = solutionUDotOld();
+    *solutionUDotdotPreviousNewton() = solutionUDotdotOld();
+  }
   system().update();
 }
 

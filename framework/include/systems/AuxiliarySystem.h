@@ -95,7 +95,21 @@ public:
     return _current_solution;
   }
 
+  virtual const NumericVector<Number> *& currentSolutionUDot() override
+  {
+    _current_solution_dot = _sys.current_local_solution_dot.get();
+    return _current_solution_dot;
+  }
+
+  virtual const NumericVector<Number> *& currentSolutionUDotdot() override
+  {
+    _current_solution_dotdot = _sys.current_local_solution_dotdot.get();
+    return _current_solution_dotdot;
+  }
+
   virtual NumericVector<Number> & solutionUDot() override;
+
+  virtual NumericVector<Number> & solutionUDotdot() override;
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
@@ -149,6 +163,16 @@ public:
 
   virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
 
+  virtual NumericVector<Number> & solutionUDotOld() override
+  {
+    return *_sys.old_local_solution_dot;
+  }
+
+  virtual NumericVector<Number> & solutionUDotdotOld() override
+  {
+    return *_sys.old_local_solution_dotdot;
+  }
+
   virtual TransientExplicitSystem & sys() { return _sys; }
 
   virtual System & system() override { return _sys; }
@@ -157,6 +181,16 @@ public:
   virtual NumericVector<Number> * solutionPreviousNewton() override
   {
     return _solution_previous_nl;
+  }
+
+  virtual NumericVector<Number> * solutionUDotPreviousNewton() override
+  {
+    return _solution_dot_previous_nl;
+  }
+
+  virtual NumericVector<Number> * solutionUDotdotPreviousNewton() override
+  {
+    return _solution_dotdot_previous_nl;
   }
 
   virtual void setPreviousNewtonSolution();
@@ -176,14 +210,24 @@ protected:
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
+  /// solution dot vector from nonlinear solver
+  const NumericVector<Number> * _current_solution_dot;
+  /// solution dotdot vector from nonlinear solver
+  const NumericVector<Number> * _current_solution_dotdot;
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
   /// Solution vector of the previous nonlinear iterate
   NumericVector<Number> * _solution_previous_nl;
+  /// Solution dot vector of the previous nonlinear iterate
+  NumericVector<Number> * _solution_dot_previous_nl;
+  /// Solution dotdot vector of the previous nonlinear iterate
+  NumericVector<Number> * _solution_dotdot_previous_nl;
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
+  /// solution vector for u^dotdot
+  NumericVector<Number> & _u_dotdot;
 
   /// Whether or not a copy of the residual needs to be made
   bool _need_serialized_solution;

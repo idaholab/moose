@@ -83,7 +83,9 @@ protected:
   /// Old value(s) of the scalar variable
   VariableValue & _u_old;
   VariableValue & _u_dot;
+  VariableValue & _u_dotdot;
   VariableValue & _du_dot_du;
+  VariableValue & _du_dotdot_du;
 };
 
 #endif /* SCALARKERNEL_H */

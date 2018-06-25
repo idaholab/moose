@@ -142,6 +142,16 @@ MooseVariableInterface<T>::dot()
     return _variable->uDot();
 }
 
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::dotdot()
+{
+  if (_nodal)
+    return _variable->dofValuesDotdot();
+  else
+    return _variable->uDotdot();
+}
+
 template <>
 const VectorVariableValue &
 MooseVariableInterface<RealVectorValue>::dot()
@@ -152,6 +162,16 @@ MooseVariableInterface<RealVectorValue>::dot()
     return _variable->uDot();
 }
 
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::dotdot()
+{
+  if (_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->uDotdot();
+}
+
 template <typename T>
 const VariableValue &
 MooseVariableInterface<T>::dotDu()
@@ -160,6 +180,16 @@ MooseVariableInterface<T>::dotDu()
     return _variable->dofValuesDuDotDu();
   else
     return _variable->duDotDu();
+}
+
+template <typename T>
+const VariableValue &
+MooseVariableInterface<T>::dotdotDu()
+{
+  if (_nodal)
+    return _variable->dofValuesDuDotdotDu();
+  else
+    return _variable->duDotdotDu();
 }
 
 template <typename T>

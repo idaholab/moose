@@ -293,6 +293,16 @@ protected:
                                                       unsigned int comp = 0);
 
   /**
+   * Second time derivative of the gradient of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the time derivative of the gradient of a
+   * coupled variable
+   */
+  virtual const VariableGradient & coupledGradientDotdot(const std::string & var_name,
+                                                         unsigned int comp = 0);
+
+  /**
    * Returns gradient of a coupled vector variable
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
@@ -402,6 +412,15 @@ protected:
   virtual const VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Time derivative of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * @see Kernel::dotdot
+   */
+  virtual const VariableValue & coupledDotdot(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Time derivative of a coupled vector variable
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
@@ -412,6 +431,16 @@ protected:
                                                        unsigned int comp = 0);
 
   /**
+   * Second time derivative of a coupled vector variable
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  virtual const VectorVariableValue & coupledVectorDotdot(const std::string & var_name,
+                                                          unsigned int comp = 0);
+
+  /**
    * Time derivative of a coupled variable with respect to the coefficients
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -420,6 +449,17 @@ protected:
    * @see Kernel:dotDu
    */
   virtual const VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Time derivative of a coupled variable with respect to the coefficients
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * with respect to the coefficients
+   * @see Kernel:dotdotDu
+   */
+  virtual const VariableValue & coupledDotdotDu(const std::string & var_name,
+                                                unsigned int comp = 0);
 
   /**
    * Returns nodal values of a coupled variable
@@ -466,6 +506,16 @@ protected:
    */
   virtual const VariableValue & coupledNodalDot(const std::string & var_name,
                                                 unsigned int comp = 0);
+
+  /**
+   * Nodal values of time derivative of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the nodal values of second time derivative of
+   * the coupled variable
+   */
+  virtual const VariableValue & coupledNodalDotdot(const std::string & var_name,
+                                                   unsigned int comp = 0);
 
   /**
    * Returns DoFs in the current solution vector of a coupled variable for the local element

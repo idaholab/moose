@@ -80,13 +80,30 @@ public:
     return _undisplaced_system.currentSolution();
   }
 
+  virtual const NumericVector<Number> *& currentSolutionUDot() override
+  {
+    return _undisplaced_system.currentSolutionUDot();
+  }
+
+  virtual const NumericVector<Number> *& currentSolutionUDotdot() override
+  {
+    return _undisplaced_system.currentSolutionUDotdot();
+  }
+
   virtual NumericVector<Number> & solution() override { return _undisplaced_system.solution(); }
 
   virtual NumericVector<Number> & solutionUDot() override
   {
     return _undisplaced_system.solutionUDot();
   }
+
+  virtual NumericVector<Number> & solutionUDotdot() override
+  {
+    return _undisplaced_system.solutionUDotdot();
+  }
+
   virtual Number & duDotDu() override { return _undisplaced_system.duDotDu(); }
+  virtual Number & duDotdotDu() override { return _undisplaced_system.duDotdotDu(); }
 
   /**
    * Return the residual copy from the NonlinearSystem
@@ -155,7 +172,21 @@ public:
 
   virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
 
+  virtual NumericVector<Number> & solutionUDotOld() override
+  {
+    return *_sys.old_local_solution_dot;
+  }
+
+  virtual NumericVector<Number> & solutionUDotdotOld() override
+  {
+    return *_sys.old_local_solution_dotdot;
+  }
+
   virtual NumericVector<Number> * solutionPreviousNewton() override { return NULL; }
+
+  virtual NumericVector<Number> * solutionUDotPreviousNewton() override { return NULL; }
+
+  virtual NumericVector<Number> * solutionUDotdotPreviousNewton() override { return NULL; }
 
   virtual TransientExplicitSystem & sys() { return _sys; }
 

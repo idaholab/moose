@@ -56,7 +56,9 @@ public:
   }
 
   VariableValue & uDot() { return _u_dot; }
+  VariableValue & uDotdot() { return _u_dotdot; }
   VariableValue & duDotDu() { return _du_dot_du; }
+  VariableValue & duDotdotDu() { return _du_dotdot_du; }
 
   /**
    * Set the nodal value for this variable (to keep everything up to date
@@ -90,7 +92,9 @@ protected:
   std::vector<bool> _need_matrix_tag_u;
 
   VariableValue _u_dot;
+  VariableValue _u_dotdot;
   VariableValue _du_dot_du;
+  VariableValue _du_dotdot_du;
 };
 
 #endif /* MOOSEVARIABLESCALAR_H */

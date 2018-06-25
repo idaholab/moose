@@ -75,8 +75,14 @@ protected:
   /// Time derivative of u
   const VariableValue & _u_dot;
 
+  /// Time derivative of u
+  const VariableValue & _u_dotdot;
+
   /// Derivative of u_dot with respect to u
   const VariableValue & _du_dot_du;
+
+  /// Derivative of u_dot with respect to u
+  const VariableValue & _du_dotdot_du;
 };
 
 #endif /* KERNEL_H */

@@ -109,9 +109,13 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _current_nl_its(0),
     _compute_initial_residual_before_preset_bcs(true),
     _current_solution(NULL),
+    _current_solution_dot(NULL),
+    _current_solution_dotdot(NULL),
     _residual_ghosted(NULL),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _solution_previous_nl(NULL),
+    _solution_dot_previous_nl(NULL),
+    _solution_dotdot_previous_nl(NULL),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
     _Re_time_tag(-1),
     _Re_time(NULL),
@@ -167,6 +171,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
 
   _u_dot = &addVector("u_dot", true, GHOSTED);
+  _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
 }
 
 NonlinearSystemBase::~NonlinearSystemBase()
@@ -182,6 +187,8 @@ NonlinearSystemBase::init()
     setupDampers();
 
   _current_solution = _sys.current_local_solution.get();
+  _current_solution_dot = _sys.current_local_solution_dot.get();
+  _current_solution_dotdot = _sys.current_local_solution_dotdot.get();
 
   if (_need_serialized_solution)
     _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
@@ -208,7 +215,11 @@ void
 NonlinearSystemBase::addExtraVectors()
 {
   if (_fe_problem.needsPreviousNewtonIteration())
+  {
     _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
+    _solution_dot_previous_nl = &addVector("u_dot_previous_newton", true, GHOSTED);
+    _solution_dotdot_previous_nl = &addVector("u_dotdot_previous_newton", true, GHOSTED);
+  }
 }
 
 void
@@ -218,6 +229,8 @@ NonlinearSystemBase::restoreSolutions()
   SystemBase::restoreSolutions();
   // and update _current_solution
   _current_solution = _sys.current_local_solution.get();
+  _current_solution_dot = _sys.current_local_solution_dot.get();
+  _current_solution_dotdot = _sys.current_local_solution_dotdot.get();
 }
 
 void
@@ -692,6 +705,12 @@ NumericVector<Number> &
 NonlinearSystemBase::solutionUDot()
 {
   return *_u_dot;
+}
+
+NumericVector<Number> &
+NonlinearSystemBase::solutionUDotdot()
+{
+  return *_u_dotdot;
 }
 
 NumericVector<Number> &
@@ -2840,9 +2859,15 @@ NonlinearSystemBase::setSolution(const NumericVector<Number> & soln)
 }
 
 void
-NonlinearSystemBase::setSolutionUDot(const NumericVector<Number> & udot)
+NonlinearSystemBase::setSolutionUDot(const NumericVector<Number> & soln_dot)
 {
-  *_u_dot = udot;
+  _current_solution_dot = &soln_dot;
+}
+
+void
+NonlinearSystemBase::setSolutionUDotdot(const NumericVector<Number> & soln_dotdot)
+{
+  _current_solution_dotdot = &soln_dotdot;
 }
 
 NumericVector<Number> &
@@ -3007,4 +3032,18 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 {
   if (_solution_previous_nl)
     *_solution_previous_nl = soln;
+}
+
+void
+NonlinearSystemBase::setPreviousNewtonSolutionUDot(const NumericVector<Number> & soln_dot)
+{
+  if (_solution_dot_previous_nl)
+    *_solution_dot_previous_nl = soln_dot;
+}
+
+void
+NonlinearSystemBase::setPreviousNewtonSolutionUDotdot(const NumericVector<Number> & soln_dotdot)
+{
+  if (_solution_dotdot_previous_nl)
+    *_solution_dotdot_previous_nl = soln;
 }

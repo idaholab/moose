@@ -147,6 +147,8 @@ public:
    * This is typically a ghosted vector that comes in from the Nonlinear solver.
    */
   virtual const NumericVector<Number> *& currentSolution() = 0;
+  virtual const NumericVector<Number> *& currentSolutionUDot() = 0;
+  virtual const NumericVector<Number> *& currentSolutionUDotdot() = 0;
 
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
@@ -154,7 +156,13 @@ public:
   virtual NumericVector<Number> * solutionPreviousNewton() = 0;
 
   virtual Number & duDotDu() { return _du_dot_du; }
-  virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
+  virtual Number & duDotdotDu() { return _du_dotdot_du; }
+  virtual NumericVector<Number> & solutionUDot() { return *_u_dot_dummy_vec; }
+  virtual NumericVector<Number> & solutionUDotOld() = 0;
+  virtual NumericVector<Number> * solutionUDotPreviousNewton() = 0;
+  virtual NumericVector<Number> & solutionUDotdot() { return *_u_dotdot_dummy_vec; }
+  virtual NumericVector<Number> & solutionUDotdotOld() = 0;
+  virtual NumericVector<Number> * solutionUDotdotPreviousNewton() = 0;
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();
@@ -674,6 +682,7 @@ protected:
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
   Real _du_dot_du;
+  Real _du_dotdot_du;
 
   /// Tagged vectors (pointer)
   std::vector<NumericVector<Number> *> _tagged_vectors;
@@ -682,11 +691,16 @@ protected:
   /// Active flags for tagged matrices
   std::vector<bool> _matrix_tag_active_flags;
 
-  NumericVector<Number> * _dummy_vec; // to satisfy the interface
+  NumericVector<Number> * _u_dot_dummy_vec;    // to satisfy the interface
+  NumericVector<Number> * _u_dotdot_dummy_vec; // to satisfy the interface
 
   // Used for saving old solutions so that they wont be accidentally changed
   NumericVector<Real> * _saved_old;
   NumericVector<Real> * _saved_older;
+
+  // Used for saving old u_dot and u_dotdot so that they wont be accidentally changed
+  NumericVector<Real> * _saved_dot_old;
+  NumericVector<Real> * _saved_dotdot_old;
 
   /// default kind of variables in this system
   Moose::VarKindType _var_kind;
