@@ -51,4 +51,4 @@ Launch WSL, and modify your bash profile to allow WSL to connect to Xming.
 echo "export DISPLAY=localhost:0" >> ~/.bashrc
 ```
 
-Once the above items are completed, please follow the installation instructions pertaining to your choice of Linux OS among our getting started pages. If you chose a Linux distribution we do not have a package for, then you will want to follow one of our 'Manual Install' instructions.
+Once the above items are complete, please follow the installation instructions pertaining to your choice of Linux OS among our getting started pages. If you chose a Linux distribution we do not have a package for, then you will want to follow one of our 'Manual Install' instructions.
