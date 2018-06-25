@@ -63,3 +63,5 @@ source /path/to/moose-environment.sh
 
 Or you can permanently have it loaded each time you open a terminal by adding the above `source`
 command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
+
+Once the above is complete, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
