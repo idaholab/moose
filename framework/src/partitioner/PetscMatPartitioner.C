@@ -83,6 +83,14 @@ PetscMatPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
   MatPartitioningCreate(mesh.comm().get(), &part);
   MatPartitioningSetAdjacency(part, dual);
   MatPartitioningSetNParts(part, n_parts);
+#if PETSC_VERSION_LESS_THAN(3, 9, 2)
+  if (_part_package == "party")
+    mooseError("PETSc-3.9.3 or higher is required for using party");
+#endif
+#if PETSC_VERSION_LESS_THAN(3, 9, 0)
+  if (_part_package == "chaco")
+    mooseError("PETSc-3.9.0 or higher is required for using chaco");
+#endif
   MatPartitioningSetType(part, _part_package.c_str());
   MatPartitioningSetFromOptions(part);
   MatPartitioningApply(part, &is);
