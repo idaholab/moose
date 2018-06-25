@@ -30,6 +30,7 @@ class Tests(Testing.PeacockTester):
         app.main_widget.setTab(exe_plugin.tabName())
         exe_plugin.ExecuteOptionsPlugin.setWorkingDir(self.starting_directory)
         exe_plugin.ExecuteRunnerPlugin.runClicked()
+        app.main_widget.setTab(result_plugin.tabName())
 
         vtkwin = result_plugin.currentWidget().VTKWindowPlugin
         Testing.set_window_size(vtkwin)

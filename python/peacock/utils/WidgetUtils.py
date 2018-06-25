@@ -93,15 +93,15 @@ def addShortcut(parent, keys, callback, shortcut_app_level=False, shortcut_with_
 Global settings grouping for storing/loading GUI state.
 """
 WIDGET_SETTINGS_CACHE = dict()
-WIDGET_SETTINGS_CACHE[QtWidgets.QTextEdit] = [('width', 'setWidth'), ('height', 'setHeight')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QLineEdit] = [('text', 'setText'), ('styleSheet', 'setStyleSheet')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QCheckBox] = [('isChecked', 'setChecked')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QComboBox] = [('currentIndex', 'setCurrentIndex')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QSlider] = [('sliderPosition', 'setSliderPosition')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QGroupBox] = [('isChecked', 'setChecked')]
-for value in WIDGET_SETTINGS_CACHE.itervalues():
-    value.append(('isEnabled', 'setEnabled'))
-
+WIDGET_SETTINGS_CACHE[QtWidgets.QLineEdit] = [(QtWidgets.QLineEdit.text, QtWidgets.QLineEdit.setText),
+                                              (QtWidgets.QLineEdit.styleSheet, QtWidgets.QLineEdit.setStyleSheet)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QCheckBox] = [(QtWidgets.QCheckBox.isChecked, QtWidgets.QCheckBox.setChecked)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QComboBox] = [(QtWidgets.QComboBox.currentText,
+                                               lambda s, t: QtWidgets.QComboBox.setCurrentIndex(s, QtWidgets.QComboBox.findText(s, t)))]
+WIDGET_SETTINGS_CACHE[QtWidgets.QSlider] = [(QtWidgets.QSlider.sliderPosition, QtWidgets.QSlider.setSliderPosition)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QGroupBox] = [(QtWidgets.QGroupBox.isChecked, QtWidgets.QGroupBox.setChecked)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QSpinBox] = [(QtWidgets.QSpinBox.value, QtWidgets.QSpinBox.setValue)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QDoubleSpinBox] = [(QtWidgets.QDoubleSpinBox.value, QtWidgets.QDoubleSpinBox.setValue)]
 
 def dumpQObjectTree(qobject, level=0):
     """
@@ -131,7 +131,6 @@ def dumpQObjectTree(qobject, level=0):
         print prefix + '+ ' + child.objectName() + ' (' + str(type(child)) + ')'
         dumpQObjectTree(child, level+1)
 
-
 def createIcon(name):
     """
     Create an icon using the "icons" directory.
@@ -142,15 +141,13 @@ def createIcon(name):
     icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'icons', name))
     return QtGui.QIcon(icon_path)
 
-
-def storeWidget(widget, key, name, **kwargs):
+def storeWidget(widget, key, **kwargs):
     """
     A function for writing QWidget state into a list of functions to call to restore the state.
 
     Args:
         widget[QtWidgets.QWidget]: The widget to store settings.
         key(s)[int|str|tuple]: The key to extract from the cache.
-        name[str]: The name of the cache to store widget information into.
 
     Kwargs:
         debug[bool]: When True debug messages are printed.
@@ -165,7 +162,7 @@ def storeWidget(widget, key, name, **kwargs):
 
             # Debugging information
             msg = ['Storing State: ' + widget.__class__.__name__ + ' ' + str(widget.objectName())]
-            msg += ['  cache = ' + str(name), '  key = ' + str(key)]
+            msg += ['  key = ' + str(key)]
 
             # Define storage structure for storing state settings
             state = widget.property('state')
@@ -174,13 +171,13 @@ def storeWidget(widget, key, name, **kwargs):
 
             # Clear current state
             state = widget.property('state')
-            state[(name, key)] = []
+            state[key] = []
 
             # Loop through the values to store
             for s in methods:
-                attr = getattr(widget, s[0])
-                state[(name, key)].append((s[1], attr()))
-                msg += [' '*4 + s[1] + '(' + str(attr()) + ')']
+                attr = s[0]
+                state[key].append((s[1], attr(widget)))
+                msg += ['    {} ({})'.format(s[1], attr)]
 
             # Print debug message
             message.mooseDebug('\n'.join(msg), color='GREEN', debug=debug)
@@ -190,42 +187,53 @@ def storeWidget(widget, key, name, **kwargs):
 
     # Call store on children
     for child in widget.children():
-        storeWidget(child, name, key, debug=debug)
+        storeWidget(child, key, debug=debug)
 
-
-def loadWidget(widget, key, name, **kwargs):
+def loadWidget(widget, key, **kwargs):
     """
     A function for loading GUI state from a storage structure created with storeWidget.
 
     Args:
         widget[QtWidgets.QWidget]: The widget to load settings.
         key(s)[int|str|tuple]: The key to extract from the cache.
-        name[str]: The name of the cache to load widget information into.
 
     Kwargs:
         debug[bool]: When True debug messages are printed.
+        block[bool]: When True (default) signals are blocked from the widget.
     """
 
     # Handle optional inputs and convert name to QString
     debug = kwargs.pop('debug', message.MOOSE_DEBUG_MODE)
+    block = kwargs.pop('block', True)
 
     # The stored state dict() of the widget
     state = widget.property('state')
+    if not state:
+        return
 
-    # If state exists and the desired name is stored in the state, then load it.
-    if state and ( (name, key) in state):
+    elif (key not in state) and ('default' in state):
+        key = 'default'
 
-        # Debug message
-        msg = ['Loading State: ' + widget.__class__.__name__ + ' ' + str(widget.objectName())]
-        msg += ['  cache = ' + str(name), '  key = ' + str(key)]
+    elif key not in state:
+        return
 
-        for func in state[(name,key)]:
-            msg += [' '*4 + str(func[0]) + '(' + str(func[1]) + ')']
-            getattr(widget, func[0])(func[1])
+    if block:
+        widget.blockSignals(True)
 
-        # Print debug message
-        message.mooseDebug('\n'.join(msg), debug=debug, color='YELLOW')
+    # Debug message
+    msg = ['Loading State: ' + widget.__class__.__name__ + ' ' + str(widget.objectName())]
+    msg += ['  key = ' + str(key)]
+
+    for func in state[key]:
+        msg += [' '*4 + str(func[0]) + '(' + str(func[1]) + ')']
+        func[0](widget, func[1])
+
+    # Print debug message
+    message.mooseDebug('\n'.join(msg), debug=debug, color='YELLOW')
+
+    if block:
+        widget.blockSignals(False)
 
     # Call load on children
     for child in widget.children():
-        loadWidget(child, name, key, debug=debug)
+        loadWidget(child, key, debug=debug, block=block)

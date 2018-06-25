@@ -7,15 +7,14 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import os
 from PyQt5.QtWidgets import QFileDialog, QPlainTextEdit, QSizePolicy, QMessageBox
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5 import QtCore
 from peacock.utils import WidgetUtils
 from peacock.base.Plugin import Plugin
 from peacock.utils.RecentlyUsedMenu import RecentlyUsedMenu
 from CheckInputWidget import CheckInputWidget
 from InputFileEditor import InputFileEditor
-import os
 
 class InputFileEditorPlugin(InputFileEditor, Plugin):
     """
@@ -23,8 +22,6 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
     In addition to InputFileEditor, this class adds menus and
     is available as a Plugin.
     """
-    highlightBC = pyqtSignal(list, list, list)
-
     def __init__(self, **kwds):
         super(InputFileEditorPlugin, self).__init__(**kwds)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -45,7 +42,7 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
 
         self.input_file_view = QPlainTextEdit()
         self.input_file_view.setReadOnly(True)
-        self.input_file_view.setWindowFlags(Qt.Window)
+        self.input_file_view.setWindowFlags(QtCore.Qt.Window)
         self.input_file_view.resize(640, 480)
         self.has_changed = False
 
@@ -92,7 +89,7 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         """
         Ask the user what input file to open.
         """
-        input_name, other = QFileDialog.getOpenFileName(self, "Chooose input file", os.getcwd(), "Input File (*.i)")
+        input_name, other = QFileDialog.getOpenFileName(self, "Choose input file", os.getcwd(), "Input File (*.i)")
         if input_name:
             input_name = os.path.abspath(input_name)
             success = self.setInputFile(input_name)
@@ -112,7 +109,7 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         """
         Ask the user what file to save the input tree to.
         """
-        input_name, other = QFileDialog.getSaveFileName(self, "Chooose input file", os.getcwd(), "Input File (*.i)")
+        input_name, other = QFileDialog.getSaveFileName(self, "Choose input file", os.getcwd(), "Input File (*.i)")
         if input_name:
             input_name = os.path.abspath(input_name)
             self.writeInputFile(input_name)

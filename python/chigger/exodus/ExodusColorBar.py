@@ -36,6 +36,14 @@ class ExodusColorBar(misc.ColorBar):
             raise mooseutils.MooseException('One or two ExodusResult objects must be supplied to '
                                             'the ExodusColorBar')
 
+    def getResult(self, index=0):
+        """
+        Return the associated ExodusResult object. The index must be 0 or 1.
+        """
+        if index not in [0, 1]:
+            raise mooseutils.MooseException("The supplied index must be 0 or 1.")
+        return self._results[index]
+
     def setOptions(self, *args, **kwargs):
         """
         Update the supplied options and apply the colormap options from the ExodusResult.
