@@ -2,6 +2,7 @@
   [./test]
     requirement = 'MOOSE need more partitioning options'
     issues = '##11628'
+    design = '/PetscMatPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_ptscotch_out.e'
@@ -14,6 +15,7 @@
   [./parmetis]
     requirement = 'MOOSE need more partitioning options'
     issues = '##11628'
+    design = '/PetscMatPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_parmetis_out.e'
@@ -26,6 +28,7 @@
   [./chaco]
     requirement = 'MOOSE need more partitioning options'
     issues = '##11628'
+    design = '/PetscMatPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_chaco_out.e'
@@ -43,6 +46,7 @@
   [./party]
     requirement = 'MOOSE need more partitioning options'
     issues = '##11628'
+    design = '/PetscMatPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_party_out.e'
