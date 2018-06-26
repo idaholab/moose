@@ -157,10 +157,16 @@ Nemesis::output(const ExecFlagType & type)
   _nemesis_io_ptr->set_output_variables(
       std::vector<std::string>(getNodalVariableOutput().begin(), getNodalVariableOutput().end()));
 
-  // Write the data
+  // Write nodal data
   _nemesis_io_ptr->write_timestep(
       filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
   _nemesis_initialized = true;
+
+  // Write elemental data
+  std::vector<std::string> elemental(getElementalVariableOutput().begin(),
+                                     getElementalVariableOutput().end());
+  _nemesis_io_ptr->set_output_variables(elemental);
+  _nemesis_io_ptr->write_element_data(*_es_ptr);
 
   // Increment output call counter for the current file
   _nemesis_num++;
