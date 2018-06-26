@@ -1,20 +1,20 @@
 ## PETSc
 
-Download PETSc 3.8.3
+Download PETSc !!package petsc_default!!
 
-```bash
+!package code
 cd $STACK_SRC
-curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.8.3.tar.gz
-tar -xf petsc-3.8.3.tar.gz -C .
-```
+curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-__PETSC_DEFAULT__.tar.gz
+tar -xf petsc-__PETSC_DEFAULT__.tar.gz -C .
+
 
 Now we configure, build, and install it
 
-```bash
-cd $STACK_SRC/petsc-3.8.3
+!package! code max-height=400
+cd $STACK_SRC/petsc-__PETSC_DEFAULT__
 
 ./configure \
---prefix=$PACKAGES_DIR/petsc-3.8.3 \
+--prefix=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__ \
 --download-hypre=1 \
 --with-ssl=0 \
 --with-debugging=no \
@@ -35,36 +35,33 @@ cd $STACK_SRC/petsc-3.8.3
 --FFLAGS='-fPIC -fopenmp' \
 --FCFLAGS='-fPIC -fopenmp' \
 --F90FLAGS='-fPIC -fopenmp' \
---F77FLAGS='-fPIC -fopenmp'
-```
+--F77FLAGS='-fPIC -fopenmp' \
+PETSC_DIR=`pwd`
+!package-end!
 
 Once configure is done, we build PETSc
 
-```bash
-make PETSC_DIR=$STACK_SRC/petsc-3.8.3 PETSC_ARCH=arch-linux2-c-opt all
-```
+!package code
+make PETSC_DIR=$STACK_SRC/petsc-__PETSC_DEFAULT__ PETSC_ARCH=arch-linux2-c-opt all
 
 Everything good so far? PETSc should be asking to run more make commands
 
-```bash
-make PETSC_DIR=$STACK_SRC/petsc-3.8.3 PETSC_ARCH=arch-linux2-c-opt install
-```
+!package code
+make PETSC_DIR=$STACK_SRC/petsc-__PETSC_DEFAULT__ PETSC_ARCH=arch-linux2-c-opt install
 
 And now after the install, we can run some built-in tests
 
-```bash
-make PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3 PETSC_ARCH="" test
-```
+!package code
+make PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__ PETSC_ARCH="" test
 
 Running the tests should produce some output like the following:
 
-```bash
-[moose@centos-7 petsc-3.6.3]$ make PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3 PETSC_ARCH="" test
+!package code
+[moose@centos-7 petsc-__PETSC_DEFAULT__]$ make PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__ PETSC_ARCH="" test
 Running test examples to verify correct installation
-Using PETSC_DIR=/opt/MOOSE/petsc-3.8.3 and PETSC_ARCH=
+Using PETSC_DIR=/opt/moose/petsc-__PETSC_DEFAULT__ and PETSC_ARCH=
 C/C++ example src/snes/examples/tutorials/ex19 run successfully with 1 MPI process
 C/C++ example src/snes/examples/tutorials/ex19 run successfully with 2 MPI processes
 Fortran example src/snes/examples/tutorials/ex5f run successfully with 1 MPI process
 Completed test examples
 =========================================
-```

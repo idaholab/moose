@@ -1,42 +1,54 @@
 # Windows 10
 
-The Windows 10 installation is experimental and not fully supported. To begin install the
-following.
+!alert! warning
+Using MOOSE on Windows 10 is experimental and not fully supported.
+
+Known issues:
+
+- Peacock does not work correctly.
+- Microsoft is now offering several different flavors of linux. Different versions means you need to choose wisely!
+
+  - (at the time of this writing, we have installation packages for: Ubuntu and OpenSUSE Leap)
+!alert-end!
+
+Begin by performing the following external sets of instructions. Do note, that when it comes time to decide what distribution of Linux you want, you should try and choose a flavor listed among our getting started pages for the smoothest installation process. This is not a requirement however, as MOOSE will run on just about any flavor of Linux if you are of the adventurous type!
 
 - [Windows Subsystem for Linux (WSL)](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide)
-- [Xming](https://sourceforge.net/projects/xming/)
+- [VcXsrv](https://sourceforge.net/projects/vcxsrv/reviews/) (Only needed for Peacock)
 
-After these two items are installed the following steps are required to complete the setup for the
-WSL to work for MOOSE. After these steps are completed then follow the install instructions for
-[Ubuntu](installation/ubuntu.md), but be sure to
-restart the bash session after installing the redistributable package.
+## Edit Hostname within WSL
 
-
-##### (1) Edit Hostname
-
-Modify the /etc/hosts file and add the results of `hostname` to resolve to 127.0.0.1 as follows.
+Launch WSL, and modify the /etc/hosts file to include the results of `hostname` to resolve to 127.0.0.1. This is necessary due to the way
+MPICH (a message passing interface) passes information among itself when running applications (like MOOSE) in parallel.
 
 ```bash
 [~]> hostname
 DESKTOP-L7BGA7L
+
 [~]> sudo vi /etc/hosts
 127.0.0.1   localhost
 127.0.0.1   DESKTOP-L7BGA7L    <---- ADD THAT
 ```
 
-##### (2) Update Ubuntu on WSL
+## Update Ubuntu/OpenSUSE within WSL
 
-It is also required to update Ubuntu to latest version.
+Launch WSL, and perform an update:
 
 ```bash
+# Ubuntu:
 sudo apt-get update
 sudo apt-get upgrade
+
+# OpenSUSE:
+sudo zypper update
 ```
 
-##### (3) Setup Xming
+## Setup Xming
 
-Allow your Bash session to connect to Xming.
+Launch WSL, and modify your bash profile to allow WSL to connect to Xming.
 
 ```bash
-echo "export DISPLAY=:0" >> ~/.bashrc
+echo "export DISPLAY=localhost:0" >> ~/.bashrc
 ```
+
+Once the above items are complete, please follow the installation instructions pertaining to your choice of Linux OS among our getting started pages. If you chose a Linux distribution we do not have a package for, then you will want to follow one of our 'Manual Install' instructions.

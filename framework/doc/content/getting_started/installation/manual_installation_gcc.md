@@ -23,6 +23,8 @@
 
 !include manual_petsc.md
 
+!include manual_miniconda.md
+
 !include manual_ownership.md
 
 ## bash_profile
@@ -32,27 +34,27 @@ variables up, and throw them in a bash shell profile somewhere.
 
 Append the following contents into a new file called `moose-environment.sh`:
 
-```bash
+!package! code
 #!/bin/bash
 ### MOOSE Environment Profile
-# GCC 7.3.0
-# MPICH 3.2
-# PETSc 3.8.3
+# GCC __GCC__
+# MPICH __MPICH__
+# PETSc __PETSC_DEFAULT__
 
 export PACKAGES_DIR=<what ever you exported initially during the Environment setup>
 
-export PATH=$PACKAGES_DIR/gcc-7.3.0/bin:$PACKAGES_DIR/mpich-3.2/bin:$PATH
-export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-7.3.0/lib64:$PACKAGES_DIR/gcc-7.3.0/lib:$PACKAGES_DIR/gcc-7.3.0/lib/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/gcc-7.3.0/libexec/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/mpich-3.2/lib:$LD_LIBRARY_PATH
-export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$C_INCLUDE_PATH
-export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$CPLUS_INCLUDE_PATH
-export FPATH=$PACKAGES_DIR/mpich-3.2/include:$FPATH
-export MANPATH=$PACKAGES_DIR/mpich-3.2/share/man:$MANPATH
-export PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3
+export PATH=$PACKAGES_DIR/gcc-__GCC__/bin:$PACKAGES_DIR/mpich-__MPICH__/bin:$PACKAGES_DIR/miniconda/bin:$PATH
+export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-__GCC__/lib64:$PACKAGES_DIR/gcc-__GCC__/lib:$PACKAGES_DIR/gcc-__GCC__/lib/gcc/x86_64-unknown-linux-gnu/__GCC__:$PACKAGES_DIR/gcc-__GCC__/libexec/gcc/x86_64-unknown-linux-gnu/__GCC__:$PACKAGES_DIR/mpich-__MPICH__/lib:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$CPLUS_INCLUDE_PATH
+export FPATH=$PACKAGES_DIR/mpich-__MPICH__/include:$FPATH
+export MANPATH=$PACKAGES_DIR/mpich-__MPICH__/share/man:$MANPATH
+export PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__
 export CC=mpicc
 export CXX=mpicxx
 export FC=mpif90
 export F90=mpif90
-```
+!package-end!
 
 Thats it! Now you can either source this file manually each time you need to work on a MOOSE based
 application:
@@ -63,3 +65,5 @@ source /path/to/moose-environment.sh
 
 Or you can permanently have it loaded each time you open a terminal by adding the above `source`
 command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
+
+Once the above is complete, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
