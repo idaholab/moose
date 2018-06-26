@@ -11,7 +11,7 @@ Known issues:
   - (at the time of this writing, we have installation packages for: Ubuntu and OpenSUSE Leap)
 !alert-end!
 
-Begin by performing the following external sets of instructions. Do note, that when it comes time to deciding what distribution of Linux you want, you should try and choose a flavor listed among our getting started pages for the smoothest installation process. This is not a requirement however, as MOOSE will run on just about any flavor of Linux if you are of the adventurous type!
+Begin by performing the following external sets of instructions. Do note, that when it comes time to decide what distribution of Linux you want, you should try and choose a flavor listed among our getting started pages for the smoothest installation process. This is not a requirement however, as MOOSE will run on just about any flavor of Linux if you are of the adventurous type!
 
 - [Windows Subsystem for Linux (WSL)](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide)
 - [VcXsrv](https://sourceforge.net/projects/vcxsrv/reviews/) (Only needed for Peacock)

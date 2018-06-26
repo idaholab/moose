@@ -1,6 +1,6 @@
 # High Performance Computing
 
-The following document will aid an administrator on setting up an environment for which end-users will need when building and running MOOSE based applications.
+The following document will aid an administrator on setting up an environment which end-users will need when building and running MOOSE based applications.
 If you do not have administrative rights, you will not be able to complete these instructions. Please forward these instructions to your HPC administrator.
 
 ## Prerequisites
@@ -39,7 +39,7 @@ export PACKAGES_DIR=/opt/moose-compilers
 
 ## Create and chown $PACKGES_DIR
 
-History teaches us, that implicitly trusting scripts we download off the internet with root access, is a very bad idea. So let us create and chown the $PACKAGES_DIR directory before we install anything. That way, the things we do install can be done so with out invoking `sudo`:
+History teaches us, that implicitly trusting scripts we download off the internet with root access, is a very bad idea. So let us create and chown the $PACKAGES_DIR directory before we install anything. That way, the things we do install can be done so without invoking `sudo`:
 
 ```bash
 sudo mkdir $PACKAGES_DIR
@@ -55,7 +55,7 @@ Verify that your umask settings are indeed set to 0022 before continuing:
 ```
 !alert-end!
 
-## Setup Modules
+## Set Up Modules
 
 Even if you are not using Modules, the following provides information on what environment variables are needed for MOOSE developement.
 
@@ -113,7 +113,7 @@ With the modulefile in place and the MODULEPATH variable set, see if our module 
 module avail
 ```
 
-Verify that somewhere among all the other modules installed, you see: 'moose-dev-gcc' among them.
+Verify that somewhere among all the other modules installed, you see: 'moose-dev-gcc'.
 
 
 ## Miniconda
