@@ -17,8 +17,8 @@ Please use a single solitary terminal session throughout and to the completion o
 Begin by creating an area for which to build:
 
 ```bash
-export CLUSTER_TEMP=`mktemp -d /tmp/cluster_temp.XXXXXX`
-cd $CLUSTER_TEMP
+export STACK_SRC=`mktemp -d /tmp/stack_src_temp.XXXXXX`
+cd $STACK_SRC
 ```
 
 ## Set your umask
@@ -34,7 +34,7 @@ umask 0022
 Export a base path variable which will be the home location for the compiler stack. All files related to libraries necessary to build MOOSE, will be stored in this location (+choose carefully, as this location should be accessible from all nodes on your cluster+):
 
 ```bash
-export PACKAGES_DIR=/opt/moose-compilers
+export PACKAGES_DIR=/opt/moose
 ```
 
 ## Create and chown $PACKGES_DIR
@@ -50,7 +50,7 @@ sudo chown -R <your user id> $PACKAGES_DIR
 Verify that your umask settings are indeed set to 0022 before continuing:
 
 ```bash
-#> umask
+$> umask
 0022
 ```
 !alert-end!
@@ -94,7 +94,7 @@ prepend-path    PATH             $base_path/miniconda/bin
 !package-end!
 
 !alert! note
-Replace `INSERT PACKAGES_DIR HERE` with whatever you had set for $PACKAGES_DIR (+do not+ literally enter: $PACKAGES_DIR. As an example, if you left packages_dir as: /opt/moose-compilers, then that is what you would enter)
+Replace `INSERT PACKAGES_DIR HERE` with whatever you had set for $PACKAGES_DIR (+do not+ literally enter: $PACKAGES_DIR. As an example, if you left packages_dir as: /opt/moose, then that is what you would enter)
 
 Replace `GCC and MPI` paths with any additional information needed to make GCC/MPI work.
 !alert-end!
@@ -110,95 +110,41 @@ The above command should be added to the list of other global profiles (perhaps 
 With the modulefile in place and the MODULEPATH variable set, see if our module is available for loading:
 
 ```bash
-module avail
-```
-
-Verify that somewhere among all the other modules installed, you see: 'moose-dev-gcc'.
-
-
-## Miniconda
-
-If your users will want to use Peacock (a MOOSE GUI frontend), the easiest way to enable this feature, is to install miniconda, along with several miniconda/pip packages.
-
-```bash
-cd $CLUSTER_TEMP
-curl -L -O https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
-sh Miniconda2-latest-Linux-x86_64.sh -b -p $PACKAGES_DIR/miniconda
-
-PATH=$PACKAGES_DIR/miniconda/bin:$PATH conda config --set ssl_verify false
-PATH=$PACKAGES_DIR/miniconda/bin:$PATH conda install -c idaholab python=2.7 coverage \
-  reportlab \
-  mako \
-  numpy \
-  scipy \
-  scikit-learn \
-  h5py \
-  hdf5 \
-  scikit-image \
-  requests \
-  vtk=7.1.0 \
-  pyyaml \
-  matplotlib \
-  pip \
-  lxml \
-  pyflakes \
-  pandas \
-  conda-build \
-  mock \
-  yaml \
-  pyqt \
-  swig --yes
-```
-
-!alert note
-Peacock (as well as the TestHarness sytem in MOOSE), does not work with Python3. Please chose Miniconda2 for Python 2.7 instead.
-
-
-Next, we need to use `pip` to install additional libraries not supplied by conda:
-
-```bash
-PATH=$PACKAGES_DIR/miniconda/bin:$PATH pip install --no-cache-dir pybtex livereload==2.5.1 daemonlite pylint==1.6.5 lxml pylatexenc anytree
-```
-
-## Building PETSc
-
-If you opted to build a moose-dev-gcc module, and if you have modules available on your cluster, we will load it as a user would. This will ensure that everything we did above is going to work for our end-users.
-
-```bash
-module purge # unload a possible conflicting environment set up by a different module
 module load moose-dev-gcc
-echo $PETSC_DIR
 ```
 
-!alert note
-Verify that the above `echo $PETSC_DIR` command is returning /the-packages_dir-path/petsc/petsc-!!package petsc_default!! you originally set up during the 'Choose a base path' step. If not, something went wrong with creating the moose-dev-gcc module in the previous step.
-
-If you chose not to create a moose-dev-gcc module, you will instead need to export the PETSC_DIR manually before continuing:
+Verify that this module loads properly by attempting to echo $PETSC_DIR:
 
 !package! code
-export PETSC_DIR=$PACKAGES_DIR/petsc/petsc-__PETSC_DEFAULT__/gcc-opt
+echo $PETSC_DIR
+/opt/moose/petsc/petsc-__PETSC_DEFAULT__/gcc-opt
 !package-end!
 
-Download and extract PETSc:
+While we are at it, verify that your MPI wrapper works by running a few commands (your results will vary, but they should return something):
 
-!package! code
-curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-__PETSC_DEFAULT__.tar.gz
-tar -xf petsc-__PETSC_DEFAULT__.tar.gz
-cd petsc-__PETSC_DEFAULT__
-!package-end!
+```bash
+which mpicc
+/opt/moose/mpich-3.2/gcc-7.3.0/bin/mpicc
 
-Configure PETSc using the following options:
+mpicc -show
+gcc -I/opt/moose/mpich-3.2/gcc-7.3.0/include -L/opt/moose/mpich-3.2/gcc-7.3.0/lib -Wl,-rpath -Wl,/opt/moose/mpich-3.2/gcc-7.3.0/lib -Wl,--enable-new-dtags -lmpi
 
-!include getting_started/petsc_default.md
+which gcc
+/opt/moose/gcc-7.3.0/bin/gcc
+```
 
-+During the configure/build process, you will be prompted to enter proper make commands.+ This can be different from system to system, so I leave that task to the reader.
+Leave this module loaded for the remainder of the instructions (PETSc requirements).
+
+!include getting_started/installation/manual_petsc.md
+
+!include getting_started/installation/manual_miniconda.md
 
 ## Clean Up and Chown
 
 Clean all the temporary stuff and change the ownership to root, so no further writes are possible:
 
 ```bash
-rm -rf $CLUSTER_TEMP
+rm -rf $STACK_SRC
 sudo chown root $PACKAGE_DIR
 ```
 

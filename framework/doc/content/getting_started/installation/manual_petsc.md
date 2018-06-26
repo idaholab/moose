@@ -35,7 +35,8 @@ cd $STACK_SRC/petsc-__PETSC_DEFAULT__
 --FFLAGS='-fPIC -fopenmp' \
 --FCFLAGS='-fPIC -fopenmp' \
 --F90FLAGS='-fPIC -fopenmp' \
---F77FLAGS='-fPIC -fopenmp'
+--F77FLAGS='-fPIC -fopenmp' \
+PETSC_DIR=`pwd`
 !package-end!
 
 Once configure is done, we build PETSc
@@ -58,7 +59,7 @@ Running the tests should produce some output like the following:
 !package code
 [moose@centos-7 petsc-__PETSC_DEFAULT__]$ make PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__ PETSC_ARCH="" test
 Running test examples to verify correct installation
-Using PETSC_DIR=/opt/MOOSE/petsc-__PETSC_DEFAULT__ and PETSC_ARCH=
+Using PETSC_DIR=/opt/moose/petsc-__PETSC_DEFAULT__ and PETSC_ARCH=
 C/C++ example src/snes/examples/tutorials/ex19 run successfully with 1 MPI process
 C/C++ example src/snes/examples/tutorials/ex19 run successfully with 2 MPI processes
 Fortran example src/snes/examples/tutorials/ex5f run successfully with 1 MPI process
