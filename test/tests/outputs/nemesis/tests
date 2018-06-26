@@ -6,4 +6,42 @@
     check_files = 'nemesis_out.e.1.0'
     max_parallel = 1
   [../]
+  [./nemesis_elemental_replicated]
+    type = 'Exodiff'
+    input = nemesis_elemental.i
+    exodiff = 'nemesis_elemental_replicated.e.4.0 nemesis_elemental_replicated.e.4.1 nemesis_elemental_replicated.e.4.2 nemesis_elemental_replicated.e.4.3'
+    # We want to make sure elemental variable writing works for
+    # ReplicatedMesh too, and the node numbering/partitioning will be
+    # different in the DistributedMesh case, so we can't reuse the
+    # gold file.
+    mesh_mode = replicated
+    cli_args = 'Outputs/out/file_base=nemesis_elemental_replicated'
+    min_parallel = 4
+    max_parallel = 4
+    # The code is platform- and compiler-independent, but our partitioners
+    # still aren't... until then we have to restrict the test to be on the
+    # safe side.
+    platform = 'DARWIN'
+    compiler = 'CLANG'
+    requirement = "The Nemesis Ouput object shall support writing elemental variables."
+    design = 'Outputs/index.md'
+    issues = '#2122'
+  [../]
+  [./nemesis_elemental_distributed]
+    type = 'Exodiff'
+    input = nemesis_elemental.i
+    exodiff = 'nemesis_elemental_distributed.e.4.0 nemesis_elemental_distributed.e.4.1 nemesis_elemental_distributed.e.4.2 nemesis_elemental_distributed.e.4.3'
+    mesh_mode = distributed
+    cli_args = 'Outputs/out/file_base=nemesis_elemental_distributed'
+    min_parallel = 4
+    max_parallel = 4
+    # The code is platform- and compiler-independent, but our partitioners
+    # still aren't... until then we have to restrict the test to be on the
+    # safe side.
+    platform = 'DARWIN'
+    compiler = 'CLANG'
+    requirement = "The Nemesis Ouput object shall support writing elemental variables."
+    design = 'Outputs/index.md'
+    issues = '#2122'
+  [../]
 []
