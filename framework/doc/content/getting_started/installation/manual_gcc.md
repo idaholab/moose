@@ -1,7 +1,7 @@
 ## GCC
 
 We need a modern C++11 capable compiler. Our minimum requirements are: GCC 4.8.4, Clang 3.4.0,
-and Intel20130607. This section will focus on building a GCC 7.3.0 compiler stack.
+and Intel20130607. This section will focus on building a GCC !!package gcc!! compiler stack.
 
 What version of GCC do we have?
 
@@ -17,26 +17,26 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 If your version is less than 4.8.4, you will need to build a newer version. If your version is at or
 greater than 4.8.4, you have the option of skipping the GCC section.
 
-```bash
+!package! code
 cd $STACK_SRC
-curl -L -O http://mirrors.concertpass.com/gcc/releases/gcc-7.3.0/gcc-7.3.0.tar.gz
-tar -xf gcc-7.3.0.tar.gz -C .
-```
+curl -L -O http://mirrors.concertpass.com/gcc/releases/gcc-__GCC__/gcc-__GCC__.tar.gz
+tar -xf gcc-__GCC__.tar.gz -C .
+!package-end!
 
 Obtain GCC pre-reqs:
 
-```bash
-cd $STACK_SRC/gcc-7.3.0
+!package! code max-height=450
+cd $STACK_SRC/gcc-__GCC__
 ./contrib/download_prerequisites
-```
+!package-end!
 
 Configure, build and install GCC:
 
-```bash
+!package! code
 mkdir $STACK_SRC/gcc-build
 cd $STACK_SRC/gcc-build
 
-../gcc-7.3.0/configure --prefix=$PACKAGES_DIR/gcc-7.3.0 \
+../gcc-__GCC__/configure --prefix=$PACKAGES_DIR/gcc-__GCC__ \
 --disable-multilib \
 --enable-languages=c,c++,fortran,jit \
 --enable-checking=release \
@@ -46,19 +46,20 @@ cd $STACK_SRC/gcc-build
 make -j #   (where # is the number of cores available)
 
 make install
-```
+!package-end!
 
 Any errors during configure/make will need to be investigated on your own. Every operating system I
 have come across has its own nuances of getting stuff built. Normally any issues are going to be
 solved by installing the necessary development libraries using your system package manager (apt-get,
-yum, zypper, etc). Hint: I would search the internet for 'how to build GCC 5.4.0 on (insert the
+yum, zypper, etc). Hint: I would search the internet for 'how to build GCC !!package gcc!! on (insert the
 name/version of your operating system here)'
 
 !alert! note
-In order to utilize our newly built GCC 7.3.0 compiler, we need to set some variables:
+In order to utilize our newly built GCC !!package gcc!! compiler, we need to set some variables:
 
-```bash
-export PATH=$PACKAGES_DIR/gcc-7.3.0/bin:$PATH
-export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-7.3.0/lib64:$PACKAGES_DIR/gcc-7.3.0/lib:$PACKAGES_DIR/gcc-7.3.0/lib/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/gcc-7.3.0/libexec/gcc/x86_64-unknown-linux-gnu/7.3.0:$LD_LIBRARY_PATH
-```
+!package! code
+export PATH=$PACKAGES_DIR/gcc-__GCC__/bin:$PATH
+export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-__GCC__/lib64:$PACKAGES_DIR/gcc-__GCC__/lib:$PACKAGES_DIR/gcc-__GCC__/lib/gcc/x86_64-unknown-linux-gnu/__GCC__:$PACKAGES_DIR/gcc-__GCC__/libexec/gcc/x86_64-unknown-linux-gnu/__GCC__:$LD_LIBRARY_PATH
+!package-end!
+
 !alert-end!

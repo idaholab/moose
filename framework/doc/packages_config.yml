@@ -1,0 +1,56 @@
+minimum_gcc: 4.8.4
+minimum_clang: 3.4.0
+minimum_intel: 2018
+mpich: 3.2
+openmpi: 1.10.2
+petsc_alt: 3.7.6
+petsc_default: 3.8.3
+slepc_alt: 3.7.3
+slepc_default: 3.8.2
+autoconf: 2.69
+utomake: 1.16
+gcc: 7.3.0
+llvm: 5.0.1
+llvm_release: 50
+cmake: 3.9.4
+gnuplot: 4.6.5
+doxygen: 1.8.11
+graphviz: 2.38.0
+lcov: 1.11
+miniconda: 4.3.11
+vtk: 7.1.0
+tbb: 2018_U3
+cppunit: 1.12.1
+ccache: 3.2.1
+tcl: 8.5.14
+modules: 3.2.10
+trilinos: 12-6-2
+dtk: 2.0.0
+pkg_config: 0.29.1
+cairo: 1.14.6
+pixman: 0.34.0
+libpng: 1.6.25
+glib: 2.47.92
+libffi: 3.2.1
+gettext: 0.19.8
+pcre: 8.39
+pango: 1.40.3
+freetype: 2.6.3
+fontconfig: 2.12.1
+harfbuzz: 1.3.2
+git_lfs: 1.4.3
+valgrind: 3.13.0
+blas_lapack: 3.7.1
+conda_python: 2.7
+conda_vtk: 7.1.0
+pip_pylint: 1.6.5
+pip_livereload: 2.5.1
+moose_packages:
+    osx10.13: moose-environment-39_highsierra-10.13_x86_64.pkg
+    osx10.12: moose-environment-92_sierra-10.12_x86_64.pkg 
+    ubuntu16.04: moose-environment-74_Ubuntu-16.04_x86_64.deb
+    ubuntu18.04: moose-environment-2_Ubuntu-18.04_x86_64.deb
+    mint18: moose-environment-70_LinuxMint-18_x86_64.deb
+    opensuseleap: moose-environment-66_openSUSE-42.2_x86_64.rpm
+    fedora25: moose-environment-38_Fedora-25_x86_64.rpm
+    centos7: moose-environment-1_CentOSLinux-7.4.1708_x86_64.rpm

@@ -24,17 +24,20 @@
 !alert! note
 In order to utilize our newly built LLVM-Clang compiler, we need to export some variables:
 
-```bash
+!package! code
 export CC=clang
 export CXX=clang++
-export PATH=$PACKAGES_DIR/llvm-5.0.1/bin:$PATH
-export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-5.0.1/lib:$LD_LIBRARY_PATH
-```
+export PATH=$PACKAGES_DIR/llvm-__LLVM__/bin:$PATH
+export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$LD_LIBRARY_PATH
+!package-end!
+
 !alert-end!
 
 !include manual_mpich_llvm.md
 
 !include manual_petsc.md
+
+!include manual_miniconda.md
 
 !include manual_ownership.md
 
@@ -45,28 +48,28 @@ variables up, and throw them in a bash shell profile somewhere.
 
 Append the following contents into a new file called `moose-environment.sh`:
 
-```bash
+!package! code
 #!/bin/bash
 ### MOOSE Environment Profile
-# GCC 7.3.0
-# LLVM 5.0.1
-# MPICH 3.2
-# PETSc 3.8.3
+# GCC __GCC__
+# LLVM __LLVM__
+# MPICH __MPICH__
+# PETSc __PETSC_DEFAULT__
 
 export PACKAGES_DIR=<what ever you exported initially during the Environment setup>
 
-export PATH=$PACKAGES_DIR/llvm-5.0.1/bin:$PACKAGES_DIR/gcc-7.3.0/bin:$PACKAGES_DIR/mpich-3.2/bin:$PATH
-export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-5.0.1/lib:$PACKAGES_DIR/gcc-7.3.0/lib64:$PACKAGES_DIR/gcc-7.3.0/lib:$PACKAGES_DIR/gcc-7.3.0/lib/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/gcc-7.3.0/libexec/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/mpich-3.2/lib:$LD_LIBRARY_PATH
-export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$C_INCLUDE_PATH
-export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$CPLUS_INCLUDE_PATH
-export FPATH=$PACKAGES_DIR/mpich-3.2/include:$FPATH
-export MANPATH=$PACKAGES_DIR/mpich-3.2/share/man:$MANPATH
-export PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3
+export PATH=$PACKAGES_DIR/llvm-__LLVM__/bin:$PACKAGES_DIR/gcc-__GCC__/bin:$PACKAGES_DIR/mpich-__MPICH__/bin:$PACKAGES_DIR/miniconda/bin:$PATH
+export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$PACKAGES_DIR/gcc-__GCC__/lib64:$PACKAGES_DIR/gcc-__GCC__/lib:$PACKAGES_DIR/gcc-__GCC__/lib/gcc/x86_64-unknown-linux-gnu/__GCC__:$PACKAGES_DIR/gcc-__GCC__/libexec/gcc/x86_64-unknown-linux-gnu/__GCC__:$PACKAGES_DIR/mpich-__MPICH__/lib:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$CPLUS_INCLUDE_PATH
+export FPATH=$PACKAGES_DIR/mpich-__MPICH__/include:$FPATH
+export MANPATH=$PACKAGES_DIR/mpich-__MPICH__/share/man:$MANPATH
+export PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__
 export CC=mpicc
 export CXX=mpicxx
 export FC=mpif90
 export F90=mpif90
-```
+!package-end!
 
 Thats it! Now you can either source this file manually each time you need to work on a MOOSE based
 application:
