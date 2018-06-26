@@ -20,8 +20,7 @@ class PackageExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         packages_config = yaml_load(os.path.join(MooseDocs.MOOSE_DIR,
-                                                 'modules',
-                                                 'combined',
+                                                 'framework',
                                                  'doc',
                                                  'packages_config.yml'))
 
