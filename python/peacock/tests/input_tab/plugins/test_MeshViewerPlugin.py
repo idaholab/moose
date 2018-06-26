@@ -40,7 +40,7 @@ class TestMeshViewerPlugin(Testing.PeacockImageTestCase):
         Test the highlighting is working.
         """
         self._window.onHighlight(block=['1'])
-        self.assertImage('testHighlightOn.png')
+        self.assertImage('testHighlightOn.png', allowed=0.98)
 
         self._window.onHighlight()
         self.assertImage('testHighlightOff.png')
