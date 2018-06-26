@@ -209,7 +209,7 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
 
 class SyntaxParametersCommand(SyntaxCommandHeadingBase):
     SUBCOMMAND = 'parameters'
-    NODE_TYPE = syntax.ObjectNode
+    NODE_TYPE = None # allows SyntaxNode objects to report combined action parameters
 
     @staticmethod
     def defaultSettings():
@@ -345,8 +345,6 @@ class SyntaxCompleteCommand(SyntaxCommandBase):
         settings['group'] = (None, "The group (app) to limit the complete syntax list.")
         settings['actions'] = (True, "Include a list of Action objects in syntax.")
         settings['level'] = (2, "Beginning heading level.")
-        #settings['objects'] = (True, "Include a list of MooseObject objects in syntax.")
-        #settings['subsystems'] = (True, "Include a list of sub system syntax in the output.")
         return settings
 
     def _addList(self, parent, obj, actions, group, level):
@@ -488,42 +486,16 @@ class RenderInputParametersToken(components.RenderComponent):
 
     def createMaterialize(self, token, parent):
 
-        if token.syntax.parameters is None:
-            return
-
-        # Build the list of groups to display
         groups = collections.OrderedDict()
-        if token.groups:
-            for group in token.groups:
-                groups[group] = dict()
+        if isinstance(token.syntax, syntax.SyntaxNode):
+            for action in token.syntax.actions():
+                self._getParameters(token, action, groups)
 
-        elif token.syntax:
-            groups['Required'] = dict()
-            groups['Optional'] = dict()
-            for param in token.syntax.parameters.itervalues():
-                group = param['group_name']
-                if group and group not in groups:
-                    groups[group] = dict()
+        elif token.syntax.parameters is not None:
+            self._getParameters(token, token.syntax, groups)
 
-        # Populate the parameter lists by group
-        for param in token.syntax.parameters.itervalues() or []:
-
-            # Do nothing if the parameter is hidden or not shown
-            name = param['name']
-            if (name == 'type') or \
-               (token.hide and name in token.hide) or \
-               (token.show and name not in token.show):
-                continue
-
-            # Handle the 'ungroup' parameters
-            group = param['group_name']
-            if not group and param['required']:
-                group = 'Required'
-            elif not group and not param['required']:
-                group = 'Optional'
-
-            if group in groups:
-                groups[group][name] = param
+        else:
+            return # do nothing if parameters are not found
 
         # Add the heading
         if token.heading is not None:
@@ -550,6 +522,46 @@ class RenderInputParametersToken(components.RenderComponent):
                 _insert_parameter(ul, name, param)
 
         return parent
+
+    @staticmethod
+    def _getParameters(token, node, groups):
+        """
+        Add the parameters from the supplied node to the supplied groups
+        """
+
+        # Build the list of groups to display
+        if token.groups:
+            for group in token.groups:
+                groups[group] = dict()
+
+        else:
+            groups['Required'] = dict()
+            groups['Optional'] = dict()
+            for param in node.parameters.itervalues():
+                group = param['group_name']
+                if group and group not in groups:
+                    groups[group] = dict()
+
+        # Populate the parameter lists by group
+        for param in node.parameters.itervalues() or []:
+
+            # Do nothing if the parameter is hidden or not shown
+            name = param['name']
+            if (name == 'type') or \
+               (token.hide and name in token.hide) or \
+               (token.show and name not in token.show):
+                continue
+
+            # Handle the 'ungroup' parameters
+            group = param['group_name']
+            if not group and param['required']:
+                group = 'Required'
+            elif not group and not param['required']:
+                group = 'Optional'
+
+            if group in groups:
+                groups[group][name] = param
+
 
 def _insert_parameter(parent, name, param):
     """
