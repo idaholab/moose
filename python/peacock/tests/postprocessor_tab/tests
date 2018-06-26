@@ -3,60 +3,70 @@
     type = PythonUnitTest
     input = test_FigurePlugin.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./LineSettingsWidget]
     type = PythonUnitTest
     input = test_LineSettingsWidget.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./LineGroupWidget_Postprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetPostprocessor.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./LineGroupWidget_VectorPostprocessor]
     type = PythonUnitTest
     input = test_LineGroupWidgetVectorPostprocessor.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./PostprocessorSelectPlugin_Postprocessor]
     type = PythonUnitTest
     input = test_PostprocessorSelectPlugin.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./PostprocessorSelectPlugin_VectorPostprocessor]
     type = PythonUnitTest
     input = test_VectorPostprocessorSelectPlugin.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./AxesSettingsPlugin]
     type = PythonUnitTest
     input = test_AxesSettingsPlugin.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./AxisTabsPlugin]
     type = PythonUnitTest
     input = test_AxisTabsPlugin.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./MediaControlPlugin]
     type = PythonUnitTest
     input = test_MediaControlPlugin.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./PostprocessorPluginManager]
     type = PythonUnitTest
     input = test_PostprocessorPluginManager.py
     display_required = True
+    platform = "DARWIN" # images are a different size on linux #11734
   [../]
 
   [./PostprocessorViewer_Postprocessor]
