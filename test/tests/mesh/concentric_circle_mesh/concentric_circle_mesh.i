@@ -1,7 +1,13 @@
 [Mesh]
   type = ConcentricCircleMesh
+  unit_cell_length = 0.496
+  radius_fuel = 0.3225
+  outer_radius_clad = 0.374
+  inner_radius_clad = 0.3515
   num_sectors = 4
-  extra_radial_intervals = 2
+  nr = 3
+  num_intervals_unit_cell = 3
+
 []
 
 [Variables]
@@ -33,9 +39,9 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  #solve_type = 'PJFNK'
+  #petsc_options_iname = '-pc_type -pc_hypre_type'
+  #petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
