@@ -120,11 +120,16 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Create the filters and load the stored state when the ExodusResult is created.
         """
         self._extents = chigger.misc.VolumeAxes(result)
+        if self.Extents.isChecked():
+            self._extents.update()
+        else:
+            self._extents.reset()
 
     def onResetWindow(self):
         """
         Delete filters when the window is destroyed.
         """
+        self._extents.reset()
         self._extents = None
 
     def _loadPlugin(self):
@@ -194,10 +199,8 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         else:
             self.removeFilter.emit(self._transform)
 
-        ## Extents
         if self._extents is not None:
-            value = self.Extents.isChecked()
-            if value:
+            if self.Extents.isChecked():
                 self._extents.update()
             else:
                 self._extents.reset()

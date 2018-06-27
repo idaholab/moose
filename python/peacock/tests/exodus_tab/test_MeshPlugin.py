@@ -207,6 +207,27 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.MeshPlugin.ScaleY.value(), 1.0)
         self.assertEqual(self._widget.MeshPlugin.ScaleZ.value(), 1.0)
 
+    def testStateExtents(self):
+        """
+        Test that the extents loading actually show up.
+        """
+        self.assertFalse(self._widget.MeshPlugin.Extents.isChecked())
+        self.assertImage('testInitial.png')
+
+        self._widget.MeshPlugin.Extents.setChecked(True)
+        self._widget.MeshPlugin.Extents.stateChanged.emit(True)
+        self.assertTrue(self._widget.MeshPlugin.Extents.isChecked())
+        self.assertImage('testExtentsOn.png')
+
+        self._widget.FilePlugin.FileList.setCurrentIndex(1)
+        self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
+        self.assertFalse(self._widget.MeshPlugin.Extents.isChecked())
+        self.assertImage('testExtentsOff.png')
+
+        self._widget.FilePlugin.FileList.setCurrentIndex(0)
+        self._widget.FilePlugin.FileList.currentIndexChanged.emit(0)
+        self.assertTrue(self._widget.MeshPlugin.Extents.isChecked())
+        self.assertImage('testExtentsOn.png')
 
 class TestMeshPlugin2(Testing.PeacockImageTestCase):
     """

@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import unittest
 from peacock.utils import Testing
 import os
 from PyQt5 import QtWidgets
@@ -241,6 +241,50 @@ class Tests(Testing.PeacockTester):
         self.vtkwin.onWrite(fname)
         self.assertFalse(Testing.gold_diff(fname))
 
+    @unittest.skip("#11756")
+    def testExodusExtentsReload(self):
+        """
+        Test that the extents is reloaded after changing input and then re-running.
+        """
+        fname = "extentsOn.png"
+        if os.path.exists(fname):
+            os.remove(fname)
+
+        # Create Peacock instance
+        cwd = os.getcwd()
+        diffusion1 = "simple_diffusion.i"
+        self.create_app([diffusion1, Testing.find_moose_test_exe(), "-w", cwd])
+        tabs = self.app.main_widget.tab_plugin
+        self.check_current_tab(tabs, self.input.tabName())
+
+        # Run simple diffusion
+        self.app.main_widget.setTab(self.exe.tabName())
+        self.exe.ExecuteRunnerPlugin.runClicked()
+        Testing.process_events(t=1)
+
+        # Enable extents and compare output
+        self.app.main_widget.setTab(self.result.tabName())
+        mesh = self.result.currentWidget().MeshPlugin
+        Testing.process_events(t=1)
+        mesh.Extents.setChecked(True)
+        mesh.Extents.stateChanged.emit(True)
+        Testing.process_events(t=1)
+
+        # Write file
+        Testing.set_window_size(self.vtkwin)
+        self.vtkwin.onWrite(fname)
+        self.assertFalse(Testing.gold_diff(fname))
+
+        # Re-execute
+        self.app.main_widget.setTab(self.exe.tabName())
+        self.exe.ExecuteRunnerPlugin.runClicked()
+        Testing.process_events(t=1)
+
+        # Show result and write file again
+        self.app.main_widget.setTab(self.result.tabName())
+        Testing.process_events(t=1)
+        self.vtkwin.onWrite('extentsOn.png')
+        self.assertFalse(Testing.gold_diff(fname, allowed=0.99))
 
 if __name__ == '__main__':
-    Testing.run_tests()
+    unittest.main(module=__name__, verbosity=2)
