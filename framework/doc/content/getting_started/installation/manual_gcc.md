@@ -1,7 +1,7 @@
 ## GCC
 
-We need a modern C++11 capable compiler. Our minimum requirements are: GCC 4.8.4, Clang 3.4.0,
-and Intel20130607. This section will focus on building a GCC !!package gcc!! compiler stack.
+We need a modern C++11 capable compiler. Our minimum requirements are: GCC !!package minimum_gcc!!, Clang !!package minimum_clang!!,
+and Intel !!package minimum_intel!!. This section will focus on building a GCC !!package gcc!! compiler stack.
 
 What version of GCC do we have?
 
@@ -14,8 +14,8 @@ This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
 
-If your version is less than 4.8.4, you will need to build a newer version. If your version is at or
-greater than 4.8.4, you have the option of skipping the GCC section.
+If your version is less than !!package minimum_gcc!!, you will need to build a newer version. If your version is at or
+greater than !!package minimum_gcc!!, you have the option of skipping the GCC section.
 
 !package! code
 cd $STACK_SRC
