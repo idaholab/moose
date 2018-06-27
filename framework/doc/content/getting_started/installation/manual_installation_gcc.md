@@ -29,8 +29,7 @@
 
 ## bash_profile
 
-Now that PETSc has been successfully installed and tested, its time to wrap all these environment
-variables up, and throw them in a bash shell profile somewhere.
+Now that everything has been installed, its time to wrap all these environment variables up, and throw them in a bash shell profile somewhere.
 
 Append the following contents into a new file called `moose-environment.sh`:
 
