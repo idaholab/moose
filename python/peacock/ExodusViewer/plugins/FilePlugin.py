@@ -231,6 +231,7 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Setup method for variable selection.
         """
         qobject.currentIndexChanged.connect(self._callbackVariableList)
+        qobject.setFocusPolicy(QtCore.Qt.StrongFocus)
 
     def _callbackVariableList(self, index):
         """
