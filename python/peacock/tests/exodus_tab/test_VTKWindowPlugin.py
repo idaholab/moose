@@ -167,6 +167,18 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         self._window._setLoadingMessage("Testing...")
         self.assertImage('testLoadingMessage.png')
 
+class TestVTKWindowPlugin2(Testing.PeacockImageTestCase):
+    """
+    Testing for VTKWindowPlugin without setting any file initially.
+    """
+
+    #: QApplication: The main App for QT, this must be static to work correctly.
+    qapp = QtWidgets.QApplication(sys.argv)
+    def test(self):
+        self.sleepIfSlow()
+        widget, self._window = main(size=[600,600])
+        self.assertImage('testStartMessage.png')
+
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

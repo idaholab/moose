@@ -162,6 +162,11 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self.setMainLayoutName('RightLayout')
         self.setup()
 
+        # Apply an initial message
+        self.blockSignals(True)
+        self.onWindowRequiresUpdate()
+        self.blockSignals(False)
+
     def onSetFilename(self, filename):
         """
         Slot for changing the filename, this is generally called from the FilePlugin signal.
@@ -242,13 +247,14 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._reset()
             self._setLoadingMessage('No file selected.')
 
-        if self._window.needsUpdate() and (self._reader is not None):
+        if self._window.needsUpdate():# and (self._reader is not None):
             self._window.update()
 
             for result in self._window:
                 result.getVTKRenderer().DrawOn()
 
-            self.updateWindow.emit(self._window, self._reader, self._result)
+            if self._reader is not None:
+                self.updateWindow.emit(self._window, self._reader, self._result)
 
             if self._reader is not None:
                 err = self._reader.getErrorObserver()
@@ -543,7 +549,7 @@ if __name__ == "__main__":
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     filename = 'none.e'
     widget, window = main(size=[600,600])
-    window.onSetFilename(filename)
-    window.onSetVariable('diffused')
-    window.onWindowRequiresUpdate()
+    #window.onSetFilename(filename)
+    #window.onSetVariable('diffused')
+    #window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

@@ -158,6 +158,19 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.ColorbarBlackFontToggle.setVisible(colorbar[0].getOption('visible'))
         self.updateOptions()
 
+    def onSetEnableWidget(self, value):
+        """
+        Enable/disable the menu items.
+        """
+        super(BackgroundPlugin, self).onSetEnableWidget(value)
+        self.GradientToggle.setEnabled(value)
+        self.BlackPreset.setEnabled(value)
+        self.WhitePreset.setEnabled(value)
+        self.ColorbarBlackFontToggle.setEnabled(value)
+        self.TopGradientColor.setEnabled(value)
+        self.BottomGradientColor.setEnabled(value)
+        self.SolidColor.setEnabled(value)
+
     def addToMenu(self, menu):
         """
         Create a toggle for the background color.
@@ -194,8 +207,10 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.BottomGradientColor = submenu.addAction("Select Bottom Gradient Color")
         self.BottomGradientColor.triggered.connect(self._callbackGradientBottomColor)
 
-        self.SolidGradientColor = submenu.addAction("Select Solid Color")
-        self.SolidGradientColor.triggered.connect(self._callbackSolidColor)
+        self.SolidColor = submenu.addAction("Select Solid Color")
+        self.SolidColor.triggered.connect(self._callbackSolidColor)
+
+        self.onSetEnableWidget(False)
 
     def updateResultOptions(self):
         """
