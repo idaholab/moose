@@ -38,19 +38,13 @@ ComputeAxisymmetric1DIncrementalStrain::ComputeAxisymmetric1DIncrementalStrain(
     _out_of_plane_strain_old(_has_out_of_plane_strain ? coupledValueOld("out_of_plane_strain")
                                                       : _zero),
     _has_scalar_out_of_plane_strain(isParamValid("scalar_out_of_plane_strain")),
-    _nscalar_strains(
-        _has_scalar_out_of_plane_strain ? coupledScalarComponents("scalar_out_of_plane_strain") : 0)
+    _nscalar_strains(coupledScalarComponents("scalar_out_of_plane_strain"))
 {
   if (_has_out_of_plane_strain && _has_scalar_out_of_plane_strain)
     mooseError("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");
 
   if (!_has_out_of_plane_strain && !_has_scalar_out_of_plane_strain)
     mooseError("Must define either out_of_plane_strain or scalar_out_of_plane_strain");
-
-  // in case when the provided scalar_out_of_plane_strain is not a coupled
-  // scalar variable, still set _nscalar_strains = 1 but return its default value 0
-  if (coupledScalarComponents("scalar_out_of_plane_strain") == 0)
-    _nscalar_strains = 1;
 
   if (_has_scalar_out_of_plane_strain)
   {
