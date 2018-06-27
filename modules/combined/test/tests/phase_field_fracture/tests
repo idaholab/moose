@@ -18,6 +18,26 @@
     input = 'crack2d_aniso.i'
     exodiff = 'crack2d_aniso_out.e'
   [../]
+  [./crack2d_aniso_hist_false]
+    type = 'Exodiff'
+    input = 'crack2d_aniso_hist_false.i'
+    exodiff = 'crack2d_aniso_hist_false_out.e'
+  [../]
+  [./crack2d_computeCrackedStress_smallstrain]
+    type = 'Exodiff'
+    input = 'crack2d_computeCrackedStress_smallstrain.i'
+    exodiff = 'crack2d_computeCrackedStress_smallstrain_out.e'
+  [../]
+  [./crack2d_computeCrackedStress_finitestrain_elastic]
+    type = 'Exodiff'
+    input = 'crack2d_computeCrackedStress_finitestrain_elastic.i'
+    exodiff = 'crack2d_computeCrackedStress_finitestrain_elastic_out.e'
+  [../]
+  [./crack2d_computeCrackedStress_finitestrain_plastic]
+    type = 'Exodiff'
+    input = 'crack2d_computeCrackedStress_finitestrain_plastic.i'
+    exodiff = 'crack2d_computeCrackedStress_finitestrain_plastic_out.e'
+  [../]
   [./void2d_iso]
     type = 'Exodiff'
     input = 'void2d_iso.i'

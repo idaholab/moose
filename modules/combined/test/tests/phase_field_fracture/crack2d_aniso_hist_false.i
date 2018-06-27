@@ -97,7 +97,7 @@
     c = c
     kdamage = 1e-6
     F_name = E_el
-    use_current_history_variable = true
+    use_current_history_variable = false
   [../]
 []
 
@@ -132,8 +132,8 @@
   l_max_its = 100
   nl_max_its = 10
 
-  dt = 5e-5
-  num_steps = 2
+  dt = 2e-6
+  num_steps = 5
 []
 
 [Outputs]

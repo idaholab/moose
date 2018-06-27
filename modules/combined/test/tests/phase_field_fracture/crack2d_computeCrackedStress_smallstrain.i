@@ -20,14 +20,22 @@
   displacements = 'disp_x disp_y'
 []
 
+[AuxVariables]
+  [./strain_yy]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
 [Modules]
   [./TensorMechanics]
     [./Master]
       [./All]
         add_variables = true
         strain = SMALL
-        additional_generate_output = 'strain_yy stress_yy'
         planar_formulation = PLANE_STRAIN
+        additional_generate_output = 'stress_yy'
+        strain_base_name = uncracked
       [../]
     [../]
   [../]
@@ -54,6 +62,16 @@
     variable = disp_y
     component = 1
     c = c
+  [../]
+[]
+
+[AuxKernels]
+  [./strain_yy]
+    type = RankTwoAux
+    variable = strain_yy
+    rank_two_tensor = uncracked_mechanical_strain
+    index_i = 1
+    index_j = 1
   [../]
 []
 
@@ -88,16 +106,22 @@
     type = ComputeElasticityTensor
     C_ijkl = '127.0 70.8 70.8 127.0 70.8 127.0 73.55 73.55 73.55'
     fill_method = symmetric9
+    base_name = uncracked
     euler_angle_1 = 30
     euler_angle_2 = 0
     euler_angle_3 = 0
   [../]
+  [./elastic]
+    type = ComputeLinearElasticStress
+    base_name = uncracked
+  [../]
   [./cracked_stress]
-    type = ComputeLinearElasticPFFractureStress
+    type = ComputeCrackedStress
     c = c
     kdamage = 1e-6
     F_name = E_el
     use_current_history_variable = true
+    uncracked_base_name = uncracked
   [../]
 []
 
