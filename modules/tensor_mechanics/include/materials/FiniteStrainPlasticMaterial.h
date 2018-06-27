@@ -35,7 +35,6 @@ public:
 protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties();
-
   std::vector<Real> _yield_stress_vector;
   MaterialProperty<RankTwoTensor> & _plastic_strain;
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;

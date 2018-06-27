@@ -33,14 +33,14 @@ validParams<FiniteStrainPlasticMaterial>()
 FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters & parameters)
   : ComputeStressBase(parameters),
     _yield_stress_vector(getParam<std::vector<Real>>("yield_stress")), // Read from input file
-    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),
-    _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
-    _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
-    _strain_increment(getMaterialProperty<RankTwoTensor>("strain_increment")),
-    _rotation_increment(getMaterialProperty<RankTwoTensor>("rotation_increment")),
-    _elasticity_tensor(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
+    _plastic_strain(declareProperty<RankTwoTensor>(_base_name + "plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "plastic_strain")),
+    _eqv_plastic_strain(declareProperty<Real>(_base_name + "eqv_plastic_strain")),
+    _eqv_plastic_strain_old(getMaterialPropertyOld<Real>(_base_name + "eqv_plastic_strain")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _elasticity_tensor(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
     _rtol(getParam<Real>("rtol")),
     _ftol(getParam<Real>("ftol")),
     _eptol(getParam<Real>("eptol")),
@@ -77,6 +77,9 @@ FiniteStrainPlasticMaterial::computeQpStress()
   // Rotate plastic strain tensor to the current configuration
   _plastic_strain[_qp] =
       _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
+
+  // Calculate the elastic strain_increment
+  _elastic_strain[_qp] = _mechanical_strain[_qp] - _plastic_strain[_qp];
 
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }

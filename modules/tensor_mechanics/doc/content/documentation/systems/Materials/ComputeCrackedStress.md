@@ -1,21 +1,20 @@
-# Compute Anisotropic Linear Elastic Phase Field Fracture Stress
+# Compute Cracked Stress
 
-!syntax description /Materials/ComputeLinearElasticPFFractureStress
+!syntax description /Materials/ComputeCrackedStress
 
 ## Description
 
-This material implements a phase field fracture model that can include anisotropic elasticity tensors, computing the
-stress and the free energy derivatives required for the model. It works with the standard phase field
-kernels for nonconserved variables. In the model, a nonconserved order parameter $d$ defines the
-crack, where $d = 0$ in undamaged material and $d = 1$ in cracked material. Cracked material can
-sustain a compressive stress, but not a tensile one. $d$ evolves to minimize the elastic free energy
+This material implements a phase field fracture model that can include anisotropic elasticity tensors, modifying the stress and computing the free energy derivatives required for the model. It works with the standard phase field
+kernels for nonconserved variables. In the model, a nonconserved order parameter $c$ defines the
+crack, where $c = 0$ in undamaged material and $c = 1$ in cracked material. Cracked material can
+sustain a compressive stress, but not a tensile one. $c$ evolves to minimize the elastic free energy
 of the system.
 
-This model assumes linear elastic mechanical deformation but can use an anisotropic elasticity tensor.
+This model takes the stress and Jacobian_mult that were calculated by another material and modifies them to include cracks.
 
 ## Model Summary
 
-In the model, the uncracked stress $\sigma_0$ is decomposed into its compressive $(-)$ and tensile $(+)$ parts using a spectral decomposition
+In the model, the uncracked stress $\sigma_0$ is provided by another material. It is decomposed into its compressive $(-)$ and tensile $(+)$ parts using a spectral decomposition
 \begin{equation}
 \boldsymbol{\sigma}_0 = \boldsymbol{Q} \boldsymbol{\Lambda} \boldsymbol{Q}^T,
 \end{equation}
@@ -35,7 +34,7 @@ The total strain energy density is defined as
 \end{equation}
 where $\psi^{+}$ is the strain energy due to tensile stress, $\psi^{-}$ is the strain energy due to
 compressive stress, and $k \ll 0$ is a parameter used to avoid non-positive definiteness at or near
-complete damage.
+complete damage. The compressive and tensile strain energies are determined from:
 \begin{equation}
 \psi^{+} = \frac{1}{2} \boldsymbol{\sigma}^{+} : \boldsymbol{\epsilon}
 \end{equation}
@@ -62,7 +61,7 @@ F =& \Psi + \gamma \\
 To be thermodynamically consistent, the stress is related to the deformation energy density according
 to
 \begin{equation}
-  \boldsymbol{\sigma} = \frac{\partial \psi_e}{\partial \boldsymbol{\epsilon}} = ((1-d)^2(1-k) + k)\frac{\partial \psi^+}{\partial \boldsymbol{\epsilon}} + \frac{\partial \psi^-}{\partial \boldsymbol{\epsilon}}.
+  \boldsymbol{\sigma} = \frac{\partial \psi_e}{\partial \boldsymbol{\epsilon}} = ((1-c)^2(1-k) + k)\frac{\partial \psi^+}{\partial \boldsymbol{\epsilon}} + \frac{\partial \psi^-}{\partial \boldsymbol{\epsilon}}.
 \end{equation}
 Since
 \begin{equation}
@@ -73,14 +72,14 @@ Since
 \end{equation}
 then,
 \begin{equation}
-	\boldsymbol{\sigma} = ((1-d)^2(1-k) + k)\boldsymbol{\sigma}^+ + \boldsymbol{\sigma}^-
+	\boldsymbol{\sigma} = ((1-c)^2(1-k) + k)\boldsymbol{\sigma}^+ + \boldsymbol{\sigma}^-
 \end{equation}
 
 The Jacobian matrix for the stress is
 \begin{equation}
-  \boldsymbol{\mathcal{J}} = \frac{\partial \boldsymbol{\sigma}}{\partial \boldsymbol{\epsilon}} = \left(((1-d)^2(1-k) + k) \boldsymbol{\mathcal{P}}^+ + \boldsymbol{\mathcal{P}}^- \right) \boldsymbol{\mathcal{C}},
+  \boldsymbol{\mathcal{J}} = \frac{\partial \boldsymbol{\sigma}}{\partial \boldsymbol{\epsilon}} = \left(((1-c)^2(1-k) + k) \boldsymbol{\mathcal{P}}^+ + \boldsymbol{\mathcal{P}}^- \right) \boldsymbol{\mathcal{M}},
 \end{equation}
-where $\boldsymbol{\mathcal{C}}$ is the elasticity tensor.
+where $\boldsymbol{\mathcal{M}}$ is the Jacobian_mult that was calculated by the constitutive model.
 
 ## Evolution Equation and History Variable
 
@@ -121,11 +120,11 @@ NonconservedAction. See the +PhaseField module documentation+ for more informati
 
 ## Example Input File Syntax
 
-!listing modules/combined/test/tests/phase_field_fracture/crack2d_aniso.i
+!listing modules/combined/test/tests/phase_field_fracture/crack2d_computeCrackedStress_smallstrain.i
          block=Materials/cracked_stress
 
-!syntax parameters /Materials/ComputeLinearElasticPFFractureStress
+!syntax parameters /Materials/ComputeCrackedStress
 
-!syntax inputs /Materials/ComputeLinearElasticPFFractureStress
+!syntax inputs /Materials/ComputeCrackedStress
 
-!syntax children /Materials/ComputeLinearElasticPFFractureStress
+!syntax children /Materials/ComputeCrackedStress

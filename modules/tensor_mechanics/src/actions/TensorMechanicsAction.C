@@ -53,6 +53,9 @@ validParams<TensorMechanicsAction>()
                                   "Add scalar quantity output for stress and/or strain (will be "
                                   "appended to the list in `generate_output`)");
   params.addParamNamesToGroup("additional_generate_output", "Output");
+  params.addParam<std::string>(
+      "strain_base_name",
+      "The base name used for the strain. If not provided, it will be set equal to base_name");
 
   return params;
 }
@@ -261,6 +264,9 @@ TensorMechanicsAction::act()
     auto params = _factory.getValidParams(type);
     params.applyParameters(parameters(),
                            {"displacements", "use_displaced_mesh", "scalar_out_of_plane_strain"});
+
+    if (isParamValid("strain_base_name"))
+      params.set<std::string>("base_name") = getParam<std::string>("strain_base_name");
 
     params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
