@@ -72,11 +72,11 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
     action_groups = collections.defaultdict(set)
 
     for node in reg.children[0].children[0]:
-        object_groups[node['name']].add(node['label'].replace('App', ''))
+        object_groups[node['name']].add(node['label'])
 
     for node in reg.children[0].children[1]:
-        action_groups[node['name']].add(node['label'].replace('App', ''))
-        action_groups[node['class']].add(node['label'].replace('App', ''))
+        action_groups[node['name']].add(node['label'])
+        action_groups[node['class']].add(node['label'])
 
     for node in anytree.PreOrderIter(root):
         if isinstance(node, MooseObjectNode):
@@ -101,7 +101,7 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
 
     if not allow_test_objects:
         for node in anytree.PreOrderIter(root):
-            if all([group.endswith('Test') for group in node.groups]):
+            if node.groups and all([group.endswith('TestApp') for group in node.groups]):
                 node.removed = True
 
     # Alias

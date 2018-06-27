@@ -114,7 +114,6 @@ def _yaml_load_extensions(config):
             if ext_type not in ext_configs:
                 ext_configs[ext_type] = dict()
             ext_configs[ext_type].update(value)
-            #ptions.pop(key)
         else:
             LOG.error("The section '%s' must contain a 'type' parameter.", key)
 
