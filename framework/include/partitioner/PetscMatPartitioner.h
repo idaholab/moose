@@ -31,11 +31,17 @@ public:
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 
+  virtual dof_id_type computeElementWieght(Elem & elm);
+
+  virtual dof_id_type computeSideWeight(Elem & elem, Elem & side);
+
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 
 private:
   std::string _part_package;
+  bool _apply_element_weight;
+  bool _apply_side_weight;
 };
 
 #endif /* PETSCMATPARTITIONER_H */

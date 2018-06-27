@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [./ptscotch]
     requirement = 'MOOSE need more partitioning options'
     issues = '##11628'
     design = '/PetscMatPartitioner.md'
@@ -7,6 +7,45 @@
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_ptscotch_out.e'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Outputs/file_base=petsc_partitioner_ptscotch_out'
+    ptscotch = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./ptscotch_weight_elment]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    design = '/PetscMatPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_weight_element_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_element_out'
+    ptscotch = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./ptscotch_weight_side]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    design = '/PetscMatPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_weight_side_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/apply_side_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_side_out'
+    ptscotch = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./ptscotch_weight_both]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    design = '/PetscMatPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_weight_both_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_both_out'
     ptscotch = true
     min_parallel = 4
     max_parallel = 4
@@ -20,6 +59,45 @@
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_parmetis_out.e'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_out'
+    parmetis = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis_weight_element]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    design = '/PetscMatPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_element_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_weight_element_out Mesh/Partitioner/apply_element_weight=true'
+    parmetis = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis_weight_side]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    design = '/PetscMatPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_side_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_weight_side_out Mesh/Partitioner/apply_side_weight=true'
+    parmetis = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis_weight_both]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    design = '/PetscMatPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_both_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_weight_both_out Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true'
     parmetis = true
     min_parallel = 4
     max_parallel = 4
@@ -52,7 +130,7 @@
     exodiff = 'petsc_partitioner_party_out.e'
     cli_args = 'Mesh/Partitioner/part_package=party Outputs/file_base=petsc_partitioner_party_out'
     party = true
-    petsc_version = '>=3.9.3'
+    petsc_version = '>=3.9.0'
     min_parallel = 4
     max_parallel = 4
   [../]
