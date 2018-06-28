@@ -7,7 +7,8 @@
     mesh_mode = REPLICATED
     issues = "#7885"
     design = "InterfaceKernels/index.md"
-    requirement = "The InterfaceKernel system shall operate with coupled variables in 2D."
+    requirement = "The InterfaceKernel system shall operate with coupled variables in 2D. "
+                  "This uses a penalty implementation that is optimally convergent."
   [../]
 
   [./jacobian_test]
