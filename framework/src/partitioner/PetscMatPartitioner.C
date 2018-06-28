@@ -54,8 +54,6 @@ PetscMatPartitioner::PetscMatPartitioner(const InputParameters & params)
     mooseError(_part_package, " does not support weighted graph");
 }
 
-PetscMatPartitioner::~PetscMatPartitioner() {}
-
 std::unique_ptr<Partitioner>
 PetscMatPartitioner::clone() const
 {
@@ -92,7 +90,7 @@ PetscMatPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
       // Get the original element
       auto & elem = _local_id_to_elem[k];
 
-      elem_weights[k] = computeElementWieght(*elem);
+      elem_weights[k] = computeElementWeight(*elem);
     }
   }
 
@@ -170,7 +168,7 @@ PetscMatPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
 }
 
 dof_id_type
-PetscMatPartitioner::computeElementWieght(Elem & /*elem*/)
+PetscMatPartitioner::computeElementWeight(Elem & /*elem*/)
 {
   return 1;
 }

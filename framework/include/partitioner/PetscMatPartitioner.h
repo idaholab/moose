@@ -27,11 +27,10 @@ class PetscMatPartitioner : public MoosePartitioner
 {
 public:
   PetscMatPartitioner(const InputParameters & params);
-  virtual ~PetscMatPartitioner();
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 
-  virtual dof_id_type computeElementWieght(Elem & elm);
+  virtual dof_id_type computeElementWeight(Elem & elm);
 
   virtual dof_id_type computeSideWeight(Elem & elem, Elem & side);
 
