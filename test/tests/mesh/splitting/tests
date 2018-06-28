@@ -36,4 +36,36 @@
     design = 'Mesh/splitting.md'
     requirement = 'The mesh splitter will throw an error when an attempt is made to split a "DistributedMesh".'
   [../]
+
+  [./split_with_RM_part1]
+    type = 'CheckFiles'
+    input = 'geometric_neighbors.i'
+    cli_args = '--split-mesh 2 --split-file geometric_neighbors Mesh/parallel_type=replicated'
+    check_files = 'geometric_neighbors.cpr/2/header.cpr geometric_neighbors.cpr/2/split-2-0.cpr geometric_neighbors.cpr/2/split-2-1.cpr'
+    recover = false
+    mesh_mode = DISTRIBUTED
+    compiler = 'GCC CLANG'
+
+    issues = '#11434'
+    design = 'Mesh/splitting.md'
+    requirement = 'The mesh splitter will throw an error when an attempt is made to split a "DistributedMesh".'
+  [../]
+
+  [./split_with_RM_part2]
+    type = 'Exodiff'
+    input = 'geometric_neighbors.i'
+    cli_args = '--use-split --split-file geometric_neighbors Outputs/file_base=geometric_edge_two_2D_out'
+    exodiff = 'geometric_edge_two_2D_out.e'
+    recover = false
+    mesh_mode = DISTRIBUTED
+    compiler = 'GCC CLANG'
+
+    min_parallel = 2
+    max_parallel = 2
+    prereq = 'split_with_RM_part1'
+
+    issues = '#11434'
+    design = 'Mesh/splitting.md'
+    requirement = 'The mesh splitter will throw an error when an attempt is made to split a "DistributedMesh".'
+  [../]
 []
