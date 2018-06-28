@@ -14,7 +14,7 @@
 
 // Forward Declarations
 class GlobalDisplacementAux;
-class GlobalStrainUserObject;
+class GlobalStrainUOInterface;
 class RankTwoTensor;
 
 template <>
@@ -33,7 +33,7 @@ protected:
 
   bool _output_global_disp;
 
-  const GlobalStrainUserObject & _pst;
+  const GlobalStrainUOInterface & _pst;
   const VectorValue<bool> & _periodic_dir;
 
   const unsigned int _dim;

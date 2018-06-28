@@ -14,7 +14,7 @@
 
 // Forward Declarations
 class ComputeGlobalStrain;
-class GlobalStrainUserObject;
+class GlobalStrainUOInterface;
 class RankTwoTensor;
 
 template <>
@@ -37,7 +37,7 @@ protected:
   const VariableValue & _scalar_global_strain;
   MaterialProperty<RankTwoTensor> & _global_strain;
 
-  const GlobalStrainUserObject & _pst;
+  const GlobalStrainUOInterface & _pst;
   const VectorValue<bool> & _periodic_dir;
 
   const unsigned int _dim;
