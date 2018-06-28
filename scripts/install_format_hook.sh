@@ -11,7 +11,17 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # determine the appropriate hook file
 function moose_is_git_submodule()
 {
-    cd $script_dir && git rev-parse --show-superproject-working-tree
+    # get the top level of the MOOSE repository or submodule
+    local moose_git_dir
+    moose_git_dir="$(cd $script_dir && git rev-parse --show-toplevel)"
+
+    # Try running git command one level above the top level MOOSE directory:
+    # * If MOOSE is a submodule, then ".." corresponds to the parent repository,
+    #   so its top level will be printed.
+    # * If MOOSE is NOT a submodule, then ".." leads to a non-git directory, so
+    #   git will print an error message that gets redirected to /dev/null, so
+    #   nothing will be printed.
+    cd $moose_git_dir/.. && git rev-parse --show-toplevel 2> /dev/null
 }
 if [[ $(moose_is_git_submodule) ]]; then
     hookfile="$(cd $script_dir && git rev-parse --show-toplevel)/../.git/modules/moose/hooks/pre-commit"
