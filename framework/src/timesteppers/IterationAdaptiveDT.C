@@ -293,7 +293,6 @@ IterationAdaptiveDT::converged()
     return true;
 
   // we need to update the post-processor value
-  // this is the only way I could find to do it, maybe there is a cleaner way
   // (otherwise, _pps_value is the value computed at the previous time step)
   if (_pps_value)
     _fe_problem.execute(EXEC_TIMESTEP_END);
@@ -308,7 +307,6 @@ IterationAdaptiveDT::converged()
 
   // if the time step is much smaller than the current time step
   // we need to repeat the current iteration with a smaller time step
-  // (the 0.5 value needs to be defined by the user)
   if (dt_test < _dt * _large_step_rejection_threshold)
     return false;
 
@@ -321,7 +319,7 @@ IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT)
 {
   if (_pps_value && _t_step > 1)
   {
-    if (/**_pps_value > _dt_min &&*/ limitedDT > *_pps_value)
+    if (limitedDT > *_pps_value)
     {
       limitedDT = std::max(_dt_min, *_pps_value);
 
