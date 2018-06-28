@@ -34,7 +34,9 @@ echo '#!/bin/bash
 # paths to all c++ source and header files
 cpp_file_paths="framework/src framework/include modules/*/src modules/*/include test unit examples tutorials stork"
 
-changed_cpp_files=`git diff --staged --name-only -- $cpp_file_paths`
+# get names of all staged files that are added, copied, modified, or renamed; exclude deleted files
+changed_cpp_files=`git diff --staged --diff-filter=ACMR --name-only -- $cpp_file_paths`
+
 git clang-format -- $changed_cpp_files
 git add $changed_cpp_files
 ' > $hookfile
