@@ -71,6 +71,8 @@ class AppSyntaxExtension(command.CommandExtension):
                              "Parameter groups to show as un-collapsed.")
         config['alias'] = (None, "List of Dictionary of lists of syntax aliases.")
         config['allow-test-objects'] = (False, "Enable the test objects.")
+        config['use-legacy-location'] = (False, "Use syntax based markdown location rather " \
+                                                "than header based location.")
 
         return config
 
@@ -92,7 +94,8 @@ class AppSyntaxExtension(command.CommandExtension):
                                                   alias=self['alias'],
                                                   remove=self['remove'],
                                                   hide=self['hide'],
-                                                  allow_test_objects=self['allow-test-objects'])
+                                                  allow_test_objects=self['allow-test-objects'],
+                                                  legacy_loc=self['use-legacy-location'])
 
                     self._app_type = mooseutils.runExe(exe, ['--type']).strip(' \n')
 
@@ -344,38 +347,42 @@ class SyntaxCompleteCommand(SyntaxCommandBase):
         settings = SyntaxCommandBase.defaultSettings()
         settings['group'] = (None, "The group (app) to limit the complete syntax list.")
         settings['actions'] = (True, "Include a list of Action objects in syntax.")
+        settings['objects'] = (True, "Include a list of MooseObject objects in syntax.")
+        settings['subsystems'] = (True, "Include a list of sub system syntax in the output.")
         settings['level'] = (2, "Beginning heading level.")
         return settings
 
-    def _addList(self, parent, obj, actions, group, level):
+    def _addList(self, parent, obj, level):
 
-        for child in obj.syntax(group=group):
+        groups = [self.settings['group']] if self.settings['group'] else []
+        for child in obj.syntax(group=self.settings['group']):
             if child.removed:
                 continue
 
             h = tokens.Heading(parent, level=level, string=unicode(child.fullpath.strip('/')))
 
             # TODO: systems prefix is needed to be unique, there must be a better way
-            url = os.path.join('systems', child.markdown())
+            if self.extension.get('use-legacy-location'):
+                url = os.path.join('systems', child.markdown())
+            else:
+                url = os.path.join('syntax', child.markdown())
+
             a = autolink.AutoLink(h, url=url)
             materialicon.IconToken(a, icon=u'input', style="padding-left:10px;")
 
             SyntaxToken(parent,
                         syntax=child,
-                        actions=actions,
-                        objects=True,
-                        subsystems=False,
-                        groups=[group] if group else [],
+                        actions=self.settings['actions'],
+                        objects=self.settings['objects'],
+                        subsystems=self.settings['subsystems'],
+                        groups=groups,
                         level=level)
-            self._addList(parent, child, actions, group, level + 1)
+            self._addList(parent, child, level + 1)
 
 
     def createTokenFromSyntax(self, info, parent, obj):
 
-        self._addList(parent, obj,
-                      self.settings['actions'],
-                      self.settings['group'],
-                      int(self.settings['level']))
+        self._addList(parent, obj, int(self.settings['level']))
         return parent
 
 
@@ -434,6 +441,7 @@ class RenderSyntaxToken(components.RenderComponent):
         errors = []
 
         for obj in items:
+
             if obj.removed:
                 continue
 
@@ -443,7 +451,14 @@ class RenderSyntaxToken(components.RenderComponent):
             #TODO: need to figure out how to get rid of 'systems' prefix:
             #  /Executioner/Adaptivity/index.md
             #  /Adaptivity/index.md
-            nodes = root_page.findall(os.path.join('systems', obj.markdown()), exc=None)
+            if isinstance(obj, syntax.SyntaxNode):
+                if self.extension.get('use-legacy-location'):
+                    nodes = root_page.findall(os.path.join('systems', obj.markdown()), exc=None)
+                else:
+                    nodes = root_page.findall(os.path.join('syntax', obj.markdown()), exc=None)
+            else:
+                nodes = root_page.findall(obj.markdown(), exc=None)
+
             if len(nodes) > 1:
                 msg = "Located multiple pages with the given filename:"
                 for n in nodes:

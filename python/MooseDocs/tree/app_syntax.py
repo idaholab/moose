@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 REGISTER_PAIRS = [('Postprocessor', 'UserObjects/*'),
                   ('AuxKernel', 'Bounds/*')]
 
-def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None):
+def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None, legacy_loc=False):
     """
     Creates a tree structure representing the MooseApp syntax for the given executable.
     """
@@ -40,19 +40,15 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
         raw = raw.split('**START JSON DATA**\n')[1]
         raw = raw.split('**END JSON DATA**')[0]
         tree = json.loads(raw, object_pairs_hook=collections.OrderedDict)
-        raw = mooseutils.runExe(exe, ['--registry-hit'])
-        raw = raw.split('### START REGISTRY DATA ###\n')[1]
-        raw = raw.split('### END REGISTRY DATA ###')[0]
-        reg = mooseutils.hit_load(raw)
 
     except Exception as e: #pylint: disable=broad-except
         LOG.error("Failed to execute the MOOSE executable '%s':\n%s", exe, e.message)
         sys.exit(1)
 
-    root = SyntaxNode(None, '')
+    root = SyntaxNode(None, '', use_legacy_location=legacy_loc)
     for key, value in tree['blocks'].iteritems():
-        node = SyntaxNode(root, key)
-        __syntax_tree_helper(node, value)
+        node = SyntaxNode(root, key, use_legacy_location=legacy_loc)
+        __syntax_tree_helper(node, value, legacy_loc)
 
     hidden = set()
     if isinstance(hide, dict):
@@ -65,26 +61,6 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
         for node in anytree.PreOrderIter(root):
             if node.fullpath in hidden:
                 node.hidden = True
-
-    #TODO: When the new registration methods are added to the --json dump, this will not be needed.
-    # Add groups from --registry-hit output
-    object_groups = collections.defaultdict(set)
-    action_groups = collections.defaultdict(set)
-
-    for node in reg.children[0].children[0]:
-        object_groups[node['name']].add(node['label'].replace('App', ''))
-
-    for node in reg.children[0].children[1]:
-        action_groups[node['name']].add(node['label'].replace('App', ''))
-        action_groups[node['class']].add(node['label'].replace('App', ''))
-
-    for node in anytree.PreOrderIter(root):
-        if isinstance(node, MooseObjectNode):
-            node._groups.update(object_groups[node.name]) #pylint: disable=protected-access
-        elif isinstance(node, ActionNode):
-            node._groups.update(action_groups[node.name]) #pylint: disable=protected-access
-            for task in node.tasks:
-                node._groups.update(action_groups[task]) #pylint: disable=protected-access
 
     # Remove
     removed = set()
@@ -101,7 +77,7 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
 
     if not allow_test_objects:
         for node in anytree.PreOrderIter(root):
-            if all([group.endswith('Test') for group in node.groups]):
+            if node.groups and all([group.endswith('TestApp') for group in node.groups]):
                 node.removed = True
 
     # Alias
@@ -113,18 +89,18 @@ def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None
 
     return root
 
-def __add_moose_object_helper(parent, name, item):
+def __add_moose_object_helper(parent, name, item, legacy_loc):
     """
     Helper to handle the Postprocessor/UserObject and Bounds/AuxKernel special case.
     """
-    node = MooseObjectNode(parent, name, item)
+    node = MooseObjectNode(parent, name, item, use_legacy_location=legacy_loc)
 
     for base, parent_syntax in REGISTER_PAIRS:
         if ('moose_base' in item) and (item['moose_base'] == base) and \
            (item['parent_syntax'] == parent_syntax):
             node.removed = True
 
-def __syntax_tree_helper(parent, item):
+def __syntax_tree_helper(parent, item, legacy_loc):
     """
     Tree builder helper function.
 
@@ -138,22 +114,22 @@ def __syntax_tree_helper(parent, item):
         for key, action in item['actions'].iteritems():
             if ('parameters' in action) and action['parameters'] and \
             ('isObjectAction' in action['parameters']):
-                MooseObjectActionNode(parent, key, action)
+                MooseObjectActionNode(parent, key, action, use_legacy_location=legacy_loc)
             else:
-                ActionNode(parent, key, action)
+                ActionNode(parent, key, action, use_legacy_location=legacy_loc)
 
     if 'star' in item:
-        __syntax_tree_helper(parent, item['star'])
+        __syntax_tree_helper(parent, item['star'], legacy_loc)
 
     if ('types' in item) and item['types']:
         for key, obj in item['types'].iteritems():
-            __add_moose_object_helper(parent, key, obj)
+            __add_moose_object_helper(parent, key, obj, legacy_loc)
 
     if ('subblocks' in item) and item['subblocks']:
         for k, v in item['subblocks'].iteritems():
-            node = SyntaxNode(parent, k)
-            __syntax_tree_helper(node, v)
+            node = SyntaxNode(parent, k, use_legacy_location=legacy_loc)
+            __syntax_tree_helper(node, v, legacy_loc)
 
     if ('subblock_types' in item) and item['subblock_types']:
         for k, v in item['subblock_types'].iteritems():
-            __add_moose_object_helper(parent, k, v)
+            __add_moose_object_helper(parent, k, v, legacy_loc)

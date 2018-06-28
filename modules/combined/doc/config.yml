@@ -28,6 +28,7 @@ Renderer:
 Extensions:
     appsyntax:
         type: MooseDocs.extensions.appsyntax
+        #use-legacy-location: False
         executable: ${MOOSE_DIR}/modules/combined
         hide:
 

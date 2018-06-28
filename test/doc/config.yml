@@ -11,6 +11,7 @@ Renderer:
 Extensions:
     appsyntax:
         type: MooseDocs.extensions.appsyntax
+        use-legacy-location: False
         executable: ${MOOSE_DIR}/test
         hide:
             framework: !include framework/doc/hidden.yml

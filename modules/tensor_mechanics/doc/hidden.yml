@@ -74,6 +74,7 @@
 - /Materials/ExponentialSoftening
 - /Materials/PowerLawSoftening
 - /Materials/StrainEnergyDensity
+- /Modules/TensorMechanics
 - /Postprocessors/Mass
 - /Postprocessors/MaterialTensorIntegral
 - /Postprocessors/CrackFrontData
