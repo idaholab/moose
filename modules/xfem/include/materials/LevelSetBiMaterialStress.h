@@ -15,8 +15,6 @@ class RankTwoTensor;
 class RankFourTensor;
 class XFEM;
 
-registerMooseObject("XFEMApp", LevelSetBiMaterialStress);
-
 template <>
 InputParameters validParams<LevelSetBiMaterialStress>();
 

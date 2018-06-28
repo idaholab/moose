@@ -9,6 +9,8 @@
 #include "MooseVariable.h"
 #include "libmesh/string_to_enum.h"
 
+registerMooseObject("XFEMApp", LevelSetCutUserObject);
+
 template <>
 InputParameters
 validParams<LevelSetCutUserObject>()
