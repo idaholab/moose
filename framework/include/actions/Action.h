@@ -194,7 +194,7 @@ protected:
   std::shared_ptr<MooseMesh> & _displaced_mesh;
 
   /// Convenience reference to a problem this action works on
-  std::shared_ptr<FEProblemBase> & _problem;
+  std::unique_ptr<FEProblemBase> & _problem;
 
   /// Convenience reference to an executioner
   std::shared_ptr<Executioner> & _executioner;

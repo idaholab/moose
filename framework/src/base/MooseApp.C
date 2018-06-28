@@ -1383,8 +1383,6 @@ void
 MooseApp::setRestart(const bool & value)
 {
   _restart = value;
-
-  std::shared_ptr<FEProblemBase> fe_problem = _action_warehouse.problemBase();
 }
 
 void

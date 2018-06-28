@@ -34,9 +34,9 @@ CreateExecutionerAction::CreateExecutionerAction(InputParameters params) : Moose
 void
 CreateExecutionerAction::act()
 {
-  std::shared_ptr<EigenProblem> eigen_problem = std::dynamic_pointer_cast<EigenProblem>(_problem);
+  auto eigen_problem = dynamic_cast<EigenProblem *>(_problem.get());
   if (eigen_problem)
-    _moose_object_pars.set<EigenProblem *>("_eigen_problem") = eigen_problem.get();
+    _moose_object_pars.set<EigenProblem *>("_eigen_problem") = eigen_problem;
 
   std::shared_ptr<Executioner> executioner =
       _factory.create<Executioner>(_type, "Executioner", _moose_object_pars);
