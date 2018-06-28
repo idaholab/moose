@@ -42,5 +42,8 @@
     input = '2d_diffusion_test.i'
     cli_args = 'Executioner/solve_type=linear Outputs/exodus=false'
     absent_out = 'Nonlinear \|R\|'
+    requirement = 'MOOSE should not compute an extra residual if the linear solver is used'
+    issues = '#11760'
+    design = 'FEProblem.md'
   [../]
 []
