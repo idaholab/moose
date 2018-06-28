@@ -11,7 +11,17 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # determine the appropriate hook file
 function moose_is_git_submodule()
 {
-    cd $script_dir && git rev-parse --show-superproject-working-tree
+    # get the top level of the MOOSE repository or submodule
+    local moose_git_dir
+    moose_git_dir="$(cd $script_dir && git rev-parse --show-toplevel)"
+
+    # Try running git command one level above the top level MOOSE directory:
+    # * If MOOSE is a submodule, then ".." corresponds to the parent repository,
+    #   so its top level will be printed.
+    # * If MOOSE is NOT a submodule, then ".." leads to a non-git directory, so
+    #   git will print an error message that gets redirected to /dev/null, so
+    #   nothing will be printed.
+    cd $moose_git_dir/.. && git rev-parse --show-toplevel 2> /dev/null
 }
 if [[ $(moose_is_git_submodule) ]]; then
     hookfile="$(cd $script_dir && git rev-parse --show-toplevel)/../.git/modules/moose/hooks/pre-commit"
@@ -34,7 +44,9 @@ echo '#!/bin/bash
 # paths to all c++ source and header files
 cpp_file_paths="framework/src framework/include modules/*/src modules/*/include test unit examples tutorials stork"
 
-changed_cpp_files=`git diff --staged --name-only -- $cpp_file_paths`
+# get names of all staged files that are added, copied, modified, or renamed; exclude deleted files
+changed_cpp_files=`git diff --staged --diff-filter=ACMR --name-only -- $cpp_file_paths`
+
 git clang-format -- $changed_cpp_files
 git add $changed_cpp_files
 ' > $hookfile
