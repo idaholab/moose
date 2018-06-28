@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Contact Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/contact
+    home: /modules/contact
 
 Extensions:
     appsyntax:

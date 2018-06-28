@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Chemical Reactions Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/chemical_reactions
+    home: /modules/chemical_reactions
 
 Extensions:
     appsyntax:

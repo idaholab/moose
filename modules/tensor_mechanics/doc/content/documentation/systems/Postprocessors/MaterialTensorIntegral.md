@@ -24,7 +24,7 @@ reference tensor
 \end{equation}
 
 This class is most often used in
-[Generalized Plane Strain](/modules/tensor_mechanics/generalized_plane_strain.md)
+[Generalized Plane Strain](modules/tensor_mechanics/generalized_plane_strain.md)
 simulations to calculate the out-of-plane stress component.
 
 ## Example Input File

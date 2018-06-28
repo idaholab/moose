@@ -14,7 +14,7 @@ _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action
 
 ## Residual Calculation
 
-!include documentation/modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
+!include modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
 
 ## Example Input File syntax
 

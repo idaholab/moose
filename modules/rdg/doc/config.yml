@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE rDG Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/rdg
+    home: /modules/rdg
 
 Extensions:
     appsyntax:

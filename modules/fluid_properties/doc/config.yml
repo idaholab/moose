@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Fluid Properties Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/fluid_properties
+    home: /modules/fluid_properties
 
 Extensions:
     appsyntax:

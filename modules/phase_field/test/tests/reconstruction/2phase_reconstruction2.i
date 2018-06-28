@@ -10,7 +10,7 @@
 []
 
 # The following sections are extracted in the documentation in
-# moose/docs/content/documentation/modules/phase_field/ICs/EBSD.md
+# moose/docs/content/modules/phase_field/ICs/EBSD.md
 
 [Mesh]
   type = EBSDMesh

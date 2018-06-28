@@ -13,7 +13,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Solid Mechanics Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/solid_mechanics
+    home: /modules/solid_mechanics
 
 Extensions:
     appsyntax:

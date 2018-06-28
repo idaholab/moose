@@ -33,7 +33,7 @@ as is required to achieve convergence.
        caption=A trial stress is shown outside of the deviatoric yield surface and the radial return
                  stress which is normal to the yield surface.
 
-!include documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 In the case of isotropic linear hardening plasticity, with the hardening function $ r = hp$, the
 effective plastic strain increment has the form:

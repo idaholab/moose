@@ -7,6 +7,6 @@ employed by MOOSE.
 
 The software quality documents for MOOSE are listed below:
 
-- [System Requirement Specification (SRS)](/sqa/moose_srs.md)
-- [System Design Description (SDD)](/sqa/moose_sdd.md)
-- [Requirements Traceability Matrix (RTM)](/sqa/moose_rtm.md)
+- [System Requirement Specification (SRS)](sqa/moose_srs.md)
+- [System Design Description (SDD)](sqa/moose_sdd.md)
+- [Requirements Traceability Matrix (RTM)](sqa/moose_rtm.md)

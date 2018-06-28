@@ -22,7 +22,7 @@ _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action
 
 ## Residual Calculation
 
-!include documentation/modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
+!include modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
 
 In cylindrical coordinates, the
 [divergence of a rank-2 tensor](https://en.wikipedia.org/wiki/Tensor_derivative_%28continuum_mechanics%29#Cylindrical_polar_coordinates_2)

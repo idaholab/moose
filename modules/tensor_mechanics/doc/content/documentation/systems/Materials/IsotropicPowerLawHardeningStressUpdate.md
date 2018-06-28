@@ -4,7 +4,7 @@
 
 ## Description
 
-!include documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
+!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
 This class models power law hardening by using the relation
 \begin{equation}

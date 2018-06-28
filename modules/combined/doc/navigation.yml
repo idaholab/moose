@@ -10,13 +10,13 @@ Getting Started:
     Manual Install (GCC): getting_started/installation/manual_installation_gcc.md
     Manual Install (LLVM): getting_started/installation/manual_installation_llvm.md
 Documentation:
-    Systems: documentation/systems/index.md
-    Application Usage: documentation/application_usage/index.md
-    Application Development: documentation/application_development/index.md
-    Framework Development: documentation/framework_development/index.md
-    Finite Element Concepts: documentation/finite_element_concepts/index.md
-    Modules: documentation/modules/index.md
-    Software Quality: documentation/sqa/index.md
+    Systems: systems/index.md
+    Application Usage: application_usage/index.md
+    Application Development: application_development/index.md
+    Framework Development: framework_development/index.md
+    Finite Element Concepts: finite_element_concepts/index.md
+    Modules: modules/index.md
+    Software Quality: sqa/index.md
     MooseDocs: utilities/MooseDocs/index.md
     Python: utilities/python/index.md
 Help:

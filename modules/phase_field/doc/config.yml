@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Phase Field Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/phase_field
+    home: /modules/phase_field
 
 Extensions:
     appsyntax:

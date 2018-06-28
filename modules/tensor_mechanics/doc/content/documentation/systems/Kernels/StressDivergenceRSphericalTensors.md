@@ -19,7 +19,7 @@ _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action
 
 ## Residual Calculation
 
-!include documentation/modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
+!include modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
 
 The stress divergence in spherical coordinates includes contributions from the normal polar and
 azimuthal stresses even in the 1D case.  After simplifying for the 1D case, the spherical stress

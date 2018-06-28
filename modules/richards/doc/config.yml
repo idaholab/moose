@@ -13,7 +13,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Richards Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/richards
+    home: /modules/richards
 
 Extensions:
     appsyntax:
