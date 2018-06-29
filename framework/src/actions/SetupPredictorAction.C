@@ -35,8 +35,8 @@ SetupPredictorAction::act()
 {
   if (_problem->isTransient())
   {
-    Transient * transient = dynamic_cast<Transient *>(_executioner.get());
-    if (transient == NULL)
+    Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+    if (!transient)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
     _moose_object_pars.set<Transient *>("_executioner") = transient;

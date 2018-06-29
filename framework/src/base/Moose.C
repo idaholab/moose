@@ -59,9 +59,11 @@ void
 addActionTypes(Syntax & syntax)
 {
   /**
-   * The last param here indicates whether the task must be satisfied or not for a successful run.
-   * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they
-   * have not been explicitly created by the parser or some other mechanism.
+   * The (optional) last param here indicates whether the task should trigger an Action auto-build.
+   * If a task is marked as "true". Then MOOSE will attempt to build the associated Action if one is
+   * not supplied by some other means (usually through the input file or custom Action). Only
+   * Actions that do not have required parameters and have defaults for all optional parameters can
+   * be built automatically (See ActionWarehouse.C).
    *
    * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we
    * can generally force creation of these "Action"s as needed by registering them to syntax that we
@@ -73,7 +75,7 @@ addActionTypes(Syntax & syntax)
   /**** Register Actions ****/
   /**************************/
   registerMooseObjectTask("create_problem",               Problem,                false);
-  registerMooseObjectTask("setup_executioner",            Executioner,            true);
+  registerMooseObjectTask("setup_executioner",            Executioner,            false);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
@@ -161,6 +163,7 @@ addActionTypes(Syntax & syntax)
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
+  registerTask("check_integrity_early", true);
   registerTask("setup_quadrature", true);
 
   /// Additional Actions
@@ -217,6 +220,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
+                           "(check_integrity_early)"
                            "(setup_predictor)"
                            "(init_displaced_problem)"
                            "(add_aux_variable, add_variable, add_elemental_field_variable)"

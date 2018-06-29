@@ -203,7 +203,7 @@ ActionWarehouse::hasActions(const std::string & task) const
 void
 ActionWarehouse::buildBuildableActions(const std::string & task)
 {
-  if (_syntax.isActionRequired(task) && _action_blocks[task].empty())
+  if (_syntax.shouldAutoBuild(task) && _action_blocks[task].empty())
   {
     bool ret_value = false;
     auto it_pair = _action_factory.getActionsByTask(task);

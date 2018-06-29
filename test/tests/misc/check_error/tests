@@ -690,7 +690,6 @@
     input = 'kernel_with_vector_var.i'
     expect_err = 'No standard variable named u found. Did you specify a vector variable when you meant to specify a standard variable'
   [../]
-
   [./coupled_nodal_for_non_nodal_variable]
     type = 'RunException'
     input = 'coupled_nodal_for_non_nodal_variable.i'
@@ -716,5 +715,14 @@
     requirement = "The system shall report an error if users try to get older nodal values of non-nodal variables."
     design = 'Coupleable.md'
     issues = '#11623'
+  [../]
+  [./missing_executioner]
+    type = 'RunException'
+    input = 'missing_executioner.i'
+    expect_err = '"Executioner" does not exist'
+
+    requirement = 'The system shall have an integrity check that ensures an Executioner object exists in the system.'
+    design = 'Executioner/index.md'
+    issues = '#11586'
   [../]
 []

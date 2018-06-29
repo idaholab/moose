@@ -57,7 +57,7 @@ LazyCoupleable::coupled(const std::string & var_name, unsigned int /*comp*/)
 {
   if (!_l_fe_problem)
   {
-    auto & executioner_ptr = _l_app.executioner();
+    auto executioner_ptr = _l_app.getExecutioner();
     if (!executioner_ptr)
       mooseError("Executioner is nullptr in LazyCoupleable. You cannot call the \"coupled\" method "
                  "until the add_algebraic_rm task");

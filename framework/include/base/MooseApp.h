@@ -234,16 +234,23 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner() const
+  Executioner * getExecutioner() const { return _executioner.get(); }
+
+  /**
+   * Retrieve the Executioner for this App
+   */
+  std::shared_ptr<Executioner> & executioner()
   {
-    mooseAssert(_executioner, "Executioner is nullptr");
-    return _executioner.get();
+    mooseDeprecated("executioner() is deprecated. Use getExecutioner(), this interface will be "
+                    "removed after 10/01/2018");
+
+    return _executioner;
   }
 
   /**
-   * Retrieve the Executioner shared pointer for this App
+   * Set the Executioner for this App
    */
-  std::shared_ptr<Executioner> & executioner() { return _executioner; }
+  void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
