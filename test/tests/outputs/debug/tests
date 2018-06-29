@@ -39,7 +39,7 @@
      # Test that top residuals are displayed using DebugOutput object via Debug block
      type = RunApp
      input = show_top_residuals_debug.i
-     expect_out = "\[DBG\]\[\d+\].*'u' in subdomain\(s\) {'block_zero', 'block_one'}.*at node"
+     expect_out = "'u' in subdomain\(s\) {'block_zero', 'block_one'}.*at node.*'v' in subdomain\(s\) {'block_one'}.*at element.*'w' \(SCALAR\)"
      max_parallel = 1
    [../]
 
@@ -55,14 +55,6 @@
      # Test that top residuals of scalar variables are displayed using DebugOutput object via Outputs block
      type = RunApp
      input = show_top_residuals_scalar.i
-     expect_out = "\[DBG\]\[\d+\].*'lambda' \(SCALAR\)"
-     max_parallel = 1
-   [../]
-
-   [./show_top_residuals_scalar_debug]
-     # Test that top residuals of scalar variables are displayed using DebugOutput object via Debug block
-     type = RunApp
-     input = show_top_residuals_scalar_debug.i
      expect_out = "\[DBG\]\[\d+\].*'lambda' \(SCALAR\)"
      max_parallel = 1
    [../]

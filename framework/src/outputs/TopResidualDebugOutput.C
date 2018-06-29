@@ -61,18 +61,37 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
   vec.resize(residual.local_size());
 
   unsigned int j = 0;
+
+  // Loop over all nodal variables
   for (const auto & node : as_range(mesh.localNodesBegin(), mesh.localNodesEnd()))
   {
     dof_id_type nd = node->id();
 
     for (unsigned int var = 0; var < node->n_vars(_sys.number()); ++var)
-      if (node->n_dofs(_sys.number(), var) >
-          0) // this check filters scalar variables (which are clearly not a dof on every node)
+      // check that variable exists on node
+      if (node->n_dofs(_sys.number(), var) > 0)
       {
         const auto & subdomain_ids = mesh.getNodeBlockIds(*node);
         dof_id_type dof_idx = node->dof_number(_sys.number(), var, 0);
-        vec[j] =
-            TopResidualDebugOutputTopResidualData(var, subdomain_ids, nd, *node, residual(dof_idx));
+        vec[j] = TopResidualDebugOutputTopResidualData(
+            var, subdomain_ids, nd, *node, residual(dof_idx), false, true);
+        j++;
+      }
+  }
+
+  // Loop over all elemental variables
+  for (const auto & elem : as_range(mesh.activeLocalElementsBegin(), mesh.activeLocalElementsEnd()))
+  {
+    dof_id_type elem_id = elem->id();
+    const SubdomainID subdomain_id = elem->subdomain_id();
+
+    for (unsigned int var = 0; var < elem->n_vars(_sys.number()); ++var)
+      // check that variable exists on element
+      if (elem->n_dofs(_sys.number(), var) > 0)
+      {
+        dof_id_type dof_idx = elem->dof_number(_sys.number(), var, 0);
+        vec[j] = TopResidualDebugOutputTopResidualData(
+            var, {subdomain_id}, elem_id, elem->centroid(), residual(dof_idx), false, false);
         j++;
       }
   }
@@ -127,8 +146,10 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
       }
       const std::string subdomains_string = Moose::stringify(subdomain_names, ", ", "'", true);
 
-      Moose::err << "in subdomain(s) " << subdomains_string << " at node " << vec[i]._nd << ": "
-                 << vec[i]._point << '\n';
+      const std::string elem_or_node_string = vec[i]._is_nodal ? "node" : "element";
+
+      Moose::err << "in subdomain(s) " << subdomains_string << " at " << elem_or_node_string << " "
+                 << vec[i]._id << ": " << vec[i]._point << '\n';
     }
   }
 }
