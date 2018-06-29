@@ -71,7 +71,7 @@ class AppSyntaxExtension(command.CommandExtension):
                              "Parameter groups to show as un-collapsed.")
         config['alias'] = (None, "List of Dictionary of lists of syntax aliases.")
         config['allow-test-objects'] = (False, "Enable the test objects.")
-        config['use-legacy-location'] = (False, "Use syntax based markdown location rather " \
+        config['use-legacy-location'] = (True, "Use syntax based markdown location rather " \
                                                 "than header based location.")
 
         return config

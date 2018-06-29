@@ -29,8 +29,8 @@ Extensions:
     appsyntax:
         type: MooseDocs.extensions.appsyntax
         executable: ${MOOSE_DIR}/modules/combined
+        use-legacy-location: False
         hide:
-
             framework: !include framework/doc/hidden.yml
             chemical_reactions: !include modules/chemical_reactions/doc/hidden.yml
             #combined: !include modules/combined/doc/hidden.yml
