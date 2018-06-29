@@ -99,7 +99,7 @@ if [ -z "$go_fast" ]; then
                --enable-unique-ptr \
                --with-thread-model=openmp \
                --disable-maintainer-mode \
-               --enable-petsc-required \
+               --enable-petsc-hypre-required \
                --disable-metaphysicl \
                $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
 else

@@ -10,8 +10,13 @@
 #ifndef GEOMETRICSEARCHDATA_H
 #define GEOMETRICSEARCHDATA_H
 
+// MOOSE includes
 #include "MooseTypes.h"
 
+// libMesh includes
+#include "libmesh/enum_order.h"
+
+// C++ includes
 #include <map>
 
 // Forward Declarations

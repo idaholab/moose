@@ -13,6 +13,9 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+// libMesh includes
+#include "libmesh/enum_xdr_mode.h"
+
 registerMooseObject("MooseApp", XDA);
 registerMooseObjectAliased("MooseApp", XDA, "XDR");
 
