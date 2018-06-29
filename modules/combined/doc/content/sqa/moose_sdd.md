@@ -86,7 +86,6 @@ directly.
 
 !syntax list subsystems=True actions=False objects=False
 
-
 The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a
 normal simulation a single MooseApp object is created and "run()". This object uses it's Factory
 objects to build user defined objects which are stored in a series of Warehouse objects and

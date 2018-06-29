@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PolycrystalKernel System
 
 !syntax list /Kernels/PolycrystalKernel objects=True actions=False subsystems=False

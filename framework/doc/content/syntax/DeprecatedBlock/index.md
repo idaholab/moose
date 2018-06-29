@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # DeprecatedBlock System
 
 !syntax list /DeprecatedBlock objects=True actions=False subsystems=False

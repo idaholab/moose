@@ -146,7 +146,7 @@ The plastic moduli are:
          end=[]
 
 Roller boundary conditions are prescribed at the boundaries.  At the roof of the excavation, a
-[StickyBC](/systems/BCs/StickyBC.md) is employed to prevent the roof from collapsing
+[StickyBC](/StickyBC.md) is employed to prevent the roof from collapsing
 further than 3$\,$m:
 
 !listing modules/porous_flow/examples/coal_mining/coarse_with_fluid.i

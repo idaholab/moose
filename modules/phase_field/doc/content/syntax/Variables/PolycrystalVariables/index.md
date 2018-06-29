@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PolycrystalVariables System
 
 !syntax list /Variables/PolycrystalVariables objects=True actions=False subsystems=False

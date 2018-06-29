@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # BCs System
 
 !syntax list /Modules/NavierStokes/BCs objects=True actions=False subsystems=False

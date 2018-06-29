@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # FeatureVolumeVectorPostprocessor
 
 This VectorPostprocessor is designed to pull data from a [FeatureFloodCount](FeatureFloodCount.md) or one of its

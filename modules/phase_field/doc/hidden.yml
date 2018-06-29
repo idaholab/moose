@@ -165,6 +165,5 @@
 - /Variables/PolycrystalVariables
 - /Variables/PolycrystalVariables/PolycrystalVariablesAction
 - /VectorPostprocessors/EulerAngleUpdaterCheck
-- /VectorPostprocessors/FeatureVolumeVectorPostprocessor
 - /VectorPostprocessors/GrainForcesPostprocessor
 - /VectorPostprocessors/GrainTextureVectorPostprocessor

@@ -13,7 +13,7 @@ or cylindrical coordinate system. This symmetry orientation is required for the
 calculation of the residual and of the jacobian, as defined in [eq-tensor_mechanics-RZ-stress-divergence].
 
 The `StressDivergenceRZTensors` kernel can be automatically created with the
-[TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md). Use of the tensor
+[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor
 mechanics master action is recommended to ensure the consistent setting of the `use_displaced_mesh`
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
 _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action usage, see the

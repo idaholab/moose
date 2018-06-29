@@ -184,6 +184,7 @@
 - /MultiApps/TransientMultiApp
 - /MultiApps/CentroidMultiApp
 - /Modules
+- /Modules/PhaseField/MortarPeriodicity
 - /NodalKernels
 - /NodalKernels/AddNodalKernelAction
 - /NodalKernels/ConstantRate
@@ -251,7 +252,6 @@
 - /Postprocessors/NumResidualEvaluations
 - /Postprocessors/NumVars
 - /Postprocessors/PercentChangePostprocessor
-- /Postprocessors/PerformanceData
 - /Postprocessors/PointValue
 - /Postprocessors/Receiver
 - /Postprocessors/RelativeSolutionDifferenceNorm

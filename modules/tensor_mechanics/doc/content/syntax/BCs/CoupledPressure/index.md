@@ -9,12 +9,12 @@ Transfer of pressure variable from an multi-app is a good example of a use case 
 
 ## Constructed MooseObjects
 
-The Coupled Pressure Action is used to construct only the [Coupled Pressure boundary condition](/BCs/CoupledPressureBC.md).
+The Coupled Pressure Action is used to construct only the [Coupled Pressure boundary condition](/CoupledPressureBC.md).
 
 !table id=pressure_BC_action_table caption=Correspondence Among Action Functionality and MooseObjects
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| A pressure traction force given by a variable | [Coupled Pressure BC](/BCs/CoupledPressureBC.md) | `displacements` : a string of the displacement variables to which the Coupled Pressure BC should be applied |
+| A pressure traction force given by a variable | [Coupled Pressure BC](/CoupledPressureBC.md) | `displacements` : a string of the displacement variables to which the Coupled Pressure BC should be applied |
 |  |  | `pressure` : a variable prescribing the pressure to be applied |
 
 The Pressure Action only applies the pressure traction in the same component direction as the `displacements` variables are listed.

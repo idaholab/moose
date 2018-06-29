@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # MortarInterfaces System
 
 !syntax list /Mesh/MortarInterfaces objects=True actions=False subsystems=False

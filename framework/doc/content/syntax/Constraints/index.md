@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Constraints System
 
 !syntax list /Constraints objects=True actions=False subsystems=False

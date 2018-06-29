@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # EulerAngles2RGB System
 
 !syntax list /Modules/PhaseField/EulerAngles2RGB objects=True actions=False subsystems=False

@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PolycrystalElasticDrivingForce System
 
 !syntax list /Kernels/PolycrystalElasticDrivingForce objects=True actions=False subsystems=False

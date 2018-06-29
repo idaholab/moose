@@ -11,7 +11,7 @@ spherically symmetric system on a 1D mesh.
 The `COORD_TYPE` in the Problem block of the input file must be set to RSPHERICAL.
 
 The `StressDivergenceRSphericalTensors` kernel can be automatically created with the
-[TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md). Use of the tensor
+[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor
 mechanics master action is recommended to ensure the consistent setting of the *use_displaced_mesh*
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
 _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action usage, see the

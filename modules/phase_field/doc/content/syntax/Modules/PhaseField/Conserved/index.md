@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Conserved System
 
 !syntax list /Modules/PhaseField/Conserved objects=True actions=False subsystems=False

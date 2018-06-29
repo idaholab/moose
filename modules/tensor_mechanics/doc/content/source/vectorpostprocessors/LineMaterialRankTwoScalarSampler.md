@@ -5,7 +5,7 @@
 ## Description
 
 The postprocessor `LineMaterialRankTwoScalarSampler` is used to output common scalar quantities computed from Rank-2 tensors along a user-defined line in the mesh.
-The postprocessor computes the same set of scalar quantities as the AuxKernel [RankTwoScalarAux](/AuxKernels/RankTwoScalarAux.md); for a full list of the available scalar quantities refer to the [RankTwoScalarAux](/AuxKernels/RankTwoScalarAux.md) page.
+The postprocessor computes the same set of scalar quantities as the AuxKernel [RankTwoScalarAux](/RankTwoScalarAux.md); for a full list of the available scalar quantities refer to the [RankTwoScalarAux](/RankTwoScalarAux.md) page.
 
 The user must supply the start and end points of the line along which the Rank-2 tensor scalar quantity should be tracked.
 Often this class is used to track stress or strain along an exterior or interior edge of the mesh.

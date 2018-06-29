@@ -125,7 +125,7 @@ strains is finalized by by applying a weighting factor, as shown in
 
 #### Jacobian Multiplier and the Consistent Tangent Operator
 
-The Jacobian multiplier, which is used in the [StressDivergenceTensors](Kernels/StressDivergenceTensors.md)
+The Jacobian multiplier, which is used in the [StressDivergenceTensors](/StressDivergenceTensors.md)
 kernel to condition the Jacobian calculation, must be calculated from the combination
 of all the different inelastic material models. There are three options used to
 calculate the combined Jacobian multiplier: Elastic, Partial, and Nonlinear, which
@@ -288,9 +288,9 @@ operators should be implemented for yielding material models (e.g. plasticity).
 In some cases, particularly in creep, limits on the time step are required by the
 material model formulation. Each inelastic material model is responsible for
 calculating the maximum time step allowable for that material model.
-The [MaterialTimeStepPostprocessor](/Postprocessors/MaterialTimeStepPostprocessor.md)
+The [MaterialTimeStepPostprocessor](/MaterialTimeStepPostprocessor.md)
 finds the minumum time step size limits from the entire simulation domain. The
-postprocessor then interfaces with the [IterationAdaptiveDT](/Executioner/TimeStepper/IterationAdaptiveDT.md)
+postprocessor then interfaces with the [IterationAdaptiveDT](/IterationAdaptiveDT.md)
 to restrict the time step size based on the limit calculated in the previous
 time step.
 

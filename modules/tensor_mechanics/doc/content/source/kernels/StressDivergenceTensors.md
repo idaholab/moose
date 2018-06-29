@@ -6,7 +6,7 @@
 
 The `StressDivergenceTensors` kernel calculates the residual of the stress divergence for 1D, 2D, and
 3D problems in the Cartesian coordinate system.  This kernel can be automatically created with the
-[TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md). Use of the tensor
+[TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor
 mechanics master action is recommended to ensure the consistent setting of the _use_displaced_mesh_
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
 _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action usage, see the

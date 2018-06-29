@@ -10,7 +10,7 @@ The material `ComputeAxisymmetric1DFiniteStrain` calculates the finite strain fo
 This material assumes symmetry about the $z$-axis.
 This 'strain calculator' material computes the strain within the cylindrical
 coordinate system and relies on the specialized
-[Axisymmetric RZ kernel](Kernels/StressDivergenceRZTensors.md) to handle the stress
+[Axisymmetric RZ kernel](/StressDivergenceRZTensors.md) to handle the stress
 divergence calcuation.
 
 !alert warning title=Symmetry Assumed About the $z$-axis

@@ -1,7 +1,7 @@
 # MultiAppCopyTransfer
 
-The MultiAppCopyTransfer allows for copying variables (both [nonlinear](systems/Variables/index.md)
-and [auxiliary](systems/AuxVariables/index.md)) between [MultiApps](/MultiApps/index.md). All types
+The MultiAppCopyTransfer allows for copying variables (both [nonlinear](syntax/Variables/index.md)
+and [auxiliary](/AuxVariables/index.md)) between [MultiApps](/MultiApps/index.md). All types
 of variables, including higher order, elemental, and nodal are supported. The only limitation is that
 the meshes in the master and sub application must be identical.
 

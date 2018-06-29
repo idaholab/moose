@@ -83,8 +83,8 @@ Explore the different ways to use the tensor mechanics module by browsing the
 introductory theory pages on the various models:
 
 - [Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md)
-- [Smeared Cracking](Materials/ComputeSmearedCrackingStress.md)
-- [Multiple Inelastic Stresses](Materials/ComputeMultipleInelasticStress.md)
+- [Smeared Cracking](/ComputeSmearedCrackingStress.md)
+- [Multiple Inelastic Stresses](/ComputeMultipleInelasticStress.md)
 - [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 - [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
 - Crystal Plasticity

@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # GlobalParams System
 
 !syntax list /GlobalParams objects=True actions=False subsystems=False

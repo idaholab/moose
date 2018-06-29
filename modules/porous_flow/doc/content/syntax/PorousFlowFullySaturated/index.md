@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PorousFlowFullySaturated System
 
 !syntax list /PorousFlowFullySaturated objects=True actions=False subsystems=False

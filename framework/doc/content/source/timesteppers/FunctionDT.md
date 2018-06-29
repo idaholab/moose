@@ -15,7 +15,7 @@ time function. The time step for a given step is computed by linearly
 interpolating between the pairs of values provided in the vectors.
 
 The same procedure that is used with
-[ConstantDT](/Executioner/TimeStepper/ConstantDT.md) is used to reduce
+[ConstantDT](/ConstantDT.md) is used to reduce
 the time step from the user-specified value if a failed solution occurs.
 
 ## Example Input Syntax

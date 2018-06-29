@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # AuxVariables System
 
 !syntax list /AuxVariables objects=True actions=False subsystems=False

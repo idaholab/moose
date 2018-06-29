@@ -1,6 +1,6 @@
 # ElementL2ErrorFunctionAux
 
-A class for computing the element-wise $L^2$ error (actually $L^p$ error, if you set the value of p to something other than 2) of the difference between an exact solution (typically represented by a [ParsedFunction](/ParsedFunction.md)) and the coupled solution variable.  The base class implements the compute() function.
+A class for computing the element-wise $L^2$ error (actually $L^p$ error, if you set the value of p to something other than 2) of the difference between an exact solution (typically represented by a [ParsedFunction](/MooseParsedFunction.md)) and the coupled solution variable.  The base class implements the compute() function.
 
 ## Example syntax
 

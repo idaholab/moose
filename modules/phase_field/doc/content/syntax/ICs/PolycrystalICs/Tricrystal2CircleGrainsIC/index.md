@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Tricrystal2CircleGrainsIC System
 
 !syntax list /ICs/PolycrystalICs/Tricrystal2CircleGrainsIC objects=True actions=False subsystems=False

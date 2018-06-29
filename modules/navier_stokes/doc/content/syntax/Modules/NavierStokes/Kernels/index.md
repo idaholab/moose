@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Kernels System
 
 !syntax list /Modules/NavierStokes/Kernels objects=True actions=False subsystems=False

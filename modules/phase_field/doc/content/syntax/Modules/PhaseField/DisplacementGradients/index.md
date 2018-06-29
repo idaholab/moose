@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # DisplacementGradients System
 
 !syntax list /Modules/PhaseField/DisplacementGradients objects=True actions=False subsystems=False

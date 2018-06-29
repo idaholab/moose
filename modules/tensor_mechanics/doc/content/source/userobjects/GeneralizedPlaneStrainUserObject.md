@@ -17,7 +17,7 @@ and the corresponding diagonal jacobian is
 	K_{zz} = \frac{\partial R_{zz}}{\partial \epsilon_{zz}} = \int_{A}{\frac{\partial \sigma_{zz}}{\partial \epsilon_{zz}}dA} = \int_{A}{C_{2222}dA}
 \end{equation}
 
-The reference residual value used by [GeneralizedPlaneStrainReferenceResidual](/AuxScalarKernels/GeneralizedPlaneStrainReferenceResidual.md) is computed as
+The reference residual value used by [GeneralizedPlaneStrainReferenceResidual](/GeneralizedPlaneStrainReferenceResidual.md) is computed as
 \begin{equation}
 	R_{ref} = \int_{A}{|\sigma_{zz}|dA}
 \end{equation}

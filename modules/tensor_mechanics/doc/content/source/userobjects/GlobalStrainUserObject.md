@@ -6,7 +6,7 @@
 
 `GlobalStrainUserObject` calculates the residual and the jacobian values corresponding to the integral of the stress tensor. In this case, the stress is generated due to global strain or any applied stress on the whole simulation domain.
 
-`ScalarKernel` [GlobalStrain](/ScalarKernels/GlobalStrain.md) extracts the residual and jacobian values from this `UserObject`.
+`ScalarKernel` [GlobalStrain](/GlobalStrain.md) extracts the residual and jacobian values from this `UserObject`.
 
 ## Example Input File Syntax
 

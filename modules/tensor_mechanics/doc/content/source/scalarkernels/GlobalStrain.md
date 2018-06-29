@@ -8,7 +8,7 @@
 
 It requires an input of the `UserObject` that calculates the integral value and corresponding jacobians.
 
-Please refer to [GlobalStrainUserObject](/UserObjects/GlobalStrainUserObject.md) for information about the residual and jacobian calculation.
+Please refer to [GlobalStrainUserObject](/GlobalStrainUserObject.md) for information about the residual and jacobian calculation.
 
 
 ## Example Input File Syntax

@@ -26,13 +26,13 @@ the Associated Actions block below, which are all created within the same block.
 !table id=cavity_pressure_action_table caption=Correspondence Among Action Functionality and MooseObjects for the `CavityPressure` Action
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| Calculation of the initial moles quantity | [CavityPressureUserObject](/UserObjects/CavityPressureUserObject.md) |  `volume`: the name of the internal volume postprocessor |
+| Calculation of the initial moles quantity | [CavityPressureUserObject](/CavityPressureUserObject.md) |  `volume`: the name of the internal volume postprocessor |
 |  |  | `R`: the universal gas constant |
 |  |  | `temperature` : the name of the average temperature postprocessor |
-| Store the value of the initial moles | [CavityPressurePostprocessor](/Postprocessors/CavityPressurePostprocessor.md) | `output_initial_moles`: the postprocessor name to used to report the initial moles of gas |
-| Calculation of the current internal pressure | [CavityPressureUserObject](/UserObjects/CavityPressureUserObject.md) | `output`: the name of the cavity pressure postprocessor |
-| Store the internal pressure value | [CavityPressurePostprocessor](/Postprocessors/CavityPressurePostprocessor.md) | `output`: the name of the cavity pressure postprocessor |
-| Apply the calculated internal pressure traction | [Pressure](/BCs/Pressure.md) | `boundary`: the list of boundary IDs to which the pressure should be applied |
+| Store the value of the initial moles | [CavityPressurePostprocessor](/CavityPressurePostprocessor.md) | `output_initial_moles`: the postprocessor name to used to report the initial moles of gas |
+| Calculation of the current internal pressure | [CavityPressureUserObject](/CavityPressureUserObject.md) | `output`: the name of the cavity pressure postprocessor |
+| Store the internal pressure value | [CavityPressurePostprocessor](/CavityPressurePostprocessor.md) | `output`: the name of the cavity pressure postprocessor |
+| Apply the calculated internal pressure traction | [Pressure](bcs/Pressure.md) | `boundary`: the list of boundary IDs to which the pressure should be applied |
 |  |  | `displacements` : a string of the displacement variables to which the Pressure BC should be applied |
 
 

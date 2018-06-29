@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # FluidProperties System
 
 !syntax list /Modules/FluidProperties objects=True actions=False subsystems=False

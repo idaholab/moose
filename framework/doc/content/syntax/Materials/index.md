@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Materials System
 
 !syntax list /Materials objects=True actions=False subsystems=False

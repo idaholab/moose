@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # NodalNormals System
 
 !syntax list /NodalNormals objects=True actions=False subsystems=False

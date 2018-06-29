@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # ICs System
 
 !syntax list /Modules/NavierStokes/ICs objects=True actions=False subsystems=False

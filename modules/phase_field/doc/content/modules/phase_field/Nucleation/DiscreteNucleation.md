@@ -15,7 +15,7 @@ The comprises two user objects and a material class:
 
 - [`DiscreteNucleationInserter`](/DiscreteNucleationInserter.md) - a user object that maintains a global list of currently active nucleus positions.
 - [`DiscreteNucleationMap`](/DiscreteNucleationMap.md)  - a user object that maintains a smooth density map for nuclei locations (obtained from a DiscreteNucleationInserter).
-- [`DiscreteNucleation`](/Materials/DiscreteNucleation.md)  - a material that calculates a local free energy penalty based on the difference of a set of given concentration variables and their target concentrations (using the data from the DiscreteNucleationMap).
+- [`DiscreteNucleation`](materials/DiscreteNucleation.md)  - a material that calculates a local free energy penalty based on the difference of a set of given concentration variables and their target concentrations (using the data from the DiscreteNucleationMap).
 
 ## Discussion
 

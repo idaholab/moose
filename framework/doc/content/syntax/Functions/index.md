@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Functions System
 
 !syntax list /Functions objects=True actions=False subsystems=False

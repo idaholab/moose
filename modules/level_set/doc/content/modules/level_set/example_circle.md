@@ -45,7 +45,7 @@ easily accomplished within MOOSE.
 ### Kernels
 
 The level set equation (see [Theory](/theory.md)) may be defined in MOOSE using two
-[Kernel](systems/Kernels/index.md) objects: [TimeDerivative](/TimeDerivative.md) and
+[Kernel](syntax/Kernels/index.md) objects: [TimeDerivative](/TimeDerivative.md) and
 [LevelSetAdvection](/LevelSetAdvection.md).
 
 Notice, that the [LevelSetAdvection](/LevelSetAdvection.md) requires that the unknown to be solved

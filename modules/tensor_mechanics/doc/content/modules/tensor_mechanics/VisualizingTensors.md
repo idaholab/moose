@@ -48,4 +48,4 @@ for more details about the available  options for saving quantities from these t
 To save these values to a CSV file or to the console for further data analysis,
 the auxiliary variables can be output as postprocessors. A complete list of the
 [Postprocessor System](/Postprocessors/index.md) is available in the MOOSE documentation,
-but the most commonly used option is [ElementAverageValue](/Postprocessors/ElementAverageValue.md).
+but the most commonly used option is [ElementAverageValue](/ElementAverageValue.md).

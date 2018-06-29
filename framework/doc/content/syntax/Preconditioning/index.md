@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Preconditioning System
 
 !syntax list /Preconditioning objects=True actions=False subsystems=False

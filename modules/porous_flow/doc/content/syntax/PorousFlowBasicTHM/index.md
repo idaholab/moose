@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PorousFlowBasicTHM System
 
 !syntax list /PorousFlowBasicTHM objects=True actions=False subsystems=False

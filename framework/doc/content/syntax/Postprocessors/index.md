@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Postprocessors System
 
 !syntax list /Postprocessors objects=True actions=False subsystems=False

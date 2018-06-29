@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # NavierStokes System
 
 !syntax list /Modules/NavierStokes objects=True actions=False subsystems=False

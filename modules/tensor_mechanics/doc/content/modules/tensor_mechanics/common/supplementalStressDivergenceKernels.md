@@ -27,8 +27,8 @@ to be calculated.  Set the parameter `use_finite_deform_jacobian = true` in this
 The `use_displaced_mesh` parameter must be set correcting to ensure consistency in the equilibrium
 equation: if the stress is calculated with respect to the deformed mesh, the test function gradients
 must also be calculated with respect to the deformed mesh. The
-[Tensor Mechanics MasterAction](/systems/Modules/TensorMechanics/Master/index.md) is designed to
+[Tensor Mechanics MasterAction](/Modules/TensorMechanics/Master/index.md) is designed to
 automatically determine and set the parameter correctly for the selected strain formulation.  We
 recommend that users employ the
-[Tensor Mechanics MasterAction](/systems/Modules/TensorMechanics/Master/index.md) whenever possible
+[Tensor Mechanics MasterAction](/Modules/TensorMechanics/Master/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.

@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # DiracKernels System
 
 !syntax list /DiracKernels objects=True actions=False subsystems=False

@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Periodic System
 
 !syntax list /BCs/Periodic objects=True actions=False subsystems=False

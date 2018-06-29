@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # HHPFCRFFSplitKernel System
 
 !syntax list /Kernels/HHPFCRFFSplitKernel objects=True actions=False subsystems=False

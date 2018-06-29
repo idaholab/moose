@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Predictor System
 
 !syntax list /Executioner/Predictor objects=True actions=False subsystems=False

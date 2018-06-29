@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Quadrature System
 
 !syntax list /Executioner/Quadrature objects=True actions=False subsystems=False

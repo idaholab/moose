@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PolycrystalColoringIC System
 
 !syntax list /ICs/PolycrystalICs/PolycrystalColoringIC objects=True actions=False subsystems=False

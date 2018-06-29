@@ -48,10 +48,10 @@ use of the TensorMechanics Master Action, as shown below.
          block=Modules/TensorMechanics/Master
 
 !alert note title=Use of the Tensor Mechanics Master Action Recommended
-The [TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md) is designed to
+The [TensorMechanics Master Action](/Modules/TensorMechanics/Master/index.md) is designed to
 automatically determine and set the strain and stress divergence parameters correctly for the
 selected strain formulation.  We recommend that users employ the
-[TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md) whenever possible
+[TensorMechanics Master Action](syntax/Modules/TensorMechanics/Master/index.md) whenever possible
 to ensure consistency between the test function gradients and the strain formulation selected.
 
 !syntax parameters /Materials/ComputeRSphericalFiniteStrain

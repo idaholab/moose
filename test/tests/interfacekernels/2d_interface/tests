@@ -31,7 +31,7 @@
     input = 'coupled_value_coupled_flux.i'
     cli_args = 'Preconditioning/smp/type=FDP'
     issues = '#10375'
-    design = 'Preconditioning/FDP.md'
+    design = '/FiniteDifferencePreconditioner.md'
     requirement = 'The finite difference preconditioner shall work in parallel.'
     allow_warnings = true
   [../]

@@ -11,7 +11,7 @@ The boundary condition is always applied to the displaced mesh.
 The `CoupledPressureBC` is typically used in a multi-app scenario.
 The pressure variable can be computed by a sub-app (it can be for example a flow code) and then transferred into an auxiliary variable, which is then coupled into this boundary condition so that it is applied in the master app.
 
-A set of `CoupledPressure` boundary conditions applied to multiple variables in multiple components can be defined with the [CoupledPressureAction](/BCs/CoupledPressure/CoupledPressureAction.md).
+A set of `CoupledPressure` boundary conditions applied to multiple variables in multiple components can be defined with the [CoupledPressureAction](/CoupledPressureAction.md).
 
 ## Example Input File Syntax
 

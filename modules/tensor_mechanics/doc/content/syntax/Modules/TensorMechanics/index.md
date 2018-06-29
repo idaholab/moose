@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # TensorMechanics System
 
 !syntax list /Modules/TensorMechanics objects=True actions=False subsystems=False

@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # GrainGrowth System
 
 !syntax list /Modules/PhaseField/GrainGrowth objects=True actions=False subsystems=False

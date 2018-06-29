@@ -55,7 +55,7 @@ include the SUPG kernels).
 
 Next, the sub-application input file must be created, which is shown below. This input file mimics
 the master input file closely, with three notable exceptions. First, the
-[Kernels](systems/Kernels/index.md) block utilize the time derivative and a new object,
+[Kernels](syntax/Kernels/index.md) block utilize the time derivative and a new object,
 [LevelSetOlssonReinitialization](/LevelSetOlssonReinitialization.md), that implements the
 reinitialization scheme of [cite:olsson2007conservative]. Second, the [Problem](/Problem/index.md) is
 set to use the [LevelSetReinitializationProblem](/LevelSetReinitializationProblem.md). Finally, the

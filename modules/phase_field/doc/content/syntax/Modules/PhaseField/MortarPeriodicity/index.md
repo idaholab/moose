@@ -5,7 +5,7 @@ constraints. Its primary application is setting up an [EqualGradientConstraint](
 when used on the displacement variables, implemnts a strain periodicity which is
 useful for representative volume element microstructure simulations.
 
-A [MortarPeriodicMesh](Mesh/MortarPeriodicMesh.md) must be used with this action.
+A [MortarPeriodicMesh](/MortarPeriodicMesh.md) must be used with this action.
 
 !media phase_field/mortar_periodic_strain.gif
 

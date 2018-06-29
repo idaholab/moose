@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PolycrystalICs System
 
 !syntax list /ICs/PolycrystalICs objects=True actions=False subsystems=False

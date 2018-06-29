@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PerformanceData
 
 The PerformanceData Postprocessor is designed to retrieve information from

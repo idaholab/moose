@@ -14,7 +14,7 @@ code snippet demonstrates how this switching of kernels is achieve with the `Tim
 Notice that the object names---the "enable_objects" and "disable_objects" parameters---expect a
 list of object names, which are defined in two different ways. For a discussion on the naming
 of objects and parameters see
-[Object and Parameter Names](systems/Controls/index.md#object-and-parameter-names) section.
+[Object and Parameter Names](syntax/Controls/index.md#object-and-parameter-names) section.
 
 !syntax parameters /Controls/TimePeriod
 

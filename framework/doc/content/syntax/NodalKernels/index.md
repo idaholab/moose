@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # NodalKernels System
 
 !syntax list /NodalKernels objects=True actions=False subsystems=False

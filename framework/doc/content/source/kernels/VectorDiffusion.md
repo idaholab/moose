@@ -2,7 +2,7 @@
 
 ## Description
 
-`VectorDiffusion` is analogous to [`Diffusion`](Kernels/Diffusion.md)
+`VectorDiffusion` is analogous to [`Diffusion`](/Diffusion.md)
 except it is applied to vector finite element variables.
 
 !syntax parameters /Kernels/VectorDiffusion

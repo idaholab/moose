@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # XFEM System
 
 !syntax list /XFEM objects=True actions=False subsystems=False

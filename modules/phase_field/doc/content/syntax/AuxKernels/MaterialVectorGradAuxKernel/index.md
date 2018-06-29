@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # MaterialVectorGradAuxKernel System
 
 !syntax list /AuxKernels/MaterialVectorGradAuxKernel objects=True actions=False subsystems=False

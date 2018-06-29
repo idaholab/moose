@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # AuxScalarKernels System
 
 !syntax list /AuxScalarKernels objects=True actions=False subsystems=False

@@ -22,7 +22,7 @@ specified coordinate system.
 !table id=tmMaster_action_table caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/Kernels/StressDivergenceTensors.md) or [StressDivergenceRZTensors](/Kernels/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/Kernels/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
+| Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/StressDivergenceTensors.md) or [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
 
 Note that there are many variations for the calculation of the stress divergence.
 Review the theoretical introduction for the

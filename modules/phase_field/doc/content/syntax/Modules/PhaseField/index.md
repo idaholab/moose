@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PhaseField System
 
 !syntax list /Modules/PhaseField objects=True actions=False subsystems=False

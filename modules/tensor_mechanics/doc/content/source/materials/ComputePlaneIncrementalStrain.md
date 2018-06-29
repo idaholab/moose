@@ -7,7 +7,7 @@
 The material `ComputePlaneIncrementalStrain` calculates the small incremental
 strain for 2D plane strain problems. It can be used for  classical
 [thick body plane strain](https://en.wikipedia.org/wiki/Plane_stress)
-problems, [Weak Plane Stress](Kernels/WeakPlaneStress.md) models, or in
+problems, [Weak Plane Stress](/WeakPlaneStress.md) models, or in
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.
 
 ## Out of Plane Strain

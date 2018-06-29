@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Adaptivity System
 
 !syntax list /Executioner/Adaptivity objects=True actions=False subsystems=False

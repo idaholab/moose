@@ -31,14 +31,14 @@ is the current scalar effective inelastic strain increment.
 The `MaterialTimeStepPostprocessor` collects the time step limitations from all
 of the quadrature points in the simulation mesh and stores the minimum value.
 This minimum allowable time step size value is then used by the
-[IterationAdaptiveDT](/Executioner/TimeStepper/IterationAdaptiveDT.md)
+[IterationAdaptiveDT](/IterationAdaptiveDT.md)
 to restrict the time step size based on the limit calculated in the previous
 time step.
 
-Note that the [IterationAdaptiveDT](/Executioner/TimeStepper/IterationAdaptiveDT.md)
+Note that the [IterationAdaptiveDT](/IterationAdaptiveDT.md)
 will apply the limiting time step size value from the `MaterialTimeStepPostprocessor`
 only if that value is less than maximum time step size value calculated by the
-internal [IterationAdaptiveDT](/Executioner/TimeStepper/IterationAdaptiveDT.md)
+internal [IterationAdaptiveDT](/IterationAdaptiveDT.md)
 adaptive time step size algorithm.
 
 !alert note title=Time Step Limiter Lags Calculation
@@ -52,7 +52,7 @@ material: both the maximum allowable inelastic strain increment and the method o
 calculating the current inelastic strain, [eqn:limiting_ts], are defined separately
 for each material.
 Given this material dependent nature, the maximum time step value is calculated
-separately by the [RadialReturnStressUpdate](/Materials/RadialReturnStressUpdate.md)
+separately by the [RadialReturnStressUpdate](/RadialReturnStressUpdate.md)
 materials at each quadrature point.
 The `MaterialTimeStepPostprocessor` then determines the minimum time step size
 value from all of the quadrature points in the simulation.
@@ -62,20 +62,20 @@ Once the inelastic material model begins to calculate inelastic strain, the valu
 of the allowable time step size varies with the inelastic strain computation.
 
 The limiting time step size is stored within a material property called `matl_timestep_limit`.
-This material property can be set up either by the 
-[ComputeMultipleInelasticStress](/Materials/ComputeMultipleInelasticStress.md) model (for creep
-or plastic strains) or the [ComputeDamageStress](/Materials/ComputeDamageStress.md) for 
+This material property can be set up either by the
+[ComputeMultipleInelasticStress](/ComputeMultipleInelasticStress.md) model (for creep
+or plastic strains) or the [ComputeDamageStress](/ComputeDamageStress.md) for
 continuum damage models.
 
 ### Minimum Time Step Size Based on Number of Elements in which a Property Changes
 
-The allowable time step size can also be controlled by the total number of elements in which a 
-material property changes over the course of the time step. This can be used in the context 
-of continuum damage to limit the number of elements damaged at a single time step. To do so, 
-the user needs to define a scalar material property with the input parameter 
-`elements_changed_property` as well as the maximum acceptable number of elements changed 
-using the `elements_changed` input parameter. When these are defined, the 
-`MaterialTimeStepPostprocessor` will sweep over the entire mesh and count the number of 
+The allowable time step size can also be controlled by the total number of elements in which a
+material property changes over the course of the time step. This can be used in the context
+of continuum damage to limit the number of elements damaged at a single time step. To do so,
+the user needs to define a scalar material property with the input parameter
+`elements_changed_property` as well as the maximum acceptable number of elements changed
+using the `elements_changed` input parameter. When these are defined, the
+`MaterialTimeStepPostprocessor` will sweep over the entire mesh and count the number of
 elements in which the selected property has changed at at least one quadrature point.
 The limiting time step is then calculated using the ratio between the current number of
 elements changed $N_{changed}$ and the maximum value $N_{max}$.
@@ -85,11 +85,11 @@ elements changed $N_{changed}$ and the maximum value $N_{max}$.
   \Delta t |_{limit} = \Delta t \cdot \frac{N_{changed}}{N_{max}}
 \end{equation}
 
-The user can define a `elements_changed_threshold` to detect a change in property. 
-This can be for example used to count the number of elements in which the damage increases 
+The user can define a `elements_changed_threshold` to detect a change in property.
+This can be for example used to count the number of elements in which the damage increases
 by at least a specific amount.
 
-This method is optional and is only active if both `elements_changed_property` 
+This method is optional and is only active if both `elements_changed_property`
 and `elements_changed` are defined. The `MaterialTimeStepPostprocessor` then uses the
 minimum between the value provided by the material model (see above) or by the number of elements
 changed. If the input parameter `use_material_timestep_limit` is set to `false`, only the number

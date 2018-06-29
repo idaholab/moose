@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # ReactionNetwork System
 
 !syntax list /ReactionNetwork objects=True actions=False subsystems=False

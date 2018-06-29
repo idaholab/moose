@@ -17,15 +17,15 @@ where $h$ is the element length.
 
 ## Example Syntax
 
-The LevelSetForcingFunctionSUPG [Kernel](systems/Kernels/index.md) should be used in conjunction with a forcing term. For
+The LevelSetForcingFunctionSUPG [Kernel](syntax/Kernels/index.md) should be used in conjunction with a forcing term. For
 example, if a [BodyForce](/BodyForce.md) is defined as follows in the `[Kernels]` block.
 
-!listing modules/level_set/test/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing 
+!listing modules/level_set/test/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing
 
 Given the forcing term, it is then possible to add the SUPG term to the same forcing function in the `[Kernels]` block
 as follows.
 
-!listing modules/level_set/test/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing_supg 
+!listing modules/level_set/test/tests/verification/1d_level_set_supg_mms/1d_level_set_supg_mms.i block=phi_forcing_supg
 
 
 !syntax parameters /Kernels/LevelSetForcingFunctionSUPG
@@ -37,4 +37,3 @@ as follows.
 
 
 !bibtex bibliography
-

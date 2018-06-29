@@ -16,7 +16,7 @@ out-of-plane pressure at each quadrature point.
 where $P$ is the computed pressure, $f$ is the function or postprocessor value of
 the pressure to be applied, and $\hat{n}$ is the unit normal vector to the out-of-plane
 surface.
-Following the convention of the [Pressure](BCs/Pressure.md) boundary condition,
+Following the convention of the [Pressure](bcs/Pressure.md) boundary condition,
 the unit normal vector is considered to be positive when pointing inward towards
 the surface.
 

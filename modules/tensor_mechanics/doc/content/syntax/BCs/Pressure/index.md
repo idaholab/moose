@@ -9,12 +9,12 @@ Hydrostatic stress is a good example of a use case for the Pressure Action.
 
 ## Constructed MooseObjects
 
-The Pressure Action is used to construct the [Pressure boundary condition](/BCs/Pressure.md) in all directions.
+The Pressure Action is used to construct the [Pressure boundary condition](/Pressure.md) in all directions.
 
 !table id=pressure_BC_action_table caption=Correspondence Among Action Functionality and MooseObjects
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
-| A pressure traction force | [Pressure BC](/BCs/Pressure.md) | `displacements` : a string of the displacement variables to which the Pressure BC should be applied |
+| A pressure traction force | [Pressure BC](/Pressure.md) | `displacements` : a string of the displacement variables to which the Pressure BC should be applied |
 
 The Pressure Action only applies the pressure traction in the same component direction as the `displacements` variables are listed.
 That is, for the argument `displacements = 'disp_x disp_y disp_z'`, the Pressure Action will create three separate Pressure BCs:
@@ -26,7 +26,7 @@ That is, for the argument `displacements = 'disp_x disp_y disp_z'`, the Pressure
 !alert note title=Displacement Variable-Component Relationship is Relative
 Note that the location of each of the variables in the `displacements` string determines the value of the corresponding component.
 
-As in the [Pressure](/BCs/Pressure.md) boundary condition, the  magnitude of the `Pressure` boundary condition can be specified as either a scalar (use the input parameter `factor`) or a `function` parameter.
+As in the [Pressure](/Pressure.md) boundary condition, the  magnitude of the `Pressure` boundary condition can be specified as either a scalar (use the input parameter `factor`) or a `function` parameter.
 
 ## Example Input Syntax
 

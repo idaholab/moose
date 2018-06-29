@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # DynamicTensorMechanics System
 
 !syntax list /Kernels/DynamicTensorMechanics objects=True actions=False subsystems=False

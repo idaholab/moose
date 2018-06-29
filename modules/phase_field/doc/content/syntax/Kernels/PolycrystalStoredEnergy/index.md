@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # PolycrystalStoredEnergy System
 
 !syntax list /Kernels/PolycrystalStoredEnergy objects=True actions=False subsystems=False

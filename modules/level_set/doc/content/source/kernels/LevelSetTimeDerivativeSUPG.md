@@ -17,11 +17,11 @@ where $h$ is the element length.
 
 ## Example Syntax
 
-The LevelSetTimeDerivativeSUPG [Kernel](systems/Kernels/index.md) should be used in conjunction with a complete level set equation.
+The LevelSetTimeDerivativeSUPG [Kernel](syntax/Kernels/index.md) should be used in conjunction with a complete level set equation.
 For example, the following provides the necessary objects for the complete level set equation
 with SUPG stabilization.
 
-!listing modules/level_set/examples/vortex/vortex_supg.i block=Kernels 
+!listing modules/level_set/examples/vortex/vortex_supg.i block=Kernels
 
 !syntax parameters /Kernels/LevelSetTimeDerivativeSUPG
 
@@ -32,4 +32,3 @@ with SUPG stabilization.
 
 
 !bibtex bibliography
-

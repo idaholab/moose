@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Variables System
 
 !syntax list /Modules/NavierStokes/Variables objects=True actions=False subsystems=False

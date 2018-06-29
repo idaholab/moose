@@ -5,11 +5,11 @@
 ## Description
 
 `DiffusionFluxBC` is a `FluxBC` which is appropriate for use with the boundary terms arising from the
-[`Diffusion`](/Diffusion.md) [`Kernel`](systems/Kernels/index.md). `DiffusionFluxBC` does not
+[`Diffusion`](/Diffusion.md) [`Kernel`](syntax/Kernels/index.md). `DiffusionFluxBC` does not
 "enforce" a boundary condition per-se (see, e.g. [`DirichletBC`](/DirichletBC.md),
 [`NeumannBC`](/NeumannBC.md), and related classes for that).  Instead, this class is responsible for
 computing the residual (and Jacobian) contributions due to the boundary contribution arising from
-integration by parts on the [`Diffusion`](/Diffusion.md) [`Kernel`](systems/Kernels/index.md).
+integration by parts on the [`Diffusion`](/Diffusion.md) [`Kernel`](syntax/Kernels/index.md).
 
 !alert note
 The standard theory of elliptic operators requires the specification of boundary conditions on all

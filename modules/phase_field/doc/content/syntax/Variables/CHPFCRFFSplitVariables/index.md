@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # CHPFCRFFSplitVariables System
 
 !syntax list /Variables/CHPFCRFFSplitVariables objects=True actions=False subsystems=False

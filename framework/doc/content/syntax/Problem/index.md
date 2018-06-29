@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Problem System
 
 !syntax list /Problem objects=True actions=False subsystems=False

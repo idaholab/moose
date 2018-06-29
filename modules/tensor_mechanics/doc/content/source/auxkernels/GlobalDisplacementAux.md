@@ -4,7 +4,7 @@
 
 ## Description
 
-The AuxKernel `GlobalDisplacementAux` calculates the displacement components from the [global strain tensor](/Materials/ComputeGlobalStrain.md). Optionally, it can combine the global displacement with the displacements calculated from the stress divergence kernel to provide the total displacement. It saves individual displacement components into an AuxVariable for visualization and/or post-processing purposes.
+The AuxKernel `GlobalDisplacementAux` calculates the displacement components from the [global strain tensor](/ComputeGlobalStrain.md). Optionally, it can combine the global displacement with the displacements calculated from the stress divergence kernel to provide the total displacement. It saves individual displacement components into an AuxVariable for visualization and/or post-processing purposes.
 
 
 ## Example Input File Syntax

@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # MaterialVectorAuxKernel System
 
 !syntax list /AuxKernels/MaterialVectorAuxKernel objects=True actions=False subsystems=False

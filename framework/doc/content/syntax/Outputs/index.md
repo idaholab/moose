@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Outputs System
 
 !syntax list /Outputs objects=True actions=False subsystems=False
