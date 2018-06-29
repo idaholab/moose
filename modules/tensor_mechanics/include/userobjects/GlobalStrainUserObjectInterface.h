@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GLOBALSTRAINUOINTERFACE_H
-#define GLOBALSTRAINUOINTERFACE_H
+#ifndef GLOBALSTRAINUSEROBJECTINTERFACE_H
+#define GLOBALSTRAINUSEROBJECTINTERFACE_H
 
 #include "UserObject.h"
 #include "RankTwoTensor.h"
@@ -17,7 +17,7 @@
  * This class provides interface for extracting the periodic directions, residual, and jacobian
  * values from UserObjects associated with global strain calculation
  */
-class GlobalStrainUOInterface
+class GlobalStrainUserObjectInterface
 {
 public:
   virtual const RankTwoTensor & getResidual() const = 0;
@@ -25,4 +25,4 @@ public:
   virtual const VectorValue<bool> & getPeriodicDirections() const = 0;
 };
 
-#endif // GLOBALSTRAINUOINTERFACE_H
+#endif // GLOBALSTRAINUSEROBJECTINTERFACE_H

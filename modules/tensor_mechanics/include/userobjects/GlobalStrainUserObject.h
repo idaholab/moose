@@ -11,7 +11,7 @@
 #define GLOBALSTRAINUSEROBJECT_H
 
 #include "ElementUserObject.h"
-#include "GlobalStrainUOInterface.h"
+#include "GlobalStrainUserObjectInterface.h"
 
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
@@ -21,7 +21,7 @@ class GlobalStrainUserObject;
 template <>
 InputParameters validParams<GlobalStrainUserObject>();
 
-class GlobalStrainUserObject : public ElementUserObject, public GlobalStrainUOInterface
+class GlobalStrainUserObject : public ElementUserObject, public GlobalStrainUserObjectInterface
 {
 public:
   GlobalStrainUserObject(const InputParameters & parameters);

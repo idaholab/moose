@@ -14,7 +14,7 @@
 
 // Forward Declarations
 class GlobalStrain;
-class GlobalStrainUOInterface;
+class GlobalStrainUserObjectInterface;
 class RankTwoTensor;
 class RankFourTensor;
 
@@ -34,7 +34,7 @@ public:
 protected:
   virtual void assignComponentIndices(Order var_order);
 
-  const GlobalStrainUOInterface & _pst;
+  const GlobalStrainUserObjectInterface & _pst;
   const RankTwoTensor & _pst_residual;
   const RankFourTensor & _pst_jacobian;
   const VectorValue<bool> & _periodic_dir;
