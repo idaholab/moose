@@ -46,9 +46,11 @@ protected:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
   virtual Real computeFailedDT() override;
+  virtual bool converged() override;
 
   void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
   Real computeInterpolationDT();
+  void limitDT(Real & limitedDT);
   void limitDTByFunction(Real & limitedDT);
   void limitDTToPostprocessorValue(Real & limitedDT);
 
@@ -100,6 +102,11 @@ protected:
 
   bool & _cutback_occurred;
   bool _at_function_point;
+
+  /// Indicates whether we need to reject a time step much larger than its ideal size
+  bool _reject_large_step;
+  /// Threshold used to detect whether we need to reject a step
+  double _large_step_rejection_threshold;
 };
 
 template <>

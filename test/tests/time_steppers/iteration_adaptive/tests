@@ -49,4 +49,10 @@
     input = 'adapt_tstep_pps_lim.i'
     exodiff = 'adapt_tstep_pps_lim_out.e'
   [../]
+
+  [./test_reject_large_dt]
+    type = 'Exodiff'
+    input = 'adapt_tstep_reject_large_dt.i'
+    exodiff = 'adapt_tstep_reject_large_dt_out.e'
+  [../]
 []
