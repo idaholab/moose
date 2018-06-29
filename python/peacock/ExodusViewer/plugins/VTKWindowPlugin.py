@@ -162,11 +162,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self.setMainLayoutName('RightLayout')
         self.setup()
 
-        # Apply an initial message
-        self.blockSignals(True)
-        self.onWindowRequiresUpdate()
-        self.blockSignals(False)
-
     def onSetFilename(self, filename):
         """
         Slot for changing the filename, this is generally called from the FilePlugin signal.
