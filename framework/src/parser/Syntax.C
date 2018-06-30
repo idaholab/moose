@@ -97,15 +97,25 @@ Syntax::getSortedTaskSet()
 }
 
 bool
-Syntax::hasTask(const std::string & task)
+Syntax::hasTask(const std::string & task) const
 {
   return (_registered_tasks.find(task) != _registered_tasks.end());
 }
 
 bool
-Syntax::isActionRequired(const std::string & task)
+Syntax::isActionRequired(const std::string & task) const
 {
-  return _registered_tasks[task];
+  mooseDeprecated("Syntax::isActionRequired is deprecated, use shouldAutoBuild() instead");
+  return shouldAutoBuild(task);
+}
+
+bool
+Syntax::shouldAutoBuild(const std::string & task) const
+{
+  auto map_pair = _registered_tasks.find(task);
+  mooseAssert(map_pair != _registered_tasks.end(), std::string("Unregistered task: ") + task);
+
+  return map_pair->second;
 }
 
 void
@@ -175,7 +185,7 @@ Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
 }
 
 std::string
-Syntax::isAssociated(const std::string & real_id, bool * is_parent)
+Syntax::isAssociated(const std::string & real_id, bool * is_parent) const
 {
   /**
    * This implementation assumes that wildcards can occur in the place of an entire token but not as

@@ -66,3 +66,6 @@ not use a file-based mesh, you will need to specify a split mesh file name using
 ```
 $ mpiexec -n 42 moose-app-opt -i your_input.i --use-split --split-file foo.cpr
 ```
+
+!alert note
+The mesh splitter commands do not work with DistributedMesh. You must only split with a ReplicatedMesh.

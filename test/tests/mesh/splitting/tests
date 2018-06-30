@@ -6,6 +6,7 @@
     check_files = 'foo.cpr/3/header.cpr foo.cpr/3/split-3-0.cpr foo.cpr/3/split-3-1.cpr foo.cpr/3/split-3-2.cpr'
     recover = false
     mesh_mode = REPLICATED
+
     issues = '#10623'
     design = 'Mesh/splitting.md'
     requirement = 'A mesh can be split into a specified number of files using command line options.'
@@ -18,8 +19,53 @@
     prereq = 'make_split'
     min_parallel = 3
     max_parallel = 3
-    design = 'Mesh/splitting.md'
+
     issues = '#10623'
+    design = 'Mesh/splitting.md'
     requirement = 'A mesh can be pre-split properly and used to generate equivalent results to running a simulation with the unsplit mesh.'
+  [../]
+
+  [./split_with_distributed_error]
+    type = 'RunException'
+    input = 'simple_diffusion.i'
+    cli_args = '--split-mesh 3 --split-file foo'
+    expect_err = 'You cannot use the mesh splitter capability with DistributedMesh!'
+    mesh_mode = DISTRIBUTED
+
+    issues = '#11434'
+    design = 'Mesh/splitting.md'
+    requirement = 'The mesh splitter will throw an error when an attempt is made to split a "DistributedMesh".'
+  [../]
+
+  [./split_with_RM_part1]
+    type = 'CheckFiles'
+    input = 'geometric_neighbors.i'
+    cli_args = '--split-mesh 2 --split-file geometric_neighbors Mesh/parallel_type=replicated'
+    check_files = 'geometric_neighbors.cpr/2/header.cpr geometric_neighbors.cpr/2/split-2-0.cpr geometric_neighbors.cpr/2/split-2-1.cpr'
+    recover = false
+    mesh_mode = DISTRIBUTED
+    compiler = 'GCC CLANG'
+
+    issues = '#11434'
+    design = 'Mesh/splitting.md'
+    requirement = 'The mesh splitter will throw an error when an attempt is made to split a "DistributedMesh".'
+  [../]
+
+  [./split_with_RM_part2]
+    type = 'Exodiff'
+    input = 'geometric_neighbors.i'
+    cli_args = '--use-split --split-file geometric_neighbors Outputs/file_base=geometric_edge_two_2D_out'
+    exodiff = 'geometric_edge_two_2D_out.e'
+    recover = false
+    mesh_mode = DISTRIBUTED
+    compiler = 'GCC CLANG'
+
+    min_parallel = 2
+    max_parallel = 2
+    prereq = 'split_with_RM_part1'
+
+    issues = '#11434'
+    design = 'Mesh/splitting.md'
+    requirement = 'The mesh splitter will throw an error when an attempt is made to split a "DistributedMesh".'
   [../]
 []

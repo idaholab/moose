@@ -10,6 +10,7 @@
 #include "ElementPointNeighbors.h"
 #include "MooseMesh.h"
 #include "Conversion.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", ElementPointNeighbors);
 
@@ -30,7 +31,7 @@ ElementPointNeighbors::ElementPointNeighbors(const InputParameters & parameters)
 void ElementPointNeighbors::attachRelationshipManagersInternal(
     Moose::RelationshipManagerType /*rm_type*/)
 {
-  if (_mesh.isDistributedMesh())
+  if (_app.isSplitMesh() || _mesh.isDistributedMesh())
   {
     _point_coupling = libmesh_make_unique<GhostPointNeighbors>(_mesh);
 

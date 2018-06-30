@@ -40,7 +40,7 @@
   [../]
   [./aux_v]
   [../]
-  [./cm]
+  [./proc_id]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -68,6 +68,10 @@
     type = FunctionAux
     variable = aux_v
     function = '-(x*x+y*y)'
+  [../]
+  [./auxk_proc_id]
+    variable = proc_id
+    type = ProcessorIDAux
   [../]
 []
 

@@ -234,16 +234,23 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner() const
+  Executioner * getExecutioner() const { return _executioner.get(); }
+
+  /**
+   * Retrieve the Executioner for this App
+   */
+  std::shared_ptr<Executioner> & executioner()
   {
-    mooseAssert(_executioner, "Executioner is nullptr");
-    return _executioner.get();
+    mooseDeprecated("executioner() is deprecated. Use getExecutioner(), this interface will be "
+                    "removed after 10/01/2018");
+
+    return _executioner;
   }
 
   /**
-   * Retrieve the Executioner shared pointer for this App
+   * Set the Executioner for this App
    */
-  std::shared_ptr<Executioner> & executioner() { return _executioner; }
+  void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -316,6 +323,11 @@ public:
    * Whether or not this is a "restart" calculation.
    */
   bool isRestarting() const;
+
+  /**
+   * Whether or not this is a split mesh operation.
+   */
+  bool isSplitMesh() const;
 
   /**
    * Return true if the recovery file base is set
@@ -694,6 +706,9 @@ protected:
 
   /// Whether or not this is a restart run
   bool _restart;
+
+  /// Whether or not we are performing a split mesh operation (--split-mesh)
+  bool _split_mesh;
 
   /// Whether or not FPE trapping should be turned on.
   bool _trap_fpe;

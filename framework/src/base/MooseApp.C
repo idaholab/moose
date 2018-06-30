@@ -276,6 +276,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _distributed_mesh_on_command_line(false),
     _recover(false),
     _restart(false),
+    _split_mesh(false),
 #ifdef DEBUG
     _trap_fpe(true),
 #else
@@ -708,6 +709,7 @@ MooseApp::setupOptions()
     }
     else if (isParamValid("split_mesh"))
     {
+      _split_mesh = true;
       _syntax.registerTaskName("split_mesh", true);
       _syntax.addDependency("split_mesh", "setup_mesh_complete");
       _action_warehouse.setFinalTask("split_mesh");
@@ -814,6 +816,12 @@ bool
 MooseApp::isRestarting() const
 {
   return _restart;
+}
+
+bool
+MooseApp::isSplitMesh() const
+{
+  return _split_mesh;
 }
 
 bool
