@@ -1705,6 +1705,9 @@ protected:
 
   std::shared_ptr<LineSearch> _line_search;
 
+  /// Whether one residual computation has been completed this timestep
+  bool _one_residual_computation_completed_this_timestep;
+
 private:
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;

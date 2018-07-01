@@ -212,6 +212,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _line_search(nullptr),
+    _one_residual_computation_completed_this_timestep(false),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
@@ -781,6 +782,8 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
+  _one_residual_computation_completed_this_timestep = false;
+
   unsigned int n_threads = libMesh::n_threads();
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
@@ -4167,6 +4170,10 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
 void
 FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
+  if (solverParams()._type == Moose::ST_LINEAR && _one_residual_computation_completed_this_timestep)
+    if (!_has_time_integrator || _nl->getTimeIntegrator()->name() == "ImplicitEuler")
+      return;
+
   _nl->zeroVariablesForResidual();
   _aux->zeroVariablesForResidual();
 
@@ -4225,6 +4232,8 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
   _app.getOutputWarehouse().residualSetup();
 
   _nl->computeResidualTags(tags);
+
+  _one_residual_computation_completed_this_timestep = true;
 }
 
 void
