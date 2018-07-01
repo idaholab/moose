@@ -145,6 +145,7 @@ setSolverOptions(SolverParams & solver_params)
 
     case Moose::ST_LINEAR:
       setSinglePetscOption("-snes_type", "ksponly");
+      setSinglePetscOption("-snes_monitor_cancel");
       break;
   }
 
