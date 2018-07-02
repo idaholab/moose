@@ -23,4 +23,17 @@
     exodiff = '3d_1d_master_out.e 3d_1d_master_out_sub_app0.e'
     recover = false
   [../]
+
+  [./3d_1d_err]
+    type = 'RunException'
+    input = '3d_1d_master.i'
+    cli_args = 'Transfers/layered_transfer_from_sub_app/all_master_nodes_contained_in_sub_app=true'
+    expect_err = 'MultiAppUserObjectTransfer: Master element with centroid at'
+    prereq = 3d_1d
+
+    requirement = "MultiAppUserObjectTransfer shall generate an error if a master node/element is not"
+                  " contained within any sub application domains."
+    design = "MultiAppUserObjectTransfer.md"
+    issues = "#10313"
+  [../]
 []

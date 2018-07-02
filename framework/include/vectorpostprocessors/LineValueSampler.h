@@ -37,6 +37,29 @@ public:
                                    unsigned int num_points,
                                    std::vector<Point> & points,
                                    std::vector<Real> & ids);
+
+  /**
+   * Gets the value of the variable at a point p.
+   * Used with MultiAppUserObjectTransfer to transfer
+   * variable information from one domain to another.
+   **/
+  virtual Real spatialValue(const Point & p) const override { return getValue(p); }
+
+  /**
+   * Gets the value of the variable at a point p.
+   * Returns zero if p does not lie along the line segment.
+   **/
+  Real getValue(Point p) const;
+
+protected:
+  /// Vector connecting the start and end points of the line segment
+  const RealVectorValue _line_vector;
+
+  /// Zero vector
+  const RealVectorValue _zero;
+
+  /// Length of line segment
+  const Real _line_vector_norm;
 };
 
 #endif

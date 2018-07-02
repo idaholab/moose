@@ -36,6 +36,12 @@ public:
 protected:
   AuxVariableName _to_var_name;
   std::string _user_object_name;
+
+  /**
+   * Boolean variable to generate error if every master node
+   * cannot be mapped to a subApp during from_multiapp transfer
+   **/
+  const bool _all_master_nodes_contained_in_sub_app;
 };
 
 #endif // MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
