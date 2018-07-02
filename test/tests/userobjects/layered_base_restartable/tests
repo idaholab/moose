@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'layered_base_restartable.i'
+    exodiff = 'layered_base_restartable_out.e'
+  [../]
+[]
