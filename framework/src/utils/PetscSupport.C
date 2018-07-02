@@ -733,7 +733,17 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     // Do not add duplicate settings
     if (find(po.inames.begin(), po.inames.end(), petsc_options_inames[i]) == po.inames.end())
     {
+#if !PETSC_VERSION_LESS_THAN(3, 9, 0)
+      if (petsc_options_inames[i] == "-pc_factor_mat_solver_package")
+      {
+        po.inames.push_back("-pc_factor_mat_solver_type");
+        mooseDeprecated("Please use -pc_factor_mat_solver_type for PETSc-3.9.x or higher");
+      }
+      else
+        po.inames.push_back(petsc_options_inames[i]);
+#else
       po.inames.push_back(petsc_options_inames[i]);
+#endif
       po.values.push_back(petsc_options_values[i]);
 
       // Look for a pc description
@@ -747,7 +757,8 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
         strong_threshold_found = true;
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
-      if (petsc_options_inames[i] == "-pc_factor_mat_solver_package" &&
+      if ((petsc_options_inames[i] == "-pc_factor_mat_solver_package" ||
+           petsc_options_inames[i] == "-pc_factor_mat_solver_type") &&
           petsc_options_values[i] == "superlu_dist")
         superlu_dist_found = true;
       if (petsc_options_inames[i] == "-mat_superlu_dist_fact")
