@@ -33,24 +33,16 @@ class MediaControlPlugin(QtWidgets.QGroupBox, peacock.base.MediaControlWidgetBas
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
         self.setup()
 
-    def onWindowCreated(self, *args):
-        """
-        Initialize the time settings when results are first created.
-        """
-        super(MediaControlPlugin, self).onWindowCreated(*args)
-        self.onWindowUpdated()
-
-    def onWindowUpdated(self):
+    def onUpdateWindow(self, window, reader, result):
         """
         Re-initializes the controls for a reader/result object.
         """
         try:
-            if self._reader:
-                self._times = self._reader.getTimes()
-                self._num_steps = len(self._times)
-                self._current_step = self._reader.getTimeData().timestep
-                self.updateTimeDisplay()
-                self.timeChanged.emit()
+            self._times = reader.getTimes()
+            self._num_steps = len(self._times)
+            self._current_step = reader.getTimeData().timestep
+            self.updateTimeDisplay()
+            self.timeChanged.emit()
         except:
             mooseutils.mooseDebug('Failed to update window.', traceback=True, color='RED')
 
@@ -88,5 +80,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main()
-    window.onFileChanged(filename)
+    window.onSetFilename(filename)
+    window.onSetVariable('diffused')
+    window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

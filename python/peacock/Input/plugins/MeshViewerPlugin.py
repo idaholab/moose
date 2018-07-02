@@ -6,12 +6,13 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import os
+import chigger
 from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
 from peacock.utils import ExeLauncher
-from PyQt5.QtCore import pyqtSignal
+from PyQt5 import QtCore
+
 import mooseutils
-import os
 
 class MeshViewerPlugin(VTKWindowPlugin):
     """
@@ -21,15 +22,23 @@ class MeshViewerPlugin(VTKWindowPlugin):
         needInputFile[str]: Emitted when an input file needs to be written out
         meshEnabled[bool]: Notifies when the mesh has been enabled/disabled
     """
-    needInputFile = pyqtSignal(str)
-    meshEnabled = pyqtSignal(bool)
+    needInputFile = QtCore.pyqtSignal(str)
+    meshEnabled = QtCore.pyqtSignal(bool)
+
+    @staticmethod
+    def getDefaultResultOptions():
+        """
+        Return the default options for the ExodusResult object.
+        """
+        return dict(representation='wireframe')
 
     def __init__(self, **kwargs):
-        super(MeshViewerPlugin, self).__init__(**kwargs)
+        super(MeshViewerPlugin, self).__init__(colorbar=False, **kwargs)
         self.temp_input_file = "peacock_run_mesh_tmp.i"
         self.temp_mesh_file = "peacock_run_mesh_tmp.e"
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
         self._use_test_objects = True
+        self.setMainLayoutName('WindowLayout')
 
     def _removeFileNoError(self, fname):
         """
@@ -43,6 +52,36 @@ class MeshViewerPlugin(VTKWindowPlugin):
         except:
             pass
 
+    def onHighlight(self, block=None, boundary=None, nodeset=None):
+        """
+        Highlight the desired block/boundary/nodeset.
+
+        To remove highlight call this function without the inputs set.
+
+        Args:
+            block[list]: List of block ids to highlight.
+            boundary[list]: List of boundary ids to highlight.
+            nodeset[list]: List of nodeset ids to highlight.
+        """
+        if not self._initialized:
+            return
+
+        if not self._highlight:
+            self._highlight = chigger.exodus.ExodusResult(self._reader,
+                                                          renderer=self._result.getVTKRenderer(),
+                                                          color=[1,0,0])
+
+        if (block or boundary or nodeset):
+            self._highlight.setOptions(block=block, boundary=boundary, nodeset=nodeset)
+            self._highlight.setOptions(edges=True, edge_width=3, edge_color=[1,0,0], point_size=5)
+            self._window.append(self._highlight)
+        else:
+            self._highlight.reset()
+            self._window.remove(self._highlight)
+            self._highlight = None
+
+        self.onWindowRequiresUpdate()
+
     def useTestObjects(self, use_test_objs):
         """
         Set to pass the --allow-test-objects flag while generating the mesh
@@ -55,7 +94,7 @@ class MeshViewerPlugin(VTKWindowPlugin):
         We need to update the view of the mesh by generating a new mesh file.
         """
         if reset:
-            self.reset()
+            self._reset()
 
         self.meshEnabled.emit(False)
         if not tree.app_info.valid():
@@ -63,9 +102,11 @@ class MeshViewerPlugin(VTKWindowPlugin):
         # if we aren't writing out the mesh node then don't show it
         mesh_node = tree.getBlockInfo("/Mesh")
         if not mesh_node or not mesh_node.included:
-            self.onFileChanged()
-            self.setLoadingMessage("Mesh block not included")
+            self.onSetFilename(None)
+            self.onWindowRequiresUpdate()
+            self._setLoadingMessage("Mesh block not included")
             return
+
         exe_path = tree.app_info.path
         self._removeFileNoError(self.current_temp_mesh_file)
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
@@ -76,22 +117,26 @@ class MeshViewerPlugin(VTKWindowPlugin):
 
         if not os.path.exists(input_file):
             self.meshEnabled.emit(False)
-            self.onFileChanged()
-            self.setLoadingMessage("Error reading temporary input file")
+            self.onSetFilename(None)
+            self.onWindowRequiresUpdate()
+            self._setLoadingMessage("Error reading temporary input file")
             return
-
         try:
             args = ["-i", input_file, "--mesh-only", self.current_temp_mesh_file]
             if self._use_test_objects:
                 args.append("--allow-test-objects")
             ExeLauncher.runExe(exe_path, args, print_errors=False)
             self.meshEnabled.emit(True)
-            self.onFileChanged(self.current_temp_mesh_file)
+            self.onSetFilename(self.current_temp_mesh_file)
+            self.onSetColorbarVisible(False)
+            self.onWindowRequiresUpdate()
+
         except Exception as e:
             self.meshEnabled.emit(False)
-            self.onFileChanged()
+            self.onSetFilename(None)
+            self.onWindowRequiresUpdate()
             mooseutils.mooseWarning("Error producing mesh: %s" % e)
-            self.setLoadingMessage("Error producing mesh")
+            self._setLoadingMessage("Error producing mesh")
             self._removeFileNoError(self.current_temp_mesh_file)
 
         self._removeFileNoError(input_file) # we need the mesh file since it is in use but not the input file
@@ -99,3 +144,26 @@ class MeshViewerPlugin(VTKWindowPlugin):
     def closing(self):
         self._removeFileNoError(self.temp_input_file)
         self._removeFileNoError(self.current_temp_mesh_file)
+
+def main(size=None):
+    """
+    Run the VTKWindowPlugin all by its lonesome.
+    """
+    from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
+    plugin = MeshViewerPlugin(size=size)
+    plugin.setMainLayoutName('RightLayout')
+    widget = ExodusPluginManager(plugins=[lambda: plugin])
+    widget.show()
+    return widget, widget.MeshViewerPlugin
+
+if __name__ == "__main__":
+    import sys
+    from peacock.utils import Testing
+    from PyQt5 import QtWidgets
+    app = QtWidgets.QApplication(sys.argv)
+    filename = Testing.get_chigger_input('mesh_only.e')
+    widget, window = main(size=[600,600])
+    window.onSetFilename(filename)
+    window.onSetVariable('diffused')
+    window.onWindowRequiresUpdate()
+    sys.exit(app.exec_())

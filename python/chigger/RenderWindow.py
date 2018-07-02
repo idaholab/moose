@@ -100,7 +100,7 @@ class RenderWindow(base.ChiggerObject):
                 raise mooseutils.MooseException(msg)
             self._results.append(result)
 
-    def pop(self, *args):
+    def remove(self, *args):
         """
         Remove result object(s) from the window.
         """
@@ -119,7 +119,7 @@ class RenderWindow(base.ChiggerObject):
         """
         Remove all objects from the render window.
         """
-        self.pop(*self._results)
+        self.remove(*self._results)
         self.append(misc.ChiggerBackground())
         self.update()
 

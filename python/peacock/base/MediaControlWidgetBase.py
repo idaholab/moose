@@ -51,7 +51,7 @@ class MediaControlWidgetBase(object):
         self.__addButton('EndButton', "Set the simulation to the end.", 'end.ico')
 
         # Move the timestep/time edit boxes to the right side
-        self.ButtonLayout.insertStretch(6)
+        self.ButtonLayout.addStretch(1)
 
         # TimeStep display/edit
         self.__addEditBox('TimeStepDisplay', 'Timestep:', "Set the simulation timestep.", True)
