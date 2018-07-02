@@ -6,4 +6,11 @@
     group = 'requirements adaptive'
     max_parallel = 1
   [../]
+  [./stateful_props]
+    type = 'RunApp'
+    input = 'dg_stateful.i'
+    requirement = 'DGKernels shall coexist with stateful material properties'
+    issues = '#11766'
+    design = 'DGKernels/index.md'
+  [../]
 []

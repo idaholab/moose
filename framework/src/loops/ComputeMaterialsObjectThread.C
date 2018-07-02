@@ -28,6 +28,7 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     std::vector<std::shared_ptr<MaterialData>> & neighbor_material_data,
     MaterialPropertyStorage & material_props,
     MaterialPropertyStorage & bnd_material_props,
+    MaterialPropertyStorage & neighbor_material_props,
     std::vector<Assembly *> & assembly)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
@@ -37,12 +38,14 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     _neighbor_material_data(neighbor_material_data),
     _material_props(material_props),
     _bnd_material_props(bnd_material_props),
+    _neighbor_material_props(neighbor_material_props),
     _materials(_fe_problem.getComputeMaterialWarehouse()),
     _discrete_materials(_fe_problem.getDiscreteMaterialWarehouse()),
     _assembly(assembly),
     _need_internal_side_material(false),
     _has_stateful_props(_material_props.hasStatefulProperties()),
-    _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties())
+    _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties()),
+    _has_neighbor_stateful_props(_neighbor_material_props.hasStatefulProperties())
 {
 }
 
@@ -57,12 +60,14 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
     _neighbor_material_data(x._neighbor_material_data),
     _material_props(x._material_props),
     _bnd_material_props(x._bnd_material_props),
+    _neighbor_material_props(x._neighbor_material_props),
     _materials(x._materials),
     _discrete_materials(x._discrete_materials),
     _assembly(x._assembly),
     _need_internal_side_material(x._need_internal_side_material),
     _has_stateful_props(_material_props.hasStatefulProperties()),
-    _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties())
+    _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties()),
+    _has_neighbor_stateful_props(_neighbor_material_props.hasStatefulProperties())
 {
 }
 
@@ -185,7 +190,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
     const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-    if (_has_bnd_stateful_props &&
+    if (_has_neighbor_stateful_props &&
         ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
          (neighbor->level() < elem->level())))
     {
@@ -194,7 +199,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
       // Neighbor Materials
       if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(
               neighbor->subdomain_id(), _tid))
-        _bnd_material_props.initStatefulProps(
+        _neighbor_material_props.initStatefulProps(
             *_bnd_material_data[_tid],
             _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
                 neighbor->subdomain_id(), _tid),
@@ -203,7 +208,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             side);
       if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(neighbor->subdomain_id(),
                                                                           _tid))
-        _bnd_material_props.initStatefulProps(
+        _neighbor_material_props.initStatefulProps(
             *_neighbor_material_data[_tid],
             _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
                 neighbor->subdomain_id(), _tid),

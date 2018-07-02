@@ -30,6 +30,7 @@ public:
                                std::vector<std::shared_ptr<MaterialData>> & neighbor_material_data,
                                MaterialPropertyStorage & material_props,
                                MaterialPropertyStorage & bnd_material_props,
+                               MaterialPropertyStorage & neighbor_material_props,
                                std::vector<Assembly *> & assembly);
 
   // Splitting Constructor
@@ -53,6 +54,7 @@ protected:
   std::vector<std::shared_ptr<MaterialData>> & _neighbor_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
+  MaterialPropertyStorage & _neighbor_material_props;
 
   /// Reference to the Material object warehouses
   const MaterialWarehouse & _materials;
@@ -63,6 +65,7 @@ protected:
 
   const bool _has_stateful_props;
   const bool _has_bnd_stateful_props;
+  const bool _has_neighbor_stateful_props;
 };
 
 #endif // COMPUTERESIDUALTHREAD_H
