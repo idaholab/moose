@@ -79,6 +79,9 @@ protected:
 
   std::vector<Point> _points;
   std::vector<std::shared_ptr<UserObjectType>> _user_objects;
+
+  // The list of InputParameter objects. This is a list because these cannot be copied (or moved).
+  std::list<InputParameters> _sub_params;
 };
 
 template <typename UserObjectType>
@@ -88,8 +91,15 @@ NearestPointBase<UserObjectType>::NearestPointBase(const InputParameters & param
   _user_objects.reserve(_points.size());
 
   // Build each of the UserObject objects:
-  for (unsigned int i = 0; i < _points.size(); i++)
-    _user_objects.push_back(std::make_shared<UserObjectType>(parameters));
+  for (auto i = beginIndex(_points); i < _points.size(); i++)
+  {
+    auto sub_params = emptyInputParameters();
+    sub_params += parameters;
+    sub_params.set<std::string>("_object_name") = name() + "_sub" + std::to_string(i);
+
+    _sub_params.push_back(sub_params);
+    _user_objects.emplace_back(std::make_shared<UserObjectType>(_sub_params.back()));
+  }
 }
 
 template <typename UserObjectType>
@@ -126,7 +136,7 @@ NearestPointBase<UserObjectType>::threadJoin(const UserObject & y)
 {
   auto & npla = static_cast<const NearestPointBase &>(y);
 
-  for (unsigned int i = 0; i < _user_objects.size(); i++)
+  for (auto i = beginIndex(_user_objects); i < _user_objects.size(); i++)
     _user_objects[i]->threadJoin(*npla._user_objects[i]);
 }
 
@@ -144,9 +154,9 @@ NearestPointBase<UserObjectType>::nearestUserObject(const Point & p) const
   unsigned int closest = 0;
   Real closest_distance = std::numeric_limits<Real>::max();
 
-  for (unsigned int i = 0; i < _points.size(); i++)
+  for (auto i = beginIndex(_points); i < _points.size(); i++)
   {
-    const Point & current_point = _points[i];
+    const auto & current_point = _points[i];
 
     Real current_distance = (p - current_point).norm();
 
