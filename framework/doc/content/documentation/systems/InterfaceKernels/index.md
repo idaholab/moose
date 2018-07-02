@@ -10,9 +10,9 @@ where $D_i$ is the diffusion coefficient of specie $i$ in subdomain $i$, and $c_
 
 [2d_interface/coupled_value_coupled_flux.i]
 
-[InterfaceDiffusion.C]
+[/InterfaceDiffusion.C]
 
-[InterfaceDiffusion.h]
+[/InterfaceDiffusion.h]
 
 Interface kernels can be used to provide any general flux condition at an interface, and even more generally can be used to impose any interfacial condition that requires access to values of different variables and gradients of different variables on either side of an interface. In an input file, the user will specify at a minimum the following parameters:
 
