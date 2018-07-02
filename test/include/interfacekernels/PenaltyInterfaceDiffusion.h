@@ -1,4 +1,4 @@
-//* This file is part of the MOOSE framework
+///* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -7,31 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEDIFFUSION_H
-#define INTERFACEDIFFUSION_H
+#ifndef PENALTYINTERFACEDIFFUSION_H
+#define PENALTYINTERFACEDIFFUSION_H
 
 #include "InterfaceKernel.h"
 
 // Forward Declarations
-class InterfaceDiffusion;
+class PenaltyInterfaceDiffusion;
 
 template <>
-InputParameters validParams<InterfaceDiffusion>();
+InputParameters validParams<PenaltyInterfaceDiffusion>();
 
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
-class InterfaceDiffusion : public InterfaceKernel
+class PenaltyInterfaceDiffusion : public InterfaceKernel
 {
 public:
-  InterfaceDiffusion(const InputParameters & parameters);
+  PenaltyInterfaceDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
-  const MaterialProperty<Real> & _D;
-  const MaterialProperty<Real> & _D_neighbor;
+  const Real _penalty;
 };
 
 #endif

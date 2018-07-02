@@ -9,8 +9,6 @@
 
 #include "InterfaceDiffusion.h"
 
-#include <cmath>
-
 registerMooseObject("MooseTestApp", InterfaceDiffusion);
 
 template <>
@@ -27,24 +25,23 @@ validParams<InterfaceDiffusion>()
 InterfaceDiffusion::InterfaceDiffusion(const InputParameters & parameters)
   : InterfaceKernel(parameters),
     _D(getMaterialProperty<Real>("D")),
-    _D_neighbor(getMaterialProperty<Real>("D_neighbor"))
+    _D_neighbor(getNeighborMaterialProperty<Real>("D_neighbor"))
 {
 }
 
 Real
 InterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
-  Real r = 0.5 * (-_D[_qp] * _grad_u[_qp] * _normals[_qp] +
-                  -_D_neighbor[_qp] * _grad_neighbor_value[_qp] * _normals[_qp]);
+  Real r = 0;
 
   switch (type)
   {
     case Moose::Element:
-      r *= _test[_i][_qp];
+      r = _test[_i][_qp] * -_D_neighbor[_qp] * _grad_neighbor_value[_qp] * _normals[_qp];
       break;
 
     case Moose::Neighbor:
-      r *= -_test_neighbor[_i][_qp];
+      r = _test_neighbor[_i][_qp] * _D[_qp] * _grad_u[_qp] * _normals[_qp];
       break;
   }
 
@@ -58,22 +55,16 @@ InterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType type)
 
   switch (type)
   {
-
     case Moose::ElementElement:
-      jac -= 0.5 * _D[_qp] * _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp];
-      break;
-
     case Moose::NeighborNeighbor:
-      jac += 0.5 * _D_neighbor[_qp] * _grad_phi_neighbor[_j][_qp] * _normals[_qp] *
-             _test_neighbor[_i][_qp];
       break;
 
     case Moose::NeighborElement:
-      jac += 0.5 * _D[_qp] * _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+      jac = _test_neighbor[_i][_qp] * _D[_qp] * _grad_phi[_j][_qp] * _normals[_qp];
       break;
 
     case Moose::ElementNeighbor:
-      jac -= 0.5 * _D_neighbor[_qp] * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp];
+      jac = _test[_i][_qp] * -_D_neighbor[_qp] * _grad_phi_neighbor[_j][_qp] * _normals[_qp];
       break;
   }
 

@@ -19,13 +19,6 @@
     paired_block = '1'
     new_boundary = 'master0_interface'
   [../]
-  [./interface_again]
-    type = SideSetsBetweenSubdomains
-    depends_on = subdomain1
-    master_block = '1'
-    paired_block = '0'
-    new_boundary = 'master1_interface'
-  [../]
 []
 
 [Variables]
@@ -59,15 +52,26 @@
 []
 
 [InterfaceKernels]
+  active = 'interface'
   [./interface]
     type = InterfaceDiffusion
     variable = u
     neighbor_var = v
     boundary = master0_interface
+    D = 'D'
+    D_neighbor = 'D'
+  [../]
+  [./penalty_interface]
+    type = PenaltyInterfaceDiffusion
+    variable = u
+    neighbor_var = v
+    boundary = master0_interface
+    penalty = 1e6
   [../]
 []
 
 [BCs]
+  active = 'left right middle'
   [./left]
     type = DirichletBC
     variable = u
@@ -94,17 +98,17 @@
     initial_diffusivity = 1
     boundary = master0_interface
   [../]
-  [./general]
+  [./block0]
     type = GenericConstantMaterial
-    block = '0 1'
-    prop_names = 'dummy'
-    prop_values = '1'
+    block = '0'
+    prop_names = 'D'
+    prop_values = '4'
   [../]
-  [./boundary]
+  [./block1]
     type = GenericConstantMaterial
-    boundary = 'master0_interface'
-    prop_names = 'D D_neighbor'
-    prop_values = '4 2'
+    block = '1'
+    prop_names = 'D'
+    prop_values = '2'
   [../]
 []
 
