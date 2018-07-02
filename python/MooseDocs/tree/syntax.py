@@ -26,7 +26,6 @@ class SyntaxNodeBase(NodeBase):
                   Property('parameters', ptype=dict),
                   Property('description', ptype=unicode),
                   Property('alias', ptype=unicode),
-                  Property('use_legacy_location', ptype=bool, default=True),
                   Property('test', ptype=bool, default=False)]
 
     def __init__(self, *args, **kwargs):
@@ -183,9 +182,6 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
         """
         The expected markdown file.
         """
-        if self.use_legacy_location:
-            return self.fullpath.lstrip('/') + '.md'
-
         hdr = self.header()
         if hdr is not None:
             idx = hdr.find('/include/') + len('/include/')

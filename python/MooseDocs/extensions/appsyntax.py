@@ -71,9 +71,6 @@ class AppSyntaxExtension(command.CommandExtension):
                              "Parameter groups to show as un-collapsed.")
         config['alias'] = (None, "List of Dictionary of lists of syntax aliases.")
         config['allow-test-objects'] = (False, "Enable the test objects.")
-        config['use-legacy-location'] = (True, "Use syntax based markdown location rather " \
-                                                "than header based location.")
-
         return config
 
     def __init__(self, *args, **kwargs):
@@ -94,8 +91,7 @@ class AppSyntaxExtension(command.CommandExtension):
                                                   alias=self['alias'],
                                                   remove=self['remove'],
                                                   hide=self['hide'],
-                                                  allow_test_objects=self['allow-test-objects'],
-                                                  legacy_loc=self['use-legacy-location'])
+                                                  allow_test_objects=self['allow-test-objects'])
 
                     self._app_type = mooseutils.runExe(exe, ['--type']).strip(' \n')
 
@@ -362,10 +358,7 @@ class SyntaxCompleteCommand(SyntaxCommandBase):
             h = tokens.Heading(parent, level=level, string=unicode(child.fullpath.strip('/')))
 
             # TODO: systems prefix is needed to be unique, there must be a better way
-            if self.extension.get('use-legacy-location'):
-                url = os.path.join('systems', child.markdown())
-            else:
-                url = os.path.join('syntax', child.markdown())
+            url = os.path.join('syntax', child.markdown())
 
             a = autolink.AutoLink(h, url=url)
             materialicon.IconToken(a, icon=u'input', style="padding-left:10px;")
@@ -452,10 +445,7 @@ class RenderSyntaxToken(components.RenderComponent):
             #  /Executioner/Adaptivity/index.md
             #  /Adaptivity/index.md
             if isinstance(obj, syntax.SyntaxNode):
-                if self.extension.get('use-legacy-location'):
-                    nodes = root_page.findall(os.path.join('systems', obj.markdown()), exc=None)
-                else:
-                    nodes = root_page.findall(os.path.join('syntax', obj.markdown()), exc=None)
+                nodes = root_page.findall(os.path.join('syntax', obj.markdown()), exc=None)
             else:
                 nodes = root_page.findall(obj.markdown(), exc=None)
 

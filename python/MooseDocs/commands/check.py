@@ -96,11 +96,7 @@ def _check_object_node(node, generate, update, prefix):
     Check that required pages for supplied ObjectNode (i.e., MooseObject/Action).
     """
     idx = node.source().find('/src/')
-    if node.use_legacy_location:
-        filename = os.path.join(node.source()[:idx], 'doc', 'content', 'documentation', 'systems',
-                                node.markdown())
-    else:
-        filename = os.path.join(node.source()[:idx], prefix, node.markdown())
+    filename = os.path.join(node.source()[:idx], prefix, node.markdown())
 
     not_exist = not os.path.isfile(filename)
     if not_exist and (not generate) and (not node.hidden):
@@ -131,20 +127,12 @@ def _check_syntax_node(node, generate, update, prefix):
 
     # Build a set if information tuples to consider
     filenames = set()
-    if node.use_legacy_location:
-        action = node.actions()[0]
+    actions = anytree.search.PreOrderIter(node, filter_=lambda n: isinstance(n, syntax.ActionNode))
+    for action in actions:
         idx = action.source().find('/src/')
-        name = os.path.join(action.source()[:idx], 'doc', 'content', 'documentation', 'systems',
-                            node.markdown())
+        name = os.path.join(action.source()[:idx], prefix,
+                            os.path.dirname(node.markdown()), 'index.md')
         filenames.add(FileInfo(name=name, exists=os.path.isfile(name)))
-    else:
-        actions = anytree.search.PreOrderIter(node,
-                                              filter_=lambda n: isinstance(n, syntax.ActionNode))
-        for action in actions:
-            idx = action.source().find('/src/')
-            name = os.path.join(action.source()[:idx], prefix, os.path.dirname(node.markdown()),
-                                'index.md')
-            filenames.add(FileInfo(name=name, exists=os.path.isfile(name)))
 
     # Case when no file exists
     not_exist = all(not f.exists for f in filenames)

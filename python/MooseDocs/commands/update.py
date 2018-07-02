@@ -51,16 +51,13 @@ def _move(options):
 
     for node in anytree.PreOrderIter(root, filter_=lambda n: isinstance(n, syntax.ObjectNode)):
 
-        node.use_legacy_location = True
         idx = node.source().find('/src/')
         old = os.path.join(node.source()[:idx], 'doc', 'content', 'documentation', 'systems',
-                           node.markdown())
+                           node.fullpath.lstrip('/') + '.md')
         if not os.path.isfile(old):
             continue
 
-        node.use_legacy_location = False
         new = os.path.join(node.source()[:idx], 'doc', 'content', 'source', node.markdown())
-
         loc = os.path.dirname(new)
         if not os.path.isdir(loc):
             os.makedirs(loc)
@@ -70,14 +67,12 @@ def _move(options):
     func = lambda n: isinstance(n, syntax.SyntaxNode) and not n.is_root
     for node in anytree.PreOrderIter(root, filter_=func):
         action = anytree.search.findall(node, filter_=lambda n: isinstance(n, syntax.ActionNode))[0]
-        action.use_legacy_location = True
         idx = action.source().find('/src/')
         old = os.path.join(action.source()[:idx], 'doc', 'content', 'documentation', 'systems',
                            os.path.dirname(node.markdown()), 'index.md')
         if not os.path.isfile(old):
             continue
 
-        action.use_legacy_location = False
         new = os.path.join(action.source()[:idx], 'doc', 'content', 'syntax',
                            os.path.dirname(node.markdown()), 'index.md')
 
