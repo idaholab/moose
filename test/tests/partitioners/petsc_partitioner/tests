@@ -21,6 +21,8 @@
     exodiff = 'petsc_partitioner_ptscotch_weight_element_out.e'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch  Mesh/Partitioner/type=PartitionerWeight Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_element_out'
     ptscotch = true
+    # work with PETSc-3.9.3 or higher
+    petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
   [../]
@@ -34,6 +36,7 @@
     exodiff = 'petsc_partitioner_ptscotch_weight_side_out.e'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeight Mesh/Partitioner/apply_side_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_side_out'
     ptscotch = true
+    petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
   [../]
@@ -47,6 +50,7 @@
     exodiff = 'petsc_partitioner_ptscotch_weight_both_out.e'
     cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeight Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_both_out'
     ptscotch = true
+    petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
   [../]
@@ -73,6 +77,7 @@
     exodiff = 'petsc_partitioner_parmetis_weight_element_out.e'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeight Outputs/file_base=petsc_partitioner_parmetis_weight_element_out Mesh/Partitioner/apply_element_weight=true'
     parmetis = true
+    petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
   [../]
@@ -86,6 +91,7 @@
     exodiff = 'petsc_partitioner_parmetis_weight_side_out.e'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeight Outputs/file_base=petsc_partitioner_parmetis_weight_side_out Mesh/Partitioner/apply_side_weight=true'
     parmetis = true
+    petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
   [../]
@@ -99,6 +105,7 @@
     exodiff = 'petsc_partitioner_parmetis_weight_both_out.e'
     cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeight Outputs/file_base=petsc_partitioner_parmetis_weight_both_out Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true'
     parmetis = true
+    petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
   [../]

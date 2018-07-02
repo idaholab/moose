@@ -71,7 +71,11 @@ PetscMatPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
   MatPartitioning part;
   IS is;
 
-  i = j = values = elem_weights = 0;
+  i = 0;
+  j = 0;
+  values = 0;
+  elem_weights = 0;
+  neighbor = 0;
 
   build_graph(mesh);
   nrows = _dual_graph.size();
