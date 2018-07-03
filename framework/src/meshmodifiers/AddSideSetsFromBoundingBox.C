@@ -63,7 +63,7 @@ void
 AddSideSetsFromBoundingBox::modify()
 {
   // this modifier is not designed for working with distributed mesh
-  _mesh_ptr->errorIfDistributedMesh("BreakBoundaryOnSubdomain");
+  _mesh_ptr->errorIfDistributedMesh("AddSideSetsFromBoundingBox");
 
   // Check that we have access to the mesh
   if (!_mesh_ptr)
