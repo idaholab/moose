@@ -18,7 +18,8 @@ the temperature, and $V$ is the volume of the cavity.  To compute the initial nu
 The moles of gas, the temperature, and the cavity volume in [eq:ideal_gas_law] are free to
 change with time.  The moles of gas $n$ at any time is the original amount of gas (computed based on
 original pressure, temperature, and volume) plus the amount in the cavity due to any gas injected
-during the simulation.
+during the simulation.  The volume $V$ is provided by a single postprocessor value or a vector of
+postprocessor values that are summed together before being used in [eq:ideal_gas_law].
 
 !syntax parameters /UserObjects/CavityPressureUserObject
 

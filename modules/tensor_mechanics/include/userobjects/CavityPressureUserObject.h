@@ -27,6 +27,8 @@ public:
 
   virtual void execute();
 
+  virtual Real computeCavityVolume();
+
   virtual void initialize();
   virtual void finalize() {}
 
@@ -45,14 +47,13 @@ protected:
   const Real _initial_pressure;
 
   std::vector<const PostprocessorValue *> _material_input;
+  std::vector<const PostprocessorValue *> _volume;
 
   const Real _R;
 
   const Real & _temperature;
   const bool _init_temp_given;
   const Real _init_temp;
-
-  const Real & _volume;
 
   Real _start_time;
   const Real _startup_time;
@@ -63,4 +64,4 @@ protected:
 template <>
 InputParameters validParams<CavityPressureUserObject>();
 
-#endif // CAVITYRESSUREPOSTPROCESSOR_H
+#endif // CAVITYRESSUREUSEROBJECT_H
