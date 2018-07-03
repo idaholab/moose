@@ -4,48 +4,56 @@
     input = 'jn01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn02]
     type = 'PetscJacobianTester'
     input = 'jn02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn03]
     type = 'PetscJacobianTester'
     input = 'jn03.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn04]
     type = 'PetscJacobianTester'
     input = 'jn04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn05]
     type = 'PetscJacobianTester'
     input = 'jn05.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn06]
     type = 'PetscJacobianTester'
     input = 'jn06.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn07]
     type = 'PetscJacobianTester'
     input = 'jn07.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn08]
     type = 'PetscJacobianTester'
     input = 'jn08.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn17]
@@ -53,12 +61,14 @@
     input = 'jn17.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn18]
     type = 'PetscJacobianTester'
     input = 'jn18.i'
     ratio_tol = 5E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn_lumped_08]
@@ -66,18 +76,21 @@
     input = 'jn_lumped_08.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_lumped_17]
     type = 'PetscJacobianTester'
     input = 'jn_lumped_17.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_lumped_18]
     type = 'PetscJacobianTester'
     input = 'jn_lumped_18.i'
     ratio_tol = 5E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn21]
@@ -85,18 +98,21 @@
     input = 'jn21.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn22]
     type = 'PetscJacobianTester'
     input = 'jn22.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_fu_22]
     type = 'PetscJacobianTester'
     input = 'jn_fu_22.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn38]
@@ -104,6 +120,7 @@
     input = 'jn38.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn_fu_01]
@@ -111,24 +128,28 @@
     input = 'jn_fu_01.i'
     ratio_tol = 5E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_fu_02]
     type = 'PetscJacobianTester'
     input = 'jn_fu_02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_fu_05]
     type = 'PetscJacobianTester'
     input = 'jn_fu_05.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_fu_06]
     type = 'PetscJacobianTester'
     input = 'jn_fu_06.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn_fu_17]
@@ -136,12 +157,14 @@
     input = 'jn_fu_17.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_fu_18]
     type = 'PetscJacobianTester'
     input = 'jn_fu_18.i'
     ratio_tol = 5E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn30]
@@ -149,12 +172,14 @@
     input = 'jn30.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn31]
     type = 'PetscJacobianTester'
     input = 'jn31.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn40]
@@ -162,6 +187,7 @@
     input = 'jn40.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jnQ2P]
@@ -169,23 +195,27 @@
     input = 'jnQ2P.i'
     ratio_tol = 1E-6
     difference_tol = 1E30
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jnQ2P_sink]
     type = 'PetscJacobianTester'
     input = 'jnQ2P_sink.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jnQ2P_bh1]
     type = 'PetscJacobianTester'
     input = 'jnQ2P_bh1.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jnQ2P_bh2]
     type = 'PetscJacobianTester'
     input = 'jnQ2P_bh2.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 []

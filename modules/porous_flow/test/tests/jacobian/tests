@@ -4,66 +4,77 @@
     input = 'mass01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass02]
     type = 'PetscJacobianTester'
     input = 'mass02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass03]
     type = 'PetscJacobianTester'
     input = 'mass03.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass04]
     type = 'PetscJacobianTester'
     input = 'mass04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass05]
     type = 'PetscJacobianTester'
     input = 'mass05.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass06]
     type = 'PetscJacobianTester'
     input = 'mass06.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass07]
     type = 'PetscJacobianTester'
     input = 'mass07.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass08]
     type = 'PetscJacobianTester'
     input = 'mass08.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass09]
     type = 'PetscJacobianTester'
     input = 'mass09.i'
     ratio_tol = 5E-6 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass10]
     type = 'PetscJacobianTester'
     input = 'mass10.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass01_fully_saturated]
     type = 'PetscJacobianTester'
     input = 'mass01_fully_saturated.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./fflux01]
@@ -71,120 +82,140 @@
     input = 'fflux01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux02]
     type = 'PetscJacobianTester'
     input = 'fflux02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux03]
     type = 'PetscJacobianTester'
     input = 'fflux03.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux04]
     type = 'PetscJacobianTester'
     input = 'fflux04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux05]
     type = 'PetscJacobianTester'
     input = 'fflux05.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux06]
     type = 'PetscJacobianTester'
     input = 'fflux06.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux07]
     type = 'PetscJacobianTester'
     input = 'fflux07.i'
     ratio_tol = 1E-6 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux08]
     type = 'PetscJacobianTester'
     input = 'fflux08.i'
     ratio_tol = 1E-7 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux09]
     type = 'PetscJacobianTester'
     input = 'fflux09.i'
     ratio_tol = 1E-7 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux10]
     type = 'PetscJacobianTester'
     input = 'fflux10.i'
     ratio_tol = 1E-7 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux11]
     type = 'PetscJacobianTester'
     input = 'fflux11.i'
     ratio_tol = 1E-7 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux12]
     type = 'PetscJacobianTester'
     input = 'fflux12.i'
     ratio_tol = 1E-7 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux13]
     type = 'PetscJacobianTester'
     input = 'fflux13.i'
     ratio_tol = 1E-6 # lots of chain rules here
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./fflux01_fully_saturated]
     type = 'PetscJacobianTester'
     input = 'fflux01_fully_saturated.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./eff_stress01]
     type = 'PetscJacobianTester'
     input = 'eff_stress01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./eff_stress02]
     type = 'PetscJacobianTester'
     input = 'eff_stress02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./eff_stress03]
     type = 'PetscJacobianTester'
     input = 'eff_stress03.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./eff_stress04]
     type = 'PetscJacobianTester'
     input = 'eff_stress04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass_vol_exp01]
     type = 'PetscJacobianTester'
     input = 'mass_vol_exp01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./mass_vol_exp02]
     type = 'PetscJacobianTester'
     input = 'mass_vol_exp02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./pls01]
@@ -192,17 +223,20 @@
     input = 'pls01.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./pls02]
     type = 'PetscJacobianTester'
     input = 'pls02.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./pls03]
     type = 'PetscJacobianTester'
     input = 'pls03.i'
     ratio_tol = 1E-6
+    cli_args = 'Executioner/num_steps=1'
     difference_tol = 1E10
   [../]
   [./pls04]
@@ -210,24 +244,28 @@
     input = 'pls04.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./hgs01]
     type = 'PetscJacobianTester'
     input = 'hgs01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./hcs01]
     type = 'PetscJacobianTester'
     input = 'hcs01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./hcs02]
     type = 'PetscJacobianTester'
     input = 'hcs02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./hcond01]
@@ -235,12 +273,14 @@
     input = 'hcond01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./hcond02]
     type = 'PetscJacobianTester'
     input = 'hcond02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./denergy01]
@@ -248,30 +288,35 @@
     input = 'denergy01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./denergy02]
     type = 'PetscJacobianTester'
     input = 'denergy02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./denergy03]
     type = 'PetscJacobianTester'
     input = 'denergy03.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./denergy04]
     type = 'PetscJacobianTester'
     input = 'denergy04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./denergy05]
     type = 'PetscJacobianTester'
     input = 'denergy05.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./heat_advection01]
@@ -279,18 +324,21 @@
     input = 'heat_advection01.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./heat_advection02]
     type = 'PetscJacobianTester'
     input = 'heat_advection02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./heat_advection01_fully_saturated]
     type = 'PetscJacobianTester'
     input = 'heat_advection01_fully_saturated.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./diff01]
@@ -298,42 +346,49 @@
     input = 'diff01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./diff02]
     type = 'PetscJacobianTester'
     input = 'diff02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./diff03]
     type = 'PetscJacobianTester'
     input = 'diff03.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./disp01]
     type = 'PetscJacobianTester'
     input = 'disp01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./disp02]
     type = 'PetscJacobianTester'
     input = 'disp02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./disp03]
     type = 'PetscJacobianTester'
     input = 'disp03.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./disp04]
     type = 'PetscJacobianTester'
     input = 'disp04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./heat_vol_exp01]
@@ -341,6 +396,7 @@
     input = 'heat_vol_exp01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./phe01]
@@ -348,6 +404,7 @@
     input = 'phe01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./line_sink01]
@@ -355,12 +412,14 @@
     input = 'line_sink01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./line_sink02]
     type = 'PetscJacobianTester'
     input = 'line_sink02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./line_sink03]
     type = 'PetscJacobianTester'
@@ -368,18 +427,19 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     skip = 'Only works sporadically -- too many qps?'
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./line_sink01_5]
     type = 'PetscJacobianTester'
     input = 'line_sink01.i'
-    cli_args = 'DiracKernels/dirac4/point_file=five_points.bh DiracKernels/dirac5/point_file=five_points.bh DiracKernels/dirac6/point_file=five_points.bh'
+    cli_args = 'DiracKernels/dirac4/point_file=five_points.bh DiracKernels/dirac5/point_file=five_points.bh DiracKernels/dirac6/point_file=five_points.bh Executioner/num_steps=1'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
   [./line_sink02_5]
     type = 'PetscJacobianTester'
     input = 'line_sink02.i'
-    cli_args = 'DiracKernels/dirac4/point_file=five_points.bh DiracKernels/dirac5/point_file=five_points.bh DiracKernels/dirac6/point_file=five_points.bh'
+    cli_args = 'DiracKernels/dirac4/point_file=five_points.bh DiracKernels/dirac5/point_file=five_points.bh DiracKernels/dirac6/point_file=five_points.bh Executioner/num_steps=1'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
@@ -389,6 +449,7 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
     skip = 'Only works sporadically -- too many qps?'
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./desorped_mass01]
@@ -396,12 +457,14 @@
     input = 'desorped_mass01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./desorped_mass_vol_exp01]
     type = 'PetscJacobianTester'
     input = 'desorped_mass_vol_exp01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./waterncg_twophase]
@@ -409,56 +472,56 @@
     input = 'waterncg_twophase.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
   [./waterncg_liqiud]
     type = 'PetscJacobianTester'
     input = 'waterncg_liquid.i'
     ratio_tol = 1e-6
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
   [./waterncg_gas]
     type = 'PetscJacobianTester'
     input = 'waterncg_gas.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
   [./brineco2_twophase]
     type = 'PetscJacobianTester'
     input = 'brineco2_twophase.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
   [./brineco2_liquid]
     type = 'PetscJacobianTester'
     input = 'brineco2_liquid.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
   [./brineco2_gas]
     type = 'PetscJacobianTester'
     input = 'brineco2_gas.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
   [./brineco2_twophase_2]
     type = 'PetscJacobianTester'
     input = 'brineco2_twophase_2.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
   [./brineco2_liquid_2]
     type = 'PetscJacobianTester'
     input = 'brineco2_liquid_2.i'
     ratio_tol = 1e-6 # Lots of chain rule derivatives
     difference_tol = 1e10
-    cli_args = '-mat_fd_type ds'
+    cli_args = '-mat_fd_type ds Executioner/num_steps=1'
   [../]
 
   [./exponential_decay]
@@ -466,6 +529,7 @@
     input = 'exponential_decay.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./chem01]
@@ -473,90 +537,105 @@
     input = 'chem01.i'
     ratio_tol = 1E-3 # lots of crazy chain rules
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem02]
     type = 'PetscJacobianTester'
     input = 'chem02.i'
     ratio_tol = 1E-5 # lots of crazy chain rules
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem03]
     type = 'PetscJacobianTester'
     input = 'chem03.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem04]
     type = 'PetscJacobianTester'
     input = 'chem04.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem05]
     type = 'PetscJacobianTester'
     input = 'chem05.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem06]
     type = 'PetscJacobianTester'
     input = 'chem06.i'
     ratio_tol = 1E-4
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem07]
     type = 'PetscJacobianTester'
     input = 'chem07.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem08]
     type = 'PetscJacobianTester'
     input = 'chem08.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem09]
     type = 'PetscJacobianTester'
     input = 'chem09.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem10]
     type = 'PetscJacobianTester'
     input = 'chem10.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem11]
     type = 'PetscJacobianTester'
     input = 'chem11.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem12]
     type = 'PetscJacobianTester'
     input = 'chem12.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem13]
     type = 'PetscJacobianTester'
     input = 'chem13.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem14]
     type = 'PetscJacobianTester'
     input = 'chem14.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./chem15]
     type = 'PetscJacobianTester'
     input = 'chem15.i'
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./basic_advection1]
@@ -564,35 +643,41 @@
     input = 'basic_advection1.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./basic_advection2]
     type = 'PetscJacobianTester'
     input = 'basic_advection2.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./basic_advection3]
     type = 'PetscJacobianTester'
     input = 'basic_advection3.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./basic_advection4]
     type = 'PetscJacobianTester'
     input = 'basic_advection4.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./basic_advection5]
     type = 'PetscJacobianTester'
     input = 'basic_advection5.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./basic_advection6]
     type = 'PetscJacobianTester'
     input = 'basic_advection6.i'
     ratio_tol = 1E-5
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 []

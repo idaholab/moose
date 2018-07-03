@@ -52,54 +52,63 @@
     input = 'jn09.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn10]
     type = 'PetscJacobianTester'
     input = 'jn10.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn11]
     type = 'PetscJacobianTester'
     input = 'jn11.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn12]
     type = 'PetscJacobianTester'
     input = 'jn12.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn13]
     type = 'PetscJacobianTester'
     input = 'jn13.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn14]
     type = 'PetscJacobianTester'
     input = 'jn14.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn15]
     type = 'PetscJacobianTester'
     input = 'jn15.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn16]
     type = 'PetscJacobianTester'
     input = 'jn16.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn17]
     type = 'PetscJacobianTester'
     input = 'jn17.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn_lumped_16]
@@ -107,14 +116,16 @@
     input = 'jn_lumped_16.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn20]
     type = 'PetscJacobianTester'
     input = 'jn20.i'
     # can't make too tight as finite-difference constant state bums out due to precision loss
-    ratio_tol = 1E-5 
+    ratio_tol = 1E-5
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn21]
     type = 'PetscJacobianTester'
@@ -122,6 +133,7 @@
     # can't make too tight as finite-difference constant state bums out due to precision loss
     ratio_tol = 1E-5
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn22]
     type = 'PetscJacobianTester'
@@ -129,14 +141,16 @@
     # can't make too tight as finite-difference constant state bums out due to precision loss
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn_fu_20]
     type = 'PetscJacobianTester'
     input = 'jn_fu_20.i'
     # can't make too tight as finite-difference constant state bums out due to precision loss
-    ratio_tol = 1E-5 
+    ratio_tol = 1E-5
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
   [./jn_fu_22]
     type = 'PetscJacobianTester'
@@ -144,20 +158,23 @@
     # can't make too tight as finite-difference constant state bums out due to precision loss
     ratio_tol = 1E-6
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn30]
     type = 'PetscJacobianTester'
     input = 'jn30.i'
-    ratio_tol = 1E-7 
+    ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn40]
     type = 'PetscJacobianTester'
     input = 'jn40.i'
-    ratio_tol = 1E-7 
+    ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn_fu_01]
@@ -213,13 +230,15 @@
     input = 'jn_fu_16.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
   [./jn_fu_30]
     type = 'PetscJacobianTester'
     input = 'jn_fu_30.i'
-    ratio_tol = 1E-7 
+    ratio_tol = 1E-7
     difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1'
   [../]
 
 
