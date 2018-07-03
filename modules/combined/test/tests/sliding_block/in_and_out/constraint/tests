@@ -82,4 +82,14 @@
     heavy = true
     allow_warnings = true
   [../]
+  [./frictional_lagrange_second_order]
+    type = 'Exodiff'
+    input = 'frictional_lagrange.i'
+    exodiff = 'frictional_lagrange_second_order_exodus.e'
+    cli_args = 'Outputs/file_base=frictional_lagrange_second_order_exodus GlobalParams/order=SECOND '
+               'Mesh/file=sliding_elastic_blocks_2d_with_lagrange_second_order.e '
+    group = 'contact_lagrange'
+    heavy = true
+    allow_warnings = true
+  [../]
 []

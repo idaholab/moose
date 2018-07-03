@@ -130,6 +130,9 @@ Real LMConstraint::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
 Real
 LMConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned jvar)
 {
+  // TODO: Make Jacobian generally applicable to higher order variables. This current Jacobian
+  // implementation improves preconditioning when first order Lagranges are used, but actually
+  // can degrade preconditioner performance when higher order variables are used.
   std::map<dof_id_type, PenetrationInfo *>::iterator found =
       _penetration_locator._penetration_info.find(_current_node->id());
   if (found != _penetration_locator._penetration_info.end())

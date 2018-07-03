@@ -7,6 +7,7 @@
     difference_tol = 1e-6
     cli_args = "Outputs/file_base=0"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./jac_45_rot]
     type = 'PetscJacobianTester'
@@ -16,6 +17,7 @@
     difference_tol = 1e-6
     cli_args = "Mesh/file='two-body-45.e' ICs/block2x/value=0.7071067811865475 ICs/block2y/value=-0.7071067811865475 BCs/topx/value=1.0606601717798212 BCs/topy/value=-1.0606601717798212 Outputs/file_base=45"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./jac_90_rot]
     type = 'PetscJacobianTester'
@@ -25,6 +27,7 @@
     difference_tol = 1e-6
     cli_args = "Mesh/file='two-body-90.e' ICs/block2x/value=1 ICs/block2y/value=0 BCs/topx/value=1.5 BCs/topy/value=0 Outputs/file_base=90"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./jac_135_rot]
     type = 'PetscJacobianTester'
@@ -34,6 +37,7 @@
     difference_tol = 1e-6
     cli_args = "Mesh/file='two-body-135.e' ICs/block2x/value=0.7071067811865475 ICs/block2y/value=0.7071067811865475 BCs/topx/value=1.0606601717798212 BCs/topy/value=1.0606601717798212 Outputs/file_base=135"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./jac_180_rot]
     type = 'PetscJacobianTester'
@@ -43,6 +47,7 @@
     difference_tol = 1e-6
     cli_args = "Mesh/file='two-body-180.e' ICs/block2x/value=0 ICs/block2y/value=1 BCs/topx/value=0 BCs/topy/value=1.5 Outputs/file_base=180"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./jac_225_rot]
     type = 'PetscJacobianTester'
@@ -52,6 +57,7 @@
     difference_tol = 1e-6
     cli_args = "Mesh/file='two-body-225.e' ICs/block2x/value=-0.7071067811865475 ICs/block2y/value=0.7071067811865475 BCs/topx/value=-1.0606601717798212 BCs/topy/value=1.0606601717798212 Outputs/file_base=225"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./jac_270_rot]
     type = 'PetscJacobianTester'
@@ -61,6 +67,7 @@
     difference_tol = 1e-6
     cli_args = "Mesh/file='two-body-270.e' ICs/block2x/value=-1 ICs/block2y/value=0 BCs/topx/value=-1.5 BCs/topy/value=0 Outputs/file_base=270"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./jac_315_rot]
     type = 'PetscJacobianTester'
@@ -70,6 +77,7 @@
     difference_tol = 1e-6
     cli_args = "Mesh/file='two-body-315.e' ICs/block2x/value=-0.7071067811865475 ICs/block2y/value=-0.7071067811865475 BCs/topx/value=-1.0606601717798212 BCs/topy/value=-1.0606601717798212 Outputs/file_base=315"
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./res_no_rot]
     type = 'Exodiff'
@@ -79,6 +87,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_no_rot'
+    petsc_version = '>=3.9'
   [../]
   [./res_45_rot]
     type = 'Exodiff'
@@ -88,6 +97,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_45_rot'
+    petsc_version = '>=3.9'
   [../]
   [./res_90_rot]
     type = 'Exodiff'
@@ -97,6 +107,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_90_rot'
+    petsc_version = '>=3.9'
   [../]
   [./res_135_rot]
     type = 'Exodiff'
@@ -106,6 +117,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_135_rot'
+    petsc_version = '>=3.9'
   [../]
   [./res_180_rot]
     type = 'Exodiff'
@@ -115,6 +127,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_180_rot'
+    petsc_version = '>=3.9'
   [../]
   [./res_225_rot]
     type = 'Exodiff'
@@ -124,6 +137,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_225_rot'
+    petsc_version = '>=3.9'
   [../]
   [./res_270_rot]
     type = 'Exodiff'
@@ -133,6 +147,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_270_rot'
+    petsc_version = '>=3.9'
   [../]
   [./res_315_rot]
     type = 'Exodiff'
@@ -142,6 +157,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_315_rot'
+    petsc_version = '>=3.9'
   [../]
 
   [./jac_pressure]
@@ -151,6 +167,7 @@
     ratio_tol = 1e-8
     difference_tol = 1e-2
     run_sim = True
+    petsc_version = '>=3.9'
   [../]
   [./res_pressure]
     type = 'Exodiff'
@@ -160,6 +177,7 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'jac_pressure'
+    petsc_version = '>=3.9'
   [../]
 
   [./jac_tan_contact_slip]
@@ -170,12 +188,14 @@
     difference_tol = 1
     run_sim = True
     cli_args = 'Executioner/num_steps=1 Outputs/exodus=false'
+    petsc_version = '>=3.9'
   [../]
   [./res_tan_contact_slip]
     type = 'Exodiff'
     group = 'contact_lagrange'
     exodiff = 'frictional-two-body-slip_out.e'
     input = 'frictional-two-body-slip.i'
+    petsc_version = '>=3.9'
   [../]
   [./jac_tan_contact_stuck]
     type = 'PetscJacobianTester'
@@ -185,12 +205,14 @@
     difference_tol = 1
     run_sim = True
     cli_args = 'Executioner/num_steps=1 Outputs/exodus=false'
+    petsc_version = '>=3.9'
   [../]
   [./res_tan_contact_stuck]
     type = 'Exodiff'
     group = 'contact_lagrange'
     exodiff = 'frictional-two-body-stuck_out.e'
     input = 'frictional-two-body-stuck.i'
+    petsc_version = '>=3.9'
   [../]
 
   [./second_lagrange_err]
@@ -201,6 +223,7 @@
     expect_err = "The current lagrange multiplier implementation currently relies on first-order "
               "Lagrange shape functions for the displacements in order to generate the best "
               "preconditioner."
+    petsc_version = '>=3.9'
   [../]
   [./not_coulomb_err]
     type = 'RunException'
@@ -209,6 +232,7 @@
     cli_args = 'Contact/leftright/model=frictionless Outputs/exodus=false'
     expect_err = "The current tangential lagrange multiplier implementation only supports the "
                    "Coulomb frictional model."
+    petsc_version = '>=3.9'
   [../]
   [./not_frictionless_err]
     type = 'RunException'
@@ -217,6 +241,7 @@
     cli_args = 'Contact/leftright/model=coulomb Outputs/exodus=false'
     expect_err = "The model options for lagrange multiplier options are frictionless or Coulomb "
                  "with coupled tangential lagrange multipliers."
+    petsc_version = '>=3.9'
   [../]
   [./lm_not_coupled_err]
     type = 'RunException'
@@ -224,6 +249,7 @@
     input = 'error-input.i'
     cli_args = 'Outputs/exodus=false'
     expect_err = "If using the Lagrange formulation, you must couple in a lagrange multiplier variable"
+    petsc_version = '>=3.9'
   [../]
   [./wrong_dim_err]
     type = 'RunException'
@@ -231,5 +257,17 @@
     input = 'error-input.i'
     cli_args = "Contact/leftright/lm=lm Mesh/dim=1 Outputs/exodus=false GlobalParams/displacements='disp_x'"
     expect_err = "The current lagrange multiplier implementation only works in two dimensions."
+    petsc_version = '>=3.9'
+  [../]
+
+  [./res_second_order]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = 'two-body-dirichlet-second-order_out.e'
+    input = 'two-body-dirichlet.i'
+    cli_args = 'Outputs/file_base=two-body-dirichlet-second-order_out '
+               'Mesh/file=two-body-1elem-blocks-second-order.e GlobalParams/order=SECOND'
+    allow_warnings = true
+    petsc_version = '>=3.9'
   [../]
 []

@@ -37,19 +37,6 @@
   [../]
 []
 
-[AuxVariables]
-  [./penetration]
-  [../]
-  [./inc_slip_x]
-  [../]
-  [./inc_slip_y]
-  [../]
-  [./accum_slip_x]
-  [../]
-  [./accum_slip_y]
-  [../]
-[]
-
 [Functions]
   [./vertical_movement]
     type = ParsedFunction
@@ -136,6 +123,7 @@
     master = 2
     variable = lm
     master_variable = disp_x
+    disp_y = disp_y
   [../]
   [./tan_lm]
     type = TangentialLMConstraint
@@ -150,41 +138,6 @@
   [../]
 []
 
-[AuxKernels]
-  [./zeroslip_x]
-    type = ConstantAux
-    variable = inc_slip_x
-    boundary = 3
-    execute_on = timestep_begin
-    value = 0.0
-  [../]
-  [./zeroslip_y]
-    type = ConstantAux
-    variable = inc_slip_y
-    boundary = 3
-    execute_on = timestep_begin
-    value = 0.0
-  [../]
-  [./accum_slip_x]
-    type = AccumulateAux
-    variable = accum_slip_x
-    accumulate_from_variable = inc_slip_x
-    execute_on = timestep_end
-  [../]
-  [./accum_slip_y]
-    type = AccumulateAux
-    variable = accum_slip_y
-    accumulate_from_variable = inc_slip_y
-    execute_on = timestep_end
-  [../]
-  [./penetration]
-    type = PenetrationAux
-    variable = penetration
-    boundary = 3
-    paired_boundary = 2
-  [../]
-[]
-
 [Postprocessors]
   [./nonlinear_its]
     type = NumNonlinearIterations
@@ -193,6 +146,15 @@
   [./tot_nonlinear_its]
     type = CumulativeValuePostprocessor
     postprocessor = nonlinear_its
+    execute_on = timestep_end
+  [../]
+  [./linear_its]
+    type = NumLinearIterations
+    execute_on = timestep_end
+  [../]
+  [./tot_linear_its]
+    type = CumulativeValuePostprocessor
+    postprocessor = linear_its
     execute_on = timestep_end
   [../]
 []

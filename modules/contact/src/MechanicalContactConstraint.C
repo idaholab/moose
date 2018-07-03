@@ -170,8 +170,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _vel_y_id(isCoupled("vel_y") ? coupled("vel_y") : libMesh::invalid_uint),
     _vel_z(isCoupled("vel_z") ? coupledValue("vel_z") : _zero),
     _vel_z_id(isCoupled("vel_z") ? coupled("vel_z") : libMesh::invalid_uint),
-    _eps(std::numeric_limits<Real>::epsilon()),
-    _regularization(getParam<Real>("regularization"))
+    _not_standard_vars(false)
 {
   _overwrite_slave_residual = false;
 
@@ -273,12 +272,14 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
       {
         const FEType & fe_family = var->feType();
         if (fe_family.order != FIRST || fe_family.family != LAGRANGE)
-          mooseError(
-              "The current lagrange multiplier implementation currently relies on first-order "
-              "Lagrange shape functions for the displacements in order to generate the best "
-              "preconditioner.");
+          _not_standard_vars = true;
       }
     }
+    if (_not_standard_vars)
+      mooseWarning(
+          "The current lagrange multiplier implementation currently relies on first-order "
+          "Lagrange shape functions for the displacements in order to generate the best "
+          "preconditioner. If second-order is used, the preconditioner will not be perfect.");
     if (isCoupled("tangent_lm"))
     {
       if (_model != CM_COULOMB)
@@ -1917,6 +1918,9 @@ MechanicalContactConstraint::residualEnd()
 Real
 MechanicalContactConstraint::onDiagNormalsJacContrib(PenetrationInfo * pinfo)
 {
+  if (_not_standard_vars)
+    return 0;
+
   Real sign;
   RealVectorValue abar;
   if (!signAndABar(pinfo, sign, abar))
@@ -1931,6 +1935,9 @@ MechanicalContactConstraint::onDiagNormalsJacContrib(PenetrationInfo * pinfo)
 Real
 MechanicalContactConstraint::offDiagNormalsJacContrib(PenetrationInfo * pinfo)
 {
+  if (_not_standard_vars)
+    return 0;
+
   Real sign;
   RealVectorValue abar;
   if (!signAndABar(pinfo, sign, abar))
@@ -1947,6 +1954,9 @@ MechanicalContactConstraint::testPerturbations(PenetrationInfo * pinfo,
                                                bool on_diagonal,
                                                bool slave)
 {
+  if (_not_standard_vars)
+    return 0;
+
   const Elem & master_elem = *pinfo->_elem;
 
   if (!slave && !master_elem.is_node_on_side(_j, pinfo->_side_num))

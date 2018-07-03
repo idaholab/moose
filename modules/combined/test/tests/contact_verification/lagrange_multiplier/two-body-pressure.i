@@ -135,7 +135,10 @@
 
 [Outputs]
   exodus = true
-  dofmap = true
+  [./dofmap]
+    type = DOFMap
+    execute_on = 'initial'
+  [../]
 []
 
 [Contact]

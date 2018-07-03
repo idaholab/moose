@@ -1,4 +1,8 @@
 reset
 import mesh geometry "sliding_elastic_blocks_2d.e"
 block 30 curve 3
-export mesh "sliding_elastic_blocks_2d_with_lagrange.e" overwrite
+block 30 element type bar3
+block 1 2 element type quad9
+mesh curve all
+mesh surface all
+export mesh "sliding_elastic_blocks_2d_with_lagrange_second_order.e" overwrite

@@ -84,12 +84,6 @@
     boundary = 30
     value = -1.5
   [../]
-  # [./topy]
-  #   type = NeumannBC
-  #   variable = disp_y
-  #   boundary = 30
-  #   value = 1
-  # [../]
 []
 
 [Executioner]
@@ -132,5 +126,22 @@
   [./smp]
     type = SMP
     full = true
+  [../]
+[]
+
+[Postprocessors]
+  [./nl_its]
+    type = NumNonlinearIterations
+  [../]
+  [./total_nl]
+    type = CumulativeValuePostprocessor
+    postprocessor = nl_its
+  [../]
+  [./linear_its]
+    type = NumLinearIterations
+  [../]
+  [./total_linear]
+    type = CumulativeValuePostprocessor
+    postprocessor = linear_its
   [../]
 []
