@@ -1,5 +1,7 @@
 #include "IdentifyLoopsAction.h"
 
+registerMooseAction("RELAP7App", IdentifyLoopsAction, "RELAP7:identify_loops");
+
 template <>
 InputParameters
 validParams<IdentifyLoopsAction>()

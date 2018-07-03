@@ -1,6 +1,8 @@
 #include "IntegrityCheckAction.h"
 #include "RELAP7App.h"
 
+registerMooseAction("RELAP7App", IntegrityCheckAction, "RELAP7:integrity_check");
+
 template <>
 InputParameters
 validParams<IntegrityCheckAction>()

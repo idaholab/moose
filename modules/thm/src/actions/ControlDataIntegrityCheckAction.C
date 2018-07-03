@@ -1,6 +1,10 @@
 #include "ControlDataIntegrityCheckAction.h"
 #include "RELAP7App.h"
 
+registerMooseAction("RELAP7App",
+                    ControlDataIntegrityCheckAction,
+                    "RELAP7:control_data_integrity_check");
+
 template <>
 InputParameters
 validParams<ControlDataIntegrityCheckAction>()

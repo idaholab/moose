@@ -1,5 +1,7 @@
 #include "AddComponentPhysicsAction.h"
 
+registerMooseAction("RELAP7App", AddComponentPhysicsAction, "RELAP7:add_component_physics");
+
 template <>
 InputParameters
 validParams<AddComponentPhysicsAction>()

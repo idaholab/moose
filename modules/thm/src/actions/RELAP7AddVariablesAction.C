@@ -1,5 +1,7 @@
 #include "RELAP7AddVariablesAction.h"
 
+registerMooseAction("RELAP7App", RELAP7AddVariablesAction, "RELAP7:add_variables");
+
 template <>
 InputParameters
 validParams<RELAP7AddVariablesAction>()

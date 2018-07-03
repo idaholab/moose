@@ -1,6 +1,8 @@
 #include "AddComponentAction.h"
 #include "Simulation.h"
 
+registerMooseAction("RELAP7App", AddComponentAction, "RELAP7:add_component");
+
 template <>
 InputParameters
 validParams<AddComponentAction>()

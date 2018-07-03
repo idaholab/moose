@@ -1,6 +1,8 @@
 #include "BuildMeshAction.h"
 #include "Simulation.h"
 
+registerMooseAction("RELAP7App", BuildMeshAction, "RELAP7:build_mesh");
+
 template <>
 InputParameters
 validParams<BuildMeshAction>()

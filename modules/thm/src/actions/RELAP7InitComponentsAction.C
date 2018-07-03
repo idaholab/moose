@@ -1,5 +1,7 @@
 #include "RELAP7InitComponentsAction.h"
 
+registerMooseAction("RELAP7App", RELAP7InitComponentsAction, "RELAP7:init_components");
+
 template <>
 InputParameters
 validParams<RELAP7InitComponentsAction>()
