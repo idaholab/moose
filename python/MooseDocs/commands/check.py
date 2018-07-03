@@ -96,7 +96,12 @@ def _check_object_node(node, generate, update, prefix):
     Check that required pages for supplied ObjectNode (i.e., MooseObject/Action).
     """
     idx = node.source().find('/src/')
-    filename = os.path.join(node.source()[:idx], prefix, node.markdown())
+
+    # If the markdown method returns None, it failed to locate the file, which throws an error
+    md = node.markdown()
+    if md is None:
+        return
+    filename = os.path.join(node.source()[:idx], prefix, md)
 
     not_exist = not os.path.isfile(filename)
     if not_exist and (not generate) and (not node.hidden):
