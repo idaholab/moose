@@ -44,4 +44,12 @@
     input = 'cavity_pressure_negative_volume.i'
     expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
   [../]
+
+  [./test_vector_input]
+    type = 'Exodiff'
+    input = 'cavity_pressure_vector.i'
+    exodiff = 'cavity_pressure_vector_out.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+  [../]
 []
