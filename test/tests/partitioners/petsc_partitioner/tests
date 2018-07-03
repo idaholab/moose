@@ -137,7 +137,7 @@
     exodiff = 'petsc_partitioner_party_out.e'
     cli_args = 'Mesh/Partitioner/part_package=party Outputs/file_base=petsc_partitioner_party_out'
     party = true
-    petsc_version = '>=3.9.0'
+    petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
   [../]

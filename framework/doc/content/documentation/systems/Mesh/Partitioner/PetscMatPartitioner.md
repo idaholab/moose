@@ -23,7 +23,7 @@ The party package aims at providing a recursive partitioning laboratory assembli
 
 ## Use
 
-These packages can be accessed via an unified interface in MOOSE, *PetscMatPartitioner*. The use of the packages is accomplished by adding a subblock in *Mesh* block of input file.  For example
+These packages can be accessed via an unified interface in MOOSE, `PetscMatPartitioner`. The use of the packages is accomplished by adding a subblock in `Mesh` block of input file.  For example
 
 ```
 [Mesh]
@@ -41,3 +41,46 @@ These packages can be accessed via an unified interface in MOOSE, *PetscMatParti
   parallel_type = distributed
 []
 ```
+
+## Partitioning Examples
+
+### 4 subdomains
+
+!row!
+!col! class=s12 m6 l3
+!media party_4parts.png caption=`Party`
+!col-end!
+
+!col! class=s12 m6 l3
+!media chaco_4parts.png caption=`chaco`
+!col-end!
+
+!col! class=s12 m6 l3
+!media parmetis_4parts.png caption=`parmetis`
+!col-end!
+
+!col! class=s12 m6 l3
+!media ptscotch_4parts.png caption=`ptscotch`
+!col-end!
+!row-end!
+
+
+### 8 subdomains
+
+!row!
+!col! class=s12 m6 l3
+!media party_8parts.png caption=`Party`
+!col-end!
+
+!col! class=s12 m6 l3
+!media chaco_8parts.png caption=`chaco`
+!col-end!
+
+!col! class=s12 m6 l3
+!media parmetis_8parts.png caption=`parmetis`
+!col-end!
+
+!col! class=s12 m6 l3
+!media ptscotch_8parts.png caption=`ptscotch`
+!col-end!
+!row-end!
