@@ -285,14 +285,14 @@ PolycrystalUserObjectBase::assignOpsToGrains()
   {
     paramInfo("coloring_algorithm",
               "The backtracking algorithm has exponential complexity. If you are using very few "
-              "order parameters, or you have several hundred grains or more, you should use one of "
-              "the PETSc coloring algorithms such as \"jp\".");
+              "order parameters,\nor you have several hundred grains or more, you should use one "
+              "of the PETSc coloring algorithms such as \"jp\".");
 
     if (!colorGraph(0))
       paramError("op_num",
                  "Unable to find a valid grain to op coloring, Make sure you have created enough "
-                 "variables to hold a valid polycrystal initial condition (no grains represented "
-                 "by the same variable should be allowed to touch, ~8 for 2D, ~25 for 3D)?");
+                 "variables to hold a\nvalid polycrystal initial condition (no grains represented "
+                 "by the same variable should be allowed to\ntouch, ~8 for 2D, ~25 for 3D)?");
   }
   else // PETSc Coloring algorithms
   {
@@ -309,8 +309,8 @@ PolycrystalUserObjectBase::assignOpsToGrains()
     {
       paramError("op_num",
                  "Unable to find a valid grain to op coloring, Make sure you have created enough "
-                 "variables to hold a valid polycrystal initial condition (no grains represented "
-                 "by the same variable should be allowed to touch, ~8 for 2D, ~25 for 3D)?");
+                 "variables to hold a\nvalid polycrystal initial condition (no grains represented "
+                 "by the same variable should be allowed to\ntouch, ~8 for 2D, ~25 for 3D)?");
     }
 #else
     mooseError("Selected coloring algorithm requires PETSc");

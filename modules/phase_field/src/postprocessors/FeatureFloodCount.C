@@ -197,7 +197,8 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _halo_ids(_maps_size),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
     _is_master(processor_id() == 0),
-    _bnd_elem_range(nullptr)
+    _bnd_elem_range(nullptr),
+    _distribute_merge_work(false && _app.n_processors() >= _n_vars)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -363,10 +364,56 @@ FeatureFloodCount::communicateAndMerge()
    * go ahead and use a vector.
    */
   std::vector<std::string> recv_buffers;
-  if (_is_master)
-    recv_buffers.reserve(_app.n_processors());
 
-  serialize(send_buffers[0]);
+  /**
+   * When we distribute merge work, we are reducing computational work by adding more communication.
+   * Each of the first _n_vars processors will receive one variable worth of information to merge.
+   * After each of those processors has merged that information, it'll be sent to the master
+   * processor where final consolidation will occur.
+   */
+  if (_distribute_merge_work)
+  {
+    bool is_merging_processor = processor_id() < _n_vars;
+
+    if (is_merging_processor)
+      recv_buffers.reserve(_app.n_processors());
+
+    for (auto i = decltype(_n_vars)(0); i < _n_vars; ++i)
+    {
+      serialize(send_buffers[0], i);
+
+      /**
+       * Send the data from all processors to the first _n_vars processors to create a complete
+       * global feature maps for each variable.
+       */
+      _communicator.gather_packed_range(i,
+                                        (void *)(nullptr),
+                                        send_buffers.begin(),
+                                        send_buffers.end(),
+                                        std::back_inserter(recv_buffers));
+    }
+
+    if (is_merging_processor)
+    {
+      deserialize(recv_buffers, processor_id());
+      recv_buffers.clear();
+
+      // Merge one variable with of data
+      mergeSets();
+
+      // Now we need to serialize again to send to the master (only the processors who did work)
+      serialize(send_buffers[0]);
+    }
+    else
+      /**
+       * We are going to use a colleective to get all of the information to processor zero.
+       * All of the processors that didn't participate in the merge need to send nothing the
+       * second time around.
+       */
+      send_buffers[0].clear();
+  }
+  else
+    serialize(send_buffers[0]);
 
   // Free up as much memory as possible here before we do global communication
   clearDataStructures();
@@ -383,11 +430,15 @@ FeatureFloodCount::communicateAndMerge()
 
   if (_is_master)
   {
-    // The root process now needs to deserialize and merge all of the data
+    // The root process now needs to deserialize all of the data
     deserialize(recv_buffers);
     recv_buffers.clear();
 
-    mergeSets();
+    // Everything has already been merged if we did distributed merge work
+    if (!_distribute_merge_work)
+      mergeSets();
+
+    consolidateMergedFeatures();
   }
 
   // Make sure that feature count is communicated to all ranks
@@ -832,37 +883,47 @@ FeatureFloodCount::prepareDataForTransfer()
 }
 
 void
-FeatureFloodCount::serialize(std::string & serialized_buffer)
+FeatureFloodCount::serialize(std::string & serialized_buffer, unsigned int var_num)
 {
   // stream for serializing the _partial_feature_sets data structure to a byte stream
   std::ostringstream oss;
 
-  /**
-   * Call the MOOSE serialization routines to serialize this processor's data.
-   * Note: The _partial_feature_sets data structure will be empty for all other processors
-   */
-  dataStore(oss, _partial_feature_sets, this);
+  // Serialize everything
+  if (var_num == invalid_id)
+    // Call the MOOSE serialization routines to serialize this processor's data.
+    dataStore(oss, _partial_feature_sets, this);
+  else
+  {
+    mooseAssert(var_num < _partial_feature_sets.size(), "Index out of range");
+    dataStore(oss, _partial_feature_sets[var_num], this);
+  }
 
   // Populate the passed in string pointer with the string stream's buffer contents
   serialized_buffer.assign(oss.str());
 }
 
-/**
- * This routine takes the vector of byte buffers (one for each processor), deserializes them
- * into a series of FeatureSet objects, and appends them to the _feature_sets data structure.
- *
- * Note: It is assumed that local processor information may already be stored in the _feature_sets
- * data structure so it is not cleared before insertion.
- */
 void
-FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
+FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, unsigned int var_num)
 {
   // The input string stream used for deserialization
   std::istringstream iss;
 
   mooseAssert(serialized_buffers.size() == _app.n_processors(),
               "Unexpected size of serialized_buffers: " << serialized_buffers.size());
+  mooseAssert(var_num << _partial_feature_sets.size(), "Index out of range");
+
   auto rank = processor_id();
+
+  /*
+   * Note: If a var_num is passed in, the serialized data will only contain one map's worth of
+   * data. In that case, we know we are only going to be assigned one variable's worth of
+   * information to merge so we can safely remove all of the rest of the variable data.
+   */
+  if (var_num != invalid_id)
+    for (auto i = beginIndex(_partial_feature_sets); i < _partial_feature_sets.size(); ++i)
+      if (i != var_num)
+        _partial_feature_sets[var_num].clear();
+
   for (auto proc_id = beginIndex(serialized_buffers); proc_id < serialized_buffers.size();
        ++proc_id)
   {
@@ -876,8 +937,11 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers)
     iss.str(serialized_buffers[proc_id]); // populate the stream with a new buffer
     iss.clear();                          // reset the string stream state
 
-    // Load the communicated data into all of the other processors' slots
-    dataLoad(iss, _partial_feature_sets, this);
+    // Load the gathered data into the data structure.
+    if (var_num == invalid_id)
+      dataLoad(iss, _partial_feature_sets, this);
+    else
+      dataLoad(iss, _partial_feature_sets[var_num], this);
   }
 }
 
@@ -886,10 +950,7 @@ FeatureFloodCount::mergeSets()
 {
   Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
 
-  // Since we gathered only on the root process, we only need to merge sets on the root process.
-  mooseAssert(_is_master, "mergeSets() should only be called on the root process");
-
-  // Local variable used for sizing structures, it will be >= the actual number of features
+  // When working with _distribute_merge_work all of the maps will be empty except for one
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
     for (auto it1 = _partial_feature_sets[map_num].begin();
@@ -938,6 +999,12 @@ FeatureFloodCount::mergeSets()
     } // it1 loop
   }   // map loop
 
+  Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
+}
+
+void
+FeatureFloodCount::consolidateMergedFeatures()
+{
   /**
    * Now that the merges are complete we need to adjust the centroid, and halos.
    * Additionally, To make several of the sorting and tracking algorithms more straightforward,
@@ -945,6 +1012,7 @@ FeatureFloodCount::mergeSets()
    * features and find the max local index seen on any processor
    * Note: This is all occurring on rank 0 only!
    */
+
   // Offset where the current set of features with the same variable id starts in the flat vector
   unsigned int feature_offset = 0;
   // Set the member feature count to zero and start counting the actual features
@@ -982,8 +1050,6 @@ FeatureFloodCount::mergeSets()
    * IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point but
    * we can't broadcast it here because this routine is not collective.
    */
-
-  Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
 
 bool
