@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # HeatStructureMaterials System
 
 !syntax list /HeatStructureMaterials objects=True actions=False subsystems=False
