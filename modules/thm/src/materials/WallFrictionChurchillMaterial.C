@@ -2,6 +2,8 @@
 #include "WallFrictionModels.h"
 #include "Numerics.h"
 
+registerMooseObject("RELAP7App", WallFrictionChurchillMaterial);
+
 template <>
 InputParameters
 validParams<WallFrictionChurchillMaterial>()
