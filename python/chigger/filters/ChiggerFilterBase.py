@@ -29,6 +29,7 @@ class ChiggerFilterBase(base.ChiggerObject):
 
         self._source = None # see initializeFilter
         self._vtkfilter = vtkfilter_type()
+        self._vtkfilter.GlobalWarningDisplayOff()
         if not isinstance(self._vtkfilter, self.VTKFILTER_TYPE):
             msg = 'The supplied filter is a {} but must be a {} type.'
             raise mooseutils.MooseException(msg.format(vtkfilter_type.__name__,

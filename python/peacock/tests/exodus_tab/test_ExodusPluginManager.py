@@ -12,7 +12,6 @@ import sys
 import os
 import unittest
 import subprocess
-import vtk
 from PyQt5 import QtCore, QtWidgets
 
 from peacock.ExodusViewer.ExodusPluginManager import main
@@ -46,13 +45,13 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
-        self._widget = main(size=[600,600])
+        self._widget, self._main_window = main(size=[600,600])
         self._window = self._widget.VTKWindowPlugin
         self._widget.FilePlugin.onSetFilenames(self._filenames)
 
         # Start with 'diffused' variable
-        self._widget.VariablePlugin.VariableList.setCurrentIndex(2)
-        self._widget.VariablePlugin.VariableList.currentIndexChanged.emit(2)
+        self._widget.FilePlugin.VariableList.setCurrentIndex(2)
+        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
 
     def testInitial(self):
         """
@@ -65,12 +64,12 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         Tests that a bunch of stuff can change without crashing.
         """
         # File
-        self._widget.FilePlugin.AvailableFiles.setCurrentIndex(1)
-        self._widget.FilePlugin.AvailableFiles.currentIndexChanged.emit(1)
+        self._widget.FilePlugin.FileList.setCurrentIndex(1)
+        self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
 
         # Variable
-        self._widget.VariablePlugin.ColorBarToggle.setCheckState(QtCore.Qt.Unchecked)
-        self._widget.VariablePlugin.ColorBarToggle.clicked.emit(False)
+        self._widget.ColorbarPlugin.ColorBarToggle.setCheckState(QtCore.Qt.Unchecked)
+        self._widget.ColorbarPlugin.ColorBarToggle.clicked.emit(False)
 
         # Time
         self._widget.MediaControlPlugin.TimeDisplay.setText('0.26')
@@ -81,12 +80,12 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         self._widget.CameraPlugin.ResetButton.clicked.emit()
 
         # Clip
-        self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
+        self._widget.ClipPlugin.setChecked(True)
+        self._widget.ClipPlugin.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
 
         # Background
-        self._widget.BackgroundPlugin.GradientToggle.clicked.emit(False)
+        self._widget.BackgroundPlugin.GradientToggle.setChecked(True)
 
         # Mesh
         self._widget.MeshPlugin.DisplacementMagnitude.setValue(0.3)
@@ -100,13 +99,7 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
         Test generic python script.
         """
-
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera)
-
+        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
         imagename = '{}_{}'.format(self.__class__.__name__, 'basic.png')
         self.python(imagename)
 
@@ -114,14 +107,9 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
         Test python script with contours.
         """
-
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera)
-        self._widget.ContourPlugin.ContourToggle.setChecked(True)
-        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
+        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
+        self._widget.ContourPlugin.setChecked(True)
+        self._widget.ContourPlugin.clicked.emit(True)
         imagename = '{}_{}'.format(self.__class__.__name__, 'contour.png')
         self.python(imagename)
 
@@ -130,13 +118,9 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         Test python script with clip.
         """
 
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera)
-        self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
+        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
+        self._widget.ClipPlugin.setChecked(True)
+        self._widget.ClipPlugin.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
         imagename = '{}_{}'.format(self.__class__.__name__, 'clip.png')
         self.python(imagename)
@@ -146,11 +130,7 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         Test python script with scale.
         """
 
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera)
+        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
         self._widget.MeshPlugin.ScaleY.setValue(1.5)
         self._widget.MeshPlugin.ScaleY.editingFinished.emit()
         imagename = '{}_{}'.format(self.__class__.__name__, 'scale.png')
@@ -161,19 +141,14 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         Test python script with multiple filters.
         """
 
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera)
-        self._widget.ClipPlugin.ClipToggle.setChecked(True)
-        self._widget.ClipPlugin.ClipToggle.clicked.emit(True)
+        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847), (9.2960, -0.4218, 12.6685), (0.0000, 0.0000, 0.1250))
+        self._widget.ClipPlugin.setChecked(True)
+        self._widget.ClipPlugin.clicked.emit(True)
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
         self._widget.MeshPlugin.ScaleY.setValue(.25)
         self._widget.MeshPlugin.ScaleY.editingFinished.emit()
         imagename = '{}_{}'.format(self.__class__.__name__, 'multiple.png')
         self.python(imagename)
-
 
     def python(self, imagename):
         """

@@ -36,6 +36,7 @@ def get_options():
     opt.add('axis_point1', [0, 0], 'Starting location of axis, in absolute viewport coordinates.')
     opt.add('axis_point2', [0, 0], 'Ending location of axis, in absolute viewport coordinates.')
     opt.add('axis_scale', 1, "The axis scaling factor.")
+    opt.add('zero_tol', 1e-10, "Tolerance for considering limits to be the same.")
     return opt
 
 def set_options(vtkaxis, opt):
@@ -54,11 +55,30 @@ def set_options(vtkaxis, opt):
 
     # Limits
     if opt.isOptionValid('lim'):
-        vtkaxis.SetBehavior(vtk.vtkAxis.FIXED)
-        vtkaxis.SetRange(*opt['lim'])
-        vtkaxis.RecalculateTickSpacing()
+        lim = opt['lim']
+        if abs(lim[1] - lim[0]) < opt['zero_tol']:
+            vtkaxis.SetBehavior(vtk.vtkAxis.CUSTOM)
+            vtkaxis.SetRange(0, 1)
+
+            pos = vtk.vtkDoubleArray()
+            pos.SetNumberOfTuples(2)
+            pos.SetValue(0, 0)
+            pos.SetValue(1, 1)
+
+            labels = vtk.vtkStringArray()
+            labels.SetNumberOfTuples(2)
+            labels.SetValue(0, str(lim[0]))
+            labels.SetValue(1, str(lim[1]))
+
+            vtkaxis.SetCustomTickPositions(pos, labels)
+        else:
+            vtkaxis.SetCustomTickPositions(None, None)
+            vtkaxis.SetBehavior(vtk.vtkAxis.FIXED)
+            vtkaxis.SetRange(*lim)
+            vtkaxis.RecalculateTickSpacing()
     else:
         vtkaxis.SetBehavior(vtk.vtkAxis.AUTO)
+        vtkaxis.SetCustomTickPositions(None, None)
 
     # Color
     if opt.isOptionValid('font_color'):

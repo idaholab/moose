@@ -171,6 +171,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(
         declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
+    _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
+        "neighbor_material_props", &_mesh)),
     _pps_data(*this),
     _vpps_data(*this),
     _all_user_objects(_app.getExecuteOnEnum()),
@@ -248,7 +250,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   {
     _material_data[i] = std::make_shared<MaterialData>(_material_props);
     _bnd_material_data[i] = std::make_shared<MaterialData>(_bnd_material_props);
-    _neighbor_material_data[i] = std::make_shared<MaterialData>(_bnd_material_props);
+    _neighbor_material_data[i] = std::make_shared<MaterialData>(_neighbor_material_props);
   }
 
   _active_elemental_moose_variables.resize(n_threads);
@@ -464,7 +466,8 @@ FEProblemBase::initialSetup()
 
   // Build Refinement and Coarsening maps for stateful material projections if necessary
   if (_adaptivity.isOn() &&
-      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
+      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+       _neighbor_material_props.hasStatefulProperties()))
   {
     if (_has_internal_edge_residual_objects)
       mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
@@ -569,6 +572,7 @@ FEProblemBase::initialSetup()
                                      _neighbor_material_data,
                                      _material_props,
                                      _bnd_material_props,
+                                     _neighbor_material_props,
                                      _assembly);
     /**
      * The ComputeMaterialObjectThread object now allocates memory as needed for the material
@@ -579,7 +583,8 @@ FEProblemBase::initialSetup()
      */
     cmt(elem_range, true);
 
-    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
+    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+        _neighbor_material_props.hasStatefulProperties())
       _has_initialized_stateful = true;
   }
 
@@ -740,7 +745,8 @@ FEProblemBase::initialSetup()
   // object computation.
   // THAT is something we should fix... so I've opened this ticket: #5804
   if (!_app.isRecovering() && !_app.isRestarting() &&
-      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
+      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+       _neighbor_material_props.hasStatefulProperties()))
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this,
@@ -749,6 +755,7 @@ FEProblemBase::initialSetup()
                                      _neighbor_material_data,
                                      _material_props,
                                      _bnd_material_props,
+                                     _neighbor_material_props,
                                      _assembly);
     Threads::parallel_reduce(elem_range, cmt);
   }
@@ -3940,6 +3947,9 @@ FEProblemBase::advanceState()
 
   if (_bnd_material_props.hasStatefulProperties())
     _bnd_material_props.shift();
+
+  if (_neighbor_material_props.hasStatefulProperties())
+    _neighbor_material_props.shift();
 }
 
 void
@@ -4764,7 +4774,8 @@ FEProblemBase::meshChanged()
 void
 FEProblemBase::meshChangedHelper(bool intermediate_change)
 {
-  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
+  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+      _neighbor_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material
                                // properties
 
@@ -4866,7 +4877,8 @@ FEProblemBase::checkProblemIntegrity()
   {
 #ifdef LIBMESH_ENABLE_AMR
     if (_adaptivity.isOn() &&
-        (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
+        (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+         _neighbor_material_props.hasStatefulProperties()))
     {
       _console << "Using EXPERIMENTAL Stateful Material Property projection with Adaptivity!\n";
 

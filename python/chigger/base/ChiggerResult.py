@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mooseutils
+from chigger import utils
 from ChiggerResultBase import ChiggerResultBase
 from ChiggerSourceBase import ChiggerSourceBase
 
@@ -100,6 +101,32 @@ class ChiggerResult(ChiggerResultBase):
         Return the list of ChiggerSource objects.
         """
         return self._sources
+
+    def getBounds(self, check=True):
+        """
+        Return the bounding box of the results.
+
+        Inputs:
+            check[bool]: (Default: True) When True, perform an update check and raise an exception
+                                         if object is not up-to-date. This should not be used.
+
+        TODO: For Peacock, on linux check=False must be set, but I am not sure why.
+        """
+        if check:
+            self.checkUpdateState()
+        elif self.needsUpdate():
+            self.update()
+        return utils.get_bounds(*self._sources)
+
+    def getRange(self, local=False):
+        """
+        Return the min/max range for the selected variables and blocks/boundary/nodeset.
+
+        NOTE: For the range to be restricted by block/boundary/nodest the reader must have
+              "squeeze=True", which can be much slower.
+        """
+        rngs = [src.getRange(local=local) for src in self._sources]
+        return utils.get_min_max(*rngs)
 
     def reset(self):
         """
