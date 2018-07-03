@@ -26,6 +26,8 @@
 #include <algorithm>
 #include <limits>
 
+#include <unistd.h>
+
 template <>
 void
 dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
@@ -198,7 +200,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
     _is_master(processor_id() == 0),
     _bnd_elem_range(nullptr),
-    _distribute_merge_work(false && _app.n_processors() >= _n_vars)
+    _distribute_merge_work(_app.n_processors() >= _n_vars)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -364,6 +366,8 @@ FeatureFloodCount::communicateAndMerge()
    * go ahead and use a vector.
    */
   std::vector<std::string> recv_buffers;
+  if (_is_master)
+    recv_buffers.reserve(_app.n_processors());
 
   /**
    * When we distribute merge work, we are reducing computational work by adding more communication.
@@ -371,16 +375,26 @@ FeatureFloodCount::communicateAndMerge()
    * After each of those processors has merged that information, it'll be sent to the master
    * processor where final consolidation will occur.
    */
-  if (_distribute_merge_work)
+  if (_distribute_merge_work && !_single_map_mode)
   {
     bool is_merging_processor = processor_id() < _n_vars;
 
     if (is_merging_processor)
       recv_buffers.reserve(_app.n_processors());
 
+    auto output_iter = std::back_inserter(recv_buffers);
+
     for (auto i = decltype(_n_vars)(0); i < _n_vars; ++i)
     {
       serialize(send_buffers[0], i);
+
+      sleep(processor_id());
+
+      std::cerr << "Processor: " << processor_id()
+                << ": before buffer size: " << recv_buffers.size() << std::endl;
+
+      std::cerr << "Processor: " << processor_id() << ": send buffer size: " << send_buffers.size()
+                << std::endl;
 
       /**
        * Send the data from all processors to the first _n_vars processors to create a complete
@@ -393,20 +407,29 @@ FeatureFloodCount::communicateAndMerge()
                                         std::back_inserter(recv_buffers));
     }
 
+    std::cerr << "Processor: " << processor_id() << ": after buffer size: " << recv_buffers.size()
+              << std::endl;
+
     if (is_merging_processor)
     {
+      std::vector<std::list<FeatureData>> tmp_data(_partial_feature_sets.size());
+      tmp_data.swap(_partial_feature_sets);
+
       deserialize(recv_buffers, processor_id());
       recv_buffers.clear();
 
-      // Merge one variable with of data
+      // Merge one variable worth of data
       mergeSets();
 
       // Now we need to serialize again to send to the master (only the processors who did work)
       serialize(send_buffers[0]);
+
+      tmp_data.swap(_partial_feature_sets);
+      recv_buffers.resize(0);
     }
     else
       /**
-       * We are going to use a colleective to get all of the information to processor zero.
+       * We are going to use a collective to get all of the information to processor zero.
        * All of the processors that didn't participate in the merge need to send nothing the
        * second time around.
        */
@@ -908,9 +931,10 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
   // The input string stream used for deserialization
   std::istringstream iss;
 
+  std::cout << "var_num: " << var_num << std::endl;
+
   mooseAssert(serialized_buffers.size() == _app.n_processors(),
               "Unexpected size of serialized_buffers: " << serialized_buffers.size());
-  mooseAssert(var_num << _partial_feature_sets.size(), "Index out of range");
 
   auto rank = processor_id();
 
@@ -920,9 +944,13 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
    * information to merge so we can safely remove all of the rest of the variable data.
    */
   if (var_num != invalid_id)
+  {
+    mooseAssert(var_num < _partial_feature_sets.size(), "Index out of range");
+
     for (auto i = beginIndex(_partial_feature_sets); i < _partial_feature_sets.size(); ++i)
       if (i != var_num)
         _partial_feature_sets[var_num].clear();
+  }
 
   for (auto proc_id = beginIndex(serialized_buffers); proc_id < serialized_buffers.size();
        ++proc_id)
