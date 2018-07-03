@@ -26,8 +26,9 @@ validParams<CavityPressureUOAction>()
   params.addRequiredParam<PostprocessorName>(
       "temperature", "The name of the average temperature postprocessor value");
   params.addParam<Real>("initial_temperature", "Initial temperature (optional)");
-  params.addRequiredParam<PostprocessorName>("volume",
-                                             "The name of the internal volume postprocessor value");
+  params.addRequiredParam<std::vector<PostprocessorName>>(
+      "volume",
+      "The name of the postprocessor(s) that holds the value of the internal volume in the cavity");
   params.addParam<Real>(
       "startup_time",
       0,
@@ -46,7 +47,7 @@ CavityPressureUOAction::CavityPressureUOAction(const InputParameters & params)
     _material_input(getParam<std::vector<PostprocessorName>>("material_input")),
     _R(getParam<Real>("R")),
     _temperature(getParam<PostprocessorName>("temperature")),
-    _volume(getParam<PostprocessorName>("volume")),
+    _volume(getParam<std::vector<PostprocessorName>>("volume")),
     _startup_time(getParam<Real>("startup_time"))
 {
 }
@@ -66,7 +67,7 @@ CavityPressureUOAction::act()
   if (isParamValid("initial_temperature"))
     params.set<Real>("initial_temperature") = getParam<Real>("initial_temperature");
 
-  params.set<PostprocessorName>("volume") = _volume;
+  params.set<std::vector<PostprocessorName>>("volume") = _volume;
   params.set<Real>("startup_time") = _startup_time;
 
   _problem->addUserObject("CavityPressureUserObject", name, params);
