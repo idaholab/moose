@@ -24,6 +24,9 @@ validParams<LMConstraint>()
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
 
+  params.addClassDescription("Implements the KKT conditions for normal contact using an NCP "
+                             "function. Requires that either the gap distance or the normal "
+                             "contact pressure (represented by the value of `variable`) is zero.");
   return params;
 }
 

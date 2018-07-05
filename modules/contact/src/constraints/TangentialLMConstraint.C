@@ -31,6 +31,10 @@ validParams<TangentialLMConstraint>()
   params.addRequiredParam<Real>("mu", "The coefficient of friction.");
   params.addParam<Real>("lambda", .95, "The weighting coefficient from Chen");
 
+  params.addClassDescription("Implements the KKT conditions for frictional Coulomb contact using "
+                             "an NCP function. Requires that either the relative tangential "
+                             "velocity is zero or the tangential stress is equal to the friction "
+                             "coefficient times the normal contact pressure.");
   return params;
 }
 
