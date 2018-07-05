@@ -8,4 +8,14 @@
                   'timestep_end to ensure that objects are up-to-date with what users expect'
     issues = '#11798'
   [../]
+  [./with-existing-timestep-end]
+    type = Exodiff
+    input = make-sure-auxes-are-updated.i
+    exodiff = make-sure-auxes-are-updated_out.e
+    design = 'SetupInterface.md'
+    requirement = 'An existing timestep_end enum item shall not modify the behavior'
+    issues = '#11798'
+    cli_args = "AuxKernels/v_aux/execute_on='timestep_end'"
+    prereq = 'make-sure-auxes-are-updated'
+  [../]
 []
