@@ -1,0 +1,11 @@
+[Tests]
+  [./make-sure-auxes-are-updated]
+    type = Exodiff
+    input = make-sure-auxes-are-updated.i
+    exodiff = make-sure-auxes-are-updated_out.e
+    design = 'SetupInterface.md'
+    requirement = 'For linear solves, objects with execute_on=linear shall be evaluated on '
+                  'timestep_end to ensure that objects are up-to-date with what users expect'
+    issues = '#11798'
+  [../]
+[]
