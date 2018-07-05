@@ -178,6 +178,17 @@ public:
      */
     bool mergeable(const FeatureData & rhs) const;
 
+    /**
+     * consolidatable -> "can consolidate"
+     * This routine indicates whether two features can be consolidated, that is, one feature is
+     * reasonably expected to be part of another. This is different than mergable in that a portion
+     * of the feature is expected to be completely identical. This happens in the distributed work
+     * scenario when a feature that is partially owned by a processor is merged on a different
+     * processor (where local entities are not sent or available). However, latter that feature
+     * ends back up on the original processor and just needs to be consolidated.
+     */
+    bool consolidatable(const FeatureData & rhs) const;
+
     ///@{
     /**
      * Determine if one of this FeaturesData's member sets intersects
@@ -199,6 +210,11 @@ public:
      * in an inconsistent state.
      */
     void merge(FeatureData && rhs);
+
+    /**
+     * Consolidates features, i.e. merges local entities but leaves everything else untouched.
+     */
+    void consolidate(FeatureData && rhs);
 
     // TODO: Doco
     void clear();
@@ -679,7 +695,7 @@ private:
    * This method consolidates all of the merged information from _partial_feature_sets into
    * the _feature_sets vectors.
    */
-  void consolidateMergedFeatures();
+  void consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data);
 
   /// Keeps track of whether we are distributing the merge work
   const bool _distribute_merge_work;

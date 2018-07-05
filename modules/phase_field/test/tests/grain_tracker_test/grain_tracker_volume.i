@@ -70,12 +70,12 @@
 
 [Executioner]
   type = Steady
-  [./Adaptivity]
-    initial_adaptivity = 3
-    refine_fraction = 0.7
-    coarsen_fraction = 0.1
-    max_h_level = 3
-  [../]
+#  [./Adaptivity]
+#    initial_adaptivity = 3
+#    refine_fraction = 0.7
+#    coarsen_fraction = 0.1
+#    max_h_level = 3
+#  [../]
 []
 
 [Problem]
