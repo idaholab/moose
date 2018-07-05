@@ -330,26 +330,35 @@ class Scheduler(MooseObject):
                     if job in self.jobs_reported:
                         return
 
-                    # we have not yet been inactive long enough to report
-                    elif clock() - self.last_reported_time < self.min_report_time:
+                    # report inactivity if last reported time falls within tolerances
+                    elif clock() - self.last_reported_time >= self.min_report_time:
+                        job_was_running = True
+                        job.addCaveats('FINISHED')
+
+                        with self.activity_lock:
+                            self.jobs_reported.add(job)
+
+                    # TestHarness has not yet been inactive long enough to warrant a report
+                    else:
+                        # adjust the next report time based on delta of last report time
+                        adjusted_interval = max(1, self.min_report_time - max(1, clock() - self.last_reported_time))
+                        job.report_timer = threading.Timer(adjusted_interval,
+                                                           self.handleLongRunningJob,
+                                                           (job, Jobs, j_lock,))
+                        job.report_timer.start()
                         return
-
-                    job_was_running = True
-                    job.addCaveats('FINISHED')
-
-                    with self.activity_lock:
-                        self.jobs_reported.add(job)
 
             # Immediately following the Job lock, print the status
             self.harness.handleJobStatus(job)
 
-            # We just reported 'something', restart the clock
-            self.last_reported_time = clock()
-
             # Do last, to prevent premature thread pool closures
             with j_lock:
+                tester = job.getTester()
+
+                if not tester.isSilent():
+                    self.last_reported_time = clock()
+
                 if job.isFinished() and not job_was_running:
-                    tester = job.getTester()
                     if tester.isFail():
                         self.__failures += 1
 
