@@ -1,6 +1,6 @@
 #include "RELAP7SetupMeshAction.h"
 
-registerMooseAction("RELAP7App", RELAP7SetupMeshAction, "RELAP7:init_displaced_problem");
+registerMooseAction("RELAP7App", RELAP7SetupMeshAction, "RELAP7:setup_mesh");
 
 template <>
 InputParameters
