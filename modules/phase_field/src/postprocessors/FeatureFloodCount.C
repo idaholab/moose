@@ -413,7 +413,7 @@ FeatureFloodCount::communicateAndMerge()
     Parallel::Communicator merge_comm;
 
     // TODO: Update to MPI_UNDEFINED when libMesh bug is fixed.
-    _communicator.split(is_merging_processor ? 0 : MPI_UNDEFINED, rank, merge_comm);
+    _communicator.split(is_merging_processor ? 0 : 1, rank, merge_comm);
 
     if (is_merging_processor)
     {
@@ -428,14 +428,16 @@ FeatureFloodCount::communicateAndMerge()
       tmp_data.swap(_partial_feature_sets);
 
       deserialize(deserialize_buffers, processor_id());
+
+      send_buffers[0].clear();
       recv_buffers.clear();
+      deserialize_buffers.clear();
 
       // Merge one variable's worth of data
       mergeSets();
 
       // Now we need to serialize again to send to the master (only the processors who did work)
       serialize(send_buffers[0]);
-      recv_buffers.resize(0);
 
       // Free up as much memory as possible here before we do global communication
       clearDataStructures();
@@ -454,6 +456,8 @@ FeatureFloodCount::communicateAndMerge()
       {
         // The root process now needs to deserialize all of the data
         deserialize(recv_buffers);
+
+        send_buffers[0].clear();
         recv_buffers.clear();
 
         consolidateMergedFeatures(&tmp_data);
@@ -887,8 +891,6 @@ FeatureFloodCount::prepareDataForTransfer()
 
   for (auto & list_ref : _partial_feature_sets)
   {
-    //    std::cout << "List num " << i++ << ":\n";
-
     for (auto & feature : list_ref)
     {
       // Now extend the bounding box by the halo region
@@ -933,12 +935,8 @@ FeatureFloodCount::prepareDataForTransfer()
 
       // Periodic node ids
       appendPeriodicNeighborNodes(feature);
-
-      //      std::cout << "Proc " << processor_id() << ": " << feature << std::endl;
     }
   }
-
-  //  std::cout << "Done preparing for transfer\n\n" << std::endl;
 }
 
 void
@@ -947,15 +945,14 @@ FeatureFloodCount::serialize(std::string & serialized_buffer, unsigned int var_n
   // stream for serializing the _partial_feature_sets data structure to a byte stream
   std::ostringstream oss;
 
+  mooseAssert(var_num == invalid_id || var_num < _partial_feature_sets.size(),
+              "var_num out of range");
+
   // Serialize everything
   if (var_num == invalid_id)
-    // Call the MOOSE serialization routines to serialize this processor's data.
     dataStore(oss, _partial_feature_sets, this);
   else
-  {
-    mooseAssert(var_num < _partial_feature_sets.size(), "Index out of range");
     dataStore(oss, _partial_feature_sets[var_num], this);
-  }
 
   // Populate the passed in string pointer with the string stream's buffer contents
   serialized_buffer.assign(oss.str());
@@ -967,47 +964,23 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
   // The input string stream used for deserialization
   std::istringstream iss;
 
-  std::cout << "var_num: " << var_num << std::endl;
-
-  //  mooseAssert(serialized_buffers.size() == _app.n_processors(),
-  //              "Unexpected size of serialized_buffers: " << serialized_buffers.size());
-
   auto rank = processor_id();
-
-  //  /*
-  //   * Note: If a var_num is passed in, the serialized data will only contain one map's worth of
-  //   * data. In that case, we know we are only going to be assigned one variable's worth of
-  //   * information to merge so we can safely remove all of the rest of the variable data.
-  //   */
-  //  if (var_num != invalid_id)
-  //  {
-  //    mooseAssert(var_num < _partial_feature_sets.size(), "Index out of range");
-  //
-  //    for (auto i = beginIndex(_partial_feature_sets); i < _partial_feature_sets.size(); ++i)
-  //      if (i != var_num)
-  //        _partial_feature_sets[var_num].clear();
-  //  }
 
   for (auto proc_id = beginIndex(serialized_buffers); proc_id < serialized_buffers.size();
        ++proc_id)
   {
     /**
-     * Usually we have the local processor data already in the _partial_feature_sets data
-     structure.
-     * However, if we are doing distributed merge work, we also need to preserve all of the
-     original
+     * Usually we have the local processor data already in the _partial_feature_sets data structure.
+     * However, if we are doing distributed merge work, we also need to preserve all of the original
      * data for use in later stages of the algorithm so it'll have been swapped out with clean
-     * buffers. This leaves us a choice, either we just duplicate the Features from the
-     original
-     * data structure after we've swapped out the buffer, or we go ahead and unpack data that
-     we
-     * would normally already have. So during distributed merging, that's exactly what we'll
-     do.
+     * buffers. This leaves us a choice, either we just duplicate the Features from the original
+     * data structure after we've swapped out the buffer, or we go ahead and unpack data that we
+     * would normally already have. So during distributed merging, that's exactly what we'll do.
      * Later however when the master is doing the final consolidating, we'll opt to just skip
      * the local unpacking. To tell the difference, between these two modes, we just need to
      * see if a var_num was passed in.
      */
-    if (var_num == invalid_id && proc_id == rank)
+    if (_is_master && proc_id == rank)
       continue;
 
     iss.str(serialized_buffers[proc_id]); // populate the stream with a new buffer
@@ -1033,8 +1006,6 @@ FeatureFloodCount::mergeSets()
          it1 != _partial_feature_sets[map_num].end();
          /* No increment on it1 */)
     {
-      //      std::cout << *it1 << std::endl;
-
       bool merge_occured = false;
       for (auto it2 = _partial_feature_sets[map_num].begin();
            it2 != _partial_feature_sets[map_num].end();
@@ -1099,10 +1070,9 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
 
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
   {
-    std::set<dof_id_type> set_difference;
     for (auto & feature : _partial_feature_sets[map_num])
     {
-      if (saved_data && map_num == 0)
+      if (saved_data)
       {
         for (auto it = (*saved_data)[map_num].begin(); it != (*saved_data)[map_num].end();
              /* no increment */)
@@ -1140,10 +1110,10 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
     _partial_feature_sets[map_num].clear();
   }
 
-  std::cout << "\n\n\n\n**********Fully Merged Features*************" << std::endl;
-
-  for (const auto & feature : _feature_sets)
-    std::cout << feature;
+  //  _console << "\n\n\n\n**********Fully Merged Features*************" << std::endl;
+  //
+  //  for (const auto & feature : _feature_sets)
+  //    _console << feature;
 
   /**
    * IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point but
