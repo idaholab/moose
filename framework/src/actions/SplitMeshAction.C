@@ -14,6 +14,7 @@
 #include "MooseMesh.h"
 #include "libmesh/checkpoint_io.h"
 
+
 registerMooseAction("MooseApp", SplitMeshAction, "split_mesh");
 
 template <>
@@ -23,12 +24,24 @@ validParams<SplitMeshAction>()
   return validParams<Action>();
 }
 
-SplitMeshAction::SplitMeshAction(InputParameters params) : Action(params) {}
+SplitMeshAction::SplitMeshAction(InputParameters params) : Action(params)
+{
+  _default_coupling = libmesh_make_unique<DefaultCoupling>();
+}
 
 void
 SplitMeshAction::act()
 {
-  auto mesh = _app.actionWarehouse().mesh();
+  auto num_ghost_layers = _app.parameters().get<unsigned short>("num_ghost_layers");
+  if (_default_coupling)
+    _default_coupling->set_n_levels(num_ghost_layers);
+  else
+    mooseError("Need a default ghost functor");
+
+  auto & mesh = _app.actionWarehouse().mesh();
+
+  mesh->getMesh().add_ghosting_functor(*_default_coupling);
+
   auto split_file_arg = _app.parameters().get<std::string>("split_file");
 
   if (mesh->getFileName() == "" && split_file_arg == "")
