@@ -1856,8 +1856,14 @@ FeatureFloodCount::FeatureData::consolidate(FeatureData && rhs)
   mooseAssert(_var_index == rhs._var_index, "Mismatched variable index in merge");
   mooseAssert(_id == rhs._id, "Mismatched auxiliary id in merge");
 
-  if (!rhs._local_ids.empty())
-    _local_ids.swap(rhs._local_ids);
+  std::set<dof_id_type> set_union;
+
+  std::set_union(_local_ids.begin(),
+                 _local_ids.end(),
+                 rhs._local_ids.begin(),
+                 rhs._local_ids.end(),
+                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+  _local_ids.swap(set_union);
 
   mooseAssert((_status & Status::MARKED & Status::DIRTY) == Status::CLEAR,
               "Flags in invalid state");
