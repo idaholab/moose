@@ -1054,6 +1054,8 @@ FeatureFloodCount::mergeSets()
 void
 FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data)
 {
+  Moose::perf_log.push("consolidateMergedFeatures()", "FeatureFloodCount");
+
   /**
    * Now that the merges are complete we need to adjust the centroid, and halos.
    * Additionally, To make several of the sorting and tracking algorithms more straightforward,
@@ -1119,6 +1121,7 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
    * IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point but
    * we can't broadcast it here because this routine is not collective.
    */
+  Moose::perf_log.pop("consolidateMergedFeatures()", "FeatureFloodCount");
 }
 
 bool
