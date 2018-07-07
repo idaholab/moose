@@ -33,7 +33,7 @@ void
 dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
   /**
-   * Not that _local_ids is not stored here. It's not needed for restart, and not needed
+   * Note that _local_ids is not stored here. It's not needed for restart, and not needed
    * during the parallel merge operation
    */
   storeHelper(stream, feature._ghosted_ids, context);
@@ -64,7 +64,7 @@ void
 dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context)
 {
   /**
-   * Not that _local_ids is not loaded here. It's not needed for restart, and not needed
+   * Note that _local_ids is not loaded here. It's not needed for restart, and not needed
    * during the parallel merge operation
    */
   loadHelper(stream, feature._ghosted_ids, context);
@@ -199,8 +199,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _halo_ids(_maps_size),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
     _is_master(processor_id() == 0),
-    _bnd_elem_range(nullptr),
-    _distribute_merge_work(_app.n_processors() >= _n_vars)
+    _distribute_merge_work(_app.n_processors() >= _maps_size && _maps_size > 1)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -366,8 +365,6 @@ FeatureFloodCount::communicateAndMerge()
    * go ahead and use a vector.
    */
   std::vector<std::string> recv_buffers, deserialize_buffers;
-  if (_is_master)
-    recv_buffers.reserve(_app.n_processors());
 
   /**
    * When we distribute merge work, we are reducing computational work by adding more communication.
@@ -375,7 +372,7 @@ FeatureFloodCount::communicateAndMerge()
    * After each of those processors has merged that information, it'll be sent to the master
    * processor where final consolidation will occur.
    */
-  if (_distribute_merge_work && !_single_map_mode)
+  if (_distribute_merge_work)
   {
     auto rank = processor_id();
     bool is_merging_processor = rank < _n_vars;
@@ -471,6 +468,9 @@ FeatureFloodCount::communicateAndMerge()
   // Serialized merging (master does all the work)
   else
   {
+    if (_is_master)
+      recv_buffers.reserve(_app.n_processors());
+
     serialize(send_buffers[0]);
 
     // Free up as much memory as possible here before we do global communication
@@ -494,7 +494,7 @@ FeatureFloodCount::communicateAndMerge()
 
       mergeSets();
 
-      consolidateMergedFeatures(nullptr);
+      consolidateMergedFeatures();
     }
   }
 
@@ -815,6 +815,10 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id,
 
     case FieldType::VARIABLE_COLORING:
     {
+      mooseAssert(
+          _var_index_mode,
+          "\"enable_var_coloring\" must be set to true to pull back the VARIABLE_COLORING field");
+
       const auto entity_it = _var_index_maps[var_index].find(entity_id);
 
       if (entity_it != _var_index_maps[var_index].end())
@@ -980,7 +984,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
      * the local unpacking. To tell the difference, between these two modes, we just need to
      * see if a var_num was passed in.
      */
-    if (_is_master && proc_id == rank)
+    if (var_num == invalid_id && proc_id == rank)
       continue;
 
     iss.str(serialized_buffers[proc_id]); // populate the stream with a new buffer
@@ -1079,7 +1083,7 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
         for (auto it = (*saved_data)[map_num].begin(); it != (*saved_data)[map_num].end();
              /* no increment */)
         {
-          if (feature.consolidatable(*it))
+          if (feature.canConsolidate(*it))
           {
             feature.consolidate(std::move(*it));
             it = (*saved_data)[map_num].erase(it); // increment
@@ -1113,7 +1117,6 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
   }
 
   //  _console << "\n\n\n\n**********Fully Merged Features*************" << std::endl;
-  //
   //  for (const auto & feature : _feature_sets)
   //    _console << feature;
 
@@ -1754,7 +1757,7 @@ FeatureFloodCount::FeatureData::mergeable(const FeatureData & rhs) const
 }
 
 bool
-FeatureFloodCount::FeatureData::consolidatable(const FeatureData & rhs) const
+FeatureFloodCount::FeatureData::canConsolidate(const FeatureData & rhs) const
 {
   for (const auto & orig_id_pair1 : _orig_ids)
     for (const auto & orig_id_pair2 : rhs._orig_ids)
