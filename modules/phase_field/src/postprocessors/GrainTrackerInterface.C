@@ -33,6 +33,11 @@ validParams<GrainTrackerInterface>()
                         "Terminate with an error if a grain is created "
                         "(does not include initial callback to start simulation)");
 
+  params.addRangeCheckedParam<short>("verbosity_level",
+                                     1,
+                                     "verbosity_level>=0 & verbosity_level<=2",
+                                     "Prints extra information to the console during operation");
+
   params.addRequiredCoupledVarWithAutoBuild(
       "variable", "var_name_base", "op_num", "Array of coupled variables");
 

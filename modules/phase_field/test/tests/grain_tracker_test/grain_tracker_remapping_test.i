@@ -7,8 +7,8 @@
   # Mesh block.  Meshes can be read in or automatically generated
   type = GeneratedMesh
   dim = 2 # Problem dimension
-  nx = 11 # Number of elements in the x-direction
-  ny = 11 # Number of elements in the y-direction
+  nx = 12 # Number of elements in the x-direction
+  ny = 12 # Number of elements in the y-direction
   xmax = 1000 # maximum x-coordinate of the mesh
   ymax = 1000 # maximum y-coordinate of the mesh
   elem_type = QUAD4 # Type of elements used in the mesh
@@ -42,6 +42,7 @@
   [./grain_tracker]
     type = GrainTracker
     threshold = 0.2
+    verbosity_level = 1
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
     compute_halo_maps = true # For displaying HALO fields
@@ -252,7 +253,7 @@
   nl_max_its = 40 # Max number of nonlinear iterations
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
   start_time = 0.0
-  num_steps = 16
+  num_steps = 15
   dt = 300
 []
 

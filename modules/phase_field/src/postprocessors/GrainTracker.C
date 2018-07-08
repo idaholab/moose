@@ -74,6 +74,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _poly_ic_uo(parameters.isParamValid("polycrystal_ic_uo")
                     ? &getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo")
                     : nullptr),
+    _verbosity_level(getParam<short>("verbosity_level")),
     _first_time(true),
     _error_on_grain_creation(getParam<bool>("error_on_grain_creation")),
     _reserve_grain_first_index(0),
@@ -273,7 +274,8 @@ GrainTracker::finalize()
   else
     trackGrains();
   Moose::perf_log.pop("trackGrains()", "GrainTracker");
-  _console << "Finished inside of trackGrains" << std::endl;
+  if (_verbosity_level > 1)
+    _console << "Finished inside of trackGrains" << std::endl;
 
   /**
    * Broadcast essential data
@@ -289,14 +291,15 @@ GrainTracker::finalize()
   Moose::perf_log.pop("remapGrains()", "GrainTracker");
 
   updateFieldInfo();
-  _console << "Finished inside of updateFieldInfo" << std::endl;
+  if (_verbosity_level > 1)
+    _console << "Finished inside of updateFieldInfo" << std::endl;
 
   // Set the first time flag false here (after all methods of finalize() have completed)
   _first_time = false;
 
   // TODO: Release non essential memory
-
-  _console << "Finished inside of GrainTracker" << std::endl;
+  if (_verbosity_level > 0)
+    _console << "Finished inside of GrainTracker" << std::endl;
   Moose::perf_log.pop("finalize()", "GrainTracker");
 }
 
@@ -427,16 +430,20 @@ GrainTracker::trackGrains()
     }
 
     // Print out stats on overall tracking changes per var_index
-    for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+    if (_verbosity_level > 0)
     {
-      _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> "
-               << _feature_counts_per_map[map_num];
-      if (map_sizes[map_num] > _feature_counts_per_map[map_num])
-        _console << "--";
-      else if (map_sizes[map_num] < _feature_counts_per_map[map_num])
-        _console << "++";
+      _console << "\nGrain Tracker Status:";
+      for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+      {
+        _console << "\nGrains active index " << map_num << ": " << map_sizes[map_num] << " -> "
+                 << _feature_counts_per_map[map_num];
+        if (map_sizes[map_num] > _feature_counts_per_map[map_num])
+          _console << "--";
+        else if (map_sizes[map_num] < _feature_counts_per_map[map_num])
+          _console << "++";
+      }
+      _console << '\n' << std::endl;
     }
-    _console << '\n' << std::endl;
 
     /**
      * To track grains across time steps, we will loop over our unique grains and link each one up
@@ -521,9 +528,14 @@ GrainTracker::trackGrains()
           auto & inactive_grain = (centroid_diff1 < centroid_diff2) ? other_old_grain : old_grain;
 
           inactive_grain._status = Status::INACTIVE;
-          _console << COLOR_GREEN << "Marking Grain " << inactive_grain._id
-                   << " as INACTIVE (variable index: " << inactive_grain._var_index << ")\n"
-                   << COLOR_DEFAULT << inactive_grain;
+          if (_verbosity_level > 0)
+          {
+            _console << COLOR_GREEN << "Marking Grain " << inactive_grain._id
+                     << " as INACTIVE (variable index: " << inactive_grain._var_index << ")\n"
+                     << COLOR_DEFAULT;
+            if (_verbosity_level > 1)
+              _console << inactive_grain;
+          }
 
           /**
            * If the grain we just marked inactive was the one whose index was in the new grain
@@ -624,9 +636,14 @@ GrainTracker::trackGrains()
           {
             grain._id = other_grain._id;    // Set the duplicate ID
             grain._status = Status::MARKED; // Mark it
-            _console << COLOR_YELLOW << "Split Grain Detected "
-                     << " (variable index: " << grain._var_index << ")\n"
-                     << COLOR_DEFAULT << grain << other_grain;
+            if (_verbosity_level > 0)
+            {
+              _console << COLOR_YELLOW << "Split Grain Detected "
+                       << " (variable index: " << grain._var_index << ")\n"
+                       << COLOR_DEFAULT;
+              if (_verbosity_level > 1)
+                _console << grain << other_grain;
+            }
           }
         }
 
@@ -646,9 +663,14 @@ GrainTracker::trackGrains()
       if (grain._status == Status::CLEAR)
       {
         grain._status = Status::INACTIVE;
-        _console << COLOR_GREEN << "Marking Grain " << grain._id
-                 << " as INACTIVE (variable index: " << grain._var_index << ")\n"
-                 << COLOR_DEFAULT << grain;
+        if (_verbosity_level > 0)
+        {
+          _console << COLOR_GREEN << "Marking Grain " << grain._id
+                   << " as INACTIVE (variable index: " << grain._var_index << ")\n"
+                   << COLOR_DEFAULT;
+          if (_verbosity_level > 1)
+            _console << grain;
+        }
       }
     }
   } // is_master
@@ -725,7 +747,8 @@ GrainTracker::remapGrains()
   if (_t_step < _tracking_step)
     return;
 
-  _console << "Running remap Grains" << std::endl;
+  if (_verbosity_level > 1)
+    _console << "Running remap Grains\n" << std::endl;
 
   /**
    * Map used for communicating remap indices to all ranks
@@ -775,11 +798,12 @@ GrainTracker::remapGrains()
           split_pairs.push_front(std::make_pair(i, j));
           if (grain1._var_index != grain2._var_index)
           {
-            _console << COLOR_YELLOW << "Split Grain (#" << grain1._id
-                     << ") detected on unmatched OPs (" << grain1._var_index << ", "
-                     << grain2._var_index << ") attempting to remap to " << grain1._var_index
-                     << ".\n"
-                     << COLOR_DEFAULT;
+            if (_verbosity_level > 0)
+              _console << COLOR_YELLOW << "Split Grain (#" << grain1._id
+                       << ") detected on unmatched OPs (" << grain1._var_index << ", "
+                       << grain2._var_index << ") attempting to remap to " << grain1._var_index
+                       << ".\n"
+                       << COLOR_DEFAULT;
 
             /**
              * We're not going to try very hard to look for a suitable remapping. Just set it to
@@ -805,10 +829,11 @@ GrainTracker::remapGrains()
         // We need to remap any grains represented on any variable index above the cuttoff
         if (grain1._var_index >= _reserve_op_index)
         {
-          _console << COLOR_YELLOW << "\nGrain #" << grain1._id
-                   << " detected on a reserved order parameter #" << grain1._var_index
-                   << ", remapping to another variable\n"
-                   << COLOR_DEFAULT;
+          if (_verbosity_level > 0)
+            _console << COLOR_YELLOW << "\nGrain #" << grain1._id
+                     << " detected on a reserved order parameter #" << grain1._var_index
+                     << ", remapping to another variable\n"
+                     << COLOR_DEFAULT;
 
           for (auto max = decltype(_max_renumbering_recursion)(0);
                max <= _max_renumbering_recursion;
@@ -841,9 +866,10 @@ GrainTracker::remapGrains()
               grain1.boundingBoxesIntersect(grain2) &&  // do bboxes intersect (coarse level)?
               grain1.halosIntersect(grain2))            // do they actually overlap (fine level)?
           {
-            _console << COLOR_YELLOW << "\nGrain #" << grain1._id << " intersects Grain #"
-                     << grain2._id << " (variable index: " << grain1._var_index << ")\n"
-                     << COLOR_DEFAULT;
+            if (_verbosity_level > 0)
+              _console << COLOR_YELLOW << "Grain #" << grain1._id << " intersects Grain #"
+                       << grain2._id << " (variable index: " << grain1._var_index << ")\n"
+                       << COLOR_DEFAULT;
 
             for (auto max = decltype(_max_renumbering_recursion)(0);
                  max <= _max_renumbering_recursion;
@@ -912,12 +938,15 @@ GrainTracker::remapGrains()
 
     if (!grain_id_to_new_var.empty())
     {
-      _console << "\nFinal remapping tally:\n";
-      for (const auto & remap_pair : grain_id_to_new_var)
-        _console << "Grain #" << remap_pair.first << " var_index "
-                 << grain_id_to_existing_var_index[remap_pair.first] << " -> " << remap_pair.second
-                 << '\n';
-      _console << "Communicating swaps with remaining processors..." << std::endl;
+      if (_verbosity_level > 1)
+      {
+        _console << "Final remapping tally:\n";
+        for (const auto & remap_pair : grain_id_to_new_var)
+          _console << "Grain #" << remap_pair.first << " var_index "
+                   << grain_id_to_existing_var_index[remap_pair.first] << " -> "
+                   << remap_pair.second << '\n';
+        _console << "Communicating swaps with remaining processors..." << std::endl;
+      }
     }
   } // root processor
 
@@ -953,7 +982,8 @@ GrainTracker::remapGrains()
 
     _fe_problem.getNonlinearSystemBase().system().update();
 
-    _console << "Swaps complete" << std::endl;
+    if (_verbosity_level > 1)
+      _console << "Swaps complete" << std::endl;
   }
 }
 
@@ -1085,14 +1115,17 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsi
     // If the distance is positive we can just remap and be done
     if (target_it->_distance > 0)
     {
-      _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
-               << " from variable index " << curr_var_index << " to " << target_it->_var_index;
-      if (target_it->_distance == std::numeric_limits<Real>::max())
-        _console << " which currently contains zero grains." << COLOR_DEFAULT;
-      else
-        _console << " whose closest grain (#" << target_it->_grain_id << ") is at a distance of "
-                 << target_it->_distance << "\n"
-                 << COLOR_DEFAULT;
+      if (_verbosity_level > 0)
+      {
+        _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
+                 << " from variable index " << curr_var_index << " to " << target_it->_var_index;
+        if (target_it->_distance == std::numeric_limits<Real>::max())
+          _console << " which currently contains zero grains.\n\n" << COLOR_DEFAULT;
+        else
+          _console << " whose closest grain (#" << target_it->_grain_id << ") is at a distance of "
+                   << target_it->_distance << "\n\n"
+                   << COLOR_DEFAULT;
+      }
 
       grain._status |= Status::DIRTY;
       grain._var_index = target_it->_var_index;
@@ -1124,11 +1157,12 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsi
 
     if (!intersection_hit)
     {
-      _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
-               << " from variable index " << curr_var_index << " to " << target_it->_var_index
-               << " whose closest grain:" << oss.str()
-               << " is inside our bounding box but whose halo(s) are not touching.\n"
-               << COLOR_DEFAULT;
+      if (_verbosity_level > 0)
+        _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
+                 << " from variable index " << curr_var_index << " to " << target_it->_var_index
+                 << " whose closest grain:" << oss.str()
+                 << " is inside our bounding box but whose halo(s) are not touching.\n\n"
+                 << COLOR_DEFAULT;
 
       grain._status |= Status::DIRTY;
       grain._var_index = target_it->_var_index;
@@ -1164,10 +1198,11 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsi
     if (attemptGrainRenumber(target_grain, depth + 1, max_depth))
     {
       // SUCCESS!
-      _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
-               << " from variable index " << curr_var_index << " to " << target_it->_var_index
-               << '\n'
-               << COLOR_DEFAULT;
+      if (_verbosity_level > 0)
+        _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
+                 << " from variable index " << curr_var_index << " to " << target_it->_var_index
+                 << "\n\n"
+                 << COLOR_DEFAULT;
 
       // Now we need to mark the grain as DIRTY since the recursion succeeded.
       grain._status |= Status::DIRTY;

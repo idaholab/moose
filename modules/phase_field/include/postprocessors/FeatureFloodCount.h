@@ -183,7 +183,7 @@ public:
      * reasonably expected to be part of another. This is different than mergable in that a portion
      * of the feature is expected to be completely identical. This happens in the distributed work
      * scenario when a feature that is partially owned by a processor is merged on a different
-     * processor (where local entities are not sent or available). However, latter that feature
+     * processor (where local entities are not sent or available). However, later that feature
      * ends back up on the original processor and just needs to be consolidated.
      */
     bool canConsolidate(const FeatureData & rhs) const;

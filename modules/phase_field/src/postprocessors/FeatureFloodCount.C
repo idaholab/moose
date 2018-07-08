@@ -26,8 +26,6 @@
 #include <algorithm>
 #include <limits>
 
-#include <unistd.h>
-
 template <>
 void
 dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
