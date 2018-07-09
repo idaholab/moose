@@ -1,6 +1,11 @@
 - /AuxVariables/InitialCondition/PorousFlowFluidStateBrineCO2IC
 - /AuxVariables/InitialCondition/PorousFlowFluidStateWaterNCGIC
 - /Functions/MovingPlanarFront
+- /Kernels/PorousFlowFullySaturatedDarcyBase
+- /Kernels/PorousFlowFullySaturatedDarcyFlow
+- /Kernels/PorousFlowFullySaturatedHeatAdvection
+- /Kernels/PorousFlowFullySaturatedMassTimeDerivative
+- /Materials/PorousFlowAddMaterialAction
 - /Materials/PorousFlowAddMaterialJoiner
 - /PorousFlowBasicTHM
 - /PorousFlowFullySaturated

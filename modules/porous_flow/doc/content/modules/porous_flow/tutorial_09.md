@@ -18,7 +18,7 @@ Yes, it is actually designed and not just hacked together!  The design is fundam
 
 1. Multi-component, multi-phase fluids need to be simulated.  This means that the `Kernels`, `Materials`, etc are all built using C++ `std::vectors` of components and phases, that are sized at runtime when MOOSE reads your input file.  An alternative approach would be to have a separate 1-component, 1-phase module; another module for 2-component, 1-phase; another for 3-component, 1-phase, another for 2-component, 2-phase, etc, as well as all the possible couplings with temperature, mechanics and chemistry.  This would be a huge task, made even worse by the exhaustive (and exhausting) testing and documentation.  Unfortunately, not only do the `std::vectors` make the code quite complex, but they necessitate the Joiners (see below).  However, to make things easier for users, `Actions` have been created that cover the common use-case of single-phase fluid flow.  These have been used in the tutorial so far, but will be abandoned in [Page 10](porous_flow/tutorial_10.md).
 
-2. In many PorousFlow simulations, [mass lumping](porous_flow/mass_lumping.md) and [full upwinding](porous_flow/upwinding.md) are critical to avoid unphysical results (eg, negative concentrations or saturations) and to vastly improve convergence (to prevent fluid from being withdrawn from a node where there is no fluid).  However, MOOSE is not really suited to this approach because the `Kernels` need all the Material properties (and other things) evaluated at the nodes, rather than at the quadpoints.  A special `PorousFlowMaterial` has been created that allows all other PorousFlow Materials to be evaluated at nodes by specifying the `at_nodes` input parameter.  The mass lumping and upwinding mean that often in PorousFlow input files you will see two identical materials: one with `at_nodes = true` and the other with `at_nodes = false` (the default).  Some `Kernels` (and `BCs`, `AuxKernels`, etc) need the normal quadpoint version, while others need the nodal version.
+2. In many PorousFlow simulations, [mass lumping](porous_flow/mass_lumping.md) and [full upwinding](porous_flow/upwinding.md) are critical to avoid unphysical results (eg, negative concentrations or saturations) and to vastly improve convergence (to prevent fluid from being withdrawn from a node where there is no fluid).  However, MOOSE is not really suited to this approach because the `Kernels` need all the Material properties (and other things) evaluated at the nodes, rather than at the quadpoints.  A special `PorousFlowMaterial` has been created that allows all other PorousFlow Materials to be evaluated at nodes by specifying the `at_nodes` input parameter. The required version of each material is added automatically, so the user shouldn't need to set the `at_nodes` parameter.
 
 3. In contrast to much of the remainder of MOOSE, good nonlinear convergence is only obtained when the Jacobian is built using all the derivative information (a short discussion has already been presented on [Page 02](porous_flow/tutorial_02.md)).  The `porous_flow_vars` input parameter of the [`PorousFlowDictator`](PorousFlowDictator.md) controls which derivatives are entered into the Jacobian.  However, sometimes the derivatives are extremely complicated (you will see hundreds of lines of chain-rules if you look at the code) so MOOSE's DerivativeMaterial system is used which allows developers to specify the derivatives if they desire, but will return 0 if none are specified.
 
@@ -34,7 +34,7 @@ These form the heart of PorousFlow.  Usually the `[Materials]` block in the inpu
 
 ### Nodal materials
 
-Mentioned above is the `at_nodes` input parameter.  The standard in PorousFlow is that a `Material` computes a property called `property_nodal` if `at_nodes = true`, while it calls the property `property_qp` if `at_nodes = false`.  Therefore in the example of the undefined `PorousFlow_matrix_internal_energy_nodal` given above, you know that your input file will have to specify `at_nodes = true` for the Material that supplies `PorousFlow_matrix_internal_energy`.
+Mentioned above is the `at_nodes` input parameter.  The standard in PorousFlow is that a `Material` computes a property called `property_nodal` if `at_nodes = true`, while it computes the property `property_qp` if `at_nodes = false`.
 
 ### Derivatives
 
@@ -49,7 +49,10 @@ added automatically by the action system.
 
 The unix `grep` utility is your friend here!  Do the following
 
-`cd porous_flow/src/materials ;  grep matrix_internal *.C`
+```bash
+cd porous_flow/src/materials
+grep matrix_internal *.C
+```
 
 to find the `PorousFlowMatrixInternalEnergy` `Material` needed to solve the above MOOSE "undefined" error.
 

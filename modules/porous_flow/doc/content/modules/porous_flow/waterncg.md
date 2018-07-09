@@ -118,12 +118,8 @@ The [`PorousFlowFluidStateWaterNCG`](/PorousFlowFluidStateWaterNCG.md)
 Material provides all phase pressures, saturation, densities, viscosities etc, as well
 as all mass fractions of all fluid components in all fluid phases in a single material
 using the formulation provided in the [`PorousFlowWaterNCG`](/PorousFlowWaterNCG.md) UserObject.
-As with many PorousFlow materials, two versions must be supplied - one for the nodes, and one
-for the quadrature points.
 
 !listing modules/porous_flow/test/tests/fluidstate/theis.i block=Materials/waterncg
-
-!listing modules/porous_flow/test/tests/fluidstate/theis.i block=Materials/waterncg_qp
 
 ## Initial condition
 
