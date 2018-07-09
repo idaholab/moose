@@ -44,9 +44,10 @@ PartitionerWeightTest::computeElementWeight(Elem & elem)
 }
 
 dof_id_type
-PartitionerWeightTest::computeSideWeight(Elem & /*elem*/, Elem & side)
+PartitionerWeightTest::computeSideWeight(Elem & elem, unsigned int side)
 {
-  auto centroid = side.centroid();
+  auto side_elem = elem.build_side(side);
+  auto centroid = side_elem->centroid();
   if (centroid(0) == 0.5)
     return 20;
   else

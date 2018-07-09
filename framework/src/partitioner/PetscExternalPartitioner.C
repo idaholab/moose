@@ -66,7 +66,8 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
 #ifdef LIBMESH_HAVE_PETSC
   // construct a dual graph
   Mat dual;
-  PetscInt *i, *j, *values, *elem_weights, nrows, nj, ncols, local_elem_id, neighbor;
+  PetscInt *i, *j, *values, *elem_weights, nrows, nj, ncols, local_elem_id;
+  unsigned int neighbor;
   const PetscInt * parts;
   MatPartitioning part;
   IS is;
@@ -118,8 +119,7 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       if (_apply_side_weight)
       {
         auto & elem = _local_id_to_elem[local_elem_id];
-        auto side_elem = elem->build_side(neighbor);
-        values[nj] = computeSideWeight(*elem, *side_elem);
+        values[nj] = computeSideWeight(*elem, neighbor);
         neighbor++;
       }
 
@@ -178,7 +178,7 @@ PetscExternalPartitioner::computeElementWeight(Elem & /*elem*/)
 }
 
 dof_id_type
-PetscExternalPartitioner::computeSideWeight(Elem & /*elem*/, Elem & /*side*/)
+PetscExternalPartitioner::computeSideWeight(Elem & /*elem*/, unsigned int /*side*/)
 {
   return 1;
 }

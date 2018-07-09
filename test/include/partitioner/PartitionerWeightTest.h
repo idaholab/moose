@@ -32,7 +32,7 @@ public:
 
   virtual dof_id_type computeElementWeight(Elem & elm) override;
 
-  virtual dof_id_type computeSideWeight(Elem & elem, Elem & side) override;
+  virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side) override;
 };
 
 #endif /* PARTITIONERWEIGHTTEST_H */

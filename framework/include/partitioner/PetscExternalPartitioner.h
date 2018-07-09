@@ -32,7 +32,7 @@ public:
 
   virtual dof_id_type computeElementWeight(Elem & elm);
 
-  virtual dof_id_type computeSideWeight(Elem & elem, Elem & side);
+  virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side);
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
