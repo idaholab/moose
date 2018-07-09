@@ -15,8 +15,8 @@ flags are listed below.
 | - | - |
 INITIAL | Prior to the first time step.
 TIMESTEP_BEGIN | Prior to the solve for each time step.
-NONLINEAR | Prior do each non-linear iteration during the solve.
-LINEAR | Prior do each linear iteration during the solve.
+NONLINEAR | Prior to each non-linear iteration during the solve; timed with evaluation of preconditioner.
+LINEAR | Prior to each linear iteration during the solve; timed with evaluation of residuals.
 TIMESTEP_END | After the solve for each time step.
 SUBDOMAIN | Executes when the subdomain (i.e., "blocks") change during calculations.
 
@@ -39,6 +39,12 @@ Depending on the system these options or others will be available, since as disc
 complete list of execution flags is provided by MOOSE are listed in the "registerExecFlags" function.
 
 !listing framework/src/base/MooseApp.C start=MooseApp::registerExecFlags() end=void
+
+!alert note
+For linear solves with PETSc version >= 3.8, there are no calls to MOOSE for residual evaluation at
+the end of the solve. Consequently, the `execute_on` flag in `SetupInterface` is modified to include
+`timestep_end` as long as `linear` is requested. This prevents users from being surprised by lagged
+`AuxKernel` evaluation, etc.
 
 ## Modifying Execute On
 

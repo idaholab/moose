@@ -33,6 +33,14 @@ SetupInterface::SetupInterface(const MooseObject * moose_object)
         (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
             ->getCurrentExecuteOnFlag())
 {
+  // PETSc no longer calls SNESComputeFunction at the end of a linear solve, so we do this so that
+  // users who expect things to be updated at the end of a solve are satisfied
+  FEProblemBase & fe_problem =
+      *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+  if (fe_problem.solverParams()._type == Moose::ST_LINEAR)
+    if (_execute_enum.contains(EXEC_LINEAR) && !_execute_enum.contains(EXEC_TIMESTEP_END))
+      const_cast<ExecFlagEnum &>(_execute_enum) += EXEC_TIMESTEP_END;
+
   _empty_execute_enum.clear(); // remove any flags for the case when "execute_on" is not used
 }
 
