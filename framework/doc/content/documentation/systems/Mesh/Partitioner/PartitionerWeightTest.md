@@ -1,4 +1,4 @@
-# PartitionerWeight
+# PartitionerWeightTest
 
 It is a test `partitioner` to demonstrate how to assign the vertex weights and the edge weights to the graph.
 The vertex weights (corresponding to word load) could be assigned by overriding `computeElementWeight`. The edge

@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PARTITIONERWEIGHT_H
-#define PARTITIONERWEIGHT_H
+#ifndef PARTITIONERWEIGHTTEST_H
+#define PARTITIONERWEIGHTTEST_H
 
 // MOOSE includes
 #include "MooseEnum.h"
 #include "PetscExternalPartitioner.h"
 
-class PartitionerWeight;
+class PartitionerWeightTest;
 class MooseMesh;
 
 template <>
-InputParameters validParams<PartitionerWeight>();
+InputParameters validParams<PartitionerWeightTest>();
 
 /**
  * Partitions a mesh based on a weighted graph
  */
-class PartitionerWeight : public PetscExternalPartitioner
+class PartitionerWeightTest : public PetscExternalPartitioner
 {
 public:
-  PartitionerWeight(const InputParameters & params);
+  PartitionerWeightTest(const InputParameters & params);
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 
@@ -35,4 +35,4 @@ public:
   virtual dof_id_type computeSideWeight(Elem & elem, Elem & side) override;
 };
 
-#endif /* PARTITIONERWEIGHT_H */
+#endif /* PARTITIONERWEIGHTTEST_H */

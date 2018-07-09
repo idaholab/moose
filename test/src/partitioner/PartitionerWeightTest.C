@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PartitionerWeight.h"
+#include "PartitionerWeightTest.h"
 
-registerMooseObject("MooseApp", PartitionerWeight);
+registerMooseObject("MooseApp", PartitionerWeightTest);
 
 template <>
 InputParameters
-validParams<PartitionerWeight>()
+validParams<PartitionerWeightTest>()
 {
   InputParameters params = validParams<PetscExternalPartitioner>();
 
@@ -22,19 +22,19 @@ validParams<PartitionerWeight>()
   return params;
 }
 
-PartitionerWeight::PartitionerWeight(const InputParameters & params)
+PartitionerWeightTest::PartitionerWeightTest(const InputParameters & params)
   : PetscExternalPartitioner(params)
 {
 }
 
 std::unique_ptr<Partitioner>
-PartitionerWeight::clone() const
+PartitionerWeightTest::clone() const
 {
-  return libmesh_make_unique<PartitionerWeight>(_pars);
+  return libmesh_make_unique<PartitionerWeightTest>(_pars);
 }
 
 dof_id_type
-PartitionerWeight::computeElementWeight(Elem & elem)
+PartitionerWeightTest::computeElementWeight(Elem & elem)
 {
   auto centroid = elem.centroid();
   if (centroid(0) < 0.5)
@@ -44,7 +44,7 @@ PartitionerWeight::computeElementWeight(Elem & elem)
 }
 
 dof_id_type
-PartitionerWeight::computeSideWeight(Elem & /*elem*/, Elem & side)
+PartitionerWeightTest::computeSideWeight(Elem & /*elem*/, Elem & side)
 {
   auto centroid = side.centroid();
   if (centroid(0) == 0.5)
