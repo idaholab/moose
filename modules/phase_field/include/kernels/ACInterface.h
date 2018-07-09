@@ -37,6 +37,9 @@ protected:
   RealGradient gradL();
   RealGradient gradKappa();
 
+  /// the \f$ \nabla(L\psi) \f$ term
+  RealGradient nablaLPsi();
+
   /// the \f$ \kappa\nabla(L\psi) \f$ term
   RealGradient kappaNablaLPsi();
 
