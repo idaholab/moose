@@ -9,22 +9,13 @@ Content:
     richards:
         root_dir: modules/richards/doc/content
 
-Check:
-    groups:
-        - RichardsApp
-
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Richards Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/richards
+    home: /modules/richards
 
 Extensions:
     appsyntax:
         type: MooseDocs.extensions.appsyntax
-        executable: ${MOOSE_DIR}/modules/richards
-        hide:
-            framework: !include framework/doc/hidden.yml
-        remove:
-            framework: !include framework/doc/remove.yml
-            richards: !include modules/richards/doc/remove.yml
+        disable: True

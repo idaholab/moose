@@ -6,7 +6,7 @@
 
     requirement = 'The NumElems Postprocessor shall report the number of elements
                    (active or total) in the simulation.'
-    design = 'Postprocessors/NumElems.md'
+    design = '/NumElems.md'
     issues = '#2094 #8421'
   [../]
 
@@ -22,7 +22,7 @@
 
     requirement = 'The NumElems Postprocessor shall report the number of elements
                    (active or total) in the simulation when using distributed (pre-split) mesh.'
-    design = 'Postprocessors/NumElems.md'
+    design = '/NumElems.md'
     issues = '#2094 #8421'
   [../]
 []

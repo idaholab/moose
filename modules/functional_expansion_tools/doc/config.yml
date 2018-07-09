@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Functional Expansion Tools Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/functional_expansion_tools
+    home: /modules/functional_expansion_tools
 
 Extensions:
     appsyntax:

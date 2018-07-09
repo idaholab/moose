@@ -6,7 +6,7 @@
 
     requirement = 'The NumVars Postprocessor shall report the number of variables from
                    one or more equation systems in the simulation.'
-    design = 'Postprocessors/NumVars.md'
+    design = '/NumVars.md'
     issues = '#2094'
   [../]
 []

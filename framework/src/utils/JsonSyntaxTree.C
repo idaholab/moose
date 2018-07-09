@@ -30,7 +30,7 @@ JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(sear
   auto & actmap = Registry::allActions();
   for (auto & entry : actmap)
     for (auto & act : entry.second)
-      _action_label_map[act._classname] = entry.first;
+      _action_label_map[act._classname] = std::make_pair(entry.first, act._file);
 
   auto & objmap = Registry::allObjects();
   for (auto & entry : objmap)
@@ -41,7 +41,7 @@ JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(sear
         name = obj._alias;
       if (name.empty())
         name = obj._classname;
-      _object_label_map[name] = entry.first;
+      _object_label_map[name] = std::make_pair(entry.first, obj._file);
     }
 }
 
@@ -196,7 +196,9 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json[action]["parameters"] = all_params;
     json[action]["description"] = params->getClassDescription();
     json[action]["action_path"] = path;
-    json[action]["label"] = getActionLabel(action);
+    auto label_pair = getActionLabel(action);
+    json[action]["label"] = label_pair.first;
+    json[action]["register_file"] = label_pair.second;
     if (lineinfo.isValid())
       json[action]["file_info"][lineinfo.file()] = lineinfo.line();
   }
@@ -209,7 +211,9 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json["syntax_path"] = path;
     json["parent_syntax"] = parent;
     json["description"] = params->getClassDescription();
-    json["label"] = getObjectLabel(path);
+    auto label_pair = getObjectLabel(path);
+    json["label"] = label_pair.first;
+    json["register_file"] = label_pair.second;
     if (lineinfo.isValid())
     {
       json["file_info"][lineinfo.file()] = lineinfo.line();
@@ -375,7 +379,7 @@ JsonSyntaxTree::prettyCppType(const std::string & cpp_type)
   return s;
 }
 
-std::string
+std::pair<std::string, std::string>
 JsonSyntaxTree::getObjectLabel(const std::string & obj) const
 {
   auto paths = splitPath(obj);
@@ -383,15 +387,15 @@ JsonSyntaxTree::getObjectLabel(const std::string & obj) const
   if (it != _object_label_map.end())
     return it->second;
   else
-    return "";
+    return std::make_pair("", "");
 }
 
-std::string
+std::pair<std::string, std::string>
 JsonSyntaxTree::getActionLabel(const std::string & action) const
 {
   auto it = _action_label_map.find(action);
   if (it != _action_label_map.end())
     return it->second;
   else
-    return "";
+    return std::make_pair("", "");
 }

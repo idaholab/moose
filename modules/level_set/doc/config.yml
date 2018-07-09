@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Level Set Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/level_set
+    home: /modules/level_set
 
 Extensions:
     appsyntax:

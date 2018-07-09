@@ -131,7 +131,7 @@ def main(options):
     _init_large_media()
 
     # Create translator
-    translator, config = common.load_config(options.config)
+    translator, _ = common.load_config(options.config)
     translator.init(options.destination)
 
     # Replace "home" with local server
@@ -151,7 +151,7 @@ def main(options):
 
     # Perform check
     if options.check:
-        check(translator, config)
+        check(translator)
 
     # Perform build
     if options.files:

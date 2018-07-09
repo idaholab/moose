@@ -8,6 +8,8 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
+registerMooseObject("XFEMApp", LevelSetBiMaterialStress);
+
 template <>
 InputParameters
 validParams<LevelSetBiMaterialStress>()

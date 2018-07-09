@@ -8,16 +8,11 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import re
 import logging
 import copy
 
 import anytree
 
-import mooseutils
-
-import MooseDocs
-from MooseDocs import common
 from .base import NodeBase, Property
 
 LOG = logging.getLogger(__name__)
@@ -32,8 +27,6 @@ class SyntaxNodeBase(NodeBase):
                   Property('description', ptype=unicode),
                   Property('alias', ptype=unicode)]
 
-    STUB_HEADER = '<!-- MOOSE Documentation Stub: Remove this when content is added. -->'
-
     def __init__(self, *args, **kwargs):
         NodeBase.__init__(self, *args, **kwargs)
         self._groups = set()
@@ -46,9 +39,6 @@ class SyntaxNodeBase(NodeBase):
         out = copy.copy(self._groups)
         for node in self.descendants:
             out.update(node.groups)
-        if 'Moose' in out:
-            out.remove('Moose')
-            out.add('MOOSE')
         return out
 
     @property
@@ -56,9 +46,6 @@ class SyntaxNodeBase(NodeBase):
         """
         Return the node full path.
         """
-        if self.alias:
-            return self.alias
-
         out = []
         node = self
         while node is not None:
@@ -66,14 +53,8 @@ class SyntaxNodeBase(NodeBase):
             node = node.parent
         return '/'.join(reversed(out))
 
-    @property
-    def content(self):
-        """Return the markdown content."""
-        return common.read(self._filename)
-
     def markdown(self):
         """Return the 'required' markdown filename."""
-        #TODO: Make this a property
         raise NotImplementedError()
 
     def findfull(self, name, maxlevel=None):
@@ -81,7 +62,7 @@ class SyntaxNodeBase(NodeBase):
         Search for a node, by full name.
         """
         for node in anytree.PreOrderIter(self, maxlevel=maxlevel):
-            if node.fullpath == name:
+            if (node.fullpath == name) or (node.alias == name):
                 return node
 
     def syntax(self, *args, **kwargs):
@@ -101,115 +82,6 @@ class SyntaxNodeBase(NodeBase):
         Return ActionNode nodes (see __nodeFinder).
         """
         return self.__nodeFinder(ActionNode, *args, **kwargs)
-
-    def check(self, generate=False, groups=None, update=None, locations=None):
-        """
-        Check that the expected documentation exists.
-
-        Return:
-            True, False, or None, where True indicates that the page exists, False indicates the
-            page does not exist or doesn't contain content, and None indicates that the page is
-            hidden.
-        """
-        if self.is_root:
-            return
-
-        if self.removed:
-            LOG.debug("Skipping documentation check for %s, it is REMOVED.", self.fullpath)
-            return
-
-        groups = groups if groups is not None else self.groups
-        for group in groups:
-
-            # Skip if the node is not in the desired groups
-            if group not in self.groups:
-                continue
-
-            # Locate all the possible locations for the markdown
-            filenames = set()
-            for location in locations:
-                install = mooseutils.eval_path(os.path.join(location, 'documentation', 'systems'))
-                if not os.path.isabs(install):
-                    filename = os.path.join(MooseDocs.ROOT_DIR, install, self.markdown())
-                else:
-                    filename = os.path.join(install, self.markdown())
-                filenames.add((filename, os.path.isfile(filename)))
-
-            # Determine the number of files that exist
-            count = sum([x[1] for x in filenames])
-
-            # Class description
-            if isinstance(self, ObjectNode) and not self.description and not self.hidden:
-                msg = "The class description is missing for %s, it can be added using the " \
-                      "'addClassDescription' method from within the objects validParams function."
-                LOG.error(msg, self.fullpath)
-
-            # Error if multiple files exist
-            if count > 1 and not self.hidden:
-                msg = "Multiple markdown files were located for the '{}' syntax:". \
-                      format(self.fullpath)
-                for filename, exists in filenames:
-                    if exists:
-                        msg += '\n  {}'.format(filename)
-                LOG.error(msg)
-
-            # Error if no files exist
-            elif count == 0:
-                if not self.hidden:
-                    msg = "No documentation for %s, documentation for this object should be " \
-                          "created in one of the following locations:"
-                    for filename, _ in filenames:
-                        msg += '\n  {}'.format(filename)
-                    msg += "\nIt is possible to generate stub pages for your documentation " \
-                           "using the './moosedocs.py check --generate' command."
-
-                    LOG.error(msg, self.fullpath)
-
-                if generate:
-                    if not os.path.exists(os.path.dirname(filename)):
-                        os.makedirs(os.path.dirname(filename))
-                    LOG.info('Creating stub page for %s %s', self.fullpath, filename)
-                    with open(filename, 'w') as fid:
-                        content = self._defaultContent()
-                        if not isinstance(content, str):
-                            raise TypeError("The _defaultContent method must return a str.")
-                        fid.write(content)
-            else:
-                for name, exists in filenames:
-                    if exists:
-                        filename = name
-
-                with open(filename, 'r') as fid:
-                    lines = fid.readlines()
-
-                if lines and self.STUB_HEADER in lines[0]:
-                    if not self.hidden:
-                        msg = "A MOOSE generated stub page for %s exists, but no content was " \
-                              "added. Add documentation content to %s."
-                        LOG.error(msg, self.fullpath, filename)
-
-                    if update:
-                        LOG.info("Updating stub page for %s in file %s.", self.fullpath, filename)
-                        with open(filename, 'w') as fid:
-                            content = self._defaultContent()
-                            if not isinstance(content, str):
-                                raise TypeError("The _defaultContent method must return a str.")
-                            fid.write(content)
-
-
-                elif self.hidden and isinstance(self, ObjectNode) and self.description:
-                    msg = "The MOOSE syntax %s is listed has hidden; however, a modified page " \
-                          "exists for the object, please remove the syntax from the list of " \
-                          "hidden list."
-                    LOG.error(msg, self.fullpath)
-
-
-    def _defaultContent(self):
-        """
-        Markdown stub content.
-        """
-        raise NotImplementedError("The _defaultContent method must be defined in child classes "
-                                  "and return a string.")
 
     def __nodeFinder(self, node_type, syntax='', group=None, recursive=False):
         """
@@ -259,6 +131,9 @@ class SyntaxNode(SyntaxNodeBase):
     """
     COLOR = 'LIGHT_GREEN'
 
+    def __init__(self, parent, name, **kwargs):
+        SyntaxNodeBase.__init__(self, parent, name, **kwargs)
+
     def markdown(self):
         """
         Return the expected markdown file name.
@@ -276,19 +151,11 @@ class SyntaxNode(SyntaxNodeBase):
                 parameters.update(action.parameters)
         return parameters
 
-    def _defaultContent(self):
+    def console(self):
         """
-        Markdown stub content.
+        Add source to console dump.
         """
-        stub = self.STUB_HEADER
-        stub += '\n\n\n# {} System\n\n'.format(self.name)
-        stub += '!syntax list {} objects=True actions=False subsystems=False\n\n' \
-                .format(self.fullpath)
-        stub += '!syntax list {} objects=False actions=False subsystems=True\n\n' \
-                .format(self.fullpath)
-        stub += '!syntax list {} objects=False actions=True subsystems=False\n\n' \
-                .format(self.fullpath)
-        return stub
+        return SyntaxNodeBase.console(self) + ' markdown={}'.format(self.markdown())
 
 class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
     """
@@ -302,26 +169,48 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
         if item['parameters']:
             self.parameters = item['parameters']
 
-        self._locateGroupNames(item)
-        if 'tasks' in item:
-            for values in item['tasks'].itervalues():
-                self._locateGroupNames(values)
+        self._groups.add(item['label'])
+        self._source = item['register_file']
+        self._repo = None
+
+        if self._source == '':
+            LOG.critical("MooseDocs requires the %s object to use the registerMooseObject or " \
+                         "registerMooseAction macro within the source (.C) file, this object " \
+                         "is being removed from the available syntax.", self.name)
+            self._source = None
+            self.removed = True
 
     def markdown(self):
         """
         The expected markdown file.
         """
-        return self.fullpath.lstrip('/') + '.md'
+        hdr = self.header()
+        if hdr is not None:
+            idx = hdr.find('/include/') + len('/include/')
+            return hdr[idx:-1] + 'md'
 
-    def _locateGroupNames(self, item):
+    def source(self):
         """
-        Creates a list of groups (i.e., Apps).
+        Return the source file for the object.
         """
-        if 'file_info' in item:
-            for info in item['file_info'].iterkeys():
-                match = re.search(r'/(?P<group>\w+)(?:App|Syntax)\.C', info)
-                if match:
-                    self._groups.add(match.group('group'))
+        return self._source
+
+    def header(self):
+        """
+        Return the header file for the object.
+        """
+        if self._source is not None:
+            header = self._source.replace('/src/', '/include/')[:-1] + 'h'
+            if not os.path.exists(header):
+                LOG.error("%s, no header file found for: %s", self.name, self._source)
+                return None
+            return header
+
+    def console(self):
+        """
+        Add source to console dump.
+        """
+        return SyntaxNodeBase.console(self) + ' markdown={}'.format(self.markdown())
 
 class MooseObjectNode(ObjectNode):
     """
@@ -339,22 +228,6 @@ class MooseObjectNode(ObjectNode):
         Return the name of the C++ class, which can be different than the input file name.
         """
         return self.__class_name
-
-    def _defaultContent(self):
-        """
-        Markdown stub content.
-        """
-        template_filename = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates',
-                                         'moose_object.md.template')
-        with open(template_filename, 'r') as fid:
-            template_content = fid.read()
-
-        template_content = template_content.replace('FullPathCodeClassName',
-                                                    '{}'.format(self.fullpath))
-        template_content = template_content.replace('CodeClassName', '{}'.format(self.name))
-        stub = self.STUB_HEADER + '\n\n'
-        stub += template_content
-        return stub
 
 class ActionNode(ObjectNode):
     """
@@ -378,22 +251,6 @@ class ActionNode(ObjectNode):
         Return the name of the C++ class for the action.
         """
         return self.name
-
-    def _defaultContent(self):
-        """
-        Markdown stub content.
-        """
-        template_filename = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates',
-                                         'action_object.md.template')
-        with open(template_filename, 'r') as fid:
-            template_content = fid.read()
-
-        template_content = template_content.replace('FullPathCodeActionName',
-                                                    '{}'.format(self.fullpath))
-        template_content = template_content.replace('CodeActionName', '{}'.format(self.name))
-        stub = self.STUB_HEADER + '\n\n'
-        stub += template_content
-        return stub
 
 class MooseObjectActionNode(ActionNode):
     """

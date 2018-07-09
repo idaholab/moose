@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Misc Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/misc
+    home: /modules/misc
 
 Extensions:
     appsyntax:

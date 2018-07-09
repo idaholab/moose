@@ -12,8 +12,6 @@
 // Forward declarations
 class LevelSetCutUserObject;
 
-registerMooseObject("XFEMApp", LevelSetCutUserObject);
-
 template <>
 InputParameters validParams<LevelSetCutUserObject>();
 

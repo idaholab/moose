@@ -169,7 +169,7 @@ class FileListingCommand(LocalListingCommand):
 
     def prepareContent(self, content, settings): #pylint: disable=no-self-use
         """
-        Apply the varous filters and adjustment to the supplied text.
+        Apply the various filters and adjustment to the supplied text.
 
         Inputs:
             content[unicode]: The extracted content.
