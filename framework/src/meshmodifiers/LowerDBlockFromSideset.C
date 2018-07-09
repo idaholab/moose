@@ -53,14 +53,31 @@ struct ElemSideDouble
 void
 LowerDBlockFromSideset::modify()
 {
-  // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
 
-  std::set<BoundaryID> sidesets(_sidesets.begin(), _sidesets.end());
+  auto side_list = mesh.get_boundary_info().build_side_list();
+  std::sort(side_list.begin(),
+            side_list.end(),
+            [](std::tuple<dof_id_type, unsigned short int, boundary_id_type> a,
+               std::tuple<dof_id_type, unsigned short int, boundary_id_type> b) {
+              auto a_elem_id = std::get<0>(a);
+              auto b_elem_id = std::get<0>(b);
+              if (a_elem_id == b_elem_id)
+              {
+                auto a_side_id = std::get<1>(a);
+                auto b_side_id = std::get<1>(b);
+                if (a_side_id == b_side_id)
+                  return std::get<2>(a) < std::get<2>(b);
+                else
+                  return a_side_id < b_side_id;
+              }
+              else
+                return a_elem_id < b_elem_id;
+            });
 
+  std::set<BoundaryID> sidesets(_sidesets.begin(), _sidesets.end());
   std::vector<ElemSideDouble> element_sides_on_boundary;
-  for (const auto & triple : mesh.get_boundary_info().build_side_list())
-    // 0 : elem; 1 : side; 2 : bc
+  for (const auto & triple : side_list)
     if (sidesets.count(std::get<2>(triple)))
       element_sides_on_boundary.push_back(
           ElemSideDouble(mesh.elem_ptr(std::get<0>(triple)), std::get<1>(triple)));
@@ -90,6 +107,4 @@ LowerDBlockFromSideset::modify()
   // Assign block name, if provided
   if (isParamValid("new_block_name"))
     mesh.subdomain_name(_new_block_id) = getParam<SubdomainName>("new_block_name");
-
-  mesh.prepare_for_use();
 }
