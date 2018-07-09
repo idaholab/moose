@@ -43,7 +43,8 @@ class TestSyntaxTree(unittest.TestCase):
         root = app_syntax(exe, alias=alias)
 
         node = root.findfull('/VPP/VolumeHistogram')
-        self.assertEqual(node.fullpath, '/VPP/VolumeHistogram')
+        self.assertEqual(node.fullpath, '/VectorPostprocessors/VolumeHistogram')
+        self.assertEqual(node.alias, '/VPP/VolumeHistogram')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -25,8 +25,7 @@ class SyntaxNodeBase(NodeBase):
                   Property('removed', ptype=bool, default=False),
                   Property('parameters', ptype=dict),
                   Property('description', ptype=unicode),
-                  Property('alias', ptype=unicode),
-                  Property('test', ptype=bool, default=False)]
+                  Property('alias', ptype=unicode)]
 
     def __init__(self, *args, **kwargs):
         NodeBase.__init__(self, *args, **kwargs)
@@ -47,9 +46,6 @@ class SyntaxNodeBase(NodeBase):
         """
         Return the node full path.
         """
-        if self.alias:
-            return self.alias
-
         out = []
         node = self
         while node is not None:
@@ -66,7 +62,7 @@ class SyntaxNodeBase(NodeBase):
         Search for a node, by full name.
         """
         for node in anytree.PreOrderIter(self, maxlevel=maxlevel):
-            if node.fullpath == name:
+            if (node.fullpath == name) or (node.alias == name):
                 return node
 
     def syntax(self, *args, **kwargs):
@@ -173,10 +169,16 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
         if item['parameters']:
             self.parameters = item['parameters']
 
-        self.test = item['label'].endswith('TestApp')
         self._groups.add(item['label'])
         self._source = item['register_file']
         self._repo = None
+
+        if self._source == '':
+            LOG.critical("MooseDocs requires the %s object to use the registerMooseObject or " \
+                         "registerMooseAction macro within the source (.C) file, this object " \
+                         "is being removed from the available syntax.", self.name)
+            self._source = None
+            self.removed = True
 
     def markdown(self):
         """
@@ -200,7 +202,7 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
         if self._source is not None:
             header = self._source.replace('/src/', '/include/')[:-1] + 'h'
             if not os.path.exists(header):
-                LOG.error("No header file found for: %s", self._source)
+                LOG.error("%s, no header file found for: %s", self.name, self._source)
                 return None
             return header
 

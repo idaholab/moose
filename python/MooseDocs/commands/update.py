@@ -12,9 +12,10 @@ import logging
 import subprocess
 import anytree
 
-import mooseutils
+import MooseDocs
+from MooseDocs.tree import syntax
+from MooseDocs import common
 
-from MooseDocs.tree import syntax, app_syntax
 
 LOG = logging.getLogger(__name__)
 
@@ -24,36 +25,25 @@ def command_line_options(subparser, parent):
     parser = subparser.add_parser('update',
                                   parents=[parent],
                                   help='Syntax update tool for MooseDocs.')
-    parser.add_argument('--executable', '-e', type=str, default='..',
-                        help="The application executable to utilize for update.")
-    parser.add_argument('--move', action='store_true', help="Move markdown files to new location.")
+    parser.add_argument('--config', default='config.yml', help="The configuration file.")
 
 def main(options):
     """./moosedocs update"""
 
-    # Move files
-    if options.move:
-        _move(options)
-
-def _move(options):
-
     # Load syntax
-    exe = os.path.abspath(os.path.join(os.getcwd(), options.executable))
-    if os.path.isdir(exe):
-        exe = mooseutils.find_moose_executable(exe)
-    LOG.info("Loading application syntax: %s", exe)
-    root = app_syntax(exe)
-
-    if options.move:
-        LOG.info('Moving markdown files:')
-    else:
-        LOG.info('Moving markdown files (dry-run, use --move to perform actual command):')
+    translator, _ = common.load_config(options.config)
+    root = None
+    for ext in translator.extensions:
+        if isinstance(ext, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
+            root = ext.syntax
+            break
 
     for node in anytree.PreOrderIter(root, filter_=lambda n: isinstance(n, syntax.ObjectNode)):
 
         idx = node.source().find('/src/')
         old = os.path.join(node.source()[:idx], 'doc', 'content', 'documentation', 'systems',
                            node.fullpath.lstrip('/') + '.md')
+
         if not os.path.isfile(old):
             continue
 
@@ -70,6 +60,7 @@ def _move(options):
         idx = action.source().find('/src/')
         old = os.path.join(action.source()[:idx], 'doc', 'content', 'documentation', 'systems',
                            os.path.dirname(node.markdown()), 'index.md')
+
         if not os.path.isfile(old):
             continue
 
