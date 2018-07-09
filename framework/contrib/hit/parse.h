@@ -418,13 +418,13 @@ private:
 };
 
 /// parse is *the* function in the hit namespace.  It takes the given hit input text and
-/// parses and builds a hit tree returning the root node.  It throws an exceptions if input
+/// parses and builds a hit tree returning the root node.  It throws an exception if input
 /// contains any invalid hit syntax.  fname is label given as a convenience (and can be any
 /// string) used to prefix any error messages generated during the parsing process.  The caller
 /// accepts ownership of the returned root node and is responsible for destructing it.
 Node * parse(const std::string & fname, const std::string & input);
 
-/// parses the file checking for errors, but don't return any built node tree.
+/// parses the file checking for errors but does not return any node tree.
 inline void
 check(const std::string & fname, const std::string & input)
 {
@@ -440,7 +440,7 @@ check(const std::string & fname, const std::string & input)
 void merge(Node * from, Node * into);
 
 /// explode walks the tree converting/exploding any fields that have path separators into them into
-/// actually sections/subsections/etc. with the final path element as the field name.  For example,
+/// actuall sections/subsections/etc. with the final path element as the field name.  For example,
 /// "foo/bar=42" becomes nodes with the structure "[foo] bar=42 []".  If nodes for sections already
 /// exist in the tree, the fields will be moved into them rather than new sections created.  The
 /// returned node is the root of the exploded tree.

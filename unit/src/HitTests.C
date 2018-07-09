@@ -95,7 +95,11 @@ private:
 
 TEST(HitTests, LineNumbers)
 {
-  LineCase cases[] = {{"[hello] foo='bar'\n\n\n boo='far'\n\n[]", {1, 1, 2, 4, 5, 6}}};
+  // list of expected line numbers for nodes starts at line 1 and skips root and blankline nodes
+  LineCase cases[] = {
+      {"[hello] foo='bar'\n\n\n boo='far'\n\n[]", {1, 1, 4}},
+      {"[hello]\n  foo='bar'\n[]\n[goodbye]\n  boo=42\n[]", {1, 2, 4, 5}},
+      {"[hello]\n\n # comment\n foo='bar' 'baz' # another comment\n\nboo=42[]", {1, 3, 4, 4, 6}}};
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(LineCase); i++)
   {
