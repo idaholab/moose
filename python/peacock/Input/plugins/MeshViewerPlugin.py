@@ -35,7 +35,7 @@ class MeshViewerPlugin(VTKWindowPlugin):
     def __init__(self, **kwargs):
         super(MeshViewerPlugin, self).__init__(colorbar=False, **kwargs)
         self.temp_input_file = "peacock_run_mesh_tmp.i"
-        self.temp_mesh_file = "peacock_run_mesh_tmp.e"
+        self.temp_mesh_file = "peacock_run_mesh_tmp_{}.e"
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
         self._use_test_objects = True
         self.setMainLayoutName('WindowLayout')
@@ -109,7 +109,10 @@ class MeshViewerPlugin(VTKWindowPlugin):
 
         exe_path = tree.app_info.path
         self._removeFileNoError(self.current_temp_mesh_file)
-        self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
+        input_filename = "unset"
+        if tree.input_filename:
+            input_filename = os.path.basename(os.path.splitext(tree.input_filename)[0])
+        self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file.format(input_filename))
         input_file = os.path.abspath(self.temp_input_file)
         self._removeFileNoError(self.current_temp_mesh_file)
         self._removeFileNoError(input_file)
