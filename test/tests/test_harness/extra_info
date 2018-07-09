@@ -24,5 +24,9 @@
     asio = true
     boost = true
     fparser_jit = true
+    chaco = true
+    parmetis = true
+    party = true
+    ptscotch = true
   [../]
 []
