@@ -33,7 +33,7 @@ class TestSyntaxTree(unittest.TestCase):
         root = app_syntax(exe)
         node = root.findfull('/UserObjects/TestDistributionPostprocessor')
         self.assertTrue(node.removed)
-        self.assertIn('MiscTest', root.groups)
+        self.assertIn('MiscTestApp', root.groups)
 
     def testAlias(self):
         location = os.path.join(MooseDocs.MOOSE_DIR, 'test')
@@ -43,7 +43,8 @@ class TestSyntaxTree(unittest.TestCase):
         root = app_syntax(exe, alias=alias)
 
         node = root.findfull('/VPP/VolumeHistogram')
-        self.assertEqual(node.fullpath, '/VPP/VolumeHistogram')
+        self.assertEqual(node.fullpath, '/VectorPostprocessors/VolumeHistogram')
+        self.assertEqual(node.alias, '/VPP/VolumeHistogram')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

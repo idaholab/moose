@@ -119,7 +119,10 @@ class Renderer(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObj
             box = mooseutils.colorText(MooseDocs.common.box(token.info[0],
                                                             line=token.info.line,
                                                             width=100), 'LIGHT_CYAN')
-            trace = mooseutils.colorText(traceback.format_exc(), 'GREY')
+            if MooseDocs.LOG_LEVEL == logging.DEBUG:
+                trace = mooseutils.colorText(traceback.format_exc(), 'GREY')
+            else:
+                trace = ''
             msg = u'\n{}\n{}{}\n{}\n'.format(title, filename, box, trace)
             LOG.error(msg)
 

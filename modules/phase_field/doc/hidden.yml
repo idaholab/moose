@@ -30,7 +30,6 @@
 - /ICs/ClosePackIC
 - /ICs/CrossIC
 - /ICs/LatticeSmoothCircleIC
-- /ICs/MultiBoundingBoxIC
 - /ICs/MultiSmoothCircleIC
 - /ICs/MultiSmoothSuperellipsoidIC
 - /ICs/PFCFreezingIC
@@ -142,13 +141,13 @@
 - /Modules/PhaseField/GrainGrowth
 - /Modules/PhaseField/GrainGrowth/GrainGrowthAction
 - /Modules/PhaseField/Nonconserved
+- /Modules/PhaseField/GrandPotential
 - /Postprocessors/AverageGrainVolume
 - /Postprocessors/FauxGrainTracker
 - /Postprocessors/FeatureVolumeFraction
 - /Postprocessors/GrainBoundaryArea
 - /Postprocessors/GrainTrackerElasticity
 - /Postprocessors/PFCElementEnergyIntegral
-- /Postprocessors/FeatureFloodCount
 - /UserObjects/ComputeExternalGrainForceAndTorque
 - /UserObjects/ComputeGrainForceAndTorque
 - /UserObjects/ConstantGrainForceAndTorque
@@ -166,6 +165,5 @@
 - /Variables/PolycrystalVariables
 - /Variables/PolycrystalVariables/PolycrystalVariablesAction
 - /VectorPostprocessors/EulerAngleUpdaterCheck
-- /VectorPostprocessors/FeatureVolumeVectorPostprocessor
 - /VectorPostprocessors/GrainForcesPostprocessor
 - /VectorPostprocessors/GrainTextureVectorPostprocessor

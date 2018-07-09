@@ -6,7 +6,7 @@
 
     requirement = 'The NumNodes Postprocessor shall report the number of nodes
                    (replicated or distributed) in the simulation.'
-    design = 'Postprocessors/NumNodes.md'
+    design = '/NumNodes.md'
     issues = '#2094'
   [../]
 
@@ -22,7 +22,7 @@
 
     requirement = 'The NumNodes Postprocessor shall report the number of nodes
                    in the simulation when using distributed (pre-split) mesh.'
-    design = 'Postprocessors/NumNodes.md'
+    design = '/NumNodes.md'
     issues = '#2094 #8421'
   [../]
 []

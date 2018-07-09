@@ -6,7 +6,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Stochastic Tools Module
     repo: https://github.com/idaholab/moose
-    home: /documentation/modules/stochastic_tools
+    home: /modules/stochastic_tools
 
 Extensions:
     appsyntax:

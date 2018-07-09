@@ -71,7 +71,6 @@ class AppSyntaxExtension(command.CommandExtension):
                              "Parameter groups to show as un-collapsed.")
         config['alias'] = (None, "List of Dictionary of lists of syntax aliases.")
         config['allow-test-objects'] = (False, "Enable the test objects.")
-
         return config
 
     def __init__(self, *args, **kwargs):
@@ -107,15 +106,11 @@ class AppSyntaxExtension(command.CommandExtension):
         # Cache the syntax entries, search the tree is very slow
         if self._app_syntax:
             self._cache = dict()
-            self._object_cache = dict()
-            self._syntax_cache = dict()
             for node in anytree.PreOrderIter(self._app_syntax):
                 if not node.removed:
                     self._cache[node.fullpath] = node
-                    if isinstance(node, syntax.ObjectNode):
-                        self._object_cache[node.fullpath] = node
-                    elif isinstance(node, syntax.SyntaxNode):
-                        self._syntax_cache[node.fullpath] = node
+                    if node.alias:
+                        self._cache[node.alias] = node
 
     @property
     def syntax(self):
@@ -129,12 +124,8 @@ class AppSyntaxExtension(command.CommandExtension):
     def apptype(self):
         return self._app_type
 
-    def find(self, name, node_type=None, exc=exceptions.TokenizeException):
+    def find(self, name, exc=exceptions.TokenizeException):
         try:
-            if node_type == syntax.ObjectNode:
-                return self._object_cache[name]
-            elif node_type == syntax.SyntaxNode:
-                return self._syntax_cache[name]
             return self._cache[name]
         except KeyError:
             msg = "'{}' syntax was not recognized."
@@ -179,7 +170,7 @@ class SyntaxCommandBase(command.CommandComponent):
                 self.settings['syntax'] = args[0]
 
         if self.settings['syntax']:
-            obj = self.extension.find(self.settings['syntax'], self.NODE_TYPE)
+            obj = self.extension.find(self.settings['syntax'])
         else:
             obj = self.extension.syntax
 
@@ -248,7 +239,6 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
 
 class SyntaxDescriptionCommand(SyntaxCommandBase):
     SUBCOMMAND = 'description'
-    NODE_TYPE = syntax.ObjectNode
 
     def createTokenFromSyntax(self, info, parent, obj):
 
@@ -269,7 +259,6 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
 
 class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
     SUBCOMMAND = 'children'
-    NODE_TYPE = syntax.ObjectNode
 
     @staticmethod
     def defaultSettings():
@@ -303,7 +292,6 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
 
 class SyntaxInputsCommand(SyntaxChildrenCommand):
     SUBCOMMAND = 'inputs'
-    NODE_TYPE = syntax.ObjectNode
 
     @staticmethod
     def defaultSettings():
@@ -314,7 +302,6 @@ class SyntaxInputsCommand(SyntaxChildrenCommand):
 
 class SyntaxListCommand(SyntaxCommandBase):
     SUBCOMMAND = 'list'
-    NODE_TYPE = syntax.SyntaxNode
 
     @staticmethod
     def defaultSettings():
@@ -337,45 +324,45 @@ class SyntaxListCommand(SyntaxCommandBase):
 
 class SyntaxCompleteCommand(SyntaxCommandBase):
     SUBCOMMAND = 'complete'
-    NODE_TYPE = syntax.SyntaxNode
 
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandBase.defaultSettings()
         settings['group'] = (None, "The group (app) to limit the complete syntax list.")
         settings['actions'] = (True, "Include a list of Action objects in syntax.")
+        settings['objects'] = (True, "Include a list of MooseObject objects in syntax.")
+        settings['subsystems'] = (True, "Include a list of sub system syntax in the output.")
         settings['level'] = (2, "Beginning heading level.")
         return settings
 
-    def _addList(self, parent, obj, actions, group, level):
+    def _addList(self, parent, obj, level):
 
-        for child in obj.syntax(group=group):
+        groups = [self.settings['group']] if self.settings['group'] else []
+        for child in obj.syntax(group=self.settings['group']):
             if child.removed:
                 continue
 
             h = tokens.Heading(parent, level=level, string=unicode(child.fullpath.strip('/')))
 
             # TODO: systems prefix is needed to be unique, there must be a better way
-            url = os.path.join('systems', child.markdown())
+            url = os.path.join('syntax', child.markdown())
+
             a = autolink.AutoLink(h, url=url)
             materialicon.IconToken(a, icon=u'input', style="padding-left:10px;")
 
             SyntaxToken(parent,
                         syntax=child,
-                        actions=actions,
-                        objects=True,
-                        subsystems=False,
-                        groups=[group] if group else [],
+                        actions=self.settings['actions'],
+                        objects=self.settings['objects'],
+                        subsystems=self.settings['subsystems'],
+                        groups=groups,
                         level=level)
-            self._addList(parent, child, actions, group, level + 1)
+            self._addList(parent, child, level + 1)
 
 
     def createTokenFromSyntax(self, info, parent, obj):
 
-        self._addList(parent, obj,
-                      self.settings['actions'],
-                      self.settings['group'],
-                      int(self.settings['level']))
+        self._addList(parent, obj, int(self.settings['level']))
         return parent
 
 
@@ -434,6 +421,7 @@ class RenderSyntaxToken(components.RenderComponent):
         errors = []
 
         for obj in items:
+
             if obj.removed:
                 continue
 
@@ -443,7 +431,11 @@ class RenderSyntaxToken(components.RenderComponent):
             #TODO: need to figure out how to get rid of 'systems' prefix:
             #  /Executioner/Adaptivity/index.md
             #  /Adaptivity/index.md
-            nodes = root_page.findall(os.path.join('systems', obj.markdown()), exc=None)
+            if isinstance(obj, syntax.SyntaxNode):
+                nodes = root_page.findall(os.path.join('syntax', obj.markdown()), exc=None)
+            else:
+                nodes = root_page.findall(obj.markdown(), exc=None)
+
             if len(nodes) > 1:
                 msg = "Located multiple pages with the given filename:"
                 for n in nodes:
