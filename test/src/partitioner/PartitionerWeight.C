@@ -15,14 +15,15 @@ template <>
 InputParameters
 validParams<PartitionerWeight>()
 {
-  InputParameters params = validParams<PetscMatPartitioner>();
+  InputParameters params = validParams<PetscExternalPartitioner>();
 
   params.addClassDescription("Partition mesh using the weighted graph");
 
   return params;
 }
 
-PartitionerWeight::PartitionerWeight(const InputParameters & params) : PetscMatPartitioner(params)
+PartitionerWeight::PartitionerWeight(const InputParameters & params)
+  : PetscExternalPartitioner(params)
 {
 }
 

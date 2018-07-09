@@ -4,7 +4,7 @@
   nx = 10
   ny = 10
   [Partitioner]
-    type = PetscMatPartitioner
+    type = PetscExternalPartitioner
     part_package = ptscotch
   []
   parallel_type = distributed

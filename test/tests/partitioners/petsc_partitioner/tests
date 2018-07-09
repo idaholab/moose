@@ -2,7 +2,7 @@
   [./ptscotch]
     requirement = 'Make MOOSE support ptscotch via PETSc'
     issues = '#11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_ptscotch_out.e'
@@ -15,7 +15,7 @@
   [./ptscotch_weight_elment]
     requirement = 'ptscotch shall support element-weighted graphs for balancing workload'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_ptscotch_weight_element_out.e'
@@ -30,7 +30,7 @@
   [./ptscotch_weight_side]
     requirement = 'ptscotch shall support side-weighted graphs for minimizing communication'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_ptscotch_weight_side_out.e'
@@ -44,7 +44,7 @@
   [./ptscotch_weight_both]
     requirement = 'ptscotch shall take both side weights and element weights into consideration'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_ptscotch_weight_both_out.e'
@@ -58,7 +58,7 @@
   [./parmetis]
     requirement = 'Make MOOSE support parmetis via PETSc'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_parmetis_out.e'
@@ -71,7 +71,7 @@
   [./parmetis_weight_element]
     requirement = 'Parmetis shall support element-weighted graphs for balancing workload'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_parmetis_weight_element_out.e'
@@ -85,7 +85,7 @@
   [./parmetis_weight_side]
     requirement = 'Parmetis shall support side-weighted graphs for minimizing communication'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_parmetis_weight_side_out.e'
@@ -99,7 +99,7 @@
   [./parmetis_weight_both]
     requirement = 'Parmetis shall take side weights and element weights into consideration'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_parmetis_weight_both_out.e'
@@ -113,7 +113,7 @@
   [./chaco]
     requirement = 'MOOSE shall support a serial partitioner Chaco'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_chaco_out.e'
@@ -131,7 +131,7 @@
   [./party]
     requirement = 'MOOSE shall support a serial partitioner party'
     issues = '##11628'
-    design = '/PetscMatPartitioner.md'
+    design = '/PetscExternalPartitioner.md'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_party_out.e'

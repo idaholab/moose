@@ -1,4 +1,4 @@
-# PetscMatPartitioner
+# PetscExternalPartitioner
 
 Allow users to use several external partitioning packages (parmetis, chaco, ptscotch and party) via PETSc.
 
@@ -23,7 +23,7 @@ The party package aims at providing a recursive partitioning laboratory assembli
 
 ## Use
 
-These packages can be accessed via an unified interface in MOOSE, `PetscMatPartitioner`. The use of the packages is accomplished by adding a subblock in `Mesh` block of input file.  For example
+These packages can be accessed via an unified interface in MOOSE, `PetscExternalPartitioner`. The use of the packages is accomplished by adding a subblock in `Mesh` block of input file.  For example
 
 ```
 [Mesh]
@@ -32,8 +32,8 @@ These packages can be accessed via an unified interface in MOOSE, `PetscMatParti
   nx = 10
   ny = 10
   [Partitioner]
-    # You need to use PetscMatPartitioner to gain an access to these external packages
-    type = PetscMatPartitioner
+    # You need to use PetscExternalPartitioner to gain an access to these external packages
+    type = PetscExternalPartitioner
     # specify which package you want to use
     # you could choose one of {Chaco, Party, PTScotch, ParMETIS}
     part_package = ptscotch

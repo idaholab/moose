@@ -12,7 +12,7 @@
 
 // MOOSE includes
 #include "MooseEnum.h"
-#include "PetscMatPartitioner.h"
+#include "PetscExternalPartitioner.h"
 
 class PartitionerWeight;
 class MooseMesh;
@@ -23,7 +23,7 @@ InputParameters validParams<PartitionerWeight>();
 /**
  * Partitions a mesh based on a weighted graph
  */
-class PartitionerWeight : public PetscMatPartitioner
+class PartitionerWeight : public PetscExternalPartitioner
 {
 public:
   PartitionerWeight(const InputParameters & params);

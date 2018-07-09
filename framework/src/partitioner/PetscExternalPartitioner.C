@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PetscMatPartitioner.h"
+#include "PetscExternalPartitioner.h"
 
 #include "GeneratedMesh.h"
 #include "MooseApp.h"
 
 #include "libmesh/mesh_tools.h"
 
-registerMooseObject("MooseApp", PetscMatPartitioner);
+registerMooseObject("MooseApp", PetscExternalPartitioner);
 
 #include <memory>
 
 template <>
 InputParameters
-validParams<PetscMatPartitioner>()
+validParams<PetscExternalPartitioner>()
 {
   InputParameters params = validParams<MoosePartitioner>();
 
@@ -43,7 +43,7 @@ validParams<PetscMatPartitioner>()
   return params;
 }
 
-PetscMatPartitioner::PetscMatPartitioner(const InputParameters & params)
+PetscExternalPartitioner::PetscExternalPartitioner(const InputParameters & params)
   : MoosePartitioner(params),
     _part_package(params.get<MooseEnum>("part_package")),
     _apply_element_weight(params.get<bool>("apply_element_weight")),
@@ -55,13 +55,13 @@ PetscMatPartitioner::PetscMatPartitioner(const InputParameters & params)
 }
 
 std::unique_ptr<Partitioner>
-PetscMatPartitioner::clone() const
+PetscExternalPartitioner::clone() const
 {
-  return libmesh_make_unique<PetscMatPartitioner>(_pars);
+  return libmesh_make_unique<PetscExternalPartitioner>(_pars);
 }
 
 void
-PetscMatPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
+PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // construct a dual graph
@@ -172,13 +172,13 @@ PetscMatPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
 }
 
 dof_id_type
-PetscMatPartitioner::computeElementWeight(Elem & /*elem*/)
+PetscExternalPartitioner::computeElementWeight(Elem & /*elem*/)
 {
   return 1;
 }
 
 dof_id_type
-PetscMatPartitioner::computeSideWeight(Elem & /*elem*/, Elem & /*side*/)
+PetscExternalPartitioner::computeSideWeight(Elem & /*elem*/, Elem & /*side*/)
 {
   return 1;
 }

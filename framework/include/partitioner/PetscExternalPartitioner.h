@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PETSCMATPARTITIONER_H
-#define PETSCMATPARTITIONER_H
+#ifndef PETSCEXTERNALPARTITIONER_H
+#define PETSCEXTERNALPARTITIONER_H
 
 // MOOSE includes
 #include "MooseEnum.h"
 #include "MoosePartitioner.h"
 
-class PetscMatPartitioner;
+class PetscExternalPartitioner;
 class MooseMesh;
 
 template <>
-InputParameters validParams<PetscMatPartitioner>();
+InputParameters validParams<PetscExternalPartitioner>();
 
 /**
  * Partitions a mesh using a regular grid.
  */
-class PetscMatPartitioner : public MoosePartitioner
+class PetscExternalPartitioner : public MoosePartitioner
 {
 public:
-  PetscMatPartitioner(const InputParameters & params);
+  PetscExternalPartitioner(const InputParameters & params);
 
   virtual std::unique_ptr<Partitioner> clone() const override;
 
@@ -43,4 +43,4 @@ private:
   bool _apply_side_weight;
 };
 
-#endif /* PETSCMATPARTITIONER_H */
+#endif /* PETSCEXTERNALPARTITIONER_H */
