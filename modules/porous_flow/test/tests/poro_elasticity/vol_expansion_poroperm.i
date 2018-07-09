@@ -214,6 +214,7 @@
   [../]
   [./porosity]
     type = PorousFlowPorosity
+    at_nodes = false
     fluid = true
     mechanical = true
     porosity_zero = 0.1

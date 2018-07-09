@@ -68,6 +68,7 @@
   [../]
   [./temperature_qp]
     type = PorousFlowTemperature
+    at_nodes = false
   [../]
   [./ppss_nodal]
     type = PorousFlow1PhaseP
@@ -77,6 +78,7 @@
   [../]
   [./ppss_qp]
     type = PorousFlow1PhaseP
+    at_nodes = false
     porepressure = pp
     capillary_pressure = pc
   [../]

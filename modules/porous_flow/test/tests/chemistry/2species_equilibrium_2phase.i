@@ -170,36 +170,14 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
   [../]
   [./ppss]
     type = PorousFlow2PhasePS
-    at_nodes = true
     capillary_pressure = pc
     phase0_porepressure = pressure0
     phase1_saturation = saturation1
   [../]
-  [./ppss_qp]
-    type = PorousFlow2PhasePS
-    capillary_pressure = pc
-    phase0_porepressure = pressure0
-    phase1_saturation = saturation1
-  [../]
-  [./massfrac_nodes]
-    type = PorousFlowMassFractionAqueousEquilibriumChemistry
-    mass_fraction_vars = 'a_in_phase0 b_in_phase0 a b'
-    num_reactions = 2
-    equilibrium_constants = 'eqm_k0 eqm_k1'
-    primary_activity_coefficients = '1 1'
-    secondary_activity_coefficients = '1 1'
-    reactions = '2 0
-                 1 1'
-    at_nodes = true
-  [../]
-  [./massfrac_qp]
+  [./massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'a_in_phase0 b_in_phase0 a b'
     num_reactions = 2
@@ -213,30 +191,13 @@
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
   [../]
   [./simple_fluid1]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 1
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp0]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-  [../]
-  [./simple_fluid_qp1]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 1
   [../]
   [./porosity]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = 0.8
-  [../]
-  [./porosity_qp]
     type = PorousFlowPorosityConst
     porosity = 0.8
   [../]
@@ -245,22 +206,12 @@
     # porous_flow permeability / porous_flow viscosity = chemical_reactions conductivity = 1E-4
     permeability = '1E-7 0 0 0 1E-7 0 0 0 1E-7'
   [../]
-  [./relp0_qp]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 0
-  [../]
-  [./relp1_qp]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 1
-  [../]
   [./relp0]
     type = PorousFlowRelativePermeabilityConst
-    at_nodes = true
     phase = 0
   [../]
   [./relp1]
     type = PorousFlowRelativePermeabilityConst
-    at_nodes = true
     phase = 1
   [../]
   [./diff]

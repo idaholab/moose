@@ -157,6 +157,7 @@
   [../]
   [./temperature_qp]
     type = PorousFlowTemperature
+    at_nodes = false
     temperature = temp
   [../]
   [./ppss_nodal]

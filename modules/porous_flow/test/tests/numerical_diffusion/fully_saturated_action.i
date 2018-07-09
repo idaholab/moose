@@ -88,14 +88,9 @@
 []
 
 [Materials]
-  [./porosity_qp]
-    type = PorousFlowPorosity
-    porosity_zero = 0.1
-  [../]
   [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-    at_nodes = true
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
@@ -145,4 +140,3 @@
   csv = true
   execute_on = final
 []
-

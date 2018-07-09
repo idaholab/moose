@@ -237,10 +237,6 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -258,10 +254,6 @@
   [./eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
   [../]
-  [./eff_fluid_pressure_nodal]
-    type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
-  [../]
   [./vol_strain]
     type = PorousFlowVolumetricStrain
   [../]
@@ -270,30 +262,16 @@
     porepressure = porepressure
     capillary_pressure = pc
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    at_nodes = true
-    porepressure = porepressure
-    capillary_pressure = pc
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
   [../]
   [./porosity]
     type = PorousFlowPorosityHMBiotModulus
-    at_nodes = true
     porosity_zero = 0.1
     biot_coefficient = 0.3
     solid_bulk = 2
@@ -306,7 +284,6 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 0 # unimportant in this fully-saturated situation
     phase = 0
   [../]

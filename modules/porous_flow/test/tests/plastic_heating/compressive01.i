@@ -88,12 +88,10 @@
   [../]
   [./temp]
     type = PorousFlowTemperature
-    at_nodes = true
     temperature = temperature
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.2
   [../]
   [./phe]

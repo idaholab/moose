@@ -47,14 +47,17 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = false
     temperature = temp
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
+    at_nodes = false
     porepressure = pp
   [../]
   [./brine]
     type = PorousFlowBrine
+    at_nodes = false
     temperature_unit = Celsius
     xnacl = 0.1047
     phase = 0

@@ -72,6 +72,7 @@
   [../]
   [./ppss_qp]
     type = PorousFlow1PhaseP
+    at_nodes = false
     porepressure = pp
     capillary_pressure = pc
   [../]
@@ -81,14 +82,13 @@
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
+    at_nodes = true
     fp = simple_fluid
     phase = 0
-    at_nodes = true
     compute_enthalpy = false
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.1
   [../]
   [./relperm]

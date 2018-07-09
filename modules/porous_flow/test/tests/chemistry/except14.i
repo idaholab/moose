@@ -73,6 +73,7 @@
   [../]
   [./predis]
     type = PorousFlowAqueousPreDisChemistry
+    at_nodes = false
     primary_concentrations = 'a b'
     num_reactions = 1
     equilibrium_constants = eqm_k
@@ -85,6 +86,7 @@
   [../]
   [./mineral]
     type = PorousFlowAqueousPreDisMineral
+    at_nodes = false
     initial_concentrations = 'ini_conc_0 ini_conc_0'
   [../]
   [./porosity_qp]
