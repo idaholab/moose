@@ -102,9 +102,13 @@ Lexer::rewind()
 {
   if (!peek()) // don't do anything if we are at EOF
     return;
+
   auto tmp = lastToken();
+  if (tmp >= _start)
+    return;
+
   // subtract newlines that may have been ignored
-  _line_count -= lineCount(_input.substr(tmp, _start));
+  _line_count -= lineCount(_input.substr(tmp, _start - tmp));
   _pos = tmp;
   if (_pos < _start)
     _start = _pos;
@@ -354,6 +358,8 @@ lexString(Lexer * l)
     quote = "\"";
   else if (l->peek() == '\'')
     quote = "'";
+  else
+    return l->error("the parser is horribly broken");
 
   // this is a loop in order to enable consecutive string literals to be parsed
   while (l->accept(quote))
