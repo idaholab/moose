@@ -64,6 +64,16 @@
     max_time = 500
   [../]
 
+  [./test_remapping_serial]
+    type = 'CSVDiff'
+    input = 'grain_tracker_remapping_test.i'
+    csvdiff = 'grain_tracker_remapping_test_out.csv'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+    petsc_version = '>=3.5.0'
+  [../]
+
   [./test_remapping_parallel]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
@@ -72,6 +82,9 @@
     valgrind = 'HEAVY'
     # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
     petsc_version = '>=3.5.0'
+    prereq = 'test_remapping_serial'
+
+    min_parallel = 8 # Test distributed merge work with grain tracker
   [../]
 
   [./remapping_with_reserve]

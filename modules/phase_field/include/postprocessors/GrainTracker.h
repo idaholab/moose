@@ -210,6 +210,11 @@ protected:
   const PolycrystalUserObjectBase * _poly_ic_uo;
 
   /**
+   * Verbosity level controlling the amount of information printed to the console.
+   */
+  const short _verbosity_level;
+
+  /**
    * Boolean to indicate the first time this object executes.
    * Note: _tracking_step isn't enough if people skip initial or execute more than once per step.
    */
@@ -220,7 +225,7 @@ protected:
    * This is for simulations where new grains are not expected. Note, this does not impact
    * the initial callback to newGrainCreated() nor does it get triggered for splitting grains.
    */
-  bool _error_on_grain_creation;
+  const bool _error_on_grain_creation;
 
 private:
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)

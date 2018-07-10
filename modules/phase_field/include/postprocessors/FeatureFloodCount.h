@@ -178,6 +178,16 @@ public:
      */
     bool mergeable(const FeatureData & rhs) const;
 
+    /**
+     * This routine indicates whether two features can be consolidated, that is, one feature is
+     * reasonably expected to be part of another. This is different than mergable in that a portion
+     * of the feature is expected to be completely identical. This happens in the distributed work
+     * scenario when a feature that is partially owned by a processor is merged on a different
+     * processor (where local entities are not sent or available). However, later that feature
+     * ends back up on the original processor and just needs to be consolidated.
+     */
+    bool canConsolidate(const FeatureData & rhs) const;
+
     ///@{
     /**
      * Determine if one of this FeaturesData's member sets intersects
@@ -199,6 +209,11 @@ public:
      * in an inconsistent state.
      */
     void merge(FeatureData && rhs);
+
+    /**
+     * Consolidates features, i.e. merges local entities but leaves everything else untouched.
+     */
+    void consolidate(FeatureData && rhs);
 
     // TODO: Doco
     void clear();
@@ -354,8 +369,8 @@ protected:
   /**
    * This method takes all of the partial features and expands the local, ghosted, and halo sets
    * around those regions to account for the diffuse interface. Rather than using any kind of
-   * recursion here, we simply expand the region by all "point" neighbors from the actual
-   * grain cells since all point neighbors will contain contributions to the region.
+   * recursion here, we simply expand the region by all "point" neighbors from the actual grain
+   * cells since all point neighbors will contain contributions to the region.
    */
   void expandPointHalos();
 
@@ -404,20 +419,26 @@ protected:
    *
    * _feature_sets layout:
    * The outer vector is sized to one when _single_map_mode == true, otherwise it is sized for the
-   * number of coupled variables. The inner list represents the flooded regions (local only
-   * after this call but fully populated after parallel communication and stitching).
+   * number of coupled variables. The inner list represents the flooded regions (local only after
+   * this call but fully populated after parallel communication and stitching).
    */
   void prepareDataForTransfer();
 
-  ///@{
   /**
-   * These routines packs/unpack the _feature_map data into a structure suitable for parallel
-   * communication operations. See the comments in these routines for the exact
-   * data structure layout.
+   * This routines packs the _partial_feature_sets data into a structure suitable for parallel
+   * communication operations.
    */
-  void serialize(std::string & serialized_buffer);
-  void deserialize(std::vector<std::string> & serialized_buffers);
-  ///@}
+  void serialize(std::string & serialized_buffer, unsigned int var_num = invalid_id);
+
+  /**
+   * This routine takes the vector of byte buffers (one for each processor), deserializes them
+   * into a series of FeatureSet objects, and appends them to the _feature_sets data structure.
+   *
+   * Note: It is assumed that local processor information may already be stored in the _feature_sets
+   * data structure so it is not cleared before insertion.
+   */
+  void deserialize(std::vector<std::string> & serialized_buffers,
+                   unsigned int var_num = invalid_id);
 
   /**
    * This routine is called on the master rank only and stitches together the partial
@@ -599,15 +620,16 @@ protected:
   unsigned int _feature_count;
 
   /**
-   * The data structure used to hold partial and communicated feature data.
-   * The data structure mirrors that found in _feature_sets, but contains
-   * one additional vector indexed by processor id
+   * The data structure used to hold partial and communicated feature data, during the discovery and
+   * merging phases. The outer vector is indexed by map number (often variable number). The inner
+   * list is an unordered list of partially discovered features.
    */
   std::vector<std::list<FeatureData>> _partial_feature_sets;
 
   /**
-   * The data structure used to hold the globally unique features. The outer vector
-   * is indexed by variable number, the inner vector is indexed by feature number
+   * The data structure used to hold the globally unique features. The sorting of the vector is
+   * implementation defined and may not correspond to anything useful. The ID of each feature should
+   * be queried from the FeatureData objects.
    */
   std::vector<FeatureData> _feature_sets;
 
@@ -656,15 +678,26 @@ protected:
   std::vector<unsigned int> _empty_var_to_features;
 
   /// Determines if the flood counter is elements or not (nodes)
-  bool _is_elemental;
-
-  /// Convenience variable for testing master rank
-  bool _is_master;
+  const bool _is_elemental;
 
   /// Indicates that this object should only run on one or more boundaries
   bool _is_boundary_restricted;
 
+  /// Boundary element range pointer (used when boundary restricting this object
   ConstBndElemRange * _bnd_elem_range;
+
+  /// Convenience variable for testing master rank
+  const bool _is_master;
+
+private:
+  /**
+   * This method consolidates all of the merged information from _partial_feature_sets into
+   * the _feature_sets vectors.
+   */
+  void consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data = nullptr);
+
+  /// Keeps track of whether we are distributing the merge work
+  const bool _distribute_merge_work;
 };
 
 template <>
