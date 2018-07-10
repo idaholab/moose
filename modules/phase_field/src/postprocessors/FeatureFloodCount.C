@@ -102,6 +102,8 @@ InputParameters
 validParams<FeatureFloodCount>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+  params += validParams<BoundaryRestrictable>();
+
   params.addRequiredCoupledVar(
       "variable",
       "The variable(s) for which to find connected regions of interests, i.e. \"features\".");
@@ -165,6 +167,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
+    BoundaryRestrictable(this, false),
     _fe_vars(getCoupledMooseVars()),
     _vars(getCoupledStandardMooseVars()),
     _threshold(getParam<Real>("threshold")),
@@ -193,12 +196,15 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
                                : _real_zero),
     _halo_ids(_maps_size),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
-    _is_master(processor_id() == 0)
+    _is_master(processor_id() == 0),
+    _bnd_elem_range(nullptr)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
 
   addMooseVariableDependency(_fe_vars);
+
+  _is_boundary_restricted = boundaryRestricted();
 }
 
 FeatureFloodCount::~FeatureFloodCount() {}
@@ -287,23 +293,49 @@ FeatureFloodCount::meshChanged()
 void
 FeatureFloodCount::execute()
 {
-  for (const auto & current_elem : _mesh.getMesh().active_local_element_ptr_range())
+  // Iterate only over boundaries if restricted
+  if (_is_boundary_restricted)
   {
-    // Loop over elements or nodes
-    if (_is_elemental)
-    {
-      for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
-        flood(current_elem, var_num, nullptr /* Designates inactive feature */);
-    }
-    else
-    {
-      auto n_nodes = current_elem->n_vertices();
-      for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
-      {
-        const Node * current_node = current_elem->get_node(i);
+    mooseInfo("Using EXPERIMENTAL boundary restricted FeatureFloodCount object!\n");
 
+    // Set the boundary range pointer for use during flooding
+    _bnd_elem_range = _mesh.getBoundaryElementRange();
+
+    auto rank = processor_id();
+
+    for (const auto & belem : *_bnd_elem_range)
+    {
+      const Elem * elem = belem->_elem;
+      BoundaryID boundary_id = belem->_bnd_id;
+
+      if (elem->processor_id() == rank)
+      {
+        if (hasBoundary(boundary_id))
+          for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+            flood(elem, var_num, nullptr /* Designates inactive feature */);
+      }
+    }
+  }
+  else // Normal volumetric operation
+  {
+    for (const auto & current_elem : _mesh.getMesh().active_local_element_ptr_range())
+    {
+      // Loop over elements or nodes
+      if (_is_elemental)
+      {
         for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
-          flood(current_node, var_num, nullptr /* Designates inactive feature */);
+          flood(current_elem, var_num, nullptr /* Designates inactive feature */);
+      }
+      else
+      {
+        auto n_nodes = current_elem->n_vertices();
+        for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
+        {
+          const Node * current_node = current_elem->get_node(i);
+
+          for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+            flood(current_node, var_num, nullptr /* Designates inactive feature */);
+        }
       }
     }
   }
@@ -1356,7 +1388,7 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
   // Loop over all active element neighbors
   for (const auto neighbor : neighbor_entities)
   {
-    if (neighbor)
+    if (neighbor && (!_is_boundary_restricted || isBoundaryEntity(neighbor)))
     {
       if (expand_halos_only)
       {
@@ -1437,6 +1469,21 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
       }
     }
   }
+}
+
+template <typename T>
+bool
+FeatureFloodCount::isBoundaryEntity(const T * entity) const
+{
+  mooseAssert(_bnd_elem_range, "Boundary Element Range is nullptr");
+
+  if (entity)
+    for (const auto & belem : *_bnd_elem_range)
+      // Only works for Elements
+      if (belem->_elem->id() == entity->id() && hasBoundary(belem->_bnd_id))
+        return true;
+
+  return false;
 }
 
 void
