@@ -14,7 +14,7 @@
   [../]
   [./ebsd]
     type = PolycrystalEBSD
-    coloring_algorithm = jp
+    coloring_algorithm = bt
     ebsd_reader = ebsd_reader
     enable_var_coloring = true
     output_adjacency_matrix = true
