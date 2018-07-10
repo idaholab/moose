@@ -164,6 +164,7 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
 
     def __init__(self, parent, name, item, **kwargs):
         SyntaxNodeBase.__init__(self, parent, name, **kwargs)
+
         if item['description']:
             self.description = item['description']
         if item['parameters']:
