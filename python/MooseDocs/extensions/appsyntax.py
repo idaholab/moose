@@ -106,11 +106,21 @@ class AppSyntaxExtension(command.CommandExtension):
         # Cache the syntax entries, search the tree is very slow
         if self._app_syntax:
             self._cache = dict()
+            self._object_cache = dict()
+            self._syntax_cache = dict()
             for node in anytree.PreOrderIter(self._app_syntax):
                 if not node.removed:
                     self._cache[node.fullpath] = node
                     if node.alias:
                         self._cache[node.alias] = node
+                    if isinstance(node, syntax.ObjectNode):
+                        self._object_cache[node.fullpath] = node
+                        if node.alias:
+                            self._object_cache[node.alias] = node
+                    elif isinstance(node, syntax.SyntaxNode):
+                        self._syntax_cache[node.fullpath] = node
+                        if node.alias:
+                            self._syntax_cache[node.alias] = node
 
     @property
     def syntax(self):
@@ -124,8 +134,12 @@ class AppSyntaxExtension(command.CommandExtension):
     def apptype(self):
         return self._app_type
 
-    def find(self, name, exc=exceptions.TokenizeException):
+    def find(self, name, node_type=None, exc=exceptions.TokenizeException):
         try:
+            if node_type == syntax.ObjectNode:
+                return self._object_cache[name]
+            elif node_type == syntax.SyntaxNode:
+                return self._syntax_cache[name]
             return self._cache[name]
         except KeyError:
             msg = "'{}' syntax was not recognized."
@@ -170,7 +184,7 @@ class SyntaxCommandBase(command.CommandComponent):
                 self.settings['syntax'] = args[0]
 
         if self.settings['syntax']:
-            obj = self.extension.find(self.settings['syntax'])
+            obj = self.extension.find(self.settings['syntax'], self.NODE_TYPE)
         else:
             obj = self.extension.syntax
 
@@ -239,6 +253,7 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
 
 class SyntaxDescriptionCommand(SyntaxCommandBase):
     SUBCOMMAND = 'description'
+    NODE_TYPE = syntax.ObjectNode
 
     def createTokenFromSyntax(self, info, parent, obj):
 
@@ -259,6 +274,7 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
 
 class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
     SUBCOMMAND = 'children'
+    NODE_TYPE = syntax.ObjectNode
 
     @staticmethod
     def defaultSettings():
@@ -292,6 +308,7 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
 
 class SyntaxInputsCommand(SyntaxChildrenCommand):
     SUBCOMMAND = 'inputs'
+    NODE_TYPE = syntax.ObjectNode
 
     @staticmethod
     def defaultSettings():
@@ -302,6 +319,7 @@ class SyntaxInputsCommand(SyntaxChildrenCommand):
 
 class SyntaxListCommand(SyntaxCommandBase):
     SUBCOMMAND = 'list'
+    NODE_TYPE = syntax.SyntaxNode
 
     @staticmethod
     def defaultSettings():
@@ -324,6 +342,7 @@ class SyntaxListCommand(SyntaxCommandBase):
 
 class SyntaxCompleteCommand(SyntaxCommandBase):
     SUBCOMMAND = 'complete'
+    NODE_TYPE = syntax.SyntaxNode
 
     @staticmethod
     def defaultSettings():

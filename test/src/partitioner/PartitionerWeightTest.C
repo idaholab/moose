@@ -9,7 +9,7 @@
 
 #include "PartitionerWeightTest.h"
 
-registerMooseObject("MooseApp", PartitionerWeightTest);
+registerMooseObject("MooseTestApp", PartitionerWeightTest);
 
 template <>
 InputParameters
