@@ -11,6 +11,8 @@
 #define GLOBALSTRAINUSEROBJECT_H
 
 #include "ElementUserObject.h"
+#include "GlobalStrainUserObjectInterface.h"
+
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
@@ -19,7 +21,7 @@ class GlobalStrainUserObject;
 template <>
 InputParameters validParams<GlobalStrainUserObject>();
 
-class GlobalStrainUserObject : public ElementUserObject
+class GlobalStrainUserObject : public ElementUserObject, public GlobalStrainUserObjectInterface
 {
 public:
   GlobalStrainUserObject(const InputParameters & parameters);
@@ -28,9 +30,9 @@ public:
   void execute() override;
   void threadJoin(const UserObject & uo) override;
   void finalize() override;
-  virtual const RankTwoTensor & getResidual() const;
-  virtual const RankFourTensor & getJacobian() const;
-  virtual const VectorValue<bool> & getPeriodicDirections() const;
+  virtual const RankTwoTensor & getResidual() const override;
+  virtual const RankFourTensor & getJacobian() const override;
+  virtual const VectorValue<bool> & getPeriodicDirections() const override;
 
   /**
    * Calculate additional applied stresses

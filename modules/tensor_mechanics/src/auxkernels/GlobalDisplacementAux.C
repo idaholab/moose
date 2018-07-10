@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GlobalDisplacementAux.h"
-#include "GlobalStrainUserObject.h"
+#include "GlobalStrainUserObjectInterface.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -42,7 +42,7 @@ GlobalDisplacementAux::GlobalDisplacementAux(const InputParameters & parameters)
     _scalar_global_strain(coupledScalarValue("scalar_global_strain")),
     _component(getParam<unsigned int>("component")),
     _output_global_disp(getParam<bool>("output_global_displacement")),
-    _pst(getUserObject<GlobalStrainUserObject>("global_strain_uo")),
+    _pst(getUserObject<GlobalStrainUserObjectInterface>("global_strain_uo")),
     _periodic_dir(_pst.getPeriodicDirections()),
     _dim(_mesh.dimension()),
     _ndisp(coupledComponents("displacements")),

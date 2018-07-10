@@ -32,6 +32,7 @@ validParams<GlobalStrainUserObject>()
 
 GlobalStrainUserObject::GlobalStrainUserObject(const InputParameters & parameters)
   : ElementUserObject(parameters),
+    GlobalStrainUserObjectInterface(),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _dstress_dstrain(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),

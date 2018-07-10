@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GlobalStrain.h"
-#include "GlobalStrainUserObject.h"
+#include "GlobalStrainUserObjectInterface.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -33,7 +33,7 @@ validParams<GlobalStrain>()
 
 GlobalStrain::GlobalStrain(const InputParameters & parameters)
   : ScalarKernel(parameters),
-    _pst(getUserObject<GlobalStrainUserObject>("global_strain_uo")),
+    _pst(getUserObject<GlobalStrainUserObjectInterface>("global_strain_uo")),
     _pst_residual(_pst.getResidual()),
     _pst_jacobian(_pst.getJacobian()),
     _periodic_dir(_pst.getPeriodicDirections()),
