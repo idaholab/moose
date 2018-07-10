@@ -59,10 +59,6 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
   [./ppss]
     type = PorousFlow1PhaseMD_Gaussian
     mass_density = md
@@ -70,32 +66,16 @@
     density_P0 = 1000
     bulk_modulus = 2E9
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseMD_Gaussian
-    at_nodes = true
-    mass_density = md
-    al = 1E-6 # this is irrelevant in this example
-    density_P0 = 1000
-    bulk_modulus = 2E9
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.1
   [../]
   [./permeability]
@@ -104,7 +84,6 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 0
     phase = 0
   [../]

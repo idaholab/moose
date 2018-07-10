@@ -111,10 +111,6 @@
 []
 
 [Materials]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
   [./temperature]
     type = PorousFlowTemperature
   [../]
@@ -124,36 +120,16 @@
     phase1_porepressure = ppgas
     capillary_pressure = pc
   [../]
-  [./ppss_nodal]
-    type = PorousFlow2PhasePP
-    at_nodes = true
-    phase0_porepressure = ppwater
-    phase1_porepressure = ppgas
-    capillary_pressure = pc
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
   [../]
   [./simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid0_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid0
-    phase = 0
   [../]
   [./simple_fluid1]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid1
-    phase = 1
-    at_nodes = true
-  [../]
-  [./simple_fluid1_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
@@ -164,13 +140,11 @@
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 1
     phase = 0
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 1
     phase = 1
   [../]

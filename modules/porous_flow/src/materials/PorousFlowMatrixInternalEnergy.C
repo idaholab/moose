@@ -20,6 +20,7 @@ validParams<PorousFlowMatrixInternalEnergy>()
                                 "Specific heat capacity of the rock grains (J/kg/K).");
   params.addRequiredParam<Real>("density", "Density of the rock grains");
   params.set<bool>("at_nodes") = true;
+  params.addPrivateParam<std::string>("pf_material_type", "matrix_internal_energy");
   params.addClassDescription("This Material calculates the internal energy of solid rock grains, "
                              "which is specific_heat_capacity * density * temperature.  Kernels "
                              "multiply this by (1 - porosity) to find the energy density of the "

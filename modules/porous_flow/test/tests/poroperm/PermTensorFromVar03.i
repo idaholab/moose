@@ -153,7 +153,6 @@
 []
 
 [Materials]
-  # Permeability
   [./permeability]
     type = PorousFlowPermeabilityTensorFromVar
     perm = perm_var
@@ -161,16 +160,9 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
-
-  # Fluid pressure
   [./eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
   [../]
@@ -179,36 +171,17 @@
     porepressure = pp
     capillary_pressure = pc
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    at_nodes = true
-    porepressure = pp
-    capillary_pressure = pc
-  [../]
-
-  # Fluid properties
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
   [../]
-  [./simple_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-  [../]
-
-  # Porosity
   [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
   [../]
-
-  # Permeability
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 0 # unimportant in this fully-saturated situation
     phase = 0
   [../]

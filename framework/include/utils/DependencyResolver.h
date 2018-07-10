@@ -107,6 +107,11 @@ public:
    */
   bool dependsOn(const std::vector<T> & keys, const T & value);
 
+  /**
+   * Returns a vector of values that the given key depends on
+   */
+  const std::vector<T> & getValues(const T & key);
+
   bool operator()(const T & a, const T & b);
 
 private:
@@ -135,6 +140,9 @@ private:
 
   /// The sorted vector (if requested)
   std::vector<T> _ordered_items_vector;
+
+  /// List of values that a given key depends upon
+  std::vector<T> _values_vector;
 };
 
 template <typename T>
@@ -226,6 +234,7 @@ DependencyResolver<T>::clear()
   _ordering_vector.clear();
   _ordered_items.clear();
   _ordered_items_vector.clear();
+  _values_vector.clear();
 }
 
 template <typename T>
@@ -417,6 +426,21 @@ DependencyResolver<T>::dependsOn(const std::vector<T> & keys, const T & value)
     if (dependsOn(key, value))
       return true;
   return false;
+}
+
+template <typename T>
+const std::vector<T> &
+DependencyResolver<T>::getValues(const T & key)
+{
+  _values_vector.clear();
+
+  std::pair<typename std::multimap<T, T>::iterator, typename std::multimap<T, T>::iterator> ret;
+  ret = _depends.equal_range(key);
+
+  for (typename std::multimap<T, T>::iterator it = ret.first; it != ret.second; ++it)
+    _values_vector.push_back(it->second);
+
+  return _values_vector;
 }
 
 template <typename T>

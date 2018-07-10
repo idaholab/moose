@@ -93,7 +93,6 @@
   [../]
 []
 
-
 [PorousFlowUnsaturated]
   porepressure = pp
   gravity = '0 0 0'
@@ -109,13 +108,9 @@
     type = PorousFlowPorosityConst
     porosity = 0.3
   [../]
-  [./poro_nodal]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = 0.3
-  [../]
   [./massfrac_qp]
      type = PorousFlowMassFraction
+     at_nodes = false
      mass_fraction_vars = massfrac0
   [../]
   [./diff]

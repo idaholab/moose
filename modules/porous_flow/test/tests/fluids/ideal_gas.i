@@ -65,14 +65,17 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = false
     temperature = temp
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
+    at_nodes = false
     porepressure = pp
   [../]
   [./idealgass]
     type = PorousFlowSingleComponentFluid
+    at_nodes = false
     temperature_unit = Celsius
     fp = idealgas
     phase = 0

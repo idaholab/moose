@@ -19,6 +19,7 @@ validParams<PorousFlowAqueousPreDisMineral>()
   params.addCoupledVar("initial_concentrations",
                        "Initial concentrations for the mineral species "
                        "(m^{3}(precipitate)/m^{3}(porous material)).  Default = 0");
+  params.addPrivateParam<std::string>("pf_material_type", "mineral");
   params.addClassDescription("This Material forms a std::vector of mineral concentrations "
                              "(volume-of-mineral/volume-of-material) appropriate to the aqueous "
                              "precipitation-dissolution system provided.");

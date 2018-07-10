@@ -14,6 +14,7 @@
 #include "GeneralPostprocessor.h"
 #include "InfixIterator.h"
 #include "MooseVariableDependencyInterface.h"
+#include "BoundaryRestrictable.h"
 
 #include <iterator>
 #include <list>
@@ -43,7 +44,8 @@ InputParameters validParams<FeatureFloodCount>();
  */
 class FeatureFloodCount : public GeneralPostprocessor,
                           public Coupleable,
-                          public MooseVariableDependencyInterface
+                          public MooseVariableDependencyInterface,
+                          public BoundaryRestrictable
 {
 public:
   FeatureFloodCount(const InputParameters & parameters);
@@ -296,6 +298,12 @@ public:
   const std::vector<FeatureData> & getFeatures() const { return _feature_sets; }
 
 protected:
+  /**
+   * Returns a Boolean indicating whether the entity is on one of the desired boundaries.
+   */
+  template <typename T>
+  bool isBoundaryEntity(const T * entity) const;
+
   /**
    * This method is used to populate any of the data structures used for storing field data (nodal
    * or elemental). It is called at the end of finalize and can make use of any of the data
@@ -652,6 +660,11 @@ protected:
 
   /// Convenience variable for testing master rank
   bool _is_master;
+
+  /// Indicates that this object should only run on one or more boundaries
+  bool _is_boundary_restricted;
+
+  ConstBndElemRange * _bnd_elem_range;
 };
 
 template <>

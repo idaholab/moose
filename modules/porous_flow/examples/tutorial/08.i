@@ -91,10 +91,9 @@
 []
 
 [Materials]
-  [./porosity_nodal]
+  [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-    at_nodes = true
   [../]
   [./permeability_aquifer]
     type = PorousFlowPermeabilityConst
@@ -136,4 +135,3 @@
 [Outputs]
   exodus = true
 []
-

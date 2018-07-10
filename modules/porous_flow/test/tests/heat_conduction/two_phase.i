@@ -80,11 +80,6 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-    temperature = temp
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
     temperature = temp
   [../]
   [./thermal_conductivity]
@@ -100,16 +95,8 @@
     phase1_saturation = phase1_saturation
     capillary_pressure = pc
   [../]
-  [./ppss_nodal]
-    type = PorousFlow2PhasePS
-    at_nodes = true
-    phase0_porepressure = phase0_porepressure
-    phase1_saturation = phase1_saturation
-    capillary_pressure = pc
-  [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.8
   [../]
   [./rock_heat]
@@ -121,20 +108,8 @@
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
-    at_nodes = true
-  [../]
-  [./simple0_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid0
-    phase = 0
   [../]
   [./simple_fluid1]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid1
-    phase = 1
-    at_nodes = true
-  [../]
-  [./simple1_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1

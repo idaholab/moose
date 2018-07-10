@@ -121,10 +121,9 @@
 []
 
 [Materials]
-  [./porosity_nodal]
+  [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
-    at_nodes = true
   [../]
   [./permeability_aquifer]
     type = PorousFlowPermeabilityConst
@@ -136,44 +135,25 @@
     block = caps
     permeability = '1E-15 0 0   0 1E-15 0   0 0 1E-16'
   [../]
-  [./saturation_calculator_nodal]
-    type = PorousFlow1PhaseP
-    at_nodes = true
-    porepressure = pp
-    capillary_pressure = pc
-  [../]
-  [./saturation_calculator_qp]
+  [./saturation_calculator]
     type = PorousFlow1PhaseP
     porepressure = pp
     capillary_pressure = pc
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-    temperature = 293
-  [../]
-  [./temperature_qp]
+  [./temperature]
     type = PorousFlowTemperature
     temperature = 293
   [../]
-  [./massfrac_nodal]
+  [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
-  [./simple_fluid_nodal]
-    type = PorousFlowSingleComponentFluid
-    at_nodes = true
-    fp = the_simple_fluid
-    phase = 0
-  [../]
-  [./simple_fluid_qp]
+  [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = the_simple_fluid
     phase = 0
   [../]
-  [./relperm_nodal]
+  [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 3
     s_res = 0.1
     sum_s_res = 0.1

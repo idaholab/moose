@@ -318,36 +318,12 @@
   [./temperature]
     type = PorousFlowTemperature
     temperature = 298.15
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
-    temperature = 298.15
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
-    at_nodes = true
     porepressure = pressure
   [../]
-  [./ppss_qp]
-    type = PorousFlow1PhaseFullySaturated
-    porepressure = pressure
-  [../]
-  [./equilibrium_massfrac_nodes]
-    type = PorousFlowMassFractionAqueousEquilibriumChemistry
-    mass_fraction_vars = 'h+ hco3- ca2+ mg2+ fe2+'
-    num_reactions = 5
-    equilibrium_constants = 'eqm_k0 eqm_k1 eqm_k2 eqm_k3 eqm_k4'
-    primary_activity_coefficients = '1 1 1 1 1'
-    secondary_activity_coefficients = '1 1 1 1 1'
-    reactions = '1 1 0 0 0
-                -1 1 0 0 0
-                 0 1 1 0 0
-                 0 1 0 1 0
-                 0 1 0 0 1'
-    at_nodes = true
-  [../]
-  [./equilibrium_massfrac_qp]
+  [./equilibrium_massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'h+ hco3- ca2+ mg2+ fe2+'
     num_reactions = 5
@@ -360,22 +336,7 @@
                  0 1 0 1 0
                  0 1 0 0 1'
   [../]
-  [./kinetic_nodes]
-    type = PorousFlowAqueousPreDisChemistry
-    primary_concentrations = 'h+ hco3- ca2+ mg2+ fe2+'
-    num_reactions = 1
-    equilibrium_constants = kinetic_k
-    primary_activity_coefficients = '1 1 1 1 1'
-    reactions = '-2 2 1 0.8 0.2'
-    specific_reactive_surface_area = '1.2E-8'
-    kinetic_rate_constant = '3E-4'
-    activation_energy = '1.5e4'
-    molar_volume = 64365.0
-    gas_constant = 8.314
-    reference_temperature = 298.15
-    at_nodes = true
-  [../]
-  [./kinetic_qp]
+  [./kinetic]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'h+ hco3- ca2+ mg2+ fe2+'
     num_reactions = 1
@@ -392,29 +353,13 @@
   [./dolomite_conc]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = dolomite_initial
-    at_nodes = true
-  [../]
-  [./dolomite_conc_qp]
-    type = PorousFlowAqueousPreDisMineral
-    initial_concentrations = dolomite_initial
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
   [../]
   [./porosity]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = 0.2
-  [../]
-  [./porosity_qp]
     type = PorousFlowPorosityConst
     porosity = 0.2
   [../]
@@ -423,11 +368,6 @@
     permeability = '1E-10 0 0 0 1E-10 0 0 0 1E-10'
   [../]
   [./relp]
-    type = PorousFlowRelativePermeabilityConst
-    phase = 0
-    at_nodes = true
-  [../]
-  [./relp_qp]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
   [../]

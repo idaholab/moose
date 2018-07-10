@@ -16,6 +16,7 @@ InputParameters
 validParams<PorousFlowEffectiveFluidPressure>()
 {
   InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  params.set<std::string>("pf_material_type") = "effective_pressure";
   params.addClassDescription("This Material calculates an effective fluid pressure: "
                              "effective_stress = total_stress + "
                              "biot_coeff*effective_fluid_pressure.  The effective_fluid_pressure = "

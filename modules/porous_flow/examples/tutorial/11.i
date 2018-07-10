@@ -381,85 +381,46 @@
 []
 
 [Materials]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-    temperature = T
-  [../]
-  [./temperature_qp]
+  [./temperature]
     type = PorousFlowTemperature
     temperature = T
   [../]
-  [./saturation_calculator_nodal]
-    type = PorousFlow2PhasePP
-    at_nodes = true
-    phase0_porepressure = pwater
-    phase1_porepressure = pgas
-    capillary_pressure = pc
-  [../]
-  [./saturation_calculator_qp]
+  [./saturation_calculator]
     type = PorousFlow2PhasePP
     phase0_porepressure = pwater
     phase1_porepressure = pgas
     capillary_pressure = pc
   [../]
-  [./massfrac_nodal]
+  [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
     mass_fraction_vars = 'mass_frac_phase0_species0 mass_frac_phase1_species0'
   [../]
-  [./water_nodal]
-    type = PorousFlowSingleComponentFluid
-    at_nodes = true
-    fp = tabulated_water
-    phase = 0
-  [../]
-  [./water_qp]
+  [./water]
     type = PorousFlowSingleComponentFluid
     fp = tabulated_water
     phase = 0
   [../]
-  [./co2_nodal]
-    type = PorousFlowSingleComponentFluid
-    at_nodes = true
-    fp = tabulated_co2
-    phase = 1
-  [../]
-  [./co2_qp]
+  [./co2]
     type = PorousFlowSingleComponentFluid
     fp = tabulated_co2
     phase = 1
   [../]
-  [./relperm_water_nodal]
+  [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 4
     s_res = 0.1
     sum_s_res = 0.2
     phase = 0
   [../]
-  [./relperm_co2_nodal]
+  [./relperm_co2]
     type = PorousFlowRelativePermeabilityBC
-    at_nodes = true
     nw_phase = true
     lambda = 2
     s_res = 0.1
     sum_s_res = 0.2
     phase = 1
   [../]
-  [./porosity_nodal]
-    type = PorousFlowPorosity
-    fluid = true
-    mechanical = true
-    thermal = true
-    porosity_zero = 0.1
-    reference_temperature = 330
-    reference_porepressure = 20E6
-    thermal_expansion_coeff = 15E-6 # volumetric
-    solid_bulk = 8E9 # unimportant since biot = 1
-    at_nodes = true
-  [../]
-  [./porosity_qp]
+  [./porosity]
     type = PorousFlowPorosity
     fluid = true
     mechanical = true
@@ -524,11 +485,7 @@
     type = ComputeLinearElasticStress
   [../]
 
-  [./effective_fluid_pressure_nodal]
-    type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
-  [../]
-  [./effective_fluid_pressure_qp]
+  [./effective_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
   [../]
   [./volumetric_strain]

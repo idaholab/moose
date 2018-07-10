@@ -91,33 +91,32 @@ PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"PorousFlowApp"});
 
-  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_user_object");
-  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_kernel");
-  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_material");
-  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_aux_variable");
-  syntax.registerActionSyntax("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_aux_kernel");
+  registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_user_object");
+  registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_kernel");
+  registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_material");
+  registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_aux_variable");
+  registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_aux_kernel");
 
-  syntax.registerActionSyntax(
-      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_user_object");
-  syntax.registerActionSyntax("PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_kernel");
-  syntax.registerActionSyntax(
-      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_material");
-  syntax.registerActionSyntax(
-      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_aux_variable");
-  syntax.registerActionSyntax(
-      "PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_aux_kernel");
+  registerSyntaxTask("PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_user_object");
+  registerSyntaxTask("PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_kernel");
+  registerSyntaxTask("PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_material");
+  registerSyntaxTask("PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_aux_variable");
+  registerSyntaxTask("PorousFlowFullySaturated", "PorousFlowFullySaturated", "add_aux_kernel");
 
-  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_user_object");
-  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_kernel");
-  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_material");
-  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_variable");
-  syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_kernel");
+  registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_user_object");
+  registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_kernel");
+  registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_material");
+  registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_variable");
+  registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_kernel");
 
+  // Task dependency and syntax for action to automatically add PorousFlow materials
+  registerSyntax("PorousFlowAddMaterialAction", "Materials");
+
+  // Task dependency and syntax for action to automatically add PorousFlowJoiner materials
   registerTask("add_joiners", /*is_required=*/false);
   addTaskDependency("add_joiners", "add_material");
-  addTaskDependency("add_joiners", "add_user_object");
 
-  syntax.registerActionSyntax("PorousFlowAddMaterialJoiner", "Materials", "add_joiners");
+  registerSyntaxTask("PorousFlowAddMaterialJoiner", "Materials", "add_joiners");
 }
 
 // External entry point for dynamic execute flag registration

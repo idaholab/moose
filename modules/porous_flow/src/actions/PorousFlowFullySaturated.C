@@ -138,7 +138,7 @@ PorousFlowFullySaturated::act()
   }
 
   // add Materials
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_qp") && _current_task == "add_material")
+  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_qp") && _current_task == "add_material")
   {
     // saturation is always unity, so is trivially calculated using PorousFlow1PhaseFullySaturated
     std::string material_type = "PorousFlow1PhaseFullySaturated";
@@ -146,9 +146,11 @@ PorousFlowFullySaturated::act()
     std::string material_name = "PorousFlowFullySaturated_1PhaseP_qp";
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
+    params.set<bool>("at_nodes") = false;
     _problem->addMaterial(material_type, material_name, params);
   }
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowPS_nodal") && _current_task == "add_material")
+  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_nodal") &&
+      _current_task == "add_material")
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
@@ -159,12 +161,12 @@ PorousFlowFullySaturated::act()
     _problem->addMaterial(material_type, material_name, params);
   }
 
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowVolumetricStrain_qp") ||
-      _deps.dependsOn(_objects_to_add, "PorousFlowVolumetricStrain_nodal"))
+  if (_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
+      _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal"))
     addVolumetricStrainMaterial(_coupled_displacements, true);
 
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_qp"))
+  if (_deps.dependsOn(_objects_to_add, "relative_permeability_qp"))
     addRelativePermeabilityCorey(false, 0, 0.0, 0.0, 0.0);
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_nodal"))
+  if (_deps.dependsOn(_objects_to_add, "relative_permeability_nodal"))
     addRelativePermeabilityCorey(true, 0, 0.0, 0.0, 0.0);
 }

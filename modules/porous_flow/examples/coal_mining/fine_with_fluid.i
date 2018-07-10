@@ -832,16 +832,7 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
-
   [./eff_fluid_pressure]
-    type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
-  [../]
-  [./eff_fluid_pressure_qp]
     type = PorousFlowEffectiveFluidPressure
   [../]
   [./vol_strain]
@@ -852,29 +843,17 @@
     porepressure = porepressure
     capillary_pressure = pc
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    at_nodes = true
-    porepressure = porepressure
-    capillary_pressure = pc
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
   [../]
   [./porosity_for_aux]
     type = PorousFlowPorosity
+    at_nodes = false
     fluid = true
     mechanical = true
     ensure_positive = true
@@ -887,7 +866,6 @@
     mechanical = true
     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30'
     ensure_positive = true
-    at_nodes = true
     porosity_zero = 0.02
     solid_bulk = 5.3333E3
   [../]
@@ -895,7 +873,6 @@
     type = PorousFlowPorosityConst
     block = 1
     porosity = 1.0
-    at_nodes = true
   [../]
   [./permeability_bulk]
     type = PorousFlowPermeabilityKozenyCarman
@@ -912,14 +889,6 @@
     permeability = '0 0 0   0 0 0   0 0 0'
   [../]
   [./relperm]
-    type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
-    n = 4
-    s_res = 0.4
-    sum_s_res = 0.4
-    phase = 0
-  [../]
-  [./relperm_qp]
     type = PorousFlowRelativePermeabilityCorey
     n = 4
     s_res = 0.4

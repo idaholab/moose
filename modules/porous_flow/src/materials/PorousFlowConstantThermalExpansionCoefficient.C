@@ -27,6 +27,7 @@ validParams<PorousFlowConstantThermalExpansionCoefficient>()
       "drained_coefficient>=0.0",
       "Volumetric coefficient of thermal expansion of the drained porous skeleton (ie the porous "
       "rock without fluid, or with a fluid that is free to move in and out of the rock)");
+  params.addPrivateParam<std::string>("pf_material_type", "thermal_expansion");
   params.addClassDescription("Computes the effective thermal expansion coefficient, (biot_coeff - "
                              "porosity) * drained_coefficient + porosity * fluid_coefficient.");
   return params;

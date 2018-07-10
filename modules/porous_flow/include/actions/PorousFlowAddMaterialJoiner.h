@@ -35,34 +35,20 @@ protected:
    * @param at_nodes if true: produce a nodal material, otherwise: produce a qp material
    * @param material_property join this PorousFlow material property
    * @param output_name The unique name given to this PorousFlowJoiner in the input file
-   * @param active if true: add PorousFlowJoiner, otherwise: do nothing
    */
-  void addJoiner(bool at_nodes,
-                 const std::string & material_property,
-                 const std::string & output_name,
-                 bool active = true);
+  void
+  addJoiner(bool at_nodes, const std::string & material_property, const std::string & output_name);
 
   /**
-   * Helper method to determine if any PorousFlowJoiner materials are present in
-   * the input file, and if they are, set's flags to disable adding an identical
-   * PorousFlowJoiner material in this action (which would otherwise result in a
-   * duplciate material property error).
+   * Helper method to determine if a PorousFLowJoiner material is already present
+   * in the input file for the given material property
+   * @param property the material property to check
+   * @return true if a PorousFLowJoiner is already present for property, false otherwise
    */
-  void checkJoiner();
+  bool hasJoiner(std::string property);
 
   /// Name of the PorousFlowDictator
   std::string _dictator_name;
-  /// Flags to control adding PorousFlowJoiners for each material
-  bool _density_nodal;
-  bool _density_qp;
-  bool _viscosity_nodal;
-  bool _viscosity_qp;
-  bool _enthalpy_nodal;
-  bool _enthalpy_qp;
-  bool _internal_energy_nodal;
-  bool _internal_energy_qp;
-  bool _relperm_nodal;
-  bool _relperm_qp;
 };
 
 #endif // POROUSFLOWADDMATERIALJOINER_H

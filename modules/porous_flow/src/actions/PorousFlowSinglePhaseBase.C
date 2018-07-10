@@ -198,19 +198,19 @@ PorousFlowSinglePhaseBase::act()
   }
 
   // add Materials
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowTemperature_qp"))
+  if (_deps.dependsOn(_objects_to_add, "temperature_qp"))
     addTemperatureMaterial(false);
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowTemperature_nodal"))
+  if (_deps.dependsOn(_objects_to_add, "temperature_nodal"))
     addTemperatureMaterial(true);
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowMassFraction_qp"))
+  if (_deps.dependsOn(_objects_to_add, "mass_fraction_qp"))
     addMassFractionMaterial(false);
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowMassFraction_nodal"))
+  if (_deps.dependsOn(_objects_to_add, "mass_fraction_nodal"))
     addMassFractionMaterial(true);
 
-  const bool compute_rho_mu_qp = _deps.dependsOn(_objects_to_add, "PorousFlowDensity_qp") ||
-                                 _deps.dependsOn(_objects_to_add, "PorousFlowViscosity_qp");
-  const bool compute_e_qp = _deps.dependsOn(_objects_to_add, "PorousFlowInternalEnergy_qp");
-  const bool compute_h_qp = _deps.dependsOn(_objects_to_add, "PorousFlowEnthalpy_qp");
+  const bool compute_rho_mu_qp = _deps.dependsOn(_objects_to_add, "density_qp") ||
+                                 _deps.dependsOn(_objects_to_add, "viscosity_qp");
+  const bool compute_e_qp = _deps.dependsOn(_objects_to_add, "internal_energy_qp");
+  const bool compute_h_qp = _deps.dependsOn(_objects_to_add, "enthalpy_qp");
   if (compute_rho_mu_qp || compute_e_qp || compute_h_qp)
   {
     if (_use_brine)
@@ -221,10 +221,11 @@ PorousFlowSinglePhaseBase::act()
     else
       addSingleComponentFluidMaterial(false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp, _fp);
   }
-  const bool compute_rho_mu_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowDensity_nodal") ||
-                                    _deps.dependsOn(_objects_to_add, "PorousFlowViscosity_nodal");
-  const bool compute_e_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowInternalEnergy_nodal");
-  const bool compute_h_nodal = _deps.dependsOn(_objects_to_add, "PorousFlowEnthalpy_nodal");
+
+  const bool compute_rho_mu_nodal = _deps.dependsOn(_objects_to_add, "density_nodal") ||
+                                    _deps.dependsOn(_objects_to_add, "viscosity_nodal");
+  const bool compute_e_nodal = _deps.dependsOn(_objects_to_add, "internal_energy_nodal");
+  const bool compute_h_nodal = _deps.dependsOn(_objects_to_add, "enthalpy_nodal");
   if (compute_rho_mu_nodal || compute_e_nodal || compute_h_nodal)
   {
     if (_use_brine)
@@ -237,33 +238,9 @@ PorousFlowSinglePhaseBase::act()
           true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal, _fp);
   }
 
-  if (compute_rho_mu_qp)
-  {
-    joinDensity(false);
-    joinViscosity(false);
-  }
-  if (compute_rho_mu_nodal)
-  {
-    joinDensity(true);
-    joinViscosity(true);
-  }
-  if (compute_e_qp)
-    joinInternalEnergy(false);
-  if (compute_e_nodal)
-    joinInternalEnergy(true);
-  if (compute_h_qp)
-    joinEnthalpy(false);
-  if (compute_h_nodal)
-    joinEnthalpy(true);
-
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_qp"))
-    joinRelativePermeability(false);
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_nodal"))
-    joinRelativePermeability(true);
-
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowEffectiveFluidPressure_qp"))
+  if (_deps.dependsOn(_objects_to_add, "effective_pressure_qp"))
     addEffectiveFluidPressureMaterial(false);
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowEffectiveFluidPressure_nodal"))
+  if (_deps.dependsOn(_objects_to_add, "effective_pressure_nodal"))
     addEffectiveFluidPressureMaterial(true);
 
   // add AuxVariables and AuxKernels

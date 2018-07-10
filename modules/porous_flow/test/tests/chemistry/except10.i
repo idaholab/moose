@@ -68,6 +68,7 @@
   [../]
   [./predis]
     type = PorousFlowAqueousPreDisChemistry
+    at_nodes = false
     primary_concentrations = 'a b'
     num_reactions = 1
     equilibrium_constants = eqm_k

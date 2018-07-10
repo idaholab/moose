@@ -191,6 +191,7 @@
   [../]
   [./porosity_qp]
     type = PorousFlowPorosity
+    at_nodes = false
     thermal = true
     fluid = true
     mechanical = true

@@ -311,40 +311,19 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = ppwater
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseFullySaturated
-    at_nodes = true
-    porepressure = ppwater
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
   [../]
   [./porosity]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = poro
-  [../]
-  [./porosity_qp]
     type = PorousFlowPorosityConst
     porosity = poro
   [../]
@@ -362,7 +341,6 @@
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 2
     phase = 0
   [../]
