@@ -10,7 +10,7 @@
 #ifndef POROUSFLOWTHERMALCONDUCTIVITYIDEAL_H
 #define POROUSFLOWTHERMALCONDUCTIVITYIDEAL_H
 
-#include "PorousFlowMaterialVectorBase.h"
+#include "PorousFlowThermalConductivityBase.h"
 
 class PorousFlowThermalConductivityIdeal;
 
@@ -24,7 +24,7 @@ InputParameters validParams<PorousFlowThermalConductivityIdeal>();
  * dry_thermal_conductivity),
  * where S is the aqueous saturation.
  */
-class PorousFlowThermalConductivityIdeal : public PorousFlowMaterialVectorBase
+class PorousFlowThermalConductivityIdeal : public PorousFlowThermalConductivityBase
 {
 public:
   PorousFlowThermalConductivityIdeal(const InputParameters & parameters);
@@ -55,12 +55,6 @@ protected:
 
   /// d(Saturation)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_qp_dvar;
-
-  /// Thermal conducitivity at the qps
-  MaterialProperty<RealTensorValue> & _la_qp;
-
-  /// d(thermal conductivity at the qps)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealTensorValue>> & _dla_qp_dvar;
 };
 
 #endif // POROUSFLOWTHERMALCONDUCTIVITYIDEAL_H

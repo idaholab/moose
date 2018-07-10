@@ -14,6 +14,7 @@ InputParameters
 validParams<PorousFlowTotalGravitationalDensityBase>()
 {
   InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  params.set<std::string>("pf_material_type") = "gravitational_density";
   params.addClassDescription("Base class Material for porous medium density");
   return params;
 }

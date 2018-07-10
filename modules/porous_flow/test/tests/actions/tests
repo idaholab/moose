@@ -30,4 +30,12 @@
     expect_err = 'PorousFlowJoiner materials are no longer required in the input file'
     cli_args = --error-deprecated
   [../]
+  [./addmaterials]
+    type = RunApp
+    input = addmaterials.i
+  [../]
+  [./addmaterials2]
+    type = RunApp
+    input = addmaterials2.i
+  [../]
 []

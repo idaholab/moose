@@ -148,22 +148,8 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
   [../]
   [./brineco2]
-    type = PorousFlowFluidStateBrineCO2
-    gas_porepressure = pgas
-    z = zi
-    at_nodes = true
-    temperature_unit = Celsius
-    xnacl = xnacl
-    capillary_pressure = pc
-    fluid_state = fs
-  [../]
-  [./brineco2_qp]
     type = PorousFlowFluidStateBrineCO2
     gas_porepressure = pgas
     z = zi
@@ -174,7 +160,6 @@
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.2
   [../]
   [./permeability]
@@ -183,7 +168,6 @@
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 2
     phase = 0
     s_res = 0.1
@@ -191,7 +175,6 @@
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
     n = 2
     phase = 1
   [../]

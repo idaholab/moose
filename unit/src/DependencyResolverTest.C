@@ -157,3 +157,19 @@ TEST_F(DependencyResolverTest, cyclicTest)
         << "failed with unexpected error: " << msg;
   }
 }
+
+TEST_F(DependencyResolverTest, getValuesTest)
+{
+  const std::vector<std::string> & values = _tree.getValues("k0");
+
+  // Make a sorted copy to compare against
+  std::vector<std::string> copy;
+  for (auto val : values)
+    copy.push_back(val);
+
+  std::sort(copy.begin(), copy.end());
+
+  EXPECT_EQ(copy[0], "m0");
+  EXPECT_EQ(copy[1], "m1");
+  EXPECT_EQ(copy[2], "m2");
+}

@@ -55,15 +55,16 @@
 []
 
 [Materials]
-  [./temperature_qp]
+  [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./ppss_qp]
+  [./ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pressure
   [../]
-  [./massfrac_qp]
+  [./massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
+    at_nodes = false
     mass_fraction_vars = 'a b'
     num_reactions = 2
     equilibrium_constants = eqm_k
@@ -72,7 +73,7 @@
     reactions = '2 0
                  1 1'
   [../]
-  [./simple_fluid_qp]
+  [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0

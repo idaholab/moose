@@ -116,15 +116,15 @@
 []
 
 [Materials]
-  [./temperature_qp]
+  [./temperature]
     type = PorousFlowTemperature
     temperature = 1
   [../]
-  [./ppss_qp]
+  [./ppss]
     type = PorousFlow1PhaseFullySaturated
     porepressure = dummy
   [../]
-  [./predis_qp]
+  [./predis]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = a
     num_reactions = 1
@@ -138,7 +138,7 @@
     gas_constant = 6
     reference_temperature = 0.5
   [../]
-  [./mineral_conc_qp]
+  [./mineral_conc]
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = ini_mineral_conc
   [../]
@@ -150,7 +150,6 @@
     initial_mineral_concentrations = ini_mineral_conc
   [../]
 []
-
 
 [Preconditioning]
   [./smp]

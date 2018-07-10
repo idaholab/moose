@@ -21,6 +21,7 @@ validParams<PorousFlowDiffusivityBase>()
       "phase n (m^2/s");
   params.addClassDescription("Base class for effective diffusivity for each phase");
   params.set<bool>("at_nodes") = false;
+  params.addPrivateParam<std::string>("pf_material_type", "diffusivity");
   return params;
 }
 

@@ -24,6 +24,7 @@ validParams<PorousFlowFluidStateFlashBase>()
   params.addRequiredParam<UserObjectName>("capillary_pressure",
                                           "Name of the UserObject defining the capillary pressure");
   params.addRequiredParam<UserObjectName>("fluid_state", "Name of the FluidState UserObject");
+  params.addPrivateParam<std::string>("pf_material_type", "fluid_state");
   params.addClassDescription("Base class for fluid state calculations using persistent primary "
                              "variables and a vapor-liquid flash");
   return params;

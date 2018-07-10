@@ -126,11 +126,6 @@
     drained_coefficient = 0.003
     fluid_coefficient = 0.0002
   [../]
-  [./porosity_nodal]
-    type = PorousFlowPorosity
-    porosity_zero = 0.1
-    at_nodes = true
-  [../]
   [./rock_internal_energy]
     type = PorousFlowMatrixInternalEnergy
     density = 2500.0
@@ -171,4 +166,3 @@
 [Outputs]
   exodus = true
 []
-

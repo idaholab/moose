@@ -77,11 +77,6 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-    temperature = temp
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
     temperature = temp
   [../]
   [./ppss]
@@ -89,23 +84,10 @@
     porepressure = pressure
     capillary_pressure = pc
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    at_nodes = true
-    porepressure = pressure
-    capillary_pressure = pc
-  [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
   [../]
   [./dens0]
-    type = PorousFlowSingleComponentFluid
-    fp = idealgas
-    at_nodes = true
-    phase = 0
-  [../]
-  [./dens0_qp]
     type = PorousFlowSingleComponentFluid
     fp = idealgas
     phase = 0
@@ -116,7 +98,6 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey # irrelevant in this fully-saturated situation
-    at_nodes = true
     n = 2
     phase = 0
   [../]

@@ -15,12 +15,11 @@ template <>
 InputParameters
 validParams<PorousFlowThermalConductivityFromPorosity>()
 {
-  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  InputParameters params = validParams<PorousFlowThermalConductivityBase>();
   params.addRequiredParam<RealTensorValue>("lambda_s",
                                            "The thermal conductivity of the solid matrix material");
   params.addRequiredParam<RealTensorValue>("lambda_f",
                                            "The thermal conductivity of the single fluid phase");
-  params.set<bool>("at_nodes") = false;
   params.addClassDescription("This Material calculates rock-fluid combined thermal conductivity "
                              "for the single phase, fully saturated case by using a linear "
                              "weighted average. "
@@ -32,14 +31,11 @@ validParams<PorousFlowThermalConductivityFromPorosity>()
 
 PorousFlowThermalConductivityFromPorosity::PorousFlowThermalConductivityFromPorosity(
     const InputParameters & parameters)
-  : PorousFlowMaterialVectorBase(parameters),
+  : PorousFlowThermalConductivityBase(parameters),
     _la_s(getParam<RealTensorValue>("lambda_s")),
     _la_f(getParam<RealTensorValue>("lambda_f")),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
-    _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
-    _la_qp(declareProperty<RealTensorValue>("PorousFlow_thermal_conductivity_qp")),
-    _dla_qp_dvar(
-        declareProperty<std::vector<RealTensorValue>>("dPorousFlow_thermal_conductivity_qp_dvar"))
+    _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar"))
 {
   if (_num_phases != 1)
     paramError("fluid_phase",
@@ -47,10 +43,6 @@ PorousFlowThermalConductivityFromPorosity::PorousFlowThermalConductivityFromPoro
                _dictator.numPhases(),
                " whereas this material can only be used for single phase "
                "simulations.  Be aware that the Dictator has noted your mistake.");
-
-  if (_nodal_material == true)
-    paramError("at_nodes",
-               "This parameter must be false for PorousFlowThermalConductivity classes");
 }
 
 void

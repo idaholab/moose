@@ -67,6 +67,7 @@
   [../]
   [./massfrac_qp]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
+    at_nodes = false
     mass_fraction_vars = 'a b'
     num_reactions = 2
     equilibrium_constants = 'eqm_k0 eqm_k1'

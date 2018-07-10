@@ -154,32 +154,12 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
-    at_nodes = true
     porepressure = pressure
   [../]
-  [./ppss_qp]
-    type = PorousFlow1PhaseFullySaturated
-    porepressure = pressure
-  [../]
-  [./massfrac_nodes]
-    type = PorousFlowMassFractionAqueousEquilibriumChemistry
-    mass_fraction_vars = 'a b'
-    num_reactions = 2
-    equilibrium_constants = 'eqm_k0 eqm_k1'
-    primary_activity_coefficients = '1 1'
-    secondary_activity_coefficients = '1 1'
-    reactions = '2 0
-                 1 1'
-    at_nodes = true
-  [../]
-  [./massfrac_qp]
+  [./massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'a b'
     num_reactions = 2
@@ -193,19 +173,8 @@
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
   [../]
   [./porosity]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = 0.2
-  [../]
-  [./porosity_qp]
     type = PorousFlowPorosityConst
     porosity = 0.2
   [../]

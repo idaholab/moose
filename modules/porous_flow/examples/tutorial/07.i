@@ -88,6 +88,7 @@
     order = CONSTANT
   [../]
 []
+
 [AuxKernels]
   [./mineral_conc]
     type = PorousFlowPropertyAux
@@ -145,20 +146,12 @@
 []
 
 [Materials]
-  [./porosity_qp]
+  [./porosity]
     type = PorousFlowPorosity
     porosity_zero = 0.1
     chemical = true
     initial_mineral_concentrations = initial_and_reference_conc
     reference_chemistry = initial_and_reference_conc
-  [../]
-  [./porosity_nodal]
-    type = PorousFlowPorosity
-    porosity_zero = 0.1
-    chemical = true
-    initial_mineral_concentrations = initial_and_reference_conc
-    reference_chemistry = initial_and_reference_conc
-    at_nodes = true
   [../]
   [./permeability_aquifer]
     type = PorousFlowPermeabilityKozenyCarman
@@ -179,7 +172,7 @@
     phi0 = 0.1
     poroperm_function = kozeny_carman_phi0
   [../]
-  [./precipitation_dissolution_qp]
+  [./precipitation_dissolution]
     type = PorousFlowAqueousPreDisChemistry
     reference_temperature = 283.0
     activation_energy = 1 # irrelevant because T=Tref
@@ -191,27 +184,9 @@
     primary_concentrations = tracer_concentration
     reactions = 1
     specific_reactive_surface_area = 1
-  [../]
-  [./precipitation_dissolution_nodal]
-    type = PorousFlowAqueousPreDisChemistry
-    reference_temperature = 283.0
-    activation_energy = 1 # irrelevant because T=Tref
-    equilibrium_constants = eqm_k # equilibrium tracer concentration
-    kinetic_rate_constant = 1E-8
-    molar_volume = 1
-    num_reactions = 1
-    primary_activity_coefficients = 1
-    primary_concentrations = tracer_concentration
-    reactions = 1
-    specific_reactive_surface_area = 1
-    at_nodes = true
   [../]
   [./mineral_concentration]
     type = PorousFlowAqueousPreDisMineral
-  [../]
-  [./mineral_concentration_nodal]
-    type = PorousFlowAqueousPreDisMineral
-    at_nodes = true
   [../]
 []
 
@@ -243,4 +218,3 @@
 [Outputs]
   exodus = true
 []
-

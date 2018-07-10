@@ -142,12 +142,8 @@ The [`PorousFlowFluidStateBrineCO2`](/PorousFlowFluidStateBrineCO2.md)
 Material provides all phase pressures, saturation, densities, viscosities etc, as well
 as all mass fractions of all fluid components in all fluid phases in a single material
 using the formulation provided in the [`PorousFlowBrineCO2`](/PorousFlowBrineCO2.md) UserObject.
-As with many PorousFlow materials, two versions must be supplied - one for the nodes, and one
-for the quadrature points.
 
 !listing modules/porous_flow/test/tests/fluidstate/brineco2.i block=Materials/brineco2
-
-!listing modules/porous_flow/test/tests/fluidstate/brineco2.i block=Materials/brineco2_qp
 
 ## Initial condition
 

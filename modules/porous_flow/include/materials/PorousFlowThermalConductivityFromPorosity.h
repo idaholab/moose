@@ -10,7 +10,7 @@
 #ifndef POROUSFLOWTHERMALCONDUCTIVITYFROMPOROSITY_H
 #define POROUSFLOWTHERMALCONDUCTIVITYFROMPOROSITY_H
 
-#include "PorousFlowMaterialVectorBase.h"
+#include "PorousFlowThermalConductivityBase.h"
 
 class PorousFlowThermalConductivityFromPorosity;
 
@@ -24,8 +24,8 @@ InputParameters validParams<PorousFlowThermalConductivityFromPorosity>();
  * Thermal conductivity = phi * lambda_f + (1 - phi) * lambda_s,
  * where phi is porosity, and lambda_f, lambda_s are
  * thermal conductivities of the fluid and solid (assumed constant)
-*/
-class PorousFlowThermalConductivityFromPorosity : public PorousFlowMaterialVectorBase
+ */
+class PorousFlowThermalConductivityFromPorosity : public PorousFlowThermalConductivityBase
 {
 public:
   PorousFlowThermalConductivityFromPorosity(const InputParameters & parameters);
@@ -44,12 +44,6 @@ protected:
 
   /// d(quadpoint porosity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
-
-  /// Thermal conducitivity at the qps
-  MaterialProperty<RealTensorValue> & _la_qp;
-
-  /// d(thermal conductivity at the qps)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealTensorValue>> & _dla_qp_dvar;
 };
 
 #endif // POROUSFLOWTHERMALCONDUCTIVITYFROMPOROSITY_H

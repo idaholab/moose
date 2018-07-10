@@ -59,7 +59,7 @@ validParams<PorousFlowAqueousPreDisChemistry>()
                                      "Theta exponent.  Defaults to 1.  (one for each reaction)");
   params.addParam<std::vector<Real>>("eta_exponent",
                                      "Eta exponent.  Defaults to 1.  (one for each reaction)");
-
+  params.addPrivateParam<std::string>("pf_material_type", "chemistry");
   params.addClassDescription("This Material forms a std::vector of mineralisation reaction rates "
                              "(L(precipitate)/L(solution)/s) appropriate to the aqueous "
                              "precipitation-dissolution system provided.  Note: the "

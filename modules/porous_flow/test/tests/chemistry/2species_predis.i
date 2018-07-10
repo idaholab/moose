@@ -125,47 +125,17 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-    temperature = 298.15
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
     temperature = 298.15
   [../]
   [./ppss]
     type = PorousFlow1PhaseFullySaturated
-    at_nodes = true
     porepressure = pressure
   [../]
-  [./ppss_qp]
-    type = PorousFlow1PhaseFullySaturated
-    porepressure = pressure
-  [../]
-  [./massfrac_nodes]
-    type = PorousFlowMassFraction
-    mass_fraction_vars = 'a b'
-    at_nodes = true
-  [../]
-  [./massfrac_qp]
+  [./massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'a b'
   [../]
-  [./chem_nodes]
-    type = PorousFlowAqueousPreDisChemistry
-    primary_concentrations = 'a b'
-    num_reactions = 1
-    equilibrium_constants = eqm_k
-    primary_activity_coefficients = '1 1'
-    reactions = '1 1'
-    specific_reactive_surface_area = '1.0'
-    kinetic_rate_constant = '1.0e-8'
-    activation_energy = '1.5e4'
-    molar_volume = 1
-    gas_constant = 8.314
-    reference_temperature = 298.15
-    at_nodes = true
-  [../]
-  [./chem_qp]
+  [./chem]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'a b'
     num_reactions = 1
@@ -181,28 +151,13 @@
   [../]
   [./mineral_conc]
     type = PorousFlowAqueousPreDisMineral
-    at_nodes = true
-  [../]
-  [./mineral_conc_qp]
-    type = PorousFlowAqueousPreDisMineral
   [../]
   [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
   [../]
   [./porosity]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = 0.4
-  [../]
-  [./porosity_qp]
     type = PorousFlowPorosityConst
     porosity = 0.4
   [../]

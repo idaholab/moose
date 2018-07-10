@@ -14,6 +14,7 @@ InputParameters
 validParams<PorousFlowVariableBase>()
 {
   InputParameters params = validParams<PorousFlowMaterial>();
+  params.addPrivateParam<std::string>("pf_material_type", "pressure_saturation");
   params.addClassDescription("Base class for thermophysical variable materials. Provides pressure "
                              "and saturation material properties for all phases as required");
   return params;

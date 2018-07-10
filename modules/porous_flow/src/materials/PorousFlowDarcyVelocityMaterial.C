@@ -19,6 +19,7 @@ validParams<PorousFlowDarcyVelocityMaterial>()
   params.addRequiredParam<RealVectorValue>("gravity",
                                            "Gravitational acceleration vector downwards (m/s^2)");
   params.addClassDescription("This Material calculates the Darcy velocity for all phases");
+  params.addPrivateParam<std::string>("pf_material_type", "darcy_velocity");
   params.set<bool>("at_nodes") = false;
   return params;
 }

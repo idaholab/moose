@@ -134,19 +134,8 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    at_nodes = true
-  [../]
-  [./temperature_qp]
-    type = PorousFlowTemperature
   [../]
   [./ppss]
-    type = PorousFlow2PhasePS
-    at_nodes = true
-    phase0_porepressure = ppwater
-    phase1_saturation = sgas
-    capillary_pressure = pc
-  [../]
-  [./ppss_qp]
     type = PorousFlow2PhasePS
     phase0_porepressure = ppwater
     phase1_saturation = sgas
@@ -154,16 +143,9 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
   [../]
   [./simple_fluid0]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid0
-    phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid0_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid0
     phase = 0
@@ -172,16 +154,9 @@
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid1
     phase = 1
-    at_nodes = true
-  [../]
-  [./simple_fluid1_qp]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid1
-    phase = 1
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.1
   [../]
   [./permeability]
@@ -190,29 +165,12 @@
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityBC
-    at_nodes = true
     lambda = 2
     phase = 0
     s_res = 0.25
     sum_s_res = 0.35
   [../]
   [./relperm_gas]
-    type = PorousFlowRelativePermeabilityBC
-    at_nodes = true
-    lambda = 2
-    phase = 1
-    s_res = 0.1
-    sum_s_res = 0.35
-  [../]
-  [./relperm_water_qp]
-    type = PorousFlowRelativePermeabilityBC
-    lambda = 2
-    phase = 0
-    s_res = 0.25
-    sum_s_res = 0.35
-    nw_phase = true
-  [../]
-  [./relperm_gas_qp]
     type = PorousFlowRelativePermeabilityBC
     lambda = 2
     phase = 1

@@ -170,16 +170,7 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
   [./ppss]
-    type = PorousFlow1PhaseFullySaturated
-    at_nodes = true
-    porepressure = pp
-  [../]
-  [./ppss_qp]
     type = PorousFlow1PhaseFullySaturated
     porepressure = pp
   [../]
@@ -187,30 +178,13 @@
     type = PorousFlowMassFraction
     mass_fraction_vars = 'tracer'
   [../]
-  [./massfrac_nodal]
-    type = PorousFlowMassFraction
-    mass_fraction_vars = 'tracer'
-    at_nodes = true
-  [../]
   [./simple_fluid]
-    type = PorousFlowSingleComponentFluid
-    fp = simple_fluid
-    phase = 0
-    at_nodes = true
-  [../]
-  [./simple_fluid_qp]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
   [../]
   [./poro1]
     type = PorousFlowPorosityConst
-    porosity = 6e-4   # = a * phif
-    block = 'f1 f2'
-  [../]
-  [./poro_nodal1]
-    type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 6e-4   # = a * phif
     block = 'f1 f2'
   [../]
@@ -225,12 +199,6 @@
     porosity = 0.1
     block = 'matrix'
   [../]
-  [./poro_nodal2]
-    type = PorousFlowPorosityConst
-    at_nodes = true
-    porosity = 0.1
-    block = 'matrix'
-  [../]
   [./diff2]
     type = PorousFlowDiffusivityConst
     diffusion_coeff = '1.e-9 1.e-9'
@@ -239,11 +207,6 @@
   [../]
   [./relp]
     type = PorousFlowRelativePermeabilityConst
-    phase = 0
-  [../]
-  [./relp_nodal]
-    type = PorousFlowRelativePermeabilityConst
-    at_nodes = true
     phase = 0
   [../]
   [./permeability1]
