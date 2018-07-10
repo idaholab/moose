@@ -109,7 +109,7 @@ class MeshViewerPlugin(VTKWindowPlugin):
 
         exe_path = tree.app_info.path
         self._removeFileNoError(self.current_temp_mesh_file)
-        input_filename = "unset"
+        input_filename = ""
         if tree.input_filename:
             input_filename = os.path.basename(os.path.splitext(tree.input_filename)[0])
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file.format(input_filename))
