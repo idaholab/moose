@@ -31,6 +31,8 @@
     # Only run in opt mode to avoid timeouts in dbg.
     method = '!DBG'
     check_input = True
+
+    cli_args = 'Mesh/uniform_refine=0'
   [../]
   [./grain_growth_3D_large]
     type = RunApp
