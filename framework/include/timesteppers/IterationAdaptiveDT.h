@@ -50,7 +50,6 @@ protected:
 
   void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
   Real computeInterpolationDT();
-  void limitDT(Real & limitedDT);
   void limitDTByFunction(Real & limitedDT);
   void limitDTToPostprocessorValue(Real & limitedDT);
 

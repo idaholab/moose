@@ -230,14 +230,6 @@ IterationAdaptiveDT::constrainStep(Real & dt)
 {
   bool at_sync_point = TimeStepper::constrainStep(dt);
 
-  limitDT(dt);
-
-  return at_sync_point;
-}
-
-void
-IterationAdaptiveDT::limitDT(Real & dt)
-{
   // Limit the timestep to postprocessor value
   limitDTToPostprocessorValue(dt);
 
@@ -255,6 +247,8 @@ IterationAdaptiveDT::limitDT(Real & dt)
                << *_tfunc_times.begin() << " dt: " << std::setw(9) << dt << '\n';
     }
   }
+
+  return at_sync_point;
 }
 
 Real
@@ -299,7 +293,7 @@ IterationAdaptiveDT::converged()
 
   // we get what the next time step should be
   Real dt_test = _dt;
-  limitDT(dt_test);
+  limitDTToPostprocessorValue(dt_test);
 
   // we cannot constrain the time step any further
   if (dt_test == 0)
