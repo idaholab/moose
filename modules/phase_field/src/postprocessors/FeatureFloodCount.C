@@ -1114,10 +1114,6 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
     _partial_feature_sets[map_num].clear();
   }
 
-  //  _console << "\n\n\n\n**********Fully Merged Features*************" << std::endl;
-  //  for (const auto & feature : _feature_sets)
-  //    _console << feature;
-
   /**
    * IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point but
    * we can't broadcast it here because this routine is not collective.
