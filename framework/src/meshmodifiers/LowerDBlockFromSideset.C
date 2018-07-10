@@ -12,7 +12,7 @@
 #include "MooseTypes.h"
 #include "MooseMesh.h"
 
-#include "libmesh/mesh.h"
+#include "libmesh/distributed_mesh.h"
 
 #include <set>
 
@@ -54,6 +54,9 @@ void
 LowerDBlockFromSideset::modify()
 {
   MeshBase & mesh = _mesh_ptr->getMesh();
+  bool distributed = dynamic_cast<DistributedMesh *>(&mesh);
+  if (distributed)
+    _mesh_ptr->needsPrepareForUse();
 
   auto side_list = mesh.get_boundary_info().build_side_list();
   std::sort(side_list.begin(),
@@ -82,10 +85,18 @@ LowerDBlockFromSideset::modify()
       element_sides_on_boundary.push_back(
           ElemSideDouble(mesh.elem_ptr(std::get<0>(triple)), std::get<1>(triple)));
 
-  for (const auto & element_side : element_sides_on_boundary)
+  dof_id_type max_elem_id = mesh.max_elem_id();
+  mesh.comm().max(max_elem_id);
+  auto max_elems_to_add = element_sides_on_boundary.size();
+  mesh.comm().max(max_elems_to_add);
+
+  for (auto i = beginIndex(element_sides_on_boundary); i < element_sides_on_boundary.size(); ++i)
   {
-    Elem * elem = element_side.elem;
-    unsigned int side = element_side.side;
+    Elem * elem = element_sides_on_boundary[i].elem;
+    if (distributed && elem->processor_id() != processor_id())
+      continue;
+
+    unsigned int side = element_sides_on_boundary[i].side;
 
     // Build a non-proxy element from this side.
     std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side, /*proxy=*/false));
@@ -100,9 +111,13 @@ LowerDBlockFromSideset::modify()
     // easy to figure out the Elem we came from.
     side_elem->set_interior_parent(elem);
 
+    // Add id for distributed
+    if (distributed)
+      side_elem->set_id(max_elem_id + processor_id() * max_elems_to_add + i);
+
     // Finally, add the lower-dimensional element to the Mesh.
     mesh.add_elem(side_elem.release());
-  }
+  };
 
   // Assign block name, if provided
   if (isParamValid("new_block_name"))
