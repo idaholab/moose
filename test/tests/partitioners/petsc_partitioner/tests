@@ -1,0 +1,144 @@
+[Tests]
+  [./ptscotch]
+    requirement = 'Make MOOSE support ptscotch via PETSc'
+    issues = '#11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch Outputs/file_base=petsc_partitioner_ptscotch_out'
+    ptscotch = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./ptscotch_weight_elment]
+    requirement = 'ptscotch shall support element-weighted graphs for balancing workload'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_weight_element_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch  Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_element_out'
+    ptscotch = true
+    # Work with PETSc-3.9.3 or higher
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./ptscotch_weight_side]
+    requirement = 'ptscotch shall support side-weighted graphs for minimizing communication'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_weight_side_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_side_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_side_out'
+    ptscotch = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./ptscotch_weight_both]
+    requirement = 'ptscotch shall take both side weights and element weights into consideration'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_ptscotch_weight_both_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=ptscotch Mesh/Partitioner/type=PartitionerWeightTest Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true Outputs/file_base=petsc_partitioner_ptscotch_weight_both_out'
+    ptscotch = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis]
+    requirement = 'Make MOOSE support parmetis via PETSc'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_out'
+    parmetis = true
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis_weight_element]
+    requirement = 'Parmetis shall support element-weighted graphs for balancing workload'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_element_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_element_out Mesh/Partitioner/apply_element_weight=true'
+    parmetis = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis_weight_side]
+    requirement = 'Parmetis shall support side-weighted graphs for minimizing communication'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_side_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_side_out Mesh/Partitioner/apply_side_weight=true'
+    parmetis = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./parmetis_weight_both]
+    requirement = 'Parmetis shall take side weights and element weights into consideration'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_both_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_both_out Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true'
+    parmetis = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./chaco]
+    requirement = 'MOOSE shall support a serial partitioner Chaco'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_chaco_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=chaco Outputs/file_base=petsc_partitioner_chaco_out'
+    chaco = true
+    petsc_version = '>=3.9.0'
+    # chaco uses rand so that it is platform dependent
+    platform = DARWIN
+    # work with 32-bit integers only
+    dof_id_bytes = 4
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./party]
+    requirement = 'MOOSE shall support a serial partitioner party'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_party_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=party Outputs/file_base=petsc_partitioner_party_out'
+    party = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+[]
