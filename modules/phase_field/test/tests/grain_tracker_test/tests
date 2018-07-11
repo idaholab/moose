@@ -69,7 +69,7 @@
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
     method = '!DBG' # slow test
-    valgrind = 'HEAVY'
+    valgrind = 'NONE' # Exact same test used elsewhere
     # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
     petsc_version = '>=3.5.0'
   [../]
@@ -118,6 +118,16 @@
     max_time = 500
     method = '!DBG' # slow test
     valgrind ='HEAVY'
+    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+    petsc_version = '>=3.5.0'
+  [../]
+
+  [./changing_avg_volume]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume_changing.i'
+    csvdiff = 'grain_tracker_volume_changing_out.csv'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
     # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
     petsc_version = '>=3.5.0'
   [../]

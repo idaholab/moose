@@ -716,6 +716,13 @@ FeatureFloodCount::getValue()
 }
 
 std::size_t
+FeatureFloodCount::getNumberActiveFeatures() const
+{
+  // Note: This value is parallel consistent, see FeatureFloodCount::communicateAndMerge()
+  return _feature_count;
+}
+
+std::size_t
 FeatureFloodCount::getTotalFeatureCount() const
 {
   /**

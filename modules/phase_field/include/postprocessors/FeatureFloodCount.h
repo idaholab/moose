@@ -59,6 +59,9 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
+  /// Return the number of active features
+  std::size_t getNumberActiveFeatures() const;
+
   /// Returns the total feature count (active and inactive ids, useful for sizing vectors)
   virtual std::size_t getTotalFeatureCount() const;
 
