@@ -1,11 +1,8 @@
 #include "ConcentricCircleMesh.h"
-#include "libmesh/mesh_generation.h"
-#include "libmesh/string_to_enum.h"
-#include "libmesh/periodic_boundaries.h"
-#include "libmesh/periodic_boundary_base.h"
-#include "libmesh/unstructured_mesh.h"
 #include "libmesh/face_quad4.h"
-
+#include "MooseMesh.h"
+#include "libmesh/mesh_modification.h"
+#include "libmesh/serial_mesh.h"
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
@@ -16,69 +13,80 @@ InputParameters
 validParams<ConcentricCircleMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
-
-  params.addRequiredParam<Real>("unit_cell_length", "Length of a unit cell of an assembly");
-
-  params.addRequiredParam<Real>("radius_fuel", "Radius of fuel");
-  params.addRequiredParam<Real>("inner_radius_clad", "Inner radius of cladding");
-  params.addRequiredParam<Real>("outer_radius_clad", "Outer radius of cladding");
-  params.addRequiredParam<unsigned int>("num_sectors",
-                                        "num_sectors=2n; n>=1"
-                                        "Number of azimuthal sectors in each quadrant"
-                                        "'num_sectors' must be an even number.");
-
+  MooseEnum portion(
+      "full top_right top_left bottom_left bottom_right right_half left_half top_half bottom_half",
+      "full");
   params.addRequiredParam<unsigned int>(
-      "nr",
-      "nr>=(num_sectors/2 + 1)"
-      "Number of intervals in a radial direction"
-      "The number of total intervals in a radial direction includes the intervals"
-      "given for the square mesh at the center, and its dimension is given as 'num_sectors/2' by "
-      "'num_sectors/2'.");
-  params.addRequiredParam<unsigned int>("num_intervals_unit_cell",
-                                        "Numer of intervals in the unit cell part.");
-  // this might not be needed. just in case for now.
-  // params.addRangeCheckedParam<Real>(
-  //    "growth_r", 1.0, "growth_r>0.0", "The ratio of radial sizes of successive rings of
-  //    elements");
-  params.addParam<SubdomainID>("fuel_subdomain_id", 1, "The subdomain ID given to fuel");
-  params.addParam<SubdomainID>("clad_subdomain_id", 3, "The subdomain ID given to cladding");
-  params.addParam<SubdomainID>("gap_subdomain_id", 2, "The subdomain ID given to gap");
-  params.addParam<SubdomainID>("moderator_subdomain_id", 4, "The subdomain ID given to moderator");
+      "num_sectors",
+      "num_sectors=2n; n>=1"
+      "Number of azimuthal sectors in each quadrant (only for the center circle)"
+      "'num_sectors' must be an even number.");
+  params.addRequiredParam<std::vector<Real>>(
+      "radii",
+      "Radii of concentric circles must be provided to determine their exact locations"
+      "The number of total intervals in a radial direction = number of provided radii + "
+      "num_sectors / 2");
+  params.addRequiredParam<std::vector<int>>("block", "Subdomain IDs for concentric circles");
+  params.addParam<Real>(
+      "unit_cell_length",
+      0.0,
+      "The moderator part can be added to complete meshes for the whole fuel unit cell."
+      "The windmill approach is applied."
+      "Triangle - shaped meshes are generated at the corners of the unit cell."
+      "Others are quad meshes.");
+  params.addParam<MooseEnum>("portion", portion, "Control of which part of mesh is created");
+  params.addRequiredParam<bool>(
+      "volume_preserving_function",
+      "Volume of concentric circles can be preserved using this function.");
 
-  params.addClassDescription("This ConcentricCircleMesh is to generate a concentric circle mesh "
-                             "for typical LWR type fuels.");
+  // x boundary names
+  params.addParam<BoundaryName>("left_boundary", "left_boundary", "name of the left (x) boundary");
+  params.addParam<BoundaryName>(
+      "right_boundary", "right_boundary", "name of the right (x) boundary");
+  // y boundary names
+  params.addParam<BoundaryName>("top_boundary", "top_boundary", "name of the top (y) boundary");
+  params.addParam<BoundaryName>(
+      "bottom_boundary", "bottom_boundary", "name of the bottom (y) boundary");
+
+  params.addClassDescription("This ConcentricCircleMesh source code is to generate concentric "
+                             "circle meshes for typical LWR fuels.");
   return params;
 }
 
 ConcentricCircleMesh::ConcentricCircleMesh(const InputParameters & parameters)
   : MooseMesh(parameters),
-    _unit_cell_length(getParam<Real>("unit_cell_length")),
-    _radius_fuel(getParam<Real>("radius_fuel")),
-    _outer_radius_clad(getParam<Real>("outer_radius_clad")),
-    _inner_radius_clad(getParam<Real>("inner_radius_clad")),
     _num_sectors(getParam<unsigned int>("num_sectors")),
-    _nr(getParam<unsigned int>("nr")),
-    _fuel_subdomain_id(getParam<SubdomainID>("fuel_subdomain_id")),
-    _clad_subdomain_id(getParam<SubdomainID>("clad_subdomain_id")),
-    _gap_subdomain_id(getParam<SubdomainID>("gap_subdomain_id")),
-    _moderator_subdomain_id(getParam<SubdomainID>("moderator_subdomain_id")),
-    _num_intervals_unit_cell(getParam<unsigned int>("num_intervals_unit_cell"))
-//_growth_r(getParam<Real>("growth_r"))
+    _radii(getParam<std::vector<Real>>("radii")),
+    _block(getParam<std::vector<int>>("block")),
+    _unit_cell_length(getParam<Real>("unit_cell_length")),
+    _volume_preserving_function(getParam<bool>("volume_preserving_function")),
+    _portion(getParam<MooseEnum>("portion"))
 {
   if (_num_sectors % 2 != 0)
-    mooseError("ConcentricCircleMesh: num_sectors must be an even number");
-  if (_unit_cell_length <= _radius_fuel)
-    mooseError("ConcentricCircleMesh: The radius of a fuel pin must be smaller than the length of "
-               "the unit cell");
-  if (_outer_radius_clad <= _radius_fuel)
-    mooseError("ConcentricCircleMesh: The outer radius of a clad must be bigger than the radius of "
-               "the fuel pin");
-  if (_outer_radius_clad <= _inner_radius_clad)
-    mooseError("ConcentricCircleMesh: The outer radius of a clad must be bigger than the inner "
-               "radius of the clad");
-  if (_nr < (_num_sectors / 2 + 1))
-    mooseError("ConcentricCircleMesh: The number of intervals in a radial direction must be bigger "
-               "than or equal to num_sectors/2 + 1");
+    mooseError("ConcentricCircleMesh: num_sectors must be an even number.");
+  // radii data check up
+  for (unsigned i = 0; i < _radii.size() - 1; ++i)
+  {
+    if (_radii.at(i) > _radii.at(i + 1))
+      mooseError("Radii must be provided in order by starting with the smallest radius and "
+                 "providing the following gradual radii.");
+  }
+
+  if (_unit_cell_length != 0.0)
+  {
+    for (unsigned i = 0; i < _radii.size(); ++i)
+    {
+      if (_unit_cell_length < _radii.at(i))
+        mooseError("The unit cell length must be larger than any radii.");
+    }
+    if (_block.size() != _radii.size() + 1)
+      mooseError("The size of 'block' is equal to the size of 'radii' plus 1.");
+  }
+  else
+  {
+    if (_block.size() != _radii.size())
+      mooseError("The size of 'block' is equal to the size of 'radii.'");
+  }
 }
 
 std::unique_ptr<MooseMesh>
@@ -92,122 +100,92 @@ ConcentricCircleMesh::buildMesh()
 {
   // Get the actual libMesh mesh
   MeshBase & mesh = getMesh();
-
   // Set dimension of mesh
   mesh.set_mesh_dimension(2);
   mesh.set_spatial_dimension(2);
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  // radius modification (for accurate criticality calculation)
   const Real d_angle = M_PI / 2 / _num_sectors;
-  const Real target_area_fuel = M_PI * std::pow(_radius_fuel, 2);
-  Real modified_radius_fuel =
-      std::sqrt(2 * target_area_fuel / std::sin(d_angle) / _num_sectors / 4);
-  const Real target_area_gap =
-      (M_PI * (std::pow(_inner_radius_clad, 2) - std::pow(_radius_fuel, 2)));
-  Real modified_inner_radius_clad = std::sqrt(
-      target_area_gap / std::sin(d_angle) / _num_sectors / 2 + std::pow(modified_radius_fuel, 2));
-  const Real target_area_clad =
-      (M_PI * (std::pow(_outer_radius_clad, 2) - std::pow(_inner_radius_clad, 2)));
-  Real modified_outer_radius_clad =
-      std::sqrt(target_area_clad / std::sin(d_angle) / _num_sectors / 2 +
-                std::pow(modified_inner_radius_clad, 2));
-
-  _radius_fuel = modified_radius_fuel;
-  _inner_radius_clad = modified_inner_radius_clad;
-  _outer_radius_clad = modified_outer_radius_clad;
-
-  // number of extra layers outside of the square.
-  unsigned num_extra_layers = _nr - _num_sectors / 2;
+  if (_volume_preserving_function == true)
+  {
+    Real original_radius = 0.0;
+    for (unsigned i = 0; i < _radii.size(); ++i)
+    {
+      // volume preserving function for the center circle
+      if (i == 0)
+      {
+        const Real target_area = M_PI * std::pow(_radii.at(i), 2);
+        Real modified_radius = std::sqrt(2 * target_area / std::sin(d_angle) / _num_sectors / 4);
+        original_radius = _radii.at(i);
+        _radii.at(i) = modified_radius;
+      }
+      else
+      {
+        // volume preserving functions for outer circles
+        const Real target_area = M_PI * (std::pow(_radii.at(i), 2) - std::pow(original_radius, 2));
+        Real modified_radius = std::sqrt(target_area / std::sin(d_angle) / _num_sectors / 2 +
+                                         std::pow(_radii.at(i - 1), 2));
+        original_radius = _radii.at(i);
+        _radii.at(i) = modified_radius;
+      }
+    }
+  }
 
   // number of total nodes
-  unsigned num_total_nodes = std::pow(_num_sectors / 2 + 1, 2) +
-                             (_num_sectors + 1) * (num_extra_layers + 2 + _num_intervals_unit_cell);
+  unsigned num_total_nodes = 0;
+  if (_unit_cell_length != 0)
+    num_total_nodes =
+        std::pow(_num_sectors / 2 + 1, 2) + (_num_sectors + 1) * _radii.size() + (_num_sectors + 1);
+  else
+    num_total_nodes = std::pow(_num_sectors / 2 + 1, 2) + (_num_sectors + 1) * _radii.size();
 
   std::vector<Node *> nodes(num_total_nodes);
   unsigned node_id = 0;
 
-  // for adding nodes for the square at the center of the circle.
+  // for adding nodes for the square at the center of the circle
   for (unsigned i = 0; i <= _num_sectors / 2; ++i)
   {
-    const Real x = i * (_radius_fuel / _nr) * std::cos(M_PI / 4);
+    const Real x = i * (_radii.at(0) / (_num_sectors / 2 + 1)) * std::cos(M_PI / 4);
     for (unsigned j = 0; j <= _num_sectors / 2; ++j)
     {
-      const Real y = j * (_radius_fuel / _nr) * std::sin(M_PI / 4);
+      const Real y = j * (_radii.at(0) / (_num_sectors / 2 + 1)) * std::sin(M_PI / 4);
       nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
       node_id++;
     }
   }
 
-  // for adding the outer notes
-  Real current_radius_fuel = 0.0;
+  // for adding the outer nodes of the square
+  Real current_radius = 0.0;
 
-  for (unsigned layers = 0; layers < num_extra_layers; ++layers)
+  for (unsigned layers = 0; layers < _radii.size(); ++layers)
   {
-    current_radius_fuel = (_num_sectors / 2 + layers + 1) * (_radius_fuel / _nr);
+    current_radius = _radii.at(layers);
     for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
     {
-      const Real x = current_radius_fuel * std::cos(num_outer_nodes * d_angle);
-      const Real y = current_radius_fuel * std::sin(num_outer_nodes * d_angle);
+      const Real x = current_radius * std::cos(num_outer_nodes * d_angle);
+      const Real y = current_radius * std::sin(num_outer_nodes * d_angle);
       nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
       node_id++;
     }
   }
 
-  // adding nodes for the gap
-  for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
+  if (_unit_cell_length != 0.0)
   {
-    const Real x = _inner_radius_clad * std::cos(num_outer_nodes * d_angle);
-    const Real y = _inner_radius_clad * std::sin(num_outer_nodes * d_angle);
-    nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-    node_id++;
-  }
-
-  // adding nodes for the cladding
-  for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
-  {
-    const Real x = _outer_radius_clad * std::cos(num_outer_nodes * d_angle);
-    const Real y = _outer_radius_clad * std::sin(num_outer_nodes * d_angle);
-    nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-    node_id++;
-  }
-
-  // adding nodes for the unit cell
-  Real current_radius_moderator = 0.0;
-
-  for (unsigned i = 0; i < _num_intervals_unit_cell; ++i)
-  {
-    if (i != _num_intervals_unit_cell - 1)
+    // adding nodes for the unit cell
+    for (unsigned j = 0; j < _num_sectors / 2 + 1; ++j)
     {
-      current_radius_moderator =
-          _outer_radius_clad + (_unit_cell_length - _outer_radius_clad) / _num_intervals_unit_cell +
-          i * (_unit_cell_length - _outer_radius_clad) / _num_intervals_unit_cell;
-      for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
-      {
-        const Real x = current_radius_moderator * std::cos(num_outer_nodes * d_angle);
-        const Real y = current_radius_moderator * std::sin(num_outer_nodes * d_angle);
-        nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-        node_id++;
-      }
+      const Real x = _unit_cell_length / 2;
+      const Real y = (_unit_cell_length / 2) * std::tan(j * d_angle);
+      nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
+      node_id++;
     }
-    else
+    for (unsigned i = 0; i < _num_sectors / 2; ++i)
     {
-      for (unsigned j = 0; j < _num_sectors / 2 + 1; ++j)
-      {
-        const Real x = _unit_cell_length;
-        const Real y = _unit_cell_length * std::tan(j * d_angle);
-        nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-        node_id++;
-      }
-
-      for (unsigned i = 0; i < _num_sectors / 2 + 1; ++i)
-      {
-        const Real x = _unit_cell_length * std::cos((i + _num_sectors / 2 + 1) * d_angle) /
-                       std::sin((i + _num_sectors / 2 + 1) * d_angle);
-        const Real y = _unit_cell_length;
-        nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-        node_id++;
-      }
+      const Real x = (_unit_cell_length / 2) * std::cos((i + _num_sectors / 2 + 1) * d_angle) /
+                     std::sin((i + _num_sectors / 2 + 1) * d_angle);
+      const Real y = _unit_cell_length / 2;
+      nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
+      node_id++;
     }
   }
 
@@ -241,7 +219,7 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
     elem->set_node(2) = nodes[index + _num_sectors / 2 + 2];
     elem->set_node(3) = nodes[index + 1];
-    elem->subdomain_id() = _fuel_subdomain_id;
+    elem->subdomain_id() = _block.at(0);
 
     if (index < standard / 2)
       boundary_info.add_side(elem, 3, 1);
@@ -264,7 +242,7 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
     elem->set_node(2) = nodes[index + _num_sectors / 2 + 2];
     elem->set_node(3) = nodes[index + 1];
-    elem->subdomain_id() = _fuel_subdomain_id;
+    elem->subdomain_id() = _block.at(0);
 
     if (index == (standard / 2 + 1) * (standard / 2))
       boundary_info.add_side(elem, 0, 2);
@@ -274,7 +252,7 @@ ConcentricCircleMesh::buildMesh()
 
   // adding elements in one outer layer of the square (left side)
   int counter = 0;
-  while (index != _num_sectors / 2)
+  while (index != standard / 2)
   {
     Elem * elem = mesh.add_elem(new Quad4);
     elem->set_node(0) = nodes[index];
@@ -282,7 +260,7 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(2) =
         nodes[index + (_num_sectors / 2 + 1) + counter * (_num_sectors / 2 + 2) + 1];
     elem->set_node(3) = nodes[index - _num_sectors / 2 - 1];
-    elem->subdomain_id() = _fuel_subdomain_id;
+    elem->subdomain_id() = _block.at(0);
 
     if (index == standard + 1)
       boundary_info.add_side(elem, 2, 1);
@@ -291,32 +269,28 @@ ConcentricCircleMesh::buildMesh()
     counter++;
   }
 
-  // adding elements in the rest of the mesh (fuel part)
+  // adding elements for other concentric circles
   index = std::pow(_num_sectors / 2 + 1, 2);
   limit = static_cast<int>(num_total_nodes) - standard - 2;
   int num_nodes_boundary = std::pow(_num_sectors / 2 + 1, 2) + _num_sectors + 1;
 
-  // adding elements in the rest of the mesh outside of fuel part.
   counter = 0;
 
   while (index < limit)
   {
+
     Elem * elem = mesh.add_elem(new Quad4);
     elem->set_node(0) = nodes[index];
     elem->set_node(1) = nodes[index + _num_sectors + 1];
     elem->set_node(2) = nodes[index + _num_sectors + 2];
     elem->set_node(3) = nodes[index + 1];
+    elem->subdomain_id() = _block.at(0);
 
-    if (index > limit - (standard + 1) * static_cast<int>(_num_intervals_unit_cell))
-      elem->subdomain_id() = _moderator_subdomain_id;
-    else if (limit - (standard + 1) * (static_cast<int>(_num_intervals_unit_cell) + 1) < index &&
-             index <= limit - (standard + 1) * static_cast<int>(_num_intervals_unit_cell))
-      elem->subdomain_id() = _clad_subdomain_id;
-    else if (limit - (standard + 1) * (static_cast<int>(_num_intervals_unit_cell) + 2) < index &&
-             index <= limit - (standard + 1) * (static_cast<int>(_num_intervals_unit_cell) + 1))
-      elem->subdomain_id() = _gap_subdomain_id;
-    else if (index <= limit - (standard + 1) * (static_cast<int>(_num_intervals_unit_cell) + 2))
-      elem->subdomain_id() = _fuel_subdomain_id;
+    for (int i = 0; i < static_cast<int>(_block.size()) - 1; ++i)
+    {
+      if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))
+        elem->subdomain_id() = _block.at(_block.size() - 1 - i);
+    }
 
     int const initial = std::pow(standard / 2 + 1, 2);
     int const final = std::pow(standard / 2 + 1, 2) + _num_sectors - 1;
@@ -327,10 +301,17 @@ ConcentricCircleMesh::buildMesh()
       boundary_info.add_side(elem, 2, 1);
     if (index > limit - (standard + 1))
     {
-      if (index < limit - standard + standard / 2)
-        boundary_info.add_side(elem, 1, 3);
+      if (_unit_cell_length != 0)
+      {
+        if (index < limit - standard + standard / 2)
+          boundary_info.add_side(elem, 1, 3);
+        else
+          boundary_info.add_side(elem, 1, 4);
+      }
       else
-        boundary_info.add_side(elem, 1, 4);
+      {
+        boundary_info.add_side(elem, 1, 3);
+      }
     }
 
     index++;
@@ -343,8 +324,63 @@ ConcentricCircleMesh::buildMesh()
 
   boundary_info.sideset_name(1) = "left";
   boundary_info.sideset_name(2) = "bottom";
-  boundary_info.sideset_name(3) = "right";
-  boundary_info.sideset_name(4) = "top";
 
+  if (_unit_cell_length == 0.0)
+    boundary_info.sideset_name(3) = "top";
+  else
+  {
+    boundary_info.sideset_name(3) = "right";
+    boundary_info.sideset_name(4) = "top";
+  }
+
+  if (_portion == "top_left")
+  {
+    MeshTools::Modification::rotate(mesh, 90, 0, 0);
+    boundary_info.sideset_name(1) = "bottom";
+    boundary_info.sideset_name(2) = "right";
+
+    if (_unit_cell_length != 0.0)
+    {
+      boundary_info.sideset_name(3) = "top";
+      boundary_info.sideset_name(4) = "left";
+    }
+  }
+  else if (_portion == "bottom_left")
+  {
+    MeshTools::Modification::rotate(mesh, 180, 0, 0);
+    boundary_info.sideset_name(1) = "right";
+    boundary_info.sideset_name(2) = "top";
+    boundary_info.sideset_name(3) = "bottom";
+
+    if (_unit_cell_length != 0.0)
+    {
+      boundary_info.sideset_name(3) = "left";
+      boundary_info.sideset_name(4) = "bottom";
+    }
+  }
+  else if (_portion == "bottom_right")
+  {
+    MeshTools::Modification::rotate(mesh, 270, 0, 0);
+    boundary_info.sideset_name(1) = "top";
+    boundary_info.sideset_name(2) = "left";
+    boundary_info.sideset_name(3) = "bottom";
+
+    if (_unit_cell_length != 0.0)
+      boundary_info.sideset_name(4) = "right";
+  }
+  else if (_portion == "top_half")
+  {
+    /*
+    boundary_info.clear();
+    ReplicatedMesh & other_mesh = cast_ref<ReplicatedMesh &>(getMesh());
+    MeshTools::Modification::rotate(_other_mesh, 90, 0, 0);
+    _other_mesh.prepare_for_use(false);
+    */
+  }
   mesh.prepare_for_use(false);
+
+  // BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
+  // BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
+  // BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
+  // BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
 }

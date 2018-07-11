@@ -1,13 +1,11 @@
 [Mesh]
   type = ConcentricCircleMesh
+  num_sectors = 6
+  radii = '0.16125 0.1645 0.187'
+  block = '1 2 3 4'
+  volume_preserving_function = true
+  portion = top_right
   unit_cell_length = 0.496
-  radius_fuel = 0.3225
-  outer_radius_clad = 0.374
-  inner_radius_clad = 0.3515
-  num_sectors = 4
-  nr = 3
-  num_intervals_unit_cell = 3
-
 []
 
 [Variables]
