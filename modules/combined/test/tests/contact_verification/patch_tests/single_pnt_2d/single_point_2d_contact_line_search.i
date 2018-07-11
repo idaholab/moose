@@ -144,26 +144,6 @@
 []
 
 [Postprocessors]
-  [./bot_react_x]
-    type = NodalSum
-    variable = saved_x
-    boundary = 1
-  [../]
-  [./bot_react_y]
-    type = NodalSum
-    variable = saved_y
-    boundary = 1
-  [../]
-  [./top_react_x]
-    type = NodalSum
-    variable = saved_x
-    boundary = 4
-  [../]
-  [./top_react_y]
-    type = NodalSum
-    variable = saved_y
-    boundary = 4
-  [../]
   [./disp_x]
     type = NodalVariableValue
     nodeid = 5
