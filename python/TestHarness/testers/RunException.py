@@ -67,7 +67,7 @@ class RunException(RunApp):
             output += "#"*80 + "\n\nUnable to match the following pattern against the program's output:\n\n" + specs['expect_err'] + "\n"
 
         if reason == '':
-            reason = RunApp.testFileOutput(self, moose_dir, options, output)
+            RunApp.testFileOutput(self, moose_dir, options, output)
 
         if reason != '':
             self.setStatus(self.fail, reason)

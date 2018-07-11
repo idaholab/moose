@@ -222,7 +222,7 @@ class RunApp(Tester):
         if reason != '':
             self.setStatus(self.fail, reason)
 
-        return reason
+        return output
 
     def processResults(self, moose_dir, options, output):
         """
@@ -238,6 +238,4 @@ class RunApp(Tester):
         # TODO: because RunParallel is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
-        self.testFileOutput(moose_dir, options, output)
-
-        return output
+        return self.testFileOutput(moose_dir, options, output)
