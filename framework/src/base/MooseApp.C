@@ -35,6 +35,7 @@
 #include "RelationshipManager.h"
 #include "Registry.h"
 #include "SerializerGuard.h"
+#include "PerfGraphInterface.h" // For TIME_SECTIOn
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -289,7 +290,17 @@ MooseApp::MooseApp(InputParameters parameters)
     _multiapp_level(
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
     _multiapp_number(
-        isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0)
+        isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
+    _setup_timer(_perf_graph.registerSection("MooseApp::setup", 2)),
+    _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions", 5)),
+    _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile", 3)),
+    _execute_timer(_perf_graph.registerSection("MooseApp::execute", 2)),
+    _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner", 3)),
+    _restore_timer(_perf_graph.registerSection("MooseApp::restore", 2)),
+    _run_timer(_perf_graph.registerSection("MooseApp::run", 3)),
+    _execute_mesh_modifiers_timer(_perf_graph.registerSection("MooseApp::executeMeshModifiers", 1)),
+    _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
+    _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3))
 {
   Registry::addKnownLabel(_type);
 
@@ -408,6 +419,8 @@ MooseApp::getPrintableVersion() const
 void
 MooseApp::setupOptions()
 {
+  TIME_SECTION(_setup_options_timer);
+
   // MOOSE was updated to have the ability to register execution flags in similar fashion as
   // objects. However, this change requires all *App.C/h files to be updated with the new
   // registerExecFlags method. To avoid breaking all applications the default MOOSE flags
@@ -436,7 +449,11 @@ MooseApp::setupOptions()
 
   // The no_timing flag takes precedence over the timing flag.
   if (getParam<bool>("no_timing"))
+  {
     _pars.set<bool>("timing") = false;
+
+    _perf_graph.setActive(false);
+  }
 
   if (isParamValid("trap_fpe") && isParamValid("no_trap_fpe"))
     mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");
@@ -750,6 +767,8 @@ MooseApp::getOutputFileBase() const
 void
 MooseApp::runInputFile()
 {
+  TIME_SECTION(_run_input_file_timer);
+
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
     return;
@@ -787,6 +806,8 @@ MooseApp::errorCheck()
 void
 MooseApp::executeExecutioner()
 {
+  TIME_SECTION(_execute_executioner_timer);
+
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
     return;
@@ -849,6 +870,8 @@ MooseApp::backup()
 void
 MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 {
+  TIME_SECTION(_restore_timer);
+
   // This means that a Backup is coming through to use for restart / recovery
   // We should just cache it for now
   if (!_executioner)
@@ -894,11 +917,11 @@ MooseApp::setErrorOverridden()
 void
 MooseApp::run()
 {
-  Moose::perf_log.push("Full Runtime", "Application");
+  TIME_SECTION(_run_timer);
 
-  Moose::perf_log.push("Application Setup", "Setup");
   try
   {
+    TIME_SECTION(_setup_timer);
     setupOptions();
     runInputFile();
   }
@@ -906,18 +929,18 @@ MooseApp::run()
   {
     mooseError(err.what());
   }
-  Moose::perf_log.pop("Application Setup", "Setup");
 
   if (!_check_input)
+  {
+    TIME_SECTION(_execute_timer);
     executeExecutioner();
+  }
   else
   {
     errorCheck();
     // Output to stderr, so it is easier for peacock to get the result
     Moose::err << "Syntax OK" << std::endl;
   }
-
-  Moose::perf_log.pop("Full Runtime", "Application");
 }
 
 void
@@ -1335,6 +1358,8 @@ MooseApp::executeMeshModifiers()
 {
   if (!_mesh_modifiers.empty())
   {
+    TIME_SECTION(_execute_mesh_modifiers_timer);
+
     DependencyResolver<std::shared_ptr<MeshModifier>> resolver;
 
     // Add all of the dependencies into the resolver and sort them
@@ -1407,6 +1432,8 @@ MooseApp::restoreCachedBackup()
   if (!_cached_backup.get())
     mooseError("No cached Backup to restore!");
 
+  TIME_SECTION(_restore_cached_backup_timer);
+
   restore(_cached_backup, isRestarting());
 
   // Release our hold on this Backup
@@ -1416,6 +1443,8 @@ MooseApp::restoreCachedBackup()
 void
 MooseApp::createMinimalApp()
 {
+  TIME_SECTION(_create_minimal_app_timer);
+
   // SetupMeshAction (setup_mesh)
   {
     // Build the Action parameters

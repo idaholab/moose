@@ -7,7 +7,7 @@ The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-elem
 
 Some of the capability at your fingertips:
 
-* Fully-coupled, fully-implicit multiphysics solver
+* Fully-coupled,  fully-implicit multiphysics solver
 * Dimension independent physics
 * Automatically parallel (largest runs >100,000 CPU cores!)
 * Modular development simplifies code reuse

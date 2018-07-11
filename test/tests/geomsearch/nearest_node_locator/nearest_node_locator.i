@@ -76,4 +76,10 @@
 
 [Outputs]
   exodus = true
+   [./pgraph]
+    type = PerfGraphOutput
+    heaviest_branch = true
+    heaviest_sections = 5
+    level = 2
+  [../]
 []

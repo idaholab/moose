@@ -14,6 +14,7 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "Restartable.h"
+#include "PerfGraphInterface.h"
 
 // System includes
 #include <string>
@@ -36,7 +37,8 @@ InputParameters validParams<Executioner>();
 class Executioner : public MooseObject,
                     public UserObjectInterface,
                     public PostprocessorInterface,
-                    public Restartable
+                    public Restartable,
+                    public PerfGraphInterface
 {
 public:
   /**

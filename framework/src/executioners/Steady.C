@@ -29,7 +29,8 @@ Steady::Steady(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
     _time_step(_problem.timeStep()),
-    _time(_problem.time())
+    _time(_problem.time()),
+    _final_timer(registerTimedSection("final", 1))
 {
   _problem.getNonlinearSystemBase().setDecomposition(_splitting);
 
@@ -109,7 +110,11 @@ Steady::execute()
   }
 #endif
 
-  _problem.execute(EXEC_FINAL);
+  {
+    TIME_SECTION(_final_timer)
+    _problem.execute(EXEC_FINAL);
+    _problem.outputStep(EXEC_FINAL);
+  }
 
   postExecute();
 }

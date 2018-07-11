@@ -14,6 +14,8 @@
 #include "NearestNodeThread.h"
 #include "Moose.h"
 #include "KDTree.h"
+#include "Conversion.h"
+#include "MooseApp.h"
 
 // libMesh
 #include "libmesh/boundary_info.h"
@@ -29,13 +31,20 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
                 Moose::stringify(boundary1) + Moose::stringify(boundary2),
                 "NearestNodeLocator",
                 0),
+    PerfGraphInterface(subproblem.getMooseApp().perfGraph(),
+                       "NearestNodeLocator_" + Moose::stringify(boundary1) + "_" +
+                           Moose::stringify(boundary2)),
     _subproblem(subproblem),
     _mesh(mesh),
     _slave_node_range(NULL),
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true),
-    _patch_update_strategy(_mesh.getPatchUpdateStrategy())
+    _patch_update_strategy(_mesh.getPatchUpdateStrategy()),
+    _find_nodes_timer(registerTimedSection("findNodes", 3)),
+    _update_patch_timer(registerTimedSection("updatePatch", 3)),
+    _reinit_timer(registerTimedSection("reinit", 3)),
+    _update_ghosted_elems_timer(registerTimedSection("updateGhostedElems", 5))
 {
   /*
   //sanity check on boundary ids
@@ -57,7 +66,8 @@ NearestNodeLocator::~NearestNodeLocator() { delete _slave_node_range; }
 void
 NearestNodeLocator::findNodes()
 {
-  Moose::perf_log.push("NearestNodeLocator::findNodes()", "Execution");
+  TIME_SECTION(_find_nodes_timer);
+
   /**
    * If this is the first time through we're going to build up a "neighborhood" of nodes
    * surrounding each of the slave nodes.  This will speed searching later.
@@ -193,12 +203,13 @@ NearestNodeLocator::findNodes()
       }
     }
   }
-  Moose::perf_log.pop("NearestNodeLocator::findNodes()", "Execution");
 }
 
 void
 NearestNodeLocator::reinit()
 {
+  TIME_SECTION(_reinit_timer);
+
   // Reset all data
   delete _slave_node_range;
   _slave_node_range = NULL;
@@ -230,7 +241,7 @@ NearestNodeLocator::nearestNode(dof_id_type node_id)
 void
 NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
 {
-  Moose::perf_log.push("NearestNodeLocator::updatePatch()", "Execution");
+  TIME_SECTION(_update_patch_timer);
 
   std::vector<dof_id_type> trial_master_nodes;
 
@@ -337,12 +348,13 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
                      "block and try again.");
     }
   }
-  Moose::perf_log.pop("NearestNodeLocator::updatePatch()", "Execution");
 }
 
 void
 NearestNodeLocator::updateGhostedElems()
 {
+  TIME_SECTION(_update_ghosted_elems_timer);
+
   // When 'iteration' patch update strategy is used, add the elements in
   // _new_ghosted_elems, which were accumulated in the nonlinear iterations
   // during the previous time step, to the list of ghosted elements. Also clear
