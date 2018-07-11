@@ -159,5 +159,8 @@ AverageGrainVolume::getValue()
   for (auto & volume : _feature_volumes)
     total_volume += volume;
 
-  return total_volume / _feature_volumes.size();
+  unsigned int active_features =
+      _feature_counter ? _feature_counter->getNumberActiveFeatures() : _feature_volumes.size();
+
+  return total_volume / active_features;
 }
