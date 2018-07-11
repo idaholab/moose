@@ -102,64 +102,60 @@
   [../]
 []
 
-# [Modules]
-#   [./PorousFlow]
-    [./Materials]
-      [./temperature]
-        type = PorousFlowTemperature
-        temperature = 50
-      [../]
-      [./ppss]
-        type = PorousFlow2PhasePS
-        phase0_porepressure = pwater
-        phase1_saturation = sgas
-        capillary_pressure = pc
-      [../]
-      [./massfrac]
-        type = PorousFlowMassFraction
-        mass_fraction_vars = 'x0 x1'
-      [../]
-      [./simple_fluid0]
-        type = PorousFlowSingleComponentFluid
-        fp = simple_fluid0
-        phase = 0
-      [../]
-      [./simple_fluid1]
-        type = PorousFlowSingleComponentFluid
-        fp = simple_fluid1
-        phase = 1
-      [../]
-      [./permeability]
-        type = PorousFlowPermeabilityConst
-        permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
-      [../]
-      [./relperm0]
-        type = PorousFlowRelativePermeabilityCorey
-        n = 2
-        phase = 0
-      [../]
-      [./relperm1]
-        type = PorousFlowRelativePermeabilityCorey
-        n = 3
-        phase = 1
-      [../]
-      [./porosity]
-        type = PorousFlowPorosityConst
-        porosity = 0.1
-      [../]
-      [./rock_heat]
-        type = PorousFlowMatrixInternalEnergy
-        specific_heat_capacity = 1.0
-        density = 125
-      [../]
-      [./unused]
-        type = GenericConstantMaterial
-        prop_names = unused
-        prop_values = 0
-      [../]
-    [../]
-#   [../]
-# []
+[Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+    temperature = 50
+  [../]
+  [./ppss]
+    type = PorousFlow2PhasePS
+    phase0_porepressure = pwater
+    phase1_saturation = sgas
+    capillary_pressure = pc
+  [../]
+  [./massfrac]
+    type = PorousFlowMassFraction
+    mass_fraction_vars = 'x0 x1'
+  [../]
+  [./simple_fluid0]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
+    phase = 0
+  [../]
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
+    phase = 1
+  [../]
+  [./permeability]
+    type = PorousFlowPermeabilityConst
+    permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
+  [../]
+  [./relperm0]
+    type = PorousFlowRelativePermeabilityCorey
+    n = 2
+    phase = 0
+  [../]
+  [./relperm1]
+    type = PorousFlowRelativePermeabilityCorey
+    n = 3
+    phase = 1
+  [../]
+  [./porosity]
+    type = PorousFlowPorosityConst
+    porosity = 0.1
+  [../]
+  [./rock_heat]
+    type = PorousFlowMatrixInternalEnergy
+    specific_heat_capacity = 1.0
+    density = 125
+  [../]
+  [./unused]
+    type = GenericConstantMaterial
+    prop_names = unused
+    prop_values = 0
+  [../]
+[]
 
 [Executioner]
   type = Transient
