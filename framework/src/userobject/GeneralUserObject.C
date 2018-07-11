@@ -16,6 +16,8 @@ validParams<GeneralUserObject>()
   InputParameters params = validParams<UserObject>();
   params += validParams<MaterialPropertyInterface>();
   params.addParam<bool>(
+      "threaded", false, "true if there should be threaded copies of this user object.");
+  params.addParam<bool>(
       "force_preaux", false, "Forces the GeneralUserObject to be executed in PREAUX");
   params.addParamNamesToGroup("force_preaux", "Advanced");
   return params;
