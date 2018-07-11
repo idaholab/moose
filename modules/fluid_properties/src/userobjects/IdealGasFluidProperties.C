@@ -110,7 +110,6 @@ IdealGasFluidProperties::cv() const
   return _cv;
 }
 
-Real IdealGasFluidProperties::gamma_from_v_e(Real, Real) const { return _gamma; }
 Real
 IdealGasFluidProperties::gamma() const
 {
