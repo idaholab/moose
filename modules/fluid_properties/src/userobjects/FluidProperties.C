@@ -15,6 +15,7 @@ validParams<FluidProperties>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.registerBase("FluidProperties");
+  params.set<bool>("threaded") = true;
   return params;
 }
 
