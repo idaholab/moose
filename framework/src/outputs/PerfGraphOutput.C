@@ -22,6 +22,13 @@ validParams<PerfGraphOutput>()
 {
   // Get the base class parameters
   InputParameters params = validParams<Output>();
+
+  // Hide/show variable output options
+  params.addParam<std::vector<VariableName>>(
+      "hide",
+      "A list of the variables and postprocessors that should NOT be output to the"
+      "file (may include Variables, ScalarVariables, and Postprocessor names).");
+
   params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
 
   params.addParam<unsigned int>(

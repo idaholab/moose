@@ -34,7 +34,8 @@
   [./check_more_values]
     type = RunApp
     input = print_perf_data.i
+
     cli_args = 'Outputs/exodus=false Outputs/csv=false'
-    absent_out = '(\s(\S+)\s\|\n)[^\n]*\1'
+    absent_out = '(\s(\S+)\s\|\n)[^\n]*\1.*Performance Graph'
   [../]
 []

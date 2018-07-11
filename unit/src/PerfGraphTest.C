@@ -16,9 +16,9 @@ TEST(PerfGraphTest, test)
 {
   PerfGraph graph;
 
-  auto a_id = graph.registerSection("a");
-  auto b_id = graph.registerSection("b");
-  auto c_id = graph.registerSection("c");
+  auto a_id = graph.registerSection("a", 1);
+  auto b_id = graph.registerSection("b", 1);
+  auto c_id = graph.registerSection("c", 1);
 
   unsigned int a = 0;
   unsigned int b = 0;
