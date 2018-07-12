@@ -32,6 +32,12 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this)
 {
+#if !defined(LIBMESH_HAVE_OPENMP) && !defined(LIBMESH_HAVE_TBB_API)
+  if (getParam<bool>("threaded"))
+    mooseError(name(),
+               ": You cannot use threaded general user objects with pthreads. To enable this "
+               "functionality configure libMesh with OpenMP or TBB.");
+#endif
   _supplied_vars.insert(name());
 }
 
