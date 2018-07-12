@@ -84,14 +84,12 @@ All of the inputs in these groups are explained below:
       mobility_name_gr = L
       kappa_gr = kappa
       free_energies_gr = 'omegab omegam'
-      energy_barrier_gr = mu
 
       additional_ops = 'phi'
       gamma_grxop = gamma
       mobility_name_op = L_phi
       kappa_op = kappa
       free_energies_op = 'omegab omegam'
-      energy_barrier_op = mu
     [../]
   [../]
 []

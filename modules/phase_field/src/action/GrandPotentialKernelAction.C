@@ -20,7 +20,8 @@ InputParameters
 validParams<GrandPotentialKernelAction>()
 {
   InputParameters parameters = validParams<Action>();
-
+  parameters.addClassDescription(
+      "Automatically generate most or all of the kernels for the grand potential model");
   parameters.addRequiredParam<std::vector<NonlinearVariableName>>(
       "chemical_potentials", "List of chemical potential variables");
   parameters.addRequiredParam<std::vector<MaterialPropertyName>>(
@@ -212,6 +213,7 @@ GrandPotentialKernelAction::act()
     params.set<bool>("use_displaced_mesh") = displaced_mesh;
     params.set<MaterialPropertyName>("kappa_name") = kappa;
     params.set<MaterialPropertyName>("mob_name") = mob_name;
+    params.set<std::vector<VariableName>>("args") = v2;
     kernel_name = "ACInt_" + var_name;
     _problem->addKernel("ACInterface", kernel_name, params);
 
