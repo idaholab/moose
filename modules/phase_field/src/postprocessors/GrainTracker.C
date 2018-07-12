@@ -452,6 +452,9 @@ GrainTracker::trackGrains()
       _console << '\n' << std::endl;
     }
 
+    // Before we track grains, lets sort them so that we get parallel consistent answers
+    std::sort(_feature_sets.begin(), _feature_sets.end());
+
     /**
      * To track grains across time steps, we will loop over our unique grains and link each one up
      * with one of our new unique grains. The criteria for doing this will be to find the unique
