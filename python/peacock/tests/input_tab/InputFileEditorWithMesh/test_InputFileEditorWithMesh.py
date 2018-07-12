@@ -14,7 +14,6 @@ from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 import argparse, os
 from mock import patch
-import vtk
 
 class BaseTests(Testing.PeacockTester):
     def setUp(self):
@@ -287,10 +286,7 @@ class Tests(BaseTests):
         bh = w.BlockHighlighterPlugin
         bh.SidesetSelector.Options.setCurrentText("bottom")
 
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(-2, -2, -1)
-        w.MeshViewerPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847),(-2, -2, -1),(0,0,0))
+        w.MeshViewerPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847), (-2, -2, -1), (0, 0, 0))
         w.vtkwin.onWrite(self.highlight_dup)
         self.assertFalse(Testing.gold_diff(self.highlight_dup))
 
@@ -317,6 +313,37 @@ class Tests(BaseTests):
         w.blockChanged(b)
         w.vtkwin.onWrite(self.mesh_toggle)
         self.assertFalse(Testing.gold_diff(self.mesh_toggle))
+
+    def testMeshCameraWithChangedInputFiles(self):
+        """
+        Previously we always wrote out the temporary mesh file to the same
+        filename. This caused problems with changing input files when the camera
+        had changed on one of them. The camera wouldn't reset so the new mesh
+        could potentially be in a weird position.
+        """
+        main_win, w = self.newWidget()
+        sdiffusion = "simple_diffusion.i"
+        w.setInputFile(sdiffusion)
+        w.MeshViewerPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847), (-2, -2, -1), (0, 0, 0))
+        sdiffusion_image = "meshrender_camera_moved.png"
+        Testing.set_window_size(w.vtkwin)
+        w.vtkwin.onWrite(sdiffusion_image)
+        self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
+
+        other = "spherical_average.i"
+        w.setInputFile(other)
+        other_image = "meshrender_3d.png"
+        w.MeshViewerPlugin.onCameraChanged((0.2, 0.5, 0.8), (-30, 10, -20), (0, 5, 0))
+        w.vtkwin.onWrite(other_image)
+        self.assertFalse(Testing.gold_diff(other_image, .98))
+
+        w.setInputFile(sdiffusion)
+        w.vtkwin.onWrite(sdiffusion_image)
+        self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
+
+        w.setInputFile(other)
+        w.vtkwin.onWrite(other_image)
+        self.assertFalse(Testing.gold_diff(other_image, .98))
 
 if __name__ == '__main__':
     Testing.run_tests()
