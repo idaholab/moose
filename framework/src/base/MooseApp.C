@@ -277,6 +277,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _recover(false),
     _restart(false),
     _split_mesh(false),
+    _use_split(parameters.get<bool>("use_split")),
 #ifdef DEBUG
     _trap_fpe(true),
 #else
@@ -822,6 +823,12 @@ bool
 MooseApp::isSplitMesh() const
 {
   return _split_mesh;
+}
+
+bool
+MooseApp::isUseSplit() const
+{
+  return _use_split;
 }
 
 bool

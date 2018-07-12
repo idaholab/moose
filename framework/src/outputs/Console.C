@@ -583,7 +583,7 @@ Console::outputSystemInformation()
     _console << ConsoleUtils::outputFrameworkInformation(_app);
 
   if (_system_info_flags.contains("mesh"))
-    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr);
+    _console << ConsoleUtils::outputMeshInformation(_app, *_problem_ptr);
 
   if (_system_info_flags.contains("nonlinear"))
   {
@@ -620,7 +620,7 @@ Console::meshChanged()
 {
   if (_print_mesh_changed_info)
   {
-    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false);
+    _console << ConsoleUtils::outputMeshInformation(_app, *_problem_ptr, /*verbose = */ false);
 
     std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
     if (!output.empty())

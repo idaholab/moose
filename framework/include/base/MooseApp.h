@@ -330,6 +330,11 @@ public:
   bool isSplitMesh() const;
 
   /**
+   * Whether or not we are running with pre-split (distributed mesh)
+   */
+  bool isUseSplit() const;
+
+  /**
    * Return true if the recovery file base is set
    */
   bool hasRecoverFileBase();
@@ -709,6 +714,9 @@ protected:
 
   /// Whether or not we are performing a split mesh operation (--split-mesh)
   bool _split_mesh;
+
+  /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
+  const bool _use_split;
 
   /// Whether or not FPE trapping should be turned on.
   bool _trap_fpe;

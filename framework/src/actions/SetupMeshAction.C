@@ -161,7 +161,7 @@ SetupMeshAction::act()
   if (_current_task == "setup_mesh")
   {
     // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
-    if (_app.parameters().get<bool>("use_split"))
+    if (_app.isUseSplit())
     {
       auto split_file = _app.parameters().get<std::string>("split_file");
 
@@ -185,19 +185,20 @@ SetupMeshAction::act()
             mooseError(
                 "Cannot use split mesh for a non-file mesh without specifying --split-file on "
                 "command line");
-          MOOSE_ABORT;
         }
 
         _type = "FileMesh";
         auto new_pars = validParams<FileMesh>();
+
+        // Keep existing parameters where possible
+        new_pars.applyParameters(_moose_object_pars);
+
         new_pars.set<MeshFileName>("file") = split_file;
         new_pars.set<MooseApp *>("_moose_app") = _moose_object_pars.get<MooseApp *>("_moose_app");
-        new_pars.set<MooseEnum>("parallel_type") = "distributed";
         _moose_object_pars = new_pars;
       }
       else
       {
-        _moose_object_pars.set<MooseEnum>("parallel_type") = "distributed";
         if (split_file != "")
           _moose_object_pars.set<MeshFileName>("file") = split_file;
         else
