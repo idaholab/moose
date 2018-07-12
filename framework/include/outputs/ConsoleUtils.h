@@ -47,8 +47,7 @@ std::string outputFrameworkInformation(const MooseApp & app);
 /**
  * Output the mesh information
  */
-std::string
-outputMeshInformation(const MooseApp & app, FEProblemBase & problem, bool verbose = true);
+std::string outputMeshInformation(FEProblemBase & problem, bool verbose = true);
 
 /**
  * Output the Auxiliary system information

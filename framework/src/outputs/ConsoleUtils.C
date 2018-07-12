@@ -51,7 +51,7 @@ outputFrameworkInformation(const MooseApp & app)
 }
 
 std::string
-outputMeshInformation(const MooseApp & app, FEProblemBase & problem, bool verbose)
+outputMeshInformation(FEProblemBase & problem, bool verbose)
 {
   std::stringstream oss;
   oss << std::left;
@@ -62,7 +62,7 @@ outputMeshInformation(const MooseApp & app, FEProblemBase & problem, bool verbos
   if (verbose)
   {
     bool forced = moose_mesh.isParallelTypeForced();
-    bool pre_split = app.isUseSplit();
+    bool pre_split = problem.getMooseApp().isUseSplit();
 
     // clang-format off
     oss << "Mesh: " << '\n'
