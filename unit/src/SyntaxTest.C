@@ -90,8 +90,8 @@ TEST_F(SyntaxTest, general)
   EXPECT_TRUE(_syntax.hasTask("second"));
   EXPECT_FALSE(_syntax.hasTask("third"));
 
-  EXPECT_FALSE(_syntax.isActionRequired("first"));
-  EXPECT_TRUE(_syntax.isActionRequired("second_mo"));
+  EXPECT_FALSE(_syntax.shouldAutoBuild("first"));
+  EXPECT_TRUE(_syntax.shouldAutoBuild("second_mo"));
 
   // TODO: test this
   _syntax.replaceActionSyntax("MooseSystem", "NewBlock", "first");
@@ -102,4 +102,17 @@ TEST_F(SyntaxTest, deprecated)
   _syntax.deprecateActionSyntax("TopBlock");
 
   EXPECT_TRUE(_syntax.isDeprecatedSyntax("TopBlock"));
+
+  const std::string message = _syntax.deprecatedActionSyntaxMessage("TopBlock");
+  EXPECT_EQ(message, "\"[TopBlock]\" is deprecated.");
+}
+
+TEST_F(SyntaxTest, deprecatedCustomMessage)
+{
+  _syntax.deprecateActionSyntax("TopBlock", "Replace [TopBlock] with [NewBlock].");
+
+  EXPECT_TRUE(_syntax.isDeprecatedSyntax("TopBlock"));
+
+  const std::string message = _syntax.deprecatedActionSyntaxMessage("TopBlock");
+  EXPECT_EQ(message, "Replace [TopBlock] with [NewBlock].");
 }

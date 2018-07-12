@@ -1,0 +1,86 @@
+[Tests]
+## all the tests have the attribute 'recover = false' because
+## by modyfing the number of nodes the --recover option fails (expected).
+## Furthermore, all the tests have the attribute 'mesh_mode = REPLICATED' because
+## the distributed mesh option has not been implemented (it might take a while)
+
+### single interface tests
+[./3D3BlocksBreakMeshManual_test]
+  ###  compare manual mesh split to gold
+  type = 'Exodiff'
+  input = 'TestBreakMesh_3D_3Block_Manual.i'
+  cli_args = '--mesh-only TestBreakMesh_3D_3Block_Manual_in.e'
+  exodiff = 'TestBreakMesh_3D_3Block_Manual_in.e'
+  mesh_mode = REPLICATED
+  recover = false
+  allow_test_objects = true
+[../]
+
+[./3D3BlocksBreakMeshAuto_test]
+  ###  compare automatic mesh split to gold
+  type = 'Exodiff'
+  input = 'TestBreakMesh_3D_3Block_Auto.i'
+  cli_args = '--mesh-only TestBreakMesh_3D_3Block_Auto_in.e'
+  exodiff = 'TestBreakMesh_3D_3Block_Auto_in.e'
+  mesh_mode = REPLICATED
+  recover = false
+  requirement = "check the results of BreakMeshByBlock for a 3D case"
+  design = 'BreakMeshByBlock.md'
+  issues = '#11775'
+[../]
+
+[./3D3BlocksBreakMeshtingCompare_test]
+  ###  compare manual vs automatic mesh split
+  type = 'Exodiff'
+  input = 'TestBreakMesh_3D_3Block_Auto.i'
+  cli_args = '--mesh-only TestBreakMesh_3D_3Block_ManualAuto_Comparison.e'
+  exodiff = 'TestBreakMesh_3D_3Block_ManualAuto_Comparison.e'
+  mesh_mode = REPLICATED
+  recover = false
+  requirement = "compare results obtained with the manual autoamtic mesh split"
+                "procedure matches for the 3D Case"
+  design = 'BreakMeshByBlock.md'
+  issues = '#11775'
+[../]
+
+#### multiple interface tests
+[./3D3BlocksBreakMeshManualSplitInterface_test]
+  ###  compare manual mesh split to gold
+  type = 'Exodiff'
+  input = 'TestBreakMesh_3D_3Block_splitTrue_Manual.i'
+  cli_args = '--mesh-only TestBreakMesh_3D_3Block_splitTrue_Manual_in.e'
+  exodiff = 'TestBreakMesh_3D_3Block_splitTrue_Manual_in.e'
+  mesh_mode = REPLICATED
+  recover = false
+  allow_test_objects = true
+[../]
+
+[./3D3BlocksBreakMeshAutoSplitInterface_test]
+  ###  compare automatic mesh split to gold
+  type = 'Exodiff'
+  input = 'TestBreakMesh_3D_3Block_splitTrue_Auto.i'
+  cli_args = '--mesh-only TestBreakMesh_3D_3Block_splitTrue_Auto_in.e'
+  exodiff = 'TestBreakMesh_3D_3Block_splitTrue_Auto_in.e'
+  mesh_mode = REPLICATED
+  recover = false
+  requirement = "same as 3D3BlocksBreakMeshAuto_test but with "
+                "the prameter split_interface=true"
+  design = 'BreakMeshByBlock.md'
+  issues = '#11775'
+[../]
+
+[./3D3BlocksBreakMeshSplitInterfaceCompare_test]
+  ###  compare manual vs automatic mesh split
+  type = 'Exodiff'
+  input = 'TestBreakMesh_3D_3Block_splitTrue_Auto.i'
+  cli_args = '--mesh-only TestBreakMesh_3D_3Block_splitTrue_ManualAuto_Comparison.e'
+  exodiff = 'TestBreakMesh_3D_3Block_splitTrue_ManualAuto_Comparison.e'
+  mesh_mode = REPLICATED
+  recover = false
+  requirement = "same as 3D3BlocksBreakMeshManualSplitInterface_test but with "
+                "the prameter split_interface=true"
+  design = 'BreakMeshByBlock.md'
+  issues = '#11775'
+[../]
+
+[]

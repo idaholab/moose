@@ -65,10 +65,12 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
     _halo_level(getParam<unsigned short>("halo_level")),
+    _max_remap_recursion_depth(getParam<unsigned short>("max_remap_recursion_depth")),
     _n_reserve_ops(getParam<unsigned short>("reserve_op")),
     _reserve_op_index(_n_reserve_ops <= _n_vars ? _n_vars - _n_reserve_ops : 0),
     _reserve_op_threshold(getParam<Real>("reserve_op_threshold")),
     _remap(getParam<bool>("remap_grains")),
+    _tolerate_failure(getParam<bool>("tolerate_failure")),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _feature_sets_old(declareRestartableData<std::vector<FeatureData>>("unique_grains")),
     _poly_ic_uo(parameters.isParamValid("polycrystal_ic_uo")
@@ -82,6 +84,11 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _max_curr_grain_id(0),
     _is_transient(_subproblem.isTransient())
 {
+  if (_tolerate_failure)
+    paramInfo("tolerate_failure",
+              "Tolerate failure has been set to true. Non-physical simulation results "
+              "are possible, you will be notified in the event of a failed remapping operation.");
+
   if (_tracking_step > 0 && _poly_ic_uo)
     mooseError("Can't start tracking after the initial condition when using a polycrystal_ic_uo");
 }
@@ -444,6 +451,9 @@ GrainTracker::trackGrains()
       }
       _console << '\n' << std::endl;
     }
+
+    // Before we track grains, lets sort them so that we get parallel consistent answers
+    std::sort(_feature_sets.begin(), _feature_sets.end());
 
     /**
      * To track grains across time steps, we will loop over our unique grains and link each one up
@@ -821,9 +831,13 @@ GrainTracker::remapGrains()
      */
     bool any_grains_remapped = false;
     bool grains_remapped;
+
+    std::set<unsigned int> notify_ids;
     do
     {
       grains_remapped = false;
+      notify_ids.clear();
+
       for (auto & grain1 : _feature_sets)
       {
         // We need to remap any grains represented on any variable index above the cuttoff
@@ -835,10 +849,10 @@ GrainTracker::remapGrains()
                      << ", remapping to another variable\n"
                      << COLOR_DEFAULT;
 
-          for (auto max = decltype(_max_renumbering_recursion)(0);
-               max <= _max_renumbering_recursion;
+          for (auto max = decltype(_max_remap_recursion_depth)(0);
+               max <= _max_remap_recursion_depth;
                ++max)
-            if (max < _max_renumbering_recursion)
+            if (max < _max_remap_recursion_depth)
             {
               if (attemptGrainRenumber(grain1, 0, max))
                 break;
@@ -846,10 +860,14 @@ GrainTracker::remapGrains()
             else if (!attemptGrainRenumber(grain1, 0, max))
             {
               _console << std::flush;
-              mooseError(COLOR_RED,
-                         "Unable to find any suitable order parameters for remapping."
-                         " Perhaps you need more op variables?\n\n",
-                         COLOR_DEFAULT);
+              std::stringstream oss;
+              oss << "Unable to find any suitable order parameters for remapping while working "
+                  << "with Grain #" << grain1._id << ", which is on a reserve order parameter.\n"
+                  << "\n\nPossible Resolutions:\n"
+                  << "\t- Add more order parameters to your simulation (8 for 2D, 28 for 3D)\n"
+                  << "\t- Increase adaptivity or reduce your grain boundary widths\n"
+                  << "\t- Make sure you are not starting with too many grains for the mesh size\n";
+              mooseError(oss.str());
             }
 
           grains_remapped = true;
@@ -871,30 +889,47 @@ GrainTracker::remapGrains()
                        << grain2._id << " (variable index: " << grain1._var_index << ")\n"
                        << COLOR_DEFAULT;
 
-            for (auto max = decltype(_max_renumbering_recursion)(0);
-                 max <= _max_renumbering_recursion;
+            for (auto max = decltype(_max_remap_recursion_depth)(0);
+                 max <= _max_remap_recursion_depth;
                  ++max)
-              if (max < _max_renumbering_recursion)
+            {
+              if (max < _max_remap_recursion_depth)
               {
                 if (attemptGrainRenumber(grain1, 0, max))
+                {
+                  grains_remapped = true;
                   break;
+                }
               }
               else if (!attemptGrainRenumber(grain1, 0, max) &&
                        !attemptGrainRenumber(grain2, 0, max))
               {
-                _console << std::flush;
-                mooseError(COLOR_RED,
-                           "Unable to find any suitable order parameters for remapping."
-                           " Perhaps you need more op variables?\n\n",
-                           COLOR_DEFAULT);
+                notify_ids.insert(grain1._id);
+                notify_ids.insert(grain2._id);
               }
-
-            grains_remapped = true;
+            }
           }
         }
       }
       any_grains_remapped |= grains_remapped;
     } while (grains_remapped);
+
+    if (!notify_ids.empty())
+    {
+      _console << std::flush;
+      std::stringstream oss;
+      oss << "Unable to find any suitable order parameters for remapping while working "
+          << "with the following grain IDs:\n"
+          << Moose::stringify(notify_ids, ", ", "", true) << "\n\nPossible Resolutions:\n"
+          << "\t- Add more order parameters to your simulation (8 for 2D, 28 for 3D)\n"
+          << "\t- Increase adaptivity or reduce your grain boundary widths\n"
+          << "\t- Make sure you are not starting with too many grains for the mesh size\n";
+
+      if (_tolerate_failure)
+        mooseWarning(oss.str());
+      else
+        mooseError(oss.str());
+    }
 
     // Verify that split grains are still intact
     for (auto & split_pair : split_pairs)

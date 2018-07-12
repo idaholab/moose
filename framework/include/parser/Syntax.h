@@ -136,6 +136,13 @@ public:
    * want deprecated in the passed in parameter.
    */
   void deprecateActionSyntax(const std::string & syntax);
+  void deprecateActionSyntax(const std::string & syntax, const std::string & message);
+
+  /**
+   * Returns the deprecation message for a given syntax that has been deprecated by
+   * deprecateActionSyntax.
+   */
+  std::string deprecatedActionSyntaxMessage(const std::string syntax);
 
   /**
    * Returns a Boolean indicating whether the syntax has been deprecated through a call to
@@ -210,8 +217,8 @@ protected:
   /// Boolean indicating whether the _actions_to_syntax map is built and valid and synced
   bool _actions_to_syntax_valid;
 
-  /// The set of deprecated syntax items
-  std::set<std::string> _deprecated_syntax;
+  /// The list of deprecated syntax items and the associated deprecated message
+  std::map<std::string, std::string> _deprecated_syntax;
 
   FileLineInfoMap _syntax_to_line;
 };

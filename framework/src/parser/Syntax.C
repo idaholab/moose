@@ -149,7 +149,25 @@ Syntax::replaceActionSyntax(const std::string & action,
 void
 Syntax::deprecateActionSyntax(const std::string & syntax)
 {
-  _deprecated_syntax.insert(syntax);
+  const std::string message = "\"[" + syntax + "]\" is deprecated.";
+  deprecateActionSyntax(syntax, message);
+}
+
+void
+Syntax::deprecateActionSyntax(const std::string & syntax, const std::string & message)
+{
+  _deprecated_syntax.insert(std::make_pair(syntax, message));
+}
+
+std::string
+Syntax::deprecatedActionSyntaxMessage(const std::string syntax)
+{
+  auto it = _deprecated_syntax.find(syntax);
+
+  if (it != _deprecated_syntax.end())
+    return it->second;
+  else
+    mooseError("The action syntax ", syntax, " is not deprecated");
 }
 
 bool
