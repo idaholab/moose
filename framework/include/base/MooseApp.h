@@ -570,7 +570,7 @@ public:
   /**
    * Returns the Relationship managers info suitable for printing.
    */
-  std::vector<std::pair<std::string, std::string>> getRelationshipManagerInfo();
+  std::vector<std::pair<std::string, std::string>> getRelationshipManagerInfo() const;
 
   /**
    * Return the app level ExecFlagEnum, this contains all the available flags for the app.

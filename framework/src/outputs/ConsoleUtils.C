@@ -32,7 +32,7 @@ indent(unsigned int spaces)
 }
 
 std::string
-outputFrameworkInformation(MooseApp & app)
+outputFrameworkInformation(const MooseApp & app)
 {
   std::stringstream oss;
   oss << std::left;
@@ -117,7 +117,7 @@ outputNonlinearSystemInformation(FEProblemBase & problem)
 }
 
 std::string
-outputSystemInformationHelper(const System & system)
+outputSystemInformationHelper(System & system)
 {
   std::stringstream oss;
   oss << std::left;
@@ -219,7 +219,7 @@ outputSystemInformationHelper(const System & system)
 }
 
 std::string
-outputRelationshipManagerInformation(MooseApp & app)
+outputRelationshipManagerInformation(const MooseApp & app)
 {
   std::stringstream oss;
   oss << std::left;
@@ -237,7 +237,7 @@ outputRelationshipManagerInformation(MooseApp & app)
 }
 
 std::string
-outputExecutionInformation(MooseApp & app, FEProblemBase & problem)
+outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
 {
 
   std::stringstream oss;

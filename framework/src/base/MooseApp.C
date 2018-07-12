@@ -1555,7 +1555,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 }
 
 std::vector<std::pair<std::string, std::string>>
-MooseApp::getRelationshipManagerInfo()
+MooseApp::getRelationshipManagerInfo() const
 {
   std::vector<std::pair<std::string, std::string>> info_strings;
   info_strings.reserve(_relationship_managers.size());
