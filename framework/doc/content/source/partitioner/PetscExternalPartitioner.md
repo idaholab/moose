@@ -36,11 +36,15 @@ These packages can be accessed via an unified interface in MOOSE, `PetscExternal
     type = PetscExternalPartitioner
     # specify which package you want to use
     # you could choose one of {Chaco, Party, PTScotch, ParMETIS}
-    part_package = ptscotch
+    part_package = parmetis
   []
   parallel_type = distributed
 []
 ```
+
+Note that in order to use {Chaco, Party, PTScotch}, you need to upgrade PETSc to PETSc-3.9.3 or higher
+with additional options: --download-chaco,  --download-party, and --download-ptscotch. But we do NOT encourage
+regular users to upgrade PETSc on their own. We will officially upgrade PETSc soon that will carries all these packages.
 
 ## Partitioning Examples
 
