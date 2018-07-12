@@ -182,7 +182,7 @@ protected:
   const unsigned short _halo_level;
 
   /// Depth of renumbering recursion (a depth of zero means no recursion)
-  static const unsigned int _max_renumbering_recursion = 4;
+  const unsigned short _max_remap_recursion_depth;
 
   /// The number of reserved order parameters
   const unsigned short _n_reserve_ops;
@@ -196,6 +196,9 @@ protected:
 
   /// Inidicates whether remapping should be done or not (remapping is independent of tracking)
   const bool _remap;
+
+  /// Indicates whether we should continue after a remap failure (will result in non-physical results)
+  const bool _tolerate_failure;
 
   /// A reference to the nonlinear system (used for retrieving solution vectors)
   NonlinearSystemBase & _nl;

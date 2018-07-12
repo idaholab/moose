@@ -20,6 +20,13 @@ validParams<GrainTrackerInterface>()
       "halo_level", 2, "The thickness of the halo surrounding each feature.");
   params.addParam<bool>(
       "remap_grains", true, "Indicates whether remapping should be done or not (default: true)");
+  params.addParam<bool>("tolerate_failure",
+                        false,
+                        "Allow the grain tracker to continue when it fails to find suitable grains "
+                        "for remapping. This will allow the simulation to continue but it will "
+                        "also allow non-physical grain coalesnce. DO NOT USE for production "
+                        "results!");
+
   params.addParam<unsigned short>(
       "reserve_op",
       0,
@@ -33,6 +40,13 @@ validParams<GrainTrackerInterface>()
                         "Terminate with an error if a grain is created "
                         "(does not include initial callback to start simulation)");
 
+  params.addParam<unsigned short>("max_remap_recursion_depth",
+                                  6,
+                                  "The recursion depth allowed when searching for remapping "
+                                  "candidates. Note: Setting this value high may result in very "
+                                  "computationally expensive searches with little benefit. "
+                                  "(Recommended level: 6)");
+
   params.addRangeCheckedParam<short>(
       "verbosity_level",
       1,
@@ -43,6 +57,8 @@ validParams<GrainTrackerInterface>()
 
   params.addRequiredCoupledVarWithAutoBuild(
       "variable", "var_name_base", "op_num", "Array of coupled variables");
+
+  params.addParamNamesToGroup("tolerate_failure max_remap_recursion_depth", "Advanced");
 
   // Set suitable default parameters for grain tracking
   params.set<Real>("threshold") = 0.1; // flood out to a fairly low value for grain remapping
