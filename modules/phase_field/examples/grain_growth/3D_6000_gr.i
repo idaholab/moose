@@ -11,12 +11,10 @@
   zmin = 0
   zmax = 180
   elem_type = HEX8
-
-  parallel_type = distributed
 []
 
 [GlobalParams]
-  op_num = 25
+  op_num = 28
   var_name_base = gr
 []
 
@@ -47,7 +45,6 @@
     [../]
   [../]
 []
-
 
 [AuxVariables]
   [./bnds]
@@ -168,8 +165,8 @@
   type = Transient
   scheme = bdf2
   solve_type = PJFNK #Preconditioned JFNK (default)
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre    boomeramg'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'asm     '
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 20
@@ -196,7 +193,7 @@
 []
 
 [Outputs]
-  exodus = true
+  nemesis = true
   checkpoint = true
   csv = true
   [./console]

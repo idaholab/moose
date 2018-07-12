@@ -132,6 +132,17 @@
     petsc_version = '>=3.5.0'
   [../]
 
+  [./tolerate_remap_failure]
+    type = 'RunApp'
+    input = 'grain_tracker_remapping_test.i'
+    cli_args = 'UserObjects/grain_tracker/tolerate_failure=true UserObjects/voronoi/grain_num=15 Executioner/num_steps=6 UserObjects/voronoi/coloring_algorithm=bt Outputs/exodus=false Outputs/csv=false'
+    expect_out = "Unable to find any suitable order parameters for remapping"
+    allow_warnings = true
+    valgrind = 'NONE'
+    method = '!DBG' # slow test
+    min_parallel = 2
+  [../]
+
   ###################################################
   # Faux grain tracker
   ###################################################
