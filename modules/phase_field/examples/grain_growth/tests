@@ -31,5 +31,16 @@
     # Only run in opt mode to avoid timeouts in dbg.
     method = '!DBG'
     check_input = True
+
+    cli_args = 'Mesh/uniform_refine=0'
+  [../]
+  [./grain_growth_3D_large]
+    type = RunApp
+    input = '3D_6000_gr.i'
+    # Only run in opt mode to avoid timeouts in dbg.
+    method = '!DBG'
+    check_input = True
+
+    cli_args = 'Mesh/nx=10 Mesh/ny=10 Mesh/ny=10 UserObjects/voronoi/grain_num=10 GlobalParams/op_num=10'
   [../]
 []
