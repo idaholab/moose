@@ -18,6 +18,9 @@
 // don't want to expose to EVERY file in MOOSE...
 #include "VariadicTable.h"
 
+// System Includes
+#include <chrono>
+
 PerfGraph::PerfGraph() : _current_position(0), _active(true)
 {
   // Not done in the initialization list on purpose because this object needs to be complete first
@@ -212,7 +215,11 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
                                  unsigned int level,
                                  unsigned int current_depth)
 {
+  mooseAssert(_id_to_section_name.find(current_node->id()) != _id_to_section_name.end(),
+              "Unable to find section name!");
   auto & name = _id_to_section_name[current_node->id()];
+
+  mooseAssert(_id_to_level.find(current_node->id()) != _id_to_level.end(), "Unable to find level!");
   auto & node_level = _id_to_level[current_node->id()];
 
   if (node_level <= level)
