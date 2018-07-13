@@ -32,6 +32,7 @@
     type = 'CSVDiff'
     input = 'mass06.i'
     csvdiff = 'mass06.csv'
+    compiler = '!INTEL'
   [../]
   [./mass07]
     type = 'RunException'

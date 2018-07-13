@@ -69,6 +69,7 @@
     # due to the changes in 3061bbd5d.
     petsc_version = '>=3.5.0'
     petsc_version_release = true
+    compiler = '!INTEL'
   [../]
   [./exodus_inline]
     # Test the output of linear and nonlinear iterations to Exodus with inline start times

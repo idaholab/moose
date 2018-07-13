@@ -3,5 +3,6 @@
     type = 'CSVDiff'
     input = 'line_material_real_sampler.i'
     csvdiff = 'out_mat_0001.csv'
+    compiler = '!INTEL'
   [../]
 []
