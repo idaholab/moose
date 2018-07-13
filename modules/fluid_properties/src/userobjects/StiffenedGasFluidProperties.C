@@ -306,8 +306,6 @@ StiffenedGasFluidProperties::g_from_v_e(Real v, Real e) const
          _cv * T * std::log(std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0)) + _q;
 }
 
-Real StiffenedGasFluidProperties::gamma_from_v_e(Real /*v*/, Real /*e*/) const { return _gamma; }
-
 Real
 StiffenedGasFluidProperties::c2_from_p_rho(Real pressure, Real rho) const
 {

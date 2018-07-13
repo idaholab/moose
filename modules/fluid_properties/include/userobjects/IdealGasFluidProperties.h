@@ -36,7 +36,6 @@ public:
   virtual Real cp() const;
   virtual Real cv_from_v_e(Real v, Real e) const override;
   virtual Real cv() const;
-  virtual Real gamma_from_v_e(Real v, Real e) const override;
   virtual Real gamma() const;
   virtual Real mu_from_v_e(Real v, Real e) const override;
   virtual Real k_from_v_e(Real v, Real e) const override;
