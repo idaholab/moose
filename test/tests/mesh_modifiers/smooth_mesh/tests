@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'mesh_smoother.i'
+    exodiff = 'mesh_smoother_out.e'
+  [../]
+[]
