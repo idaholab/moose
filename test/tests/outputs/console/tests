@@ -64,7 +64,7 @@
     input = 'console.i'
     cli_args = 'Outputs/screen/output_file=true Outputs/screen/solve_log=true Outputs/screen/file_base=console_file_solve_log_out'
     check_files = 'console_file_solve_log_out.txt'
-    file_expect_out = 'Scalar\sVariable\sValues:'
+    file_expect_out = 'Moose\sTest\sPerformance:'
     recover = false
     group = 'requirements'
   [../]
@@ -81,7 +81,7 @@
     type = RunApp
     input = 'console.i'
     cli_args = 'Outputs/screen/perf_log=false --timing'
-    expect_out = 'Performance\sGraph'
+    expect_out = 'Moose\sTest\sPerformance:'
     group = 'requirements'
   [../]
   [./transient]
@@ -94,8 +94,8 @@
     # Test the transient console output with a perf log interval
     type = RunApp
     input = 'console_transient.i'
-    cli_args = 'Outputs/pgraph/type=PerfGraphOutput Outputs/pgraph/additional_execute_on=timestep_end Outputs/pgraph/interval=6'
-    expect_out = 'Time Step 6.*?Graph.*?Time Step 7'
+    cli_args = 'Outputs/screen/perf_log_interval=6'
+    expect_out = 'Time Step\s+6.*?Moose Test Performance.*?Time Step\s+7'
   [../]
   [./_console]
     # Test the used of MooseObject::_console method
@@ -125,23 +125,23 @@
     valgrind = NONE
     cli_args = "Outputs/execute_on='timestep_begin linear' Outputs/console/execute_on='nonlinear final failed timestep_end'"
   [../]
-  [./perf_graph]
+  [./print_perf_log]
     # Tests that flag is working to show performace log from the top level
     type = RunApp
     input = 'console_print_toggles.i'
-    expect_out = 'Graph'
-    cli_args = 'Outputs/perf_graph=true'
+    expect_out = 'Moose Test Performance'
+    cli_args = 'Outputs/print_perf_log=true'
   [../]
-  [./perf_graph_disable]
+  [./print_perf_log_disable]
     # Tests that perf log is disabled flag when console level flag is set to false
     type = RunApp
     input = 'console_print_toggles.i'
     # We are testing that the perflog is disabled, so the string 'Alive time' should
     # be absent from the output.
-    absent_out = 'Performance Graph'
+    absent_out = 'Alive time'
     valgrind = NONE
     # Note the "--disable-perflog" cli option is for libMesh currently NOT MOOSE
-    cli_args = '--disable-perflog Outputs/perf_graph=true --no-timing'
+    cli_args = '--disable-perflog Outputs/print_perf_log=true Outputs/console/perf_log=false --no-timing'
     method = 'opt oprof devel' # debug prints some extra stuff at the end that messes up the regex
   [../]
   [./additional_output_on]

@@ -150,7 +150,6 @@ validParams<MooseMesh>()
 MooseMesh::MooseMesh(const InputParameters & parameters)
   : MooseObject(parameters),
     Restartable(this, "Mesh"),
-    PerfGraphInterface(this),
     _mesh_parallel_type(getParam<MooseEnum>("parallel_type")),
     _use_distributed_mesh(false),
     _distribution_overridden(false),
@@ -171,38 +170,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _max_leaf_size(getParam<unsigned int>("max_leaf_size")),
     _regular_orthogonal_mesh(false),
     _allow_recovery(true),
-    _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
-    _prepare_timer(registerTimedSection("prepare", 2)),
-    _update_timer(registerTimedSection("update", 3)),
-    _mesh_changed_timer(registerTimedSection("meshChanged", 3)),
-    _cache_changed_lists_timer(registerTimedSection("cacheChangedLists", 5)),
-    _update_active_semi_local_node_range_timer(
-        registerTimedSection("updateActiveSemiLocalNodeRange", 5)),
-    _build_node_list_timer(registerTimedSection("buildNodeList", 5)),
-    _build_bnd_elem_list_timer(registerTimedSection("buildBndElemList", 5)),
-    _node_to_elem_map_timer(registerTimedSection("nodeToElemMap", 5)),
-    _node_to_active_semilocal_elem_map_timer(
-        registerTimedSection("nodeToActiveSemilocalElemMap", 5)),
-    _get_active_local_element_range_timer(registerTimedSection("getActiveLocalElementRange", 5)),
-    _get_active_node_range_timer(registerTimedSection("getActiveNodeRange", 5)),
-    _get_local_node_range_timer(registerTimedSection("getLocalNodeRange", 5)),
-    _get_boundary_node_range_timer(registerTimedSection("getBoundaryNodeRange", 5)),
-    _get_boundary_element_range_timer(registerTimedSection("getBoundaryElementRange", 5)),
-    _cache_info_timer(registerTimedSection("cacheInfo", 3)),
-    _build_periodic_node_map_timer(registerTimedSection("buildPeriodicNodeMap", 5)),
-    _build_periodic_node_sets_timer(registerTimedSection("buildPeriodicNodeSets", 5)),
-    _detect_orthogonal_dim_ranges_timer(registerTimedSection("detectOrthogonalDimRanges", 5)),
-    _detect_paired_sidesets_timer(registerTimedSection("detectPairedSidesets", 5)),
-    _build_refinement_map_timer(registerTimedSection("buildRefinementMap", 5)),
-    _build_coarsening_map_timer(registerTimedSection("buildCoarseningMap", 5)),
-    _find_adaptivity_qp_maps_timer(registerTimedSection("findAdaptivityQpMaps", 5)),
-    _build_refinement_and_coarsening_maps_timer(
-        registerTimedSection("buildRefinementAndCoarseningMaps", 5)),
-    _change_boundary_id_timer(registerTimedSection("changeBoundaryId", 6)),
-    _init_timer(registerTimedSection("init", 2)),
-    _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
-    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
-    _add_mortar_interface_timer(registerTimedSection("addMortarInterface", 5))
+    _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list"))
 {
   MooseEnum temp_patch_update_strategy = getParam<MooseEnum>("patch_update_strategy");
   if (temp_patch_update_strategy == "never")
@@ -266,7 +234,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   : MooseObject(other_mesh._pars),
     Restartable(this, "Mesh"),
-    PerfGraphInterface(this, "CopiedMesh"),
     _mesh_parallel_type(other_mesh._mesh_parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
@@ -283,38 +250,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _max_leaf_size(other_mesh._max_leaf_size),
     _patch_update_strategy(other_mesh._patch_update_strategy),
     _regular_orthogonal_mesh(false),
-    _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
-    _prepare_timer(registerTimedSection("prepare", 2)),
-    _update_timer(registerTimedSection("update", 2)),
-    _mesh_changed_timer(registerTimedSection("meshChanged", 3)),
-    _cache_changed_lists_timer(registerTimedSection("cacheChangedLists", 5)),
-    _update_active_semi_local_node_range_timer(
-        registerTimedSection("updateActiveSemiLocalNodeRange", 5)),
-    _build_node_list_timer(registerTimedSection("buildNodeList", 5)),
-    _build_bnd_elem_list_timer(registerTimedSection("buildBndElemList", 5)),
-    _node_to_elem_map_timer(registerTimedSection("nodeToElemMap", 5)),
-    _node_to_active_semilocal_elem_map_timer(
-        registerTimedSection("nodeToActiveSemilocalElemMap", 5)),
-    _get_active_local_element_range_timer(registerTimedSection("getActiveLocalElementRange", 5)),
-    _get_active_node_range_timer(registerTimedSection("getActiveNodeRange", 5)),
-    _get_local_node_range_timer(registerTimedSection("getLocalNodeRange", 5)),
-    _get_boundary_node_range_timer(registerTimedSection("getBoundaryNodeRange", 5)),
-    _get_boundary_element_range_timer(registerTimedSection("getBoundaryElementRange", 5)),
-    _cache_info_timer(registerTimedSection("cacheInfo", 3)),
-    _build_periodic_node_map_timer(registerTimedSection("buildPeriodicNodeMap", 5)),
-    _build_periodic_node_sets_timer(registerTimedSection("buildPeriodicNodeSets", 5)),
-    _detect_orthogonal_dim_ranges_timer(registerTimedSection("detectOrthogonalDimRanges", 5)),
-    _detect_paired_sidesets_timer(registerTimedSection("detectPairedSidesets", 5)),
-    _build_refinement_map_timer(registerTimedSection("buildRefinementMap", 5)),
-    _build_coarsening_map_timer(registerTimedSection("buildCoarseningMap", 5)),
-    _find_adaptivity_qp_maps_timer(registerTimedSection("findAdaptivityQpMaps", 5)),
-    _build_refinement_and_coarsening_maps_timer(
-        registerTimedSection("buildRefinementAndCoarseningMaps", 5)),
-    _change_boundary_id_timer(registerTimedSection("changeBoundaryId", 5)),
-    _init_timer(registerTimedSection("init", 2)),
-    _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
-    _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
-    _add_mortar_interface_timer(registerTimedSection("addMortarInterface", 5))
+    _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -385,8 +321,6 @@ MooseMesh::freeBndElems()
 void
 MooseMesh::prepare(bool force)
 {
-  TIME_SECTION(_prepare_timer);
-
   if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
   {
     // Call prepare_for_use() and don't mess with the renumbering
@@ -443,8 +377,6 @@ MooseMesh::prepare(bool force)
 void
 MooseMesh::update()
 {
-  TIME_SECTION(_update_timer);
-
   // Rebuild the boundary conditions
   buildNodeListFromSideList();
 
@@ -530,8 +462,6 @@ MooseMesh::queryNodePtr(const dof_id_type i)
 void
 MooseMesh::meshChanged()
 {
-  TIME_SECTION(_mesh_changed_timer);
-
   update();
 
   // Delete all of the cached ranges
@@ -561,8 +491,6 @@ MooseMesh::onMeshChanged()
 void
 MooseMesh::cacheChangedLists()
 {
-  TIME_SECTION(_cache_changed_lists_timer);
-
   ConstElemRange elem_range(getMesh().local_elements_begin(), getMesh().local_elements_end(), 1);
   CacheChangedListsThread cclt(*this);
   Threads::parallel_reduce(elem_range, cclt);
@@ -599,8 +527,6 @@ MooseMesh::coarsenedElementChildren(const Elem * elem) const
 void
 MooseMesh::updateActiveSemiLocalNodeRange(std::set<dof_id_type> & ghosted_elems)
 {
-  TIME_SECTION(_update_active_semi_local_node_range_timer);
-
   _semilocal_node_list.clear();
 
   // First add the nodes connected to local elems
@@ -673,8 +599,6 @@ public:
 void
 MooseMesh::buildNodeList()
 {
-  TIME_SECTION(_build_node_list_timer);
-
   freeBndNodes();
 
   auto bc_tuples = getMesh().get_boundary_info().build_node_list();
@@ -707,8 +631,6 @@ MooseMesh::buildNodeList()
 void
 MooseMesh::buildBndElemList()
 {
-  TIME_SECTION(_build_bnd_elem_list_timer);
-
   freeBndElems();
 
   auto bc_tuples = getMesh().get_boundary_info().build_active_side_list();
@@ -733,11 +655,8 @@ MooseMesh::nodeToElemMap()
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
     if (!_node_to_elem_map_built)
     {
-      TIME_SECTION(_node_to_elem_map_timer);
-
       for (const auto & elem : getMesh().active_element_ptr_range())
         for (unsigned int n = 0; n < elem->n_nodes(); n++)
           _node_to_elem_map[elem->node(n)].push_back(elem->id());
@@ -755,9 +674,6 @@ MooseMesh::nodeToActiveSemilocalElemMap()
   if (!_node_to_active_semilocal_elem_map_built) // Guard the creation with a double checked lock
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
-    TIME_SECTION(_node_to_active_semilocal_elem_map_timer);
-
     if (!_node_to_active_semilocal_elem_map_built)
     {
       for (const auto & elem :
@@ -778,12 +694,8 @@ ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
 {
   if (!_active_local_elem_range)
-  {
-    TIME_SECTION(_get_active_local_element_range_timer);
-
     _active_local_elem_range = libmesh_make_unique<ConstElemRange>(
         getMesh().active_local_elements_begin(), getMesh().active_local_elements_end(), GRAIN_SIZE);
-  }
 
   return _active_local_elem_range.get();
 }
@@ -792,12 +704,8 @@ NodeRange *
 MooseMesh::getActiveNodeRange()
 {
   if (!_active_node_range)
-  {
-    TIME_SECTION(_get_active_node_range_timer);
-
     _active_node_range = libmesh_make_unique<NodeRange>(
         getMesh().active_nodes_begin(), getMesh().active_nodes_end(), GRAIN_SIZE);
-  }
 
   return _active_node_range.get();
 }
@@ -815,12 +723,8 @@ ConstNodeRange *
 MooseMesh::getLocalNodeRange()
 {
   if (!_local_node_range)
-  {
-    TIME_SECTION(_get_local_node_range_timer);
-
     _local_node_range = libmesh_make_unique<ConstNodeRange>(
         getMesh().local_nodes_begin(), getMesh().local_nodes_end(), GRAIN_SIZE);
-  }
 
   return _local_node_range.get();
 }
@@ -829,11 +733,8 @@ ConstBndNodeRange *
 MooseMesh::getBoundaryNodeRange()
 {
   if (!_bnd_node_range)
-  {
-    TIME_SECTION(_get_boundary_node_range_timer);
     _bnd_node_range =
         libmesh_make_unique<ConstBndNodeRange>(bndNodesBegin(), bndNodesEnd(), GRAIN_SIZE);
-  }
 
   return _bnd_node_range.get();
 }
@@ -842,11 +743,8 @@ ConstBndElemRange *
 MooseMesh::getBoundaryElementRange()
 {
   if (!_bnd_elem_range)
-  {
-    TIME_SECTION(_get_boundary_element_range_timer);
     _bnd_elem_range =
         libmesh_make_unique<ConstBndElemRange>(bndElemsBegin(), bndElemsEnd(), GRAIN_SIZE);
-  }
 
   return _bnd_elem_range.get();
 }
@@ -854,8 +752,6 @@ MooseMesh::getBoundaryElementRange()
 void
 MooseMesh::cacheInfo()
 {
-  TIME_SECTION(_cache_info_timer);
-
   // TODO: Thread this!
   for (const auto & elem : getMesh().element_ptr_range())
   {
@@ -1202,8 +1098,6 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
               "This function should only be called outside of a threaded "
               "region due to the use of PointLocator");
 
-  TIME_SECTION(_build_periodic_node_map_timer);
-
   periodic_node_map.clear();
 
   std::unique_ptr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
@@ -1271,8 +1165,6 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type>> & p
                                  unsigned int var_number,
                                  PeriodicBoundaries * pbs) const
 {
-  TIME_SECTION(_build_periodic_node_sets_timer);
-
   periodic_node_sets.clear();
 
   // Loop over all the boundary nodes adding the periodic nodes to the appropriate set
@@ -1296,8 +1188,6 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type>> & p
 bool
 MooseMesh::detectOrthogonalDimRanges(Real tol)
 {
-  TIME_SECTION(_detect_orthogonal_dim_ranges_timer);
-
   if (_regular_orthogonal_mesh)
     return true;
 
@@ -1375,8 +1265,6 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 void
 MooseMesh::detectPairedSidesets()
 {
-  TIME_SECTION(_detect_paired_sidesets_timer);
-
   // Loop over level-0 elements (since boundary condition information
   // is only directly stored for them) and find sidesets with normals
   // that point in the -x, +x, -y, +y, and -z, +z direction.  If there
@@ -1584,8 +1472,6 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 void
 MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
 {
-  TIME_SECTION(_build_refinement_and_coarsening_maps_timer);
-
   std::map<ElemType, Elem *> canonical_elems;
 
   // First, loop over all elements and find a canonical element for each type
@@ -1648,8 +1534,6 @@ MooseMesh::buildRefinementMap(const Elem & elem,
                               int child,
                               int child_side)
 {
-  TIME_SECTION(_build_refinement_map_timer);
-
   if (child == -1) // Doing volume mapping or parent side mapping
   {
     mooseAssert(parent_side == child_side,
@@ -1722,8 +1606,6 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
 void
 MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_face, int input_side)
 {
-  TIME_SECTION(_build_coarsening_map_timer);
-
   std::pair<int, ElemType> the_pair(input_side, elem.type());
 
   if (_elem_type_to_coarsening_map.find(the_pair) != _elem_type_to_coarsening_map.end())
@@ -1799,8 +1681,6 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
                                 int child,
                                 int child_side)
 {
-  TIME_SECTION(_find_adaptivity_qp_maps_timer);
-
   ReplicatedMesh mesh(_communicator);
   mesh.skip_partitioning(true);
 
@@ -1932,8 +1812,6 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id,
                             const boundary_id_type new_id,
                             bool delete_prev)
 {
-  TIME_SECTION(_change_boundary_id_timer);
-
   // Get a reference to our BoundaryInfo object, we will use it several times below...
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
@@ -1990,8 +1868,6 @@ MooseMesh::init()
 {
   if (_app.isSplitMesh() && _use_distributed_mesh)
     mooseError("You cannot use the mesh splitter capability with DistributedMesh!");
-
-  TIME_SECTION(_init_timer);
 
   if (_custom_partitioner_requested)
   {
@@ -2065,10 +1941,7 @@ MooseMesh::init()
 
     // For now, only read the recovery mesh on the Ultimate Master..
     // sub-apps need to just build their mesh like normal
-    {
-      TIME_SECTION(_read_recovered_mesh_timer);
-      getMesh().read(_app.getRecoverFileBase() + "_mesh." + _app.getRecoverFileSuffix());
-    }
+    getMesh().read(_app.getRecoverFileBase() + "_mesh." + _app.getRecoverFileSuffix());
 
     getMesh().allow_renumbering(allow_renumbering_later);
     getMesh().skip_partitioning(skip_partitioning_later);
@@ -2376,8 +2249,6 @@ MooseMesh::ghostGhostedBoundaries()
   if (!_use_distributed_mesh)
     return;
 
-  TIME_SECTION(_ghost_ghosted_boundaries_timer);
-
   DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
 
   // We would like to clear ghosted elements that were added by
@@ -2677,8 +2548,6 @@ MooseMesh::addMortarInterface(const std::string & name,
                               BoundaryName slave,
                               SubdomainName domain_name)
 {
-  TIME_SECTION(_add_mortar_interface_timer);
-
   SubdomainID domain_id = getSubdomainID(domain_name);
   boundary_id_type master_id = getBoundaryID(master);
   boundary_id_type slave_id = getBoundaryID(slave);

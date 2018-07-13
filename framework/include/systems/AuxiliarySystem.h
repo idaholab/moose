@@ -13,7 +13,6 @@
 // MOOSE includes
 #include "SystemBase.h"
 #include "ExecuteMooseObjectWarehouse.h"
-#include "PerfGraphInterface.h"
 
 #include "libmesh/explicit_system.h"
 #include "libmesh/transient_system.h"
@@ -36,7 +35,7 @@ class NumericVector;
  * A system that holds auxiliary variables
  *
  */
-class AuxiliarySystem : public SystemBase, public PerfGraphInterface
+class AuxiliarySystem : public SystemBase
 {
 public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
@@ -196,11 +195,6 @@ protected:
 
   // Storage for AuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
-
-  /// Timers
-  PerfID _compute_scalar_vars_timer;
-  PerfID _compute_nodal_vars_timer;
-  PerfID _compute_elemental_vars_timer;
 
   friend class AuxKernel;
   friend class ComputeNodalAuxVarsThread;

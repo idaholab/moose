@@ -29,7 +29,6 @@
 
 Adaptivity::Adaptivity(FEProblemBase & subproblem)
   : ConsoleStreamInterface(subproblem.getMooseApp()),
-    PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "Adaptivity"),
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),
@@ -45,11 +44,7 @@ Adaptivity::Adaptivity(FEProblemBase & subproblem)
     _cycles_per_step(1),
     _use_new_system(false),
     _max_h_level(0),
-    _recompute_markers_during_cycles(false),
-    _adapt_mesh_timer(registerTimedSection("adaptMesh", 3)),
-    _uniform_refine_timer(registerTimedSection("uniformRefine", 2)),
-    _uniform_refine_with_projection(registerTimedSection("uniformRefineWithProjection", 2)),
-    _update_error_vectors(registerTimedSection("updateErrorVectors", 5))
+    _recompute_markers_during_cycles(false)
 {
 }
 
@@ -124,8 +119,6 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 bool
 Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 {
-  TIME_SECTION(_adapt_mesh_timer);
-
   // If the marker name is supplied, use it. Otherwise, use the one in _marker_variable_name
   if (marker_name.empty())
     marker_name = _marker_variable_name;
@@ -218,8 +211,6 @@ Adaptivity::uniformRefine(MooseMesh * mesh)
 void
 Adaptivity::uniformRefineWithProjection()
 {
-  TIME_SECTION(_uniform_refine_with_projection);
-
   // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be
   // able to do refinements
   MeshRefinement mesh_refinement(_mesh);
@@ -288,8 +279,6 @@ Adaptivity::getErrorVector(const std::string & indicator_field)
 void
 Adaptivity::updateErrorVectors()
 {
-  TIME_SECTION(_update_error_vectors);
-
   // Resize all of the ErrorVectors in case the mesh has changed
   for (const auto & it : _indicator_field_to_error_vector)
   {

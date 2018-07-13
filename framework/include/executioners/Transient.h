@@ -323,8 +323,6 @@ protected:
 
   /// The DoFs associates with all of the relaxed variables
   std::set<dof_id_type> _relaxed_dofs;
-
-  PerfID _final_timer;
 };
 
 #endif // TRANSIENTEXECUTIONER_H

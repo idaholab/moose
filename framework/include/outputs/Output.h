@@ -16,7 +16,6 @@
 #include "MeshChangedInterface.h"
 #include "SetupInterface.h"
 #include "AdvancedOutputUtils.h"
-#include "PerfGraphInterface.h"
 
 // Forward declarations
 class Output;
@@ -42,8 +41,7 @@ InputParameters validParams<Output>();
 class Output : public MooseObject,
                public Restartable,
                public MeshChangedInterface,
-               public SetupInterface,
-               public PerfGraphInterface
+               public SetupInterface
 {
 public:
   /**
@@ -247,9 +245,6 @@ protected:
   // access to this data from the Console object for displaying
   // the output settings.
   OutputOnWarehouse _advanced_execute_on;
-
-  /// Timers
-  PerfID _output_step_timer;
 
   friend class OutputWarehouse;
 };

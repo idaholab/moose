@@ -76,6 +76,9 @@ Checkpoint::directory()
 void
 Checkpoint::output(const ExecFlagType & /*type*/)
 {
+  // Start the performance log
+  Moose::perf_log.push("Checkpoint::output()", "Output");
+
   // Create the output directory
   std::string cp_dir = directory();
   mkdir(cp_dir.c_str(), S_IRWXU | S_IRGRP);
@@ -122,6 +125,9 @@ Checkpoint::output(const ExecFlagType & /*type*/)
 
   // Remove old checkpoint files
   updateCheckpointFiles(current_file_struct);
+
+  // Stop the logging
+  Moose::perf_log.pop("Checkpoint::output()", "Output");
 }
 
 void
