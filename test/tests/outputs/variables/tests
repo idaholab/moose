@@ -49,18 +49,4 @@
     design = 'Outputs/index.md'
     issues = '#1895'
   [../]
-
-  [./nemesis_hide_intel]
-    type = 'Exodiff'
-    input = nemesis_hide.i
-    cli_args = 'Outputs/out/file_base=intel_show_hide_out'
-    min_parallel = 2
-    max_parallel = 2
-    exodiff = 'intel_show_hide_out.e.2.0 intel_show_hide_out.e.2.1'
-    platform = 'LINUX'
-    compiler = 'INTEL'
-    requirement = "The variables specified in an Output object's 'hide = ' list shall not appear in the output file."
-    design = 'Outputs/index.md'
-    issues = '#1895'
-  [../]
 []

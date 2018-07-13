@@ -11,6 +11,7 @@
     superlu = true
     prereq = 'glued_kin_sm'
     petsc_version = '>=3.7.6'
+    compiler = '!INTEL'
     allow_warnings = true
   [../]
   [./glued_pen]

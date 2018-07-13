@@ -194,11 +194,11 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
       _use_distributed_mesh = true;
       break;
     case 1: // SERIAL
-      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
+      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _app.isUseSplit())
         _parallel_type_overridden = true;
       break;
     case 2: // DEFAULT
-      // The user did not specify 'distribution = XYZ' in the input file,
+      // The user did not specify 'parallel_type = XYZ' in the input file,
       // so we allow the --distributed-mesh command line arg to possibly turn
       // on DistributedMesh.  If the command line arg is not present, we pick ReplicatedMesh.
       if (_app.getDistributedMeshOnCommandLine())
@@ -208,8 +208,9 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
       // No default switch needed for MooseEnum
   }
 
-  // If the user specifies 'nemesis = true' in the Mesh block, we must use DistributedMesh.
-  if (_is_nemesis)
+  // If the user specifies 'nemesis = true' in the Mesh block, or they are using --use-split,
+  // we must use DistributedMesh.
+  if (_is_nemesis || _app.isUseSplit())
     _use_distributed_mesh = true;
 
   unsigned dim = getParam<MooseEnum>("dim");

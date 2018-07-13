@@ -42,7 +42,7 @@ std::string indent(unsigned int spaces);
  *
  * This includes the versions and timestamps
  */
-std::string outputFrameworkInformation(MooseApp & app);
+std::string outputFrameworkInformation(const MooseApp & app);
 
 /**
  * Output the mesh information
@@ -62,12 +62,12 @@ std::string outputNonlinearSystemInformation(FEProblemBase & problem);
 /**
  * Output action RelationshipManager information
  */
-std::string outputRelationshipManagerInformation(MooseApp & app);
+std::string outputRelationshipManagerInformation(const MooseApp & app);
 
 /**
  * Output execution information
  */
-std::string outputExecutionInformation(MooseApp & app, FEProblemBase & problem);
+std::string outputExecutionInformation(const MooseApp & app, FEProblemBase & problem);
 
 /**
  * Output the output information
@@ -79,7 +79,7 @@ std::string outputOutputInformation(MooseApp & app);
  * @param system The libMesh system to output
  * @see outputAuxiliarySystemInformation outputNonlinearSystemInformation
  */
-std::string outputSystemInformationHelper(const System & system);
+std::string outputSystemInformationHelper(System & system);
 
 /**
  * Helper function function for stringstream formatting

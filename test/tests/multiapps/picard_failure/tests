@@ -9,6 +9,7 @@
     petsc_version = '>=3.6.1'
     allow_warnings = true
     petsc_version_release = true
+    compiler = '!INTEL'
 
     design = '/MultiApps/index.md'
     requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
@@ -25,6 +26,7 @@
     petsc_version = '>=3.6.1'
     allow_warnings = true
     petsc_version_release = true
+    compiler = '!INTEL'
 
     # Turn off Exodus and turn on CSV globally
     cli_args = ':Outputs/csv=true :Outputs/exodus=false'
