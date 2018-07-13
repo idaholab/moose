@@ -12,6 +12,7 @@
 
 // Moose
 #include "Restartable.h"
+#include "PerfGraphInterface.h"
 
 // Forward declarations
 class SubProblem;
@@ -21,7 +22,7 @@ class MooseMesh;
  * Finds the nearest node to each node in boundary1 to each node in boundary2 and the other way
  * around.
  */
-class NearestNodeLocator : public Restartable
+class NearestNodeLocator : public Restartable, public PerfGraphInterface
 {
 public:
   NearestNodeLocator(SubProblem & subproblem,
@@ -116,6 +117,12 @@ public:
 
   // The list of ghosted elements added during a time step for iteration patch update strategy
   std::vector<dof_id_type> _new_ghosted_elems;
+
+  // Timers
+  PerfID _find_nodes_timer;
+  PerfID _update_patch_timer;
+  PerfID _reinit_timer;
+  PerfID _update_ghosted_elems_timer;
 };
 
 #endif // NEARESTNODELOCATOR_H

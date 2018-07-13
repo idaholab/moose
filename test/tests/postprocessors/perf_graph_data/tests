@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    requirement = "MOOSE shall have the abililty to pull time from the PerfGrahp into a Postprocessor"
+    design = 'PerfGraphData.md'
+    issues = '#11551'
+    type = 'CheckFiles'
+    input = 'perf_graph.i'
+    check_files = 'perf_graph_out.csv'
+  [../]
+[]

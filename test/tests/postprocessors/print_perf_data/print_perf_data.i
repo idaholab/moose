@@ -33,53 +33,50 @@
 []
 
 [Postprocessors]
-  [./elapsed_alive]
-    type = PerformanceData
-    event = 'ALIVE'
-  [../]
-  [./elapsed_active]
-    type = PerformanceData
-    event = 'ACTIVE'
+  [./elapsed]
+    type = PerfGraphData
+    section_name = "App"
+    data_type = total
   [../]
   [./res_calls]
-    type = PerformanceData
-    column = n_calls
-    event = compute_residual()
+    type = PerfGraphData
+    section_name = "FEProblem::computeResidualInternal"
+    data_type = calls
   [../]
   [./jac_calls]
-    type = PerformanceData
-    column = n_calls
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = calls
   [../]
   [./jac_total_time]
-    type = PerformanceData
-    column = total_time
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = self
   [../]
   [./jac_average_time]
-    type = PerformanceData
-    column = average_time
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total_avg
   [../]
   [./jac_total_time_with_sub]
-    type = PerformanceData
-    column = total_time_with_sub
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total
   [../]
   [./jac_average_time_with_sub]
-    type = PerformanceData
-    column = average_time_with_sub
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total_avg
   [../]
   [./jac_percent_of_active_time]
-    type = PerformanceData
-    column = percent_of_active_time
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = self_percent
   [../]
   [./jac_percent_of_active_time_with_sub]
-    type = PerformanceData
-    column = percent_of_active_time_with_sub
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total_percent
   [../]
 []
 
@@ -95,5 +92,5 @@
 [Outputs]
   exodus = true
   csv = true
-  print_perf_log = true
+  perf_graph = true
 []
