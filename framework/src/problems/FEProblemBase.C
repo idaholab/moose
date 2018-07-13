@@ -3838,6 +3838,10 @@ FEProblemBase::solve()
 {
   TIME_SECTION(_solve_timer);
 
+#if LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::petscSetOptions(*this);
+#endif
+
   Moose::setSolverDefaults(*this);
 
   // Setup the output system for printing linear/nonlinear iteration information
