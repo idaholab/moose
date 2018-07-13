@@ -93,7 +93,7 @@ public:
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
-      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + ") ";
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
     mooseError(prefix, args...);
   }
 
@@ -108,7 +108,7 @@ public:
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
-      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + ") ";
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
     mooseWarning(prefix, args...);
   }
 
@@ -124,7 +124,7 @@ public:
   {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
-      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + ") ";
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
     mooseInfo(prefix, args...);
   }
 
