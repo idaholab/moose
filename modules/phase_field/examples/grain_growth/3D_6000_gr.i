@@ -166,7 +166,7 @@
   scheme = bdf2
   solve_type = PJFNK #Preconditioned JFNK (default)
   petsc_options_iname = '-pc_type'
-  petsc_options_value = 'asm     '
+  petsc_options_value = 'asm'
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 20
@@ -199,6 +199,6 @@
   [./console]
     type = Console
     perf_log = true
-    perf_log_interval = 5
+    perf_log_interval = 1
   [../]
 []
