@@ -34,7 +34,6 @@ public:
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
   virtual Real cp_from_v_e(Real v, Real e) const override;
   virtual Real cv_from_v_e(Real v, Real e) const override;
-  virtual Real gamma_from_v_e(Real v, Real e) const override;
   virtual Real mu_from_v_e(Real v, Real e) const override;
   virtual Real k_from_v_e(Real v, Real e) const override;
   virtual Real s_from_v_e(Real v, Real e) const override;

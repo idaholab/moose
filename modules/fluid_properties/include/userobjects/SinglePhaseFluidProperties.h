@@ -102,14 +102,6 @@ public:
   virtual Real cv_from_v_e(Real v, Real e) const = 0;
 
   /**
-   * Ratio of specific heats from specific volume and specific internal energy
-   *
-   * @param[in] v   specific volume
-   * @param[in] e   specific internal energy
-   */
-  virtual Real gamma_from_v_e(Real v, Real e) const;
-
-  /**
    * Dynamic viscosity from specific volume and specific internal energy
    *
    * @param[in] v   specific volume
