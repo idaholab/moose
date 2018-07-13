@@ -98,7 +98,6 @@ Output::Output(const InputParameters & parameters)
     Restartable(this, "Output"),
     MeshChangedInterface(parameters),
     SetupInterface(this),
-    PerfGraphInterface(this),
     _problem_ptr(getParam<FEProblemBase *>("_fe_problem_base")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),
@@ -127,8 +126,7 @@ Output::Output(const InputParameters & parameters)
     _initialized(false),
     _allow_output(true),
     _is_advanced(false),
-    _advanced_execute_on(_execute_on, parameters),
-    _output_step_timer(registerTimedSection("outputStep", 2))
+    _advanced_execute_on(_execute_on, parameters)
 {
   if (_use_displaced)
   {
@@ -190,10 +188,7 @@ Output::outputStep(const ExecFlagType & type)
 
   // Call the output method
   if (shouldOutput(type))
-  {
-    TIME_SECTION(_output_step_timer);
     output(type);
-  }
 }
 
 bool

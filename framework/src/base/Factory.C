@@ -103,9 +103,6 @@ Factory::create(const std::string & obj_name,
   InputParameters & params =
       _app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
 
-  // Set the _type parameter
-  params.set<std::string>("_type") = obj_name;
-
   // Check to make sure that all required parameters are supplied
   params.checkParams(name);
 

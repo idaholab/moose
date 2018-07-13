@@ -367,6 +367,9 @@ Exodus::output(const ExecFlagType & type)
   if (!hasOutput(type))
     return;
 
+  // Start the performance log
+  Moose::perf_log.push("Exodus::output()", "Output");
+
   // Prepare the ExodusII_IO object
   outputSetup();
   LockFile lf(filename(), processor_id() == 0);
@@ -399,6 +402,9 @@ Exodus::output(const ExecFlagType & type)
 
   // Reset the mesh changed flag
   _exodus_mesh_changed = false;
+
+  // Stop the logging
+  Moose::perf_log.pop("Exodus::output()", "Output");
 }
 
 std::string

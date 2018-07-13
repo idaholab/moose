@@ -37,12 +37,6 @@ public:
   virtual ~MooseObject() = default;
 
   /**
-   * Get the type of this object.
-   * @return the name of the type of this object
-   */
-  const std::string & type() const { return _type; }
-
-  /**
    * Get the name of the object
    * @return The name of the object
    */
@@ -167,9 +161,6 @@ protected:
 
   /// The MooseApp this object is associated with
   MooseApp & _app;
-
-  /// The type of this object (the Class name)
-  const std::string & _type;
 
   /// The name of this object, reference to value stored in InputParameters
   const std::string & _name;

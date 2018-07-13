@@ -37,11 +37,6 @@ libmesh_LIBS     := $(shell METHOD=$(METHOD) $(libmesh_config) --libs)
 libmesh_HOST     := $(shell METHOD=$(METHOD) $(libmesh_config) --host)
 libmesh_LDFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --ldflags)
 
-# You can completely disable timing by setting MOOSE_NO_PERF_GRAPH in your environment
-ifneq (x$(MOOSE_NO_PERF_GRAPH), x)
-  libmesh_CXXFLAGS += -DMOOSE_NO_PERF_GRAPH
-endif
-
 # Make.common used to provide an obj-suffix which was related to the
 # machine in question (from config.guess, i.e. @host@ in
 # contrib/utils/Make.common.in) and the $(METHOD).

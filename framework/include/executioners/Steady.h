@@ -51,8 +51,6 @@ protected:
 
   int & _time_step;
   Real & _time;
-
-  PerfID _final_timer;
 };
 
 #endif // STEADY_H

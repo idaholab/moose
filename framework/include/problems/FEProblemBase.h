@@ -29,7 +29,6 @@
 #include "Postprocessor.h"
 #include "HashMap.h"
 #include "VectorPostprocessor.h"
-#include "PerfGraphInterface.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -1723,53 +1722,6 @@ private:
 
   /// Whether the problem has dgkernels or interface kernels
   bool _has_internal_edge_residual_objects;
-
-  /// Timers
-  PerfID _initial_setup_timer;
-  PerfID _project_solution_timer;
-  PerfID _compute_indicators_timer;
-  PerfID _compute_markers_timer;
-  PerfID _compute_user_objects_timer;
-  PerfID _execute_controls_timer;
-  PerfID _execute_samplers_timer;
-  PerfID _update_active_objects_timer;
-  PerfID _reinit_because_of_ghosting_or_new_geom_objects_timer;
-  PerfID _exec_multi_app_transfers_timer;
-  PerfID _init_timer;
-  PerfID _eq_init_timer;
-  PerfID _solve_timer;
-  PerfID _check_exception_and_stop_solve_timer;
-  PerfID _advance_state_timer;
-  PerfID _restore_solutions_timer;
-  PerfID _save_old_solutions_timer;
-  PerfID _restore_old_solutions_timer;
-  PerfID _output_step_timer;
-  PerfID _on_timestep_begin_timer;
-  PerfID _compute_residual_l2_norm_timer;
-  PerfID _compute_residual_sys_timer;
-  PerfID _compute_residual_internal_timer;
-  PerfID _compute_residual_type_timer;
-  PerfID _compute_transient_implicit_residual_timer;
-  PerfID _compute_residual_tags_timer;
-  PerfID _compute_jacobian_internal_timer;
-  PerfID _compute_jacobian_tags_timer;
-  PerfID _compute_jacobian_blocks_timer;
-  PerfID _compute_bounds_timer;
-  PerfID _compute_post_check_timer;
-  PerfID _compute_damping_timer;
-  PerfID _possibly_rebuild_geom_search_patches_timer;
-  PerfID _initial_adapt_mesh_timer;
-  PerfID _adapt_mesh_timer;
-  PerfID _update_mesh_xfem_timer;
-  PerfID _mesh_changed_timer;
-  PerfID _mesh_changed_helper_timer;
-  PerfID _check_problem_integrity_timer;
-  PerfID _serialize_solution_timer;
-  PerfID _check_nonlinear_convergence_timer;
-  PerfID _check_linear_convergence_timer;
-  PerfID _update_geometric_search_timer;
-  PerfID _exec_multi_apps_timer;
-  PerfID _backup_multi_apps_timer;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

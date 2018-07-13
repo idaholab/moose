@@ -13,7 +13,6 @@
 // Moose includes
 #include "Restartable.h"
 #include "PenetrationInfo.h"
-#include "PerfGraphInterface.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/point.h"
@@ -25,7 +24,7 @@ class MooseMesh;
 class GeometricSearchData;
 class NearestNodeLocator;
 
-class PenetrationLocator : Restartable, public PerfGraphInterface
+class PenetrationLocator : Restartable
 {
 public:
   PenetrationLocator(SubProblem & subproblem,
@@ -100,10 +99,6 @@ protected:
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
 
   const Moose::PatchUpdateType _patch_update_strategy; // Contact patch update strategy
-
-  /// Timers
-  PerfID _detect_penetration_timer;
-  PerfID _reinit_timer;
 };
 
 /**
