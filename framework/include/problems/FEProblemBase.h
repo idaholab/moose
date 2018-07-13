@@ -1610,6 +1610,8 @@ public:
   using SubProblem::haveADObjects;
   void haveADObjects(bool have_ad_objects) override;
 
+  void hypreMatrix(bool hypre_matrix) { _hypre_matrix = hypre_matrix; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1860,6 +1862,8 @@ protected:
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property
   bool _using_ad_mat_props;
+
+  bool _hypre_matrix;
 
 private:
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);

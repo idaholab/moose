@@ -968,6 +968,33 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   ISColoringDestroy(&iscoloring);
 }
 
+ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem)
+  : _fe_problem(fe_problem)
+{
+}
+
+void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
+{
+  _fe_problem.lineSearch();
+}
+
+bool
+detectHypreFromOptions()
+{
+  char pc_type[256];
+  PetscBool flg;
+
+  PetscOptionsGetString(NULL, NULL, "-pc_type", pc_type, sizeof(pc_type), &flg);
+  if (!flg)
+    return false;
+  else
+  {
+    PetscStrcmp(pc_type, "hypre", &flg);
+    return flg;
+  }
+  return false;
+}
+
 } // Namespace PetscSupport
 } // Namespace MOOSE
 

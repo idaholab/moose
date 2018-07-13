@@ -247,3 +247,13 @@ EigenProblem::isNonlinearEigenvalueSolver()
          solverParams()._eigen_solve_type == Moose::EST_MONOLITH_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_MF_MONOLITH_NEWTON;
 }
+
+void
+EigenProblem::init()
+{
+#ifdef LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
+#endif
+
+  FEProblemBase::init();
+}

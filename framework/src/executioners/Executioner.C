@@ -133,6 +133,11 @@ validParams<Executioner>()
                         false,
                         "Should XFEM update the mesh at the beginning of the timestep");
 
+  params.addParam<bool>("hypre_matrix",
+                        false,
+                        "If true, use a hypre matrix to remove the duplicate matrix in PETSc."
+                        "It is only active when using Hypre preconditioner");
+
   params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
                               "compute_initial_residual_before_preset_bcs",
@@ -203,6 +208,8 @@ Executioner::Executioner(const InputParameters & parameters)
   if (getParam<Real>("relaxation_factor") != 1.0)
     // Store a copy of the previous solution here
     _fe_problem.getNonlinearSystemBase().addVector("relax_previous", false, PARALLEL);
+
+  _fe_problem.hypreMatrix(getParam<bool>("hypre_matrix"));
 }
 
 Executioner::~Executioner() {}

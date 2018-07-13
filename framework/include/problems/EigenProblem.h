@@ -32,6 +32,8 @@ public:
 
   virtual bool converged() override;
 
+  virtual void init() override;
+
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
   virtual void setNEigenPairsRequired(unsigned int n_eigen_pairs)
   {

@@ -14,6 +14,8 @@
 #include "MooseEigenSystem.h"
 #include "NonlinearSystem.h"
 #include "LineSearch.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/petsc_matrix.h"
 
 registerMooseObject("MooseApp", FEProblem);
 
@@ -82,4 +84,27 @@ FEProblem::addLineSearch(const InputParameters & parameters)
     mooseError("Currently contact line search requires use of Petsc.");
 #endif
   }
+}
+
+void
+FEProblem::init()
+{
+#ifdef LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
+                                               // Determine if HYPRE is used
+#if !PETSC_VERSION_LESS_THAN(3, 9, 2)
+  if (_hypre_matrix)
+  {
+    bool use_hypre = Moose::PetscSupport::detectHypreFromOptions();
+    if (use_hypre)
+    {
+      PetscMatrix<Number> * petsc_mat = dynamic_cast<PetscMatrix<Number> *>(_nl_sys->sys().matrix);
+      if (petsc_mat)
+        petsc_mat->set_matrix_type(libMesh::HYPRE);
+    }
+  }
+#endif
+
+#endif
+  FEProblemBase::init();
 }

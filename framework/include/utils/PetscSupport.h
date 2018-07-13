@@ -132,6 +132,11 @@ void setSinglePetscOption(const std::string & name, const std::string & value = 
 void addPetscOptionsFromCommandline();
 
 /**
+ * Return true if Hypre PC is used
+ */
+bool detectHypreFromOptions();
+
+/**
  * This method takes an adjacency matrix, and a desired number of colors and applies
  * a graph coloring algorithm to produce a coloring. The coloring is returned as a vector
  * of unsigned integers indicating which color or group each vextex in the adjacency matrix

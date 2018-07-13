@@ -36,6 +36,8 @@ public:
 
   virtual void addLineSearch(const InputParameters & parameters) override;
 
+  virtual void init() override;
+
 protected:
   bool _use_nonlinear;
   std::shared_ptr<NonlinearSystem> _nl_sys;
