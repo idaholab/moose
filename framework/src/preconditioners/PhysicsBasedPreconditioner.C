@@ -58,9 +58,7 @@ validParams<PhysicsBasedPreconditioner>()
 PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & params)
   : MoosePreconditioner(params),
     Preconditioner<Number>(MoosePreconditioner::_communicator),
-    _nl(_fe_problem.getNonlinearSystemBase()),
-    _init_timer(registerTimedSection("init", 2)),
-    _apply_timer(registerTimedSection("apply", 1))
+    _nl(_fe_problem.getNonlinearSystemBase())
 {
   unsigned int num_systems = _nl.system().n_vars();
   _systems.resize(num_systems);
@@ -142,7 +140,10 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
     mooseError("PBP must be used with JFNK solve type");
 }
 
-PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner() { this->clear(); }
+PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner()
+{
+  this->clear();
+}
 
 void
 PhysicsBasedPreconditioner::addSystem(unsigned int var,
@@ -175,7 +176,7 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var,
 void
 PhysicsBasedPreconditioner::init()
 {
-  TIME_SECTION(_init_timer);
+  Moose::perf_log.push("init()", "PhysicsBasedPreconditioner");
 
   // Tell libMesh that this is initialized!
   _is_initialized = true;
@@ -207,6 +208,8 @@ PhysicsBasedPreconditioner::init()
 
     preconditioner->init();
   }
+
+  Moose::perf_log.pop("init()", "PhysicsBasedPreconditioner");
 }
 
 void
@@ -247,7 +250,7 @@ PhysicsBasedPreconditioner::setup()
 void
 PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector<Number> & y)
 {
-  TIME_SECTION(_apply_timer);
+  Moose::perf_log.push("apply()", "PhysicsBasedPreconditioner");
 
   const unsigned int num_systems = _systems.size();
 
@@ -305,6 +308,8 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
   }
 
   y.close();
+
+  Moose::perf_log.pop("apply()", "PhysicsBasedPreconditioner");
 }
 
 void

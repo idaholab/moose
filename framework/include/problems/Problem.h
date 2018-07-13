@@ -11,7 +11,6 @@
 #define PROBLEM_H
 
 #include "MooseObject.h"
-#include "PerfGraphInterface.h"
 
 class TimePeriodOld;
 class Problem;
@@ -22,7 +21,7 @@ InputParameters validParams<Problem>();
 /**
  * Class that hold the whole problem being solved.
  */
-class Problem : public MooseObject, public PerfGraphInterface
+class Problem : public MooseObject
 {
 public:
   Problem(const InputParameters & parameters);

@@ -30,17 +30,13 @@ validParams<FileMesh>()
 }
 
 FileMesh::FileMesh(const InputParameters & parameters)
-  : MooseMesh(parameters),
-    _file_name(getParam<MeshFileName>("file")),
-    _read_mesh_timer(registerTimedSection("readMesh", 2))
+  : MooseMesh(parameters), _file_name(getParam<MeshFileName>("file"))
 {
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh)
-  : MooseMesh(other_mesh),
-    _file_name(other_mesh._file_name),
-    _read_mesh_timer(other_mesh._read_mesh_timer)
+  : MooseMesh(other_mesh), _file_name(other_mesh._file_name)
 {
 }
 
@@ -55,10 +51,9 @@ FileMesh::safeClone() const
 void
 FileMesh::buildMesh()
 {
-  TIME_SECTION(_read_mesh_timer);
-
   std::string _file_name = getParam<MeshFileName>("file");
 
+  Moose::perf_log.push("Read Mesh", "Setup");
   if (_is_nemesis)
   {
     // Nemesis_IO only takes a reference to DistributedMesh, so we can't be quite so short here.
@@ -135,6 +130,8 @@ FileMesh::buildMesh()
       }
     }
   }
+
+  Moose::perf_log.pop("Read Mesh", "Setup");
 }
 
 void

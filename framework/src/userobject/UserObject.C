@@ -53,7 +53,6 @@ UserObject::UserObject(const InputParameters & parameters)
     Restartable(this, "UserObjects"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(this),
-    PerfGraphInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),

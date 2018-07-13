@@ -1366,7 +1366,6 @@ InputParameters::getParamHelper(const std::string & name, const InputParameters 
 {
   if (!pars.isParamValid(name))
     mooseError("The parameter \"", name, "\" is being retrieved before being set.\n");
-
   return pars.get<T>(name);
 }
 

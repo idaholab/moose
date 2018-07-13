@@ -8,7 +8,6 @@
   [./use_log_data_no_print]
     type = RunApp
     input = use_log_data_no_print.i
-    timing = false
 
     # Make sure that the perf_log table doesn't just report
     # the same active time each timestep
@@ -34,8 +33,7 @@
   [./check_more_values]
     type = RunApp
     input = print_perf_data.i
-
     cli_args = 'Outputs/exodus=false Outputs/csv=false'
-    absent_out = '(\s(\S+)\s\|\n)[^\n]*\1.*Performance Graph'
+    absent_out = '(\s(\S+)\s\|\n)[^\n]*\1'
   [../]
 []
