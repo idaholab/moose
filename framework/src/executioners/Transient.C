@@ -210,7 +210,8 @@ Transient::Transient(const InputParameters & parameters)
     _verbose(getParam<bool>("verbose")),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _relax_factor(getParam<Real>("relaxation_factor")),
-    _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables"))
+    _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables")),
+    _final_timer(registerTimedSection("final", 1))
 {
   // Handl deprecated parameters
   if (!parameters.isParamSetByAddParam("trans_ss_check"))
@@ -380,6 +381,8 @@ Transient::execute()
 
   if (!_app.halfTransient())
   {
+    TIME_SECTION(_final_timer);
+
     _problem.outputStep(EXEC_FINAL);
     _problem.execute(EXEC_FINAL);
   }

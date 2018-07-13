@@ -14,6 +14,7 @@
 #include "ConstraintWarehouse.h"
 #include "MooseObjectWarehouse.h"
 #include "MooseObjectTagWarehouse.h"
+#include "PerfGraphInterface.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -54,7 +55,9 @@ class SparseMatrix;
  *
  * It is a part of FEProblemBase ;-)
  */
-class NonlinearSystemBase : public SystemBase, public ConsoleStreamInterface
+class NonlinearSystemBase : public SystemBase,
+                            public ConsoleStreamInterface,
+                            public PerfGraphInterface
 {
 public:
   NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
@@ -786,6 +789,19 @@ protected:
   void getNodeDofs(dof_id_type node_id, std::vector<dof_id_type> & dofs);
 
   std::vector<dof_id_type> _var_all_dof_indices;
+
+  /// Timers
+  PerfID _compute_residual_tags_timer;
+  PerfID _compute_residual_internal_timer;
+  PerfID _kernels_timer;
+  PerfID _scalar_kernels_timer;
+  PerfID _nodal_kernels_timer;
+  PerfID _nodal_kernel_bcs_timer;
+  PerfID _nodal_bcs_timer;
+  PerfID _compute_jacobian_tags_timer;
+  PerfID _compute_jacobian_blocks_timer;
+  PerfID _compute_dampers_timer;
+  PerfID _compute_dirac_timer;
 };
 
 #endif /* NONLINEARSYSTEMBASE_H */
