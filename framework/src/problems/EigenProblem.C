@@ -39,12 +39,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     // By default, we want to compute an eigenvalue only (smallest or largest)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
-    _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
-    _compute_jacobian_tag_timer(registerTimedSection("computeJacobianTag", 3)),
-    _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
-    _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
-    _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
-    _solve_timer(registerTimedSection("solve", 1))
+    _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0"))
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -117,8 +112,6 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
                                  SparseMatrix<Number> & jacobian,
                                  TagID tag)
 {
-  TIME_SECTION(_compute_jacobian_tag_timer);
-
   _fe_matrix_tags.clear();
 
   _fe_matrix_tags.insert(tag);
@@ -141,8 +134,6 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
                                 TagID tagA,
                                 TagID tagB)
 {
-  TIME_SECTION(_compute_jacobian_ab_timer);
-
   _fe_matrix_tags.clear();
 
   _fe_matrix_tags.insert(tagA);
@@ -165,8 +156,6 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
                                  NumericVector<Number> & residual,
                                  TagID tag)
 {
-  TIME_SECTION(_compute_residual_tag_timer);
-
   _fe_vector_tags.clear();
 
   _fe_vector_tags.insert(tag);
@@ -189,8 +178,6 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
                                 TagID tagA,
                                 TagID tagB)
 {
-  TIME_SECTION(_compute_residual_ab);
-
   _fe_vector_tags.clear();
 
   _fe_vector_tags.insert(tagA);
@@ -224,10 +211,9 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
+  Moose::perf_log.push("Eigen_solve()", "Execution");
   if (_solve)
   {
-    TIME_SECTION(_solve_timer);
-
     _nl->solve();
     _nl->update();
   }
@@ -235,6 +221,8 @@ EigenProblem::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
+
+  Moose::perf_log.pop("Eigen_solve()", "Execution");
 }
 
 bool

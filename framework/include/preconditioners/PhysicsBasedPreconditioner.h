@@ -94,10 +94,6 @@ protected:
    * to keep looking this thing up through it's name.
    */
   std::vector<std::vector<SparseMatrix<Number> *>> _off_diag_mats;
-
-  /// Timers
-  PerfID _init_timer;
-  PerfID _apply_timer;
 };
 
 #endif // PHYSICSBASEDPRECONDITIONER_H

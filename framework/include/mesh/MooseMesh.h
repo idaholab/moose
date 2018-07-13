@@ -15,7 +15,6 @@
 #include "BndElement.h"
 #include "Restartable.h"
 #include "MooseEnum.h"
-#include "PerfGraphInterface.h"
 
 #include <memory> //std::unique_ptr
 
@@ -68,7 +67,7 @@ public:
  * MooseMesh wraps a libMesh::Mesh object and enhances its capabilities
  * by caching additional data and storing more state.
  */
-class MooseMesh : public MooseObject, public Restartable, public PerfGraphInterface
+class MooseMesh : public MooseObject, public Restartable
 {
 public:
   /**
@@ -1114,36 +1113,6 @@ private:
 
   /// Whether or not to allow generation of nodesets from sidesets
   bool _construct_node_list_from_side_list;
-
-  /// Timers
-  PerfID _prepare_timer;
-  PerfID _update_timer;
-  PerfID _mesh_changed_timer;
-  PerfID _cache_changed_lists_timer;
-  PerfID _update_active_semi_local_node_range_timer;
-  PerfID _build_node_list_timer;
-  PerfID _build_bnd_elem_list_timer;
-  PerfID _node_to_elem_map_timer;
-  PerfID _node_to_active_semilocal_elem_map_timer;
-  PerfID _get_active_local_element_range_timer;
-  PerfID _get_active_node_range_timer;
-  PerfID _get_local_node_range_timer;
-  PerfID _get_boundary_node_range_timer;
-  PerfID _get_boundary_element_range_timer;
-  PerfID _cache_info_timer;
-  PerfID _build_periodic_node_map_timer;
-  PerfID _build_periodic_node_sets_timer;
-  PerfID _detect_orthogonal_dim_ranges_timer;
-  PerfID _detect_paired_sidesets_timer;
-  PerfID _build_refinement_map_timer;
-  PerfID _build_coarsening_map_timer;
-  PerfID _find_adaptivity_qp_maps_timer;
-  PerfID _build_refinement_and_coarsening_maps_timer;
-  PerfID _change_boundary_id_timer;
-  PerfID _init_timer;
-  PerfID _read_recovered_mesh_timer;
-  PerfID _ghost_ghosted_boundaries_timer;
-  PerfID _add_mortar_interface_timer;
 };
 
 /**

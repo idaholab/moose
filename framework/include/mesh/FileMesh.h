@@ -39,12 +39,8 @@ public:
 protected:
   /// the file_name from whence this mesh came
   std::string _file_name;
-
   /// Auxiliary object for restart
   std::unique_ptr<ExodusII_IO> _exreader;
-
-  /// Timers
-  PerfID _read_mesh_timer;
 };
 
 #endif // FILEMESH_H

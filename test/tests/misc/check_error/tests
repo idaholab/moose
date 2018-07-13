@@ -569,6 +569,13 @@
     expect_err = "Error: mesh has SECOND order elements, so all displacement variables must be SECOND order."
   [../]
 
+  [./perf_log_control_from_multiapp_sub]
+    type = 'RunException'
+    input = 'multi_master.i'
+    expect_err = "Performance logging cannot currently be controlled from a Multiapp"
+    max_parallel = 1
+  [../]
+
   [./function_conflict]
     # Check to see if a warning is produced when a function name could evaluate to a ParsedFunction
     type = 'RunApp'

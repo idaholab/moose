@@ -13,7 +13,6 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
-#include "PerfGraphInterface.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -32,7 +31,7 @@ InputParameters validParams<MoosePreconditioner>();
 /**
  * Base class for MOOSE preconditioners.
  */
-class MoosePreconditioner : public MooseObject, public Restartable, public PerfGraphInterface
+class MoosePreconditioner : public MooseObject, public Restartable
 {
 public:
   MoosePreconditioner(const InputParameters & params);

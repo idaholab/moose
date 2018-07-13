@@ -101,12 +101,8 @@ validParams<CommonOutputAction>()
   params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
 
   // Add special Console flags
-  params.addDeprecatedParam<bool>(
-      "print_perf_log", false, "Use perf_graph instead!", "Use perf_graph instead!");
-
   params.addParam<bool>(
-      "perf_graph", false, "Enable printing of the performance graph to the screen (Console)");
-
+      "print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
   params.addParam<bool>("print_mesh_changed_info",
                         false,
                         "When true, each time the mesh is changed the mesh information is printed");
@@ -189,11 +185,6 @@ CommonOutputAction::act()
 
   if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
     create("ControlOutput");
-
-  if (!_app.getParam<bool>("no_timing") &&
-      (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log") ||
-       _app.getParam<bool>("timing")))
-    create("PerfGraphOutput");
 
   if (!getParam<bool>("color"))
     Moose::setColorConsole(false);

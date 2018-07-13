@@ -9,7 +9,7 @@
     # Test how many times compute_jacobian() has been called
     type = RunApp
     input = '1d-linear.i'
-    expect_out = 'computeJacobianInternal\s*|\s*1'
+    expect_out = 'compute_jacobian\(\)\s*1'
     cli_args = 'Outputs/exodus=false'
   [../]
 
@@ -24,7 +24,7 @@
     # Test how many times compute_jacobian() has been called
     type = RunApp
     input = '2d-quadratic.i'
-    expect_out = 'computeJacobianInternal\s*|\s*1'
+    expect_out = 'compute_jacobian\(\)\s*1'
     cli_args = 'Outputs/exodus=false'
   [../]
 []
