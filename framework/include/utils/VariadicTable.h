@@ -81,7 +81,7 @@ public:
    *
    * @param data A Tuple of data to add
    */
-  void addRow(std::tuple<Ts...> data) { _data.push_back(data); }
+  void addRow(Ts... entries) { _data.emplace_back(std::make_tuple(entries...)); }
 
   /**
    * Pretty print the table of data

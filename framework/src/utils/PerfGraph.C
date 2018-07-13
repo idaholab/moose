@@ -245,17 +245,17 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto total_avg = total / static_cast<Real>(num_calls);
     auto total_percent = 100. * total / total_root_time;
 
-    vtable.addRow({section,
-                   num_calls,
-                   self,
-                   self_avg,
-                   self_percent,
-                   children,
-                   children_avg,
-                   children_percent,
-                   total,
-                   total_avg,
-                   total_percent});
+    vtable.addRow(section,
+                  num_calls,
+                  self,
+                  self_avg,
+                  self_percent,
+                  children,
+                  children_avg,
+                  children_percent,
+                  total,
+                  total_avg,
+                  total_percent);
 
     current_depth++;
   }
@@ -292,17 +292,17 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   auto total_avg = total / static_cast<Real>(num_calls);
   auto total_percent = 100. * total / total_root_time;
 
-  vtable.addRow({section,
-                 num_calls,
-                 self,
-                 self_avg,
-                 self_percent,
-                 children,
-                 children_avg,
-                 children_percent,
-                 total,
-                 total_avg,
-                 total_percent});
+  vtable.addRow(section,
+                num_calls,
+                self,
+                self_avg,
+                self_percent,
+                children,
+                children_avg,
+                children_percent,
+                total,
+                total_avg,
+                total_percent);
 
   current_depth++;
 
@@ -442,12 +442,12 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   {
     auto id = sorted[i];
 
-    vtable.addRow(
-        {_id_to_section_name[id],
-         _section_time_ptrs[id]->_num_calls,
-         _section_time_ptrs[id]->_self,
-         _section_time_ptrs[id]->_self / static_cast<Real>(_section_time_ptrs[id]->_num_calls),
-         100 * _section_time_ptrs[id]->_self / total_root_time});
+    vtable.addRow(_id_to_section_name[id],
+                  _section_time_ptrs[id]->_num_calls,
+                  _section_time_ptrs[id]->_self,
+                  _section_time_ptrs[id]->_self /
+                      static_cast<Real>(_section_time_ptrs[id]->_num_calls),
+                  100 * _section_time_ptrs[id]->_self / total_root_time);
   }
 
   vtable.print(console);
