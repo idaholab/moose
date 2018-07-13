@@ -3,6 +3,7 @@
 #include "MooseMesh.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
+#include "libmesh/boundary_info.h"
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
@@ -38,11 +39,11 @@ validParams<ConcentricCircleMesh>()
   params.addRequiredParam<bool>(
       "volume_preserving_function",
       "Volume of concentric circles can be preserved using this function.");
-
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left_boundary", "name of the left (x) boundary");
   params.addParam<BoundaryName>(
       "right_boundary", "right_boundary", "name of the right (x) boundary");
+
   // y boundary names
   params.addParam<BoundaryName>("top_boundary", "top_boundary", "name of the top (y) boundary");
   params.addParam<BoundaryName>(
@@ -313,7 +314,6 @@ ConcentricCircleMesh::buildMesh()
         boundary_info.add_side(elem, 1, 3);
       }
     }
-
     index++;
     if (index == (num_nodes_boundary + counter * (standard + 1)) - 1)
     {
@@ -322,11 +322,12 @@ ConcentricCircleMesh::buildMesh()
     }
   }
 
+  // This is to set boundary names.
   boundary_info.sideset_name(1) = "left";
   boundary_info.sideset_name(2) = "bottom";
 
   if (_unit_cell_length == 0.0)
-    boundary_info.sideset_name(3) = "top";
+    boundary_info.sideset_name(3) = "outer";
   else
   {
     boundary_info.sideset_name(3) = "right";
@@ -339,7 +340,9 @@ ConcentricCircleMesh::buildMesh()
     boundary_info.sideset_name(1) = "bottom";
     boundary_info.sideset_name(2) = "right";
 
-    if (_unit_cell_length != 0.0)
+    if (_unit_cell_length == 0.0)
+      boundary_info.sideset_name(3) = "outer";
+    else
     {
       boundary_info.sideset_name(3) = "top";
       boundary_info.sideset_name(4) = "left";
@@ -350,9 +353,10 @@ ConcentricCircleMesh::buildMesh()
     MeshTools::Modification::rotate(mesh, 180, 0, 0);
     boundary_info.sideset_name(1) = "right";
     boundary_info.sideset_name(2) = "top";
-    boundary_info.sideset_name(3) = "bottom";
 
-    if (_unit_cell_length != 0.0)
+    if (_unit_cell_length == 0.0)
+      boundary_info.sideset_name(3) = "outer";
+    else
     {
       boundary_info.sideset_name(3) = "left";
       boundary_info.sideset_name(4) = "bottom";
@@ -363,24 +367,232 @@ ConcentricCircleMesh::buildMesh()
     MeshTools::Modification::rotate(mesh, 270, 0, 0);
     boundary_info.sideset_name(1) = "top";
     boundary_info.sideset_name(2) = "left";
-    boundary_info.sideset_name(3) = "bottom";
 
-    if (_unit_cell_length != 0.0)
+    if (_unit_cell_length == 0.0)
+      boundary_info.sideset_name(3) = "outer";
+    else
+    {
+      boundary_info.sideset_name(3) = "bottom";
       boundary_info.sideset_name(4) = "right";
+    }
   }
   else if (_portion == "top_half")
   {
-    /*
-    boundary_info.clear();
-    ReplicatedMesh & other_mesh = cast_ref<ReplicatedMesh &>(getMesh());
-    MeshTools::Modification::rotate(_other_mesh, 90, 0, 0);
-    _other_mesh.prepare_for_use(false);
-    */
-  }
-  mesh.prepare_for_use(false);
+    ReplicatedMesh & original_mesh = cast_ref<ReplicatedMesh &>(getMesh());
+    ReplicatedMesh other_mesh(original_mesh);
 
-  // BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
-  // BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
-  // BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
-  // BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
+    // This is to rotate the mesh and also to reset boundary IDs.
+    MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
+    if (_unit_cell_length != 0.0)
+    {
+      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      MeshTools::Modification::change_boundary_id(other_mesh, 4, 1);
+      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      MeshTools::Modification::change_boundary_id(other_mesh, 6, 3);
+      MeshTools::Modification::change_boundary_id(other_mesh, 7, 4);
+      original_mesh.stitch_meshes(other_mesh, 1, 3, TOLERANCE, true);
+      original_mesh.get_boundary_info().sideset_name(1) = "left";
+      original_mesh.get_boundary_info().sideset_name(2) = "bottom";
+      original_mesh.get_boundary_info().sideset_name(3) = "right";
+      original_mesh.get_boundary_info().sideset_name(4) = "top";
+    }
+    else
+    {
+      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(other_mesh, 2, 1);
+      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      original_mesh.stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
+
+      MeshTools::Modification::change_boundary_id(original_mesh, 2, 1);
+      MeshTools::Modification::change_boundary_id(original_mesh, 3, 2);
+      original_mesh.get_boundary_info().sideset_name(1) = "bottom";
+      original_mesh.get_boundary_info().sideset_name(2) = "outer";
+    }
+  }
+  else if (_portion == "right_half")
+  {
+    ReplicatedMesh & original_mesh = cast_ref<ReplicatedMesh &>(getMesh());
+    ReplicatedMesh other_mesh(original_mesh);
+
+    // This is to rotate the mesh and also to reset boundary IDs.
+    MeshTools::Modification::rotate(other_mesh, 270, 0, 0);
+    if (_unit_cell_length != 0.0)
+    {
+      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      MeshTools::Modification::change_boundary_id(other_mesh, 4, 3);
+      MeshTools::Modification::change_boundary_id(other_mesh, 5, 4);
+      MeshTools::Modification::change_boundary_id(other_mesh, 6, 1);
+      MeshTools::Modification::change_boundary_id(other_mesh, 7, 2);
+
+      original_mesh.stitch_meshes(other_mesh, 2, 4, TOLERANCE, true);
+      original_mesh.get_boundary_info().sideset_name(1) = "left";
+      original_mesh.get_boundary_info().sideset_name(2) = "bottom";
+      original_mesh.get_boundary_info().sideset_name(3) = "right";
+      original_mesh.get_boundary_info().sideset_name(4) = "top";
+    }
+    else
+    {
+      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(other_mesh, 2, 1);
+      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      original_mesh.stitch_meshes(other_mesh, 2, 2, TOLERANCE, true);
+
+      MeshTools::Modification::change_boundary_id(original_mesh, 3, 2);
+      original_mesh.get_boundary_info().sideset_name(1) = "left";
+      original_mesh.get_boundary_info().sideset_name(2) = "outer";
+    }
+  }
+  else if (_portion == "left_half")
+  {
+    ReplicatedMesh & original_mesh = cast_ref<ReplicatedMesh &>(getMesh());
+    ReplicatedMesh other_mesh(original_mesh);
+
+    // This is to rotate the mesh and to reset boundary IDs.
+    MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
+    MeshTools::Modification::rotate(original_mesh, 180, 0, 0);
+    if (_unit_cell_length != 0.0)
+    {
+      // The other mesh is created by rotating the original mesh about 90 degrees.
+      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      MeshTools::Modification::change_boundary_id(other_mesh, 4, 1);
+      MeshTools::Modification::change_boundary_id(other_mesh, 5, 2);
+      MeshTools::Modification::change_boundary_id(other_mesh, 6, 3);
+      MeshTools::Modification::change_boundary_id(other_mesh, 7, 4);
+      // The original mesh is then rotated about 180 degrees.
+      MeshTools::Modification::change_boundary_id(original_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(original_mesh, 2, 6);
+      MeshTools::Modification::change_boundary_id(original_mesh, 3, 7);
+      MeshTools::Modification::change_boundary_id(original_mesh, 4, 2);
+      MeshTools::Modification::change_boundary_id(original_mesh, 5, 3);
+      MeshTools::Modification::change_boundary_id(original_mesh, 6, 4);
+      MeshTools::Modification::change_boundary_id(original_mesh, 7, 1);
+      original_mesh.stitch_meshes(other_mesh, 4, 2, TOLERANCE, true);
+      original_mesh.get_boundary_info().sideset_name(1) = "left";
+      original_mesh.get_boundary_info().sideset_name(2) = "bottom";
+      original_mesh.get_boundary_info().sideset_name(3) = "right";
+      original_mesh.get_boundary_info().sideset_name(4) = "top";
+    }
+    else
+    {
+      MeshTools::Modification::change_boundary_id(original_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(original_mesh, 2, 1);
+      MeshTools::Modification::change_boundary_id(original_mesh, 5, 2);
+      original_mesh.stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
+
+      MeshTools::Modification::change_boundary_id(original_mesh, 2, 1);
+      MeshTools::Modification::change_boundary_id(original_mesh, 3, 2);
+      original_mesh.get_boundary_info().sideset_name(1) = "right";
+      original_mesh.get_boundary_info().sideset_name(2) = "outer";
+    }
+  }
+  else if (_portion == "bottom_half")
+  {
+    ReplicatedMesh & original_mesh = cast_ref<ReplicatedMesh &>(getMesh());
+    ReplicatedMesh other_mesh(original_mesh);
+
+    // This is to rotate the mesh and also to reset boundary IDs.
+    MeshTools::Modification::rotate(other_mesh, 180, 0, 0);
+    MeshTools::Modification::rotate(original_mesh, 270, 0, 0);
+    if (_unit_cell_length != 0.0)
+    {
+      // The other mesh is created by rotating the original mesh about 180 degrees.
+      MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
+      MeshTools::Modification::change_boundary_id(other_mesh, 3, 7);
+      MeshTools::Modification::change_boundary_id(other_mesh, 4, 2);
+      MeshTools::Modification::change_boundary_id(other_mesh, 5, 3);
+      MeshTools::Modification::change_boundary_id(other_mesh, 6, 4);
+      MeshTools::Modification::change_boundary_id(other_mesh, 7, 1);
+      // The original mesh is rotated about 270 degrees.
+      MeshTools::Modification::change_boundary_id(original_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(original_mesh, 2, 6);
+      MeshTools::Modification::change_boundary_id(original_mesh, 3, 7);
+      MeshTools::Modification::change_boundary_id(original_mesh, 4, 3);
+      MeshTools::Modification::change_boundary_id(original_mesh, 5, 4);
+      MeshTools::Modification::change_boundary_id(original_mesh, 6, 1);
+      MeshTools::Modification::change_boundary_id(original_mesh, 7, 2);
+      original_mesh.stitch_meshes(other_mesh, 1, 3, TOLERANCE, true);
+      original_mesh.get_boundary_info().sideset_name(1) = "left";
+      original_mesh.get_boundary_info().sideset_name(2) = "bottom";
+      original_mesh.get_boundary_info().sideset_name(3) = "right";
+      original_mesh.get_boundary_info().sideset_name(4) = "top";
+    }
+    else
+    {
+      MeshTools::Modification::change_boundary_id(original_mesh, 1, 5);
+      MeshTools::Modification::change_boundary_id(original_mesh, 2, 1);
+      MeshTools::Modification::change_boundary_id(original_mesh, 5, 2);
+      original_mesh.stitch_meshes(other_mesh, 1, 1, TOLERANCE, true);
+
+      MeshTools::Modification::change_boundary_id(original_mesh, 2, 1);
+      MeshTools::Modification::change_boundary_id(original_mesh, 3, 2);
+      original_mesh.get_boundary_info().sideset_name(1) = "top";
+      original_mesh.get_boundary_info().sideset_name(2) = "outer";
+    }
+  }
+  else if (_portion == "full")
+  {
+    ReplicatedMesh & portion_one = cast_ref<ReplicatedMesh &>(getMesh());
+    ReplicatedMesh portion_two(portion_one);
+
+    // This is to rotate the mesh and also to reset boundary IDs.
+    MeshTools::Modification::rotate(portion_two, 90, 0, 0);
+
+    if (_unit_cell_length != 0.0)
+    {
+      // Portion 2: 2nd quadrant
+      MeshTools::Modification::change_boundary_id(portion_two, 1, 5);
+      MeshTools::Modification::change_boundary_id(portion_two, 2, 6);
+      MeshTools::Modification::change_boundary_id(portion_two, 3, 7);
+      MeshTools::Modification::change_boundary_id(portion_two, 4, 1);
+      MeshTools::Modification::change_boundary_id(portion_two, 5, 2);
+      MeshTools::Modification::change_boundary_id(portion_two, 6, 3);
+      MeshTools::Modification::change_boundary_id(portion_two, 7, 4);
+      // 'top_half'
+      portion_one.stitch_meshes(portion_two, 1, 3, TOLERANCE, true);
+
+      // 'bottom_half'
+      ReplicatedMesh portion_bottom(portion_one);
+      MeshTools::Modification::rotate(portion_bottom, 180, 0, 0);
+      MeshTools::Modification::change_boundary_id(portion_bottom, 1, 5);
+      MeshTools::Modification::change_boundary_id(portion_bottom, 2, 6);
+      MeshTools::Modification::change_boundary_id(portion_bottom, 3, 7);
+      MeshTools::Modification::change_boundary_id(portion_bottom, 4, 2);
+      MeshTools::Modification::change_boundary_id(portion_bottom, 5, 3);
+      MeshTools::Modification::change_boundary_id(portion_bottom, 6, 4);
+      MeshTools::Modification::change_boundary_id(portion_bottom, 7, 1);
+      // 'full'
+      portion_one.stitch_meshes(portion_bottom, 2, 4, TOLERANCE, true);
+
+      portion_one.get_boundary_info().sideset_name(1) = "left";
+      portion_one.get_boundary_info().sideset_name(2) = "bottom";
+      portion_one.get_boundary_info().sideset_name(3) = "right";
+      portion_one.get_boundary_info().sideset_name(4) = "top";
+    }
+    else
+    {
+      MeshTools::Modification::change_boundary_id(portion_two, 1, 5);
+      MeshTools::Modification::change_boundary_id(portion_two, 2, 1);
+      MeshTools::Modification::change_boundary_id(portion_two, 5, 2);
+      // 'top half'
+      portion_one.stitch_meshes(portion_two, 1, 1, TOLERANCE, true);
+      // 'bottom half'
+      ReplicatedMesh portion_bottom(portion_one);
+      MeshTools::Modification::rotate(portion_bottom, 180, 0, 0);
+      // 'full'
+      portion_one.stitch_meshes(portion_bottom, 2, 2, TOLERANCE, true);
+      MeshTools::Modification::change_boundary_id(portion_one, 3, 1);
+      portion_one.get_boundary_info().sideset_name(1) = "outer";
+    }
+  }
+
+  if (_portion != "top_half" && _portion != "bottom_half" && _portion != "right_half" &&
+      _portion != "left_half")
+    mesh.prepare_for_use(false);
 }

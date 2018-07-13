@@ -4,7 +4,7 @@
   radii = '0.16125 0.1645 0.187'
   block = '1 2 3 4'
   volume_preserving_function = true
-  portion = top_right
+  #portion = top_right
   unit_cell_length = 0.496
 []
 
