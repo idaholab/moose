@@ -189,7 +189,7 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
                                 TagID tagA,
                                 TagID tagB)
 {
-  TIME_SECTION(_compute_residual_ab);
+  TIME_SECTION(_compute_residual_ab_timer);
 
   _fe_vector_tags.clear();
 
