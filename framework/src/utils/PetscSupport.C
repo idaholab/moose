@@ -968,23 +968,16 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   ISColoringDestroy(&iscoloring);
 }
 
-ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
-{
-}
-
-void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
-{
-  _fe_problem.lineSearch();
-}
-
 bool
 detectHypreFromOptions()
 {
   char pc_type[256];
   PetscBool flg;
-
+#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
   PetscOptionsGetString(NULL, NULL, "-pc_type", pc_type, sizeof(pc_type), &flg);
+#else
+  PetscOptionsGetString(NULL, "-pc_type", pc_type, sizeof(pc_type), &flg);
+#endif
   if (!flg)
     return false;
   else

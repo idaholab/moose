@@ -70,4 +70,14 @@
     issues = '#11760'
     design = 'FEProblem.md'
   [../]
+
+  [./test_hypre_matrix]
+    type = 'Exodiff'
+    input = '2d_diffusion_test.i'
+    exodiff = 'out.e'
+    cli_args = 'Executioner/hypre_matrix=true Executioner/petsc_options_iname=-pc_type Executioner/petsc_options_value=hypre'
+    petsc_version = '>=3.9.4'
+    prereq = test_force_iteration
+  [../]
+
 []
