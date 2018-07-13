@@ -979,6 +979,23 @@ void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_obj
   _fe_problem.lineSearch();
 }
 
+bool
+detectHypreFromOptions()
+{
+  char pc_type[256];
+  PetscBool flg;
+
+  PetscOptionsGetString(NULL, NULL, "-pc_type", pc_type, sizeof(pc_type), &flg);
+  if (!flg)
+    return false;
+  else
+  {
+    PetscStrcmp(pc_type, "hypre", &flg);
+    return flg;
+  }
+  return false;
+}
+
 } // Namespace PetscSupport
 } // Namespace MOOSE
 

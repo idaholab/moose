@@ -83,6 +83,10 @@ validParams<Executioner>()
                         "Use the residual norm computed *before* PresetBCs are imposed in relative "
                         "convergence check");
 
+  params.addParam<bool>("hypre_matrix",
+                        false,
+                        "If true, use a hypre matrix to remove the duplicate matrix in PETSc."
+                        "It is only active when using Hypre preconditioner");
   params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
                               "compute_initial_residual_before_preset_bcs",
@@ -145,6 +149,8 @@ Executioner::Executioner(const InputParameters & parameters)
       getParam<bool>("compute_initial_residual_before_preset_bcs");
 
   _fe_problem.getNonlinearSystemBase()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
+
+  _fe_problem.hypreMatrix(getParam<bool>("hypre_matrix"));
 }
 
 Executioner::~Executioner() {}
