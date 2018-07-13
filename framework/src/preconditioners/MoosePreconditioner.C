@@ -39,7 +39,6 @@ validParams<MoosePreconditioner>()
 MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
   : MooseObject(params),
     Restartable(this, "Preconditioners"),
-    PerfGraphInterface(this),
     _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
   _fe_problem.getNonlinearSystemBase().setPCSide(getParam<MooseEnum>("pc_side"));

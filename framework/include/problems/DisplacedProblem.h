@@ -291,12 +291,6 @@ protected:
 
   GeometricSearchData _geometric_search_data;
 
-  /// Timers
-  PerfID _eq_init_timer;
-  PerfID _update_mesh_timer;
-  PerfID _sync_solutions_timer;
-  PerfID _update_geometric_search_timer;
-
 private:
   friend class UpdateDisplacedMeshThread;
   friend class Restartable;

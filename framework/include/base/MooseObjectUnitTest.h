@@ -75,7 +75,6 @@ protected:
   {
     InputParameters mesh_params = _factory.getValidParams("GeneratedMesh");
     mesh_params.set<std::string>("_object_name") = "name1";
-    mesh_params.set<std::string>("_type") = "GeneratedMesh";
     mesh_params.set<MooseEnum>("dim") = "3";
     _mesh = libmesh_make_unique<GeneratedMesh>(mesh_params);
 

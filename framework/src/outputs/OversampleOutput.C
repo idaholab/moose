@@ -88,7 +88,6 @@ OversampleOutput::outputStep(const ExecFlagType & type)
   // FileOutput)
   if (shouldOutput(type))
   {
-    TIME_SECTION(_output_step_timer);
     updateOversample();
     output(type);
   }

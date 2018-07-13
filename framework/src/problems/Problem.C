@@ -17,14 +17,12 @@ validParams<Problem>()
 {
   InputParameters params = emptyInputParameters();
   params += validParams<MooseObject>();
-
   params.registerBase("Problem");
   return params;
 }
 
 Problem::Problem(const InputParameters & parameters)
   : MooseObject(parameters),
-    PerfGraphInterface(this),
     _cli_option_found(false),
     _color_output(false),
     _termination_requested(false)

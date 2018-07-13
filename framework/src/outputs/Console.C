@@ -66,21 +66,15 @@ validParams<Console>()
       "The number of significant digits that are printed on time related outputs");
 
   // Performance Logging
-  params.addDeprecatedParam<bool>("perf_log",
-                                  false,
-                                  "If true, all performance logs will be printed. The "
-                                  "individual log settings will override this option.",
-                                  "Use PerfGraphOutput");
-  params.addDeprecatedParam<unsigned int>(
-      "perf_log_interval",
-      0,
-      "If set, the performance log will be printed every n time steps",
-      "Use PerfGraphOutput instead");
+  params.addParam<bool>("perf_log",
+                        false,
+                        "If true, all performance logs will be printed. The "
+                        "individual log settings will override this option.");
+  params.addParam<unsigned int>(
+      "perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
-  params.addDeprecatedParam<bool>(
-      "perf_header",
-      "Print the libMesh performance log header (requires that 'perf_log = true')",
-      "Use PerfGraphOutput instead");
+  params.addParam<bool>(
+      "perf_header", "Print the libMesh performance log header (requires that 'perf_log = true')");
 
   params.addParam<bool>(
       "libmesh_log",
@@ -164,7 +158,7 @@ Console::Console(const InputParameters & parameters)
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
-    _perf_log(getParam<bool>("perf_log")),
+    _perf_log(getParam<bool>("perf_log") || _app.getParam<bool>("timing")),
     _perf_log_interval(getParam<unsigned int>("perf_log_interval")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
     _libmesh_log(getParam<bool>("libmesh_log")),
@@ -201,6 +195,14 @@ Console::Console(const InputParameters & parameters)
     _solve_log = true;
   }
 
+  if (_app.name() != "main" &&
+      (_pars.isParamSetByUser("perf_log") || _pars.isParamSetByUser("perf_log_interval") ||
+       _pars.isParamSetByUser("solve_log") || _pars.isParamSetByUser("perf_header") ||
+       _pars.isParamSetByUser("libmesh_log") ||
+       common_action->parameters().isParamSetByUser("print_perf_log")))
+    mooseWarning("Performance logging cannot currently be controlled from a Multiapp, please set "
+                 "all performance options in the main input file");
+
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
   const ExecFlagEnum & common_execute_on = common_action->getParam<ExecFlagEnum>("execute_on");
@@ -214,6 +216,14 @@ Console::Console(const InputParameters & parameters)
 
 Console::~Console()
 {
+  // Write the libMesh performance log header
+  if (_perf_header)
+    write(Moose::perf_log.get_info_header(), false);
+
+  // Write the solve log (Moose Test Performance)
+  if (_solve_log)
+    write(Moose::perf_log.get_perf_info(), false);
+
   // Write the libMesh log
   if (_libmesh_log)
     write(libMesh::perflog.get_perf_info(), false);
@@ -232,6 +242,13 @@ Console::initialSetup()
   // Only allow the main app to change the perf_log settings.
   if (_app.name() == "main")
   {
+    if (_perf_log || _solve_log || _perf_header)
+      _app.getOutputWarehouse().setLoggingRequested();
+
+    // Disable performance logging if nobody needs logging
+    if (!_app.getOutputWarehouse().getLoggingRequested())
+      Moose::perf_log.disable_logging();
+
     // Disable libMesh log
     if (!_libmesh_log)
       libMesh::perflog.disable_logging();

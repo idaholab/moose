@@ -96,6 +96,9 @@ CSV::outputVectorPostprocessors()
 void
 CSV::output(const ExecFlagType & type)
 {
+  // Start the performance log
+  Moose::perf_log.push("CSV::output()", "Output");
+
   // Call the base class output (populates tables)
   TableOutput::output(type);
 
@@ -140,4 +143,6 @@ CSV::output(const ExecFlagType & type)
   // Re-set write flags
   _write_all_table = false;
   _write_vector_table = false;
+
+  Moose::perf_log.pop("CSV::output()", "Output");
 }
