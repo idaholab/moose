@@ -41,34 +41,6 @@ protected:
    */
   virtual Real effectiveSaturation(Real saturation) const;
 
-  /**
-   * Capillary pressure as a function of saturation.
-   * Default is constant capillary pressure = 0.0.
-   * Override in derived classes to implement other capillary pressure forulations
-   *
-   * @param saturation true saturation
-   * @return capillary pressure (Pa)
-   */
-  virtual Real capillaryPressure(Real saturation) const;
-
-  /**
-   * Derivative of capillary pressure wrt to saturation.
-   * Override in derived classes to implement other capillary pressure forulations
-   *
-   * @param saturation true saturation
-   * @return derivative of capillary pressure wrt saturation
-   */
-  virtual Real dCapillaryPressure_dS(Real seff) const;
-
-  /**
-   * Second derivative of capillary pressure wrt to saturation.
-   * Override in derived classes to implement other capillary pressure forulations
-   *
-   * @param saturation true saturation
-   * @return second derivative of capillary pressure wrt saturation
-   */
-  virtual Real d2CapillaryPressure_dS2(Real saturation) const;
-
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
@@ -93,9 +65,7 @@ protected:
   /// Derivative of effective saturation with respect to saturation
   const Real _dseff_ds;
   /// Capillary pressure UserObject
-  /// Note: This pointer can be replaced with a reference once the deprecated PS
-  /// materials have been removed
-  const PorousFlowCapillaryPressure * _pc_uo;
+  const PorousFlowCapillaryPressure & _pc_uo;
 };
 
 #endif // POROUSFLOW2PHASEPS_H
