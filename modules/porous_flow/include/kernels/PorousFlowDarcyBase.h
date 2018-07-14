@@ -124,7 +124,7 @@ protected:
   const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
 
   /// PorousFlowDictator UserObject
-  const PorousFlowDictator & _porousflow_dictator;
+  const PorousFlowDictator & _dictator;
 
   /// The number of fluid phases
   const unsigned int _num_phases;

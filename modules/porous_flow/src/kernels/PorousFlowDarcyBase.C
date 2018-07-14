@@ -65,8 +65,8 @@ PorousFlowDarcyBase::PorousFlowDarcyBase(const InputParameters & parameters)
         "dPorousFlow_grad_porepressure_qp_dgradvar")),
     _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>(
         "dPorousFlow_grad_porepressure_qp_dvar")),
-    _porousflow_dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _num_phases(_porousflow_dictator.numPhases()),
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _num_phases(_dictator.numPhases()),
     _gravity(getParam<RealVectorValue>("gravity")),
     _full_upwind_threshold(getParam<unsigned>("full_upwind_threshold")),
     _fallback_scheme(getParam<MooseEnum>("fallback_scheme").getEnum<FallbackEnum>()),
@@ -100,10 +100,10 @@ PorousFlowDarcyBase::darcyQp(unsigned int ph) const
 Real
 PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph) const
 {
-  if (_porousflow_dictator.notPorousFlowVariable(jvar))
+  if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
 
-  const unsigned int pvar = _porousflow_dictator.porousFlowVariableNum(jvar);
+  const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
   RealVectorValue deriv = _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
                           (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
@@ -143,14 +143,12 @@ PorousFlowDarcyBase::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 void
 PorousFlowDarcyBase::computeResidualAndJacobian(JacRes res_or_jac, unsigned int jvar)
 {
-  if ((res_or_jac == JacRes::CALCULATE_JACOBIAN) &&
-      _porousflow_dictator.notPorousFlowVariable(jvar))
+  if ((res_or_jac == JacRes::CALCULATE_JACOBIAN) && _dictator.notPorousFlowVariable(jvar))
     return;
 
   // The PorousFlow variable index corresponding to the variable number jvar
   const unsigned int pvar =
-      ((res_or_jac == JacRes::CALCULATE_JACOBIAN) ? _porousflow_dictator.porousFlowVariableNum(jvar)
-                                                  : 0);
+      ((res_or_jac == JacRes::CALCULATE_JACOBIAN) ? _dictator.porousFlowVariableNum(jvar) : 0);
 
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   if ((ke.n() == 0) && (res_or_jac == JacRes::CALCULATE_JACOBIAN)) // this removes a problem
