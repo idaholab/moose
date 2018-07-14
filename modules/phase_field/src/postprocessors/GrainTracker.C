@@ -1169,39 +1169,55 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsi
 
     // If the distance isn't positive we just need to make sure that none of the grains represented
     // by the target variable index would intersect this one if we were to remap
-    auto next_target_it = target_it;
-    bool intersection_hit = false;
-    std::ostringstream oss;
-    while (!intersection_hit && next_target_it != list_ref.end())
     {
-      if (next_target_it->_distance > 0)
-        break;
+      auto next_target_it = target_it;
+      bool intersection_hit = false;
+      unsigned short num_close_targets = 0;
+      std::ostringstream oss;
+      while (!intersection_hit && next_target_it != list_ref.end())
+      {
+        if (next_target_it->_distance > 0)
+          break;
 
-      mooseAssert(next_target_it->_grain_index < _feature_sets.size(),
-                  "Error in indexing target grain in attemptGrainRenumber");
-      FeatureData & next_target_grain = _feature_sets[next_target_it->_grain_index];
+        mooseAssert(next_target_it->_grain_index < _feature_sets.size(),
+                    "Error in indexing target grain in attemptGrainRenumber");
+        FeatureData & next_target_grain = _feature_sets[next_target_it->_grain_index];
 
-      // If any grains touch we're done here
-      if (grain.halosIntersect(next_target_grain))
-        intersection_hit = true;
-      else
-        oss << " #" << next_target_it->_grain_id;
+        // If any grains touch we're done here
+        if (grain.halosIntersect(next_target_grain))
+          intersection_hit = true;
+        else
+        {
+          if (num_close_targets > 0)
+            oss << ", "; // delimiter
+          oss << "#" << next_target_it->_grain_id;
+        }
 
-      ++next_target_it;
-    }
+        ++next_target_it;
+        ++num_close_targets;
+      }
 
-    if (!intersection_hit)
-    {
-      if (_verbosity_level > 0)
-        _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
-                 << " from variable index " << curr_var_index << " to " << target_it->_var_index
-                 << " whose closest grain:" << oss.str()
-                 << " is inside our bounding box but whose halo(s) are not touching.\n\n"
-                 << COLOR_DEFAULT;
+      if (!intersection_hit)
+      {
+        if (_verbosity_level > 0)
+        {
+          _console << COLOR_GREEN << "- Depth " << depth << ": Remapping grain #" << grain._id
+                   << " from variable index " << curr_var_index << " to " << target_it->_var_index;
 
-      grain._status |= Status::DIRTY;
-      grain._var_index = target_it->_var_index;
-      return true;
+          if (num_close_targets == 1)
+            _console << " whose closest grain (" << oss.str()
+                     << ") is inside our bounding box but whose halo is not touching.\n\n"
+                     << COLOR_DEFAULT;
+          else
+            _console << " whose closest grains (" << oss.str()
+                     << ") are inside our bounding box but whose halos are not touching.\n\n"
+                     << COLOR_DEFAULT;
+        }
+
+        grain._status |= Status::DIRTY;
+        grain._var_index = target_it->_var_index;
+        return true;
+      }
     }
 
     // If we reach this part of the loop, there is no simple renumbering that can be done.

@@ -611,8 +611,6 @@ Console::outputSystemInformation()
 
   if (_system_info_flags.contains("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
-
-  _console << "\n\n";
 }
 
 void
