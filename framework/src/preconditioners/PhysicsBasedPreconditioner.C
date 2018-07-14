@@ -140,10 +140,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
     mooseError("PBP must be used with JFNK solve type");
 }
 
-PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner()
-{
-  this->clear();
-}
+PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner() { this->clear(); }
 
 void
 PhysicsBasedPreconditioner::addSystem(unsigned int var,
