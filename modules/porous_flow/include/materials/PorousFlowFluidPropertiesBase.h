@@ -36,12 +36,6 @@ protected:
   /// Fluid temperature at the nodes or quadpoints
   const MaterialProperty<Real> & _temperature;
 
-  /// Name of (dummy) pressure primary variable
-  const VariableName _pressure_variable_name;
-
-  /// Name of (dummy) temperature primary variable
-  const VariableName _temperature_variable_name;
-
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _t_c2k;
 

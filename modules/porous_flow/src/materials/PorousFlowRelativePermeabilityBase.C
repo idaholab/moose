@@ -35,7 +35,6 @@ PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(
     const InputParameters & parameters)
   : PorousFlowMaterialBase(parameters),
     _scaling(getParam<Real>("scaling")),
-    _saturation_variable_name(_dictator.saturationVariableNameDummy()),
     _saturation(_nodal_material
                     ? getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")
                     : getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")),

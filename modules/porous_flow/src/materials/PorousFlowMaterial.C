@@ -29,7 +29,11 @@ validParams<PorousFlowMaterial>()
 PorousFlowMaterial::PorousFlowMaterial(const InputParameters & parameters)
   : Material(parameters),
     _nodal_material(getParam<bool>("at_nodes")),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator"))
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _pressure_variable_name("pressure_variable"),
+    _saturation_variable_name("saturation_variable"),
+    _temperature_variable_name("temperature_variable"),
+    _mass_fraction_variable_name("mass_fraction_variable")
 {
 }
 

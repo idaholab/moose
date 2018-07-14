@@ -137,27 +137,3 @@ PorousFlowDictator::notPorousFlowVariable(unsigned int moose_var_num) const
 {
   return moose_var_num >= _pf_var_num.size() || _pf_var_num[moose_var_num] == _num_variables;
 }
-
-const VariableName
-PorousFlowDictator::pressureVariableNameDummy() const
-{
-  return "pressure_variable_dummy";
-}
-
-const VariableName
-PorousFlowDictator::saturationVariableNameDummy() const
-{
-  return "saturation_variable_dummy";
-}
-
-const VariableName
-PorousFlowDictator::temperatureVariableNameDummy() const
-{
-  return "temperature_variable_dummy";
-}
-
-const VariableName
-PorousFlowDictator::massFractionVariableNameDummy() const
-{
-  return "mass_fraction_variable_dummy";
-}

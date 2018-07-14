@@ -43,18 +43,6 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Name of (dummy) pressure variable
-  const VariableName _pressure_variable_name;
-
-  /// Name of (dummy) saturation variable
-  const VariableName _saturation_variable_name;
-
-  /// Name of (dummy) temperature variable
-  const VariableName _temperature_variable_name;
-
-  /// Name of (dummy) mass fraction variable
-  const VariableName _mass_fraction_variable_name;
-
   /// Name of material property to be joined
   const std::string _pf_prop;
 

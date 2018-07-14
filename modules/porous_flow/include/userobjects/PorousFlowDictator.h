@@ -127,30 +127,6 @@ public:
    */
   bool notPorousFlowVariable(unsigned int moose_var_num) const;
 
-  /**
-   * Dummy pressure variable name for use in derivatives using the
-   * DerivativeMaterialInterface
-   */
-  const VariableName pressureVariableNameDummy() const;
-
-  /**
-   * Dummy saturation variable name for use in derivatives using the
-   * DerivativeMaterialInterface
-   */
-  const VariableName saturationVariableNameDummy() const;
-
-  /**
-   * Dummy temperature variable name for use in derivatives using the
-   * DerivativeMaterialInterface
-   */
-  const VariableName temperatureVariableNameDummy() const;
-
-  /**
-   * Dummy mass fraction variable name for use in derivatives using the
-   * DerivativeMaterialInterface
-   */
-  const VariableName massFractionVariableNameDummy() const;
-
 protected:
   /// Number of PorousFlow variables
   const unsigned int _num_variables;
