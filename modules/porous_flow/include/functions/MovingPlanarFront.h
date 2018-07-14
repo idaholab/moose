@@ -13,7 +13,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-// Forward Declarations
 class MovingPlanarFront;
 
 template <>
@@ -44,22 +43,22 @@ protected:
   /// The front's distance from start_posn (along the normal direction)
   Function & _distance;
 
-  /// active length
+  /// Active length
   const Real _active_length;
 
-  /// true value to return
+  /// True value to return
   const Real _true_value;
 
-  /// false value to return
+  /// False value to return
   const Real _false_value;
 
-  /// activation time
+  /// Activation time
   const Real _activation_time;
 
-  /// deactivation time
+  /// Deactivation time
   const Real _deactivation_time;
 
-  /// front unit normal
+  /// Front unit normal
   RealVectorValue _front_normal;
 };
 

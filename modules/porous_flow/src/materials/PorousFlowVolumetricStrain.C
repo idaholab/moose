@@ -109,7 +109,7 @@ PorousFlowVolumetricStrain::computeQpProperties()
   for (unsigned i = 0; i < _ndisp; ++i)
     if (_dictator.isPorousFlowVariable(_disp_var_num[i]))
     {
-      // the i_th displacement is a porous-flow variable
+      // the i_th displacement is a PorousFlow variable
       const unsigned int pvar = _dictator.porousFlowVariableNum(_disp_var_num[i]);
       _dvol_strain_rate_qp_dvar[_qp][pvar](i) = 1.0 / _dt / andy;
       _dvol_total_strain_qp_dvar[_qp][pvar](i) = 1.0;

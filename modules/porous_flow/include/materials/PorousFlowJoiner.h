@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-// Forward Declarations
 class PorousFlowJoiner;
 
 template <>
@@ -68,13 +67,13 @@ protected:
   /// Derivatives of temperature variable wrt PorousFlow variables at the qps or nodes
   const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
 
-  /// computed property of the phase
+  /// Computed property of the phase
   MaterialProperty<std::vector<Real>> & _property;
 
   /// d(property)/d(PorousFlow variable)
   MaterialProperty<std::vector<std::vector<Real>>> & _dproperty_dvar;
 
-  /// property of each phase
+  /// Property of each phase
   std::vector<const MaterialProperty<Real> *> _phase_property;
 
   /// d(property of each phase)/d(pressure)

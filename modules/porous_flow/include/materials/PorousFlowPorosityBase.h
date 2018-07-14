@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-// Forward Declarations
 class PorousFlowPorosityBase;
 
 template <>
@@ -27,7 +26,7 @@ public:
   PorousFlowPorosityBase(const InputParameters & parameters);
 
 protected:
-  /// computed porosity at the nodes or quadpoints
+  /// Computed porosity at the nodes or quadpoints
   MaterialProperty<Real> & _porosity;
 
   /// d(porosity)/d(PorousFlow variable)

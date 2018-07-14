@@ -12,7 +12,6 @@
 
 #include "PorousFlowDarcyVelocityComponent.h"
 
-// Forward Declarations
 class PorousFlowDarcyVelocityComponentLowerDimensional;
 
 template <>
@@ -37,6 +36,7 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  /// Fracture aperture (width)
   const VariableValue & _aperture;
 };
 

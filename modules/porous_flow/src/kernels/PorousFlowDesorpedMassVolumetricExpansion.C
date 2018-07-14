@@ -9,7 +9,6 @@
 
 #include "PorousFlowDesorpedMassVolumetricExpansion.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowDesorpedMassVolumetricExpansion);
@@ -20,7 +19,7 @@ validParams<PorousFlowDesorpedMassVolumetricExpansion>()
 {
   InputParameters params = validParams<TimeKernel>();
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addRequiredCoupledVar(
       "conc_var", "The variable that represents the concentration of desorped species");
   params.addClassDescription("Desorped_mass * rate_of_solid_volumetric_expansion");

@@ -9,12 +9,10 @@
 
 #include "PorousFlowSink.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 #include "libmesh/quadrature.h"
 
-// C++ includes
 #include <iostream>
 
 registerMooseObject("PorousFlowApp", PorousFlowSink);

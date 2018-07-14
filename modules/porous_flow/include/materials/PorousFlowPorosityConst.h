@@ -12,7 +12,6 @@
 
 #include "PorousFlowPorosityBase.h"
 
-// Forward Declarations
 class PorousFlowPorosityConst;
 
 template <>

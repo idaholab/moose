@@ -36,7 +36,7 @@ protected:
   /// Jacobian contribution for the PorousFlow variable pvar
   Real computeQpJac(unsigned int pvar);
 
-  /// PorousFlow UserObject
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
   /// Whether the Variable for this Kernel is a PorousFlow variable

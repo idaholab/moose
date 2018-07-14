@@ -33,10 +33,10 @@ public:
   PorousFlowLineGeometry(const InputParameters & parameters);
 
 protected:
-  /// line length.  This is only used if there is only one borehole point
+  /// Line length.  This is only used if there is only one borehole point
   const Real _line_length;
 
-  /// line direction.  This is only used if there is only one borehole point
+  /// Line direction.  This is only used if there is only one borehole point
   const RealVectorValue _line_direction;
 
   /**
@@ -46,7 +46,7 @@ protected:
    */
   const std::string _point_file;
 
-  /// radii of the borehole
+  /// Radii of the borehole
   std::vector<Real> _rs;
 
   /// x points of the borehole
@@ -58,7 +58,7 @@ protected:
   /// z points of borehole
   std::vector<Real> _zs;
 
-  /// the bottom point of the borehole (where bottom_pressure is defined)
+  /// The bottom point of the borehole (where bottom_pressure is defined)
   Point _bottom_point;
 
   /// 0.5*(length of polyline segments between points)
@@ -67,7 +67,7 @@ protected:
   /// Add Dirac Points to the line sink
   virtual void addPoints() override;
 
-  /// reads a space-separated line of floats from ifs and puts in myvec
+  /// Reads a space-separated line of floats from ifs and puts in myvec
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 };
 

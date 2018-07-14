@@ -9,12 +9,10 @@
 
 #include "PorousFlowMassTimeDerivative.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 #include "libmesh/quadrature.h"
 
-// C++ includes
 #include <limits>
 
 registerMooseObject("PorousFlowApp", PorousFlowMassTimeDerivative);
@@ -34,7 +32,7 @@ validParams<PorousFlowMassTimeDerivative>()
   params.addParam<unsigned int>(
       "fluid_component", 0, "The index corresponding to the component for this kernel");
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addClassDescription(
       "Component mass derivative wrt time for component given by fluid_component");
   return params;
@@ -100,7 +98,7 @@ PorousFlowMassTimeDerivative::computeQpResidual()
 Real
 PorousFlowMassTimeDerivative::computeQpJacobian()
 {
-  /// If the variable is not a PorousFlow variable (very unusual), the diag Jacobian terms are 0
+  // If the variable is not a PorousFlow variable (very unusual), the diag Jacobian terms are 0
   if (!_var_is_porflow_var)
     return 0.0;
   return computeQpJac(_dictator.porousFlowVariableNum(_var.number()));
@@ -109,7 +107,7 @@ PorousFlowMassTimeDerivative::computeQpJacobian()
 Real
 PorousFlowMassTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  /// If the variable is not a PorousFlow variable, the OffDiag Jacobian terms are 0
+  // If the variable is not a PorousFlow variable, the OffDiag Jacobian terms are 0
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
   return computeQpJac(_dictator.porousFlowVariableNum(jvar));
@@ -132,7 +130,7 @@ PorousFlowMassTimeDerivative::computeQpJac(unsigned int pvar)
   if (_i != _j)
     return _test[_i][_qp] * dmass / _dt;
 
-  /// As the fluid mass is lumped to the nodes, only non-zero terms are for _i==_j
+  // As the fluid mass is lumped to the nodes, only non-zero terms are for _i==_j
   for (unsigned ph = 0; ph < _num_phases; ++ph)
   {
     dmass += _dfluid_density_dvar[_i][ph][pvar] * _fluid_saturation_nodal[_i][ph] *

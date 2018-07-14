@@ -85,23 +85,23 @@ public:
    */
   unsigned int numVariables() const;
 
-  /// the number of fluid phases
+  /// The number of fluid phases
   unsigned int numPhases() const;
 
-  /// the number of fluid components
+  /// The number of fluid components
   unsigned int numComponents() const;
 
-  /// the number of aqueous equilibrium secondary species
+  /// The number of aqueous equilibrium secondary species
   unsigned int numAqueousEquilibrium() const;
 
-  /// the number of aqueous kinetic secondary species
+  /// The number of aqueous kinetic secondary species
   unsigned int numAqueousKinetic() const;
 
-  /// the aqueous phase number
+  /// The aqueous phase number
   unsigned int aqueousPhaseNumber() const;
 
   /**
-   * the PorousFlow variable number
+   * The PorousFlow variable number
    * @param moose_var_num the MOOSE variable number
    * eg if porous_flow_vars = 'pwater pgas', and the variables in
    * the simulation are 'energy pwater pgas shape'
@@ -110,7 +110,7 @@ public:
   unsigned int porousFlowVariableNum(unsigned int moose_var_num) const;
 
   /**
-   * returns true if moose_var_num is a porous flow variable
+   * Returns true if moose_var_num is a porous flow variable
    * @param moose_var_num the MOOSE variable number
    * eg if porous_flow_vars = 'pwater pgas', and the variables in
    * the simulation are 'energy pwater pgas shape'
@@ -119,7 +119,7 @@ public:
   bool isPorousFlowVariable(unsigned int moose_var_num) const;
 
   /**
-   * returns true if moose_var_num is not a porous flow variabe
+   * Returns true if moose_var_num is not a porous flow variabe
    * @param moose_var_num the MOOSE variable number
    * eg if porous_flow_vars = 'pwater pgas', and the variables in
    * the simulation are 'energy pwater pgas shape'
@@ -152,22 +152,22 @@ public:
   const VariableName massFractionVariableNameDummy() const;
 
 protected:
-  /// number of porousflow variables
+  /// Number of PorousFlow variables
   const unsigned int _num_variables;
 
-  /// number of fluid phases
+  /// Number of fluid phases
   const unsigned int _num_phases;
 
-  /// number of fluid components
+  /// Number of fluid components
   const unsigned int _num_components;
 
-  /// number of aqueous-equilibrium secondary species
+  /// Number of aqueous-equilibrium secondary species
   const unsigned int _num_aqueous_equilibrium;
 
-  /// number of aqeuous-kinetic secondary species that are involved in mineralisation
+  /// Number of aqeuous-kinetic secondary species that are involved in mineralisation
   const unsigned int _num_aqueous_kinetic;
 
-  /// aqueous phase number
+  /// Aqueous phase number
   const unsigned int _aqueous_phase_number;
 
 private:

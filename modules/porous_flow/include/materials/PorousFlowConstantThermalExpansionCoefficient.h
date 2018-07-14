@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-// Forward Declarations
 class PorousFlowConstantThermalExpansionCoefficient;
 
 template <>

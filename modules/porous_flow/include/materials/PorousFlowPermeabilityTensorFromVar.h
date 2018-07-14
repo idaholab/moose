@@ -12,7 +12,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-// Forward Declarations
 class PorousFlowPermeabilityTensorFromVar;
 
 template <>

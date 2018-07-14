@@ -37,7 +37,7 @@ protected:
   const VariableValue & _saturation;
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;
-  /// The PorousFlow dictator UserObject
+  /// The PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 };
 

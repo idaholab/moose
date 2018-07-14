@@ -17,7 +17,7 @@ validParams<PorousFlowMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<bool>(
       "at_nodes", false, "Evaluate Material properties at nodes instead of quadpoints");
   params.addPrivateParam<std::string>("pf_material_type", "pf_material");

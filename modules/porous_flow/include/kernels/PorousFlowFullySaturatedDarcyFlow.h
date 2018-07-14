@@ -34,8 +34,8 @@ protected:
   virtual Real mobility() const override;
 
   /**
-   * The derivative of the mobility with respect to the porous-flow variable pvar
-   * @param pvar Take the derivative with respect to this porous-flow variable
+   * The derivative of the mobility with respect to the PorousFlow variable pvar
+   * @param pvar Take the derivative with respect to this PorousFlow variable
    */
   virtual Real dmobility(unsigned pvar) const override;
 

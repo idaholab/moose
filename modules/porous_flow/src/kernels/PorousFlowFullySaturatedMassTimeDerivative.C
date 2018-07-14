@@ -9,7 +9,6 @@
 
 #include "PorousFlowFullySaturatedMassTimeDerivative.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedMassTimeDerivative);
@@ -34,7 +33,7 @@ validParams<PorousFlowFullySaturatedMassTimeDerivative>()
                         "mass.  If false, then this Kernel is the derivative of the "
                         "fluid volume (which is common in poro-mechanics)");
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addClassDescription("Fully-saturated version of the single-component, single-phase fluid "
                              "mass derivative wrt time");
   return params;
@@ -53,14 +52,12 @@ PorousFlowFullySaturatedMassTimeDerivative::PorousFlowFullySaturatedMassTimeDeri
                          _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),
     _biot_coefficient(getParam<Real>("biot_coefficient")),
     _biot_modulus(getMaterialProperty<Real>("PorousFlow_constant_biot_modulus_qp")),
-    _thermal_coeff(
-        _includes_thermal
-            ? &getMaterialProperty<Real>("PorousFlow_constant_thermal_expansion_coefficient_qp")
-            : nullptr),
-    _fluid_density(
-        _multiply_by_density
-            ? &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")
-            : nullptr),
+    _thermal_coeff(_includes_thermal ? &getMaterialProperty<Real>(
+                                           "PorousFlow_constant_thermal_expansion_coefficient_qp")
+                                     : nullptr),
+    _fluid_density(_multiply_by_density ? &getMaterialProperty<std::vector<Real>>(
+                                              "PorousFlow_fluid_phase_density_qp")
+                                        : nullptr),
     _dfluid_density_dvar(_multiply_by_density
                              ? &getMaterialProperty<std::vector<std::vector<Real>>>(
                                    "dPorousFlow_fluid_phase_density_qp_dvar")
@@ -73,17 +70,15 @@ PorousFlowFullySaturatedMassTimeDerivative::PorousFlowFullySaturatedMassTimeDeri
                                    : nullptr),
     _temperature_old(_includes_thermal ? &getMaterialPropertyOld<Real>("PorousFlow_temperature_qp")
                                        : nullptr),
-    _dtemperature_dvar(
-        _includes_thermal
-            ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")
-            : nullptr),
+    _dtemperature_dvar(_includes_thermal ? &getMaterialProperty<std::vector<Real>>(
+                                               "dPorousFlow_temperature_qp_dvar")
+                                         : nullptr),
     _strain_rate(_includes_mechanical
                      ? &getMaterialProperty<Real>("PorousFlow_volumetric_strain_rate_qp")
                      : nullptr),
-    _dstrain_rate_dvar(_includes_mechanical
-                           ? &getMaterialProperty<std::vector<RealGradient>>(
-                                 "dPorousFlow_volumetric_strain_rate_qp_dvar")
-                           : nullptr)
+    _dstrain_rate_dvar(_includes_mechanical ? &getMaterialProperty<std::vector<RealGradient>>(
+                                                  "dPorousFlow_volumetric_strain_rate_qp_dvar")
+                                            : nullptr)
 {
   if (_dictator.numComponents() != 1 || _dictator.numPhases() != 1)
     mooseError("PorousFlowFullySaturatedMassTimeDerivative is only applicable to single-phase, "
@@ -109,7 +104,7 @@ PorousFlowFullySaturatedMassTimeDerivative::computeQpResidual()
 Real
 PorousFlowFullySaturatedMassTimeDerivative::computeQpJacobian()
 {
-  /// If the variable is not a PorousFlow variable (very unusual), the diag Jacobian terms are 0
+  // If the variable is not a PorousFlow variable (very unusual), the diag Jacobian terms are 0
   if (!_var_is_porflow_var)
     return 0.0;
   return computeQpJac(_dictator.porousFlowVariableNum(_var.number()));
@@ -118,7 +113,7 @@ PorousFlowFullySaturatedMassTimeDerivative::computeQpJacobian()
 Real
 PorousFlowFullySaturatedMassTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  /// If the variable is not a PorousFlow variable, the OffDiag Jacobian terms are 0
+  // If the variable is not a PorousFlow variable, the OffDiag Jacobian terms are 0
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
   return computeQpJac(_dictator.porousFlowVariableNum(jvar));

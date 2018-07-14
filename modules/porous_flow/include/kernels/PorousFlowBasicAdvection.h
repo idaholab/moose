@@ -13,7 +13,6 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowBasicAdvection;
 
 template <>
@@ -32,10 +31,10 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// holds info on the Porous Flow variables
+  /// Holds info on the Porous Flow variables
   const PorousFlowDictator & _dictator;
 
-  /// phase of Darcy velocity
+  /// Phase of Darcy velocity
   const unsigned _ph;
 
   /// _darcy_velocity[_qp][ph](j) = j^th component of the Darcy velocity of phase ph

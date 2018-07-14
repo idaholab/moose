@@ -12,7 +12,6 @@
 
 #include "PorousFlowVariableBase.h"
 
-// Forward Declarations
 class PorousFlowCapillaryPressure;
 class PorousFlow2PhasePP;
 

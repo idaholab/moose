@@ -13,7 +13,6 @@
 #include "PorousFlowSinkPTDefiner.h"
 #include "LinearInterpolation.h"
 
-// Forward Declarations
 class PorousFlowPiecewiseLinearSink;
 
 template <>
@@ -32,7 +31,7 @@ public:
   PorousFlowPiecewiseLinearSink(const InputParameters & parameters);
 
 protected:
-  /// piecewise-linear function of porepressure that multiplies the sink flux
+  /// Piecewise-linear function of porepressure that multiplies the sink flux
   const LinearInterpolation _sink_func;
 
   virtual Real multiplier() const override;

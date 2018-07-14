@@ -12,7 +12,6 @@
 
 #include "PorousFlowSink.h"
 
-// Forward Declarations
 class PorousFlowSinkPTDefiner;
 
 template <>

@@ -53,7 +53,7 @@ In this simple example, the `PorousFlowDictator` isn't built explicitly, since i
 
 !listing modules/porous_flow/test/tests/energy_conservation/heat03.i start=[./dictator] end=[./pc]
 
-The `PorousFlowDictator` is given the name `dictator` and the number of fluid phases and fluid components are specified.  The `porous_flow_vars` specifies the porous-flow variables.  *All derivatives with respect to these variables enter the Jacobian, while derivatives with respect to any other Variables are not computed.*  Therefore it is strongly recommended that all Variables are entered into the `porous_flow_vars`, unless there is a good reason to not compute the derivatives with respect to a particular variable.
+The `PorousFlowDictator` is given the name `dictator` and the number of fluid phases and fluid components are specified.  The `porous_flow_vars` specifies the PorousFlow variables.  *All derivatives with respect to these variables enter the Jacobian, while derivatives with respect to any other Variables are not computed.*  Therefore it is strongly recommended that all Variables are entered into the `porous_flow_vars`, unless there is a good reason to not compute the derivatives with respect to a particular variable.
 
 ## Preconditioning and the linear solve
 

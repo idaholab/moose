@@ -39,20 +39,22 @@ protected:
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
 
-  /// the Darcy part of the flux (this is the non-upwinded part)
+  /// The Darcy part of the flux (this is the non-upwinded part)
   virtual Real darcyQp(unsigned int ph) const;
 
   /// Jacobian of the Darcy part of the flux
   virtual Real darcyQpJacobian(unsigned int jvar, unsigned int ph) const;
 
-  /** The mobility of the fluid.  For multi-component Darcy flow
+  /**
+   * The mobility of the fluid.  For multi-component Darcy flow
    * this is mass_fraction * fluid_density * relative_permeability / fluid_viscosity
    * @param nodenum The node-number to evaluate the mobility for
    * @param phase the fluid phase number
    */
   virtual Real mobility(unsigned nodenum, unsigned phase) const;
 
-  /** The derivative of mobility with respect to PorousFlow variable pvar
+  /**
+   * The derivative of mobility with respect to PorousFlow variable pvar
    * @param nodenum The node-number to evaluate the mobility for
    * @param phase the fluid phase number
    * @param pvar the PorousFlow variable pvar
@@ -85,10 +87,10 @@ protected:
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> & _permeability;
 
-  /// d(permeabiity)/d(porous-flow variable)
+  /// d(permeabiity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<RealTensorValue>> & _dpermeability_dvar;
 
-  /// d(permeabiity)/d(grad(porous-flow variable))
+  /// d(permeabiity)/d(grad(PorousFlow variable))
   const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_dgradvar;
 
   /// Fluid density for each phase (at the node)
@@ -121,7 +123,7 @@ protected:
   /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
 
-  /// PorousFlow UserObject
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _porousflow_dictator;
 
   /// The number of fluid phases

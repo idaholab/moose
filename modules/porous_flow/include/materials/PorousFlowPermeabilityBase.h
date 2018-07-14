@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-// Forward Declarations
 class PorousFlowPermeabilityBase;
 
 template <>
@@ -27,7 +26,7 @@ public:
   PorousFlowPermeabilityBase(const InputParameters & parameters);
 
 protected:
-  /// quadpoint permeability
+  /// Quadpoint permeability
   MaterialProperty<RealTensorValue> & _permeability_qp;
 
   /// d(quadpoint permeability)/d(PorousFlow variable)

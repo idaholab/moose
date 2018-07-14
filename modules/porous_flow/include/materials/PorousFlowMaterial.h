@@ -14,7 +14,6 @@
 #include "MaterialData.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowMaterial;
 
 template <>
@@ -45,13 +44,13 @@ public:
   PorousFlowMaterial(const InputParameters & parameters);
 
 protected:
-  /// correctly sizes nodal materials, then initialises using Material::initStatefulProperties
+  /// Correctly sizes nodal materials, then initialises using Material::initStatefulProperties
   virtual void initStatefulProperties(unsigned int n_points) override;
 
-  /// correctly sizes nodal materials, then computes using Material::computeProperties
+  /// Correctly sizes nodal materials, then computes using Material::computeProperties
   virtual void computeProperties() override;
 
-  /// whether the derived class holds nodal values
+  /// Whether the derived class holds nodal values
   const bool _nodal_material;
 
   /// The variable names UserObject for the PorousFlow variables

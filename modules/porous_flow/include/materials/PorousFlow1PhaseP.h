@@ -12,7 +12,6 @@
 
 #include "PorousFlowVariableBase.h"
 
-// Forward Declarations
 class PorousFlowCapillaryPressure;
 class PorousFlow1PhaseP;
 
@@ -77,7 +76,7 @@ protected:
   const VariableGradient & _gradp_qp_var;
   /// Moose variable number of the porepressure
   const unsigned int _porepressure_varnum;
-  /// the PorousFlow variable number of the porepressure
+  /// The PorousFlow variable number of the porepressure
   const unsigned int _p_var_num;
   /// Capillary pressure UserObject
   /// Note: This pointer can be replaced with a reference once the deprecated PP

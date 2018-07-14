@@ -12,7 +12,6 @@
 
 #include "PorousFlowMassFraction.h"
 
-// Forward Declarations
 class PorousFlowMassFractionAqueousEquilibriumChemistry;
 
 template <>
@@ -84,7 +83,7 @@ protected:
   /// Derivative of the secondary concentrations with respect to the porous flow variables
   MaterialProperty<std::vector<std::vector<Real>>> & _dsec_conc_dvar;
 
-  /// temperature
+  /// Temperature
   const MaterialProperty<Real> & _temperature;
 
   /// d(temperature)/(d porflow variable)
@@ -93,31 +92,31 @@ protected:
   /// Number of primary species
   const unsigned int _num_primary;
 
-  /// aqueous phase number
+  /// Aqueous phase number
   const unsigned int _aq_ph;
 
-  /// index (into _mf_vars) of the first of the primary species
+  /// Index (into _mf_vars) of the first of the primary species
   const unsigned int _aq_i;
 
-  /// number of equations in the aqueous geochemistry system
+  /// Number of equations in the aqueous geochemistry system
   const unsigned int _num_reactions;
 
   /// Whether the equilibium constants are written in their log10 form, or in absolute terms
   const bool _equilibrium_constants_as_log10;
 
-  /// number of equilibrium_constants provided
+  /// Number of equilibrium_constants provided
   const unsigned _num_equilibrium_constants;
 
-  /// equilibrium constants (dimensionless)
+  /// Equilibrium constants (dimensionless)
   std::vector<const VariableValue *> _equilibrium_constants;
 
-  /// activity coefficients for the primary species (dimensionless)
+  /// Activity coefficients for the primary species (dimensionless)
   const std::vector<Real> _primary_activity_coefficients;
 
-  /// stoichiometry defining the aqeuous geochemistry equilibrium reactions
+  /// Stoichiometry defining the aqeuous geochemistry equilibrium reactions
   const std::vector<Real> _reactions;
 
-  /// activity coefficients for the secondary species
+  /// Activity coefficients for the secondary species
   const std::vector<Real> _secondary_activity_coefficients;
 };
 

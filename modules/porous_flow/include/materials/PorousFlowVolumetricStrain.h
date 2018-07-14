@@ -33,19 +33,19 @@ protected:
   /// If true then the strain rate will include terms that ensure mass is conserved when doing integrals over the displaced mesh
   const bool _consistent;
 
-  /// number of displacements supplied (1 in 1D, 2 in 2D, 3 in 3D)
+  /// Number of displacements supplied (1 in 1D, 2 in 2D, 3 in 3D)
   const unsigned int _ndisp;
 
-  /// displacement variable values at the quad point
+  /// Displacement variable values at the quad point
   std::vector<const VariableValue *> _disp;
 
-  /// moose variable number of the displacements variables provided
+  /// MOOSE variable number of the displacements variables provided
   std::vector<unsigned int> _disp_var_num;
 
-  /// gradient of the displacements
+  /// Gradient of the displacements
   std::vector<const VariableGradient *> _grad_disp;
 
-  /// old value of gradient of the displacements
+  /// Old value of gradient of the displacements
   std::vector<const VariableGradient *> _grad_disp_old;
 
   /// The volumetric strain rate at the quadpoints

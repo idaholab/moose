@@ -13,7 +13,6 @@
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowMassTimeDerivative;
 
 template <>
@@ -35,61 +34,61 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// the fluid component index
+  /// The fluid component index
   const unsigned int _fluid_component;
 
-  /// holds info on the PorousFlow variables
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
-  /// whether the Variable for this Kernel is a porous-flow variable according to the Dictator
+  /// Whether the Variable for this Kernel is a PorousFlow variable according to the Dictator
   const bool _var_is_porflow_var;
 
-  /// number of fluid phases
+  /// Number of fluid phases
   const unsigned int _num_phases;
 
-  /// whether the porosity uses the volumetric strain at the closest quadpoint
+  /// Whether the porosity uses the volumetric strain at the closest quadpoint
   const bool _strain_at_nearest_qp;
 
-  /// porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at the qps
+  /// Porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at the qps
   const MaterialProperty<Real> & _porosity;
 
-  /// old value of porosity
+  /// Old value of porosity
   const MaterialProperty<Real> & _porosity_old;
 
-  /// d(porosity)/d(porous-flow variable) - these derivatives will be wrt variables at the nodes
+  /// d(porosity)/d(PorousFlow variable) - these derivatives will be wrt variables at the nodes
   const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
 
-  /// d(porosity)/d(grad porous-flow variable) - remember these derivatives will be wrt grad(vars) at qps
+  /// d(porosity)/d(grad PorousFlow variable) - remember these derivatives will be wrt grad(vars) at qps
   const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 
-  /// the nearest qp to the node
+  /// The nearest qp to the node
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
-  /// nodal fluid density
+  /// Nodal fluid density
   const MaterialProperty<std::vector<Real>> & _fluid_density;
 
-  /// old value of nodal fluid density
+  /// Old value of nodal fluid density
   const MaterialProperty<std::vector<Real>> & _fluid_density_old;
 
-  /// d(nodal fluid density)/d(porous-flow variable)
+  /// d(nodal fluid density)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_dvar;
 
-  /// nodal fluid saturation
+  /// Nodal fluid saturation
   const MaterialProperty<std::vector<Real>> & _fluid_saturation_nodal;
 
-  /// old value of fluid saturation
+  /// Old value of fluid saturation
   const MaterialProperty<std::vector<Real>> & _fluid_saturation_nodal_old;
 
-  /// d(nodal fluid saturation)/d(porous-flow variable)
+  /// d(nodal fluid saturation)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_saturation_nodal_dvar;
 
-  /// nodal mass fraction
+  /// Nodal mass fraction
   const MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
 
-  /// old value of nodal mass fraction
+  /// Old value of nodal mass fraction
   const MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac_old;
 
-  /// d(nodal mass fraction)/d(porous-flow variable)
+  /// d(nodal mass fraction)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
 
   /**

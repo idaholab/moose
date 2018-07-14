@@ -14,7 +14,6 @@
 #include "Function.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowSink;
 
 template <>
@@ -43,7 +42,7 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// PorousFlow UserObject
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
   /// Whether this BC involves fluid (whether the user has supplied a fluid phase number)
@@ -61,34 +60,34 @@ protected:
   /// The component number (only used if _use_mass_fraction==true)
   const unsigned int _sp;
 
-  /// whether to multiply the sink flux by permeability*density/viscosity
+  /// Whether to multiply the sink flux by permeability*density/viscosity
   const bool _use_mobility;
 
   /// Whether there are Materials that can form "mobility".  This is just for error checking
   const bool _has_mobility;
 
-  /// whether to multiply the sink flux by relative permeability
+  /// Whether to multiply the sink flux by relative permeability
   const bool _use_relperm;
 
   /// Whether there is a "relperm" Material.  This is just for error checking
   const bool _has_relperm;
 
-  /// whether to multiply the sink flux by enthalpy
+  /// Whether to multiply the sink flux by enthalpy
   const bool _use_enthalpy;
 
-  /// whether there is an "enthalpy" Material.  This is just for error checking
+  /// Whether there is an "enthalpy" Material.  This is just for error checking
   const bool _has_enthalpy;
 
-  /// whether to multiply the sink flux by internal_energy
+  /// Whether to multiply the sink flux by internal_energy
   const bool _use_internal_energy;
 
-  /// whether there is an "internal_energy" Material.  This is just for error checking
+  /// Whether there is an "internal_energy" Material.  This is just for error checking
   const bool _has_internal_energy;
 
-  /// whether to multiply the sink flux by thermal_conductivity
+  /// Whether to multiply the sink flux by thermal_conductivity
   const bool _use_thermal_conductivity;
 
-  /// whether there is an "thermal_conductivity" Material.  This is just for error checking
+  /// Whether there is an "thermal_conductivity" Material.  This is just for error checking
   const bool _has_thermal_conductivity;
 
   /// The flux
@@ -145,7 +144,7 @@ protected:
   /// d(Thermal_Conductivity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<RealTensorValue>> * const _dthermal_conductivity_dvar;
 
-  /// derivative of residual with respect to the jvar variable
+  /// Derivative of residual with respect to the jvar variable
   Real jac(unsigned int jvar) const;
 
   /// The flux gets multiplied by this quantity

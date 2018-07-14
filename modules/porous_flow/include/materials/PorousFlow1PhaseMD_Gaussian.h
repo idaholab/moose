@@ -12,7 +12,6 @@
 
 #include "PorousFlowVariableBase.h"
 
-// Forward Declarations
 class PorousFlow1PhaseMD_Gaussian;
 
 template <>
@@ -39,10 +38,10 @@ protected:
   /// _al2 = al*al
   const Real _al2;
 
-  /// fluid density = _dens0*exp(P/_bulk)
+  /// Fluid density = _dens0*exp(P/_bulk)
   const Real _logdens0;
 
-  /// fluid density = _dens0*exp(P/_bulk)
+  /// Fluid density = _dens0*exp(P/_bulk)
   const Real _bulk;
 
   /// 1/_bulk/_al

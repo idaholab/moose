@@ -9,7 +9,6 @@
 
 #include "PorousFlowEffectiveStressCoupling.h"
 
-// MOOSE includes
 #include "Function.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
@@ -24,7 +23,7 @@ validParams<PorousFlowEffectiveStressCoupling>()
   params.addClassDescription(
       "Adds $-Bi \\cdot p_s \\cdot \\nabla \\Psi_c$, where the subscript $c$ is the component.");
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addRangeCheckedParam<Real>(
       "biot_coefficient", 1, "biot_coefficient>=0&biot_coefficient<=1", "Biot coefficient");
   params.addRequiredParam<unsigned int>("component",
