@@ -1829,6 +1829,20 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
               }
             }
           }
+          else
+          {
+            _fe_problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+            _fe_problem.prepareAssembly(0);
+            for (const auto & nfc : constraints)
+            {
+              std::vector<dof_id_type> slave_dofs(1, nfc->variable().nodalDofIndex());
+              nfc->_Kee.resize(1, 1);
+              nfc->_Kee(0, 0) = 1.;
+              // Cache the jacobian block for the slave side
+              _fe_problem.assembly(0).cacheJacobianBlock(
+                  nfc->_Kee, slave_dofs, slave_dofs, nfc->variable().scalingFactor());
+            }
+          }
         }
       }
     }
