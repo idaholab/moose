@@ -1,6 +1,7 @@
 #include "PipeBase.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
+#include "FlowModelTwoPhaseNCG.h"
 
 template <>
 InputParameters
@@ -38,10 +39,14 @@ PipeBase::init()
   pars.set<bool>("implicit_rdg") = _implicit_rdg;
   if (_model_id == RELAP7::FM_SINGLE_PHASE)
     _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);
-  else if (_model_id == RELAP7::FM_TWO_PHASE || _model_id == RELAP7::FM_TWO_PHASE_NCG)
-  {
-    pars.set<unsigned int>("n_ncgs") = _n_ncgs;
+  else if (_model_id == RELAP7::FM_TWO_PHASE)
     _flow_model = std::make_shared<FlowModelTwoPhase>(name(), pars);
+  else if (_model_id == RELAP7::FM_TWO_PHASE_NCG)
+  {
+    const TwoPhaseNCGFluidProperties & fp =
+        _sim.getUserObject<TwoPhaseNCGFluidProperties>(_fp_name);
+    pars.set<unsigned int>("n_ncgs") = fp.getNumberOfNCGs();
+    _flow_model = std::make_shared<FlowModelTwoPhaseNCG>(name(), pars);
   }
   else
     logModelNotImplementedError(_model_id);

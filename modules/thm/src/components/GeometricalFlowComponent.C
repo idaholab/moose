@@ -22,7 +22,6 @@ validParams<GeometricalFlowComponent>()
 GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & parameters)
   : GeometricalComponent(parameters),
     _fp_name(getParam<UserObjectName>("fp")),
-    _n_ncgs(0),
     _rdg_flux_name(genName(name(), "rdg_flux")),
     _rdg_slope_reconstruction(
         getEnumParam<FlowModel::ESlopeReconstructionType>("rdg_slope_reconstruction")),
@@ -38,13 +37,6 @@ GeometricalFlowComponent::init()
   GeometricalComponent::init();
 
   _model_id = _app.getFlowModelID(_sim.getUserObject<FluidProperties>(_fp_name));
-
-  if (_model_id == RELAP7::FM_TWO_PHASE_NCG)
-  {
-    const TwoPhaseNCGFluidProperties & fp =
-        _sim.getUserObject<TwoPhaseNCGFluidProperties>(_fp_name);
-    _n_ncgs = fp.getNumberOfNCGs();
-  }
 }
 
 const std::vector<GeometricalFlowComponent::Connection> &
