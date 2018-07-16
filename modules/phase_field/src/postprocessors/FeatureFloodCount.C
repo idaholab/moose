@@ -896,12 +896,26 @@ FeatureFloodCount::prepareDataForTransfer()
 {
   MeshBase & mesh = _mesh.getMesh();
 
-  std::set<dof_id_type> local_ids_no_ghost, set_difference;
+  FeatureData::container_type local_ids_no_ghost, set_difference;
 
   for (auto & list_ref : _partial_feature_sets)
   {
     for (auto & feature : list_ref)
     {
+      // Periodic node ids
+      appendPeriodicNeighborNodes(feature);
+
+      /**
+       * If using a vector container, we need to sort all of the data structures for later
+       * operations such as checking for intersection and merging. The following "sort" function
+       * does nothing when invoked on a std::set.
+       */
+      FeatureFloodCount::sort(feature._ghosted_ids);
+      FeatureFloodCount::sort(feature._local_ids);
+      FeatureFloodCount::sort(feature._halo_ids);
+      FeatureFloodCount::sort(feature._disjoint_halo_ids);
+      FeatureFloodCount::sort(feature._periodic_nodes);
+
       // Now extend the bounding box by the halo region
       if (_is_elemental)
         feature.updateBBoxExtremes(mesh);
@@ -921,15 +935,15 @@ FeatureFloodCount::prepareDataForTransfer()
                           feature._local_ids.end(),
                           feature._ghosted_ids.begin(),
                           feature._ghosted_ids.end(),
-                          std::insert_iterator<std::set<dof_id_type>>(local_ids_no_ghost,
-                                                                      local_ids_no_ghost.begin()));
+                          std::insert_iterator<FeatureData::container_type>(
+                              local_ids_no_ghost, local_ids_no_ghost.begin()));
 
-      std::set_difference(
-          feature._halo_ids.begin(),
-          feature._halo_ids.end(),
-          local_ids_no_ghost.begin(),
-          local_ids_no_ghost.end(),
-          std::insert_iterator<std::set<dof_id_type>>(set_difference, set_difference.begin()));
+      std::set_difference(feature._halo_ids.begin(),
+                          feature._halo_ids.end(),
+                          local_ids_no_ghost.begin(),
+                          local_ids_no_ghost.end(),
+                          std::insert_iterator<FeatureData::container_type>(
+                              set_difference, set_difference.begin()));
       feature._halo_ids.swap(set_difference);
       local_ids_no_ghost.clear();
       set_difference.clear();
@@ -941,9 +955,6 @@ FeatureFloodCount::prepareDataForTransfer()
        * identify the feature regardless of n_procs
        */
       feature._min_entity_id = *feature._local_ids.begin();
-
-      // Periodic node ids
-      appendPeriodicNeighborNodes(feature);
     }
   }
 }
@@ -1230,8 +1241,8 @@ FeatureFloodCount::flood(const DofObject * dof_object,
       feature->_id = new_id;
   }
 
-  // Insert the current entity into the local ids map
-  feature->_local_ids.insert(entity_id);
+  // Insert the current entity into the local ids data structure
+  feature->_local_ids.insert(feature->_local_ids.end(), entity_id);
 
   /**
    * See if this particular entity cell contributes to the centroid calculation. We
@@ -1329,7 +1340,7 @@ void
 FeatureFloodCount::expandPointHalos()
 {
   const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
-  decltype(FeatureData::_local_ids) expanded_local_ids;
+  FeatureData::container_type expanded_local_ids;
   auto my_processor_id = processor_id();
 
   /**
@@ -1361,7 +1372,10 @@ FeatureFloodCount::expandPointHalos()
 
           const auto & elem_vector = elem_vector_it->second;
 
-          expanded_local_ids.insert(elem_vector.begin(), elem_vector.end());
+          std::copy(elem_vector.begin(),
+                    elem_vector.end(),
+                    std::insert_iterator<FeatureData::container_type>(expanded_local_ids,
+                                                                      expanded_local_ids.end()));
 
           // Now see which elements need to go into the ghosted set
           for (auto entity : elem_vector)
@@ -1370,7 +1384,7 @@ FeatureFloodCount::expandPointHalos()
             mooseAssert(neighbor, "neighbor pointer is NULL");
 
             if (neighbor->processor_id() != my_processor_id)
-              feature._ghosted_ids.insert(elem->id());
+              feature._ghosted_ids.insert(feature._ghosted_ids.end(), elem->id());
           }
         }
       }
@@ -1401,7 +1415,7 @@ FeatureFloodCount::expandEdgeHalos(unsigned int num_layers_to_expand)
          * Create a copy of the halo set so that as we insert new ids into the
          * set we don't continue to iterate on those new ids.
          */
-        std::set<dof_id_type> orig_halo_ids(feature._halo_ids);
+        FeatureData::container_type orig_halo_ids(feature._halo_ids);
         for (auto entity : orig_halo_ids)
         {
           if (_is_elemental)
@@ -1421,7 +1435,7 @@ FeatureFloodCount::expandEdgeHalos(unsigned int num_layers_to_expand)
          * We have to handle disjoint halo IDs slightly differently. Once you are disjoint, you
          * can't go back so make sure that we keep placing these IDs in the disjoint set.
          */
-        std::set<dof_id_type> disjoint_orig_halo_ids(feature._disjoint_halo_ids);
+        FeatureData::container_type disjoint_orig_halo_ids(feature._disjoint_halo_ids);
         for (auto entity : disjoint_orig_halo_ids)
         {
           if (_is_elemental)
@@ -1535,16 +1549,16 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
       if (expand_halos_only)
       {
         if (topological_neighbor || disjoint_only)
-          feature->_disjoint_halo_ids.insert(neighbor->id());
+          feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), neighbor->id());
         else
-          feature->_halo_ids.insert(neighbor->id());
+          feature->_halo_ids.insert(feature->_halo_ids.end(), neighbor->id());
       }
       else
       {
         auto my_processor_id = processor_id();
 
         if (!topological_neighbor && neighbor->processor_id() != my_processor_id)
-          feature->_ghosted_ids.insert(curr_entity->id());
+          feature->_ghosted_ids.insert(feature->_ghosted_ids.end(), curr_entity->id());
 
         /**
          * Only recurse where we own this entity and it's a topologically connected entity. We
@@ -1564,10 +1578,10 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
            * here.
            */
           if (topological_neighbor || disjoint_only)
-            feature->_disjoint_halo_ids.insert(neighbor->id());
+            feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), neighbor->id());
           else
           {
-            feature->_halo_ids.insert(neighbor->id());
+            feature->_halo_ids.insert(feature->_halo_ids.end(), neighbor->id());
 
             flood(neighbor, current_index, feature);
           }
@@ -1592,8 +1606,8 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
 
         for (auto it = iters.first; it != iters.second; ++it)
         {
-          feature._periodic_nodes.insert(it->first);
-          feature._periodic_nodes.insert(it->second);
+          feature._periodic_nodes.insert(feature._periodic_nodes.end(), it->first);
+          feature._periodic_nodes.insert(feature._periodic_nodes.end(), it->second);
         }
       }
     }
@@ -1606,11 +1620,13 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
 
       for (auto it = iters.first; it != iters.second; ++it)
       {
-        feature._periodic_nodes.insert(it->first);
-        feature._periodic_nodes.insert(it->second);
+        feature._periodic_nodes.insert(feature._periodic_nodes.end(), it->first);
+        feature._periodic_nodes.insert(feature._periodic_nodes.end(), it->second);
       }
     }
   }
+
+  // TODO: Remove duplicates
 }
 
 template <typename T>
@@ -1694,7 +1710,15 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
       for (const auto elem_id : list_ref)
         updateBBoxExtremesHelper(_bboxes[region], *mesh.elem_ptr(elem_id));
 
-      _halo_ids.insert(_disjoint_halo_ids.begin(), _disjoint_halo_ids.end());
+      FeatureData::container_type set_union;
+      std::set_union(
+          _halo_ids.begin(),
+          _halo_ids.end(),
+          _disjoint_halo_ids.begin(),
+          _disjoint_halo_ids.end(),
+          std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
+      _halo_ids.swap(set_union);
+
       _disjoint_halo_ids.clear();
       ++region;
     }
@@ -1774,13 +1798,14 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   mooseAssert(_var_index == rhs._var_index, "Mismatched variable index in merge");
   mooseAssert(_id == rhs._id, "Mismatched auxiliary id in merge");
 
-  std::set<dof_id_type> set_union;
+  FeatureData::container_type set_union;
 
+  // TODO: Reserve space?
   std::set_union(_local_ids.begin(),
                  _local_ids.end(),
                  rhs._local_ids.begin(),
                  rhs._local_ids.end(),
-                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+                 std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
   _local_ids.swap(set_union);
 
   set_union.clear();
@@ -1788,7 +1813,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
                  _periodic_nodes.end(),
                  rhs._periodic_nodes.begin(),
                  rhs._periodic_nodes.end(),
-                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+                 std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
   _periodic_nodes.swap(set_union);
 
   set_union.clear();
@@ -1796,7 +1821,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
                  _ghosted_ids.end(),
                  rhs._ghosted_ids.begin(),
                  rhs._ghosted_ids.end(),
-                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+                 std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
 
   /**
    * Even though we've determined that these two partial regions need to be merged, we don't
@@ -1822,7 +1847,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
                  _disjoint_halo_ids.end(),
                  rhs._disjoint_halo_ids.begin(),
                  rhs._disjoint_halo_ids.end(),
-                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+                 std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
   _disjoint_halo_ids.swap(set_union);
 
   set_union.clear();
@@ -1830,7 +1855,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
                  _halo_ids.end(),
                  rhs._halo_ids.begin(),
                  rhs._halo_ids.end(),
-                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+                 std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
   _halo_ids.swap(set_union);
 
   // Keep track of the original ids so we can notify other processors of the local to global mapping
@@ -1863,13 +1888,13 @@ FeatureFloodCount::FeatureData::consolidate(FeatureData && rhs)
   mooseAssert(_var_index == rhs._var_index, "Mismatched variable index in merge");
   mooseAssert(_id == rhs._id, "Mismatched auxiliary id in merge");
 
-  std::set<dof_id_type> set_union;
+  FeatureData::container_type set_union;
 
   std::set_union(_local_ids.begin(),
                  _local_ids.end(),
                  rhs._local_ids.begin(),
                  rhs._local_ids.end(),
-                 std::insert_iterator<std::set<dof_id_type>>(set_union, set_union.begin()));
+                 std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
   _local_ids.swap(set_union);
 
   mooseAssert((_status & Status::MARKED & Status::DIRTY) == Status::CLEAR,
