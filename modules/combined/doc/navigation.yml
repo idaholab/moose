@@ -11,6 +11,7 @@ Getting Started:
     Manual Install (LLVM): getting_started/installation/manual_installation_llvm.md
 Documentation:
     Syntax: syntax/index.md
+    Source: source/index.md
     Application Usage: application_usage/index.md
     Application Development: application_development/index.md
     Framework Development: framework_development/index.md

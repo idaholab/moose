@@ -180,7 +180,7 @@ h1:first-of-type{
     margin-top:48px;
 }
 
-h2 {
+h2{
     font-size:180%;
     font-weight:400;
     margin-top:0;
@@ -997,4 +997,12 @@ details[open] .moose-section-content {
   @keyframes sweep {
       0% {opacity: 0; margin-top: 0px}
       100% {opacity: 1; margin-left: 0px}
+  }
+}
+
+/* MooseDocs contents extension */
+.moose-source-directory{
+    font-weight:400;
+    margin-top:0;
+    margin-bottom: 8px;
 }

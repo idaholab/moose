@@ -345,12 +345,12 @@ class MaterializeRenderer(HTMLRenderer):
         div = html.Tag(toc, 'div', class_='toc-wrapper pin-top')
         ul = html.Tag(div, 'ul', class_='section table-of-contents')
         for node in anytree.PreOrderIter(content):
-            if node.name == 'section' and node['data-section-level'] == 2:
-                node.addClass('section', 'scrollspy')
+            if node.get('data-section-level', None) == 2:
+                node.addClass('scrollspy')
                 li = html.Tag(ul, 'li')
                 a = html.Tag(li, 'a',
                              href='#{}'.format(node['id']),
-                             string=node['data-section-text'],
+                             string=node.get('data-section-text', 'Unknown...'),
                              class_='tooltipped')
                 a['data-delay'] = '1000'
                 a['data-position'] = 'left'
@@ -396,12 +396,11 @@ class MaterializeRenderer(HTMLRenderer):
             if value.startswith('http'):
                 nav[key] = value
             else:
-                try:
-                    node = root_page.findall(value)
-                    nav[key] = node[0]
-                except exceptions.MooseDocsException:
-                    msg = 'Failed to locate navigation item: {}.'.format(value)
-                    LOG.critical(msg)
+                node = root_page.findall(value)
+                if node is None:
+                    msg = 'Failed to locate navigation item: {}.'
+                    raise exceptions.MooseDocsException(msg, value)
+                nav[key] = node[0]
 
         # Do nothing if navigation is not provided
         navigation = config.get('navigation', None)
