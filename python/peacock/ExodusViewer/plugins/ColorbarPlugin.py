@@ -162,6 +162,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         # Colormap
         result_options['cmap'] = str(self.ColorMapList.currentText())
         result_options['cmap_reverse'] = self.ColorMapReverse.isChecked()
+        result_options['local_range'] = self.ColorBarRangeType.isChecked()
 
         # Components
         result_options['component'] = self._component

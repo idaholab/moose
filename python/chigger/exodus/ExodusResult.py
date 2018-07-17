@@ -27,6 +27,7 @@ class ExodusResult(base.ChiggerResult):
                                  "setting this to a value will cause the various sources to be "
                                  "'exploded' away from the center of the entire object.",
                 vtype=float)
+        opt.add('local_range', False, "Use local range when computing the default data range.")
 
         return opt
 
@@ -53,7 +54,7 @@ class ExodusResult(base.ChiggerResult):
             return
 
         # Re-compute ranges for all sources
-        rng = list(self.getRange()) # Use range from all sources as the default
+        rng = list(self.getRange(local=self.getOption('local_range')))
         if self.isOptionValid('range'):
             rng = self.getOption('range')
         else:
