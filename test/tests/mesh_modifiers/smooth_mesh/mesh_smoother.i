@@ -1,11 +1,6 @@
 [Mesh]
-  type = ConcentricCircleMesh
-  num_sectors = 6
-  radii = '0.15 0.16125 0.1645 0.187 0.23 0.24'
-  block = '1 1 2 3 4 4 4'
-  volume_preserving_function = true
-  #portion = top_right
-  unit_cell_length = 0.496
+  type = FileMesh
+  file = concentric_circle_mesh_in.e
 []
 
 [Variables]
