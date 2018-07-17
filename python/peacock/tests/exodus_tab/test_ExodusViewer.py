@@ -166,5 +166,29 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.currentWidget().ColorbarPlugin.ColorMapList.currentText(), "default")
 
 
+class TestExodusViewer2(TestExodusViewer):
+    _filename = Testing.get_chigger_input('diffusion_4.e')
+
+    def testLocalRange(self):
+        clip = self._widget.currentWidget().ClipPlugin
+        cbar = self._widget.currentWidget().ColorbarPlugin
+
+        clip.setChecked(QtCore.Qt.Checked)
+        clip.clicked.emit(QtCore.Qt.Checked)
+        clip.ClipSlider.setSliderPosition(35)
+        clip.ClipSlider.sliderReleased.emit()
+        Testing.process_events(1)
+
+        self.assertTrue(cbar.RangeMinimum.text().startswith('0.635'))
+        self.assertTrue(cbar.RangeMaximum.text(), '1')
+        self.assertImage('testLocalRange.png')
+
+        cbar.ColorBarRangeType.setChecked(QtCore.Qt.Unchecked)
+        cbar.ColorBarRangeType.stateChanged.emit(QtCore.Qt.Unchecked)
+        Testing.process_events(10)
+
+        self.assertTrue(cbar.RangeMinimum.text(), '0')
+        self.assertTrue(cbar.RangeMaximum.text(), '1')
+
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)
