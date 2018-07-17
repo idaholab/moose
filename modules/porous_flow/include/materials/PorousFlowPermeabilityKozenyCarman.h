@@ -12,7 +12,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-// Forward Declarations
 class PorousFlowPermeabilityKozenyCarman;
 
 template <>
@@ -61,7 +60,7 @@ protected:
   /// Tensor multiplier k_ijk in k = k_ijk * A * phi^n / (1 - phi)^m
   const RealTensorValue _k_anisotropy;
 
-  /// quadpoint porosity
+  /// Quadpoint porosity
   const MaterialProperty<Real> & _porosity_qp;
 
   /// d(quadpoint porosity)/d(PorousFlow variable)

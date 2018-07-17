@@ -12,7 +12,6 @@
 
 #include "PorousFlowPorosity.h"
 
-// Forward Declarations
 class PorousFlowPorosityHMBiotModulus;
 
 template <>
@@ -35,22 +34,22 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-  /// old value of porosity
+  /// Old value of porosity
   const MaterialProperty<Real> & _porosity_old;
 
-  /// constant biot modulus
+  /// Constant biot modulus
   const Real _biot_modulus;
 
-  /// constant fluid bulk modulus
+  /// Constant fluid bulk modulus
   const Real _fluid_bulk_modulus;
 
-  /// old value of effective fluid pressure
+  /// Old value of effective fluid pressure
   const MaterialProperty<Real> & _pf_old;
 
-  /// old value of total volumetric strain
+  /// Old value of total volumetric strain
   const MaterialProperty<Real> & _vol_strain_qp_old;
 
-  /// volumetric strain rate
+  /// Volumetric strain rate
   const MaterialProperty<Real> & _vol_strain_rate_qp;
 
   /// d(volumetric strain rate)/d(PorousFlow variable)

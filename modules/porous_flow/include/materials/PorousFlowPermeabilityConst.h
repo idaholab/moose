@@ -12,7 +12,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-// Forward Declarations
 class PorousFlowPermeabilityConst;
 
 template <>
@@ -29,7 +28,7 @@ public:
 protected:
   void computeQpProperties() override;
 
-  /// constant value of permeability tensor
+  /// Constant value of permeability tensor
   const RealTensorValue _input_permeability;
 };
 

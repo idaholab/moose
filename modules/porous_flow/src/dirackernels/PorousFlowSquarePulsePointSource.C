@@ -80,6 +80,6 @@ PorousFlowSquarePulsePointSource::computeQpResidual()
       factor = (_end_time - (_t - _dt)) / _dt;
   }
 
-  /// Negative sign to make a positive mass_flux in the input file a source
+  // Negative sign to make a positive mass_flux in the input file a source
   return -_test[_i][_qp] * factor * _mass_flux;
 }

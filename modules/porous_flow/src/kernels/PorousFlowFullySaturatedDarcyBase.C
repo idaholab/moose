@@ -9,7 +9,6 @@
 
 #include "PorousFlowFullySaturatedDarcyBase.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedDarcyBase);

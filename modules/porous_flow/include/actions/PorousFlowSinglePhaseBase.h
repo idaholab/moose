@@ -30,7 +30,7 @@ public:
 protected:
   virtual void addDictator() override;
 
-  /// porepressure NonlinearVariable name
+  /// Porepressure NonlinearVariable name
   const NonlinearVariableName _pp_var;
 
   /// Determines the coupling type
@@ -41,25 +41,25 @@ protected:
     ThermoHydroMechanical
   } _coupling_type;
 
-  /// whether steady or transient simulation
+  /// Whether steady or transient simulation
   const enum class SimulationTypeChoiceEnum { STEADY, TRANSIENT } _simulation_type;
 
   /// Name of the fluid-properties UserObject
   const UserObjectName & _fp;
 
-  /// fluid specific heat capacity at constant volume
+  /// Fluid specific heat capacity at constant volume
   const Real _biot_coefficient;
 
-  /// add a AuxVariables to record Darcy velocity
+  /// Add a AuxVariables to record Darcy velocity
   const bool _add_darcy_aux;
 
-  /// add AuxVariables for stress
+  /// Add AuxVariables for stress
   const bool _add_stress_aux;
 
-  /// use PorousFlowBrine material
+  /// Use PorousFlowBrine material
   const bool _use_brine;
 
-  /// index of NaCl in list of fluid components
+  /// Index of NaCl in list of fluid components
   const unsigned _nacl_index;
 };
 

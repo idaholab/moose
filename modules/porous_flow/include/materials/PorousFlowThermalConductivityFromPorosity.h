@@ -39,7 +39,7 @@ protected:
   /// Thermal conductivity of the single fluid phase
   const RealTensorValue _la_f;
 
-  /// quadpoint porosity
+  /// Quadpoint porosity
   const MaterialProperty<Real> & _porosity_qp;
 
   /// d(quadpoint porosity)/d(PorousFlow variable)

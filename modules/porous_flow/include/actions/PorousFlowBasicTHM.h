@@ -31,7 +31,7 @@ public:
   virtual void act() override;
 
 protected:
-  // whether to multiply the fluid kernels by the fluid density
+  // Whether to multiply the fluid kernels by the fluid density
   const bool _multiply_by_density;
 };
 

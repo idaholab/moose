@@ -7,7 +7,6 @@
 
 #include "PorousFlowExponentialDecay.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowExponentialDecay);

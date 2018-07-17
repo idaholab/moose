@@ -39,8 +39,8 @@ protected:
   virtual Real mobility() const;
 
   /**
-   * The derivative of the mobility with respect to the porous-flow variable pvar
-   * @param pvar Take the derivative with respect to this porous-flow variable
+   * The derivative of the mobility with respect to the PorousFlow variable pvar
+   * @param pvar Take the derivative with respect to this PorousFlow variable
    */
   virtual Real dmobility(unsigned pvar) const;
 
@@ -50,10 +50,10 @@ protected:
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> & _permeability;
 
-  /// d(permeabiity)/d(porous-flow variable)
+  /// d(permeabiity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<RealTensorValue>> & _dpermeability_dvar;
 
-  /// d(permeabiity)/d(grad(porous-flow variable))
+  /// d(permeabiity)/d(grad(PorousFlow variable))
   const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_dgradvar;
 
   /// Fluid density for each phase (at the qp)
@@ -80,7 +80,7 @@ protected:
   /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
 
-  /// PorousFlow UserObject
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
   /// Gravity pointing downwards

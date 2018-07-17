@@ -42,14 +42,14 @@
 
 \chapter{Simple heat conduction in 1D}
 
-Porous-flow heat conduction is governed by the equation
+PorousFlow heat conduction is governed by the equation
 \begin{equation}
 0 = \frac{\partial}{\partial t}\energydens + \nabla\cdot \flux^{\mathrm{T}} \ ,
 \label{eqn.heat.cond}
 \end{equation}
 Here $\energydens$ is the energy per unit volume in the rock-fluid
 system, and $\flux^{\mathrm{T}}$ is the heat flux.  In the
-porous-flow module
+PorousFlow module
 \begin{equation}
 \energydens = (1 - \phi)\rho_{R}C_{R} T + \phi
 \sum_{\phase}S_{\phase}\rho_{\phase}\energydens_{\phase} \ ,

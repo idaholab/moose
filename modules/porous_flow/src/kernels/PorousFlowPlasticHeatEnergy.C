@@ -9,7 +9,6 @@
 
 #include "PorousFlowPlasticHeatEnergy.h"
 
-// MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
@@ -28,7 +27,7 @@ validParams<PorousFlowPlasticHeatEnergy>()
                         " If you set this to true, you will also want to set the same parameter to "
                         "true for related Kernels and Materials");
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addClassDescription(
       "Plastic heat energy density source = (1 - porosity) * coeff * stress * plastic_strain_rate");
   return params;
@@ -63,7 +62,7 @@ PorousFlowPlasticHeatEnergy::computeQpJacobian()
 Real
 PorousFlowPlasticHeatEnergy::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  /// If the variable is not a PorousFlow variable, the Jacobian terms are 0
+  // If the variable is not a PorousFlow variable, the Jacobian terms are 0
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
 

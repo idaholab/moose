@@ -17,7 +17,7 @@ validParams<PorousFlowBasicAdvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<unsigned int>("phase", 0, "Use the Darcy velocity of this fluid phase");
   params.addClassDescription(
       "Advective flux of a Variable using the Darcy velocity of the fluid phase");

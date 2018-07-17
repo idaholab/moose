@@ -21,7 +21,8 @@ InputParameters validParams<PorousFlowPropertyAux>();
 /**
  * Provides a simple interface to PorousFlow material properties.
  * Note that as all properties are in materials, only elemental
- * AuxVariables can be used
+ * AuxVariables can be used and as such, all properties are evaluated
+ * at the qps only
  */
 class PorousFlowPropertyAux : public AuxKernel
 {
@@ -29,19 +30,19 @@ public:
   PorousFlowPropertyAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
 private:
-  /// Pressure of each phase (at the qps)
+  /// Pressure of each phase
   const MaterialProperty<std::vector<Real>> * _pressure;
 
-  /// Saturation of each phase (at the qps)
+  /// Saturation of each phase
   const MaterialProperty<std::vector<Real>> * _saturation;
 
-  /// Temperature of the fluid (at the qps)
+  /// Temperature of the fluid
   const MaterialProperty<Real> * _temperature;
 
-  /// Fluid density of each phase (at the qps)
+  /// Fluid density of each phase
   const MaterialProperty<std::vector<Real>> * _fluid_density;
 
   /// Viscosity of each phase
@@ -68,10 +69,10 @@ private:
   /// Mineral-species reacion rate
   const MaterialProperty<std::vector<Real>> * _mineral_reaction_rate;
 
-  /// PorousFlow Dictator UserObject
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
-  /// enum of properties
+  /// Enum of properties
   const enum class PropertyEnum {
     PRESSURE,
     SATURATION,

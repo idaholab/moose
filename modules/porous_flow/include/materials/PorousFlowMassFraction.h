@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-// Forward Declarations
 class PorousFlowMassFraction;
 
 template <>
@@ -54,13 +53,13 @@ protected:
    */
   const unsigned int _num_passed_mf_vars;
 
-  /// the variable number of the mass-fraction variables
+  /// The variable number of the mass-fraction variables
   std::vector<unsigned int> _mf_vars_num;
 
-  /// the mass-fraction variables
+  /// The mass-fraction variables
   std::vector<const VariableValue *> _mf_vars;
 
-  /// the gradient of the mass-fraction variables
+  /// The gradient of the mass-fraction variables
   std::vector<const VariableGradient *> _grad_mf_vars;
 };
 

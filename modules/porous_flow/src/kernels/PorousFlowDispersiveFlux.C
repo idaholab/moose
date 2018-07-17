@@ -9,7 +9,6 @@
 
 #include "PorousFlowDispersiveFlux.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowDispersiveFlux);

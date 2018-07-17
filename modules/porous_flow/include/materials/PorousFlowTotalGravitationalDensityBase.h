@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-// Forward Declarations
 class PorousFlowTotalGravitationalDensityBase;
 
 template <>
@@ -27,7 +26,7 @@ public:
   PorousFlowTotalGravitationalDensityBase(const InputParameters & parameters);
 
 protected:
-  /// computed density at quadpoints
+  /// Computed density at quadpoints
   MaterialProperty<Real> & _gravdensity;
 
   /// d(density)/d(PorousFlow variable)

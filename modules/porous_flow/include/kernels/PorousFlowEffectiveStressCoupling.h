@@ -13,7 +13,6 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowEffectiveStressCoupling;
 
 template <>
@@ -35,16 +34,16 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// The Porous-Flow dictator that holds global info about the simulation
+  /// The PorousFlow dictator that holds global info about the simulation
   const PorousFlowDictator & _dictator;
 
   /// Biot coefficient
   const Real _coefficient;
 
-  /// the spatial component
+  /// The spatial component
   const unsigned int _component;
 
-  /// effective porepressure
+  /// Effective porepressure
   const MaterialProperty<Real> & _pf;
 
   /// d(effective porepressure)/(d porflow variable)

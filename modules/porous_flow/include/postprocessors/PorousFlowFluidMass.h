@@ -13,7 +13,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowFluidMass;
 
 template <>
@@ -31,7 +30,7 @@ protected:
   virtual Real computeIntegral() override;
   virtual Real computeQpIntegral() override;
 
-  /// Holds info on the PorousFlow variables
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
   /// The fluid component index that this Postprocessor applies to
   const unsigned int _fluid_component;
@@ -47,7 +46,7 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fraction;
   /// Saturation threshold - only fluid mass at saturations below this are calculated
   const Real _saturation_threshold;
-  /// the variable for the corresponding PorousFlowMassTimeDerivative Kernel: this provides test functions
+  /// The variable for the corresponding PorousFlowMassTimeDerivative Kernel: this provides test functions
   MooseVariable * const _var;
 };
 

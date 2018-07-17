@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-// Forward Declarations
 class PorousFlowAqueousPreDisChemistry;
 
 template <>
@@ -69,16 +68,16 @@ protected:
 
   Real rateConstantQp(unsigned reaction_num) const;
 
-  /// old values of the porosity
+  /// Old values of the porosity
   const MaterialProperty<Real> & _porosity_old;
 
   /// Aqueous phase number
   const unsigned int _aq_ph;
 
-  /// saturation
+  /// Saturation
   const MaterialProperty<std::vector<Real>> & _saturation;
 
-  /// temperature
+  /// Temperature
   const MaterialProperty<Real> & _temperature;
 
   /// d(temperature)/(d porflow variable)
@@ -87,70 +86,70 @@ protected:
   /// Number of primary species
   const unsigned int _num_primary;
 
-  /// number of equations in the aqueous geochemistry system
+  /// Number of equations in the aqueous geochemistry system
   const unsigned int _num_reactions;
 
   /// Whether the equilibium constants are written in their log10 form, or in absolute terms
   const bool _equilibrium_constants_as_log10;
 
-  /// number of equilibrium_constants provided
+  /// Number of equilibrium_constants provided
   const unsigned _num_equilibrium_constants;
 
-  /// equilibrium constants (dimensionless)
+  /// Equilibrium constants (dimensionless)
   std::vector<const VariableValue *> _equilibrium_constants;
 
-  /// activity coefficients for the primary species (dimensionless)
+  /// Activity coefficients for the primary species (dimensionless)
   const std::vector<Real> _primary_activity_coefficients;
 
-  /// stoichiometry defining the aqeuous geochemistry equilibrium reactions
+  /// Stoichiometry defining the aqeuous geochemistry equilibrium reactions
   const std::vector<Real> _reactions;
 
-  /// the variable number of the primary variables
+  /// The variable number of the primary variables
   std::vector<unsigned int> _primary_var_num;
 
   /// Values of the primary species' concentrations (dimensionless)
   std::vector<const VariableValue *> _primary;
 
-  // old values of the mineral species concentrations
+  // Old values of the mineral species concentrations
   const MaterialProperty<std::vector<Real>> & _sec_conc_old;
 
-  // mineral saturation ratio - a useful temporary variable during computeQpProperties
+  /// Mineral saturation ratio - a useful temporary variable during computeQpProperties
   std::vector<Real> _mineral_sat;
 
-  // whether the reaction rate has to be bounded in order that the precipitate stays inside [0, 1]
+  /// Whether the reaction rate has to be bounded in order that the precipitate stays inside [0, 1]
   std::vector<bool> _bounded_rate;
 
-  // reaction rate of mineralisation
+  /// Reaction rate of mineralisation
   MaterialProperty<std::vector<Real>> & _reaction_rate;
 
-  // d(reaction rate of mineralisation)/d(porous flow var)
+  /// d(reaction rate of mineralisation)/d(porous flow var)
   MaterialProperty<std::vector<std::vector<Real>>> & _dreaction_rate_dvar;
 
-  // reactive surface area (m^2/L) for each reaction
+  /// Reactive surface area (m^2/L) for each reaction
   const std::vector<Real> _r_area;
 
-  // molar volume (L/mol) for each secondary species
+  /// Molar volume (L/mol) for each secondary species
   const std::vector<Real> _molar_volume;
 
-  // rate constant (mol/(m^2 s)) at reference temperature for each reaction
+  /// Rate constant (mol/(m^2 s)) at reference temperature for each reaction
   const std::vector<Real> _ref_kconst;
 
-  // activation energy (J/mol) for each reaction
+  /// Activation energy (J/mol) for each reaction
   const std::vector<Real> _e_act;
 
-  // gas constant (J/(mol K))
+  /// Gas constant (J/(mol K))
   const Real _gas_const;
 
-  // 1/reference_temperature (1/K)
+  /// 1/reference_temperature (1/K)
   const Real _one_over_ref_temp;
 
-  // theta exponent for the precipitation-dissolution for each reaction
+  /// Theta exponent for the precipitation-dissolution for each reaction
   const std::vector<Real> _theta_exponent;
 
-  // eta exponent for the precipitation-dissolution for each reaction
+  /// Eta exponent for the precipitation-dissolution for each reaction
   const std::vector<Real> _eta_exponent;
 
-  // initial values of the secondary species concentrations
+  /// Initial values of the secondary species concentrations
   std::vector<const VariableValue *> _initial_conc;
 };
 
