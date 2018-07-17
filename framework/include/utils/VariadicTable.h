@@ -244,7 +244,10 @@ protected:
 
     // Unset the format
     if (!_column_format.empty())
-      stream << std::defaultfloat;
+    {
+      // Because "stream << std::defaultfloat;" won't compile with old GCC or Clang
+      stream.unsetf(std::ios_base::floatfield);
+    }
 
     // Recursive call to print the next item
     print_each(std::forward<TupleType>(t), stream, std::integral_constant<size_t, I + 1>());
