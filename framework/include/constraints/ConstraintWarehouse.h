@@ -11,7 +11,7 @@
 #define CONSTRAINTWAREHOUSE_H
 
 // MOOSE includes
-#include "MooseObjectWarehouse.h"
+#include "MooseObjectTagWarehouse.h"
 #include "MooseTypes.h"
 
 class Constraint;

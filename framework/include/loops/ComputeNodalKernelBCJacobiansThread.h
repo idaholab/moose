@@ -21,7 +21,8 @@ class ComputeNodalKernelBCJacobiansThread
 {
 public:
   ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem,
-                                      const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+                                      MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+                                      const std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x,
@@ -34,9 +35,15 @@ public:
   void join(const ComputeNodalKernelBCJacobiansThread & /*y*/);
 
 protected:
+  FEProblemBase & _fe_problem;
+
   AuxiliarySystem & _aux_sys;
 
-  const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
+  const std::set<TagID> & _tags;
+
+  MooseObjectTagWarehouse<NodalKernel> & _nodal_kernels;
+
+  MooseObjectWarehouse<NodalKernel> * _nkernel_warehouse;
 
   /// Number of contributions cached up
   unsigned int _num_cached;

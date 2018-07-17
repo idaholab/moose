@@ -1027,11 +1027,15 @@ Assembly::init(const CouplingMatrix * cm)
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
 
   _sub_Re.resize(num_vector_tags);
+  _sub_Re_used.resize(num_vector_tags);
   _sub_Rn.resize(num_vector_tags);
+  _sub_Rn_used.resize(num_vector_tags);
   for (auto i = beginIndex(_sub_Re); i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);
+    _sub_Re_used[i].resize(n_vars);
     _sub_Rn[i].resize(n_vars);
+    _sub_Rn_used[i].resize(n_vars);
   }
 
   _cached_residual_values.resize(num_vector_tags);
@@ -1134,6 +1138,7 @@ Assembly::prepare()
     {
       _sub_Re[tag][var->number()].resize(var->dofIndices().size());
       _sub_Re[tag][var->number()].zero();
+      _sub_Re_used[tag][var->number()] = 0;
     }
 }
 
@@ -1186,6 +1191,7 @@ Assembly::prepareVariable(MooseVariableFEBase * var)
   {
     _sub_Re[tag][var->number()].resize(var->dofIndices().size());
     _sub_Re[tag][var->number()].zero();
+    _sub_Re_used[tag][var->number()] = 0;
   }
 }
 
@@ -1252,6 +1258,7 @@ Assembly::prepareNeighbor()
     {
       _sub_Rn[tag][var->number()].resize(var->dofIndicesNeighbor().size());
       _sub_Rn[tag][var->number()].zero();
+      _sub_Rn_used[tag][var->number()] = 0;
     }
 }
 
@@ -1271,6 +1278,7 @@ Assembly::prepareBlock(unsigned int ivar,
   {
     _sub_Re[tag][ivar].resize(dof_indices.size());
     _sub_Re[tag][ivar].zero();
+    _sub_Re_used[tag][ivar] = 0;
   }
 }
 
@@ -1302,6 +1310,7 @@ Assembly::prepareScalar()
     {
       _sub_Re[tag][ivar->number()].resize(idofs);
       _sub_Re[tag][ivar->number()].zero();
+      _sub_Re_used[tag][ivar->number()] = 0;
     }
 
     for (const auto & jvar : vars)
@@ -1500,8 +1509,9 @@ Assembly::addResidual(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    addResidualBlock(
-        residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
+    if (_sub_Re_used[tag_id][var->number()])
+      addResidualBlock(
+          residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
 }
 
 void
@@ -1517,8 +1527,11 @@ Assembly::addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id /* 
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    addResidualBlock(
-        residual, _sub_Rn[tag_id][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
+    if (_sub_Rn_used[tag_id][var->number()])
+      addResidualBlock(residual,
+                       _sub_Rn[tag_id][var->number()],
+                       var->dofIndicesNeighbor(),
+                       var->scalingFactor());
 }
 
 void
@@ -1535,7 +1548,7 @@ Assembly::addResidualScalar(TagID tag_id)
   // add the scalar variables residuals
   const std::vector<MooseVariableScalar *> & vars = _sys.getScalarVariables(_tid);
   for (const auto & var : vars)
-    if (_sys.hasVector(tag_id))
+    if (_sys.hasVector(tag_id) && _sub_Re_used[tag_id][var->number()])
       addResidualBlock(_sys.getVector(tag_id),
                        _sub_Re[tag_id][var->number()],
                        var->dofIndices(),
@@ -1557,7 +1570,7 @@ Assembly::cacheResidual()
   {
     for (auto tag = beginIndex(_cached_residual_values); tag < _cached_residual_values.size();
          tag++)
-      if (_sys.hasVector(tag))
+      if (_sys.hasVector(tag) && _sub_Re_used[tag][var->number()])
         cacheResidualBlock(_cached_residual_values[tag],
                            _cached_residual_rows[tag],
                            _sub_Re[tag][var->number()],
@@ -1589,7 +1602,7 @@ Assembly::cacheResidualNeighbor()
     for (auto tag = beginIndex(_cached_residual_values); tag < _cached_residual_values.size();
          tag++)
     {
-      if (_sys.hasVector(tag))
+      if (_sys.hasVector(tag) && _sub_Rn_used[tag][var->number()])
         cacheResidualBlock(_cached_residual_values[tag],
                            _cached_residual_rows[tag],
                            _sub_Rn[tag][var->number()],
@@ -1690,8 +1703,17 @@ Assembly::setResidual(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    setResidualBlock(
-        residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
+    if (_sub_Re_used[tag_id][var->number()])
+      setResidualBlock(
+          residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
+}
+
+void
+Assembly::setResidual(const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasVector(tag))
+      setResidual(_sys.getVector(tag), tag);
 }
 
 void
@@ -1699,8 +1721,11 @@ Assembly::setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id /* 
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    setResidualBlock(
-        residual, _sub_Rn[tag_id][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
+    if (_sub_Rn_used[tag_id][var->number()])
+      setResidualBlock(residual,
+                       _sub_Rn[tag_id][var->number()],
+                       var->dofIndicesNeighbor(),
+                       var->scalingFactor());
 }
 
 void
@@ -1725,6 +1750,18 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
     else
       jacobian.add_matrix(jac_block, di, dj);
   }
+}
+
+void
+Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+                             std::vector<dof_id_type> & idof_indices,
+                             std::vector<dof_id_type> & jdof_indices,
+                             Real scaling_factor,
+                             const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      cacheJacobianBlock(jac_block, idof_indices, jdof_indices, scaling_factor, tag);
 }
 
 void
@@ -2184,6 +2221,17 @@ Assembly::cacheJacobianContribution(numeric_index_type i,
   _cached_jacobian_contribution_rows[tag].push_back(i);
   _cached_jacobian_contribution_cols[tag].push_back(j);
   _cached_jacobian_contribution_vals[tag].push_back(value);
+}
+
+void
+Assembly::cacheJacobianContribution(numeric_index_type i,
+                                    numeric_index_type j,
+                                    Real value,
+                                    const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      cacheJacobianContribution(i, j, value, tag);
 }
 
 void

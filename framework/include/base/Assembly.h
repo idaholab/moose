@@ -539,6 +539,7 @@ public:
   void addCachedResidual(NumericVector<Number> & residual, TagID tag_id);
 
   void setResidual(NumericVector<Number> & residual, TagID tag_id = 0);
+  void setResidual(const std::set<TagID> & tags);
   void setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
 
   void addJacobian();
@@ -592,12 +593,14 @@ public:
 
   DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id = 0)
   {
-    return _sub_Re[static_cast<unsigned int>(tag_id)][var_num];
+    _sub_Re_used[tag_id][var_num] = 1;
+    return _sub_Re[tag_id][var_num];
   }
 
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, TagID tag_id = 0)
   {
-    return _sub_Rn[static_cast<unsigned int>(tag_id)][var_num];
+    _sub_Rn_used[tag_id][var_num] = 1;
+    return _sub_Rn[tag_id][var_num];
   }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0);
@@ -612,6 +615,13 @@ public:
                           std::vector<dof_id_type> & jdof_indices,
                           Real scaling_factor,
                           TagID tag = 0);
+
+  void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+                          std::vector<dof_id_type> & idof_indices,
+                          std::vector<dof_id_type> & jdof_indices,
+                          Real scaling_factor,
+                          const std::set<TagID> & tags);
+
   void cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block,
                                   const std::vector<dof_id_type> & idof_indices,
                                   const std::vector<dof_id_type> & jdof_indices,
@@ -910,6 +920,11 @@ public:
   void
   cacheJacobianContribution(numeric_index_type i, numeric_index_type j, Real value, TagID tag = 0);
 
+  void cacheJacobianContribution(numeric_index_type i,
+                                 numeric_index_type j,
+                                 Real value,
+                                 const std::set<TagID> & tags);
+
   /**
    * Sets previously-cached Jacobian values via SparseMatrix::set() calls.
    */
@@ -1168,8 +1183,12 @@ protected:
 
   /// residual contributions for each variable from the element
   std::vector<std::vector<DenseVector<Number>>> _sub_Re;
+  /// flag indicates if the corresponding sub_re is used
+  std::vector<std::vector<unsigned char>> _sub_Re_used;
   /// residual contributions for each variable from the neighbor
   std::vector<std::vector<DenseVector<Number>>> _sub_Rn;
+  /// flag indicates if the corresponding sub_Rn is used
+  std::vector<std::vector<unsigned char>> _sub_Rn_used;
   /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
   DenseVector<Number> _tmp_Re;
 

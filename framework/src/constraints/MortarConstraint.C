@@ -149,10 +149,13 @@ MortarConstraint::reinitSide(Moose::ConstraintType res_type)
 void
 MortarConstraint::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  prepareVectorTag(_assembly, _var.number());
+
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
-      re(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidual();
+      _local_re(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidual();
+
+  accumulateTaggedLocalResidual();
 }
 
 void
@@ -162,23 +165,29 @@ MortarConstraint::computeResidualSide(Moose::ConstraintType side)
   {
     case Moose::Master:
     {
-      DenseVector<Number> & re_master = _assembly.residualBlock(_master_var.number());
+      prepareVectorTag(_assembly, _master_var.number());
+
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
         for (_i = 0; _i < _test_master.size(); _i++)
-          re_master(_i) += _JxW_lm[_qp] * computeQpResidualSide(Moose::Master);
+          _local_re(_i) += _JxW_lm[_qp] * computeQpResidualSide(Moose::Master);
       }
+
+      accumulateTaggedLocalResidual();
     }
     break;
 
     case Moose::Slave:
     {
-      DenseVector<Number> & re_slave = _assembly.residualBlock(_slave_var.number());
+      prepareVectorTag(_assembly, _slave_var.number());
+
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
         for (_i = 0; _i < _test_slave.size(); _i++)
-          re_slave(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidualSide(Moose::Slave);
+          _local_re(_i) += _JxW_lm[_qp] * _coord[_qp] * computeQpResidualSide(Moose::Slave);
       }
+
+      accumulateTaggedLocalResidual();
     }
     break;
   }
@@ -191,12 +200,14 @@ MortarConstraint::computeJacobian()
   std::vector<std::vector<Real>> phi_master;
   std::vector<std::vector<Real>> phi_slave;
 
-  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
-        Kee(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobian();
+        _local_ke(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobian();
+
+  accumulateTaggedLocalMatrix();
 }
 
 void
@@ -206,40 +217,49 @@ MortarConstraint::computeJacobianSide(Moose::ConstraintType side)
   {
     case Moose::Master:
     {
-      DenseMatrix<Number> & Ken_master =
-          _assembly.jacobianBlock(_var.number(), _master_var.number());
-      DenseMatrix<Number> & Kne_master =
-          _assembly.jacobianBlock(_master_var.number(), _var.number());
+      prepareMatrixTag(_assembly, _var.number(), _master_var.number());
 
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         for (_i = 0; _i < _test_master.size(); _i++)
-        {
           for (_j = 0; _j < _phi.size(); _j++)
-          {
-            Ken_master(_j, _i) +=
+            _local_ke(_j, _i) +=
                 _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterMaster);
-            Kne_master(_i, _j) +=
+
+      accumulateTaggedLocalMatrix();
+
+      prepareMatrixTag(_assembly, _master_var.number(), _var.number());
+
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        for (_i = 0; _i < _test_master.size(); _i++)
+          for (_j = 0; _j < _phi.size(); _j++)
+            _local_ke(_i, _j) +=
                 _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveMaster);
-          }
-        }
+
+      accumulateTaggedLocalMatrix();
     }
     break;
 
     case Moose::Slave:
     {
-      DenseMatrix<Number> & Ken_slave = _assembly.jacobianBlock(_var.number(), _slave_var.number());
-      DenseMatrix<Number> & Kne_slave = _assembly.jacobianBlock(_slave_var.number(), _var.number());
+      prepareMatrixTag(_assembly, _var.number(), _slave_var.number());
+
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         for (_i = 0; _i < _test_slave.size(); _i++)
-        {
           for (_j = 0; _j < _phi.size(); _j++)
-          {
-            Ken_slave(_j, _i) +=
+            _local_ke(_j, _i) +=
                 _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::MasterSlave);
-            Kne_slave(_i, _j) +=
+
+      accumulateTaggedLocalMatrix();
+
+      prepareMatrixTag(_assembly, _slave_var.number(), _var.number());
+
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        for (_i = 0; _i < _test_slave.size(); _i++)
+          for (_j = 0; _j < _phi.size(); _j++)
+            _local_ke(_i, _j) +=
                 _JxW_lm[_qp] * _coord[_qp] * computeQpJacobianSide(Moose::SlaveSlave);
-          }
-        }
+
+      accumulateTaggedLocalMatrix();
     }
     break;
   }

@@ -324,14 +324,6 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
   std::shared_ptr<ScalarKernel> kernel =
       _factory.create<ScalarKernel>(kernel_name, name, parameters);
   _scalar_kernels.addObject(kernel);
-
-  // Store time/non-time ScalarKernels separately
-  ODETimeKernel * t_kernel = dynamic_cast<ODETimeKernel *>(kernel.get());
-
-  if (t_kernel)
-    _time_scalar_kernels.addObject(kernel);
-  else
-    _non_time_scalar_kernels.addObject(kernel);
 }
 
 void
@@ -862,10 +854,9 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
 }
 
 void
-NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool displaced)
+NonlinearSystemBase::constraintResiduals(const std::set<TagID> & tags, bool displaced)
 {
-  // Make sure the residual is in a good state
-  residual.close();
+  closeTaggedVectors(tags);
 
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
@@ -886,6 +877,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   bool residual_has_inserted_values = false;
   if (!_assemble_constraints_separately)
     constraints_applied = false;
+
+  ConstraintWarehouse * constraint_warehouse = nullptr;
+
+  if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
+    constraint_warehouse = &_constraints;
+  else if (tags.size() == 1)
+    constraint_warehouse = &(_constraints.getVectorTagObjectWarehouse(*(tags.begin()), 0));
+  else
+    constraint_warehouse = &(_constraints.getVectorTagsObjectWarehouse(tags, 0));
+
   for (const auto & it : *penetration_locators)
   {
     if (_assemble_constraints_separately)
@@ -900,10 +901,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
     BoundaryID slave_boundary = pen_loc._slave_boundary;
 
-    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    if (constraint_warehouse->hasActiveNodeFaceConstraints(slave_boundary, displaced))
     {
       const auto & constraints =
-          _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+          constraint_warehouse->getActiveNodeFaceConstraints(slave_boundary, displaced);
 
       for (unsigned int i = 0; i < slave_nodes.size(); i++)
       {
@@ -943,7 +944,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
                 if (nfc->overwriteSlaveResidual())
                 {
-                  _fe_problem.setResidual(residual, 0);
+                  _fe_problem.setResidual(tags, 0);
                   residual_has_inserted_values = true;
                 }
                 else
@@ -970,14 +971,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
         _communicator.max(residual_has_inserted_values);
         if (residual_has_inserted_values)
         {
-          residual.close();
+          closeTaggedVectors(tags);
           residual_has_inserted_values = false;
         }
-        _fe_problem.addCachedResidualDirectly(residual, 0);
-        residual.close();
-
-        if (_need_residual_ghosted)
-          *_residual_ghosted = residual;
+        if (hasVector(residualVectorTag()))
+        {
+          _fe_problem.addCachedResidualDirectly(getVector(residualVectorTag()), 0);
+          getVector(residualVectorTag()).close();
+        }
+        if (_need_residual_ghosted && hasVector(residualVectorTag()))
+          *_residual_ghosted = getVector(residualVectorTag());
       }
     }
   }
@@ -991,13 +994,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
       // before adding the cached residuals below.
       _communicator.max(residual_has_inserted_values);
       if (residual_has_inserted_values)
-        residual.close();
+        closeTaggedVectors(tags);
 
-      _fe_problem.addCachedResidualDirectly(residual, 0);
-      residual.close();
+      if (hasVector(residualVectorTag()))
+      {
+        _fe_problem.addCachedResidualDirectly(getVector(residualVectorTag()), 0);
+        getVector(residualVectorTag()).close();
+      }
 
-      if (_need_residual_ghosted)
-        *_residual_ghosted = residual;
+      if (_need_residual_ghosted && hasVector(residualVectorTag()))
+        *_residual_ghosted = getVector(residualVectorTag());
     }
   }
 
@@ -1006,9 +1012,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
-    if (_constraints.hasActiveMortarConstraints(iface->_name))
+    if (constraint_warehouse->hasActiveMortarConstraints(iface->_name))
     {
-      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
+      const auto & face_constraints =
+          constraint_warehouse->getActiveMortarConstraints(iface->_name);
 
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;
@@ -1061,11 +1068,11 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   {
     ElementPairLocator & elem_pair_loc = *(it.second);
 
-    if (_constraints.hasActiveElemElemConstraints(it.first, displaced))
+    if (constraint_warehouse->hasActiveElemElemConstraints(it.first, displaced))
     {
       // ElemElemConstraint objects
       const auto & _element_constraints =
-          _constraints.getActiveElemElemConstraints(it.first, displaced);
+          constraint_warehouse->getActiveElemElemConstraints(it.first, displaced);
 
       // go over pair elements
       const std::list<std::pair<const Elem *, const Elem *>> & elem_pairs =
@@ -1154,27 +1161,22 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       Moose::perf_log.push("computScalarKernels()", "Execution");
 
-      const std::vector<std::shared_ptr<ScalarKernel>> * scalars;
-
+      MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
       // This code should be refactored once we can do tags for scalar
       // kernels
       // Should redo this based on Warehouse
       if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
-        scalars = &(_scalar_kernels.getActiveObjects());
-      else if (tags.size() == 2)
-      {
-        if (tags.find(timeVectorTag()) != tags.end())
-          scalars = &(_time_scalar_kernels.getActiveObjects());
-        else if (tags.find(nonTimeVectorTag()) != tags.end())
-          scalars = &(_non_time_scalar_kernels.getActiveObjects());
-        else
-          mooseError("Wrong tags for scalar kernels ");
-      }
+        scalar_kernel_warehouse = &_scalar_kernels;
+      else if (tags.size() == 1)
+        scalar_kernel_warehouse =
+            &(_scalar_kernels.getVectorTagObjectWarehouse(*(tags.begin()), 0));
       else
-        mooseError("Unrecognized tags for scalar kernels in computeResidualInternal().");
+        // scalar_kernels is not threading
+        scalar_kernel_warehouse = &(_scalar_kernels.getVectorTagsObjectWarehouse(tags, 0));
 
       bool have_scalar_contributions = false;
-      for (const auto & scalar_kernel : *scalars)
+      const auto & scalars = scalar_kernel_warehouse->getActiveObjects();
+      for (const auto & scalar_kernel : scalars)
       {
         scalar_kernel->reinit();
         const std::vector<dof_id_type> & dof_indices = scalar_kernel->variable().dofIndices();
@@ -1206,7 +1208,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       Moose::perf_log.push("computNodalKernels()", "Execution");
 
-      ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels);
+      ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels, tags);
 
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
@@ -1234,7 +1236,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       Moose::perf_log.push("computNodalKernelBCs()", "Execution");
 
-      ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels);
+      ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels, tags);
 
       ConstBndNodeRange & bnd_node_range = *_mesh.getBoundaryNodeRange();
 
@@ -1263,7 +1265,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _residual_ghosted->close();
   }
 
-  PARALLEL_TRY { computeDiracContributions(false); }
+  PARALLEL_TRY { computeDiracContributions(tags, false); }
   PARALLEL_CATCH;
 
   if (_fe_problem._has_constraints)
@@ -1279,17 +1281,18 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     PARALLEL_TRY
     {
       // Undisplaced Constraints
-      constraintResiduals(*_Re_non_time, false);
+      constraintResiduals(tags, false);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintResiduals(*_Re_non_time, true);
+        constraintResiduals(tags, true);
 
       if (_fe_problem.computingNonlinearResid())
         _constraints.residualEnd();
     }
     PARALLEL_CATCH;
-    _Re_non_time->close();
+
+    closeTaggedVectors(tags);
   }
 }
 
@@ -1522,23 +1525,25 @@ NonlinearSystemBase::addImplicitGeometricCouplingEntries(GeometricSearchData & g
 }
 
 void
-NonlinearSystemBase::constraintJacobians(bool displaced)
+NonlinearSystemBase::constraintJacobians(const std::set<TagID> & tags, bool displaced)
 {
-  if (!hasMatrix(systemMatrixTag()))
-    mooseError("A system matrix is required");
-
-  auto & jacobian = getMatrix(systemMatrixTag());
-
+  for (auto tag : tags)
+    if (hasMatrix(tag))
+    {
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
 #else
-  if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_NEW_NONZERO_ALLOCATION_ERR,
-                 PETSC_FALSE);
-  if (_fe_problem.ignoreZerosInJacobian())
-    MatSetOption(
-        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
+      auto & jacobian = getMatrix(tag);
+
+      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                     MAT_NEW_NONZERO_ALLOCATION_ERR,
+                     PETSC_FALSE);
+      if (_fe_problem.ignoreZerosInJacobian())
+        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                     MAT_IGNORE_ZERO_ENTRIES,
+                     PETSC_TRUE);
 #endif
+    }
 
   std::vector<numeric_index_type> zero_rows;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
@@ -1559,6 +1564,16 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   bool constraints_applied;
   if (!_assemble_constraints_separately)
     constraints_applied = false;
+
+  ConstraintWarehouse * constraint_warehouse = nullptr;
+
+  if (!tags.size() || tags.size() == _fe_problem.numMatrixTags())
+    constraint_warehouse = &_constraints;
+  else if (tags.size() == 1)
+    constraint_warehouse = &(_constraints.getMatrixTagObjectWarehouse(*(tags.begin()), 0));
+  else
+    constraint_warehouse = &(_constraints.getMatrixTagsObjectWarehouse(tags, 0));
+
   for (const auto & it : *penetration_locators)
   {
     if (_assemble_constraints_separately)
@@ -1574,10 +1589,10 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     BoundaryID slave_boundary = pen_loc._slave_boundary;
 
     zero_rows.clear();
-    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    if (constraint_warehouse->hasActiveNodeFaceConstraints(slave_boundary, displaced))
     {
       const auto & constraints =
-          _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+          constraint_warehouse->getActiveNodeFaceConstraints(slave_boundary, displaced);
 
       for (const auto & slave_node_num : slave_nodes)
       {
@@ -1606,8 +1621,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
             _fe_problem.reinitNeighborPhys(master_elem, master_side, points, 0);
             for (const auto & nfc : constraints)
             {
-              nfc->_jacobian = &jacobian;
-
               if (nfc->shouldApply())
               {
                 constraints_applied = true;
@@ -1622,22 +1635,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   // Add this variable's dof's row to be zeroed
                   zero_rows.push_back(nfc->variable().nodalDofIndex());
                 }
-
-                std::vector<dof_id_type> slave_dofs(1, nfc->variable().nodalDofIndex());
-
-                // Cache the jacobian block for the slave side
-                _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee,
-                                                           slave_dofs,
-                                                           nfc->_connected_dof_indices,
-                                                           nfc->variable().scalingFactor());
-
-                // Cache the jacobian block for the master side
-                if (nfc->addCouplingEntriesToJacobian())
-                  _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Kne,
-                      nfc->masterVariable().dofIndicesNeighbor(),
-                      nfc->_connected_dof_indices,
-                      nfc->variable().scalingFactor());
 
                 _fe_problem.cacheJacobian(0);
                 if (nfc->addCouplingEntriesToJacobian())
@@ -1665,19 +1662,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                   nfc->computeOffDiagJacobian(jvar->number());
 
-                  // Cache the jacobian block for the slave side
-                  _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kee,
-                                                             slave_dofs,
-                                                             nfc->_connected_dof_indices,
-                                                             nfc->variable().scalingFactor());
-
-                  // Cache the jacobian block for the master side
-                  if (nfc->addCouplingEntriesToJacobian())
-                    _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne,
-                                                               nfc->variable().dofIndicesNeighbor(),
-                                                               nfc->_connected_dof_indices,
-                                                               nfc->variable().scalingFactor());
-
                   _fe_problem.cacheJacobian(0);
                   if (nfc->addCouplingEntriesToJacobian())
                     _fe_problem.cacheJacobianNeighbor(0);
@@ -1697,25 +1681,34 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
       {
 #ifdef LIBMESH_HAVE_PETSC
 // Necessary for speed
+for (auto tag : tags)
+  if (hasMatrix(tag))
+  {
+    auto & jacobian = getMatrix(tag);
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
-        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3, 1, 0)
         // In Petsc 3.0.0, MatSetOption has three args...the third arg
         // determines whether the option is set (true) or unset (false)
         MatSetOption(
             static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #else
-        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                     MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                     PETSC_TRUE);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                 PETSC_TRUE);
 #endif
+  }
 #endif
 
-        jacobian.close();
-        jacobian.zero_rows(zero_rows, 0.0);
-        jacobian.close();
-        _fe_problem.addCachedJacobian(0);
-        jacobian.close();
+closeTaggedMatrices(tags);
+
+for (auto tag : tags)
+  if (hasMatrix(tag))
+    getMatrix(tag).zero_rows(zero_rows, 0.0);
+
+_fe_problem.addCachedJacobian(0);
+
+closeTaggedMatrices(tags);
       }
     }
   }
@@ -1728,25 +1721,34 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     {
 #ifdef LIBMESH_HAVE_PETSC
 // Necessary for speed
+for (auto tag : tags)
+  if (hasMatrix(tag))
+  {
+    auto & jacobian = getMatrix(tag);
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-      // In Petsc 3.0.0, MatSetOption has three args...the third arg
-      // determines whether the option is set (true) or unset (false)
-      MatSetOption(
-          static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+    // In Petsc 3.0.0, MatSetOption has three args...the third arg
+    // determines whether the option is set (true) or unset (false)
+    MatSetOption(
+        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #else
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                   PETSC_TRUE);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                 PETSC_TRUE);
 #endif
+  }
 #endif
 
-      jacobian.close();
-      jacobian.zero_rows(zero_rows, 0.0);
-      jacobian.close();
-      _fe_problem.addCachedJacobian(0);
-      jacobian.close();
+closeTaggedMatrices(tags);
+
+for (auto tag : tags)
+  if (hasMatrix(tag))
+    getMatrix(tag).zero_rows(zero_rows, 0.0);
+
+_fe_problem.addCachedJacobian(0);
+
+closeTaggedMatrices(tags);
     }
   }
 
@@ -1755,10 +1757,11 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
-    if (_constraints.hasActiveMortarConstraints(iface->_name))
+    if (constraint_warehouse->hasActiveMortarConstraints(iface->_name))
     {
       // MortarConstraint objects
-      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
+      const auto & face_constraints =
+          constraint_warehouse->getActiveMortarConstraints(iface->_name);
 
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;
@@ -1808,11 +1811,11 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   {
     ElementPairLocator & elem_pair_loc = *(it.second);
 
-    if (_constraints.hasActiveElemElemConstraints(it.first, displaced))
+    if (constraint_warehouse->hasActiveElemElemConstraints(it.first, displaced))
     {
       // ElemElemConstraint objects
       const auto & _element_constraints =
-          _constraints.getActiveElemElemConstraints(it.first, displaced);
+          constraint_warehouse->getActiveElemElemConstraints(it.first, displaced);
 
       // go over pair elements
       const std::list<std::pair<const Elem *, const Elem *>> & elem_pairs =
@@ -1850,12 +1853,21 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 }
 
 void
-NonlinearSystemBase::computeScalarKernelsJacobians()
+NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 {
+  MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
+
+  if (!tags.size() || tags.size() == _fe_problem.numMatrixTags())
+    scalar_kernel_warehouse = &_scalar_kernels;
+  else if (tags.size() == 1)
+    scalar_kernel_warehouse = &(_scalar_kernels.getMatrixTagObjectWarehouse(*(tags.begin()), 0));
+  else
+    scalar_kernel_warehouse = &(_scalar_kernels.getMatrixTagsObjectWarehouse(tags, 0));
+
   // Compute the diagonal block for scalar variables
-  if (_scalar_kernels.hasActiveObjects())
+  if (scalar_kernel_warehouse->hasActiveObjects())
   {
-    const auto & scalars = _scalar_kernels.getActiveObjects();
+    const auto & scalars = scalar_kernel_warehouse->getActiveObjects();
 
     _fe_problem.reinitScalars(/*tid=*/0);
 
@@ -1960,7 +1972,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -1973,7 +1985,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -1998,7 +2010,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -2011,7 +2023,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -2025,9 +2037,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       break;
     }
 
-    computeDiracContributions(true);
+    computeDiracContributions(tags, true);
 
-    computeScalarKernelsJacobians();
+    computeScalarKernelsJacobians(tags);
 
     static bool first = true;
 
@@ -2056,11 +2068,11 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       enforceNodalConstraintsJacobian();
 
       // Undisplaced Constraints
-      constraintJacobians(false);
+      constraintJacobians(tags, false);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintJacobians(true);
+        constraintJacobians(tags, true);
     }
   }
   PARALLEL_CATCH;
@@ -2423,7 +2435,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 }
 
 void
-NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
+NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian)
 {
   _fe_problem.clearDiracInfo();
 
@@ -2444,7 +2456,7 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
       }
     }
 
-    ComputeDiracThread cd(_fe_problem, is_jacobian);
+    ComputeDiracThread cd(_fe_problem, tags, is_jacobian);
 
     _fe_problem.getDiracElements(dirac_elements);
 
@@ -2456,9 +2468,6 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
 
     Moose::perf_log.pop("computeDiracContributions()", "Execution");
   }
-
-  if (!is_jacobian)
-    _Re_non_time->close();
 }
 
 NumericVector<Number> &

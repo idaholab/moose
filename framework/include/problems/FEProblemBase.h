@@ -1125,7 +1125,7 @@ public:
    */
   virtual void addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid);
 
-  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
+  virtual void setResidual(const std::set<TagID> & tags, THREAD_ID tid) override;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) override;
 
   virtual void addJacobian(THREAD_ID tid) override;

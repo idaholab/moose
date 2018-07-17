@@ -272,7 +272,7 @@ public:
   virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
   virtual void addCachedResidual(THREAD_ID tid) = 0;
 
-  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void setResidual(const std::set<TagID> & tags, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
 
   virtual void addJacobian(THREAD_ID tid) = 0;
