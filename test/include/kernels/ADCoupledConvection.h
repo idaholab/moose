@@ -18,7 +18,7 @@
 
 class ADCoupledConvection;
 
-template<>
+template <>
 InputParameters validParams<ADCoupledConvection>();
 
 /**
@@ -36,7 +36,7 @@ protected:
   virtual ADReal computeQpResidual();
 
 private:
-  ADVariableGradient & _velocity_vector;
+  const ADVariableGradient & _velocity_vector;
 };
 
-#endif //ADCOUPLEDCONVECTION_H
+#endif // ADCOUPLEDCONVECTION_H

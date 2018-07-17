@@ -21,24 +21,26 @@
 
 class NonlinearSystem;
 
-
 class MaxVarNDofsPerElem : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  MaxVarNDofsPerElem(FEProblem & feproblem, NonlinearSystem & sys);
+  MaxVarNDofsPerElem(FEProblemBase & feproblem, NonlinearSystemBase & sys);
 
   // Splitting Constructor
   MaxVarNDofsPerElem(MaxVarNDofsPerElem & x, Threads::split split);
 
   virtual ~MaxVarNDofsPerElem();
 
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem * elem);
 
   void join(const MaxVarNDofsPerElem &);
 
   dof_id_type max() { return _max; }
 
 protected:
+  /// The nonlinear system
+  NonlinearSystemBase & _system;
+
   /// Maximum number of dofs for any one variable on any one element
   size_t _max;
 
@@ -49,4 +51,4 @@ protected:
   std::vector<dof_id_type> _dof_indices;
 };
 
-#endif //MAXVARNDOFSPERELEM_H
+#endif // MAXVARNDOFSPERELEM_H

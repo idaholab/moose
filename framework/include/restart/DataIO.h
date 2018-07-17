@@ -314,6 +314,8 @@ dataStore(std::ostream & stream, HashMap<T, U> & m, void * context)
 template <>
 void dataStore(std::ostream & stream, Real & v, void * /*context*/);
 template <>
+void dataStore(std::ostream & stream, ADReal & v, void * /*context*/);
+template <>
 void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
 template <>
 void dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/);

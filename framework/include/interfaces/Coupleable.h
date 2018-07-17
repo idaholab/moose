@@ -127,7 +127,8 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    * @see Kernel::value
    */
-  virtual ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual const ADVariableValue & adCoupledValue(const std::string & var_name,
+                                                 unsigned int comp = 0);
 
   /**
    * Returns value of a coupled variable for a given tag
@@ -239,8 +240,8 @@ protected:
    * @return Reference to a VariableGradient containing the gradient of the coupled variable
    * @see Kernel::gradient
    */
-  virtual ADVariableGradient & adCoupledGradient(const std::string & var_name,
-                                                 unsigned int comp = 0);
+  virtual const ADVariableGradient & adCoupledGradient(const std::string & var_name,
+                                                       unsigned int comp = 0);
 
   /**
    * Returns an old gradient from previous time step of a coupled variable

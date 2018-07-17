@@ -673,9 +673,6 @@ protected:
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
-  /// Maximum number of dofs for any one variable on any one element
-  size_t _max_var_n_dofs_per_elem;
-
   Real _du_dot_du;
 
   /// Tagged vectors (pointer)
@@ -695,6 +692,9 @@ protected:
   Moose::VarKindType _var_kind;
 
   std::vector<VarCopyInfo> _var_to_copy;
+
+  /// Maximum number of dofs for any one variable on any one element
+  size_t _max_var_n_dofs_per_elem;
 };
 
 #define PARALLEL_TRY

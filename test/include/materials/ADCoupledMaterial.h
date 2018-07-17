@@ -18,7 +18,7 @@
 
 class ADCoupledMaterial;
 
-template<>
+template <>
 InputParameters validParams<ADCoupledMaterial>();
 
 /**
@@ -35,9 +35,9 @@ protected:
   std::string _mat_prop_name;
   MaterialProperty<ADReal> & _mat_prop;
 
-  ADVariableValue & _coupled_var;
+  const ADVariableValue & _coupled_var;
 
-  //const MaterialProperty<ADReal> & _coupled_mat_prop;
+  // const MaterialProperty<ADReal> & _coupled_mat_prop;
 };
 
-#endif //ADCOUPLEDMATERIAL_H
+#endif // ADCOUPLEDMATERIAL_H

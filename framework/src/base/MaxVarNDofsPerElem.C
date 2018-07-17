@@ -20,27 +20,24 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-MaxVarNDofsPerElem::MaxVarNDofsPerElem(FEProblem & feproblem, NonlinearSystem & sys):
-    ThreadedElementLoop<ConstElemRange>(feproblem, sys),
+MaxVarNDofsPerElem::MaxVarNDofsPerElem(FEProblemBase & feproblem, NonlinearSystemBase & sys)
+  : ThreadedElementLoop<ConstElemRange>(feproblem),
+    _system(sys),
     _max(0),
     _dof_map(_system.dofMap())
 {
 }
 
 // Splitting Constructor
-MaxVarNDofsPerElem::MaxVarNDofsPerElem(MaxVarNDofsPerElem & x, Threads::split split):
-    ThreadedElementLoop<ConstElemRange>(x, split),
-    _max(0),
-    _dof_map(x._dof_map)
+MaxVarNDofsPerElem::MaxVarNDofsPerElem(MaxVarNDofsPerElem & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split), _system(x._system), _max(0), _dof_map(x._dof_map)
 {
 }
 
-MaxVarNDofsPerElem::~MaxVarNDofsPerElem()
-{
-}
+MaxVarNDofsPerElem::~MaxVarNDofsPerElem() {}
 
 void
-MaxVarNDofsPerElem::onElement(const Elem *elem)
+MaxVarNDofsPerElem::onElement(const Elem * elem)
 {
   for (unsigned int var = 0; var < _system.nVariables(); var++)
   {

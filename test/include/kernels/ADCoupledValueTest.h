@@ -24,10 +24,10 @@ public:
 protected:
   virtual ADReal computeQpResidual();
 
-  ADVariableValue & _v;
+  const ADVariableValue & _v;
 };
 
-template<>
+template <>
 InputParameters validParams<ADCoupledValueTest>();
 
 #endif /* ADCOUPLEDVALUETEST_H_ */

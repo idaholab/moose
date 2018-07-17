@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableFE.h"
+#include <typeinfo>
 
 template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
@@ -1019,57 +1020,69 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
   // Automatic differentiation
   if (_need_ad_u)
+    computeAD(num_dofs, nqp);
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::computeAD(const unsigned int & /*num_dofs*/,
+                                       const unsigned int & /*nqp*/)
+{
+}
+
+template <>
+void
+MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned int & nqp)
+{
+  _ad_dofs.resize(num_dofs);
+  _ad_u.resize(nqp);
+
+  if (_need_ad_grad_u)
+    _ad_grad_u.resize(nqp);
+
+  if (_need_ad_second_u)
+    _ad_second_u.resize(nqp);
+
+  // Derivatives are offset by the variable number
+  size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+
+  // Hopefully this problem can go away at some point
+  if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
+    mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of ",
+               AD_MAX_DOFS_PER_ELEM);
+
+  for (unsigned int qp = 0; qp < nqp; qp++)
   {
-    _ad_dofs.resize(num_dofs);
-    _ad_u.resize(nqp);
+    _ad_u[qp] = 0;
 
     if (_need_ad_grad_u)
-      _ad_grad_u.resize(nqp);
+      _ad_grad_u[qp] = 0;
 
     if (_need_ad_second_u)
-      _ad_second_u.resize(nqp);
+      _ad_second_u[qp] = 0;
+  }
 
-    // Derivatives are offset by the variable number
-    size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+  for (unsigned int i = 0; i < num_dofs; i++)
+  {
+    _ad_dofs[i] = (*_sys.currentSolution())(_dof_indices[i]);
 
-    // Hopefully this problem can go away at some point
-    if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)
-      mooseError("Current number of dofs per element is greater than AD_MAX_DOFS_PER_ELEM of "
-                 << AD_MAX_DOFS_PER_ELEM);
+    // NOTE!  You have to do this AFTER setting the value!
+    _ad_dofs[i].derivatives()[ad_offset + i] = 1.0;
+  }
 
+  // Now build up the solution at each quadrature point:
+  for (unsigned int i = 0; i < num_dofs; i++)
+  {
     for (unsigned int qp = 0; qp < nqp; qp++)
     {
-      _ad_u[qp] = 0;
+      _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
 
       if (_need_ad_grad_u)
-        _ad_grad_u[qp] = 0;
+        _ad_grad_u[qp].add_scaled(_grad_phi[i][qp], _ad_dofs[i]); // Note: += does NOT work here!
 
       if (_need_ad_second_u)
-        _ad_second_u[qp] = 0;
-    }
-
-    for (unsigned int i = 0; i < num_dofs; i++)
-    {
-      _ad_dofs[i] = current_solution(_dof_indices[i]);
-
-      // NOTE!  You have to do this AFTER setting the value!
-      _ad_dofs[i].derivatives()[ad_offset + i] = 1.0;
-    }
-
-    // Now build up the solution at each quadrature point:
-    for (unsigned int i = 0; i < num_dofs; i++)
-    {
-      for (unsigned int qp = 0; qp < nqp; qp++)
-      {
-        _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
-
-        if (_need_ad_grad_u)
-          _ad_grad_u[qp].add_scaled(_grad_phi[i][qp], _ad_dofs[i]); // Note: += does NOT work here!
-
-        if (_need_ad_second_u)
-          _ad_second_u[qp].add_scaled((*_second_phi)[i][qp],
-                                      _ad_dofs[i]); // Note: += does NOT work here!
-      }
+        _ad_second_u[qp].add_scaled((*_second_phi)[i][qp],
+                                    _ad_dofs[i]); // Note: += does NOT work here!
     }
   }
 }

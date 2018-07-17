@@ -36,6 +36,22 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
 template <>
 void
+dataStore(std::ostream & stream, ADReal & v, void * /*context*/)
+{
+  Real value = v.value();
+  stream.write((char *)&value, sizeof(value));
+
+  auto derivatives = v.derivatives();
+
+  for (size_t i = 0; i < derivatives.size(); ++i)
+  {
+    Real deriv = derivatives[i];
+    stream.write((char *)&deriv, sizeof(deriv));
+  }
+}
+
+template <>
+void
 dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/)
 {
   v.close();

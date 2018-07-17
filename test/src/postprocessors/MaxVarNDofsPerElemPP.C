@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "MaxVarNDofsPerElemPP.h"
+#include "NonlinearSystem.h"
 
 registerMooseObject("MooseTestApp", MaxVarNDofsPerElemPP);
 

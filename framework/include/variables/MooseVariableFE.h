@@ -543,6 +543,8 @@ public:
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
 
+  void computeAD(const unsigned int & num_dofs, const unsigned int & nqp);
+
 protected:
   /// Our assembly
   Assembly & _assembly;

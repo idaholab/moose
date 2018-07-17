@@ -22,16 +22,26 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-template<>
-InputParameters validParams<ADKernel>()
+template <>
+InputParameters
+validParams<ADKernel>()
 {
   InputParameters params = validParams<KernelBase>();
   params.registerBase("Kernel");
   return params;
 }
 
-ADKernel::ADKernel(const InputParameters & parameters) :
-    KernelBase(parameters),
+ADKernel::ADKernel(const InputParameters & parameters)
+  : KernelBase(parameters),
+    MooseVariableInterface<Real>(this,
+                                 false,
+                                 "variable",
+                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var(*mooseVariable()),
+    _test(_var.phi()),
+    _grad_test(_var.gradPhi()),
+    _phi(_assembly.phi(_var)),
     _u(_var.adSln()),
     _grad_u(_var.adGradSln()),
     _u_dot(_var.uDot()),
@@ -39,9 +49,7 @@ ADKernel::ADKernel(const InputParameters & parameters) :
 {
 }
 
-ADKernel::~ADKernel()
-{
-}
+ADKernel::~ADKernel() {}
 
 void
 ADKernel::computeResidual()
@@ -59,7 +67,7 @@ ADKernel::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
@@ -77,7 +85,8 @@ ADKernel::computeJacobian()
   {
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      ADReal residual = computeQpResidual(); // This will also compute the derivative with respect to all dofs
+      ADReal residual =
+          computeQpResidual(); // This will also compute the derivative with respect to all dofs
       for (_j = 0; _j < _phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
     }
@@ -89,31 +98,34 @@ ADKernel::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
-      diag(i) = _local_ke(i,i);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
 
 void
-ADKernel::computeOffDiagJacobian(unsigned int jvar)
+ADKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  if (jvar == _var.number())
+  auto jvar_num = jvar.number();
+
+  if (jvar_num == _var.number())
     computeJacobian();
   else
   {
-    size_t ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
+    size_t ad_offset = jvar_num * _sys.getMaxVarNDofsPerElem();
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
     for (_i = 0; _i < _test.size(); _i++)
     {
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
-        ADReal residual = computeQpResidual(); // This will also compute the derivative with respect to all dofs
+        ADReal residual =
+            computeQpResidual(); // This will also compute the derivative with respect to all dofs
 
         for (_j = 0; _j < _phi.size(); _j++)
           ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
@@ -123,7 +135,7 @@ ADKernel::computeOffDiagJacobian(unsigned int jvar)
 }
 
 void
-ADKernel::computeOffDiagJacobianScalar(unsigned int jvar)
+ADKernel::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
   /*
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);

@@ -19,11 +19,10 @@
 
 class ADKernel;
 
-template<>
+template <>
 InputParameters validParams<ADKernel>();
 
-class ADKernel :
-  public KernelBase
+class ADKernel : public KernelBase, public MooseVariableInterface<Real>
 {
 public:
   ADKernel(const InputParameters & parameters);
@@ -31,26 +30,40 @@ public:
   virtual ~ADKernel();
 
   // See KernelBase base for documentation of these overridden methods
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar);
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
+
+  virtual MooseVariable & variable() override { return _var; }
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADReal computeQpResidual() = 0;
 
+  /// This is a regular kernel so we cast to a regular MooseVariable
+  MooseVariable & _var;
+
+  /// the current test function
+  const VariableTestValue & _test;
+
+  /// gradient of the test function
+  const VariableTestGradient & _grad_test;
+
+  /// the current shape functions
+  const VariablePhiValue & _phi;
+
   /// Holds the solution at current quadrature points
-  ADVariableValue & _u;
+  const ADVariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
-  ADVariableGradient & _grad_u;
+  const ADVariableGradient & _grad_u;
 
   /// Time derivative of u
-  VariableValue & _u_dot;
+  const VariableValue & _u_dot;
 
   /// Derivative of u_dot with respect to u
-  VariableValue & _du_dot_du;
+  const VariableValue & _du_dot_du;
 };
 
 #endif /* ADKERNEL_H */
