@@ -2,7 +2,7 @@ CXX ?= g++
 
 # some systems have python2 but no python2-config command - fall back to python-config for them
 pyconfig := python2-config
-ifeq (, $(shell which python2-config))
+ifeq (, $(shell which python2-config 2>/dev/null))
   pyconfig := python-config
 endif
 
