@@ -42,7 +42,7 @@ appropriately.
 !alert note
 Full upwinding only works for continuous FEM
 
-In DE systems describing more than just advection (eg, in
+In DE systems describing more than just advection (e.g., in
 diffusion-advection problems) full upwinding may be used on the
 advection alone.  In practise, it is reasonably common that these more
 complicated cases benefit from numerical stabilization on their
@@ -103,7 +103,7 @@ $v_y$, and  $v_z$.
 
 To form the correct equations, the boundary term $\langle\psi_i, \vec{v} u
 \cdot \vec{n}\rangle$ needs to be included in the `BCs` block of a
-MOOSE input file (n is the outward normal to the boundary).  An
+MOOSE input file ($\vec{n}$ is the outward normal to the boundary).  An
 `OutflowBC` may be used, for instance
 
 !listing test/tests/kernels/conservative_advection/none_in_all_out.i block=BCs
@@ -139,7 +139,7 @@ or $\vec{v} \cdot \vec{n} > 0$, simply use
 no BC at that boundary. Then for $\vec{v} \cdot \vec{n} > 0$ there is no BC to remove fluid
 from that boundary so the fluid "piles up" there. For $\vec{v} \cdot \vec{n} < 0$ the
 omission of a BC can be thought of setting $u_B=0$ in an
-InflowBC.
+`InflowBC`.
 
 ## Comparison of no upwinding and full upwinding
 
@@ -155,7 +155,7 @@ describe the same physical situation: advection from left to right
 along a line.  A source at the left boundary introduces $u$ into the
 domain at a fixed rate (using an `InflowBC`).  The right boundary is
 impermeable (no BC), so when $u$ arrives
-there is starts building up at the boundary.  It is clear from the
+there it starts building up at the boundary.  It is clear from the
 figures below that no upwinding leads to unphysical overshoots and
 undershoots, while full upwinding results in none of that oscillatory
 behaviour but instead produces more numerical diffusion.

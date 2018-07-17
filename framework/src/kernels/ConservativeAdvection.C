@@ -91,26 +91,19 @@ ConservativeAdvection::computeJacobian()
 void
 ConservativeAdvection::fullUpwind(JacRes res_or_jac)
 {
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-  {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-    if (ke.n() == 0)
-      // this removes a problem encountered in
-      // the initial timestep when
-      // use_displaced_mesh=true
-      return;
-    _local_ke.resize(ke.m(), ke.n());
-    _local_ke.zero();
-  }
-
   // The number of nodes in the element
   const unsigned int num_nodes = _test.size();
 
-  // Compute the outflux from each node.  Even if we are computing the Jacobian we still need this
-  // to see which nodes are upwind and which are downwind
-  _local_re.resize(num_nodes); // if this is positive at the node, mass (or whatever the Variable
-                               // represents) is flowing out of the node
-  _local_re.zero();
+  // Even if we are computing the Jacobian we still need to compute the outflow from each node to
+  // see which nodes are upwind and which are downwind
+  prepareVectorTag(_assembly, _var.number());
+
+  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+    prepareMatrixTag(_assembly, _var.number(), _var.number());
+
+  // Compute the outflux from each node and store in _local_re
+  // If _local_re is positive at the node, mass (or whatever the Variable represents) is flowing out
+  // of the node
   _upwind_node.resize(num_nodes);
   for (_i = 0; _i < num_nodes; ++_i)
   {
@@ -150,7 +143,7 @@ ConservativeAdvection::fullUpwind(JacRes res_or_jac)
   }
 
   // Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes,
-  // weighted by their proto_flux values
+  // weighted by their local_re values
   for (unsigned int n = 0; n < num_nodes; ++n)
   {
     if (!_upwind_node[n]) // downwind node
@@ -165,32 +158,30 @@ ConservativeAdvection::fullUpwind(JacRes res_or_jac)
   // Add the result to the residual and jacobian
   if (res_or_jac == JacRes::CALCULATE_RESIDUAL)
   {
-    DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-    re += _local_re;
+    accumulateTaggedLocalResidual();
 
     if (_has_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i = 0; i < _save_in.size(); i++)
-        _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+      for (const auto & var : _save_in)
+        var->sys().solution().add_vector(_local_re, var->dofIndices());
     }
   }
 
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
   {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-    ke += _local_ke;
+    accumulateTaggedLocalMatrix();
 
     if (_has_diag_save_in)
     {
-      unsigned int rows = ke.m();
+      unsigned int rows = _local_ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i, i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-        _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+      for (const auto & var : _diag_save_in)
+        var->sys().solution().add_vector(diag, var->dofIndices());
     }
   }
 }
