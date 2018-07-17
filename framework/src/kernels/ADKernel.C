@@ -17,7 +17,7 @@
 #include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -47,6 +47,49 @@ ADKernel::ADKernel(const InputParameters & parameters)
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
+  addMooseVariableDependency(mooseVariable());
+  _save_in.resize(_save_in_strings.size());
+  _diag_save_in.resize(_diag_save_in_strings.size());
+
+  for (unsigned int i = 0; i < _save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _save_in_strings[i]);
+
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
+      paramError("save_in", "cannot use solution variable as save-in variable");
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _save_in[i] = var;
+    var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_save_in = _save_in.size() > 0;
+
+  for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _diag_save_in_strings[i]);
+
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
+      paramError("diag_save_in", "cannot use solution variable as diag save-in variable");
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "diag_save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _diag_save_in[i] = var;
+    var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
 ADKernel::~ADKernel() {}
