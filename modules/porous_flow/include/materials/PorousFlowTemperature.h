@@ -42,7 +42,7 @@ protected:
   /// Whether the temperature coupled variable is a PorousFlow variable
   const bool _temperature_is_PF;
 
-  /// the PorousFlow variable number of the temperature
+  /// The PorousFlow variable number of the temperature
   const unsigned int _t_var_num;
 
   /// Computed temperature at quadpoints or nodes

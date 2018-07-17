@@ -13,7 +13,6 @@
 #include "AuxKernel.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowDarcyVelocityComponent;
 
 template <>
@@ -52,7 +51,7 @@ protected:
   /// Fluid density for each phase (at the qp)
   const MaterialProperty<std::vector<Real>> & _fluid_density_qp;
 
-  /// PorousFlow UserObject
+  /// PorousFlowDicatator UserObject
   const PorousFlowDictator & _dictator;
 
   /// Index of the fluid phase

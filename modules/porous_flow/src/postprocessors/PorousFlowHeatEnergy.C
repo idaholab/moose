@@ -9,7 +9,6 @@
 
 #include "PorousFlowHeatEnergy.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 #include "libmesh/quadrature.h"

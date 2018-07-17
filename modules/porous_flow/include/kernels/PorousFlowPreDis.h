@@ -13,7 +13,6 @@
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowPreDis;
 
 template <>
@@ -37,28 +36,28 @@ protected:
   /// Density of the mineral species
   const std::vector<Real> _mineral_density;
 
-  /// holds info on the PorousFlow variables
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
   /// Aqueous phase number
   const unsigned int _aq_ph;
 
-  /// old value of porosity
+  /// Old value of porosity
   const MaterialProperty<Real> & _porosity_old;
 
-  /// saturation
+  /// Saturation
   const MaterialProperty<std::vector<Real>> & _saturation;
 
   /// d(saturation)/d(PorousFlow var)
   const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
 
-  /// reaction rate of the yielding the secondary species
+  /// Reaction rate of the yielding the secondary species
   const MaterialProperty<std::vector<Real>> & _reaction_rate;
 
   /// d(reaction rate)/d(porflow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> & _dreaction_rate_dvar;
 
-  /// stoichiometric coefficients
+  /// Stoichiometric coefficients
   const std::vector<Real> _stoichiometry;
 
   /**

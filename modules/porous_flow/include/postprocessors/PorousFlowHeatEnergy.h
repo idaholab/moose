@@ -13,7 +13,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "PorousFlowDictator.h"
 
-// Forward Declarations
 class PorousFlowHeatEnergy;
 
 template <>
@@ -32,7 +31,7 @@ protected:
   virtual Real computeIntegral() override;
   virtual Real computeQpIntegral() override;
 
-  /// Holds info on the PorousFlow variables
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
   /// Number of fluid phases
@@ -50,19 +49,19 @@ protected:
   /// Porosity
   const MaterialProperty<Real> & _porosity;
 
-  /// nodal rock energy density
+  /// Nodal rock energy density
   const MaterialProperty<Real> & _rock_energy_nodal;
 
-  /// nodal fluid density
+  /// Nodal fluid density
   const MaterialProperty<std::vector<Real>> * const _fluid_density;
 
-  /// nodal fluid saturation
+  /// Nodal fluid saturation
   const MaterialProperty<std::vector<Real>> * const _fluid_saturation_nodal;
 
-  /// internal energy of the phases, evaluated at the nodes
+  /// Internal energy of the phases, evaluated at the nodes
   const MaterialProperty<std::vector<Real>> * const _energy_nodal;
 
-  /// the variable for the corresponding PorousFlowEnergyTimeDerivative Kernel: this provides test functions
+  /// The variable for the corresponding PorousFlowEnergyTimeDerivative Kernel: this provides test functions
   MooseVariable * const _var;
 };
 

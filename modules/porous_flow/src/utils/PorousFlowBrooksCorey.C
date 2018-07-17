@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowBrooksCorey.h"
-//#include "libmesh/utility.h"
 
 namespace PorousFlowBrooksCorey
 {
@@ -119,8 +118,7 @@ dRelativePermeabilityNW(Real seff, Real lambda)
   if (seff <= 0.0 || seff >= 1.0)
     return 0.0;
 
-  return seff * (2.0 +
-                 (seff * (2.0 + 3.0 * lambda) - 2.0 * lambda) * std::pow(1.0 - seff, 2.0 / lambda) /
-                     lambda);
+  return seff * (2.0 + (seff * (2.0 + 3.0 * lambda) - 2.0 * lambda) *
+                           std::pow(1.0 - seff, 2.0 / lambda) / lambda);
 }
-}
+} // namespace PorousFlowBrooksCorey

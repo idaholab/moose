@@ -91,7 +91,7 @@ PorousFlowVariableBase::computeQpProperties()
     (*_dgrads_qp_dv)[_qp].resize(_num_phases);
   }
 
-  /// Prepare the derivative matrices with zeroes
+  // Prepare the derivative matrices with zeroes
   for (unsigned phase = 0; phase < _num_phases; ++phase)
   {
     _dporepressure_dvar[_qp][phase].assign(_num_pf_vars, 0.0);

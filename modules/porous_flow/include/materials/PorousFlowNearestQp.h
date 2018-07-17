@@ -12,7 +12,6 @@
 
 #include "PorousFlowMaterial.h"
 
-// Forward Declarations
 class PorousFlowNearestQp;
 
 template <>
@@ -30,7 +29,7 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-  /// the nearest quadpoint
+  /// The nearest quadpoint
   MaterialProperty<unsigned int> & _nearest_qp;
 };
 

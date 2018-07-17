@@ -17,7 +17,7 @@ validParams<PorousFlowMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<bool>(
       "at_nodes", false, "Evaluate Material properties at nodes instead of quadpoints");
   params.addPrivateParam<std::string>("pf_material_type", "pf_material");
@@ -29,7 +29,11 @@ validParams<PorousFlowMaterial>()
 PorousFlowMaterial::PorousFlowMaterial(const InputParameters & parameters)
   : Material(parameters),
     _nodal_material(getParam<bool>("at_nodes")),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator"))
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _pressure_variable_name("pressure_variable"),
+    _saturation_variable_name("saturation_variable"),
+    _temperature_variable_name("temperature_variable"),
+    _mass_fraction_variable_name("mass_fraction_variable")
 {
 }
 

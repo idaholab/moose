@@ -35,21 +35,20 @@ protected:
   /**
    * List of Kernels, AuxKernels, Materials, etc, to be added.
    * This list will be used to determine what Materials need
-   * to be added.
-   * Actions may add or remove things from this list
+   * to be added. Actions may add or remove things from this list
    */
   std::vector<std::string> _objects_to_add;
 
   /// The name of the PorousFlowDictator object to be added
   const std::string _dictator_name;
 
-  /// number of aqueous-equilibrium secondary species
+  /// Number of aqueous-equilibrium secondary species
   const unsigned int _num_aqueous_equilibrium;
 
-  /// number of aqeuous-kinetic secondary species that are involved in mineralisation
+  /// Number of aqeuous-kinetic secondary species that are involved in mineralisation
   const unsigned int _num_aqueous_kinetic;
 
-  /// gravity
+  /// Gravity
   const RealVectorValue _gravity;
 
   /// Name of the mass-fraction variables (if any)
@@ -61,20 +60,20 @@ protected:
   /// Name of the temperature variable (if any)
   const std::vector<VariableName> & _temperature_var;
 
-  /// displacement NonlinearVariable names (if any)
+  /// Displacement NonlinearVariable names (if any)
   const std::vector<NonlinearVariableName> & _displacements;
 
-  /// number of displacement variables supplied
+  /// Number of displacement variables supplied
   const unsigned _ndisp;
 
-  /// displacement Variable names
+  /// Displacement Variable names
   std::vector<VariableName> _coupled_displacements;
 
   /// Coordinate system of the simulation (eg RZ, XYZ, etc)
   Moose::CoordinateSystemType _coord_system;
 
   /**
-   * add the PorousFlowDictator object
+   * Add the PorousFlowDictator object
    */
   virtual void addDictator() = 0;
 

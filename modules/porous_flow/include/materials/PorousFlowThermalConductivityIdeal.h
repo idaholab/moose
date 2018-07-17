@@ -41,10 +41,10 @@ protected:
   /// Wet thermal conductivity of rock
   const RealTensorValue _la_wet;
 
-  /// exponent for saturation
+  /// Exponent for saturation
   const Real _exponent;
 
-  /// whether this is a fluid simulation
+  /// Whether this is a fluid simulation
   const bool _aqueous_phase;
 
   /// Phase number of the aqueous phase

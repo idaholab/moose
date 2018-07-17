@@ -32,7 +32,7 @@ protected:
   virtual Real relativePermeability(Real seff) const override;
   virtual Real dRelativePermeability(Real seff) const override;
 
-  /// exponent m for the specified phase
+  /// Exponent m for the specified phase
   const Real _m;
 };
 

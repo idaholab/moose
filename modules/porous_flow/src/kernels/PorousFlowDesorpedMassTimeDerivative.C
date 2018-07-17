@@ -9,7 +9,6 @@
 
 #include "PorousFlowDesorpedMassTimeDerivative.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 #include "libmesh/quadrature.h"
@@ -22,7 +21,7 @@ validParams<PorousFlowDesorpedMassTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addRequiredCoupledVar(
       "conc_var", "The variable that represents the concentration of desorped species");
   params.addClassDescription("Desorped component mass derivative wrt time.");

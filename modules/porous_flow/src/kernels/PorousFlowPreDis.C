@@ -21,7 +21,7 @@ validParams<PorousFlowPreDis>()
       "Density (kg(precipitate)/m^3(precipitate)) of each secondary species in the "
       "aqueous precipitation-dissolution reaction system");
   params.addRequiredParam<UserObjectName>(
-      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+      "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addRequiredParam<std::vector<Real>>("stoichiometry",
                                              "A vector of stoichiometric coefficients for the "
                                              "primary species that is the Variable of this Kernel: "

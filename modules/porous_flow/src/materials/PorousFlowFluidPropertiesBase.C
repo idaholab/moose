@@ -29,8 +29,6 @@ PorousFlowFluidPropertiesBase::PorousFlowFluidPropertiesBase(const InputParamete
                       : getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp")),
     _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal")
                                  : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
-    _pressure_variable_name(_dictator.pressureVariableNameDummy()),
-    _temperature_variable_name(_dictator.temperatureVariableNameDummy()),
     _t_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
     _R(8.3144598)
 {

@@ -10,7 +10,6 @@
 #ifndef POROUSFLOWLINESINK_H
 #define POROUSFLOWLINESINK_H
 
-// Moose Includes
 #include "PorousFlowLineGeometry.h"
 #include "PorousFlowSumQuantity.h"
 #include "PorousFlowDictator.h"
@@ -58,7 +57,7 @@ protected:
                                             Real & outflow,
                                             Real & outflowp) const = 0;
 
-  /// PorousFlow UserObject
+  /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
   /**

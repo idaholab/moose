@@ -9,7 +9,6 @@
 
 #include "PorousFlowHeatConduction.h"
 
-// MOOSE includes
 #include "MooseVariable.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowHeatConduction);
@@ -57,7 +56,7 @@ PorousFlowHeatConduction::computeQpOffDiagJacobian(unsigned int jvar)
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
 
-  /// The PorousFlow variable index corresponding to the variable number jvar
+  // The PorousFlow variable index corresponding to the variable number jvar
   const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
 
   return _grad_test[_i][_qp] *

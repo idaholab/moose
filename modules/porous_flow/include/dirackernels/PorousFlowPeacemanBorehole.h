@@ -43,16 +43,16 @@ protected:
    */
   Function & _character;
 
-  /// bottomhole pressure of borehole
+  /// Bottomhole pressure of borehole
   const Real _p_bot;
 
-  /// unit weight of fluid in borehole (for calculating bottomhole pressure at each Dirac Point)
+  /// Unit weight of fluid in borehole (for calculating bottomhole pressure at each Dirac Point)
   const RealVectorValue _unit_weight;
 
-  /// borehole constant
+  /// Borehole constant
   const Real _re_constant;
 
-  /// well constant
+  /// Well constant
   const Real _well_constant;
 
   /// Whether there is a quadpoint permeability material (for error checking)
@@ -67,7 +67,7 @@ protected:
   /// d(Permeability)/d(PorousFlow variable)
   const MaterialProperty<std::vector<RealTensorValue>> & _dperm_or_cond_dvar;
 
-  /// rotation matrix used in well_constant calculation
+  /// Rotation matrix used in well_constant calculation
   std::vector<RealTensorValue> _rot_matrix;
 
   /**

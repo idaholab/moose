@@ -54,9 +54,6 @@ protected:
   /// Relative permeability is multiplied by this quantity
   const Real _scaling;
 
-  /// Name of (dummy) saturation primary variable
-  VariableName _saturation_variable_name;
-
   /// Saturation material property
   const MaterialProperty<std::vector<Real>> & _saturation;
 

@@ -42,7 +42,7 @@ protected:
   /// Heat capacity = _cp * _density
   const Real _heat_cap;
 
-  /// temperature at the nodes
+  /// Temperature at the nodes
   const MaterialProperty<Real> & _temperature_nodal;
 
   /// d(temperature at the nodes)/d(PorousFlow variable)
