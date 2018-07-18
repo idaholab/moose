@@ -1111,7 +1111,7 @@ Assembly::initNonlocalCoupling()
 }
 
 void
-Assembly::prepare()
+Assembly::prepareJacobianBlock()
 {
   for (const auto & it : _cm_entry)
   {
@@ -1128,6 +1128,11 @@ Assembly::prepare()
       _jacobian_block_used[tag][vi][vj] = 0;
     }
   }
+}
+
+void
+Assembly::prepareResidual()
+{
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     for (auto tag = beginIndex(_sub_Re); tag < _sub_Re.size(); tag++)
@@ -1135,6 +1140,13 @@ Assembly::prepare()
       _sub_Re[tag][var->number()].resize(var->dofIndices().size());
       _sub_Re[tag][var->number()].zero();
     }
+}
+
+void
+Assembly::prepare()
+{
+  prepareJacobianBlock();
+  prepareResidual();
 }
 
 void
