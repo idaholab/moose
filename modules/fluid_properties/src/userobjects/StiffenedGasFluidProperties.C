@@ -163,6 +163,31 @@ StiffenedGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, 
 }
 
 Real
+StiffenedGasFluidProperties::s_from_p_T(Real p, Real T) const
+{
+  Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+  return _cv * std::log(n) + _q_prime;
+}
+
+void
+StiffenedGasFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  const Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+
+  s = _cv * std::log(n) + _q_prime;
+
+  const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
+  const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
+
+  ds_dp = _cv / n * dn_dp;
+  ds_dT = _cv / n * dn_dT;
+}
+
+Real
 StiffenedGasFluidProperties::rho_from_p_s(Real p, Real s) const
 {
   Real a = (s - _q_prime + _cv * std::log(std::pow(p + _p_inf, _gamma - 1.0))) / _cv;

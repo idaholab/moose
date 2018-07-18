@@ -137,6 +137,25 @@ public:
   virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const = 0;
 
   /**
+   * Specific entropy from pressure and temperature
+   *
+   * @param[in] p   pressure
+   * @param[in] T   temperature
+   */
+  virtual Real s_from_p_T(Real p, Real T) const;
+
+  /**
+   * Specific entropy and its derivatives from pressure and temperature
+   *
+   * @param[in] p        pressure
+   * @param[in] T        temperature
+   * @param[out] s       specific entropy
+   * @param[out] ds_dp   derivative of specific entropy w.r.t. pressure
+   * @param[out] ds_dT   derivative of specific entropy w.r.t. temperature
+   */
+  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const;
+
+  /**
    * Specific entropy from specific enthalpy and pressure
    *
    * @param[in] h   specific enthalpy

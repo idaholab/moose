@@ -157,6 +157,31 @@ IdealGasFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real
 }
 
 Real
+IdealGasFluidProperties::s_from_p_T(Real p, Real T) const
+{
+  const Real n = std::pow(T, _gamma) / std::pow(p, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+  return _cv * std::log(n);
+}
+
+void
+IdealGasFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  const Real n = std::pow(T, _gamma) / std::pow(p, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+
+  s = _cv * std::log(n);
+
+  const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p, _gamma - 1.0);
+  const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p, -_gamma);
+
+  ds_dp = _cv / n * dn_dp;
+  ds_dT = _cv / n * dn_dT;
+}
+
+Real
 IdealGasFluidProperties::s_from_h_p(Real h, Real p) const
 {
   const Real aux = p * std::pow(h / (_gamma * _cv), -_gamma / (_gamma - 1));
