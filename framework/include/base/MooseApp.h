@@ -477,19 +477,23 @@ public:
   std::set<std::string> & getRecoverableData() { return _recoverable_data; }
 
   /**
-   * Create a Backup from the current App.  A Backup contains all the data necessary to be able
-   * to restore the state of an App.
+   * Create a Backup from the current App. A Backup contains all the data necessary to be able to
+   * restore the state of an App.
+   *
+   * This method should be overridden in external or MOOSE-wrapped applications.
    */
-  std::shared_ptr<Backup> backup();
+  virtual std::shared_ptr<Backup> backup();
 
   /**
-   * Restore a Backup.  This sets the App's state.
+   * Restore a Backup. This sets the App's state.
    *
    * @param backup The Backup holding the data for the app
    * @param for_restart Whether this restoration is explicitly for the first restoration of restart
-   * data
+   * data.
+   *
+   * This method should be overridden in external or MOOSE-wrapped applications.
    */
-  void restore(std::shared_ptr<Backup> backup, bool for_restart = false);
+  virtual void restore(std::shared_ptr<Backup> backup, bool for_restart = false);
 
   /**
    * Returns a string to be printed at the beginning of a simulation
