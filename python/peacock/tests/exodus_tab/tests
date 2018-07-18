@@ -83,4 +83,10 @@
     separate = True
     display_required = True
   [../]
+  [./ExodusViewer2]
+    type = PythonUnitTest
+    input = test_ExodusViewer2.py
+    separate = True
+    display_required = True
+  [../]
 []
