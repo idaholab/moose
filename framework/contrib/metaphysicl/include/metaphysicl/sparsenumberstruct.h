@@ -462,6 +462,10 @@ public:
   const typename entry_type<i>::type& get() const
     { return _data.template data<MetaPhysicL::UnsignedIntType<i> >(); }
 
+  template <unsigned int i>
+  typename entry_type<i>::type& insert()
+    { return _data.template data<MetaPhysicL::UnsignedIntType<i> >(); }
+
   std::size_t size() const
     { return IndexSet::size; }
 
@@ -574,7 +578,8 @@ public:
     return returnval;
   }
 
-  static SparseNumberStruct<typename SetDiagonalTensor<IndexSet>::type> identity()
+  static SparseNumberStruct<typename SetDiagonalTensor<IndexSet>::type>
+  identity(std::size_t n=0)
   {
     typedef 
       SparseNumberStruct<typename SetDiagonalTensor<IndexSet>::type> DiagonalStruct;
@@ -605,6 +610,31 @@ private:
 // Non-member functions
 //
 
+/*
+template <typename B, typename T, typename T2,
+	  typename IndexSetB, typename IndexSet, typename IndexSet2>
+inline
+SparseNumberArray<typename SymmetricCompareTypes<T,T2>::supertype,
+                  typename IndexSetB::template Union<IndexSet>::type::Union
+                    <typename IndexSet2::template Difference<IndexSetB>::type >::type>
+if_else (const SparseNumberArray<IndexSetB,B> & condition,
+         const SparseNumberArray<IndexSet,T> & if_true,
+         const SparseNumberArray<IndexSet2,T2> & if_false)
+{
+  typedef typename SymmetricCompareTypes<T,T2>::supertype TS;
+  typedef typename IndexSetB::template Union<IndexSet>::type::Union
+    <typename IndexSet2::template Difference<IndexSetB>::type >::type IndexSetS;
+
+  SparseNumberArray<TS, IndexSetS> returnval;
+
+  FIXME
+
+  return returnval;
+}
+*/
+
+
+
 template <std::size_t size, unsigned int index, typename T>
 struct SparseNumberStructUnitVector
 {
@@ -615,7 +645,7 @@ struct SparseNumberStructUnitVector
 
   typedef SparseNumberStruct<IndexSet> type;
 
-  static const type value() {
+  static type value() {
     type returnval;
     returnval.raw_data().template data<MetaPhysicL::UnsignedIntType<index> >() = 1;
     return returnval;
@@ -632,7 +662,7 @@ struct SparseNumberStructFullVector
 
   typedef SparseNumberStruct<IndexSet> type;
 
-  static const type value() {
+  static type value() {
     type returnval;
     returnval.for_each_datum
       (type::template CopyFunctor<ConstantDataSet<int> >
@@ -648,7 +678,7 @@ struct SparseNumberStructFullVector<0,T>
 
   typedef SparseNumberStruct<IndexSet> type;
 
-  static const type value() {
+  static type value() {
     type returnval;
     return returnval;
   }

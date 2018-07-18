@@ -331,6 +331,7 @@ struct CompareTypes<std::complex<T>, T, reverseorder, Enable> {
 CompareTypes_single(unsigned char);
 CompareTypes_single(unsigned short);
 CompareTypes_single(unsigned int);
+CompareTypes_single(bool);
 CompareTypes_single(char);
 CompareTypes_single(short);
 CompareTypes_single(int);
@@ -350,6 +351,13 @@ CompareTypes_all(unsigned short, long double);
 CompareTypes_all(unsigned int, float);
 CompareTypes_all(unsigned int, double);
 CompareTypes_all(unsigned int, long double);
+CompareTypes_all(bool, char);
+CompareTypes_all(bool, unsigned char);
+CompareTypes_all(bool, short);
+CompareTypes_all(bool, int);
+CompareTypes_all(bool, float);
+CompareTypes_all(bool, double);
+CompareTypes_all(bool, long double);
 CompareTypes_all(char, short);
 CompareTypes_all(char, int);
 CompareTypes_all(char, float);
@@ -487,6 +495,23 @@ Symmetric_definition(OrType);
 
 // #undef MacroComma
 // #undef CompareTypes_default_Type
+
+// Define an overloadable "ternary" operator.  No short-circuiting
+// here I'm afraid.
+
+template <typename B, typename T, typename T2>
+inline
+typename boostcopy::enable_if_c<
+  ScalarTraits<B>::value,
+  typename CompareTypes<T,T2>::supertype
+>::type
+if_else (const B & condition, const T & if_true, const T2 & if_false)
+{
+  if (condition)
+    return if_true;
+  return if_false;
+}
+
 
 } // namespace MetaPhysicL
 

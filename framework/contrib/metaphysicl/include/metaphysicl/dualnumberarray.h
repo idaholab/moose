@@ -50,6 +50,13 @@ struct DerivativesType<NumberArray<size, T> >
 
 
 template <std::size_t size, typename T>
+struct DivergenceType<NumberArray<size, T> >
+{
+  typedef NumberArray<size, typename DivergenceType<T>::type> type;
+};
+
+
+template <std::size_t size, typename T>
 inline
 typename DerivativeType<NumberArray<size, T> >::type
 derivative(const NumberArray<size, T>& a, unsigned int derivativeindex)
@@ -95,10 +102,10 @@ struct DerivativeOf<NumberArray<size, T>, derivativeindex>
 
 template <std::size_t size, typename T>
 inline
-typename DerivativeType<NumberArray<size, T> >::type
+typename DivergenceType<NumberArray<size, T> >::type
 divergence(const NumberArray<size, T>& a)
 {
-  typename DerivativeType<NumberArray<size, T> >::type
+  typename DivergenceType<NumberArray<size, T> >::type
     returnval = 0;
 
   for (unsigned int i=0; i != size; ++i)

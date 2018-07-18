@@ -21,38 +21,37 @@
 //
 //-----------------------------------------------------------------------el-
 //
-// $Id$
+// $Id: core.h 37197 2013-02-21 05:49:09Z roystgnr $
 //
 //--------------------------------------------------------------------------
 
-#ifndef METAPHYSICL_DUALSHADOWVECTOR_H
-#define METAPHYSICL_DUALSHADOWVECTOR_H
+#ifndef METAPHYSICL_DUALSHADOWDYNAMICSPARSEARRAY_H
+#define METAPHYSICL_DUALSHADOWDYNAMICSPARSEARRAY_H
 
 
 // Order of declarations is important here?
-#include "metaphysicl/dualnumber_decl.h"
-#include "metaphysicl/numbervector.h"
 #include "metaphysicl/dualshadow.h"
-#include "metaphysicl/dualnumbervector.h"
+#include "metaphysicl/dualdynamicsparsenumberarray.h"
 
-// ShadowNumber is subordinate to NumberVector:
+// ShadowNumber is subordinate to DynamicSparseNumberArray
+// T-vs-ShadowNumber CompareTypes specializations...
 
-#define DualShadowVector_comparisons(templatename) \
-template<std::size_t size, typename T, typename T2, typename S, bool reverseorder> \
-struct templatename<NumberVector<size, T2>, ShadowNumber<T, S>, reverseorder> { \
-  typedef NumberVector<size, typename Symmetric##templatename<T2, ShadowNumber<T, S>, reverseorder>::supertype> supertype; \
+#define DualShadowDynamicSparseArray_comparisons(templatename) \
+template<typename T, typename T2, typename S, typename IndexSet, bool reverseorder> \
+struct templatename<DynamicSparseNumberArray<T2, IndexSet>, ShadowNumber<T, S>, reverseorder> { \
+  typedef DynamicSparseNumberArray<typename Symmetric##templatename<T2, ShadowNumber<T, S>, reverseorder>::supertype, IndexSet> supertype; \
 }
 
 namespace MetaPhysicL {
 
-DualShadowVector_comparisons(CompareTypes);
-DualShadowVector_comparisons(PlusType);
-DualShadowVector_comparisons(MinusType);
-DualShadowVector_comparisons(MultipliesType);
-DualShadowVector_comparisons(DividesType);
-DualShadowVector_comparisons(AndType);
-DualShadowVector_comparisons(OrType);
+DualShadowDynamicSparseArray_comparisons(CompareTypes);
+DualShadowDynamicSparseArray_comparisons(PlusType);
+DualShadowDynamicSparseArray_comparisons(MinusType);
+DualShadowDynamicSparseArray_comparisons(MultipliesType);
+DualShadowDynamicSparseArray_comparisons(DividesType);
+DualShadowDynamicSparseArray_comparisons(AndType);
+DualShadowDynamicSparseArray_comparisons(OrType);
 
 } // namespace MetaPhysicL
 
-#endif // METAPHYSICL_DUALSHADOWVECTOR_H
+#endif // METAPHYSICL_DUALSHADOWDYNAMICSPARSEARRAY_H

@@ -52,16 +52,25 @@ struct bound_first
 {
 protected:
   BinaryFunctor f;
-  typename BinaryFunctor::first_argument_type arg1;
+
+  typedef typename boostcopy::remove_reference
+    <typename BinaryFunctor::first_argument_type>::type
+    binary_first_argument_type;
+
+  typedef typename boostcopy::remove_reference
+    <typename BinaryFunctor::second_argument_type>::type
+    binary_second_argument_type;
+
+  binary_first_argument_type arg1;
 
 public:
   bound_first(const BinaryFunctor& f_in,
-              const typename BinaryFunctor::first_argument_type&
-              arg1_in) : f(f_in), arg1(arg1_in) {}
+              const binary_first_argument_type & arg1_in) :
+    f(f_in), arg1(arg1_in) {}
 
   typename BinaryFunctor::result_type
   operator()
-    (const typename BinaryFunctor::second_argument_type& arg2) const
+    (const binary_second_argument_type& arg2) const
   { return f(arg1, arg2); }
 };
 
@@ -72,28 +81,37 @@ struct bound_second
 {
 protected:
   BinaryFunctor f;
-  typename BinaryFunctor::second_argument_type arg2;
+
+  typedef typename boostcopy::remove_reference
+    <typename BinaryFunctor::first_argument_type>::type
+    binary_first_argument_type;
+
+  typedef typename boostcopy::remove_reference
+    <typename BinaryFunctor::second_argument_type>::type
+    binary_second_argument_type;
+
+  const binary_second_argument_type & arg2;
 
 public:
   bound_second(const BinaryFunctor& f_in,
-               const typename BinaryFunctor::second_argument_type&
-               arg2_in) : f(f_in), arg2(arg2_in) {}
+               const binary_second_argument_type & arg2_in) :
+    f(f_in), arg2(arg2_in) {}
 
   typename BinaryFunctor::result_type
   operator()
-    (const typename BinaryFunctor::first_argument_type& arg1) const
+    (const binary_first_argument_type & arg1) const
   { return f(arg1, arg2); }
 };
 
 template <typename BinaryFunctor, typename Arg1>
 bound_first<BinaryFunctor>
 binary_bind1st (BinaryFunctor f, const Arg1 &a)
-{ return bound_first<BinaryFunctor>{f, a}; }
+{ return bound_first<BinaryFunctor>(f, a); }
 
 template <typename BinaryFunctor, typename Arg2>
 bound_second<BinaryFunctor>
 binary_bind2nd (BinaryFunctor f, const Arg2 &b)
-{ return bound_second<BinaryFunctor>{f, b}; }
+{ return bound_second<BinaryFunctor>(f, b); }
 
   template <typename SubFunctor, typename IndexSet,
             typename IndexSetOut, typename T, typename Tout>

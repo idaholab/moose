@@ -25,29 +25,29 @@
 //
 //--------------------------------------------------------------------------
 
-#ifndef METAPHYSICL_DUALDYNAMICSPARSENUMBERARRAY_H
-#define METAPHYSICL_DUALDYNAMICSPARSENUMBERARRAY_H
+#ifndef METAPHYSICL_DUALDYNAMICSPARSENUMBERVECTOR_H
+#define METAPHYSICL_DUALDYNAMICSPARSENUMBERVECTOR_H
 
 
-#include "metaphysicl/dualdynamicsparsenumberarray_decl.h"
+#include "metaphysicl/dualdynamicsparsenumbervector_decl.h"
 
 #include "metaphysicl/dualnumber.h"
-#include "metaphysicl/dynamicsparsenumberarray.h"
+#include "metaphysicl/dynamicsparsenumbervector.h"
 
 
 namespace MetaPhysicL {
 
 template <typename T, typename I>
 inline
-typename DerivativeType<DynamicSparseNumberArray<T, I> >::type
-derivative (const DynamicSparseNumberArray<T, I>& a,
+typename DerivativeType<DynamicSparseNumberVector<T, I> >::type
+derivative (const DynamicSparseNumberVector<T, I>& a,
             unsigned int derivativeindex)
 {
   std::size_t index_size = a.size();
 
-  typename DerivativeType<DynamicSparseNumberArray<T, I> >::type returnval;
+  typename DerivativeType<DynamicSparseNumberVector<T, I> >::type returnval;
   returnval.nude_indices() = a.nude_indices();
-  returnval.resize(index_size);
+  returnval.nude_data().resize(index_size);
 
   for (unsigned int i=0; i != index_size; ++i)
     returnval.raw_at(i) = derivative(a.raw_at(i),derivativeindex);
@@ -57,12 +57,12 @@ derivative (const DynamicSparseNumberArray<T, I>& a,
 
 template <typename T, typename I>
 inline
-typename DerivativesType<DynamicSparseNumberArray<T, I> >::type
-derivatives (const DynamicSparseNumberArray<T, I>& a)
+typename DerivativesType<DynamicSparseNumberVector<T, I> >::type
+derivatives (const DynamicSparseNumberVector<T, I>& a)
 {
   std::size_t index_size = a.size();
 
-  typename DerivativesType<DynamicSparseNumberArray<T, I> >::type returnval;
+  typename DerivativesType<DynamicSparseNumberVector<T, I> >::type returnval;
 
   returnval.nude_indices() = a.nude_indices();
   returnval.resize(index_size);
@@ -74,12 +74,13 @@ derivatives (const DynamicSparseNumberArray<T, I>& a)
 
 
 template <typename T, typename I, unsigned int derivativeindex>
-typename DerivativeType<DynamicSparseNumberArray<T, I> >::type
-DerivativeOf<DynamicSparseNumberArray<T, I>, derivativeindex>::derivative (const DynamicSparseNumberArray<T, I>& a)
+typename DerivativeType<DynamicSparseNumberVector<T, I> >::type
+DerivativeOf<DynamicSparseNumberVector<T, I>, derivativeindex>::derivative
+  (const DynamicSparseNumberVector<T, I>& a)
 {
   std::size_t index_size = a.size();
 
-  typename DerivativeType<DynamicSparseNumberArray<T, I> >::type returnval;
+  typename DerivativeType<DynamicSparseNumberVector<T, I> >::type returnval;
 
   returnval.nude_indices() = a.nude_indices();
   returnval.resize(index_size);
@@ -99,12 +100,13 @@ DerivativeOf<DynamicSparseNumberArray<T, I>, derivativeindex>::derivative (const
 template <typename T, typename I>
 inline
 typename DerivativeType<T>::type
-divergence(const DynamicSparseNumberArray<T, I>& a)
+divergence(const DynamicSparseNumberVector<T, I>& a)
 {
   typename DerivativeType<T>::type returnval = 0;
 
-  // FIXME
-  metaphysicl_not_implemented();
+  std::size_t size = a.size();
+  for (unsigned int i=0; i != size; ++i)
+    returnval += derivative(a.raw_at(i), a.raw_index(i));
 
   return returnval;
 }
@@ -113,15 +115,15 @@ divergence(const DynamicSparseNumberArray<T, I>& a)
 // For a vector of values, the gradient is going to be a tensor
 template <typename T, typename I>
 inline
-DynamicSparseNumberArray<typename T::derivatives_type, I>
-gradient(const DynamicSparseNumberArray<T, I>& a)
+DynamicSparseNumberVector<typename T::derivatives_type, I>
+gradient(const DynamicSparseNumberVector<T, I>& a)
 {
   static const unsigned int index_size = a.size();
 
-  DynamicSparseNumberArray<typename T::derivatives_type, I> returnval;
+  DynamicSparseNumberVector<typename T::derivatives_type, I> returnval;
 
   returnval.nude_indices() = a.nude_indices();
-  returnval.resize(index_size);
+  returnval.nude_data().resize(index_size);
 
   for (unsigned int i=0; i != index_size; ++i)
     returnval.raw_at(i) = gradient(a.raw_at(i));
@@ -131,4 +133,4 @@ gradient(const DynamicSparseNumberArray<T, I>& a)
 
 } // namespace MetaPhysicL
 
-#endif // METAPHYSICL_DUALDYNAMICSPARSENUMBERARRAY_H
+#endif // METAPHYSICL_DUALDYNAMICSPARSENUMBERVECTOR_H

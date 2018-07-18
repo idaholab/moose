@@ -49,6 +49,17 @@ struct DerivativesType<SparseNumberArray<T, IndexSet> >
 };
 
 
+// For an array of values a[i] each of which has a defined divergence,
+// the divergence is the array of divergence(a[i])
+
+template <typename T, typename IndexSet>
+struct DivergenceType<SparseNumberArray<T, IndexSet> >
+{
+  typedef SparseNumberArray<typename DivergenceType<T>::type, IndexSet> type;
+};
+
+
+
 template <typename T, typename IndexSet>
 inline
 typename DerivativeType<SparseNumberArray<T, IndexSet> >::type
@@ -108,8 +119,22 @@ private:
 };
 
 
-// For a vector of values a[i] each of which has a defined gradient,
-// the divergence is the sum of derivative_wrt_xi(a[i])
+// For an array of values a[i] each of which has a defined divergence,
+// the divergence is the array of divergence(a[i])
+template <typename T, typename IndexSet>
+inline
+typename DivergenceType<SparseNumberArray<T, IndexSet> >::type
+divergence(const SparseNumberArray<T, IndexSet>& a)
+{
+  typename DivergenceType<SparseNumberArray<T, IndexSet> >::type
+    returnval = 0;
+
+  typename IndexSet::ForEach()
+    (DivergenceArrayFunctor<T,IndexSet>(a.raw_data(), returnval));
+
+  return returnval;
+}
+
 
 // For a tensor of values, we take the divergence with respect to the
 // first index.

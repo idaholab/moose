@@ -718,7 +718,7 @@ struct NullContainer
   }
 
   template <typename T>
-  static int runtime_value_of(unsigned int i) {
+  static int runtime_value_of(unsigned int /*i*/) {
     throw std::domain_error("Container::runtime_value_of argument not found");
     return static_cast<unsigned int>(-1);
   }

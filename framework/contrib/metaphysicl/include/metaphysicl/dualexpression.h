@@ -622,8 +622,15 @@ using MetaPhysicL::DualExpression;
 using MetaPhysicL::CompareTypes;
 using MetaPhysicL::enable_if_c;
 using MetaPhysicL::DefinesSupertype;
+using std::isnan;
 
-DualExpression<double, double> testexpr;
+template <typename T, typename D>
+inline
+auto isnan (const DualExpression<T,D> & a)
+-> decltype(isnan(a.value()))
+{
+  return isnan(a.value());
+}
 
 // Some forward declarations necessary for recursive DualExpressions
 
@@ -726,9 +733,13 @@ funcname (const DualExpression<T,D>& a, const T2& b) \
     (std::funcname(a.value(), b), leftderiv); \
 }
 
-DualExpression_std_binary(pow, 
-  std::pow(a.value(), b.value()) * (b.value() * a.derivatives() / a.value() + b.derivatives() * std::log(a.value())),
-  std::pow(a, b.value()) * (b.derivatives() * std::log(a)),
+// if_else is necessary here to handle cases where a is negative but
+// b' is 0; we should have a contribution of 0 from those, not NaN.
+DualExpression_std_binary(pow,
+  std::pow(a.value(), b.value()) * (b.value() * a.derivatives() / a.value() +
+  MetaPhysicL::if_else(b.derivatives(), b.derivatives() * std::log(a.value()), b.derivatives())),
+  std::pow(a, b.value()) *
+  MetaPhysicL::if_else(b.derivatives(), (b.derivatives() * std::log(a)), b.derivatives()),
   std::pow(a.value(), b) * (b * a.derivatives() / a.value())
   )
 DualExpression_std_binary(atan2,

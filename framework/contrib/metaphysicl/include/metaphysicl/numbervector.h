@@ -35,6 +35,7 @@
 
 #include "metaphysicl/compare_types.h"
 #include "metaphysicl/ct_types.h"
+#include "metaphysicl/metaphysicl_asserts.h"
 #include "metaphysicl/raw_type.h"
 
 namespace MetaPhysicL {
@@ -97,12 +98,22 @@ public:
   const T& operator[](std::size_t i) const
     { return _data[i]; }
 
+  T& raw_at (std::size_t i)
+    { return _data[i]; }
+
+  const T& raw_at (std::size_t i) const
+    { return _data[i]; }
+
   template <std::size_t i>
   typename entry_type<i>::type& get()
     { return _data[i]; }
 
   template <std::size_t i>
   const typename entry_type<i>::type& get() const
+    { return _data[i]; }
+
+  template <std::size_t i>
+  typename entry_type<i>::type& insert()
     { return _data[i]; }
 
   std::size_t size() const
@@ -175,8 +186,11 @@ public:
     return returnval;
   }
 
-  static NumberVector<N, NumberVector<N, T> > identity()
+  static NumberVector<N, NumberVector<N, T> >
+  identity(std::size_t n = N)
   {
+    metaphysicl_assert_equal_to(n, N);
+
     NumberVector<N, NumberVector<N, T> > returnval(0);
   
     for (std::size_t i=0; i != N; ++i)
@@ -195,6 +209,21 @@ private:
 //
 // Non-member functions
 //
+
+template <std::size_t N, typename B, typename T, typename T2>
+inline
+typename CompareTypes<T,T2>::supertype
+if_else (const NumberVector<N,B> & condition, const T & if_true, const T2 & if_false)
+{
+  typedef typename CompareTypes<T,T2>::supertype returntype;
+  for (std::size_t i = 0; i != N; ++i)
+    if (condition[i])
+      return returntype(if_true);
+
+  return returntype(if_false);
+}
+
+
 
 template <std::size_t N,
           unsigned int index1=0, typename Data1=void,
@@ -232,7 +261,7 @@ struct NumberVectorUnitVector
 {
   typedef NumberVector<N, T> type;
 
-  static const type value() {
+  static type value() {
     type returnval = 0;
     returnval[index] = 1;
     return returnval;
@@ -245,7 +274,7 @@ struct NumberVectorFullVector
 {
   typedef NumberVector<N,T> type;
 
-  static const type value() {
+  static type value() {
     type returnval;
     for (std::size_t i=0; i != N; ++i)
       returnval[i] = 1;
@@ -472,6 +501,10 @@ NumberVector_std_binary_abab(funcname, NumberVector<N MacroComma T>,            
                             NumberVector<N MacroComma T> MacroComma T2,                              a[i],    b) \
 NumberVector_std_binary_aa(funcname, NumberVector<N MacroComma T>)
 
+// These functions are hard to consistently define on vectors, as
+// opposed to arrays, so let's not define them for now.
+
+/*
 NumberVector_std_binary(pow)
 NumberVector_std_unary(exp)
 NumberVector_std_unary(log)
@@ -494,6 +527,7 @@ NumberVector_std_binary(min)
 NumberVector_std_unary(ceil)
 NumberVector_std_unary(floor)
 NumberVector_std_binary(fmod)
+*/
 
 
 template <std::size_t N, typename T>

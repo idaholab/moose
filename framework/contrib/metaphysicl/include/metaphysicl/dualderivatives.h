@@ -48,6 +48,14 @@ struct DerivativesType
 
 
 template <typename T>
+struct DivergenceType
+{
+  // The "divergence" of a scalar is a plain derivative
+  typedef typename DerivativeType<T>::type type;
+};
+
+
+template <typename T>
 inline
 typename DerivativeType<T>::type
 derivative(const T& a, unsigned int derivativeindex)

@@ -288,6 +288,11 @@ public:
   }
 
   template <unsigned int i>
+  typename entry_type<i>::type& insert() {
+    return _data[IndexSet::template IndexOf<MetaPhysicL::UnsignedIntType<i> >::index];
+  }
+
+  template <unsigned int i>
   const typename entry_type<i>::type& get() const {
     return _data[IndexSet::template IndexOf<MetaPhysicL::UnsignedIntType<i> >::index];
   }
@@ -383,7 +388,7 @@ public:
       typename SymmetricMultipliesType<T,T2>::supertype, IndexSet2
     >, IndexSet > returnval;
 
-    static const unsigned int size2 = IndexSet2::size;
+    const unsigned int size2 = IndexSet2::size;
 
     for (unsigned int i=0; i != index_size; ++i)
       for (unsigned int j=0; j != size2; ++j)
@@ -392,7 +397,8 @@ public:
     return returnval;
   }
 
-  static SparseNumberVector<SparseNumberVector<T, IndexSet>, IndexSet> identity()
+  static SparseNumberVector<SparseNumberVector<T, IndexSet>, IndexSet>
+  identity(std::size_t n=0)
   {
     SparseNumberVector<SparseNumberVector<T, IndexSet>, IndexSet > returnval(0);
   
@@ -414,6 +420,31 @@ private:
 //
 // Non-member functions
 //
+
+/*
+template <typename B, typename T, typename T2,
+	  typename IndexSetB, typename IndexSet, typename IndexSet2>
+inline
+SparseNumberVector<typename SymmetricCompareTypes<T,T2>::supertype,
+                   typename IndexSetB::template Union<IndexSet>::type::Union
+                     <typename IndexSet2::template Difference<IndexSetB>::type >::type>
+if_else (const SparseNumberVector<IndexSetB,B> & condition,
+         const SparseNumberVector<IndexSet,T> & if_true,
+         const SparseNumberVector<IndexSet2,T2> & if_false)
+{
+  typedef typename SymmetricCompareTypes<T,T2>::supertype TS;
+  typedef typename IndexSetB::template Union<IndexSet>::type::Union
+    <typename IndexSet2::template Difference<IndexSetB>::type >::type IndexSetS;
+
+  SparseNumberVector<TS, IndexSetS> returnval;
+
+  FIXME
+
+  return returnval;
+}
+*/
+
+
 
 template <unsigned int N,
           unsigned int index1=0, typename Data1=void,
@@ -478,7 +509,7 @@ struct SparseNumberVectorUnitVector
 
   typedef SparseNumberVector<T, IndexSet> type;
 
-  static const type value() {
+  static type value() {
     type returnval;
     returnval.raw_at(0) = 1;
     return returnval;
@@ -496,7 +527,7 @@ struct SparseNumberVectorFullVector
 
   typedef SparseNumberVector<T,IndexSet> type;
 
-  static const type value() {
+  static type value() {
     type returnval;
     for (unsigned int i=0; i != N; ++i)
       returnval[i] = 1;
@@ -512,7 +543,7 @@ struct SparseNumberVectorFullVector<0,T>
 
   typedef SparseNumberVector<T,IndexSet> type;
 
-  static const type value() {
+  static type value() {
     type returnval;
     return returnval;
   }
@@ -526,8 +557,8 @@ inline
 SparseNumberVector<SparseNumberVector<T, IndexSet>, IndexSet2>
 transpose(const SparseNumberVector<SparseNumberVector<T, IndexSet2>, IndexSet>& a)
 {
-  static const unsigned int size  = IndexSet::size;
-  static const unsigned int size2 = IndexSet2::size;
+  const unsigned int size  = IndexSet::size;
+  const unsigned int size2 = IndexSet2::size;
 
   SparseNumberVector<SparseNumberVector<T, IndexSet>, IndexSet2> returnval;
 
@@ -579,7 +610,7 @@ inline
 typename MultipliesType<SparseNumberVector<T2,IndexSet>,T,true>::supertype
 operator * (const T& a, const SparseNumberVector<T2,IndexSet>& b)
 {
-  static const unsigned int size = IndexSet::size;
+  const unsigned int size = IndexSet::size;
 
   typename MultipliesType<SparseNumberVector<T2,IndexSet>,T,true>::supertype returnval;
   for (unsigned int i=0; i != size; ++i)
@@ -592,7 +623,7 @@ inline
 typename MultipliesType<SparseNumberVector<T,IndexSet>,T2>::supertype
 operator * (const SparseNumberVector<T,IndexSet>& a, const T2& b)
 {
-  static const unsigned int size = IndexSet::size;
+  const unsigned int size = IndexSet::size;
 
   typename MultipliesType<SparseNumberVector<T,IndexSet>,T2>::supertype returnval;
   for (unsigned int i=0; i != size; ++i)
@@ -605,7 +636,7 @@ inline
 typename DividesType<SparseNumberVector<T,IndexSet>,T2>::supertype
 operator / (const SparseNumberVector<T,IndexSet>& a, const T2& b)
 {
-  static const unsigned int size = IndexSet::size;
+  const unsigned int size = IndexSet::size;
 
   typename DividesType<SparseNumberVector<T,IndexSet>,T2>::supertype returnval;
   for (unsigned int i=0; i != size; ++i)
@@ -625,14 +656,14 @@ operator opname (const SparseNumberVector<T,IndexSet>& a, const SparseNumberVect
   SparseNumberVector<bool, IndexSetS> returnval; \
  \
   typename IndexSet::template Intersection<IndexSet2>::type::ForEach() \
-    (BinaryVectorFunctor<std::binary_function<TS,TS,bool>,IndexSet,IndexSet2,IndexSetS,T,T2,bool> \
-      (a.raw_data(), b.raw_data(), returnval.raw_data(), std::functorname<TS>())); \
+    (BinaryVectorFunctor<std::functorname<TS>,IndexSet,IndexSet2,IndexSetS,T,T2,bool> \
+      (std::functorname<TS>(), a.raw_data(), b.raw_data(), returnval.raw_data())); \
   typename IndexSet::template Difference<IndexSet2>::type::ForEach() \
     (UnaryVectorFunctor<std::unary_function<T,bool>,IndexSet,IndexSetS,T,bool> \
-      (a.raw_data(), returnval.raw_data(), std::bind2nd(std::functorname<T>(),TS(0)))); \
+      (std::bind2nd(std::functorname<T>(),TS(0)), a.raw_data(), returnval.raw_data())); \
   typename IndexSet2::template Difference<IndexSet>::type::ForEach() \
     (UnaryVectorFunctor<std::unary_function<T,bool>,IndexSet2,IndexSetS,T2,bool> \
-      (b.raw_data(), returnval.raw_data(), std::bind1st(std::functorname<T2>(),T2(0)))); \
+      (std::bind1st(std::functorname<T2>(),T2(0)), b.raw_data(), returnval.raw_data())); \
  \
   return returnval; \
 } \
@@ -853,17 +884,20 @@ funcname (const SparseNumberVector<T, IndexSet>& a, const SparseNumberVector<T2,
   typedef typename IndexSet::template Union<IndexSet2>::type IndexSetS; \
   SparseNumberVector<TS, IndexSetS> returnval; \
  \
+  const TS& (*unambiguous) (const TS&, const TS&); \
+  unambiguous = std::funcname<TS>; \
+ \
   typename IndexSet::template Intersection<IndexSet2>::type::ForEach() \
     (BinaryVectorFunctor<std::pointer_to_binary_function<const TS&,const TS&,const TS&>,IndexSet,IndexSet2,IndexSetS,T,T2,TS> \
-      (MetaPhysicL::binary_ptr_fun(std::funcname<TS>), \
+      (MetaPhysicL::binary_ptr_fun(unambiguous), \
        a.raw_data(), b.raw_data(), returnval.raw_data())); \
   typename IndexSet::template Difference<IndexSet2>::type::ForEach() \
     (UnaryVectorFunctor<MetaPhysicL::bound_second<std::pointer_to_binary_function<const TS&,const TS&,const TS&> >,IndexSet,IndexSetS,T,TS> \
-      (MetaPhysicL::binary_bind2nd(MetaPhysicL::binary_ptr_fun(std::funcname<TS>),TS(0)), \
+      (MetaPhysicL::binary_bind2nd(MetaPhysicL::binary_ptr_fun(unambiguous),TS(0)), \
        a.raw_data(), returnval.raw_data())); \
   typename IndexSet2::template Difference<IndexSet>::type::ForEach() \
     (UnaryVectorFunctor<MetaPhysicL::bound_first<std::pointer_to_binary_function<const TS&,const TS&,const TS&> >,IndexSet2,IndexSetS,T2,TS> \
-      (MetaPhysicL::binary_bind1st(MetaPhysicL::binary_ptr_fun(std::funcname<TS>),TS(0)), \
+      (MetaPhysicL::binary_bind1st(MetaPhysicL::binary_ptr_fun(unambiguous),TS(0)), \
        b.raw_data(), returnval.raw_data())); \
  \
   return returnval; \
@@ -876,9 +910,12 @@ funcname (const SparseNumberVector<T, IndexSet>& a, const SparseNumberVector<T, 
 { \
   SparseNumberVector<T, IndexSet> returnval; \
  \
+  const T& (*unambiguous) (const T&, const T&); \
+  unambiguous = std::funcname<T>; \
+ \
   typename IndexSet::ForEach() \
     (BinaryVectorFunctor<std::pointer_to_binary_function<const T&,const T&,const T&>,IndexSet,IndexSet,IndexSet,T,T,T> \
-      (MetaPhysicL::binary_ptr_fun(std::funcname<T>), \
+      (MetaPhysicL::binary_ptr_fun(unambiguous), \
        a.raw_data(), b.raw_data(), returnval.raw_data())); \
  \
   return returnval; \
@@ -892,9 +929,12 @@ funcname (const SparseNumberVector<T, IndexSet>& a, const T2& b) \
   typedef typename SymmetricCompareTypes<T,T2>::supertype TS; \
   SparseNumberVector<TS, IndexSet> returnval; \
  \
+  const TS& (*unambiguous) (const TS&, const TS&); \
+  unambiguous = std::funcname<TS>; \
+ \
   typename IndexSet::ForEach() \
     (UnaryVectorFunctor<MetaPhysicL::bound_second<std::pointer_to_binary_function<const TS&,const TS&,const TS&> >,IndexSet,IndexSet,T,TS> \
-      (MetaPhysicL::binary_bind2nd(MetaPhysicL::binary_ptr_fun(std::funcname<TS>),TS(b)), \
+      (MetaPhysicL::binary_bind2nd(MetaPhysicL::binary_ptr_fun(unambiguous),TS(b)), \
        a.raw_data(), returnval.raw_data())); \
  \
   return returnval; \
@@ -908,9 +948,12 @@ funcname (const T& a, const SparseNumberVector<T2, IndexSet>& b) \
   typedef typename SymmetricCompareTypes<T,T2>::supertype TS; \
   SparseNumberVector<TS, IndexSet> returnval; \
  \
+  const TS& (*unambiguous) (const TS&, const TS&); \
+  unambiguous = std::funcname<TS>; \
+ \
   typename IndexSet::ForEach() \
     (UnaryVectorFunctor<MetaPhysicL::bound_first<std::pointer_to_binary_function<const TS&,const TS&,const TS&> >,IndexSet,IndexSet,T2,TS> \
-      (MetaPhysicL::binary_bind1st(MetaPhysicL::binary_ptr_fun(std::funcname<TS>),TS(a)), \
+      (MetaPhysicL::binary_bind1st(MetaPhysicL::binary_ptr_fun(unambiguous),TS(a)), \
        b.raw_data(), returnval.raw_data())); \
  \
   return returnval; \
