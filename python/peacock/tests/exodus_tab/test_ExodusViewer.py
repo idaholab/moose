@@ -16,7 +16,6 @@ from peacock.ExodusViewer.ExodusViewer import main
 from peacock.utils import Testing, qtutils
 from mooseutils import message
 
-
 class TestExodusViewer(Testing.PeacockImageTestCase):
     """
     Testing for ExodusViewer.
@@ -164,7 +163,6 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
 
         self._widget.cornerWidget().clone.emit()
         self.assertEqual(self._widget.currentWidget().ColorbarPlugin.ColorMapList.currentText(), "default")
-
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)
