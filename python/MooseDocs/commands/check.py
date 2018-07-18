@@ -82,16 +82,16 @@ def check(translator,
         if node.is_root or node.removed:
             continue
         elif isinstance(node, syntax.ObjectNode):
-            _check_object_node(node, generate, update, object_prefix)
+            _check_object_node(node, extension.apptype, generate, update, object_prefix)
         elif isinstance(node, syntax.SyntaxNode):
-            _check_syntax_node(node, generate, update, syntax_prefix)
+            _check_syntax_node(node, extension.apptype, generate, update, syntax_prefix)
         else:
             LOG.critical("Unexpected object type of %s, only %s and %s based types are supported",
                          type(node).__name__,
                          syntax.ObjectNode.__name__,
                          syntax.SyntaxNode.__name__)
 
-def _check_object_node(node, generate, update, prefix):
+def _check_object_node(node, app_name, generate, update, prefix):
     """
     Check that required pages for supplied ObjectNode (i.e., MooseObject/Action).
     """
@@ -111,7 +111,7 @@ def _check_object_node(node, generate, update, prefix):
                "'./moosedocs.py check --generate'."
         LOG.error(msg, node.fullpath, filename)
 
-    elif not_exist and generate:
+    elif not_exist and generate and (app_name in node.groups):
         if not os.path.exists(os.path.dirname(filename)):
             os.makedirs(os.path.dirname(filename))
         LOG.info('Creating stub page for %s at %s.', node.fullpath, filename)
@@ -120,9 +120,9 @@ def _check_object_node(node, generate, update, prefix):
             fid.write(content)
 
     elif not not_exist:
-        _check_page_for_stub(node, filename, update)
+        _check_page_for_stub(node, app_name, filename, update)
 
-def _check_syntax_node(node, generate, update, prefix):
+def _check_syntax_node(node, app_name, generate, update, prefix):
     """
     Check that required pages for syntax exists (e.g., Adaptivity/index.md).
     """
@@ -176,9 +176,9 @@ def _check_syntax_node(node, generate, update, prefix):
     else:
         for info in filenames:
             if info.exists:
-                _check_page_for_stub(node, info.name, update)
+                _check_page_for_stub(node, app_name, info.name, update)
 
-def _check_page_for_stub(node, filename, update):
+def _check_page_for_stub(node, app_name, filename, update):
     """
     Helper method to check if a page is a stub.
     """
@@ -186,7 +186,7 @@ def _check_page_for_stub(node, filename, update):
         lines = fid.readlines()
 
     if lines and STUB_HEADER in lines[0]:
-        if update:
+        if update and (app_name in node.groups):
             LOG.info("Updating stub page for %s in file %s.", node.fullpath, filename)
             with open(filename, 'w') as fid:
                 content = _default_content(node)
