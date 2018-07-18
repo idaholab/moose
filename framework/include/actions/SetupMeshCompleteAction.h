@@ -25,6 +25,8 @@ public:
   bool completeSetup(MooseMesh * mesh);
 
   virtual void act() override;
+
+  PerfID _uniform_refine_timer;
 };
 
 #endif // SETUPMESHCOMPLETEACTION_H

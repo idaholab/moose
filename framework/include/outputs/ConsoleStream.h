@@ -54,6 +54,11 @@ public:
    */
   const ConsoleStream & operator<<(StandardEndLine manip) const;
 
+  /**
+   * Unset format flags
+   */
+  void unsetf(std::ios_base::fmtflags mask) const;
+
 private:
   /// Reference to the OutputWarhouse that contains the Console output objects
   OutputWarehouse & _output_warehouse;

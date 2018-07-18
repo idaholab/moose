@@ -19,6 +19,7 @@
 #include "Restartable.h"
 #include "ScalarCoupleable.h"
 #include "SetupInterface.h"
+#include "PerfGraphInterface.h"
 
 #include "libmesh/parallel.h"
 
@@ -40,7 +41,8 @@ class UserObject : public MooseObject,
                    public DistributionInterface,
                    public Restartable,
                    public MeshChangedInterface,
-                   public ScalarCoupleable
+                   public ScalarCoupleable,
+                   public PerfGraphInterface
 {
 public:
   UserObject(const InputParameters & params);
