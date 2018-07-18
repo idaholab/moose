@@ -31,20 +31,6 @@ mooseSetToZero<RankFourTensor>(RankFourTensor & v)
   v.zero();
 }
 
-template <>
-void
-dataStore(std::ostream & stream, RankFourTensor & rft, void * context)
-{
-  dataStore(stream, rft._vals, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, RankFourTensor & rft, void * context)
-{
-  dataLoad(stream, rft._vals, context);
-}
-
 MooseEnum
 RankFourTensor::fillMethodEnum()
 {
@@ -375,7 +361,7 @@ RankFourTensor::invSymm() const
 }
 
 void
-RankFourTensor::rotate(const RealTensorValue & R)
+RankFourTensor::rotate(const TypeTensor<Real> & R)
 {
   RankFourTensor old = *this;
 

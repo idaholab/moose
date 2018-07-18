@@ -9,22 +9,33 @@
 
 #include "ADDiffusion.h"
 
-registerMooseObject("MooseApp", ADDiffusion);
+registerADMooseObject("MooseApp", ADDiffusion);
 
 template <>
 InputParameters
-validParams<ADDiffusion>()
+validParams<ADDiffusion<RESIDUAL>>()
 {
-  InputParameters p = validParams<ADKernel>();
+  InputParameters p = validParams<ADKernel<RESIDUAL>>();
   p.addClassDescription("Same as `Diffusion` in terms of physics/residual, but the Jacobian "
                         "is computed using forward automatic differentiation");
   return p;
 }
+template <>
+InputParameters
+validParams<ADDiffusion<JACOBIAN>>()
+{
+  return validParams<ADDiffusion<RESIDUAL>>();
+}
 
-ADDiffusion::ADDiffusion(const InputParameters & parameters) : ADKernel(parameters) {}
+template <ComputeStage compute_stage>
+ADDiffusion<compute_stage>::ADDiffusion(const InputParameters & parameters)
+  : ADKernel<compute_stage>(parameters)
+{
+}
 
-ADReal
-ADDiffusion::computeQpResidual()
+template <ComputeStage compute_stage>
+typename ResidualReturnType<compute_stage>::type
+ADDiffusion<compute_stage>::computeQpResidual()
 {
   return _grad_u[_qp] * _grad_test[_i][_qp];
 }

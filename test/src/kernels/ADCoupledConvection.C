@@ -8,24 +8,23 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "ADCoupledConvection.h"
 
-registerMooseObject("MooseTestApp", ADCoupledConvection);
+registerADMooseObject("MooseTestApp", ADCoupledConvection);
 
-template <>
-InputParameters
-validParams<ADCoupledConvection>()
-{
-  InputParameters params = validParams<ADKernel>();
-  params.addRequiredCoupledVar("velocity_vector", "Velocity Vector for the Convection ADKernel");
-  return params;
-}
+defineADValidParams(ADCoupledConvection,
+                    ADKernel,
+                    params.addRequiredCoupledVar("velocity_vector",
+                                                 "Velocity Vector for the Convection ADKernel"););
 
-ADCoupledConvection::ADCoupledConvection(const InputParameters & parameters)
-  : ADKernel(parameters), _velocity_vector(adCoupledGradient("velocity_vector"))
+template <ComputeStage compute_stage>
+ADCoupledConvection<compute_stage>::ADCoupledConvection(const InputParameters & parameters)
+  : ADKernel<compute_stage>(parameters),
+    _velocity_vector(this->template adCoupledGradient<compute_stage>("velocity_vector"))
 {
 }
 
-ADReal
-ADCoupledConvection::computeQpResidual()
+template <ComputeStage compute_stage>
+ADResidual
+ADCoupledConvection<compute_stage>::computeQpResidual()
 {
-  return _test[_i][_qp] * (_velocity_vector[_qp] * _grad_u[_qp]);
+  return _test[_i][_qp] * _velocity_vector[_qp] * _grad_u[_qp];
 }

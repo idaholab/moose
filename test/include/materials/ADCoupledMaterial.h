@@ -9,17 +9,18 @@
 #ifndef ADCOUPLEDMATERIAL_H_
 #define ADCOUPLEDMATERIAL_H_
 
-#include "Material.h"
+#include "ADMaterial.h"
 
+template <ComputeStage>
 class ADCoupledMaterial;
 
-template <>
-InputParameters validParams<ADCoupledMaterial>();
+declareADValidParams(ADCoupledMaterial);
 
 /**
  * A material that couples a material property
  */
-class ADCoupledMaterial : public Material
+template <ComputeStage compute_stage>
+class ADCoupledMaterial : public ADMaterial<compute_stage>
 {
 public:
   ADCoupledMaterial(const InputParameters & parameters);
@@ -27,12 +28,12 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  std::string _mat_prop_name;
-  MaterialProperty<ADReal> & _mat_prop;
+  ADMaterialPropertyType(Real) & _ad_mat_prop;
+  MaterialProperty<Real> & _regular_mat_prop;
 
   const ADVariableValue & _coupled_var;
 
-  // const MaterialProperty<ADReal> & _coupled_mat_prop;
+  usingMaterialMembers;
 };
 
 #endif // ADCOUPLEDMATERIAL_H

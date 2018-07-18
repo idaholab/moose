@@ -24,11 +24,6 @@
     type = Diffusion
     variable = u
   [../]
-  [./ad_value_test]
-    type = ADValueTest
-    variable = u
-    diag_save_in = u_jac
-  [../]
   [./diff_v]
     type = Diffusion
     variable = v
@@ -37,6 +32,14 @@
     type = ValueTest
     variable = v
     diag_save_in = v_jac
+  [../]
+[]
+
+[ADKernels]
+  [./ad_value_test]
+    type = ADValueTest
+    variable = u
+    diag_save_in = u_jac
   [../]
 []
 

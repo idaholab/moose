@@ -10,6 +10,8 @@
 #include "DataIO.h"
 #include "MooseMesh.h"
 #include "ColumnMajorMatrix.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dense_matrix.h"
@@ -32,22 +34,6 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
   // Write the string (Do not store the null byte)
   stream.write(v.c_str(), sizeof(char) * size);
-}
-
-template <>
-void
-dataStore(std::ostream & stream, ADReal & v, void * /*context*/)
-{
-  Real value = v.value();
-  stream.write((char *)&value, sizeof(value));
-
-  auto derivatives = v.derivatives();
-
-  for (size_t i = 0; i < derivatives.size(); ++i)
-  {
-    Real deriv = derivatives[i];
-    stream.write((char *)&deriv, sizeof(deriv));
-  }
 }
 
 template <>
@@ -113,6 +99,20 @@ dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/)
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     for (unsigned int j = 0; i < LIBMESH_DIM; i++)
       stream.write((char *)&v(i, j), sizeof(v(i, j)));
+}
+
+template <>
+void
+dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
+{
+  dataStore(stream, rtt._coords, context);
+}
+
+template <>
+void
+dataStore(std::ostream & stream, RankFourTensor & rft, void * context)
+{
+  dataStore(stream, rft._vals, context);
 }
 
 template <>
@@ -310,6 +310,20 @@ dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/)
       stream.read((char *)&r, sizeof(r));
       v(i, j) = r;
     }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RankTwoTensor & rtt, void * context)
+{
+  dataLoad(stream, rtt._coords, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RankFourTensor & rft, void * context)
+{
+  dataLoad(stream, rft._vals, context);
 }
 
 template <>

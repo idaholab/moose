@@ -8,19 +8,19 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "ADValueTest.h"
 
-registerMooseObject("MooseTestApp", ADValueTest);
+registerADMooseObject("MooseTestApp", ADValueTest);
 
-template <>
-InputParameters
-validParams<ADValueTest>()
+defineADValidParams(ADValueTest, ADKernel, );
+
+template <ComputeStage compute_stage>
+ADValueTest<compute_stage>::ADValueTest(const InputParameters & parameters)
+  : ADKernel<compute_stage>(parameters)
 {
-  return validParams<ADKernel>();
 }
 
-ADValueTest::ADValueTest(const InputParameters & parameters) : ADKernel(parameters) {}
-
-ADReal
-ADValueTest::computeQpResidual()
+template <ComputeStage compute_stage>
+ADResidual
+ADValueTest<compute_stage>::computeQpResidual()
 {
   return -_u[_qp] * _test[_i][_qp];
 }

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiPlasticityDebugger.h"
+#include "RankFourTensor.h"
 #include "libmesh/utility.h"
 
 template <>

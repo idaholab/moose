@@ -21,6 +21,17 @@
     type = Diffusion
     variable = u
   [../]
+  [./diff_v]
+    type = Diffusion
+    variable = v
+  [../]
+  [./diff_w]
+    type = Diffusion
+    variable = w
+  [../]
+[]
+
+[ADKernels]
   [./ad_coupled_value]
     type = ADCoupledValueTest
     variable = u
@@ -35,14 +46,6 @@
     type = ADCoupledValueTest
     variable = u
     # v = 2.0 (Using the default value)
-  [../]
-  [./diff_v]
-    type = Diffusion
-    variable = v
-  [../]
-  [./diff_w]
-    type = Diffusion
-    variable = w
   [../]
 []
 

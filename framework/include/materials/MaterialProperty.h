@@ -29,13 +29,6 @@ template <typename P>
 PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type);
 
 /**
- * Vector Init helper routine so that specialization isn't needed for basic vector MaterialProperty
- * types
- */
-template <typename P>
-PropertyValue * _init_helper(int size, PropertyValue * prop, const std::vector<P> * the_type);
-
-/**
  * Abstract definition of a property value.
  */
 class PropertyValue
@@ -107,12 +100,18 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  MooseArray<T> & get() { return _value; }
+  const MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> & get() const
+  {
+    return _value;
+  }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  MooseArray<T> & set() { return _value; }
+  MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> & set()
+  {
+    return _value;
+  }
 
   /**
    * String identifying the type of parameter stored.
@@ -129,17 +128,17 @@ public:
    */
   virtual void resize(int n);
 
-  /**
-   * Get element i out of the array.
-   */
-  T & operator[](const unsigned int i) { return _value[i]; }
-
-  unsigned int size() const { return _value.size(); }
+  virtual unsigned int size() const { return _value.size(); }
 
   /**
-   * Get element i out of the array.
+   * Get element i out of the array as a writeable reference.
    */
-  const T & operator[](const unsigned int i) const { return _value[i]; }
+  T & operator[](const unsigned int i) { return _value[i].value(); }
+
+  /**
+   * Get element i out of the array as a ready-only reference.
+   */
+  const T & operator[](const unsigned int i) const { return _value[i].value(); }
 
   /**
    *
@@ -175,14 +174,6 @@ public:
   template <typename P>
   friend PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type);
 
-  /**
-   * Friend helper function to handle vector material property initializations
-   * This function is an overload for the vector version
-   */
-  template <typename P>
-  friend PropertyValue *
-  _init_helper(int size, PropertyValue * prop, const std::vector<P> * the_type);
-
 private:
   /// private copy constructor to avoid shallow copying of material properties
   MaterialProperty(const MaterialProperty<T> & /*src*/)
@@ -196,8 +187,9 @@ private:
     mooseError("Material properties must be assigned to references (missing '&')");
   }
 
+protected:
   /// Stored parameter value.
-  MooseArray<T> _value;
+  MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> _value;
 };
 
 // ------------------------------------------------------------
@@ -245,7 +237,7 @@ template <typename T>
 inline void
 MaterialProperty<T>::store(std::ostream & stream)
 {
-  for (unsigned int i = 0; i < _value.size(); i++)
+  for (unsigned int i = 0; i < size(); i++)
     storeHelper(stream, _value[i], NULL);
 }
 
@@ -253,9 +245,33 @@ template <typename T>
 inline void
 MaterialProperty<T>::load(std::istream & stream)
 {
-  for (unsigned int i = 0; i < _value.size(); i++)
+  for (unsigned int i = 0; i < size(); i++)
     loadHelper(stream, _value[i], NULL);
 }
+
+template <typename T>
+class ADMaterialProperty : public MaterialProperty<T>
+{
+public:
+  ADMaterialProperty() : MaterialProperty<T>() {}
+
+  /**
+   * Get element i out of the array as a writeable reference.
+   */
+  typename MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> &
+  operator[](const unsigned int i)
+  {
+    return this->_value[i];
+  }
+  /**
+   * Get element i out of the array as a read-only reference.
+   */
+  const typename MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> &
+  operator[](const unsigned int i) const
+  {
+    return this->_value[i];
+  }
+};
 
 /**
  * Container for storing material properties
@@ -325,24 +341,7 @@ PropertyValue *
 _init_helper(int size, PropertyValue * /*prop*/, const P *)
 {
   MaterialProperty<P> * copy = new MaterialProperty<P>;
-  copy->_value.resize(size, P{});
-  return copy;
-}
-
-// Vector Init Helper Function
-template <typename P>
-PropertyValue *
-_init_helper(int size, PropertyValue * /*prop*/, const std::vector<P> *)
-{
-  typedef MaterialProperty<std::vector<P>> PropType;
-  PropType * copy = new PropType;
-  copy->_value.resize(size, std::vector<P>{});
-
-  // We don't know the size of the underlying vector at each
-  // quadrature point, the user will be responsible for resizing it
-  // and filling in the entries...
-
-  // Return the copy we allocated
+  copy->_value.resize(size, MetaPhysicL::NDDualNumber<P, NumberArray<AD_MAX_DOFS_PER_ELEM, P>>{});
   return copy;
 }
 

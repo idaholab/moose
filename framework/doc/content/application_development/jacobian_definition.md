@@ -1,5 +1,31 @@
 # Jacobian Definition
 
+## Using Automatic Differentiation
+
+One can elect to sacrifice some computing speed and calculate Jacobians
+automatically using
+[automatic differentiation (AD)](https://en.wikipedia.org/wiki/Automatic_differentiation). MOOSE
+employs the `DualNumber` class from the
+[MetaPhysicL](https://github.com/roystgnr/MetaPhysicL) package in order to
+enable AD. If the application developer wants to make use of AD, they should
+inherit from `ADKernel` as opposed to `Kernel`. Additionally, when coupling in
+variables, the `adCoupled*` methods should be used. For example, to retrieve a
+coupled value, instead of using `coupledValue("v")` in the `ADKernel`
+constructor, `adCoupledValue("v")` should be used. `adCoupledGradient` should
+replace `coupledGradient`, etc. An example of coupling in an AD variable can be found in
+[`ADCoupledConvection.C`](test/src/kernels/ADCoupledConvection.C) and
+[`ADCoupledConvection.h`](test/include/kernels/ADCoupledConvection.h). Moreover,
+material properties that may depend on the non-linear variables should be
+retrieved using `getADMaterialProperty` instead of `getMaterialProperty`. They
+should be declared in materials using `declareADProperty`. Example AD material
+source and header files can be found
+[here](test/src/materials/ADCoupledMaterial.C) and
+[here](test/include/materials/ADCoupledMaterial.h); example kernel source and
+header files that use AD material properties can be found
+[here](test/src/kernels/ADMatDiffusion.C) and [here](test/include/kernels/ADMatDiffusion.h).
+
+## Traditional Hand-coded Jacobians
+
 Finite element shape functions are introduced in the documentation section
 [shape functions](finite_element_concepts/shape_functions.md). There we outline
 how our primary variables are summations of those shape functions multiplied by

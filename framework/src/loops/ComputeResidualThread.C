@@ -84,6 +84,9 @@ ComputeResidualThread::subdomainChanged()
   // This one may be expensive
   else
     _tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+
+  for (auto & var : needed_moose_vars)
+    var->computingJacobian(false);
 }
 
 void

@@ -13,21 +13,27 @@
 #include "MaterialProperty.h"
 
 // Forward Declaration
+template <ComputeStage compute_stage>
 class ADMatDiffusion;
 
-template <>
-InputParameters validParams<ADMatDiffusion>();
+declareADValidParams(ADMatDiffusion);
 
-class ADMatDiffusion : public ADKernel
+template <ComputeStage compute_stage>
+class ADMatDiffusion : public ADKernel<compute_stage>
 {
 public:
   ADMatDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual();
+  virtual ADResidual computeQpResidual();
 
-  std::string _prop_name;
-  const MaterialProperty<ADReal> * _diff;
+  const ADMaterialPropertyType(Real) & _ad_diff_from_ad_prop;
+  const MaterialProperty<Real> & _regular_diff_from_ad_prop;
+  const ADMaterialPropertyType(Real) & _ad_diff_from_regular_prop;
+  const MaterialProperty<Real> & _regular_diff_from_regular_prop;
+  const MooseEnum _prop_to_use;
+
+  usingKernelMembers;
 };
 
 #endif // ADMATDIFFUSION_H

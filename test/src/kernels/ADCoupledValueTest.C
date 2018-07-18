@@ -8,24 +8,21 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "ADCoupledValueTest.h"
 
-registerMooseObject("MooseTestApp", ADCoupledValueTest);
+registerADMooseObject("MooseTestApp", ADCoupledValueTest);
 
-template <>
-InputParameters
-validParams<ADCoupledValueTest>()
-{
-  InputParameters params = validParams<ADKernel>();
-  params.addCoupledVar("v", 2.0, "The coupled variable.");
-  return params;
-}
+defineADValidParams(ADCoupledValueTest,
+                    ADKernel,
+                    params.addCoupledVar("v", 2.0, "The coupled variable."););
 
-ADCoupledValueTest::ADCoupledValueTest(const InputParameters & parameters)
-  : ADKernel(parameters), _v(adCoupledValue("v"))
+template <ComputeStage compute_stage>
+ADCoupledValueTest<compute_stage>::ADCoupledValueTest(const InputParameters & parameters)
+  : ADKernel<compute_stage>(parameters), _v(this->template adCoupledValue<compute_stage>("v"))
 {
 }
 
-ADReal
-ADCoupledValueTest::computeQpResidual()
+template <ComputeStage compute_stage>
+ADResidual
+ADCoupledValueTest<compute_stage>::computeQpResidual()
 {
-  return -_v[_qp] * _test[_i][_qp];
+  return _test[_i][_qp] * -_v[_qp];
 }

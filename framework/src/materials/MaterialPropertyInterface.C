@@ -88,6 +88,34 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
   return nullptr;
 }
 
+template <>
+const ADMaterialProperty<Real> *
+MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
+{
+  std::istringstream ss(name);
+  Real real_value;
+
+  // check if the string parsed cleanly into a Real number
+  if (ss >> real_value && ss.eof())
+  {
+    _default_ad_real_properties.emplace_back(libmesh_make_unique<ADMaterialProperty<Real>>());
+    auto & default_property = _default_ad_real_properties.back();
+
+    // resize to accomodate maximum number obf qpoints
+    auto nqp = _mi_feproblem.getMaxQps();
+    default_property->resize(nqp);
+
+    // set values for all qpoints to the given default
+    for (decltype(nqp) qp = 0; qp < nqp; ++qp)
+      (*default_property)[qp] = real_value;
+
+    // return the raw pointer inside the shared pointer
+    return default_property.get();
+  }
+
+  return nullptr;
+}
+
 std::set<SubdomainID>
 MaterialPropertyInterface::getMaterialPropertyBlocks(const std::string & name)
 {

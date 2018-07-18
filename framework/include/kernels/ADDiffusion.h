@@ -12,18 +12,27 @@
 
 #include "ADKernel.h"
 
+template <ComputeStage compute_stage>
 class ADDiffusion;
 
 template <>
-InputParameters validParams<ADDiffusion>();
+InputParameters validParams<ADDiffusion<RESIDUAL>>();
+template <>
+InputParameters validParams<ADDiffusion<JACOBIAN>>();
 
-class ADDiffusion : public ADKernel
+template <ComputeStage compute_stage>
+class ADDiffusion : public ADKernel<compute_stage>
 {
 public:
   ADDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual();
+  virtual typename ResidualReturnType<compute_stage>::type computeQpResidual() override;
+
+  using ADKernel<compute_stage>::_grad_u;
+  using ADKernel<compute_stage>::_qp;
+  using ADKernel<compute_stage>::_grad_test;
+  using ADKernel<compute_stage>::_i;
 };
 
 #endif /* ADDIFFUSION_H */

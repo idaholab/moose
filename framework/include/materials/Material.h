@@ -102,6 +102,8 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
+  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
@@ -113,6 +115,8 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
+  template <typename T>
+  const ADMaterialProperty<T> & getADMaterialPropertyByName(const std::string & prop_name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
   template <typename T>
@@ -129,6 +133,8 @@ public:
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
   template <typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
+  template <typename T>
+  ADMaterialProperty<T> & declareADProperty(const std::string & prop_name);
   ///@}
 
   /**
@@ -301,6 +307,21 @@ Material::getMaterialProperty(const std::string & name)
 }
 
 template <typename T>
+const ADMaterialProperty<T> &
+Material::getADMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid imput parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant.
+  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getADMaterialPropertyByName<T>(prop_name);
+}
+
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & name)
 {
@@ -340,6 +361,18 @@ Material::getMaterialPropertyByName(const std::string & prop_name)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
   return MaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
+}
+
+template <typename T>
+const ADMaterialProperty<T> &
+Material::getADMaterialPropertyByName(const std::string & prop_name)
+{
+  checkExecutionStage();
+  // The property may not exist yet, so declare it (declare/getADMaterialProperty are referencing
+  // the same memory)
+  _requested_props.insert(prop_name);
+  registerPropName(prop_name, true, Material::CURRENT);
+  return MaterialPropertyInterface::getADMaterialPropertyByName<T>(prop_name);
 }
 
 template <typename T>
@@ -386,6 +419,14 @@ Material::declarePropertyOlder(const std::string & prop_name)
                       "getMaterialPropertyOlder (only) if a reference is required in this class."));
   registerPropName(prop_name, false, Material::OLDER);
   return _material_data->declarePropertyOlder<T>(prop_name);
+}
+
+template <typename T>
+ADMaterialProperty<T> &
+Material::declareADProperty(const std::string & prop_name)
+{
+  registerPropName(prop_name, false, Material::CURRENT);
+  return _material_data->declareADProperty<T>(prop_name);
 }
 
 template <typename T>

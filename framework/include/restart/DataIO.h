@@ -22,6 +22,8 @@
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
 #endif
+#include "metaphysicl/nddualnumber.h"
+#include "metaphysicl/numberarray.h"
 
 // C++ includes
 #include <string>
@@ -34,6 +36,8 @@
 
 // Forward declarations
 class ColumnMajorMatrix;
+class RankTwoTensor;
+class RankFourTensor;
 namespace libMesh
 {
 template <typename T>
@@ -310,11 +314,21 @@ dataStore(std::ostream & stream, HashMap<T, U> & m, void * context)
   }
 }
 
+template <typename T>
+inline void
+dataStore(std::ostream & stream,
+          MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> & dn,
+          void * context)
+{
+  dataStore(stream, dn.value(), context);
+
+  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
+    dataStore(stream, dn.derivatives()[i], context);
+}
+
 // Specializations (defined in .C)
 template <>
 void dataStore(std::ostream & stream, Real & v, void * /*context*/);
-template <>
-void dataStore(std::ostream & stream, ADReal & v, void * /*context*/);
 template <>
 void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
 template <>
@@ -341,6 +355,10 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template <>
 void dataStore(std::ostream & stream, std::stringstream *& s, void * context);
+template <>
+void dataStore(std::ostream & stream, RankTwoTensor &, void *);
+template <>
+void dataStore(std::ostream & stream, RankFourTensor &, void *);
 
 // global load functions
 
@@ -490,6 +508,18 @@ dataLoad(std::istream & stream, HashMap<T, U> & m, void * context)
   }
 }
 
+template <typename T>
+inline void
+dataLoad(std::istream & stream,
+         MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> & dn,
+         void * context)
+{
+  dataLoad(stream, dn.value(), context);
+
+  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
+    dataLoad(stream, dn.derivatives()[i], context);
+}
+
 // Specializations (defined in .C)
 template <>
 void dataLoad(std::istream & stream, Real & v, void * /*context*/);
@@ -519,6 +549,10 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 template <>
 void dataLoad(std::istream & stream, std::stringstream *& s, void * context);
+template <>
+void dataLoad(std::istream & stream, RankTwoTensor &, void *);
+template <>
+void dataLoad(std::istream & stream, RankFourTensor &, void *);
 
 // Scalar Helper Function
 template <typename P>

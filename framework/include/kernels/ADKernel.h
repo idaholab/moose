@@ -12,11 +12,21 @@
 
 #include "KernelBase.h"
 
+#define usingKernelMembers                                                                         \
+  using ADKernel<compute_stage>::_test;                                                            \
+  using ADKernel<compute_stage>::_qp;                                                              \
+  using ADKernel<compute_stage>::_i;                                                               \
+  using ADKernel<compute_stage>::_u;                                                               \
+  using ADKernel<compute_stage>::_var;                                                             \
+  using ADKernel<compute_stage>::_grad_test;                                                       \
+  using ADKernel<compute_stage>::_grad_u
+
+template <ComputeStage compute_stage>
 class ADKernel;
 
-template <>
-InputParameters validParams<ADKernel>();
+declareADValidParams(ADKernel);
 
+template <ComputeStage compute_stage>
 class ADKernel : public KernelBase, public MooseVariableInterface<Real>
 {
 public:
@@ -34,31 +44,22 @@ public:
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
-  virtual ADReal computeQpResidual() = 0;
+  virtual ADResidual computeQpResidual() = 0;
 
   /// This is a regular kernel so we cast to a regular MooseVariable
   MooseVariable & _var;
 
   /// the current test function
-  const VariableTestValue & _test;
+  const ADVariableTestValue & _test;
 
   /// gradient of the test function
-  const VariableTestGradient & _grad_test;
-
-  /// the current shape functions
-  const VariablePhiValue & _phi;
+  const ADVariableTestGradient & _grad_test;
 
   /// Holds the solution at current quadrature points
   const ADVariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
   const ADVariableGradient & _grad_u;
-
-  /// Time derivative of u
-  const VariableValue & _u_dot;
-
-  /// Derivative of u_dot with respect to u
-  const VariableValue & _du_dot_du;
 };
 
 #endif /* ADKERNEL_H */

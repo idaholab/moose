@@ -329,7 +329,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _real_zero.resize(n_threads, 0.);
   _scalar_zero.resize(n_threads);
   _zero.resize(n_threads);
+  _ad_zero.resize(n_threads);
   _grad_zero.resize(n_threads);
+  _ad_grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
   _second_phi_zero.resize(n_threads);
   _point_zero.resize(n_threads);
@@ -2350,6 +2352,31 @@ FEProblemBase::addMaterial(const std::string & mat_name,
                            const std::string & name,
                            InputParameters parameters)
 {
+  addMaterialHelper(_materials, mat_name, name, parameters);
+}
+
+void
+FEProblemBase::addADResidualMaterial(const std::string & mat_name,
+                                     const std::string & name,
+                                     InputParameters parameters)
+{
+  addMaterialHelper(_residual_materials, mat_name, name, parameters);
+}
+
+void
+FEProblemBase::addADJacobianMaterial(const std::string & mat_name,
+                                     const std::string & name,
+                                     InputParameters parameters)
+{
+  addMaterialHelper(_jacobian_materials, mat_name, name, parameters);
+}
+
+void
+FEProblemBase::addMaterialHelper(MaterialWarehouse & warehouse,
+                                 const std::string & mat_name,
+                                 const std::string & name,
+                                 InputParameters parameters)
+{
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2383,7 +2410,7 @@ FEProblemBase::addMaterial(const std::string & mat_name,
       if (discrete)
         _discrete_materials.addObject(material, tid);
       else
-        _materials.addObject(material, tid);
+        warehouse.addObject(material, tid);
     }
 
     // Non-boundary restricted require face and neighbor objects
@@ -2418,7 +2445,7 @@ FEProblemBase::addMaterial(const std::string & mat_name,
       if (discrete)
         _discrete_materials.addObjects(material, neighbor_material, face_material, tid);
       else
-        _materials.addObjects(material, neighbor_material, face_material, tid);
+        warehouse.addObjects(material, neighbor_material, face_material, tid);
 
       // link parameters of face and neighbor materials
       MooseObjectParameterName name(MooseObjectName("Material", material->name()), "*");
@@ -2449,6 +2476,16 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   {
     _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
     _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
+    if (_currently_computing_jacobian)
+    {
+      _jacobian_materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
+      _jacobian_materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
+    }
+    else
+    {
+      _residual_materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
+      _residual_materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
+    }
   }
 
   const std::set<MooseVariableFEBase *> & current_active_elemental_moose_variables =
@@ -2483,6 +2520,12 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 
     if (_materials.hasActiveBlockObjects(blk_id, tid))
       _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
+
+    if (_jacobian_materials.hasActiveBlockObjects(blk_id, tid) && _currently_computing_jacobian)
+      _material_data[tid]->reinit(_jacobian_materials.getActiveBlockObjects(blk_id, tid));
+
+    if (_residual_materials.hasActiveBlockObjects(blk_id, tid) && !_currently_computing_jacobian)
+      _material_data[tid]->reinit(_residual_materials.getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -2507,6 +2550,16 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
     if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reinit(
           _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_jacobian_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+        _currently_computing_jacobian)
+      _bnd_material_data[tid]->reinit(
+          _jacobian_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_residual_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+        !_currently_computing_jacobian)
+      _bnd_material_data[tid]->reinit(
+          _residual_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -2532,6 +2585,16 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
     if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reinit(
           _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+        _currently_computing_jacobian)
+      _neighbor_material_data[tid]->reinit(
+          _jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
+        !_currently_computing_jacobian)
+      _neighbor_material_data[tid]->reinit(
+          _residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -2554,6 +2617,16 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 
     if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
       _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
+
+    if (_jacobian_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
+        _currently_computing_jacobian)
+      _bnd_material_data[tid]->reinit(
+          _jacobian_materials.getActiveBoundaryObjects(boundary_id, tid));
+
+    if (_residual_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
+        !_currently_computing_jacobian)
+      _bnd_material_data[tid]->reinit(
+          _residual_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -3223,6 +3296,8 @@ FEProblemBase::updateActiveObjects()
     _markers.updateActive(tid);
     _all_materials.updateActive(tid);
     _materials.updateActive(tid);
+    _residual_materials.updateActive(tid);
+    _jacobian_materials.updateActive(tid);
     _discrete_materials.updateActive(tid);
     _nodal_user_objects.updateActive(tid);
     _elemental_user_objects.updateActive(tid);
@@ -3820,7 +3895,12 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     // the highest available order in libMesh is 43
     _scalar_zero[tid].resize(FORTYTHIRD, 0);
     _zero[tid].resize(max_qpts, 0);
+    _ad_zero[tid].resize(max_qpts, NDDualNumber<Real, NumberArray<AD_MAX_DOFS_PER_ELEM, Real>>(0));
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
+    _ad_grad_zero[tid].resize(
+        max_qpts,
+        NDDualNumber<RealGradient, NumberArray<AD_MAX_DOFS_PER_ELEM, RealGradient>>(
+            RealGradient(0)));
     _second_zero[tid].resize(max_qpts, RealTensor(0.));
     _second_phi_zero[tid].resize(max_qpts,
                                  std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
@@ -5169,6 +5249,11 @@ FEProblemBase::checkProblemIntegrity()
     for (const auto & material : materials)
       material->checkStatefulSanity();
 
+    // auto mats_to_check = _materials.getActiveBlockObjects();
+    // const auto & discrete_materials = _discrete_materials.getActiveBlockObjects();
+    // for (const auto & map_it : discrete_materials)
+    //   for (const auto & container_element : map_it.second)
+    //     mats_to_check[map_it.first].push_back(container_element);
     checkDependMaterialsHelper(_all_materials.getActiveBlockObjects());
   }
 
@@ -5342,6 +5427,18 @@ FEProblemBase::checkDependMaterialsHelper(
       {
         if (outer_mat == inner_mat)
           continue;
+
+        // Check whether these materials are an AD pair
+        auto outer_mat_type = outer_mat->type();
+        auto inner_mat_type = inner_mat->type();
+        removeSubstring(outer_mat_type, "<RESIDUAL>");
+        removeSubstring(outer_mat_type, "<JACOBIAN>");
+        removeSubstring(inner_mat_type, "<RESIDUAL>");
+        removeSubstring(inner_mat_type, "<JACOBIAN>");
+        if (outer_mat_type == inner_mat_type && outer_mat_type != outer_mat->type() &&
+            inner_mat_type != inner_mat->type())
+          continue;
+
         inner_supplied.insert(inner_mat->getSuppliedItems().begin(),
                               inner_mat->getSuppliedItems().end());
 

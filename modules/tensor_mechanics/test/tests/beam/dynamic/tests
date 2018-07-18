@@ -27,7 +27,7 @@
                   " of an Euler-Bernoulli beam modeled using beam elements in the"
                   " presence of Rayleigh damping and numerical damping introduced"
                   " by Hilber-Hughes-Taylor (HHT) time integration."
-    rel_err = 6.5e-6
+    rel_err = 7e-6
   [../]
   [./dyn_euler_added_mass]
     type = 'Exodiff'
@@ -97,12 +97,12 @@
     input = 'dyn_euler_small_rayleigh_hht_action.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
     prereq = 'dyn_euler_rayleigh_hht'
-
     requirement = "The LineElementAction shall correctly create the input blocks"
                   " required for a dynamic beam simulation using beam elements and"
                   " a consistent mass/inertia matrix in the presence of Rayleigh"
                   " damping and numerical damping in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
+    rel_err = 7e-6
   [../]
   [./dyn_euler_added_mass_inertia_damping_action]
     type = 'Exodiff'

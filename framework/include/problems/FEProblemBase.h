@@ -609,6 +609,16 @@ public:
   virtual void addMaterial(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters parameters);
+  virtual void addADResidualMaterial(const std::string & kernel_name,
+                                     const std::string & name,
+                                     InputParameters parameters);
+  virtual void addADJacobianMaterial(const std::string & kernel_name,
+                                     const std::string & name,
+                                     InputParameters parameters);
+  virtual void addMaterialHelper(MaterialWarehouse & warehouse,
+                                 const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters parameters);
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -1437,7 +1447,9 @@ public:
   std::vector<Real> _real_zero;
   std::vector<VariableValue> _scalar_zero;
   std::vector<VariableValue> _zero;
+  std::vector<MooseArray<ADReal>> _ad_zero;
   std::vector<VariableGradient> _grad_zero;
+  std::vector<MooseArray<ADRealGradient>> _ad_grad_zero;
   std::vector<VariableSecond> _second_zero;
   std::vector<VariablePhiSecond> _second_phi_zero;
   std::vector<Point> _point_zero;
@@ -1558,6 +1570,8 @@ protected:
   ///@{
   // Material Warehouses
   MaterialWarehouse _materials;          // Traditional materials that MOOSE computes
+  MaterialWarehouse _residual_materials; // ADMaterials for computing residuals
+  MaterialWarehouse _jacobian_materials; // ADMaterials for computing jacobians
   MaterialWarehouse _discrete_materials; // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}

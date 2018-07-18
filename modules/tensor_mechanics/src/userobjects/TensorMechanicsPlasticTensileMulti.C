@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TensorMechanicsPlasticTensileMulti.h"
+#include "RankFourTensor.h"
 
 // Following is for perturbing eigvenvalues.  This looks really bodgy, but works quite well!
 #include "MooseRandom.h"

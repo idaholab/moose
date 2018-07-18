@@ -14,6 +14,8 @@
 #include "MooseEnum.h"
 #include "MooseUtils.h"
 #include "ColumnMajorMatrix.h"
+#include "MooseRandom.h"
+#include "RankFourTensor.h"
 
 #include "Conversion.h"
 
@@ -35,20 +37,6 @@ void
 mooseSetToZero<RankTwoTensor>(RankTwoTensor & v)
 {
   v.zero();
-}
-
-template <>
-void
-dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
-{
-  dataStore(stream, rtt._coords, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, RankTwoTensor & rtt, void * context)
-{
-  dataLoad(stream, rtt._coords, context);
 }
 
 MooseEnum

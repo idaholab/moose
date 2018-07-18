@@ -27,7 +27,8 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
     _variable(sys.system().variable(_var_num)),
     _dof_map(sys.dofMap()),
     _mesh(_subproblem.mesh()),
-    _scaling_factor(1.0)
+    _scaling_factor(1.0),
+    _computing_jacobian(false)
 {
 }
 

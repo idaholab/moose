@@ -11,11 +11,13 @@
   [../]
 []
 
-[Kernels]
+[ADKernels]
   [./diff]
     type = ADMatDiffusion
     variable = u
-    prop_name = diffusivity
+    prop_to_use = 'AdAd'
+    ad_mat_prop = ad_diffusivity
+    regular_mat_prop = regular_diffusivity
   [../]
 []
 
@@ -34,12 +36,12 @@
   [../]
 []
 
-[Materials]
+[ADMaterials]
   [./ad_coupled_mat]
     type = ADCoupledMaterial
     coupled_var = u
-    block = 0
-    mat_prop = diffusivity
+    ad_mat_prop = ad_diffusivity
+    regular_mat_prop = regular_diffusivity
   [../]
 []
 
