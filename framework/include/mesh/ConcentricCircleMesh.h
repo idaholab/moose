@@ -36,10 +36,12 @@ protected:
   unsigned int _num_sectors;
   // Radii of concentric circles
   std::vector<Real> _radii;
-  // SubdomainIDs for concentric circles
-  std::vector<int> _block;
-  // Adding the moderator part is optional
-  Real _unit_cell_length;
+  // Number of rings in each circle or in the moderator
+  std::vector<unsigned int> _rings;
+  // Length of inner squares
+  Real _inner_mesh_fraction;
+  // Adding the moderator is optional
+  Real _pitch;
   // Volume preserving function is optional
   bool _volume_preserving_function;
   // Control of which portion of mesh will be developed

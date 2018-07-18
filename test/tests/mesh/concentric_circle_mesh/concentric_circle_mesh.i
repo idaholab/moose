@@ -2,10 +2,11 @@
   type = ConcentricCircleMesh
   num_sectors = 6
   radii = '0.16125 0.1645 0.187'
-  block = '1 2 3 4'
-  volume_preserving_function = true
-  #portion = top_right
-  unit_cell_length = 0.496
+  rings = '4 1 3 3'
+  inner_mesh_fraction = 0.6
+  volume_preserving_function = on
+  #portion = left_half
+  pitch = 0.496
 []
 
 [Variables]

@@ -17,38 +17,24 @@ validParams<ConcentricCircleMesh>()
   MooseEnum portion(
       "full top_right top_left bottom_left bottom_right right_half left_half top_half bottom_half",
       "full");
-  params.addRequiredParam<unsigned int>(
-      "num_sectors",
-      "num_sectors=2n; n>=1"
-      "Number of azimuthal sectors in each quadrant (only for the center circle)"
-      "'num_sectors' must be an even number.");
-  params.addRequiredParam<std::vector<Real>>(
-      "radii",
-      "Radii of concentric circles must be provided to determine their exact locations"
-      "The number of total intervals in a radial direction = number of provided radii + "
-      "num_sectors / 2");
-  params.addRequiredParam<std::vector<int>>("block", "Subdomain IDs for concentric circles");
+  params.addRequiredParam<unsigned int>("num_sectors",
+                                        "num_sectors=2n; n>=1"
+                                        "Number of azimuthal sectors in each quadrant"
+                                        "'num_sectors' must be an even number.");
+  params.addRequiredParam<std::vector<Real>>("radii", "Radii of major concentric circles");
+  params.addRequiredParam<std::vector<unsigned int>>(
+      "rings", "Number of rings in each circle or in the moderator");
+  params.addRequiredParam<Real>("inner_mesh_fraction",
+                                "Length of inner square / radius of the innermost circle");
   params.addParam<Real>(
-      "unit_cell_length",
+      "pitch",
       0.0,
-      "The moderator part can be added to complete meshes for the whole fuel unit cell."
-      "The windmill approach is applied."
-      "Triangle - shaped meshes are generated at the corners of the unit cell."
-      "Others are quad meshes.");
+      "The moderator can be added to complete meshes for one unit cell of fuel assembly."
+      "Elements are quad meshes.");
   params.addParam<MooseEnum>("portion", portion, "Control of which part of mesh is created");
   params.addRequiredParam<bool>(
       "volume_preserving_function",
       "Volume of concentric circles can be preserved using this function.");
-  // x boundary names
-  params.addParam<BoundaryName>("left_boundary", "left_boundary", "name of the left (x) boundary");
-  params.addParam<BoundaryName>(
-      "right_boundary", "right_boundary", "name of the right (x) boundary");
-
-  // y boundary names
-  params.addParam<BoundaryName>("top_boundary", "top_boundary", "name of the top (y) boundary");
-  params.addParam<BoundaryName>(
-      "bottom_boundary", "bottom_boundary", "name of the bottom (y) boundary");
-
   params.addClassDescription("This ConcentricCircleMesh source code is to generate concentric "
                              "circle meshes for typical LWR fuels.");
   return params;
@@ -58,35 +44,45 @@ ConcentricCircleMesh::ConcentricCircleMesh(const InputParameters & parameters)
   : MooseMesh(parameters),
     _num_sectors(getParam<unsigned int>("num_sectors")),
     _radii(getParam<std::vector<Real>>("radii")),
-    _block(getParam<std::vector<int>>("block")),
-    _unit_cell_length(getParam<Real>("unit_cell_length")),
+    _rings(getParam<std::vector<unsigned int>>("rings")),
+    _inner_mesh_fraction(getParam<Real>("inner_mesh_fraction")),
+    _pitch(getParam<Real>("pitch")),
     _volume_preserving_function(getParam<bool>("volume_preserving_function")),
     _portion(getParam<MooseEnum>("portion"))
 {
   if (_num_sectors % 2 != 0)
     mooseError("ConcentricCircleMesh: num_sectors must be an even number.");
-  // radii data check up
+
+  // radii data check
   for (unsigned i = 0; i < _radii.size() - 1; ++i)
-  {
     if (_radii.at(i) > _radii.at(i + 1))
       mooseError("Radii must be provided in order by starting with the smallest radius and "
                  "providing the following gradual radii.");
-  }
 
-  if (_unit_cell_length != 0.0)
+  // size of 'rings' check
+  if (_pitch != 0.0)
   {
-    for (unsigned i = 0; i < _radii.size(); ++i)
-    {
-      if (_unit_cell_length < _radii.at(i))
-        mooseError("The unit cell length must be larger than any radii.");
-    }
-    if (_block.size() != _radii.size() + 1)
-      mooseError("The size of 'block' is equal to the size of 'radii' plus 1.");
+    if (_rings.size() != _radii.size() + 1)
+      mooseError("The size of 'rings' must be equal to the size of 'radii' plus 1");
   }
   else
   {
-    if (_block.size() != _radii.size())
-      mooseError("The size of 'block' is equal to the size of 'radii.'");
+    if (_rings.size() != _radii.size())
+      mooseError("The size of 'rings' must be equal to the size of 'radii'.");
+  }
+
+  // condition for setting the size of inner squares.
+  if (_inner_mesh_fraction > std::cos(M_PI / 4))
+    mooseError("The aspect ratio can not be larger than cos(PI/4).");
+
+  // pitch / 2 must be bigger than any raddi.
+  if (_pitch != 0.0)
+  {
+    for (unsigned i = 0; i < _radii.size(); ++i)
+    {
+      if (_pitch / 2 < _radii.at(i))
+        mooseError("The pitch / 2 must be larger than any radii.");
+    }
   }
 }
 
@@ -106,39 +102,74 @@ ConcentricCircleMesh::buildMesh()
   mesh.set_spatial_dimension(2);
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
+  // Creating real mesh concentric circles
+  // i: index for _rings, j: index for _radii
+  std::vector<Real> total_concentric_circles;
+  unsigned int j = 0;
+  while (j < _radii.size())
+  {
+    unsigned int i = 0;
+    if (j == 0)
+    {
+      while (i < _rings.at(j))
+      {
+        total_concentric_circles.push_back(_inner_mesh_fraction * _radii.at(j) +
+                                           (_radii.at(j) - _inner_mesh_fraction * _radii.at(j)) /
+                                               _rings.at(j) * (i + 1));
+        i++;
+      }
+    }
+    else
+    {
+      while (i < _rings.at(j))
+      {
+        total_concentric_circles.push_back(_radii.at(j - 1) + (_radii.at(j) - _radii.at(j - 1)) /
+                                                                  _rings.at(j) * (i + 1));
+        i++;
+      }
+    }
+    j++;
+  }
+
+  // volume preserving function is used to conserve volume.
   const Real d_angle = M_PI / 2 / _num_sectors;
+
   if (_volume_preserving_function == true)
   {
     Real original_radius = 0.0;
-    for (unsigned i = 0; i < _radii.size(); ++i)
+    for (unsigned i = 0; i < total_concentric_circles.size(); ++i)
     {
       // volume preserving function for the center circle
       if (i == 0)
       {
-        const Real target_area = M_PI * std::pow(_radii.at(i), 2);
+        const Real target_area = M_PI * std::pow(total_concentric_circles.at(i), 2);
         Real modified_radius = std::sqrt(2 * target_area / std::sin(d_angle) / _num_sectors / 4);
-        original_radius = _radii.at(i);
-        _radii.at(i) = modified_radius;
+        original_radius = total_concentric_circles.at(i);
+        total_concentric_circles.at(i) = modified_radius;
       }
       else
       {
         // volume preserving functions for outer circles
-        const Real target_area = M_PI * (std::pow(_radii.at(i), 2) - std::pow(original_radius, 2));
+        const Real target_area =
+            M_PI * (std::pow(total_concentric_circles.at(i), 2) - std::pow(original_radius, 2));
         Real modified_radius = std::sqrt(target_area / std::sin(d_angle) / _num_sectors / 2 +
-                                         std::pow(_radii.at(i - 1), 2));
-        original_radius = _radii.at(i);
-        _radii.at(i) = modified_radius;
+                                         std::pow(total_concentric_circles.at(i - 1), 2));
+        original_radius = total_concentric_circles.at(i);
+        total_concentric_circles.at(i) = modified_radius;
       }
     }
   }
 
   // number of total nodes
   unsigned num_total_nodes = 0;
-  if (_unit_cell_length != 0)
+  if (_pitch != 0)
     num_total_nodes =
-        std::pow(_num_sectors / 2 + 1, 2) + (_num_sectors + 1) * _radii.size() + (_num_sectors + 1);
+        std::pow(_num_sectors / 2 + 1, 2) +
+        (_num_sectors + 1) * (total_concentric_circles.size() + _rings.at(_rings.size() - 1)) +
+        (_num_sectors + 1);
   else
-    num_total_nodes = std::pow(_num_sectors / 2 + 1, 2) + (_num_sectors + 1) * _radii.size();
+    num_total_nodes =
+        std::pow(_num_sectors / 2 + 1, 2) + (_num_sectors + 1) * total_concentric_circles.size();
 
   std::vector<Node *> nodes(num_total_nodes);
   unsigned node_id = 0;
@@ -146,10 +177,10 @@ ConcentricCircleMesh::buildMesh()
   // for adding nodes for the square at the center of the circle
   for (unsigned i = 0; i <= _num_sectors / 2; ++i)
   {
-    const Real x = i * (_radii.at(0) / (_num_sectors / 2 + 1)) * std::cos(M_PI / 4);
+    const Real x = i * _inner_mesh_fraction * total_concentric_circles.at(0) / (_num_sectors / 2);
     for (unsigned j = 0; j <= _num_sectors / 2; ++j)
     {
-      const Real y = j * (_radii.at(0) / (_num_sectors / 2 + 1)) * std::sin(M_PI / 4);
+      const Real y = j * _inner_mesh_fraction * total_concentric_circles.at(0) / (_num_sectors / 2);
       nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
       node_id++;
     }
@@ -158,9 +189,9 @@ ConcentricCircleMesh::buildMesh()
   // for adding the outer nodes of the square
   Real current_radius = 0.0;
 
-  for (unsigned layers = 0; layers < _radii.size(); ++layers)
+  for (unsigned layers = 0; layers < total_concentric_circles.size(); ++layers)
   {
-    current_radius = _radii.at(layers);
+    current_radius = total_concentric_circles.at(layers);
     for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
     {
       const Real x = current_radius * std::cos(num_outer_nodes * d_angle);
@@ -170,21 +201,38 @@ ConcentricCircleMesh::buildMesh()
     }
   }
 
-  if (_unit_cell_length != 0.0)
+  // adding nodes for the unit cell of fuel assembly.
+  if (_pitch != 0.0)
   {
-    // adding nodes for the unit cell
+    Real current_radius_moderator = 0.0;
+    for (unsigned i = 1; i <= _rings.at(_rings.size() - 1); ++i)
+    {
+      current_radius_moderator =
+          _radii.at(_radii.size() - 1) +
+          i * (_pitch / 2 - _radii.at(_radii.size() - 1)) / (_rings.at(_rings.size() - 1) + 1);
+      total_concentric_circles.push_back(current_radius_moderator);
+      for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
+      {
+        const Real x = current_radius_moderator * std::cos(num_outer_nodes * d_angle);
+        const Real y = current_radius_moderator * std::sin(num_outer_nodes * d_angle);
+        nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
+        node_id++;
+      }
+    }
+
     for (unsigned j = 0; j < _num_sectors / 2 + 1; ++j)
     {
-      const Real x = _unit_cell_length / 2;
-      const Real y = (_unit_cell_length / 2) * std::tan(j * d_angle);
+      const Real x = _pitch / 2;
+      const Real y = _pitch / 2 * std::tan(j * d_angle);
       nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
       node_id++;
     }
+
     for (unsigned i = 0; i < _num_sectors / 2; ++i)
     {
-      const Real x = (_unit_cell_length / 2) * std::cos((i + _num_sectors / 2 + 1) * d_angle) /
+      const Real x = _pitch / 2 * std::cos((i + _num_sectors / 2 + 1) * d_angle) /
                      std::sin((i + _num_sectors / 2 + 1) * d_angle);
-      const Real y = _unit_cell_length / 2;
+      const Real y = _pitch / 2;
       nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
       node_id++;
     }
@@ -212,6 +260,17 @@ ConcentricCircleMesh::buildMesh()
     limit = standard;
   }
 
+  // SubdomainIDs set up
+  std::vector<unsigned int> subdomainIDs;
+  for (unsigned int i = 0; i < _rings.size(); ++i)
+  {
+    for (unsigned int j = 0; j < _rings.at(i); ++j)
+    {
+      subdomainIDs.push_back(i + 1);
+    }
+  }
+  if (_pitch != 0.0)
+    subdomainIDs.push_back(subdomainIDs.at(subdomainIDs.size() - 1));
   // adding elements in the square
   while (index <= limit)
   {
@@ -220,7 +279,7 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
     elem->set_node(2) = nodes[index + _num_sectors / 2 + 2];
     elem->set_node(3) = nodes[index + 1];
-    elem->subdomain_id() = _block.at(0);
+    elem->subdomain_id() = subdomainIDs.at(0);
 
     if (index < standard / 2)
       boundary_info.add_side(elem, 3, 1);
@@ -243,7 +302,7 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(1) = nodes[index + _num_sectors / 2 + 1];
     elem->set_node(2) = nodes[index + _num_sectors / 2 + 2];
     elem->set_node(3) = nodes[index + 1];
-    elem->subdomain_id() = _block.at(0);
+    elem->subdomain_id() = subdomainIDs.at(0);
 
     if (index == (standard / 2 + 1) * (standard / 2))
       boundary_info.add_side(elem, 0, 2);
@@ -261,7 +320,7 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(2) =
         nodes[index + (_num_sectors / 2 + 1) + counter * (_num_sectors / 2 + 2) + 1];
     elem->set_node(3) = nodes[index - _num_sectors / 2 - 1];
-    elem->subdomain_id() = _block.at(0);
+    elem->subdomain_id() = subdomainIDs.at(0);
 
     if (index == standard + 1)
       boundary_info.add_side(elem, 2, 1);
@@ -285,12 +344,11 @@ ConcentricCircleMesh::buildMesh()
     elem->set_node(1) = nodes[index + _num_sectors + 1];
     elem->set_node(2) = nodes[index + _num_sectors + 2];
     elem->set_node(3) = nodes[index + 1];
-    elem->subdomain_id() = _block.at(0);
 
-    for (int i = 0; i < static_cast<int>(_block.size()) - 1; ++i)
+    for (int i = 0; i < static_cast<int>(subdomainIDs.size()) - 1; ++i)
     {
       if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))
-        elem->subdomain_id() = _block.at(_block.size() - 1 - i);
+        elem->subdomain_id() = subdomainIDs.at(subdomainIDs.size() - 1 - i);
     }
 
     int const initial = std::pow(standard / 2 + 1, 2);
@@ -302,7 +360,7 @@ ConcentricCircleMesh::buildMesh()
       boundary_info.add_side(elem, 2, 1);
     if (index > limit - (standard + 1))
     {
-      if (_unit_cell_length != 0)
+      if (_pitch != 0)
       {
         if (index < limit - standard + standard / 2)
           boundary_info.add_side(elem, 1, 3);
@@ -326,7 +384,7 @@ ConcentricCircleMesh::buildMesh()
   boundary_info.sideset_name(1) = "left";
   boundary_info.sideset_name(2) = "bottom";
 
-  if (_unit_cell_length == 0.0)
+  if (_pitch == 0.0)
     boundary_info.sideset_name(3) = "outer";
   else
   {
@@ -340,7 +398,7 @@ ConcentricCircleMesh::buildMesh()
     boundary_info.sideset_name(1) = "bottom";
     boundary_info.sideset_name(2) = "right";
 
-    if (_unit_cell_length == 0.0)
+    if (_pitch == 0.0)
       boundary_info.sideset_name(3) = "outer";
     else
     {
@@ -354,7 +412,7 @@ ConcentricCircleMesh::buildMesh()
     boundary_info.sideset_name(1) = "right";
     boundary_info.sideset_name(2) = "top";
 
-    if (_unit_cell_length == 0.0)
+    if (_pitch == 0.0)
       boundary_info.sideset_name(3) = "outer";
     else
     {
@@ -368,7 +426,7 @@ ConcentricCircleMesh::buildMesh()
     boundary_info.sideset_name(1) = "top";
     boundary_info.sideset_name(2) = "left";
 
-    if (_unit_cell_length == 0.0)
+    if (_pitch == 0.0)
       boundary_info.sideset_name(3) = "outer";
     else
     {
@@ -383,7 +441,7 @@ ConcentricCircleMesh::buildMesh()
 
     // This is to rotate the mesh and also to reset boundary IDs.
     MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
-    if (_unit_cell_length != 0.0)
+    if (_pitch != 0.0)
     {
       MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
       MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
@@ -410,6 +468,7 @@ ConcentricCircleMesh::buildMesh()
       original_mesh.get_boundary_info().sideset_name(1) = "bottom";
       original_mesh.get_boundary_info().sideset_name(2) = "outer";
     }
+    other_mesh.clear();
   }
   else if (_portion == "right_half")
   {
@@ -418,7 +477,7 @@ ConcentricCircleMesh::buildMesh()
 
     // This is to rotate the mesh and also to reset boundary IDs.
     MeshTools::Modification::rotate(other_mesh, 270, 0, 0);
-    if (_unit_cell_length != 0.0)
+    if (_pitch != 0.0)
     {
       MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
       MeshTools::Modification::change_boundary_id(other_mesh, 2, 6);
@@ -445,6 +504,7 @@ ConcentricCircleMesh::buildMesh()
       original_mesh.get_boundary_info().sideset_name(1) = "left";
       original_mesh.get_boundary_info().sideset_name(2) = "outer";
     }
+    other_mesh.clear();
   }
   else if (_portion == "left_half")
   {
@@ -454,7 +514,7 @@ ConcentricCircleMesh::buildMesh()
     // This is to rotate the mesh and to reset boundary IDs.
     MeshTools::Modification::rotate(other_mesh, 90, 0, 0);
     MeshTools::Modification::rotate(original_mesh, 180, 0, 0);
-    if (_unit_cell_length != 0.0)
+    if (_pitch != 0.0)
     {
       // The other mesh is created by rotating the original mesh about 90 degrees.
       MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
@@ -490,6 +550,7 @@ ConcentricCircleMesh::buildMesh()
       original_mesh.get_boundary_info().sideset_name(1) = "right";
       original_mesh.get_boundary_info().sideset_name(2) = "outer";
     }
+    other_mesh.clear();
   }
   else if (_portion == "bottom_half")
   {
@@ -499,7 +560,7 @@ ConcentricCircleMesh::buildMesh()
     // This is to rotate the mesh and also to reset boundary IDs.
     MeshTools::Modification::rotate(other_mesh, 180, 0, 0);
     MeshTools::Modification::rotate(original_mesh, 270, 0, 0);
-    if (_unit_cell_length != 0.0)
+    if (_pitch != 0.0)
     {
       // The other mesh is created by rotating the original mesh about 180 degrees.
       MeshTools::Modification::change_boundary_id(other_mesh, 1, 5);
@@ -535,6 +596,7 @@ ConcentricCircleMesh::buildMesh()
       original_mesh.get_boundary_info().sideset_name(1) = "top";
       original_mesh.get_boundary_info().sideset_name(2) = "outer";
     }
+    other_mesh.clear();
   }
   else if (_portion == "full")
   {
@@ -544,7 +606,7 @@ ConcentricCircleMesh::buildMesh()
     // This is to rotate the mesh and also to reset boundary IDs.
     MeshTools::Modification::rotate(portion_two, 90, 0, 0);
 
-    if (_unit_cell_length != 0.0)
+    if (_pitch != 0.0)
     {
       // Portion 2: 2nd quadrant
       MeshTools::Modification::change_boundary_id(portion_two, 1, 5);
@@ -574,6 +636,7 @@ ConcentricCircleMesh::buildMesh()
       portion_one.get_boundary_info().sideset_name(2) = "bottom";
       portion_one.get_boundary_info().sideset_name(3) = "right";
       portion_one.get_boundary_info().sideset_name(4) = "top";
+      portion_bottom.clear();
     }
     else
     {
@@ -589,9 +652,10 @@ ConcentricCircleMesh::buildMesh()
       portion_one.stitch_meshes(portion_bottom, 2, 2, TOLERANCE, true);
       MeshTools::Modification::change_boundary_id(portion_one, 3, 1);
       portion_one.get_boundary_info().sideset_name(1) = "outer";
+      portion_bottom.clear();
     }
+    portion_two.clear();
   }
-
   if (_portion != "top_half" && _portion != "bottom_half" && _portion != "right_half" &&
       _portion != "left_half")
     mesh.prepare_for_use(false);
