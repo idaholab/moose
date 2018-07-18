@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    requirement = "MOOSE shall have the ability to output a detailed performance log"
+    design = 'PerfGraphOutput.md'
+    issues = '#11551'
+    type = 'RunApp'
+    input = 'perf_graph.i'
+    expect_out = 'FEProblem::computeResidualInternal'
+  [../]
+[]

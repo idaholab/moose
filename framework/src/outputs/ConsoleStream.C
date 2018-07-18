@@ -24,3 +24,9 @@ const ConsoleStream & ConsoleStream::operator<<(StandardEndLine /*manip*/) const
 
   return *this;
 }
+
+void
+ConsoleStream::unsetf(std::ios_base::fmtflags mask) const
+{
+  _oss.unsetf(mask);
+}

@@ -17,6 +17,7 @@
 #include "NearestNodeLocator.h"
 #include "PenetrationThread.h"
 #include "SubProblem.h"
+#include "MooseApp.h"
 
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
@@ -29,6 +30,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                 Moose::stringify(master_id) + "to" + Moose::stringify(slave_id),
                 "PenetrationLocator",
                 0),
+    PerfGraphInterface(subproblem.getMooseApp().perfGraph(),
+                       "PenetrationLocator_" + Moose::stringify(master_id) + "_" +
+                           Moose::stringify(slave_id)),
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_id),
@@ -44,7 +48,10 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     _do_normal_smoothing(false),
     _normal_smoothing_distance(0.0),
     _normal_smoothing_method(NSM_EDGE_BASED),
-    _patch_update_strategy(_mesh.getPatchUpdateStrategy())
+    _patch_update_strategy(_mesh.getPatchUpdateStrategy()),
+    _detect_penetration_timer(registerTimedSection("detectPenetration", 3)),
+    _reinit_timer(registerTimedSection("reinit", 3))
+
 {
   // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional
   // element
@@ -83,7 +90,7 @@ PenetrationLocator::~PenetrationLocator()
 void
 PenetrationLocator::detectPenetration()
 {
-  Moose::perf_log.push("detectPenetration()", "Execution");
+  TIME_SECTION(_detect_penetration_timer);
 
   // Get list of boundary (elem, side, id) tuples.
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> bc_tuples =
@@ -142,13 +149,13 @@ PenetrationLocator::detectPenetration()
                              "warning is printed only once, so a similar situation could occur "
                              "multiple times during the simulation but this warning is printed "
                              "only at the first occurrence."));
-
-  Moose::perf_log.pop("detectPenetration()", "Execution");
 }
 
 void
 PenetrationLocator::reinit()
 {
+  TIME_SECTION(_reinit_timer);
+
   // Delete the PenetrationInfo objects we own before clearing the
   // map, or we have a memory leak.
   for (auto & it : _penetration_info)
