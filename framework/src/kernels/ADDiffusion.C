@@ -21,6 +21,8 @@ InputParameters
 validParams<ADDiffusion>()
 {
   InputParameters p = validParams<ADKernel>();
+  p.addClassDescription("Same as `Diffusion` in terms of physics/residual, but the Jacobian "
+                        "is computed using forward automatic differentiation");
   return p;
 }
 
