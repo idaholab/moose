@@ -41,6 +41,7 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _dt_old(_fe_problem.dtOld()),
     _Re_time(_nl.getResidualTimeVector()),
     _Re_non_time(_nl.getResidualNonTimeVector()),
+    _final_nonlinear_residual(0.0),
     _n_nonlinear_iterations(0),
     _n_linear_iterations(0)
 {
@@ -53,6 +54,16 @@ TimeIntegrator::solve()
 
   _n_nonlinear_iterations = getNumNonlinearIterationsLastSolve();
   _n_linear_iterations = getNumLinearIterationsLastSolve();
+}
+
+Real
+TimeIntegrator::getFinalNonlinearResidual() const
+{
+  if (_nonlinear_implicit_system)
+    return _nonlinear_implicit_system->final_nonlinear_residual();
+  else
+    mooseError("The system is not of type 'NonlinearImplicitSystem', so the final nonlinear "
+               "residual is unavailable.");
 }
 
 unsigned int

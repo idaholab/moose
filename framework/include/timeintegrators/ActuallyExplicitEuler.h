@@ -41,6 +41,8 @@ public:
 
   virtual void meshChanged() override;
 
+  virtual Real getFinalNonlinearResidual() const override { return _final_nonlinear_residual; }
+
 protected:
   enum SolveType
   {
@@ -55,6 +57,12 @@ protected:
   bool checkLinearConvergence();
 
   MooseEnum _solve_type;
+
+  /// Compute the final nonlinear residual?
+  const bool _compute_final_nonlinear_residual;
+
+  /// Norm of final nonlinear residual (if monitoring; otherwise, zero)
+  Real _final_nonlinear_residual;
 
   /// Residual used for the RHS
   NumericVector<Real> & _explicit_residual;

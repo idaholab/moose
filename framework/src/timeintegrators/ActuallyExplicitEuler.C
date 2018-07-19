@@ -37,6 +37,9 @@ validParams<ActuallyExplicitEuler>()
       "a simple inversion - incredibly fast but may be less accurate.  'lump_preconditioned' uses "
       "the lumped mass matrix as a preconditioner for the 'consistent' solve");
 
+  params.addParam<bool>(
+      "compute_final_nonlinear_residual", false, "Compute the final nonlinear residual?");
+
   params.addClassDescription(
       "Implementation of Explicit/Forward Euler without invoking any of the nonlinear solver");
 
@@ -74,6 +77,8 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     MeshChangedInterface(parameters),
     _solve_type(getParam<MooseEnum>("solve_type")),
+    _compute_final_nonlinear_residual(getParam<bool>("compute_final_nonlinear_residual")),
+    _final_nonlinear_residual(0.0),
     _explicit_residual(_nl.addVector("explicit_residual", false, PARALLEL)),
     _explicit_euler_update(_nl.addVector("explicit_euler_update", true, PARALLEL)),
     _mass_matrix_diag(_nl.addVector("mass_matrix_diag", false, PARALLEL))
@@ -219,6 +224,32 @@ ActuallyExplicitEuler::solve()
   nonlinear_system.setSolution(*libmesh_system.current_local_solution);
 
   libmesh_system.nonlinear_solver->converged = converged;
+
+  // Compute the final nonlinear residual if specified. Note that there are two
+  // methods for computing the nonlinear residual:
+  //   1. As solved by this time integrator: This would keep the steady-state
+  //      residual as it was already computed and then manually compute and add
+  //      the temporal residual for a given "solve_type" ("consistent",
+  //      "lumped", or "lump_preconditioned"). Caveats include the following:
+  //        * If there are constraints enforced on the system after the solve,
+  //          then there will be an inconsistency between the solution and the
+  //          nonlinear residual, unless the nonlinear residual is also modified
+  //          to account for the constraints.
+  //   2. As indicated by the user: This would recompute the entire nonlinear
+  //      residual after the solution is updated. Caveats include the following:
+  //        * The user must be sure to set "implicit" flags as necessary to
+  //          reproduce the behavior of this time integrator.
+  //        * This does not respect the "solve_type" option selected by the
+  //          user, so if using a lumped mass matrix, the user will need to
+  //          set the lumping parameter in the time kernels.
+  // Currently, Method 2 will be used, since there is consistency with the
+  // constraints.
+  if (_compute_final_nonlinear_residual)
+  {
+    _explicit_residual.zero();
+    _fe_problem.computeResidual(*libmesh_system.current_local_solution, _explicit_residual);
+    _final_nonlinear_residual = _explicit_residual.l2_norm();
+  }
 }
 
 void

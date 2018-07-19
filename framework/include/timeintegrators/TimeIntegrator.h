@@ -101,6 +101,11 @@ public:
   virtual void computeTimeDerivatives() = 0;
 
   /**
+   * Gets the final nonlinear residual.
+   */
+  virtual Real getFinalNonlinearResidual() const;
+
+  /**
    * Gets the total number of nonlinear iterations over all stages of the time step.
    */
   virtual unsigned int getNumNonlinearIterations() const { return _n_nonlinear_iterations; }
@@ -147,6 +152,8 @@ protected:
   /// residual vector for non-time contributions
   NumericVector<Number> & _Re_non_time;
 
+  /// Final nonlinear residual at the end of the time step
+  Real _final_nonlinear_residual;
   /// Total number of nonlinear iterations over all stages of the time step
   unsigned int _n_nonlinear_iterations;
   /// Total number of linear iterations over all stages of the time step

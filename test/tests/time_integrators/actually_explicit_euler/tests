@@ -41,4 +41,13 @@
     expect_err = 'Solve failed and timestep already at or below dtmin'
     cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lump_preconditioned'
   [../]
+
+  [./nonlinear_residual]
+    type = 'CSVDiff'
+    input = 'actually_explicit_euler_nonlinear_residual.i'
+    csvdiff = 'actually_explicit_euler_nonlinear_residual_out.csv'
+
+    requirement = 'Allow final nonlinear residuals to be monitored for all time integrators'
+    issues = '#11857'
+  [../]
 []
