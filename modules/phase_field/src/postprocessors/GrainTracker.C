@@ -82,7 +82,9 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
     _max_curr_grain_id(0),
-    _is_transient(_subproblem.isTransient())
+    _is_transient(_subproblem.isTransient()),
+    _finalize_timer(registerTimedSection("finalize", 1)),
+    _remap_timer(registerTimedSection("remapGrains", 2))
 {
   if (_tolerate_failure)
     paramInfo("tolerate_failure",
@@ -194,9 +196,7 @@ GrainTracker::execute()
   if (_poly_ic_uo && _first_time)
     return;
 
-  Moose::perf_log.push("execute()", "GrainTracker");
   FeatureFloodCount::execute();
-  Moose::perf_log.pop("execute()", "GrainTracker");
 }
 
 Real
@@ -246,16 +246,11 @@ GrainTracker::prepopulateState(const FeatureFloodCount & ffc_object)
 void
 GrainTracker::finalize()
 {
-  /**
-   * Some perf_log operations appear here instead of inside of the named routines
-   * because of multiple return paths.
-   */
-
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
 
-  Moose::perf_log.push("finalize()", "GrainTracker");
+  TIME_SECTION(_finalize_timer);
 
   // Expand the depth of the halos around all grains
   auto num_halo_layers = _halo_level >= 1
@@ -275,12 +270,11 @@ GrainTracker::finalize()
   /**
    * Assign or Track Grains
    */
-  Moose::perf_log.push("trackGrains()", "GrainTracker");
   if (_first_time)
     assignGrains();
   else
     trackGrains();
-  Moose::perf_log.pop("trackGrains()", "GrainTracker");
+
   if (_verbosity_level > 1)
     _console << "Finished inside of trackGrains" << std::endl;
 
@@ -292,10 +286,8 @@ GrainTracker::finalize()
   /**
    * Remap Grains
    */
-  Moose::perf_log.push("remapGrains()", "GrainTracker");
   if (_remap)
     remapGrains();
-  Moose::perf_log.pop("remapGrains()", "GrainTracker");
 
   updateFieldInfo();
   if (_verbosity_level > 1)
@@ -307,7 +299,6 @@ GrainTracker::finalize()
   // TODO: Release non essential memory
   if (_verbosity_level > 0)
     _console << "Finished inside of GrainTracker" << std::endl;
-  Moose::perf_log.pop("finalize()", "GrainTracker");
 }
 
 void
@@ -756,6 +747,8 @@ GrainTracker::remapGrains()
   // Don't remap grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
+
+  TIME_SECTION(_remap_timer);
 
   if (_verbosity_level > 1)
     _console << "Running remap Grains\n" << std::endl;
