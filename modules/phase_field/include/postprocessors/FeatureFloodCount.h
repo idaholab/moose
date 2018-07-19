@@ -128,7 +128,7 @@ public:
      * The primary underlying container type used to hold the data in each FeatureData.
      * Supported types are std::set<dof_id_type> or std::vector<dof_id_type>.
      */
-    using container_type = std::set<dof_id_type>;
+    using container_type = std::vector<dof_id_type>;
 
     FeatureData() : FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE) {}
 
@@ -719,6 +719,14 @@ private:
 
   /// Keeps track of whether we are distributing the merge work
   const bool _distribute_merge_work;
+
+  /// Timers
+  PerfID _execute_timer;
+  PerfID _merge_timer;
+  PerfID _finalize_timer;
+  PerfID _comm_and_merge;
+  PerfID _expand_halos;
+  PerfID _update_field_info;
 };
 
 template <>

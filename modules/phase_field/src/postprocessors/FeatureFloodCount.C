@@ -197,7 +197,13 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _halo_ids(_maps_size),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
     _is_master(processor_id() == 0),
-    _distribute_merge_work(_app.n_processors() >= _maps_size && _maps_size > 1)
+    _distribute_merge_work(_app.n_processors() >= _maps_size && _maps_size > 1),
+    _execute_timer(registerTimedSection("execute", 1)),
+    _merge_timer(registerTimedSection("mergeFeatures", 2)),
+    _finalize_timer(registerTimedSection("finalize", 1)),
+    _comm_and_merge(registerTimedSection("communicateAndMerge", 2)),
+    _expand_halos(registerTimedSection("expandEdgeHalos", 2)),
+    _update_field_info(registerTimedSection("updateFieldInfo", 2))
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -293,6 +299,8 @@ FeatureFloodCount::meshChanged()
 void
 FeatureFloodCount::execute()
 {
+  TIME_SECTION(_execute_timer);
+
   // Iterate only over boundaries if restricted
   if (_is_boundary_restricted)
   {
@@ -344,6 +352,8 @@ FeatureFloodCount::execute()
 void
 FeatureFloodCount::communicateAndMerge()
 {
+  TIME_SECTION(_comm_and_merge);
+
   // First we need to transform the raw data into a usable data structure
   prepareDataForTransfer();
 
@@ -611,6 +621,8 @@ FeatureFloodCount::buildFeatureIdToLocalIndices(unsigned int max_id)
 void
 FeatureFloodCount::finalize()
 {
+  TIME_SECTION(_finalize_timer);
+
   // Gather all information on processor zero and merge
   communicateAndMerge();
 
@@ -1017,7 +1029,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
 void
 FeatureFloodCount::mergeSets()
 {
-  Moose::perf_log.push("mergeSets()", "FeatureFloodCount");
+  TIME_SECTION(_merge_timer);
 
   // When working with _distribute_merge_work all of the maps will be empty except for one
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
@@ -1067,15 +1079,11 @@ FeatureFloodCount::mergeSets()
 
     } // it1 loop
   }   // map loop
-
-  Moose::perf_log.pop("mergeSets()", "FeatureFloodCount");
 }
 
 void
 FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data)
 {
-  Moose::perf_log.push("consolidateMergedFeatures()", "FeatureFloodCount");
-
   /**
    * Now that the merges are complete we need to adjust the centroid, and halos.
    * Additionally, To make several of the sorting and tracking algorithms more straightforward,
@@ -1136,7 +1144,6 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
    * IMPORTANT: FeatureFloodCount::_feature_count is set on rank 0 at this point but
    * we can't broadcast it here because this routine is not collective.
    */
-  Moose::perf_log.pop("consolidateMergedFeatures()", "FeatureFloodCount");
 }
 
 bool
@@ -1403,6 +1410,8 @@ FeatureFloodCount::expandEdgeHalos(unsigned int num_layers_to_expand)
 {
   if (num_layers_to_expand == 0)
     return;
+
+  TIME_SECTION(_expand_halos);
 
   for (auto & list_ref : _partial_feature_sets)
   {

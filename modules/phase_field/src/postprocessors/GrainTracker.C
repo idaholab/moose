@@ -82,7 +82,12 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
     _max_curr_grain_id(0),
-    _is_transient(_subproblem.isTransient())
+    _is_transient(_subproblem.isTransient()),
+    _finalize_timer(registerTimedSection("finalize", 1)),
+    _remap_timer(registerTimedSection("remapGrains", 2)),
+    _track_grains(registerTimedSection("trackGrains", 2)),
+    _broadcast_update(registerTimedSection("broadCastUpdate", 2)),
+    _update_field_info(registerTimedSection("updateFieldInfo", 2))
 {
   if (_tolerate_failure)
     paramInfo("tolerate_failure",
@@ -194,9 +199,7 @@ GrainTracker::execute()
   if (_poly_ic_uo && _first_time)
     return;
 
-  Moose::perf_log.push("execute()", "GrainTracker");
   FeatureFloodCount::execute();
-  Moose::perf_log.pop("execute()", "GrainTracker");
 }
 
 Real
@@ -246,16 +249,11 @@ GrainTracker::prepopulateState(const FeatureFloodCount & ffc_object)
 void
 GrainTracker::finalize()
 {
-  /**
-   * Some perf_log operations appear here instead of inside of the named routines
-   * because of multiple return paths.
-   */
-
   // Don't track grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
 
-  Moose::perf_log.push("finalize()", "GrainTracker");
+  TIME_SECTION(_finalize_timer);
 
   // Expand the depth of the halos around all grains
   auto num_halo_layers = _halo_level >= 1
@@ -275,12 +273,11 @@ GrainTracker::finalize()
   /**
    * Assign or Track Grains
    */
-  Moose::perf_log.push("trackGrains()", "GrainTracker");
   if (_first_time)
     assignGrains();
   else
     trackGrains();
-  Moose::perf_log.pop("trackGrains()", "GrainTracker");
+
   if (_verbosity_level > 1)
     _console << "Finished inside of trackGrains" << std::endl;
 
@@ -292,10 +289,8 @@ GrainTracker::finalize()
   /**
    * Remap Grains
    */
-  Moose::perf_log.push("remapGrains()", "GrainTracker");
   if (_remap)
     remapGrains();
-  Moose::perf_log.pop("remapGrains()", "GrainTracker");
 
   updateFieldInfo();
   if (_verbosity_level > 1)
@@ -307,12 +302,13 @@ GrainTracker::finalize()
   // TODO: Release non essential memory
   if (_verbosity_level > 0)
     _console << "Finished inside of GrainTracker" << std::endl;
-  Moose::perf_log.pop("finalize()", "GrainTracker");
 }
 
 void
 GrainTracker::broadcastAndUpdateGrainData()
 {
+  TIME_SECTION(_broadcast_update);
+
   std::vector<PartialFeatureData> root_feature_data;
   std::vector<std::string> send_buffer(1), recv_buffer;
 
@@ -414,6 +410,8 @@ GrainTracker::assignGrains()
 void
 GrainTracker::trackGrains()
 {
+  TIME_SECTION(_track_grains);
+
   mooseAssert(!_first_time, "Track grains may only be called when _tracking_step > _t_step");
 
   // Used to track indices for which to trigger the new grain callback on (used on all ranks)
@@ -756,6 +754,8 @@ GrainTracker::remapGrains()
   // Don't remap grains if the current simulation step is before the specified tracking step
   if (_t_step < _tracking_step)
     return;
+
+  TIME_SECTION(_remap_timer);
 
   if (_verbosity_level > 1)
     _console << "Running remap Grains\n" << std::endl;
@@ -1393,6 +1393,8 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node,
 void
 GrainTracker::updateFieldInfo()
 {
+  TIME_SECTION(_update_field_info);
+
   for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
     _feature_maps[map_num].clear();
 
