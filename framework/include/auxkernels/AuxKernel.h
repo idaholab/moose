@@ -198,6 +198,11 @@ protected:
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
 
+  /// whether to use nodal patch recovery
+  /// if set to be true, we won't prevent user from retrieving
+  /// values on qp even though this is a nodal aux kernel.
+  const bool _use_nodal_patch_recovery;
+
   /// Quadrature point index
   unsigned int _qp;
 
@@ -223,7 +228,7 @@ template <typename T>
 const MaterialProperty<T> &
 AuxKernel::getMaterialProperty(const std::string & name)
 {
-  if (isNodal())
+  if (isNodal() && !_use_nodal_patch_recovery)
     mooseError("Nodal AuxKernel '",
                AuxKernel::name(),
                "' attempted to reference material property '",
@@ -239,7 +244,7 @@ template <typename T>
 const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOld(const std::string & name)
 {
-  if (isNodal())
+  if (isNodal() && !_use_nodal_patch_recovery)
     mooseError("Nodal AuxKernel '",
                AuxKernel::name(),
                "' attempted to reference material property '",
@@ -255,7 +260,7 @@ template <typename T>
 const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOlder(const std::string & name)
 {
-  if (isNodal())
+  if (isNodal() && !_use_nodal_patch_recovery)
     mooseError("Nodal AuxKernel '",
                AuxKernel::name(),
                "' attempted to reference material property '",
