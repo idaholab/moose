@@ -21,7 +21,7 @@ This will cause a simple, short printing of the `PerfGraph`.  For more detailed 
     execute_on = 'initial final'  # Default is "final"
     level = 2                     # Default is 1
     heaviest_branch = true        # Default is false
-    heaviest_sections = true      # Default is false
+    heaviest_sections = 7         # Default is 0
   []
 []
 ```
@@ -97,7 +97,7 @@ Example with `level = 3`:
 -------------------------------------------------------------------------------------------------------------------------------------
 ```
 
-The columns `Self`, `Children` and `Total` represent the time spent __in__ the section, __in sections underneath__ the section and the sum of those two.
+The columns `Self`, `Children` and `Total` represent the time spent *in* the section, *in sections underneath* the section, and the sum of those two.
 
 The percentage columns following each one are the percent that the time to the left is of the total run-time of the App.
 
@@ -138,7 +138,7 @@ To output the most expensive ("heaviest") trace through the code set `heaviest_b
 
 ## Heaviest Sections
 
-By setting `heaviest_sections = true` you can get a print out of the sections that take the most "Self" time like so:
+By setting `heaviest_sections = 10` (or any positive integer) you can get a print out of the 10 sections that take the most "Self" time like so:
 
 ```
 ---------------------------------------------------------------------
