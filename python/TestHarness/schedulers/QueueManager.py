@@ -187,16 +187,18 @@ class QueueManager(Scheduler):
     def getRunTestsCommand(self, job):
         """ return the command necessary to launch the TestHarness within the third party scheduler """
 
-        # Build ['/path/to/run_tests', '-j', '#']
-        command = [os.path.join(self.harness.run_tests_dir, 'run_tests'),
-                   '-j', str(job.getMetaData().get('QUEUEING_NCPUS', 1) )]
+        # Build ['/path/to/run_tests']
+        command = [os.path.join(self.harness.run_tests_dir, 'run_tests')]
 
         # get current sys.args we are allowed to include when we launch run_tests
         args = list(self.cleanAndModifyArgs())
 
         # Build [<args>, '--spec-file' ,/path/to/tests', '-o', '/path/to']
-        args.extend(['--spec-file', os.path.join(job.getTestDir(), self.options.input_file_name),
-                     '-o', job.getTestDir()])
+        if self.options.spec_file:
+            args.extend(['--spec-file', self.options.spec_file, '-o', job.getTestDir()])
+        else:
+            args.extend(['--spec-file', os.path.join(job.getTestDir(), self.options.input_file_name),
+                         '-o', job.getTestDir()])
 
         # Build [<command>, <args>]
         command.extend(args)
@@ -347,6 +349,10 @@ class QueueManager(Scheduler):
                 if group_results.get(job.getTestName(), {}):
                     job_results = group_results[job.getTestName()]
                     (status, caveats) = self._getTesterStatusAndCaveatsFromSession(results, tester)
+
+                    if 'OVERSIZED' in caveats:
+                        caveats.remove('OVERSIZED')
+
                     tester.addCaveats(caveats)
                     tester.setStatus(status)
 

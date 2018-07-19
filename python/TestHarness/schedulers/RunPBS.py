@@ -7,9 +7,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re
+import os, re, sys
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
+from itertools import groupby # to get most common ncpus from `pbsnodes -a`
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
@@ -24,6 +25,24 @@ class RunPBS(QueueManager):
         self.params = params
         self.harness = harness
         self.options = self.harness.getOptions()
+        self.pbs_resources = None
+
+    def _getPBSResources(self):
+        """
+        Call `pbsnodes -a` and determine the most common core count per node available.
+        This is to support heterogeneous clusters.
+        """
+        # Do only once and store the results in a global
+        if not self.pbs_resources:
+            pbsnode_output = util.runCommand('pbsnodes -a')
+            core_nodes = re.findall(r'resources_available.ncpus = (\d+)', pbsnode_output)
+            if core_nodes:
+                self.pbs_resources = core_nodes
+            else:
+                print('`pbsnodes -a` returned unexpected output')
+                sys.exit(1)
+
+        return self.pbs_resources
 
     def getBadKeyArgs(self):
         """ arguments we need to remove from sys.argv """
@@ -70,6 +89,37 @@ class RunPBS(QueueManager):
                     job.addCaveats('TESTHARNESS EXCEPTION')
                 return True
 
+    def _optimizeSelect(self, job):
+        """ Determine the optimal select statement for PBS """
+
+        slots = int(job.getMetaData().get('QUEUEING_NCPUS', 1))
+        all_nodes = self._getPBSResources()
+        total_cores = sum([int(cores) for cores in all_nodes])
+
+        # Is this job to big for this cluster?
+        if slots > total_cores:
+            job.addCaveats('insufficient slots')
+            job.setStatus(job.skip)
+            # continue and allow the qsub script to be created
+
+        procs_per_node = int(max(groupby(sorted(all_nodes)), key=lambda(x, v):(len(list(v)),-all_nodes.index(x)))[0])
+        num_full_chunks = slots / procs_per_node
+        remaining_ranks = slots % procs_per_node
+
+        # slots > procs_per_node and is not evenly distributable (both non-zero)
+        if num_full_chunks and remaining_ranks:
+            select_ncpus = 'select=%d:ncpus=%d+%d' % (num_full_chunks, procs_per_node, remaining_ranks)
+
+        # slots < procs_per_node
+        elif remaining_ranks:
+            select_ncpus = 'select=1:ncpus=%d' % (remaining_ranks)
+
+        # slots evenly distributable
+        else:
+            select_ncpus = 'select=%d:ncpus=%d' % (num_full_chunks, procs_per_node)
+
+        return select_ncpus
+
     def _augmentTemplate(self, job):
         """ populate qsub script template with paramaters """
         template = {}
@@ -77,8 +127,8 @@ class RunPBS(QueueManager):
         # Launch script location
         template['launch_script'] = os.path.join(job.getTestDir(), job.getTestNameShort() + '.qsub')
 
-        # NCPUS
-        template['mpi_procs'] = job.getMetaData().get('QUEUEING_NCPUS', 1)
+        # Get an optimized select statement
+        template['ncpus'] = self._optimizeSelect(job)
 
         # Convert MAX_TIME to hours:minutes for walltime use
         max_time = job.getMetaData().get('QUEUEING_MAXTIME', 1)
@@ -107,11 +157,14 @@ class RunPBS(QueueManager):
         """ execute qsub and return the launch id """
         template = self._augmentTemplate(job)
         tester = job.getTester()
+        launch_results = ""
 
         self.createQueueScript(job, template)
 
         command = ' '.join(['qsub', template['launch_script']])
-        launch_results = util.runCommand(command, job.getTestDir())
+
+        if not job.isSkip():
+            launch_results = util.runCommand(command, job.getTestDir())
 
         # List of files we need to clean up when we are done
         dirty_files = [template['launch_script'],
@@ -137,7 +190,7 @@ class RunPBS(QueueManager):
         else:
             job.addMetaData(RunPBS={'ID' : launch_results,
                                     'QSUB_COMMAND' : command,
-                                    'NCPUS' : template['mpi_procs'],
+                                    'NCPUS' : template['ncpus'],
                                     'WALLTIME' : template['walltime'],
                                     'QSUB_OUTPUT' : template['output']})
             tester.setStatus(tester.no_status, 'LAUNCHING')
