@@ -937,29 +937,6 @@ FeatureFloodCount::prepareDataForTransfer()
           updateBBoxExtremesHelper(feature._bboxes[0], mesh.node(halo_id));
       }
 
-      /**
-       * We need to adjust the halo markings before sending. We need to discard all of the
-       * local cell information but not any of the stitch region information. To do that
-       * we subtract off the ghosted cells from the local cells and use that in the
-       * set difference operation with the halo_ids.
-       */
-      std::set_difference(feature._local_ids.begin(),
-                          feature._local_ids.end(),
-                          feature._ghosted_ids.begin(),
-                          feature._ghosted_ids.end(),
-                          std::insert_iterator<FeatureData::container_type>(
-                              local_ids_no_ghost, local_ids_no_ghost.begin()));
-
-      std::set_difference(feature._halo_ids.begin(),
-                          feature._halo_ids.end(),
-                          local_ids_no_ghost.begin(),
-                          local_ids_no_ghost.end(),
-                          std::insert_iterator<FeatureData::container_type>(
-                              set_difference, set_difference.begin()));
-      feature._halo_ids.swap(set_difference);
-      local_ids_no_ghost.clear();
-      set_difference.clear();
-
       mooseAssert(!feature._local_ids.empty(), "local entity ids cannot be empty");
 
       /**
@@ -1590,9 +1567,9 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
             feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), neighbor->id());
           else
           {
-            feature->_halo_ids.insert(feature->_halo_ids.end(), neighbor->id());
-
-            flood(neighbor, current_index, feature);
+            // If we didn't flood the immediate neighbor, mark it with a halo instead
+            if (!flood(neighbor, current_index, feature))
+              feature->_halo_ids.insert(neighbor->id());
           }
         }
       }
