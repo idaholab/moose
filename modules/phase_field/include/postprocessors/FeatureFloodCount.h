@@ -701,6 +701,11 @@ private:
 
   /// Keeps track of whether we are distributing the merge work
   const bool _distribute_merge_work;
+
+  /// Timers
+  PerfID _execute_timer;
+  PerfID _merge_timer;
+  PerfID _finalize_timer;
 };
 
 template <>
