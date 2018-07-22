@@ -1237,7 +1237,9 @@ build_cube(UnstructuredMesh & mesh,
   // Add the ghosts to the mesh
   for (auto & ghost_id : ghost_elems)
   {
-    dof_id_type i, j, k;
+    dof_id_type i = 0;
+    dof_id_type j = 0;
+    dof_id_type k = 0;
 
     get_indices<T>(nx, ny, ghost_id, i, j, k);
 
