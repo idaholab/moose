@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "EqualValueEmbededConstraint.h"
+#include "EqualValueEmbeddedConstraint.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "AuxiliarySystem.h"
@@ -21,51 +21,76 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
-registerMooseObject("MooseApp", EqualValueEmbededConstraint);
+registerMooseObject("MooseApp", EqualValueEmbeddedConstraint);
 
 template <>
 InputParameters
-validParams<EqualValueEmbededConstraint>()
+validParams<EqualValueEmbeddedConstraint>()
 {
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
   InputParameters params = validParams<NodeElemConstraint>();
   params.addClassDescription("This is a constraint enforcing overlapping portions of two blocks to "
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;
-  params.addParam<std::string>("formulation", "kinematic", "The formulation");
-  params.addParam<Real>(
+  params.addParam<std::string>(
+      "formulation", "kinematic", "Formulation used to enforce the constraint");
+  params.addRequiredParam<Real>(
       "penalty",
-      1e8,
-      "The penalty to apply.  This can vary depending on the stiffness of your materials");
+      "Penalty parameter used in constraint enforcement for kinematic and penalty formulations.");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   return params;
 }
 
-EqualValueEmbededConstraint::EqualValueEmbededConstraint(const InputParameters & parameters)
+EqualValueEmbeddedConstraint::EqualValueEmbeddedConstraint(const InputParameters & parameters)
   : NodeElemConstraint(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _formulation(getFormulation(getParam<std::string>("formulation"))),
     _penalty(getParam<Real>("penalty")),
-    _residual_copy(_sys.residualGhosted()),
-    _mesh_dimension(_mesh.dimension())
+    _residual_copy(_sys.residualGhosted())
 {
   _overwrite_slave_residual = false;
+  prepareSlaveToMasterMap();
 }
 
 void
-EqualValueEmbededConstraint::timestepSetup()
+EqualValueEmbeddedConstraint::prepareSlaveToMasterMap()
 {
-}
+  // get mesh pointLocator
+  std::unique_ptr<PointLocatorBase> pointLocator = _mesh.getPointLocator();
+  pointLocator->enable_out_of_mesh_mode();
+  const std::set<subdomain_id_type> allowed_subdomains{_master};
 
-void
-EqualValueEmbededConstraint::jacobianSetup()
-{
+  // slave id and master id
+  dof_id_type sid, mid;
+
+  // prepare _slave_to_master_map
+  std::set<dof_id_type> unique_slave_node_ids;
+  const MeshBase & meshhelper = _mesh.getMesh();
+  for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(_slave),
+                                    meshhelper.active_subdomain_elements_end(_slave)))
+  {
+    for (auto & sn : elem->node_ref_range())
+    {
+      sid = sn.id();
+      if (_slave_to_master_map.find(sid) == _slave_to_master_map.end())
+      {
+        // master element
+        const Elem * me = pointLocator->operator()(sn, &allowed_subdomains);
+        if (me != NULL)
+        {
+          mid = me->id();
+          _slave_to_master_map.insert(std::pair<dof_id_type, dof_id_type>(sid, mid));
+          _subproblem.addGhostedElem(mid);
+        }
+      }
+    }
+  }
 }
 
 bool
-EqualValueEmbededConstraint::shouldApply()
+EqualValueEmbeddedConstraint::shouldApply()
 {
   // master element
   auto it = _slave_to_master_map.find(_current_node->id());
@@ -73,8 +98,7 @@ EqualValueEmbededConstraint::shouldApply()
   if (it != _slave_to_master_map.end())
   {
     const Elem * master_elem = _mesh.elemPtr(it->second);
-    std::vector<Point> points;
-    points.push_back(*_current_node);
+    std::vector<Point> points = {*_current_node};
 
     // reinit variables on the master element at the slave point
     _fe_problem.setNeighborSubdomainID(master_elem, 0);
@@ -86,7 +110,7 @@ EqualValueEmbededConstraint::shouldApply()
 }
 
 void
-EqualValueEmbededConstraint::computeReactionForce()
+EqualValueEmbeddedConstraint::computeConstraintForce()
 {
   const Node * node = _current_node;
   unsigned int sys_num = _sys.number();
@@ -95,11 +119,11 @@ EqualValueEmbededConstraint::computeReactionForce()
   switch (_formulation)
   {
     case KINEMATIC:
-      _reaction_force = -_residual_copy(dof_number);
+      _constraint_force = -_residual_copy(dof_number);
       break;
 
     case PENALTY:
-      _reaction_force = _penalty * (_u_slave[0] - _u_master[0]);
+      _constraint_force = _penalty * (_u_slave[0] - _u_master[0]);
       break;
 
     default:
@@ -109,15 +133,15 @@ EqualValueEmbededConstraint::computeReactionForce()
 }
 
 Real
-EqualValueEmbededConstraint::computeQpSlaveValue()
+EqualValueEmbeddedConstraint::computeQpSlaveValue()
 {
   return _u_slave[_qp];
 }
 
 Real
-EqualValueEmbededConstraint::computeQpResidual(Moose::ConstraintType type)
+EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
 {
-  Real resid = _reaction_force;
+  Real resid = _constraint_force;
 
   switch (type)
   {
@@ -139,10 +163,11 @@ EqualValueEmbededConstraint::computeQpResidual(Moose::ConstraintType type)
 }
 
 Real
-EqualValueEmbededConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
+EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   unsigned int sys_num = _sys.number();
   const Real penalty = _penalty;
+  Real curr_jac, slave_jac;
 
   switch (type)
   {
@@ -150,15 +175,11 @@ EqualValueEmbededConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       switch (_formulation)
       {
         case KINEMATIC:
-        {
-          const Real curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                             _connected_dof_indices[_j]);
+          curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                                  _connected_dof_indices[_j]);
           return -curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
-        }
-
         case PENALTY:
           return _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
-
         default:
           mooseError("Invalid formulation");
       }
@@ -167,13 +188,9 @@ EqualValueEmbededConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       switch (_formulation)
       {
         case KINEMATIC:
-        {
           return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
-        }
-
         case PENALTY:
           return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
-
         default:
           mooseError("Invalid formulation");
       }
@@ -182,15 +199,11 @@ EqualValueEmbededConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       switch (_formulation)
       {
         case KINEMATIC:
-        {
-          const Real slave_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                              _connected_dof_indices[_j]);
+          slave_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                                   _connected_dof_indices[_j]);
           return slave_jac * _test_master[_i][_qp];
-        }
-
         case PENALTY:
           return -_phi_slave[_j][_qp] * penalty * _test_master[_i][_qp];
-
         default:
           mooseError("Invalid formulation");
       }
@@ -200,48 +213,41 @@ EqualValueEmbededConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
       {
         case KINEMATIC:
           return 0.0;
-
         case PENALTY:
           return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp];
-
         default:
           mooseError("Invalid formulation");
       }
   }
-
   return 0.0;
 }
 
 Real
-EqualValueEmbededConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                                      unsigned int /*jvar*/)
+EqualValueEmbeddedConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                       unsigned int /*jvar*/)
 {
+  Real curr_jac, slave_jac;
   unsigned int sys_num = _sys.number();
+
   switch (type)
   {
     case Moose::SlaveSlave:
-    {
-      const Real curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                         _connected_dof_indices[_j]);
+      curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                              _connected_dof_indices[_j]);
       return -curr_jac;
-    }
 
     case Moose::SlaveMaster:
-      return 0;
+      return 0.0;
 
     case Moose::MasterSlave:
       switch (_formulation)
       {
         case KINEMATIC:
-        {
-          const Real slave_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                              _connected_dof_indices[_j]);
+          slave_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
+                                   _connected_dof_indices[_j]);
           return slave_jac * _test_master[_i][_qp];
-        }
-
         case PENALTY:
           return 0.0;
-
         default:
           mooseError("Invalid formulation");
       }
@@ -254,7 +260,7 @@ EqualValueEmbededConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
 }
 
 void
-EqualValueEmbededConstraint::computeJacobian()
+EqualValueEmbeddedConstraint::computeJacobian()
 {
   getConnectedDofIndices(_var.number());
 
@@ -288,7 +294,7 @@ EqualValueEmbededConstraint::computeJacobian()
 }
 
 void
-EqualValueEmbededConstraint::computeOffDiagJacobian(unsigned int jvar)
+EqualValueEmbeddedConstraint::computeOffDiagJacobian(unsigned int jvar)
 {
   getConnectedDofIndices(jvar);
 
@@ -321,7 +327,7 @@ EqualValueEmbededConstraint::computeOffDiagJacobian(unsigned int jvar)
 }
 
 void
-EqualValueEmbededConstraint::getConnectedDofIndices(unsigned int var_num)
+EqualValueEmbeddedConstraint::getConnectedDofIndices(unsigned int var_num)
 {
   NodeElemConstraint::getConnectedDofIndices(var_num);
 
@@ -344,13 +350,8 @@ EqualValueEmbededConstraint::getConnectedDofIndices(unsigned int var_num)
   }
 }
 
-void
-EqualValueEmbededConstraint::residualEnd()
-{
-}
-
 Formulation
-EqualValueEmbededConstraint::getFormulation(std::string name)
+EqualValueEmbeddedConstraint::getFormulation(std::string name)
 {
   Formulation formulation(INVALID);
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);

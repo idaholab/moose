@@ -1,0 +1,86 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef EQUALVALUEEMBEDDEDCONSTRAINT_H
+#define EQUALVALUEEMBEDDEDCONSTRAINT_H
+
+// MOOSE includes
+#include "NodeElemConstraint.h"
+
+/**
+ * Formulations, currently only supports KINEMATIC and PENALTY
+ */
+enum Formulation
+{
+  KINEMATIC,
+  PENALTY,
+  INVALID
+};
+
+// Forward Declarations
+class EqualValueEmbeddedConstraint;
+
+template <>
+InputParameters validParams<EqualValueEmbeddedConstraint>();
+
+/**
+ * A EqualValueEmbeddedConstraint forces the value of a variable to be the same
+ * on overlapping portion of two blocks
+ */
+class EqualValueEmbeddedConstraint : public NodeElemConstraint
+{
+public:
+  EqualValueEmbeddedConstraint(const InputParameters & parameters);
+
+  virtual void timestepSetup() override{};
+  virtual void jacobianSetup() override{};
+  virtual void residualEnd() override{};
+
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+
+  virtual bool addCouplingEntriesToJacobian() override { return true; }
+
+  bool shouldApply() override;
+
+  /**
+   * Compute the reaction force required to enforce the constraint based on the specified
+   * formulation.
+   */
+  void computeConstraintForce() override;
+
+protected:
+  virtual void prepareSlaveToMasterMap() override;
+  virtual Real computeQpSlaveValue() override;
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar) override;
+  virtual void getConnectedDofIndices(unsigned int var_num) override;
+  /**
+   * Get the Formulation enum from a case-insensitive string
+   * @param name name of the formulation string to be parsed
+   * @return Formulation parsed enum of the corresponding formulation, returns INVALID by default
+   */
+  static Formulation getFormulation(std::string name);
+
+  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  FEProblem & _fe_problem;
+
+  /// Enum used to define the formulation used to impose the constraint
+  const Formulation _formulation;
+  /// Penalty parameter used in constraint enforcement for kinematic and penalty formulations
+  const Real _penalty;
+  /// copy of the residual before the constraint is applied
+  NumericVector<Number> & _residual_copy;
+  /// constraint force needed to enforce the constraint
+  Real _constraint_force;
+};
+
+#endif

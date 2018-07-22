@@ -70,7 +70,7 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
     _dof_map(_sys.dofMap()),
     _node_to_elem_map(_mesh.nodeToElemMap()),
 
-    _overwrite_slave_residual(true)
+    _overwrite_slave_residual(false)
 {
   _mesh.errorIfDistributedMesh("NodeElemConstraint");
 
@@ -78,37 +78,6 @@ NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
   // Put a "1" into test_slave
   // will always only have one entry that is 1
   _test_slave[0].push_back(1);
-
-  // get mesh pointLocator
-  std::unique_ptr<PointLocatorBase> pointLocator = _mesh.getPointLocator();
-  pointLocator->enable_out_of_mesh_mode();
-  const std::set<subdomain_id_type> allowed_subdomains{_master};
-
-  // slave id and master id
-  dof_id_type sid, mid;
-
-  // prepare _slave_to_master_map
-  std::set<dof_id_type> unique_slave_node_ids;
-  const MeshBase & meshhelper = _mesh.getMesh();
-  for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(_slave),
-                                    meshhelper.active_subdomain_elements_end(_slave)))
-  {
-    for (auto & sn : elem->node_ref_range())
-    {
-      sid = sn.id();
-      if (_slave_to_master_map.find(sid) == _slave_to_master_map.end())
-      {
-        // master element
-        const Elem * me = pointLocator->operator()(sn, &allowed_subdomains);
-        if (me != NULL)
-        {
-          mid = me->id();
-          _slave_to_master_map.insert(std::pair<dof_id_type, dof_id_type>(sid, mid));
-          _subproblem.addGhostedElem(mid);
-        }
-      }
-    }
-  }
 }
 
 NodeElemConstraint::~NodeElemConstraint()

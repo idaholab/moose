@@ -882,9 +882,7 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
                                           meshhelper.active_subdomain_elements_end(slave_id)))
         {
           for (auto & n : elem->node_ref_range())
-          {
             unique_slave_node_ids.insert(n.id());
-          }
         }
 
         for (auto slave_node_id : unique_slave_node_ids)
@@ -905,7 +903,7 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
             {
               if (nec->shouldApply())
               {
-                nec->computeReactionForce();
+                nec->computeConstraintForce();
                 constraints_applied = true;
                 nec->computeSlaveValue(solution);
               }
@@ -1187,9 +1185,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                                           meshhelper.active_subdomain_elements_end(slave_id)))
         {
           for (auto & n : elem->node_ref_range())
-          {
             unique_slave_node_ids.insert(n.id());
-          }
         }
 
         for (auto slave_node_id : unique_slave_node_ids)
@@ -1209,7 +1205,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
             {
               if (nec->shouldApply())
               {
-                nec->computeReactionForce();
+                nec->computeConstraintForce();
                 constraints_applied = true;
                 nec->computeResidual();
 
@@ -2004,9 +2000,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                                           meshhelper.active_subdomain_elements_end(slave_id)))
         {
           for (auto & n : elem->node_ref_range())
-          {
             unique_slave_node_ids.insert(n.id());
-          }
         }
 
         for (auto slave_node_id : unique_slave_node_ids)
@@ -2029,7 +2023,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
               {
                 nec->_jacobian = &jacobian;
 
-                nec->computeReactionForce();
+                nec->computeConstraintForce();
                 constraints_applied = true;
 
                 nec->subProblem().prepareShapes(nec->variable().number(), 0);

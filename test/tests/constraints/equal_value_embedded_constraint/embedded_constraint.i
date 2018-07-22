@@ -4,9 +4,7 @@
 # two blocks to have the same value
 ###########################################################
 
-
 [Mesh]
-  file = gold/1D_2D.e
 []
 
 [Variables]
@@ -22,7 +20,6 @@
     variable = phi
   []
 []
-
 
 [BCs]
   [top]
@@ -53,21 +50,20 @@
 
 [Constraints]
   [equal]
-    type = EqualValueEmbededConstraint
+    type = EqualValueEmbeddedConstraint
     slave = 2
     master = 1
     penalty = 1e3
     master_variable = phi
     variable = phi
-    formulation = penalty
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   line_search = none
   nl_rel_tol = 1e-15
   nl_abs_tol = 1e-8
