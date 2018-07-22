@@ -126,7 +126,11 @@ public:
   public:
     /**
      * The primary underlying container type used to hold the data in each FeatureData.
-     * Supported types are std::set<dof_id_type> or std::vector<dof_id_type>.
+     * Supported types are std::set<dof_id_type> (with minor adjustmnets)
+     * or std::vector<dof_id_type>.
+     *
+     * Note: Testing has shown that the vector container is nearly 10x faster. There's really
+     * no reason to use sets.
      */
     using container_type = std::vector<dof_id_type>;
 
