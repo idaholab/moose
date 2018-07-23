@@ -132,7 +132,7 @@ public:
      * Note: Testing has shown that the vector container is nearly 10x faster. There's really
      * no reason to use sets.
      */
-    using container_type = std::vector<dof_id_type>;
+    using container_type = std::set<dof_id_type>;
 
     FeatureData() : FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE) {}
 
@@ -704,15 +704,27 @@ protected:
 
 private:
   template <class T>
-  static void sort(std::set<T> & /*container*/)
+  static inline void sort(std::set<T> & /*container*/)
   {
     // Sets are already sorted, do nothing
   }
 
   template <class T>
-  static void sort(std::vector<T> & container)
+  static inline void sort(std::vector<T> & container)
   {
     std::sort(container.begin(), container.end());
+  }
+
+  template <class T>
+  static inline void reserve(std::set<T> & /*container*/, std::size_t /*size*/)
+  {
+    // Sets are trees, no reservations necessary
+  }
+
+  template <class T>
+  static inline void reserve(std::vector<T> & container, std::size_t size)
+  {
+    container.reserve(size);
   }
 
   /**
@@ -725,12 +737,14 @@ private:
   const bool _distribute_merge_work;
 
   /// Timers
-  PerfID _execute_timer;
-  PerfID _merge_timer;
-  PerfID _finalize_timer;
-  PerfID _comm_and_merge;
-  PerfID _expand_halos;
-  PerfID _update_field_info;
+  const PerfID _execute_timer;
+  const PerfID _merge_timer;
+  const PerfID _finalize_timer;
+  const PerfID _comm_and_merge;
+  const PerfID _expand_halos;
+  const PerfID _update_field_info;
+  const PerfID _prepare_for_transfer;
+  const PerfID _consolidate_merged_features;
 };
 
 template <>

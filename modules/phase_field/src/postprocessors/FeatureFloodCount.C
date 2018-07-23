@@ -203,7 +203,9 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _finalize_timer(registerTimedSection("finalize", 1)),
     _comm_and_merge(registerTimedSection("communicateAndMerge", 2)),
     _expand_halos(registerTimedSection("expandEdgeHalos", 2)),
-    _update_field_info(registerTimedSection("updateFieldInfo", 2))
+    _update_field_info(registerTimedSection("updateFieldInfo", 2)),
+    _prepare_for_transfer(registerTimedSection("prepareDataForTransfer", 2)),
+    _consolidate_merged_features(registerTimedSection("consolidateMergedFeatures", 2))
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
@@ -906,6 +908,8 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id,
 void
 FeatureFloodCount::prepareDataForTransfer()
 {
+  TIME_SECTION(_prepare_for_transfer);
+
   MeshBase & mesh = _mesh.getMesh();
 
   FeatureData::container_type local_ids_no_ghost, set_difference;
@@ -1061,6 +1065,8 @@ FeatureFloodCount::mergeSets()
 void
 FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data)
 {
+  TIME_SECTION(_consolidate_merged_features);
+
   /**
    * Now that the merges are complete we need to adjust the centroid, and halos.
    * Additionally, To make several of the sorting and tracking algorithms more straightforward,
@@ -1697,7 +1703,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
         updateBBoxExtremesHelper(_bboxes[region], *mesh.elem_ptr(elem_id));
 
       FeatureData::container_type set_union;
-      set_union.reserve(_halo_ids.size() + _disjoint_halo_ids.size());
+      FeatureFloodCount::reserve(set_union, _halo_ids.size() + _disjoint_halo_ids.size());
       std::set_union(
           _halo_ids.begin(),
           _halo_ids.end(),
@@ -1787,7 +1793,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 
   FeatureData::container_type set_union;
 
-  set_union.reserve(_local_ids.size() + rhs._local_ids.size());
+  FeatureFloodCount::reserve(set_union, _local_ids.size() + rhs._local_ids.size());
   std::set_union(_local_ids.begin(),
                  _local_ids.end(),
                  rhs._local_ids.begin(),
@@ -1796,7 +1802,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   _local_ids.swap(set_union);
 
   set_union.clear();
-  set_union.reserve(_periodic_nodes.size() + rhs._periodic_nodes.size());
+  FeatureFloodCount::reserve(set_union, _periodic_nodes.size() + rhs._periodic_nodes.size());
   std::set_union(_periodic_nodes.begin(),
                  _periodic_nodes.end(),
                  rhs._periodic_nodes.begin(),
@@ -1805,7 +1811,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   _periodic_nodes.swap(set_union);
 
   set_union.clear();
-  set_union.reserve(_ghosted_ids.size() + rhs._ghosted_ids.size());
+  FeatureFloodCount::reserve(set_union, _ghosted_ids.size() + rhs._ghosted_ids.size());
   std::set_union(_ghosted_ids.begin(),
                  _ghosted_ids.end(),
                  rhs._ghosted_ids.begin(),
@@ -1832,7 +1838,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
     std::move(rhs._bboxes.begin(), rhs._bboxes.end(), std::back_inserter(_bboxes));
 
   set_union.clear();
-  set_union.reserve(_disjoint_halo_ids.size() + rhs._disjoint_halo_ids.size());
+  FeatureFloodCount::reserve(set_union, _disjoint_halo_ids.size() + rhs._disjoint_halo_ids.size());
   std::set_union(_disjoint_halo_ids.begin(),
                  _disjoint_halo_ids.end(),
                  rhs._disjoint_halo_ids.begin(),
@@ -1841,7 +1847,7 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   _disjoint_halo_ids.swap(set_union);
 
   set_union.clear();
-  set_union.reserve(_halo_ids.size() + rhs._halo_ids.size());
+  FeatureFloodCount::reserve(set_union, _halo_ids.size() + rhs._halo_ids.size());
   std::set_union(_halo_ids.begin(),
                  _halo_ids.end(),
                  rhs._halo_ids.begin(),
@@ -1880,7 +1886,7 @@ FeatureFloodCount::FeatureData::consolidate(FeatureData && rhs)
   mooseAssert(_id == rhs._id, "Mismatched auxiliary id in merge");
 
   FeatureData::container_type set_union;
-  _local_ids.reserve(_local_ids.size() + rhs._local_ids.size());
+  FeatureFloodCount::reserve(_local_ids, _local_ids.size() + rhs._local_ids.size());
   std::set_union(_local_ids.begin(),
                  _local_ids.end(),
                  rhs._local_ids.begin(),

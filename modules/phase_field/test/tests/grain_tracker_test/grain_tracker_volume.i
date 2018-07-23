@@ -39,7 +39,7 @@
                0  0  0'
     opposite_corners = '-0.5 -0.5 0
                         1    1    0'
-    inside = '1'
+    inside = 1
     outside = 0
     variable = gr1
   [../]
