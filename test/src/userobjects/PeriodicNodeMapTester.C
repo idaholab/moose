@@ -28,6 +28,11 @@ PeriodicNodeMapTester::PeriodicNodeMapTester(const InputParameters & parameters)
     _dim(_mesh.dimension()),
     _perf_buildmap(registerTimedSection("buildPeriodicNodeMap", 1))
 {
+}
+
+void
+PeriodicNodeMapTester::initialSetup()
+{
   // collect mesh periodicity data
   for (unsigned int i = 0; i < _dim; ++i)
   {
@@ -59,7 +64,11 @@ PeriodicNodeMapTester::initialize()
   unsigned int n_corner = 0;
   for (auto item : periodic_node_map)
   {
-    auto & p = _mesh.nodeRef(item.first);
+    Node * node_ptr = _mesh.nodePtr(item.first);
+    if (node_ptr == nullptr)
+      mooseError("Non-existing node found in periodic_node_map");
+
+    Point p(*node_ptr);
     bool corner = true;
     for (unsigned int i = 0; i < _dim; ++i)
       corner = corner && (MooseUtils::absoluteFuzzyEqual(p(i), _periodic_min[i]) ||

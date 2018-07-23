@@ -1219,6 +1219,8 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
   {
     // unfortunately libMesh does not give us a pointer, so we have to look it up ourselves
     auto node = _mesh->node_ptr(std::get<0>(t));
+    mooseAssert(node != nullptr,
+                "libMesh::BoundaryInfo::build_node_list() returned an ID for a non-existing node");
     auto bc_id = std::get<1>(t);
     periodic_nodes.emplace_back(node, bc_id);
   }

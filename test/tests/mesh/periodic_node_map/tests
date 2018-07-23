@@ -3,18 +3,15 @@
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x' Mesh/dim=1"
-    recover = false
   [../]
   [./2D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x y' Mesh/dim=2"
-    recover = false
   [../]
   [./3D]
     type = 'RunApp'
     input = 'test.i'
     cli_args = "BCs/Periodic/all/auto_direction='x y z' Mesh/dim=3"
-    recover = false
   [../]
 []
