@@ -14,4 +14,4 @@ method to obtain non-oscillatory solutions of flow problems that contain contact
 shock waves. For compressible flow problems, users can choose the CGFE method only when the flow
 field is sufficiently smooth.
 
-!syntax complete group=NavierStokes
+!syntax complete group=NavierStokesApp

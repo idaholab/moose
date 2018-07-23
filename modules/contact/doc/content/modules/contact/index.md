@@ -5,4 +5,4 @@ Documentation for the contact module needs some work...
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=Contact level=3
+!syntax complete group=ContactApp level=3
