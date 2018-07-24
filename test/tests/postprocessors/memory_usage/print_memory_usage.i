@@ -99,5 +99,4 @@
 [Outputs]
   csv = true
   execute_on = 'INITIAL TIMESTEP_END FINAL'
-  print_perf_log = true
 []
