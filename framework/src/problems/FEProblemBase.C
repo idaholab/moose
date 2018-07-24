@@ -3795,6 +3795,13 @@ FEProblemBase::init()
   }
 
   _nl->dofMap()._dof_coupling = _cm.get();
+
+  // If there are no variables, make sure to pass a nullptr coupling
+  // matrix, to avoid warnings about non-nullptr yet empty
+  // CouplingMatrices.
+  if (n_vars == 0)
+    _nl->dofMap()._dof_coupling = nullptr;
+
   _nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl.get());
   _nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl.get());
   _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
