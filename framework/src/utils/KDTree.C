@@ -13,7 +13,7 @@
 #include "libmesh/nanoflann.hpp"
 
 KDTree::KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size)
-  : _point_list_adaptor(master_points),
+  : _point_list_adaptor(master_points.begin(), master_points.end()),
     _kd_tree(libmesh_make_unique<KdTreeT>(
         LIBMESH_DIM, _point_list_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size)))
 {

@@ -24,6 +24,7 @@
 #include "libmesh/elem_range.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/node_range.h"
+#include "libmesh/nanoflann.hpp"
 
 // forward declaration
 class MooseMesh;
@@ -824,6 +825,9 @@ public:
    * otherwise.
    */
   virtual std::string getFileName() const { return ""; }
+
+  /// Helper type for building periodic node maps
+  using PeriodicNodeInfo = std::pair<const Node *, BoundaryID>;
 
 protected:
   /// Deprecated (DO NOT USE)

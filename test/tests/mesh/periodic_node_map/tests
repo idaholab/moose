@@ -1,0 +1,19 @@
+[Tests]
+  [./1D]
+    type = 'RunApp'
+    input = 'test.i'
+    cli_args = "BCs/Periodic/all/auto_direction='x' Mesh/dim=1"
+  [../]
+  [./2D]
+    type = 'RunApp'
+    input = 'test.i'
+    cli_args = "BCs/Periodic/all/auto_direction='x y' Mesh/dim=2"
+    prereq = 1D
+  [../]
+  [./3D]
+    type = 'RunApp'
+    input = 'test.i'
+    cli_args = "BCs/Periodic/all/auto_direction='x y z' Mesh/dim=3"
+    prereq = 2D
+  [../]
+[]

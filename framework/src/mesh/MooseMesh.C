@@ -14,6 +14,7 @@
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "RelationshipManager.h"
+#include "PointListAdaptor.h"
 
 #include <utility>
 
@@ -1193,77 +1194,98 @@ MooseMesh::getBoundaryName(BoundaryID boundary_id)
     return boundary_info.get_nodeset_name(boundary_id);
 }
 
+// specialization for PointListAdaptor<MooseMesh::PeriodicNodeInfo>
+template <>
+inline const Point &
+PointListAdaptor<MooseMesh::PeriodicNodeInfo>::getPoint(
+    const MooseMesh::PeriodicNodeInfo & item) const
+{
+  return *(item.first);
+}
+
 void
 MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map,
                                 unsigned int var_number,
                                 PeriodicBoundaries * pbs) const
 {
-  mooseAssert(!Threads::in_threads,
-              "This function should only be called outside of a threaded "
-              "region due to the use of PointLocator");
-
   TIME_SECTION(_build_periodic_node_map_timer);
 
+  // clear existing map
   periodic_node_map.clear();
 
-  std::unique_ptr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
+  // get periodic nodes
+  std::vector<PeriodicNodeInfo> periodic_nodes;
+  for (const auto & t : getMesh().get_boundary_info().build_node_list())
+  {
+    // unfortunately libMesh does not give us a pointer, so we have to look it up ourselves
+    auto node = _mesh->node_ptr(std::get<0>(t));
+    mooseAssert(node != nullptr,
+                "libMesh::BoundaryInfo::build_node_list() returned an ID for a non-existing node");
+    auto bc_id = std::get<1>(t);
+    periodic_nodes.emplace_back(node, bc_id);
+  }
 
-  // Get a const reference to the BoundaryInfo object that we will use several times below...
-  const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  // sort by boundary id
+  std::sort(periodic_nodes.begin(),
+            periodic_nodes.end(),
+            [](const PeriodicNodeInfo & a, const PeriodicNodeInfo & b) -> bool {
+              return a.second > b.second;
+            });
 
-  // A typedef makes the code below easier to read...
-  typedef std::multimap<dof_id_type, dof_id_type>::iterator IterType;
+  // build kd-tree
+  using KDTreeType = nanoflann::KDTreeSingleIndexAdaptor<
+      nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<PeriodicNodeInfo>>,
+      PointListAdaptor<PeriodicNodeInfo>,
+      LIBMESH_DIM>;
+  const unsigned int max_leaf_size = 20; // slightly affects runtime
+  auto point_list =
+      PointListAdaptor<PeriodicNodeInfo>(periodic_nodes.begin(), periodic_nodes.end());
+  auto kd_tree = libmesh_make_unique<KDTreeType>(
+      LIBMESH_DIM, point_list, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size));
+  mooseAssert(kd_tree != nullptr, "KDTree was not properly initialized.");
+  kd_tree->buildIndex();
 
-  // Container to catch IDs passed back from the BoundaryInfo object
-  std::vector<boundary_id_type> bc_ids;
+  // data structures for kd-tree search
+  nanoflann::SearchParams search_params;
+  std::vector<std::pair<std::size_t, Real>> ret_matches;
 
-  for (const auto & elem : getMesh().active_element_ptr_range())
-    for (unsigned int s = 0; s < elem->n_sides(); ++s)
+  // iterate over periodic nodes (boundary ids are in contiguous blocks)
+  PeriodicBoundaryBase * periodic = nullptr;
+  BoundaryID current_bc_id = BoundaryInfo::invalid_id;
+  for (auto & pair : periodic_nodes)
+  {
+    // entering a new block of boundary IDs
+    if (pair.second != current_bc_id)
     {
-      if (elem->neighbor_ptr(s))
-        continue;
-
-      boundary_info.boundary_ids(elem, s, bc_ids);
-      for (const auto & boundary_id : bc_ids)
-      {
-        const PeriodicBoundaryBase * periodic = pbs->boundary(boundary_id);
-        if (periodic && periodic->is_my_variable(var_number))
-        {
-          const Elem * neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
-          unsigned int s_neigh =
-              boundary_info.side_with_boundary_id(neigh, periodic->pairedboundary);
-
-          std::unique_ptr<const Elem> elem_side = elem->build_side_ptr(s);
-          std::unique_ptr<const Elem> neigh_side = neigh->build_side_ptr(s_neigh);
-
-          // At this point we have matching sides - lets find matching nodes
-          for (unsigned int i = 0; i < elem_side->n_nodes(); ++i)
-          {
-            const Node * master_node = elem->node_ptr(i);
-            Point master_point = periodic->get_corresponding_pos(*master_node);
-            for (unsigned int j = 0; j < neigh_side->n_nodes(); ++j)
-            {
-              const Node * slave_node = neigh_side->node_ptr(j);
-              if (master_point.absolute_fuzzy_equals(*slave_node))
-              {
-                // Avoid inserting any duplicates
-                std::pair<IterType, IterType> iters =
-                    periodic_node_map.equal_range(master_node->id());
-                bool found = false;
-                for (IterType map_it = iters.first; map_it != iters.second; ++map_it)
-                  if (map_it->second == slave_node->id())
-                    found = true;
-                if (!found)
-                {
-                  periodic_node_map.insert(std::make_pair(master_node->id(), slave_node->id()));
-                  periodic_node_map.insert(std::make_pair(slave_node->id(), master_node->id()));
-                }
-              }
-            }
-          }
-        }
-      }
+      current_bc_id = pair.second;
+      periodic = pbs->boundary(current_bc_id);
+      if (periodic && !periodic->is_my_variable(var_number))
+        periodic = nullptr;
     }
+
+    // variable is not periodic at this node, skip
+    if (!periodic)
+      continue;
+
+    // clear result buffer
+    ret_matches.clear();
+
+    // id of the current node
+    const auto id = pair.first->id();
+
+    // position where we expect a periodic partner for the current node and boundary
+    Point search_point = periodic->get_corresponding_pos(*pair.first);
+
+    // search at the expected point
+    kd_tree->radiusSearch(&(search_point)(0), libMesh::TOLERANCE, ret_matches, search_params);
+    for (auto & match_pair : ret_matches)
+    {
+      const auto & match = periodic_nodes[match_pair.first];
+      // add matched node if the boundary id is the corresponding id in the periodic pair
+      if (match.second == periodic->pairedboundary)
+        periodic_node_map.emplace(id, match.first->id());
+    }
+  }
 }
 
 void
