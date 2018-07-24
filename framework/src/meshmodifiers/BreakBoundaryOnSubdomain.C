@@ -58,6 +58,7 @@ BreakBoundaryOnSubdomain::modify()
 
   // create a list of new boundary names
   std::set<std::string> new_boundary_name_set;
+  std::vector<boundary_id_type> side_boundary_ids;
   for (const auto & elem : mesh.active_element_ptr_range())
   {
     auto subdomain_id = elem->subdomain_id();
@@ -66,7 +67,7 @@ BreakBoundaryOnSubdomain::modify()
       subdomain_name = std::to_string(subdomain_id);
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
-      auto side_boundary_ids = boundary_info.boundary_ids(elem, side);
+      boundary_info.boundary_ids(elem, side, side_boundary_ids);
       for (auto i = beginIndex(side_boundary_ids); i < side_boundary_ids.size(); ++i)
         if (breaking_boundary_ids.count(side_boundary_ids[i]) > 0)
           new_boundary_name_set.emplace(boundary_info.sideset_name(side_boundary_ids[i]) + "_to_" +
@@ -102,7 +103,8 @@ BreakBoundaryOnSubdomain::modify()
       subdomain_name = std::to_string(subdomain_id);
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
-      auto side_boundary_ids = boundary_info.boundary_ids(elem, side);
+      std::vector<boundary_id_type> side_boundary_ids;
+      boundary_info.boundary_ids(elem, side, side_boundary_ids);
       for (auto i = beginIndex(side_boundary_ids); i < side_boundary_ids.size(); ++i)
       {
         if (breaking_boundary_ids.count(side_boundary_ids[i]) > 0)

@@ -30,6 +30,7 @@ PerflogDumper::PerflogDumper(const InputParameters & parameters) : GeneralUserOb
 void
 PerflogDumper::execute()
 {
+#ifdef LIBMESH_ENABLE_DEPRECATED
   auto & log = Moose::perf_log.get_log_raw();
   std::ofstream f(_pars.get<std::string>("outfile"));
   if (!f.good())
@@ -48,4 +49,8 @@ PerflogDumper::execute()
   }
   if (!f.good())
     mooseError("PerfLogDumper: error writing file '", _pars.get<std::string>("outfile"), "'");
+#else
+  mooseWarning("The version of libMesh you are using does not support direct access "
+               "to the underlying PerfLog container, no log information will be dumped.");
+#endif
 }

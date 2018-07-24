@@ -42,7 +42,7 @@ TrackDiracFront::execute()
   if (_var_value[_qp] > 0.4 && _var_value[_qp] < 0.6)
   {
     Elem * elem = localElementConnectedToCurrentNode();
-    _dirac_points.push_back(std::make_pair(elem, *_current_node));
+    _dirac_points.push_back(std::make_pair(elem, Point(*_current_node)));
   }
 }
 

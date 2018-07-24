@@ -149,7 +149,7 @@ ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side
   {
     for (unsigned int child = 0; child < elem->n_children(); child++)
     {
-      Elem * child_elem = elem->child(child);
+      const Elem * child_elem = elem->child_ptr(child);
 
       for (unsigned int side = 0; side < child_elem->n_sides(); side++)
       {
