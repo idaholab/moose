@@ -51,7 +51,7 @@ sideIntersectedByLine(const Elem * elem,
       continue;
 
     // Get a simplified side element
-    std::unique_ptr<Elem> side_elem = elem->side(i);
+    std::unique_ptr<const Elem> side_elem = elem->side_ptr(i);
 
     if (dim == 3)
     {

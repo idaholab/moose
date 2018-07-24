@@ -131,7 +131,7 @@ MaterialPropertyStorage::prolongStatefulProps(
     if (input_child == -1 && input_child_side != -1 && !elem.is_child_on_side(child, parent_side))
       continue;
 
-    const Elem * child_elem = elem.child(child);
+    const Elem * child_elem = elem.child_ptr(child);
 
     mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];

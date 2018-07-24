@@ -138,12 +138,12 @@ public:
 
   virtual void onInternalSide(const Elem * elem, unsigned int side) override
   {
-    if (elem->neighbor(side)->processor_id() != _this_pid)
+    if (elem->neighbor_ptr(side)->processor_id() != _this_pid)
     {
       _local_num_partition_sides++;
 
       // Build the side so we can compute its volume
-      auto side_elem = elem->build_side(side);
+      auto side_elem = elem->build_side_ptr(side);
       _local_partition_surface_area += side_elem->volume();
     }
   }

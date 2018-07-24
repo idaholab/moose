@@ -58,12 +58,12 @@ RandomHitSolutionModifier::execute()
     if (elem && (elem->processor_id() == processor_id()))
     {
       Real closest_distance = std::numeric_limits<unsigned int>::max();
-      Node * closest_node = NULL;
+      const Node * closest_node = NULL;
 
       // Find the node on that element that is closest.
       for (unsigned int n = 0; n < elem->n_nodes(); n++)
       {
-        Node * cur_node = elem->get_node(n);
+        const Node * cur_node = elem->node_ptr(n);
         Real cur_distance = (hit - *cur_node).norm();
 
         if (cur_distance < closest_distance)

@@ -40,15 +40,15 @@ BreakMeshByBlockManualBase::duplicateAndSetLocalNode(dof_id_type element_id, dof
   // method used to duplicate existing nodes given an element and a local node.
   // The new node is added to the mesh and assigned to specified element.
 
-  Elem * elem = _mesh_ptr->getMesh().elem(element_id);   // retrieve element
-  dof_id_type original_node_id = elem->node(local_node); // find original node id
+  Elem * elem = _mesh_ptr->getMesh().elem_ptr(element_id);  // retrieve element
+  dof_id_type original_node_id = elem->node_id(local_node); // find original node id
 
   // duplicate node
   Node * new_node =
-      Node::build(_mesh_ptr->getMesh().node(original_node_id), _mesh_ptr->getMesh().n_nodes())
+      Node::build(_mesh_ptr->getMesh().node_ref(original_node_id), _mesh_ptr->getMesh().n_nodes())
           .release();
   // assign node to the correct process (i.e. the same process the orignal node had)
-  new_node->processor_id() = _mesh_ptr->getMesh().node(original_node_id).processor_id();
+  new_node->processor_id() = _mesh_ptr->getMesh().node_ref(original_node_id).processor_id();
   // add node to the mesh
   _mesh_ptr->getMesh().add_node(new_node);
 
@@ -63,7 +63,7 @@ BreakMeshByBlockManualBase::setElemNode(dof_id_type element_id,
 {
 
   // method used to set a local node given element and global node id
-  Elem * elem = _mesh_ptr->getMesh().elem(element_id);          // retrieve element
+  Elem * elem = _mesh_ptr->getMesh().elem_ptr(element_id);      // retrieve element
   Node * new_node = _mesh_ptr->getMesh().node_ptr(global_node); // retrieve node
   elem->set_node(local_node) = _mesh_ptr->getMesh().node_ptr(new_node->id());
 }

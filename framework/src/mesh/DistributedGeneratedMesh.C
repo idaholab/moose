@@ -1269,7 +1269,7 @@ build_cube(UnstructuredMesh & mesh,
   // Set RemoteElem neighbors
   for (auto & elem_ptr : mesh.element_ptr_range())
     for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      if (!elem_ptr->neighbor(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
+      if (!elem_ptr->neighbor_ptr(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
         elem_ptr->set_neighbor(s, const_cast<RemoteElem *>(remote_elem));
 
   if (verbose)

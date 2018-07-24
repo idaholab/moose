@@ -28,7 +28,7 @@ void
 CacheChangedListsThread::onElement(const Elem * elem)
 {
   if (elem->refinement_flag() == Elem::INACTIVE && elem->has_children() &&
-      elem->child(0)->refinement_flag() == Elem::JUST_REFINED)
+      elem->child_ptr(0)->refinement_flag() == Elem::JUST_REFINED)
     _refined_elements.push_back(elem);
 
   if (elem->refinement_flag() == Elem::JUST_COARSENED)
@@ -40,7 +40,7 @@ CacheChangedListsThread::onElement(const Elem * elem)
       std::vector<const Elem *> & children = _coarsened_element_children[elem];
 
       for (unsigned int child = 0; child < elem->n_children(); child++)
-        children.push_back(elem->child(child));
+        children.push_back(elem->child_ptr(child));
     }
   }
 }

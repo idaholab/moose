@@ -52,7 +52,7 @@ DTKInterpolationEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal> & ele
 
   for (GlobalOrdinal i = 0; i < num_values; i++)
   {
-    Elem * elem = mesh.elem(elements[i]);
+    Elem * elem = mesh.elem_ptr(elements[i]);
 
     Point p;
 

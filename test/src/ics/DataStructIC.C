@@ -39,7 +39,7 @@ DataStructIC::initialSetup()
     unsigned int n_nodes = current_elem->n_vertices();
     for (unsigned int i = 0; i < n_nodes; ++i)
     {
-      const Node * current_node = current_elem->get_node(i);
+      const Node * current_node = current_elem->node_ptr(i);
 
       _data[current_node->id()] = current_node->id() * 2.0; // double the node_id
     }

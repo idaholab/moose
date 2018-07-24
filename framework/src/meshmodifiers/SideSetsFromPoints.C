@@ -72,7 +72,7 @@ SideSetsFromPoints::modify()
         continue;
 
       // See if this point is on this side
-      std::unique_ptr<Elem> elem_side = elem->side(side);
+      std::unique_ptr<const Elem> elem_side = elem->side_ptr(side);
 
       if (elem_side->contains_point(_points[i]))
       {
