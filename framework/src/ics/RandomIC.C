@@ -35,7 +35,15 @@ RandomIC::RandomIC(const InputParameters & parameters)
     _range(_max - _min)
 {
   mooseAssert(_range > 0.0, "Min > Max for RandomIC!");
-  MooseRandom::seed(getParam<unsigned int>("seed"));
+  unsigned int processor_seed = getParam<unsigned int>("seed");
+  MooseRandom::seed(processor_seed);
+
+  if (processor_id() > 0)
+  {
+    for (processor_id_type i = 0; i < processor_id(); ++i)
+      processor_seed = MooseRandom::randl();
+    MooseRandom::seed(processor_seed);
+  }
 }
 
 Real
