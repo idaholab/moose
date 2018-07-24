@@ -216,7 +216,7 @@ public:
           case AttributeId::ExecOn:
             passes = false;
             for (auto val : d->execute_ons)
-              if (cond.value == val)
+              if (cond.value == Moose::ALL || val == Moose::ALL || cond.value == val)
               {
                 passes = true;
                 break;
