@@ -2937,8 +2937,10 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   TheWarehouse::Builder query = theWarehouse().build().system("UserObject").exec_on(type);
   if (group == Moose::PRE_IC)
     query.pre_ic(true);
-  else
-    query.pre_aux(group == Moose::PRE_AUX);
+  else if (group == Moose::PRE_AUX)
+    query.pre_aux(true);
+  else if (group == Moose::POST_AUX)
+    query.pre_aux(false);
 
   std::vector<GeneralUserObject *> genobjs;
   query.clone().interfaces(Interfaces::GeneralUserObject).queryInto(genobjs);
@@ -2984,9 +2986,11 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 
     // non-nodal user objects have to be finalized separately before the nodal user objects run
     // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
-    joinAndFinalize(query.clone().interfaces(Interfaces::ElementUserObject |
-                                             Interfaces::SideUserObject |
-                                             Interfaces::InternalSideUserObject));
+    // Also there is one instance in rattlesnake where an elemental user object's finalize depends
+    // on a side user object having been finalized first :-(
+    joinAndFinalize(query.clone().interfaces(Interfaces::SideUserObject));
+    joinAndFinalize(query.clone().interfaces(Interfaces::InternalSideUserObject));
+    joinAndFinalize(query.clone().interfaces(Interfaces::ElementUserObject));
   }
 
   // Execute NodalUserObjects
@@ -3004,9 +3008,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     for (auto obj : tguos_zero)
     {
       std::vector<GeneralUserObject *> tguos;
-      auto q = query.clone()
-                   .name(obj->name())
-                   .interfaces(Interfaces::ThreadedGeneralUserObject);
+      auto q = query.clone().name(obj->name()).interfaces(Interfaces::ThreadedGeneralUserObject);
       q.queryInto(tguos);
 
       ComputeThreadedGeneralUserObjectsThread ctguot(*this);
