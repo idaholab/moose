@@ -11,7 +11,7 @@ links provided detailed information on the theory and use of the level set modul
 For reference the following tables list the objects contained within the level set module and a brief
 description of there purpose, each object may be selected to navigate to a detailed page.
 
-!syntax complete group=level_set
+!syntax complete group=LevelSetApp
 
 ## Level Set Module Tasks
 
@@ -32,6 +32,6 @@ set module more useful and robust for real-world applications:
 
 ## Objects, Actions, and, Syntax
 
-!syntax complete group=LevelSet level=3
+!syntax complete group=LevelSetApp level=3
 
 !bibtex bibliography

@@ -121,7 +121,7 @@ class ExodusSource(base.ChiggerSource):
         """
         self.checkUpdateState()
         if self.__current_variable is None:
-            raise mooseutils.MooseException("There must be a current variable for getRange.")
+            return (None, None)
         elif not local:
             return self.__getRange()
         else:

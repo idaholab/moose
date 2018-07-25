@@ -137,4 +137,4 @@ to support the newly-available series.
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=FunctionalExpansionTools level=3
+!syntax complete group=FunctionalExpansionToolsApp level=3

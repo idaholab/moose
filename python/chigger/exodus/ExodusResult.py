@@ -88,7 +88,11 @@ class ExodusResult(base.ChiggerResult):
               "squeeze=True", which can be much slower.
         """
         self.checkUpdateState()
-        rngs = [src.getRange(**kwargs) for src in self._sources]
+        rngs = []
+        for src in self._sources:
+            rng = src.getRange(**kwargs)
+            if None not in rng:
+                rngs.append(rng)
         return utils.get_min_max(*rngs)
 
     def getCenter(self):
