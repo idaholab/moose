@@ -32,7 +32,7 @@
   if (std::abs(ref_value) < 1e-15)                                                                 \
     ABS_TEST(value, ref_value, tol);                                                               \
   else                                                                                             \
-    EXPECT_LE(std::abs((value) - (ref_value)) / (ref_value), (tol));
+    EXPECT_LE(std::abs(((value) - (ref_value)) / (ref_value)), tol);
 
 // Macro for computing absolute error
 #define ABS_TEST(value, ref_value, tol) EXPECT_LE(std::abs(((value) - (ref_value))), (tol))
