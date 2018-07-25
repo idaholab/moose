@@ -26,25 +26,29 @@ from mooseutils import HitNode, hit_parse
 import argparse
 from timeit import default_timer as clock
 
+def readTestRoot(fname):
+    with open(fname, 'r') as f:
+        data = f.read()
+    root = hit.parse(fname, data)
+    args = []
+    if root.find('run_tests_args'):
+        args = shlex.split(root.param('run_tests_args'))
+
+    hit_node = HitNode(hitnode=root)
+    hit_parse(hit_node, root, '')
+
+    # TODO: add check to see if the binary exists before returning. This can be used to
+    # allow users to control fallthrough for e.g. individual module binaries vs. the
+    # combined binary.
+    return root.param('app_name'), args, hit_node
+
 def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
     rootdir = os.path.abspath(start)
     while os.path.dirname(rootdir) != rootdir:
         fname = os.path.join(rootdir, 'testroot')
         if os.path.exists(fname):
-            with open(fname, 'r') as f:
-                data = f.read()
-            root = hit.parse(fname, data)
-            args = []
-            if root.find('run_tests_args'):
-                args = shlex.split(root.param('run_tests_args'))
-
-            hit_node = HitNode(hitnode=root)
-            hit_parse(hit_node, root, '')
-
-            # TODO: add check to see if the binary exists before returning. This can be used to
-            # allow users to control fallthrough for e.g. individual module binaries vs. the
-            # combined binary.
-            return rootdir, root.param('app_name'), args, hit_node
+            app_name, args, hit_node = readTestRoot(fname)
+            return rootdir, app_name, args, hit_node
         rootdir = os.path.dirname(rootdir)
     raise RuntimeError('test root directory not found')
 
@@ -224,6 +228,7 @@ class TestHarness:
             search_dir = os.getcwd()
 
         try:
+            testroot_params = {}
             for dirpath, dirnames, filenames in os.walk(search_dir, followlinks=True):
                 # Prune submdule paths when searching for tests
 
@@ -232,9 +237,27 @@ class TestHarness:
                     dirnames[:] = []
                     filenames[:] = []
 
+                if self.options.use_subdir_exe and testroot_params and not dirpath.startswith(testroot_params["testroot_dir"]):
+                    # Reset the params when we go outside the current testroot base directory
+                    testroot_params = {}
+
                 # walk into directories that aren't contrib directories
                 if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
                     for file in filenames:
+                        if self.options.use_subdir_exe and file == "testroot":
+                            # Rely on the fact that os.walk does a depth first traversal.
+                            # Any directories below this one will use the executable specified
+                            # in this testroot file unless it is overridden.
+                            app_name, args, root_params = readTestRoot(os.path.join(dirpath, file))
+                            full_app_name = app_name + "-" + self.options.method
+                            testroot_params["executable"] = os.path.join(dirpath, full_app_name)
+                            testroot_params["testroot_dir"] = dirpath
+                            caveats = [full_app_name]
+                            if args:
+                                caveats.append("Ignoring args %s" % args)
+                            testroot_params["caveats"] = caveats
+                            testroot_params["root_params"] = root_params
+
                         # See if there were other arguments (test names) passed on the command line
                         if file in self._infiles \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
@@ -247,7 +270,7 @@ class TestHarness:
                             os.chdir(dirpath)
 
                             # Get the testers for this test
-                            testers = self.createTesters(dirpath, file, find_only)
+                            testers = self.createTesters(dirpath, file, find_only, testroot_params)
 
                             # Schedule the testers for immediate execution
                             self.scheduler.schedule(testers)
@@ -287,12 +310,12 @@ class TestHarness:
 
    # Create and return list of tester objects. A tester is created by providing
     # abspath to basename (dirpath), and the test file in queustion (file)
-    def createTesters(self, dirpath, file, find_only):
+    def createTesters(self, dirpath, file, find_only, testroot_params={}):
         # Build a Parser to parse the objects
         parser = Parser(self.factory, self.warehouse)
 
         # Parse it
-        parser.parse(file, self.root_params)
+        parser.parse(file, testroot_params.get("root_params", self.root_params))
         self.parse_errors.extend(parser.errors)
 
         # Retrieve the tests from the warehouse
@@ -304,7 +327,10 @@ class TestHarness:
             # Initialize the status system for each tester object immediately after creation
             tester.initStatusSystem(self.options)
 
-            self.augmentParameters(file, tester)
+            self.augmentParameters(file, tester, testroot_params)
+            if testroot_params.get("caveats"):
+                # Show what executable we are using if using a different testroot file
+                tester.addCaveats(testroot_params["caveats"])
 
         # Short circuit this loop if we've only been asked to parse Testers
         # Note: The warehouse will accumulate all testers in this mode
@@ -327,7 +353,7 @@ class TestHarness:
             and os.path.join(dirpath, filename) != self.options.spec_file):
             return True
 
-    def augmentParameters(self, filename, tester):
+    def augmentParameters(self, filename, tester, testroot_params={}):
         params = tester.parameters()
 
         # We are going to do some formatting of the path that is printed
@@ -348,12 +374,12 @@ class TestHarness:
         params['test_name'] = formatted_name
         params['test_dir'] = test_dir
         params['relative_path'] = relative_path
-        params['executable'] = self.executable
+        params['executable'] = testroot_params.get("executable", self.executable)
         params['hostname'] = self.host_name
         params['moose_dir'] = self.moose_dir
         params['base_dir'] = self.base_dir
         params['first_directory'] = first_directory
-        params['root_params'] = self.root_params
+        params['root_params'] = testroot_params.get("root_params", self.root_params)
 
         if params.isValid('prereq'):
             if type(params['prereq']) != list:
@@ -791,6 +817,7 @@ class TestHarness:
         queuegroup.add_argument('--pbs', nargs=1, action='store', metavar='session_name', help='Launch tests using PBS as your scheduler. You must supply a name to identify this session with')
         queuegroup.add_argument('--queue-project', nargs=1, action='store', type=str, default='moose', metavar='project', help='Identify your Queue job(s) with this project (default:  moose)')
         queuegroup.add_argument('--queue-cleanup', action="store_true", help='Clean up files generated by the queue manager. Use in conjunction with previous queue options(--pbs <session_file>')
+        queuegroup.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory.')
 
         code = True
         if self.code.decode('hex') in argv:
