@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "StiffenedGasFluidPropertiesTest.h"
-#include "SinglePhaseFluidPropertiesUtils.h"
+#include "SinglePhaseFluidPropertiesTestUtils.h"
 
 TEST_F(StiffenedGasFluidPropertiesTest, testAll)
 {

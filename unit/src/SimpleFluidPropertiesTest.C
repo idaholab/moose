@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SimpleFluidPropertiesTest.h"
-#include "SinglePhaseFluidPropertiesPTUtils.h"
+#include "SinglePhaseFluidPropertiesPTTestUtils.h"
 
 /**
  * Test that the fluid name is correctly returned

@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef FLUIDPROPERTIESTESTUTILS_H
+#define FLUIDPROPERTIESTESTUTILS_H
 
 // Relative tolerance to be used when comparing to a value from external fluid
 // property packages, which might be using different underlying models
@@ -37,4 +37,4 @@
 // Macro for computing absolute error
 #define ABS_TEST(value, ref_value, tol) EXPECT_LE(std::abs(((value) - (ref_value))), (tol))
 
-#endif // UTILS_H
+#endif // FLUIDPROPERTIESTESTUTILS_H
