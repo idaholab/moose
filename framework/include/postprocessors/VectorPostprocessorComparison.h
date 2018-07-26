@@ -10,7 +10,7 @@
 #ifndef VECTORPOSTPROCESSORCOMPARISON_H
 #define VECTORPOSTPROCESSORCOMPARISON_H
 
-#include "GeneralPostprocessor.h"
+#include "ComparisonPostprocessor.h"
 
 class VectorPostprocessorComparison;
 
@@ -31,10 +31,10 @@ InputParameters validParams<VectorPostprocessorComparison>();
  * For all comparisons, a "fuzzy" comparison is made via the corresponding
  * function in \c MooseUtils.
  * If the comparison condition is true for all elements of the vector post-
- * processors, then a value of "+1" is output; otherwise, a value of "-1" is
+ * processors, then a value of 1 is output; otherwise, a value of 0 is
  * output.
  */
-class VectorPostprocessorComparison : public GeneralPostprocessor
+class VectorPostprocessorComparison : public ComparisonPostprocessor
 {
 public:
   VectorPostprocessorComparison(const InputParameters & parameters);
@@ -49,13 +49,7 @@ protected:
   /// Values of the second vector post-processor to compare
   const VectorPostprocessorValue & _values_b;
 
-  /// Type of comparison to perform
-  const MooseEnum _comparison_type;
-
-  /// Absolute tolerance for "fuzzy" comparisons
-  const Real _absolute_tolerance;
-
-  /// The comparison value; "+1" for all true and "-1" for at least one false
+  /// The comparison value; 1 for all true and 0 for at least one false
   PostprocessorValue _comparison_value;
 };
 
