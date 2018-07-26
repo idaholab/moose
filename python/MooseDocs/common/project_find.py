@@ -1,8 +1,7 @@
 #pylint:disable=missing-docstring, unused-argument
 import MooseDocs
-from . import exceptions
 
-def project_find(filename, mincout=None, maxcount=None, exc=exceptions.MooseDocsException):
+def project_find(filename):
     """
     Utility for finding files within a project based on 'git ls-files', see MooseDocs.__init__.py.
 

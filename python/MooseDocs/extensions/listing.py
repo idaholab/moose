@@ -108,18 +108,8 @@ class FileListingCommand(LocalListingCommand):
         Build the tokens needed for displaying code listing.
         """
 
-        # Read filename
-        filenames = common.project_find(info['subcommand'])
-        if len(filenames) == 0:
-            msg = "{} does not exist."
-            raise exceptions.TokenizeException(msg, info['subcommand'])
-        elif len(filenames) > 1:
-            msg = "Multiple files located with matching name '{}':\n".format(info['subcommand'])
-            for f in filenames:
-                msg += '    {}\n'.format(f)
-            raise exceptions.TokenizeException(msg)
-        else:
-            filename = filenames[0]
+        # Locate filename
+        filename = common.check_filenames(info['subcommand'])
 
         # Listing container
         flt = floats.Float(parent)
