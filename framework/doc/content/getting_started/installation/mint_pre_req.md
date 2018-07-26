@@ -3,17 +3,23 @@
 Install the following using apt-get
 
 ```bash
-sudo -E apt-get install build-essential \
+sudo apt-get install build-essential \
 gfortran \
 tcl \
+git \
+m4 \
 freeglut3 \
-libX11-dev \
+doxygen \
 libblas-dev \
 liblapack-dev \
-git \
-m4
+libx11-dev \
+libnuma-dev \
+libcurl4-gnutls-dev \
+zlib1g-dev \
+libhwloc-dev
 ```
 
-Download and install one of our redistributable packages according to your version of Mint.
+Download and install one of our redistributable packages according to your version of Mint. Mint is a spinoff of Ubuntu. But the versions do not necessarly match (each Mint release is based on Ubuntu's LTS release schedule): [https://en.wikipedia.org/wiki/Linux_Mint_version_history](https://en.wikipedia.org/wiki/Linux_Mint_version_history).
 
-- Mint 18: !!package name arch=mint18!!
+- Mint 19: !!package name arch=ubuntu18!!
+- Mint 18: !!package name arch=ubuntu16!!

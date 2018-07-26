@@ -25,8 +25,6 @@
 
 !include manual_miniconda.md
 
-!include manual_ownership.md
-
 ## bash_profile
 
 Now that everything has been installed, its time to wrap all these environment variables up, and throw them in a bash shell profile somewhere.
@@ -66,3 +64,5 @@ Or you can permanently have it loaded each time you open a terminal by adding th
 command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
 
 Once the above is complete, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
+
+!include manual_cleanup.md

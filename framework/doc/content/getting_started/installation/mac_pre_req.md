@@ -1,6 +1,10 @@
 ## Prerequisites
 
-- Xcode Command Line Tools (CLT). To install CLT on your machine, open a terminal and run `xcode-select --install`. If you do not have CLT installed, you will be presented with a dialog box allowing you to install CLT.
+- Xcode Command Line Tools (CLT). To install CLT on your machine, open a terminal and run:
+
+    `xcode-select --install`
+
+    If you do not have CLT installed, you will be presented with a dialog box allowing you to install CLT.
 
 - Download and install [XQuartz](https://www.xquartz.org/)
 
