@@ -75,14 +75,14 @@ public:
    * @param i     the index of the generator
    * @param seed  the seed number
    */
-  inline void seed(unsigned int i, unsigned int seed) { mts_seed32new(&(_states[i].first), seed); }
+  inline void seed(std::size_t i, unsigned int seed) { mts_seed32new(&(_states[i].first), seed); }
 
   /**
    * This method returns the next random number (double format) from the specified generator
    * @param i     the index of the generator
    * @return      the next random number in the range [0,1) with 64-bit precision
    */
-  inline double rand(unsigned int i)
+  inline double rand(std::size_t i)
   {
     mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return mts_ldrand(&(_states[i].first));
@@ -97,7 +97,7 @@ public:
    * @return      the next random number following a normal distribution of width sigma around mean
    * with 64-bit precision
    */
-  inline double randNormal(unsigned int i, double mean, double sigma)
+  inline double randNormal(std::size_t i, double mean, double sigma)
   {
     mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return rds_normal(&(_states[i].first), mean, sigma);
@@ -106,14 +106,14 @@ public:
   /**
    * Return next random number drawn from a standard distribution.
    */
-  inline double randNormal(unsigned int i) { return randNormal(i, 0.0, 1.0); }
+  inline double randNormal(std::size_t i) { return randNormal(i, 0.0, 1.0); }
 
   /**
    * This method returns the next random number (long format) from the specified generator
    * @param i     the index of the generator
    * @return      the next random number in the range [0,max(uinit32_t)) with 32-bit number
    */
-  inline uint32_t randl(unsigned int i)
+  inline uint32_t randl(std::size_t i)
   {
     mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return mts_lrand(&(_states[i].first));
@@ -128,7 +128,7 @@ public:
     _saved = true;
     std::for_each(_states.begin(),
                   _states.end(),
-                  [](std::pair<const unsigned int, std::pair<mt_state, mt_state>> & pair) {
+                  [](std::pair<const std::size_t, std::pair<mt_state, mt_state>> & pair) {
                     pair.second.second = pair.second.first;
                   });
   }
@@ -141,7 +141,7 @@ public:
     mooseAssert(_saved, "saveState() must be called prior to restoreState().");
     std::for_each(_states.begin(),
                   _states.end(),
-                  [](std::pair<const unsigned int, std::pair<mt_state, mt_state>> & pair) {
+                  [](std::pair<const std::size_t, std::pair<mt_state, mt_state>> & pair) {
                     pair.second.first = pair.second.second;
                   });
   }
@@ -149,7 +149,7 @@ public:
   /**
    * Return the number of states.
    */
-  inline unsigned int size() { return _states.size(); }
+  inline std::size_t size() { return _states.size(); }
 
 private:
   /**
@@ -157,7 +157,7 @@ private:
    * second is the backup state. It is used to restore state at a later time
    * to the active state.
    */
-  std::unordered_map<unsigned int, std::pair<mt_state, mt_state>> _states;
+  std::unordered_map<std::size_t, std::pair<mt_state, mt_state>> _states;
 
   // for restart capability
   friend void dataStore<MooseRandom>(std::ostream & stream, MooseRandom & v, void * context);

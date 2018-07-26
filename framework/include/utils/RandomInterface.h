@@ -62,7 +62,7 @@ public:
    * @param id - dof object id
    * @return current seed for this id
    */
-  unsigned int getSeed(unsigned int id);
+  unsigned int getSeed(std::size_t id);
 
   /**************************************************
    *                Data Accessors                  *

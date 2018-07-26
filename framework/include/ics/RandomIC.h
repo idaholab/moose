@@ -11,9 +11,8 @@
 #define RANDOMIC_H
 
 #include "InitialCondition.h"
-
-// System includes
-#include <string>
+#include "RandomData.h"
+#include "MooseRandom.h"
 
 // Forward Declarations
 class InputParameters;
@@ -43,11 +42,37 @@ public:
   RandomIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;
+  void initialSetup() override;
 
 protected:
-  Real _min;
-  Real _max;
-  Real _range;
+  inline Real
+  value_helper(dof_id_type id, MooseRandom & generator, std::map<dof_id_type, Real> & map)
+  {
+    auto it_pair = map.lower_bound(id);
+
+    // Do we need to generate a new number?
+    if (it_pair == map.end() || it_pair->first != id)
+      it_pair = map.emplace_hint(it_pair, id, generator.rand(id));
+
+    return it_pair->second;
+  }
+
+  const Real _min;
+  const Real _max;
+  const Real _range;
+
+  const bool _is_nodal;
+  const bool _use_legacy;
+
+private:
+  std::unique_ptr<RandomData> _elem_random_data;
+  std::unique_ptr<RandomData> _node_random_data;
+
+  MooseRandom * _elem_random_generator;
+  MooseRandom * _node_random_generator;
+
+  std::map<dof_id_type, Real> _elem_numbers;
+  std::map<dof_id_type, Real> _node_numbers;
 };
 
 #endif // RANDOMIC_H

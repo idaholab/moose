@@ -304,7 +304,11 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  virtual Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
+  virtual Assembly & assembly(THREAD_ID tid) override
+  {
+    mooseAssert(tid < _assembly.size(), "Assembly objects not initialized");
+    return *_assembly[tid];
+  }
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
