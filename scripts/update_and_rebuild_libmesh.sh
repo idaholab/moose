@@ -128,6 +128,8 @@ if [ -z "$go_fast" ]; then
                --disable-maintainer-mode \
                --enable-petsc-hypre-required \
                --disable-metaphysicl \
+               --enable-march \
+               --with-gcc-arch=native \
                $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
 else
   # The build directory must already exist: you can't do --fast for
