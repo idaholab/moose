@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SINGLEPHASEFLUIDPROPERTIESUTILS_H
-#define SINGLEPHASEFLUIDPROPERTIESUTILS_H
+#ifndef SINGLEPHASEFLUIDPROPERTIESTESTUTILS_H
+#define SINGLEPHASEFLUIDPROPERTIESTESTUTILS_H
 
-#include "Utils.h"
+#include "FluidPropertiesTestUtils.h"
 
 // Relative perturbation for derivative tests
 #define REL_PERTURBATION 1e-6
@@ -58,4 +58,4 @@
     }                                                                                              \
   }
 
-#endif // SINGLEPHASEFLUIDPROPERTIESUTILS_H
+#endif // SINGLEPHASEFLUIDPROPERTIESTESTUTILS_H

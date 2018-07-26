@@ -12,7 +12,7 @@
 
 #include "MooseObjectUnitTest.h"
 #include "Water97FluidProperties.h"
-#include "SinglePhaseFluidPropertiesPTUtils.h"
+#include "SinglePhaseFluidPropertiesPTTestUtils.h"
 
 class Water97FluidPropertiesTest : public MooseObjectUnitTest
 {

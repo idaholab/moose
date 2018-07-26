@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MethaneFluidPropertiesTest.h"
-#include "SinglePhaseFluidPropertiesPTUtils.h"
+#include "SinglePhaseFluidPropertiesPTTestUtils.h"
 
 /**
  * Verify that critical properties are correctly returned

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BrineFluidPropertiesTest.h"
-#include "Utils.h"
+#include "FluidPropertiesTestUtils.h"
 
 /**
  * Test that the fluid name is correctly returned
