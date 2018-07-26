@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SINGLEPHASEFLUIDPROPERTIESPTUTILS_H
-#define SINGLEPHASEFLUIDPROPERTIESPTUTILS_H
+#ifndef SINGLEPHASEFLUIDPROPERTIESPTTESTUTILS_H
+#define SINGLEPHASEFLUIDPROPERTIESPTTESTUTILS_H
 
-#include "Utils.h"
+#include "FluidPropertiesTestUtils.h"
 #include "SinglePhaseFluidPropertiesPT.h"
 
 // Macro for performing a derivative test
@@ -67,4 +67,4 @@ combinedProperties(const U & f, Real p, Real T, Real tol)
   ABS_TEST(de_dT, de2_dT, tol);
 }
 
-#endif // SINGLEPHASEFLUIDPROPERTIESPTUTILS_H
+#endif // SINGLEPHASEFLUIDPROPERTIESPTTESTUTILS_H

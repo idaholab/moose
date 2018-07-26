@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "StiffenedGasFluidPropertiesTest.h"
-#include "SinglePhaseFluidPropertiesUtils.h"
+#include "SinglePhaseFluidPropertiesTestUtils.h"
 
 TEST_F(StiffenedGasFluidPropertiesTest, testAll)
 {
@@ -57,7 +57,7 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
   DERIV_TEST(_fp->h_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
   ABS_TEST(_fp->s_from_h_p(h, p), -2.6562518076298216e4, REL_TOL_SAVED_VALUE);
-  DERIV_TEST(_fp->s_from_h_p, h, p, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->s_from_h_p, h, p, 1e-5);
 
   ABS_TEST(_fp->e_from_p_T(p, T), 8.397412646416575e4, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
