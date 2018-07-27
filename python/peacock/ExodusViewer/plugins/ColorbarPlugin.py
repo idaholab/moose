@@ -356,7 +356,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Setup the colorbar toggle.
         """
         qobject.setChecked(True)
-        qobject.stateChanged.connect(self._callbackColorBarToggle)
+        qobject.clicked.connect(self._callbackColorBarToggle)
 
     def _callbackColorBarToggle(self, value):
         """
