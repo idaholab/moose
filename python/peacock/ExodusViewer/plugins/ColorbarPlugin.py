@@ -7,6 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import chigger
 import os
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -25,9 +26,6 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     readerOptionsChanged = QtCore.pyqtSignal(dict)
     resultOptionsChanged = QtCore.pyqtSignal(dict)
     colorbarOptionsChanged = QtCore.pyqtSignal(dict)
-
-    #: pyqtSignal: Emitted when colorbar is added/removed
-    setColorbarVisible = QtCore.pyqtSignal(bool)
 
     def __init__(self):
         super(ColorbarPlugin, self).__init__()
@@ -89,6 +87,12 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.RangeMaximumLayout.setSpacing(10)
         self.ColorbarToggleLayout.setSpacing(10)
 
+        # The ExodusColorbar object is added by this plugin, so it needs
+        # to do a few things with the core chigger objects.
+        self._window = None   # RenderWindow (from VTKWindowPlugin)
+        self._result = None   # ExodusResult (from VTKWindowPlugin)
+        self._colorbar = None # ExodusColorbar (created by this plugin)
+
         # Call widget setup methods
         self.setup()
 
@@ -136,11 +140,33 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self._setDefaultLimitHelper(self.RangeMinimumMode, self.RangeMinimum, rng[0])
         self._setDefaultLimitHelper(self.RangeMaximumMode, self.RangeMaximum, rng[1])
 
+    def onSetupWindow(self, window):
+        """
+        Store the RenderWindow for adding and removing the colorbar
+        """
+        self._window = window
+        self.updateColorbarOptions()
+
+    def onSetupResult(self, result):
+        """
+        Add the colorbar after the result is changed.
+        """
+        self._result = result
+        self.updateColorbarOptions()
+
+    def onResetWindow(self):
+        """
+        Remove stored chigger objects.
+        """
+        self._window = None
+        self._result = None
+
     def updateOptions(self):
         """
         Update result/reader options for this widget.
         """
         self.updateResultOptions()
+        self.updateColorbarOptions()
 
     def updateResultOptions(self):
         """
@@ -172,9 +198,22 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
     def updateColorbarOptions(self):
         """
-        Toggle the state of the colorbar.
+        Add/remove the colorbar object.
         """
-        self.setColorbarVisible.emit(self.ColorBarToggle.isChecked())
+        if (self._window is None) or (self._result is None):
+            return
+
+        visible = self.ColorBarToggle.isChecked()
+        if visible:
+            if self._colorbar is None:
+                self._colorbar = chigger.exodus.ExodusColorBar(self._result, layer=3)
+
+            if self._colorbar not in self._window:
+                self._window.append(self._colorbar)
+
+        elif (self._colorbar in self._window) and (self._colorbar is not None):
+            self._window.remove(self._colorbar)
+            self._colorbar = None
 
     @staticmethod
     def _setLimitHelper(mode, qobject):
@@ -317,7 +356,6 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Setup the colorbar toggle.
         """
         qobject.setChecked(True)
-        self.setColorbarVisible.emit(True)
         qobject.stateChanged.connect(self._callbackColorBarToggle)
 
     def _callbackColorBarToggle(self, value):
@@ -325,8 +363,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Callback for the colorbar toggle.
         """
         self.store(self.ColorBarToggle)
-        self.updateColorbarOptions()
-        #self.updateOptions()
+        self.updateOptions()
         self.windowRequiresUpdate.emit()
 
     def _setupColorBarRangeType(self, qobject):
@@ -338,6 +375,15 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.store(self.ColorBarRangeType)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
+
+    def repr(self):
+        output = dict()
+        colorbar_options, colorbar_sub_options = self._colorbar.options().toScriptString()
+        output['colorbar'] = ['cbar = chigger.exodus.ExodusColorBar(result)']
+        output['colorbar'] += ['cbar.setOptions({})'.format(', '.join(colorbar_options))]
+        for key, value in colorbar_sub_options.iteritems():
+            output['colorbar'] += ['cbar.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+        return output
 
 def main(size=None):
     """
