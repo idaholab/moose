@@ -30,6 +30,9 @@ MeshOnlyAction::act()
   auto mesh_file = _app.parameters().get<std::string>("mesh_only");
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
+  // Print information about the mesh
+  mesh_ptr->getMesh().print_info();
+
   bool should_generate = false;
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
