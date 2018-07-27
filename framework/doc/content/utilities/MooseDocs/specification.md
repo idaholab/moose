@@ -56,6 +56,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [/sqa.md] | Provides tools for writing software quality documentation using templates. |
 | [/layout.md] | Provides tools for creating columns and tabs via markdown. |
 | [/acronym.md] | Provides means for defining and listing acronyms across pages. |
+| [/plotly.md] | Adds [plotly](https://plot.ly) support for creating charts. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |
@@ -64,6 +65,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [/floats.md] | Tools for creating numbered and/or captioned content (see [/media.md]). |
 | [/devel.md] | Tools for documenting MooseDocs extensions. |
 | [/package.md] | Tools for linking to MOOSE environment packages. |
+| [/contents.md] | Creates complete list of markdown pages within a directory. |
 
 [AST]: https://en.wikipedia.org/wiki/Abstract_syntax_tree
 

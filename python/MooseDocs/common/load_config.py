@@ -30,7 +30,8 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.config',
                       'MooseDocs.extensions.materialicon',
                       'MooseDocs.extensions.acronym',
-                      'MooseDocs.extensions.contents']
+                      'MooseDocs.extensions.contents',
+                      'MooseDocs.extensions.plotly']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
@@ -85,9 +86,9 @@ def _get_module(ext):
         name = ext
         try:
             ext = importlib.import_module(name)
-        except ImportError:
-            msg = "Failed to import the supplied '{}' module."
-            raise exceptions.MooseDocsException(msg, name)
+        except ImportError as e:
+            msg = "Failed to import the supplied '{}' module.\n{}"
+            raise exceptions.MooseDocsException(msg, name, e.message)
     else:
         msg = "The supplied module ({}) must be a module type or a string, but a {} object "\
               "was provided."
