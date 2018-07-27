@@ -8,6 +8,15 @@
     method = 'opt oprof'
   [../]
 
+  [./mesh_info]
+    type = 'RunApp'
+    input = 'mesh_only.i'
+    cli_args = '--mesh-only info_test.e'
+    recover = false
+    method = 'opt oprof'
+    expect_out = 'Mesh Information'
+  [../]
+
   [./mesh_only_warning]
     type = RunApp
     input = 'mesh_only.i'
