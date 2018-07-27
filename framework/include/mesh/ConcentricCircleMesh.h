@@ -25,26 +25,32 @@ class ConcentricCircleMesh : public MooseMesh
 {
 public:
   ConcentricCircleMesh(const InputParameters & parameters);
+
   ConcentricCircleMesh(const ConcentricCircleMesh & /* other_mesh */) = default;
 
   ConcentricCircleMesh & operator=(const ConcentricCircleMesh & other_mesh) = delete;
-  virtual std::unique_ptr<MooseMesh> safeClone() const override;
+  virtual std::unique_ptr<MooseMesh> safeClone() const override
+  {
+    return libmesh_make_unique<ConcentricCircleMesh>(*this);
+  }
+
   virtual void buildMesh() override;
 
 protected:
-  // Number of sectors in one quadrant
+  /// Number of sectors in one quadrant
   unsigned int _num_sectors;
-  // Radii of concentric circles
+  /// Radii of concentric circles
   std::vector<Real> _radii;
-  // Number of rings in each circle or in the moderator
+  /// Number of rings in each circle or in the moderator
   std::vector<unsigned int> _rings;
-  // Length of inner squares
+  /// Size of inner square in relation to radius of the innermost concentric circle
   Real _inner_mesh_fraction;
-  // Adding the moderator is optional
+  /// Adding the moderator is optional
+  bool _has_outer_square;
   Real _pitch;
-  // Volume preserving function is optional
-  bool _volume_preserving_function;
-  // Control of which portion of mesh will be developed
+  /// Volume preserving function is optional
+  bool _preserve_volumes;
+  /// Control of which portion of mesh will be developed
   MooseEnum _portion;
 };
 
