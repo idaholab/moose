@@ -8,327 +8,82 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TheWarehouse.h"
-#include "MooseObject.h"
 
-#include "TaggingInterface.h"
-#include "BoundaryRestrictable.h"
-#include "BlockRestrictable.h"
-#include "SetupInterface.h"
-#include "MooseVariableInterface.h"
-#include "MooseVariableFE.h"
-#include "ElementUserObject.h"
-#include "SideUserObject.h"
-#include "InternalSideUserObject.h"
-#include "NodalUserObject.h"
+#include "Attributes.h"
+#include "MooseObject.h"
+#include "SubProblem.h"
 #include "GeneralUserObject.h"
-#include "ThreadedGeneralUserObject.h"
-#include "NonlocalKernel.h"
-#include "NonlocalIntegratedBC.h"
-#include "InternalSideIndicator.h"
-#include "TransientMultiApp.h"
-#include "MultiAppTransfer.h"
-#include "ShapeUserObject.h"
-#include "ShapeSideUserObject.h"
-#include "ShapeElementUserObject.h"
+#include "DependencyResolverInterface.h"
+#include "BlockRestrictable.h"
 
 #include <memory>
 #include <mutex>
-
-Interfaces
-operator|(Interfaces l, Interfaces r)
-{
-  return static_cast<Interfaces>(static_cast<unsigned int>(l) | static_cast<unsigned int>(r));
-}
-
-std::string
-printAttribs(const std::vector<Attribute> & attribs)
-{
-  std::string s = "attrib_set:\n";
-  for (auto & attrib : attribs)
-  {
-    s += "    ";
-    switch (attrib.id)
-    {
-      case AttributeId::Thread:
-        s += "Thread=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::Name:
-        s += "Name=";
-        s += attrib.strvalue;
-        break;
-      case AttributeId::System:
-        s += "System=";
-        s += attrib.strvalue;
-        break;
-      case AttributeId::Variable:
-        s += "Variable=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::Interfaces:
-        s += "Interfaces=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::PreIC:
-        s += "PreIC=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::PreAux:
-        s += "PreAux=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::Boundary:
-        s += "Boundary=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::Subdomain:
-        s += "Subdomain=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::ExecOn:
-        s += "ExecOn=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::VectorTag:
-        s += "VectorTag=";
-        s += std::to_string(attrib.value);
-        break;
-      case AttributeId::MatrixTag:
-        s += "MatrixTag=";
-        s += std::to_string(attrib.value);
-        break;
-      default:
-        throw std::runtime_error("unknown AttributeId " +
-                                 std::to_string(static_cast<int>(attrib.id)));
-    }
-    s += "\n";
-  }
-  return s;
-}
 
 class Storage
 {
 public:
   virtual ~Storage() = default;
-
-  virtual void add(size_t obj_id, const std::vector<Attribute> & attribs) = 0;
-  virtual std::vector<size_t> query(const std::vector<Attribute> & conds) = 0;
-  virtual void set(size_t obj_id, const std::vector<Attribute> & attribs) = 0;
+  virtual void add(size_t obj_id, std::vector<std::unique_ptr<Attribute>> attribs) = 0;
+  virtual std::vector<size_t> query(const std::vector<std::unique_ptr<Attribute>> & conds) = 0;
+  virtual void set(size_t obj_id, std::vector<std::unique_ptr<Attribute>> attribs) = 0;
 };
+
+bool
+operator<(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs)
+{
+  return *lhs.get() < *rhs.get();
+}
+
+Attribute::Attribute(TheWarehouse & w, const std::string name) : _id(w.attribID(name)) {}
 
 class VecStore : public Storage
 {
-private:
-  struct Data
-  {
-    size_t id;
-    std::string name;
-    std::string system;
-    int thread = 0;
-    int variable = -1;
-    int64_t interfaces = 0; // this is a bitmask for Interfaces enum
-    std::vector<boundary_id_type> boundaries;
-    std::vector<subdomain_id_type> subdomains;
-    std::vector<int> execute_ons;
-    std::vector<int> vector_tags;
-    std::vector<int> matrix_tags;
-    // TODO: delete these two later - they are temporary hacks for dealing with inter-system
-    // dependencies:
-    bool pre_ic = false;
-    bool pre_aux = false;
-  };
-
 public:
-  virtual void add(size_t obj_id, const std::vector<Attribute> & attribs) override
+  virtual void add(size_t obj_id, std::vector<std::unique_ptr<Attribute>> attribs) override
   {
     std::lock_guard<std::mutex> l(_mutex);
-    if (obj_id < _data.size())
+    if (obj_id != _data.size())
       throw std::runtime_error("object with id " + std::to_string(obj_id) + " already added");
-
-    _data.push_back({});
-    auto & d = _data.back();
-    d.id = obj_id;
-    set(d, attribs);
+    _data.push_back(std::move(attribs));
   }
 
-  virtual std::vector<size_t> query(const std::vector<Attribute> & conds) override
+  virtual std::vector<size_t> query(const std::vector<std::unique_ptr<Attribute>> & conds) override
   {
-    std::vector<size_t> objs;
+    std::vector<size_t> ids;
+    std::lock_guard<std::mutex> l(_mutex);
     for (size_t i = 0; i < _data.size(); i++)
     {
-      Data * d = nullptr;
-      {
-        std::lock_guard<std::mutex> l(_mutex);
-        d = &_data[i];
-      }
-
-      bool passes = true;
+      auto & data = _data[i];
+      bool ismatch = true;
       for (auto & cond : conds)
       {
-        switch (cond.id)
+        if (*data[cond->id()] != *cond.get())
         {
-          case AttributeId::Thread:
-            passes = cond.value == d->thread;
-            break;
-          case AttributeId::Name:
-            passes = cond.strvalue == d->name;
-            break;
-          case AttributeId::System:
-            passes = cond.strvalue == d->system;
-            break;
-          case AttributeId::Variable:
-            passes = cond.value == d->variable;
-            break;
-          case AttributeId::Interfaces:
-            passes = static_cast<unsigned int>(cond.value) &
-                     static_cast<unsigned int>(d->interfaces); // check bit in bitmask
-            break;
-          // TODO: delete this case later - it is a temporary hack for dealing with inter-system
-          // dependencies:
-          case AttributeId::PreIC:
-            passes = cond.value == d->pre_ic;
-            break;
-          // TODO: delete this case later - it is a temporary hack for dealing with inter-system
-          // dependencies:
-          case AttributeId::PreAux:
-            passes = cond.value == d->pre_aux;
-            break;
-          case AttributeId::Boundary:
-            passes = false;
-            for (auto val : d->boundaries)
-              if (cond.value == Moose::ANY_BOUNDARY_ID || val == Moose::ANY_BOUNDARY_ID ||
-                  cond.value == val)
-              {
-                passes = true;
-                break;
-              }
-            break;
-          case AttributeId::Subdomain:
-            passes = false;
-            for (auto val : d->subdomains)
-              if (cond.value == Moose::ANY_BLOCK_ID || val == Moose::ANY_BLOCK_ID ||
-                  cond.value == val)
-              {
-                passes = true;
-                break;
-              }
-            break;
-          case AttributeId::ExecOn:
-            passes = false;
-            for (auto val : d->execute_ons)
-              if (cond.value == Moose::ALL || val == Moose::ALL || cond.value == val)
-              {
-                passes = true;
-                break;
-              }
-            break;
-          case AttributeId::VectorTag:
-            passes = false;
-            for (auto val : d->vector_tags)
-              if (cond.value == val)
-              {
-                passes = true;
-                break;
-              }
-            break;
-          case AttributeId::MatrixTag:
-            passes = false;
-            for (auto val : d->matrix_tags)
-              if (cond.value == val)
-              {
-                passes = true;
-                break;
-              }
-            break;
-          default:
-            throw std::runtime_error("unknown AttributeId " +
-                                     std::to_string(static_cast<int>(cond.id)));
-        }
-        if (!passes)
+          ismatch = false;
           break;
+        }
       }
-      if (passes)
-        objs.push_back(i);
+      if (ismatch)
+        ids.push_back(i);
     }
-    return objs;
+    return ids;
   }
 
-  virtual void set(size_t obj_id, const std::vector<Attribute> & attribs) override
+  virtual void set(size_t obj_id, std::vector<std::unique_ptr<Attribute>> attribs) override
   {
-    std::lock_guard<std::mutex> l(_mutex);
-    Data * dat = nullptr;
-    if (_data[obj_id].id == obj_id)
-      dat = &_data[obj_id];
-    else
-      for (auto & d : _data)
-        if (d.id == obj_id)
-        {
-          dat = &d;
-          break;
-        }
-
-    if (!dat)
+    if (obj_id > _data.size())
       throw std::runtime_error("unknown object id " + std::to_string(obj_id));
 
-    set(*dat, attribs);
+    std::lock_guard<std::mutex> l(_mutex);
+
+    auto & dst = _data[obj_id];
+    for (auto & attrib : attribs)
+      dst[attrib->id()] = std::move(attrib);
   }
 
 private:
-  void set(Data & d, const std::vector<Attribute> & attribs)
-  {
-    for (auto & attrib : attribs)
-    {
-      switch (attrib.id)
-      {
-        case AttributeId::Thread:
-          d.thread = attrib.value;
-          break;
-        case AttributeId::Name:
-          d.name = attrib.strvalue;
-          break;
-        case AttributeId::System:
-          d.system = attrib.strvalue;
-          break;
-        case AttributeId::Variable:
-          d.variable = attrib.value;
-          break;
-        case AttributeId::Interfaces:
-          d.interfaces = attrib.value;
-          break;
-        // TODO: delete this case later - it is a temporary hack for dealing with inter-system
-        // dependencies:
-        case AttributeId::PreIC:
-          d.pre_ic = attrib.value;
-          break;
-        // TODO: delete this case later - it is a temporary hack for dealing with inter-system
-        // dependencies:
-        case AttributeId::PreAux:
-          d.pre_aux = attrib.value;
-          break;
-        case AttributeId::Boundary:
-          d.boundaries.push_back(attrib.value);
-          break;
-        case AttributeId::Subdomain:
-          d.subdomains.push_back(attrib.value);
-          break;
-        case AttributeId::ExecOn:
-          d.execute_ons.push_back(attrib.value);
-          break;
-        case AttributeId::VectorTag:
-          d.vector_tags.push_back(attrib.value);
-          break;
-        case AttributeId::MatrixTag:
-          d.matrix_tags.push_back(attrib.value);
-          break;
-        default:
-          throw std::runtime_error("unknown AttributeId " +
-                                   std::to_string(static_cast<int>(attrib.id)));
-      }
-    }
-  }
-
   std::mutex _mutex;
-  std::vector<Data> _data;
+  std::vector<std::vector<std::unique_ptr<Attribute>>> _data;
 };
 
 TheWarehouse::TheWarehouse() : _store(new VecStore()) {}
@@ -339,12 +94,21 @@ static std::mutex cache_mutex;
 
 void isValid(MooseObject * obj);
 
+unsigned int
+TheWarehouse::attribID(const std::string & name)
+{
+  auto it = _attrib_ids.find(name);
+  if (it != _attrib_ids.end())
+    return it->second;
+  mooseError("no ID exists for unregistered attribute '", name, "'");
+}
+
 void
 TheWarehouse::add(std::shared_ptr<MooseObject> obj, const std::string & system)
 {
   isValid(obj.get());
 
-  std::vector<Attribute> attribs;
+  std::vector<std::unique_ptr<Attribute>> attribs;
   readAttribs(obj.get(), system, attribs);
   size_t obj_id = 0;
   {
@@ -353,26 +117,40 @@ TheWarehouse::add(std::shared_ptr<MooseObject> obj, const std::string & system)
     obj_id = _objects.size() - 1;
     _obj_ids[obj.get()] = obj_id;
   }
-  _store->add(obj_id, attribs);
+  _store->add(obj_id, std::move(attribs));
 
+  // reset/invalidate the query cache since query results may have been affected by this warehouse
+  // insertion.
   _obj_cache.clear();
   _query_cache.clear();
 }
 
 void
-TheWarehouse::update(MooseObject * obj, const std::vector<Attribute> & extras /*={}*/)
+TheWarehouse::update(MooseObject * obj, const Attribute & extra)
 {
-  std::vector<Attribute> attribs;
-  readAttribs(obj, "", attribs);
-  attribs.insert(attribs.end(), extras.begin(), extras.end());
-  _store->set(_obj_ids[obj], attribs);
+  std::vector<std::unique_ptr<Attribute>> attribs;
+  attribs.push_back(extra.clone());
+  _store->set(_obj_ids[obj], std::move(attribs));
+  // reset/invalidate the query cache since query results may have been affected by this object
+  // attribute modification.
+  _obj_cache.clear();
+  _query_cache.clear();
+}
 
+void
+TheWarehouse::update(MooseObject * obj)
+{
+  std::vector<std::unique_ptr<Attribute>> attribs;
+  readAttribs(obj, "", attribs);
+  _store->set(_obj_ids[obj], std::move(attribs));
+  // reset/invalidate the query cache since query results may have been affected by this object
+  // attribute modification.
   _obj_cache.clear();
   _query_cache.clear();
 }
 
 int
-TheWarehouse::prepare(const std::vector<Attribute> & conds)
+TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
 {
   auto obj_ids = _store->query(conds);
 
@@ -380,7 +158,8 @@ TheWarehouse::prepare(const std::vector<Attribute> & conds)
   _obj_cache.push_back({});
   auto query_id = _obj_cache.size() - 1;
   auto & vec = _obj_cache.back();
-  _query_cache[conds] = query_id;
+
+  _query_cache[std::move(conds)] = query_id;
 
   std::lock_guard<std::mutex> o_lock(obj_mutex);
   for (auto & id : obj_ids)
@@ -427,9 +206,9 @@ TheWarehouse::query(int query_id)
 }
 
 size_t
-TheWarehouse::count(const std::vector<Attribute> & conds)
+TheWarehouse::count(std::vector<std::unique_ptr<Attribute>> conds)
 {
-  auto query_id = prepare(conds);
+  auto query_id = prepare(std::move(conds));
   if (static_cast<size_t>(query_id) >= _obj_cache.size())
     throw std::runtime_error("unknown query id");
   std::lock_guard<std::mutex> lock(cache_mutex);
@@ -444,73 +223,21 @@ TheWarehouse::count(const std::vector<Attribute> & conds)
 void
 TheWarehouse::readAttribs(const MooseObject * obj,
                           const std::string & system,
-                          std::vector<Attribute> & attribs)
+                          std::vector<std::unique_ptr<Attribute>> & attribs)
 {
-  if (!system.empty())
-    attribs.push_back({AttributeId::System, 0, system});
-  attribs.push_back({AttributeId::Name, 0, obj->name()});
-  attribs.push_back({AttributeId::Thread, static_cast<int>(obj->getParam<THREAD_ID>("_tid")), ""});
-
-  // clang-format off
-  unsigned int imask = 0;
-  imask |= (unsigned int)Interfaces::UserObject                * (dynamic_cast<const UserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::ElementUserObject         * (dynamic_cast<const ElementUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::SideUserObject            * (dynamic_cast<const SideUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::InternalSideUserObject    * (dynamic_cast<const InternalSideUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::NodalUserObject           * (dynamic_cast<const NodalUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::GeneralUserObject         * (dynamic_cast<const GeneralUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::ThreadedGeneralUserObject * (dynamic_cast<const ThreadedGeneralUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::ShapeElementUserObject    * (dynamic_cast<const ShapeElementUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::ShapeSideUserObject       * (dynamic_cast<const ShapeSideUserObject *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::Postprocessor             * (dynamic_cast<const Postprocessor *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::VectorPostprocessor       * (dynamic_cast<const VectorPostprocessor *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::NonlocalKernel            * (dynamic_cast<const NonlocalKernel *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::NonlocalIntegratedBC      * (dynamic_cast<const NonlocalIntegratedBC *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::InternalSideIndicator     * (dynamic_cast<const InternalSideIndicator *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::TransientMultiApp         * (dynamic_cast<const TransientMultiApp *>(obj) != nullptr);
-  imask |= (unsigned int)Interfaces::MultiAppTransfer          * (dynamic_cast<const MultiAppTransfer *>(obj) != nullptr);
-  attribs.push_back({AttributeId::Interfaces, static_cast<int>(imask), ""});
-  // clang-format on
-
-  auto vi = dynamic_cast<const MooseVariableInterface<Real> *>(obj);
-  if (vi)
-    attribs.push_back({AttributeId::Variable, static_cast<int>(vi->mooseVariable()->number()), ""});
-
-  auto ti = dynamic_cast<const TaggingInterface *>(obj);
-  if (ti)
+  AttribSystem sys(*this, system);
+  for (auto & ref : _attrib_list)
   {
-    for (auto tag : ti->getVectorTags())
-      attribs.push_back({AttributeId::VectorTag, static_cast<int>(tag), ""});
-    for (auto tag : ti->getMatrixTags())
-      attribs.push_back({AttributeId::MatrixTag, static_cast<int>(tag), ""});
-  }
-  auto blk = dynamic_cast<const BlockRestrictable *>(obj);
-  if (blk)
-  {
-    if (blk->blockRestricted())
-      for (auto id : blk->blockIDs())
-        attribs.push_back({AttributeId::Subdomain, id, ""});
-    else
-      attribs.push_back({AttributeId::Subdomain, Moose::ANY_BLOCK_ID, ""});
-  }
-  auto bnd = dynamic_cast<const BoundaryRestrictable *>(obj);
-  if (bnd && bnd->boundaryRestricted())
-  {
-    if (bnd->boundaryRestricted())
-      for (auto & bound : bnd->boundaryIDs())
-        attribs.push_back({AttributeId::Boundary, bound, ""});
-    else
-      attribs.push_back({AttributeId::Boundary, Moose::ANY_BOUNDARY_ID, ""});
-  }
-  auto sup = dynamic_cast<const SetupInterface *>(obj);
-  if (sup)
-  {
-    auto e = sup->getExecuteOnEnum();
-    for (auto & on : e.items())
+    if (ref->id() == sys.id())
     {
-      if (e.contains(on))
-        attribs.push_back({AttributeId::ExecOn, on, ""});
+      if (!system.empty())
+        attribs.push_back(sys.clone());
+      continue;
     }
+
+    auto attrib = ref->clone();
+    attrib->initFrom(obj);
+    attribs.push_back(std::move(attrib));
   }
 }
 

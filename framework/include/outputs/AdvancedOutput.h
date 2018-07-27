@@ -359,7 +359,11 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   bool has_limited_pps = false;
 
   std::vector<UserObject *> objs;
-  _problem_ptr->theWarehouse().build().system("UserObject").thread(0).queryInto(objs);
+  _problem_ptr->theWarehouse()
+      .build()
+      .cond<AttribSystem>("UserObject")
+      .cond<AttribThread>(0)
+      .queryInto(objs);
 
   for (const auto & obj : objs)
   {

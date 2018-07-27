@@ -17,7 +17,7 @@
 #include "libmesh/threads.h"
 
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblemBase & fe_problem,
-                                                             const TheWarehouse::Builder & query)
+                                                             const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem), _query(query)
 {
 }
@@ -37,16 +37,17 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   const Node * node = *node_it;
   _fe_problem.reinitNode(node, _tid);
 
+  std::vector<NodalUserObject *> objs;
+
   // Boundary Restricted
   std::vector<BoundaryID> nodeset_ids;
   _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node, nodeset_ids);
   for (const auto & bnd : nodeset_ids)
   {
-    std::vector<NodalUserObject *> objs;
     _query.clone()
-        .thread(_tid)
-        .interfaces(Interfaces::NodalUserObject)
-        .boundary(bnd)
+        .cond<AttribThread>(_tid)
+        .cond<AttribInterfaces>(Interfaces::NodalUserObject)
+        .cond<AttribBoundaries>(bnd, true)
         .queryInto(objs);
     for (const auto & uo : objs)
       uo->execute();
@@ -64,11 +65,10 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
   {
-    std::vector<NodalUserObject *> objs;
     _query.clone()
-        .thread(_tid)
-        .interfaces(Interfaces::NodalUserObject)
-        .subdomain(block)
+        .cond<AttribThread>(_tid)
+        .cond<AttribInterfaces>(Interfaces::NodalUserObject)
+        .cond<AttribSubdomains>(block)
         .queryInto(objs);
 
     for (const auto & uo : objs)

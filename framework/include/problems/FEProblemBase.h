@@ -29,6 +29,7 @@
 #include "HashMap.h"
 #include "VectorPostprocessor.h"
 #include "PerfGraphInterface.h"
+#include "Attributes.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -668,7 +669,7 @@ public:
   T & getUserObject(const std::string & name, unsigned int tid = 0) const
   {
     std::vector<T *> objs;
-    theWarehouse().build().thread(tid).name(name).queryInto(objs);
+    theWarehouse().build().cond<AttribThread>(tid).cond<AttribName>(name).queryInto(objs);
     if (objs.empty())
       mooseError("Unable to find user object with name '" + name + "'");
     return *(objs[0]);
@@ -1724,7 +1725,7 @@ protected:
   std::unique_ptr<ConstElemRange> _evaluable_local_elem_range;
 
 private:
-  void joinAndFinalize(TheWarehouse::Builder query, bool isgen = false);
+  void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
 
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;

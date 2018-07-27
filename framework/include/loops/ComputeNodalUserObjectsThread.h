@@ -21,7 +21,7 @@ class ComputeNodalUserObjectsThread
   : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalUserObjectsThread(FEProblemBase & fe_problem, const TheWarehouse::Builder & query);
+  ComputeNodalUserObjectsThread(FEProblemBase & fe_problem, const TheWarehouse::Query & query);
   // Splitting Constructor
   ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
@@ -32,7 +32,7 @@ public:
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
 private:
-  const TheWarehouse::Builder _query;
+  const TheWarehouse::Query _query;
 };
 
 #endif // COMPUTENODALUSEROBJECTSTHREAD_H

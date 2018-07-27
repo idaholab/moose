@@ -21,191 +21,220 @@
 
 class MooseObject;
 class Storage;
+class TheWarehouse;
 
-// attributes include:
-//
-//     * tag (multiple) few - 3ish
-//     * system - order 50
-//     * execute_on (multiple) 10 max
-//     * thread_id - order 10
-//     * boundary_id (multiple) 1000 per mesh, 1000 per object (use "all/any" optimization)
-//     * subdomain_id (multiple) 10000 per mesh, 1000 per object (use "all/any" optimization)
-enum class AttributeId
-{
-  None,
-  Thread,
-  Name,
-  System,
-  Variable,
-  Interfaces, // bitmask
-  VectorTag,  // multiple
-  MatrixTag,  // multiple
-  Boundary,   // multiple
-  Subdomain,  // multiple
-  ExecOn,     // multiple
-  // TODO: delete these two later - they are temporary hacks for dealing with inter-system
-  // dependencies
-  PreIC,
-  PreAux,
-};
-
-enum class Interfaces
-{
-  UserObject = 1 << 1,
-  ElementUserObject = 1 << 2,
-  SideUserObject = 1 << 3,
-  InternalSideUserObject = 1 << 4,
-  NodalUserObject = 1 << 5,
-  GeneralUserObject = 1 << 6,
-  ThreadedGeneralUserObject = 1 << 7,
-  ShapeElementUserObject = 1 << 8,
-  ShapeSideUserObject = 1 << 9,
-  Postprocessor = 1 << 10,
-  VectorPostprocessor = 1 << 11,
-  NonlocalKernel = 1 << 12,
-  NonlocalIntegratedBC = 1 << 13,
-  InternalSideIndicator = 1 << 14,
-  TransientMultiApp = 1 << 15,
-  MultiAppTransfer = 1 << 16
-};
-
-template <typename T>
-class EnumFlag
+/// Attribute is an abstract class that can be implemented in order to track custom metadata about
+/// MooseObject instances - enabling warehouse queries over the attribute.  Attribute subclasses
+/// must be registered with the warehouse (i.e. via TheWarehouse::registerAttrib) where they will
+/// be used *before* objects are added to that warehouse.  Specific Attribute instances cannot (and
+/// should not) generally be created before the class is registered with a warehouse.
+class Attribute
 {
 public:
-  using UnderlyingType = typename std::underlying_type<T>::type;
-  EnumFlag(const T & flags) : m_flags(static_cast<UnderlyingType>(flags)) {}
-  bool operator&(T r) const { return 0 != (m_flags & static_cast<UnderlyingType>(r)); }
-  operator Interfaces() const { return Interfaces(m_flags); }
-  operator int() const { return (int)Interfaces(m_flags); }
-  static const T NoFlag = static_cast<T>(0);
+  /// Constructs/initializes a new attribute with the specified name for use in warehouse w.  The
+  /// attribute must have been previously registered with w prior to calling this constructor.
+  Attribute(TheWarehouse & w, const std::string name);
+  virtual ~Attribute() {}
 
-private:
-  UnderlyingType m_flags;
-};
-
-Interfaces operator|(Interfaces l, Interfaces r);
-
-struct Attribute
-{
-  AttributeId id;
-  int64_t value;
-  std::string strvalue;
   inline bool operator==(const Attribute & other) const
   {
-    return id == other.id && value == other.value && strvalue == other.strvalue;
+    return _id == other._id && isMatch(other);
   }
+  inline bool operator!=(const Attribute & other) const { return !(*this == other); }
   inline bool operator<(const Attribute & other) const
   {
-    if (id == other.id)
-    {
-      if (value == other.value)
-        return strvalue < other.strvalue;
-      return value < other.value;
-    }
-    return id < other.id;
+    return _id == other._id ? isLess(other) : _id < other._id;
   }
+
+  /// returns the unique attribute ID associated with all attributes that have the same (mose
+  /// derived) class as this object. This ID is determined at construction time
+  /// this
+  inline unsigned int id() const { return _id; }
+
+  /// initFrom reads and stores the desired meta-data from obj for later matching comparisons.
+  virtual void initFrom(const MooseObject * obj) = 0;
+  /// isMatch returns true if the meta-data stored in this attribute has the same value as that
+  /// stored in other. isMatch does not need to check/compare the values from the instances' id()
+  /// functions.
+  virtual bool isMatch(const Attribute & other) const = 0;
+  /// isLess should return true if the meta-data stored in this object is "less" than that stored
+  /// in other (i.e. like an operator< overload). This comparison can be implemented in any way
+  /// that makes sense for the type of data being stored.  "attrib1.isLess(attrib2)" and
+  /// "attrib2.isLess(attrib1)" should never both be true, and they should only both return false
+  /// if and only if "attrib1.isMatch(attrib2)" returns true.  isLess does not need to
+  /// check/compare the values from the instances' id() functions.
+  virtual bool isLess(const Attribute & other) const = 0;
+  /// clone creates and returns and identical (deep) copy of this attribute - i.e. the result of
+  /// clone should return true if passed into isMatch.
+  virtual std::unique_ptr<Attribute> clone() const = 0;
+
+private:
+  int _id = -1;
 };
 
+/// TheWarehouse uses this operator function for indexing and caching queries. So this is
+/// important even though you don't see it being called (directly) anywhere - it *IS* being used.
+bool operator<(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs);
+
+/// TheWarehouse is a container for MooseObjects that allows querying/filtering over various
+/// customizeable attributes.  The meta-data about the objects is read/stored when the objects are
+/// added to the warehouse - updates to objects' state will not be reflected in query
+/// results unless the object is explicitly updated through the warehouse interface.  The
+/// warehouse object can safely be queried concurrently from multiple threads.
+///
+/// Once Query and Attribute objects have been constructed, they are tied to the specific
+/// warehouse they were created with.  They must not be used for different warehouses or the
+/// attribute ID they store internally will be wrong and that is bad.
 class TheWarehouse
 {
 public:
-  TheWarehouse();
-  ~TheWarehouse();
-
-  class Builder
+  /// Query is a convenient way to construct and pass around (possible partially constructed)
+  /// warehouse queries.  The warehouse's "build()" function should generally be used to create
+  /// new Query objects rather than constructing them directly.  A Query object holds a list of
+  /// conditions used to filter/select objects from the warehouse.  When the query is
+  /// executed/run, results are filtered by "and"ing each condition together - i.e. only objects
+  /// that match *all* conditions are returned.
+  class Query
   {
   public:
-    Builder(TheWarehouse & w) : _w(w) {}
-    Builder clone() const { return Builder(*this); }
-    Builder thread(int tid)
+    /// Creates a new query operating on the given warehouse w.  You should generally use
+    /// TheWarehouse::build() instead.
+    Query(TheWarehouse & w) : _w(&w) {}
+
+    Query & operator=(const Query & other)
     {
-      _attribs.push_back({AttributeId::Thread, tid, ""});
+      if (this == &other)
+        return *this;
+
+      _w = other._w;
+      _attribs.clear();
+      for (auto & attrib : other._attribs)
+        _attribs.push_back(attrib->clone());
       return *this;
     }
-    Builder name(const std::string & name)
+    Query(const Query & other) : _w(other._w)
     {
-      _attribs.push_back({AttributeId::Name, 0, name});
-      return *this;
+      for (auto & attrib : other._attribs)
+        _attribs.push_back(attrib->clone());
     }
-    Builder interfaces(unsigned int ifaces)
+
+    /// Adds one or more new conditions to the query.  Each arg must be an Attribute object of the
+    /// desired type+value.
+    template <typename... Args>
+    Query & conds(const Attribute & attrib, Args... args)
     {
-      _attribs.push_back({AttributeId::Interfaces, ifaces, ""});
-      return *this;
+      _attribs.push_back(attrib.clone());
+      return cond(args...);
     }
-    Builder interfaces(Interfaces ifaces)
+
+    /// Adds a new condition to the query.  The template parameter T is the Attribute class of
+    /// interest and args are forwarded to T's constructor to build+add the attribute in-situ.
+    template <typename T, typename... Args>
+    Query & cond(Args... args)
     {
-      _attribs.push_back({AttributeId::Interfaces, (int)ifaces, ""});
-      return *this;
-    }
-    Builder subdomain(unsigned int id)
-    {
-      _attribs.push_back({AttributeId::Subdomain, id, ""});
-      return *this;
-    }
-    Builder boundary(int id)
-    {
-      _attribs.push_back({AttributeId::Boundary, id, ""});
-      return *this;
-    }
-    Builder exec_on(int on)
-    {
-      _attribs.push_back({AttributeId::ExecOn, on, ""});
-      return *this;
-    }
-    Builder system(const std::string & sys)
-    {
-      _attribs.push_back({AttributeId::System, 0, sys});
+      _attribs.push_back(std::unique_ptr<Attribute>(new T(*_w, args...)));
       return *this;
     }
 
-    /// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
-    Builder pre_ic(bool pre_ic)
-    {
-      _attribs.push_back({AttributeId::PreIC, (int)pre_ic, ""});
-      return *this;
-    }
-    /// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
-    Builder pre_aux(bool pre_aux)
-    {
-      _attribs.push_back({AttributeId::PreAux, (int)pre_aux, ""});
-      return *this;
-    }
-    size_t count() { return _w.count(_attribs); }
-    std::vector<Attribute> attribs() { return _attribs; }
+    /// clone creates and returns an independent copy of the query in its current state.
+    Query clone() const { return std::move(Query(*this)); }
+    /// count returns the number of results that match the query (this requires actually running
+    /// the query).
+    size_t count() { return _w->count(std::move(clone()._attribs)); }
+
+    /// attribs returns a copy of the constructed Attribute list for the query in its current state.
+    std::vector<std::unique_ptr<Attribute>> attribs() { return std::move(clone()._attribs); }
+
+    /// queryInto executes the query and stores the results in the given vector.  All results must
+    /// be castable to the templated type T.
     template <typename T>
     std::vector<T *> queryInto(std::vector<T *> & results)
     {
-      return _w.queryInto(_attribs, results);
+      return _w->queryInto(std::move(clone()._attribs), results);
     }
 
   private:
-    TheWarehouse & _w;
-    std::vector<Attribute> _attribs;
+    Query & cond(const Attribute & attrib)
+    {
+      _attribs.push_back(attrib.clone());
+      return *this;
+    }
+
+    TheWarehouse * _w = nullptr;
+    std::vector<std::unique_ptr<Attribute>> _attribs;
   };
-  Builder build() { return Builder(*this); }
 
+  TheWarehouse();
+  ~TheWarehouse();
+
+  /// registers a new "tracked" attribute of type T for the warehouse.  args are all arguments
+  /// necessary to create an instance of the T class excluding the warehouse reference/pointer
+  /// which is assumed to be first and automatically inserted.  An instance of every registered
+  /// attribute will be created for and initialized to each object added to the warehouse allowing
+  /// queries to be executed over specific values the attribute may take on. Attributes must be
+  /// registered *before* objects are added to the warehouse.  A unique ID associated with the
+  /// registered attribute is returned - which is generally not needed used by users.
+  ///
+  /// As an example, to register a class with the constructor "YourAttribute(TheWarehouse& w, int
+  /// foo)", you would call "registerAttrib<YourAttribute>("your_attrib_name", 42 /* a dummy-value
+  /// */)". Custom attribute classes are required to pass an attribute name (i.e.
+  /// "your_attrib_name") to the Attribute base class.  The name passed here into registerAttrib
+  /// must be the same string as the name passed to the Attribute base class's constructor.
+  template <typename T, typename... Args>
+  unsigned int registerAttrib(const std::string & name, Args... args)
+  {
+    auto it = _attrib_ids.find(name);
+    if (it != _attrib_ids.end())
+      return it->second;
+
+    _attrib_ids[name] = _attrib_list.size();
+    _attrib_list.push_back(std::unique_ptr<Attribute>(new T(*this, args...)));
+    return _attrib_list.size() - 1;
+  }
+
+  /// Returns a unique ID associated with the given attribute name - i.e. an attribute and name
+  /// that were previously registered via calls to registerAttrib.  Users should generally *not*
+  /// need to use this function.
+  unsigned int attribID(const std::string & name);
+
+  /// add adds a new object to the warehouse and stores attributes/metadata about it for running
+  /// queries/filtering.  The warehouse will maintain a pointer to the object indefinitely.
   void add(std::shared_ptr<MooseObject> obj, const std::string & system);
-
-  /// Any attributes specified in extras overwrite/trump ones read from the object's current state.
-  void update(MooseObject * obj, const std::vector<Attribute> & extras = {});
-
-  size_t count(const std::vector<Attribute> & conds);
-
-  /// This function filters out not-enabled objects.
+  /// update updates the metadata/attribute-info stored for the given object obj that must already
+  /// exists in the warehouse.  Call this if an object's state has changed in such a way that its
+  /// warehouse attributes have become stale/incorrect.
+  void update(MooseObject * obj);
+  /// update updates the metadata/attribute-info stored for the given object obj that must already
+  /// exists in the warehouse.  Call this if an object's state has changed in such a way that its
+  /// warehouse attributes have become stale/incorrect.
+  /// Any attribute specified in extra overwrites/trumps one read from the object's current state.
+  void update(MooseObject * obj, const Attribute & extra);
+  /// build creates and returns an initialized a query object for querying objects from the
+  /// warehouse.
+  Query build() { return Query(*this); }
+  /// count returns the number of objects that match the provided query conditions. This requires
+  /// executing a full query operation (i.e. as if calling queryInto). A Query object should
+  /// generally be used via the build() member function instead.
+  size_t count(std::vector<std::unique_ptr<Attribute>> conds);
+  /// queryInto takes the given conditions (i.e. Attributes holding the values to filter/match
+  /// over) and filters all objects in the warehouse that match all conditions (i.e. "and"ing the
+  /// conditions together) and stores them in the results vector. All result objects must be
+  /// castable to the templated type T. This function filters out disabled objects on the fly -
+  /// only returning enabled ones.
   template <typename T>
-  std::vector<T *> & queryInto(const std::vector<Attribute> & conds, std::vector<T *> & results)
+  std::vector<T *> & queryInto(std::vector<std::unique_ptr<Attribute>> conds,
+                               std::vector<T *> & results)
   {
     int query_id = -1;
-    if (_query_cache.count(conds) == 0)
-      query_id = prepare(conds);
+    auto it = _query_cache.find(conds);
+    if (it == _query_cache.end())
+      query_id = prepare(std::move(conds));
     else
-      query_id = _query_cache[conds];
+      query_id = it->second;
     return queryInto(query_id, results);
   }
 
 private:
-  // This function filters out not-enabled objects.
   template <typename T>
   std::vector<T *> & queryInto(int query_id, std::vector<T *> & results, bool show_all = false)
   {
@@ -222,20 +251,28 @@ private:
   }
 
   /// prepares a query and returns an associated query_id (i.e. for use with the query function).
-  int prepare(const std::vector<Attribute> & conds);
+  int prepare(std::vector<std::unique_ptr<Attribute>> conds);
 
   const std::vector<MooseObject *> query(int query_id);
 
   void readAttribs(const MooseObject * obj,
                    const std::string & system,
-                   std::vector<Attribute> & attribs);
+                   std::vector<std::unique_ptr<Attribute>> & attribs);
 
   std::unique_ptr<Storage> _store;
   std::vector<std::shared_ptr<MooseObject>> _objects;
   std::unordered_map<MooseObject *, size_t> _obj_ids;
 
+  // Results from queries are cached here. The outer vector index is the query id as stored by the
+  // _query_cache data structure.  A list objects that match each query id are stored.
   std::vector<std::vector<MooseObject *>> _obj_cache;
-  std::map<std::vector<Attribute>, int> _query_cache;
+  // This stores a query id for every query keyed by the query conditions/attributes.
+  // User-initiated queries check this map to see if a queries results have already been cached.
+  // The query id is an index into the _obj_cache data structure.
+  std::map<std::vector<std::unique_ptr<Attribute>>, int> _query_cache;
+
+  std::map<std::string, unsigned int> _attrib_ids;
+  std::vector<std::unique_ptr<Attribute>> _attrib_list;
 };
 
 #endif // THEWAREHOUSE_H

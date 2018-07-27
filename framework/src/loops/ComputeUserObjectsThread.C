@@ -23,7 +23,7 @@
 
 ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblemBase & problem,
                                                    SystemBase & sys,
-                                                   const TheWarehouse::Builder & query)
+                                                   const TheWarehouse::Query & query)
   : ThreadedElementLoop<ConstElemRange>(problem), _soln(*sys.currentSolution()), _query(query)
 {
 }
@@ -44,7 +44,10 @@ ComputeUserObjectsThread::subdomainChanged()
   querySubdomain(Interfaces::ElementUserObject | Interfaces::InternalSideUserObject, objs);
 
   std::vector<UserObject *> side_objs;
-  _query.clone().thread(_tid).interfaces(Interfaces::SideUserObject).queryInto(side_objs);
+  _query.clone()
+      .cond<AttribThread>(_tid)
+      .cond<AttribInterfaces>(Interfaces::SideUserObject)
+      .queryInto(side_objs);
 
   objs.insert(objs.begin(), side_objs.begin(), side_objs.end());
 

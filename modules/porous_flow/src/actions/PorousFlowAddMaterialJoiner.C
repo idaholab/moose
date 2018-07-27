@@ -42,7 +42,11 @@ PorousFlowAddMaterialJoiner::act()
   {
     // Get the user objects that have been added to get the name of the PorousFlowDictator
     std::vector<UserObject *> userobjects;
-    _problem->theWarehouse().build().system("UserObject").thread(0).queryInto(userobjects);
+    _problem->theWarehouse()
+        .build()
+        .cond<AttribSystem>("UserObject")
+        .cond<AttribThread>(0)
+        .queryInto(userobjects);
     for (auto & userobject : userobjects)
       if (dynamic_cast<PorousFlowDictator *>(userobject))
         _dictator_name = userobject->name();

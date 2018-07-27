@@ -30,7 +30,7 @@ class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 public:
   ComputeUserObjectsThread(FEProblemBase & problem,
                            SystemBase & sys,
-                           const TheWarehouse::Builder & query);
+                           const TheWarehouse::Query & query);
   // Splitting Constructor
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
 
@@ -51,15 +51,23 @@ private:
   template <typename T>
   void querySubdomain(Interfaces iface, std::vector<T> & results)
   {
-    _query.clone().thread(_tid).subdomain(_subdomain).interfaces(iface).queryInto(results);
+    _query.clone()
+        .cond<AttribThread>(_tid)
+        .cond<AttribSubdomains>(_subdomain)
+        .cond<AttribInterfaces>(iface)
+        .queryInto(results);
   }
   template <typename T>
   void queryBoundary(Interfaces iface, BoundaryID bnd, std::vector<T> & results)
   {
-    _query.clone().thread(_tid).boundary(bnd).interfaces(iface).queryInto(results);
+    _query.clone()
+        .cond<AttribThread>(_tid)
+        .cond<AttribBoundaries>(bnd)
+        .cond<AttribInterfaces>(iface)
+        .queryInto(results);
   }
 
-  const TheWarehouse::Builder _query;
+  const TheWarehouse::Query _query;
 };
 
 // determine when we need to run user objects based on whether any initial conditions or aux
@@ -86,19 +94,14 @@ groupUserObjects(TheWarehouse & w,
   //
   for (const auto obj : objs)
   {
-    std::vector<Attribute> attribs;
-    auto b = w.build();
-
     if (ic_deps.count(obj->name()) > 0)
-      b.pre_ic(true);
+      w.update(obj, AttribPreIC(w, true));
 
     if ((obj->isParamValid("force_preaux") && obj->template getParam<bool>("force_preaux")) ||
         aux_deps.count(obj->name()) > 0 || ic_deps.count(obj->name()) > 0)
-      b.pre_aux(true);
+      w.update(obj, AttribPreAux(w, true));
     else
-      b.pre_aux(false);
-
-    w.update(obj, b.attribs());
+      w.update(obj, AttribPreAux(w, false));
   }
 }
 

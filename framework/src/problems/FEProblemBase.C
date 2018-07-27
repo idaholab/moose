@@ -645,7 +645,7 @@ FEProblemBase::initialSetup()
 
   // This replaces all prior updateDependObjects calls on the old user object warehouses.
   std::vector<UserObject *> userobjs;
-  theWarehouse().build().system("UserObject").queryInto(userobjs);
+  theWarehouse().build().cond<AttribSystem>("UserObject").queryInto(userobjs);
   groupUserObjects(theWarehouse(), userobjs, depend_objects_ic, depend_objects_aux);
 
   for (auto obj : userobjs)
@@ -907,7 +907,7 @@ FEProblemBase::timestepSetup()
   }
 
   std::vector<UserObject *> userobjs;
-  theWarehouse().build().system("UserObject").queryInto(userobjs);
+  theWarehouse().build().cond<AttribSystem>("UserObject").queryInto(userobjs);
   for (auto obj : userobjs)
     obj->timestepSetup();
 
@@ -984,9 +984,17 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
     std::vector<ShapeElementUserObject *> objs;
     theWarehouse()
         .build()
-        .interfaces(Interfaces::ShapeElementUserObject)
-        .thread(tid)
+        .cond<AttribInterfaces>(Interfaces::ShapeElementUserObject)
+        .cond<AttribThread>(tid)
         .queryInto(objs);
+
+    // TODO: remove this comment (just here for temporary example alternative):
+    //    auto & w = theWarehouse();
+    //    theWarehouse()
+    //        .build()
+    //        .cond(AttribInterfaces(w, Interfaces::ShapeElementUserObject), AttribThread(w, tid))
+    //        .queryInto(objs);
+
     for (const auto & uo : objs)
     {
       _calculate_jacobian_in_uo = uo->computeJacobianFlag();
@@ -996,7 +1004,11 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
   }
   {
     std::vector<ShapeSideUserObject *> objs;
-    theWarehouse().build().interfaces(Interfaces::ShapeSideUserObject).thread(tid).queryInto(objs);
+    theWarehouse()
+        .build()
+        .cond<AttribInterfaces>(Interfaces::ShapeSideUserObject)
+        .cond<AttribThread>(tid)
+        .queryInto(objs);
     for (const auto & uo : objs)
     {
       _calculate_jacobian_in_uo = uo->computeJacobianFlag();
@@ -2719,7 +2731,7 @@ const UserObject &
 FEProblemBase::getUserObjectBase(const std::string & name) const
 {
   std::vector<UserObject *> objs;
-  theWarehouse().build().thread(0).name(name).queryInto(objs);
+  theWarehouse().build().cond<AttribThread>(0).cond<AttribName>(name).queryInto(objs);
   if (objs.empty())
     mooseError("Unable to find user object with name '" + name + "'");
   return *(objs[0]);
@@ -2729,7 +2741,7 @@ bool
 FEProblemBase::hasUserObject(const std::string & name) const
 {
   std::vector<UserObject *> objs;
-  theWarehouse().build().thread(0).name(name).queryInto(objs);
+  theWarehouse().build().cond<AttribThread>(0).cond<AttribName>(name).queryInto(objs);
   return !objs.empty();
 }
 
@@ -2974,7 +2986,7 @@ FEProblemBase::computeAuxiliaryKernels(const ExecFlagType & type)
 
 // Finalize, threadJoin, and update PP values of Elemental/Nodal/Side/InternalSideUserObjects
 void
-FEProblemBase::joinAndFinalize(TheWarehouse::Builder query, bool isgen)
+FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
 {
   std::vector<UserObject *> objs;
   query.queryInto(objs);
@@ -2986,7 +2998,7 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Builder query, bool isgen)
         obj->primaryThreadCopy()->threadJoin(*obj);
   }
 
-  query.thread(0).queryInto(objs);
+  query.cond<AttribThread>(0).queryInto(objs);
 
   // finalize objects and retrieve/store any postproessor values
   for (auto obj : objs)
@@ -3019,21 +3031,22 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Builder query, bool isgen)
 void
 FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group)
 {
-  TheWarehouse::Builder query = theWarehouse().build().system("UserObject").exec_on(type);
+  TheWarehouse::Query query =
+      theWarehouse().build().cond<AttribSystem>("UserObject").cond<AttribExecOns>(type);
   if (group == Moose::PRE_IC)
-    query.pre_ic(true);
+    query.cond<AttribPreIC>(true);
   else if (group == Moose::PRE_AUX)
-    query.pre_aux(true);
+    query.cond<AttribPreAux>(true);
   else if (group == Moose::POST_AUX)
-    query.pre_aux(false);
+    query.cond<AttribPreAux>(false);
 
   std::vector<GeneralUserObject *> genobjs;
-  query.clone().interfaces(Interfaces::GeneralUserObject).queryInto(genobjs);
+  query.clone().cond<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
 
   std::vector<UserObject *> userobjs;
   query.clone()
-      .interfaces(Interfaces::ElementUserObject | Interfaces::NodalUserObject |
-                  Interfaces::SideUserObject | Interfaces::InternalSideUserObject)
+      .cond<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::NodalUserObject |
+                              Interfaces::SideUserObject | Interfaces::InternalSideUserObject)
       .queryInto(userobjs);
 
   if (userobjs.empty() && genobjs.empty())
@@ -3073,36 +3086,38 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
     // Also there is one instance in rattlesnake where an elemental user object's finalize depends
     // on a side user object having been finalized first :-(
-    joinAndFinalize(query.clone().interfaces(Interfaces::SideUserObject));
-    joinAndFinalize(query.clone().interfaces(Interfaces::InternalSideUserObject));
-    joinAndFinalize(query.clone().interfaces(Interfaces::ElementUserObject));
+    joinAndFinalize(query.clone().cond<AttribInterfaces>(Interfaces::SideUserObject));
+    joinAndFinalize(query.clone().cond<AttribInterfaces>(Interfaces::InternalSideUserObject));
+    joinAndFinalize(query.clone().cond<AttribInterfaces>(Interfaces::ElementUserObject));
   }
 
   // Execute NodalUserObjects
-  if (query.clone().interfaces(Interfaces::NodalUserObject).count() > 0)
+  if (query.clone().cond<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
   {
     ComputeNodalUserObjectsThread cnppt(*this, query);
     Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
-    joinAndFinalize(query.clone().interfaces(Interfaces::NodalUserObject));
+    joinAndFinalize(query.clone().cond<AttribInterfaces>(Interfaces::NodalUserObject));
   }
 
   std::vector<GeneralUserObject *> tguos_zero;
-  query.clone().thread(0).interfaces(Interfaces::ThreadedGeneralUserObject).queryInto(tguos_zero);
-  if (!tguos_zero.empty())
+  query.clone()
+      .cond<AttribThread>(0)
+      .cond<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+      .queryInto(tguos_zero);
+  for (auto obj : tguos_zero)
   {
-    for (auto obj : tguos_zero)
-    {
-      std::vector<GeneralUserObject *> tguos;
-      auto q = query.clone().name(obj->name()).interfaces(Interfaces::ThreadedGeneralUserObject);
-      q.queryInto(tguos);
+    std::vector<GeneralUserObject *> tguos;
+    auto q = query.clone()
+                 .cond<AttribName>(obj->name())
+                 .cond<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject);
+    q.queryInto(tguos);
 
-      ComputeThreadedGeneralUserObjectsThread ctguot(*this);
-      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
-      joinAndFinalize(q);
-    }
+    ComputeThreadedGeneralUserObjectsThread ctguot(*this);
+    Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
+    joinAndFinalize(q);
   }
 
-  joinAndFinalize(query.clone().interfaces(Interfaces::GeneralUserObject), true);
+  joinAndFinalize(query.clone().cond<AttribInterfaces>(Interfaces::GeneralUserObject), true);
 }
 
 void
@@ -5191,7 +5206,7 @@ FEProblemBase::checkUserObjects()
   std::set<std::string> names;
 
   std::vector<UserObject *> objects;
-  theWarehouse().build().interfaces(Interfaces::UserObject).queryInto(objects);
+  theWarehouse().build().cond<AttribInterfaces>(Interfaces::UserObject).queryInto(objects);
 
   for (const auto & obj : objects)
     names.insert(obj->name());
@@ -5542,9 +5557,9 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
       _bnd_mat_side_cache[tid][bnd_id] = true;
     else if (theWarehouse()
                  .build()
-                 .thread(tid)
-                 .interfaces(Interfaces::SideUserObject)
-                 .boundary(bnd_id)
+                 .cond<AttribThread>(tid)
+                 .cond<AttribInterfaces>(Interfaces::SideUserObject)
+                 .cond<AttribBoundaries>(bnd_id)
                  .count() > 0)
       _bnd_mat_side_cache[tid][bnd_id] = true;
   }
@@ -5563,9 +5578,9 @@ FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID t
       _block_mat_side_cache[tid][subdomain_id] = true;
     else if (theWarehouse()
                  .build()
-                 .thread(tid)
-                 .interfaces(Interfaces::InternalSideUserObject)
-                 .subdomain(subdomain_id)
+                 .cond<AttribThread>(tid)
+                 .cond<AttribInterfaces>(Interfaces::InternalSideUserObject)
+                 .cond<AttribSubdomains>(subdomain_id)
                  .count() > 0)
       _block_mat_side_cache[tid][subdomain_id] = true;
   }
