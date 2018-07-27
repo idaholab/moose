@@ -251,19 +251,16 @@ class TestMeshPlugin2(Testing.PeacockImageTestCase):
         mesh = self._widget.MeshPlugin
         file = self._widget.FilePlugin
 
-        self._window.onSetColorbarVisible(False)
         mesh.ScaleX.setValue(0.5)
         mesh.ScaleX.valueChanged.emit(0.5)
         self.assertImage('testDiffusion1.png')
 
         file.FileList.setCurrentIndex(1)
         file.FileList.currentIndexChanged.emit(1)
-        self._window.onSetColorbarVisible(False)
         self.assertImage('testDiffusion2.png')
 
         file.FileList.setCurrentIndex(0)
         file.FileList.currentIndexChanged.emit(0)
-        self._window.onSetColorbarVisible(False)
         self.assertImage('testDiffusion1.png')
 
 if __name__ == '__main__':
