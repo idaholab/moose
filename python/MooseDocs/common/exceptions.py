@@ -8,7 +8,7 @@ class MooseDocsException(Exception):
 
     Inputs:
         message[str]: (Required) The exception messages.
-        *args: (Optoinal) Any values supplied in *args are automattically applied to the to the
+        *args: (Optoinal) Any values supplied in *args are automatically applied to the to the
                message with the built-in python format method.
     """
     def __init__(self, message, *args):
