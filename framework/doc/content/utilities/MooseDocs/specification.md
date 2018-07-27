@@ -64,6 +64,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [/floats.md] | Tools for creating numbered and/or captioned content (see [/media.md]). |
 | [/devel.md] | Tools for documenting MooseDocs extensions. |
 | [/package.md] | Tools for linking to MOOSE environment packages. |
+| [/contents.md] | Creates complete list of markdown pages within a directory. |
 
 [AST]: https://en.wikipedia.org/wiki/Abstract_syntax_tree
 
