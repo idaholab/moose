@@ -1471,6 +1471,8 @@ public:
 
   const VectorPostprocessorData & getVectorPostprocessorData() const;
 
+  void hypreMatrix(bool hypre_matrix) { _hypre_matrix = hypre_matrix; }
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
@@ -1710,6 +1712,8 @@ protected:
 #endif // LIBMESH_HAVE_PETSC
 
   std::shared_ptr<LineSearch> _line_search;
+
+  bool _hypre_matrix;
 
 private:
   bool _error_on_jacobian_nonzero_reallocation;

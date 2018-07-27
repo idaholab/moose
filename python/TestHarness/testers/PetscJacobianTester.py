@@ -111,7 +111,7 @@ class PetscJacobianTester(RunApp):
                 reason = 'EXPECTED OUTPUT NOT FOUND'
 
         else:
-            matches = re.finditer("\|\|J - Jfd\|\|_F/\|\|J\|\|_F = (\S+), \|\|J - Jfd\|\|_F = (\S+)",
+            matches = re.finditer("\|\|J - Jfd\|\|_F/\|\|J\|\|_F[= ]*(\S+), \|\|J - Jfd\|\|_F[= ]*(\S+)",
                   output, re.MULTILINE | re.DOTALL)
 
             reason = 'EXPECTED OUTPUT NOT FOUND'
