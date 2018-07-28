@@ -19,6 +19,33 @@
     input = 'dyn_euler_small_added_mass.i'
     exodiff = 'dyn_euler_small_added_mass_out.e'
   [../]
+  [./dyn_euler_added_mass_file]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_file.i'
+    cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass.csv"
+    exodiff = 'dyn_euler_small_added_mass_out.e'
+    prereq = 'dyn_euler_added_mass'
+  [../]
+  [./dyn_euler_added_mass_gravity]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_gravity.i'
+    cli_args = "NodalKernels/force_y2/mass=0.01899772"
+    exodiff = 'dyn_euler_small_added_mass_out.e'
+    prereq = 'dyn_euler_added_mass_file'
+  [../]
+  [./dyn_euler_added_mass_gravity_2]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_gravity.i'
+    cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass.csv"
+    exodiff = 'dyn_euler_small_added_mass_out.e'
+    prereq = 'dyn_euler_added_mass_gravity'
+  [../]
+  [./add_dynamic_variables_action]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_dyn_variable_action.i'
+    exodiff = 'dyn_euler_small_added_mass_out.e'
+    prereq = 'dyn_euler_added_mass_gravity_2'
+  [../]
   [./dyn_euler_added_mass_inertia_damping]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
@@ -82,5 +109,65 @@
     input = 'dyn_euler_small.i'
     cli_args = "Kernels/inertial_force_x/accelerations='accel_x accel_y' Outputs/csv=false Outputs/exodus=false"
     expect_err = "InertialForceBeam: The number of variables supplied in 'velocities', 'accelerations', 'rotational_velocities' and 'rotational_accelerations' must match the number of displacement variables."
+  [../]
+  [./error_8]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_file.i'
+    cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass.csv NodalKernels/x_inertial/mass=2.0 Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalTranslationalInertia: Please provide either mass or nodal_mass_file as input, not both."
+  [../]
+  [./error_9]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_file.i'
+    cli_args = "Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalTranslationalInertia: Please provide either mass or nodal_mass_file as input."
+  [../]
+  [./error_10]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_file.i'
+    cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass_col_test.csv Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalTranslationalInertia: The number of columns in"
+  [../]
+  [./error_11]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_file.i'
+    cli_args = "NodalKernels/x_inertial/nodal_mass_file=nodal_mass.csv NodalKernels/x_inertial/boundary='right' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalTranslationalInertia: Out of 2 nodal positions in"
+  [../]
+  [./error_12]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_gravity.i'
+    cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass.csv NodalKernels/force_y2/mass=2.0 Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalGravity: Please provide either mass or nodal_mass_file as input, not both."
+  [../]
+  [./error_13]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_gravity.i'
+    cli_args = "Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalGravity: Please provide either mass or nodal_mass_file as input."
+  [../]
+  [./error_14]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_gravity.i'
+    cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass_col_test.csv Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalGravity: The number of columns in"
+  [../]
+  [./error_15]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_gravity.i'
+    cli_args = "NodalKernels/force_y2/nodal_mass_file=nodal_mass.csv NodalKernels/force_y2/boundary='right' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalGravity: Out of 2 nodal positions in"
+  [../]
+  [./error_16]
+    type = 'RunException'
+    input = 'dyn_euler_small_rayleigh_hht_action.i'
+    cli_args = 'Modules/TensorMechanics/LineElementMaster/all/add_dynamic_variables=false Outputs/csv=false Outputs/exodus=false'
+    expect_err = "LineElementAction: When using 'dynamic_consistent_inertia', 'dynamic_nodal_rotational_inertia' or '_dynamic_nodal_translational_inertia', the velocity and acceleration AuxVariables and the corresponding AuxKernels are automatically set by"
+  [../]
+  [./error_17]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_inertia_damping_action.i'
+    cli_args = 'Modules/TensorMechanics/LineElementMaster/all/nodal_mass_file=nodal_mass.csv Outputs/csv=false Outputs/exodus=false'
+    expect_err = "NodalTranslationalInertia: Please provide either mass or nodal_mass_file as input, not both"
   [../]
 []

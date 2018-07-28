@@ -37,11 +37,11 @@ By default, the `LineElement` Action sets up the kernels, strain materials, disp
 | | | `rotations`: a string of the rotation variables |
 | Calculation of strain | [ComputeIncrementalBeamStrain](/ComputeIncrementalBeamStrain.md) or [ComputeFiniteBeamStrain](/ComputeFiniteBeamStrain.md) | `strain_type`: small or large strain formulation |
 | | | `rotation_type`: small or large rotation formulation |
-| Calculation of initerial forces and moments with consistent mass / inertia matrices | [InertialForceBeam](/InertialForceBeam.md) | `dynamic_consistent_inertia`: boolean |
+| Calculation of inertial forces and moments with consistent mass / inertia matrices | [InertialForceBeam](/InertialForceBeam.md) | `dynamic_consistent_inertia`: boolean |
 | Calculation of inertial forces using nodal mass | [NodalTranslationalInertia](/NodalTranslationalInertia.md) | `dynamic_nodal_translational_inertia`: boolean |
-| Calculation of inertial moments using nodal moment of inertia maxtrix | [NodalRotationalInertia](/NodalRotationalInertia.md) | `dynamic_nodal_rotational_inertia`: boolean |
-| Calculation of translational and rotational velocities | [NewmarkVelAux](/NewmarkVelAux.md) | `dynamic_consistent_inertia` or `dynamic_nodal_translational_inertia` or `dynamic_nodal_rotational_inertia`|
-| Calculation of translational and rotational accelerations | [NewmarkAccelAux](/NewmarkAccelAux.md) | `dynamic_consistent_inertia` or `dynamic_nodal_translational_inertia` or `dynamic_nodal_rotational_inertia` |
+| Calculation of inertial moments using nodal moment of inertia matrix | [NodalRotationalInertia](/NodalRotationalInertia.md) | `dynamic_nodal_rotational_inertia`: boolean |
+| Calculation of translational and rotational velocities | [NewmarkVelAux](/NewmarkVelAux.md) | `dynamic_consistent_inertia` or `dynamic_nodal_translational_inertia` or `dynamic_nodal_rotational_inertia` or `add_dynamic_variables`|
+| Calculation of translational and rotational accelerations | [NewmarkAccelAux](/NewmarkAccelAux.md) | `dynamic_consistent_inertia` or `dynamic_nodal_translational_inertia` or `dynamic_nodal_rotational_inertia` or `add_dynamic_variables`|
 
 ## Example Input Syntax (Beam Elements)
 

@@ -46,7 +46,7 @@ where the final term is only used if coupling with mechanics is also desired.  T
 For simulations that couple fluid flow to mechanics, the equations are already written in [governing equations](governing_equations.md), and `PorousFlowBasicTHM` implements these by using the following kernels:
 
 - [StressDivergenceTensors](/StressDivergenceTensors.md)
-- [Gravity](Gravity.md)
+- [Gravity](/Gravity.md)
 - [PorousFlowEffectiveStressCoupling](PorousFlowEffectiveStressCoupling.md)
 
 `PorousFlowBasicTHM` adds many Materials automatically, however, to run a simulation you will need to provide more Materials for each mesh block, depending on your simulation type, viz:
