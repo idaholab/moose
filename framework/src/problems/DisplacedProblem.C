@@ -411,7 +411,9 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
-  _assembly[tid]->prepare();
+  if (!_mproblem.hasJacobian() || !_mproblem.constJacobian())
+    _assembly[tid]->prepareJacobianBlock();
+  _assembly[tid]->prepareResidual();
 }
 
 void

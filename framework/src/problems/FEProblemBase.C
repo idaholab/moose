@@ -960,7 +960,9 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 
   _nl->prepare(tid);
   _aux->prepare(tid);
-  _assembly[tid]->prepare();
+  if (!_has_jacobian || !_const_jacobian)
+    _assembly[tid]->prepareJacobianBlock();
+  _assembly[tid]->prepareResidual();
   if (_has_nonlocal_coupling)
     _assembly[tid]->prepareNonlocal();
 
@@ -5464,4 +5466,16 @@ void
 FEProblemBase::needsPreviousNewtonIteration(bool state /* = true*/)
 {
   _needs_old_newton_iter = state;
+}
+
+bool
+FEProblemBase::hasJacobian() const
+{
+  return _has_jacobian;
+}
+
+bool
+FEProblemBase::constJacobian() const
+{
+  return _const_jacobian;
 }

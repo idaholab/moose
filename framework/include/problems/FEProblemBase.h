@@ -1471,6 +1471,17 @@ public:
 
   const VectorPostprocessorData & getVectorPostprocessorData() const;
 
+  /**
+   * Returns _has_jacobian
+   */
+  bool hasJacobian() const;
+
+  /**
+   * Returns _const_jacobian (whether a MOOSE object has specified that
+   * the Jacobian is the same as the previous time it was computed)
+   */
+  bool constJacobian() const;
+
 protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
