@@ -453,6 +453,12 @@ public:
   /// Create pair of variables requiring nonlocal jacobian contributions
   void initNonlocalCoupling();
 
+  /// Sizes and zeroes the Jacobian blocks used for the current element
+  void prepareJacobianBlock();
+
+  /// Sizes and zeroes the residual for the current element
+  void prepareResidual();
+
   void prepare();
   void prepareNonlocal();
 
