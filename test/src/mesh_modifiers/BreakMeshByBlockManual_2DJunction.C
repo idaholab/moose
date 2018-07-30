@@ -87,14 +87,14 @@ BreakMeshByBlockManual_2DJunction::addInterfaceBoundary()
   SubdomainID interface_id = 100;
   if (!_split_interface)
   {
-    elem = _mesh_ptr->getMesh().elem(0);
+    elem = _mesh_ptr->getMesh().elem_ptr(0);
     boundary_info.add_side(elem->id(), 0, interface_id);
     boundary_info.add_side(elem->id(), 2, interface_id);
 
-    elem = _mesh_ptr->getMesh().elem(1);
+    elem = _mesh_ptr->getMesh().elem_ptr(1);
     boundary_info.add_side(elem->id(), 2, interface_id);
 
-    elem = _mesh_ptr->getMesh().elem(2);
+    elem = _mesh_ptr->getMesh().elem_ptr(2);
     boundary_info.add_side(elem->id(), 0, interface_id);
 
     // rename the boundary
@@ -102,18 +102,18 @@ BreakMeshByBlockManual_2DJunction::addInterfaceBoundary()
   }
   else
   {
-    elem = _mesh_ptr->getMesh().elem(0);
+    elem = _mesh_ptr->getMesh().elem_ptr(0);
     boundary_info.add_side(elem->id(), 0, 0);
     boundary_info.sideset_name(0) = "Block1_Block2";
 
     boundary_info.add_side(elem->id(), 2, 5);
     boundary_info.sideset_name(5) = "Block1_Block3";
 
-    elem = _mesh_ptr->getMesh().elem(1);
+    elem = _mesh_ptr->getMesh().elem_ptr(1);
     boundary_info.add_side(elem->id(), 2, 6);
     boundary_info.sideset_name(6) = "Block2_Block4";
 
-    elem = _mesh_ptr->getMesh().elem(2);
+    elem = _mesh_ptr->getMesh().elem_ptr(2);
     boundary_info.add_side(elem->id(), 0, 7);
     boundary_info.sideset_name(7) = "Block3_Block4";
   }

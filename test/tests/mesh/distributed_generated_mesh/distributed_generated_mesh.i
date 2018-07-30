@@ -1,7 +1,6 @@
 # Note: The gold files for this test were generated using GeneratedMesh
 
 [Mesh]
-  #type = GeneratedMesh
   type = DistributedGeneratedMesh
   nx = 10
   ny = 10
@@ -63,6 +62,5 @@
 []
 
 [Outputs]
-#  exodus = true
-  print_perf_log = true
+  exodus = true
 []
