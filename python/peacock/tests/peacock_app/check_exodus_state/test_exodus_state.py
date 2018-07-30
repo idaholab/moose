@@ -84,6 +84,7 @@ class TestExodusState(Testing.PeacockAppImageTestCase):
         # Run and check that basic results show up
         self.execute()
         self.selectTab(exodus)
+        Testing.process_events(1)
 
         # Disable colorbar
         cbar_plugin.ColorBarToggle.setCheckState(QtCore.Qt.Unchecked)
@@ -94,6 +95,7 @@ class TestExodusState(Testing.PeacockAppImageTestCase):
         self.selectTab(execute)
         self.execute()
         self.selectTab(exodus)
+        Testing.process_events(1)
         self.assertImage("testColorbarOff.png", allowed=0.98)
 
 
