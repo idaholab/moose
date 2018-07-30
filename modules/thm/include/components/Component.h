@@ -360,6 +360,13 @@ protected:
   void check7EqnRequiredParameter(const std::string & param) const;
 
   /**
+   * Checks that a 7-equation (2-phase plus phase interaction) + NCG parameter was provided
+   *
+   * @param[in] param   parameter name
+   */
+  void check7EqnNCGRequiredParameter(const std::string & param) const;
+
+  /**
    * Logs an error for the model type not being implemented for the component
    *
    * @param[in] model   model type

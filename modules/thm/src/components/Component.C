@@ -254,6 +254,15 @@ Component::check7EqnRequiredParameter(const std::string & param) const
 }
 
 void
+Component::check7EqnNCGRequiredParameter(const std::string & param) const
+{
+  if (!isParamValid(param))
+    logError("The parameter '",
+             param,
+             "' must be provided for the 7-equation model with non-condensable gas");
+}
+
+void
 Component::logModelNotImplementedError(const RELAP7::FlowModelID & model) const
 {
   if (model == RELAP7::FM_SINGLE_PHASE)
