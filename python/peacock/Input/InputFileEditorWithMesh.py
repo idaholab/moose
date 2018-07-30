@@ -10,6 +10,7 @@
 import os
 from plugins import MeshViewerPlugin
 from peacock.ExodusViewer.plugins.BackgroundPlugin import BackgroundPlugin
+from peacock.ExodusViewer.plugins.CameraPlugin import CameraPlugin
 from BlockHighlighterPlugin import BlockHighlighterPlugin
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
@@ -41,10 +42,11 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         if not plugins:
             plugins = [lambda: InputFileEditorPlugin(layout='LeftLayout'),
                        lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
-                       lambda: BackgroundPlugin(layout='WindowLayout',
+                       lambda: BackgroundPlugin(layout='WindowBottomLayout',
                                                 settings_key="input",
                                                 set_result_color=True),
-                       BlockHighlighterPlugin]
+                       lambda: BlockHighlighterPlugin(layout='WindowBottomLayout'),
+                       lambda: CameraPlugin(layout='WindowBottomLayout')]
 
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
         self.setTabName('Input file')
@@ -59,10 +61,13 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.LeftLayout = QVBoxLayout()
         self.WindowLayout = QVBoxLayout()
 
+        self.WindowBottomLayout = QHBoxLayout()
+
         self.MainLayout.addLayout(self.LeftLayout)
         self.MainLayout.addLayout(self.WindowLayout)
         self.setup()
         self.setupVTKWindow()
+        self.WindowLayout.addLayout(self.WindowBottomLayout)
 
         self.InputFileEditorPlugin.blockChanged.connect(self.blockChanged)
         self.InputFileEditorPlugin.blockSelected.connect(self.highlightChanged)

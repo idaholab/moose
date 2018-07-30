@@ -18,8 +18,8 @@ class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
     windowRequiresUpdate = QtCore.pyqtSignal()
 
-    def __init__(self):
-        super(CameraPlugin, self).__init__()
+    def __init__(self, **kwargs):
+        super(CameraPlugin, self).__init__(**kwargs)
 
         self.MainLayout = QtWidgets.QHBoxLayout(self)
 
