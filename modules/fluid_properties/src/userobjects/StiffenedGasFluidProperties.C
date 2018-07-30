@@ -23,6 +23,7 @@ validParams<StiffenedGasFluidProperties>()
   params.addParam<Real>("q_prime", 0, "Parameter");
   params.addParam<Real>("mu", 1.e-3, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 0.6, "Thermal conductivity, W/(m-K)");
+  params.addParam<Real>("M", 0, "Molar mass, kg/mol");
   params.addClassDescription("Fluid properties for a stiffened gas");
   return params;
 }
@@ -35,7 +36,8 @@ StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters &
     _q_prime(getParam<Real>("q_prime")),
     _p_inf(getParam<Real>("p_inf")),
     _mu(getParam<Real>("mu")),
-    _k(getParam<Real>("k"))
+    _k(getParam<Real>("k")),
+    _molar_mass(getParam<Real>("M"))
 {
   if (_cv == 0.0)
     mooseError(name(), ": cv cannot be zero.");
@@ -335,4 +337,10 @@ Real
 StiffenedGasFluidProperties::c2_from_p_rho(Real pressure, Real rho) const
 {
   return _gamma * (pressure + _p_inf) / rho;
+}
+
+Real
+StiffenedGasFluidProperties::molarMass() const
+{
+  return _molar_mass;
 }

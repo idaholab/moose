@@ -95,3 +95,9 @@ SinglePhaseFluidProperties::s_from_p_T(Real, Real, Real &, Real &, Real &) const
 {
   mooseError(name(), ": s_from_p_T is not implemented");
 }
+
+Real
+SinglePhaseFluidProperties::molarMass() const
+{
+  mooseError(name(), ": molarMass is not implemented");
+}

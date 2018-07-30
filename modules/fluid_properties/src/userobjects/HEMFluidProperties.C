@@ -22,3 +22,9 @@ HEMFluidProperties::HEMFluidProperties(const InputParameters & parameters)
   : FluidProperties(parameters)
 {
 }
+
+Real
+HEMFluidProperties::molarMass() const
+{
+  mooseError(name(), ": molarMass is not implemented");
+}

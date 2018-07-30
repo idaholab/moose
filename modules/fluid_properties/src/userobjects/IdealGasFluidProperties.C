@@ -348,3 +348,9 @@ IdealGasFluidProperties::g_from_v_e(Real v, Real e) const
 
   return _gamma * _cv * T - _cv * T * std::log(std::pow(T, _gamma) / std::pow(p, _gamma - 1.0));
 }
+
+Real
+IdealGasFluidProperties::molarMass() const
+{
+  return _R / R_universal;
+}

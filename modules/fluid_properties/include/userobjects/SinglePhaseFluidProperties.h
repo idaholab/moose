@@ -337,6 +337,13 @@ public:
    * @param[in] T   temperature
    */
   virtual Real beta_from_p_T(Real p, Real T) const;
+
+  /**
+   * Molar mass [kg/mol]
+   *
+   * @return molar mass
+   */
+  virtual Real molarMass() const;
 };
 
 #endif /* SINGLEPHASEFLUIDPROPERTIES_H */
