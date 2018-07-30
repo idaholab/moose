@@ -731,6 +731,7 @@ stringToInteger(const std::string & input, bool throw_on_failure)
 }
 
 void
+
 linearPartitionItems(dof_id_type num_items,
                      dof_id_type num_chunks,
                      dof_id_type chunk_id,
@@ -808,6 +809,15 @@ template std::string join<std::vector<MooseEnumItem>>(const std::vector<MooseEnu
                                                       const std::string &);
 template std::string join<std::set<MooseEnumItem>>(const std::set<MooseEnumItem> &,
                                                    const std::string &);
+
+void
+createSymlink(const std::string & target, const std::string & link)
+{
+  struct stat sbuf;
+  if (lstat(link.c_str(), &sbuf) == 0)
+    unlink(link.c_str());
+  symlink(target.c_str(), link.c_str());
+}
 
 } // MooseUtils namespace
 

@@ -97,6 +97,15 @@ private:
 
   /// Flag indicating MOOSE is recovering via --recover command-line option
   bool _recovering;
+
+  /// Flag for creating a _FINAL symlink
+  bool _create_final_symlink;
+
+  /// Flag for creating a _LATEST symlink
+  bool _create_latest_symlink;
+
+  /// Current list of VPP filenames (see CSV::output for more information)
+  std::vector<std::pair<std::string, std::string>> _latest_vpp_filenames;
 };
 
 #endif /* CSV_H */
