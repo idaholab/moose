@@ -25,7 +25,6 @@ class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     def __init__(self, **kwargs):
         super(BlockHighlighterPlugin, self).__init__(**kwargs)
 
-        self.setMainLayoutName('WindowLayout')
         self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         self.MainLayout = QtWidgets.QHBoxLayout(self)
         self.MainLayout.setSpacing(10)
