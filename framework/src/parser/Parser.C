@@ -1814,13 +1814,22 @@ Parser::setVectorParameter<VariableName, VariableName>(
     std::istringstream ss(var_name);
 
     // If we are able to convert this value into a Real, then set a default coupled value
+    // NOTE: parameter must be either all default or no defaults
+    unsigned int mode = 0;
     if (ss >> real_value && ss.eof())
-      /* FIXME: the real_value is assigned to defaultCoupledValue overriding the value assigned
-       * before. Currently there is no functionality to separately assign the correct
-       * "real_value[i]" in InputParameters.*/
-      _current_params->defaultCoupledValue(short_name, real_value);
+    {
+      if (mode == 2)
+        mooseError(
+            "Variable name ", short_name, " contains both default and actual variable names.");
+      mode = 1;
+      _current_params->defaultCoupledValue(short_name, real_value, i);
+    }
     else
     {
+      if (mode == 1)
+        mooseError(
+            "Variable name ", short_name, " contains both default and actual variable names.");
+      mode = 2;
       var_names[i] = var_name;
       has_var_names = true;
     }

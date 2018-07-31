@@ -300,6 +300,18 @@ public:
    */
   void addCoupledVar(const std::string & name, const Real value, const std::string & doc_string);
 
+  /**
+   * This method adds a coupled variable name pair.  The parser will look for variable
+   * name pair in the input file and can return a reference to the storage location
+   * for the coupled variable if found
+   *
+   * Also - you can provide a vector of values for this variable in the case that an actual variable
+   * is not provided.
+   */
+  void addCoupledVar(const std::string & name,
+                     const std::vector<Real> & value,
+                     const std::string & doc_string);
+
   ///@{
   /**
    * These methods add a coupled variable name pair. The parser will look for variable
@@ -527,7 +539,14 @@ public:
    *
    * @param coupling_name The name of the coupling parameter to get the default value for.
    */
-  Real defaultCoupledValue(const std::string & coupling_name) const;
+  Real defaultCoupledValue(const std::string & coupling_name, unsigned int i = 0) const;
+
+  /**
+   * Get the number of defaulted coupled value entries
+   *
+   * @param coupling_name The name of the coupling parameter to get the default value for.
+   */
+  unsigned int numberDefaultCoupledValues(const std::string & coupling_name) const;
 
   /**
    * Set the default value for an optionally coupled variable (called by the Parser).
@@ -535,7 +554,7 @@ public:
    * @param coupling_name The name of the coupling parameter to get the default value for.
    * @param value Default value to set.
    */
-  void defaultCoupledValue(const std::string & coupling_name, Real value);
+  void defaultCoupledValue(const std::string & coupling_name, Real value, unsigned int i = 0);
 
   /**
    * Returns the auto build vectors for all parameters.
@@ -754,7 +773,7 @@ private:
     bool _is_private = false;
     bool _have_coupled_default = false;
     /// The default value for optionally coupled variables
-    Real _coupled_default = 0;
+    std::vector<Real> _coupled_default = {};
     bool _have_default_postprocessor_val = false;
     PostprocessorValue _default_postprocessor_val = 0;
     /// True if a parameters value was set by addParam, and not set again.

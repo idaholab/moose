@@ -164,6 +164,18 @@ InputParameters::addCoupledVar(const std::string & name, Real value, const std::
   // std::vector<VariableName>(1, Moose::stringify(value)),
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
+  _params[name]._coupled_default.assign(1, value);
+  _params[name]._have_coupled_default = true;
+}
+
+void
+InputParameters::addCoupledVar(const std::string & name,
+                               const std::vector<Real> & value,
+                               const std::string & doc_string)
+{
+  // std::vector<VariableName>(1, Moose::stringify(value)),
+  addParam<std::vector<VariableName>>(name, doc_string);
+  _coupled_vars.insert(name);
   _params[name]._coupled_default = value;
   _params[name]._have_coupled_default = true;
 }
@@ -443,14 +455,15 @@ InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 }
 
 void
-InputParameters::defaultCoupledValue(const std::string & coupling_name, Real value)
+InputParameters::defaultCoupledValue(const std::string & coupling_name, Real value, unsigned int i)
 {
-  _params[coupling_name]._coupled_default = value;
+  _params[coupling_name]._coupled_default.resize(i + 1);
+  _params[coupling_name]._coupled_default[i] = value;
   _params[coupling_name]._have_coupled_default = true;
 }
 
 Real
-InputParameters::defaultCoupledValue(const std::string & coupling_name) const
+InputParameters::defaultCoupledValue(const std::string & coupling_name, unsigned int i) const
 {
   auto value_it = _params.find(coupling_name);
 
@@ -463,7 +476,18 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
                "variable added with params.addRequiredCoupledVar() \n 3. The call to get the "
                "coupled value should have been properly guarded with isCoupled()\n");
 
-  return value_it->second._coupled_default;
+  return value_it->second._coupled_default[i];
+}
+
+unsigned int
+InputParameters::numberDefaultCoupledValues(const std::string & coupling_name) const
+{
+  auto value_it = _params.find(coupling_name);
+  if (value_it == _params.end())
+    mooseError("Attempted to retrieve default value for coupled variable '",
+               coupling_name,
+               "' when none was provided.");
+  return value_it->second._coupled_default.size();
 }
 
 std::map<std::string, std::pair<std::string, std::string>>
