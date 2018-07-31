@@ -81,14 +81,8 @@ class Scheduler(MooseObject):
         # Job lock when modifying a jobs status
         self.activity_lock = threading.Lock()
 
-        # Job count lock when modifying incoming/outgoing jobs
-        self.job_count_lock = threading.Lock()
-
         # A combination of processors + threads (-j/-n) currently in use, that a job requires
         self.slots_in_use = 0
-
-        # Count of jobs which need to complete
-        self.job_count = 0
 
         # Set containing all submitted jobs
         self.__job_bank = set([])
@@ -177,7 +171,7 @@ class Scheduler(MooseObject):
             waiting_on_status_pool = True
             waiting_on_runner_pool = True
 
-            while (waiting_on_status_pool or waiting_on_runner_pool) and self.job_count:
+            while (waiting_on_status_pool or waiting_on_runner_pool) and self.__job_bank:
 
                 if self.__error_state:
                     break
@@ -189,8 +183,8 @@ class Scheduler(MooseObject):
 
                 sleep(0.1)
 
-            # Reporting sanity check
-            if not self.__error_state and self.job_count:
+            # Completed all jobs sanity check
+            if not self.__error_state and self.__job_bank:
                 raise SchedulerError('Scheduler exiting with different amount of work than what was tasked!')
 
             if not self.__error_state:
@@ -225,11 +219,8 @@ class Scheduler(MooseObject):
         if j_dag.size() != len(testers):
             raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
 
-        # Final reporting job-count sanity check
-        with self.job_count_lock:
-            self.job_count += j_dag.size()
-
-        # Store all processed jobs in the global job bank
+        # Store all submitted jobs in the global job bank. As jobs finish, they will be removed
+        # from this set. This will function as our final sanity check on 100% job completion
         self.__job_bank.update(j_dag.topological_sort())
 
         # Launch these jobs to perform work
@@ -318,12 +309,18 @@ class Scheduler(MooseObject):
         threaded operation, so as to prevent clobbering of text being printed
         to stdout.
         """
-        if self.status_pool._state:
+        # The pool is closing down due to a failure, or this job has previously been handled:
+        #
+        # A job which triggers the long_running timer, has a chance to finish before this
+        # slower serialized status pool, has a chance to process it. Meaning two of the same
+        # jobs now exist in this queue, with a finished status. This method can only work on
+        # a finished job object once (a set removal operation occurs to signify scheduled job
+        # completion as a sanity check).
+        if self.status_pool._state or job not in self.__job_bank:
             return
 
         # Its possible, the queue is just trying to empty
         try:
-            job_was_running = False
             # Check if we should print due to inactivity
             with j_lock:
                 if job.isRunning():
@@ -332,7 +329,6 @@ class Scheduler(MooseObject):
 
                     # report inactivity if last reported time falls within tolerances
                     elif clock() - self.last_reported_time >= self.min_report_time:
-                        job_was_running = True
                         job.addCaveats('FINISHED')
 
                         with self.activity_lock:
@@ -358,15 +354,17 @@ class Scheduler(MooseObject):
                 if not tester.isSilent():
                     self.last_reported_time = clock()
 
-                if job.isFinished() and not job_was_running:
+                if job.isFinished():
+                    if job in self.__job_bank:
+                        self.__job_bank.remove(job)
+                    else:
+                        raise SchedulerError('job accountability failure while working with: %s' % (job.getTestName()))
+
                     if tester.isFail():
                         self.__failures += 1
 
                     if self.maxFailures():
                         self.killRemaining()
-                    else:
-                        with self.job_count_lock:
-                            self.job_count -= 1
 
         except Exception:
             print('statusWorker Exception: %s' % (traceback.format_exc()))
