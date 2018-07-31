@@ -1,4 +1,8 @@
 [Tests]
+  requirement = "Vector post-processor values shall be able to be compared and return a boolean value."
+  design = 'VectorPostprocessorComparison.md'
+  issues = '#11704'
+
   [./greater_than_equals]
     type = 'CSVDiff'
     input = 'vector_postprocessor_comparison.i'
