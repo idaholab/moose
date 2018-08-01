@@ -398,8 +398,9 @@ class MaterializeRenderer(HTMLRenderer):
             else:
                 node = root_page.findall(value)
                 if node is None:
-                    msg = 'Failed to locate navigation item: {}.'
-                    raise exceptions.MooseDocsException(msg, value)
+                    msg = 'Failed to locate navigation item: {}.'.format(value)
+                    LOG.error(msg)
+                    raise exceptions.MooseDocsException(msg)
                 nav[key] = node[0]
 
         # Do nothing if navigation is not provided
