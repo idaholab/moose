@@ -46,7 +46,7 @@ SolidWall::addMooseObjects1Phase()
     {
       const std::string class_name = "Euler1DVarAreaWallBoundaryFlux";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+      params.set<UserObjectName>("rdg_flux") = _rdg_conservative_flux_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim.addUserObject(class_name, boundary_flux_name, params);
     }
@@ -86,9 +86,8 @@ SolidWall::addMooseObjects2Phase()
     {
       const std::string class_name = "Euler1DVarAreaWallBoundaryFlux7Eqn";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
-      params.set<UserObjectName>("int_var_uo_name") = _rdg_int_var_uo_name;
-      params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
+      params.set<UserObjectName>("rdg_conservative_flux") = _rdg_conservative_flux_name;
+      params.set<UserObjectName>("rdg_nonconservative_flux") = _rdg_nonconservative_flux_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim.addUserObject(class_name, boundary_flux_name, params);
     }
