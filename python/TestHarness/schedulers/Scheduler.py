@@ -85,7 +85,7 @@ class Scheduler(MooseObject):
         self.slots_in_use = 0
 
         # Set containing all scheduled jobs
-        self.__submitted_jobs = set([])
+        self.__scheduled_jobs = set([])
 
         # Set containing jobs entering the run_pool
         self.__job_bank = set([])
@@ -135,7 +135,7 @@ class Scheduler(MooseObject):
 
     def retrieveJobs(self):
         """ return all the jobs the scheduler was tasked to perform work for """
-        return self.__submitted_jobs
+        return self.__scheduled_jobs
 
     def schedulerError(self):
         """ boolean if the scheduler prematurely exited """
@@ -222,13 +222,13 @@ class Scheduler(MooseObject):
         if j_dag.size() != len(testers):
             raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
 
-        # Store all submitted jobs in the global job bank. As jobs finish, they will be removed
-        # from this set. This will function as our final sanity check on 100% job completion
+        # Store all jobs in the global job bank. As jobs finish, they will be removed from
+        # this set. This will function as our final sanity check on 100% job completion
         with j_lock:
             self.__job_bank.update(j_dag.topological_sort())
 
         # Store all scheduled jobs
-        self.__submitted_jobs.update(j_dag.topological_sort())
+        self.__scheduled_jobs.update(j_dag.topological_sort())
 
         # Launch these jobs to perform work
         self.queueJobs(Jobs, j_lock)
