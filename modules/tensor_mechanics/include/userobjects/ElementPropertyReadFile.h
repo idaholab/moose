@@ -46,6 +46,11 @@ public:
   virtual void readGrainData();
 
   /**
+   * This function Read block data from file
+   */
+  virtual void readBlockData();
+
+  /**
    * This function generates grain center point
    * Presently random generated
    */
@@ -68,6 +73,12 @@ public:
   Real getGrainData(const Elem *, unsigned int) const;
 
   /**
+   * This function assign properties to element read from file with grain  based properties
+   * Grain distribution in the RVE can be Periodic or non-periodic (default)
+   */
+  Real getBlockData(const Elem *, unsigned int) const;
+
+  /**
    * This function calculates minimum distance between 2 points
    * considering periodicity of the simulation volume
    */
@@ -82,6 +93,8 @@ protected:
   unsigned int _nprop;
   ///Number of grains (for property read based on grains)
   unsigned int _ngrain;
+  ///Number of blocks (for property read based on grains)
+  unsigned int _nblock;
   ///Type of read - element or grain
   MooseEnum _read_type;
   ///Random seed - used for generating grain centers

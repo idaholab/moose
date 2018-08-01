@@ -25,8 +25,9 @@ validParams<ElementPropertyReadFile>()
   params.addParam<FileName>("prop_file_name", "", "Name of the property file name");
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
   params.addParam<unsigned int>("ngrain", 0, "Number of grains");
+  params.addParam<unsigned int>("nblock", 0, "Number of blocks");
   params.addParam<MooseEnum>("read_type",
-                             MooseEnum("element grain none", "none"),
+                             MooseEnum("element grain block none", "none"),
                              "Type of property distribution: element:element by element property "
                              "variation; grain:voronoi grain structure");
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
@@ -42,6 +43,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _prop_file_name(getParam<FileName>("prop_file_name")),
     _nprop(getParam<unsigned int>("nprop")),
     _ngrain(getParam<unsigned int>("ngrain")),
+    _nblock(getParam<unsigned int>("nblock")),
     _read_type(getParam<MooseEnum>("read_type")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
@@ -49,17 +51,6 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
 {
   _nelem = _mesh.nElem();
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-  {
-    _bottom_left(i) = _mesh.getMinInDimension(i);
-    _top_right(i) = _mesh.getMaxInDimension(i);
-    _range(i) = _top_right(i) - _bottom_left(i);
-  }
-
-  _max_range = _range(0);
-  for (unsigned int i = 1; i < LIBMESH_DIM; i++)
-    if (_range(i) > _max_range)
-      _max_range = _range(i);
 
   switch (_read_type)
   {
@@ -68,11 +59,27 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
       break;
 
     case 1:
+      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+      {
+        _bottom_left(i) = _mesh.getMinInDimension(i);
+        _top_right(i) = _mesh.getMaxInDimension(i);
+        _range(i) = _top_right(i) - _bottom_left(i);
+      }
+
+      _max_range = _range(0);
+      for (unsigned int i = 1; i < LIBMESH_DIM; i++)
+        if (_range(i) > _max_range)
+          _max_range = _range(i);
+
+
       readGrainData();
       break;
 
+    case 2:
+      readBlockData();
+      break;
     default:
-      mooseError("Error ElementPropertyReadFile: Provide valid read type");
+      mooseError("Error ElementPropertyReadFile: Provide valid read type in ElementPropertyReadFile method");
   }
 }
 
@@ -87,6 +94,24 @@ ElementPropertyReadFile::readElementData()
   file_prop.open(_prop_file_name.c_str());
 
   for (unsigned int i = 0; i < _nelem; i++)
+    for (unsigned int j = 0; j < _nprop; j++)
+      if (!(file_prop >> _data[i * _nprop + j]))
+        mooseError("Error ElementPropertyReadFile: Premature end of file");
+
+  file_prop.close();
+}
+
+void
+ElementPropertyReadFile::readBlockData()
+{
+  _data.resize(_nprop * _nblock);
+
+  MooseUtils::checkFileReadable(_prop_file_name);
+
+  std::ifstream file_prop;
+  file_prop.open(_prop_file_name.c_str());
+
+  for (unsigned int i = 0; i < _nblock; i++)
     for (unsigned int j = 0; j < _nprop; j++)
       if (!(file_prop >> _data[i * _nprop + j]))
         mooseError("Error ElementPropertyReadFile: Premature end of file");
@@ -133,8 +158,11 @@ ElementPropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
 
     case 1:
       return getGrainData(elem, prop_num);
+
+    case 2:
+      return getBlockData(elem, prop_num);
   }
-  mooseError("Error ElementPropertyReadFile: Provide valid read type");
+  mooseError("Error ElementPropertyReadFile: Provide valid read type in getData method");
 }
 
 Real
@@ -152,6 +180,23 @@ ElementPropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num
                   << " greater than than total number of properties "
                   << _nprop);
   return _data[jelem * _nprop + prop_num];
+}
+
+Real
+ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
+{
+  unsigned int elem_subdomain_id = elem->subdomain_id();
+  mooseAssert(elem_subdomain_id < _nblock,
+              "Error ElementPropertyReadFile: Element "
+                  << elem_subdomain_id
+                  << " greater than than total number of element in mesh "
+                  << _nblock);
+  mooseAssert(prop_num < _nprop,
+              "Error ElementPropertyReadFile: Property number "
+                  << prop_num
+                  << " greater than than total number of properties "
+                  << _nprop);
+  return _data[elem_subdomain_id * _nprop + prop_num];
 }
 
 Real
