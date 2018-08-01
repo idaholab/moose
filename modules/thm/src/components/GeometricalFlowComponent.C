@@ -22,7 +22,8 @@ validParams<GeometricalFlowComponent>()
 GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & parameters)
   : GeometricalComponent(parameters),
     _fp_name(getParam<UserObjectName>("fp")),
-    _rdg_flux_name(genName(name(), "rdg_flux")),
+    _rdg_conservative_flux_name(genName(name(), "rdg_conservative_flux")),
+    _rdg_nonconservative_flux_name(genName(name(), "rdg_nonconservative_flux")),
     _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),
     _rdg_slope_reconstruction(
         getEnumParam<FlowModel::ESlopeReconstructionType>("rdg_slope_reconstruction")),

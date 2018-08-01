@@ -356,7 +356,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("fluid_properties") = fp_name;
     params.set<ExecFlagEnum>("execute_on") = lin_execute_on;
-    _sim.addUserObject(class_name, _rdg_flux_name, params);
+    _sim.addUserObject(class_name, _rdg_conservative_flux_name, params);
   }
 
   // advection
@@ -371,7 +371,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-    params.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+    params.set<UserObjectName>("rdg_flux") = _rdg_conservative_flux_name;
     params.set<bool>("implicit") = _implicit_rdg;
     _sim.addDGKernel(class_name, Component::genName(_comp_name, "mass_advection"), params);
 

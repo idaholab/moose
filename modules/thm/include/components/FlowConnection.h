@@ -151,8 +151,10 @@ protected:
   RELAP7::FlowModelID _flow_model_id;
   /// The name of the fluid property user object
   UserObjectName _fp_name;
-  /// rDG flux user object names
-  std::vector<UserObjectName> _rdg_flux_names;
+  /// rDG conservative flux user object names
+  std::vector<UserObjectName> _rdg_conservative_flux_names;
+  /// rDG non-conservative flux user object names
+  std::vector<UserObjectName> _rdg_nonconservative_flux_names;
   /// rDG interfacial variables user object names
   std::vector<UserObjectName> _rdg_int_var_uo_names;
   /// Use implicit time integration for rDG
