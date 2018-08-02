@@ -87,6 +87,8 @@ public:
 protected:
   ///Name of file containing property values
   std::string _prop_file_name;
+  // Name of file containing grain center values
+  std::string _points_file_name;
   ///Store property values read from file
   std::vector<Real> _data;
   ///Number of properties in a row
@@ -96,11 +98,15 @@ protected:
   ///Number of blocks (for property read based on grains)
   unsigned int _nblock;
   ///Type of read - element or grain
+  unsigned int _npoints;
+  ///Type of read - element or grain
   MooseEnum _read_type;
   ///Random seed - used for generating grain centers
   unsigned int _rand_seed;
   ///Type of grain structure - non-periodic default
   MooseEnum _rve_type;
+  ///Type of grain initialization
+  MooseEnum _method;
 
   MooseMesh & _mesh;
   std::vector<Point> _center;

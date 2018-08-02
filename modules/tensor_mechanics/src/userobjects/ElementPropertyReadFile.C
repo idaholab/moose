@@ -23,9 +23,10 @@ validParams<ElementPropertyReadFile>()
   params.addClassDescription("User Object to read property data from an external file and assign "
                              "to elements: Works only for Rectangular geometry (2D-3D)");
   params.addParam<FileName>("prop_file_name", "", "Name of the property file name");
+  params.addParam<FileName>("points_file_name", "", "Name of the points file name");
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
-  params.addParam<unsigned int>("ngrain", 0, "Number of grains");
-  params.addParam<unsigned int>("nblock", 0, "Number of blocks");
+  params.addParam<unsigned int>("ngrain", 16, "Number of grains");
+  params.addParam<unsigned int>("nblock", 16, "Number of blocks");
   params.addParam<MooseEnum>("read_type",
                              MooseEnum("element grain block none", "none"),
                              "Type of property distribution: element:element by element property "
@@ -35,18 +36,23 @@ validParams<ElementPropertyReadFile>()
       "rve_type",
       MooseEnum("periodic none", "none"),
       "Periodic or non-periodic grain distribution: Default is non-periodic");
+  params.addParam<MooseEnum>(
+      "method", MooseEnum("UserSpecified Random", "Random"), "description goes here");
+
   return params;
 }
 
 ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _prop_file_name(getParam<FileName>("prop_file_name")),
+    _points_file_name(getParam<FileName>("points_file_name")),
     _nprop(getParam<unsigned int>("nprop")),
     _ngrain(getParam<unsigned int>("ngrain")),
     _nblock(getParam<unsigned int>("nblock")),
     _read_type(getParam<MooseEnum>("read_type")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
+    _method(getParam<MooseEnum>("method")),
     _mesh(_fe_problem.mesh())
 {
   _nelem = _mesh.nElem();
@@ -71,15 +77,16 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
         if (_range(i) > _max_range)
           _max_range = _range(i);
 
-
       readGrainData();
       break;
 
     case 2:
       readBlockData();
       break;
+
     default:
-      mooseError("Error ElementPropertyReadFile: Provide valid read type in ElementPropertyReadFile method");
+      mooseError("Error ElementPropertyReadFile: Provide valid read type in "
+                 "ElementPropertyReadFile method");
   }
 }
 
@@ -104,19 +111,36 @@ ElementPropertyReadFile::readElementData()
 void
 ElementPropertyReadFile::readBlockData()
 {
-  _data.resize(_nprop * _nblock);
+  if (_method == "Random")
+  {
+    _data.resize(_npoints * LIBMESH_DIM);
+    MooseRandom::seed(_rand_seed);
+    for (unsigned int i = 0; i < _npoints; i++)
+      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+      {
+        if (j == 1)
+          _data[i * LIBMESH_DIM + j] = MooseRandom::rand() * 180.;
+        else
+          _data[i * LIBMESH_DIM + j] = MooseRandom::rand() * 360.;
+      }
+  }
 
-  MooseUtils::checkFileReadable(_prop_file_name);
+  else if (_method == "UserSpecified")
+  {
+    _data.resize(_nprop * _nblock);
 
-  std::ifstream file_prop;
-  file_prop.open(_prop_file_name.c_str());
+    MooseUtils::checkFileReadable(_prop_file_name);
 
-  for (unsigned int i = 0; i < _nblock; i++)
-    for (unsigned int j = 0; j < _nprop; j++)
-      if (!(file_prop >> _data[i * _nprop + j]))
-        mooseError("Error ElementPropertyReadFile: Premature end of file");
+    std::ifstream file_prop;
+    file_prop.open(_prop_file_name.c_str());
 
-  file_prop.close();
+    for (unsigned int i = 0; i < _nblock; i++)
+      for (unsigned int j = 0; j < _nprop; j++)
+        if (!(file_prop >> _data[i * _nprop + j]))
+          mooseError("Error ElementPropertyReadFile: Premature end of file");
+
+    file_prop.close();
+  }
 }
 
 void
@@ -142,10 +166,27 @@ void
 ElementPropertyReadFile::initGrainCenterPoints()
 {
   _center.resize(_ngrain);
-  MooseRandom::seed(_rand_seed);
-  for (unsigned int i = 0; i < _ngrain; i++)
-    for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-      _center[i](j) = _bottom_left(j) + MooseRandom::rand() * _range(j);
+  if (_method == "Random")
+  {
+    MooseRandom::seed(_rand_seed);
+    for (unsigned int i = 0; i < _ngrain; i++)
+      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+        _center[i](j) = _bottom_left(j) + MooseRandom::rand() * _range(j);
+  }
+  else if (_method == "UserSpecified")
+  {
+    // READ FILE IN HERE
+    MooseUtils::checkFileReadable(_points_file_name);
+    std::ifstream file_prop;
+    file_prop.open(_points_file_name.c_str());
+
+    for (unsigned int i = 0; i < _ngrain; i++)
+      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+        if (!(file_prop >> _center[i * _ngrain](j)))
+          mooseError("Error ElementPropertyReadFile: Premature end of file");
+
+    file_prop.close();
+  }
 }
 
 Real
@@ -188,14 +229,11 @@ ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) 
   unsigned int elem_subdomain_id = elem->subdomain_id();
   mooseAssert(elem_subdomain_id < _nblock,
               "Error ElementPropertyReadFile: Element "
-                  << elem_subdomain_id
-                  << " greater than than total number of element in mesh "
+                  << elem_subdomain_id << " greater than than total number of element in mesh "
                   << _nblock);
   mooseAssert(prop_num < _nprop,
               "Error ElementPropertyReadFile: Property number "
-                  << prop_num
-                  << " greater than than total number of properties "
-                  << _nprop);
+                  << prop_num << " greater than than total number of properties " << _nprop);
   return _data[elem_subdomain_id * _nprop + prop_num];
 }
 
