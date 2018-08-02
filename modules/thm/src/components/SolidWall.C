@@ -21,7 +21,7 @@ SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
 void
 SolidWall::check() const
 {
-  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id != RELAP7::FM_SINGLE_PHASE))
+  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id == RELAP7::FM_TWO_PHASE_NCG))
     logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
@@ -59,19 +59,42 @@ SolidWall::addMooseObjects1Phase()
 void
 SolidWall::addMooseObjects2Phase()
 {
+  if (_spatial_discretization == FlowModel::CG)
   {
-    InputParameters params = _factory.getValidParams("DirichletBC");
-    params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("value") = 0.;
-    _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_liquid"), params);
+    {
+      InputParameters params = _factory.getValidParams("DirichletBC");
+      params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID;
+      params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
+      params.set<Real>("value") = 0.;
+      _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_liquid"), params);
+    }
+    {
+      InputParameters params = _factory.getValidParams("DirichletBC");
+      params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR;
+      params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
+      params.set<Real>("value") = 0.;
+      _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_vapor"), params);
+    }
   }
+  else if (_spatial_discretization == FlowModel::rDG)
   {
-    InputParameters params = _factory.getValidParams("DirichletBC");
-    params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR;
-    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-    params.set<Real>("value") = 0.;
-    _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_vapor"), params);
+    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
+    userobject_execute_on = {EXEC_LINEAR, EXEC_NONLINEAR};
+
+    // boundary flux user object
+    const std::string boundary_flux_name = genName(name(), "boundary_flux");
+    {
+      const std::string class_name = "Euler1DVarAreaWallBoundaryFlux7Eqn";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+      params.set<UserObjectName>("int_var_uo_name") = _rdg_int_var_uo_name;
+      params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
+      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+      _sim.addUserObject(class_name, boundary_flux_name, params);
+    }
+
+    // BCs
+    createRDGBoundaryConditions2Phase(boundary_flux_name);
   }
 }
 

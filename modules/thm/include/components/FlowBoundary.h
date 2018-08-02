@@ -27,6 +27,13 @@ protected:
    */
   void createRDGBoundaryConditions1Phase(const std::string & boundary_flux_name);
 
+  /**
+   * Creates the boundary condition objects for 2-phase rDG
+   *
+   * @param[in] boundary_flux_name   name of the boundary flux user object
+   */
+  void createRDGBoundaryConditions2Phase(const std::string & boundary_flux_name);
+
   /// The name of the connect pipe
   std::string _connected_pipe_name;
   /// The end type of the connected pipe
@@ -44,6 +51,8 @@ protected:
 
   /// rDG flux user object name
   UserObjectName _rdg_flux_name;
+  /// rDG interfacial variables user object name
+  UserObjectName _rdg_int_var_uo_name;
 };
 
 #endif /* FLOWBOUNDARY_H */

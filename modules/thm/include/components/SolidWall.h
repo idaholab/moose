@@ -10,7 +10,6 @@ InputParameters validParams<SolidWall>();
 
 /**
  * A simple component for solid wall BC
- *
  */
 class SolidWall : public FlowBoundary
 {
