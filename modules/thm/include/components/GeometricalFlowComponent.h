@@ -71,6 +71,9 @@ protected:
   /// Name of fluid properties user object
   const UserObjectName & _fp_name;
 
+  /// Number of non-condensable gases, if any
+  unsigned int _n_ncgs;
+
   /// rDG flux user object name
   const UserObjectName _rdg_flux_name;
 

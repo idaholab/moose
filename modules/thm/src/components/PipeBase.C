@@ -29,28 +29,21 @@ PipeBase::init()
 {
   GeometricalFlowComponent::init();
 
+  // create and initialize flow model
+  InputParameters pars = emptyInputParameters();
+  pars.set<Simulation *>("_sim") = &_sim;
+  pars.set<PipeBase *>("_pipe") = this;
+  pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
+  pars.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+  pars.set<bool>("implicit_rdg") = _implicit_rdg;
   if (_model_id == RELAP7::FM_SINGLE_PHASE)
-  {
-    InputParameters pars = emptyInputParameters();
-    pars.set<Simulation *>("_sim") = &_sim;
-    pars.set<PipeBase *>("_pipe") = this;
-    pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
-    pars.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
-    pars.set<bool>("implicit_rdg") = _implicit_rdg;
     _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);
-    _flow_model->init();
-  }
-  else if (_model_id == RELAP7::FM_TWO_PHASE)
+  else if (_model_id == RELAP7::FM_TWO_PHASE || _model_id == RELAP7::FM_TWO_PHASE_NCG)
   {
-    InputParameters pars = emptyInputParameters();
-    pars.set<Simulation *>("_sim") = &_sim;
-    pars.set<PipeBase *>("_pipe") = this;
-    pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
-    pars.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
-    pars.set<bool>("implicit_rdg") = _implicit_rdg;
+    pars.set<unsigned int>("n_ncgs") = _n_ncgs;
     _flow_model = std::make_shared<FlowModelTwoPhase>(name(), pars);
-    _flow_model->init();
   }
   else
     logModelNotImplementedError(_model_id);
+  _flow_model->init();
 }

@@ -106,7 +106,7 @@ FlowConnection::init()
       if (hasComponentByName<Pipe>(_connections[0]._geometrical_component_name))
       {
         const Pipe & pipe = getComponentByName<Pipe>(_connections[0]._geometrical_component_name);
-        if (_flow_model_id == RELAP7::FM_TWO_PHASE)
+        if (_flow_model_id == RELAP7::FM_TWO_PHASE || _flow_model_id == RELAP7::FM_TWO_PHASE_NCG)
         {
           auto flow_model = pipe.getFlowModel();
           auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase &>(*flow_model);
