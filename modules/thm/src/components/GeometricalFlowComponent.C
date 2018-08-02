@@ -23,6 +23,7 @@ GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & param
   : GeometricalComponent(parameters),
     _fp_name(getParam<UserObjectName>("fp")),
     _rdg_flux_name(genName(name(), "rdg_flux")),
+    _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),
     _rdg_slope_reconstruction(
         getEnumParam<FlowModel::ESlopeReconstructionType>("rdg_slope_reconstruction")),
     _implicit_rdg(getParam<bool>("implicit_rdg"))

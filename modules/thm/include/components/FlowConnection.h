@@ -153,6 +153,8 @@ protected:
   UserObjectName _fp_name;
   /// rDG flux user object names
   std::vector<UserObjectName> _rdg_flux_names;
+  /// rDG interfacial variables user object names
+  std::vector<UserObjectName> _rdg_int_var_uo_names;
   /// Use implicit time integration for rDG
   bool _implicit_rdg;
   /// Spatial discretization

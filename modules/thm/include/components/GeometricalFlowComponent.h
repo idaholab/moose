@@ -53,12 +53,20 @@ public:
   const RELAP7::FlowModelID & getFlowModelID() const;
 
   /**
-   * Gets the flow model ID
+   * Gets the RDG flux user object name
    */
   const UserObjectName & getRDGFluxUserObjectName() const { return _rdg_flux_name; }
 
   /**
-   * Gets the flow model ID
+   * Gets the RDG interfacial variables user object name
+   */
+  const UserObjectName & getRDGInterfacialVariablesUserObjectName() const
+  {
+    return _rdg_int_var_uo_name;
+  }
+
+  /**
+   * Gets the flag indicating whether RDG objects are in an implicit form
    */
   const bool & getImplicitRDGFlag() const { return _implicit_rdg; }
 
@@ -73,6 +81,9 @@ protected:
 
   /// rDG flux user object name
   const UserObjectName _rdg_flux_name;
+
+  /// rDG interfacial variables user object name
+  const UserObjectName _rdg_int_var_uo_name;
 
   /// Slope reconstruction type for rDG
   const FlowModel::ESlopeReconstructionType _rdg_slope_reconstruction;
