@@ -13,16 +13,6 @@
 // MOOSE includes
 #include "NodeElemConstraint.h"
 
-/**
- * Formulations, currently only supports KINEMATIC and PENALTY
- */
-enum Formulation
-{
-  KINEMATIC,
-  PENALTY,
-  INVALID
-};
-
 // Forward Declarations
 class EqualValueEmbeddedConstraint;
 
@@ -63,18 +53,12 @@ protected:
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
                                         unsigned int jvar) override;
   virtual void getConnectedDofIndices(unsigned int var_num) override;
-  /**
-   * Get the Formulation enum from a case-insensitive string
-   * @param name name of the formulation string to be parsed
-   * @return Formulation parsed enum of the corresponding formulation, returns INVALID by default
-   */
-  static Formulation getFormulation(std::string name);
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   FEProblem & _fe_problem;
 
-  /// Enum used to define the formulation used to impose the constraint
-  const Formulation _formulation;
+  /// Formulations, currently only supports KINEMATIC and PENALTY
+  const enum class Formulation { KINEMATIC, PENALTY } _formulation;
   /// Penalty parameter used in constraint enforcement for kinematic and penalty formulations
   const Real _penalty;
   /// copy of the residual before the constraint is applied

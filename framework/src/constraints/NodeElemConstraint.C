@@ -22,11 +22,9 @@ template <>
 InputParameters
 validParams<NodeElemConstraint>()
 {
-  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   InputParameters params = validParams<Constraint>();
   params.addRequiredParam<SubdomainName>("slave", "slave block id");
   params.addRequiredParam<SubdomainName>("master", "master block id");
-  params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
   params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");
 
   return params;

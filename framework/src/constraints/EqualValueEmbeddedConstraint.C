@@ -32,12 +32,12 @@ validParams<EqualValueEmbeddedConstraint>()
   params.addClassDescription("This is a constraint enforcing overlapping portions of two blocks to "
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;
-  params.addParam<std::string>(
-      "formulation", "kinematic", "Formulation used to enforce the constraint");
+  MooseEnum formulation("kinematic penalty", "kinematic");
+  params.addParam<MooseEnum>(
+      "formulation", formulation, "Formulation used to enforce the constraint");
   params.addRequiredParam<Real>(
       "penalty",
       "Penalty parameter used in constraint enforcement for kinematic and penalty formulations.");
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   return params;
 }
@@ -46,7 +46,7 @@ EqualValueEmbeddedConstraint::EqualValueEmbeddedConstraint(const InputParameters
   : NodeElemConstraint(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
-    _formulation(getFormulation(getParam<std::string>("formulation"))),
+    _formulation(getParam<MooseEnum>("formulation").getEnum<Formulation>()),
     _penalty(getParam<Real>("penalty")),
     _residual_copy(_sys.residualGhosted())
 {
@@ -118,11 +118,11 @@ EqualValueEmbeddedConstraint::computeConstraintForce()
 
   switch (_formulation)
   {
-    case KINEMATIC:
+    case Formulation::KINEMATIC:
       _constraint_force = -_residual_copy(dof_number);
       break;
 
-    case PENALTY:
+    case Formulation::PENALTY:
       _constraint_force = _penalty * (_u_slave[0] - _u_master[0]);
       break;
 
@@ -147,7 +147,7 @@ EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
   {
     case Moose::Slave:
     {
-      if (_formulation == KINEMATIC)
+      if (_formulation == Formulation::KINEMATIC)
       {
         Real pen_force = _penalty * (_u_slave[_qp] - _u_master[_qp]);
         resid += pen_force;
@@ -174,11 +174,11 @@ EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
     case Moose::SlaveSlave:
       switch (_formulation)
       {
-        case KINEMATIC:
+        case Formulation::KINEMATIC:
           curr_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
                                   _connected_dof_indices[_j]);
           return -curr_jac + _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
-        case PENALTY:
+        case Formulation::PENALTY:
           return _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp];
         default:
           mooseError("Invalid formulation");
@@ -187,9 +187,9 @@ EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
     case Moose::SlaveMaster:
       switch (_formulation)
       {
-        case KINEMATIC:
+        case Formulation::KINEMATIC:
           return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
-        case PENALTY:
+        case Formulation::PENALTY:
           return -_phi_master[_j][_qp] * penalty * _test_slave[_i][_qp];
         default:
           mooseError("Invalid formulation");
@@ -198,11 +198,11 @@ EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
     case Moose::MasterSlave:
       switch (_formulation)
       {
-        case KINEMATIC:
+        case Formulation::KINEMATIC:
           slave_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
                                    _connected_dof_indices[_j]);
           return slave_jac * _test_master[_i][_qp];
-        case PENALTY:
+        case Formulation::PENALTY:
           return -_phi_slave[_j][_qp] * penalty * _test_master[_i][_qp];
         default:
           mooseError("Invalid formulation");
@@ -211,9 +211,9 @@ EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
     case Moose::MasterMaster:
       switch (_formulation)
       {
-        case KINEMATIC:
+        case Formulation::KINEMATIC:
           return 0.0;
-        case PENALTY:
+        case Formulation::PENALTY:
           return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp];
         default:
           mooseError("Invalid formulation");
@@ -242,11 +242,11 @@ EqualValueEmbeddedConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobian
     case Moose::MasterSlave:
       switch (_formulation)
       {
-        case KINEMATIC:
+        case Formulation::KINEMATIC:
           slave_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
                                    _connected_dof_indices[_j]);
           return slave_jac * _test_master[_i][_qp];
-        case PENALTY:
+        case Formulation::PENALTY:
           return 0.0;
         default:
           mooseError("Invalid formulation");
@@ -348,22 +348,4 @@ EqualValueEmbeddedConstraint::getConnectedDofIndices(unsigned int var_num)
     else
       _phi_slave[j][_qp] = 0.0;
   }
-}
-
-Formulation
-EqualValueEmbeddedConstraint::getFormulation(std::string name)
-{
-  Formulation formulation(INVALID);
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-  if ("kinematic" == name)
-    formulation = KINEMATIC;
-
-  else if ("penalty" == name)
-    formulation = PENALTY;
-
-  if (formulation == INVALID)
-    ::mooseError("Invalid formulation found: ", name);
-
-  return formulation;
 }
