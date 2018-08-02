@@ -21,7 +21,7 @@ SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
 void
 SolidWall::check() const
 {
-  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id == RELAP7::FM_TWO_PHASE))
+  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id != RELAP7::FM_SINGLE_PHASE))
     logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
@@ -80,6 +80,6 @@ SolidWall::addMooseObjects()
 {
   if (_flow_model_id == RELAP7::FM_SINGLE_PHASE)
     addMooseObjects1Phase();
-  else if (_flow_model_id == RELAP7::FM_TWO_PHASE)
+  else if (_flow_model_id == RELAP7::FM_TWO_PHASE || _flow_model_id == RELAP7::FM_TWO_PHASE_NCG)
     addMooseObjects2Phase();
 }
