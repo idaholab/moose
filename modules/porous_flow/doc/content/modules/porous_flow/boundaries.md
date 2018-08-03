@@ -70,7 +70,7 @@ Dirichlet conditions is inappropriate.
   outside a model providing a limitless source (or sink) of fluid and
   that does not happen in reality.
 - The Variables used may not be porepressure, so a straightforward
-  translation to ``fixing porepressure'' is not easy.
+  translation to "fixing porepressure" is not easy.
 - The Dirichlet condition can lead to extremely poor convergence
   as it forces areas near the boundary close to unphysical or unlikely
   regions in parameter space.
@@ -86,7 +86,7 @@ pressure, but the recharge if porepressure is lowered may be zero.
 Again this may be modelled using a `PorousFlowSink`.
 
 When fixing porepressures (or temperatures) using a `PorousFlowSink`,
-what should the ``conductance'' be?  Consider an imaginary environment
+what should the "conductance" be?  Consider an imaginary environment
 that sits at distance $L$ from the model.  The imaginary environment
 provides a limitless source or sink of fluid, but that fluid must
 travel through the distance $L$ between the model and the imaginary
@@ -200,4 +200,109 @@ Below are shown some outputs.  Evidently the boundary condition satisfies the re
 
 !media injection_production_eg.gif style=width:50%;margin-left:10px caption=Evolution of gas saturation (the jaggedness of the line is because gas saturation is an elemental variable).  id=injection_production_eg
 
+## Boundary terms for the advection-diffusion equation
 
+The theoretical background concerning boundary fluxes is developed in
+this section.  The presentation is general and not specific to Porous
+Flow.  The variable $u$ may represent temperature, fluid mass,
+mass-densty of a species, number-density of a species, etc.  The flux
+quantified below has units depending on the physical meaning of $u$:
+if $u$ is temperature then the flux has units J.s$^{-1}$; if $u$ is
+fluid mass then the flux has units kg.s$^{-1}$, etc.  For sake or
+argument, $u$ is referred to as "fluid" in the discussion below.
+
+### The advection equation
+
+The advection equation for $u$ is
+\begin{equation}
+\frac{\partial u}{\partial t} = -\nabla (\mathbf{V} u) \ .
+\end{equation}
+The velocity field ${\mathbf{V}}$ advects $u$, meaning that $u$
+follows the streamlines of ${\mathbf{V}}$.  The weak form of this equation reads
+\begin{equation}
+\label{eq:adv_eqn_weak}
+0 = \int_{\Omega}\psi \frac{\partial u}{\partial t} - \int_{\Omega}\nabla\psi\cdot\mathbf{V}u + \int_{\partial\Omega}\psi \mathbf{n}\cdot\mathbf{V}u \ .
+\end{equation}
+In a MOOSE input file, the second term is typically represented by a
+[`ConservativeAdvection`](ConservativeAdvection.md) `Kernel`, while
+the final term is the flux out through the surface $\partial\Omega$
+and can be represented by an `Outflow` or `Inflow` `BC`.
+
+The flux out through an area $A$ is
+\begin{equation}
+\mathrm{flux}_{\mathrm{out}} = \int_{A} \mathbf{n}\cdot\mathbf{V} u \ .
+\end{equation}
+Here $\mathbf{n}$ is the outward normal to $A$.  If $A$ is an arbitrary internal area, this equation is always correct, but if $A$ is on the boundary of the simulation, the flux out is dictated by the boundary condition used.
+
+There are various common boundary conditions.  For the sake of the arguments below,
+imagine $\partial\Omega$ being an outside boundary of the MOOSE numerical model.
+
+- If $\mathbf{n}\cdot\mathbf{V}>0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  If no BC is used then there is no term in the system of equations that is removing fluid from the boundary.  That is, no fluid is allowed out of the model through $\partial\Omega$, and fluid builds up at the boundary.  (Even though $\mathrm{flux}_{\mathrm{out}}=0$, $u$ does not have to be zero on the boundary.)
+
+- If $\mathbf{n}\cdot\mathbf{V}>0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  An `Outflow` BC is exactly the final term in [eq:adv_eqn_weak].  This removes fluid through $\partial\Omega$ at exactly the rate specified by the advection equation, so this is a "free" boundary that is "invisible" to the simulation.
+
+- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  If no BC is used then no fluid enters the domain through $\partial\Omega$ (and $u$ will reduce).
+
+- If $\mathbf{n}\cdot\mathbf{V}<0$ then fluid is moving from the numerical model through the boundary towards the outside of the model.  An `Inflow` `BC`, which is exactly the last term in [eq:adv_eqn_weak] with $u=u_{B}$ fixed, may be used to specify an injection rate through this boundary ($u_{B}$ has units kg.s$^{-1}$.m$^{-2}$).
+
+
+### The diffusion equation
+
+The diffusion equation for $u$ (representing temperature, fluid mass,
+mass-density of a species, etc) is
+\begin{equation}
+\frac{\partial u}{\partial t} = \nabla (D \nabla u) \ ,
+\end{equation}
+with weak form
+\begin{equation}
+\label{eq:diff_eqn_weak}
+0 = \int_{\Omega}\psi \dot{u} + \int_{\Omega}\nabla\psi\cdot D\nabla u - \int_{\partial\Omega}\psi \mathbf{n}\cdot D\nabla u \ .
+\end{equation}
+The second is typically represented in MOOSE using the [`Diffusion`](source/kernels/Diffusion.md) Kernel, while the last term is the [`DiffusionFluxBC`](DiffusionFluxBC.md) BC (assuming $D=I$).  This last term is the flux out (kg.s$^{-1}$, or
+J.s$^{-1}$, or whatever are appropriate units associated with $u$) through an area $\partial\Omega$.
+
+The flux out through an arbitrary area $A$ is
+\begin{equation}
+\mathrm{flux}_{\mathrm{out}} = -\int_{A} \mathbf{n}\cdot D\nabla u \ .
+\end{equation}
+Here $\mathbf{n}$ is the outward normal to $A$.  If $A$ is an arbitrary internal area, this equation is always correct, but if $A$ is on the boundary of the simulation, the flux out is dictated by the boundary condition used.
+
+Inclusion of a BC for $u$ in a MOOSE input file will specify something about the flux from the boundary.  Some examples are:
+
+- A [`NeumannBC`](source/bcs/NeumannBC.md) simply adds a constant value (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid and MOOSE will find the solution that has ${\mathbf{n}}\cdot D\nabla u = h$.  The value is the flux into the domain (negative of the out-going flux mentioned above).
+
+- Using no BC at all on $\partial\Omega$ means that there is no boundary term in [eq:diff_eqn_weak] so no fluid gets removed from this boundary: it is impermeable.  MOOSE will find the solution that has ${\mathbf{n}}\cdot D\nabla u = 0$.
+
+- Using a [`DirichletBC`](source/bcs/DirichletBC.md) fixes $u$ on the boundary.  The physical interpretation is that an external source or sink is providing or removing fluid at the correct rate so that $u$ remains fixed.
+
+- Using a [`DiffusionFluxBC`](DiffusionFluxBC.md) will remove fluid at exactly the rate specified by the diffusion equation (assuming $D=I$: otherwise an extension to the DiffusionFluxBC class needs to be encoded into MOOSE).  This boundary condition is a "free" boundary that is "invisible" to the simulation.
+
+
+### The advection-diffusion equation
+
+The advection-diffusion equation for $u$ (representing temperature, fluid mass,
+mass-density of a species, etc) is just a combination of the above:
+\begin{equation}
+\frac{\partial u}{\partial t} = \nabla (D \nabla u - \mathbf{V}u) \ ,
+\end{equation}
+with weak form
+\begin{equation}
+\label{eq:diff_adv_eqn_weak}
+0 = \int_{\Omega}\psi \dot{u} + \int_{\Omega}\nabla\psi\cdot (D\nabla u - \mathbf{V}u) - \int_{\partial\Omega}\psi \mathbf{n}\cdot (D\nabla u - \mathbf{V}u) \ .
+\end{equation}
+
+The flux out (kg.s$^{-1}$, or
+J.s$^{-1}$, or whatever are appropriate units associated with $u$) through an area
+$A$ is
+\begin{equation}
+\mathrm{flux}_{\mathrm{out}} = -\int_{A} \mathbf{n}\cdot \left( D\nabla u - \mathbf{V}u\right) \ .
+\end{equation}
+Here $\mathbf{n}$ is the outward normal to $A$.
+
+Inclusion of a BC for $u$ in a MOOSE input file will specify something about the flux from the boundary.  Some examples are.
+
+- Using no BCs means the final term [eq:diff_adv_eqn_weak] is missing from the system of equations that MOOSE solves.  This means that no fluid is entering or exiting the domain from this boundary: the boundary is "impermeable".  The fluid will "pile up" at the boundary, if ${\mathbf{V}}$ is such that it is attempting to "blow" fluid out of the boundary (${\mathbf{n}}\cdot{\mathbf{V}}>0$).  Conversely, the fluid will deplete at the boundary, if ${\mathbf{V}}$ is attempting to "blow" fluid from the boundary into the model domain (${\mathbf{n}}\cdot{\mathbf{V}}<0$).
+
+- A [`NeumannBC`](source/bcs/NeumannBC.md) adds a constant value (kg.s$^{-1}$.m$^{-2}$) to the Residual and integrates it over the boundary.  Adding this constant value corresponds to adding a constant flux of fluid and MOOSE will find the solution that has ${\mathbf{n}}\cdot (D\nabla u - \mathbf{V}u) = h$.  The value of $h$ is the flux into the domain (negative of the out-going flux mentioned above).
+
+- Using an `OutflowBC` together with a [`DiffusionFluxBC`](DiffusionFluxBC.md) removes fluid through $\partial\Omega$ at exactly the rate specified by the advection-diffusion equation, so this is a "free" boundary that is "invisible" to the simulation.
