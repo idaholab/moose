@@ -65,18 +65,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
       break;
 
     case 1:
-      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-      {
-        _bottom_left(i) = _mesh.getMinInDimension(i);
-        _top_right(i) = _mesh.getMaxInDimension(i);
-        _range(i) = _top_right(i) - _bottom_left(i);
-      }
-
-      _max_range = _range(0);
-      for (unsigned int i = 1; i < LIBMESH_DIM; i++)
-        if (_range(i) > _max_range)
-          _max_range = _range(i);
-
+      _max_range = 30.; // FIX ME!!
       readGrainData();
       break;
 
@@ -146,17 +135,24 @@ ElementPropertyReadFile::readBlockData()
 void
 ElementPropertyReadFile::readGrainData()
 {
-  mooseAssert(_ngrain > 0, "Error ElementPropertyReadFile: Provide non-zero number of grains");
-  _data.resize(_nprop * _ngrain);
-
   MooseUtils::checkFileReadable(_prop_file_name);
-  std::ifstream file_prop;
+
+  std::ifstream file_prop(_prop_file_name);
+  unsigned int _npoints = 0;
+  std::string line;
+  while (std::getline(file_prop, line))
+    ++_npoints;
+  file_prop.close();
+  _data.resize(_nprop * _npoints);
+
+  mooseAssert(_npoints > 0, "Error ElementPropertyReadFile: Provide non-zero number of grains");
+
   file_prop.open(_prop_file_name.c_str());
 
-  for (unsigned int i = 0; i < _ngrain; i++)
+  for (unsigned int i = 0; i < _npoints; i++)
     for (unsigned int j = 0; j < _nprop; j++)
       if (!(file_prop >> _data[i * _nprop + j]))
-        mooseError("Error ElementPropertyReadFile: Premature end of file");
+        mooseError("Error ElementPropertyReadFile: Premature end of grain-location file");
 
   file_prop.close();
   initGrainCenterPoints();
@@ -165,7 +161,6 @@ ElementPropertyReadFile::readGrainData()
 void
 ElementPropertyReadFile::initGrainCenterPoints()
 {
-  _center.resize(_ngrain);
   if (_method == "Random")
   {
     MooseRandom::seed(_rand_seed);
@@ -175,17 +170,25 @@ ElementPropertyReadFile::initGrainCenterPoints()
   }
   else if (_method == "UserSpecified")
   {
-    // READ FILE IN HERE
-    MooseUtils::checkFileReadable(_points_file_name);
-    std::ifstream file_prop;
-    file_prop.open(_points_file_name.c_str());
 
-    for (unsigned int i = 0; i < _ngrain; i++)
+    MooseUtils::checkFileReadable(_points_file_name);
+
+    std::ifstream file_points(_points_file_name);
+    unsigned int _npoints = 0;
+    std::string line;
+    while (std::getline(file_points, line))
+      ++_npoints;
+    file_points.close();
+    _center.resize(_npoints);
+
+    file_points.open(_points_file_name.c_str());
+
+    for (unsigned int i = 0; i < _npoints; i++)
       for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-        if (!(file_prop >> _center[i * _ngrain](j)))
+        if (!(file_points >> _center[i](j)))
           mooseError("Error ElementPropertyReadFile: Premature end of file");
 
-    file_prop.close();
+    file_points.close();
   }
 }
 
