@@ -104,13 +104,15 @@ EqualValueEmbeddedConstraint::shouldApply()
     _fe_problem.setNeighborSubdomainID(master_elem, 0);
     _fe_problem.reinitNeighborPhys(master_elem, points, 0);
 
+    reinitConstraint();
+
     return true;
   }
   return false;
 }
 
 void
-EqualValueEmbeddedConstraint::computeConstraintForce()
+EqualValueEmbeddedConstraint::reinitConstraint()
 {
   const Node * node = _current_node;
   unsigned int sys_num = _sys.number();
@@ -119,11 +121,11 @@ EqualValueEmbeddedConstraint::computeConstraintForce()
   switch (_formulation)
   {
     case Formulation::KINEMATIC:
-      _constraint_force = -_residual_copy(dof_number);
+      _constraint_residual = -_residual_copy(dof_number);
       break;
 
     case Formulation::PENALTY:
-      _constraint_force = _penalty * (_u_slave[0] - _u_master[0]);
+      _constraint_residual = _penalty * (_u_slave[0] - _u_master[0]);
       break;
 
     default:
@@ -141,7 +143,7 @@ EqualValueEmbeddedConstraint::computeQpSlaveValue()
 Real
 EqualValueEmbeddedConstraint::computeQpResidual(Moose::ConstraintType type)
 {
-  Real resid = _constraint_force;
+  Real resid = _constraint_residual;
 
   switch (type)
   {

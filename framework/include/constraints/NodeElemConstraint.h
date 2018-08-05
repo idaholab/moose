@@ -61,9 +61,6 @@ public:
    */
   virtual bool shouldApply() { return true; }
 
-  /// Compute reaction force of the constraint depending on the formulation
-  virtual void computeConstraintForce(){};
-
   /**
    * Whether or not the slave's residual should be overwritten.
    * @return bool When this returns true the slave's residual as computed by the constraint will

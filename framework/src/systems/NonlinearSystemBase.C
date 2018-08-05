@@ -903,7 +903,6 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
             {
               if (nec->shouldApply())
               {
-                nec->computeConstraintForce();
                 constraints_applied = true;
                 nec->computeSlaveValue(solution);
               }
@@ -1205,7 +1204,6 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
             {
               if (nec->shouldApply())
               {
-                nec->computeConstraintForce();
                 constraints_applied = true;
                 nec->computeResidual();
 
@@ -2021,11 +2019,9 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
             {
               if (nec->shouldApply())
               {
-                nec->_jacobian = &jacobian;
-
-                nec->computeConstraintForce();
                 constraints_applied = true;
 
+                nec->_jacobian = &jacobian;
                 nec->subProblem().prepareShapes(nec->variable().number(), 0);
                 nec->subProblem().prepareNeighborShapes(nec->variable().number(), 0);
 

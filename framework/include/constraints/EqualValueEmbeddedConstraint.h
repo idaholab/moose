@@ -40,10 +40,10 @@ public:
   bool shouldApply() override;
 
   /**
-   * Compute the reaction force required to enforce the constraint based on the specified
-   * formulation.
+   * Prepare the residual contribution of the current constraint required to enforce it
+   * based on the specified formulation.
    */
-  void computeConstraintForce() override;
+  void reinitConstraint();
 
 protected:
   virtual void prepareSlaveToMasterMap() override;
@@ -64,7 +64,7 @@ protected:
   /// copy of the residual before the constraint is applied
   NumericVector<Number> & _residual_copy;
   /// constraint force needed to enforce the constraint
-  Real _constraint_force;
+  Real _constraint_residual;
 };
 
 #endif
