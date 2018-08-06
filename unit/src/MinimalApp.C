@@ -19,7 +19,10 @@ TEST(MinimalApp, create)
   std::shared_ptr<MooseApp> app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
   app->parameters().set<bool>("minimal") = true;
   app->run();
-  EXPECT_EQ(app->executioner()->name(), "Executioner");
-  EXPECT_EQ(app->executioner()->feProblem().name(), "MOOSE Problem");
-  EXPECT_EQ(app->executioner()->feProblem().mesh().nElem(), 1);
+  Executioner * exec = app->getExecutioner();
+  EXPECT_EQ(exec->name(), "Executioner");
+  FEProblemBase & fe_problem = exec->feProblem();
+  EXPECT_EQ(fe_problem.name(), "MOOSE Problem");
+  MooseMesh & mesh = fe_problem.mesh();
+  EXPECT_EQ(mesh.nElem(), 1);
 }
