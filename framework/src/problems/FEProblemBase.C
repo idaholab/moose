@@ -47,6 +47,7 @@
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
+#include "InterfaceUOPostprocessor.h"
 #include "InternalSidePostprocessor.h"
 #include "GeneralPostprocessor.h"
 #include "ElementVectorPostprocessor.h"
@@ -63,6 +64,7 @@
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
+#include "InterfaceUserObject.h"
 #include "GeneralUserObject.h"
 #include "InternalSideIndicator.h"
 #include "Transfer.h"
@@ -180,6 +182,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _nodal_user_objects(_app.getExecuteOnEnum()),
     _elemental_user_objects(_app.getExecuteOnEnum()),
     _side_user_objects(_app.getExecuteOnEnum()),
+    _interface_user_objects(_app.getExecuteOnEnum()),
     _internal_side_user_objects(_app.getExecuteOnEnum()),
     _multi_apps(_app.getExecuteOnEnum()),
     _transient_multi_apps(_app.getExecuteOnEnum()),
@@ -305,6 +308,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _block_mat_side_cache.resize(n_threads);
   _bnd_mat_side_cache.resize(n_threads);
+  _bnd_mat_interface_cache.resize(n_threads);
 
   _resurrector = libmesh_make_unique<Resurrector>(*this);
 
@@ -566,6 +570,9 @@ FEProblemBase::initialSetup()
 
     _side_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
     _side_user_objects.initialSetup(tid);
+
+    _interface_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
+    _interface_user_objects.initialSetup(tid);
 
     _internal_side_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
     _internal_side_user_objects.initialSetup(tid);
@@ -840,6 +847,7 @@ FEProblemBase::timestepSetup()
     _nodal_user_objects.timestepSetup(tid);
     _elemental_user_objects.timestepSetup(tid);
     _side_user_objects.timestepSetup(tid);
+    _interface_user_objects.timestepSetup(tid);
     _internal_side_user_objects.timestepSetup(tid);
   }
   _general_user_objects.timestepSetup();
@@ -937,6 +945,19 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
+  const auto & i_objects = _interface_user_objects.getActiveObjects(tid);
+  for (const auto & uo : i_objects)
+  {
+    std::shared_ptr<ShapeSideUserObject> shape_side_uo =
+        std::dynamic_pointer_cast<ShapeSideUserObject>(uo);
+    if (shape_side_uo)
+    {
+      _calculate_jacobian_in_uo = shape_side_uo->computeJacobianFlag();
+      const std::set<MooseVariableFEBase *> & mv_deps = shape_side_uo->jacobianMooseVariables();
+      uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    }
+  }
+
   _uo_jacobian_moose_vars[tid].assign(uo_jacobian_moose_vars.begin(), uo_jacobian_moose_vars.end());
   std::sort(
       _uo_jacobian_moose_vars[tid].begin(), _uo_jacobian_moose_vars[tid].end(), sortMooseVariables);
@@ -2620,6 +2641,8 @@ FEProblemBase::addUserObject(std::string user_object_name,
     std::shared_ptr<ElementUserObject> euo =
         std::dynamic_pointer_cast<ElementUserObject>(user_object);
     std::shared_ptr<SideUserObject> suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
+    std::shared_ptr<InterfaceUserObject> iuo =
+        std::dynamic_pointer_cast<InterfaceUserObject>(user_object);
     std::shared_ptr<InternalSideUserObject> isuo =
         std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
     std::shared_ptr<NodalUserObject> nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
@@ -2645,6 +2668,8 @@ FEProblemBase::addUserObject(std::string user_object_name,
       _nodal_user_objects.addObject(nuo, tid);
     else if (suo)
       _side_user_objects.addObject(suo, tid);
+    else if (iuo)
+      _interface_user_objects.addObject(iuo, tid);
     else if (isuo)
       _internal_side_user_objects.addObject(isuo, tid);
     else if (euo)
@@ -2909,13 +2934,16 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   // Get convenience reference to active warehouse
   const MooseObjectWarehouse<ElementUserObject> & elemental = _elemental_user_objects[group][type];
   const MooseObjectWarehouse<SideUserObject> & side = _side_user_objects[group][type];
+  const MooseObjectWarehouse<InterfaceUserObject> & interface =
+      _interface_user_objects[group][type];
   const MooseObjectWarehouse<InternalSideUserObject> & internal_side =
       _internal_side_user_objects[group][type];
   const MooseObjectWarehouse<NodalUserObject> & nodal = _nodal_user_objects[group][type];
   const MooseObjectWarehouse<GeneralUserObject> & general = _general_user_objects[group][type];
 
   if (!elemental.hasActiveObjects() && !side.hasActiveObjects() &&
-      !internal_side.hasActiveObjects() && !nodal.hasActiveObjects() && !general.hasActiveObjects())
+      !internal_side.hasActiveObjects() && !interface.hasActiveObjects() &&
+      !nodal.hasActiveObjects() && !general.hasActiveObjects())
     // Nothing to do, return early
     return;
 
@@ -2931,6 +2959,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     {
       elemental.residualSetup(tid);
       side.residualSetup(tid);
+      interface.residualSetup(tid);
       internal_side.residualSetup(tid);
       nodal.residualSetup(tid);
     }
@@ -2943,26 +2972,31 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     {
       elemental.jacobianSetup(tid);
       side.jacobianSetup(tid);
+      interface.jacobianSetup(tid);
       internal_side.jacobianSetup(tid);
       nodal.jacobianSetup(tid);
     }
     general.jacobianSetup();
   }
 
-  // Initialize Elemental/Side/InternalSideUserObjects
+  // Initialize Elemental/Side/Interface/InternalSideUserObjects
   initializeUserObjects<ElementUserObject>(elemental);
   initializeUserObjects<SideUserObject>(side);
+  initializeUserObjects<InterfaceUserObject>(interface);
   initializeUserObjects<InternalSideUserObject>(internal_side);
 
-  // Execute Elemental/Side/InternalSideUserObjects
-  if (elemental.hasActiveObjects() || side.hasActiveObjects() || internal_side.hasActiveObjects())
+  // Execute Elemental/Side/Interface/InternalSideUserObjects
+  if (elemental.hasActiveObjects() || side.hasActiveObjects() || interface.hasActiveObjects() ||
+      internal_side.hasActiveObjects())
   {
-    ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), elemental, side, internal_side);
+    ComputeUserObjectsThread cppt(
+        *this, getNonlinearSystemBase(), elemental, side, interface, internal_side);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
   }
 
   // Finalize, threadJoin, and update PP values of Elemental/Side/InternalSideUserObjects
   finalizeUserObjects<SideUserObject>(side);
+  finalizeUserObjects<InterfaceUserObject>(interface);
   finalizeUserObjects<InternalSideUserObject>(internal_side);
   finalizeUserObjects<ElementUserObject>(elemental);
 
@@ -3083,6 +3117,7 @@ FEProblemBase::updateActiveObjects()
     _nodal_user_objects.updateActive(tid);
     _elemental_user_objects.updateActive(tid);
     _side_user_objects.updateActive(tid);
+    _interface_user_objects.updateActive(tid);
     _internal_side_user_objects.updateActive(tid);
     _samplers.updateActive(tid);
   }
@@ -5438,6 +5473,22 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
   }
 
   return _bnd_mat_side_cache[tid][bnd_id];
+}
+
+bool
+FEProblemBase::needBoundaryMaterialOnInterface(BoundaryID bnd_id, THREAD_ID tid)
+{
+  if (_bnd_mat_interface_cache[tid].find(bnd_id) == _bnd_mat_interface_cache[tid].end())
+  {
+    _bnd_mat_interface_cache[tid][bnd_id] = false;
+
+    if (_nl->needBoundaryMaterialOnInterface(bnd_id, tid))
+      _bnd_mat_interface_cache[tid][bnd_id] = true;
+    else if (_interface_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
+      _bnd_mat_interface_cache[tid][bnd_id] = true;
+  }
+
+  return _bnd_mat_interface_cache[tid][bnd_id];
 }
 
 bool
