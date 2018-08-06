@@ -64,7 +64,6 @@ void
 GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
 {
   // First: build the GeneratedMesh
-
   auto & factory = _app.getFactory();
 
   // Figure out the physical bounds of the given mesh
