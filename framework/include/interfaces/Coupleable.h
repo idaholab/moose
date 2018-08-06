@@ -121,6 +121,16 @@ protected:
   virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns value of a coupled variable for use in Automatic Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::value
+   */
+  virtual const ADVariableValue & adCoupledValue(const std::string & var_name,
+                                                 unsigned int comp = 0);
+
+  /**
    * Returns value of a coupled variable for a given tag
    * @param var_name Name of coupled variable
    * @param tag vector tag ID
@@ -222,6 +232,16 @@ protected:
    */
   virtual const VariableGradient & coupledGradient(const std::string & var_name,
                                                    unsigned int comp = 0);
+
+  /**
+   * Returns gradient of a coupled variable for use in Automatic Differentation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  virtual const ADVariableGradient & adCoupledGradient(const std::string & var_name,
+                                                       unsigned int comp = 0);
 
   /**
    * Returns an old gradient from previous time step of a coupled variable
@@ -498,6 +518,9 @@ protected:
   /// Will hold the default value for optional coupled variables.
   std::map<std::string, VariableValue *> _default_value;
 
+  /// Will hold the default value for optional coupled variables for automatic differentiation.
+  std::map<std::string, ADVariableValue *> _ad_default_value;
+
   /// Will hold the default value for optional vector coupled variables.
   std::map<std::string, VectorVariableValue *> _default_vector_value;
 
@@ -511,7 +534,13 @@ protected:
   VariableGradient _default_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
+  ADVariableGradient _ad_default_gradient;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  ADVariableSecond _ad_default_second;
 
   /// Zero value of a variable
   const VariableValue & _zero;
@@ -588,6 +617,14 @@ private:
    * @return a pointer to the associated VariableValue.
    */
   VariableValue * getDefaultValue(const std::string & var_name);
+
+  /**
+   * Helper method to return (and insert if necessary) the default value for Automatic
+   * Differentiation for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default value
+   * @return VariableValue * a pointer to the associated VarirableValue.
+   */
+  ADVariableValue * getADDefaultValue(const std::string & var_name);
 
   /**
    * Helper method to return (and insert if necessary) the default value

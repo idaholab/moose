@@ -90,7 +90,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _dummy_vec(NULL),
     _saved_old(NULL),
     _saved_older(NULL),
-    _var_kind(var_kind)
+    _var_kind(var_kind),
+    _max_var_n_dofs_per_elem(0)
 {
 }
 
