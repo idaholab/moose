@@ -12,9 +12,7 @@
 #include "libmesh/vtk_io.h"
 #include "libmesh/equation_systems.h"
 
-#ifdef LIBMESH_HAVE_VTK
 registerMooseObjectAliased("MooseApp", VTKOutput, "VTK");
-#endif
 
 template <>
 InputParameters
@@ -35,6 +33,10 @@ validParams<VTKOutput>()
 VTKOutput::VTKOutput(const InputParameters & parameters)
   : OversampleOutput(parameters), _binary(getParam<bool>("binary"))
 {
+#ifndef LIBMESH_HAVE_VTK
+  mooseError("VTK output was requested, but libMesh was not configured with VTK. To fix this, you "
+             "must reconfigure libMesh to use VTK.");
+#endif
 }
 
 void
@@ -50,8 +52,6 @@ VTKOutput::output(const ExecFlagType & /*type*/)
   // Write the data
   vtk.write_equation_systems(filename(), *_es_ptr);
   _file_num++;
-#else
-  mooseError("libMesh not configured with VTK");
 #endif
 }
 
