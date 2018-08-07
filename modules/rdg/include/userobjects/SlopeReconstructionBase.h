@@ -71,31 +71,31 @@ protected:
   virtual void deserialize(std::vector<std::string> & serialized_buffers);
 
   /// store the reconstructed slopes into this map indexed by element ID
-  std::map<dof_id_type, std::vector<RealGradient>> _rslope;
+  std::map<dof_id_type, std::vector<RealGradient>> & _rslope;
 
   /// store the average variable values into this map indexed by element ID
-  std::map<dof_id_type, std::vector<Real>> _avars;
+  std::map<dof_id_type, std::vector<Real>> & _avars;
 
   /// store the boundary average variable values into this map indexed by pair of element ID and local side ID
-  std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _bnd_avars;
+  std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> & _bnd_avars;
 
   /// store the side centroid into this map indexed by pair of element ID and neighbor ID
-  std::map<std::pair<dof_id_type, dof_id_type>, Point> _side_centroid;
+  std::map<std::pair<dof_id_type, dof_id_type>, Point> & _side_centroid;
 
   /// store the boundary side centroid into this map indexed by pair of element ID and local side ID
-  std::map<std::pair<dof_id_type, unsigned int>, Point> _bnd_side_centroid;
+  std::map<std::pair<dof_id_type, unsigned int>, Point> & _bnd_side_centroid;
 
   /// store the side area into this map indexed by pair of element ID and neighbor ID
-  std::map<std::pair<dof_id_type, dof_id_type>, Real> _side_area;
+  std::map<std::pair<dof_id_type, dof_id_type>, Real> & _side_area;
 
   /// store the boundary side area into this map indexed by pair of element ID and local side ID
-  std::map<std::pair<dof_id_type, unsigned int>, Real> _bnd_side_area;
+  std::map<std::pair<dof_id_type, unsigned int>, Real> & _bnd_side_area;
 
   /// store the side normal into this map indexed by pair of element ID and neighbor ID
-  std::map<std::pair<dof_id_type, dof_id_type>, Point> _side_normal;
+  std::map<std::pair<dof_id_type, dof_id_type>, Point> & _side_normal;
 
   /// store the boundary side normal into this map indexed by pair of element ID and local side ID
-  std::map<std::pair<dof_id_type, unsigned int>, Point> _bnd_side_normal;
+  std::map<std::pair<dof_id_type, unsigned int>, Point> & _bnd_side_normal;
 
   /// required data for face assembly
   const MooseArray<Point> & _q_point_face;

@@ -43,10 +43,10 @@ protected:
   virtual void deserialize(std::vector<std::string> & serialized_buffers);
 
   /// store the updated slopes into this map indexed by element ID
-  std::map<dof_id_type, std::vector<RealGradient>> _lslope;
+  std::map<dof_id_type, std::vector<RealGradient>> & _lslope;
 
   /// option whether to include BCs
-  bool _include_bc;
+  const bool _include_bc;
 
   /// required data for face assembly
   const MooseArray<Point> & _q_point_face;
