@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "OptionallyCoupledForce2.h"
+#include "OptionallyVectorCoupledForce.h"
 
-registerMooseObject("MooseTestApp", OptionallyCoupledForce2);
+registerMooseObject("MooseTestApp", OptionallyVectorCoupledForce);
 
 template <>
 InputParameters
-validParams<OptionallyCoupledForce2>()
+validParams<OptionallyVectorCoupledForce>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -22,14 +22,12 @@ validParams<OptionallyCoupledForce2>()
   return params;
 }
 
-OptionallyCoupledForce2::OptionallyCoupledForce2(const InputParameters & parameters)
+OptionallyVectorCoupledForce::OptionallyVectorCoupledForce(const InputParameters & parameters)
   : Kernel(parameters)
 {
-  if (coupledComponents("v") != 2)
-    mooseError("Should always have two coupled components.");
-  _v_var.resize(2);
-  _v.resize(2);
-  for (unsigned int j = 0; j < 2; ++j)
+  _v_var.resize(coupledComponents("v"));
+  _v.resize(coupledComponents("v"));
+  for (unsigned int j = 0; j < coupledComponents("v"); ++j)
   {
     _v_var[j] = coupled("v", j);
     _v[j] = &coupledValue("v", j);
@@ -37,13 +35,16 @@ OptionallyCoupledForce2::OptionallyCoupledForce2(const InputParameters & paramet
 }
 
 Real
-OptionallyCoupledForce2::computeQpResidual()
+OptionallyVectorCoupledForce::computeQpResidual()
 {
-  return -((*_v[0])[_qp] + (*_v[1])[_qp]) * _test[_i][_qp];
+  Real s = 0;
+  for (unsigned int j = 0; j < _v.size(); ++j)
+    s += (*_v[j])[_qp];
+  return -s * _test[_i][_qp];
 }
 
 Real
-OptionallyCoupledForce2::computeQpJacobian()
+OptionallyVectorCoupledForce::computeQpJacobian()
 {
   return 0;
 }

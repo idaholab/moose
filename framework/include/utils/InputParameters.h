@@ -538,6 +538,7 @@ public:
    * Get the default value for an optionally coupled variable.
    *
    * @param coupling_name The name of the coupling parameter to get the default value for.
+   * @param i By default 0, in general the index of the requested coupled default value.
    */
   Real defaultCoupledValue(const std::string & coupling_name, unsigned int i = 0) const;
 
@@ -553,6 +554,7 @@ public:
    *
    * @param coupling_name The name of the coupling parameter to get the default value for.
    * @param value Default value to set.
+   * @param i By default 0, in general the index of the requested coupled default value.
    */
   void defaultCoupledValue(const std::string & coupling_name, Real value, unsigned int i = 0);
 
@@ -773,7 +775,7 @@ private:
     bool _is_private = false;
     bool _have_coupled_default = false;
     /// The default value for optionally coupled variables
-    std::vector<Real> _coupled_default = {};
+    std::vector<Real> _coupled_default = {0};
     bool _have_default_postprocessor_val = false;
     PostprocessorValue _default_postprocessor_val = 0;
     /// True if a parameters value was set by addParam, and not set again.

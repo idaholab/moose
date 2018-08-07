@@ -10,13 +10,19 @@
   [../]
 []
 
+[AuxVariables]
+  [./v]
+    initial_condition = 1
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = Diffusion
     variable = u
   [../]
   [./optional_coupling]
-    type = OptionallyCoupledForce2
+    type = OptionallyVectorCoupledForce
     variable = u
   [../]
 []
@@ -38,15 +44,10 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   exodus = true
-[]
-
-[Debug]
-  show_var_residual_norms = true
 []

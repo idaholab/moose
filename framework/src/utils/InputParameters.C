@@ -161,7 +161,6 @@ InputParameters::operator+=(const InputParameters & rhs)
 void
 InputParameters::addCoupledVar(const std::string & name, Real value, const std::string & doc_string)
 {
-  // std::vector<VariableName>(1, Moose::stringify(value)),
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
   _params[name]._coupled_default.assign(1, value);

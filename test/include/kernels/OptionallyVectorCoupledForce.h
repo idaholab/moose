@@ -7,21 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef OPTIONALLYCOUPLEDFORCE2_H
-#define OPTIONALLYCOUPLEDFORCE2_H
+#ifndef OPTIONALLYVECTORCOUPLEDFORCE_H
+#define OPTIONALLYVECTORCOUPLEDFORCE_H
 
 #include "Kernel.h"
 
 // Forward Declaration
-class OptionallyCoupledForce2;
+class OptionallyVectorCoupledForce;
 
 template <>
-InputParameters validParams<OptionallyCoupledForce2>();
+InputParameters validParams<OptionallyVectorCoupledForce>();
 
-class OptionallyCoupledForce2 : public Kernel
+/**
+ * Simple class for testing multiple optionally coupled variable values
+ */
+class OptionallyVectorCoupledForce : public Kernel
 {
 public:
-  OptionallyCoupledForce2(const InputParameters & parameters);
+  OptionallyVectorCoupledForce(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -33,4 +36,4 @@ private:
   std::vector<const VariableValue *> _v;
 };
 
-#endif // OptionallyCoupledForce2_H
+#endif // OPTIONALLYVECTORCOUPLEDFORCE_H

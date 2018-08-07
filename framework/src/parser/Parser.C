@@ -1803,6 +1803,7 @@ Parser::setVectorParameter<VariableName, VariableName>(
     GlobalParamsAction * /*global_block*/)
 {
   auto vec = _root->param<std::vector<std::string>>(full_name);
+  auto strval = _root->param<std::string>(full_name);
   std::vector<VariableName> var_names(vec.size());
 
   bool has_var_names = false;
@@ -1815,21 +1816,10 @@ Parser::setVectorParameter<VariableName, VariableName>(
 
     // If we are able to convert this value into a Real, then set a default coupled value
     // NOTE: parameter must be either all default or no defaults
-    unsigned int mode = 0;
     if (ss >> real_value && ss.eof())
-    {
-      if (mode == 2)
-        mooseError(
-            "Variable name ", short_name, " contains both default and actual variable names.");
-      mode = 1;
       _current_params->defaultCoupledValue(short_name, real_value, i);
-    }
     else
     {
-      if (mode == 1)
-        mooseError(
-            "Variable name ", short_name, " contains both default and actual variable names.");
-      mode = 2;
       var_names[i] = var_name;
       has_var_names = true;
     }
@@ -1845,7 +1835,7 @@ Parser::setVectorParameter<VariableName, VariableName>(
         _errmsg += errormsg(
             _input_filename,
             _root->find(full_name),
-            "invalid vallue for ",
+            "invalid value for ",
             full_name,
             ":\n"
             "    MOOSE does not currently support a coupled vector where some parameters are ",
