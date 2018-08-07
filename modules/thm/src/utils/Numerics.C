@@ -65,6 +65,16 @@ dvel_darhouA(Real arhoA)
 }
 
 void
+rho_from_arhoA_alpha_A(
+    Real arhoA, Real alpha, Real A, Real & rho, Real & drho_darhoA, Real & drho_dalpha)
+{
+  rho = arhoA / (alpha * A);
+
+  drho_darhoA = 1.0 / (alpha * A);
+  drho_dalpha = -arhoA / (alpha * alpha * A);
+}
+
+void
 v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA)
 {
   v = A / rhoA;

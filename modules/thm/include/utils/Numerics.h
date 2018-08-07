@@ -128,6 +128,19 @@ Real dvel_darhoA(Real arhoA, Real arhouA);
 Real dvel_darhouA(Real arhoA);
 
 /**
+ * Computes density and its derivatives from alpha*rho*A, alpha, and area.
+ *
+ * @param[in] arhoA   alpha*rho*A
+ * @param[in] alpha   volume fraction
+ * @param[in] A       area
+ * @param[out] rho           density
+ * @param[out] drho_darhoA   derivative of density w.r.t. alpha*rho*A
+ * @param[out] drho_dalpha   derivative of density w.r.t. alpha
+ */
+void rho_from_arhoA_alpha_A(
+    Real arhoA, Real alpha, Real A, Real & rho, Real & drho_darhoA, Real & drho_dalpha);
+
+/**
  * Computes specific volume and its derivatives from rho*A, and area.
  *
  * @param[in] rhoA        rho*A
