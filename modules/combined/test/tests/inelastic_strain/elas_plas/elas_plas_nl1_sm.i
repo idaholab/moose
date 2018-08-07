@@ -370,7 +370,6 @@
   file_base=elas_plas_nl1_out
   [./console]
     type = Console
-    perf_log = true
     output_linear = true
   [../]
 [] # Outputs

@@ -174,5 +174,5 @@
     type = Exodus
     interval = 2
   [../]
-  print_perf_log = true
+  perf_graph = true
 []

@@ -193,5 +193,5 @@
 [Outputs]
   interval = 10
   csv = true
-  print_perf_log = true
+  perf_graph = true
 []

@@ -128,5 +128,4 @@
 [Outputs]
   execute_on = 'initial timestep_end linear'
   exodus = true
-  perf_log = true
 []

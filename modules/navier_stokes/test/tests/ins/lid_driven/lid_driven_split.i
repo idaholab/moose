@@ -242,7 +242,6 @@
   type = Transient
   dt = 1.e-4
   dtmin = 1.e-6
-  perf_log = true
   petsc_options_iname = '-ksp_gmres_restart '
   petsc_options_value = '300                '
 

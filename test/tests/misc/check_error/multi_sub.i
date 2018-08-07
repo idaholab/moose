@@ -51,5 +51,5 @@
   exodus = true
 
   # We can't control perf log output from a subapp
-  print_perf_log = true
+  perf_graph = true
 []

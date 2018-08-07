@@ -116,7 +116,7 @@
 []
 
 [Outputs]
-  print_perf_log = true
+  perf_graph = true
   file_base = nonsplit_gradderiv_out
   exodus = true
 []

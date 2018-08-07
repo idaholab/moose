@@ -303,5 +303,5 @@
 [Outputs]
   file_base = 'rayleigh_newmark_out'
   exodus = true
-  print_perf_log = true
+  perf_graph = true
 []

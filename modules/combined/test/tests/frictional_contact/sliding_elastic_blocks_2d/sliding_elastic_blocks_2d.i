@@ -231,7 +231,7 @@
 [Outputs]
   file_base = sliding_elastic_blocks_2d_out
   print_linear_residuals = true
-  print_perf_log = true
+  perf_graph = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

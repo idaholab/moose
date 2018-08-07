@@ -305,7 +305,7 @@
 [Outputs]
   file_base = ring1_mu_0_2_pen_out
   print_linear_residuals = true
-  print_perf_log = true
+  perf_graph = true
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

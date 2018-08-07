@@ -118,7 +118,7 @@ u_left = 0.5
 
 [Outputs]
   exodus = true
-  print_perf_log = true
+  perf_graph = true
 []
 
 [ICs]

@@ -264,7 +264,7 @@
 
 [Outputs]
   print_linear_residuals = false
-  print_perf_log = true
+  perf_graph = true
   [./csvout]
     type = CSV
     execute_on = timestep_end

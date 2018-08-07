@@ -194,5 +194,5 @@
 [Outputs]
   execute_on = 'initial'
   exodus = true
-  print_perf_log = true
+  perf_graph = true
 []

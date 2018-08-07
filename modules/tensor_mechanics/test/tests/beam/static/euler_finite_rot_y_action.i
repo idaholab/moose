@@ -155,5 +155,5 @@
 [Outputs]
   file_base = 'euler_finite_rot_y_out'
   exodus = true
-  print_perf_log = true
+  perf_graph = true
 []

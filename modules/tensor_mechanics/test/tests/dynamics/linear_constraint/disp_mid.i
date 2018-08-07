@@ -186,10 +186,9 @@
 [Outputs]
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
+  perf_graph = true
   [./console]
     type = Console
-    perf_log = true
     output_linear = true
   [../]
 []

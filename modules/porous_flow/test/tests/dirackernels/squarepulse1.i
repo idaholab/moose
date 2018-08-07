@@ -96,7 +96,7 @@
 []
 
 [Outputs]
-  print_perf_log = true
+  perf_graph = true
   file_base = squarepulse1
   csv = true
   execute_on = 'initial timestep_end'

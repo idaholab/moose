@@ -198,5 +198,5 @@
   exodus = true
   csv = true
   print_linear_residuals = false
-  print_perf_log = true
+  perf_graph = true
 []
