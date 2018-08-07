@@ -24,6 +24,25 @@ validParams<SlopeReconstructionBase>()
 
 SlopeReconstructionBase::SlopeReconstructionBase(const InputParameters & parameters)
   : ElementLoopUserObject(parameters),
+    _rslope(declareRestartableData<std::map<dof_id_type, std::vector<RealGradient>>>(
+        "reconstructed_slopes")),
+    _avars(declareRestartableData<std::map<dof_id_type, std::vector<Real>>>("avg_var_values")),
+    _bnd_avars(
+        declareRestartableData<std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>>>(
+            "avg_bnd_var_values")),
+    _side_centroid(declareRestartableData<std::map<std::pair<dof_id_type, dof_id_type>, Point>>(
+        "side_centroid")),
+    _bnd_side_centroid(
+        declareRestartableData<std::map<std::pair<dof_id_type, unsigned int>, Point>>(
+            "bnd_side_centroid")),
+    _side_area(
+        declareRestartableData<std::map<std::pair<dof_id_type, dof_id_type>, Real>>("side_area")),
+    _bnd_side_area(declareRestartableData<std::map<std::pair<dof_id_type, unsigned int>, Real>>(
+        "bnd_side_area")),
+    _side_normal(declareRestartableData<std::map<std::pair<dof_id_type, dof_id_type>, Point>>(
+        "side_normal")),
+    _bnd_side_normal(declareRestartableData<std::map<std::pair<dof_id_type, unsigned int>, Point>>(
+        "bnd_side_normal")),
     _q_point_face(_assembly.qPointsFace()),
     _qrule_face(_assembly.qRuleFace()),
     _JxW_face(_assembly.JxWFace()),
