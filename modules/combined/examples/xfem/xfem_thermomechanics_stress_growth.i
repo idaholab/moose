@@ -175,7 +175,6 @@
   execute_on = timestep_end
   [./console]
     type = Console
-    perf_log = true
     output_linear = true
   [../]
 []

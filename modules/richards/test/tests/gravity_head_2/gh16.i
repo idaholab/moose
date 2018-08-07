@@ -289,5 +289,4 @@
   interval = 100000
   exodus = true
   csv = true
-  perf_log = false
 []

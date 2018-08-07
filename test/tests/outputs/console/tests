@@ -80,7 +80,7 @@
     # Tests that the --timing enables all logs
     type = RunApp
     input = 'console.i'
-    cli_args = 'Outputs/screen/perf_log=false --timing'
+    cli_args = '--timing'
     expect_out = 'Performance\sGraph'
     group = 'requirements'
   [../]

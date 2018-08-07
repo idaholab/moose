@@ -712,7 +712,6 @@
   [../]
 #[./console]
 #    type = Console
-#    perf_log = true
 #    output_file = true
 #  [../]
 []
