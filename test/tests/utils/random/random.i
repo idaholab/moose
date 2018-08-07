@@ -36,11 +36,13 @@
   [./random_nodal]
     type = RandomAux
     variable = random_nodal
+    execute_on = 'LINEAR'
   [../]
   [./random_elemental]
     type = RandomAux
     variable = random_elemental
     generate_integers = true
+    execute_on = 'LINEAR'
   [../]
 []
 
