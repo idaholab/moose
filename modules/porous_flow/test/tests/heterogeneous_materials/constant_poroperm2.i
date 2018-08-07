@@ -373,5 +373,5 @@
 [Outputs]
   execute_on = 'initial timestep_end'
   exodus = true
-  print_perf_log = true
+  perf_graph = true
 []

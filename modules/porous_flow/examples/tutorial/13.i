@@ -402,6 +402,6 @@
 
 [Outputs]
   print_linear_residuals = false
-  print_perf_log = true
+  perf_graph = true
   exodus = true
 []

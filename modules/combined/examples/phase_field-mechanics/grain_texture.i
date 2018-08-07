@@ -164,7 +164,7 @@
   execute_on = 'INITIAL TIMESTEP_END'
   exodus = true
   csv = true
-  print_perf_log = true
+  perf_graph = true
   [./console]
     type = Console
     max_rows = 20

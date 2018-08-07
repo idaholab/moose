@@ -216,6 +216,6 @@
   execute_on = 'initial timestep_end'
   file_base = grav02g
   exodus = true
-  print_perf_log = true
+  perf_graph = true
   csv = false
 []

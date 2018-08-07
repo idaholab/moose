@@ -375,5 +375,5 @@
   csv = true
   file_base = brineco2_2
   execute_on = 'initial timestep_end'
-  print_perf_log = true
+  perf_graph = true
 []

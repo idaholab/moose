@@ -125,7 +125,7 @@
 []
 
 [Outputs]
-  print_perf_log = true
+  perf_graph = true
   file_base = theis1
   csv = true
   execute_on = 'final'
