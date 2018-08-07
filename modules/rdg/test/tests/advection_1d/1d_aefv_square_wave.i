@@ -115,5 +115,5 @@
     file_base = 1d_aefv_square_wave_none_out
     interval = 2
   [../]
-  print_perf_log = true
+  perf_graph = true
 []

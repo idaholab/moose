@@ -31,8 +31,9 @@ validParams<AuxKernel>()
   params += validParams<MeshChangedInterface>();
   params += validParams<MaterialPropertyInterface>();
 
-  // Add the SetupInterface parameter, 'execute_on', the default is 'linear'
+  // Add the SetupInterface parameter 'execute_on' with 'linear' and 'timestep_end'
   params += validParams<SetupInterface>();
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_LINEAR, EXEC_TIMESTEP_END};
 
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this object applies to");

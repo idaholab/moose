@@ -186,5 +186,5 @@
   file_base = 'dyn_euler_small_rayleigh_hht_out'
   exodus = true
   csv = true
-  print_perf_log = true
+  perf_graph = true
 []

@@ -220,7 +220,7 @@
   file_base = single_point_2d_out_frictional_0_2_kin
   exodus = true
   print_linear_residuals = true
-  print_perf_log = true
+  perf_graph = true
   csv = true
   [./console]
     type = Console

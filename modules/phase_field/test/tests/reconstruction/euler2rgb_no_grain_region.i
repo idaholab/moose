@@ -148,5 +148,5 @@
   csv = true
   exodus = true
   execute_on = 'INITIAL TIMESTEP_END'
-  print_perf_log = true
+  perf_graph = true
 []

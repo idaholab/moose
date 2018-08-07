@@ -377,7 +377,7 @@
 
 
 [Outputs]
-  print_perf_log = false
+  perf_graph = false
   csv = true
 []
 

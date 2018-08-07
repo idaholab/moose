@@ -236,7 +236,7 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
+  perf_graph = true
   [./display]
     type = Console
     max_rows = 12

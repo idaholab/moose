@@ -143,7 +143,6 @@
   file_base = out
   [./console]
     type = Console
-    perf_log = true
     output_linear = true
     max_rows = 10
   [../]

@@ -198,7 +198,5 @@
   csv = true
   [./console]
     type = Console
-    perf_log = true
-    perf_log_interval = 1
   [../]
 []

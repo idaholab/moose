@@ -96,6 +96,5 @@
   [../]
   [./console]
     Type = Console
-    perf_log = true
   [../]
 []

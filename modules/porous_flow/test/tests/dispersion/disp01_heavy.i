@@ -212,5 +212,5 @@
 [Outputs]
   csv = true
   execute_on = 'final'
-  print_perf_log = true
+  perf_graph = true
 []

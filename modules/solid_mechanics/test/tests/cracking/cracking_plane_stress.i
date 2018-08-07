@@ -384,7 +384,6 @@
   [../]
   [./console]
     type = Console
-    perf_log = true
     output_linear = true
   [../]
  csv = true

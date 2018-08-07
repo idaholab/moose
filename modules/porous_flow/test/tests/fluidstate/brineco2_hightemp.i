@@ -320,5 +320,5 @@
 [Outputs]
   csv = true
   execute_on = 'TIMESTEP_END'
-  print_perf_log = false
+  perf_graph = false
 []

@@ -81,7 +81,7 @@
 []
 
 [Outputs]
-  print_perf_log = true
+  perf_graph = true
 []
 
 [Preconditioning]

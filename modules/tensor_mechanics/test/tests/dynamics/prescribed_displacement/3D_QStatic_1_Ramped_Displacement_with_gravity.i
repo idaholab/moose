@@ -353,5 +353,5 @@
 [Outputs]
   exodus = true
   csv = true
-  print_perf_log = true
+  perf_graph = true
 []

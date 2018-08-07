@@ -117,5 +117,5 @@
   exodus = true
   interval = 1
   show = bnds
-  print_perf_log = true
+  perf_graph = true
 []

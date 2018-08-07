@@ -405,7 +405,6 @@
   file_base=creep_nl1_out
   [./console]
     type = Console
-    perf_log = true
     output_linear = true
   [../]
 []

@@ -131,5 +131,5 @@
 []
 [Outputs]
   csv = true
-  print_perf_log = true
+  perf_graph = true
 []

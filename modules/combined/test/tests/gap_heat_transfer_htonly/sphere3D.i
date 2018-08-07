@@ -162,7 +162,6 @@
   exodus = true
   [./Console]
     type = Console
-    perf_log = true
   [../]
 []
 
