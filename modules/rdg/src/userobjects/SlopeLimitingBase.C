@@ -32,6 +32,8 @@ validParams<SlopeLimitingBase>()
 
 SlopeLimitingBase::SlopeLimitingBase(const InputParameters & parameters)
   : ElementLoopUserObject(parameters),
+    _lslope(
+        declareRestartableData<std::map<dof_id_type, std::vector<RealGradient>>>("limited_slope")),
     _include_bc(getParam<bool>("include_bc")),
     _q_point_face(_assembly.qPointsFace()),
     _qrule_face(_assembly.qRuleFace()),
