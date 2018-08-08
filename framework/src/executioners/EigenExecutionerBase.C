@@ -56,7 +56,8 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
     _source_integral_old(1),
     _normalization(isParamValid("normalization")
                        ? getPostprocessorValue("normalization")
-                       : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
+                       : getPostprocessorValue("bx_norm")), // use |Bx| for normalization by default
+    _final_timer(registerTimedSection("final", 1))
 {
   // FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
@@ -394,6 +395,12 @@ EigenExecutionerBase::postExecute()
     _problem.time() = _problem.timeStep();
     _problem.outputStep(EXEC_TIMESTEP_END);
     _problem.time() = t;
+  }
+
+  {
+    TIME_SECTION(_final_timer)
+    _problem.execute(EXEC_FINAL);
+    _problem.outputStep(EXEC_FINAL);
   }
 }
 
