@@ -59,7 +59,7 @@ void
 MultiAppVectorPostprocessorTransfer::executeToMultiapp()
 {
   VectorPostprocessorValue & vpp =
-      _multi_app->problemBase().getVectorPostprocessorValue(_master_vpp_name, _vector_name);
+      _multi_app->problemBase().getVectorPostprocessorValue(_master_vpp_name, _vector_name, false);
 
   if (vpp.size() != _multi_app->numGlobalApps())
     mooseError("VectorPostprocessor ",
@@ -78,7 +78,7 @@ void
 MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
 {
   VectorPostprocessorValue & vpp =
-      _multi_app->problemBase().getVectorPostprocessorValue(_master_vpp_name, _vector_name);
+      _multi_app->problemBase().getVectorPostprocessorValue(_master_vpp_name, _vector_name, false);
 
   if (vpp.size() != _multi_app->numGlobalApps())
     mooseError("VectorPostprocessor ",
