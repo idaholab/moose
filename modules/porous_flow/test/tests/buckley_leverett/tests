@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'bl01.i'
     exodiff = 'bl01.e'
+    threading = '!pthreads'
   [../]
 []

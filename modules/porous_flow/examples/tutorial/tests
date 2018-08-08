@@ -3,21 +3,25 @@
     type = Exodiff
     input = '00.i'
     exodiff = '3D_mesh.e'
+    threading = '!pthreads'
   [../]
   [./00_2D]
     type = Exodiff
     input = '00_2D.i'
     exodiff = '2D_mesh.e'
+    threading = '!pthreads'
   [../]
   [./01]
     type = Exodiff
     input = '01.i'
     exodiff = '01_out.e'
+    threading = '!pthreads'
   [../]
   [./03]
     type = Exodiff
     input = '03.i'
     exodiff = '03_out.e'
+    threading = '!pthreads'
   [../]
   [./04]
     type = Exodiff
@@ -25,6 +29,7 @@
     exodiff = '04_out.e'
     abs_zero = 1E-6
     heavy = true
+    threading = '!pthreads'
   [../]
   [./05]
     type = Exodiff
@@ -32,6 +37,7 @@
     exodiff = '05_out.e'
     abs_zero = 1E-6
     heavy = true
+    threading = '!pthreads'
   [../]
   [./05_tabulated]
     type = Exodiff
@@ -39,27 +45,32 @@
     exodiff = '05_tabulated_out.e'
     abs_zero = 1E-6
     heavy = true
+    threading = '!pthreads'
   [../]
   [./06]
     type = Exodiff
     input = '06.i'
     exodiff = '06_out.e'
+    threading = '!pthreads'
   [../]
   [./07]
     type = Exodiff
     input = '07.i'
     exodiff = '07_out.e'
     heavy = true
+    threading = '!pthreads'
   [../]
   [./08]
     type = Exodiff
     input = '08.i'
     exodiff = '08_out.e'
+    threading = '!pthreads'
   [../]
   [./10]
     type = Exodiff
     input = '10.i'
     exodiff = '10_out.e'
+    threading = '!pthreads'
   [../]
   [./11]
     type = Exodiff
@@ -69,6 +80,7 @@
     abs_zero = 1E-3
     heavy = true
     rel_err = 1E-4
+    threading = '!pthreads'
   [../]
   [./11_2D]
     type = Exodiff
@@ -77,10 +89,12 @@
     cli_args = 'Executioner/end_time=1E3'
     abs_zero = 1E-3
     rel_err = 1E-4
+    threading = '!pthreads'
   [../]
   [./13]
     type = Exodiff
     input = '13.i'
     exodiff = '13_out.e'
+    threading = '!pthreads'
   [../]
 []

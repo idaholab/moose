@@ -4,54 +4,64 @@
     input = 'mass01.i'
     csvdiff = 'mass01.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./mass02]
     type = 'CSVDiff'
     input = 'mass02.i'
     csvdiff = 'mass02.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./mass03]
     type = 'CSVDiff'
     input = 'mass03.i'
     csvdiff = 'mass03.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./mass04]
     type = 'CSVDiff'
     input = 'mass04.i'
     csvdiff = 'mass04.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./mass05]
     type = 'CSVDiff'
     input = 'mass05.i'
     csvdiff = 'mass05.csv'
+    threading = '!pthreads'
   [../]
   [./mass06]
     type = 'CSVDiff'
     input = 'mass06.i'
     csvdiff = 'mass06.csv'
     compiler = '!INTEL'
+    threading = '!pthreads'
   [../]
   [./mass07]
     type = 'RunException'
     input = 'mass07.i'
     expect_err = 'The Dictator decrees that the number of phases in this simulation is 2 but you have entered 3 phases.'
+    threading = '!pthreads'
   [../]
   [./mass08]
     type = 'RunException'
     input = 'mass08.i'
     expect_err = 'The Dictator proclaims that the phase index 2 is greater than the largest phase index possible, which is 1'
+    threading = '!pthreads'
   [../]
   [./mass09]
     type = 'RunException'
     input = 'mass09.i'
     expect_err = 'A single phase_index must be entered when prescribing a saturation_threshold'
+    threading = '!pthreads'
   [../]
   [./mass10]
     type = 'RunException'
     input = 'mass10.i'
     expect_err = 'The Dictator pronounces that the number of PorousFlow variables is 2, however you have used 2. This is an error'
+    threading = '!pthreads'
   [../]
 []

@@ -3,51 +3,60 @@
     type = 'RunException'
     input = 'except01.i'
     expect_err = 'The Dictator proclaims that the phase index 1 is greater than the largest phase index possible, which is 0'
+    threading = '!pthreads'
   [../]
   [./except02]
     type = 'RunException'
     input = 'except02.i'
     expect_err = 'The Dictator pronounces that the number of PorousFlow variables is 2, however you have used 2. This is an error'
+    threading = '!pthreads'
   [../]
   [./heat01]
     type = 'CSVDiff'
     input = 'heat01.i'
     csvdiff = 'heat01.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./heat02]
     type = 'CSVDiff'
     input = 'heat02.i'
     csvdiff = 'heat02.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./heat03]
     type = 'CSVDiff'
     input = 'heat03.i'
     csvdiff = 'heat03.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./heat04]
     type = 'CSVDiff'
     input = 'heat04.i'
     csvdiff = 'heat04.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./heat04_action]
     type = 'CSVDiff'
     input = 'heat04_action.i'
     csvdiff = 'heat04_action.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./heat04_fullysat_action]
     type = 'CSVDiff'
     input = 'heat04_fullysat_action.i'
     csvdiff = 'heat04_fullysat_action.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./heat05]
     type = 'CSVDiff'
     input = 'heat05.i'
     csvdiff = 'heat05.csv'
+    threading = '!pthreads'
   [../]
 []

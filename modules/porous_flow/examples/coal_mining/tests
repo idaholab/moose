@@ -6,5 +6,6 @@
     csvdiff = 'coarse_with_fluid_out.csv'
     cli_args = 'Executioner/end_time=0.014706'
     superlu = true
+    threading = '!pthreads'
   [../]
 []
