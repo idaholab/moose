@@ -28,7 +28,7 @@
     type = NodalEqualValueConstraint
     variable = lm
     var = u
-    nodes = '2 3'
+    boundary = '100 101'
   [../]
 []
 
