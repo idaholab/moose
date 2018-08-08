@@ -149,6 +149,8 @@ protected:
 
   /// Convenience variable that stores model type
   RELAP7::FlowModelID _flow_model_id;
+  /// Flow model used in this connection
+  std::shared_ptr<const FlowModel> _flow_model;
   /// The name of the fluid property user object
   UserObjectName _fp_name;
   /// rDG conservative flux user object names
