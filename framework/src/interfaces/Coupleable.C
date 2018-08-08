@@ -38,6 +38,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
+  unsigned int optional_var_index_counter = 0;
   // Coupling
   for (std::set<std::string>::const_iterator iter = _c_parameters.coupledVarsBegin();
        iter != _c_parameters.coupledVarsEnd();
@@ -76,8 +77,13 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
       }
     }
     else // This means it was optional coupling.  Let's assign a unique id to this variable
-      _optional_var_index[name] =
-          std::numeric_limits<unsigned int>::max() - _optional_var_index.size();
+    {
+      _optional_var_index[name].assign(_c_parameters.numberDefaultCoupledValues(name), 0);
+      for (unsigned int j = 0; j < _optional_var_index[name].size(); ++j)
+        _optional_var_index[name][j] =
+            std::numeric_limits<unsigned int>::max() - optional_var_index_counter;
+      ++optional_var_index_counter;
+    }
   }
 
   _default_value_zero.resize(_coupleable_max_qps, 0);
@@ -91,10 +97,11 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
 Coupleable::~Coupleable()
 {
   for (auto & it : _default_value)
-  {
-    it.second->release();
-    delete it.second;
-  }
+    for (auto itt : it.second)
+    {
+      itt->release();
+      delete itt;
+    }
   _default_value_zero.release();
   _default_gradient.release();
   _default_second.release();
@@ -138,7 +145,7 @@ Coupleable::coupledComponents(const std::string & var_name)
   else
   {
     if (_c_parameters.hasDefaultCoupledValue(var_name))
-      return 1;
+      return _c_parameters.numberDefaultCoupledValues(var_name);
     else
       return 0;
   }
@@ -217,7 +224,7 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   checkVar(var_name);
 
   if (!isCoupled(var_name))
-    return _optional_var_index[var_name];
+    return _optional_var_index[var_name][comp];
 
   MooseVariableFEBase * var = getFEVar(var_name, comp);
   switch (var->kind())
@@ -232,17 +239,21 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
 }
 
 VariableValue *
-Coupleable::getDefaultValue(const std::string & var_name)
+Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp)
 {
-  std::map<std::string, VariableValue *>::iterator default_value_it = _default_value.find(var_name);
+  std::map<std::string, std::vector<VariableValue *>>::iterator default_value_it =
+      _default_value.find(var_name);
   if (default_value_it == _default_value.end())
   {
-    VariableValue * value =
-        new VariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name));
-    default_value_it = _default_value.insert(std::make_pair(var_name, value)).first;
+    _default_value[var_name] = {
+        new VariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name, 0))};
+    for (unsigned int j = 1; j < _c_parameters.numberDefaultCoupledValues(var_name); ++j)
+      _default_value[var_name].push_back(
+          new VariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name, j)));
+    default_value_it = _default_value.find(var_name);
   }
 
-  return default_value_it->second;
+  return default_value_it->second[comp];
 }
 
 VectorVariableValue *
@@ -264,7 +275,7 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
@@ -357,7 +368,7 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   validateExecutionerType(var_name, "coupledValueOld");
   coupledCallback(var_name, true);
@@ -386,7 +397,7 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   validateExecutionerType(var_name, "coupledValueOlder");
   coupledCallback(var_name, true);
@@ -435,7 +446,7 @@ Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int co
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   _c_fe_problem.needsPreviousNewtonIteration(true);
   coupledCallback(var_name, true);
@@ -959,7 +970,7 @@ Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
@@ -982,7 +993,7 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   validateExecutionerType(var_name, "coupledNodalValueOld");
   coupledCallback(var_name, true);
@@ -1006,7 +1017,7 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   validateExecutionerType(var_name, "coupledNodalValueOlder");
   coupledCallback(var_name, true);
@@ -1034,7 +1045,7 @@ Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned i
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    return *getDefaultValue(var_name, comp);
 
   _c_fe_problem.needsPreviousNewtonIteration(true);
   coupledCallback(var_name, true);

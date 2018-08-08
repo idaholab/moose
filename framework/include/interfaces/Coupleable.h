@@ -496,7 +496,7 @@ protected:
   THREAD_ID _c_tid;
 
   /// Will hold the default value for optional coupled variables.
-  std::map<std::string, VariableValue *> _default_value;
+  std::map<std::string, std::vector<VariableValue *>> _default_value;
 
   /// Will hold the default value for optional vector coupled variables.
   std::map<std::string, VectorVariableValue *> _default_vector_value;
@@ -587,7 +587,7 @@ private:
    * @param var_name the name of the variable for which to retrieve a default value
    * @return a pointer to the associated VariableValue.
    */
-  VariableValue * getDefaultValue(const std::string & var_name);
+  VariableValue * getDefaultValue(const std::string & var_name, unsigned int comp);
 
   /**
    * Helper method to return (and insert if necessary) the default value
@@ -601,7 +601,7 @@ private:
   unsigned int _coupleable_max_qps;
 
   /// Unique indices for optionally coupled vars that weren't provided
-  std::map<std::string, unsigned int> _optional_var_index;
+  std::map<std::string, std::vector<unsigned int>> _optional_var_index;
 
   /// Scalar variables coupled into this object (for error checking)
   std::map<std::string, std::vector<MooseVariableScalar *>> _c_coupled_scalar_vars;
