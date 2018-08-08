@@ -3,5 +3,6 @@
     type = Exodiff
     input = 'methane.i'
     exodiff = 'methane_out.e'
+    threading = '!pthreads'
   [../]
 []
