@@ -16,7 +16,7 @@
     tecplot = true
     dof_id_bytes = 4
     curl = true
-    tbb = true
+    threading = openmp
     superlu = true
     slepc = true
     unique_id = true
