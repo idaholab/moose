@@ -86,3 +86,37 @@ B::B(...) : A(...),
     _vars.push_back(dynamic_cast<MooseVariable *>(getVar("v", i)));
 }
 ```
+
+## Defaults for Coupling of Vectors of Variables
+
+Vectors of variables can be added using `params.addCoupledVar` as described above. The parameter class allows providing
+defaults for vector variables as follows:
+
+```
+validParams<B>()
+{
+  InputParameters params = validParams<A>();
+  params.addCoupledVar("v", {1, 2, 3}, "Coupled value");
+  ...
+}
+```
+
+Coupled variable parameters can be set to constant real numbers in the input file using the syntax
+
+```
+v = '1'
+```
+
+for a single coupled variable or using
+
+```
+v = '1 2 3'
+```
+
+for a vector of coupled variables. Currently mixing actual variable assignments and defaults like this:
+
+```
+v = '1 actual_var 3'
+```
+
+is not supported.
