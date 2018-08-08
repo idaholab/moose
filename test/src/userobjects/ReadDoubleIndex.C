@@ -16,7 +16,7 @@ template <>
 InputParameters
 validParams<ReadDoubleIndex>()
 {
-  InputParameters params = validParams<UserObject>();
+  InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<std::vector<std::vector<Real>>>("real_di",
                                                           "A double index field of real numbers.");
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(

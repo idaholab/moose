@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<CrackDataSampler>()
 {
-  InputParameters params = validParams<VectorPostprocessor>();
+  InputParameters params = validParams<GeneralVectorPostprocessor>();
 
   params += validParams<SamplerBase>();
 

@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTENODALUserObjectsTHREAD_H
-#define COMPUTENODALUserObjectsTHREAD_H
+#ifndef COMPUTENODALUSEROBJECTSTHREAD_H
+#define COMPUTENODALUSEROBJECTSTHREAD_H
 
 #include "ThreadedNodeLoop.h"
 
@@ -37,4 +37,4 @@ protected:
   const MooseObjectWarehouse<NodalUserObject> & _user_objects;
 };
 
-#endif // COMPUTENODALUserObjectsTHREAD_H
+#endif // COMPUTENODALUSEROBJECTSTHREAD_H
