@@ -745,6 +745,7 @@ protected:
   OutputType _nodal_value_dot;
 
   friend class NodeFaceConstraint;
+  friend class NodeElemConstraint;
   friend class ValueThresholdMarker;
   friend class ValueRangeMarker;
 };
