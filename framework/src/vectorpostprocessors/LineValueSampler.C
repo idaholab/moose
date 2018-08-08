@@ -97,7 +97,7 @@ LineValueSampler::getValue(Point p) const
         std::lower_bound(_id.begin(), _id.end(), position * _line_vector_norm) - _id.begin();
 
     VectorPostprocessorValue & value_vector =
-        _vpp_fe_problem->getVectorPostprocessorValue(_vpp_name, _variable_names[0]);
+        _vpp_fe_problem->getVectorPostprocessorValue(_vpp_name, _variable_names[0], false);
 
     if (MooseUtils::absoluteFuzzyEqual(_id[vec_pos], position * _line_vector_norm))
       value = value_vector[vec_pos];
