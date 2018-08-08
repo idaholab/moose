@@ -7,21 +7,21 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORPOSTPROCESSORCOMPARISON_H
-#define VECTORPOSTPROCESSORCOMPARISON_H
+#ifndef POSTPROCESSORCOMPARISON_H
+#define POSTPROCESSORCOMPARISON_H
 
 #include "ComparisonPostprocessor.h"
 
-class VectorPostprocessorComparison;
+class PostprocessorComparison;
 
 template <>
-InputParameters validParams<VectorPostprocessorComparison>();
+InputParameters validParams<PostprocessorComparison>();
 
 /**
- * Compares two vector post-processors of equal size and produces a boolean value
+ * Compares two post-processors and produces a boolean value
  *
  * This post-processor implements a number of different comparisons between
- * vector post-processor \c a and vector post-processor \c b:
+ * post-processor \c a and post-processor \c b:
  * \li <b>equals</b>: <tt>a == b</tt>?
  * \li <b>greater_than</b>: <tt>a > b</tt>?
  * \li <b>greater_than_equals</b>: <tt>a >= b</tt>?
@@ -30,26 +30,25 @@ InputParameters validParams<VectorPostprocessorComparison>();
  *
  * For all comparisons, a "fuzzy" comparison is made via the corresponding
  * function in \c MooseUtils.
- * If the comparison condition is true for all elements of the vector post-
- * processors, then a value of 1 is output; otherwise, a value of 0 is
- * output.
+ * If the comparison condition is true, then a value of 1 is output;
+ * otherwise, a value of 0 is output.
  */
-class VectorPostprocessorComparison : public ComparisonPostprocessor
+class PostprocessorComparison : public ComparisonPostprocessor
 {
 public:
-  VectorPostprocessorComparison(const InputParameters & parameters);
+  PostprocessorComparison(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
   virtual PostprocessorValue getValue() override;
 
 protected:
-  /// Values of the first vector post-processor to compare
-  const VectorPostprocessorValue & _values_a;
-  /// Values of the second vector post-processor to compare
-  const VectorPostprocessorValue & _values_b;
+  /// First post-processor to compare
+  const PostprocessorValue & _value_a;
+  /// Second post-processor to compare
+  const PostprocessorValue & _value_b;
 
-  /// The comparison value; 1 for all true and 0 for at least one false
+  /// The comparison value; 1 for true and 0 for false
   PostprocessorValue _comparison_value;
 };
 
