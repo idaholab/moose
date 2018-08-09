@@ -103,8 +103,6 @@ protected:
   ///Number of blocks (for property read based on grains)
   unsigned int _nblock;
   ///Type of read - element or grain
-  unsigned int _npoints;
-  ///Type of read - element or grain
   MooseEnum _read_type;
   ///Random seed - used for generating grain centers
   unsigned int _rand_seed;
