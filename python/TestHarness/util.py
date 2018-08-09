@@ -98,7 +98,15 @@ LIBMESH_OPTIONS = {
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
+  'threads' :      { 're_option' : r'#define\s+LIBMESH_USING_THREADS\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
   'tbb' :          { 're_option' : r'#define\s+LIBMESH_HAVE_TBB_API\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
+  'openmp' :       { 're_option' : r'#define\s+LIBMESH_HAVE_OPENMP\s+(\d+)',
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
@@ -385,6 +393,22 @@ def getCompilers(libmesh_dir):
         compilers.add("CLANG")
 
     return compilers
+
+def getLibMeshThreadingModel(libmesh_dir):
+    threading_models = set(['ALL'])
+    have_threads = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'threads');
+    if have_threads:
+        have_tbb = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'tbb')
+        have_openmp = 'TRUE' in getLibMeshConfigOption(libmesh_dir, 'openmp')
+        if have_openmp:
+            threading_models.add("OPENMP")
+        elif have_tbb:
+            threading_models.add("TBB")
+        else:
+            threading_models.add("PTHREADS")
+    else:
+        threading_models.add("NONE")
+    return threading_models
 
 def getPetscVersion(libmesh_dir):
     major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')

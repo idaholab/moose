@@ -3,15 +3,18 @@
     type = 'CSVDiff'
     input = 'tensile01.i'
     csvdiff = 'tensile01.csv'
+    threading = '!pthreads'
   [../]
   [./compressive01]
     type = 'CSVDiff'
     input = 'compressive01.i'
     csvdiff = 'compressive01.csv'
+    threading = '!pthreads'
   [../]
   [./shear01]
     type = 'CSVDiff'
     input = 'shear01.i'
     csvdiff = 'shear01.csv'
+    threading = '!pthreads'
   [../]
 []

@@ -3,151 +3,181 @@
     type = RunException
     input = except1.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of secondary activity coefficients is 1 which must be equal to the number of secondary species \(2\)'
+    threading = '!pthreads'
   [../]
   [./except2]
     type = RunException
     input = except2.i
     expect_err = 'The Dictator proclaims that the number of phases is 2 whereas PorousFlow1PhaseFullySaturated can only be used for 1-phase simulations. Be aware that the Dictator has noted your mistake.'
+    threading = '!pthreads'
   [../]
   [./except3]
     type = RunException
     input = except3.i
     expect_err = 'This value must be equal to the Dictator\'s num_phases \(1\) multiplied by num_components-1 \(1\)'
+    threading = '!pthreads'
   [../]
   [./except5]
     type = RunException
     input = except5.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of equilibrium constants is 1 which must be equal to the number of reactions \(2\)'
+    threading = '!pthreads'
   [../]
   [./except6]
     type = RunException
     input = except6.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of primary activity coefficients is 1 which must be equal to the number of primary species \(2\)'
+    threading = '!pthreads'
   [../]
   [./except7]
     type = RunException
     input = except7.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of stoichiometric coefficients specified in \'reactions\' \(2\) must be equal to the number of reactions \(2\) multiplied by the number of primary species \(2\)'
+    threading = '!pthreads'
   [../]
   [./except8]
     type = RunException
     input = except8.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of specific reactive surface areas provided is 2 which must be equal to the number of reactions \(1\)'
+    threading = '!pthreads'
   [../]
   [./except9]
     type = RunException
     input = except9.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of kinetic rate constants is 2 which must be equal to the number of reactions \(1\)'
+    threading = '!pthreads'
   [../]
   [./except10]
     type = RunException
     input = except10.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of activation energies is 2 which must be equal to the number of reactions \(1\)'
+    threading = '!pthreads'
   [../]
   [./except11]
     type = RunException
     input = except11.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of molar volumes is 2 which must be equal to the number of reactions \(1\)'
+    threading = '!pthreads'
   [../]
   [./except12]
     type = RunException
     input = except12.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of theta exponents is 2 which must be equal to the number of reactions \(1\)'
+    threading = '!pthreads'
   [../]
   [./except13]
     type = RunException
     input = except13.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of eta exponents is 2 which must be equal to the number of reactions \(1\)'
+    threading = '!pthreads'
   [../]
   [./except14]
     type = RunException
     input = except14.i
     expect_err = 'PorousFlowAqueousPreDisMineral: The number of initial concentrations is 2 but the Dictator knows that the number of aqueous kinetic \(precipitation-dissolution\) reactions is 1'
+    threading = '!pthreads'
   [../]
   [./except15]
     type = RunException
     input = except15.i
     expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2. The Dictator does not take such mistakes lightly'
+    threading = '!pthreads'
   [../]
   [./except16]
     type = RunException
     input = except16.i
     expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2. The Dictator does not take such mistakes lightly'
+    threading = '!pthreads'
   [../]
   [./except17]
     type = RunException
     input = except17.i
     expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: You have specified the number of reactions to be 2 but the Dictator knows that the number of aqueous equilibrium reactions is 0'
+    threading = '!pthreads'
   [../]
   [./except18]
     type = RunException
     input = except18.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: You have specified the number of reactions to be 1 but the Dictator knows that the number of aqueous kinetic \(precipitation-dissolution\) reactions is 0'
+    threading = '!pthreads'
   [../]
   [./except19]
     type = RunException
     input = except19.i
     expect_err = 'PorousFlowPorosity: When chemical=true you must provide the initial_mineral_concentrations.  The Dictator proclaims there should be 1 of these'
+    threading = '!pthreads'
   [../]
   [./except20]
     type = RunException
     input = except20.i
     expect_err = 'PorousFlowPorosity: When chemical=true you must provide the reference_chemistry values.  The Dictator proclaims there should be 1 of these'
+    threading = '!pthreads'
   [../]
   [./except21]
     type = RunException
     input = except21.i
     expect_err = 'PorousflowDictator: The aqueous phase number must be less than the number of fluid phases.  The Dictator does not appreciate jokes.'
+    threading = '!pthreads'
   [../]
   [./except22]
     type = RunException
     input = except22.i
     expect_err = 'PorousFlowAqueousPreDisChemistry: The number of fluid phases must not be zero'
+    threading = '!pthreads'
   [../]
 
   [./precipitation]
     type = CSVDiff
     input = precipitation.i
     csvdiff = precipitation_out.csv
+    threading = '!pthreads'
   [../]
   [./precipitation_porosity_change]
     type = CSVDiff
     input = precipitation_porosity_change.i
     csvdiff = precipitation_porosity_change_out.csv
+    threading = '!pthreads'
   [../]
   [./dissolution]
     type = CSVDiff
     input = dissolution.i
     csvdiff = dissolution_out.csv
+    threading = '!pthreads'
   [../]
   [./dissolution_limited]
     type = CSVDiff
     input = dissolution_limited.i
     csvdiff = dissolution_limited_out.csv
+    threading = '!pthreads'
   [../]
   [./2species_equilibrium]
     type = Exodiff
     input = 2species_equilibrium.i
     exodiff = 2species_equilibrium_out.e
+    threading = '!pthreads'
   [../]
   [./2species_predis]
     type = Exodiff
     input = 2species_predis.i
     exodiff = 2species_predis_out.e
+    threading = '!pthreads'
   [../]
   [./precipitation_2phase]
     type = CSVDiff
     input = precipitation_2phase.i
     csvdiff = precipitation_2phase_out.csv
+    threading = '!pthreads'
   [../]
   [./dissolution_limited_2phase]
     type = CSVDiff
     input = dissolution_limited_2phase.i
     csvdiff = dissolution_limited_2phase_out.csv
+    threading = '!pthreads'
   [../]
   [./2species_equilibrium_2phase]
     type = Exodiff
     input = 2species_equilibrium_2phase.i
     exodiff = 2species_equilibrium_2phase_out.e
+    threading = '!pthreads'
   [../]
 []

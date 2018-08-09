@@ -1568,6 +1568,7 @@ protected:
   /// Storage for UserObjects
   ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<GeneralUserObject> _general_user_objects;
+  AuxGroupExecuteMooseObjectWarehouse<GeneralUserObject> _threaded_general_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<NodalUserObject> _nodal_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<ElementUserObject> _elemental_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<SideUserObject> _side_user_objects;

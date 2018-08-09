@@ -542,6 +542,9 @@
     input = 'check_syntax_error.i'
     cli_args = '--check-input'
     expect_err = 'invalid number of nodes: want 2, got 3'
+    # because with distributed, not all nodes end up on one proc, so the number of received nodes
+    # in not 3
+    mesh_mode = REPLICATED
   [../]
 
   [./check_syntax_no_input]

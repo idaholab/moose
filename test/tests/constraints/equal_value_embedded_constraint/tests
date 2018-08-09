@@ -1,0 +1,91 @@
+[Tests]
+  [1D_2D_kinematic]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=kinematic Outputs/file_base=1D_2D_kinematic_out'
+    exodiff = '1D_2D_kinematic_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+  []
+  [1D_2D_penalty]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/1D_2D.e Constraints/equal/formulation=penalty Outputs/file_base=1D_2D_penalty_out'
+    exodiff = '1D_2D_penalty_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '1D_2D_kinematic'
+  []
+  [1D_3D_kinematic]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=kinematic Outputs/file_base=1D_3D_kinematic_out'
+    exodiff = '1D_3D_kinematic_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '1D_2D_penalty'
+  []
+  [1D_3D_penalty]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/1D_3D.e Constraints/equal/formulation=penalty Outputs/file_base=1D_3D_penalty_out'
+    exodiff = '1D_3D_penalty_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '1D_3D_kinematic'
+  []
+  [2D_2D_kinematic]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=kinematic Outputs/file_base=2D_2D_kinematic_out'
+    exodiff = '2D_2D_kinematic_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '1D_3D_penalty'
+  []
+  [2D_2D_penalty]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/2D_2D.e Constraints/equal/formulation=penalty Outputs/file_base=2D_2D_penalty_out'
+    exodiff = '2D_2D_penalty_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '2D_2D_kinematic'
+  []
+  [2D_3D_kinematic]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=kinematic Outputs/file_base=2D_3D_kinematic_out'
+    exodiff = '2D_3D_kinematic_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '2D_2D_penalty'
+  []
+  [2D_3D_penalty]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/2D_3D.e Constraints/equal/formulation=penalty Outputs/file_base=2D_3D_penalty_out'
+    exodiff = '2D_3D_penalty_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '2D_3D_kinematic'
+  []
+  [3D_3D_kinematic]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=kinematic Outputs/file_base=3D_3D_kinematic_out'
+    exodiff = '3D_3D_kinematic_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '2D_3D_penalty'
+  []
+  [3D_3D_penalty]
+    type = 'Exodiff'
+    input = 'embedded_constraint.i'
+    cli_args = 'Mesh/file=gold/3D_3D.e Constraints/equal/formulation=penalty Outputs/file_base=3D_3D_penalty_out'
+    exodiff = '3D_3D_penalty_out.e'
+    abs_zero = 1e-9
+    mesh_mode = REPLICATED
+    prereq = '3D_3D_kinematic'
+  []
+[]

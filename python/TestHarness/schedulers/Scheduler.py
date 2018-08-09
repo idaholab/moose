@@ -81,16 +81,13 @@ class Scheduler(MooseObject):
         # Job lock when modifying a jobs status
         self.activity_lock = threading.Lock()
 
-        # Job count lock when modifying incoming/outgoing jobs
-        self.job_count_lock = threading.Lock()
-
         # A combination of processors + threads (-j/-n) currently in use, that a job requires
         self.slots_in_use = 0
 
-        # Count of jobs which need to complete
-        self.job_count = 0
+        # Set containing all scheduled jobs
+        self.__scheduled_jobs = set([])
 
-        # Set containing all submitted jobs
+        # Set containing jobs entering the run_pool
         self.__job_bank = set([])
 
         # Total running Job and Test failures encountered
@@ -138,7 +135,7 @@ class Scheduler(MooseObject):
 
     def retrieveJobs(self):
         """ return all the jobs the scheduler was tasked to perform work for """
-        return self.__job_bank
+        return self.__scheduled_jobs
 
     def schedulerError(self):
         """ boolean if the scheduler prematurely exited """
@@ -177,7 +174,7 @@ class Scheduler(MooseObject):
             waiting_on_status_pool = True
             waiting_on_runner_pool = True
 
-            while (waiting_on_status_pool or waiting_on_runner_pool) and self.job_count:
+            while (waiting_on_status_pool or waiting_on_runner_pool) and self.__job_bank:
 
                 if self.__error_state:
                     break
@@ -189,8 +186,8 @@ class Scheduler(MooseObject):
 
                 sleep(0.1)
 
-            # Reporting sanity check
-            if not self.__error_state and self.job_count:
+            # Completed all jobs sanity check
+            if not self.__error_state and self.__job_bank:
                 raise SchedulerError('Scheduler exiting with different amount of work than what was tasked!')
 
             if not self.__error_state:
@@ -225,12 +222,13 @@ class Scheduler(MooseObject):
         if j_dag.size() != len(testers):
             raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
 
-        # Final reporting job-count sanity check
-        with self.job_count_lock:
-            self.job_count += j_dag.size()
+        # Store all jobs in the global job bank. As jobs finish, they will be removed from
+        # this set. This will function as our final sanity check on 100% job completion
+        with j_lock:
+            self.__job_bank.update(j_dag.topological_sort())
 
-        # Store all processed jobs in the global job bank
-        self.__job_bank.update(j_dag.topological_sort())
+        # Store all scheduled jobs
+        self.__scheduled_jobs.update(j_dag.topological_sort())
 
         # Launch these jobs to perform work
         self.queueJobs(Jobs, j_lock)
@@ -318,21 +316,27 @@ class Scheduler(MooseObject):
         threaded operation, so as to prevent clobbering of text being printed
         to stdout.
         """
-        if self.status_pool._state:
+        # The pool is closing down due to a failure, or this job has previously been handled:
+        #
+        # A job which triggers the long_running timer, has a chance to finish before this
+        # slower serialized status pool, has a chance to process it. Meaning two of the same
+        # jobs now exist in this queue, with a finished status. This method can only work on
+        # a finished job object once (a set removal operation occurs to signify scheduled job
+        # completion as a sanity check).
+        if self.status_pool._state or job not in self.__job_bank:
             return
 
-        # Its possible, the queue is just trying to empty
+        # Peform within a try, to allow keyboard ctrl-c
         try:
-            job_was_running = False
-            # Check if we should print due to inactivity
+            tester = job.getTester()
             with j_lock:
                 if job.isRunning():
+                    # already reported this job once before
                     if job in self.jobs_reported:
                         return
 
-                    # report inactivity if last reported time falls within tolerances
+                    # this job will be reported as 'RUNNING'
                     elif clock() - self.last_reported_time >= self.min_report_time:
-                        job_was_running = True
                         job.addCaveats('FINISHED')
 
                         with self.activity_lock:
@@ -348,25 +352,25 @@ class Scheduler(MooseObject):
                         job.report_timer.start()
                         return
 
-            # Immediately following the Job lock, print the status
-            self.harness.handleJobStatus(job)
+                # Inform the TestHarness of job status
+                self.harness.handleJobStatus(job)
 
-            # Do last, to prevent premature thread pool closures
-            with j_lock:
-                tester = job.getTester()
-
+                # Reset activity clock
                 if not tester.isSilent():
                     self.last_reported_time = clock()
 
-                if job.isFinished() and not job_was_running:
-                    if tester.isFail():
-                        self.__failures += 1
+                if tester.isFail():
+                    self.__failures += 1
 
-                    if self.maxFailures():
-                        self.killRemaining()
+                if job.isFinished():
+                    if job in self.__job_bank:
+                        self.__job_bank.remove(job)
                     else:
-                        with self.job_count_lock:
-                            self.job_count -= 1
+                        raise SchedulerError('job accountability failure while working with: %s' % (job.getTestName()))
+
+            # Max failure threshold reached, begin shutdown
+            if self.maxFailures():
+                self.killRemaining()
 
         except Exception:
             print('statusWorker Exception: %s' % (traceback.format_exc()))

@@ -6,6 +6,7 @@
 # Run in serial so RandomIC gets fixed PRNG results
     max_parallel = 1
     max_threads  = 1
+    threading = '!pthreads'
   [../]
   [./constant_poroperm2]
     type = 'Exodiff'
@@ -14,6 +15,7 @@
 # Run in serial so RandomIC gets fixed PRNG results
     max_parallel = 1
     max_threads  = 1
+    threading = '!pthreads'
   [../]
   [./vol_expansion_poroperm]
     type = Exodiff
@@ -22,5 +24,6 @@
 # Run in serial so RandomIC gets fixed PRNG results
     max_parallel = 1
     max_threads  = 1
+    threading = '!pthreads'
   [../]
 []

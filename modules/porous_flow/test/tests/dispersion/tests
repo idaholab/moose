@@ -3,17 +3,20 @@
     type = 'CSVDiff'
     input = 'diff01.i'
     csvdiff = 'diff01_out_xmass_0021.csv'
+    threading = '!pthreads'
   [../]
   [./diff01_action]
     type = 'CSVDiff'
     input = 'diff01_action.i'
     csvdiff = 'diff01_action_out_xmass_0021.csv'
+    threading = '!pthreads'
   [../]
   [./disp01]
     type = 'CSVDiff'
     input = 'disp01.i'
     csvdiff = 'disp01_out_xmass_0029.csv'
     rel_err = 1E-5
+    threading = '!pthreads'
   [../]
   [./disp01_heavy]
     type = 'CSVDiff'
@@ -21,5 +24,6 @@
     csvdiff = 'disp01_heavy_out_xmass_0105.csv'
     rel_err = 1E-5
     heavy = true
+    threading = '!pthreads'
   [../]
 []

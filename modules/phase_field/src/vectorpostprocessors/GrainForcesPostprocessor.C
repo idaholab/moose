@@ -16,7 +16,7 @@ template <>
 InputParameters
 validParams<GrainForcesPostprocessor>()
 {
-  InputParameters params = validParams<VectorPostprocessor>();
+  InputParameters params = validParams<GeneralVectorPostprocessor>();
   params.addClassDescription("Outputs the values from GrainForcesPostprocessor");
   params.addParam<UserObjectName>(
       "grain_force", "Specify userobject that gives center of mass and volume of grains");

@@ -19,6 +19,7 @@ class NodalConstraint;
 class NodeFaceConstraint;
 class MortarConstraint;
 class ElemElemConstraint;
+class NodeElemConstraint;
 
 /**
  * Warehouse for storing constraints
@@ -46,6 +47,8 @@ public:
   getActiveElemElemConstraints(InterfaceID interface_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
   getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
+  const std::vector<std::shared_ptr<NodeElemConstraint>> &
+  getActiveNodeElemConstraints(SubdomainID slave_id, SubdomainID master_id, bool displaced) const;
   ///@}
 
   ///@{
@@ -56,6 +59,8 @@ public:
   bool hasActiveMortarConstraints(const std::string & interface) const;
   bool hasActiveElemElemConstraints(const InterfaceID interface_id, bool displaced) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
+  bool
+  hasActiveNodeElemConstraints(SubdomainID slave_id, SubdomainID master_id, bool displaced) const;
   ///@}
 
   /**
@@ -90,6 +95,14 @@ protected:
 
   /// ElemElemConstraints (displaced)
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _displaced_element_constraints;
+
+  /// NodeElemConstraint objects
+  std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraint>>
+      _node_elem_constraints;
+
+  /// NodeElemConstraint objects
+  std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraint>>
+      _displaced_node_elem_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H

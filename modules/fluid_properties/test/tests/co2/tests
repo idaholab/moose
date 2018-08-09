@@ -3,5 +3,6 @@
     type = CSVDiff
     input = 'co2.i'
     csvdiff = 'co2_out.csv'
+    threading = '!pthreads'
   [../]
 []

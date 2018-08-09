@@ -139,6 +139,8 @@ protected:
   const Real & _normalization;
   ExecFlagEnum _norm_exec;
 
+  PerfID _final_timer;
+
   // Chebyshev acceleration
   class Chebyshev_Parameters
   {

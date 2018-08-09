@@ -19,6 +19,7 @@
 #include "MaterialData.h"
 #include "ComputeUserObjectsThread.h"
 #include "ComputeNodalUserObjectsThread.h"
+#include "ComputeThreadedGeneralUserObjectsThread.h"
 #include "ComputeMaterialsObjectThread.h"
 #include "ProjectMaterialProperties.h"
 #include "ComputeIndicatorThread.h"
@@ -177,6 +178,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _vpps_data(*this),
     _all_user_objects(_app.getExecuteOnEnum()),
     _general_user_objects(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _threaded_general_user_objects(_app.getExecuteOnEnum()),
     _nodal_user_objects(_app.getExecuteOnEnum()),
     _elemental_user_objects(_app.getExecuteOnEnum()),
     _side_user_objects(_app.getExecuteOnEnum()),
@@ -569,6 +571,10 @@ FEProblemBase::initialSetup()
 
     _internal_side_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
     _internal_side_user_objects.initialSetup(tid);
+
+    _threaded_general_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
+    _threaded_general_user_objects.initialSetup(tid);
+    _threaded_general_user_objects.sort(tid);
   }
 
   // check if jacobian calculation is done in userobject
@@ -841,6 +847,7 @@ FEProblemBase::timestepSetup()
     _elemental_user_objects.timestepSetup(tid);
     _side_user_objects.timestepSetup(tid);
     _internal_side_user_objects.timestepSetup(tid);
+    _threaded_general_user_objects.timestepSetup(tid);
   }
   _general_user_objects.timestepSetup();
 
@@ -2638,8 +2645,13 @@ FEProblemBase::addUserObject(std::string user_object_name,
     // Add the object to the correct warehouse
     if (guo)
     {
-      _general_user_objects.addObject(guo);
-      break; // not threaded
+      if (guo->getParam<bool>("threaded"))
+        _threaded_general_user_objects.addObject(guo, tid);
+      else
+      {
+        _general_user_objects.addObject(guo);
+        break;
+      }
     }
     else if (nuo)
       _nodal_user_objects.addObject(nuo, tid);
@@ -2913,9 +2925,12 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       _internal_side_user_objects[group][type];
   const MooseObjectWarehouse<NodalUserObject> & nodal = _nodal_user_objects[group][type];
   const MooseObjectWarehouse<GeneralUserObject> & general = _general_user_objects[group][type];
+  const MooseObjectWarehouse<GeneralUserObject> & threaded_general =
+      _threaded_general_user_objects[group][type];
 
   if (!elemental.hasActiveObjects() && !side.hasActiveObjects() &&
-      !internal_side.hasActiveObjects() && !nodal.hasActiveObjects() && !general.hasActiveObjects())
+      !internal_side.hasActiveObjects() && !nodal.hasActiveObjects() &&
+      !general.hasActiveObjects() && !threaded_general.hasActiveObjects())
     // Nothing to do, return early
     return;
 
@@ -2933,6 +2948,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       side.residualSetup(tid);
       internal_side.residualSetup(tid);
       nodal.residualSetup(tid);
+      threaded_general.residualSetup(tid);
     }
     general.residualSetup();
   }
@@ -2945,6 +2961,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       side.jacobianSetup(tid);
       internal_side.jacobianSetup(tid);
       nodal.jacobianSetup(tid);
+      threaded_general.jacobianSetup(tid);
     }
     general.jacobianSetup();
   }
@@ -2978,6 +2995,48 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 
   // Finalize, threadJoin, and update PP values of Nodal
   finalizeUserObjects<NodalUserObject>(nodal);
+
+  if (threaded_general.hasActiveObjects())
+  {
+    for (std::size_t i = 0; i < threaded_general.getActiveObjects(0).size(); ++i)
+    {
+      std::vector<std::shared_ptr<GeneralUserObject>> tguos(libMesh::n_threads());
+      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+        tguos[tid] = threaded_general.getActiveObjects(tid)[i];
+
+      initializeUserObjects<GeneralUserObject>(threaded_general);
+
+      for (auto & object : tguos)
+        object->initialize();
+
+      ComputeThreadedGeneralUserObjectsThread ctguot(*this);
+      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
+
+      // Join threaded user objects down to thread 0
+      const auto & object = tguos[0];
+      for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
+        object->threadJoin(*(tguos[tid]));
+
+      // Finalize them and save off PP values
+      std::set<std::string> vpps_finalized;
+      for (auto & object : tguos)
+      {
+        object->finalize();
+
+        auto pp = std::dynamic_pointer_cast<Postprocessor>(object);
+        if (pp)
+          _pps_data.storeValue(pp->PPName(), pp->getValue());
+
+        auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(object);
+        if (vpp)
+          vpps_finalized.insert(vpp->PPName());
+      }
+
+      // Broadcast/Scatter any VPPs that need it
+      for (auto & vpp_name : vpps_finalized)
+        _vpps_data.broadcastScatterVectors(vpp_name);
+    }
+  }
 
   // Execute GeneralUserObjects
   if (general.hasActiveObjects())
@@ -3084,6 +3143,7 @@ FEProblemBase::updateActiveObjects()
     _elemental_user_objects.updateActive(tid);
     _side_user_objects.updateActive(tid);
     _internal_side_user_objects.updateActive(tid);
+    _threaded_general_user_objects.updateActive(tid);
     _samplers.updateActive(tid);
   }
 
