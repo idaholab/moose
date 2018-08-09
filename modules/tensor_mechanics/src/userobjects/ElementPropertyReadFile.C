@@ -146,10 +146,11 @@ ElementPropertyReadFile::readGrainData()
   _nprop = _col_names.size();
   std::vector<std::vector<Real>> _myData;
   _myData = _prop_file_reader.getData();
-  _npoints = _myData[0].size();
+  _ngrain = _myData[0].size();
 
   _data.resize(_nprop * _npoints);
-  mooseAssert(_npoints > 0, "Error ElementPropertyReadFile: " << _prop_file_name << " is empty");
+  if (_grain == 0)
+    paramError("prop_file_name", " - Euler angle file is empty!");
 
   for (unsigned int i = 0; i < _npoints; i++)
     for (unsigned int j = 0; j < _nprop; j++)
@@ -170,14 +171,14 @@ ElementPropertyReadFile::initGrainCenterPoints()
   }
   else if (_method == "UserSpecified")
   {
-
     std::vector<std::string> _col_names;
-    _prop_file_reader.read();
-    _col_names = _prop_file_reader.getNames();
+    _points_file_reader.read();
+    _col_names = _points_file_reader.getNames();
     _nprop = _col_names.size();
     std::vector<std::vector<Real>> _myData;
-    _myData = _prop_file_reader.getData();
-    _npoints = _myData[0].size();
+    _myData = _points_file_reader.getData();
+    if (_myData[0].size() != _ngrain)
+      paramError("points_file_name", "Number of lines in grain center file don't match number of lines in Euler angle file");
 
     _center.resize(_npoints);
 
