@@ -33,14 +33,14 @@
 []
 
 [UserObjects]
+  [./borehole_total_outflow_mass]
+    type = PorousFlowSumQuantity
+  [../]
   [./dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./borehole_total_outflow_mass]
-    type = PorousFlowSumQuantity
   [../]
   [./pc]
     type = PorousFlowCapillaryPressureVG
@@ -103,13 +103,40 @@
 [DiracKernels]
   [./bh]
     type = PorousFlowPeacemanBorehole
-    bottom_p_or_t = 0
-    fluid_phase = 0
-    point_file = bh02.bh
-    use_mobility = true
-    SumQuantityUO = borehole_total_outflow_mass
+
+    # Because the Variable for this Sink is pp, and pp is associated
+    # with the fluid-mass conservation equation, this sink is extracting
+    # fluid mass (and not heat energy or something else)
     variable = pp
+
+
+    # The following specfies that the total fluid mass coming out of
+    # the porespace via this sink in this timestep should be recorded
+    # in the pls_total_outflow_mass UserObject
+    SumQuantityUO = borehole_total_outflow_mass
+
+
+    # The following file defines the polyline geometry
+    # which is just two points in this particular example
+    point_file = bh02.bh
+
+
+    # First, we want Peacemans f to be a function of porepressure (and not
+    # temperature or something else).  So bottom_p_or_t is actually porepressure
+    function_of = pressure
+    fluid_phase = 0
+
+    # The bottomhole pressure
+    bottom_p_or_t = 0
+
+    # In this example there is no increase of the wellbore pressure
+    # due to gravity:
     unit_weight = '0 0 0'
+
+    # PeacemanBoreholes should almost always have use_mobility = true
+    use_mobility = true
+
+    # This is a production wellbore (a sink of fluid that removes fluid from porespace)
     character = 1
   [../]
 []
@@ -119,7 +146,6 @@
     type = PorousFlowPlotQuantity
     uo = borehole_total_outflow_mass
   [../]
-
   [./fluid_mass0]
     type = PorousFlowFluidMass
     execute_on = timestep_begin

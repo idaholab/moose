@@ -62,14 +62,14 @@
 []
 
 [UserObjects]
+  [./pls_total_outflow_mass]
+    type = PorousFlowSumQuantity
+  [../]
   [./dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'pp'
     number_fluid_phases = 1
     number_fluid_components = 1
-  [../]
-  [./pls_total_outflow_mass]
-    type = PorousFlowSumQuantity
   [../]
   [./pc]
     type = PorousFlowCapillaryPressureVG
@@ -131,14 +131,53 @@
 
 [DiracKernels]
   [./pls]
+    # This defines a sink that has strength
+    # f = L(P) * relperm * L_seg
+    # where
+    #    L(P) is a piecewise-linear function of porepressure
+    #      that is zero at pp=0 and 1 at pp=1E7
+    #    relperm is the relative permeability of the fluid
+    #    L_seg is the line-segment length associated with
+    #      the Dirac points defined in the file pls02.bh
     type = PorousFlowPolyLineSink
-    fluid_phase = 0
-    point_file = pls02.bh
-    use_mobility = true
-    SumQuantityUO = pls_total_outflow_mass
+
+    # Because the Variable for this Sink is pp, and pp is associated
+    # with the fluid-mass conservation equation, this sink is extracting
+    # fluid mass (and not heat energy or something else)
     variable = pp
+
+    # The following specfies that the total fluid mass coming out of
+    # the porespace via this sink in this timestep should be recorded
+    # in the pls_total_outflow_mass UserObject
+    SumQuantityUO = pls_total_outflow_mass
+
+    # The following file defines the polyline geometry
+    # which is just two points in this particular example
+    point_file = pls02.bh
+
+    # Now define the piecewise-linear function, L
+
+    # First, we want L to be a function of porepressure (and not
+    # temperature or something else).  The following means that
+    # p_or_t_vals should be intepreted by MOOSE as the zeroth-phase
+    # porepressure
+    function_of = pressure
+    fluid_phase = 0
+
+    # Second, define the piecewise-linear function, L
+    # The following means
+    #    flux=0 when pp=0  (and also pp<0)
+    #    flux=1 when pp=1E7  (and also pp>1E7)
+    #    flux=linearly intepolated between pp=0 and pp=1E7
+    # When flux>0 this means a sink, while flux<0 means a source
     p_or_t_vals = '0 1E7'
     fluxes = '0 1'
+
+    # Finally, in this case we want to always multiply
+    # L by the fluid mobility (of the zeroth phase) and
+    # use that in the sink strength instead of the bare L
+    # computed above
+    use_mobility = true
   [../]
 []
 
@@ -147,7 +186,6 @@
     type = PorousFlowPlotQuantity
     uo = pls_total_outflow_mass
   [../]
-
   [./fluid_mass0]
     type = PorousFlowFluidMass
     execute_on = timestep_begin
