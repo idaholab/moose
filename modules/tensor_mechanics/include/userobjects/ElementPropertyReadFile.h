@@ -11,6 +11,7 @@
 #define ELEMENTPROPERTYREADFILE_H
 
 #include "GeneralUserObject.h"
+#include "DelimitedFileReader.h"
 
 /**
  * Read properties from file - grain or element
@@ -89,6 +90,10 @@ protected:
   std::string _prop_file_name;
   // Name of file containing grain center values
   std::string _points_file_name;
+  // MOOSE Utility: Delimited file reader, for reading property values file
+  MooseUtils::DelimitedFileReader _prop_file_reader;
+  // MOOSE Utility: Delimited file reader, for reading grain center values file
+  MooseUtils::DelimitedFileReader _points_file_reader;
   ///Store property values read from file
   std::vector<Real> _data;
   ///Number of properties in a row

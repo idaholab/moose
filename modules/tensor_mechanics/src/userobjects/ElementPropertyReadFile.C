@@ -46,6 +46,8 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
   : GeneralUserObject(parameters),
     _prop_file_name(getParam<FileName>("prop_file_name")),
     _points_file_name(getParam<FileName>("points_file_name")),
+    _prop_file_reader(_prop_file_name, &_communicator),
+    _points_file_reader(_points_file_name, &_communicator),
     _nprop(getParam<unsigned int>("nprop")),
     _ngrain(getParam<unsigned int>("ngrain")),
     _nblock(getParam<unsigned int>("nblock")),
@@ -116,19 +118,20 @@ ElementPropertyReadFile::readBlockData()
 
   else if (_method == "UserSpecified")
   {
+    std::vector<std::string> _col_names;
+    _prop_file_reader.read();
+    _col_names = _prop_file_reader.getNames();
+    _nprop = _col_names.size();
+    std::vector<std::vector<Real>> _myData;
+    _myData = _prop_file_reader.getData();
+    _npoints = _myData[0].size();
+
     _data.resize(_nprop * _nblock);
-
-    MooseUtils::checkFileReadable(_prop_file_name);
-
-    std::ifstream file_prop;
-    file_prop.open(_prop_file_name.c_str());
 
     for (unsigned int i = 0; i < _nblock; i++)
       for (unsigned int j = 0; j < _nprop; j++)
-        if (!(file_prop >> _data[i * _nprop + j]))
-          mooseError("Error ElementPropertyReadFile: Premature end of file");
+        _data[i * _nprop + j] = _myData[j][i];
 
-    file_prop.close();
   }
 }
 
@@ -137,24 +140,21 @@ ElementPropertyReadFile::readGrainData()
 {
   MooseUtils::checkFileReadable(_prop_file_name);
 
-  std::ifstream file_prop(_prop_file_name);
-  unsigned int _npoints = 0;
-  std::string line;
-  while (std::getline(file_prop, line))
-    ++_npoints;
-  file_prop.close();
+  std::vector<std::string> _col_names;
+  _prop_file_reader.read();
+  _col_names = _prop_file_reader.getNames();
+  _nprop = _col_names.size();
+  std::vector<std::vector<Real>> _myData;
+  _myData = _prop_file_reader.getData();
+  _npoints = _myData[0].size();
+
   _data.resize(_nprop * _npoints);
-
-  mooseAssert(_npoints > 0, "Error ElementPropertyReadFile: Provide non-zero number of grains");
-
-  file_prop.open(_prop_file_name.c_str());
+  mooseAssert(_npoints > 0, "Error ElementPropertyReadFile: " << _prop_file_name << " is empty");
 
   for (unsigned int i = 0; i < _npoints; i++)
     for (unsigned int j = 0; j < _nprop; j++)
-      if (!(file_prop >> _data[i * _nprop + j]))
-        mooseError("Error ElementPropertyReadFile: Premature end of grain-location file");
+      _data[i * _nprop + j] = _myData[j][i];
 
-  file_prop.close();
   initGrainCenterPoints();
 }
 
@@ -171,24 +171,21 @@ ElementPropertyReadFile::initGrainCenterPoints()
   else if (_method == "UserSpecified")
   {
 
-    MooseUtils::checkFileReadable(_points_file_name);
+    std::vector<std::string> _col_names;
+    _prop_file_reader.read();
+    _col_names = _prop_file_reader.getNames();
+    _nprop = _col_names.size();
+    std::vector<std::vector<Real>> _myData;
+    _myData = _prop_file_reader.getData();
+    _npoints = _myData[0].size();
 
-    std::ifstream file_points(_points_file_name);
-    unsigned int _npoints = 0;
-    std::string line;
-    while (std::getline(file_points, line))
-      ++_npoints;
-    file_points.close();
     _center.resize(_npoints);
-
-    file_points.open(_points_file_name.c_str());
 
     for (unsigned int i = 0; i < _npoints; i++)
       for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-        if (!(file_points >> _center[i](j)))
-          mooseError("Error ElementPropertyReadFile: Premature end of file");
+        _center[i](j) = _myData[j][i];
 
-    file_points.close();
+
   }
 }
 
