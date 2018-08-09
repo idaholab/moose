@@ -224,7 +224,17 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   checkVar(var_name);
 
   if (!isCoupled(var_name))
+  {
+    // make sure we don't try to access default var ids that were not provided
+    if (comp + 1 > _optional_var_index[var_name].size())
+      mooseError(_c_name,
+                 ": Requested component ",
+                 comp,
+                 " of coupled value ",
+                 var_name,
+                 " is out of range.");
     return _optional_var_index[var_name][comp];
+  }
 
   MooseVariableFEBase * var = getFEVar(var_name, comp);
   switch (var->kind())
@@ -241,6 +251,15 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
 VariableValue *
 Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp)
 {
+  // make sure we don't access values that were not provided
+  if (comp + 1 > _c_parameters.numberDefaultCoupledValues(var_name))
+    mooseError(_c_name,
+               ": Requested component ",
+               comp,
+               " of coupled value ",
+               var_name,
+               " is out of range.");
+
   std::map<std::string, std::vector<VariableValue *>>::iterator default_value_it =
       _default_value.find(var_name);
   if (default_value_it == _default_value.end())
