@@ -3,100 +3,120 @@
     type = Exodiff
     input = vol_expansion.i
     exodiff = vol_expansion.e
+    threading = '!pthreads'
   [../]
   [./undrained_oedometer]
     type = CSVDiff
     input = undrained_oedometer.i
     csvdiff = undrained_oedometer.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation]
     type = CSVDiff
     input = pp_generation.i
     csvdiff = pp_generation.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation_action]
     type = CSVDiff
     input = pp_generation_action.i
     csvdiff = pp_generation_action.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation_fullysat_action]
     type = CSVDiff
     input = pp_generation_fullysat_action.i
     csvdiff = pp_generation_fullysat_action.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation_unconfined]
     type = CSVDiff
     input = pp_generation_unconfined.i
     csvdiff = pp_generation_unconfined.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation_unconfined_constM]
     type = CSVDiff
     input = pp_generation_unconfined_constM.i
     csvdiff = pp_generation_unconfined_constM.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation_unconfined_fully_saturated]
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated.i
     csvdiff = pp_generation_unconfined_fully_saturated.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation_unconfined_fully_saturated_volume]
     type = CSVDiff
     input = pp_generation_unconfined_fully_saturated_volume.i
     csvdiff = pp_generation_unconfined_fully_saturated_volume.csv
+    threading = '!pthreads'
   [../]
   [./pp_generation_unconfined_basicthm]
     type = CSVDiff
     input = pp_generation_unconfined_basicthm.i
     csvdiff = pp_generation_unconfined_basicthm.csv
+    threading = '!pthreads'
   [../]
   [./mandel]
     type = CSVDiff
     input = mandel.i
     csvdiff = mandel.csv
+    threading = '!pthreads'
   [../]
   [./mandel_constM]
     type = CSVDiff
     input = mandel_constM.i
     csvdiff = mandel_constM.csv
+    threading = '!pthreads'
   [../]
   [./mandel_fully_saturated]
     type = CSVDiff
     input = mandel_fully_saturated.i
     csvdiff = mandel_fully_saturated.csv
+    threading = '!pthreads'
   [../]
   [./mandel_fully_saturated_volume]
     type = CSVDiff
     input = mandel_fully_saturated_volume.i
     csvdiff = mandel_fully_saturated_volume.csv
+    threading = '!pthreads'
   [../]
   [./mandel_basicthm]
     type = CSVDiff
     input = mandel_basicthm.i
     csvdiff = mandel_basicthm.csv
+    threading = '!pthreads'
   [../]
   [./terzaghi]
     type = CSVDiff
     input = terzaghi.i
     csvdiff = terzaghi.csv
+    threading = '!pthreads'
   [../]
   [./terzaghi_constM]
     type = CSVDiff
     input = terzaghi_constM.i
     csvdiff = terzaghi_constM.csv
+    threading = '!pthreads'
   [../]
   [./terzaghi_fully_saturated_volume]
     type = CSVDiff
     input = terzaghi_fully_saturated_volume.i
     csvdiff = terzaghi_fully_saturated_volume.csv
+    threading = '!pthreads'
   [../]
   [./terzaghi_basicthm]
     type = CSVDiff
     input = terzaghi_basicthm.i
     csvdiff = terzaghi_basicthm.csv
+    threading = '!pthreads'
   [../]
   [./vol_expansion_poroperm]
     type = CSVDiff
     input = vol_expansion_poroperm.i
     csvdiff = vol_expansion_poroperm.csv
+    threading = '!pthreads'
   [../]
 []

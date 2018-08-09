@@ -4,25 +4,30 @@
     input = 'darcy_velocity.i'
     csvdiff = 'darcy_velocity.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./properties]
     type = 'Exodiff'
     input = 'properties.i'
     exodiff = 'properties_out.e'
+    threading = '!pthreads'
   [../]
   [./darcy_velocity_lower]
     type = 'CSVDiff'
     input = 'darcy_velocity_lower.i'
     csvdiff = 'darcy_velocity_lower_out.csv'
+    threading = '!pthreads'
   [../]
   [./darcy_velocity_lower_2D]
     type = 'CSVDiff'
     input = 'darcy_velocity_lower_2D.i'
     csvdiff = 'darcy_velocity_lower_2D_out.csv'
+    threading = '!pthreads'
   [../]
   [./darcy_velocity_lower_except]
     type = 'RunException'
     input = 'darcy_velocity_lower_except.i'
     expect_err = 'The variable fracture_vel_x must must be defined on lower-dimensional elements only since it employs PorousFlowDarcyVelocityComponentLowerDimensional'
+    threading = '!pthreads'
   [../]
 []

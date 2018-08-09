@@ -4,57 +4,67 @@
     input = 'PermFromPoro01.i'
     csvdiff = 'PermFromPoro01_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./PermFromPoro02]
     type = 'CSVDiff'
     input = 'PermFromPoro02.i'
     csvdiff = 'PermFromPoro02_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./PermFromPoro03]
     type = 'CSVDiff'
     input = 'PermFromPoro03.i'
     csvdiff = 'PermFromPoro03_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./PermFromPoro04]
     type = 'CSVDiff'
     input = 'PermFromPoro04.i'
     csvdiff = 'PermFromPoro04_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./PermFromPoro05]
     type = 'CSVDiff'
     input = 'PermFromPoro05.i'
     csvdiff = 'PermFromPoro05_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
 
   [./poro_thm]
     type = CSVDiff
     input = poro_thm.i
     csvdiff = poro_thm_out.csv
+    threading = '!pthreads'
   [../]
   [./poro_tm]
     type = CSVDiff
     input = poro_tm.i
     csvdiff = poro_tm_out.csv
+    threading = '!pthreads'
   [../]
   [./poro_hm]
     type = CSVDiff
     input = poro_hm.i
     csvdiff = poro_hm_out.csv
+    threading = '!pthreads'
   [../]
 
   [./except1]
     type = RunException
     input = except1.i
     expect_err = 'PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff'
+    threading = '!pthreads'
   [../]
   [./except2]
     type = RunException
     input = except2.i
     expect_err = 'PorousFlowPorosity: When fluid=true you must provide a solid_bulk'
+    threading = '!pthreads'
   [../]
 
   [./PermTensorFromVar01]
@@ -62,17 +72,20 @@
     input = 'PermTensorFromVar01.i'
     csvdiff = 'PermTensorFromVar01_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./PermTensorFromVar02]
     type = 'CSVDiff'
     input = 'PermTensorFromVar02.i'
     csvdiff = 'PermTensorFromVar02_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
   [./PermTensorFromVar03]
     type = 'CSVDiff'
     input = 'PermTensorFromVar03.i'
     csvdiff = 'PermTensorFromVar03_out.csv'
     rel_err = 1.0E-5
+    threading = '!pthreads'
   [../]
 []

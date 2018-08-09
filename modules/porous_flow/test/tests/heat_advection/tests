@@ -3,10 +3,12 @@
     type = Exodiff
     input = heat_advection_1d.i
     exodiff = heat_advection_1d.e
+    threading = '!pthreads'
   [../]
   [./head_advection_1d_fully_saturated]
     type = Exodiff
     input = heat_advection_1d_fully_saturated.i
     exodiff = heat_advection_1d_fully_saturated.e
+    threading = '!pthreads'
   [../]
 []

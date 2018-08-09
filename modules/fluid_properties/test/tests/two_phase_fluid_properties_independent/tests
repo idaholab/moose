@@ -5,6 +5,7 @@
     csvdiff = 'test_out.csv'
     rel_err = 1e-8
     allow_test_objects = true
+    threading = '!pthreads'
   [../]
   [./call_2phase_property]
     type = 'RunException'
@@ -19,5 +20,6 @@
       AuxKernels/T_sat_aux/execute_on=initial"
     expect_err = "The 2-phase fluid properties class 'TwoPhaseFluidPropertiesIndependent' does not allow calling any 2-phase property interfaces"
     allow_test_objects = true
+    threading = '!pthreads'
   [../]
 []

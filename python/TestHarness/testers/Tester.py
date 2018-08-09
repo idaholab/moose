@@ -59,7 +59,7 @@ class Tester(MooseObject):
         params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
         params.addParam('petsc_debug',   ['ALL'], "{False,True} -> test only runs when PETSc is configured with --with-debugging={0,1}, otherwise test always runs.")
         params.addParam('curl',          ['ALL'], "A test that runs only if CURL is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('tbb',           ['ALL'], "A test that runs only if TBB is available ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('threading',     ['ALL'], "A list of threading models ths tests runs with ('ALL', 'TBB', 'OPENMP', 'PTHREADS', 'NONE')")
         params.addParam('superlu',       ['ALL'], "A test that runs only if SuperLU is available via PETSc ('ALL', 'TRUE', 'FALSE')")
         params.addParam('chaco',         ['ALL'], "A test that runs only if Chaco (partitioner) is available via PETSc ('ALL', 'TRUE', 'FALSE')")
         params.addParam('parmetis',      ['ALL'], "A test that runs only if Parmetis (partitioner) is available via PETSc ('ALL', 'TRUE', 'FALSE')")
@@ -496,8 +496,8 @@ class Tester(MooseObject):
 
         # PETSc and SLEPc is being explicitly checked above
         local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot', \
-                        'petsc_debug', 'curl', 'tbb', 'superlu', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release', 'boost', 'fparser_jit',
-                        'parmetis', 'chaco', 'party', 'ptscotch']
+                        'petsc_debug', 'curl', 'superlu', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release', 'boost', 'fparser_jit',
+                        'parmetis', 'chaco', 'party', 'ptscotch', 'threading']
         for check in local_checks:
             test_platforms = set()
             operator_display = '!='
