@@ -125,14 +125,14 @@ ElementPropertyReadFile::readBlockData()
     std::vector<std::vector<Real>> _myData;
     _myData = _prop_file_reader.getData();
     if (_myData[0].size() != _nblock)
-      paramError("points_file_name", "Number of lines in property file don't match number of blocks");
+      paramError("points_file_name",
+                 "Number of lines in property file don't match number of blocks");
 
     _data.resize(_nprop * _nblock);
 
     for (unsigned int i = 0; i < _nblock; i++)
       for (unsigned int j = 0; j < _nprop; j++)
         _data[i * _nprop + j] = _myData[j][i];
-
   }
 }
 
@@ -150,7 +150,7 @@ ElementPropertyReadFile::readGrainData()
   _ngrain = _myData[0].size();
 
   _data.resize(_nprop * _ngrain);
-  if (_grain == 0)
+  if (_ngrain == 0)
     paramError("prop_file_name", " - Euler angle file is empty!");
 
   for (unsigned int i = 0; i < _ngrain; i++)
@@ -179,15 +179,15 @@ ElementPropertyReadFile::initGrainCenterPoints()
     std::vector<std::vector<Real>> _myData;
     _myData = _points_file_reader.getData();
     if (_myData[0].size() != _ngrain)
-      paramError("points_file_name", "Number of lines in grain center file don't match number of lines in Euler angle file");
+      paramError(
+          "points_file_name",
+          "Number of lines in grain center file don't match number of lines in Euler angle file");
 
     _center.resize(_ngrain);
 
     for (unsigned int i = 0; i < _ngrain; i++)
       for (unsigned int j = 0; j < LIBMESH_DIM; j++)
         _center[i](j) = _myData[j][i];
-
-
   }
 }
 
