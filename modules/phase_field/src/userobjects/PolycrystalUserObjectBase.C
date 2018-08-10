@@ -122,7 +122,7 @@ PolycrystalUserObjectBase::execute()
   {
     // Loop over elements or nodes
     if (_is_elemental)
-      while (flood(current_elem, invalid_size_t, nullptr))
+      while (flood(current_elem, invalid_size_t))
         ;
     else
     {
@@ -131,7 +131,7 @@ PolycrystalUserObjectBase::execute()
       {
         const Node * current_node = current_elem->get_node(i);
 
-        while (flood(current_node, invalid_size_t, nullptr))
+        while (flood(current_node, invalid_size_t))
           ;
       }
     }

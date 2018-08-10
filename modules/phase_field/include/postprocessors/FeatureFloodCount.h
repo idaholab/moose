@@ -340,14 +340,13 @@ protected:
   virtual void updateFieldInfo();
 
   /**
-   * This method will "mark" all entities on neighboring elements that
-   * are above the supplied threshold. If feature is NULL, we are exploring
-   * for a new region to mark, otherwise we are in the recursive calls
-   * currently marking a region.
+   * This method will see if the current entity is above the supplied threshold and "mark" it. It
+   * will then inspect neighboring entities that are above the connecting threshold and add them
+   * to the current feature.
    *
    * @return Boolean indicating whether a new feature was found while exploring the current entity.
    */
-  bool flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
+  bool flood(const DofObject * dof_object, std::size_t current_index);
 
   /**
    * Return the starting comparison threshold to use when inspecting an entity during the flood
@@ -369,7 +368,7 @@ protected:
   bool compareValueWithThreshold(Real entity_value, Real threshold) const;
 
   /**
-   * Method called during the recursive flood routine that should return whether or not the current
+   * Method called during the flood routine that should return whether or not the current
    * entity is part of the current feature (if one is being explored), or if it's the start
    * of a new feature.
    */
@@ -399,12 +398,8 @@ protected:
    * visiting neighbors. Since the logic is different for the elemental versus nodal case it's
    * easier to split them up.
    */
-  void visitNodalNeighbors(const Node * node,
-                           std::size_t current_index,
-                           FeatureData * feature,
-                           bool expand_halos_only);
+  void visitNodalNeighbors(const Node * node, FeatureData * feature, bool expand_halos_only);
   void visitElementalNeighbors(const Elem * elem,
-                               std::size_t current_index,
                                FeatureData * feature,
                                bool expand_halos_only,
                                bool disjoint_only);
@@ -418,7 +413,6 @@ protected:
   template <typename T>
   void visitNeighborsHelper(const T * curr_entity,
                             std::vector<const T *> neighbor_entities,
-                            std::size_t current_index,
                             FeatureData * feature,
                             bool expand_halos_only,
                             bool topological_neighbor,
@@ -745,6 +739,9 @@ private:
   const PerfID _update_field_info;
   const PerfID _prepare_for_transfer;
   const PerfID _consolidate_merged_features;
+
+  /// The data structure for maintaining entities to flood during discovery
+  std::deque<const DofObject *> _entity_queue;
 };
 
 template <>
