@@ -1158,7 +1158,7 @@ GrainTracker::attemptGrainRenumber(FeatureData & grain, unsigned int depth, unsi
           _console << " which currently contains zero grains.\n\n" << COLOR_DEFAULT;
         else
           _console << " whose closest grain (#" << target_it->_grain_id << ") is at a distance of "
-                   << target_it->_distance << "\n\n"
+                   << std::sqrt(target_it->_distance) << "\n\n"
                    << COLOR_DEFAULT;
       }
 
