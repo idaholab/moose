@@ -481,44 +481,48 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
   // C. Miehe and M. Lambrecht, Commun. Numer. Meth. Engng 2001; 17:337~353
 
   // Compute eigenvectors and eigenvalues of this tensor
-  (*this).symmetricEigenvaluesEigenvectors(eigval, eigvec);
+  this->symmetricEigenvaluesEigenvectors(eigval, eigvec);
 
   // Separate out positive and negative eigen values
   std::array<Real, N> epos;
+  std::array<Real, N> d;
   for (unsigned int i = 0; i < N; ++i)
+  {
     epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
+    d[i] = eigval[i] > 0 ? 1.0 : 0.0;
+  }
 
   // projection tensor
   RankFourTensor proj_pos;
   RankFourTensor Gab, Gba;
   RankTwoTensor Ma, Mb;
 
-  for (unsigned int i = 0; i < N; ++i)
+  for (unsigned int a = 0; a < N; ++a)
   {
-    Ma.vectorOuterProduct(eigvec.column(i), eigvec.column(i));
-    Mb.vectorOuterProduct(eigvec.column(i), eigvec.column(i));
-    Gab = Ma.outerProduct(Mb);
-    if (eigval[i] > 0.0)
-      proj_pos += Gab;
+    Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
+    proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    for (unsigned int j = 0; j < N && j != i; ++j)
+  for (unsigned int a = 0; a < N; ++a)
+    for (unsigned int b = 0; b < N; ++b)
     {
-      Ma.vectorOuterProduct(eigvec.column(i), eigvec.column(i));
-      Mb.vectorOuterProduct(eigvec.column(j), eigvec.column(j));
+      if (a == b)
+        continue;
+
+      Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
+      Mb.vectorOuterProduct(eigvec.column(b), eigvec.column(b));
 
       Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
       Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
 
-      // The case for equal eigenvalues
-      if (!MooseUtils::absoluteFuzzyEqual(eigval[i], eigval[j]))
-        proj_pos += (epos[i] - epos[j]) / (eigval[i] - eigval[j]) * (Gab + Gba) * 0.5;
+      Real theta_ab;
+      if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
+        theta_ab = 0.5 * (epos[a] - epos[b]) / (eigval[a] - eigval[b]);
       else
-        proj_pos += (Gab + Gba) * 0.5;
+        theta_ab = 0.25 * (d[a] + d[b]);
+
+      proj_pos += 0.5 * theta_ab * (Gab + Gba);
     }
-  }
   return proj_pos;
 }
 
