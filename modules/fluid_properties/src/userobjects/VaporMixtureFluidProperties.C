@@ -7,24 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "HEMFluidProperties.h"
-#include "FluidProperties.h"
+#include "VaporMixtureFluidProperties.h"
 
 template <>
 InputParameters
-validParams<HEMFluidProperties>()
+validParams<VaporMixtureFluidProperties>()
 {
   InputParameters params = validParams<FluidProperties>();
+
   return params;
 }
 
-HEMFluidProperties::HEMFluidProperties(const InputParameters & parameters)
+VaporMixtureFluidProperties::VaporMixtureFluidProperties(const InputParameters & parameters)
   : FluidProperties(parameters)
 {
 }
 
+VaporMixtureFluidProperties::~VaporMixtureFluidProperties() {}
+
 Real
-HEMFluidProperties::molarMass() const
+VaporMixtureFluidProperties::primaryMassFraction(std::vector<Real> x) const
 {
-  mooseError(name(), ": molarMass is not implemented");
+  return 1 - std::accumulate(x.begin(), x.end(), 0.0);
 }

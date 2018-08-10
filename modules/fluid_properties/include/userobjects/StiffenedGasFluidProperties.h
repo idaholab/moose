@@ -40,6 +40,8 @@ public:
   virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
   virtual Real s_from_h_p(Real h, Real p) const override;
   virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const override;
+  virtual Real s_from_p_T(Real p, Real T) const override;
+  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
   virtual Real rho_from_p_s(Real p, Real s) const override;
   virtual void
   rho_from_p_s(Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const override;
@@ -58,6 +60,7 @@ public:
   virtual Real p_from_h_s(Real h, Real s) const override;
   virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
+  virtual Real molarMass() const override;
 
   virtual Real c2_from_p_rho(Real pressure, Real rho) const;
 
@@ -71,6 +74,7 @@ protected:
 
   Real _mu;
   Real _k;
+  Real _molar_mass;
 };
 
 #endif /* STIFFENEDGASFLUIDPROPERTIES_H */

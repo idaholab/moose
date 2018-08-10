@@ -41,6 +41,8 @@ public:
   virtual Real k_from_v_e(Real v, Real e) const override;
   virtual Real s_from_v_e(Real v, Real e) const override;
   virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
+  virtual Real s_from_p_T(Real p, Real T) const override;
+  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
   virtual Real s_from_h_p(Real h, Real p) const override;
   virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const override;
   virtual Real rho_from_p_s(Real p, Real s) const override;
@@ -61,6 +63,7 @@ public:
   virtual Real p_from_h_s(Real h, Real s) const override;
   virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
+  virtual Real molarMass() const override;
 
 protected:
   Real _gamma;
@@ -70,6 +73,9 @@ protected:
 
   Real _mu;
   Real _k;
+
+  /// Universal gas constant [J/K.mol]
+  constexpr static Real R_universal = 8.3144598;
 };
 
 #endif /* IDEALGASFLUIDPROPERTIES_H */
