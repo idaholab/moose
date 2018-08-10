@@ -9,4 +9,9 @@
     input = 'GrandPotentialMultiphase.i'
     exodiff = 'GrandPotentialMultiphase_out.e'
   [../]
+  [./GrandPotentialAnisotropy]
+    type = 'Exodiff'
+    input = 'GrandPotentialAnisotropy.i'
+    exodiff = 'GrandPotentialAnisotropy_out.e'
+  [../]
 []

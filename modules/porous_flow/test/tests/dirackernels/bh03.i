@@ -103,13 +103,14 @@
 [DiracKernels]
   [./bh]
     type = PorousFlowPeacemanBorehole
-    bottom_p_or_t = 1E7
-    fluid_phase = 0
-    point_file = bh03.bh
-    use_mobility = true
-    SumQuantityUO = borehole_total_outflow_mass
     variable = pp
+    SumQuantityUO = borehole_total_outflow_mass
+    point_file = bh03.bh
+    function_of = pressure
+    fluid_phase = 0
+    bottom_p_or_t = 1E7
     unit_weight = '0 0 0'
+    use_mobility = true
     character = -1
   [../]
 []

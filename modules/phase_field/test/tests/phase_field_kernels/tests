@@ -76,4 +76,10 @@
     recover = false
     heavy = true
   [../]
+
+  [./nonuniform_barrier_coefficient]
+    type = 'Exodiff'
+    input = 'nonuniform_barrier_coefficient.i'
+    exodiff = 'nonuniform_barrier_coefficient_out.e'
+  [../]
 []
