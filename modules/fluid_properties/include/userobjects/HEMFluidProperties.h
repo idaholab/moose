@@ -206,6 +206,13 @@ public:
    * @param enthalpy enthalpy
    */
   virtual Real v_ph(Real pressure, Real enthalpy) const = 0;
+
+  /**
+   * Molar mass [kg/mol]
+   *
+   * @return molar mass
+   */
+  virtual Real molarMass() const;
 };
 
 #endif /* HEMFLUIDPROPERTIES_H */

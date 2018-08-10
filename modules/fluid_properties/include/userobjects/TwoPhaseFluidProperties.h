@@ -26,8 +26,15 @@ class TwoPhaseFluidProperties : public FluidProperties
 public:
   TwoPhaseFluidProperties(const InputParameters & parameters);
 
-  const UserObjectName & getLiquidName() const;
-  const UserObjectName & getVaporName() const;
+  /**
+   * Returns the name of the liquid single-phase fluid properties object
+   */
+  virtual const UserObjectName & getLiquidName() const { return _liquid_name; }
+
+  /**
+   * Returns the name of the vapor single-phase fluid properties object
+   */
+  virtual const UserObjectName & getVaporName() const { return _vapor_name; }
 
   /**
    * Returns the critical pressure
