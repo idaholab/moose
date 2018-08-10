@@ -83,7 +83,7 @@ ACInterface::gradL()
 }
 
 RealGradient
-ACInterface::kappaNablaLPsi()
+ACInterface::nablaLPsi()
 {
   // sum is the product rule gradient \f$ \nabla (L\psi) \f$
   RealGradient sum = _L[_qp] * _grad_test[_i][_qp];
@@ -91,7 +91,13 @@ ACInterface::kappaNablaLPsi()
   if (_variable_L)
     sum += gradL() * _test[_i][_qp];
 
-  return _kappa[_qp] * sum;
+  return sum;
+}
+
+RealGradient
+ACInterface::kappaNablaLPsi()
+{
+  return _kappa[_qp] * nablaLPsi();
 }
 
 Real
