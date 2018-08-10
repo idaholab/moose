@@ -124,6 +124,16 @@ public:
   class FeatureData
   {
   public:
+    /**
+     * The primary underlying container type used to hold the data in each FeatureData.
+     * Supported types are std::set<dof_id_type> (with minor adjustmnets)
+     * or std::vector<dof_id_type>.
+     *
+     * Note: Testing has shown that the vector container is nearly 10x faster. There's really
+     * no reason to use sets.
+     */
+    using container_type = std::set<dof_id_type>;
+
     FeatureData() : FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE) {}
 
     FeatureData(std::size_t var_index,
@@ -241,20 +251,20 @@ public:
     friend std::ostream & operator<<(std::ostream & out, const FeatureData & feature);
 
     /// Holds the ghosted ids for a feature (the ids which will be used for stitching
-    std::set<dof_id_type> _ghosted_ids;
+    container_type _ghosted_ids;
 
     /// Holds the local ids in the interior of a feature.
     /// This data structure is only maintained on the local processor
-    std::set<dof_id_type> _local_ids;
+    container_type _local_ids;
 
     /// Holds the ids surrounding the feature
-    std::set<dof_id_type> _halo_ids;
+    container_type _halo_ids;
 
     /// Holds halo ids that extend onto a non-topologically connected surface
-    std::set<dof_id_type> _disjoint_halo_ids;
+    container_type _disjoint_halo_ids;
 
     /// Holds the nodes that belong to the feature on a periodic boundary
-    std::set<dof_id_type> _periodic_nodes;
+    container_type _periodic_nodes;
 
     /// The Moose variable where this feature was found (often the "order parameter")
     std::size_t _var_index;
@@ -517,10 +527,10 @@ protected:
    * It exits as soon as any intersection is detected.
    */
   template <class InputIterator>
-  static inline bool setsIntersect(InputIterator first1,
-                                   InputIterator last1,
-                                   InputIterator first2,
-                                   InputIterator last2)
+  static bool setsIntersect(InputIterator first1,
+                            InputIterator last1,
+                            InputIterator first2,
+                            InputIterator last2)
   {
     while (first1 != last1 && first2 != last2)
     {
@@ -693,6 +703,30 @@ protected:
   const bool _is_master;
 
 private:
+  template <class T>
+  static inline void sort(std::set<T> & /*container*/)
+  {
+    // Sets are already sorted, do nothing
+  }
+
+  template <class T>
+  static inline void sort(std::vector<T> & container)
+  {
+    std::sort(container.begin(), container.end());
+  }
+
+  template <class T>
+  static inline void reserve(std::set<T> & /*container*/, std::size_t /*size*/)
+  {
+    // Sets are trees, no reservations necessary
+  }
+
+  template <class T>
+  static inline void reserve(std::vector<T> & container, std::size_t size)
+  {
+    container.reserve(size);
+  }
+
   /**
    * This method consolidates all of the merged information from _partial_feature_sets into
    * the _feature_sets vectors.
@@ -701,6 +735,16 @@ private:
 
   /// Keeps track of whether we are distributing the merge work
   const bool _distribute_merge_work;
+
+  /// Timers
+  const PerfID _execute_timer;
+  const PerfID _merge_timer;
+  const PerfID _finalize_timer;
+  const PerfID _comm_and_merge;
+  const PerfID _expand_halos;
+  const PerfID _update_field_info;
+  const PerfID _prepare_for_transfer;
+  const PerfID _consolidate_merged_features;
 };
 
 template <>

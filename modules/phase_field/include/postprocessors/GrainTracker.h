@@ -242,6 +242,13 @@ private:
 
   /// Boolean to indicate whether this is a Steady or Transient solve
   const bool _is_transient;
+
+  /// Timers
+  const PerfID _finalize_timer;
+  const PerfID _remap_timer;
+  const PerfID _track_grains;
+  const PerfID _broadcast_update;
+  const PerfID _update_field_info;
 };
 
 /**
