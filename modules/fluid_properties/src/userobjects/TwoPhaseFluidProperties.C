@@ -36,7 +36,7 @@ TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & paramet
   // is implied that these objects will be created by a derived class. In this
   // case, we need to check that these user objects do not already exist.
   if (!isParamValid("fp_liquid"))
-    if (_fe_problem.hasUserObject(_liquid_name))
+    if (_tid == 0 && _fe_problem.hasUserObject(_liquid_name))
       paramError("fp_liquid",
                  "The two-phase fluid properties object '" + name() + "' is ",
                  "trying to create a single-phase fluid properties object with ",
@@ -45,7 +45,7 @@ TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & paramet
                  "', but a single-phase fluid properties ",
                  "object with this name already exists.");
   if (!isParamValid("fp_vapor"))
-    if (_fe_problem.hasUserObject(_vapor_name))
+    if (_tid == 0 && _fe_problem.hasUserObject(_vapor_name))
       paramError("fp_vapor",
                  "The two-phase fluid properties object '" + name() + "' is ",
                  "trying to create a single-phase fluid properties object with ",
