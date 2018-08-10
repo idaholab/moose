@@ -10,7 +10,7 @@
 #ifndef RANKTWOSCALARAUX_H
 #define RANKTWOSCALARAUX_H
 
-#include "AuxKernel.h"
+#include "NodalPatchRecovery.h"
 #include "RankTwoTensor.h"
 
 class RankTwoScalarAux;
@@ -22,7 +22,7 @@ InputParameters validParams<RankTwoScalarAux>();
  * RankTwoScalarAux uses the namespace RankTwoScalarTools to compute scalar
  * values from Rank-2 tensors.
  */
-class RankTwoScalarAux : public AuxKernel
+class RankTwoScalarAux : public NodalPatchRecovery
 {
 public:
   RankTwoScalarAux(const InputParameters & parameters);

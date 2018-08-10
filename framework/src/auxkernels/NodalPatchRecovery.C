@@ -1,9 +1,12 @@
-/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "NodalPatchRecovery.h"
 #include "SwapBackSentinel.h"
 #include "libmesh/utility.h"
@@ -13,23 +16,33 @@ InputParameters
 validParams<NodalPatchRecovery>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<unsigned>("order", "polynomial order");
-  params.set<bool>("use_nodal_patch_recovery") = true;
+  params.addParam<unsigned>("patch_polynomial_order", "polynomial order");
+
+  // TODO make this class work with relationship manager
+  // params.registerRelationshipManagers("ElementSideNeighborLayers");
+  // params.addPrivateParam<unsigned short>("element_side_neighbor_layers", 2);
+
   return params;
 }
 
 NodalPatchRecovery::NodalPatchRecovery(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _order(getParam<unsigned>("order")),
+    _order_provided(isParamValid("patch_polynomial_order")),
+    _order(_order_provided ? getParam<unsigned>("patch_polynomial_order") : (unsigned)_var.order()),
     _dim(_mesh.dimension()),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _multi_index(multiIndex(_dim, _order))
 {
-  MeshBase & meshhelper = _mesh.getMesh();
-  meshhelper.allow_renumbering(false);
-  for (const auto & elem :
-       as_range(meshhelper.semilocal_elements_begin(), meshhelper.semilocal_elements_end()))
-    _fe_problem.addGhostedElem(elem->id());
+  // TODO remove the manual ghosting once relationship manager is working correctly
+  // no need to ghost if this aux is elemental
+  if (isNodal())
+  {
+    MeshBase & meshhelper = _mesh.getMesh();
+    meshhelper.allow_renumbering(false);
+    for (const auto & elem :
+         as_range(meshhelper.semilocal_elements_begin(), meshhelper.semilocal_elements_end()))
+      _fe_problem.addGhostedElem(elem->id());
+  }
 }
 
 std::vector<std::vector<unsigned>>
@@ -116,7 +129,7 @@ NodalPatchRecovery::accumulateBVector(Real val)
 }
 
 void
-NodalPatchRecovery::precalculateValue()
+NodalPatchRecovery::reinitPatch()
 {
   // clean and resize P, A, B, coef
   _P.resize(_multi_index.size());
@@ -135,9 +148,12 @@ void
 NodalPatchRecovery::compute()
 {
   if (!isNodal())
-    mooseError("must run on a nodal variable");
+  {
+    AuxKernel::compute();
+    return;
+  }
 
-  precalculateValue();
+  reinitPatch();
 
   // get node-to-conneted-elem map
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();

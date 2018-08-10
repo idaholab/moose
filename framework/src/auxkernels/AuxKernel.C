@@ -47,7 +47,6 @@ validParams<AuxKernel>()
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
-  params.addParam<bool>("use_nodal_patch_recovery", false, "whether to use nodal patch recovery");
   // This flag is set to true if the AuxKernel is being used on a boundary
   params.addPrivateParam<bool>("_on_boundary", false);
 
@@ -70,8 +69,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     BlockRestrictable(this),
     BoundaryRestrictable(this, mooseVariable()->isNodal()),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(
-        this, mooseVariable()->isNodal() && !getParam<bool>("use_nodal_patch_recovery")),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, mooseVariable()->isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
@@ -116,9 +114,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
 
     _current_node(_assembly.node()),
 
-    _solution(_aux_sys.solution()),
-
-    _use_nodal_patch_recovery(getParam<bool>("use_nodal_patch_recovery"))
+    _solution(_aux_sys.solution())
 {
   addMooseVariableDependency(mooseVariable());
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));

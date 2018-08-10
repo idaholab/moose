@@ -1,15 +1,24 @@
-/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
-#ifndef NodalPatchRecovery_H
-#define NodalPatchRecovery_H
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef NODALPATCHRECOVERY_H
+#define NODALPATCHRECOVERY_H
 
 #include "AuxKernel.h"
 #include "FEProblem.h"
 
+/**
+ * This class uses patch recovery technique to recover material properties to smooth nodal fields
+ * Zienkiewicz, O. C. and Zhu, J. Z. (1992), The superconvergent patch recovery and a posteriori
+ * error estimates. Part 1: The recovery technique. Int. J. Numer. Meth. Engng., 33: 1331-1364.
+ * doi:10.1002/nme.1620330702
+ */
 class NodalPatchRecovery;
 
 template <>
@@ -20,11 +29,18 @@ class NodalPatchRecovery : public AuxKernel
 public:
   NodalPatchRecovery(const InputParameters & parameters);
   virtual ~NodalPatchRecovery(){};
+  /// Override from Auxkernel to suppress warnings
+  template <typename T>
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  /// Override from Auxkernel to suppress warnings
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  /// Override from Auxkernel to suppress warnings
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
 protected:
-  /**
-   * generate all combinations of n choose k
-   */
+  /// generate all combinations of n choose k
   virtual std::vector<std::vector<unsigned>> nchoosek(unsigned N, unsigned K);
 
   /**
@@ -63,10 +79,8 @@ protected:
    */
   virtual void accumulateBVector(Real val);
 
-  /**
-   * reserve space for A, B, P, and prepare required material properties
-   */
-  virtual void precalculateValue() override;
+  /// reserve space for A, B, P, and prepare required material properties
+  virtual void reinitPatch();
 
   /**
    * solve the equation Ac = B
@@ -75,14 +89,13 @@ protected:
    */
   virtual void compute() override;
 
-  /**
-   * polynomial order
-   */
+  /// a boolean indicating whether a patch polynomial order is specified by the user
+  const bool _order_provided;
+
+  /// polynomial order, default is variable order
   const unsigned _order;
 
-  /**
-   * mesh dimension
-   */
+  /// mesh dimension
   const unsigned _dim;
 
   FEProblemBase & _fe_problem;
@@ -93,4 +106,25 @@ protected:
   DenseVector<Number> _coef;
 };
 
-#endif // NodalPatchRecovery_H
+template <typename T>
+const MaterialProperty<T> &
+NodalPatchRecovery::getMaterialProperty(const std::string & name)
+{
+  return MaterialPropertyInterface::getMaterialProperty<T>(name);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+NodalPatchRecovery::getMaterialPropertyOld(const std::string & name)
+{
+  return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+NodalPatchRecovery::getMaterialPropertyOlder(const std::string & name)
+{
+  return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
+}
+
+#endif // NODALPATCHRECOVERY_H
