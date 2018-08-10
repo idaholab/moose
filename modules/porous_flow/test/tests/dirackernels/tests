@@ -227,4 +227,9 @@
     exodiff = 'bh07.e'
     threading = '!pthreads'
   [../]
+  [./injection_production]
+    type = 'Exodiff'
+    input = 'injection_production.i'
+    exodiff = 'injection_production_out.e'
+  [../]
 []

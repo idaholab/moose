@@ -59,11 +59,11 @@ Several boundary conditions useful for many simulations are provided.
 
 - [Boundaries](boundaries.md)
 
-## Sources/sinks
+## Point and line sources and sinks
 
 A number of fluid and/or heat sources/sinks are available for use in PorousFlow.
 
-- [Sources/sinks](sinks.md)
+- [Point and line sources and sinks](sinks.md)
 
 ## Implementation details
 
