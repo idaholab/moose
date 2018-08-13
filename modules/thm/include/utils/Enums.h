@@ -102,7 +102,7 @@ const std::map<unsigned int, std::string> wall_heat_transfer_flow_regime_type_to
     {WHT_TRANSITION, "transition_boiling"},
     {WHT_INVERTEDANNULAR, "inverted_annular_postCHF"},
     {WHT_DISPERSED, "dispersed_postCHF"}};
-} // namespace RELAP7
+}
 
 template <typename T>
 T

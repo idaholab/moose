@@ -282,6 +282,6 @@ bool isInlet(Real vel, Real normal);
  * @param normal Outward normal vector
  */
 bool isOutlet(Real vel, Real normal);
-} // namespace RELAP7
+}
 
 #endif // NUMERICS_H
