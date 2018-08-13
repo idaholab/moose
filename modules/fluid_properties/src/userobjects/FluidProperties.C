@@ -15,11 +15,11 @@ validParams<FluidProperties>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.registerBase("FluidProperties");
-  params.set<bool>("threaded") = true;
   return params;
 }
 
-FluidProperties::FluidProperties(const InputParameters & parameters) : GeneralUserObject(parameters)
+FluidProperties::FluidProperties(const InputParameters & parameters)
+  : ThreadedGeneralUserObject(parameters)
 {
 }
 

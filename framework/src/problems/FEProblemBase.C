@@ -65,6 +65,7 @@
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "GeneralUserObject.h"
+#include "ThreadedGeneralUserObject.h"
 #include "InternalSideIndicator.h"
 #include "Transfer.h"
 #include "MultiAppTransfer.h"
@@ -2632,6 +2633,8 @@ FEProblemBase::addUserObject(std::string user_object_name,
     std::shared_ptr<NodalUserObject> nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
     std::shared_ptr<GeneralUserObject> guo =
         std::dynamic_pointer_cast<GeneralUserObject>(user_object);
+    std::shared_ptr<GeneralUserObject> tguo =
+        std::dynamic_pointer_cast<ThreadedGeneralUserObject>(user_object);
 
     // Account for displaced mesh use
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -2643,15 +2646,12 @@ FEProblemBase::addUserObject(std::string user_object_name,
     }
 
     // Add the object to the correct warehouse
-    if (guo)
+    if (tguo)
+      _threaded_general_user_objects.addObject(guo, tid);
+    else if (guo)
     {
-      if (guo->getParam<bool>("threaded"))
-        _threaded_general_user_objects.addObject(guo, tid);
-      else
-      {
-        _general_user_objects.addObject(guo);
-        break;
-      }
+      _general_user_objects.addObject(guo);
+      break;
     }
     else if (nuo)
       _nodal_user_objects.addObject(nuo, tid);
