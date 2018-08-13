@@ -18,6 +18,7 @@ validParams<PeriodicDistanceAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<Point>("point", "Some point in the domain");
+
   return params;
 }
 
@@ -27,13 +28,12 @@ PeriodicDistanceAux::PeriodicDistanceAux(const InputParameters & parameters)
   // Make sure the point is in the domain
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     if (_point(i) < _mesh.getMinInDimension(i) || _point(i) > _mesh.getMaxInDimension(i))
-    {
-      _console << _mesh.getMinInDimension(i) << "\t" << _mesh.getMaxInDimension(i) << "\n";
-      mooseError("\"point\" is outside of the domain.");
-    }
+      paramError("point",
+                 _mesh.getMinInDimension(i),
+                 "\t",
+                 _mesh.getMaxInDimension(i),
+                 "\n\"point\" is outside of the domain.");
 }
-
-PeriodicDistanceAux::~PeriodicDistanceAux() {}
 
 Real
 PeriodicDistanceAux::computeValue()

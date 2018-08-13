@@ -1372,11 +1372,10 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
   // See if we matched all of the extremes for the mesh dimension
   this->comm().max(extreme_matches);
-  if (std::count(extreme_matches.begin(), extreme_matches.end(), true) != std::pow(2.0, (int)dim))
-    return false; // This is not a regular orthogonal mesh
+  if (std::count(extreme_matches.begin(), extreme_matches.end(), true) == (1 << dim))
+    _regular_orthogonal_mesh = true;
 
-  // This is a regular orthogonal mesh, so set the bounds
-  _regular_orthogonal_mesh = true;
+  // Set the bounds
   _bounds.resize(LIBMESH_DIM);
   for (unsigned int i = 0; i < dim; ++i)
   {
@@ -1391,7 +1390,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     _bounds[i][MAX] = 0;
   }
 
-  return true;
+  return _regular_orthogonal_mesh;
 }
 
 void
@@ -1506,8 +1505,7 @@ MooseMesh::dimensionWidth(unsigned int component) const
 Real
 MooseMesh::getMinInDimension(unsigned int component) const
 {
-  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
-  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+  mooseAssert(component < _bounds.size(), "Requested dimension out of bounds");
 
   return _bounds[component][MIN];
 }
@@ -1515,8 +1513,7 @@ MooseMesh::getMinInDimension(unsigned int component) const
 Real
 MooseMesh::getMaxInDimension(unsigned int component) const
 {
-  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
-  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
+  mooseAssert(component < _bounds.size(), "Requested dimension out of bounds");
 
   return _bounds[component][MAX];
 }
@@ -1545,7 +1542,6 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
 bool
 MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const
 {
-  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
   if (_periodic_dim.find(nonlinear_var_num) != _periodic_dim.end())
