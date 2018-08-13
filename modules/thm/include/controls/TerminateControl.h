@@ -19,6 +19,12 @@ public:
   virtual void execute();
 
 protected:
+  /// Flag to throw an error if the terminate condition is met
+  const bool _throw_error;
+
+  /// Message to use if termination occurs
+  const std::string & _termination_message;
+
   /// The control data that indicates if the simulation should be terminated
   const bool & _terminate;
 };
