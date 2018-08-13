@@ -2,6 +2,7 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 #include "FlowModelTwoPhaseNCG.h"
+#include "TwoPhaseNCGFluidProperties.h"
 
 template <>
 InputParameters
