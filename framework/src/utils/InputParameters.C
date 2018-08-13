@@ -715,7 +715,13 @@ InputParameters::applyCoupledVar(const InputParameters & common, const std::stri
   if (hasCoupledValue(var_name))
   {
     if (common.hasDefaultCoupledValue(var_name))
-      addCoupledVar(var_name, common.defaultCoupledValue(var_name), common.getDocString(var_name));
+    {
+      // prepare a vector of default coupled values
+      std::vector<Real> defaults(common.numberDefaultCoupledValues(var_name));
+      for (unsigned int j = 0; j < common.numberDefaultCoupledValues(var_name); ++j)
+        defaults[j] = common.defaultCoupledValue(var_name, j);
+      addCoupledVar(var_name, defaults, common.getDocString(var_name));
+    }
     else if (common.hasCoupledValue(var_name))
       addCoupledVar(var_name, common.getDocString(var_name));
   }
