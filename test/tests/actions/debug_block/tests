@@ -1,7 +1,14 @@
 [Tests]
-  [./test_debug_block]
+  [./test_show_actions_dependency]
     type = RunApp
     input = 'debug_print_actions_test.i'
-    expect_out = '[DBG][ACT]'
+    expect_out = '[DBG][ACT] Action Dependency Sets'
+    match_literal = true
+  [../]
+  [./test_show_actions_tasks]
+    type = RunApp
+    input = 'debug_print_actions_test.i'
+    expect_out = '[DBG][ACT] TASK'
+    match_literal = true
   [../]
 []

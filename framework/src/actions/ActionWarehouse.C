@@ -349,7 +349,17 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
 
   for (_act_iter = actionBlocksWithActionBegin(task); _act_iter != actionBlocksWithActionEnd(task);
        ++_act_iter)
+  {
+    if (_show_actions)
+      _console << "[DBG][ACT] "
+               << "TASK (" << COLOR_YELLOW << std::setw(24) << task << COLOR_DEFAULT << ") "
+               << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*_act_iter)->type() << COLOR_DEFAULT
+               << ") "
+               << "NAME (" << COLOR_YELLOW << std::setw(16) << (*_act_iter)->name() << COLOR_DEFAULT
+               << ")" << std::endl;
+
     (*_act_iter)->timedAct();
+  }
 }
 
 void
