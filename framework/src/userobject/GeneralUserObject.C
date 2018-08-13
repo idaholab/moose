@@ -16,8 +16,6 @@ validParams<GeneralUserObject>()
   InputParameters params = validParams<UserObject>();
   params += validParams<MaterialPropertyInterface>();
   params.addParam<bool>(
-      "threaded", false, "true if there should be threaded copies of this user object.");
-  params.addParam<bool>(
       "force_preaux", false, "Forces the GeneralUserObject to be executed in PREAUX");
   params.addParamNamesToGroup("force_preaux", "Advanced");
   return params;
@@ -32,12 +30,6 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this)
 {
-#if !defined(LIBMESH_HAVE_OPENMP) && !defined(LIBMESH_HAVE_TBB_API)
-  if (getParam<bool>("threaded"))
-    mooseError(name(),
-               ": You cannot use threaded general user objects with pthreads. To enable this "
-               "functionality configure libMesh with OpenMP or TBB.");
-#endif
   _supplied_vars.insert(name());
 }
 

@@ -32,7 +32,6 @@
 [UserObjects]
   [./prime_product]
     type = PrimeProductUserObject
-    threaded = true
     execute_on = timestep_end
   [../]
 []

@@ -10,7 +10,7 @@
 #ifndef FLUIDPROPERTIES_H
 #define FLUIDPROPERTIES_H
 
-#include "GeneralUserObject.h"
+#include "ThreadedGeneralUserObject.h"
 
 // Forward Declarations
 class FluidProperties;
@@ -18,7 +18,7 @@ class FluidProperties;
 template <>
 InputParameters validParams<FluidProperties>();
 
-class FluidProperties : public GeneralUserObject
+class FluidProperties : public ThreadedGeneralUserObject
 {
 public:
   FluidProperties(const InputParameters & parameters);

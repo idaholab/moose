@@ -10,7 +10,7 @@
 #ifndef PRIMECOUNTERUSEROBJECT_H
 #define PRIMECOUNTERUSEROBJECT_H
 
-#include "GeneralUserObject.h"
+#include "ThreadedGeneralUserObject.h"
 
 class PrimeProductUserObject;
 
@@ -22,7 +22,7 @@ InputParameters validParams<PrimeProductUserObject>();
  * its thread ID. Then when threads join the product of all prime numbers is computed, which is the
  * final value provided by this user object.
  */
-class PrimeProductUserObject : public GeneralUserObject
+class PrimeProductUserObject : public ThreadedGeneralUserObject
 {
 public:
   PrimeProductUserObject(const InputParameters & params);
