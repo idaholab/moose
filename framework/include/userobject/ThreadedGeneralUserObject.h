@@ -16,7 +16,7 @@
 class ThreadedGeneralUserObject : public GeneralUserObject
 {
 public:
-  ThreadedGeneralUserObject(const InputParameters & parameters) : GeneralUserObject(parameters) {}
+  ThreadedGeneralUserObject(const InputParameters & parameters);
   virtual ~ThreadedGeneralUserObject() = default;
   virtual void threadJoin(const UserObject &) override;
   virtual void subdomainSetup() override{};
