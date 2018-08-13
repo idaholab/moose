@@ -1,0 +1,12 @@
+Content:
+    - doc/content
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: Stork
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${ROOT_DIR}
+        includes:
+            - include
