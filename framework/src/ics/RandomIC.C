@@ -14,6 +14,24 @@
 
 registerMooseObject("MooseApp", RandomIC);
 
+namespace
+{
+/**
+ * Method for retrieving or generating and caching a value in a map.
+ */
+inline Real
+valueHelper(dof_id_type id, MooseRandom & generator, std::map<dof_id_type, Real> & map)
+{
+  auto it_pair = map.lower_bound(id);
+
+  // Do we need to generate a new number?
+  if (it_pair == map.end() || it_pair->first != id)
+    it_pair = map.emplace_hint(it_pair, id, generator.rand(id));
+
+  return it_pair->second;
+}
+}
+
 template <>
 InputParameters
 validParams<RandomIC>()
@@ -42,8 +60,8 @@ RandomIC::RandomIC(const InputParameters & parameters)
     _elem_random_generator(nullptr),
     _node_random_generator(nullptr)
 {
-  if (MooseUtils::absoluteFuzzyGreaterEqual(_min, _max))
-    paramError("min", "Min => Max for RandomIC!");
+  if (_min >= _max)
+    paramError("min", "Min >= Max for RandomIC!");
 
   unsigned int processor_seed = getParam<unsigned int>("seed");
   MooseRandom::seed(processor_seed);
@@ -96,9 +114,9 @@ RandomIC::value(const Point & /*p*/)
   else
   {
     if (_current_node)
-      rand_num = value_helper(_current_node->id(), *_node_random_generator, _node_numbers);
+      rand_num = valueHelper(_current_node->id(), *_node_random_generator, _node_numbers);
     else if (_current_elem)
-      rand_num = value_helper(_current_elem->id(), *_elem_random_generator, _elem_numbers);
+      rand_num = valueHelper(_current_elem->id(), *_elem_random_generator, _elem_numbers);
     else
       mooseError("We can't generate parallel consistent random numbers for this kind of variable "
                  "yet. Please contact the MOOSE team for assistance");
