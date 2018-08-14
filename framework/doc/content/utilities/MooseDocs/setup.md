@@ -39,7 +39,7 @@ If you are not using a MOOSE package or your package is old, then the following 
 installed, which can be done using [pip](https://pip.pypa.io/en/stable/).
 
 ```bash
-pip install --user pybtex livereload pylatexenc anytree pandas
+pip install --user pybtex livereload==2.5.1 pylatexenc anytree pandas
 ```
 
 ## Creating Documentation Files

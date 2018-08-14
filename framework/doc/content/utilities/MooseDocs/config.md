@@ -32,7 +32,7 @@ directories are used. When building content all relevant files (e.g., markdown) 
 the supplied list of directories into a set, with the path relative to the supplied directory. This
 unique set of files is then copied to the destination directory of the build, with markdown files
 being rendered to html first. For example, the following illustrates how the multiple source
-files are combined in the destination directory (
+files are combined in the destination directory.
 
 ```text
 doc/content/index.md -> ${HOME}/.local/share/moose/site/index.html
