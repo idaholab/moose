@@ -504,11 +504,8 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
   }
 
   for (unsigned int a = 0; a < N; ++a)
-    for (unsigned int b = 0; b < N; ++b)
+    for (unsigned int b = 0; b < a; ++b)
     {
-      if (a == b)
-        continue;
-
       Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
       Mb.vectorOuterProduct(eigvec.column(b), eigvec.column(b));
 
@@ -521,7 +518,7 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
       else
         theta_ab = 0.25 * (d[a] + d[b]);
 
-      proj_pos += 0.5 * theta_ab * (Gab + Gba);
+      proj_pos += theta_ab * (Gab + Gba);
     }
   return proj_pos;
 }
