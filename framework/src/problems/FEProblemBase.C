@@ -822,8 +822,11 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
-  unsigned int n_threads = libMesh::n_threads();
+  // Random interface objects
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
+  unsigned int n_threads = libMesh::n_threads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _all_materials.timestepSetup(tid);
@@ -832,10 +835,6 @@ FEProblemBase::timestepSetup()
 
   _aux->timestepSetup();
   _nl->timestepSetup();
-
-  // Random interface objects
-  for (const auto & it : _random_data_objects)
-    it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
