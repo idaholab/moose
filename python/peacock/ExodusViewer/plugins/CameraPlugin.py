@@ -20,6 +20,7 @@ class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
     def __init__(self, **kwargs):
         super(CameraPlugin, self).__init__(**kwargs)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.MainLayout = QtWidgets.QHBoxLayout(self)
 
