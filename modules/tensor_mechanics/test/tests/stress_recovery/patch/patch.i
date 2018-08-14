@@ -68,6 +68,7 @@
   []
   [stress_yy_recovered]
     type = RankTwoAux
+    patch_polynomial_order = SECOND
     rank_two_tensor = stress
     variable = stress_yy_recovered
     index_i = 1

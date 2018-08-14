@@ -15,10 +15,12 @@ InputParameters
 validParams<NodalPatchRecovery>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<unsigned int>(
-      "patch_polynomial_order",
-      "Polynomial order used in least squares fitting of material property "
-      "over the local patch of elements connected to a given node");
+  MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH");
+  params.addParam<MooseEnum>("patch_polynomial_order",
+                             orders,
+                             "Polynomial order used in least squares fitting of material property "
+                             "over the local patch of elements connected to a given node");
+  params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
   // TODO make this class work with relationship manager
   // params.registerRelationshipManagers("ElementSideNeighborLayers");
@@ -29,12 +31,18 @@ validParams<NodalPatchRecovery>()
 
 NodalPatchRecovery::NodalPatchRecovery(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _patch_polynomial_order(isParamValid("patch_polynomial_order")
-                                ? getParam<unsigned int>("patch_polynomial_order")
-                                : (unsigned int)_var.order()),
+    _patch_polynomial_order(
+        isParamValid("patch_polynomial_order")
+            ? static_cast<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))
+            : static_cast<unsigned int>(_var.order())),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _multi_index(multiIndex(_mesh.dimension(), _patch_polynomial_order))
 {
+  // if the patch polynomial order is lower than the variable order,
+  // it is very likely that the patch recovery is not used at its max accuracy
+  if (_patch_polynomial_order < static_cast<unsigned int>(_var.order()))
+    mooseWarning("Specified 'patch_polynomial_order' is lower than the AuxVariable's order");
+
   // TODO remove the manual ghosting once relationship manager is working correctly
   // no need to ghost if this aux is elemental
   if (isNodal())

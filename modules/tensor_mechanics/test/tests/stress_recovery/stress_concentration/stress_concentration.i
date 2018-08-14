@@ -51,7 +51,7 @@
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx_recovered
-    patch_polynomial_order = 2
+    patch_polynomial_order = SECOND
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
@@ -60,7 +60,7 @@
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy_recovered
-    patch_polynomial_order = 2
+    patch_polynomial_order = SECOND
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
