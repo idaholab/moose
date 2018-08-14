@@ -2,8 +2,27 @@
   [./test]
     type = 'Exodiff'
     input = 'random_ic_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1
-    max_threads = 1
+    exodiff = 'random_ic_test_out.e'
+
+    requirement = 'MOOSE shall generate parallel agnostic random initial conditions'
+    design = '/RandomIC.md'
+    issues = '#5567 #11901'
+
+    # Test is sensitive to difference in partitioning
+    mesh_mode = 'replicated'
+  [../]
+  [./test_threaded]
+    type = 'Exodiff'
+    input = 'random_ic_test.i'
+    exodiff = 'random_ic_test_out.e'
+    prereq = 'test'
+    min_threads = 2
+
+    requirement = 'MOOSE shall generate threaded agnostic random initial conditions'
+    design = '/RandomIC.md'
+    issues = '#5567 #11901'
+
+    # Test is sensitive to difference in partitioning
+    mesh_mode = 'replicated'
   [../]
 []

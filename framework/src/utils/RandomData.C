@@ -14,12 +14,23 @@
 
 const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
 
-RandomData::RandomData(FEProblemBase & problem, const RandomInterface & random_interface)
-  : _rd_problem(problem),
-    _rd_mesh(problem.mesh()),
-    _is_nodal(random_interface.isNodal()),
-    _reset_on(random_interface.getResetOnTime()),
-    _master_seed(random_interface.getMasterSeed()),
+RandomData::RandomData(FEProblemBase & fe_problem, const RandomInterface & random_interface)
+  : RandomData(fe_problem,
+               random_interface.isNodal(),
+               random_interface.getResetOnTime(),
+               random_interface.getMasterSeed())
+{
+}
+
+RandomData::RandomData(FEProblemBase & fe_problem,
+                       bool is_nodal,
+                       ExecFlagType reset_on,
+                       unsigned int seed)
+  : _rd_problem(fe_problem),
+    _rd_mesh(fe_problem.mesh()),
+    _is_nodal(is_nodal),
+    _reset_on(reset_on),
+    _master_seed(seed),
     _current_master_seed(std::numeric_limits<unsigned int>::max()),
     _new_seed(0)
 {
@@ -91,32 +102,56 @@ RandomData::updateGenerators()
     _generator.seed(MASTER, parallel_seed);
   }
 
+  auto processor_id = _rd_problem.processor_id();
+
   if (_is_nodal)
-    updateGeneratorHelper(_rd_mesh.getMesh().active_nodes_begin(),
-                          _rd_mesh.getMesh().active_nodes_end());
-  else
-    updateGeneratorHelper(_rd_mesh.getMesh().active_elements_begin(),
-                          _rd_mesh.getMesh().active_elements_end());
-}
-
-template <typename T>
-void
-RandomData::updateGeneratorHelper(T it, T end_it)
-{
-  processor_id_type processor_id = _rd_problem.processor_id();
-
-  for (; it != end_it; ++it)
   {
-    dof_id_type id = (*it)->id();
-    uint32_t rand_int = _generator.randl(MASTER);
+    const auto & node_to_elem = _rd_mesh.nodeToElemMap();
+    auto & mesh = _rd_mesh.getMesh();
 
-    if (processor_id == (*it)->processor_id())
+    for (const auto node_ptr :
+         as_range(_rd_mesh.getMesh().active_nodes_begin(), _rd_mesh.getMesh().active_nodes_end()))
     {
-      // Only save states for local dofs
-      _seeds[id] = rand_int;
+      auto id = node_ptr->id();
+      auto rand_int = _generator.randl(MASTER);
 
-      // Update the individual dof object generators
-      _generator.seed(static_cast<unsigned int>(id), _seeds[id]);
+      // Only save states for nodes attached to active elements
+      auto elem_id_it = node_to_elem.find(id);
+
+      if (elem_id_it != node_to_elem.end())
+      {
+        for (auto elem_id : elem_id_it->second)
+        {
+          const auto * elem_ptr = mesh.elem_ptr(elem_id);
+
+          if (elem_ptr && processor_id == elem_ptr->processor_id())
+          {
+            _seeds[id] = rand_int;
+
+            // Update the individual dof object generators
+            _generator.seed(id, rand_int);
+            break;
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    for (const auto & elem_ptr : as_range(_rd_mesh.getMesh().active_elements_begin(),
+                                          _rd_mesh.getMesh().active_elements_end()))
+    {
+      auto id = elem_ptr->id();
+      auto rand_int = _generator.randl(MASTER);
+
+      // Only save states for local elements
+      if (processor_id == elem_ptr->processor_id())
+      {
+        _seeds[id] = rand_int;
+
+        // Update the individual dof object generators
+        _generator.seed(id, rand_int);
+      }
     }
   }
 }
