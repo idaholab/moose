@@ -326,17 +326,27 @@ AuxVariable block for each AuxKernel block.
 ## AuxVariable Order
 
 !alert note title=Elemental vs Nodal Visualization of Quadrature Field Values
-Using an AuxVariable with `family = MONOMIAL` and `order = CONSTANT` will give a constant value of
-the AuxVariable for the entire element, which is computed by taking a local $L_2$ projection. Using an
-AuxVariable with `family = MONOMIAL` and `order = FIRST` or higher will result in fields that vary linearly
-(or with higher order) within each element. Because the Exodus mesh format does not support higher-order
-elemental variables, these AuxVariables are output by libMesh as nodal variables for visualization purposes.
-Using higher order monomial variables in this way can produce smoother visualizations of results for a properly
-converged simulation.
+Results will have different quality based on the AuxVariable:
 
-Using an AuxVariable with `family = LAGRANGE` will give a smooth nodal field of the material property,
-constructed using nodal patch recovery. `patch_polynomial_order` is set to equal the order of the AuxVariable
-by default.
+  * Elemental Constant Monomial
+
+  Using an AuxVariable with `family = MONOMIAL` and `order = CONSTANT` will give a constant value of
+  the AuxVariable for the entire element, which is computed by taking a volume-weighted average of the integration
+  point quantities. This is the default option using TensorMechanics Action and requires the least computational cost.
+
+  * Elemental Higher-order Monomial
+
+  Using an AuxVariable with `family = MONOMIAL` and `order = FIRST` or higher will result in
+  fields that vary linearly (or with higher order) within each element. Because the Exodus mesh format does not
+  support higher-order elemental variables, these AuxVariables are output by libMesh as nodal variables for visualization
+  purposes. Using higher order monomial variables in this way can produce smoother visualizations of results for a properly
+  converged simulation.
+
+  * Nodal Lagrange
+
+  Using an AuxVariable with `family = LAGRANGE` will result in a smooth nodal field of the material property,
+  constructed using nodal patch recovery. `patch_polynomial_order` is set to equal the order of the AuxVariable
+  by default. Use this option for the best (smoothest, most accurate) results, but there is some additional computational cost.
 
 !syntax parameters /AuxKernels/RankTwoScalarAux
 

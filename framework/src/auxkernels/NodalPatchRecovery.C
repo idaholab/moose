@@ -9,29 +9,31 @@
 
 #include "NodalPatchRecovery.h"
 #include "SwapBackSentinel.h"
-#include "libmesh/utility.h"
 
 template <>
 InputParameters
 validParams<NodalPatchRecovery>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<unsigned>("patch_polynomial_order", "polynomial order");
+  params.addParam<unsigned int>(
+      "patch_polynomial_order",
+      "Polynomial order used in least squares fitting of material property "
+      "over the local patch of elements connected to a given node");
 
   // TODO make this class work with relationship manager
   // params.registerRelationshipManagers("ElementSideNeighborLayers");
-  // params.addPrivateParam<unsigned short>("element_side_neighbor_layers", 2);
+  // params.addPrivateParam<unsigned int short>("element_side_neighbor_layers", 2);
 
   return params;
 }
 
 NodalPatchRecovery::NodalPatchRecovery(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _order_provided(isParamValid("patch_polynomial_order")),
-    _order(_order_provided ? getParam<unsigned>("patch_polynomial_order") : (unsigned)_var.order()),
-    _dim(_mesh.dimension()),
+    _patch_polynomial_order(isParamValid("patch_polynomial_order")
+                                ? getParam<unsigned int>("patch_polynomial_order")
+                                : (unsigned int)_var.order()),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
-    _multi_index(multiIndex(_dim, _order))
+    _multi_index(multiIndex(_mesh.dimension(), _patch_polynomial_order))
 {
   // TODO remove the manual ghosting once relationship manager is working correctly
   // no need to ghost if this aux is elemental
@@ -45,11 +47,11 @@ NodalPatchRecovery::NodalPatchRecovery(const InputParameters & parameters)
   }
 }
 
-std::vector<std::vector<unsigned>>
-NodalPatchRecovery::nchoosek(unsigned N, unsigned K)
+std::vector<std::vector<unsigned int>>
+NodalPatchRecovery::nChooseK(unsigned int N, unsigned int K)
 {
-  std::vector<std::vector<unsigned>> n_choose_k;
-  std::vector<unsigned> row;
+  std::vector<std::vector<unsigned int>> n_choose_k;
+  std::vector<unsigned int> row;
   std::string bitmask(K, 1); // K leading 1's
   bitmask.resize(N, 0);      // N-K trailing 0's
 
@@ -57,7 +59,7 @@ NodalPatchRecovery::nchoosek(unsigned N, unsigned K)
   {
     row.clear();
     row.push_back(0);
-    for (unsigned i = 0; i < N; ++i) // [0..N-1] integers
+    for (unsigned int i = 0; i < N; ++i) // [0..N-1] integers
       if (bitmask[i])
         row.push_back(i + 1);
     row.push_back(N + 1);
@@ -67,29 +69,29 @@ NodalPatchRecovery::nchoosek(unsigned N, unsigned K)
   return n_choose_k;
 }
 
-std::vector<std::vector<unsigned>>
-NodalPatchRecovery::multiIndex(unsigned dim, unsigned order)
+std::vector<std::vector<unsigned int>>
+NodalPatchRecovery::multiIndex(unsigned int dim, unsigned int order)
 {
   // first row all zero
-  std::vector<std::vector<unsigned>> multi_index;
-  std::vector<std::vector<unsigned>> n_choose_k;
-  std::vector<unsigned> row(dim, 0);
+  std::vector<std::vector<unsigned int>> multi_index;
+  std::vector<std::vector<unsigned int>> n_choose_k;
+  std::vector<unsigned int> row(dim, 0);
   multi_index.push_back(row);
 
   if (dim == 1)
-    for (unsigned q = 1; q <= order; q++)
+    for (unsigned int q = 1; q <= order; q++)
     {
       row[0] = q;
       multi_index.push_back(row);
     }
   else
-    for (unsigned q = 1; q <= order; q++)
+    for (unsigned int q = 1; q <= order; q++)
     {
-      n_choose_k = nchoosek(dim + q - 1, dim - 1);
-      for (unsigned r = 0; r < n_choose_k.size(); r++)
+      n_choose_k = nChooseK(dim + q - 1, dim - 1);
+      for (unsigned int r = 0; r < n_choose_k.size(); r++)
       {
         row.clear();
-        for (unsigned c = 1; c < n_choose_k[0].size(); c++)
+        for (unsigned int c = 1; c < n_choose_k[0].size(); c++)
           row.push_back(n_choose_k[r][c] - n_choose_k[r][c - 1] - 1);
         multi_index.push_back(row);
       }
@@ -103,11 +105,11 @@ NodalPatchRecovery::computePVector(Point q_point)
 {
   _P.resize(_multi_index.size());
   Real polynomial;
-  for (unsigned r = 0; r < _multi_index.size(); r++)
+  for (unsigned int r = 0; r < _multi_index.size(); r++)
   {
     polynomial = 1.0;
-    for (unsigned c = 0; c < _multi_index[0].size(); c++)
-      for (unsigned p = 0; p < _multi_index[r][c]; p++)
+    for (unsigned int c = 0; c < _multi_index[0].size(); c++)
+      for (unsigned int p = 0; p < _multi_index[r][c]; p++)
         polynomial *= q_point(c);
     _P(r) = polynomial;
   }
@@ -147,11 +149,14 @@ NodalPatchRecovery::reinitPatch()
 void
 NodalPatchRecovery::compute()
 {
+  // Fall back on standard procedure for element variables
   if (!isNodal())
   {
     AuxKernel::compute();
     return;
   }
+
+  // Use Zienkiewicz-Zhu patch recovery for nodal variables
 
   reinitPatch();
 

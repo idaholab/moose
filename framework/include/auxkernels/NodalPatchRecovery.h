@@ -14,10 +14,14 @@
 #include "FEProblem.h"
 
 /**
- * This class uses patch recovery technique to recover material properties to smooth nodal fields
- * Zienkiewicz, O. C. and Zhu, J. Z. (1992), The superconvergent patch recovery and a posteriori
- * error estimates. Part 1: The recovery technique. Int. J. Numer. Meth. Engng., 33: 1331-1364.
- * doi:10.1002/nme.1620330702
+ * This class uses patch recovery technique to recover material properties to smooth nodal fields.
+ * It is designed to run on nodal (Lagrange) AuxVariables. However, if it is used with
+ * elemental (monomial) AuxVariables, this class falls back on the standard techniques in
+ * AuxKernel.C to compute either constant or higher-order monomials, depending on the order of the
+ * AuxVariable.
+ * Zienkiewicz, O. C. and Zhu, J. Z. (1992), The superconvergent patch recovery and a
+ * posteriori error estimates. Part 1: The recovery technique. Int. J. Numer. Meth. Engng., 33:
+ * 1331-1364. doi:10.1002/nme.1620330702
  */
 class NodalPatchRecovery;
 
@@ -29,19 +33,47 @@ class NodalPatchRecovery : public AuxKernel
 public:
   NodalPatchRecovery(const InputParameters & parameters);
   virtual ~NodalPatchRecovery(){};
-  /// Override from Auxkernel to suppress warnings
+  /**
+   * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
+   * material properties
+   *
+   * @param name name of the material property
+   * @return MaterialProperty holding material property values of type T at all qps on the current
+   * element
+   */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
-  /// Override from Auxkernel to suppress warnings
+  /**
+   * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
+   * material properties
+   *
+   * @param name name of the material property
+   * @return MaterialProperty holding material property values of type T from the previous time step
+   * at all qps on the current element
+   */
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
-  /// Override from Auxkernel to suppress warnings
+  /**
+   * This function overrides the one implemented in AuxKernel.C to suppress warnings when retrieving
+   * material properties
+   *
+   * @param name name of the material property
+   * @return MaterialProperty holding material property values of type T from two time steps ago at
+   * all qps on the current element
+   */
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
 
 protected:
-  /// generate all combinations of n choose k
-  virtual std::vector<std::vector<unsigned>> nchoosek(unsigned N, unsigned K);
+  /**
+   * Find out how many different ways you can choose K items from N items set without repetition and
+   * without ordering
+   *
+   * @param N number of items you can choose from
+   * @param K number of items to pick
+   * @return a data structure holding all combinations of N choose K
+   */
+  virtual std::vector<std::vector<unsigned int>> nChooseK(unsigned int N, unsigned int K);
 
   /**
    * generate a complete multi index table for given dimension and order
@@ -52,8 +84,15 @@ protected:
    * 2 0
    * 1 1
    * 0 2
+   * The first number in each entry represents the order of the first variable, i.e. x;
+   * The second number in each entry represents the order of the second variable, i.e. y.
+   * Multiplication is implied between numbers in each entry, i.e. 1 1 represents x^1 * y^1
+   *
+   * @param dim dimension of the multi-index, here dim = mesh dimension
+   * @param order generate the multi-index up to certain order
+   * @return a data structure holding entries representing the complete multi index
    */
-  virtual std::vector<std::vector<unsigned>> multiIndex(unsigned dim, unsigned order);
+  virtual std::vector<std::vector<unsigned int>> multiIndex(unsigned int dim, unsigned int order);
 
   /**
    * compute the P vector at given point
@@ -64,11 +103,13 @@ protected:
    * x^2
    * xy
    * y^2
+   *
+   * @param q_point point at which to evaluate the polynomial basis
    */
   virtual void computePVector(Point q_point);
 
   /**
-   * calculate the patch stiffness matrix as \sum_1^n P^TP
+   * Calculate the patch stiffness matrix as \sum_1^n P^TP
    * where n is the number of quadrature points in the element patch
    */
   virtual void accumulateAMatrix();
@@ -76,6 +117,8 @@ protected:
   /**
    * calculate the patch load vector as \sum_1^n P^Tval
    * where n is the number of quadrature points in the element patch
+   *
+   * @param val The variable value to be recovered at the current quadrature point
    */
   virtual void accumulateBVector(Real val);
 
@@ -89,17 +132,12 @@ protected:
    */
   virtual void compute() override;
 
-  /// a boolean indicating whether a patch polynomial order is specified by the user
-  const bool _order_provided;
-
+private:
   /// polynomial order, default is variable order
-  const unsigned _order;
-
-  /// mesh dimension
-  const unsigned _dim;
+  const unsigned int _patch_polynomial_order;
 
   FEProblemBase & _fe_problem;
-  std::vector<std::vector<unsigned>> _multi_index;
+  std::vector<std::vector<unsigned int>> _multi_index;
   DenseVector<Number> _P;
   DenseMatrix<Number> _A;
   DenseVector<Number> _B;
