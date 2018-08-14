@@ -38,17 +38,18 @@ AuxVariable is used as the argument for the `variable` input parameter in the `R
 !alert note title=Elemental vs Nodal Visualization of Quadrature Field Values
 Results will have different quality based on the AuxVariable:
 
-  * _Elemental Constant Monomial_ Using an AuxVariable with `family = MONOMIAL` and `order = CONSTANT` will give a constant value of
+- _Elemental Constant Monomial_ Using an AuxVariable with `family = MONOMIAL` and `order = CONSTANT` will give a constant value of
   the AuxVariable for the entire element, which is computed by taking a volume-weighted average of the integration
   point quantities. This is the default option using TensorMechanics Action and requires the least computational cost.
-  * _Elemental Higher-order Monomial_ Using an AuxVariable with `family = MONOMIAL` and `order = FIRST` or higher will result in
+- _Elemental Higher-order Monomial_ Using an AuxVariable with `family = MONOMIAL` and `order = FIRST` or higher will result in
   fields that vary linearly (or with higher order) within each element. Because the Exodus mesh format does not
   support higher-order elemental variables, these AuxVariables are output by libMesh as nodal variables for visualization
   purposes. Using higher order monomial variables in this way can produce smoother visualizations of results for a properly
   converged simulation.
-  * _Nodal Lagrange_ Using an AuxVariable with `family = LAGRANGE` will result in a smooth nodal field of the material property,
+- _Nodal Lagrange_ Using an AuxVariable with `family = LAGRANGE` will result in a smooth nodal field of the material property,
   constructed using nodal patch recovery. `patch_polynomial_order` is set to equal the order of the AuxVariable
   by default. Use this option for the best (smoothest, most accurate) results, but there is some additional computational cost.
+
 
 !syntax parameters /AuxKernels/RankTwoAux
 
