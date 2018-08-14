@@ -81,7 +81,7 @@ Extensions:
 ```
 
 The various extensions as well as links to the documentation for each extension, which includes
-the available configuration options, is found on the [specification page](specification.md).
+the available configuration options, is found on the [specification page](MooseDocs/specification.md).
 
 !listing common/load_config.py
          id=default-extensions

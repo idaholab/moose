@@ -36,7 +36,8 @@ def command_line_options(subparser, parent):
     parser.add_argument('--port', default='8000', type=str,
                         help="The local host port for live web server (default: %(default)s).")
     parser.add_argument('--clean', action='store_true',
-                        help="Clean the destination directory.")
+                        help="Clean the destination directory when the '--files' option is used. "
+                             "The destination directory is always cleaned otherwise.")
     parser.add_argument('-f', '--files', default=[], nargs='*',
                         help="A list of file to build, this is useful for testing. The paths " \
                              "should be as complete as necessary to make the name unique, just " \
@@ -145,8 +146,11 @@ def main(options):
     if options.dump:
         print translator.root
 
-    # Clean
-    if options.clean:
+    # Clean when --files is NOT used or when --clean is used with --files.
+    if ((options.files == []) or (options.files != [] and options.clean)) \
+       and os.path.exists(options.destination):
+        log = logging.getLogger('MooseDocs.build')
+        log.info("Cleaning destination %s", options.destination)
         shutil.rmtree(options.destination)
 
     # Perform check
