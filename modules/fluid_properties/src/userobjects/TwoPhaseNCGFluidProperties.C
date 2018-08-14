@@ -26,6 +26,6 @@ TwoPhaseNCGFluidProperties::TwoPhaseNCGFluidProperties(const InputParameters & p
     _vapor_mixture_name(name() + ":vapor_mixture")
 {
   // check that the user has not already created user objects of the same name
-  if (_fe_problem.hasUserObject(_vapor_mixture_name))
+  if (_tid == 0 && _fe_problem.hasUserObject(_vapor_mixture_name))
     mooseError(name(), ": A user object with the name '", _vapor_mixture_name, "' already exists.");
 }
