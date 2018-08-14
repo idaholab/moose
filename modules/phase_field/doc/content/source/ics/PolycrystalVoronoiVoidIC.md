@@ -1,12 +1,12 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PolycrystalVoronoiVoidIC
 
-!alert construction title=Undocumented Class
-The PolycrystalVoronoiVoidIC has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
+The PolycrystalVoronoiVoidIC generates a Voronoi tesslation to produce a grain structure with voids randomly distributed along the grain boundaries. The centroids of grains can be either generated from a set of random points or assigned from a file. It requires the number of voids to be greater than zero. In general, you should use [PolycrystalVoronoi](/PolycrystalVoronoi.md) to represent Voronoi grain structures without voids.
+
+## Typical usage in an input file:
+
+!listing modules/phase_field/test/tests/initial_conditions/PolycrystalVoronoiVoidIC_periodic.i block=ICs/c_IC
+
+## Description and Syntax
 
 !syntax description /ICs/PolycrystalVoronoiVoidIC
 
@@ -15,5 +15,3 @@ determined by what is necessary to make the documentation clear for users.
 !syntax inputs /ICs/PolycrystalVoronoiVoidIC
 
 !syntax children /ICs/PolycrystalVoronoiVoidIC
-
-!bibtex bibliography

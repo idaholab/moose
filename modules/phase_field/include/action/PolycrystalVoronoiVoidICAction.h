@@ -27,6 +27,7 @@ public:
 protected:
   const unsigned int _op_num;
   const std::string _var_name_base;
+  const FileName _file_name;
 };
 
 template <>

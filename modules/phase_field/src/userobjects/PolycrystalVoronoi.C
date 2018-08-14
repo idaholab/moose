@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "NonlinearSystemBase.h"
+#include "DelimitedFileReader.h"
 
 registerMooseObject("PhaseFieldApp", PolycrystalVoronoi);
 
@@ -23,13 +24,16 @@ validParams<PolycrystalVoronoi>()
   InputParameters params = validParams<PolycrystalUserObjectBase>();
   params.addClassDescription(
       "Random Voronoi tesselation polycrystal (used by PolycrystalVoronoiAction)");
-  params.addRequiredParam<unsigned int>(
-      "grain_num", "Number of grains being represented by the order parameters");
-
+  params.addParam<unsigned int>(
+      "grain_num", 0, "Number of grains being represented by the order parameters");
   params.addParam<unsigned int>("rand_seed", 0, "The random seed");
   params.addParam<bool>(
       "columnar_3D", false, "3D microstructure will be columnar in the z-direction?");
-
+  params.addParam<FileName>(
+      "file_name",
+      "",
+      "File containing grain centroids, if file_name is provided, the centroids "
+      "from the file will be used.");
   return params;
 }
 
@@ -37,8 +41,14 @@ PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
   : PolycrystalUserObjectBase(parameters),
     _grain_num(getParam<unsigned int>("grain_num")),
     _columnar_3D(getParam<bool>("columnar_3D")),
-    _rand_seed(getParam<unsigned int>("rand_seed"))
+    _rand_seed(getParam<unsigned int>("rand_seed")),
+    _file_name(getParam<FileName>("file_name"))
 {
+  if (_file_name == "" && _grain_num == 0)
+    mooseError("grain_num must be provided if the grain centriods are not read from a file");
+
+  if (_file_name != "" && _grain_num > 0)
+    mooseWarning("grain_num is ignored and will be determined from the file.");
 }
 
 void
@@ -88,8 +98,6 @@ PolycrystalVoronoi::getVariableValue(unsigned int op_index, const Point & p) con
 void
 PolycrystalVoronoi::precomputeGrainStructure()
 {
-  MooseRandom::seed(_rand_seed);
-
   // Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
@@ -98,15 +106,48 @@ PolycrystalVoronoi::precomputeGrainStructure()
   }
   _range = _top_right - _bottom_left;
 
-  // Randomly generate the centers of the individual grains represented by the Voronoi tessellation
-  _centerpoints.resize(_grain_num);
-  std::vector<Real> distances(_grain_num);
-
-  for (auto grain = decltype(_grain_num)(0); grain < _grain_num; grain++)
+  if (!_file_name.empty())
   {
-    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-      _centerpoints[grain](i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
-    if (_columnar_3D)
-      _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
+    MooseUtils::DelimitedFileReader txt_reader(_file_name, &_communicator);
+
+    txt_reader.read();
+    std::vector<std::string> col_names = txt_reader.getNames();
+    std::vector<std::vector<Real>> data = txt_reader.getData();
+    _grain_num = data[0].size();
+    _centerpoints.resize(_grain_num);
+
+    for (unsigned int i = 0; i < col_names.size(); ++i)
+    {
+      // Check vector lengths
+      if (data[i].size() != _grain_num)
+        paramError("Columns in ", _file_name, " do not have uniform lengths.");
+    }
+
+    for (unsigned int grain = 0; grain < _grain_num; ++grain)
+    {
+      _centerpoints[grain](0) = data[0][grain];
+      _centerpoints[grain](1) = data[1][grain];
+      if (col_names.size() > 2)
+        _centerpoints[grain](2) = data[2][grain];
+      else
+        _centerpoints[grain](2) = 0.0;
+    }
+  }
+  else
+  {
+    MooseRandom::seed(_rand_seed);
+
+    // Randomly generate the centers of the individual grains represented by the Voronoi
+    // tessellation
+    _centerpoints.resize(_grain_num);
+    std::vector<Real> distances(_grain_num);
+
+    for (auto grain = decltype(_grain_num)(0); grain < _grain_num; grain++)
+    {
+      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+        _centerpoints[grain](i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
+      if (_columnar_3D)
+        _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;
+    }
   }
 }
