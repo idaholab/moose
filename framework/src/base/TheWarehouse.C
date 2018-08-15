@@ -31,7 +31,7 @@ public:
 bool
 operator<(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs)
 {
-  return *lhs.get() < *rhs.get();
+  return (*lhs.get()) < (*rhs.get());
 }
 
 Attribute::Attribute(TheWarehouse & w, const std::string name) : _id(w.attribID(name)) {}
@@ -225,13 +225,14 @@ TheWarehouse::readAttribs(const MooseObject * obj,
                           const std::string & system,
                           std::vector<std::unique_ptr<Attribute>> & attribs)
 {
-  AttribSystem sys(*this, system);
+  std::unique_ptr<AttribSystem> sys;
+  if (!system.empty())
+    sys.reset(new AttribSystem(*this, system));
   for (auto & ref : _attrib_list)
   {
-    if (ref->id() == sys.id())
+    if (sys && (ref->id() == sys->id()))
     {
-      if (!system.empty())
-        attribs.push_back(sys.clone());
+      attribs.push_back(sys->clone());
       continue;
     }
 

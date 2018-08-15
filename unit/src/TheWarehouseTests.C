@@ -1,0 +1,246 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "MooseObjectUnitTest.h"
+
+#include "gtest_include.h"
+#include <iostream>
+#include <vector>
+
+class TestObject : public MooseObject
+{
+public:
+  TestObject(const InputParameters & params) : MooseObject(params) {}
+  virtual bool enabled() const override { return on; }
+  std::vector<int> vals;
+  bool on = true;
+};
+
+registerMooseObject("MooseUnitApp", TestObject);
+
+template <>
+InputParameters
+validParams<TestObject>()
+{
+  auto p = validParams<MooseObject>();
+  p.registerBase("TestObject");
+  return p;
+}
+
+class TestAttrib : public Attribute
+{
+public:
+  TestAttrib(TheWarehouse & w, int index, int val)
+    : Attribute(w, "attrib" + std::to_string(index)), index(index), val(val)
+  {
+  }
+
+  virtual std::unique_ptr<Attribute> clone() const override
+  {
+    return std::unique_ptr<Attribute>(new TestAttrib(*this));
+  }
+  virtual void initFrom(const MooseObject * obj) override
+  {
+    auto o = dynamic_cast<const TestObject *>(obj);
+    val = o->vals[index];
+  }
+
+  virtual bool isMatch(const Attribute & other) const override
+  {
+    auto o = dynamic_cast<const TestAttrib *>(&other);
+    return val == o->val;
+  }
+  virtual bool isLess(const Attribute & other) const override
+  {
+    auto o = dynamic_cast<const TestAttrib *>(&other);
+    return val < o->val;
+  }
+
+  int index;
+  int val;
+};
+
+class TheWarehouseTest : public MooseObjectUnitTest
+{
+public:
+  TheWarehouseTest() : MooseObjectUnitTest("MooseUnitApp")
+  {
+    w.registerAttrib<TestAttrib>("attrib0", 0, 0);
+    w.registerAttrib<TestAttrib>("attrib1", 1, 0);
+    w.registerAttrib<TestAttrib>("attrib2", 2, 0);
+    w.registerAttrib<TestAttrib>("attrib3", 3, 0);
+  }
+
+  std::shared_ptr<TestObject> obj(int val1, int val2, int val3, int val4)
+  {
+    InputParameters p = _factory.getValidParams("TestObject");
+    p.set<SubProblem *>("_subproblem") = _fe_problem.get();
+    auto obj = _factory.create<TestObject>("TestObject", "dummy" + std::to_string(count++), p, 0);
+    obj->vals = {val1, val2, val3, val4};
+    return obj;
+  }
+
+  int count = 0;
+  TheWarehouse w;
+};
+
+struct AttribSpec
+{
+  AttribSpec(int i, int v) : index(i), val(v) {}
+  int index;
+  int val;
+};
+
+struct QueryTest
+{
+  QueryTest(const std::vector<AttribSpec> & query, size_t wantn, const std::vector<int> & wantvals)
+    : query(query), wantn(wantn), wantvals(wantvals)
+  {
+  }
+  // a list of desired attribute values to build a warehouse query from.
+  std::vector<AttribSpec> query;
+  // the number of expected results from running the given query.
+  size_t wantn;
+  // A pattern of attribute values that each object should conform to (i.e. four ints representing
+  // attribute values of resulting objects from query). Negative values are not compared (i.e. are
+  // wildcards).
+  std::vector<int> wantvals;
+};
+
+struct WarehouseTest
+{
+  // a vector of four ints for each object to add to the warehouse.  The ints specify the attrib
+  // values for TestObject instances.
+  std::vector<std::vector<int>> objects;
+  // A list of queryies (and expected results) to run after objects have been added to the
+  // warehouse.
+  std::vector<QueryTest> queries;
+};
+
+// A series of warehouse querying tests - each test has a set of objects that get added to the
+// warehouse
+TEST_F(TheWarehouseTest, test)
+{
+  // clang-format off
+  std::vector<WarehouseTest> cases = {
+      WarehouseTest{
+          {
+              {1, 1, 1, 1},
+              {1, 1, 2, 1},
+              {1, 1, 2, 2},
+              {1, 1, 1, 3},
+          },{
+              QueryTest({AttribSpec(0, 0)                  }, 0, {-1, -1, -1, -1}),
+              QueryTest({AttribSpec(0, 1)                  }, 4, { 1, -1, -1, -1}),
+              QueryTest({AttribSpec(2, 1)                  }, 2, {-1, -1,  1, -1}),
+              QueryTest({AttribSpec(2, 2)                  }, 2, {-1, -1,  2, -1}),
+              QueryTest({AttribSpec(0, 1), AttribSpec(1, 1)}, 4, { 1,  1, -1, -1}),
+              QueryTest({AttribSpec(2, 2), AttribSpec(3, 2)}, 1, {-1, -1,  2,  2}),
+              QueryTest({AttribSpec(0, 1), AttribSpec(3, 3)}, 1, { 1, -1, -1,  3}),
+          }
+      },
+  };
+  // clang-format on
+
+  bool totalfail = false;
+  for (size_t i = 0; i < cases.size(); i++)
+  {
+    std::stringstream msg;
+    msg << "---------- case " << i + 1 << " ----------\n";
+    auto & test = cases[i];
+
+    msg << "objects:\n";
+    for (auto & vals : test.objects)
+    {
+      msg << "    * {";
+      for (auto val : vals)
+        msg << val << ",";
+      msg << "}\n";
+      w.add(obj(vals[0], vals[1], vals[2], vals[3]), "");
+    }
+
+    for (size_t j = 0; j < test.queries.size(); j++)
+    {
+      auto query_test = test.queries[j];
+      auto query = w.build();
+      msg << "* query " << j + 1 << " { ";
+      for (auto & attrib : query_test.query)
+      {
+        msg << "{val_" << attrib.index + 1 << " = " << attrib.val << "}, ";
+        query.cond<TestAttrib>(attrib.index, attrib.val);
+      }
+      msg << "}: ";
+
+      std::vector<TestObject *> objs;
+      query.queryInto(objs);
+
+      std::stringstream qmsg; // only printed if this query test fails
+      qmsg << "FAIL\n";
+      bool failed = false;
+      if (query_test.wantn != objs.size())
+      {
+        qmsg << "    * wrong number results: want " << query_test.wantn << ", got " << objs.size()
+             << "\n";
+        failed = true;
+      }
+
+      if (objs.size() > 0)
+      {
+        qmsg << "    * checking objects - want vals {";
+        for (auto val : query_test.wantvals)
+          qmsg << val << ",";
+        qmsg << "}:\n";
+      }
+
+      for (size_t k = 0; k < objs.size(); k++)
+      {
+        qmsg << "        * object " << k + 1 << " {";
+        for (auto val : objs[k]->vals)
+          qmsg << val << ",";
+        qmsg << "}: ";
+
+        bool failvals = false;
+        if (query_test.wantvals[0] >= 0 && query_test.wantvals[0] != objs[k]->vals[0])
+        {
+          failvals = true;
+          qmsg << " index 1 FAIL, ";
+        }
+        if (query_test.wantvals[1] >= 0 && query_test.wantvals[1] != objs[k]->vals[1])
+        {
+          failvals = true;
+          qmsg << " index 2 FAIL, ";
+        }
+        if (query_test.wantvals[2] >= 0 && query_test.wantvals[2] != objs[k]->vals[2])
+        {
+          failvals = true;
+          qmsg << " index 3 FAIL, ";
+        }
+        if (query_test.wantvals[3] >= 0 && query_test.wantvals[3] != objs[k]->vals[3])
+        {
+          failvals = true;
+          qmsg << " index 4 FAIL, ";
+        }
+        failed |= failvals;
+        if (!failvals)
+          qmsg << " PASS";
+        qmsg << "\n";
+      }
+      if (failed)
+      {
+        Moose::out << msg.str() << qmsg.str();
+        msg.str("");
+      }
+      else
+        msg << "PASS\n";
+      totalfail |= failed;
+    }
+  }
+  if (totalfail)
+    FAIL();
+}
