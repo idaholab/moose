@@ -19,7 +19,7 @@ class ExodusFilterProxyModel(QtCore.QSortFilterProxyModel):
     """
     def filterAcceptsRow(self, row, parent):
         index0 = self.sourceModel().index(row, 0, parent)
-        filename = str(self.sourceModel().filePath(index0))
+        filename = self.sourceModel().filePath(index0)
 
         if os.path.isdir(filename):
             return True
