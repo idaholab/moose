@@ -12,13 +12,7 @@ InputParameters validParams<BoundaryFlux3EqnBC>();
 
 /**
  * Boundary conditions for the 1-D, 1-phase, variable-area Euler equations
- *
- * The boundary fluxes are computed using the reconstructed linear solution,
- * passed in using a material, but their Jacobians are approximated using the
- * constant monomial cell-average solution, coupled in as variables. This
- * approximation has been found to be perfectly sufficient and avoids the
- * complexities and expense of the perfect Jacobian, which would require chain
- * rule with the Jacobians of the solution slopes.
+ * using a boundary flux user object
  */
 class BoundaryFlux3EqnBC : public OneDIntegratedBC, public RDGIndices3Eqn
 {
@@ -37,20 +31,15 @@ protected:
    */
   virtual std::map<unsigned int, unsigned int> getIndexMapping() const;
 
-  /// Cross-sectional area, piecewise constant
-  const VariableValue & _A_avg;
+  /// Cross-sectional area, elemental
+  const VariableValue & _A_elem;
   /// Cross-sectional area, linear
   const VariableValue & _A_linear;
 
-  // piecewise constant variable values in interior cells
-  const VariableValue & _rhoA_avg;
-  const VariableValue & _rhouA_avg;
-  const VariableValue & _rhoEA_avg;
-
-  // reconstructed variable values
-  const MaterialProperty<Real> & _rhoA;
-  const MaterialProperty<Real> & _rhouA;
-  const MaterialProperty<Real> & _rhoEA;
+  // coupled variables
+  const VariableValue & _rhoA;
+  const VariableValue & _rhouA;
+  const VariableValue & _rhoEA;
 
   // coupled variable indices
   const unsigned int _rhoA_var;
