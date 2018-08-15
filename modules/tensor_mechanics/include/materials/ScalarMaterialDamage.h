@@ -10,7 +10,7 @@
 #ifndef SCALARMATERIALDAMAGE_H
 #define SCALARMATERIALDAMAGE_H
 
-#include "DamageBase.h"
+#include "ScalarDamageBase.h"
 
 // Forward declaration
 class ScalarMaterialDamage;
@@ -21,33 +21,17 @@ InputParameters validParams<ScalarMaterialDamage>();
 /**
  * Scalar damage model for which the damage is prescribed by another material
  */
-class ScalarMaterialDamage : public DamageBase
+class ScalarMaterialDamage : public ScalarDamageBase
 {
 public:
   ScalarMaterialDamage(const InputParameters & parameters);
 
-  virtual void updateDamage() override;
-
-  virtual void updateStressForDamage(RankTwoTensor & stress_new) override;
-
-  virtual void updateJacobianMultForDamage(RankFourTensor & jacobian_mult) override;
-
-  virtual Real computeTimeStepLimit() override;
-
 protected:
-  /// If true, use the damage index from the old state (rather than the current state)
-  const bool _use_old_damage;
+  virtual void updateQpDamageIndex() override;
 
   ///@{ Material property that provides the damage index
-  const MaterialProperty<Real> & _damage_index;
-  const MaterialProperty<Real> & _damage_index_old;
+  const MaterialProperty<Real> & _damage_property;
   ///@}
-
-  /// Residual fraction of stiffness used for material that is fully damaged
-  const Real & _residual_stiffness_fraction;
-
-  /// Maximum damage increment allowed for the time step
-  const Real & _maximum_damage_increment;
 };
 
 #endif // SCALARMATERIALDAMAGE_H
