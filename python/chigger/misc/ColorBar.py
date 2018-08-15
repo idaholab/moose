@@ -110,7 +110,8 @@ class ColorBar(base.ChiggerResult):
         pos = coord.GetComputedViewportValue(self._vtkrenderer)
 
         # Update the bar position
-        plane.setOptions(origin=[pos[0], pos[1], 0], point1=[p0[0], p0[1], 0],
+        plane.setOptions(origin=[pos[0], pos[1], 0],
+                         point1=[p0[0], p0[1], 0],
                          point2=[p1[0], p1[1], 0])
 
         # Set the colormap for the bar

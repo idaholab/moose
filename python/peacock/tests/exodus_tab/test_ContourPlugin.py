@@ -179,11 +179,11 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
         """
         Test that elemental variable disables the contour.
         """
-        self._widget.ContourPlugin.ContourToggle.setChecked(True)
-        self._widget.ContourPlugin.ContourToggle.clicked.emit(True)
+        self._widget.ContourPlugin.setChecked(True)
+        self._widget.ContourPlugin.clicked.emit(True)
 
-        self._widget.VariablePlugin.VariableList.setCurrentIndex(0)
-        self._widget.VariablePlugin.VariableList.currentIndexChanged.emit(0)
+        self._widget.FilePlugin.VariableList.setCurrentIndex(0)
+        self._widget.FilePlugin.VariableList.currentIndexChanged.emit(0)
 
         self.assertFalse(self._widget.ContourPlugin.isEnabled())
         self.assertImage('testElemental.png')
