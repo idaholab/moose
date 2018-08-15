@@ -1,0 +1,9 @@
+[Tests]
+  [./stress_concentration]
+    type = 'Exodiff'
+    input = 'stress_concentration.i'
+    exodiff = 'stress_concentration_out.e'
+    abs_zero = 2e-5
+    mesh_mode = replicated
+  [../]
+[]

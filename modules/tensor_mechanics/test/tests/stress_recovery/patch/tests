@@ -1,0 +1,8 @@
+[Tests]
+  [./patch]
+    type = 'Exodiff'
+    input = 'patch.i'
+    exodiff = 'patch_out.e'
+    mesh_mode = replicated
+  [../]
+[]
