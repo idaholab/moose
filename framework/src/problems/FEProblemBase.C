@@ -786,6 +786,9 @@ FEProblemBase::initialSetup()
     Threads::parallel_reduce(elem_range, cmt);
   }
 
+  // Control Logic
+  executeControls(EXEC_INITIAL);
+
   // Scalar variables need to reinited for the initial conditions to be available for output
   for (unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
@@ -2875,8 +2878,10 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   setCurrentExecuteOnFlag(exec_type);
   if (exec_type == EXEC_NONLINEAR)
     _currently_computing_jacobian = true;
+
   // Samplers
-  executeSamplers(exec_type);
+  if (exec_type != EXEC_INITIAL)
+    executeSamplers(exec_type);
 
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);
@@ -2888,7 +2893,8 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   computeUserObjects(exec_type, Moose::POST_AUX);
 
   // Controls
-  executeControls(exec_type);
+  if (exec_type != EXEC_INITIAL)
+    executeControls(exec_type);
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
