@@ -5,6 +5,5 @@ environment. The following instructions will ultimately fail if you do not.
 !alert! note
 Internal INL Users may obtain our redistributable packages on the following machines:
 
-- `cone.inl.gov:/archive/MOOSE_ENVIRONMENT_PACKAGES`
 - `rod.inl.gov:/raid/PROTOTYPE_PACKAGES`
 !alert-end!
