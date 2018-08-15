@@ -29,8 +29,8 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
                                  FEProblemBase & problem,
                                  THREAD_ID tid,
                                  bool is_nodal)
-  : _random_data(NULL),
-    _generator(NULL),
+  : _random_data(nullptr),
+    _generator(nullptr),
     _ri_problem(problem),
     _ri_name(parameters.get<std::string>("_object_name")),
     _master_seed(parameters.get<unsigned int>("seed")),
@@ -58,7 +58,7 @@ RandomInterface::setRandomDataPointer(RandomData * random_data)
 }
 
 unsigned int
-RandomInterface::getSeed(unsigned int id)
+RandomInterface::getSeed(std::size_t id)
 {
   mooseAssert(_random_data, "RandomData object is NULL!");
 
@@ -76,7 +76,7 @@ RandomInterface::getRandomLong() const
   else
     id = _curr_element->id();
 
-  return _generator->randl(static_cast<unsigned int>(id));
+  return _generator->randl(id);
 }
 
 Real
@@ -90,5 +90,5 @@ RandomInterface::getRandomReal() const
   else
     id = _curr_element->id();
 
-  return _generator->rand(static_cast<unsigned int>(id));
+  return _generator->rand(id);
 }

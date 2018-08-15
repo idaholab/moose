@@ -16,7 +16,7 @@ template <>
 InputParameters
 validParams<RankTwoScalarAux>()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = validParams<NodalPatchRecovery>();
   params.addClassDescription("Compute a scalar property of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
@@ -41,7 +41,7 @@ validParams<RankTwoScalarAux>()
 }
 
 RankTwoScalarAux::RankTwoScalarAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
+  : NodalPatchRecovery(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _scalar_type(getParam<MooseEnum>("scalar_type")),
     _has_selected_qp(isParamValid("selected_qp")),

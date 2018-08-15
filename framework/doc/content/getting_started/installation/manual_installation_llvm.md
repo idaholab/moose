@@ -39,8 +39,6 @@ export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$LD_LIBRARY_PATH
 
 !include manual_miniconda.md
 
-!include manual_ownership.md
-
 ## bash_profile
 
 Now that everything has been installed, its time to wrap all these environment variables up, and throw them in a bash shell profile somewhere.
@@ -79,3 +77,5 @@ source /path/to/moose-environment.sh
 
 Or you can permanently have it loaded each time you open a terminal by adding the above `source`
 command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
+
+!include manual_cleanup.md

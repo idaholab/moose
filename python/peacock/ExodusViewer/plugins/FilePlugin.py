@@ -90,16 +90,6 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.BottomLayout.addWidget(self.ComponentList)
         self.MainLayout.addLayout(self.BottomLayout)
 
-        # File dialog
-        self.FileOpenDialog = QtWidgets.QFileDialog()
-        self.FileOpenDialog.setWindowTitle('Select ExodusII File(s)')
-        self.FileOpenDialog.setNameFilter('ExodusII Files (*.e)')
-        self.FileOpenDialog.setDirectory(os.getcwd())
-
-        self.FileOpenDialog.setFileMode(QtWidgets.QFileDialog.ExistingFiles)
-        self.FileOpenDialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
-        self.FileOpenDialog.setProxyModel(ExodusFilterProxyModel())
-
         self.MainLayout.setSpacing(0)
         self.TopLayout.setSpacing(10)
         self.BottomLayout.setSpacing(10)
@@ -282,9 +272,17 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Callback for opening an additional file.
         """
+        fd = QtWidgets.QFileDialog()
+        fd.setWindowTitle('Select ExodusII File(s)')
+        fd.setNameFilter('ExodusII Files (*.e)')
+        fd.setDirectory(os.getcwd())
 
-        if self.FileOpenDialog.exec_() == QtWidgets.QDialog.Accepted:
-            filenames = [str(fname) for fname in list(self.FileOpenDialog.selectedFiles())]
+        fd.setFileMode(QtWidgets.QFileDialog.ExistingFiles)
+        fd.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+        fd.setProxyModel(ExodusFilterProxyModel())
+
+        if fd.exec_() == QtWidgets.QDialog.Accepted:
+            filenames = [str(fname) for fname in list(fd.selectedFiles())]
             if self.FileList.count() == 0:
                 self.onSetFilenames(filenames)
         else:

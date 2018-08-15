@@ -16,7 +16,7 @@ template <>
 InputParameters
 validParams<RankTwoAux>()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = validParams<NodalPatchRecovery>();
   params.addClassDescription("Access a component of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
@@ -34,7 +34,7 @@ validParams<RankTwoAux>()
 }
 
 RankTwoAux::RankTwoAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
+  : NodalPatchRecovery(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j")),

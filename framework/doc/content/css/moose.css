@@ -161,7 +161,7 @@ img.moose-image{
 
 h1, h2, h3, h4, h5, h6 {
   text-align: left;
-/*  margin-top: 10px; */
+  margin-top: 12px;
 }
 
 /* HEADINGS */
@@ -183,36 +183,30 @@ h1:first-of-type{
 h2{
     font-size:180%;
     font-weight:400;
-    margin-top:0;
-
     margin-bottom: 8px;
 }
 
 h3 {
     font-size:160%;
     font-weight:20000;
-    margin-top:0;
     margin-bottom: 6px;
 }
 
 h4 {
     font-size:140%;
     font-weight:300;
-    margin-top:0;
     margin-bottom:6px;
 }
 
 h5 {
     font-size:120%;
     font-weight:100;
-    margin-top:0;
     margin-bottom:6px;
 }
 
 h6 {
     font-size:100%;
     font-weight:100;
-    margin-top:0;
     margin-bottom:6px;
 }
 

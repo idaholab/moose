@@ -24,7 +24,11 @@ class RandomInterface;
 class RandomData
 {
 public:
-  RandomData(FEProblemBase & problem, const RandomInterface & random_interface);
+  RandomData(FEProblemBase & fe_problem, const RandomInterface & random_interface);
+
+  RandomData(FEProblemBase & fe_problem, bool is_nodal, ExecFlagType reset_on, unsigned int seed);
+
+  ~RandomData() = default;
 
   /**
    * This method is called to reset or update the seeds based on the reset_on
@@ -46,9 +50,6 @@ public:
 
 private:
   void updateGenerators();
-
-  template <typename T>
-  void updateGeneratorHelper(T it, T end_it);
 
   FEProblemBase & _rd_problem;
   MooseMesh & _rd_mesh;

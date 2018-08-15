@@ -10,7 +10,7 @@
 #ifndef RANKTWOAUX_H
 #define RANKTWOAUX_H
 
-#include "AuxKernel.h"
+#include "NodalPatchRecovery.h"
 #include "RankTwoTensor.h"
 
 class RankTwoAux;
@@ -24,7 +24,7 @@ class RankTwoAux;
 template <>
 InputParameters validParams<RankTwoAux>();
 
-class RankTwoAux : public AuxKernel
+class RankTwoAux : public NodalPatchRecovery
 {
 public:
   RankTwoAux(const InputParameters & parameters);

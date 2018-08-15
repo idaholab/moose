@@ -26,4 +26,17 @@
     expect_err = 'Damage Model damage_index is not compatible with ComputeDamageStress'
     allow_warnings = true #Avoid failing on another warning before hitting the error we're testing for
   [../]
+  [./combined_scalar_damage_max]
+    type = 'CSVDiff'
+    input = 'combined_scalar_damage.i'
+    csvdiff = 'combined_scalar_damage_out.csv'
+    abs_zero = 1.e-6
+  [../]
+  [./combined_scalar_damage_mult]
+    type = 'CSVDiff'
+    input = 'combined_scalar_damage.i'
+    cli_args = 'Materials/damage/combination_type=Product Outputs/file_base=combined_scalar_damage_mult_out'
+    csvdiff = 'combined_scalar_damage_mult_out.csv'
+    abs_zero = 1.e-6
+  [../]
 []

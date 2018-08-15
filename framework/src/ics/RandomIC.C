@@ -14,6 +14,24 @@
 
 registerMooseObject("MooseApp", RandomIC);
 
+namespace
+{
+/**
+ * Method for retrieving or generating and caching a value in a map.
+ */
+inline Real
+valueHelper(dof_id_type id, MooseRandom & generator, std::map<dof_id_type, Real> & map)
+{
+  auto it_pair = map.lower_bound(id);
+
+  // Do we need to generate a new number?
+  if (it_pair == map.end() || it_pair->first != id)
+    it_pair = map.emplace_hint(it_pair, id, generator.rand(id));
+
+  return it_pair->second;
+}
+}
+
 template <>
 InputParameters
 validParams<RandomIC>()
@@ -22,6 +40,10 @@ validParams<RandomIC>()
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
   params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
+  params.addParam<bool>(
+      "legacy_generator",
+      true,
+      "Determines whether or not the legacy generator (deprecated) should be used.");
 
   params.addClassDescription(
       "This class produces a random field for a variable. It is not parallel agnostic.");
@@ -32,25 +54,73 @@ RandomIC::RandomIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
-    _range(_max - _min)
+    _range(_max - _min),
+    _is_nodal(_var.isNodal()),
+    _use_legacy(getParam<bool>("legacy_generator")),
+    _elem_random_generator(nullptr),
+    _node_random_generator(nullptr)
 {
-  mooseAssert(_range > 0.0, "Min > Max for RandomIC!");
+  if (_min >= _max)
+    paramError("min", "Min >= Max for RandomIC!");
+
   unsigned int processor_seed = getParam<unsigned int>("seed");
   MooseRandom::seed(processor_seed);
 
-  if (processor_id() > 0)
+  if (_use_legacy)
   {
-    for (processor_id_type i = 0; i < processor_id(); ++i)
-      processor_seed = MooseRandom::randl();
-    MooseRandom::seed(processor_seed);
+    auto proc_id = processor_id();
+    if (proc_id > 0)
+    {
+      for (processor_id_type i = 0; i < proc_id; ++i)
+        processor_seed = MooseRandom::randl();
+      MooseRandom::seed(processor_seed);
+    }
+  }
+  else
+  {
+    _elem_random_data =
+        libmesh_make_unique<RandomData>(_fe_problem, false, EXEC_INITIAL, MooseRandom::randl());
+    _node_random_data =
+        libmesh_make_unique<RandomData>(_fe_problem, true, EXEC_INITIAL, MooseRandom::randl());
+
+    _elem_random_generator = &_elem_random_data->getGenerator();
+    _node_random_generator = &_node_random_data->getGenerator();
+  }
+}
+
+void
+RandomIC::initialSetup()
+{
+  if (!_use_legacy)
+  {
+    _elem_random_data->updateSeeds(EXEC_INITIAL);
+    _node_random_data->updateSeeds(EXEC_INITIAL);
   }
 }
 
 Real
 RandomIC::value(const Point & /*p*/)
 {
-  // Random number between 0 and 1
-  Real rand_num = MooseRandom::rand();
+  Real rand_num;
+
+  if (_use_legacy)
+  {
+    mooseDeprecated("legacy_generator is deprecated. Please set \"legacy_generator = false\". This "
+                    "capability will be removed after 11/01/2018");
+
+    // Random number between 0 and 1
+    rand_num = MooseRandom::rand();
+  }
+  else
+  {
+    if (_current_node)
+      rand_num = valueHelper(_current_node->id(), *_node_random_generator, _node_numbers);
+    else if (_current_elem)
+      rand_num = valueHelper(_current_elem->id(), *_elem_random_generator, _elem_numbers);
+    else
+      mooseError("We can't generate parallel consistent random numbers for this kind of variable "
+                 "yet. Please contact the MOOSE team for assistance");
+  }
 
   // Between 0 and range
   rand_num *= _range;

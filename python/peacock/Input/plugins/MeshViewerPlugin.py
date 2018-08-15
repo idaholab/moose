@@ -33,7 +33,7 @@ class MeshViewerPlugin(VTKWindowPlugin):
         return dict(representation='wireframe')
 
     def __init__(self, **kwargs):
-        super(MeshViewerPlugin, self).__init__(colorbar=False, **kwargs)
+        super(MeshViewerPlugin, self).__init__(**kwargs)
         self.temp_input_file = "peacock_run_mesh_tmp.i"
         self.temp_mesh_file = "peacock_run_mesh_tmp_{}.e"
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
@@ -131,7 +131,6 @@ class MeshViewerPlugin(VTKWindowPlugin):
             ExeLauncher.runExe(exe_path, args, print_errors=False)
             self.meshEnabled.emit(True)
             self.onSetFilename(self.current_temp_mesh_file)
-            self.onSetColorbarVisible(False)
             self.onWindowRequiresUpdate()
 
         except Exception as e:

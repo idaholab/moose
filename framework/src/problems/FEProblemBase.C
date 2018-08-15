@@ -594,6 +594,10 @@ FEProblemBase::initialSetup()
     _functions.initialSetup(tid);
   }
 
+  // Random interface objects
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_INITIAL);
+
   if (!_app.isRecovering())
   {
     computeUserObjects(EXEC_INITIAL, Moose::PRE_IC);
@@ -695,10 +699,6 @@ FEProblemBase::initialSetup()
     _displaced_problem->updateMesh();
 
   updateGeomSearch(); // Call all of the rest of the geometric searches
-
-  // Random interface objects
-  for (const auto & it : _random_data_objects)
-    it.second->updateSeeds(EXEC_INITIAL);
 
   auto ti = _nl->getTimeIntegrator();
 
@@ -822,8 +822,11 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
-  unsigned int n_threads = libMesh::n_threads();
+  // Random interface objects
+  for (const auto & it : _random_data_objects)
+    it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
+  unsigned int n_threads = libMesh::n_threads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _all_materials.timestepSetup(tid);
@@ -832,10 +835,6 @@ FEProblemBase::timestepSetup()
 
   _aux->timestepSetup();
   _nl->timestepSetup();
-
-  // Random interface objects
-  for (const auto & it : _random_data_objects)
-    it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {

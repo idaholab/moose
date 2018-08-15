@@ -72,5 +72,32 @@ class TestExodusState(Testing.PeacockAppImageTestCase):
         self.assertFalse(self._window._timers['initialize'].isActive())
         self.assertFalse(self._window._timers['update'].isActive())
 
+    def testColorbarState(self):
+        """
+        Test that re-running the simulation maintains colorbar state.
+        """
+        # The tabs to switch between
+        exodus = self._app.main_widget.tab_plugin.ExodusViewer
+        execute = self._app.main_widget.tab_plugin.ExecuteTabPlugin
+        cbar_plugin = exodus.currentWidget().ColorbarPlugin
+
+        # Run and check that basic results show up
+        self.execute()
+        self.selectTab(exodus)
+        Testing.process_events(1)
+
+        # Disable colorbar
+        cbar_plugin.ColorBarToggle.setCheckState(QtCore.Qt.Unchecked)
+        cbar_plugin.ColorBarToggle.clicked.emit(True)
+        self.assertImage("testColorbarOff.png", allowed=0.98)
+
+        # Re-run and check results again
+        self.selectTab(execute)
+        self.execute()
+        self.selectTab(exodus)
+        Testing.process_events(1)
+        self.assertImage("testColorbarOff.png", allowed=0.98)
+
+
 if __name__ == '__main__':
     Testing.run_tests()
