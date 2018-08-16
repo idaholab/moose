@@ -8,21 +8,21 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "Material.h"
+#include "InterfaceMaterial.h"
 
 template <>
 InputParameters
-validParams<Material>()
+validParams<InterfaceMaterial>()
 {
   InputParameters params = validParams<MaterialBase>();
-  params += validParams<MaterialPropertyInterface>();
+  params += validParams<TwoMaterialPropertyInterface>();
   return params;
 }
 
-Material::Material(const InputParameters & parameters)
+InterfaceMaterial::InterfaceMaterial(const InputParameters & parameters)
   : MaterialBase(parameters),
-    Coupleable(this, false),
-    MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
+    NeighborCoupleable(this, false, false),
+    TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
     _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
     _q_point(_bnd ? _assembly.qPointsFace() : _assembly.qPoints()),

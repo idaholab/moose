@@ -135,7 +135,7 @@ getCrackingModel(const std::string & name)
     mooseError("Unknown cracking model");
   return cm;
 }
-}
+} // namespace
 
 SolidModel::SolidModel(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
@@ -966,8 +966,8 @@ SolidModel::initialSetup()
   for (unsigned i(0); i < _block_id.size(); ++i)
   {
 
-    //    const std::vector<Material*> * mats_p;
-    std::vector<MooseSharedPointer<Material>> const * mats_p;
+    //    const std::vector<MaterialBase*> * mats_p;
+    std::vector<MooseSharedPointer<MaterialBase>> const * mats_p;
     std::string suffix;
     if (_bnd)
     {
@@ -978,7 +978,7 @@ SolidModel::initialSetup()
     else
       mats_p = &_fe_problem.getMaterialWarehouse().getActiveBlockObjects(_block_id[i], _tid);
 
-    const std::vector<MooseSharedPointer<Material>> & mats = *mats_p;
+    const std::vector<MooseSharedPointer<MaterialBase>> & mats = *mats_p;
 
     for (unsigned int j = 0; j < mats.size(); ++j)
     {

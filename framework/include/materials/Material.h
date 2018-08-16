@@ -62,6 +62,11 @@ public:
 
   virtual bool isBoundaryMaterial() const override { return _bnd; }
 
+  virtual const std::set<unsigned int> & getMatPropDependencies() const override
+  {
+    return MaterialPropertyInterface::getMatPropDependencies();
+  }
+
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
@@ -73,6 +78,9 @@ protected:
 
   bool _bnd;
   bool _neighbor;
+
+  const MooseArray<Point> & _q_point;
+  const QBase * const & _qrule;
 
   const MooseArray<Real> & _JxW;
 

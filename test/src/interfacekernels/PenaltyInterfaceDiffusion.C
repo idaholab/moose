@@ -18,11 +18,15 @@ validParams<PenaltyInterfaceDiffusion>()
   InputParameters params = validParams<InterfaceKernel>();
   params.addRequiredParam<Real>(
       "penalty", "The penalty that penalizes jump between master and neighbor variables.");
+  params.addParam<MaterialPropertyName>(
+      "jump_prop_name", "the name of the material property that calculates the jump.");
   return params;
 }
 
 PenaltyInterfaceDiffusion::PenaltyInterfaceDiffusion(const InputParameters & parameters)
-  : InterfaceKernel(parameters), _penalty(getParam<Real>("penalty"))
+  : InterfaceKernel(parameters),
+    _penalty(getParam<Real>("penalty")),
+    _jump(isParamValid("jump_prop_name") ? &getMaterialProperty<Real>("jump_prop_name") : nullptr)
 {
 }
 
@@ -31,14 +35,21 @@ PenaltyInterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
   Real r = 0;
 
+  Real jump_value = 0;
+
+  if (_jump != nullptr)
+    jump_value = (*_jump)[_qp];
+  else
+    jump_value = _u[_qp] - _neighbor_value[_qp];
+
   switch (type)
   {
     case Moose::Element:
-      r = _test[_i][_qp] * _penalty * (_u[_qp] - _neighbor_value[_qp]);
+      r = _test[_i][_qp] * _penalty * jump_value;
       break;
 
     case Moose::Neighbor:
-      r = _test_neighbor[_i][_qp] * -_penalty * (_u[_qp] - _neighbor_value[_qp]);
+      r = _test_neighbor[_i][_qp] * -_penalty * jump_value;
       break;
   }
 

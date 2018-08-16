@@ -140,6 +140,14 @@ public:
    */
   virtual void subdomainSetup() override;
 
+  /**
+   * Retrieve the set of material properties that _this_ object depends on.
+   *
+   * @return The IDs corresponding to the material properties that
+   * MUST be reinited before evaluating this object
+   */
+  virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
+
 protected:
   /**
    * Evaluate material properties on subdomain
@@ -188,9 +196,6 @@ protected:
   Assembly & _assembly;
 
   unsigned int _qp;
-
-  const QBase * const & _qrule;
-  const MooseArray<Point> & _q_point;
 
   const MooseArray<Real> & _coord;
   /// normals at quadrature points (valid only in boundary materials)

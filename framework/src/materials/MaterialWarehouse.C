@@ -9,20 +9,20 @@
 
 // MOOSE includes
 #include "MaterialWarehouse.h"
-#include "Material.h"
+#include "MaterialBase.h"
 
 void
-MaterialWarehouse::addObjects(std::shared_ptr<Material> block,
-                              std::shared_ptr<Material> neighbor,
-                              std::shared_ptr<Material> face,
+MaterialWarehouse::addObjects(std::shared_ptr<MaterialBase> block,
+                              std::shared_ptr<MaterialBase> neighbor,
+                              std::shared_ptr<MaterialBase> face,
                               THREAD_ID tid /*=0*/)
 {
-  MooseObjectWarehouse<Material>::addObject(block, tid);
+  MooseObjectWarehouse<MaterialBase>::addObject(block, tid);
   _neighbor_materials.addObject(neighbor, tid);
   _face_materials.addObject(face, tid);
 }
 
-const MooseObjectWarehouse<Material> & MaterialWarehouse::
+const MooseObjectWarehouse<MaterialBase> & MaterialWarehouse::
 operator[](Moose::MaterialDataType data_type) const
 {
   switch (data_type)
@@ -41,7 +41,7 @@ operator[](Moose::MaterialDataType data_type) const
 void
 MaterialWarehouse::initialSetup(THREAD_ID tid /*=0*/) const
 {
-  MooseObjectWarehouse<Material>::initialSetup(tid);
+  MooseObjectWarehouse<MaterialBase>::initialSetup(tid);
   _neighbor_materials.initialSetup(tid);
   _face_materials.initialSetup(tid);
 }
@@ -49,7 +49,7 @@ MaterialWarehouse::initialSetup(THREAD_ID tid /*=0*/) const
 void
 MaterialWarehouse::timestepSetup(THREAD_ID tid /*=0*/) const
 {
-  MooseObjectWarehouse<Material>::timestepSetup(tid);
+  MooseObjectWarehouse<MaterialBase>::timestepSetup(tid);
   _neighbor_materials.timestepSetup(tid);
   _face_materials.timestepSetup(tid);
 }
@@ -57,7 +57,7 @@ MaterialWarehouse::timestepSetup(THREAD_ID tid /*=0*/) const
 void
 MaterialWarehouse::subdomainSetup(THREAD_ID tid /*=0*/) const
 {
-  MooseObjectWarehouse<Material>::subdomainSetup(tid);
+  MooseObjectWarehouse<MaterialBase>::subdomainSetup(tid);
   _face_materials.subdomainSetup(tid);
 }
 
@@ -70,7 +70,7 @@ MaterialWarehouse::neighborSubdomainSetup(THREAD_ID tid /*=0*/) const
 void
 MaterialWarehouse::subdomainSetup(SubdomainID id, THREAD_ID tid /*=0*/) const
 {
-  MooseObjectWarehouse<Material>::subdomainSetup(id, tid);
+  MooseObjectWarehouse<MaterialBase>::subdomainSetup(id, tid);
   _face_materials.subdomainSetup(id, tid);
 }
 
@@ -83,7 +83,7 @@ MaterialWarehouse::neighborSubdomainSetup(SubdomainID id, THREAD_ID tid /*=0*/) 
 void
 MaterialWarehouse::residualSetup(THREAD_ID tid /*=0*/) const
 {
-  MooseObjectWarehouse<Material>::residualSetup(tid);
+  MooseObjectWarehouse<MaterialBase>::residualSetup(tid);
   _neighbor_materials.residualSetup(tid);
   _face_materials.residualSetup(tid);
 }
@@ -91,7 +91,7 @@ MaterialWarehouse::residualSetup(THREAD_ID tid /*=0*/) const
 void
 MaterialWarehouse::jacobianSetup(THREAD_ID tid /*=0*/) const
 {
-  MooseObjectWarehouse<Material>::jacobianSetup(tid);
+  MooseObjectWarehouse<MaterialBase>::jacobianSetup(tid);
   _neighbor_materials.jacobianSetup(tid);
   _face_materials.jacobianSetup(tid);
 }
@@ -99,7 +99,7 @@ MaterialWarehouse::jacobianSetup(THREAD_ID tid /*=0*/) const
 void
 MaterialWarehouse::updateActive(THREAD_ID tid /*=0*/)
 {
-  MooseObjectWarehouse<Material>::updateActive(tid);
+  MooseObjectWarehouse<MaterialBase>::updateActive(tid);
   _neighbor_materials.updateActive(tid);
   _face_materials.updateActive(tid);
 }
@@ -107,7 +107,7 @@ MaterialWarehouse::updateActive(THREAD_ID tid /*=0*/)
 void
 MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
 {
-  MooseObjectWarehouse<Material>::sort(tid);
+  MooseObjectWarehouse<MaterialBase>::sort(tid);
   _neighbor_materials.sort(tid);
   _face_materials.sort(tid);
 }
