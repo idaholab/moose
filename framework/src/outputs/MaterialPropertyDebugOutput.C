@@ -115,7 +115,7 @@ MaterialPropertyDebugOutput::printMaterialMap() const
 
 void
 MaterialPropertyDebugOutput::printMaterialProperties(
-    std::stringstream & output, const std::vector<std::shared_ptr<Material>> & materials) const
+    std::stringstream & output, const std::vector<std::shared_ptr<MaterialBase>> & materials) const
 {
   // Loop through all material objects
   for (const auto & mat : materials)

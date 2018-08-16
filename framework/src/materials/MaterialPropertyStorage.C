@@ -219,7 +219,7 @@ MaterialPropertyStorage::restrictStatefulProps(
 
 void
 MaterialPropertyStorage::initStatefulProps(MaterialData & material_data,
-                                           const std::vector<std::shared_ptr<Material>> & mats,
+                                           const std::vector<std::shared_ptr<MaterialBase>> & mats,
                                            unsigned int n_qpoints,
                                            const Elem & elem,
                                            unsigned int side /* = 0*/)

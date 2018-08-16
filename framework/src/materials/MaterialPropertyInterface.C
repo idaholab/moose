@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
-#include "Material.h"
+#include "MaterialBase.h"
 
 template <>
 InputParameters
@@ -201,20 +201,21 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
   _stateful_allowed = stateful_allowed;
 }
 
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterial(const std::string & name)
 {
   return getMaterialByName(_mi_params.get<MaterialName>(name));
 }
 
 void
-MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(std::shared_ptr<Material> discrete)
+MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
+    std::shared_ptr<MaterialBase> discrete)
 {
   // Check block compatibility
   if (!discrete->hasBlocks(_mi_block_ids))
   {
     std::ostringstream oss;
-    oss << "The Material object '" << discrete->name()
+    oss << "The MaterialBase object '" << discrete->name()
         << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name
         << "':\n";
     oss << "  " << discrete->name();
@@ -232,7 +233,7 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(std::shared_ptr<Ma
   if (!discrete->hasBoundary(_mi_boundary_ids))
   {
     std::ostringstream oss;
-    oss << "The Material object '" << discrete->name()
+    oss << "The MaterialBase object '" << discrete->name()
         << "' is defined on boundaries that are incompatible with the retrieving object '"
         << _mi_name << "':\n";
     oss << "  " << discrete->name();
@@ -247,24 +248,24 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(std::shared_ptr<Ma
   }
 }
 
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
 {
-  std::shared_ptr<Material> discrete =
+  std::shared_ptr<MaterialBase> discrete =
       _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
   checkBlockAndBoundaryCompatibility(discrete);
   return *discrete;
 }
 
 template <ComputeStage compute_stage>
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterial(const std::string & name)
 {
   return getMaterialByName<compute_stage>(_mi_params.get<MaterialName>(name));
 }
 
 template <>
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name, bool no_warn)
 {
   const std::string new_name = name + "_residual";
@@ -272,20 +273,21 @@ MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name,
 }
 
 template <>
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName<JACOBIAN>(const std::string & name, bool no_warn)
 {
   const std::string new_name = name + "_jacobian";
   return getMaterialByName(new_name, no_warn);
 }
 
-template Material & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
-template Material & MaterialPropertyInterface::getMaterial<JACOBIAN>(const std::string &);
+template MaterialBase & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
+template MaterialBase & MaterialPropertyInterface::getMaterial<JACOBIAN>(const std::string &);
 
 void
 MaterialPropertyInterface::checkExecutionStage()
 {
   if (_mi_feproblem.startedInitialSetup())
-    mooseError("Material properties must be retrieved during object construction to ensure correct "
-               "problem integrity validation.");
+    mooseError(
+        "MaterialBase properties must be retrieved during object construction to ensure correct "
+        "problem integrity validation.");
 }

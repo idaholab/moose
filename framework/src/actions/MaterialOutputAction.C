@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "AddOutputAction.h"
-#include "Material.h"
+#include "MaterialBase.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
@@ -21,23 +21,23 @@
 // Declare the output helper specializations
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<Real>(
-    const std::string & material_name, const Material & material, bool get_names_only);
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RealVectorValue>(
-    const std::string & material_name, const Material & material, bool get_names_only);
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RealTensorValue>(
-    const std::string & material_name, const Material & material, bool get_names_only);
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankTwoTensor>(
-    const std::string & material_name, const Material & material, bool get_names_only);
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankFourTensor>(
-    const std::string & material_name, const Material & material, bool get_names_only);
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 registerMooseAction("MooseApp", MaterialOutputAction, "add_output_aux_variables");
 
@@ -73,7 +73,7 @@ MaterialOutputAction::act()
   _block_material_data = _problem->getMaterialData(Moose::BLOCK_MATERIAL_DATA);
   _boundary_material_data = _problem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
 
-  // A complete list of all Material objects
+  // A complete list of all MaterialBase objects
   const auto & material_ptrs = _problem->getMaterialWarehouse().getObjects();
 
   // Handle setting of material property output in [Outputs] sub-blocks
@@ -131,7 +131,7 @@ MaterialOutputAction::act()
 
     // Create necessary outputs for the properties if:
     //   (1) The Outputs block has material output enabled
-    //   (2) If the Material object itself has set the 'outputs' parameter
+    //   (2) If the MaterialBase object itself has set the 'outputs' parameter
     if (outputs_has_properties || outputs.find("none") == outputs.end())
     {
       // Add the material property for output if the name is contained in the 'output_properties'
@@ -204,9 +204,9 @@ MaterialOutputAction::act()
   }
   else
   {
-    // When a Material object has 'output_properties' defined all other properties not listed must
-    // be added to the hide list for the output objects so that properties that are not desired do
-    // not appear.
+    // When a MaterialBase object has 'output_properties' defined all other properties not listed
+    // must be added to the hide list for the output objects so that properties that are not desired
+    // do not appear.
     for (const auto & it : _material_variable_names_map)
     {
       std::set<std::string> hide;
@@ -225,7 +225,7 @@ InputParameters
 MaterialOutputAction::getParams(const std::string & type,
                                 const std::string & property_name,
                                 const std::string & variable_name,
-                                const Material & material)
+                                const MaterialBase & material)
 {
   // Append the list of output variables for the current material
   _material_variable_names.insert(variable_name);
@@ -248,7 +248,7 @@ MaterialOutputAction::getParams(const std::string & type,
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name,
-                                                 const Material & material,
+                                                 const MaterialBase & material,
                                                  bool get_names_only)
 {
   std::vector<std::string> names = {property_name};
@@ -264,7 +264,7 @@ MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_na
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name,
-                                                            const Material & material,
+                                                            const MaterialBase & material,
                                                             bool get_names_only)
 {
   std::array<char, 3> suffix = {{'x', 'y', 'z'}};
@@ -289,7 +289,7 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & property_name,
-                                                            const Material & material,
+                                                            const MaterialBase & material,
                                                             bool get_names_only)
 {
   std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
@@ -316,7 +316,7 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & property_name,
-                                                          const Material & material,
+                                                          const MaterialBase & material,
                                                           bool get_names_only)
 {
   std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
@@ -343,7 +343,7 @@ MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & pr
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & property_name,
-                                                           const Material & material,
+                                                           const MaterialBase & material,
                                                            bool get_names_only)
 {
   std::vector<std::string> names(Utility::pow<4>(LIBMESH_DIM));

@@ -140,6 +140,14 @@ public:
    */
   virtual void subdomainSetup() override;
 
+  /**
+   * Retrieve the set of material properties that _this_ object depends on.
+   *
+   * @return The IDs corresponding to the material properties that
+   * MUST be reinited before evaluating this object
+   */
+  virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
+
 protected:
   /**
    * Evaluate material properties on subdomain

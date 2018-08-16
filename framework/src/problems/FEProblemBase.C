@@ -2299,7 +2299,7 @@ FEProblemBase::projectSolution()
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
 }
 
-std::shared_ptr<Material>
+std::shared_ptr<MaterialBase>
 FEProblemBase::getMaterial(std::string name,
                            Moose::MaterialDataType type,
                            THREAD_ID tid,
@@ -2317,7 +2317,7 @@ FEProblemBase::getMaterial(std::string name,
       break;
   }
 
-  std::shared_ptr<Material> material = _all_materials[type].getActiveObject(name, tid);
+  std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
   if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (",
                  material->name(),
@@ -2400,8 +2400,10 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    // Create the general Block/Boundary Material object
-    std::shared_ptr<Material> material = _factory.create<Material>(mat_name, name, parameters, tid);
+    // Create the general Block/Boundary MaterialBase object
+    std::shared_ptr<MaterialBase> material =
+        _factory.create<MaterialBase>(mat_name, name, parameters, tid);
+
     bool discrete = !material->getParam<bool>("compute");
 
     // If the object is boundary restricted do not create the neighbor and face objects
@@ -2430,16 +2432,18 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
           Moose::FACE_MATERIAL_DATA;
       object_name = name + "_face";
-      std::shared_ptr<Material> face_material =
-          _factory.create<Material>(mat_name, object_name, current_parameters, tid);
+
+      std::shared_ptr<MaterialBase> face_material =
+          _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
 
       // neighbor material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") =
           Moose::NEIGHBOR_MATERIAL_DATA;
       current_parameters.set<bool>("_neighbor") = true;
       object_name = name + "_neighbor";
-      std::shared_ptr<Material> neighbor_material =
-          _factory.create<Material>(mat_name, object_name, current_parameters, tid);
+
+      std::shared_ptr<MaterialBase> neighbor_material =
+          _factory.create<MaterialBase>(mat_name, object_name, current_parameters, tid);
 
       // Store the material objects
       _all_materials.addObjects(material, neighbor_material, face_material, tid);
@@ -5480,7 +5484,7 @@ FEProblemBase::checkUserObjects()
 
 void
 FEProblemBase::checkDependMaterialsHelper(
-    const std::map<SubdomainID, std::vector<std::shared_ptr<Material>>> & materials_map)
+    const std::map<SubdomainID, std::vector<std::shared_ptr<MaterialBase>>> & materials_map)
 {
   auto & prop_names = _material_props.statefulPropNames();
 
@@ -5504,7 +5508,7 @@ FEProblemBase::checkDependMaterialsHelper(
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)
       {
-        const std::set<std::string> & supplied_props = mat2->Material::getSuppliedItems();
+        const std::set<std::string> & supplied_props = mat2->MaterialBase::getSuppliedItems();
         block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
       }
     }

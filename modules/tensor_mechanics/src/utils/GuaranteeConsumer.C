@@ -11,7 +11,7 @@
 #include "GuaranteeProvider.h"
 
 #include "MooseObject.h"
-#include "Material.h"
+#include "MaterialBase.h"
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
 #include "InputParameters.h"
@@ -45,7 +45,7 @@ GuaranteeConsumer::hasGuaranteedMaterialProperty(const MaterialPropertyName & pr
     // If block materials exist, look if any issue the required guarantee
     if (warehouse.hasActiveBlockObjects(id))
     {
-      const std::vector<std::shared_ptr<Material>> & mats = warehouse.getActiveBlockObjects(id);
+      const std::vector<std::shared_ptr<MaterialBase>> & mats = warehouse.getActiveBlockObjects(id);
       for (const auto & mat : mats)
       {
         const auto & mat_props = mat->getSuppliedItems();

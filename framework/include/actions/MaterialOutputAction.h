@@ -17,7 +17,7 @@
 // Forward declarations
 class MaterialOutputAction;
 class MooseObjectAction;
-class Material;
+class MaterialBase;
 
 template <>
 InputParameters validParams<MaterialOutputAction>();
@@ -48,7 +48,7 @@ private:
    * Template method for creating the necessary objects for the various material property types
    * @tparam T The type of material property that automatic output is being performed
    * @param property_name The name of the material property to output
-   * @param material A pointer to the Material object containing the property of interest
+   * @param material A pointer to the MaterialBase object containing the property of interest
    * @param get_names_only A bool used to indicate that only the variable names should be returned
    *
    * @return A vector of names that can be used as AuxVariable names
@@ -59,7 +59,7 @@ private:
    */
   template <typename T>
   std::vector<std::string> materialOutputHelper(const std::string & property_name,
-                                                const Material & material,
+                                                const MaterialBase & material,
                                                 bool get_names_only);
 
   /**
@@ -67,14 +67,14 @@ private:
    * @param type The type of AuxVariable
    * @param property_name The property name to associated with that action
    * @param variable_name The AuxVariable name to create
-   * @param material A Material object containing the property of interest
+   * @param material A MaterialBase object containing the property of interest
    *
    * @return An InputParameter object with common properties added.
    */
   InputParameters getParams(const std::string & type,
                             const std::string & property_name,
                             const std::string & variable_name,
-                            const Material & material);
+                            const MaterialBase & material);
 
   /// Pointer the MaterialData object storing the block restricted materials
   std::shared_ptr<MaterialData> _block_material_data;
@@ -85,7 +85,7 @@ private:
   /// Map of variable name that contains the blocks to which the variable should be restricted
   std::map<std::string, std::set<SubdomainID>> _block_variable_map;
 
-  /// List of variables for the current Material object
+  /// List of variables for the current MaterialBase object
   std::set<std::string> _material_variable_names;
 
   /// Map of output names and list of variables associated with the output
@@ -98,7 +98,7 @@ private:
 template <typename T>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper(const std::string & /*property_name*/,
-                                           const Material & /*material*/,
+                                           const MaterialBase & /*material*/,
                                            bool /*get_names_only*/)
 {
   mooseError("Unknown type, you must create a specialization of materialOutputHelper");

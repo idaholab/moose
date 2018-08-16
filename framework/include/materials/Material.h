@@ -62,6 +62,11 @@ public:
 
   virtual bool isBoundaryMaterial() const override { return _bnd; }
 
+  virtual const std::set<unsigned int> & getMatPropDependencies() const override
+  {
+    return MaterialPropertyInterface::getMatPropDependencies();
+  }
+
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }

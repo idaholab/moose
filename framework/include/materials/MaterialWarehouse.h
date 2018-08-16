@@ -14,20 +14,20 @@
 #include "MooseObjectWarehouse.h"
 
 // Forward declarations
-class Material;
+class MaterialBase;
 
 /**
- * Material objects are special in that they have additional objects created automatically (see
+ * MaterialBase objects are special in that they have additional objects created automatically (see
  * FEProblemBase::addMaterial).
  *
  * This class specializes the base class to acount for the additional Neightbor and face objects
  * that may
  * exist.
  */
-class MaterialWarehouse : public MooseObjectWarehouse<Material>
+class MaterialWarehouse : public MooseObjectWarehouse<MaterialBase>
 {
 public:
-  const MooseObjectWarehouse<Material> & operator[](Moose::MaterialDataType data_type) const;
+  const MooseObjectWarehouse<MaterialBase> & operator[](Moose::MaterialDataType data_type) const;
 
   ///@{
   /**
@@ -49,17 +49,17 @@ public:
   /**
    * A special method unique to this class for adding Block, Neighbor, and Face material objects.
    */
-  void addObjects(std::shared_ptr<Material> block,
-                  std::shared_ptr<Material> neighbor,
-                  std::shared_ptr<Material> face,
+  void addObjects(std::shared_ptr<MaterialBase> block,
+                  std::shared_ptr<MaterialBase> neighbor,
+                  std::shared_ptr<MaterialBase> face,
                   THREAD_ID tid = 0);
 
 protected:
   /// Storage for neighbor material objects (Block are stored in the base class)
-  MooseObjectWarehouse<Material> _neighbor_materials;
+  MooseObjectWarehouse<MaterialBase> _neighbor_materials;
 
   /// Storage for face material objects (Block are stored in the base class)
-  MooseObjectWarehouse<Material> _face_materials;
+  MooseObjectWarehouse<MaterialBase> _face_materials;
 };
 
 #endif // MATERIALWAREHOUSE_H
