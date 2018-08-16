@@ -19,25 +19,27 @@
 // Declare the output helper specializations
 template <>
 void MaterialOutputAction::materialOutputHelper<Real>(const std::string & material_name,
-                                                      std::shared_ptr<Material> material);
+                                                      std::shared_ptr<MaterialBase> material);
 
 template <>
 void
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & material_name,
-                                                            std::shared_ptr<Material> material);
+                                                            std::shared_ptr<MaterialBase> material);
 
 template <>
 void
 MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & material_name,
-                                                            std::shared_ptr<Material> material);
+                                                            std::shared_ptr<MaterialBase> material);
 
 template <>
-void MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & material_name,
-                                                               std::shared_ptr<Material> material);
+void
+MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & material_name,
+                                                          std::shared_ptr<MaterialBase> material);
 
 template <>
-void MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & material_name,
-                                                                std::shared_ptr<Material> material);
+void
+MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & material_name,
+                                                           std::shared_ptr<MaterialBase> material);
 
 registerMooseAction("MooseApp", MaterialOutputAction, "setup_material_output");
 
@@ -77,7 +79,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblemBase * problem_ptr)
   _boundary_material_data = problem_ptr->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
 
   // A complete list of all Material objects
-  const std::vector<std::shared_ptr<Material>> & materials =
+  const std::vector<std::shared_ptr<MaterialBase>> & materials =
       problem_ptr->getMaterialWarehouse().getObjects();
 
   // Handle setting of material property output in [Outputs] sub-blocks
@@ -205,7 +207,7 @@ std::shared_ptr<MooseObjectAction>
 MaterialOutputAction::createAction(const std::string & type,
                                    const std::string & property_name,
                                    const std::string & variable_name,
-                                   std::shared_ptr<Material> material)
+                                   std::shared_ptr<MaterialBase> material)
 {
   // Append the list of variables to create
   _variable_names.insert(variable_name);
@@ -245,7 +247,7 @@ MaterialOutputAction::createAction(const std::string & type,
 template <>
 void
 MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name,
-                                                 std::shared_ptr<Material> material)
+                                                 std::shared_ptr<MaterialBase> material)
 {
   _awh.addActionBlock(createAction("MaterialRealAux", property_name, property_name, material));
 }
@@ -253,7 +255,7 @@ MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_na
 template <>
 void
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name,
-                                                            std::shared_ptr<Material> material)
+                                                            std::shared_ptr<MaterialBase> material)
 {
   char suffix[3] = {'x', 'y', 'z'};
 
@@ -272,7 +274,7 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
 template <>
 void
 MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & property_name,
-                                                            std::shared_ptr<Material> material)
+                                                            std::shared_ptr<MaterialBase> material)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
@@ -291,7 +293,7 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
 template <>
 void
 MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & property_name,
-                                                          std::shared_ptr<Material> material)
+                                                          std::shared_ptr<MaterialBase> material)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
@@ -310,7 +312,7 @@ MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & pr
 template <>
 void
 MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & property_name,
-                                                           std::shared_ptr<Material> material)
+                                                           std::shared_ptr<MaterialBase> material)
 {
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)

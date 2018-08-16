@@ -128,15 +128,15 @@ public:
 
   ///@{
   /**
-   * Return a Material reference - usable for computing directly.
+   * Return a MaterialBase reference - usable for computing directly.
    *
    * @param name The name of the input parameter or explicit material name.
    * @param no_warn If true, suppress warning about retrieving the material
    * potentially during its calculation. If you don't know what this is/means,
    * then you don't need it.
    */
-  Material & getMaterial(const std::string & name);
-  Material & getMaterialByName(const std::string & name, bool no_warn = false);
+  MaterialBase & getMaterial(const std::string & name);
+  MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
   ///@{

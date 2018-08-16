@@ -61,7 +61,7 @@ validParams<MaterialBase>()
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
   params.addParamNamesToGroup("use_displaced_mesh constant_on", "Advanced");
-
+  params.registerBase("MaterialBase");
   return params;
 }
 

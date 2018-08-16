@@ -9,4 +9,15 @@
     requirement = "The InterfaceKernel system shall operate with coupled variables in 3D. "
                   "This uses a penalty implementation that is optimally convergent."
   [../]
+
+  [./test_jump_material]
+    type = 'Exodiff'
+    input = 'coupled_value_coupled_flux_with_jump_material.i'
+    exodiff = 'coupled_value_coupled_flux_with_jump_material_out.e'
+    mesh_mode = REPLICATED
+    issues = "#12066"
+    design = "InterfaceKernels/index.md"
+    requirement = "The InterfaceKernel system shall use with interface material in 3D."
+                  "In this penalty implementation, jump is calculated by an interface material."
+  [../]
 []

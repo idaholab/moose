@@ -64,14 +64,14 @@ MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 }
 
 void
-MaterialData::reinit(const std::vector<std::shared_ptr<Material>> & mats)
+MaterialData::reinit(const std::vector<std::shared_ptr<MaterialBase>> & mats)
 {
   for (const auto & mat : mats)
     mat->computeProperties();
 }
 
 void
-MaterialData::reset(const std::vector<std::shared_ptr<Material>> & mats)
+MaterialData::reset(const std::vector<std::shared_ptr<MaterialBase>> & mats)
 {
   for (const auto & mat : mats)
     mat->resetProperties();

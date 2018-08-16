@@ -138,16 +138,16 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
   _stateful_allowed = stateful_allowed;
 }
 
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterial(const std::string & name)
 {
   return getMaterialByName(_mi_params.get<MaterialName>(name));
 }
 
-Material &
+MaterialBase &
 MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
 {
-  std::shared_ptr<Material> discrete =
+  std::shared_ptr<MaterialBase> discrete =
       _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
 
   // Check block compatibility

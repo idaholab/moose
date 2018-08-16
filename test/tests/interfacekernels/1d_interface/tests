@@ -18,6 +18,16 @@
     requirement = "The interface diffusion penalty method should reproduce the analytic solution"
     prereq = 'interface_diffusion'
   [../]
+  [./interface_diffusion_penalty_with_jump_material]
+    type = 'Exodiff'
+    input = 'coupled_value_coupled_flux_with_jump_material.i'
+    exodiff = 'coupled_value_coupled_flux_with_jump_material_out.e'
+    design = 'InterfaceKernels/index.md'
+    issues = '#12066'
+    requirement = "The InterfaceKernel system shall use with interface material in 1D."
+                  "In this penalty implementation, jump is calculated by an interface material."
+    prereq = 'interface_diffusion'
+  [../]
   # This test ensures that shape functions for the NEIGHBORING variable are used in test_neighbor
   # and phi_neighbor; this is relevant when _var and _neighbor_var use a different space of shape
   # functions
