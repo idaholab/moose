@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "UserObjectInterface.h"
 #include "DiscreteElementUserObject.h"
+#include "ThreadedGeneralUserObject.h"
 #include "InputParameters.h"
 
 UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
@@ -32,7 +33,8 @@ UserObjectInterface::getUserObjectBaseByName(const std::string & name)
 }
 
 bool
-UserObjectInterface::isDiscreteUserObject(const UserObject & uo) const
+UserObjectInterface::needThreadedCopy(const UserObject & uo) const
 {
-  return dynamic_cast<const DiscreteElementUserObject *>(&uo) != NULL;
+  return (dynamic_cast<const DiscreteElementUserObject *>(&uo) != NULL) ||
+         (dynamic_cast<const ThreadedGeneralUserObject *>(&uo) != NULL);
 }
