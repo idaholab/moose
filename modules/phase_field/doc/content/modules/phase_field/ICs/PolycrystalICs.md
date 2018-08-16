@@ -33,6 +33,8 @@ stochastic or deterministic graph coloring algorithm. MOOSE defaults to using on
 high performance coloring algorithms from the PETSc package. However, a simple backtracking algorithm
 is also included which works reasonably well on smaller to mid-sized problems.
 
+The centroids of grains can be randomly generated or read from a file. The use of Maximal Poisson-Disk Sampling (MPS) to generate grain centroids is described in [MPS](/MPS.md).
+
 See:
 
 [PolycrystalVoronoi](/PolycrystalVoronoi.md)

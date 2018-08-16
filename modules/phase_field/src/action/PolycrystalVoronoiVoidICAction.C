@@ -23,14 +23,19 @@ validParams<PolycrystalVoronoiVoidICAction>()
   params += PolycrystalVoronoiVoidIC::actionParameters();
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.suppressParameter<VariableName>("variable");
-
+  params.addParam<FileName>(
+      "file_name",
+      "",
+      "File containing grain centroids, if file_name is provided, the centroids "
+      "from the file will be used.");
   return params;
 }
 
 PolycrystalVoronoiVoidICAction::PolycrystalVoronoiVoidICAction(const InputParameters & params)
   : Action(params),
     _op_num(getParam<unsigned int>("op_num")),
-    _var_name_base(getParam<std::string>("var_name_base"))
+    _var_name_base(getParam<std::string>("var_name_base")),
+    _file_name(getParam<FileName>("file_name"))
 {
 }
 
