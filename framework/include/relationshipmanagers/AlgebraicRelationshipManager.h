@@ -38,9 +38,6 @@ protected:
    * Helper method for attaching ghosting functors to the relevant EquationSystem's DofMap.
    */
   void attachAlgebraicFunctorHelper(GhostingFunctor & gf) const;
-
-  /// Problem pointer
-  FEProblem * _problem;
 };
 
 #endif /* ALGEBRAICRELATIONSHIPMANAGER_H */

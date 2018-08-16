@@ -9,6 +9,7 @@
 
 #include "GhostUserObject.h"
 #include "MooseMesh.h"
+#include "NonlinearSystem.h"
 
 // invalid_processor_id
 #include "libmesh/dof_object.h"
@@ -51,6 +52,7 @@ void
 GhostUserObject::execute()
 {
   auto my_processor_id = processor_id();
+  auto & dof_map = _fe_problem.getNonlinearSystem().dofMap();
 
   if (_rank == DofObject::invalid_processor_id || my_processor_id == _rank)
   {

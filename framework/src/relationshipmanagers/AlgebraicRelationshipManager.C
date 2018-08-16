@@ -9,6 +9,7 @@
 
 #include "AlgebraicRelationshipManager.h"
 #include "FEProblem.h"
+#include "Executioner.h"
 #include "NonlinearSystemBase.h"
 
 template <>
@@ -17,23 +18,18 @@ validParams<AlgebraicRelationshipManager>()
 {
   InputParameters params = validParams<GeometricRelationshipManager>();
 
-  // Algebraic functors are also Geometric by definition. We'll OR these types together to
-  // simplify logic when processing these types.
-  params.set<Moose::RelationshipManagerType>("rm_type") =
-      Moose::RelationshipManagerType::Geometric | Moose::RelationshipManagerType::Algebraic;
+  params.set<Moose::RelationshipManagerType>("rm_type") = Moose::RelationshipManagerType::Algebraic;
   return params;
 }
 
 AlgebraicRelationshipManager::AlgebraicRelationshipManager(const InputParameters & parameters)
-  : GeometricRelationshipManager(parameters), LazyCoupleable(this), _problem(nullptr)
+  : GeometricRelationshipManager(parameters), LazyCoupleable(this)
 {
 }
 
 void
 AlgebraicRelationshipManager::attachAlgebraicFunctorHelper(GhostingFunctor & gf) const
 {
-  mooseAssert(_problem, "Problem pointer is NULL");
-
   // TODO: Need to figure out Nonlinear versus Aux
-  _problem->getNonlinearSystemBase().dofMap().add_coupling_functor(gf);
+  _app.getExecutioner()->feProblem().getNonlinearSystemBase().dofMap().add_coupling_functor(gf);
 }
