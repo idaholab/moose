@@ -37,12 +37,14 @@ protected:
   const MooseEnum _structure_type;
 
   const unsigned int _op_num;
-  const unsigned int _grain_num;
+  unsigned int _grain_num;
   const unsigned int _op_index;
 
   const unsigned int _rand_seed;
 
   const bool _columnar_3D;
+
+  const FileName _file_name;
 
   virtual void computeCircleCenters() override;
 

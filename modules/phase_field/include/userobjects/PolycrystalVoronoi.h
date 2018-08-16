@@ -32,7 +32,7 @@ public:
 
 protected:
   /// The number of grains to create
-  const unsigned int _grain_num;
+  unsigned int _grain_num;
 
   const bool _columnar_3D;
 
@@ -43,6 +43,8 @@ protected:
   Point _range;
 
   std::vector<Point> _centerpoints;
+
+  const FileName _file_name;
 };
 
 #endif // POLYCRYSTALVORONOI_H
