@@ -179,6 +179,34 @@ PolycrystalUserObjectBase::finalize()
   _colors_assigned = true;
 }
 
+void
+PolycrystalUserObjectBase::mergeSets()
+{
+  /**
+   * With initial conditions we know the grain IDs of every grain (even partial grains). We can use
+   * this information to put all mergeable features adjacent to one and other in the list so that
+   * merging is simply O(n).
+   */
+  _partial_feature_sets[0].sort();
+
+  auto it1 = _partial_feature_sets[0].begin();
+  auto it_end = _partial_feature_sets[0].end();
+  while (it1 != it_end)
+  {
+    auto it2 = it1;
+    if (++it2 == it_end)
+      break;
+
+    if (areFeaturesMergeable(*it1, *it2))
+    {
+      it1->merge(std::move(*it2));
+      _partial_feature_sets[0].erase(it2);
+    }
+    else
+      ++it1; // Only increment if we have a mismatch
+  }
+}
+
 bool
 PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
                                                          std::size_t & current_index,
