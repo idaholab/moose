@@ -108,6 +108,7 @@ protected:
                                              FeatureData *& feature,
                                              Status & status,
                                              unsigned int & new_id) override;
+  virtual void mergeSets() override;
 
   /**
    * Builds a dense adjacency matrix based on the discovery of grain neighbors and halos

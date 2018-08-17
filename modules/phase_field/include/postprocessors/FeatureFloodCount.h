@@ -457,7 +457,7 @@ protected:
    * This routine is called on the master rank only and stitches together the partial
    * feature pieces seen on any processor.
    */
-  void mergeSets();
+  virtual void mergeSets();
 
   /**
    * Method for determining whether two features are mergeable. This routine exists because

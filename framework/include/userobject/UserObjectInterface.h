@@ -72,15 +72,15 @@ private:
   /// Thread ID
   THREAD_ID _uoi_tid;
 
-  /// Check if the user object is a DiscreteElementUserObject
-  bool isDiscreteUserObject(const UserObject & uo) const;
+  /// Check if the threaded copy of the user object is needed
+  bool needThreadedCopy(const UserObject & uo) const;
 };
 
 template <class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
-  unsigned int tid = isDiscreteUserObject(getUserObjectBase(name)) ? _uoi_tid : 0;
+  unsigned int tid = needThreadedCopy(getUserObjectBase(name)) ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), tid);
 }
 
@@ -88,7 +88,7 @@ template <class T>
 const T &
 UserObjectInterface::getUserObjectByName(const std::string & name)
 {
-  unsigned int tid = isDiscreteUserObject(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
+  unsigned int tid = needThreadedCopy(getUserObjectBaseByName(name)) ? _uoi_tid : 0;
   return _uoi_feproblem.getUserObject<T>(name, tid);
 }
 
