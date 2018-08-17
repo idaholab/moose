@@ -96,6 +96,7 @@ We are currently in the process of building a few key examples of PorousFlow.
 - [Flow through an explicitly fractured medium and flow through a fracture network](flow_through_fractured_media.md)
 - [Cold CO$_{2}$ injection into an elastic reservoir --- a THM problem](co2_example.md)
 - [Underground mining - an HM problem](coal_mining.md)
+- [CO$_2$ storage benchmark problems](co2_intercomparison.md)
 
 ## Additional MOOSE objects
 
