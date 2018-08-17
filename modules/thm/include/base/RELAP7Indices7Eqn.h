@@ -1,8 +1,6 @@
 #ifndef RELAP7INDICES7EQN_H
 #define RELAP7INDICES7EQN_H
 
-#include <vector>
-
 /**
  * Provides indices used for the 7-equation model of 2-phase flow.
  */
@@ -40,13 +38,6 @@ public:
     LOCAL_PRIM_VAR_PRESSURE = 4
   };
 
-  /// alpha*rho*A indices by phase
-  static const std::vector<ConservativeVariableIndex> _var_index_by_phase_arhoA;
-  /// alpha*rho*u*A indices by phase
-  static const std::vector<ConservativeVariableIndex> _var_index_by_phase_arhouA;
-  /// alpha*rho*E*A indices by phase
-  static const std::vector<ConservativeVariableIndex> _var_index_by_phase_arhoEA;
-
   /// Number of equations
   static const unsigned int _n_eq = 7;
 
@@ -61,13 +52,6 @@ public:
     EQ_MOMENTUM_VAPOR = 5,
     EQ_ENERGY_VAPOR = 6
   };
-
-  /// Mass equation indices by phase
-  static const std::vector<EquationIndex> _eq_index_by_phase_mass;
-  /// Momentum equation indices by phase
-  static const std::vector<EquationIndex> _eq_index_by_phase_momentum;
-  /// Energy equation indices by phase
-  static const std::vector<EquationIndex> _eq_index_by_phase_energy;
 
   /// Number of local equations (per phase)
   static const unsigned int _n_local_eq = 4;
