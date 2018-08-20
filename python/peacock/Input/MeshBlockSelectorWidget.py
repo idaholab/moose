@@ -56,7 +56,7 @@ class MeshBlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
             self.Options.clear()
             self._blocks = blocks
             self.Options.addItem("")
-            for i, block in enumerate(blocks.itervalues()):
+            for block in sorted(blocks.values(), key=lambda b: b.name):
                 self.Options.addItem(block.name)
             self.Options.setCurrentIndex(0)
 
