@@ -9,6 +9,7 @@
 
 #include "PorousFlowWaterNCG.h"
 #include "SinglePhaseFluidPropertiesPT.h"
+#include "Conversion.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowWaterNCG);
 
@@ -514,8 +515,8 @@ PorousFlowWaterNCG::checkVariables(Real temperature) const
   // Check whether the input temperature is within the region of validity of this equation
   // of state (T_triple <= T <= T_critical)
   if (temperature < _water_triple_temperature || temperature > _water_critical_temperature)
-    mooseError("PorousFlowWaterNCG: Temperature is outside range 273.16 K <= T "
-               "<= 647.096 K");
+    mooseException(name() + ": temperature " + Moose::stringify(temperature) +
+                   " is outside range 273.16 K <= T <= 647.096 K");
 }
 
 void
