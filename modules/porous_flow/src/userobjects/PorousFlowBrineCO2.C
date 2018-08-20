@@ -11,6 +11,7 @@
 #include "BrineFluidProperties.h"
 #include "SinglePhaseFluidPropertiesPT.h"
 #include "MathUtils.h"
+#include "Conversion.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowBrineCO2);
 
@@ -1543,8 +1544,10 @@ PorousFlowBrineCO2::checkVariables(Real pressure, Real temperature) const
   // The calculation of mass fractions is valid from 12C <= T <= 300C, and
   // pressure less than 60 MPa
   if (temperature < 285.15 || temperature > 573.15)
-    mooseError(name(), ": temperature is outside range 285.15 K <= T <= 573.15 K");
+    mooseException(name() + ": temperature " + Moose::stringify(temperature) +
+                   " is outside range 285.15 K <= T <= 573.15 K");
 
   if (pressure > 6.0e7)
-    mooseError(name(), ": pressure must be less than 60 MPa");
+    mooseException(name() + ": pressure " + Moose::stringify(pressure) +
+                   " must be less than 60 MPa");
 }
