@@ -12,22 +12,21 @@
 /*             See COPYRIGHT for full restrictions              */
 /****************************************************************/
 
-#ifndef GRANDPOTENTIALSINTERINGMATERIAL
-#define GRANDPOTENTIALSINTERINGMATERIAL
+#ifndef GRANDPOTENTIALSINTERINGMATERIAL_H
+#define GRANDPOTENTIALSINTERINGMATERIAL_H
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
-
-/**
- * This material calculates necessary parameters for the grand potential sintering model.
- * Especially those related to switching functions and thermodynamics.
- **/
 
 class GrandPotentialSinteringMaterial;
 
 template <>
 InputParameters validParams<GrandPotentialSinteringMaterial>();
 
+/**
+ * This material calculates necessary parameters for the grand potential sintering model.
+ * Especially those related to switching functions and thermodynamics.
+ */
 class GrandPotentialSinteringMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
@@ -36,62 +35,118 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  const unsigned int _neta;                // number of solid phase order paramters
-  std::vector<const VariableValue *> _eta; // solid phase order parameters
-  std::vector<VariableName> _eta_name;
-  const VariableValue & _w; // chemical potential
-  const NonlinearVariableName _w_name;
-  const VariableValue & _phi; // void phase order parameter
-  const NonlinearVariableName _phi_name;
-  const VariableValue & _T;           // temperature
-  const MaterialProperty<Real> & _kv; // void energy coefficient
-  const MaterialProperty<Real> & _ks; // solid energy coefficient
+  /// number of solid phase order paramters
+  const unsigned int _neta;
 
-  MaterialProperty<Real> & _hv; // void phase switching function
+  /// solid phase order parameters
+  std::vector<const VariableValue *> _eta;
+  std::vector<VariableName> _eta_name;
+
+  /// chemical potential
+  const VariableValue & _w;
+  const NonlinearVariableName _w_name;
+
+  /// void phase order parameter
+  const VariableValue & _phi;
+  const NonlinearVariableName _phi_name;
+
+  /// temperature
+  const VariableValue & _T;
+
+  /// void energy coefficient
+  const MaterialProperty<Real> & _kv;
+  /// solid energy coefficient
+  const MaterialProperty<Real> & _ks;
+
+  /// void phase switching function
+  MaterialProperty<Real> & _hv;
   MaterialProperty<Real> & _dhv;
   MaterialProperty<Real> & _d2hv;
-  MaterialProperty<Real> & _hs; // solid phase switching function
+
+  /// solid phase switching function
+  MaterialProperty<Real> & _hs;
   MaterialProperty<Real> & _dhs;
   MaterialProperty<Real> & _d2hs;
-  MaterialProperty<Real> & _chi; // susceptibility
+
+  /// susceptibility
+  MaterialProperty<Real> & _chi;
   MaterialProperty<Real> & _dchi;
   MaterialProperty<Real> & _d2chi;
-  MaterialProperty<Real> & _rhov; // void phase vacancy density
+
+  /// void phase vacancy density
+  MaterialProperty<Real> & _rhov;
   MaterialProperty<Real> & _drhovdw;
-  MaterialProperty<Real> & _rhos; // solid phase vacancy density
+
+  /// solid phase vacancy density
+  MaterialProperty<Real> & _rhos;
   MaterialProperty<Real> & _drhosdw;
   std::vector<MaterialProperty<Real> *> _drhos;
   std::vector<std::vector<MaterialProperty<Real> *>> _d2rhos;
-  MaterialProperty<Real> & _omegav; // void phase potential density
+
+  /// void phase potential density
+  MaterialProperty<Real> & _omegav;
   MaterialProperty<Real> & _domegavdw;
   MaterialProperty<Real> & _d2omegavdw2;
-  MaterialProperty<Real> & _omegas; // solid phase potential density
+
+  /// solid phase potential density
+  MaterialProperty<Real> & _omegas;
   MaterialProperty<Real> & _domegasdw;
   MaterialProperty<Real> & _d2omegasdw2;
   std::vector<MaterialProperty<Real> *> _domegasdeta;
   std::vector<MaterialProperty<Real> *> _d2omegasdwdeta;
   std::vector<std::vector<MaterialProperty<Real> *>> _d2omegasdetadeta;
-  MaterialProperty<Real> & _mu; // energy barrier coefficient
+
+  /// energy barrier coefficient
+  MaterialProperty<Real> & _mu;
   MaterialProperty<Real> & _dmu;
   MaterialProperty<Real> & _d2mu;
-  MaterialProperty<Real> & _kappa; // gradient energy coefficient
+
+  /// gradient energy coefficient
+  MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _dkappa;
   MaterialProperty<Real> & _d2kappa;
-  MaterialProperty<Real> & _gamma; // interface profile coefficient
 
-  const Real _sigma_s;   // surface energy
-  const Real _sigma_gb;  // grain boundary energy
-  const Real _int_width; // interface width
-  const Real _switch;    // Parameter to determine accuracy of surface/GB phase switching function
-  const Real _Ef;        // Vacancy formation energy
-  const Real _c_gb;      // Extra grain boundary vacancy concentration
-  const Real _Va;        // Atomic volume of species
-  const Real _prefactor; // Vacancy concentration prefactor
-  const Real _mu_s;      // mu value on surfaces
-  const Real _mu_gb;     // mu value on grain boundaries
-  const Real _kappa_s;   // kappa value on surfaces
-  const Real _kappa_gb;  // kappa value on grain boundaries
-  const Real _kB;        // Boltzmann constant
+  /// interface profile coefficient
+  MaterialProperty<Real> & _gamma;
+
+  /// surface energy
+  const Real _sigma_s;
+
+  /// grain boundary energy
+  const Real _sigma_gb;
+
+  /// interface width
+  const Real _int_width;
+
+  /// Parameter to determine accuracy of surface/GB phase switching function
+  const Real _switch;
+
+  /// Vacancy formation energy
+  const Real _Ef;
+
+  /// Extra grain boundary vacancy concentration
+  const Real _c_gb;
+
+  /// Atomic volume of species
+  const Real _Va;
+
+  /// Vacancy concentration prefactor
+  const Real _prefactor;
+
+  /// mu value on surfaces
+  const Real _mu_s;
+
+  /// mu value on grain boundaries
+  const Real _mu_gb;
+
+  /// kappa value on surfaces
+  const Real _kappa_s;
+
+  /// kappa value on grain boundaries
+  const Real _kappa_gb;
+
+  /// Boltzmann constant
+  const Real _kB;
 };
 
-#endif // GRANDPOTENTIALSINTERINGMATERIAL
+#endif // GRANDPOTENTIALSINTERINGMATERIAL_H

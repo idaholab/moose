@@ -24,7 +24,8 @@ InputParameters
 validParams<GrandPotentialTensorMaterial>()
 {
   InputParameters params = validParams<PolycrystalDiffusivityTensorBase>();
-  params.addClassDescription("Diffusion and mobility parameters for grand potential model governing equations. Uses a tensor diffusivity");
+  params.addClassDescription("Diffusion and mobility parameters for grand potential model "
+                             "governing equations. Uses a tensor diffusivity");
   params.addRequiredParam<Real>("int_width",
                                 "The interfacial width in the lengthscale of the problem");
   params.addParam<MaterialPropertyName>("chi", "Coefficient to multiply by D");
@@ -45,8 +46,8 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
     _chiD(declareProperty<RealTensorValue>(_D_name)),
     _dchiDdc(declarePropertyDerivative<RealTensorValue>(_D_name, _c_name)),
     _Ls_name(getParam<std::string>("solid_mobility")),
-    _Lv_name(getParam<std::string>("void_mobility")),
     _Ls(declareProperty<Real>(_Ls_name)),
+    _Lv_name(getParam<std::string>("void_mobility")),
     _Lv(declareProperty<Real>(_Lv_name)),
     _Dmag(declareProperty<Real>("chiD_mag")),
     _sigma_s(getMaterialProperty<Real>("surface_energy")),
@@ -54,16 +55,13 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
     _chi_name(getParam<MaterialPropertyName>("chi")),
     _chi(getMaterialProperty<Real>(_chi_name)),
     _dchidc(getMaterialPropertyDerivative<Real>("chi", _c_name)),
+    _dchideta(_op_num),
+    _dchiDdeta(_op_num),
     _GBMobility(getParam<Real>("GBMobility")),
     _GBmob0(getParam<Real>("GBmob0")),
     _Q(getParam<Real>("Q")),
-    _vals_name(_op_num),
-    _dchideta(_op_num),
-    _dchiDdeta(_op_num)
+    _vals_name(_op_num)
 {
-  if (_op_num == 0)
-    mooseError("Model requires op_num > 0");
-
   for (unsigned int i = 0; i < _op_num; ++i)
   {
     _vals_name[i] = getVar("v", i)->name();

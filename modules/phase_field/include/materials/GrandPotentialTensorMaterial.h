@@ -12,8 +12,8 @@
 /*             See COPYRIGHT for full restrictions              */
 /****************************************************************/
 
-#ifndef GrandPotentialTensorMaterial_H
-#define GrandPotentialTensorMaterial_H
+#ifndef GRANDPOTENTIALTENSORMATERIAL_H
+#define GRANDPOTENTIALTENSORMATERIAL_H
 
 #include "PolycrystalDiffusivityTensorBase.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -37,26 +37,41 @@ public:
   virtual void computeProperties() override;
 
 protected:
-  std::string _D_name;  /// mobility tensor
+  /// mobility tensor
+  std::string _D_name;
   MaterialProperty<RealTensorValue> & _chiD;
   MaterialProperty<RealTensorValue> & _dchiDdc;
-  std::string _Ls_name; /// grain boundary mobility name
-  std::string _Lv_name; /// void mobility name
-  MaterialProperty<Real> & _Ls;
-  MaterialProperty<Real> & _Lv;
-  MaterialProperty<Real> & _Dmag; /// magnitude of mobility tensor
-  const MaterialProperty<Real> & _sigma_s; /// surface energy
 
-  Real _int_width; /// interface width
-  const MaterialPropertyName _chi_name; /// susceptibility
+  /// grain boundary mobility
+  std::string _Ls_name;
+  MaterialProperty<Real> & _Ls;
+
+  /// void mobility
+  std::string _Lv_name;
+  MaterialProperty<Real> & _Lv;
+
+  /// magnitude of mobility tensor
+  MaterialProperty<Real> & _Dmag;
+
+  /// surface energy
+  const MaterialProperty<Real> & _sigma_s;
+
+  /// interface width
+  Real _int_width;
+
+  /// susceptibility
+  const MaterialPropertyName _chi_name;
   const MaterialProperty<Real> & _chi;
   const MaterialProperty<Real> & _dchidc;
+  std::vector<const MaterialProperty<Real> *> _dchideta;
+  std::vector<MaterialProperty<RealTensorValue> *> _dchiDdeta;
+
   Real _GBMobility;
   Real _GBmob0;
   const Real _Q;
-  std::vector<NonlinearVariableName> _vals_name; /// solid phase order parameters
-  std::vector<const MaterialProperty<Real> *> _dchideta;
-  std::vector<MaterialProperty<RealTensorValue> *> _dchiDdeta;
+
+  /// solid phase order parameters
+  std::vector<NonlinearVariableName> _vals_name;
 };
 
-#endif // GrandPotentialTensorMaterial_H
+#endif // GRANDPOTENTIALTENSORMATERIAL_H

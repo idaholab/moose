@@ -12,8 +12,8 @@
 /*             See COPYRIGHT for full restrictions              */
 /****************************************************************/
 
-#ifndef PolycrystalDiffusivityTensorBase_H
-#define PolycrystalDiffusivityTensorBase_H
+#ifndef POLYCRYSTALDIFFUSIVITYTENSORBASE_H
+#define POLYCRYSTALDIFFUSIVITYTENSORBASE_H
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
@@ -28,7 +28,6 @@ InputParameters validParams<PolycrystalDiffusivityTensorBase>();
  * Generates a diffusion tensor to distinguish between the bulk, grain boundary,
  * and surface diffusion rates.
  */
-
 class PolycrystalDiffusivityTensorBase : public DerivativeMaterialInterface<Material>
 {
 public:
@@ -57,4 +56,4 @@ protected:
   const unsigned int _op_num;
 };
 
-#endif // PolycrystalDiffusivityTensorBase_H
+#endif // POLYCRYSTALDIFFUSIVITYTENSORBASE_H

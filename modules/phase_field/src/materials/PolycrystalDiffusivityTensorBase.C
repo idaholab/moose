@@ -17,13 +17,15 @@
 
 registerMooseObject("MarmotApp", PolycrystalDiffusivityTensorBase);
 
-template<>
+template <>
 InputParameters
 validParams<PolycrystalDiffusivityTensorBase>()
 {
   InputParameters params = validParams<Material>();
-  params.addClassDescription("Generates a diffusion tensor to distinguish between the bulk, grain boundaries, and surfaces");
-  params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
+  params.addClassDescription("Generates a diffusion tensor to distinguish between the bulk, grain "
+                             "boundaries, and surfaces");
+  params.addRequiredCoupledVarWithAutoBuild(
+      "v", "var_name_base", "op_num", "Array of coupled variables");
   params.addCoupledVar("T", "Temperature variable in Kelvin");
   params.addRequiredParam<Real>("D0", "Diffusion prefactor for vacancies in m^2/s");
   params.addRequiredParam<Real>("Em", "Vacancy migration energy in eV");
@@ -34,21 +36,22 @@ validParams<PolycrystalDiffusivityTensorBase>()
   return params;
 }
 
-PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(const InputParameters & parameters)
+PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
+    const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
-  _T(coupledValue("T")),
-  _c(coupledValue("c")),
-  _grad_c(coupledGradient("c")),
-  _c_name(getVar("c", 0)->name()),
-  _D(declareProperty<RealTensorValue>("D")),
-  _dDdc(declarePropertyDerivative<RealTensorValue>("D", _c_name)),
-  _D0(getParam<Real>("D0")),
-  _Em(getParam<Real>("Em")),
-  _s_index(getParam<Real>("surfindex")),
-  _gb_index(getParam<Real>("gbindex")),
-  _b_index(getParam<Real>("bulkindex")),
-  _kb(8.617343e-5), //Boltzmann constant in eV/K
-  _op_num(coupledComponents("v"))
+    _T(coupledValue("T")),
+    _c(coupledValue("c")),
+    _grad_c(coupledGradient("c")),
+    _c_name(getVar("c", 0)->name()),
+    _D(declareProperty<RealTensorValue>("D")),
+    _dDdc(declarePropertyDerivative<RealTensorValue>("D", _c_name)),
+    _D0(getParam<Real>("D0")),
+    _Em(getParam<Real>("Em")),
+    _s_index(getParam<Real>("surfindex")),
+    _gb_index(getParam<Real>("gbindex")),
+    _b_index(getParam<Real>("bulkindex")),
+    _kb(8.617343e-5), // Boltzmann constant in eV/K
+    _op_num(coupledComponents("v"))
 {
   if (_op_num == 0)
     mooseError("Model requires op_num > 0");
@@ -62,7 +65,8 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(const InputPa
   }
 }
 
-void PolycrystalDiffusivityTensorBase::computeProperties()
+void
+PolycrystalDiffusivityTensorBase::computeProperties()
 {
   RealTensorValue I(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
@@ -71,11 +75,11 @@ void PolycrystalDiffusivityTensorBase::computeProperties()
     Real c = _c[_qp];
     Real mc = 1.0 - c;
 
-    //Compute grain boundary diffusivity
+    // Compute grain boundary diffusivity
     RealTensorValue Dgb(0.0);
 
     for (unsigned int i = 0; i < _op_num; ++i)
-      for (unsigned int j = i+1; j < _op_num; ++j)
+      for (unsigned int j = i + 1; j < _op_num; ++j)
       {
         RealGradient ngb = (*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp];
         if (ngb.norm() > 1.0e-10)
@@ -87,15 +91,15 @@ void PolycrystalDiffusivityTensorBase::computeProperties()
         for (unsigned int a = 0; a < 3; ++a)
           for (unsigned int b = a; b < 3; ++b)
           {
-            Tgb(a,b) = I(a,b) - ngb(a) * ngb(b);
-            Tgb(b,a) = I(b,a) - ngb(b) * ngb(a);
+            Tgb(a, b) = I(a, b) - ngb(a) * ngb(b);
+            Tgb(b, a) = I(b, a) - ngb(b) * ngb(a);
           }
 
         Dgb += (*_vals[i])[_qp] * (*_vals[j])[_qp] * Tgb;
         Dgb += (*_vals[j])[_qp] * (*_vals[i])[_qp] * Tgb;
-      } //for (unsigned int j = 0; j < _op_num; ++j) //for (unsigned int i = 0; i < _op_num; ++i)
+      }
 
-    //Compute surface diffusivity matrix
+    // Compute surface diffusivity matrix
     RealGradient ns(0), dns(0);
     if (_grad_c[_qp].norm() > 1.0e-10)
       ns = _grad_c[_qp] / _grad_c[_qp].norm();
@@ -105,21 +109,20 @@ void PolycrystalDiffusivityTensorBase::computeProperties()
     for (unsigned int a = 0; a < 3; ++a)
       for (unsigned int b = 0; b < 3; ++b)
       {
-        Ts(a,b) = I(a,b) - ns(a) * ns(b);
-        dTs(a,b) = -2.0 * dns(a) * ns(b);
-      } //for (auto b = 0; b < 3; ++b) //for (auto a = 0; a < 3; ++a)
+        Ts(a, b) = I(a, b) - ns(a) * ns(b);
+        dTs(a, b) = -2.0 * dns(a) * ns(b);
+      }
 
     RealTensorValue Dsurf = c * c * mc * mc * Ts;
     RealTensorValue dDsurfdc = (2.0 * c * mc * mc - 2.0 * c * c * mc) * Ts + c * c * mc * mc * dTs;
 
-    //Compute bulk properties
+    // Compute bulk properties
     _Dbulk = _D0 * std::exp(-_Em / _kb / _T[_qp]);
     const Real mult_bulk = 1.0;
     const Real dmult_bulk = 0.0;
 
-    //Compute diffusion tensor
+    // Compute diffusion tensor
     _D[_qp] = _Dbulk * (_b_index * mult_bulk * I + _gb_index * Dgb + _s_index * Dsurf);
     _dDdc[_qp] = _Dbulk * (_b_index * dmult_bulk * I + _s_index * dDsurfdc);
-
-  } //for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-} //void PolycrystalDiffusivityTensorBase::computeProperties()
+  }
+}

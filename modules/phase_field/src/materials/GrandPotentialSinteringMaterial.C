@@ -47,7 +47,9 @@ validParams<GrandPotentialSinteringMaterial>()
                         0.189,
                         "Extra vacancy concentration on grain boundaries compared to in the bulk");
   params.addParam<Real>("atomic_volume", 0.04092, "Atomic volume of material");
-  params.addParam<Real>("vacancy_prefactor", 1.0, "Prefactor for Arrhenius function describing the vancancy concentration");
+  params.addParam<Real>("vacancy_prefactor",
+                        1.0,
+                        "Prefactor for Arrhenius function describing the vancancy concentration");
   return params;
 }
 
@@ -63,7 +65,6 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _T(coupledValue("Temperature")),
     _kv(getMaterialProperty<Real>("void_energy_coefficient")),
     _ks(getMaterialProperty<Real>("solid_energy_coefficient")),
-
     _hv(declareProperty<Real>("hv")),
     _dhv(declarePropertyDerivative<Real>("hv", _phi_name)),
     _d2hv(declarePropertyDerivative<Real>("hv", _phi_name, _phi_name)),
@@ -95,7 +96,6 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _dkappa(declarePropertyDerivative<Real>("kappa", _phi_name)),
     _d2kappa(declarePropertyDerivative<Real>("kappa", _phi_name, _phi_name)),
     _gamma(declareProperty<Real>("gamma")),
-
     _sigma_s(getParam<Real>("surface_energy")),
     _sigma_gb(getParam<Real>("grainboundary_energy")),
     _int_width(getParam<Real>("int_width")),
@@ -128,8 +128,8 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
       _d2rhos[j][i] = &declarePropertyDerivative<Real>("rhos", _eta_name[j], _eta_name[i]);
       _d2omegasdetadeta[j][i] =
           &declarePropertyDerivative<Real>("omegas", _eta_name[j], _eta_name[i]);
-    } // for (unsigned int j = 0; j <= i; ++j)
-  }   // for (unsigned int i = 0; i < _neta; ++i)
+    }
+  }
 }
 
 void
@@ -179,8 +179,8 @@ GrandPotentialSinteringMaterial::computeQpProperties()
 
   // Calculate Densities and potentials
   Real cv_eq = 1.0;
-  Real cs_eq =
-      _prefactor * std::exp(-_Ef / (_kB * _T[_qp])) + _c_gb * 4.0 * (1.0 - sum_eta_i) * (1.0 - sum_eta_i);
+  Real cs_eq = _prefactor * std::exp(-_Ef / (_kB * _T[_qp])) +
+               _c_gb * 4.0 * (1.0 - sum_eta_i) * (1.0 - sum_eta_i);
 
   std::vector<Real> dcs_eq;
   std::vector<std::vector<Real>> d2cs_eq;
@@ -194,7 +194,7 @@ GrandPotentialSinteringMaterial::computeQpProperties()
     d2cs_eq[i][i] = 16.0 * _c_gb * (1.0 - sum_eta_i - 2.0 * (*_eta[i])[_qp] * (*_eta[i])[_qp]);
     for (unsigned int j = i + 1; j < _neta; ++j)
       d2cs_eq[i][j] = -32.0 * _c_gb * (*_eta[i])[_qp] * (*_eta[j])[_qp];
-  } // for (unsigned int i = 0; i < _neta; ++i)
+  }
 
   _rhov[_qp] = _w[_qp] / (_Va * _Va * _kv[_qp]) + cv_eq / _Va;
   _rhos[_qp] = _w[_qp] / (_Va * _Va * _ks[_qp]) + cs_eq / _Va;
@@ -205,7 +205,7 @@ GrandPotentialSinteringMaterial::computeQpProperties()
     (*_drhos[i])[_qp] = dcs_eq[i] / _Va;
     for (unsigned int j = i; j < _neta; ++j)
       (*_d2rhos[i][j])[_qp] = d2cs_eq[i][j] / _Va;
-  } // for (unsigned int i = 0; i < _neta; ++i)
+  }
 
   _omegav[_qp] = -0.5 * _w[_qp] * _w[_qp] / (_Va * _Va * _kv[_qp]) - _w[_qp] * cv_eq / _Va;
   _omegas[_qp] = -0.5 * _w[_qp] * _w[_qp] / (_Va * _Va * _ks[_qp]) - _w[_qp] * cs_eq / _Va;
@@ -220,7 +220,7 @@ GrandPotentialSinteringMaterial::computeQpProperties()
     (*_d2omegasdwdeta[i])[_qp] = -dcs_eq[i] / _Va;
     for (unsigned int j = i; j < _neta; ++j)
       (*_d2omegasdetadeta[i][j])[_qp] = -_w[_qp] * d2cs_eq[i][j] / _Va;
-  } // for (unsigned int i = 0; i < _neta; ++i)
+  }
 
   // thermodynamic parameters
   _mu[_qp] = _mu_gb + (_mu_s - _mu_gb) * f;
