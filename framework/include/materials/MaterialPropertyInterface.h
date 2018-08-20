@@ -15,6 +15,7 @@
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
+#include "ZeroMaterial.h"
 
 // Forward declarations
 class InputParameters;
@@ -248,29 +249,6 @@ private:
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> & _mi_boundary_ids;
 };
-
-/**
- * Helper function templates to set a variable to zero.
- * Specializations may have to be implemented (for examples see
- * RankTwoTensor, RankFourTensor).
- */
-template <typename T>
-inline void
-mooseSetToZero(T & v)
-{
-  /**
-   * The default for non-pointer types is to assign zero.
-   * This should either do something sensible, or throw a compiler error.
-   * Otherwise the T type is designed badly.
-   */
-  v = 0;
-}
-template <typename T>
-inline void
-mooseSetToZero(T *&)
-{
-  mooseError("Cannot use pointer types for MaterialProperty derivatives.");
-}
 
 template <typename T>
 const MaterialProperty<T> &
