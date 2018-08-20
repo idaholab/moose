@@ -27,5 +27,6 @@
     type = RunApp
     input = '1Dradial.i'
     check_input = true
+    threading = '!pthreads'
   [../]
 []
