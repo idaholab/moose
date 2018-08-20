@@ -29,7 +29,7 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     MaterialPropertyStorage & material_props,
     MaterialPropertyStorage & bnd_material_props,
     MaterialPropertyStorage & neighbor_material_props,
-    std::vector<Assembly *> & assembly)
+    std::vector<std::unique_ptr<Assembly>> & assembly)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
@@ -70,8 +70,6 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
     _has_neighbor_stateful_props(_neighbor_material_props.hasStatefulProperties())
 {
 }
-
-ComputeMaterialsObjectThread::~ComputeMaterialsObjectThread() {}
 
 void
 ComputeMaterialsObjectThread::subdomainChanged()

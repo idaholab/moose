@@ -31,12 +31,10 @@ public:
                                MaterialPropertyStorage & material_props,
                                MaterialPropertyStorage & bnd_material_props,
                                MaterialPropertyStorage & neighbor_material_props,
-                               std::vector<Assembly *> & assembly);
+                               std::vector<std::unique_ptr<Assembly>> & assembly);
 
   // Splitting Constructor
   ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split);
-
-  virtual ~ComputeMaterialsObjectThread();
 
   virtual void post() override;
   virtual void subdomainChanged() override;
@@ -60,7 +58,7 @@ protected:
   const MaterialWarehouse & _materials;
   const MaterialWarehouse & _discrete_materials;
 
-  std::vector<Assembly *> & _assembly;
+  std::vector<std::unique_ptr<Assembly>> & _assembly;
   bool _need_internal_side_material;
 
   const bool _has_stateful_props;

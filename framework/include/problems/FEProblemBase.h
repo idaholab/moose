@@ -370,7 +370,6 @@ public:
   virtual void neighborSubdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
   virtual void newAssemblyArray(NonlinearSystemBase & nl);
-  virtual void deleteAssemblyArray();
   virtual void initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl);
 
   virtual void init() override;
@@ -1514,7 +1513,7 @@ protected:
   // Dimension of the subspace spanned by the vectors with a given prefix
   std::map<std::string, unsigned int> _subspace_dim;
 
-  std::vector<Assembly *> _assembly;
+  std::vector<std::unique_ptr<Assembly>> _assembly;
 
   /// functions
   MooseObjectWarehouse<Function> _functions;
