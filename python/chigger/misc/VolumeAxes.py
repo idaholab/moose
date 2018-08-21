@@ -18,11 +18,11 @@ class VolumeAxes(base.ChiggerResultBase):
     A class for displaying the 3D axis around a volume
     """
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerResult.getOptions()
-        opt.add('xaxis', VolumeAxes.getAxisActorOptions(), "The x-axis options.")
-        opt.add('yaxis', VolumeAxes.getAxisActorOptions(), "The y-axis options.")
-        opt.add('zaxis', VolumeAxes.getAxisActorOptions(), "The z-axis options.")
+    def validOptions():
+        opt = base.ChiggerResult.validOptions()
+        opt.add('xaxis', default=VolumeAxes.getAxisActorOptions(), doc="The x-axis options.")
+        opt.add('yaxis', default=VolumeAxes.getAxisActorOptions(), doc="The y-axis options.")
+        opt.add('zaxis', default=VolumeAxes.getAxisActorOptions(), doc="The z-axis options.")
         return opt
 
     @staticmethod
@@ -40,6 +40,7 @@ class VolumeAxes(base.ChiggerResultBase):
 
         self._vtkactor = vtk.vtkCubeAxesActor()
         self._result = result
+        self.init()
 
     def reset(self):
         """
@@ -48,11 +49,10 @@ class VolumeAxes(base.ChiggerResultBase):
         super(VolumeAxes, self).reset()
         self._vtkrenderer.RemoveViewProp(self._vtkactor)
 
-    def initialize(self):
+    def init(self):
         """
         Add the actor to renderer.
         """
-        super(VolumeAxes, self).initialize()
         self._vtkrenderer.AddViewProp(self._vtkactor)
 
     def update(self, **kwargs):
@@ -61,11 +61,9 @@ class VolumeAxes(base.ChiggerResultBase):
         """
         super(VolumeAxes, self).update(**kwargs)
 
-        if self._result.needsUpdate():
-            self._result.update()
+        self._result.update()
 
-        xmin, xmax = utils.get_bounds(*self._result.getSources())
-        bnds = [xmin[0], xmax[0], xmin[1], xmax[1], xmin[2], xmax[2]]
+        bnds = utils.get_bounds(*self._result.getSources())
         self._vtkactor.SetBounds(*bnds)
 
         self._vtkactor.SetCamera(self._vtkrenderer.GetActiveCamera())
@@ -85,13 +83,13 @@ class VolumeAxes(base.ChiggerResultBase):
             return
 
         opt = self.getOption(axis + 'axis')
-        color = opt['color']
+        color = opt.get('color')
         comp = ['x', 'y', 'z'].index(axis)
         self._vtkactor.GetTitleTextProperty(comp).SetColor(*color)
         self._vtkactor.GetLabelTextProperty(comp).SetColor(*color)
 
         func = getattr(self._vtkactor, 'Set{}AxisMinorTickVisibility'.format(axis.upper()))
-        func(opt['minor_ticks'])
+        func(opt.get('minor_ticks'))
 
         func = getattr(self._vtkactor, 'Get{}AxesLinesProperty'.format(axis.upper()))
         func().SetColor(*color)

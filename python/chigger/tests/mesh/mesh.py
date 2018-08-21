@@ -18,9 +18,9 @@ camera.SetPosition(-3.0062, -15.1563, 2.4016)
 camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
 
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-result = chigger.exodus.ExodusResult(reader, variable='diffused', edges=True, edge_color=[1,1,1], camera=camera, cmap='viridis')
+result = chigger.exodus.ExodusResult(reader, variable='diffused', edges=True,
+                                     edge_color=(1,1,1), camera=camera, cmap='viridis')
 
-window = chigger.RenderWindow(result, size=[300,300], test=True, antialiasing=20)
-window.update(); window.resetCamera() #TODO: This is needed to make results render correctly, not sure why
+window = chigger.RenderWindow(result, size=(300,300), test=True, antialiasing=20)
 window.write('mesh.png')
 window.start()

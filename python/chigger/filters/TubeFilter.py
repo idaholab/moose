@@ -19,15 +19,16 @@ class TubeFilter(ChiggerFilterBase):
     """
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerFilterBase.getOptions()
-        opt.add('radius', None, "Radius of the tube.", vtype=float)
-        opt.add('normalized_radius', 0.1, "Specify the radius as a percentage of the 'length' of "
-                                          "the object, where the length is compute as the distance "
-                                          "between the two points that comprise the object "
-                                          "bounding box.")
-        opt.add('caps', True, "Toggle the end-caps of the tube.")
-        opt.add('sides', 30, "The number of edges for the tube.", vtype=int)
+    def validOptions():
+        opt = ChiggerFilterBase.validOptions()
+        opt.add('radius', doc="Radius of the tube.", vtype=float)
+        opt.add('normalized_radius', default=0.1, vtype=float,
+                doc="Specify the radius as a percentage of the 'length' of "
+                "the object, where the length is compute as the distance "
+                "between the two points that comprise the object "
+                "bounding box.")
+        opt.add('caps', default=True, vtype=bool, doc="Toggle the end-caps of the tube.")
+        opt.add('sides', default=30, doc="The number of edges for the tube.", vtype=int)
         return opt
 
     def __init__(self, **kwargs):

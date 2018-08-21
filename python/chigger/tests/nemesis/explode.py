@@ -21,6 +21,6 @@ camera.SetFocalPoint(0.5000, 0.5000, 0.5000)
 reader = chigger.exodus.NemesisReader('../input/nemesis.e.24.*')
 result = chigger.exodus.ExodusResult(reader, variable='u', explode=0.3, camera=camera)
 
-window = chigger.RenderWindow(result, size=[300,300], test=True)
+window = chigger.RenderWindow(result, size=(300,300), test=True)
 window.write('explode.png')
 window.start()

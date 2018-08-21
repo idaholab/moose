@@ -7,12 +7,18 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+from .. import base
 
 from CubeSource import CubeSource
 from CylinderSource import CylinderSource
 from LineSource import LineSource
 
+import OutlineSourceMeta
+OutlineSource = OutlineSourceMeta.create(base.ChiggerSource)
+OutlineSource2D = OutlineSourceMeta.create(base.ChiggerSource2D)
+
+from OutlineResult import OutlineResult
+
 import PlaneSourceMeta
-from .. import base
 PlaneSource = PlaneSourceMeta.create(base.ChiggerSource)
 PlaneSource2D = PlaneSourceMeta.create(base.ChiggerSource2D)

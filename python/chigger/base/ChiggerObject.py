@@ -20,55 +20,47 @@ class ChiggerObject(object):
     """
 
     @staticmethod
-    def getOptions():
+    def validOptions():
         """
-        All object should define a static getOptions method to add new key, value options. (public)
+        All object should define a static validOptions method to add new key, value options. (public)
         """
         opt = utils.Options()
-        opt.add('debug', False, "Enable/disable debug messaging.")
+        opt.add('name', vtype=str,
+                doc="The object name (this name is displayed on the console help by pressing 'h')."
+                    "If a name is not supplied the class name is utilized.")
         return opt
 
     def __init__(self, **kwargs):
         super(ChiggerObject, self).__init__()
-        self._options = getattr(self.__class__, 'getOptions')()
-        self.__initial_options = kwargs
-        self.__needs_initialize = True
-        self.__needs_update = True
+        self._options = getattr(self.__class__, 'validOptions')()
+        self._options.update(**kwargs)
+
+    def __str__(self):
+        return '{}:\n{}'.format(mooseutils.colorText(self.__class__.__name__, "GREY"),
+                                self._options.string())
+
+    def title(self):
+        if self.isOptionValid('name'):
+            title = '{} ({})'.format(self.getOption('name'), self.__class__.__name__)
+        else:
+            title = self.__class__.__name__
+        return title
 
     def options(self):
         """
-        Return the utils.Options object for this class.
+        Return the utils.Options object for this class. (public)
         """
         return self._options
 
-    def needsUpdate(self):
-        """
-        Return True if the object requires an Update method call. (public)
-        """
-        mooseutils.mooseDebug("{}.needsUpdate() = {}".format(self.__class__.__name__,
-                                                             self.__needs_update))
-        return self.__needs_update
-
-    def needsInitialize(self):
-        """
-        Return True if the object requires an _initialize method call. (public)
-        """
-        mooseutils.mooseDebug("{}.needsInitialize() = {}".format(self.__class__.__name__,
-                                                                 self.__needs_initialize))
-        return self.__needs_initialize
-
-    def update(self, initialize=True, **kwargs):
+    def update(self, **kwargs):
         """
         Update method should contain calls to underlying vtk objects. (public)
 
         Inputs:
             initialize[bool]: When True the initialize() method will be called, but only if needed.
         """
-        if self.__needs_initialize and initialize:
-            self.initialize()
         mooseutils.mooseDebug("{}.update()".format(self.__class__.__name__))
-        self.setOptions(**kwargs)
-        self.setNeedsUpdate(False)
+        self._options.update(**kwargs)
 
     def isOptionValid(self, name):
         """
@@ -80,10 +72,20 @@ class ChiggerObject(object):
         """
         Return the value of an option. (public)
 
-        Inputs:
+        Inputs:d
             name[str]: The name of the option to retrieve
         """
-        return self._options[name]
+        if name not in self._options:
+            msg = "The {} object does not contain the '{}' option.".format(self.title(), name)
+            mooseutils.mooseWarning(msg)
+            return None
+        return self._options.get(name)
+
+    def applyOption(self, name):
+        """
+        Returns the option and sets the apply
+        """
+        return self._options.applyOption(name)
 
     def setOption(self, name, value):
         """
@@ -93,10 +95,7 @@ class ChiggerObject(object):
             name[str]: The name of the option to retrieve
             value: The value to set the option to
         """
-        changed = (self._options[name] != value)
-        if changed:
-            self._options[name] = value
-            self.setNeedsUpdate(True)
+        self._options.set(name, value)
 
     def setOptions(self, *args, **kwargs):
         """
@@ -104,87 +103,42 @@ class ChiggerObject(object):
 
         Usage:
            setOptions(sub0, sub1, ..., key0=value0, key1=value1, ...)
-           Updates all suboptions with the provided key value pairs
+           Updates all sub-options with the provided key value pairs
 
            setOptions(key0=value0, key1=value1, ...)
            Updates the main options with the provided key,value pairs
         """
-
         # Sub-options case
-        changed = [self.needsUpdate()] # default changed status to the current status
-        if len(args) > 0:
+        if args:
             for sub in args:
-                if (self._options.hasOption(sub)) and isinstance(self.getOption(sub),
-                                                                 utils.Options):
-                    changed.append(self._options[sub].update(**kwargs))
-                elif isinstance(sub, utils.Options):
-                    changed.append(self._options.update(sub))
+                if not self.options().hasOption(sub):
+                    mooseutils.mooseError("The supplied sub-option '{}' does not exist.".format(sub))
+                self._options.get(sub).update(**kwargs)
+
         # Main options case
         else:
-            changed.append(self._options.update(**kwargs))
+            self._options.update(**kwargs)
 
-        changed = any(changed)
-        self.setNeedsUpdate(changed)
-        return changed
-
-    def updateOptions(self, *args):
+    def printOption(self, name):
         """
-        Apply the supplied option objects to this object and the contained ChiggerFilterSourceBase
-        objects. (override)
+        Print the title of the object with the setOptions key, value pair for the supplied option.
 
         Inputs:
-            see ChiggerResultBase
+            name[str]: The name of the option to display.
         """
-        changed = [self.needsUpdate()]
-        for sub in args:
-            changed.append(self._options.update(sub))
-        changed = any(changed)
-        self.setNeedsUpdate(changed)
-        return changed
+        print '{}:{}={}'.format(self.title(), name, repr(self.getOption(name)))
 
-    def reset(self):
+    def printOptions(self):
         """
-        Reset initialization flag, so the _initialize method will be called again on next update.
+        Print a list of all available options for this object.
         """
-        self.__needs_initialize = True
+        print self._options
 
-    def initialize(self):
+    def printSetOptions(self):
         """
-        Initialize method that runs once when update() is first called. (protected)
+        Print python code for the 'setOptions' method.
         """
-        mooseutils.mooseDebug("{}.initialize()".format(self.__class__.__name__))
-        self.__needs_initialize = False
-        self._setInitialOptions()
-
-    def _setInitialOptions(self):
-        """
-        Method for applying the options passed to constructor, this is called by the
-        initialize() method automatically.
-        """
-        if self.__initial_options:
-            self.setOptions(**self.__initial_options)
-            self.__initial_options = None
-
-    def setNeedsUpdate(self, value):
-        """
-        Set the value of the need update flag. (protected)
-
-        Inputs:
-            value[bool]: The value for the update flag.
-        """
-        mooseutils.mooseDebug("{}.setNeedsUpdate({})".format(self.__class__.__name__, value))
-        self.__needs_update = value
-
-    def _setNeedsInitialize(self, value):
-        """
-        Set the initialize flag for the _initialize method. (protected)
-        """
-        mooseutils.mooseDebug("{}._setNeedsInitialize({})".format(self.__class__.__name__, value))
-        self.__needs_initialize = value
-
-    def checkUpdateState(self):
-        """
-        Checks if the object needs update and performs updated, if needed.
-        """
-        if self.needsUpdate():
-            self.update()
+        output, sub_output = self._options.toScriptString()
+        print 'setOptions({})'.format(', '.join(output))
+        for key, value in sub_output.iteritems():
+            print 'setOptions({}, {})'.format(key, ', '.join(repr(value)))

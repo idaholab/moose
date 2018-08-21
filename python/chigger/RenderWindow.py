@@ -9,12 +9,19 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import sys
 import vtk
 
 import base
 import observers
+import geometric
 import misc
 import mooseutils
+
+class ChiggerInteractorStyle(vtk.vtkInteractorStyleUser):
+    def OnKeyPress(self, *args, **kwargs):
+        print 'hello'
+        pass
 
 
 class RenderWindow(base.ChiggerObject):
@@ -24,47 +31,58 @@ class RenderWindow(base.ChiggerObject):
     RESULT_TYPE = base.ChiggerResultBase
 
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerObject.getOptions()
+    def validOptions():
+        opt = base.ChiggerObject.validOptions()
 
-        opt.add('size', [960, 540], "The size of the window, expects a list of two items",
-                vtype=list)
-        opt.add('style', 'interactive', "The interaction style.",
-                allow=['interactive', 'modal', 'interactive2D'])
-        opt.add('test', False, "When True the interaction is disabled and the window closes "
-                               "immediately after rendering.")
-        opt.add('offscreen', False, "Enable offscreen rendering.")
-        opt.add('chigger', False, "Places a chigger logo in the lower left corner.")
-        opt.add('smoothing', False, "Enable VTK render window smoothing options.")
-        opt.add('multisamples', None, "Set the number of multi-samples.", vtype=int)
-        opt.add('antialiasing', 0, "Number of antialiasing frames to perform "
-                                   "(set vtkRenderWindow::SetAAFrames).", vtype=int)
+        opt.add('size', default=(960, 540), vtype=int, size=2,
+                doc="The size of the window, expects a list of two items")
+        opt.add('style', default='interactive', vtype=str,
+                allow=('interactive', 'modal', 'interactive2D'),
+                doc="The interaction style ('interactive' enables 3D interaction, 'interactive2D' " \
+                    "disables out-of-plane interaction, and 'modal' disables all interaction.")
+        opt.add('test', default='--test' in sys.argv, vtype=bool,
+                doc="When True the interaction is disabled and the window closes immediately " \
+                    "after rendering.")
+        opt.add('offscreen', default=False, vtype=bool,
+                doc="Enable offscreen rendering.")
+        #opt.add('chigger', False, "Places a chigger logo in the lower left corner.") #TODO
+        opt.add('smoothing', default=False, vtype=bool,
+                doc="Enable VTK render window smoothing options.")
+        opt.add('multisamples', vtype=int,
+                doc="Set the number of multi-samples.")
+        opt.add('antialiasing', default=0, vtype=int,
+                doc="Number of antialiasing frames to perform (set vtkRenderWindow::SetAAFrames).")
 
         # Observers
-        opt.add('observers', [], "A list of ChiggerObserver objects, once added they are not " \
-                                 "removed. Hence, changing the observers in this list will not " \
-                                 "remove existing objects.")
+        opt.add('observers', default=[], vtype=list,
+                doc="A list of ChiggerObserver objects, once added they are not " \
+                    "removed. Hence, changing the observers in this list will not " \
+                    "remove existing objects.")
 
         # Background settings
-        background = misc.ChiggerBackground.getOptions()
-        background.pop('layer')
-        background.pop('camera')
-        background.pop('viewport')
+        background = misc.ChiggerBackground.validOptions()
+        background.remove('layer')
+        background.remove('camera')
+        background.remove('viewport')
         opt += background
         return opt
 
     def __init__(self, *args, **kwargs):
-
         self.__vtkwindow = kwargs.pop('vtkwindow', vtk.vtkRenderWindow())
         self.__vtkinteractor = kwargs.pop('vtkinteractor', None)
+        self.__vtkinteractorstyle = None
 
         super(RenderWindow, self).__init__(**kwargs)
 
-        self._results = [misc.ChiggerBackground()]
+        self._results = []
+        self._observers = set()
         self.__active = None
+        self.__highlight = None
 
         # Store the supplied result objects
-        self.append(*args)
+        self.__background = misc.ChiggerBackground()
+        self.append(self.__background, *args)
+        self.setActive(None)
 
     def __contains__(self, item):
         """
@@ -78,6 +96,12 @@ class RenderWindow(base.ChiggerObject):
         """
         return self.__vtkinteractor
 
+    def getVTKInteractorStyle(self):
+        """
+        Return the vtkInteractor object.
+        """
+        return self.__vtkinteractorstyle
+
     def getVTKWindow(self):
         """
         Return the vtkRenderWindow object.
@@ -88,7 +112,6 @@ class RenderWindow(base.ChiggerObject):
         """
         Append result object(s) to the window.
         """
-        self.setNeedsUpdate(True)
         for result in args:
             mooseutils.mooseDebug('RenderWindow.append {}'.format(type(result).__name__))
             if isinstance(result, base.ResultGroup):
@@ -99,49 +122,95 @@ class RenderWindow(base.ChiggerObject):
                 msg = 'The supplied result type of {} must be of type {}.'.format(n, t)
                 raise mooseutils.MooseException(msg)
             self._results.append(result)
+            result.setRenderWindow(self)
 
     def remove(self, *args):
         """
         Remove result object(s) from the window.
         """
-        self.setNeedsUpdate(True)
         for result in args:
-            if self.__vtkwindow.HasRenderer(result.getVTKRenderer()):
+            actors = result.getVTKRenderer().GetActors()
+            for source in result.getSources():
+                result.getVTKRenderer().RemoveActor(source.getVTKActor())
+
+            if result.getVTKRenderer().GetActors().GetNumberOfItems() == 0:
                 self.__vtkwindow.RemoveRenderer(result.getVTKRenderer())
             if result in self._results:
                 self._results.remove(result)
 
         # Reset active if it was removed
         if self.__active and (self.__active not in self._results):
-            self.__active = None
+            self.setActive(None)
+
+        self.update()
 
     def clear(self):
         """
         Remove all objects from the render window.
         """
-        self.remove(*self._results)
-        self.append(misc.ChiggerBackground())
+        self.remove(*self._results[1:])
         self.update()
-
-    def needsUpdate(self):
-        """
-        Returns True if the window or any of the child objects require update.
-        """
-        needs_update = base.ChiggerObject.needsUpdate(self)
-        return needs_update or any([result.needsUpdate() for result in self._results])
 
     def setActive(self, result):
         """
         Set the active result object for interaction.
         """
-        if result not in self._results:
-            mooseutils.mooseError("The active result must be added to the RendererWindow prior to "
-                                  "setting it as active.")
-            return
+        if self.__active is not None:
+            self.__active.getVTKRenderer().SetInteractive(False)
 
-        self.__active = result
-        if self.__vtkinteractor:
-            self.__vtkinteractor.GetInteractorStyle().SetDefaultRenderer(result.getVTKRenderer())
+            if self.__highlight is not None:
+                self.remove(self.__highlight)
+                self.__highlight = None
+
+            if hasattr(self.__active, 'onHighlight'):
+                self.__active.onHighlight(self, False)
+
+        if result is None:
+            self.__active = None
+            self.__background.getVTKRenderer().SetInteractive(True)
+            if self.getVTKInteractorStyle():
+                self.getVTKInteractorStyle().SetCurrentRenderer(self.__background.getVTKRenderer())
+                self.getVTKInteractorStyle().SetEnabled(False)
+            print 'No active object.'
+
+        else:
+            self.__active = result
+            if self.getVTKInteractorStyle():
+                self.getVTKInteractorStyle().SetEnabled(True)
+                self.getVTKInteractorStyle().SetCurrentRenderer(self.__active.getVTKRenderer())
+
+
+                if hasattr(self.__active, 'onHighlight'):
+                    self.__active.onHighlight(self, True)
+                else:
+                    # Creates a OutlineResult to higlight the data. The original version of this
+                    # relied on the VTK based HighlightProp. However, the highlighting for 2D objects
+                    # was not very good.
+                    self.__highlight = geometric.OutlineResult(self.__active, interactive=False,
+                                                               color=(1,0,0), line_width=5)
+                    self.append(self.__highlight)
+
+                print 'Activated: {}'.format(self.__active.title())
+
+
+            self.__active.getVTKRenderer().SetInteractive(True)
+
+    def nextActive(self, reverse=False):
+
+        step = 1 if not reverse else -1
+        available = [result for result in self._results if result.getOption('interactive')]
+        if (self.__active is None) and step == 1:
+            self.setActive(available[0])
+        elif (self.__active is None) and step == -1:
+            self.setActive(available[-1])
+        else:
+            n = len(available)
+            index = available.index(self.__active)
+            index += step
+            if (index == n) or (index == -1):
+                self.setActive(None)
+            else:
+                self.setActive(available[index])
 
     def getActive(self):
         """
@@ -159,15 +228,14 @@ class RenderWindow(base.ChiggerObject):
 
         mooseutils.mooseDebug("{}.start()".format(self.__class__.__name__), color='MAGENTA')
 
-        if self.needsUpdate():
-            self.update()
+        self.update()
 
         if self.__vtkinteractor:
             self.__vtkinteractor.Initialize()
             self.__vtkinteractor.Start()
 
-        if self.getOption('style') == 'test':
-            self.__vtkwindow.Finalize()
+        #if self.getOption('style') == 'test':
+        #    self.__vtkwindow.Finalize()
 
     def update(self, **kwargs):
         """
@@ -186,15 +254,23 @@ class RenderWindow(base.ChiggerObject):
             style = self.getOption('style').lower()
             self.setOption('style', None) # avoids calling this function unless it changes
             if style == 'interactive':
-                b = base.KeyPressInteractorStyle(self.__vtkinteractor)
-                self.__vtkinteractor.SetInteractorStyle(b)
+                self.__vtkinteractorstyle = vtk.vtkInteractorStyleJoystickCamera()
             elif style == 'interactive2d':
-                self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
+                self.__vtkinteractorstyle = vtk.vtkInteractorStyleImage()
             elif style == 'modal':
-                self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleUser())
+                self.__vtkinteractorstyle = vtk.vtkInteractorStyleUser()
+
+            self.__vtkinteractor.SetInteractorStyle(self.__vtkinteractorstyle)
+            self.__vtkinteractor.RemoveObservers(vtk.vtkCommand.CharEvent)
+
+            main_observer = observers.MainWindowObserver()
+            main_observer.init(self)
+            self._observers.add(main_observer)
 
         # Background settings
-        self._results[0].updateOptions(self._options)
+        self._results[0].update(background=self._options.get('background'),
+                                background2=self._options.get('background2'),
+                                gradient_background=self._options.get('gradient_background'))
 
         # vtkRenderWindow Settings
         if self.isOptionValid('offscreen'):
@@ -213,9 +289,7 @@ class RenderWindow(base.ChiggerObject):
             self.__vtkwindow.SetMultiSamples(self.getOption('multisamples'))
 
         if self.isOptionValid('size'):
-            self.__vtkwindow.SetSize(self.getOption('size'))
-
-        self.__vtkwindow.Render()
+            self.__vtkwindow.SetSize(self.applyOption('size'))
 
         # Setup the result objects
         n = self.__vtkwindow.GetNumberOfLayers()
@@ -223,26 +297,35 @@ class RenderWindow(base.ChiggerObject):
             renderer = result.getVTKRenderer()
             if not self.__vtkwindow.HasRenderer(renderer):
                 self.__vtkwindow.AddRenderer(renderer)
-            if result.needsUpdate():
-                result.update()
+            result.update()
             n = max(n, renderer.GetLayer() + 1)
-        self.__vtkwindow.SetNumberOfLayers(n)
 
-        if (self.__active is None) and len(self._results) > 1:
-            self.setActive(self._results[1])
+        # TODO: set if changed only
+        self.__vtkwindow.SetNumberOfLayers(n)
 
         # Observers
         if self.__vtkinteractor:
+
             for observer in self.getOption('observers'):
                 if not isinstance(observer, observers.ChiggerObserver):
                     msg = "The supplied observer of type {} must be a {} object."
                     raise mooseutils.MooseException(msg.format(type(observer),
                                                                observers.ChiggerObserver))
 
-                elif not observer.isActive() is None:
+                if observer not in self._observers:
                     observer.init(self)
+                    self._observers.add(observer)
+
+        for result in self._results:
+            result.update()
 
         self.__vtkwindow.Render()
+
+        for result in self._results:
+            if result.isOptionValid('camera'):
+                result.getVTKRenderer().ResetCameraClippingRange()
+            else:
+                result.getVTKRenderer().ResetCamera()
 
     def resetCamera(self):
         """
@@ -254,14 +337,19 @@ class RenderWindow(base.ChiggerObject):
         for result in self._results:
             result.getVTKRenderer().ResetCamera()
 
+    def resetClippingRange(self):
+        """
+        Resets all the clipping range for open cameras.
+        """
+        for result in self._results:
+            result.getVTKRenderer().ResetCameraClippingRange()
+
     def write(self, filename, dialog=False, **kwargs):
         """
         Writes the VTKWindow to an image.
         """
         mooseutils.mooseDebug('RenderWindow.write()', color='MAGENTA')
-
-        if self.needsUpdate() or kwargs:
-            self.update(**kwargs)
+        self.update(**kwargs)
 
         # Allowed extensions and the associated readers
         writers = dict()
@@ -289,6 +377,8 @@ class RenderWindow(base.ChiggerObject):
         # Build a filter for writing an image
         window_filter = vtk.vtkWindowToImageFilter()
         window_filter.SetInput(self.__vtkwindow)
+        if self.__background.getOption('background') is None:
+            window_filter.SetInputBufferTypeToRGBA()
         window_filter.Update()
 
         # Write it

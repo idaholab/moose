@@ -3,10 +3,18 @@
     type = ImageDiff
     command = background.py
     imagediff = background.png
+    cli_args = '--test'
   [../]
   [./gradient]
     type = ImageDiff
     command = gradient.py
     imagediff = gradient.png
+    cli_args = '--test'
+  [../]
+  [./transparent]
+    type = ImageDiff
+    command = transparent.py
+    imagediff = transparent.png
+    cli_args = '--test'
   [../]
 []

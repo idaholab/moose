@@ -24,10 +24,10 @@ for f in files:
 base_file = '../input/step10_micro_out.e'
 shutil.copy(base_file, 'new_file_adapt.e')
 reader = chigger.exodus.ExodusReader('new_file_adapt.e')
-mug = chigger.exodus.ExodusResult(reader, variable='phi', range=[0, 1], cmap='viridis')
+mug = chigger.exodus.ExodusResult(reader, variable='phi', range=(0, 1), cmap='viridis')
 
 # Create the window
-window = chigger.RenderWindow(mug, size=[600,600], test=True)
+window = chigger.RenderWindow(mug, size=(600,600), test=True)
 
 # Render the results and write a file
 suffix = ['-s002', '-s003', '-s004', '-s005', '-s006', '-s007', '-s008', '-s009']

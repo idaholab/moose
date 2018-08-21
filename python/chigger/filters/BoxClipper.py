@@ -19,10 +19,12 @@ class BoxClipper(ClipperFilterBase):
     """
 
     @staticmethod
-    def getOptions():
-        opt = ClipperFilterBase.getOptions()
-        opt.add('lower', [0.5, 0.5, 0.5], "The outward normal of the clipping plane.")
-        opt.add('upper', [1, 1, 1], "The origin of the clipping plane.")
+    def validOptions():
+        opt = ClipperFilterBase.validOptions()
+        opt.add('lower', default=(0.5, 0.5, 0.5), size=3, vtype=float,
+                doc="The outward normal of the clipping plane.")
+        opt.add('upper', default=(1, 1, 1), size=3, vtype=float,
+                doc="The origin of the clipping plane.")
         return opt
 
     def __init__(self, **kwargs):
@@ -33,7 +35,10 @@ class BoxClipper(ClipperFilterBase):
         Update the bounds of the clipping box.
         """
         super(BoxClipper, self).update(**kwargs)
-        lower = self.getPosition(self.getOption('lower'))
-        upper = self.getPosition(self.getOption('upper'))
-        self._vtkclipfunction.SetXMin(lower)
-        self._vtkclipfunction.SetXMax(upper)
+        if self.isOptionValid('lower'):
+            lower = self.getPosition(list(self.applyOption('lower')))
+            self._vtkclipfunction.SetXMin(lower)
+
+        if self.isOptionValid('upper'):
+            upper = self.getPosition(list(self.getOption('upper')))
+            self._vtkclipfunction.SetXMax(upper)

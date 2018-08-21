@@ -19,6 +19,6 @@ camera.SetFocalPoint(0.16947273724857123, 0.07124492441302266, -0.00156940437060
 
 reader = chigger.exodus.ExodusReader('../../input/mug_blocks_out.e')
 mug = chigger.exodus.ExodusResult(reader, variable='convected', cmap='viridis', camera=camera)
-window = chigger.RenderWindow(mug, size=[300,300], test=True)
+window = chigger.RenderWindow(mug, size=(300,300), test=True)
 window.write('default.png')
 window.start()

@@ -10,24 +10,23 @@
 
 from Options import Options
 
-def get_options():
+def validOptions():
     """
     Returns options for vtk fonts.
     """
     opt = Options()
-    opt.add('text_color', [1, 1, 1], "The text color.")
-    opt.add('text_shadow', False, "Toggle text shadow.")
-    opt.add('justification', 'left', "Set the font justification.",
-            allow=['left', 'center', 'right'])
+    opt.add('text_color', (1., 1., 1.), "The text color.", vtype=float, size=3)
+    opt.add('text_shadow', False, "Toggle text shadow.", vtype=bool)
+    opt.add('justification', 'left', "Set the font justification.", vtype=str,
+            allow=('left', 'center', 'right'))
     opt.add('vertical_justification', 'bottom', "The vertical text justification.",
-            allow=['bottom', 'middle', 'top'])
-    opt.add('text_opacity', 1, "The text opacity.", vtype=float)
-    opt.add('text', None, "The text to display.", vtype=str)
+            allow=('bottom', 'middle', 'top'))
+    opt.add('text_opacity', 1., "The text opacity.", vtype=float)
     opt.add('font_size', 24, "The text font size.", vtype=int)
     return opt
 
 
-def set_options(tprop, options):
+def applyOptions(tprop, options):
     """
     Applies font options to vtkTextProperty object.
 
@@ -37,21 +36,21 @@ def set_options(tprop, options):
     """
 
     if options.isOptionValid('text_color'):
-        tprop.SetColor(options['text_color'])
+        tprop.SetColor(options.applyOption('text_color'))
 
     if options.isOptionValid('text_shadow'):
-        tprop.SetShadow(options['text_shadow'])
+        tprop.SetShadow(options.applyOption('text_shadow'))
 
     if options.isOptionValid('justification'):
-        idx = options.raw('justification').allow.index(options['justification'])
+        idx = options.raw('justification').allow.index(options.applyOption('justification'))
         tprop.SetJustification(idx)
 
     if options.isOptionValid('vertical_justification'):
-        idx = options.raw('vertical_justification').allow.index(options['vertical_justification'])
+        idx = options.raw('vertical_justification').allow.index(options.applyOption('vertical_justification'))
         tprop.SetVerticalJustification(idx)
 
     if options.isOptionValid('text_opacity'):
-        tprop.SetOpacity(options['text_opacity'])
+        tprop.SetOpacity(options.applyOption('text_opacity'))
 
     if options.isOptionValid('font_size'):
-        tprop.SetFontSize(options['font_size'])
+        tprop.SetFontSize(options.applyOption('font_size'))

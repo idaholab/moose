@@ -26,13 +26,14 @@ class LabelExodusSource(base.ChiggerSource2D):
     FILTER_TYPES = [filters.IdFilter, filters.CellCenters, filters.SelectVisiblePoints]
 
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerSource2D().getOptions()
-        opt += utils.FontOptions.get_options()
-        opt.add('label_type', 'variable', "Specify the type of label to create.", vtype=str,
-                allow=['point', 'cell', 'variable'])
-        opt.setDefault('justification', 'center')
-        opt.setDefault('vertical_justification', 'middle')
+    def validOptions():
+        opt = base.ChiggerSource2D().validOptions()
+        opt += utils.FontOptions.validOptions()
+        opt.add('label_type', default='variable', vtype=str,
+                doc="Specify the type of label to create.",
+                allow=('point', 'cell', 'variable'))
+        opt.set('justification', 'center')
+        opt.set('vertical_justification', 'middle')
         return opt
 
     def __init__(self, exodus_source, **kwargs):
@@ -59,12 +60,7 @@ class LabelExodusSource(base.ChiggerSource2D):
         Update the settings for this object.
         """
 
-        # Update the ExodusSource object to be labeled
-        if self._exodus_source.needsUpdate():
-            self._exodus_source.update()
-
         # Apply options (update can't be called here b/c the required filters need to be set first)
-        self._setInitialOptions()
         self.setOptions(**kwargs)
 
         # Update the required filters based on the label type.
@@ -92,4 +88,4 @@ class LabelExodusSource(base.ChiggerSource2D):
         self._required_filters[-1].getVTKFilter().SetRenderer(self._vtkrenderer)
 
         # Update fonts
-        utils.FontOptions.set_options(self._vtkmapper.GetLabelTextProperty(), self._options)
+        utils.FontOptions.applyOptions(self._vtkmapper.GetLabelTextProperty(), self._options)

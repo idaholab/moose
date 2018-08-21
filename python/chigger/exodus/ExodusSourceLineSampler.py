@@ -20,10 +20,10 @@ class ExodusSourceLineSampler(geometric.LineSource):
     """
 
     @staticmethod
-    def getOptions():
-        opt = geometric.LineSource.getOptions()
-        opt.setDefault('point1', None)
-        opt.setDefault('point2', None)
+    def validOptions():
+        opt = geometric.LineSource.validOptions()
+        opt.set('point1', None)
+        opt.set('point2', None)
         return opt
 
     def __init__(self, exodus_source, **kwargs):
@@ -38,51 +38,46 @@ class ExodusSourceLineSampler(geometric.LineSource):
 
         self._probe = vtk.vtkCompositeDataProbeFilter()
 
-    def setOptions(self, *args, **kwargs):
-        """
-        Sets point1/point2 defaults.
-        """
-        super(ExodusSourceLineSampler, self).setOptions(*args, **kwargs)
-
-        bounds = self._exodus_source.getBounds()
-        if not self.isOptionValid('point1'):
-            self.setOption('point1', bounds[0])
-        if not self.isOptionValid('point2'):
-            self.setOption('point2', bounds[1])
-
     def update(self, **kwargs):
         """
         Update the probe to extract the desired data.
         """
         super(ExodusSourceLineSampler, self).update(**kwargs)
 
-        self._exodus_source.checkUpdateState()
+        # Set the default points to the corners of the bounding box
+        bnds = self._exodus_source.getBounds()
+        if self.getOption('point1') is None:
+            self._vtksource.SetPoint1((bnds[0], bnds[2], bnds[4]))
+        if self.getOption('point2') is None:
+            self._vtksource.SetPoint2((bnds[1], bnds[3], bnds[5]))
 
-        if self.isOptionValid('resolution'):
-            n = self.getOption('resolution')
-            p0 = self.getOption('point1')
-            p1 = self.getOption('point2')
-            dist = np.linalg.norm(np.array(p1) - np.array(p0))
-            self._distance = list(np.linspace(0, dist, num=n))
+        # Compute the distance
+        n = self.getOption('resolution')
+        self._vtksource.Update()
+        p0 = self._vtksource.GetPoint1()
+        p1 = self._vtksource.GetPoint2()
+        dist = np.linalg.norm(np.array(p1) - np.array(p0))
+        self._distance = list(np.linspace(0, dist, num=n))
 
         self._probe.PassCellArraysOn()
         self._probe.SetInputConnection(self.getVTKSource().GetOutputPort())
         f = self._exodus_source.getFilters()[-1].getVTKFilter().GetOutputPort()
         self._probe.SetSourceConnection(f)
+        self._probe.Update()
+
 
     def getDistance(self):
         """
         Return the distance array.
         """
-        self.checkUpdateState()
+        self.update()
         return self._distance
 
     def getSample(self, variable):
         """
         Return the sampled data for the given variable.
         """
-        self.checkUpdateState()
-        self._probe.Update()
+        self.update()
 
         # Return data
         if self._probe.GetOutput().GetPointData().HasArray(variable):

@@ -12,16 +12,16 @@
 import chigger
 
 n = 3
-line0 = chigger.graphs.Line(marker='circle', color=[0,0,1])
-line1 = chigger.graphs.Line(marker='plus', color=[0,1,0], corner='right-top')
+line0 = chigger.graphs.Line(marker='circle', color=(0,0,1))
+line1 = chigger.graphs.Line(marker='plus', color=(0,1,0), corner='right-top')
 graph = chigger.graphs.Graph(line0, line1)
-graph.setOptions('xaxis', lim=[0,n])
-graph.setOptions('yaxis', lim=[0,n])
-graph.setOptions('x2axis', lim=[0,n])
-graph.setOptions('y2axis', lim=[0,n])
+graph.setOptions('xaxis', lim=(0,n))
+graph.setOptions('yaxis', lim=(0,n))
+graph.setOptions('x2axis', lim=(0,n))
+graph.setOptions('y2axis', lim=(0,n))
 graph.setOptions('legend', visible=False)
 
-window = chigger.RenderWindow(graph, size=[300,300], test=True)
+window = chigger.RenderWindow(graph, size=(300,300), test=True)
 window.write('secondary_initial.png')
 
 for i in range(n+1):

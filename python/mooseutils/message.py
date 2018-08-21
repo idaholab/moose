@@ -20,7 +20,7 @@ except:
 """
 Global for enabling/disabling debug mode.
 """
-MOOSE_DEBUG_MODE = os.environ.get("MOOSE_PYTHON_DEBUG_MODE") == "1"
+MOOSE_DEBUG_MODE = os.environ.get("MOOSE_PYTHON_DEBUG_MODE", None) == "1"
 
 """
 Global for enabling/disabling testing mode.

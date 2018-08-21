@@ -20,8 +20,9 @@ camera.SetFocalPoint(0.0000, 0.0000, -0.7582)
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
 
 contour = chigger.filters.ContourFilter()
-result = chigger.exodus.ExodusResult(reader, variable='diffused', camera=camera, block=['76'], filters=[contour])
+result = chigger.exodus.ExodusResult(reader, variable='diffused', camera=camera,
+                                     block=('76',), filters=[contour])
 
-window = chigger.RenderWindow(result, size=[300,300], test=True)
+window = chigger.RenderWindow(result, size=(300,300), test=True)
 window.write('block.png')
 window.start()

@@ -21,8 +21,6 @@ camera.SetFocalPoint(0.5000, 0.5000, 0.5000)
 reader = chigger.exodus.NemesisReader('../input/nemesis.e.3.*')
 multiapp = chigger.exodus.ExodusResult(reader, variable='u', camera=camera)
 
-window = chigger.RenderWindow(multiapp, size=[300,300], test=True)
-window.update()
-window.resetCamera() # TODO: This is needed to re-center the object, not sure why
+window = chigger.RenderWindow(multiapp, size=(300,300), test=True)
 window.write('nemesis.png')
 window.start()

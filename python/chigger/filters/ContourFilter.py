@@ -18,12 +18,14 @@ class ContourFilter(ChiggerFilterBase):
     """
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerFilterBase.getOptions()
-        opt.add('count', 10, "The number of contours to be automatically generated between the "
-                             "specified range.", vtype=int)
-        opt.add('levels', None, "Explicitly define the contour levels, if this options is "
-                                "provided 'count' is ignored.", vtype=list)
+    def validOptions():
+        opt = ChiggerFilterBase.validOptions()
+        opt.add('count', default=10, vtype=int,
+                doc="The number of contours to be automatically generated between the "
+                    "specified range.")
+        opt.add('levels', vtype=float, array=True,
+                doc="Explicitly define the contour levels, if this options is "
+                    "provided 'count' is ignored.")
         return opt
 
     def __init__(self, **kwargs):
@@ -44,13 +46,11 @@ class ContourFilter(ChiggerFilterBase):
                                                varinfo.name)
 
         if self.isOptionValid('levels'):
-            levels = self.getOption('levels')
+            levels = self.applyOption('levels')
             n = len(levels)
             self._vtkfilter.SetNumberOfContours(n)
             for i in range(n):
                 self._vtkfilter.SetValue(i, levels[i])
-        elif self.isOptionValid('count'):
+        elif self.isOptionValid('count') and (self.getOption('levels') is None):
             rng = self._source.getVTKMapper().GetScalarRange()
-            self._vtkfilter.GenerateValues(self.getOption('count'), rng)
-        else:
-            mooseutils.MooseException('Either the "levels" or the "count" options must be used.')
+            self._vtkfilter.GenerateValues(self.applyOption('count'), rng)

@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+#Lpylint: disable=missing-docstring
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -20,9 +20,9 @@ class LabelExodusResult(base.ChiggerResult):
         result[ExodusResult]: The result object to label.
     """
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerResult.getOptions()
-        opt += LabelExodusSource.getOptions()
+    def validOptions():
+        opt = base.ChiggerResult.validOptions()
+        opt += LabelExodusSource.validOptions()
         return opt
 
     def __init__(self, exodus_result, **kwargs):

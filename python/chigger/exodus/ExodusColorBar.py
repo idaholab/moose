@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mooseutils
+from .. import base
 from .. import misc
 
 class ExodusColorBar(misc.ColorBar):
@@ -19,22 +20,20 @@ class ExodusColorBar(misc.ColorBar):
         result0: The ExodusResult objects for the primary axis.
         result1: (Optional) The ExodusResult for the secondary axis.
     """
-
-    AXIS_NAMES = ['primary', 'secondary']
-
     @staticmethod
-    def getOptions():
-        opt = misc.ColorBar.getOptions()
-        opt.setDefault('viewport', None)
+    def validOptions():
+        opt = misc.ColorBar.validOptions()
+        opt.set('viewport', None)
+        opt.set('layer', None)
         return opt
 
     def __init__(self, *results, **kwargs):
-        super(ExodusColorBar, self).__init__(**kwargs)
-
         self._results = results
         if len(results) not in [1, 2]:
             raise mooseutils.MooseException('One or two ExodusResult objects must be supplied to '
                                             'the ExodusColorBar')
+
+        super(ExodusColorBar, self).__init__(**kwargs)
 
     def getResult(self, index=0):
         """
@@ -48,24 +47,18 @@ class ExodusColorBar(misc.ColorBar):
         """
         Update the supplied options and apply the colormap options from the ExodusResult.
         """
-        opts = ['cmap', 'cmap_reverse', 'cmap_num_colors', 'cmap_range']
-        cmap_options = {key:self._results[0].getOption(key) for key in opts}
-        kwargs.update(cmap_options)
+        if not args:
+            opts = base.ColorMap.validOptions()
+            for i, result in enumerate(self._results):
+                for key, value in opts.iteritems():
+                    kwargs[key] = result.getOption(key)
+
+            if self.getOption('viewport') is None:
+                self.setOption('viewport', self._results[0].getOption('viewport'))
+            if self.getOption('layer') is None:
+                self.setOption('layer', self._results[0].getOption('layer'))
 
         super(ExodusColorBar, self).setOptions(*args, **kwargs)
-
-    def needsUpdate(self):
-        """
-        Check if the result ranges has changed.
-        """
-        for i, result in enumerate(self._results):
-            axis_options = self.getOption(self.AXIS_NAMES[i])
-            rng = result[0].getVTKMapper().GetScalarRange()
-            if rng != axis_options['lim']:
-                return True
-
-        return super(ExodusColorBar, self).needsUpdate() or \
-               any([result.needsUpdate() for result in self._results])
 
     def update(self, **kwargs):
         """
@@ -73,32 +66,25 @@ class ExodusColorBar(misc.ColorBar):
         colorbar.
         """
 
-        # Set the options provided
-        self.setOptions(**kwargs)
-        if self.needsInitialize():
-            self.initialize()
+        n = len(self._results)
+        primary = self.getOption('primary')
+        secondary = self.getOption('secondary')
 
-        # The results must be updated for the settings to be applied below
-        for result in self._results:
-            if result.needsUpdate():
-                result.update()
+        def set_axis_options_helper(ax, result):
+            """Helper for setting axis options."""
+            ax.set('lim', result[0].getVTKMapper().GetScalarRange())
+            if (not ax.isOptionValid('title')) and (ax.get('title') is None):
+                ax.set('title', result[0].getVTKMapper().GetArrayName())
 
-        # Enable the secondary if two results provided
-        if len(self._results) == 2:
-            self.getOption(self.AXIS_NAMES[1])['visible'] = True
+        # Primary
+        if n > 0:
+            set_axis_options_helper(primary, self._results[0])
 
-        # Apply settings from results
-        for i, result in enumerate(self._results):
+        # Secondary
+        if n == 2:
+            set_axis_options_helper(secondary, self._results[1])
+            secondary.set('visible', True)
 
-            # Set the range for the axis' and titles
-            axis_options = self.getOption(self.AXIS_NAMES[i])
-            axis_options['lim'] = list(result[0].getVTKMapper().GetScalarRange())
-            if not axis_options.isOptionValid('title'):
-                self._sources[i+1].getVTKSource().SetTitle(result[0].getVTKMapper().GetArrayName())
-
-            # Viewport
-            if not self.isOptionValid('viewport'):
-                self.setOption('viewport', result.getOption('viewport'))
-            self.setOption('layer', result.getOption('layer'))
-
+        self.setOption('primary', primary)
+        self.setOption('secondary', secondary)
         super(ExodusColorBar, self).update(**kwargs)

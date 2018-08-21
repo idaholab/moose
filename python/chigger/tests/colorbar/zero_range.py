@@ -13,6 +13,6 @@ import chigger
 reader = chigger.exodus.ExodusReader('../input/zero_variable.e')
 mug = chigger.exodus.ExodusResult(reader, cmap='viridis', variable='zero')
 cbar = chigger.exodus.ExodusColorBar(mug)
-window = chigger.RenderWindow(mug, cbar, size=[600,400], test=True)
+window = chigger.RenderWindow(mug, cbar, size=(600,400), test=True)
 window.write('zero_range.png')
 window.start()

@@ -18,25 +18,28 @@ class Line(base.ChiggerObject):
     """
 
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerObject.getOptions()
-        opt.add('x', [], "The x-axis data.")
-        opt.add('y', [], "The y-axis data.")
-        opt.add('label', "The plot label (name appearing in legend).", vtype=str)
-        opt.add('style', '-', "The line style.", allow=['none', '-'])
-        opt.add('color', "The color of the line to plot.", vtype=list)
-        opt.add('width', "The width of the line in Points.", vtype=int)
-        opt.add('corner', 'left-bottom', "The axis corner to place the line.",
-                allow=['left-bottom', 'right-bottom', 'right-top', 'left-top'])
-        opt.add('marker', 'none', "Set the marker type.",
-                allow=['none', 'cross', 'plus', 'square', 'circle', 'diamond'])
-        opt.add('append', True, "Append new data to the existing data.")
-        opt.add('tracer', False, "Places both x and y tracing lines, (see 'xtracer' and "
-                                 "'ytracer').")
-        opt.add('xtracer', None, "Place a tracing line that follows the leading x-value (overrides "
-                                 "'tracer' option).", vtype=bool)
-        opt.add('ytracer', None, "Place a tracing line that follows the leading y-value (overrides "
-                                 "'tracer' option).", vtype=bool)
+    def validOptions():
+        opt = base.ChiggerObject.validOptions()
+        opt.add('x', vtype=list, doc="The x-axis data.")
+        opt.add('y', vtype=list, doc="The y-axis data.")
+        opt.add('label', vtype=str, doc="The plot label (name appearing in legend).")
+        opt.add('style', default='-', vtype=str, allow=('none', '-'), doc="The line style.")
+        opt.add('color', vtype=float, size=3, doc="The color of the line to plot.")
+        opt.add('width', vtype=int, default=1, doc="The width of the line in Points.")
+        opt.add('corner', default='left-bottom', vtype=str,
+                allow=('left-bottom', 'right-bottom', 'right-top', 'left-top'),
+                doc="The axis corner to place the line.")
+        opt.add('marker', default='none', doc="Set the marker type.",
+                allow=('none', 'cross', 'plus', 'square', 'circle', 'diamond'))
+        opt.add('append', default=True, vtype=bool, doc="Append new data to the existing data.")
+        opt.add('tracer', default=False, vtype=bool,
+                doc="Places both x and y tracing lines, (see 'xtracer' and 'ytracer').")
+        opt.add('xtracer', vtype=bool,
+                doc="Place a tracing line that follows the leading x-value (overrides "
+                    "'tracer' option).")
+        opt.add('ytracer', vtype=bool,
+                doc="Place a tracing line that follows the leading y-value (overrides "
+                    "'tracer' option).")
 
         return opt
 
@@ -83,8 +86,6 @@ class Line(base.ChiggerObject):
 
         see Graph::Update
         """
-        super(Line, self).initialize()
-
         # Create the vtk line or points object
         style = self.getOption('style')
         if style == '-' and not isinstance(self._vtkplot, vtk.vtkPlotLine):
@@ -99,12 +100,12 @@ class Line(base.ChiggerObject):
         if self.getOption('xtracer'):
             if self._xtracer is None:
                 self._xtracer = Line(append=False, width=0.1, color=self.getOption('color'))
-                self._xtracer.update()
+                self._xtracer.initialize()
 
         if self.getOption('ytracer'):
             if self._ytracer is None:
                 self._ytracer = Line(append=False, width=0.1, color=self.getOption('color'))
-                self._ytracer.update()
+                self._ytracer.initialize()
 
     def getVTKPlot(self):
         """
@@ -118,13 +119,15 @@ class Line(base.ChiggerObject):
         """
         super(Line, self).update(**kwargs)
 
-        # Extract x,y data
+        # Remove x,y data
         if not self.getOption('append'):
             self._vtktable.SetNumberOfRows(0)
 
         # Get the x,y data and reset to None so that data doesn't append over and over
         x = self.getOption('x')
         y = self.getOption('y')
+        self._options.set('x', None)
+        self._options.set('y', None)
         if (x and y) and (len(x) == len(y)):
             for i in range(len(x)): #pylint: disable=consider-using-enumerate
                 array = vtk.vtkVariantArray()

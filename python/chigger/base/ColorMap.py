@@ -11,10 +11,12 @@
 import os
 import glob
 import xml.etree.ElementTree as xml
+import json
 
 # Import matplotlib, if it exists
 try:
     from matplotlib import cm
+    import matplotlib.pyplot as plt
     import numpy as np
     USE_MATPLOTLIB = True
 except ImportError:
@@ -40,6 +42,26 @@ def get_xml_table_values():
             data[child.attrib['name']] = child
     return data
 
+def get_json_table_values():
+    """
+    Load Paraview JSON files.
+    """
+    # Locate the XML files storing the colormap data
+    contrib = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+    filenames = glob.glob(os.path.join(contrib, '*.json'))
+
+    # If a name is provided, locate the actual table values
+    data = dict()
+    for fname in filenames:
+        with open(fname, 'r') as fid:
+            tree = json.read(fid)
+            print tree
+
+
+        #for child in json.parse(fname).getroot():
+        #    data[child.attrib['name']] = child
+    return data
+
 class ColorMap(ChiggerObject):
     """
     Class for defining colormaps for use with ExodusResult objects.
@@ -50,12 +72,16 @@ class ColorMap(ChiggerObject):
     """
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerObject.getOptions()
-        opt.add('cmap', 'default', "The colormap name.")
-        opt.add('cmap_reverse', False, "Reverse the order of colormap.")
-        opt.add('cmap_num_colors', 256, "Number of colors to use (matplotlib only).")
-        opt.add('cmap_range', [0, 1], "Set the data range for the color map to display.")
+    def validOptions():
+        opt = ChiggerObject.validOptions()
+        opt.add('cmap', default='default', vtype=str,
+                doc="The colormap name.")
+        opt.add('cmap_reverse', default=False, vtype=bool,
+                doc="Reverse the order of colormap.")
+        opt.add('cmap_num_colors', default=256, vtype=int,
+                doc="Number of colors to use (matplotlib only).")
+        opt.add('cmap_range', default=(0, 1), vtype=float, size=2,
+                doc="Set the data range for the color map to display.")
         return opt
 
     # The table is only needed once
@@ -73,7 +99,7 @@ class ColorMap(ChiggerObject):
         """
         names = ['default']
         if USE_MATPLOTLIB:
-            names += dir(cm)
+            names += plt.colormaps()
         names += self._data.keys()
         return names
 

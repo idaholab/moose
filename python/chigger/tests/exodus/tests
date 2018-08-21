@@ -1,6 +1,16 @@
 [Tests]
-  [./reader]
+  [./ExodusReader]
     type = PythonUnitTest
     input = test_ExodusReader.py
+  [../]
+  [./reader]
+    type = RunApp
+    command = reader.py
+    cli_args = '--test'
+  [../]
+  [./multiappreader]
+    type = RunApp
+    command = multiappreader.py
+    cli_args = '--test'
   [../]
 []

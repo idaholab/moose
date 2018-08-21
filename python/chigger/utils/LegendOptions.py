@@ -11,31 +11,29 @@
 import vtk
 from Options import Options
 
-def get_options():
+def validOptions():
     """
     Options specific to the legend.
     """
     opt = Options()
-    opt.add('visible', True, "Control the visibility of the legend.")
-    opt.add('background', "Set the legend background color (defaults to graph background color).",
-            vtype=list)
-    opt.add('opacity', 0, "The legend background opacity.")
-    opt.add('label_color', [1, 1, 1], "The legend text color.")
-    opt.add('label_font_size', "The legend label test size in points.", vtype=int)
-    opt.add('point', "The location of the legend anchor point.", vtype=list)
-    opt.add('horizontal_alignment', 'right', "The horizontal alignment of the legend with respect "
-                                             "to the anchor point.",
-            vtype=str, allow=['left', 'center', 'right'])
-    opt.add('vertical_alignment', 'top', "The vertical alignment of the legend with respect to the "
-                                         "anchor point.",
-            vtype=str, allow=['top', 'bottom', 'center'])
-    opt.add('border', False, "Show the legend border.")
-    opt.add('border_color', [1, 1, 1], "The border color.")
-    opt.add('border_opacity', 1, "The border opacity.")
-    opt.add('border_width', "The border width.", vtype=float)
+    opt.add('visible', default=True, vtype=bool,
+            doc="Control the visibility of the legend.")
+    opt.add('background', vtype=float, size=3,
+            doc="Set the legend background color (defaults to graph background color).")
+    opt.add('opacity', default=0, vtype=float, doc="The legend background opacity.")
+    opt.add('color', default=(1, 1, 1), size=3, vtype=float, doc="The legend text color.")
+    opt.add('font_size', vtype=int, doc="The legend label test size in points.")
+    opt.add('point', size=2, vtype=float, doc="The location of the legend anchor point.")
+    opt.add('horizontal_alignment', default='right', vtype=str, allow=('left', 'center', 'right'),
+            doc= "The horizontal alignment of the legend with respect to the anchor point.")
+    opt.add('vertical_alignment', default='top', vtype=str, allow=('top', 'center', 'bottom'),
+            doc="The vertical alignment of the legend with respect to the anchor point.")
+    opt.add('border', default=False, vtype=bool, doc="Show the legend border.")
+    opt.add('border_color', default=(1, 1, 1), size=3, vtype=float, doc="The border color.")
+    opt.add('border_width', doc="The border width.", vtype=float)
     return opt
 
-def set_options(vtkchart, vtkrenderer, opt):
+def setOptions(vtkchart, vtkrenderer, opt):
     """
     A method for updating the legend options.
     """
@@ -43,23 +41,24 @@ def set_options(vtkchart, vtkrenderer, opt):
     legend = vtkchart.GetLegend()
 
     if opt.isOptionValid('visible'):
-        vtkchart.SetShowLegend(opt['visible'])
-    else:
-        vtkchart.SetShowLegend(True)
+        vtkchart.SetShowLegend(opt.applyOption('visible'))
 
-    if opt.isOptionValid('background'):
-        legend.GetBrush().SetColorF(opt['background'])
-    else:
-        legend.GetBrush().SetColorF(vtkrenderer.GetBackground())
+    #if opt.isOptionValid('background'):
+    #    legend.GetBrush().SetColorF(opt.applyOption('background'))
+    #else:
+    #    legend.GetBrush().SetColorF(vtkrenderer.GetBackground())
 
-    legend.GetLabelProperties().SetColor(opt['label_color'])
-    legend.GetBrush().SetOpacityF(opt['opacity'])
+    if opt.isOptionValid('color'):
+        legend.GetLabelProperties().SetColor(opt.applyOption('color'))
 
-    if opt.isOptionValid('label_font_size'):
-        legend.SetLabelSize(opt['label_font_size'])
+    if opt.isOptionValid('opacity'):
+        legend.GetBrush().SetOpacityF(opt.applyOption('opacity'))
+
+    if opt.isOptionValid('font_size'):
+        legend.SetLabelSize(opt.applyOption('font_size'))
 
     if opt.isOptionValid('point'):
-        pt = opt['point']
+        pt = opt.get('point')
         legend.SetVerticalAlignment(vtk.vtkChartLegend.CUSTOM)
         legend.SetHorizontalAlignment(vtk.vtkChartLegend.CUSTOM)
 
@@ -70,14 +69,14 @@ def set_options(vtkchart, vtkrenderer, opt):
         legend.SetPoint(*loc)
     else:
         legend.SetVerticalAlignment(eval('vtk.vtkChartLegend.' +
-                                         opt['vertical_alignment'].upper()))
+                                         opt.get('vertical_alignment').upper()))
         legend.SetHorizontalAlignment(eval('vtk.vtkChartLegend.' +
-                                           opt['horizontal_alignment'].upper()))
+                                           opt.get('horizontal_alignment').upper()))
 
-    if opt.isOptionValid('border'):
-        legend.GetPen().SetOpacity(opt['border_opacity'])
-        legend.GetPen().SetColorF(opt['border_color'])
+    if opt.get('border'):
+        if opt.isOptionValid('border_color'):
+            legend.GetPen().SetColorF(opt.applyOption('border_color'))
         if opt.isOptionValid('border_width'):
-            legend.GetPen().SetWidth(opt['border_width'])
+            legend.GetPen().SetWidth(opt.applyOption('border_width'))
     else:
         legend.GetPen().SetOpacity(0)

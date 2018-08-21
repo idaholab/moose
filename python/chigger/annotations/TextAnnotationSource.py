@@ -18,19 +18,20 @@ class TextAnnotationSource(base.ChiggerSourceBase):
     """
 
     @staticmethod
-    def getOptions():
+    def validOptions():
         """
         Return default options for this object.
         """
-        opt = base.ChiggerSourceBase.getOptions()
-        opt.add('position', [0.5, 0.5], "The text position within the viewport, in relative "
-                                        "coordinates.", vtype=tuple)
-        opt += utils.FontOptions.get_options()
+        opt = base.ChiggerSourceBase.validOptions()
+        opt.add('position', default=(0.5, 0.5), vtype=float, size=2,
+                doc="The text position within the viewport, in relative coordinates.")
+        opt.add('text', vtype=str, doc="The text to display.")
+        opt += utils.FontOptions.validOptions()
         return opt
 
     def __init__(self, **kwargs):
-        super(TextAnnotationSource, self).__init__(vtkactor_type=vtk.vtkActor2D,
-                                                   vtkmapper_type=vtk.vtkTextMapper, **kwargs)
+        super(TextAnnotationSource, self).__init__(vtkactor_type=vtk.vtkTextActor,
+                                                   vtkmapper_type=None, **kwargs)
         self._vtkactor.GetPositionCoordinate().SetCoordinateSystemToNormalizedViewport()
 
     def update(self, **kwargs):
@@ -38,9 +39,10 @@ class TextAnnotationSource(base.ChiggerSourceBase):
         Updates the settings for the text creation. (override)
         """
         super(TextAnnotationSource, self).update(**kwargs)
-        utils.FontOptions.set_options(self._vtkmapper.GetTextProperty(), self._options)
-        self._vtkactor.GetPositionCoordinate().SetValue(*self.getOption('position'))
+
+        utils.FontOptions.applyOptions(self._vtkactor.GetTextProperty(), self._options)
+        if self.isOptionValid('position'):
+            self._vtkactor.GetPositionCoordinate().SetValue(*self.applyOption('position'))
 
         if self.isOptionValid('text'):
-            self._vtkmapper.GetTextProperty().Modified()
-            self._vtkmapper.SetInput(self.getOption('text'))
+            self._vtkactor.SetInput(self.applyOption('text'))

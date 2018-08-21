@@ -8,11 +8,9 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import chigger
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-mug = chigger.exodus.ExodusResult(reader, variable='diffused', cmap='viridis')
-cbar = chigger.exodus.ExodusColorBar(mug)
-window = chigger.RenderWindow(mug, cbar, size=[300,300], test=True)
+mug = chigger.exodus.ExodusResult(reader, name='Mug Data', variable='diffused', cmap='viridis')
+window = chigger.RenderWindow(mug, size=(300,300))
 window.write('simple.png')
 window.start()

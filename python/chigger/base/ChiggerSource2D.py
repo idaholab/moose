@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
+from chigger import utils
 from ChiggerFilterSourceBase import ChiggerFilterSourceBase
 
 class ChiggerSource2D(ChiggerFilterSourceBase):
@@ -27,10 +28,10 @@ class ChiggerSource2D(ChiggerFilterSourceBase):
     VTKMAPPER_TYPE = vtk.vtkMapper2D
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerFilterSourceBase.getOptions()
-        opt.add('opacity', 1, "The object opacity.", vtype=float)
-        opt.add('color', "The color of the object.", vtype=list)
+    def validOptions():
+        opt = ChiggerFilterSourceBase.validOptions()
+        opt.add('opacity', 1, vtype=float, doc="The object opacity.", )
+        opt.add('color', vtype=float, size=3, doc="The color of the object.")
         return opt
 
     def __init__(self, vtkactor_type=vtk.vtkActor2D, vtkmapper_type=vtk.vtkPolyDataMapper2D,
@@ -47,7 +48,10 @@ class ChiggerSource2D(ChiggerFilterSourceBase):
         super(ChiggerSource2D, self).update(**kwargs)
 
         if self.isOptionValid('opacity'):
-            self._vtkactor.GetProperty().SetOpacity(self.getOption('opacity'))
+            self._vtkactor.GetProperty().SetOpacity(self.applyOption('opacity'))
 
         if self.isOptionValid('color'):
-            self._vtkactor.GetProperty().SetColor(self.getOption('color'))
+            self._vtkactor.GetProperty().SetColor(self.applyOption('color'))
+
+    def getBounds(self):
+        return self.getVTKActor().GetBounds()

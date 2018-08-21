@@ -27,16 +27,17 @@ class ChiggerSource(ChiggerFilterSourceBase):
     VTKMAPPER_TYPE = vtk.vtkMapper
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerFilterSourceBase.getOptions()
-        opt.add('orientation', None, "The orientation of the object.", vtype=list)
-        opt.add('rotation', [0, 0, 0], "The rotation of the object about x, y, z axes.", vtype=list)
-        opt.add('edges', False, "Enable/disable display of object edges.")
-        opt.add('edge_color', [0, 0, 1], "Set the edge color.")
-        opt.add('edge_width', "The edge width.", vtype=int)
-        opt.add('point_size', "The point size.", vtype=float)
-        opt.add('opacity', 1, "The object opacity.", vtype=float)
-        opt.add('color', "The color of the object.", vtype=list)
+    def validOptions():
+        opt = ChiggerFilterSourceBase.validOptions()
+        opt.add('orientation', vtype=float, size=3, doc="The orientation of the object.")
+        opt.add('rotation', default=(0., 0., 0.), vtype=float, size=3,
+                doc="The rotation of the object about x, y, z axes.")
+        opt.add('edges', default=False, doc="Enable/disable display of object edges.")
+        opt.add('edge_color', default=(1., 1., 1.), size=3, doc="Set the edge color.")
+        opt.add('edge_width', vtype=int, doc="The edge width, if None then no edges are shown.")
+        opt.add('point_size', vtype=int, doc="The point size, if None then no points are shown.")
+        opt.add('opacity', default=1., vtype=float, doc="The object opacity.")
+        opt.add('color', vtype=float, size=3, doc="The color of the object.")
         return opt
 
     def __init__(self, vtkactor_type=vtk.vtkActor, vtkmapper_type=vtk.vtkPolyDataMapper, **kwargs):
@@ -47,37 +48,40 @@ class ChiggerSource(ChiggerFilterSourceBase):
         Updates the VTK settings for the VTKACTOR_TYPE/VTKMAPPER_TYPE objects. (override)
 
         Inputs:
-            see ChiggerFilterSourceBase
+            see ChiggerFilterSourceBa.se
         """
         super(ChiggerSource, self).update(**kwargs)
 
         if self.isOptionValid('orientation'):
-            self._vtkactor.SetOrientation(self.getOption('orientation'))
+            self._vtkactor.SetOrientation(self.applyOption('orientation'))
 
         if self.isOptionValid('rotation'):
-            x, y, z = self.getOption('rotation')
+            x, y, z = self.applyOption('rotation')
             self._vtkactor.RotateX(x)
             self._vtkactor.RotateY(y)
-            self._vtkactor.RotateZ(z)
+            self._vtkactor.RotateZ(z),
 
         if self.isOptionValid('edges') and \
            hasattr(self._vtkactor.GetProperty(), 'SetEdgeVisibility'):
-            self._vtkactor.GetProperty().SetEdgeVisibility(self.getOption('edges'))
+            self._vtkactor.GetProperty().SetEdgeVisibility(self.applyOption('edges'))
 
         if self.isOptionValid('edge_color') and \
            hasattr(self._vtkactor.GetProperty(), 'SetEdgeColor'):
-            self._vtkactor.GetProperty().SetEdgeColor(self.getOption('edge_color'))
+            self._vtkactor.GetProperty().SetEdgeColor(self.applyOption('edge_color'))
 
         if self.isOptionValid('edge_width') and \
            hasattr(self._vtkactor.GetProperty(), 'SetLineWidth'):
-            self._vtkactor.GetProperty().SetLineWidth(self.getOption('edge_width'))
+            self._vtkactor.GetProperty().SetLineWidth(self.applyOption('edge_width'))
 
         if self.isOptionValid('point_size') and \
            hasattr(self._vtkactor.GetProperty(), 'SetPointSize'):
-            self._vtkactor.GetProperty().SetPointSize(self.getOption('point_size'))
+            self._vtkactor.GetProperty().SetPointSize(self.applyOption('point_size'))
 
         if self.isOptionValid('opacity'):
-            self._vtkactor.GetProperty().SetOpacity(self.getOption('opacity'))
+            self._vtkactor.GetProperty().SetOpacity(self.applyOption('opacity'))
 
         if self.isOptionValid('color'):
-            self._vtkactor.GetProperty().SetColor(self.getOption('color'))
+            self._vtkactor.GetProperty().SetColor(self.applyOption('color'))
+
+    def getBounds(self):
+        return self.getVTKMapper().GetBounds()

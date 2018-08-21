@@ -18,17 +18,18 @@ class TimeAnnotationSource(TextAnnotationSource):
     """
 
     @staticmethod
-    def getOptions():
+    def validOptions():
         """
         Return default options for this object.
         """
-        opt = TextAnnotationSource.getOptions()
-        opt.add('time', 330667320, "The time to display, in seconds.", vtype=float)
-        opt.add('prefix', 'Time:', "The text to display prior to the time string.")
-        opt.add('suffix', None, "The text to display after the time string.", vtype=str)
-        opt.add('timedelta', False, "Format the time using the python datetime.timedelta")
-        opt.setDefault('position', [0.01, 0.01])
-        opt.pop('text')
+        opt = TextAnnotationSource.validOptions()
+        opt.add('time', 330667320, vtype=float, doc="The time to display, in seconds.")
+        opt.add('prefix', 'Time:', vtype=str, doc="The text to display prior to the time string.")
+        opt.add('suffix', None, vtype=str, doc="The text to display after the time string.")
+        opt.add('timedelta', False, vtype=bool,
+                doc="Format the time using the python datetime.timedelta")
+        opt.set('position', (0.01, 0.01))
+        opt.remove('text')
         return opt
 
     def update(self, **kwargs):
@@ -54,5 +55,5 @@ class TimeAnnotationSource(TextAnnotationSource):
         if self.isOptionValid('suffix'):
             text.append(self.getOption('suffix'))
 
-        self._vtkmapper.GetTextProperty().Modified()
-        self._vtkmapper.SetInput(' '.join(text))
+        self._vtkactor.GetTextProperty().Modified()
+        self._vtkactor.SetInput(' '.join(text))

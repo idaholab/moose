@@ -1,0 +1,82 @@
+from chigger import base
+from TextAnnotationSource import TextAnnotationSource
+
+class TextAnnotationBase(base.ChiggerResult):
+    """
+    Base for text based annotations.
+    """
+    @staticmethod
+    def validOptions():
+        opt = base.ChiggerResult.validOptions()
+        opt.remove('camera')
+        return opt
+
+    @staticmethod
+    def validKeyBindings():
+        bindings = base.ChiggerResult.validKeyBindings()
+        bindings.add('f', TextAnnotationBase._increaseFont, desc="Increase the font size by 1 point.")
+        bindings.add('f', TextAnnotationBase._decreaseFont, shift=True, desc="Decrease the font size by 1 point.")
+        bindings.add('a', TextAnnotationBase._increaseOpacity, desc="Increase the font alpha (opacity) by 1%.")
+        bindings.add('a', TextAnnotationBase._decreaseOpacity, shift=True, desc="Decrease the font alpha (opacity) by 1%.")
+        bindings.add('d', TextAnnotationBase._toggleMouseDrag, desc="Enable/disable the ability to drag the text with the mouse.")
+        return bindings
+
+    def __init__(self, source, **kwargs):
+        super(TextAnnotationBase, self).__init__(source, **kwargs)
+
+        # TODO: Allow frame options, the highlight will need to remember the options
+        for src in self.getSources():
+            src.getVTKActor().GetTextProperty().SetFrameColor(1,0,0)
+            src.getVTKActor().GetTextProperty().SetFrameWidth(2)
+
+        # Flag for allowing mouse to move the text, this was needed because it was too easy
+        # to mess up the next when toggling through result options.
+        self._allow_mouse_drag = False
+
+    def _toggleMouseDrag(self, *args):
+        """Keybinding method."""
+        self._allow_mouse_drag = not self._allow_mouse_drag
+
+        if self._allow_mouse_drag:
+            for src in self.getSources():
+                src.getVTKActor().GetTextProperty().SetFrameColor(1,1,0)
+        else:
+            for src in self.getSources():
+                src.getVTKActor().GetTextProperty().SetFrameColor(1,0,0)
+
+    def _increaseFont(self, *args):
+        """Keybinding method."""
+        sz = self.getOption('font_size') + 1
+        self.update(font_size=sz)
+        self.printOption('font_size')
+
+    def _decreaseFont(self, *args):
+        """Keybinding method."""
+        sz = self.getOption('font_size') - 1
+        self.update(font_size=sz)
+        self.printOption('font_size')
+
+    def _increaseOpacity(self, *args):
+        """Keybinding method."""
+        opacity = self.getOption('text_opacity') + 0.01
+        if opacity <= 1.:
+            self.update(text_opacity=opacity)
+            self.printOption('text_opacity')
+
+    def _decreaseOpacity(self, *args):
+        """Keybinding method."""
+        opacity = self.getOption('text_opacity') - 0.01
+        if opacity > 0.:
+            self.update(text_opacity=opacity)
+            self.printOption('text_opacity')
+
+    def onMouseMoveEvent(self, position):
+        """Called by MainWindowObserver when the mouse moves and this object is active."""
+        if self._allow_mouse_drag:
+            self.update(position=position)
+            self.printOption('position')
+
+    def onHighlight(self, window, active):
+        """Overrides the default active highlighting."""
+        for src in self.getSources():
+            src.getVTKActor().GetTextProperty().SetFrame(active)

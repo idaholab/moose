@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import glob
+import mooseutils
 from ExodusReader import ExodusReader
 from .. import base
 
@@ -25,8 +26,8 @@ class MultiAppExodusReader(base.ChiggerObject):
     """
 
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerObject.getOptions()
+    def validOptions():
+        opt = ExodusReader.validOptions()
         return opt
 
     def __init__(self, pattern, **kwargs):
@@ -48,3 +49,37 @@ class MultiAppExodusReader(base.ChiggerObject):
         Provide operator[] access to the readers.
         """
         return self.__readers[index]
+
+    def __str__(self):
+        """
+        Return the ExodusReader information for each multiapp file.
+        """
+        out = ''
+        for reader in self.__readers:
+            out += '\n\n' + mooseutils.colorText(reader.filename(), 'MAGENTA')
+            out += str(reader)
+        return out
+
+    def setOption(self, *args, **kwargs):
+        """
+        Set single option for all contained readers.
+        """
+        super(MultiAppExodusReader, self).setOption(*args, **kwargs)
+        for reader in self.__readers:
+            reader.setOption(*args, **kwargs)
+
+    def setOptions(self, *args, **kwargs):
+        """
+        Set options for all contained readers.
+        """
+        super(MultiAppExodusReader, self).setOptions(*args, **kwargs)
+        for reader in self.__readers:
+            reader.setOptions(*args, **kwargs)
+
+    def update(self, *args, **kwargs):
+        """
+        Update all readers.
+        """
+        super(MultiAppExodusReader, self).update(*args, **kwargs)
+        for reader in self.__readers:
+            reader.update(*args, **kwargs)

@@ -19,12 +19,12 @@ camera.SetFocalPoint(0.000000, 0.000000, 0.125000)
 
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
 
-tclip = chigger.filters.PlaneClipper(normal=[0,0,1])
+tclip = chigger.filters.PlaneClipper(normal=(0,0,1))
 top = chigger.exodus.ExodusResult(reader, camera=camera, variable='diffused', cmap='viridis', opacity=0.5, range=[0,2], filters=[tclip])
 
-bclip = chigger.filters.PlaneClipper(normal=[0,0,-1])
+bclip = chigger.filters.PlaneClipper(normal=(0,0,-1))
 bottom = chigger.exodus.ExodusResult(reader, camera=camera, variable='diffused', cmap='viridis', range=[0,2], filters=[bclip])
 
-window = chigger.RenderWindow(bottom, top, size=[600,600], test=True)
+window = chigger.RenderWindow(bottom, top, size=(600,600), test=True)
 window.write('multiple_clips.png')
 window.start()

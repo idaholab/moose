@@ -3,18 +3,21 @@
     type = RunApp
     command = field_data.py
     expect_out = "13.960"
+    cli_args = '--test'
   [../]
 
   [./current_field_data]
     type = RunApp
     command = current_field_data.py
     expect_out = "0.0,\s14.\d+,\s14."
+    cli_args = '--test'
   [../]
 
   [./plot_field_data]
     type = ImageDiff
     command = plot_field_data.py
     imagediff = 'plot_field_data.png'
+    cli_args = '--test'
   [../]
 
   [./plot_current_field_data]

@@ -21,8 +21,8 @@ reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
 mug = chigger.exodus.ExodusResult(reader, variable='diffused', camera=camera, cmap='viridis')
 
 extents = chigger.misc.VolumeAxes(mug)
-extents.setOptions('xaxis', color=[1,0,0], minor_ticks=True)
-window = chigger.RenderWindow(mug, extents, size=[300,300], antialiasing=10, test=True)
+extents.setOptions('xaxis', color=(1,0,0), minor_ticks=True)
+window = chigger.RenderWindow(mug, extents, size=(300,300), antialiasing=10, test=True)
 
 window.write('extents.png')
 window.start()

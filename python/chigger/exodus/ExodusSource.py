@@ -25,36 +25,40 @@ class ExodusSource(base.ChiggerSource):
         reader[ExodusReader]: The reader object containing the ExodusII file desired to be open.
         **kwargs: see ChiggerSource
     """
-    FILTER_TYPES = [filters.ContourFilter, filters.ClipperFilterBase, filters.GeometryFilter,
-                    filters.TransformFilter, filters.TubeFilter]
+    FILTER_TYPES = [filters.ContourFilter,
+                    filters.ClipperFilterBase,
+                    filters.GeometryFilter,
+                    filters.TransformFilter,
+                    filters.TubeFilter,
+                    filters.OutlineFilter]
 
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerSource.getOptions()
+    def validOptions():
+        opt = base.ChiggerSource.validOptions()
 
         # Variable
-        opt.add('variable', "The nodal or elemental variable to render.", vtype=str)
-        opt.add('component', -1, "The vector variable component to render (-1 plots the "
-                                 " magnitude).", vtype=int, allow=[-1, 0, 1, 2])
+        opt.add('variable', vtype=str, doc="The nodal or elemental variable to render.")
+        opt.add('component', -1, vtype=int, allow=(-1, 0, 1, 2),
+                doc="The vector variable component to render (-1 plots the magnitude).")
 
         # Subdomains/sidesets/nodesets
-        opt.add('nodeset', None, "A list of nodeset ids or names to display, use [] to display all "
-                                 "nodesets.", vtype=list)
-        opt.add('boundary', None, "A list of boundary ids (sideset) ids or names to display, use "
-                                  "[] to display all sidesets", vtype=list)
-        opt.add('block', [], "A list of subdomain (block) ids or names to display, use [] to "
-                             "dislpay all blocks.", vtype=list)
+        opt.add('nodeset', None, vtype=list,
+                doc="A list of nodeset ids or names to display, use [] to display all nodesets.")
+        opt.add('boundary', None, vtype=list,
+                doc="A list of boundary ids (sideset) ids or names to display, use [] to display all sidesets.")
+        opt.add('block', [], vtype=list,
+                doc="A list of subdomain (block) ids or names to display, use [] to display all blocks.")
 
-        opt.add('representation', 'surface', "View volume representation.",
-                allow=['surface', 'wireframe', 'points'])
+        opt.add('representation', 'surface', allow=('surface', 'wireframe', 'points'),
+                doc="View volume representation.")
 
-        opt.add('range', "The range of data to display on the volume and colorbar; range takes "
-                         "precedence of min/max.", vtype=list)
-        opt.add('min', "The minimum range.", vtype=float)
-        opt.add('max', "The maximum range.", vtype=float)
+        opt.add('range', vtype=float, size=2,
+                doc="The range of data to display on the volume and colorbar; range takes precedence of min/max.")
+        opt.add('min', vtype=float, doc="The minimum range.")
+        opt.add('max', vtype=float, doc="The maximum range.")
 
         # Colormap
-        opt += base.ColorMap.getOptions()
+        opt += base.ColorMap.validOptions()
         return opt
 
     def __init__(self, reader, **kwargs):
@@ -101,8 +105,6 @@ class ExodusSource(base.ChiggerSource):
         """
         Return the extents of the active data objects.
         """
-        self.checkUpdateState()
-
         bnds = []
         for i in range(self.__vtkextractblock.GetOutput().GetNumberOfBlocks()):
             current = self.__vtkextractblock.GetOutput().GetBlock(i)
@@ -113,13 +115,13 @@ class ExodusSource(base.ChiggerSource):
                 for j in range(current.GetNumberOfBlocks()):
                     bnds.append(current.GetBlock(j).GetBounds())
 
-        return utils.get_bounds_min_max(*bnds)
+        return utils.get_vtk_bounds_min_max(*bnds)
 
     def getRange(self, local=False):
         """
         Return range of the active variable and blocks.
         """
-        self.checkUpdateState()
+        self.update()
         if self.__current_variable is None:
             return (None, None)
         elif not local:
@@ -185,17 +187,6 @@ class ExodusSource(base.ChiggerSource):
             raise mooseutils.MooseException('Unable to get the range for the '
                                             'variable "{}"'.format(self.__current_variable.name))
 
-    def needsUpdate(self):
-        """
-        Indicates if this object needs its update method called. (override)
-
-        This adds checking of the contained reader, if the reader needs updating then so does this
-        class.
-        """
-        needs_update = super(ExodusSource, self).needsUpdate()
-        mooseutils.mooseDebug('ExodusSource.needsUpdate() = {}'.format(needs_update))
-        return needs_update or self.__reader.needsUpdate()
-
     def update(self, **kwargs):
         """
         Updates this object based on the reader and specified options.
@@ -208,9 +199,8 @@ class ExodusSource(base.ChiggerSource):
         # method.
         self.setOptions(**kwargs)
 
-        # Update the reader, if needed
-        if self.__reader.needsUpdate():
-            self.__reader.update()
+        # Update the reader
+        self.__reader.update()
 
         # Enable all blocks (subdomains) if nothing is enabled
         block_info = self.__reader.getBlockInformation()
@@ -218,7 +208,6 @@ class ExodusSource(base.ChiggerSource):
             if self.isOptionValid(item) and self.getOption(item) == []:
                 self.setOption(item, [item.name for item in \
                                       block_info[getattr(ExodusReader, item.upper())].itervalues()])
-        self.setNeedsUpdate(False) # this function does not need to update again
 
         def get_indices(option, vtk_type):
             """
@@ -241,6 +230,7 @@ class ExodusSource(base.ChiggerSource):
             for index in extract_indices:
                 self.__vtkextractblock.AddIndex(index)
             self.__extract_indices = extract_indices
+        self.__vtkextractblock.SetInputConnection(self.__reader.getVTKReader().GetOutputPort())
         self.__vtkextractblock.Update()
 
         # Define the coloring to utilize for the object
@@ -307,7 +297,7 @@ class ExodusSource(base.ChiggerSource):
         self.__current_variable = varinfo
 
         # Colormap
-        if not self.isOptionValid('color'):
+        if not self.getOption('color'):
             self._colormap.setOptions(cmap=self.getOption('cmap'),
                                       cmap_reverse=self.getOption('cmap_reverse'),
                                       cmap_num_colors=self.getOption('cmap_num_colors'))

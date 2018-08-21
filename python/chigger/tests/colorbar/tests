@@ -1,73 +1,85 @@
 [Tests]
-  [./standalone]
+  [./colorbar]
     type = ImageDiff
     command = colorbar.py
     imagediff = 'colorbar.png'
+    cli_args = '--test'
   [../]
 
-  [./standalone_horiz]
+  [./colorbar_horiz]
     type = ImageDiff
     command = colorbar_horiz.py
     imagediff = 'colorbar_horiz.png'
+    cli_args = '--test'
   [../]
 
   [./exdous_default]
     type = ImageDiff
     command = exodus_colorbar.py
     imagediff = 'exodus_colorbar.png'
+    cli_args = '--test'
   [../]
 
   [./left]
     type = ImageDiff
     command = colorbar_left.py
     imagediff = 'colorbar_left.png'
+    cli_args = '--test'
   [../]
 
   [./top]
     type = ImageDiff
     command = colorbar_top.py
     imagediff = 'colorbar_top.png'
+    cli_args = '--test'
   [../]
 
   [./bottom]
     type = ImageDiff
     command = colorbar_bottom.py
     imagediff = 'colorbar_bottom.png'
+    cli_args = '--test'
   [../]
 
   [./common]
     type = ImageDiff
     command = common_colorbar.py
     imagediff = 'common_colorbar.png'
+    cli_args = '--test'
   [../]
 
   [./common_horiz]
     type = ImageDiff
     command = common_colorbar_horiz.py
     imagediff = 'common_colorbar_horiz.png'
+    cli_args = '--test'
   [../]
 
   [./dual]
     type = ImageDiff
     command = dual_colorbar.py
     imagediff = 'dual_colorbar.png'
+    cli_args = '--test'
   [../]
 
   [./dual_horiz]
     type = ImageDiff
     command = dual_colorbar_horiz.py
     imagediff = 'dual_colorbar_horiz.png'
+    cli_args = '--test'
   [../]
 
   [./font]
     type = ImageDiff
     command = colorbar_font.py
     imagediff = 'colorbar_font.png'
+    cli_args = '--test'
   [../]
 
   [./zero_range]
     type = ImageDiff
     command = zero_range.py
     imagediff = 'zero_range.png'
+    cli_args = '--test'
   [../]
 []
