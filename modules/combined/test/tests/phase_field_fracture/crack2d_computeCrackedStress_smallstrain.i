@@ -63,6 +63,12 @@
     component = 1
     c = c
   [../]
+  [./off_disp]
+    type = AllenCahnElasticEnergyOffDiag
+    variable = c
+    displacements = 'disp_x disp_y'
+    mob_name = L
+  [../]
 []
 
 [AuxKernels]
