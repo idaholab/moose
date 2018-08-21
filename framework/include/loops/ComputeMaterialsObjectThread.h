@@ -68,4 +68,4 @@ protected:
   const bool _has_neighbor_stateful_props;
 };
 
-#endif // COMPUTERESIDUALTHREAD_H
+#endif // COMPUTEMATERIALOBJECTTHREAD_H
