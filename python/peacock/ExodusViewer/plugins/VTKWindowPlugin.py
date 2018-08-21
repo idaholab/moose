@@ -361,8 +361,8 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         # Create result (renderer)
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
-        self._window.append(self._result)
         self.setupResult.emit(self._result)
+        self._window.append(self._result)
         self._result.update()
 
         # Set the interaction mode (2D/3D)
