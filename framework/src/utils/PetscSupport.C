@@ -860,7 +860,7 @@ getCommonPetscFlags()
       "-dm_moose_print_embedding -dm_view -ksp_converged_reason -ksp_gmres_modifiedgramschmidt "
       "-ksp_monitor -ksp_monitor_snes_lg-snes_ksp_ew -ksp_snes_ew -snes_converged_reason "
       "-snes_ksp -snes_ksp_ew -snes_linesearch_monitor -snes_mf -snes_mf_operator -snes_monitor "
-      "-snes_test_display -snes_view -snew_ksp_ew",
+      "-snes_test_display -snes_view",
       "",
       true);
 }
