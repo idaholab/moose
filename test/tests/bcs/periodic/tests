@@ -99,6 +99,16 @@
     group = 'periodic'
   [../]
 
+  [./trapezoid_non_periodic]
+    type = 'Exodiff'
+    input = 'trapezoid_non_periodic.i'
+    exodiff = 'trapezoid_non_periodic_out.e'
+
+    requirement = 'Calls to periodic distance and bounds methods on the mesh shall work when periodic boundary conditions are not used.'
+    design = 'mesh/MooseMesh.md'
+    issues = '#11939'
+  [../]
+
   [./testwedge]
     type = 'Exodiff'
     input = 'wedge.i'

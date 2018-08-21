@@ -25,7 +25,6 @@ class PeriodicDistanceAux : public AuxKernel
 {
 public:
   PeriodicDistanceAux(const InputParameters & parameters);
-  virtual ~PeriodicDistanceAux();
 
 protected:
   virtual Real computeValue();
