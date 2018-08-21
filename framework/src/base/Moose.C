@@ -144,7 +144,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
   registerTask("add_aux_variable", false);
-  registerTask("add_external_aux_variables", false);
+  registerTask("add_external_aux_variables", true);
   registerTask("add_variable", false);
 
   registerTask("execute_mesh_modifiers", false);

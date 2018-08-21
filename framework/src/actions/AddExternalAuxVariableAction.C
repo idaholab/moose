@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AddExternalAuxVariableAction.h"
+#include "ExternalProblem.h"
 
 registerMooseAction("MooseApp", AddExternalAuxVariableAction, "add_external_aux_variables");
 
@@ -25,5 +26,8 @@ AddExternalAuxVariableAction::AddExternalAuxVariableAction(InputParameters param
 void
 AddExternalAuxVariableAction::act()
 {
-  //  _problem->addExternalVariables();
+  auto external_problem_ptr = std::dynamic_pointer_cast<ExternalProblem>(_problem);
+
+  if (external_problem_ptr)
+    external_problem_ptr->addExternalVariables();
 }

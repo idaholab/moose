@@ -9,6 +9,8 @@
 
 // MOOSE includes
 #include "ExternalProblem.h"
+#include "NonlinearSystem.h"
+#include "AuxiliarySystem.h"
 
 template <>
 InputParameters
