@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SHAREDPOOL_H
-#define SHAREDPOOL_H
+#ifndef SHARED_POOLH
+#define SHARED_POOLH
 
 // System Includes
 #include <stack>
@@ -27,17 +27,17 @@ template <class T>
 class SharedPool
 {
 private:
-  struct External_Deleter
+  struct ExternalDeleter
   {
-    explicit External_Deleter(std::weak_ptr<SharedPool<T> *> pool) : pool_(pool) {}
+    explicit ExternalDeleter(std::weak_ptr<SharedPool<T> *> pool) : _pool(pool) {}
 
     void operator()(T * ptr)
     {
-      if (auto pool_ptr = pool_.lock())
+      if (auto _poolptr = _pool.lock())
       {
         try
         {
-          (*pool_ptr.get())->add(std::unique_ptr<T>{ptr});
+          (*_poolptr.get())->add(std::unique_ptr<T>{ptr});
           return;
         }
         catch (...)
@@ -48,41 +48,38 @@ private:
     }
 
   private:
-    std::weak_ptr<SharedPool<T> *> pool_;
+    std::weak_ptr<SharedPool<T> *> _pool;
   };
 
 public:
-  using ptr_type = std::unique_ptr<T, External_Deleter>;
+  using ptr_type = std::unique_ptr<T, ExternalDeleter>;
 
-  SharedPool() : this_ptr_(new SharedPool<T> *(this)) {}
+  SharedPool() : _this_ptr(new SharedPool<T> *(this)) {}
   virtual ~SharedPool() {}
 
-  void add(std::unique_ptr<T> t) { pool_.push(std::move(t)); }
+  void add(std::unique_ptr<T> t) { _pool.push(std::move(t)); }
 
   template <typename... Args>
   ptr_type acquire(Args &&... args)
   {
-    // assert(!pool_.empty());
-
-    // If the pool is empty - create one
-    if (pool_.empty())
+    // if the pool is empty - create one
+    if (_pool.empty())
       return std::move(ptr_type(new T(std::forward<Args>(args)...),
-                                External_Deleter{std::weak_ptr<SharedPool<T> *>{this_ptr_}}));
+                                ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}}));
 
-    ptr_type tmp(pool_.top().release(),
-                 External_Deleter{std::weak_ptr<SharedPool<T> *>{this_ptr_}});
-    pool_.pop();
+    ptr_type tmp(_pool.top().release(), ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}});
+    _pool.pop();
     return std::move(tmp);
   }
 
-  bool empty() const { return pool_.empty(); }
+  bool empty() const { return _pool.empty(); }
 
-  size_t size() const { return pool_.size(); }
+  size_t size() const { return _pool.size(); }
 
 private:
-  std::shared_ptr<SharedPool<T> *> this_ptr_;
-  std::stack<std::unique_ptr<T>> pool_;
+  std::shared_ptr<SharedPool<T> *> _this_ptr;
+  std::stack<std::unique_ptr<T>> _pool;
 };
 }
 
-#endif // SHAREDPOOL_H
+#endif // SHARED_POOLH
