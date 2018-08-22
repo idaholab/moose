@@ -77,14 +77,24 @@ def check(translator,
     if dump:
         print app_syntax
 
+    # The default build for any application creates the test app (e.g., FrogTestApp), therefore
+    # the actual application name must be captured from this name to properly generate stub pages.
+    # This is because the --generate option will only create stub pages for objects registered
+    # within the running application, otherwise pages for all MOOSE and modules objects would
+    # be generated if they were not included. However, for a given object the registered application
+    # from the register macros is used, thus the compiled application used for building
+    # documentation (FrogTestApp) and the object registration name (FrogApp) are always out of sync.
+    # The simple fix is to change the name of the running application here.
+    app_name = extension.apptype.replace('TestApp', 'App')
+
     # Perform check for all the nodes
     for node in anytree.PreOrderIter(app_syntax):
         if node.is_root or node.removed:
             continue
         elif isinstance(node, syntax.ObjectNode):
-            _check_object_node(node, extension.apptype, generate, update, object_prefix)
+            _check_object_node(node, app_name, generate, update, object_prefix)
         elif isinstance(node, syntax.SyntaxNode):
-            _check_syntax_node(node, extension.apptype, generate, update, syntax_prefix)
+            _check_syntax_node(node, app_name, generate, update, syntax_prefix)
         else:
             LOG.critical("Unexpected object type of %s, only %s and %s based types are supported",
                          type(node).__name__,
