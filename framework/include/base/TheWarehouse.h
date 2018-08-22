@@ -130,9 +130,9 @@ public:
     /// Adds a new condition to the query.  The template parameter T is the Attribute class of
     /// interest and args are forwarded to T's constructor to build+add the attribute in-situ.
     template <typename T, typename... Args>
-    Query & cond(Args... args)
+    Query & cond(Args &&... args)
     {
-      _attribs.push_back(std::unique_ptr<Attribute>(new T(*_w, args...)));
+      _attribs.emplace_back(new T(*_w, std::forward<Args>(args)...));
       return *this;
     }
 
@@ -140,7 +140,7 @@ public:
     Query clone() const { return std::move(Query(*this)); }
     /// count returns the number of results that match the query (this requires actually running
     /// the query).
-    size_t count() { return _w->count(std::move(clone()._attribs)); }
+    size_t count() { return _w->count(_attribs); }
 
     /// attribs returns a copy of the constructed Attribute list for the query in its current state.
     std::vector<std::unique_ptr<Attribute>> attribs() { return std::move(clone()._attribs); }
@@ -150,7 +150,7 @@ public:
     template <typename T>
     std::vector<T *> queryInto(std::vector<T *> & results)
     {
-      return _w->queryInto(std::move(clone()._attribs), results);
+      return _w->queryInto(_attribs, results);
     }
 
   private:
@@ -215,20 +215,25 @@ public:
   /// count returns the number of objects that match the provided query conditions. This requires
   /// executing a full query operation (i.e. as if calling queryInto). A Query object should
   /// generally be used via the build() member function instead.
-  size_t count(std::vector<std::unique_ptr<Attribute>> conds);
+  size_t count(const std::vector<std::unique_ptr<Attribute>> & conds);
   /// queryInto takes the given conditions (i.e. Attributes holding the values to filter/match
   /// over) and filters all objects in the warehouse that match all conditions (i.e. "and"ing the
   /// conditions together) and stores them in the results vector. All result objects must be
   /// castable to the templated type T. This function filters out disabled objects on the fly -
   /// only returning enabled ones.
   template <typename T>
-  std::vector<T *> & queryInto(std::vector<std::unique_ptr<Attribute>> conds,
+  std::vector<T *> & queryInto(const std::vector<std::unique_ptr<Attribute>> & conds,
                                std::vector<T *> & results)
   {
     int query_id = -1;
     auto it = _query_cache.find(conds);
     if (it == _query_cache.end())
-      query_id = prepare(std::move(conds));
+    {
+      std::vector<std::unique_ptr<Attribute>> conds_clone;
+      for (auto & cond : conds)
+        conds_clone.emplace_back(cond->clone());
+      query_id = prepare(std::move(conds_clone));
+    }
     else
       query_id = it->second;
     return queryInto(query_id, results);

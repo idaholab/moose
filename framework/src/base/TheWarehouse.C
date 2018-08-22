@@ -206,11 +206,23 @@ TheWarehouse::query(int query_id)
 }
 
 size_t
-TheWarehouse::count(std::vector<std::unique_ptr<Attribute>> conds)
+TheWarehouse::count(const std::vector<std::unique_ptr<Attribute>> & conds)
 {
-  auto query_id = prepare(std::move(conds));
+  int query_id = -1;
+  auto it = _query_cache.find(conds);
+  if (it == _query_cache.end())
+  {
+    std::vector<std::unique_ptr<Attribute>> conds_clone;
+    for (auto & cond : conds)
+      conds_clone.emplace_back(cond->clone());
+    query_id = prepare(std::move(conds_clone));
+  }
+  else
+    query_id = it->second;
+
   if (static_cast<size_t>(query_id) >= _obj_cache.size())
     throw std::runtime_error("unknown query id");
+
   std::lock_guard<std::mutex> lock(cache_mutex);
   auto & objs = _obj_cache[query_id];
   size_t count = 0;
