@@ -52,18 +52,18 @@ private:
   void querySubdomain(Interfaces iface, std::vector<T> & results)
   {
     _query.clone()
-        .cond<AttribThread>(_tid)
-        .cond<AttribSubdomains>(_subdomain)
-        .cond<AttribInterfaces>(iface)
+        .condition<AttribThread>(_tid)
+        .condition<AttribSubdomains>(_subdomain)
+        .condition<AttribInterfaces>(iface)
         .queryInto(results);
   }
   template <typename T>
   void queryBoundary(Interfaces iface, BoundaryID bnd, std::vector<T> & results)
   {
     _query.clone()
-        .cond<AttribThread>(_tid)
-        .cond<AttribBoundaries>(bnd)
-        .cond<AttribInterfaces>(iface)
+        .condition<AttribThread>(_tid)
+        .condition<AttribBoundaries>(bnd)
+        .condition<AttribInterfaces>(iface)
         .queryInto(results);
   }
 

@@ -360,9 +360,9 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
 
   std::vector<UserObject *> objs;
   _problem_ptr->theWarehouse()
-      .build()
-      .cond<AttribSystem>("UserObject")
-      .cond<AttribThread>(0)
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
       .queryInto(objs);
 
   for (const auto & obj : objs)

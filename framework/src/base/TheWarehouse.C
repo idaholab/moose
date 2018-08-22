@@ -17,7 +17,6 @@
 #include "BlockRestrictable.h"
 
 #include <memory>
-#include <mutex>
 
 class Storage
 {
@@ -89,9 +88,6 @@ private:
 TheWarehouse::TheWarehouse() : _store(new VecStore()) {}
 TheWarehouse::~TheWarehouse() {}
 
-static std::mutex obj_mutex;
-static std::mutex cache_mutex;
-
 void isValid(MooseObject * obj);
 
 unsigned int
@@ -112,7 +108,7 @@ TheWarehouse::add(std::shared_ptr<MooseObject> obj, const std::string & system)
   readAttribs(obj.get(), system, attribs);
   size_t obj_id = 0;
   {
-    std::lock_guard<std::mutex> lock(obj_mutex);
+    std::lock_guard<std::mutex> lock(_obj_mutex);
     _objects.push_back(obj);
     obj_id = _objects.size() - 1;
     _obj_ids[obj.get()] = obj_id;
@@ -154,14 +150,14 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
 {
   auto obj_ids = _store->query(conds);
 
-  std::lock_guard<std::mutex> c_lock(cache_mutex);
+  std::lock_guard<std::mutex> c_lock(_cache_mutex);
   _obj_cache.push_back({});
   auto query_id = _obj_cache.size() - 1;
   auto & vec = _obj_cache.back();
 
   _query_cache[std::move(conds)] = query_id;
 
-  std::lock_guard<std::mutex> o_lock(obj_mutex);
+  std::lock_guard<std::mutex> o_lock(_obj_mutex);
   for (auto & id : obj_ids)
     vec.push_back(_objects[id].get());
 
@@ -201,7 +197,7 @@ TheWarehouse::query(int query_id)
 {
   if (static_cast<size_t>(query_id) >= _obj_cache.size())
     throw std::runtime_error("unknown query id");
-  std::lock_guard<std::mutex> lock(cache_mutex);
+  std::lock_guard<std::mutex> lock(_cache_mutex);
   return _obj_cache[query_id];
 }
 
@@ -223,7 +219,7 @@ TheWarehouse::count(const std::vector<std::unique_ptr<Attribute>> & conds)
   if (static_cast<size_t>(query_id) >= _obj_cache.size())
     throw std::runtime_error("unknown query id");
 
-  std::lock_guard<std::mutex> lock(cache_mutex);
+  std::lock_guard<std::mutex> lock(_cache_mutex);
   auto & objs = _obj_cache[query_id];
   size_t count = 0;
   for (auto obj : objs)

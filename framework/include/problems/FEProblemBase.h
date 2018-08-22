@@ -656,7 +656,7 @@ public:
   const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
   {
     mooseDeprecated(
-        "This function is deprecated, use theWarehouse().build() to construct a query instead");
+        "This function is deprecated, use theWarehouse().query() to construct a query instead");
     return _all_user_objects;
   }
 
@@ -669,7 +669,7 @@ public:
   T & getUserObject(const std::string & name, unsigned int tid = 0) const
   {
     std::vector<T *> objs;
-    theWarehouse().build().cond<AttribThread>(tid).cond<AttribName>(name).queryInto(objs);
+    theWarehouse().query().condition<AttribThread>(tid).condition<AttribName>(name).queryInto(objs);
     if (objs.empty())
       mooseError("Unable to find user object with name '" + name + "'");
     return *(objs[0]);

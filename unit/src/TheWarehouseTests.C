@@ -168,12 +168,12 @@ TEST_F(TheWarehouseTest, test)
     for (size_t j = 0; j < test.queries.size(); j++)
     {
       auto query_test = test.queries[j];
-      auto query = w.build();
+      auto query = w.query();
       msg << "* query " << j + 1 << " { ";
       for (auto & attrib : query_test.query)
       {
         msg << "{val_" << attrib.index + 1 << " = " << attrib.val << "}, ";
-        query.cond<TestAttrib>(attrib.index, attrib.val);
+        query.condition<TestAttrib>(attrib.index, attrib.val);
       }
       msg << "}: ";
 

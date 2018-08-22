@@ -45,9 +45,9 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   for (const auto & bnd : nodeset_ids)
   {
     _query.clone()
-        .cond<AttribThread>(_tid)
-        .cond<AttribInterfaces>(Interfaces::NodalUserObject)
-        .cond<AttribBoundaries>(bnd, true)
+        .condition<AttribThread>(_tid)
+        .condition<AttribInterfaces>(Interfaces::NodalUserObject)
+        .condition<AttribBoundaries>(bnd, true)
         .queryInto(objs);
     for (const auto & uo : objs)
       uo->execute();
@@ -66,9 +66,9 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   for (const auto & block : block_ids)
   {
     _query.clone()
-        .cond<AttribThread>(_tid)
-        .cond<AttribInterfaces>(Interfaces::NodalUserObject)
-        .cond<AttribSubdomains>(block)
+        .condition<AttribThread>(_tid)
+        .condition<AttribInterfaces>(Interfaces::NodalUserObject)
+        .condition<AttribSubdomains>(block)
         .queryInto(objs);
 
     for (const auto & uo : objs)

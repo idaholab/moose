@@ -13,9 +13,9 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <type_traits>
 #include <unordered_map>
 #include <iostream>
+#include <mutex>
 
 #include "MooseObject.h"
 
@@ -89,7 +89,7 @@ class TheWarehouse
 {
 public:
   /// Query is a convenient way to construct and pass around (possible partially constructed)
-  /// warehouse queries.  The warehouse's "build()" function should generally be used to create
+  /// warehouse queries.  The warehouse's "query()" function should generally be used to create
   /// new Query objects rather than constructing them directly.  A Query object holds a list of
   /// conditions used to filter/select objects from the warehouse.  When the query is
   /// executed/run, results are filtered by "and"ing each condition together - i.e. only objects
@@ -98,7 +98,7 @@ public:
   {
   public:
     /// Creates a new query operating on the given warehouse w.  You should generally use
-    /// TheWarehouse::build() instead.
+    /// TheWarehouse::query() instead.
     Query(TheWarehouse & w) : _w(&w) {}
 
     Query & operator=(const Query & other)
@@ -118,32 +118,23 @@ public:
         _attribs.push_back(attrib->clone());
     }
 
-    /// Adds one or more new conditions to the query.  Each arg must be an Attribute object of the
-    /// desired type+value.
-    template <typename... Args>
-    Query & conds(const Attribute & attrib, Args... args)
-    {
-      _attribs.push_back(attrib.clone());
-      return cond(args...);
-    }
-
     /// Adds a new condition to the query.  The template parameter T is the Attribute class of
     /// interest and args are forwarded to T's constructor to build+add the attribute in-situ.
     template <typename T, typename... Args>
-    Query & cond(Args &&... args)
+    Query & condition(Args &&... args)
     {
       _attribs.emplace_back(new T(*_w, std::forward<Args>(args)...));
       return *this;
     }
 
     /// clone creates and returns an independent copy of the query in its current state.
-    Query clone() const { return std::move(Query(*this)); }
+    Query clone() const { return Query(*this); }
     /// count returns the number of results that match the query (this requires actually running
     /// the query).
     size_t count() { return _w->count(_attribs); }
 
     /// attribs returns a copy of the constructed Attribute list for the query in its current state.
-    std::vector<std::unique_ptr<Attribute>> attribs() { return std::move(clone()._attribs); }
+    std::vector<std::unique_ptr<Attribute>> attributes() { return std::move(clone()._attribs); }
 
     /// queryInto executes the query and stores the results in the given vector.  All results must
     /// be castable to the templated type T.
@@ -154,12 +145,6 @@ public:
     }
 
   private:
-    Query & cond(const Attribute & attrib)
-    {
-      _attribs.push_back(attrib.clone());
-      return *this;
-    }
-
     TheWarehouse * _w = nullptr;
     std::vector<std::unique_ptr<Attribute>> _attribs;
   };
@@ -209,12 +194,12 @@ public:
   /// warehouse attributes have become stale/incorrect.
   /// Any attribute specified in extra overwrites/trumps one read from the object's current state.
   void update(MooseObject * obj, const Attribute & extra);
-  /// build creates and returns an initialized a query object for querying objects from the
+  /// query creates and returns an initialized a query object for querying objects from the
   /// warehouse.
-  Query build() { return Query(*this); }
+  Query query() { return Query(*this); }
   /// count returns the number of objects that match the provided query conditions. This requires
   /// executing a full query operation (i.e. as if calling queryInto). A Query object should
-  /// generally be used via the build() member function instead.
+  /// generally be used via the query() member function instead.
   size_t count(const std::vector<std::unique_ptr<Attribute>> & conds);
   /// queryInto takes the given conditions (i.e. Attributes holding the values to filter/match
   /// over) and filters all objects in the warehouse that match all conditions (i.e. "and"ing the
@@ -244,11 +229,12 @@ private:
   std::vector<T *> & queryInto(int query_id, std::vector<T *> & results, bool show_all = false)
   {
     auto objs = query(query_id);
-    results.resize(0);
+    results.clear();
+    results.reserve(objs.size());
     for (unsigned int i = 0; i < objs.size(); i++)
     {
       auto obj = objs[i];
-      assert(dynamic_cast<T *>(obj));
+      mooseAssert(dynamic_cast<T *>(obj), "queried object has incompatible c++ type");
       if (show_all || obj->enabled())
         results.push_back(dynamic_cast<T *>(obj));
     }
@@ -278,6 +264,9 @@ private:
 
   std::map<std::string, unsigned int> _attrib_ids;
   std::vector<std::unique_ptr<Attribute>> _attrib_list;
+
+  std::mutex _obj_mutex;
+  std::mutex _cache_mutex;
 };
 
 #endif // THEWAREHOUSE_H

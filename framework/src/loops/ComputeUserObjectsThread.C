@@ -45,8 +45,8 @@ ComputeUserObjectsThread::subdomainChanged()
 
   std::vector<UserObject *> side_objs;
   _query.clone()
-      .cond<AttribThread>(_tid)
-      .cond<AttribInterfaces>(Interfaces::SideUserObject)
+      .condition<AttribThread>(_tid)
+      .condition<AttribInterfaces>(Interfaces::SideUserObject)
       .queryInto(side_objs);
 
   objs.insert(objs.begin(), side_objs.begin(), side_objs.end());
