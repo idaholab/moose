@@ -50,6 +50,12 @@ protected:
   const VariableValue & _phi;
   const NonlinearVariableName _phi_name;
 
+  /// equilibrium vacancy concentration
+  const MaterialPropertyName _cs_eq_name;
+  const MaterialProperty<Real> & _cs_eq;
+  std::vector<const MaterialProperty<Real> *> _dcs_eq;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _d2cs_eq;
+
   /// temperature
   const VariableValue & _T;
 
@@ -70,8 +76,11 @@ protected:
 
   /// susceptibility
   MaterialProperty<Real> & _chi;
-  MaterialProperty<Real> & _dchi;
-  MaterialProperty<Real> & _d2chi;
+  MaterialProperty<Real> & _dchidphi;
+  MaterialProperty<Real> & _dchidw;
+  MaterialProperty<Real> & _d2chidphi2;
+  MaterialProperty<Real> & _d2chidw2;
+  MaterialProperty<Real> & _d2chidphidw;
 
   /// void phase vacancy density
   MaterialProperty<Real> & _rhov;
@@ -80,7 +89,9 @@ protected:
   /// solid phase vacancy density
   MaterialProperty<Real> & _rhos;
   MaterialProperty<Real> & _drhosdw;
+  MaterialProperty<Real> & _d2rhosdw2;
   std::vector<MaterialProperty<Real> *> _drhos;
+  std::vector<MaterialProperty<Real> *> _d2rhosdwdeta;
   std::vector<std::vector<MaterialProperty<Real> *>> _d2rhos;
 
   /// void phase potential density
@@ -121,17 +132,11 @@ protected:
   /// Parameter to determine accuracy of surface/GB phase switching function
   const Real _switch;
 
-  /// Vacancy formation energy
-  const Real _Ef;
-
-  /// Extra grain boundary vacancy concentration
-  const Real _c_gb;
-
   /// Atomic volume of species
   const Real _Va;
 
-  /// Vacancy concentration prefactor
-  const Real _prefactor;
+  /// Type of energy function to use for the solid phase
+  const MooseEnum _solid_energy;
 
   /// mu value on surfaces
   const Real _mu_s;
