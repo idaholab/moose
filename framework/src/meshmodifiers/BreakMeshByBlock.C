@@ -50,7 +50,6 @@ BreakMeshByBlock::modify()
 
     if (current_node != nullptr)
     {
-
       // find node multiplicity
       const std::set<SubdomainID> & connected_blocks = _mesh_ptr->getNodeBlockIds(*current_node);
       unsigned int node_multiplicity = connected_blocks.size();
@@ -58,7 +57,6 @@ BreakMeshByBlock::modify()
       // check if current_node need to be duplicated
       if (node_multiplicity > 1)
       {
-
         // retrieve connected elements from the map
         const std::vector<dof_id_type> & connected_elems = node_it->second;
 
@@ -66,75 +64,84 @@ BreakMeshByBlock::modify()
         auto subdomain_it = connected_blocks.begin();
         SubdomainID reference_subdomain_id = *subdomain_it;
 
-        // we need to keep track of which element belong to the reference block and which
-        // to neighboring blocks
-        std::set<dof_id_type> reference_elems;
-        std::set<dof_id_type> neighbor_elems;
-
-        // initialize current multiplicity to keep track of how many nodes we added
-        unsigned int current_multiplicity = 1;
-
-        // loop over node multiplicity to add nodes starting from the second subdomain
-        // the original node remains on the reference_subdoamin
-        while (current_multiplicity < node_multiplicity)
+        // multiplicity counter to keep track of how many nodes we added
+        unsigned int multiplicity_counter = node_multiplicity;
+        for (auto elem_id : connected_elems)
         {
+          // all the duplicate nodes are added and assigned
+          if (multiplicity_counter == 0)
+            break;
 
-          // add new node
-          Node * new_node = Node::build(*current_node, mesh.n_nodes()).release();
-          new_node->processor_id() = current_node->processor_id();
-          mesh.add_node(new_node);
-          current_multiplicity += 1; // node created, update multiplicity
-
-          // fix all the elements belonging to the connected_blocks[subdomain_it]
-          for (auto elem_id : connected_elems)
+          Elem * current_elem = mesh.elem_ptr(elem_id);
+          if (current_elem->subdomain_id() != reference_subdomain_id)
           {
-            Elem * current_elem = mesh.elem_ptr(elem_id);
+            // assign the newly added node to current_elem
+            Node * new_node = nullptr;
 
-            // check if we need to fix a node in the current element
-            // if current_elem belong to the reference subdomain
-            if (current_elem->subdomain_id() == reference_subdomain_id)
-              reference_elems.insert(current_elem->id()); // store reference element
-            else                                          // this is a neighbor element
+            for (unsigned int node_id = 0; node_id < current_elem->n_nodes(); ++node_id)
+              if (current_elem->node_id(node_id) ==
+                  current_node->id()) // if current node == node on element
+              {
+                // add new node
+                new_node = Node::build(*current_node, mesh.n_nodes()).release();
+                new_node->processor_id() = current_node->processor_id();
+                mesh.add_node(new_node);
+
+                // Add boundary info to the new node
+                std::vector<boundary_id_type> node_boundary_ids =
+                    mesh.boundary_info->boundary_ids(current_node);
+                mesh.boundary_info->add_node(new_node, node_boundary_ids);
+
+                multiplicity_counter--; // node created, update multiplicity counter
+
+                current_elem->set_node(node_id) = new_node;
+                break; // ones the proper node has been fixed in one element we can break the
+                       // loop
+              }
+
+            for (auto connected_elem_id : connected_elems)
             {
-              // add the current element to the neighbor elements list
-              neighbor_elems.insert(current_elem->id());
+              Elem * connected_elem = mesh.elem_ptr(connected_elem_id);
 
-              // fix current element node:
-              // cicle over the neighbor element nodes to find the node to fix
-              for (unsigned int local_elem_node_it = 0;
-                   local_elem_node_it < current_elem->n_nodes();
-                   ++local_elem_node_it)
-                if (current_elem->node_id(local_elem_node_it) ==
-                    current_node->id()) // if current node == node on element
-                {
-                  current_elem->set_node(local_elem_node_it) = new_node;
-                  break; // ones the proper node has been fixed in one element we can break the loop
-                }
-            } // end reference/neighbor actions
-          }   // end loop over connected elements
-        }     // end multiplicity loop
-
-        // to add the appropriate side to the new interface we need to loop over
-        // reference elements and find all the neighbors sharing a side with it
-        for (auto ref_elem_id : reference_elems)
-        {
-
-          Elem * ref_elem = mesh.elem_ptr(ref_elem_id);
-
-          // loop over possible neighbors
-          for (auto neigh_elem_id : neighbor_elems)
-          {
-            Elem * neigh_elem = mesh.elem_ptr(neigh_elem_id);
-            if (ref_elem->has_neighbor(neigh_elem))
-            {
-              std::pair<subdomain_id_type, subdomain_id_type> blocks_pair =
-                  std::make_pair(ref_elem->subdomain_id(), neigh_elem->subdomain_id());
-
-              _new_boundary_sides_map[blocks_pair].insert(
-                  std::make_pair(ref_elem->id(), ref_elem->which_neighbor_am_i(neigh_elem)));
+              // Assign the newly added node to other connected elements with the same block_id
+              if (connected_elem->subdomain_id() == current_elem->subdomain_id() &&
+                  connected_elem != current_elem)
+              {
+                for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
+                  if (connected_elem->node_id(node_id) ==
+                      current_node->id()) // if current node == node on element
+                  {
+                    connected_elem->set_node(node_id) = new_node;
+                    break;
+                  }
+              }
             }
           }
         }
+
+        // create blocks pair and assign element side to new interface boundary map
+        for (auto elem_id : connected_elems)
+        {
+          for (auto connected_elem_id : connected_elems)
+          {
+            Elem * current_elem = mesh.elem_ptr(elem_id);
+            Elem * connected_elem = mesh.elem_ptr(connected_elem_id);
+
+            if (current_elem != connected_elem &&
+                current_elem->subdomain_id() < connected_elem->subdomain_id())
+            {
+              if (current_elem->has_neighbor(connected_elem))
+              {
+                std::pair<subdomain_id_type, subdomain_id_type> blocks_pair =
+                    std::make_pair(current_elem->subdomain_id(), connected_elem->subdomain_id());
+
+                _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
+                    current_elem->id(), current_elem->which_neighbor_am_i(connected_elem)));
+              }
+            }
+          }
+        }
+
       } // end multiplicity check
     }   // end loop over nodes
   }     // end nodeptr check
