@@ -16,13 +16,28 @@
 namespace MooseUtils
 {
 
+template <class T, typename... Args>
+auto
+reset(int, T & obj, Args... args) -> decltype(obj.reset(args...), void())
+{
+  obj.reset(std::forward<Args>(args)...);
+}
+
+template <class T, typename... Args>
+void
+reset(double, T & /*obj*/, Args... /*args*/)
+{
+}
+
 /**
  *
  * Originally From https://stackoverflow.com/a/27837534/2042320
  *
  * friedmud added variadic templated perfect forwarding to acquire()
+ *
+ * For an object to be resetable it needs to define a reset() function
+ * that takes the same arguments as its constructor.
  */
-
 template <class T>
 class SharedPool
 {
@@ -66,10 +81,16 @@ public:
     if (_pool.empty())
       return std::move(ptr_type(new T(std::forward<Args>(args)...),
                                 ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}}));
+    else
+    {
+      ptr_type tmp(_pool.top().release(),
+                   ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}});
+      _pool.pop();
 
-    ptr_type tmp(_pool.top().release(), ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}});
-    _pool.pop();
-    return std::move(tmp);
+      reset(1, *tmp, std::forward<Args>(args)...);
+
+      return std::move(tmp);
+    }
   }
 
   bool empty() const { return _pool.empty(); }
