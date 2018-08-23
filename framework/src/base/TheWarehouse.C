@@ -30,7 +30,7 @@ public:
 bool
 operator<(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs)
 {
-  return (*lhs.get()) < (*rhs.get());
+  return (*lhs) < (*rhs);
 }
 
 Attribute::Attribute(TheWarehouse & w, const std::string name) : _id(w.attribID(name)) {}
@@ -192,7 +192,7 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
   return query_id;
 }
 
-const std::vector<MooseObject *>
+const std::vector<MooseObject *> &
 TheWarehouse::query(int query_id)
 {
   if (static_cast<size_t>(query_id) >= _obj_cache.size())
@@ -240,13 +240,12 @@ TheWarehouse::readAttribs(const MooseObject * obj,
   {
     if (sys && (ref->id() == sys->id()))
     {
-      attribs.push_back(sys->clone());
+      attribs.push_back(std::move(sys));
       continue;
     }
 
-    auto attrib = ref->clone();
-    attrib->initFrom(obj);
-    attribs.push_back(std::move(attrib));
+    attribs.emplace_back(ref->clone());
+    attribs.back()->initFrom(obj);
   }
 }
 

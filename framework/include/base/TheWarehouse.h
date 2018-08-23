@@ -228,7 +228,7 @@ private:
   template <typename T>
   std::vector<T *> & queryInto(int query_id, std::vector<T *> & results, bool show_all = false)
   {
-    auto objs = query(query_id);
+    auto & objs = query(query_id);
     results.clear();
     results.reserve(objs.size());
     for (unsigned int i = 0; i < objs.size(); i++)
@@ -244,7 +244,7 @@ private:
   /// prepares a query and returns an associated query_id (i.e. for use with the query function).
   int prepare(std::vector<std::unique_ptr<Attribute>> conds);
 
-  const std::vector<MooseObject *> query(int query_id);
+  const std::vector<MooseObject *> & query(int query_id);
 
   void readAttribs(const MooseObject * obj,
                    const std::string & system,
