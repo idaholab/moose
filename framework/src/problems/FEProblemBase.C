@@ -743,8 +743,6 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
-    _current_execute_on_flag = EXEC_INITIAL;
-
     execTransfers(EXEC_INITIAL);
 
     bool converged = execMultiApps(EXEC_INITIAL);
@@ -757,15 +755,7 @@ FEProblemBase::initialSetup()
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
       reinitScalars(tid);
 
-    // TODO: user object evaluation could fail.
-    computeUserObjects(EXEC_INITIAL, Moose::PRE_AUX);
-
-    _aux->compute(EXEC_INITIAL);
-
-    // The only user objects that should be computed here are the initial UOs
-    computeUserObjects(EXEC_INITIAL, Moose::POST_AUX);
-
-    _current_execute_on_flag = EXEC_NONE;
+    execute(EXEC_INITIAL);
   }
 
   // Here we will initialize the stateful properties once more since they may have been updated
@@ -2888,8 +2878,10 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   setCurrentExecuteOnFlag(exec_type);
   if (exec_type == EXEC_NONLINEAR)
     _currently_computing_jacobian = true;
+
   // Samplers
-  executeSamplers(exec_type);
+  if (exec_type != EXEC_INITIAL)
+    executeSamplers(exec_type);
 
   // Pre-aux UserObjects
   computeUserObjects(exec_type, Moose::PRE_AUX);
@@ -2901,7 +2893,8 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   computeUserObjects(exec_type, Moose::POST_AUX);
 
   // Controls
-  executeControls(exec_type);
+  if (exec_type != EXEC_INITIAL)
+    executeControls(exec_type);
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
