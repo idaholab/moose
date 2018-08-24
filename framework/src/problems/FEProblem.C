@@ -41,8 +41,6 @@ FEProblem::FEProblem(const InputParameters & parameters)
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
 }
 
-FEProblem::~FEProblem() { FEProblemBase::deleteAssemblyArray(); }
-
 void
 FEProblem::setInputParametersFEProblem(InputParameters & parameters)
 {

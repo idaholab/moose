@@ -27,8 +27,6 @@ class FEProblem : public FEProblemBase
 public:
   FEProblem(const InputParameters & parameters);
 
-  virtual ~FEProblem();
-
   virtual bool getUseNonlinear() const { return _use_nonlinear; }
   virtual void setUseNonlinear(bool use_nonlinear) { _use_nonlinear = use_nonlinear; }
 
