@@ -61,13 +61,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
 #endif /* LIBMESH_HAVE_SLEPC */
 }
 
-EigenProblem::~EigenProblem()
-{
-#if LIBMESH_HAVE_SLEPC
-  FEProblemBase::deleteAssemblyArray();
-#endif /* LIBMESH_HAVE_SLEPC */
-}
-
 #if LIBMESH_HAVE_SLEPC
 void
 EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
