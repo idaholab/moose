@@ -259,14 +259,14 @@ public:
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
 
   /**
-   * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
+   * Get the problem type for this App
    */
-  bool & useNonlinear() { return _use_nonlinear; }
+  const std::string & problemType() const { return _problem_type; }
 
   /**
-   * Set a Boolean indicating whether this app will use an eigenvalue executioner.
+   * Returns a writable reference to the problem type of this App
    */
-  bool & useEigenvalue() { return _use_eigen_value; }
+  std::string & problemType() { return _problem_type; }
 
   /**
    * Retrieve the Factory associated with this App.
@@ -690,11 +690,8 @@ protected:
   /// Pointer to the executioner of this run (typically build by actions)
   std::shared_ptr<Executioner> _executioner;
 
-  /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
-  bool _use_nonlinear;
-
-  /// Boolean to indicate whether to use an eigenvalue executioner
-  bool _use_eigen_value;
+  /// Problem type
+  std::string _problem_type;
 
   /// System Information
   std::unique_ptr<SystemInfo> _sys_info;

@@ -267,8 +267,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
-    _use_nonlinear(true),
-    _use_eigen_value(false),
+    _problem_type("FEProblem"),
     _enable_unused_check(WARN_UNUSED),
     _factory(*this),
     _error_overridden(false),
@@ -1509,14 +1508,10 @@ MooseApp::createMinimalApp()
     // Build the Action parameters
     InputParameters action_params = _action_factory.getValidParams("CreateProblemAction");
     action_params.set<std::string>("type") = "FEProblem";
+    action_params.set<bool>("_skip_param_construction_and_solving") = true;
 
     // Create the action
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _action_factory.create("CreateProblemAction", "Problem", action_params));
-
-    // Set the object parameters
-    InputParameters & params = action->getObjectParams();
-    params.set<bool>("solve") = false;
+    auto action = _action_factory.create("CreateProblemAction", "Problem", action_params);
 
     // Add Action to the warehouse
     _action_warehouse.addActionBlock(action);
