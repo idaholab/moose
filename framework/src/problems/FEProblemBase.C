@@ -146,7 +146,10 @@ validParams<FEProblemBase>()
                         false,
                         "True to skip additional data in equation system for restart. It is useful "
                         "for starting a transient calculation with a steady-state solution");
-
+  params.addParam<bool>("skip_nl_system_check",
+                        false,
+                        "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
+                        "that there are variables to solve for).");
   return params;
 }
 
@@ -222,6 +225,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
+    _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
@@ -321,17 +325,7 @@ FEProblemBase::newAssemblyArray(NonlinearSystemBase & nl)
 
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
-    _assembly[i] = new Assembly(nl, i);
-}
-
-void
-FEProblemBase::deleteAssemblyArray()
-{
-  unsigned int n_threads = libMesh::n_threads();
-  for (unsigned int i = 0; i < n_threads; i++)
-  {
-    delete _assembly[i];
-  }
+    _assembly[i] = libmesh_make_unique<Assembly>(nl, i);
 }
 
 void
@@ -523,7 +517,7 @@ FEProblemBase::initialSetup()
     if (_has_internal_edge_residual_objects)
       mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
 
-    _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
+    _mesh.buildRefinementAndCoarseningMaps(_assembly[0].get());
   }
 
   if (!_app.isRecovering())
@@ -3853,7 +3847,7 @@ FEProblemBase::init()
   _nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl.get());
   _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux.get());
 
-  if (_solve && n_vars == 0)
+  if (!_skip_nl_system_check && _solve && n_vars == 0)
     mooseError("No variables specified in the FEProblemBase '", name(), "'.");
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
@@ -4482,11 +4476,9 @@ FEProblemBase::computeJacobianBlock(SparseMatrix<Number> & jacobian,
                                     unsigned int ivar,
                                     unsigned int jvar)
 {
-  std::vector<JacobianBlock *> blocks;
-  JacobianBlock * block = new JacobianBlock(precond_system, jacobian, ivar, jvar);
-  blocks.push_back(block);
+  JacobianBlock jac_block(precond_system, jacobian, ivar, jvar);
+  std::vector<JacobianBlock *> blocks = {&jac_block};
   computeJacobianBlocks(blocks);
-  delete block;
 }
 
 void
@@ -4991,7 +4983,7 @@ FEProblemBase::checkProblemIntegrity()
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
 
   // Check kernel coverage of subdomains (blocks) in the mesh
-  if (_solve && _kernel_coverage_check)
+  if (!_skip_nl_system_check && _solve && _kernel_coverage_check)
     _nl->checkKernelCoverage(mesh_subdomains);
 
   // Check materials

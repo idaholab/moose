@@ -1,0 +1,23 @@
+[Tests]
+  [external_steady]
+    type = 'RunApp'
+    input = 'external_steady.i'
+    expect_out = "Dummy External Solve"
+
+    requirement = "MOOSE shall support an code coupling interface that can trigger external solves."
+    design = "ExternalProblem.md"
+    issues = "#12024"
+  []
+
+  [external_transient]
+    type = 'RunApp'
+    input = 'external_transient.i'
+
+    # Match 5 solves
+    expect_out = "(?:Dummy External Solve.*){5}"
+
+    requirement = "MOOSE shall support an code coupling interface that can trigger external solves for transient simulations."
+    design = "ExternalProblem.md"
+    issues = "#12024"
+  []
+[]

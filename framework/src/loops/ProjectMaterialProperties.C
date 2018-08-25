@@ -28,7 +28,7 @@ ProjectMaterialProperties::ProjectMaterialProperties(
     std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
     MaterialPropertyStorage & material_props,
     MaterialPropertyStorage & bnd_material_props,
-    std::vector<Assembly *> & assembly)
+    std::vector<std::unique_ptr<Assembly>> & assembly)
   : ThreadedElementLoop<ConstElemPointerRange>(fe_problem),
     _refine(refine),
     _fe_problem(fe_problem),

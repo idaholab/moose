@@ -144,6 +144,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_bounds_vectors", false);
   registerTask("add_periodic_bc", false);
   registerTask("add_aux_variable", false);
+  registerTask("add_external_aux_variables", true);
   registerTask("add_variable", false);
 
   registerTask("execute_mesh_modifiers", false);
@@ -223,7 +224,8 @@ addActionTypes(Syntax & syntax)
                            "(check_integrity_early)"
                            "(setup_predictor)"
                            "(init_displaced_problem)"
-                           "(add_aux_variable, add_variable, add_elemental_field_variable)"
+                           "(add_aux_variable, add_variable, add_elemental_field_variable,"
+                           " add_external_aux_variables)"
                            "(setup_variable_complete)"
                            "(setup_quadrature)"
                            "(add_function)"
@@ -254,9 +256,9 @@ addActionTypes(Syntax & syntax)
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
-                           "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, "
-                           "add_nodal_kernel, add_dg_kernel, add_interface_kernel, "
-                           "add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+                           "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
+                           " add_nodal_kernel, add_dg_kernel, add_interface_kernel,"
+                           " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
                            "(add_control)"
                            "(check_output)"
                            "(check_integrity)");
