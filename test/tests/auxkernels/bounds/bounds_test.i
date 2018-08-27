@@ -79,8 +79,8 @@
     type = BoundsAux
     variable = bounds_dummy
     bounded_variable = u
-    upper = 1
-    lower = 0
+    upper = 0.5
+    lower = 0.1
   [../]
 
   [./v_bounds]
@@ -95,7 +95,9 @@
 [Executioner]
   type = Steady
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
+  petsc_options_iname = "-snes_type"
+  petsc_options_value = "vinewtonrsls"
 []
 
 [Outputs]
