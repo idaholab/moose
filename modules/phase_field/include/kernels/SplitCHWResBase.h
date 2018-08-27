@@ -28,10 +28,12 @@ public:
 
   static InputParameters validParams();
 
+  void initialSetup() override;
+
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  Real computeQpResidual() override;
+  Real computeQpJacobian() override;
+  Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
 private:
   const MaterialPropertyName _mob_name;
@@ -67,6 +69,13 @@ SplitCHWResBase<T>::validParams()
   params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");
   params.addCoupledVar("args", "Vector of arguments of the mobility");
   return params;
+}
+
+template <typename T>
+void
+SplitCHWResBase<T>::initialSetup()
+{
+  validateNonlinearCoupling<Real>("mob_name");
 }
 
 template <typename T>
