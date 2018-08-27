@@ -69,6 +69,19 @@
   issues = '#11775'
 [../]
 
+[./2DPolyCrystalBreakMesh_test]
+  ###  compare manual vs automatic mesh split
+  type = 'Exodiff'
+  input = 'TestBreakMesh_2D_polycrystal.i'
+  cli_args = '--mesh-only'
+  exodiff = 'TestBreakMesh_2D_polycrystal_in.e'
+  mesh_mode = REPLICATED
+  recover = false
+  requirement = "For a 2D case, the MeshModifier should break the mesh into multiple unconnected grains and create an interface on all grain boundaries"
+  design = 'BreakMeshByBlock.md'
+  issues = '#12033'
+[../]
+
 [./2D4ElementJunctionBreakMeshSplitInterfaceCompare_test]
   ###  compare manual vs automatic mesh split
   type = 'Exodiff'
