@@ -165,15 +165,7 @@ public:
 
   void getCrackTipOrigin(std::map<unsigned int, const Elem *> & elem_id_crack_tip,
                          std::vector<Point> & crack_front_points);
-  // void update_crack_propagation_direction(const Elem* elem, Point direction);
-  // void clear_crack_propagation_direction();
-  /**
-   * Set and get xfem cut data and type
-   */
-  std::vector<Real> & getXFEMCutData();
-  void setXFEMCutData(std::vector<Real> & cut_data);
-  std::string & getXFEMCutType();
-  void setXFEMCutType(std::string & cut_type);
+
   Xfem::XFEM_QRULE & getXFEMQRule();
   void setXFEMQRule(std::string & xfem_qrule);
   void setCrackGrowthMethod(bool use_crack_growth_increment, Real crack_growth_increment);
