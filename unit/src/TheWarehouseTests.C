@@ -123,6 +123,34 @@ struct WarehouseTest
   std::vector<QueryTest> queries;
 };
 
+TEST_F(TheWarehouseTest, benchmark)
+{
+  int n_objs = 1000;
+  int n_queries = 1000;
+  int n_repeat_query = 10000;
+  for (int i = 0; i < n_objs; i++)
+    w.add(obj(i % 1000, 1, 1, 1), "");
+
+  int cum_results = 0;
+  for (int n = 0; n < n_repeat_query; n++)
+  {
+    for (int i = 0; i < n_queries; i++)
+    {
+      std::vector<TestObject *> objs;
+      w.query()
+          .condition<TestAttrib>(0, i % 1000)
+          .condition<TestAttrib>(1, 1)
+          .condition<TestAttrib>(2, 1)
+          .condition<TestAttrib>(2, 1)
+          .queryInto(objs);
+      cum_results += objs.size();
+    }
+  }
+  std::cout << "ran " << n_queries << " unique queries each repeated " << n_repeat_query
+            << " times over " << n_objs << " objects totaling " << cum_results
+            << " resulting objects\n";
+}
+
 // A series of warehouse querying tests - each test has a set of objects that get added to the
 // warehouse
 TEST_F(TheWarehouseTest, test)
