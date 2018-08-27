@@ -33,11 +33,21 @@ validParams<TestObject>()
   return p;
 }
 
+const std::string &
+fastStr(int i)
+{
+  static std::vector<std::string> vec;
+  if (vec.empty())
+    for (int i = 0; i < 20; i++)
+      vec.push_back(std::to_string(i));
+  return vec[i];
+}
+
 class TestAttrib : public Attribute
 {
 public:
   TestAttrib(TheWarehouse & w, int index, int val)
-    : Attribute(w, "attrib" + std::to_string(index)), index(index), val(val)
+    : Attribute(w, fastStr(index)), index(index), val(val)
   {
   }
 
@@ -71,10 +81,10 @@ class TheWarehouseTest : public MooseObjectUnitTest
 public:
   TheWarehouseTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    w.registerAttrib<TestAttrib>("attrib0", 0, 0);
-    w.registerAttrib<TestAttrib>("attrib1", 1, 0);
-    w.registerAttrib<TestAttrib>("attrib2", 2, 0);
-    w.registerAttrib<TestAttrib>("attrib3", 3, 0);
+    w.registerAttrib<TestAttrib>("0", 0, 0);
+    w.registerAttrib<TestAttrib>("1", 1, 0);
+    w.registerAttrib<TestAttrib>("2", 2, 0);
+    w.registerAttrib<TestAttrib>("3", 3, 0);
   }
 
   std::shared_ptr<TestObject> obj(int val1, int val2, int val3, int val4)
@@ -126,8 +136,8 @@ struct WarehouseTest
 TEST_F(TheWarehouseTest, benchmark)
 {
   int n_objs = 1000;
-  int n_queries = 1000;
-  int n_repeat_query = 10000;
+  int n_queries = 2000;
+  int n_repeat_query = 20000;
   for (int i = 0; i < n_objs; i++)
     w.add(obj(i % 1000, 1, 1, 1), "");
 
@@ -146,9 +156,9 @@ TEST_F(TheWarehouseTest, benchmark)
       cum_results += objs.size();
     }
   }
-  std::cout << "ran " << n_queries << " unique queries each repeated " << n_repeat_query
-            << " times over " << n_objs << " objects totaling " << cum_results
-            << " resulting objects\n";
+  Moose::out << "ran " << n_queries << " unique queries each repeated " << n_repeat_query
+             << " times over " << n_objs << " objects totaling " << cum_results
+             << " resulting objects\n";
 }
 
 // A series of warehouse querying tests - each test has a set of objects that get added to the
