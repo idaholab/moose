@@ -25,4 +25,31 @@
                   Variables/temp/scaling=0.001'
       prereq = test_sm
     [../]
+    [./group_variables]
+      type = 'Exodiff'
+      input = 'group_variables.i'
+      exodiff = 'group_variables_out.e'
+      abs_zero = 1e-9
+      requirement = 'The reference residual based convergence checking system shall permit the norm of independent groups of either scalar and standard solution variables to be compared against reference quantities provided through the norms of groups of auxiliary variables.'
+      design = 'ReferenceResidualProblem.md'
+      issues = '#12053'
+    [../]
+    [./group_variables_duplicate_error_check]
+      type = 'RunException'
+      input = 'group_variables.i'
+      expect_err = "A variable cannot be included in multiple groups in the 'group_variables' parameter."
+      cli_args = 'Problem/group_variables="disp_x disp_y; disp_x scalar_strain_zz1"'
+      requirement = 'The reference residual based convergence checking system shall generate an error if a variable is added to multiple groups.'
+      design = 'ReferenceResidualProblem.md'
+      issues = '#12053'
+    [../]
+    [./group_variables_ungroup_error_check]
+      type = 'RunException'
+      input = 'group_variables.i'
+      expect_err = "In the 'group_variables' parameter, variable disp_x is not grouped with other variables."
+      cli_args = 'Problem/group_variables="disp_x; scalar_strain_zz1 scalar_strain_zz2"'
+      requirement = 'The reference residual based convergence checking system shall generate an error if a group containing a single variable is defined.'
+      design = 'ReferenceResidualProblem.md'
+      issues = '#12053'
+    [../]
 []
