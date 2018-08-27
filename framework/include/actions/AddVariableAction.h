@@ -53,7 +53,7 @@ protected:
    *
    * @param var_name The name of the variable.
    */
-  void addVariable(std::string & var_name);
+  void addVariable(const std::string & var_name);
 
   /**
    * Create the action to generate the InitialCondition object
