@@ -99,7 +99,7 @@ public:
   public:
     /// Creates a new query operating on the given warehouse w.  You should generally use
     /// TheWarehouse::query() instead.
-    Query(TheWarehouse & w) : _w(&w) {}
+    Query(TheWarehouse & w) : _w(&w) { _attribs.reserve(5); }
 
     Query & operator=(const Query & other)
     {
@@ -108,12 +108,14 @@ public:
 
       _w = other._w;
       _attribs.clear();
+      _attribs.reserve(other._attribs.size());
       for (auto & attrib : other._attribs)
         _attribs.push_back(attrib->clone());
       return *this;
     }
     Query(const Query & other) : _w(other._w)
     {
+      _attribs.reserve(other._attribs.size());
       for (auto & attrib : other._attribs)
         _attribs.push_back(attrib->clone());
     }
@@ -139,7 +141,7 @@ public:
     /// queryInto executes the query and stores the results in the given vector.  All results must
     /// be castable to the templated type T.
     template <typename T>
-    std::vector<T *> queryInto(std::vector<T *> & results)
+    std::vector<T *> & queryInto(std::vector<T *> & results)
     {
       return _w->queryInto(_attribs, results);
     }
@@ -180,7 +182,13 @@ public:
   /// Returns a unique ID associated with the given attribute name - i.e. an attribute and name
   /// that were previously registered via calls to registerAttrib.  Users should generally *not*
   /// need to use this function.
-  unsigned int attribID(const std::string & name);
+  inline unsigned int attribID(const std::string & name)
+  {
+    auto it = _attrib_ids.find(name);
+    if (it != _attrib_ids.end())
+      return it->second;
+    mooseError("no ID exists for unregistered attribute '", name, "'");
+  }
 
   /// add adds a new object to the warehouse and stores attributes/metadata about it for running
   /// queries/filtering.  The warehouse will maintain a pointer to the object indefinitely.
@@ -262,7 +270,7 @@ private:
   // The query id is an index into the _obj_cache data structure.
   std::map<std::vector<std::unique_ptr<Attribute>>, int> _query_cache;
 
-  std::map<std::string, unsigned int> _attrib_ids;
+  std::unordered_map<std::string, unsigned int> _attrib_ids;
   std::vector<std::unique_ptr<Attribute>> _attrib_list;
 
   std::mutex _obj_mutex;

@@ -90,15 +90,6 @@ TheWarehouse::~TheWarehouse() {}
 
 void isValid(MooseObject * obj);
 
-unsigned int
-TheWarehouse::attribID(const std::string & name)
-{
-  auto it = _attrib_ids.find(name);
-  if (it != _attrib_ids.end())
-    return it->second;
-  mooseError("no ID exists for unregistered attribute '", name, "'");
-}
-
 void
 TheWarehouse::add(std::shared_ptr<MooseObject> obj, const std::string & system)
 {

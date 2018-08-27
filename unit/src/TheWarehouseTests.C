@@ -47,18 +47,18 @@ public:
   }
   virtual void initFrom(const MooseObject * obj) override
   {
-    auto o = dynamic_cast<const TestObject *>(obj);
+    auto o = static_cast<const TestObject *>(obj);
     val = o->vals[index];
   }
 
   virtual bool isMatch(const Attribute & other) const override
   {
-    auto o = dynamic_cast<const TestAttrib *>(&other);
+    auto o = static_cast<const TestAttrib *>(&other);
     return val == o->val;
   }
   virtual bool isLess(const Attribute & other) const override
   {
-    auto o = dynamic_cast<const TestAttrib *>(&other);
+    auto o = static_cast<const TestAttrib *>(&other);
     return val < o->val;
   }
 
