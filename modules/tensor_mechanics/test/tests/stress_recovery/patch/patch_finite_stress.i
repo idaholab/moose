@@ -3,29 +3,40 @@
 []
 
 [Mesh]
-  type = FileMesh
-  file = geo.msh
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
+  elem_type = QUAD4
 []
 
 [Variables]
   [disp_x]
+    order = FIRST
+    family = LAGRANGE
   []
   [disp_y]
+    order = FIRST
+    family = LAGRANGE
   []
 []
 
 [AuxVariables]
   [stress_xx]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   []
   [stress_yy]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   []
   [stress_xx_recovered]
+    order = FIRST
+    family = LAGRANGE
   []
   [stress_yy_recovered]
+    order = FIRST
+    family = LAGRANGE
   []
 []
 
@@ -50,7 +61,6 @@
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx_recovered
-    patch_polynomial_order = SECOND
     index_i = 0
     index_j = 0
     execute_on = 'timestep_end'
@@ -59,7 +69,6 @@
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy_recovered
-    patch_polynomial_order = SECOND
     index_i = 1
     index_j = 1
     execute_on = 'timestep_end'
@@ -81,7 +90,7 @@
 
 [Materials]
   [strain]
-    type = ComputeSmallStrain
+    type = ComputeFiniteStrain
   []
   [Cijkl]
     type = ComputeIsotropicElasticityTensor
@@ -89,14 +98,14 @@
     youngs_modulus = 2.1e+5
   []
   [stress]
-    type = ComputeLinearElasticStress
+    type = ComputeFiniteStrainElasticStress
   []
 []
 
 [BCs]
   [top_xdisp]
     type = FunctionPresetBC
-    variable = disp_y
+    variable = disp_x
     boundary = 'top'
     function = 0
   []
@@ -104,7 +113,7 @@
     type = FunctionPresetBC
     variable = disp_y
     boundary = 'top'
-    function = 0.01
+    function = t
   []
   [bottom_xdisp]
     type = FunctionPresetBC
@@ -129,7 +138,7 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = NEWTON
   petsc_options_iname = '-ksp_type -pc_type'
   petsc_options_value = 'preonly   lu'
@@ -137,10 +146,13 @@
   nl_rel_tol = 1e-8
   l_max_its = 100
   nl_max_its = 30
+  dt = 0.01
+  dtmin = 1e-11
+  start_time = 0
+  end_time = 0.05
 []
 
 [Outputs]
-  interval = 1
   exodus = true
   print_linear_residuals = false
 []

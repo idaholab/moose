@@ -164,8 +164,13 @@ NodalPatchRecovery::compute()
     return;
   }
 
-  // Use Zienkiewicz-Zhu patch recovery for nodal variables
+  // Limit current use of NodalPatchRecovery to a single processor
+  if (_communicator.size() > 1)
+    mooseError("The nodal patch recovery option, which calculates the Zienkiewicz-Zhu patch "
+               "recovery for nodal variables (family = LAGRANGE), is not currently implemented for "
+               "parallel runs. Run in serial if you must use the nodal patch capability");
 
+  // Use Zienkiewicz-Zhu patch recovery for nodal variables
   reinitPatch();
 
   // get node-to-conneted-elem map
