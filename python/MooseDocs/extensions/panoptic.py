@@ -25,10 +25,11 @@ class PanopticExtension(command.CommandExtension):
         pass
 
     def postTokenize(self, ast, config): #pylint: disable=unused-argument
-        shortcuts = self.get('shortcuts', dict())
-        for key, value in shortcuts.iteritems():
-            if isinstance(value, dict):
-                for k, v in value.iteritems():
-                    tokens.Shortcut(ast, key=unicode(k), link=unicode(v), string=unicode(k))
-            else:
-                tokens.Shortcut(ast, key=unicode(key), link=unicode(value), string=unicode(key))
+        if ast.is_root:
+            shortcuts = self.get('shortcuts', dict())
+            for key, value in shortcuts.iteritems():
+                if isinstance(value, dict):
+                    for k, v in value.iteritems():
+                        tokens.Shortcut(ast, key=unicode(k), link=unicode(v), string=unicode(k))
+                else:
+                    tokens.Shortcut(ast, key=unicode(key), link=unicode(value), string=unicode(key))

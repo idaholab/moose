@@ -37,10 +37,22 @@ class SQAExtension(command.CommandExtension):
         #NOTE: This is too slow to perform on reinit()
         self.__requirements = common.get_requirements(self.get('directories'), self.get('specs'))
 
+        # Storage for requirement matrix counting (see SQARequirementMatricCommand)
+        self.__counts = collections.defaultdict(int)
+
     @property
     def requirements(self):
         """Return the requirements dictionary."""
         return self.__requirements
+
+    def reinit(self):
+        """Reset counts."""
+        self.__counts.clear()
+
+    def increment(self, key):
+        """Increment and return count for requirements matrix."""
+        self.__counts[key] += 1
+        return self.__counts[key]
 
     def extend(self, reader, renderer):
         self.requires(command, alert, floats, core, materialicon)
@@ -50,6 +62,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(SQARequirementsCommand())
         self.addCommand(SQADocumentItemCommand())
         self.addCommand(SQACrossReferenceCommand())
+        self.addCommand(SQARequirementsMatrixCommand())
 
         renderer.add(SQATemplateItem, RenderSQATemplateItem())
         renderer.add(SQARequirementMatrix, RenderSQARequirementMatrix())
@@ -150,6 +163,54 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
                 self._addRequirement(matrix, req)
 
         return parent
+
+class SQARequirementsMatrixCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'requirements-matrix'
+    COUNT = 1
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['prefix'] = (None, "The letter prefix (e.g., 'P' for performance) for the type of "
+                                  "requirement.")
+        config['heading'] = (None, "Requirement matrix heading.")
+        return config
+
+    def createToken(self, info, parent):
+        content = info['block'] if 'block' in info else info['inline']
+
+        if self.settings['prefix'] is None:
+            msg = "The 'prefix' option is required."
+            raise exceptions.TokenizeException(msg)
+
+        # Extract the unordered list
+        self.reader.parse(parent, content, MooseDocs.BLOCK)
+        ul = parent.children[-1]
+        ul.parent = None
+
+        # Check the list type
+        if not isinstance(ul, tokens.UnorderedList):
+            msg = "The content is required to be an unordered list (i.e., use '-')."
+            raise exceptions.TokenizeException(msg)
+
+        # Build the matrix
+        prefix = self.settings['prefix']
+        label = u'{}{:d}'.format(prefix, self.extension.increment(prefix))
+        matrix = SQARequirementMatrix(parent)
+
+        heading = self.settings['heading']
+        if heading is not None:
+            matrix.heading = tokens.Token(None) #pylint: disable=attribute-defined-outside-init
+            self.reader.parse(matrix.heading, heading, MooseDocs.INLINE)
+
+        for i, item in enumerate(ul.children):
+            matrix_item = SQARequirementMatrixItem(matrix, label=u'{}.{:d}'.format(label, i))
+            for child in item:
+                child.parent = matrix_item
+
+        return parent
+
 
 class SQATemplateLoadCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -294,7 +355,7 @@ class RenderSQARequirementMatrix(core.RenderUnorderedList):
             self.translator.renderer.process(h, token.heading)
             return collection
         else:
-            return html.Tag(parent, 'ul', class_="collection")
+            return html.Tag(parent, 'ul', class_="moose-requirements collection")
 
 class RenderSQARequirementMatrixItem(core.RenderListItem):
     def createMaterialize(self, token, parent): #pylint: disable=no-self-use,unused-argument
