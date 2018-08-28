@@ -55,9 +55,15 @@ IdealGasFluidPropertiesPT::molarMass() const
   return _molar_mass;
 }
 
-Real IdealGasFluidPropertiesPT::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const { return _cp; }
+Real IdealGasFluidPropertiesPT::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _cp;
+}
 
-Real IdealGasFluidPropertiesPT::cv_from_p_T(Real /*pressure*/, Real /*temperature*/) const { return _cv; }
+Real IdealGasFluidPropertiesPT::cv_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _cv;
+}
 
 Real
 IdealGasFluidPropertiesPT::c(Real /*pressure*/, Real temperature) const

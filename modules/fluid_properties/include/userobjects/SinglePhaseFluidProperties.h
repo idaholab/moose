@@ -237,7 +237,8 @@ public:
    * @param[out] drho_dT   derivative of density w.r.t. temperature
    */
   virtual void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const = 0;
-  virtual void rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
+  virtual void
+  rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
 
   /**
    * Specific volume from pressure and temperature
@@ -400,8 +401,7 @@ public:
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
-  virtual void
-  e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const;
+  virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const;
 
   /**
    * Density and internal energy and their derivatives wrt pressure and temperature
@@ -542,8 +542,7 @@ public:
    * @param[out] derivative of thermal conductivity wrt pressure
    * @param[out] derivative of thermal conductivity wrt temperature
    */
-  virtual void
-  k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const;
+  virtual void k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const;
 
   /**
    * Thermal conductivity as a function of density and temperature
@@ -577,8 +576,7 @@ public:
    * @param[out] dh_dp derivative of enthalpy wrt pressure
    * @param[out] dh_dT derivative of enthalpy wrt temperature
    */
-  virtual void
-  h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const;
+  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const;
 
   /**
    * Isobaric thermal expansion coefficient, defined as
@@ -639,7 +637,6 @@ protected:
   /// IAPWS formulation of Henry's law constant for dissolution in water and derivative wrt temperature
   virtual void
   henryConstantIAPWS_dT(Real temperature, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const;
-
 
   /// Universal gas constant (J/mol/K)
   const Real _R;
