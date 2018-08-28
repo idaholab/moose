@@ -8,9 +8,9 @@
     recover = false
     group = 'requirements nemesis'
 
-    requirement = 'MOOSE shall support writing out a solution in a parallel file format (domain decomposition solution files'
+    requirement = 'MOOSE shall support writing out a solution in a parallel file format (domain decomposition solution files).'
     issues = '#2520'
-    design = 'Mesh/index.md'
+    design = 'Mesh/index.md outputs/Nemesis.md'
 [../]
 
   [./nemesis_repartitioning_test]
