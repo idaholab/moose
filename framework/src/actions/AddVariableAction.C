@@ -129,7 +129,7 @@ AddVariableAction::createInitialConditionAction()
 }
 
 void
-AddVariableAction::addVariable(std::string & var_name)
+AddVariableAction::addVariable(const std::string & var_name)
 {
   std::set<SubdomainID> blocks = getSubdomainIDs();
   Real scale_factor = isParamValid("scaling") ? getParam<Real>("scaling") : 1;

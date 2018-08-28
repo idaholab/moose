@@ -59,7 +59,8 @@ private:
                                    const subdomain_id_type & /*slaveBlockID*/);
 
   /// this method save the boundary name/id pair
-  void mapBoundaryIdAndBoundaryName(BoundaryID & /*boundaryID*/, std::string & /*boundaryName*/);
+  void mapBoundaryIdAndBoundaryName(BoundaryID & /*boundaryID*/,
+                                    const std::string & /*boundaryName*/);
 };
 
 #endif // BREAKMESHBYBLOCKBASE_H
