@@ -10,7 +10,7 @@
 #ifndef POROUSFLOWCAPILLARYPRESSURE_H
 #define POROUSFLOWCAPILLARYPRESSURE_H
 
-#include "GeneralUserObject.h"
+#include "DiscreteElementUserObject.h"
 
 class PorousFlowCapillaryPressure;
 
@@ -32,14 +32,12 @@ InputParameters validParams<PorousFlowCapillaryPressure>();
  * logarithmic extension from Webb, A simple extension of two-phase characteristic
  * curves to include the dry region, Water Resources Research 36, 1425-1430 (2000)
  */
-class PorousFlowCapillaryPressure : public GeneralUserObject
+class PorousFlowCapillaryPressure : public DiscreteElementUserObject
 {
 public:
   PorousFlowCapillaryPressure(const InputParameters & parameters);
 
   virtual void initialize() final{};
-  virtual void execute() final{};
-  virtual void finalize() final{};
   virtual void initialSetup() override;
 
   /**

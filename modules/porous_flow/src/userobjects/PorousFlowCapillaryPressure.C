@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<PorousFlowCapillaryPressure>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<DiscreteElementUserObject>();
   params.addRangeCheckedParam<Real>(
       "sat_lr",
       0.0,
@@ -32,7 +32,7 @@ validParams<PorousFlowCapillaryPressure>()
 }
 
 PorousFlowCapillaryPressure::PorousFlowCapillaryPressure(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+  : DiscreteElementUserObject(parameters),
     _sat_lr(getParam<Real>("sat_lr")),
     _dseff_ds(1.0 / (1.0 - _sat_lr)),
     _log_ext(getParam<bool>("log_extension")),
