@@ -91,7 +91,7 @@ BreakMeshByBlockBase::generateBoundaryName(const subdomain_id_type & masterBlock
 
 void
 BreakMeshByBlockBase::mapBoundaryIdAndBoundaryName(BoundaryID & boundaryID,
-                                                   std::string & boundaryName)
+                                                   const std::string & boundaryName)
 {
   _bName_bID_set.insert(std::pair<std::string, int>(boundaryName, boundaryID));
 }
