@@ -81,7 +81,7 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   Real T = 350.0;
   Real Xnacl = 0.0;
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  _co2_fp->rho_dpT(p, T, co2_density, dco2_density_dp, dco2_density_dT);
+  _co2_fp->rho_from_p_T(p, T, co2_density, dco2_density_dp, dco2_density_dT);
 
   Real phiH2O, dphiH2O_dp, dphiH2O_dT;
   Real phiCO2, dphiCO2_dp, dphiCO2_dT;
@@ -104,7 +104,7 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   T = 423.15;
 
   Real xco2, yh2o;
-  co2_density = _co2_fp->rho(p, T);
+  co2_density = _co2_fp->rho_from_p_T(p, T);
 
   _fp->solveEquilibriumMoleFractionHighTemp(p, T, Xnacl, co2_density, xco2, yh2o);
   phiH2O = _fp->fugacityCoefficientH2OHighTemp(p, T, co2_density, xco2, yh2o);
@@ -473,7 +473,7 @@ TEST_F(PorousFlowBrineCO2Test, gasProperties)
   Real gas_viscosity = fsp[1].viscosity;
   Real gas_enthalpy = fsp[1].enthalpy;
 
-  Real density = _co2_fp->rho(p, T);
+  Real density = _co2_fp->rho_from_p_T(p, T);
   Real viscosity = _co2_fp->mu(p, T);
   Real enthalpy = _co2_fp->h(p, T);
 
@@ -1003,7 +1003,7 @@ TEST_F(PorousFlowBrineCO2Test, solveEquilibriumMoleFractionHighTemp)
   Real Xnacl = 0.0;
 
   Real yh2o, xco2;
-  Real co2_density = _co2_fp->rho(p, T);
+  Real co2_density = _co2_fp->rho_from_p_T(p, T);
   _fp->solveEquilibriumMoleFractionHighTemp(p, T, Xnacl, co2_density, xco2, yh2o);
   ABS_TEST(yh2o, 0.161429471353, 1.0e-10);
   ABS_TEST(xco2, 0.0236967010229, 1.0e-10);
@@ -1021,7 +1021,7 @@ TEST_F(PorousFlowBrineCO2Test, solveEquilibriumMoleFractionHighTemp)
   T = 523.15;
   Xnacl = 0.189;
 
-  co2_density = _co2_fp->rho(p, T);
+  co2_density = _co2_fp->rho_from_p_T(p, T);
   _fp->solveEquilibriumMoleFractionHighTemp(p, T, Xnacl, co2_density, xco2, yh2o);
   ABS_TEST(yh2o, 0.253292227782, 1.0e-10);
   ABS_TEST(xco2, 0.016834474171, 1.0e-10);

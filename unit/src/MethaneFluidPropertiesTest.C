@@ -68,7 +68,7 @@ TEST_F(MethaneFluidPropertiesTest, properties)
   Real T = 350.0;
   const Real tol = REL_TOL_EXTERNAL_VALUE;
 
-  REL_TEST(_fp->rho(p, T), 55.13, tol);
+  REL_TEST(_fp->rho_from_p_T(p, T), 55.13, tol);
   REL_TEST(_fp->h(p, T), 708.5e3, tol);
   REL_TEST(_fp->e(p, T), 527.131e3, tol);
   REL_TEST(_fp->s(p, T), 11.30e3, tol);
@@ -98,7 +98,7 @@ TEST_F(MethaneFluidPropertiesTest, derivatives)
   const Real p = 10.0e6;
   Real T = 350.0;
 
-  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->mu, _fp->mu_dpT, p, T, tol);
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);

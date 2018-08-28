@@ -79,16 +79,16 @@ MethaneFluidProperties::triplePointTemperature() const
 }
 
 Real
-MethaneFluidProperties::rho(Real pressure, Real temperature) const
+MethaneFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   return pressure * _Mch4 / (_R * temperature);
 }
 
 void
-MethaneFluidProperties::rho_dpT(
+MethaneFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = _Mch4 / (_R * temperature);
   drho_dT = -pressure * _Mch4 / (_R * temperature * temperature);
 }
@@ -121,7 +121,7 @@ MethaneFluidProperties::rho_e_dpT(Real pressure,
                                   Real & de_dT) const
 {
   Real density, ddensity_dp, ddensity_dT;
-  rho_dpT(pressure, temperature, density, ddensity_dp, ddensity_dT);
+  rho_from_p_T(pressure, temperature, density, ddensity_dp, ddensity_dT);
   rho = density;
   drho_dp = ddensity_dp;
   drho_dT = ddensity_dT;
@@ -197,7 +197,7 @@ MethaneFluidProperties::mu_dpT(
 void
 MethaneFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   mu = this->mu(pressure, temperature);
 }
 
@@ -211,7 +211,7 @@ MethaneFluidProperties::rho_mu_dpT(Real pressure,
                                    Real & dmu_dp,
                                    Real & dmu_dT) const
 {
-  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 

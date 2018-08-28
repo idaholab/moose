@@ -76,7 +76,7 @@ NaClFluidProperties::triplePointTemperature() const
 }
 
 Real
-NaClFluidProperties::rho(Real pressure, Real temperature) const
+NaClFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.0e-5;
@@ -93,10 +93,10 @@ NaClFluidProperties::rho(Real pressure, Real temperature) const
 }
 
 void
-NaClFluidProperties::rho_dpT(
+NaClFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
 
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.0e-5;
@@ -116,7 +116,7 @@ NaClFluidProperties::rho_dpT(
 Real
 NaClFluidProperties::e(Real pressure, Real temperature) const
 {
-  return h(pressure, temperature) - pressure / rho(pressure, temperature);
+  return h(pressure, temperature) - pressure / rho_from_p_T(pressure, temperature);
 }
 
 void
@@ -126,7 +126,7 @@ NaClFluidProperties::e_dpT(
   Real h, dh_dp, dh_dT;
   h_dpT(pressure, temperature, h, dh_dp, dh_dT);
   Real rho, drho_dp, drho_dT;
-  rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
 
   e = h - pressure / rho;
   de_dp = dh_dp + pressure * drho_dp / rho / rho - 1.0 / rho;
@@ -143,7 +143,7 @@ NaClFluidProperties::rho_e_dpT(Real pressure,
                                Real & de_dp,
                                Real & de_dT) const
 {
-  rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   e_dpT(pressure, temperature, e, de_dp, de_dT);
 }
 

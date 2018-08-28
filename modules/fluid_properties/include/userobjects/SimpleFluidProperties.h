@@ -66,10 +66,10 @@ public:
   virtual Real s(Real pressure, Real temperature) const override;
 
   /// Density from pressure and temperature (kg/m^3)
-  virtual Real rho(Real pressure, Real temperature) const override;
+  virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
 
   /// Density from pressure and temperature and its derivatives wrt pressure and temperature
-  virtual void rho_dpT(
+  virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   /// Internal energy from pressure and temperature (J/kg)

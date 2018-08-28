@@ -80,7 +80,7 @@ Water97FluidProperties::triplePointTemperature() const
 }
 
 Real
-Water97FluidProperties::rho(Real pressure, Real temperature) const
+Water97FluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   Real density, pi, tau;
 
@@ -118,7 +118,7 @@ Water97FluidProperties::rho(Real pressure, Real temperature) const
 }
 
 void
-Water97FluidProperties::rho_dpT(
+Water97FluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   Real pi, tau, ddensity_dp, ddensity_dT;
@@ -179,7 +179,7 @@ Water97FluidProperties::rho_dpT(
       mooseError(name(), ": inRegion() has given an incorrect region");
   }
 
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = ddensity_dp;
   drho_dT = ddensity_dT;
 }
@@ -317,7 +317,7 @@ Water97FluidProperties::rho_e_dpT(Real pressure,
                                   Real & de_dp,
                                   Real & de_dT) const
 {
-  rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   e_dpT(pressure, temperature, e, de_dp, de_dT);
 }
 
@@ -483,7 +483,7 @@ Water97FluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 Real
 Water97FluidProperties::mu(Real pressure, Real temperature) const
 {
-  Real rho = this->rho(pressure, temperature);
+  Real rho = this->rho_from_p_T(pressure, temperature);
   return this->mu_from_rho_T(rho, temperature);
 }
 
@@ -492,7 +492,7 @@ Water97FluidProperties::mu_dpT(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   Real rho, drho_dp, drho_dT;
-  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   Real dmu_drho;
   this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
   dmu_dp = dmu_drho * drho_dp;
@@ -575,7 +575,7 @@ Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
 void
 Water97FluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   mu = this->mu_from_rho_T(rho, temperature);
 }
 
@@ -589,7 +589,7 @@ Water97FluidProperties::rho_mu_dpT(Real pressure,
                                    Real & dmu_dp,
                                    Real & dmu_dT) const
 {
-  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   Real dmu_drho;
   this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
   dmu_dp = dmu_drho * drho_dp;
@@ -598,7 +598,7 @@ Water97FluidProperties::rho_mu_dpT(Real pressure,
 Real
 Water97FluidProperties::k(Real pressure, Real temperature) const
 {
-  Real rho = this->rho(pressure, temperature);
+  Real rho = this->rho_from_p_T(pressure, temperature);
   return this->k_from_rho_T(rho, temperature);
 }
 

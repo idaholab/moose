@@ -57,9 +57,9 @@ public:
 
   virtual Real triplePointTemperature() const override;
 
-  virtual Real rho(Real pressure, Real temperature) const override;
+  virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
 
-  virtual void rho_dpT(
+  virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   virtual Real e(Real pressure, Real temperature) const override;

@@ -220,21 +220,24 @@ public:
   /**
    * Density from pressure and temperature
    *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return density (kg/m^3)
    */
   virtual Real rho_from_p_T(Real p, Real T) const = 0;
+  virtual Real rho(Real p, Real T) const;
 
   /**
    * Density and its derivatives from pressure and temperature
    *
-   * @param[in] p          pressure
-   * @param[in] T          temperature
-   * @param[out] rho       density
+   * @param[in] p          pressure (Pa)
+   * @param[in] T          temperature (K)
+   * @param[out] rho       density (kg/m^3)
    * @param[out] drho_dp   derivative of density w.r.t. pressure
    * @param[out] drho_dT   derivative of density w.r.t. temperature
    */
   virtual void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const = 0;
+  virtual void rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
 
   /**
    * Specific volume from pressure and temperature
@@ -380,25 +383,6 @@ public:
    * @return triple point temperature (K)
    */
   virtual Real triplePointTemperature() const;
-
-  /**
-   * Density
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return density (kg/m^3)
-   */
-  virtual Real rho(Real pressure, Real temperature) const;
-
-  /**
-   * Density and its derivatives wrt pressure and temperature
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param[out] rho density (kg/m^3)
-   * @param[out] drho_dp derivative of density wrt pressure
-   * @param[out] drho_dT derivative of density wrt temperature
-   */
-  virtual void
-  rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const;
 
   /**
    * Internal energy

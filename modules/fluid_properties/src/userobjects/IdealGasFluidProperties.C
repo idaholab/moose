@@ -256,7 +256,8 @@ Real
 IdealGasFluidProperties::rho_from_p_T(Real p, Real T) const
 {
   if ((_gamma - 1.0) * p == 0.0)
-    throw MooseException(name() + ": Invalid gamma or pressure detected in rho(pressure = " +
+    throw MooseException(name() +
+                         ": Invalid gamma or pressure detected in rho_from_p_T(pressure = " +
                          Moose::stringify(p) + ", gamma = " + Moose::stringify(_gamma) + ")");
 
   return p / (_gamma - 1.0) / _cv / T;

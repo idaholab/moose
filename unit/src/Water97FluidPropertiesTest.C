@@ -323,9 +323,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   T1 = 300.0;
   T2 = 500.0;
 
-  REL_TEST(_fp->rho(p0, T0), 1.0 / 0.00100215168, tol);
-  REL_TEST(_fp->rho(p1, T1), 1.0 / 0.000971180894, tol);
-  REL_TEST(_fp->rho(p2, T2), 1.0 / 0.00120241800, tol);
+  REL_TEST(_fp->rho_from_p_T(p0, T0), 1.0 / 0.00100215168, tol);
+  REL_TEST(_fp->rho_from_p_T(p1, T1), 1.0 / 0.000971180894, tol);
+  REL_TEST(_fp->rho_from_p_T(p2, T2), 1.0 / 0.00120241800, tol);
   REL_TEST(_fp->h(p0, T0), 115.331273e3, tol);
   REL_TEST(_fp->h(p1, T1), 184.142828e3, tol);
   REL_TEST(_fp->h(p2, T2), 975.542239e3, tol);
@@ -353,9 +353,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   T1 = 700.0;
   T2 = 700.0;
 
-  REL_TEST(_fp->rho(p0, T0), 1.0 / 39.4913866, tol);
-  REL_TEST(_fp->rho(p1, T1), 1.0 / 92.3015898, tol);
-  REL_TEST(_fp->rho(p2, T2), 1.0 / 0.00542946619, tol);
+  REL_TEST(_fp->rho_from_p_T(p0, T0), 1.0 / 39.4913866, tol);
+  REL_TEST(_fp->rho_from_p_T(p1, T1), 1.0 / 92.3015898, tol);
+  REL_TEST(_fp->rho_from_p_T(p2, T2), 1.0 / 0.00542946619, tol);
   REL_TEST(_fp->h(p0, T0), 2549.91145e3, tol);
   REL_TEST(_fp->h(p1, T1), 3335.68375e3, tol);
   REL_TEST(_fp->h(p2, T2), 2631.49474e3, tol);
@@ -384,9 +384,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   T2 = 750.0;
 
   // Note: lower tolerance in this region as density is calculated using backwards equation
-  REL_TEST(_fp->rho(p0, T0), 500.0, 1.0e-5);
-  REL_TEST(_fp->rho(p1, T1), 200.0, 1.0e-5);
-  REL_TEST(_fp->rho(p2, T2), 500.0, 1.0e-5);
+  REL_TEST(_fp->rho_from_p_T(p0, T0), 500.0, 1.0e-5);
+  REL_TEST(_fp->rho_from_p_T(p1, T1), 200.0, 1.0e-5);
+  REL_TEST(_fp->rho_from_p_T(p2, T2), 500.0, 1.0e-5);
   REL_TEST(_fp->h(p0, T0), 1863.43019e3, 1.0e-5);
   REL_TEST(_fp->h(p1, T1), 2375.12401e3, 1.0e-5);
   REL_TEST(_fp->h(p2, T2), 2258.68845e3, 1.0e-5);
@@ -414,9 +414,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   T1 = 1500.0;
   T2 = 2000.0;
 
-  REL_TEST(_fp->rho(p0, T0), 1.0 / 1.38455090, tol);
-  REL_TEST(_fp->rho(p1, T1), 1.0 / 0.0230761299, tol);
-  REL_TEST(_fp->rho(p2, T2), 1.0 / 0.0311385219, tol);
+  REL_TEST(_fp->rho_from_p_T(p0, T0), 1.0 / 1.38455090, tol);
+  REL_TEST(_fp->rho_from_p_T(p1, T1), 1.0 / 0.0230761299, tol);
+  REL_TEST(_fp->rho_from_p_T(p2, T2), 1.0 / 0.0311385219, tol);
   REL_TEST(_fp->h(p0, T0), 5219.76855e3, tol);
   REL_TEST(_fp->h(p1, T1), 5167.23514e3, tol);
   REL_TEST(_fp->h(p2, T2), 6571.22604e3, tol);
@@ -512,21 +512,21 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   // Region 1
   Real p = 3.0e6;
   Real T = 300.0;
-  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
 
   // Region 2
   p = 3.5e3;
   T = 300.0;
-  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
 
   // Region 3
   p = 26.0e6;
   T = 650.0;
-  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, 1.0e-2);
+  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, 1.0e-2);
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, 1.0e-2);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, 1.0e-2);
 
@@ -543,7 +543,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   // Region 5
   p = 30.0e6;
   T = 1500.0;
-  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
 
@@ -563,10 +563,10 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   // To properly test derivative wrt temperature, use p and T and calculate density,
   // so that the change in density wrt temperature is included
   p = 1.0e6;
-  _fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
+  _fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
   _fp->mu_drhoT_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
-  Real dmu_dT_fd = (_fp->mu_from_rho_T(_fp->rho(p, T + dT), T + dT) -
-                    _fp->mu_from_rho_T(_fp->rho(p, T - dT), T - dT)) /
+  Real dmu_dT_fd = (_fp->mu_from_rho_T(_fp->rho_from_p_T(p, T + dT), T + dT) -
+                    _fp->mu_from_rho_T(_fp->rho_from_p_T(p, T - dT), T - dT)) /
                    (2.0 * dT);
 
   REL_TEST(dmu_dT, dmu_dT_fd, 1.0e-6);

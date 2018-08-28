@@ -121,7 +121,7 @@ BrineFluidProperties::rho(Real pressure, Real temperature, Real xnacl) const
 
   // The density of water at temperature Tv
   // Note: convert Tv to Kelvin to calculate water density
-  water_density = _water_fp->rho(pressure, Tv + _T_c2k);
+  water_density = _water_fp->rho_from_p_T(pressure, Tv + _T_c2k);
 
   // The brine density is given by the water density scaled by the ratio of
   // brine molar mass to pure water molar mass

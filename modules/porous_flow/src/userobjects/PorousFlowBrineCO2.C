@@ -533,7 +533,7 @@ PorousFlowBrineCO2::equilibriumMassFractions(Real pressure,
                                              Real & dYh2o_dX) const
 {
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+  _co2_fp.rho_from_p_T(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
 
   // Mole fractions at equilibrium
   Real xco2, dxco2_dp, dxco2_dT, dxco2_dX, yh2o, dyh2o_dp, dyh2o_dT, dyh2o_dX;
@@ -980,7 +980,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
 {
   // CO2 density and derivatives wrt pressure and temperature
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+  _co2_fp.rho_from_p_T(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
 
   if (temperature <= _Tlower)
   {
@@ -1017,7 +1017,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
 
     // Equilibrium mole fractions and derivatives at the upper temperature
     Real xco2_upper, yh2o_upper;
-    Real co2_density_upper = _co2_fp.rho(pressure, _Tupper);
+    Real co2_density_upper = _co2_fp.rho_from_p_T(pressure, _Tupper);
 
     solveEquilibriumMoleFractionHighTemp(
         pressure, _Tupper, Xnacl, co2_density_upper, xco2_upper, yh2o_upper);
@@ -1100,7 +1100,7 @@ PorousFlowBrineCO2::equilibriumMoleFractionsLowTemp(Real pressure,
 
   // CO2 density and derivatives wrt pressure and temperature
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+  _co2_fp.rho_from_p_T(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
 
   // Assume infinite dilution (yh20 = 0 and xco2 = 0) in low temperature regime
   Real A, dA_dp, dA_dT, B, dB_dp, dB_dT;
