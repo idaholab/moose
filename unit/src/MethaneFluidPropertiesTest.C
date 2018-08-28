@@ -72,8 +72,8 @@ TEST_F(MethaneFluidPropertiesTest, properties)
   REL_TEST(_fp->h(p, T), 708.5e3, tol);
   REL_TEST(_fp->e(p, T), 527.131e3, tol);
   REL_TEST(_fp->s(p, T), 11.30e3, tol);
-  REL_TEST(_fp->cp(p, T), 2.375e3, tol);
-  REL_TEST(_fp->cv(p, T), 1.857e3, tol);
+  REL_TEST(_fp->cp_from_p_T(p, T), 2.375e3, tol);
+  REL_TEST(_fp->cv_from_p_T(p, T), 1.857e3, tol);
   REL_TEST(_fp->c(p, T), 481.7, tol);
   REL_TEST(_fp->mu(p, T), 0.01276e-3, tol);
   REL_TEST(_fp->k(p, T), 0.04113, tol);
@@ -84,7 +84,7 @@ TEST_F(MethaneFluidPropertiesTest, properties)
 
   REL_TEST(_fp->h(p, T), 2132.0e3, tol);
   REL_TEST(_fp->s(p, T), 13.83e3, tol);
-  REL_TEST(_fp->cp(p, T), 3.934e3, tol);
+  REL_TEST(_fp->cp_from_p_T(p, T), 3.934e3, tol);
 }
 
 /**

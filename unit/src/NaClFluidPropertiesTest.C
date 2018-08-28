@@ -72,9 +72,9 @@ TEST_F(NaClFluidPropertiesTest, halite)
   REL_TEST(_fp->rho(p0, T0), 2167.88, tol);
   REL_TEST(_fp->rho(p1, T1), 2116.0, tol);
   REL_TEST(_fp->rho(p2, T2), 2056.8, tol);
-  REL_TEST(_fp->cp(p0, T0), 0.865e3, 40.0 * tol);
-  REL_TEST(_fp->cp(p1, T1), 0.922e3, 40.0 * tol);
-  REL_TEST(_fp->cp(p2, T2), 0.979e3, 40.0 * tol);
+  REL_TEST(_fp->cp_from_p_T(p0, T0), 0.865e3, 40.0 * tol);
+  REL_TEST(_fp->cp_from_p_T(p1, T1), 0.922e3, 40.0 * tol);
+  REL_TEST(_fp->cp_from_p_T(p2, T2), 0.979e3, 40.0 * tol);
 
   // Test enthalpy at the triple point pressure of water
   Real pt = 611.657;

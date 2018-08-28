@@ -153,7 +153,7 @@ Real NaClFluidProperties::c(Real /*pressure*/, Real /*temperature*/) const
 }
 
 Real
-NaClFluidProperties::cp(Real pressure, Real temperature) const
+NaClFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
   // Correlation needs pressure in bar
   Real pbar = pressure * 10.0e-5;
@@ -171,7 +171,7 @@ NaClFluidProperties::cp(Real pressure, Real temperature) const
 }
 
 Real
-NaClFluidProperties::cv(Real pressure, Real temperature) const
+NaClFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
   return e(pressure, temperature) / temperature;
 }

@@ -74,9 +74,9 @@ Real SimpleFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
   return _thermal_expansion;
 }
 
-Real SimpleFluidProperties::cp(Real /*pressure*/, Real /*temperature*/) const { return _cp; }
+Real SimpleFluidProperties::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const { return _cp; }
 
-Real SimpleFluidProperties::cv(Real /*pressure*/, Real /*temperature*/) const { return _cv; }
+Real SimpleFluidProperties::cv_from_p_T(Real /*pressure*/, Real /*temperature*/) const { return _cv; }
 
 Real
 SimpleFluidProperties::c(Real pressure, Real temperature) const

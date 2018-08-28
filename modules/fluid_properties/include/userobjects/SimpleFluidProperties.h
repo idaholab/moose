@@ -47,10 +47,10 @@ public:
   virtual Real beta(Real pressure, Real temperature) const override;
 
   /// Isobaric specific heat capacity (J/kg/K)
-  virtual Real cp(Real pressure, Real temperature) const override;
+  virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
 
   /// Isochoric specific heat capacity (J/kg/K)
-  virtual Real cv(Real pressure, Real temperature) const override;
+  virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
 
   /// Speed of sound (m/s)
   virtual Real c(Real pressure, Real temperature) const override;

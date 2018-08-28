@@ -380,7 +380,7 @@ Water97FluidProperties::c(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::cp(Real pressure, Real temperature) const
+Water97FluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
   Real specific_heat, pi, tau, delta;
 
@@ -429,7 +429,7 @@ Water97FluidProperties::cp(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::cv(Real pressure, Real temperature) const
+Water97FluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
   Real specific_heat, pi, tau, delta;
 

@@ -119,8 +119,8 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST(_tab_fp->e(p, T), _co2_fp->e(p, T), 1.0e-4);
   REL_TEST(_tab_fp->mu(p, T), _co2_fp->mu(p, T), 1.0e-4);
   REL_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
-  REL_TEST(_tab_fp->cp(p, T), _co2_fp->cp(p, T), 1.0e-4);
-  REL_TEST(_tab_fp->cv(p, T), _co2_fp->cv(p, T), 1.0e-4);
+  REL_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
 
   // Fluid properties and derivatives
@@ -167,8 +167,8 @@ TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
   REL_TEST(_tab_gen_fp->e(p, T), _co2_fp->e(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->mu(p, T), _co2_fp->mu(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->cp(p, T), _co2_fp->cp(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->cv(p, T), _co2_fp->cv(p, T), 1.0e-4);
+  REL_TEST(_tab_gen_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_gen_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
 }
 
@@ -187,8 +187,8 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_fp->e(p, T), _co2_fp->e(p, T), tol);
   ABS_TEST(_tab_fp->mu(p, T), _co2_fp->mu(p, T), tol);
   ABS_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), tol);
-  ABS_TEST(_tab_fp->cp(p, T), _co2_fp->cp(p, T), tol);
-  ABS_TEST(_tab_fp->cv(p, T), _co2_fp->cv(p, T), tol);
+  ABS_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), tol);
+  ABS_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->s(p, T), _co2_fp->s(p, T), tol);
   ABS_TEST(_tab_fp->henryConstant(T), _co2_fp->henryConstant(T), tol);
 }

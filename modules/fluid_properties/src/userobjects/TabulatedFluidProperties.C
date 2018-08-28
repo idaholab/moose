@@ -451,7 +451,7 @@ TabulatedFluidProperties::c(Real pressure, Real temperature) const
 }
 
 Real
-TabulatedFluidProperties::cp(Real pressure, Real temperature) const
+TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_cp)
   {
@@ -459,11 +459,11 @@ TabulatedFluidProperties::cp(Real pressure, Real temperature) const
     return _property_ipol[_cp_idx]->sample(pressure, temperature);
   }
   else
-    return _fp.cp(pressure, temperature);
+    return _fp.cp_from_p_T(pressure, temperature);
 }
 
 Real
-TabulatedFluidProperties::cv(Real pressure, Real temperature) const
+TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_cv)
   {
@@ -471,7 +471,7 @@ TabulatedFluidProperties::cv(Real pressure, Real temperature) const
     return _property_ipol[_cv_idx]->sample(pressure, temperature);
   }
   else
-    return _fp.cv(pressure, temperature);
+    return _fp.cv_from_p_T(pressure, temperature);
 }
 
 Real
@@ -615,12 +615,12 @@ TabulatedFluidProperties::generateTabulatedData()
     if (_interpolated_properties[i] == "cv")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.cv(_pressure[p], _temperature[t]);
+          _properties[i][p * _num_T + t] = _fp.cv_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "cp")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.cp(_pressure[p], _temperature[t]);
+          _properties[i][p * _num_T + t] = _fp.cp_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "entropy")
       for (unsigned int p = 0; p < _num_p; ++p)

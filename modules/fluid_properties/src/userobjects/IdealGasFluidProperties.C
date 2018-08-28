@@ -97,6 +97,7 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real
 }
 
 Real IdealGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
+
 Real
 IdealGasFluidProperties::cp() const
 {
@@ -104,6 +105,7 @@ IdealGasFluidProperties::cp() const
 }
 
 Real IdealGasFluidProperties::cv_from_v_e(Real, Real) const { return _cv; }
+
 Real
 IdealGasFluidProperties::cv() const
 {
