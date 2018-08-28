@@ -52,6 +52,26 @@ Both the "replicated" and "distributed" mesh formats are parallel with respect t
 the finite element assembly and solve. In both types the solution data is distributed, which is
 the portion of the simulation that usually dominates memory demands.
 
+### Distributed Mesh Output Format (Nemesis)
+
+When running a simulation with `DistributedMesh` it is generally desirable to avoid serializing
+the mesh to the first rank for output. In the largest case this may cause your simulation to run
+out of memory, in smaller cases, it may just cause unecessary communication to serialize your
+parallel datastructure. The solution is to use "nemesis" output.
+
+Nemesis creates separate Exodus files that are automatically read by paraview and displayed as
+if a normal Exodus mesh had been output. The output files have the following naming convention:
+
+```
+<filename>.e.<num_processors>.<rank>
+
+# For example, on a 4 processor run, you can expect filenames like this:
+out.e.4.0
+out.e.4.1
+out.e.4.2
+out.e.4.3
+```
+
 ## Mesh splitting
 
 For large meshes, MOOSE provides the ability to pre-split a mesh for use in the the "distributed"
