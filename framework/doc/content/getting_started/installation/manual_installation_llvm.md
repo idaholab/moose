@@ -4,16 +4,9 @@
 
 ## Prerequisites
 
-- Cmake 3.4 or greater will be needed for building PETSc and LLVM. Unless your system is very old, one should
-  be able to use their system's package manager (apt-get, yum, zypper, etc) to install a compatible
-  version of Cmake. For older systems, you will need to obtain cmake source from http://www.cmake.org,
-  and build it appropriately for your system.
+- Cmake 3.4 or greater will be needed for building LLVM and some of the optional packages distributed with PETSc that MOOSE requires. Unless your system is very old, one should be able to use their system's package manager (apt-get, yum, zypper, etc) to install a compatible version of Cmake. For older systems, you will need to obtain cmake source from http://www.cmake.org, and build it appropriately for your system.
 
-- A sane environment. This means having a clean, nothing but the bare minimum as far as available
-  libraries go in your running environment. No additional LD_LIBRARY_PATHs, or other extra PATHs
-  set. No strange UMASK settings. No odd aliases. It might even be best, to create a separate
-  account, strictly for the use of these instructions. I have created an account called 'moose', and
-  will assume you have done the same.
+!include manual_prereqs.md
 
 !include manual_environment.md
 

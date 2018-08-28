@@ -1,13 +1,16 @@
 # High Performance Computing
 
-The following document will aid an administrator on setting up an environment which end-users will need when building and running MOOSE based applications.
-If you do not have administrative rights, you will not be able to complete these instructions. Please forward these instructions to your HPC administrator.
+This document will aid an +HPC Administrator+ on building an environment which end-users will use when compiling and running MOOSE based applications. +If you do not have administrative rights, you will not be able to complete these instructions!+ Please forward these instructions to your HPC Administrator.
+
+Because this document assumes the reader is an administrator, most of the content herein are suggestions, and should not be blindly followed with 'copy/paste/enter' behavior (your HPC cluster is no doubt different than our cluster these instructions were based on).
+
++If you are an end-user trying to follow these instructions, please seek help from one of your HPC Administrators.+ However, if you are the sole owner of the machine for which you currently operate on (a single workstation), you should follow one of our [Manual Install (GCC)](manual_installation_gcc.md) instructions instead.
 
 ## Prerequisites
 
 - Some sort of environmental module management software. Such as [Environment Modules](http://modules.sourceforge.net/).
 - A working MPI wrapper (MPICH/OpenMPI/MVAPICH) which wraps to a C++11 compliant compiler.
-- Knowledge on how to set up the environment to use the desired compiler (either module loading, or exporting PATHs etc)
+- Knowledge on Access Control Lists (ACLs) or other means to safeguard a directory from further tampering by others.
 
 !alert warning
 Please use a single solitary terminal session throughout and to the completion of these instructions.
@@ -23,7 +26,7 @@ cd $STACK_SRC
 
 ## Set your umask
 
-Some systems have a secure umask set. We need to adjust our umask so that when you write a file, it is readable by everyone:
+Some systems have a secure umask set. We need to adjust our umask so that when you write a file (`make install`), it is readable by everyone:
 
 ```bash
 umask 0022
@@ -42,7 +45,7 @@ export PACKAGES_DIR=/opt/moose
 History teaches us, that implicitly trusting scripts we download off the internet with root access, is a very bad idea. So let us create and chown the $PACKAGES_DIR directory before we install anything. That way, the things we do install can be done so without invoking `sudo`:
 
 ```bash
-sudo mkdir $PACKAGES_DIR
+sudo mkdir -p $PACKAGES_DIR
 sudo chown -R <your user id> $PACKAGES_DIR
 ```
 
@@ -96,7 +99,7 @@ prepend-path    PATH             $base_path/miniconda/bin
 !alert! note
 Replace `INSERT PACKAGES_DIR HERE` with whatever you had set for $PACKAGES_DIR (+do not+ literally enter: $PACKAGES_DIR. As an example, if you left packages_dir as: /opt/moose, then that is what you would enter)
 
-Replace `GCC and MPI` paths with any additional information needed to make GCC/MPI work.
+Replace `GCC and MPI` paths with any additional information needed to make GCC/MPI work on your cluster.
 !alert-end!
 
 To make the module available in your terminal session, export the following:
@@ -145,7 +148,7 @@ Clean all the temporary stuff and change the ownership to root, so no further wr
 
 ```bash
 rm -rf $STACK_SRC
-sudo chown root $PACKAGE_DIR
+sudo chown -R root:root $PACKAGE_DIR
 ```
 
 This concludes setting up the environment for MOOSE-based development. However you decide to instruct your users on enabling the above environment, each user will need to perform the instructions provided by the following link: [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
