@@ -1,0 +1,39 @@
+[Tests]
+  issues = '#12002'
+  design = ''
+
+  [./no_problem_block]
+    type = 'RunApp'
+    input = 'action_custom_fe_problem_test.i'
+    expect_out = 'Hello, I am your FEProblemBase-derived class and my name is \S+'
+
+    requirement = 'MOOSE shall allow the creation of the Problem block through a User-defined Action.'
+  [../]
+
+  [./with_problem_block_no_type]
+    type = 'RunApp'
+    input = 'action_custom_fe_problem_test.i'
+    expect_out = 'Hello, I am your FEProblemBase-derived class and my name is \S+'
+    cli_args = 'Problem/coord_type=RZ'
+
+    requirement = 'MOOSE shall support the separate mechanisms for Problem creation and setting Problem parameters.'
+  [../]
+
+  [./with_problem_block_and_type]
+    type = 'RunApp'
+    input = 'action_custom_fe_problem_test.i'
+    expect_out = 'Hello, I am your FEProblemBase-derived class and my name is \S+'
+    cli_args = 'Problem/coord_type=RZ Problem/type=MooseTestProblem'
+
+    requirement = 'MOOSE shall support multiple problem creation blocks provided they are consistent.'
+  [../]
+
+  [./with_problem_block_and_type_conflict]
+    type = 'RunException'
+    input = 'action_custom_fe_problem_test.i'
+    expect_err = 'User requested problem types conflict'
+    cli_args = 'Problem/type=FEProblem'
+
+    requirement = 'MOOSE shall error when multiple Problem creations conflict.'
+  [../]
+[]

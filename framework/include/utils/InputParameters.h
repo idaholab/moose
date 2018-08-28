@@ -702,11 +702,14 @@ public:
    */
   std::set<std::string> reservedValues(const std::string & name) const;
 
+  ///@{
   /**
    * Get/set a string representing the location (i.e. filename,linenum) in the input text for the
    * block containing parameters for this object.
    */
   std::string & blockLocation() { return _block_location; };
+  const std::string & blockLocation() const { return _block_location; };
+  ///@}
 
   ///@{
   /**

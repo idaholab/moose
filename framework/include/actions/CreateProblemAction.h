@@ -29,6 +29,8 @@ public:
   void CreateTagVectors();
 
 protected:
+  bool checkSanity(const std::list<Action *> &) const;
+
   std::vector<SubdomainName> _blocks;
   MultiMooseEnum _coord_sys;
   /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:

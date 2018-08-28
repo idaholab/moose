@@ -1,0 +1,58 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  nx = 4
+  ny = 4
+  elem_type = QUAD4
+[]
+
+# This test demonstrates that a Problem can be created through an Action (possibly associated with
+# special syntax), that may or may not even have a type specified.
+[TestProblem]
+  name = 'MOOSE Action Test problem'
+[]
+
+# Also set existing parameters without worrying about the type
+#[Problem]
+#  coord_type = RZ
+#[]
+
+[Variables]
+  [u]
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[Kernels]
+  [diff]
+    type = Diffusion
+    variable = u
+  []
+[]
+
+[BCs]
+  [left]
+    type = DirichletBC
+    variable = u
+    boundary = left
+    value = 0
+  []
+
+  [right]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 1
+  []
+[]
+
+[Executioner]
+  type = Steady
+
+  solve_type = 'PJFNK'
+[]
