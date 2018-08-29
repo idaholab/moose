@@ -56,7 +56,7 @@ public:
                          Real & de_dp,
                          Real & de_dT) const override;
 
-  virtual Real c(Real pressure, Real temperature) const override;
+  virtual Real c_from_p_T(Real pressure, Real temperature) const override;
 
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
 

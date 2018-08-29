@@ -445,9 +445,9 @@ TabulatedFluidProperties::rho_mu_dpT(Real pressure,
 }
 
 Real
-TabulatedFluidProperties::c(Real pressure, Real temperature) const
+TabulatedFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
-  return _fp.c(pressure, temperature);
+  return _fp.c_from_p_T(pressure, temperature);
 }
 
 Real

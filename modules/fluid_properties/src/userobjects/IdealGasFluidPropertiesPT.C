@@ -66,7 +66,7 @@ Real IdealGasFluidPropertiesPT::cv_from_p_T(Real /*pressure*/, Real /*temperatur
 }
 
 Real
-IdealGasFluidPropertiesPT::c(Real /*pressure*/, Real temperature) const
+IdealGasFluidPropertiesPT::c_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return std::sqrt(_cp * _R * temperature / (_cv * _molar_mass));
 }

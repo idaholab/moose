@@ -705,7 +705,7 @@ CO2FluidProperties::rho_e_dpT(Real pressure,
 }
 
 Real
-CO2FluidProperties::c(Real pressure, Real temperature) const
+CO2FluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   // Require density first
   Real density = rho_from_p_T(pressure, temperature);

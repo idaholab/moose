@@ -414,6 +414,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return speed of sound (m/s)
    */
+  virtual Real c_from_p_T(Real pressure, Real temperature) const;
   virtual Real c(Real pressure, Real temperature) const;
 
   /**

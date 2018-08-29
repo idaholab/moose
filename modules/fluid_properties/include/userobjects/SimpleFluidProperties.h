@@ -53,7 +53,7 @@ public:
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
 
   /// Speed of sound (m/s)
-  virtual Real c(Real pressure, Real temperature) const override;
+  virtual Real c_from_p_T(Real pressure, Real temperature) const override;
 
   /// Thermal conductivity (W/m/K)
   virtual Real k(Real pressure, Real temperature) const override;

@@ -134,7 +134,7 @@ MethaneFluidProperties::rho_e_dpT(Real pressure,
 }
 
 Real
-MethaneFluidProperties::c(Real pressure, Real temperature) const
+MethaneFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   return std::sqrt(gamma_from_p_T(pressure, temperature) * _R * temperature / _Mch4);
 }

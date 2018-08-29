@@ -85,7 +85,7 @@ Real SimpleFluidProperties::cv_from_p_T(Real /*pressure*/, Real /*temperature*/)
 }
 
 Real
-SimpleFluidProperties::c(Real pressure, Real temperature) const
+SimpleFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   return std::sqrt(_bulk_modulus / rho_from_p_T(pressure, temperature));
 }

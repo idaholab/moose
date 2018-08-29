@@ -338,9 +338,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->cp_from_p_T(p0, T0), 4.17301218e3, tol);
   REL_TEST(_fp->cp_from_p_T(p1, T1), 4.01008987e3, tol);
   REL_TEST(_fp->cp_from_p_T(p2, T2), 4.65580682e3, tol);
-  REL_TEST(_fp->c(p0, T0), 1507.73921, tol);
-  REL_TEST(_fp->c(p1, T1), 1634.69054, tol);
-  REL_TEST(_fp->c(p2, T2), 1240.71337, tol);
+  REL_TEST(_fp->c_from_p_T(p0, T0), 1507.73921, tol);
+  REL_TEST(_fp->c_from_p_T(p1, T1), 1634.69054, tol);
+  REL_TEST(_fp->c_from_p_T(p2, T2), 1240.71337, tol);
 
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 4.1207e3, REL_TOL_EXTERNAL_VALUE);
@@ -368,9 +368,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->cp_from_p_T(p0, T0), 1.91300162e3, tol);
   REL_TEST(_fp->cp_from_p_T(p1, T1), 2.08141274e3, tol);
   REL_TEST(_fp->cp_from_p_T(p2, T2), 10.3505092e3, tol);
-  REL_TEST(_fp->c(p0, T0), 427.920172, tol);
-  REL_TEST(_fp->c(p1, T1), 644.289068, tol);
-  REL_TEST(_fp->c(p2, T2), 480.386523, tol);
+  REL_TEST(_fp->c_from_p_T(p0, T0), 427.920172, tol);
+  REL_TEST(_fp->c_from_p_T(p1, T1), 644.289068, tol);
+  REL_TEST(_fp->c_from_p_T(p2, T2), 480.386523, tol);
 
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 1.4415e3, REL_TOL_EXTERNAL_VALUE);
@@ -399,9 +399,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->cp_from_p_T(p0, T0), 13.8935717e3, 1.0e-4);
   REL_TEST(_fp->cp_from_p_T(p1, T1), 44.6579342e3, 1.0e-5);
   REL_TEST(_fp->cp_from_p_T(p2, T2), 6.34165359e3, 1.0e-5);
-  REL_TEST(_fp->c(p0, T0), 502.005554, 1.0e-5);
-  REL_TEST(_fp->c(p1, T1), 383.444594, 1.0e-5);
-  REL_TEST(_fp->c(p2, T2), 760.696041, 1.0e-5);
+  REL_TEST(_fp->c_from_p_T(p0, T0), 502.005554, 1.0e-5);
+  REL_TEST(_fp->c_from_p_T(p1, T1), 383.444594, 1.0e-5);
+  REL_TEST(_fp->c_from_p_T(p2, T2), 760.696041, 1.0e-5);
 
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 3.1910e3, REL_TOL_EXTERNAL_VALUE);
@@ -429,9 +429,9 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->cp_from_p_T(p0, T0), 2.61609445e3, tol);
   REL_TEST(_fp->cp_from_p_T(p1, T1), 2.72724317e3, tol);
   REL_TEST(_fp->cp_from_p_T(p2, T2), 2.88569882e3, tol);
-  REL_TEST(_fp->c(p0, T0), 917.06869, tol);
-  REL_TEST(_fp->c(p1, T1), 928.548002, tol);
-  REL_TEST(_fp->c(p2, T2), 1067.36948, tol);
+  REL_TEST(_fp->c_from_p_T(p0, T0), 917.06869, tol);
+  REL_TEST(_fp->c_from_p_T(p1, T1), 928.548002, tol);
+  REL_TEST(_fp->c_from_p_T(p2, T2), 1067.36948, tol);
 
   // Lower tolerance for cv as it is compared with values from NIST
   REL_TEST(_fp->cv_from_p_T(p0, T0), 2.1534e3, REL_TOL_EXTERNAL_VALUE);

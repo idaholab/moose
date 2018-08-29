@@ -147,7 +147,7 @@ NaClFluidProperties::rho_e_dpT(Real pressure,
   e_from_p_T(pressure, temperature, e, de_dp, de_dT);
 }
 
-Real NaClFluidProperties::c(Real /*pressure*/, Real /*temperature*/) const
+Real NaClFluidProperties::c_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   mooseError(name(), ": c() is not implemented");
 }

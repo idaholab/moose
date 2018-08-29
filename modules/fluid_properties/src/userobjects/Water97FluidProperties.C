@@ -322,7 +322,7 @@ Water97FluidProperties::rho_e_dpT(Real pressure,
 }
 
 Real
-Water97FluidProperties::c(Real pressure, Real temperature) const
+Water97FluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   Real speed2, pi, tau, delta;
 
