@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#1634'
+  design = 'auxkernels/NearestNodeValueAux.md'
   [./test]
     type = 'Exodiff'
     input = 'nearest_node_value.i'
     exodiff = 'nearest_node_value_out.e'
+    requirement = "MOOSE shall include the ability to compute the shortest distance from a nodes across boundaries."
   [../]
 []

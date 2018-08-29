@@ -151,32 +151,29 @@ follow this format.
 !sqa-end!
 
 !sqa! item key=useability-requirements
-| Number | Description |
-| - | - |
-| U1.10 | The system will be command-line and input file driven. |
-| U1.20 | The system shall return usage messages when unidentified arguments or incorrectly used arguments are passed. |
-| U1.30 | The system shall provide diagnostics when the input file fails to parse, or the format is incorrect. |
-| U1.40 | The system will provide on screen information about the simulation and performance characteristics of the solves under normal operating conditions. |
+!sqa requirements-matrix prefix=U
+- The system will be command-line and input file driven.
+- The system shall return usage messages when unidentified arguments or incorrectly used arguments are passed.
+- The system shall provide diagnostics when the input file fails to parse, or the format is incorrect.
+- The system will provide on screen information about the simulation and performance characteristics of the solves under normal operating conditions.
 !sqa-end!
 
 !sqa! item key=performance-requirements
-| Number | Description |
-| - | - |
-| P1.10 | The system will support multi-process distributed memory execution. |
-| P1.20 | The system will support multi-process shared memory execution. |
-| P1.30 | The system will support execution on Unix-based laptops. |
-| P1.40 | The system will support execution on Unix-based workstation systems. |
-| P1.50 | The system will support execution on large Unix-based cluster systems. |
+!sqa requirements-matrix prefix=P
+- The system will support multi-process distributed memory execution.
+- The system will support multi-process shared memory execution.
+- The system will support execution on Unix-based laptops.
+- The system will support execution on Unix-based workstation systems.
+- The system will support execution on large Unix-based cluster systems.
 !sqa-end!
 
 !sqa! item key=system-interfaces
-| Number | Description |
-| - | - |
-| S1.10 | The system shall support POSIX compliant systems. |
-| S1.20 | The system shall support the Message Passing Interface (MPI) standard. |
-| S1.30 | The system shall support POSIX ``pthreads''. |
-| S1.40 | The system shall support Intel Threaded Building Blocks (TBB) interface. |
-| S1.50 | The system shall support the OpenMP threading interface. |
+!sqa requirements-matrix prefix=S
+- The system shall support POSIX compliant systems.
+- The system shall support the Message Passing Interface (MPI) standard.
+- The system shall support POSIX ``pthreads''.
+- The system shall support Intel Threaded Building Blocks (TBB) interface.
+- The system shall support the OpenMP threading interface.
 !sqa-end!
 
 

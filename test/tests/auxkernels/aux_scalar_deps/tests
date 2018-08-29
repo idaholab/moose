@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#1896'
+  design = '/AuxScalarKernels/index.md'
   [./test]
     type = 'Exodiff'
     input = 'aux_scalar_deps.i'
     exodiff = 'aux_scalar_deps_out.e'
+    requirement = "The AuxScalarKernel system shall automatically resolve dependencies between objects."
   [../]
 []

@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7656'
+  design = 'auxkernels/ElementLpNormAux.md auxkernels/ElementL2ErrorFunctionAux.md auxkernels/ElementH1ErrorFunctionAux.md'
   [./error_function_aux]
     type = 'Exodiff'
     input = 'error_function_aux.i'
     exodiff = 'error_function_aux_out.e'
+    requirement = "MOOSE shall include the ability to compute the L^p^, L^2^, and H^1^ error norms for each element."
   [../]
 []

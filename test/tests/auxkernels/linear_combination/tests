@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#4281 #4871'
+  design = 'auxkernels/ParsedAux.md'
   [./test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
+    requirement = "MOOSE shall include the ability to compute the linear combination of variables as an auxiliary variable."
   [../]
 []

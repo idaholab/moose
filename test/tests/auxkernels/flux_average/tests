@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#3558'
+  design = 'syntax/AuxKernels/index.md source/variables/MooseVariableFE.md'
   [./test]
     type = 'Exodiff'
     input = 'flux_average.i'
     exodiff = 'flux_average_out.e'
+    requirement = "MOOSE shall include the ability to access the normal of a coupled variable within an AuxKernel object."
   [../]
 []

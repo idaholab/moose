@@ -1,0 +1,10 @@
+[Tests]
+  design = 'source/postprocessors/ElementAverageValue.md'
+  [./test]
+    type = 'CSVDiff'
+    input = 'element_average_value_test.i'
+    csvdiff = 'out.csv'
+    issues = ''
+    requirement = "The system shall contain a `Postprocessor` that computes the average value of a variable."
+  [../]
+[]

@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7427'
+  design = 'syntax/AuxKernels/index.md syntax/VectorPostprocessors/index.md'
   [./test]
     type = 'Exodiff'
     input = 'vectorpostprocessor.i'
     exodiff = 'vectorpostprocessor_out.e'
+    requirement = "AuxKernel objects shall be capable of coupling to VectorPostprocessor objects."
   [../]
 []
