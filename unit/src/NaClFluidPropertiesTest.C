@@ -120,7 +120,7 @@ TEST_F(NaClFluidPropertiesTest, combined)
   Real rho, drho_dp, drho_dT;
   _fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
   Real e, de_dp, de_dT;
-  _fp->e_dpT(p, T, e, de_dp, de_dT);
+  _fp->e_from_p_T(p, T, e, de_dp, de_dT);
 
   // Combined property methods
   Real rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT;

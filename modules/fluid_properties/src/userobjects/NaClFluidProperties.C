@@ -114,13 +114,13 @@ NaClFluidProperties::rho_from_p_T(
 }
 
 Real
-NaClFluidProperties::e(Real pressure, Real temperature) const
+NaClFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
   return h(pressure, temperature) - pressure / rho_from_p_T(pressure, temperature);
 }
 
 void
-NaClFluidProperties::e_dpT(
+NaClFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   Real h, dh_dp, dh_dT;
@@ -144,7 +144,7 @@ NaClFluidProperties::rho_e_dpT(Real pressure,
                                Real & de_dT) const
 {
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  e_dpT(pressure, temperature, e, de_dp, de_dT);
+  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
 }
 
 Real NaClFluidProperties::c(Real /*pressure*/, Real /*temperature*/) const
@@ -173,7 +173,7 @@ NaClFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 Real
 NaClFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
-  return e(pressure, temperature) / temperature;
+  return e_from_p_T(pressure, temperature) / temperature;
 }
 
 Real NaClFluidProperties::mu(Real /*pressure*/, Real /*temperature*/) const

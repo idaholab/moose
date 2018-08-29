@@ -116,7 +116,7 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   // Fluid properties
   REL_TEST(_tab_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->h(p, T), _co2_fp->h(p, T), 1.0e-4);
-  REL_TEST(_tab_fp->e(p, T), _co2_fp->e(p, T), 1.0e-4);
+  REL_TEST(_tab_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->mu(p, T), _co2_fp->mu(p, T), 1.0e-4);
   REL_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
   REL_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
@@ -146,8 +146,8 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST(dmu_dT, dmuc_dT, 1.0e-3);
 
   Real e, de_dp, de_dT, ec, dec_dp, dec_dT;
-  _tab_fp->e_dpT(p, T, e, de_dp, de_dT);
-  _co2_fp->e_dpT(p, T, ec, dec_dp, dec_dT);
+  _tab_fp->e_from_p_T(p, T, e, de_dp, de_dT);
+  _co2_fp->e_from_p_T(p, T, ec, dec_dp, dec_dT);
   REL_TEST(e, ec, 1.0e-4);
   REL_TEST(de_dp, dec_dp, 1.0e-3);
   REL_TEST(de_dT, dec_dT, 1.0e-3);
@@ -164,7 +164,7 @@ TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
 
   REL_TEST(_tab_gen_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->h(p, T), _co2_fp->h(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->e(p, T), _co2_fp->e(p, T), 1.0e-4);
+  REL_TEST(_tab_gen_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->mu(p, T), _co2_fp->mu(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
@@ -184,7 +184,7 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
   // properties will be passed through to the given userobject
   ABS_TEST(_tab_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->h(p, T), _co2_fp->h(p, T), tol);
-  ABS_TEST(_tab_fp->e(p, T), _co2_fp->e(p, T), tol);
+  ABS_TEST(_tab_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->mu(p, T), _co2_fp->mu(p, T), tol);
   ABS_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), tol);
   ABS_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), tol);

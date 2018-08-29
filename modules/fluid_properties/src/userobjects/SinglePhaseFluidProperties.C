@@ -353,15 +353,15 @@ SinglePhaseFluidProperties::rho_dpT(
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
 }
 
-Real SinglePhaseFluidProperties::e(Real, Real) const
+Real SinglePhaseFluidProperties::e(Real p, Real T) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  return e_from_p_T(p, T);
 }
 
 void
-SinglePhaseFluidProperties::e_dpT(Real, Real, Real &, Real &, Real &) const
+SinglePhaseFluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
 }
 
 void

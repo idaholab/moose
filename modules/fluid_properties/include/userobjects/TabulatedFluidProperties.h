@@ -104,10 +104,10 @@ public:
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
-  virtual Real e(Real pressure, Real temperature) const override;
+  virtual Real e_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void
-  e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
+  e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
   virtual void rho_e_dpT(Real pressure,
                          Real temperature,

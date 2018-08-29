@@ -73,11 +73,11 @@ public:
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   /// Internal energy from pressure and temperature (J/kg)
-  virtual Real e(Real pressure, Real temperature) const override;
+  virtual Real e_from_p_T(Real pressure, Real temperature) const override;
 
   /// Internal energy and its derivatives wrt pressure and temperature
   virtual void
-  e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
+  e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
   /// Density and internal energy from pressure and temperature and derivatives wrt pressure and temperature
   virtual void rho_e_dpT(Real pressure,

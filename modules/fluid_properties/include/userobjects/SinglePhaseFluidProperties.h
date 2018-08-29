@@ -300,21 +300,24 @@ public:
   /**
    * Internal energy from pressure and temperature
    *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return internal energy (J/kg)
    */
   virtual Real e_from_p_T(Real p, Real T) const;
+  virtual Real e(Real pressure, Real temperature) const;
 
   /**
    * Internal energy and its derivatives from pressure and temperature
    *
-   * @param[in] p        pressure
-   * @param[in] T        temperature
-   * @param[out] e       internal energy
+   * @param[in] p        pressure (Pa)
+   * @param[in] T        temperature (K)
+   * @param[out] e       internal energy (J/kg)
    * @param[out] de_dp   derivative of internal energy w.r.t. pressure
    * @param[out] de_dT   derivative of internal energy w.r.t. temperature
    */
   virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const;
+  virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const;
 
   /**
    * Pressure from specific enthalpy and specific entropy
@@ -384,24 +387,6 @@ public:
    * @return triple point temperature (K)
    */
   virtual Real triplePointTemperature() const;
-
-  /**
-   * Internal energy
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return internal energy (J/kg)
-   */
-  virtual Real e(Real pressure, Real temperature) const;
-
-  /**
-   * Internal energy and its derivatives wrt pressure and temperature
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param[out] e internal energy (J/kg)
-   * @param[out] de_dp derivative of internal energy wrt pressure
-   * @param[out] de_dT derivative of internal energy wrt temperature
-   */
-  virtual void e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const;
 
   /**
    * Density and internal energy and their derivatives wrt pressure and temperature

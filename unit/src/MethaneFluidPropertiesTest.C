@@ -70,7 +70,7 @@ TEST_F(MethaneFluidPropertiesTest, properties)
 
   REL_TEST(_fp->rho_from_p_T(p, T), 55.13, tol);
   REL_TEST(_fp->h(p, T), 708.5e3, tol);
-  REL_TEST(_fp->e(p, T), 527.131e3, tol);
+  REL_TEST(_fp->e_from_p_T(p, T), 527.131e3, tol);
   REL_TEST(_fp->s(p, T), 11.30e3, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), 2.375e3, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), 1.857e3, tol);

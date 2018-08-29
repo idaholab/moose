@@ -185,7 +185,7 @@ Water97FluidProperties::rho_from_p_T(
 }
 
 Real
-Water97FluidProperties::e(Real pressure, Real temperature) const
+Water97FluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
   Real internal_energy, pi, tau;
 
@@ -232,7 +232,7 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
 }
 
 void
-Water97FluidProperties::e_dpT(
+Water97FluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   Real pi, tau, dinternal_energy_dp, dinternal_energy_dT;
@@ -302,7 +302,7 @@ Water97FluidProperties::e_dpT(
       mooseError(name(), ": inRegion has given an incorrect region");
   }
 
-  e = this->e(pressure, temperature);
+  e = this->e_from_p_T(pressure, temperature);
   de_dp = dinternal_energy_dp;
   de_dT = dinternal_energy_dT;
 }
@@ -318,7 +318,7 @@ Water97FluidProperties::rho_e_dpT(Real pressure,
                                   Real & de_dT) const
 {
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  e_dpT(pressure, temperature, e, de_dp, de_dT);
+  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
 }
 
 Real
