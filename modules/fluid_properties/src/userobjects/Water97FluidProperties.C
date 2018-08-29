@@ -481,14 +481,14 @@ Water97FluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::mu(Real pressure, Real temperature) const
+Water97FluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
   Real rho = this->rho_from_p_T(pressure, temperature);
   return this->mu_from_rho_T(rho, temperature);
 }
 
 void
-Water97FluidProperties::mu_dpT(
+Water97FluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   Real rho, drho_dp, drho_dT;

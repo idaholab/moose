@@ -519,14 +519,14 @@ CO2FluidProperties::rho_from_p_T(
 }
 
 Real
-CO2FluidProperties::mu(Real pressure, Real temperature) const
+CO2FluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
   Real rho = this->rho_from_p_T(pressure, temperature);
   return this->mu_from_rho_T(rho, temperature);
 }
 
 void
-CO2FluidProperties::mu_dpT(
+CO2FluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   Real rho, drho_dp, drho_dT;
@@ -542,7 +542,7 @@ CO2FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1000.0 || density > 1400.0)
-    throw MooseException("Parameters out of range in " + name() + ": mu()");
+    throw MooseException("Parameters out of range in " + name() + ": mu_from_rho_T()");
 
   Real Tstar = temperature / 251.196;
 

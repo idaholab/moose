@@ -117,7 +117,7 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST(_tab_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->h(p, T), _co2_fp->h(p, T), 1.0e-4);
   REL_TEST(_tab_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_fp->mu(p, T), _co2_fp->mu(p, T), 1.0e-4);
+  REL_TEST(_tab_fp->mu_from_p_T(p, T), _co2_fp->mu_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
   REL_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
@@ -139,8 +139,8 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST(dh_dT, dhc_dT, 1.0e-3);
 
   Real mu, dmu_dp, dmu_dT, muc, dmuc_dp, dmuc_dT;
-  _tab_fp->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
-  _co2_fp->mu_dpT(p, T, muc, dmuc_dp, dmuc_dT);
+  _tab_fp->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
+  _co2_fp->mu_from_p_T(p, T, muc, dmuc_dp, dmuc_dT);
   REL_TEST(mu, muc, 1.0e-4);
   REL_TEST(dmu_dp, dmuc_dp, 1.0e-3);
   REL_TEST(dmu_dT, dmuc_dT, 1.0e-3);
@@ -165,7 +165,7 @@ TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
   REL_TEST(_tab_gen_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->h(p, T), _co2_fp->h(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->mu(p, T), _co2_fp->mu(p, T), 1.0e-4);
+  REL_TEST(_tab_gen_fp->mu_from_p_T(p, T), _co2_fp->mu_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
@@ -185,7 +185,7 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->h(p, T), _co2_fp->h(p, T), tol);
   ABS_TEST(_tab_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), tol);
-  ABS_TEST(_tab_fp->mu(p, T), _co2_fp->mu(p, T), tol);
+  ABS_TEST(_tab_fp->mu_from_p_T(p, T), _co2_fp->mu_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), tol);
   ABS_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), tol);

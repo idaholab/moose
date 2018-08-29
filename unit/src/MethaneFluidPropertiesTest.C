@@ -75,7 +75,7 @@ TEST_F(MethaneFluidPropertiesTest, properties)
   REL_TEST(_fp->cp_from_p_T(p, T), 2.375e3, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), 1.857e3, tol);
   REL_TEST(_fp->c_from_p_T(p, T), 481.7, tol);
-  REL_TEST(_fp->mu(p, T), 0.01276e-3, tol);
+  REL_TEST(_fp->mu_from_p_T(p, T), 0.01276e-3, tol);
   REL_TEST(_fp->k(p, T), 0.04113, tol);
 
   // Test s, h and cp for temperatures > 755K as well as these methods have a

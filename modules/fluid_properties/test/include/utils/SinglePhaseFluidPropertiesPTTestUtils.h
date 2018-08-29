@@ -39,7 +39,7 @@ combinedProperties(const U & f, Real p, Real T, Real tol)
   Real rho, drho_dp, drho_dT;
   f->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
   Real mu, dmu_dp, dmu_dT;
-  f->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
+  f->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
   Real e, de_dp, de_dT;
   f->e_from_p_T(p, T, e, de_dp, de_dT);
 

@@ -398,7 +398,7 @@ TabulatedFluidProperties::h_dpT(
 }
 
 Real
-TabulatedFluidProperties::mu(Real pressure, Real temperature) const
+TabulatedFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_viscosity)
   {
@@ -406,11 +406,11 @@ TabulatedFluidProperties::mu(Real pressure, Real temperature) const
     return _property_ipol[_viscosity_idx]->sample(pressure, temperature);
   }
   else
-    return _fp.mu(pressure, temperature);
+    return _fp.mu_from_p_T(pressure, temperature);
 }
 
 void
-TabulatedFluidProperties::mu_dpT(
+TabulatedFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   if (_interpolate_viscosity)
@@ -420,14 +420,14 @@ TabulatedFluidProperties::mu_dpT(
         pressure, temperature, mu, dmu_dp, dmu_dT);
   }
   else
-    return _fp.mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+    return _fp.mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 void
 TabulatedFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
   rho = this->rho_from_p_T(pressure, temperature);
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
 }
 
 void
@@ -441,7 +441,7 @@ TabulatedFluidProperties::rho_mu_dpT(Real pressure,
                                      Real & dmu_dT) const
 {
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+  mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real
@@ -605,7 +605,7 @@ TabulatedFluidProperties::generateTabulatedData()
     if (_interpolated_properties[i] == "viscosity")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.mu(_pressure[p], _temperature[t]);
+          _properties[i][p * _num_T + t] = _fp.mu_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "k")
       for (unsigned int p = 0; p < _num_p; ++p)

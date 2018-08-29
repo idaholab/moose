@@ -161,7 +161,7 @@ BrineFluidProperties::mu(Real pressure, Real temperature, Real xnacl) const
   Real a = 1.0 + 0.0816 * mol + 0.0122 * mol2 + 0.128e-3 * mol3 +
            0.629e-3 * Tc * (1.0 - std::exp(-0.7 * mol));
 
-  return a * _water_fp->mu(pressure, temperature);
+  return a * _water_fp->mu_from_p_T(pressure, temperature);
 }
 
 void
@@ -175,7 +175,7 @@ BrineFluidProperties::mu_dpTx(Real pressure,
 {
   // Viscosity of water and derivatives wrt pressure and temperature
   Real muw, dmuw_dp, dmuw_dT;
-  _water_fp->mu_dpT(pressure, temperature, muw, dmuw_dp, dmuw_dT);
+  _water_fp->mu_from_p_T(pressure, temperature, muw, dmuw_dp, dmuw_dT);
 
   // Correlation requires molal concentration (mol/kg)
   Real mol = massFractionToMolalConc(xnacl);

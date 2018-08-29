@@ -166,12 +166,12 @@ MethaneFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 }
 
 Real
-MethaneFluidProperties::mu(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
     throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (200K, 1000K) in " + name() + ": mu()");
+                         "K out of range (200K, 1000K) in " + name() + ": mu_from_p_T()");
 
   Real viscosity = 0.0;
   for (std::size_t i = 0; i < _a.size(); ++i)
@@ -181,11 +181,11 @@ MethaneFluidProperties::mu(Real /*pressure*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::mu_dpT(
+MethaneFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
 
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
   dmu_dp = 0.0;
 
   Real dmudt = 0.0;
@@ -198,7 +198,7 @@ void
 MethaneFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
   rho = this->rho_from_p_T(pressure, temperature);
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
 }
 
 void
@@ -212,7 +212,7 @@ MethaneFluidProperties::rho_mu_dpT(Real pressure,
                                    Real & dmu_dT) const
 {
   this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+  this->mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real

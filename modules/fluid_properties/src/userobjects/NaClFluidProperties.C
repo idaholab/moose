@@ -176,21 +176,6 @@ NaClFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
   return e_from_p_T(pressure, temperature) / temperature;
 }
 
-Real NaClFluidProperties::mu(Real /*pressure*/, Real /*temperature*/) const
-{
-  mooseError(name(), ": mu() is not implemented.");
-}
-
-void
-NaClFluidProperties::mu_dpT(Real /*pressure*/,
-                            Real /*temperature*/,
-                            Real & /*mu*/,
-                            Real & /*dmu_dp*/,
-                            Real & /*dmu_dT*/) const
-{
-  mooseError(name(), ": mu_dpT() is not implemented.");
-}
-
 void
 NaClFluidProperties::rho_mu(Real /*pressure*/,
                             Real /*temperature*/,

@@ -62,10 +62,10 @@ public:
 
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
 
-  virtual Real mu(Real pressure, Real temperature) const override;
+  virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void
-  mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+  mu_from_p_T(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
   virtual void rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const override;
 

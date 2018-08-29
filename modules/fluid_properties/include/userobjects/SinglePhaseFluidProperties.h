@@ -448,6 +448,7 @@ public:
    * @return viscosity (Pa.s)
    */
   virtual Real mu(Real pressure, Real temperature) const;
+  virtual Real mu_from_p_T(Real pressure, Real temperature) const;
 
   /**
    * Dynamic viscosity and its derivatives wrt pressure and temperature
@@ -459,6 +460,8 @@ public:
    */
   virtual void
   mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const;
+  virtual void
+  mu_from_p_T(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const;
 
   /**
    * Dynamic viscosity as a function of density and temperature

@@ -449,16 +449,16 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->mu_from_rho_T(100.0, 1173.15), 47.640433e-6, tol);
   REL_TEST(_fp->mu_from_rho_T(400.0, 1173.15), 64.154608e-6, tol);
 
-  ABS_TEST(_fp->mu(1e6, 298.15), 889.898581797e-6, 2e-8);
-  ABS_TEST(_fp->mu(2e6, 298.15), 889.763899645e-6, 1e-8);
-  ABS_TEST(_fp->mu(1e6, 373.15), 281.825180491e-6, 1e-8);
-  ABS_TEST(_fp->mu(2e6, 373.15), 282.09550632e-6, 1e-8);
-  ABS_TEST(_fp->mu(1e6, 433.15), 170.526801634e-6, 1e-8);
-  ABS_TEST(_fp->mu(2e6, 433.15), 170.780193827e-6, 1e-8);
-  ABS_TEST(_fp->mu(1e6, 873.15), 3.2641885983e-5, 1e-12);
-  ABS_TEST(_fp->mu(2e6, 873.15), 3.26820969808e-5, 1e-12);
-  ABS_TEST(_fp->mu(1e6, 1173.15), 4.42374919686e-5, 1e-12);
-  ABS_TEST(_fp->mu(2e6, 1173.15), 4.42823959629e-5, 1e-12);
+  ABS_TEST(_fp->mu_from_p_T(1e6, 298.15), 889.898581797e-6, 2e-8);
+  ABS_TEST(_fp->mu_from_p_T(2e6, 298.15), 889.763899645e-6, 1e-8);
+  ABS_TEST(_fp->mu_from_p_T(1e6, 373.15), 281.825180491e-6, 1e-8);
+  ABS_TEST(_fp->mu_from_p_T(2e6, 373.15), 282.09550632e-6, 1e-8);
+  ABS_TEST(_fp->mu_from_p_T(1e6, 433.15), 170.526801634e-6, 1e-8);
+  ABS_TEST(_fp->mu_from_p_T(2e6, 433.15), 170.780193827e-6, 1e-8);
+  ABS_TEST(_fp->mu_from_p_T(1e6, 873.15), 3.2641885983e-5, 1e-12);
+  ABS_TEST(_fp->mu_from_p_T(2e6, 873.15), 3.26820969808e-5, 1e-12);
+  ABS_TEST(_fp->mu_from_p_T(1e6, 1173.15), 4.42374919686e-5, 1e-12);
+  ABS_TEST(_fp->mu_from_p_T(2e6, 1173.15), 4.42823959629e-5, 1e-12);
 
   // Thermal conductivity
   REL_TEST(_fp->k(1.0e6, 323.15), 0.641, 1.0e-4);
@@ -574,9 +574,9 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   // Check derivative of viscosity wrt pressure
   Real dp = 1.0e1;
 
-  Real dmu_dp_fd = (_fp->mu(p + dp, T) - _fp->mu(p - dp, T)) / (2.0 * dp);
+  Real dmu_dp_fd = (_fp->mu_from_p_T(p + dp, T) - _fp->mu_from_p_T(p - dp, T)) / (2.0 * dp);
   Real dmu_dp = 0.0;
-  _fp->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
+  _fp->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
 
   REL_TEST(dmu_dp, dmu_dp_fd, 1.0e-5);
 }
