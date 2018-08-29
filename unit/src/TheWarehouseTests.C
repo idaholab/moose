@@ -8,10 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseObjectUnitTest.h"
+#include "TheWarehouse.h"
 
 #include "gtest_include.h"
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
 class TestObject : public MooseObject
 {
@@ -66,10 +68,12 @@ public:
     auto o = static_cast<const TestAttrib *>(&other);
     return val == o->val;
   }
-  virtual bool isLess(const Attribute & other) const override
+
+  virtual size_t hash() const override
   {
-    auto o = static_cast<const TestAttrib *>(&other);
-    return val < o->val;
+    size_t h = 0;
+    hash_combine(h, index, val);
+    return h;
   }
 
   int index;
@@ -132,6 +136,33 @@ struct WarehouseTest
   // warehouse.
   std::vector<QueryTest> queries;
 };
+
+TEST_F(TheWarehouseTest, hashing)
+{
+  std::vector<std::unique_ptr<Attribute>> attribs1;
+  attribs1.emplace_back(new TestAttrib(w, 0, 42));
+  attribs1.emplace_back(new TestAttrib(w, 1, 43));
+  std::hash<std::vector<std::unique_ptr<Attribute>>> hasher{};
+  auto h1 = hasher(attribs1);
+  auto h2 = hasher(attribs1);
+
+  std::vector<std::unique_ptr<Attribute>> attribs2;
+  attribs2.emplace_back(new TestAttrib(w, 0, 42));
+  attribs2.emplace_back(new TestAttrib(w, 1, 43));
+  auto h3 = hasher(attribs2);
+  auto h4 = hasher(attribs2);
+
+  EXPECT_EQ(h1, h2);
+  EXPECT_EQ(h2, h3);
+  EXPECT_EQ(h3, h4);
+
+  std::unordered_map<std::vector<std::unique_ptr<Attribute>>, int> cache;
+  cache[std::move(attribs1)] = 1;
+
+  auto it = cache.find(attribs2);
+  EXPECT_TRUE(it != cache.end());
+  EXPECT_EQ(cache.count(attribs2), 1);
+}
 
 TEST_F(TheWarehouseTest, benchmark)
 {

@@ -39,6 +39,14 @@ struct enable_bitmask_operators<Interfaces>
     return std::unique_ptr<Attribute>(new T(*this));                                               \
   }
 
+#define hashfunc(...)                                                                              \
+  virtual size_t hash() const override                                                             \
+  {                                                                                                \
+    size_t h = 0;                                                                                  \
+    hash_combine(h, __VA_ARGS__);                                                                  \
+    return h;                                                                                      \
+  }
+
 class AttribTagBase : public Attribute
 {
 public:
@@ -49,7 +57,7 @@ public:
   }
 
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_vals);
 
 protected:
   std::vector<unsigned int> _vals;
@@ -58,9 +66,9 @@ protected:
 class AttribMatrixTags : public AttribTagBase
 {
 public:
-  clonefunc(AttribMatrixTags);
   AttribMatrixTags(TheWarehouse & w, unsigned int tag) : AttribTagBase(w, tag, "matrix_tags") {}
   virtual void initFrom(const MooseObject * obj) override;
+  clonefunc(AttribMatrixTags);
 };
 
 class AttribVectorTags : public AttribTagBase
@@ -75,15 +83,14 @@ public:
 class AttribExecOns : public Attribute
 {
 public:
-  clonefunc(AttribExecOns);
-
   AttribExecOns(TheWarehouse & w, unsigned int exec_flag) : Attribute(w, "exec_ons")
   {
     _vals.push_back(exec_flag);
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_vals);
+  clonefunc(AttribExecOns);
 
 private:
   std::vector<unsigned int> _vals;
@@ -92,15 +99,14 @@ private:
 class AttribSubdomains : public Attribute
 {
 public:
-  clonefunc(AttribSubdomains);
-
   AttribSubdomains(TheWarehouse & w, SubdomainID id) : Attribute(w, "subdomains")
   {
     _vals.push_back(id);
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_vals);
+  clonefunc(AttribSubdomains);
 
 private:
   std::vector<SubdomainID> _vals;
@@ -109,8 +115,6 @@ private:
 class AttribBoundaries : public Attribute
 {
 public:
-  clonefunc(AttribBoundaries);
-
   AttribBoundaries(TheWarehouse & w, BoundaryID id, bool must_be_restricted = false)
     : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
   {
@@ -118,7 +122,8 @@ public:
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_vals, _must_be_restricted);
+  clonefunc(AttribBoundaries);
 
 private:
   std::vector<BoundaryID> _vals;
@@ -128,11 +133,11 @@ private:
 class AttribThread : public Attribute
 {
 public:
-  clonefunc(AttribThread);
   AttribThread(TheWarehouse & w, THREAD_ID t) : Attribute(w, "thread"), _val(t) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribThread);
 
 private:
   THREAD_ID _val;
@@ -142,11 +147,11 @@ private:
 class AttribPreIC : public Attribute
 {
 public:
-  clonefunc(AttribPreIC);
   AttribPreIC(TheWarehouse & w, bool pre_ic) : Attribute(w, "pre_ic"), _val(pre_ic) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribPreIC);
 
 private:
   bool _val;
@@ -156,11 +161,11 @@ private:
 class AttribPreAux : public Attribute
 {
 public:
-  clonefunc(AttribPreAux);
   AttribPreAux(TheWarehouse & w, bool pre_aux) : Attribute(w, "pre_aux"), _val(pre_aux) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribPreAux);
 
 private:
   bool _val;
@@ -169,11 +174,11 @@ private:
 class AttribName : public Attribute
 {
 public:
-  clonefunc(AttribName);
   AttribName(TheWarehouse & w, const std::string & name) : Attribute(w, "name"), _val(name) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribName);
 
 private:
   std::string _val;
@@ -182,13 +187,13 @@ private:
 class AttribSystem : public Attribute
 {
 public:
-  clonefunc(AttribSystem);
   AttribSystem(TheWarehouse & w, const std::string & system) : Attribute(w, "system"), _val(system)
   {
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribSystem);
 
 private:
   std::string _val;
@@ -197,11 +202,11 @@ private:
 class AttribVar : public Attribute
 {
 public:
-  clonefunc(AttribVar);
   AttribVar(TheWarehouse & w, int var) : Attribute(w, "variable"), _val(var) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribVar);
 
 private:
   int _val = -1;
@@ -210,7 +215,6 @@ private:
 class AttribInterfaces : public Attribute
 {
 public:
-  clonefunc(AttribInterfaces);
   AttribInterfaces(TheWarehouse & w, Interfaces mask)
     : Attribute(w, "interfaces"), _val(static_cast<uint64_t>(mask))
   {
@@ -218,12 +222,14 @@ public:
   AttribInterfaces(TheWarehouse & w, unsigned int mask) : Attribute(w, "interfaces"), _val(mask) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
-  virtual bool isLess(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribInterfaces);
 
 private:
   uint64_t _val = 0;
 };
 
 #undef clonefunc
+#undef hashfunc
 
 #endif

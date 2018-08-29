@@ -39,15 +39,6 @@ AttribTagBase::isMatch(const Attribute & other) const
   return false;
 }
 
-bool
-AttribTagBase::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribTagBase *>(&other);
-  if (!a)
-    return false;
-  return _vals < a->_vals;
-}
-
 void
 AttribMatrixTags::initFrom(const MooseObject * obj)
 {
@@ -102,13 +93,6 @@ AttribExecOns::isMatch(const Attribute & other) const
   return false;
 }
 
-bool
-AttribExecOns::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribExecOns *>(&other);
-  return a ? _vals < a->_vals : false;
-}
-
 void
 AttribSubdomains::initFrom(const MooseObject * obj)
 {
@@ -139,13 +123,6 @@ AttribSubdomains::isMatch(const Attribute & other) const
       return true;
   }
   return false;
-}
-
-bool
-AttribSubdomains::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribSubdomains *>(&other);
-  return a ? _vals < a->_vals : false;
 }
 
 void
@@ -180,13 +157,6 @@ AttribBoundaries::isMatch(const Attribute & other) const
   return false;
 }
 
-bool
-AttribBoundaries::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribBoundaries *>(&other);
-  return a ? _vals < a->_vals : false;
-}
-
 void
 AttribThread::initFrom(const MooseObject * obj)
 {
@@ -199,12 +169,6 @@ AttribThread::isMatch(const Attribute & other) const
   return a && (a->_val == _val);
 }
 
-bool
-AttribThread::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribThread *>(&other);
-  return a ? _val < a->_val : false;
-}
 void
 AttribPreIC::initFrom(const MooseObject * /*obj*/)
 {
@@ -216,13 +180,6 @@ AttribPreIC::isMatch(const Attribute & other) const
   return a && (a->_val == _val);
 }
 
-bool
-AttribPreIC::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribPreIC *>(&other);
-  return a ? _val < a->_val : false;
-}
-
 void
 AttribPreAux::initFrom(const MooseObject * /*obj*/)
 {
@@ -232,13 +189,6 @@ AttribPreAux::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPreAux *>(&other);
   return a && (a->_val == _val);
-}
-
-bool
-AttribPreAux::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribPreAux *>(&other);
-  return a ? _val < a->_val : false;
 }
 
 void
@@ -253,13 +203,6 @@ AttribName::isMatch(const Attribute & other) const
   return a && (a->_val == _val);
 }
 
-bool
-AttribName::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribName *>(&other);
-  return a ? _val < a->_val : false;
-}
-
 void
 AttribSystem::initFrom(const MooseObject * /*obj*/)
 {
@@ -271,12 +214,6 @@ AttribSystem::isMatch(const Attribute & other) const
   return a && (a->_val == _val);
 }
 
-bool
-AttribSystem::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribSystem *>(&other);
-  return a ? _val < a->_val : false;
-}
 void
 AttribVar::initFrom(const MooseObject * obj)
 {
@@ -289,13 +226,6 @@ AttribVar::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribVar *>(&other);
   return a && (a->_val == _val);
-}
-
-bool
-AttribVar::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribVar *>(&other);
-  return a ? _val < a->_val : false;
 }
 
 void
@@ -322,11 +252,4 @@ AttribInterfaces::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribInterfaces *>(&other);
   return a && (a->_val & _val);
-}
-
-bool
-AttribInterfaces::isLess(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribInterfaces *>(&other);
-  return a ? _val < a->_val : false;
 }

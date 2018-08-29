@@ -28,9 +28,9 @@ public:
 };
 
 bool
-operator<(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs)
+operator==(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs)
 {
-  return (*lhs) < (*rhs);
+  return (*lhs) == (*rhs);
 }
 
 Attribute::Attribute(TheWarehouse & w, const std::string name) : _id(w.attribID(name)) {}

@@ -41,15 +41,13 @@ public:
     return _id == other._id && isMatch(other);
   }
   inline bool operator!=(const Attribute & other) const { return !(*this == other); }
-  inline bool operator<(const Attribute & other) const
-  {
-    return _id == other._id ? isLess(other) : _id < other._id;
-  }
 
   /// returns the unique attribute ID associated with all attributes that have the same (mose
   /// derived) class as this object. This ID is determined at construction time
   /// this
   inline unsigned int id() const { return _id; }
+
+  virtual size_t hash() const = 0;
 
   /// initFrom reads and stores the desired meta-data from obj for later matching comparisons.
   virtual void initFrom(const MooseObject * obj) = 0;
@@ -57,13 +55,6 @@ public:
   /// stored in other. isMatch does not need to check/compare the values from the instances' id()
   /// functions.
   virtual bool isMatch(const Attribute & other) const = 0;
-  /// isLess should return true if the meta-data stored in this object is "less" than that stored
-  /// in other (i.e. like an operator< overload). This comparison can be implemented in any way
-  /// that makes sense for the type of data being stored.  "attrib1.isLess(attrib2)" and
-  /// "attrib2.isLess(attrib1)" should never both be true, and they should only both return false
-  /// if and only if "attrib1.isMatch(attrib2)" returns true.  isLess does not need to
-  /// check/compare the values from the instances' id() functions.
-  virtual bool isLess(const Attribute & other) const = 0;
   /// clone creates and returns and identical (deep) copy of this attribute - i.e. the result of
   /// clone should return true if passed into isMatch.
   virtual std::unique_ptr<Attribute> clone() const = 0;
@@ -72,9 +63,59 @@ private:
   int _id = -1;
 };
 
+inline void
+hash_combine(std::size_t & /*seed*/)
+{
+}
+
+template <typename T, typename... Rest>
+inline void
+hash_combine(std::size_t & seed, const T & v, Rest &&... rest)
+{
+  std::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  hash_combine(seed, std::forward<Rest>(rest)...);
+}
+
+template <typename T, typename... Rest>
+inline void
+hash_combine(std::size_t & seed, const std::vector<T> & v, Rest &&... rest)
+{
+  for (auto & val : v)
+    hash_combine(seed, val);
+  hash_combine(seed, std::forward<Rest>(rest)...);
+}
+
+namespace std
+{
+template <>
+struct hash<Attribute>
+{
+public:
+  size_t operator()(const Attribute & attrib) const
+  {
+    size_t h = attrib.hash();
+    hash_combine(h, attrib.id());
+    return h;
+  }
+};
+template <>
+struct hash<std::vector<std::unique_ptr<Attribute>>>
+{
+public:
+  size_t operator()(const std::vector<std::unique_ptr<Attribute>> & attribs) const
+  {
+    size_t h = 0;
+    for (auto & attrib : attribs)
+      hash_combine(h, *attrib);
+    return h;
+  }
+};
+}
+
 /// TheWarehouse uses this operator function for indexing and caching queries. So this is
 /// important even though you don't see it being called (directly) anywhere - it *IS* being used.
-bool operator<(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs);
+bool operator==(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs);
 
 /// TheWarehouse is a container for MooseObjects that allows querying/filtering over various
 /// customizeable attributes.  The meta-data about the objects is read/stored when the objects are
@@ -268,7 +309,7 @@ private:
   // This stores a query id for every query keyed by the query conditions/attributes.
   // User-initiated queries check this map to see if a queries results have already been cached.
   // The query id is an index into the _obj_cache data structure.
-  std::map<std::vector<std::unique_ptr<Attribute>>, int> _query_cache;
+  std::unordered_map<std::vector<std::unique_ptr<Attribute>>, int> _query_cache;
 
   std::unordered_map<std::string, unsigned int> _attrib_ids;
   std::vector<std::unique_ptr<Attribute>> _attrib_list;
