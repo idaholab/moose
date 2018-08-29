@@ -12,59 +12,42 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALTRANSLATIONALINERTIA_H
-#define NODALTRANSLATIONALINERTIA_H
+#ifndef NodalGravity_H
+#define NodalGravity_H
 
 #include "NodalKernel.h"
 
 // Forward Declarations
-class NodalTranslationalInertia;
+class NodalGravity;
 
 template <>
-InputParameters validParams<NodalTranslationalInertia>();
+InputParameters validParams<NodalGravity>();
 
 /**
- * Calculates the inertial force and mass proportional damping for a nodal mass
+ * Calculates the gravitational force proportional to nodal mass
  */
-class NodalTranslationalInertia : public NodalKernel
+class NodalGravity : public NodalKernel
 {
 public:
-  NodalTranslationalInertia(const InputParameters & parameters);
+  NodalGravity(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian() override;
-
   /// Mass associated with the node
   const Real _mass;
 
-  /// Old value of displacement
-  const VariableValue & _u_old;
-
-  /// Newmark time integration parameter
-  const Real & _beta;
-
-  /// Newmark time integration parameter
-  const Real & _gamma;
-
-  /// Mass proportional Rayliegh damping
-  const Real & _eta;
-
   /// HHT time integration parameter
-  const Real & _alpha;
+  const Real _alpha;
 
-  /// Auxiliary system object
-  AuxiliarySystem & _aux_sys;
+  /// Acceleration due to gravity
+  const Real _gravity_value;
 
-  /// Variable number corresponding to the velocity aux variable
-  unsigned int _vel_num;
-
-  /// Variable number corresponding to the acceleration aux variable
-  unsigned int _accel_num;
+  /// Time and space dependent factor multiplying acceleration due to gravity
+  Function & _function;
 
   /// Map between boundary nodes and nodal mass
   std::map<dof_id_type, Real> _node_id_to_mass;
 };
 
-#endif /* NODALTRANSLATIONALINERTIA_H */
+#endif /* NodalGravity_H */

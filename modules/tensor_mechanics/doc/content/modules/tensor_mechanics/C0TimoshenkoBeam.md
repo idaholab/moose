@@ -94,18 +94,18 @@ where $A$ is the cross-sectional area, $A_y = \int_A y dA$ and $A_z = \int_A z d
 Apart from the translational strain increments, rotational strain increments also need to be calculated.
 \begin{equation}
 \kappa_1(x) = \int_A (\epsilon_{13}(x,y,z) y - \epsilon_{12}(x,y,z) z) dA
-            = \theta_2 A_y + \frac{\partial u_3(x)}{\partial x} A_y + \frac{\partial \theta_1(x)}{\partial x} (I_y + I_z)  + \theta_3 A_z - \frac{\partial u_2(x)}{\partial x} A_z
+            = \theta_2 A_y + \frac{\partial u_3(x)}{\partial x} A_y + \frac{\partial \theta_1(x)}{\partial x} I_x  + \theta_3 A_z - \frac{\partial u_2(x)}{\partial x} A_z
 \end{equation}
 
 \begin{equation}
-\kappa_2(x) = \int_A \epsilon_{11}(x,y,z) z dA = \frac{\partial u_1(x)}{\partial x} A_z - \frac{\partial \theta_3(x)}{\partial x} J + \frac{\partial \theta_2(x)}{\partial x} I_z
+\kappa_2(x) = \int_A \epsilon_{11}(x,y,z) z dA = \frac{\partial u_1(x)}{\partial x} A_z - \frac{\partial \theta_3(x)}{\partial x} Iyz + \frac{\partial \theta_2(x)}{\partial x} I_z
 \end{equation}
 
 \begin{equation}
-\kappa_3(x) = \int_A \epsilon_{11}(x,y,z) y dA = \frac{\partial u_1(x)}{\partial x} A_y - \frac{\partial \theta_3(x)}{\partial x} I_y + \frac{\partial \theta_2(x)}{\partial x} J
+\kappa_3(x) = \int_A \epsilon_{11}(x,y,z) y dA = \frac{\partial u_1(x)}{\partial x} A_y - \frac{\partial \theta_3(x)}{\partial x} I_y + \frac{\partial \theta_2(x)}{\partial x} Iyz
 \end{equation}
 
-where $I_y = \int_A y^2 dA$, $I_z = \int_A z^2 dA$ and $J = \int_A yz dA$. Note that $J$ is assumed to be zero for simplicity and this assumption is valid for symmetric cross-sections such as square, rectangular and circular.
+where $I_y = \int_A y^2 dA$, $I_z = \int_A z^2 dA$, $I_x = \int_A (y^2 + z^2) dA$ and $Iyz = \int_A yz dA$. Note that $Iyz$ is assumed to be zero for simplicity and this assumption is valid for symmetric cross-sections such as square, rectangular and circular. $I_x$ is automatically calculated from $I_y$ and $I_z$ unless $I_x$ is provided as input by the user.
 
 The above strain increments are calculated using the small strain assumption. If the `large_strain` option in [ComputeIncrementalBeamStrain](/ComputeIncrementalBeamStrain.md) or [ComputeFiniteBeamStrain](/ComputeFiniteBeamStrain.md) is set to `true`, then the strains are calculated using the equations below:
 
@@ -166,7 +166,7 @@ There are two main ways to include the inertial effects for the beam. The first 
 
 ### Consistent mass matrix
 
-If $A_y$, $A_z$ and $J$ are zero in [InertialForceBeam](/InertialForceBeam.md), then there is no coupling between the rotational and translational DOFs. The residual for the $j^{th}$ translational degree of freedom at node $i$ can be obtained as follows:
+If $A_y$, $A_z$ and $Iyz$ are zero in [InertialForceBeam](/InertialForceBeam.md), then there is no coupling between the rotational and translational DOFs. The residual for the $j^{th}$ translational degree of freedom at node $i$ can be obtained as follows:
 
 \begin{equation}
 R_j^0 = \int_{0}^{{}^0L} \rho A \left(\frac{x}{{}^0L} {\ddot{u}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{u}_j}^1 \right) \frac{x}{{}^0L} dx
@@ -183,7 +183,7 @@ R_j^0 = \int_{0}^{{}^0L} \rho I \left(\frac{x}{{}^0L} {\ddot{\theta}_j}^0 + \fra
 \begin{equation}
 R_j^1 = \int_{0}^{{}^0L} \rho I \left(\frac{x}{{}^0L} {\ddot{\theta}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{\theta}_j}^1 \right) \frac{{}^0L - x}{{}^0L} dx
 \end{equation}
-where $I = I_y + I_z$ for $j = 1$, $I = I_z$ for $j = 2$ and $I = I_y$ for $j = 3$.
+where $I = I_y + I_z$ or user provided $I_x$ for $j = 1$, $I = I_z$ for $j = 2$ and $I = I_y$ for $j = 3$.
 
 If $A_y$ and $A_z$ are non-zero, then there is coupling between $u_1$, $\theta_2$ and $\theta_3$, $u_2$ and $\theta_1$, and $u_3$ and $\theta_1$.
 

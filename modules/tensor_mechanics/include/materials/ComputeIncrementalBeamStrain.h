@@ -65,6 +65,9 @@ protected:
   /// Coupled variable for the second moment of area in z direction, i.e., integral of z^2*dA over the cross-section
   const VariableValue & _Iz;
 
+  /// Coupled variable for the second moment of area in x direction, i.e., integral of (y^2 + z^2)*dA over the cross-section
+  const VariableValue & _Ix;
+
   /// Rotational transformation from global coordinate system to initial beam local configuration
   RankTwoTensor _original_local_config;
 

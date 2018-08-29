@@ -42,6 +42,9 @@ validParams<ComputeIncrementalBeamStrain>()
                        0.0,
                        "First moment of area of the beam about z asix. Can be supplied "
                        "as either a number or a variable name.");
+  params.addCoupledVar("Ix",
+                       "Second moment of area of the beam about x axis. Can be "
+                       "supplied as either a number or a variable name. Defaults to Iy+Iz.");
   params.addRequiredCoupledVar("Iy",
                                "Second moment of area of the beam about y axis. Can be "
                                "supplied as either a number or a variable name.");
@@ -65,6 +68,7 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _Az(coupledValue("Az")),
     _Iy(coupledValue("Iy")),
     _Iz(coupledValue("Iz")),
+    _Ix(isParamValid("Ix") ? coupledValue("Ix") : _zero),
     _original_length(declareProperty<Real>("original_length")),
     _total_rotation(declareProperty<RankTwoTensor>("total_rotation")),
     _total_disp_strain(declareProperty<RealVectorValue>("total_disp_strain")),
@@ -215,6 +219,10 @@ ComputeIncrementalBeamStrain::computeProperties()
 void
 ComputeIncrementalBeamStrain::computeQpStrain()
 {
+  Real Ix = _Ix[_qp];
+  if (!isParamValid("Ix"))
+    Ix = _Iy[_qp] + _Iz[_qp];
+
   // Rotate the gradient of displacements and rotations at t+delta t from global coordinate
   // frame to beam local coordinate frame
   const RealVectorValue grad_disp_0(1.0 / _original_length[0] * (_disp1 - _disp0));
@@ -252,19 +260,19 @@ ComputeIncrementalBeamStrain::computeQpStrain()
   // rot_strain_1 = integral(e_13 * y - e_12 * z) dA
   // rot_strain_2 = integral(e_11 * z) dA
   // rot_strain_3 = integral(e_11 * y) dA
-  // J is the product moment of inertia which is zero for most cross-sections so it is assumed to be
-  // zero for this analysis
-  const Real J = 0;
+  // Iyz is the product moment of inertia which is zero for most cross-sections so it is assumed to
+  // be zero for this analysis
+  const Real Iyz = 0;
   _mech_rot_strain_increment[_qp](0) =
       _avg_rot_local_t(1) * _Ay[_qp] + _grad_disp_0_local_t(2) * _Ay[_qp] +
-      _grad_rot_0_local_t(0) * _Iy[_qp] + _avg_rot_local_t(2) * _Az[_qp] -
-      _grad_disp_0_local_t(1) * _Az[_qp] + _grad_rot_0_local_t(0) * _Iz[_qp];
+      _grad_rot_0_local_t(0) * Ix + _avg_rot_local_t(2) * _Az[_qp] -
+      _grad_disp_0_local_t(1) * _Az[_qp];
   _mech_rot_strain_increment[_qp](1) = _grad_disp_0_local_t(0) * _Az[_qp] -
-                                       _grad_rot_0_local_t(2) * J +
+                                       _grad_rot_0_local_t(2) * Iyz +
                                        _grad_rot_0_local_t(1) * _Iz[_qp];
   _mech_rot_strain_increment[_qp](2) = _grad_disp_0_local_t(0) * _Ay[_qp] -
                                        _grad_rot_0_local_t(2) * _Iy[_qp] +
-                                       _grad_rot_0_local_t(1) * J;
+                                       _grad_rot_0_local_t(1) * Iyz;
 
   if (_large_strain)
   {
@@ -275,7 +283,7 @@ ComputeIncrementalBeamStrain::computeQpStrain()
              _area[_qp] +
          Utility::pow<2>(_grad_rot_0_local_t(2)) * _Iy[_qp] +
          Utility::pow<2>(_grad_rot_0_local_t(1)) * _Iz[_qp] +
-         Utility::pow<2>(_grad_rot_0_local_t(0)) * (_Iy[_qp] + _Iz[_qp]));
+         Utility::pow<2>(_grad_rot_0_local_t(0)) * Ix);
     _mech_disp_strain_increment[_qp](1) += (-_avg_rot_local_t(2) * _grad_disp_0_local_t(0) +
                                             _avg_rot_local_t(0) * _grad_disp_0_local_t(2)) *
                                            _area[_qp];
@@ -319,6 +327,9 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
   const Real A_avg = (_area[0] + _area[1]) / 2.0;
   const Real Iy_avg = (_Iy[0] + _Iy[1]) / 2.0;
   const Real Iz_avg = (_Iz[0] + _Iz[1]) / 2.0;
+  Real Ix_avg = (_Ix[0] + _Ix[1]) / 2.0;
+  if (!isParamValid("Ix"))
+    Ix_avg = Iy_avg + Iz_avg;
 
   // K = |K11 K12|
   //     |K21 K22|
@@ -341,7 +352,7 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
   // relation between rotations at node 0 and rotational moments at node 0
   RankTwoTensor K22_local;
   K22_local.zero();
-  K22_local(0, 0) = shear_modulus * (Iy_avg + Iz_avg) / _original_length[0];
+  K22_local(0, 0) = shear_modulus * Ix_avg / _original_length[0];
   K22_local(1, 1) = youngs_modulus * Iz_avg / _original_length[0] +
                     shear_modulus * A_avg * _original_length[0] / 4.0;
   K22_local(2, 2) = youngs_modulus * Iy_avg / _original_length[0] +
@@ -368,7 +379,7 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
                         1.5 * Utility::pow<2>(_grad_rot_0_local_t(1)) * Iz_avg +
                         0.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) +
                         0.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) +
-                        0.5 * Utility::pow<2>(_grad_rot_0_local_t(0)) * (Iy_avg + Iz_avg);
+                        0.5 * Utility::pow<2>(_grad_rot_0_local_t(0)) * Ix_avg;
     k1_large_11(1, 0) = 0.5 * _grad_disp_0_local_t(0) * _grad_disp_0_local_t(1) -
                         1.0 / 3.0 * _grad_rot_0_local_t(0) * _grad_rot_0_local_t(1) * Iz_avg;
     k1_large_11(2, 0) = 0.5 * _grad_disp_0_local_t(0) * _grad_disp_0_local_t(2) -
@@ -400,8 +411,8 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
 
     RankTwoTensor k1_large_21;
     // row 1
-    k1_large_21(0, 0) = 0.5 * _grad_disp_0_local_t(0) * _grad_rot_0_local_t(0) * (Iy_avg + Iz_avg) -
-                        1.0 / 3.0 * _grad_disp_0_local_t(1) * _grad_rot_0_local_t(1) * Iz_avg -
+    k1_large_21(0, 0) = 0.5 * _grad_disp_0_local_t(0) * _grad_rot_0_local_t(0) * (Ix_avg)-1.0 /
+                            3.0 * _grad_disp_0_local_t(1) * _grad_rot_0_local_t(1) * Iz_avg -
                         1.0 / 3.0 * _grad_disp_0_local_t(2) * _grad_rot_0_local_t(2);
     k1_large_21(1, 0) = 1.5 * _grad_disp_0_local_t(0) * _grad_rot_0_local_t(1) * Iz_avg -
                         1.0 / 3.0 * _grad_disp_0_local_t(1) * _grad_rot_0_local_t(0) * Iz_avg;
@@ -423,43 +434,38 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
 
     RankTwoTensor k1_large_22;
     // row 1
-    k1_large_22(0, 0) =
-        Utility::pow<2>(_grad_rot_0_local_t(0)) * Utility::pow<2>(Iy_avg + Iz_avg) +
-        1.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iz_avg +
-        1.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iy_avg +
-        0.5 * Utility::pow<2>(_grad_disp_0_local_t(0)) * (Iy_avg + Iz_avg) +
-        0.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iz_avg +
-        0.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iy_avg +
-        0.5 * Utility::pow<2>(_grad_rot_0_local_t(2)) * (Iy_avg * Iz_avg + Iy_avg * Iy_avg) +
-        0.5 * Utility::pow<2>(_grad_rot_0_local_t(1)) * (Iz_avg * Iz_avg + Iy_avg * Iz_avg);
-    k1_large_22(1, 0) = 0.5 * _grad_rot_0_local_t(0) * _grad_rot_0_local_t(1) *
-                            (Iz_avg * Iz_avg + Iz_avg * Iy_avg) -
+    k1_large_22(0, 0) = Utility::pow<2>(_grad_rot_0_local_t(0)) * Utility::pow<2>(Ix_avg) +
+                        1.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iz_avg +
+                        1.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iy_avg +
+                        0.5 * Utility::pow<2>(_grad_disp_0_local_t(0)) * Ix_avg +
+                        0.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iz_avg +
+                        0.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iy_avg +
+                        0.5 * Utility::pow<2>(_grad_rot_0_local_t(2)) * Iy_avg * Ix_avg +
+                        0.5 * Utility::pow<2>(_grad_rot_0_local_t(1)) * Iz_avg * Ix_avg;
+    k1_large_22(1, 0) = 0.5 * _grad_rot_0_local_t(0) * _grad_rot_0_local_t(1) * Iz_avg * Ix_avg -
                         1.0 / 3.0 * _grad_disp_0_local_t(0) * _grad_disp_0_local_t(1) * Iz_avg;
-    k1_large_22(2, 0) = 0.5 * _grad_rot_0_local_t(0) * _grad_rot_0_local_t(2) *
-                            (Iy_avg * Iz_avg + Iy_avg * Iy_avg) -
+    k1_large_22(2, 0) = 0.5 * _grad_rot_0_local_t(0) * _grad_rot_0_local_t(2) * Iy_avg * Ix_avg -
                         1.0 / 3.0 * _grad_disp_0_local_t(0) * _grad_disp_0_local_t(2) * Iy_avg;
 
     // row 2
     k1_large_22(0, 1) = k1_large_22(1, 0);
-    k1_large_22(1, 1) =
-        Utility::pow<2>(_grad_rot_0_local_t(1)) * Iz_avg * Iz_avg +
-        1.5 * Utility::pow<2>(_grad_disp_0_local_t(0)) * Iz_avg +
-        1.5 * Utility::pow<2>(_grad_rot_0_local_t(2)) * Iy_avg * Iz_avg +
-        0.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iz_avg +
-        0.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iz_avg +
-        0.5 * Utility::pow<2>(_grad_rot_0_local_t(0)) * (Iz_avg * Iz_avg + Iy_avg * Iz_avg);
+    k1_large_22(1, 1) = Utility::pow<2>(_grad_rot_0_local_t(1)) * Iz_avg * Iz_avg +
+                        1.5 * Utility::pow<2>(_grad_disp_0_local_t(0)) * Iz_avg +
+                        1.5 * Utility::pow<2>(_grad_rot_0_local_t(2)) * Iy_avg * Iz_avg +
+                        0.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iz_avg +
+                        0.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iz_avg +
+                        0.5 * Utility::pow<2>(_grad_rot_0_local_t(0)) * Iz_avg * Ix_avg;
     k1_large_22(2, 1) = 1.5 * _grad_rot_0_local_t(1) * _grad_rot_0_local_t(2) * Iy_avg * Iz_avg;
 
     // row 3
     k1_large_22(0, 2) = k1_large_22(2, 0);
     k1_large_22(1, 2) = k1_large_22(2, 1);
-    k1_large_22(2, 2) =
-        Utility::pow<2>(_grad_rot_0_local_t(2)) * Iy_avg * Iy_avg +
-        1.5 * Utility::pow<2>(_grad_disp_0_local_t(0)) * Iy_avg +
-        1.5 * Utility::pow<2>(_grad_rot_0_local_t(1)) * Iy_avg * Iz_avg +
-        0.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iy_avg +
-        0.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iy_avg +
-        0.5 * Utility::pow<2>(_grad_rot_0_local_t(0)) * (Iz_avg * Iy_avg + Iy_avg * Iy_avg);
+    k1_large_22(2, 2) = Utility::pow<2>(_grad_rot_0_local_t(2)) * Iy_avg * Iy_avg +
+                        1.5 * Utility::pow<2>(_grad_disp_0_local_t(0)) * Iy_avg +
+                        1.5 * Utility::pow<2>(_grad_rot_0_local_t(1)) * Iy_avg * Iz_avg +
+                        0.5 * Utility::pow<2>(_grad_disp_0_local_t(1)) * Iy_avg +
+                        0.5 * Utility::pow<2>(_grad_disp_0_local_t(2)) * Iy_avg +
+                        0.5 * Utility::pow<2>(_grad_rot_0_local_t(0)) * Iz_avg * Ix_avg;
 
     k1_large_22 *= 1.0 / 4.0 / Utility::pow<2>(_original_length[0]);
 
@@ -484,7 +490,7 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
 
     RankTwoTensor k2_large_22;
     // col1
-    k2_large_22(0, 0) = 0.25 * Utility::pow<2>(_avg_rot_local_t(0)) * (Iy_avg + Iz_avg);
+    k2_large_22(0, 0) = 0.25 * Utility::pow<2>(_avg_rot_local_t(0)) * Ix_avg;
     k2_large_22(1, 0) = 1.0 / 6.0 * _avg_rot_local_t(0) * _avg_rot_local_t(1) * Iz_avg;
     k2_large_22(2, 0) = 1.0 / 6.0 * _avg_rot_local_t(0) * _avg_rot_local_t(2) * Iy_avg;
 
@@ -504,7 +510,7 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
     RankTwoTensor k3_large_22;
     // col1
     k3_large_22(0, 0) = 0.25 * Utility::pow<2>(_grad_disp_0_local_t(2)) +
-                        0.25 * _grad_rot_0_local_t(0) * (Iy_avg + Iz_avg) +
+                        0.25 * _grad_rot_0_local_t(0) * Ix_avg +
                         0.25 * Utility::pow<2>(_grad_disp_0_local_t(1));
     k3_large_22(1, 0) = -1.0 / 6.0 * _grad_disp_0_local_t(0) * _grad_disp_0_local_t(1) +
                         1.0 / 6.0 * _grad_rot_0_local_t(0) * _grad_rot_0_local_t(1) * Iz_avg;
@@ -549,7 +555,7 @@ ComputeIncrementalBeamStrain::computeStiffnessMatrix()
 
     RankTwoTensor k4_large_22;
     // col 1
-    k4_large_22(0, 0) = 0.25 * _grad_rot_0_local_t(0) * _avg_rot_local_t(0) * (Iy_avg + Iz_avg) +
+    k4_large_22(0, 0) = 0.25 * _grad_rot_0_local_t(0) * _avg_rot_local_t(0) * Ix_avg +
                         1.0 / 6.0 * _grad_rot_0_local_t(2) * _avg_rot_local_t(2) * Iy_avg +
                         1.0 / 6.0 * _grad_rot_0_local_t(1) * _avg_rot_local_t(1) * Iz_avg;
     k4_large_22(1, 0) = 1.0 / 6.0 * _grad_rot_0_local_t(1) * _avg_rot_local_t(0) * Iz_avg;

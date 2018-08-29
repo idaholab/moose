@@ -76,6 +76,12 @@ private:
   const VariableValue & _Az;
 
   /**
+   * Coupled variable for second moment of area of beam in x direction,
+   * i.e., integral of (y^2+z^2)*dA over the cross-section.
+   **/
+  const VariableValue & _Ix;
+
+  /**
    * Coupled variable for second moment of area of beam in y direction,
    * i.e., integral of y^2*dA over the cross-section
    **/
