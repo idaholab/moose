@@ -1,6 +1,6 @@
 [Tests]
   issues = '#12002'
-  design = ''
+  design = 'Problem/index.md'
 
   [./no_problem_block]
     type = 'RunApp'

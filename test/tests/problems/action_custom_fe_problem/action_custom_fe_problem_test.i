@@ -16,11 +16,6 @@
   name = 'MOOSE Action Test problem'
 []
 
-# Also set existing parameters without worrying about the type
-#[Problem]
-#  coord_type = RZ
-#[]
-
 [Variables]
   [u]
     order = FIRST
