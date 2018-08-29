@@ -259,24 +259,16 @@ public:
   std::vector<T *> & queryInto(const std::vector<std::unique_ptr<Attribute>> & conds,
                                std::vector<T *> & results)
   {
-    int query_id = -1;
-    auto it = _query_cache.find(conds);
-    if (it == _query_cache.end())
-    {
-      std::vector<std::unique_ptr<Attribute>> conds_clone;
-      for (auto & cond : conds)
-        conds_clone.emplace_back(cond->clone());
-      query_id = prepare(std::move(conds_clone));
-    }
-    else
-      query_id = it->second;
-    return queryInto(query_id, results);
+    return queryInto(queryID(conds), results);
   }
 
 private:
+  size_t queryID(const std::vector<std::unique_ptr<Attribute>> & conds);
+
   template <typename T>
   std::vector<T *> & queryInto(int query_id, std::vector<T *> & results, bool show_all = false)
   {
+    std::lock_guard<std::mutex> lock(_cache_mutex);
     auto & objs = query(query_id);
     results.clear();
     results.reserve(objs.size());
