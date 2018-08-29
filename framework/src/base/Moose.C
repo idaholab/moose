@@ -74,7 +74,7 @@ addActionTypes(Syntax & syntax)
   /**************************/
   /**** Register Actions ****/
   /**************************/
-  registerMooseObjectTask("create_problem",               Problem,                false);
+  registerMooseObjectTask("create_problem",               Problem,                true);
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
 
   // This task does not construct an object, but it needs all of the parameters that

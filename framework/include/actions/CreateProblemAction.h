@@ -11,7 +11,7 @@
 #define CREATEPROBLEMACTION_H
 
 // MOOSE includes
-#include "MooseObjectAction.h"
+#include "Action.h"
 #include "MultiMooseEnum.h"
 
 class CreateProblemAction;
@@ -19,7 +19,7 @@ class CreateProblemAction;
 template <>
 InputParameters validParams<CreateProblemAction>();
 
-class CreateProblemAction : public MooseObjectAction
+class CreateProblemAction : public Action
 {
 public:
   CreateProblemAction(InputParameters parameters);
