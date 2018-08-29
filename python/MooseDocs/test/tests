@@ -1,0 +1,18 @@
+[Tests]
+  [materialize]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form materialize'
+  []
+  [html]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form html'
+  []
+  [json]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form json'
+  []
+  [latex]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form latex'
+  []
+[]

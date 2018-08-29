@@ -23,7 +23,7 @@ class TestExtensions(testing.MooseDocsTestCase):
 
     @classmethod
     def setUpClass(cls):
-        ext = os.path.join(MooseDocs.MOOSE_DIR, 'python', 'MooseDocs', 'test', 'extensions')
+        ext = os.path.join(MooseDocs.MOOSE_DIR, 'python', 'MooseDocs', 'unit', 'extensions')
         sys.path.append(ext)
 
     def testTokenComponents(self):
@@ -41,7 +41,7 @@ class TestExtensions(testing.MooseDocsTestCase):
             try:
                 tmod = importlib.import_module('test_{}'.format(name))
             except ImportError:
-                msg = "test_{0}.py must be added to test/extensions, run './moosedocs.py devel " \
+                msg = "test_{0}.py must be added to unit/extensions, run './moosedocs.py devel " \
                       "--generate-extension-tests {0}'".format(name)
                 messages.append(msg)
                 continue

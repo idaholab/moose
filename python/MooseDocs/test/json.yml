@@ -1,0 +1,21 @@
+Content:
+    framework:
+        root_dir: framework/doc/content
+        content:
+            - contrib/**
+            - css/*
+            - js/*
+    test:
+        root_dir: python/MooseDocs/test/content
+
+Renderer:
+    type: MooseDocs.base.JSONRenderer
+
+Extensions:
+    disable_defaults: True
+    core:
+        type: MooseDocs.extensions.core
+
+Translator:
+    type: MooseDocs.base.Translator
+    destination: ${MOOSE_DIR}/python/MooseDocs/test/output/json

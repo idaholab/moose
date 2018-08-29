@@ -179,6 +179,7 @@ tmp_jit_*
 
 # MooseDocs
 site
+python/MooseDocs/test/output
 !**/doc/content/**/*.md
 !**/doc/content/**/*.jpg
 !**/doc/content/**/*.jpeg
@@ -193,6 +194,10 @@ site
 !**/doc/content/**/*.bib
 !**/doc/content/**/*.woff
 !**/doc/content/**/*.woff2
+!python/MooseDocs/test/gold/json/*.json
+!python/MooseDocs/test/gold/materialize/*.html
+!python/MooseDocs/test/gold/html/*.html
+!python/MooseDocs/test/gold/latex/*.tex
 
 # Chigger
 !python/chigger/tests/**/gold/*.png

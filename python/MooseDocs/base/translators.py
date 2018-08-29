@@ -19,7 +19,7 @@ from MooseDocs.common import mixins, exceptions
 from MooseDocs.tree import page
 from components import Extension
 from readers import Reader
-from renderers import Renderer
+from renderers import Renderer, MaterializeRenderer
 
 LOG = logging.getLogger('MooseDocs.Translator')
 
@@ -40,6 +40,14 @@ class Translator(mixins.ConfigObject):
         renderer: [Renderer] A Renderer instance.
         extensions: [list] A list of extensions objects to use.
     """
+    @staticmethod
+    def defaultConfig():
+        config = mixins.ConfigObject.defaultConfig()
+        config['destination'] = (os.path.join(os.getenv('HOME'), '.local', 'share', 'moose',
+                                              'site'),
+                                 "The output directory.")
+        return config
+
     def __init__(self, content, reader, renderer, extensions, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
 
@@ -100,12 +108,14 @@ class Translator(mixins.ConfigObject):
         """Return a multiprocessing lock for serial operations (e.g., directory creation)."""
         return self.__lock
 
-    @property
-    def destination(self):
-        """Return the destination assigned during init()."""
-        return self.__destination
+    def update(self, **kwargs):
+        """Update configuration and handle destination."""
+        dest = kwargs.get('destination', None)
+        if dest is not None:
+            kwargs['destination'] = mooseutils.eval_path(dest)
+        mixins.ConfigObject.update(self, **kwargs)
 
-    def init(self, destination):
+    def init(self):
         """
         Initialize the translator with the output destination for the converted content.
 
@@ -120,8 +130,7 @@ class Translator(mixins.ConfigObject):
                   "be called twice."
             raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
 
-        common.check_type("destination", destination, str)
-        self.__destination = destination
+        destination = self.get("destination")
         self.__reader.init(self)
         self.__renderer.init(self)
 
@@ -217,15 +226,17 @@ class Translator(mixins.ConfigObject):
 
         manager = multiprocessing.Manager()
         array = manager.list()
+        build_index = isinstance(self.renderer, MaterializeRenderer)
         def target(nodes, lock):
             """Helper for building multiple nodes (i.e., a chunk for a process)."""
             for node in nodes:
                 node.build()
                 if isinstance(node, page.MarkdownNode):
-                    node.buildIndex(self.renderer.get('home', None))
-                    with lock:
-                        for entry in node.index:
-                            array.append(entry)
+                    if build_index:
+                        node.buildIndex(self.renderer.get('home', None))
+                        with lock:
+                            for entry in node.index:
+                                array.append(entry)
 
         # Complete list of nodes
         nodes = [n for n in anytree.PreOrderIter(self.root)]
@@ -249,11 +260,12 @@ class Translator(mixins.ConfigObject):
         stop = time.time()
         LOG.info("Build time %s sec.", stop - start)
 
-        iname = os.path.join(self.destination, 'js', 'search_index.js')
-        if not os.path.isdir(os.path.dirname(iname)):
-            os.makedirs(os.path.dirname(iname))
-        items = [v for v in array if v]
-        common.write(iname, 'var index_data = {};'.format(json.dumps(items)))
+        if build_index:
+            iname = os.path.join(self.get('destination'), 'js', 'search_index.js')
+            if not os.path.isdir(os.path.dirname(iname)):
+                os.makedirs(os.path.dirname(iname))
+                items = [v for v in array if v]
+                common.write(iname, 'var index_data = {};'.format(json.dumps(items)))
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""
