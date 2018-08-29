@@ -1,13 +1,17 @@
 [Tests]
+  issues = '#1630'
+  design = 'auxkernels/GapValueAux.md'
   [./test]
     type = 'Exodiff'
     input = 'gap_value.i'
     exodiff = 'gap_value_out.e'
+    requirement = "MOOSE shall include the ability to report values on a boundary from a boundary across a mesh gap."
   [../]
 
   [./test_restricted]
     type = 'Exodiff'
     input = 'gap_value_subdomain_restricted.i'
     exodiff = 'gap_value_subdomain_restricted_out.e'
+    requirement = "MOOSE shall include the ability to report values on a boundary from a boundary across a mesh gap for a block restricted variable."
   [../]
 []

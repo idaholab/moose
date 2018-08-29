@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#4807'
+  design = 'source/auxkernels/ParsedAux.md'
   [./test]
     type = 'Exodiff'
     input = 'parsed_aux_test.i'
     exodiff = 'out.e'
     scale_refine = 3
+    requirement = "MOOSE shall include an AuxKernel object capable of computing values from a functional expression."
   [../]
 []

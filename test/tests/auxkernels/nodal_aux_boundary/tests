@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#3114'
+  design = 'syntax/AuxKernels/index.md'
   [./test]
     type = 'Exodiff'
     input = 'nodal_aux_boundary.i'
     exodiff = 'nodal_aux_boundary_out.e'
+    requirement = "MOOSE shall have the ability to restrict AuxKernel objects with coupled variables to a boundary."
   [../]
 []

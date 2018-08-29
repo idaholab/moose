@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#1894'
+  design = 'source/auxkernels/VectorMagnitudeAux.md'
   [./test]
     type = 'Exodiff'
     input = 'vector_magnitude.i'
     exodiff = 'vector_magnitude_out.e'
+    requirement = "MOOSE shall include the ability to compute the Euclidean norm of three coupled variables."
   [../]
 []

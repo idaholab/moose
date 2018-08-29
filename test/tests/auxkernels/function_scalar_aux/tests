@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#3499'
+  design = 'auxkernels/FunctionScalarAux.md'
   [./test]
     type = 'Exodiff'
     input = 'function_scalar_aux.i'
     exodiff = 'function_scalar_aux_out.e'
     use_old_floor = true
     abs_zero = 1e-9
+    requirement = "MOOSE shall include the ability to set the value of a scalar variable using a function."
   [../]
 []
