@@ -49,7 +49,7 @@ TEST_F(IdealGasFluidPropertiesPTTest, properties)
   REL_TEST(_fp->c_from_p_T(p, T), std::sqrt(cp * R * T / (cv * molar_mass)), tol);
   REL_TEST(_fp->k(p, T), thermal_conductivity, tol);
   REL_TEST(_fp->k(p, T), thermal_conductivity, tol);
-  REL_TEST(_fp->s(p, T), entropy, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), entropy, tol);
   REL_TEST(_fp->rho_from_p_T(p, T), p * molar_mass / (R * T), tol);
   REL_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
   REL_TEST(_fp->mu_from_p_T(p, T), viscosity, tol);

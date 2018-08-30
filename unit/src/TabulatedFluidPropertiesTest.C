@@ -121,7 +121,7 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
   REL_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
+  REL_TEST(_tab_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), 1.0e-4);
 
   // Fluid properties and derivatives
   Real rho, drho_dp, drho_dT, rhoc, drhoc_dp, drhoc_dT;
@@ -169,7 +169,7 @@ TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
   REL_TEST(_tab_gen_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
   REL_TEST(_tab_gen_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
+  REL_TEST(_tab_gen_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), 1.0e-4);
 }
 
 // Test that all fluid properties are properly passed back to the given user object
@@ -189,7 +189,7 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), tol);
   ABS_TEST(_tab_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), tol);
-  ABS_TEST(_tab_fp->s(p, T), _co2_fp->s(p, T), tol);
+  ABS_TEST(_tab_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->henryConstant(T), _co2_fp->henryConstant(T), tol);
 }
 

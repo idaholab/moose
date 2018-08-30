@@ -219,11 +219,6 @@ NaClFluidProperties::k_dpT(
   dk_dT = -3.16584e-2 + 2.06902e-4 * Tc - 4.44621e-7 * Tc * Tc;
 }
 
-Real NaClFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
-{
-  mooseError(name(), ": s() is not implemented");
-}
-
 Real
 NaClFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {

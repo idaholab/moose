@@ -149,6 +149,7 @@ public:
    * @param[in] T   temperature
    */
   virtual Real s_from_p_T(Real p, Real T) const;
+  virtual Real s(Real pressure, Real temperature) const;
 
   /**
    * Specific entropy and its derivatives from pressure and temperature
@@ -545,14 +546,6 @@ public:
    * @return thermal conductivity  (W/m/K)
    */
   virtual Real k_from_rho_T(Real density, Real temperature) const;
-
-  /**
-   * Specific entropy
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return s (J/kg/K)
-   */
-  virtual Real s(Real pressure, Real temperature) const;
 
   /**
    * Henry's law constant for dissolution in water

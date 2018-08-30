@@ -186,7 +186,7 @@ TEST_F(CO2FluidPropertiesTest, propertiesSW)
   REL_TEST(_fp->rho_from_p_T(p, T), 20.199, tol);
   REL_TEST(_fp->h_from_p_T(p, T), -26.385e3, tol);
   REL_TEST(_fp->e_from_p_T(p, T), -75.892e3, tol);
-  REL_TEST(_fp->s(p, T), -0.51326e3, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), -0.51326e3, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), 0.92518e3, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), 0.67092e3, tol);
   REL_TEST(_fp->c_from_p_T(p, T), 252.33, tol);
@@ -196,7 +196,7 @@ TEST_F(CO2FluidPropertiesTest, propertiesSW)
   REL_TEST(_fp->rho_from_p_T(p, T), 10.664, tol);
   REL_TEST(_fp->h_from_p_T(p, T), 185.60e3, tol);
   REL_TEST(_fp->e_from_p_T(p, T), 91.829e3, tol);
-  REL_TEST(_fp->s(p, T), 0.04225e3, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), 0.04225e3, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), 1.0273e3, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), 0.82823e3, tol);
   REL_TEST(_fp->c_from_p_T(p, T), 339.81, tol);
@@ -206,7 +206,7 @@ TEST_F(CO2FluidPropertiesTest, propertiesSW)
   REL_TEST(_fp->rho_from_p_T(p, T), 113.07, tol);
   REL_TEST(_fp->h_from_p_T(p, T), 157.01e3, tol);
   REL_TEST(_fp->e_from_p_T(p, T), 68.569e3, tol);
-  REL_TEST(_fp->s(p, T), -0.4383e3, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), -0.4383e3, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), 1.1624e3, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), 0.85516e3, tol);
   REL_TEST(_fp->c_from_p_T(p, T), 337.45, tol);

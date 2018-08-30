@@ -501,7 +501,7 @@ TabulatedFluidProperties::k_dpT(
 }
 
 Real
-TabulatedFluidProperties::s(Real pressure, Real temperature) const
+TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_entropy)
   {
@@ -509,7 +509,7 @@ TabulatedFluidProperties::s(Real pressure, Real temperature) const
     return _property_ipol[_entropy_idx]->sample(pressure, temperature);
   }
   else
-    return _fp.s(pressure, temperature);
+    return _fp.s_from_p_T(pressure, temperature);
 }
 
 Real
@@ -625,7 +625,7 @@ TabulatedFluidProperties::generateTabulatedData()
     if (_interpolated_properties[i] == "entropy")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.s(_pressure[p], _temperature[t]);
+          _properties[i][p * _num_T + t] = _fp.s_from_p_T(_pressure[p], _temperature[t]);
   }
 }
 

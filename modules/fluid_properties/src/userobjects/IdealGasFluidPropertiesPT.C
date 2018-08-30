@@ -85,7 +85,7 @@ IdealGasFluidPropertiesPT::k_dpT(
   dk_dT = 0;
 }
 
-Real IdealGasFluidPropertiesPT::s(Real /*pressure*/, Real /*temperature*/) const
+Real IdealGasFluidPropertiesPT::s_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
 }

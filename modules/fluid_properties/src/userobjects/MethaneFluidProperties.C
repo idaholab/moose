@@ -253,7 +253,7 @@ MethaneFluidProperties::k_dpT(
 }
 
 Real
-MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::s_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)

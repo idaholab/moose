@@ -104,7 +104,7 @@ SimpleFluidProperties::k_dpT(
   dk_dT = 0;
 }
 
-Real SimpleFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::s_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
 }

@@ -645,7 +645,7 @@ Water97FluidProperties::k_from_rho_T(Real density, Real temperature) const
 }
 
 Real
-Water97FluidProperties::s(Real pressure, Real temperature) const
+Water97FluidProperties::s_from_p_T(Real pressure, Real temperature) const
 {
   Real entropy, pi, tau, density3, delta;
 

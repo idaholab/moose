@@ -254,7 +254,7 @@ public:
 
   virtual Real k_from_rho_T(Real density, Real temperature) const override;
 
-  virtual Real s(Real pressure, Real temperature) const override;
+  virtual Real s_from_p_T(Real pressure, Real temperature) const override;
 
   virtual Real h_from_p_T(Real p, Real T) const override;
 
