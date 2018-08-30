@@ -96,7 +96,7 @@ MethaneFluidProperties::rho_from_p_T(
 Real
 MethaneFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
-  return h(pressure, temperature) - _R * temperature / _Mch4;
+  return h_from_p_T(pressure, temperature) - _R * temperature / _Mch4;
 }
 
 void
@@ -105,7 +105,7 @@ MethaneFluidProperties::e_from_p_T(
 {
   e = this->e_from_p_T(pressure, temperature);
   Real enthalpy, enthalpy_dp, enthalpy_dT;
-  h_dpT(pressure, temperature, enthalpy, enthalpy_dp, enthalpy_dT);
+  h_from_p_T(pressure, temperature, enthalpy, enthalpy_dp, enthalpy_dT);
   de_dp = enthalpy_dp;
   de_dT = enthalpy_dT - _R / _Mch4;
 }
@@ -283,7 +283,7 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
 }
 
 Real
-MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
@@ -309,10 +309,10 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::h_dpT(
+MethaneFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  h = this->h(pressure, temperature);
+  h = this->h_from_p_T(pressure, temperature);
   // Enthalpy doesn't depend on pressure
   dh_dp = 0.0;
 

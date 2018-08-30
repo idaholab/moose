@@ -195,7 +195,7 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
   Real viscosity = Z * _ncg_fp->mu_from_p_T(Z * p, T) +
                    (1.0 - Z) * _water_fp->mu_from_p_T(_water_fp->vaporPressure(T), T);
   Real enthalpy =
-      Z * _ncg_fp->h(Z * p, T) + (1.0 - Z) * _water_fp->h(_water_fp->vaporPressure(T), T);
+      Z * _ncg_fp->h_from_p_T(Z * p, T) + (1.0 - Z) * _water_fp->h_from_p_T(_water_fp->vaporPressure(T), T);
 
   ABS_TEST(gas_density, density, 1.0e-8);
   ABS_TEST(gas_viscosity, viscosity, 1.0e-8);

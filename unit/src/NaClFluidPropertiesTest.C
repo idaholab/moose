@@ -79,9 +79,9 @@ TEST_F(NaClFluidPropertiesTest, halite)
   // Test enthalpy at the triple point pressure of water
   Real pt = 611.657;
 
-  ABS_TEST(_fp->h(pt, 273.16), 0.0, tol);
-  REL_TEST(_fp->h(pt, 573.15), 271.13e3, tol);
-  REL_TEST(_fp->h(pt, 673.15), 366.55e3, tol);
+  ABS_TEST(_fp->h_from_p_T(pt, 273.16), 0.0, tol);
+  REL_TEST(_fp->h_from_p_T(pt, 573.15), 271.13e3, tol);
+  REL_TEST(_fp->h_from_p_T(pt, 673.15), 366.55e3, tol);
 
   // Thermal conductivity (function of T only)
   REL_TEST(_fp->k(p0, 323.15), 5.488, 10.0 * tol);

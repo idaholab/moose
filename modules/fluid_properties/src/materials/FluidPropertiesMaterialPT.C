@@ -52,7 +52,7 @@ FluidPropertiesMaterialPT::computeQpProperties()
   _cp[_qp] = _fp.cp_from_p_T(_pressure[_qp], _temperature[_qp]);
   _cv[_qp] = _fp.cv_from_p_T(_pressure[_qp], _temperature[_qp]);
   _k[_qp] = _fp.k(_pressure[_qp], _temperature[_qp]);
-  _h[_qp] = _fp.h(_pressure[_qp], _temperature[_qp]);
+  _h[_qp] = _fp.h_from_p_T(_pressure[_qp], _temperature[_qp]);
   _e[_qp] = _fp.e_from_p_T(_pressure[_qp], _temperature[_qp]);
   _s[_qp] = _fp.s(_pressure[_qp], _temperature[_qp]);
   _c[_qp] = _fp.c_from_p_T(_pressure[_qp], _temperature[_qp]);

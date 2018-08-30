@@ -79,10 +79,10 @@ public:
                           Real & dmu_dp,
                           Real & dmu_dT) const override;
 
-  virtual Real h(Real p, Real T) const override;
+  virtual Real h_from_p_T(Real p, Real T) const override;
 
   virtual void
-  h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
+  h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   virtual Real henryConstant(Real temperature) const override;
 

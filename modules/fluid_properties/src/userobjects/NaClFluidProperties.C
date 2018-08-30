@@ -116,7 +116,7 @@ NaClFluidProperties::rho_from_p_T(
 Real
 NaClFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
-  return h(pressure, temperature) - pressure / rho_from_p_T(pressure, temperature);
+  return h_from_p_T(pressure, temperature) - pressure / rho_from_p_T(pressure, temperature);
 }
 
 void
@@ -124,7 +124,7 @@ NaClFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   Real h, dh_dp, dh_dT;
-  h_dpT(pressure, temperature, h, dh_dp, dh_dT);
+  h_from_p_T(pressure, temperature, h, dh_dp, dh_dT);
   Real rho, drho_dp, drho_dT;
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
 
@@ -225,7 +225,7 @@ Real NaClFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
 }
 
 Real
-NaClFluidProperties::h(Real pressure, Real temperature) const
+NaClFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   // Correlation needs pressure in bar
   Real pbar = pressure * 1.0e-5;
@@ -242,7 +242,7 @@ NaClFluidProperties::h(Real pressure, Real temperature) const
 }
 
 void
-NaClFluidProperties::h_dpT(
+NaClFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   // Correlation needs pressure in bar

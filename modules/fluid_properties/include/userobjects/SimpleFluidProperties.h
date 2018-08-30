@@ -106,11 +106,11 @@ public:
                           Real & dmu_dT) const override;
 
   /// Specific enthalpy (J/kg)
-  virtual Real h(Real p, Real T) const override;
+  virtual Real h_from_p_T(Real p, Real T) const override;
 
   /// Specific enthalpy and its derivatives
   virtual void
-  h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
+  h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
   /// Henry's law constant for dissolution in water
   virtual Real henryConstant(Real temperature) const override;

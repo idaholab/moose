@@ -179,16 +179,16 @@ IdealGasFluidPropertiesPT::rho_mu_dpT(Real pressure,
 }
 
 Real
-IdealGasFluidPropertiesPT::h(Real /*pressure*/, Real temperature) const
+IdealGasFluidPropertiesPT::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return _cp * temperature;
 }
 
 void
-IdealGasFluidPropertiesPT::h_dpT(
+IdealGasFluidPropertiesPT::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  h = this->h(pressure, temperature);
+  h = this->h_from_p_T(pressure, temperature);
   dh_dp = 0.0;
   dh_dT = _cp;
 }

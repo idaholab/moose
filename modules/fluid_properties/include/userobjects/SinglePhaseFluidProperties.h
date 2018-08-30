@@ -281,21 +281,24 @@ public:
   /**
    * Specific enthalpy from pressure and temperature
    *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return h (J/kg)
    */
   virtual Real h_from_p_T(Real p, Real T) const;
+  virtual Real h(Real p, Real T) const;
 
   /**
    * Specific enthalpy and its derivatives from pressure and temperature
    *
-   * @param[in] p        pressure
-   * @param[in] T        temperature
-   * @param[out] h       specific enthalpy
+   * @param[in] p        pressure (Pa)
+   * @param[in] T        temperature (K)
+   * @param[out] h       specific enthalpy (J/kg)
    * @param[out] dh_dp   derivative of specific enthalpy w.r.t. pressure
    * @param[out] dh_dT   derivative of specific enthalpy w.r.t. temperature
    */
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const;
+  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const;
 
   /**
    * Internal energy from pressure and temperature
@@ -548,24 +551,6 @@ public:
    * @return s (J/kg/K)
    */
   virtual Real s(Real pressure, Real temperature) const;
-
-  /**
-   * Specific enthalpy
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return h (J/kg)
-   */
-  virtual Real h(Real p, Real T) const;
-
-  /**
-   * Enthalpy and its derivatives wrt pressure and temperature
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param[out] h (J/kg)
-   * @param[out] dh_dp derivative of enthalpy wrt pressure
-   * @param[out] dh_dT derivative of enthalpy wrt temperature
-   */
-  virtual void h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const;
 
   /**
    * Isobaric thermal expansion coefficient, defined as

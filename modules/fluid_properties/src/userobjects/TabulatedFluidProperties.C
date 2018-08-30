@@ -372,7 +372,7 @@ TabulatedFluidProperties::rho_e_dpT(Real pressure,
 }
 
 Real
-TabulatedFluidProperties::h(Real pressure, Real temperature) const
+TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   if (_interpolate_enthalpy)
   {
@@ -380,11 +380,11 @@ TabulatedFluidProperties::h(Real pressure, Real temperature) const
     return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
   }
   else
-    return _fp.h(pressure, temperature);
+    return _fp.h_from_p_T(pressure, temperature);
 }
 
 void
-TabulatedFluidProperties::h_dpT(
+TabulatedFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   if (_interpolate_enthalpy)
@@ -394,7 +394,7 @@ TabulatedFluidProperties::h_dpT(
         pressure, temperature, h, dh_dp, dh_dT);
   }
   else
-    _fp.h_dpT(pressure, temperature, h, dh_dp, dh_dT);
+    _fp.h_from_p_T(pressure, temperature, h, dh_dp, dh_dT);
 }
 
 Real
@@ -595,7 +595,7 @@ TabulatedFluidProperties::generateTabulatedData()
     if (_interpolated_properties[i] == "enthalpy")
       for (unsigned int p = 0; p < _num_p; ++p)
         for (unsigned int t = 0; t < _num_T; ++t)
-          _properties[i][p * _num_T + t] = _fp.h(_pressure[p], _temperature[t]);
+          _properties[i][p * _num_T + t] = _fp.h_from_p_T(_pressure[p], _temperature[t]);
 
     if (_interpolated_properties[i] == "internal_energy")
       for (unsigned int p = 0; p < _num_p; ++p)

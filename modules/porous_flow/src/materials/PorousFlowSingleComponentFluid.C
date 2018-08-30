@@ -133,7 +133,7 @@ PorousFlowSingleComponentFluid::initQpStatefulProperties()
   if (_compute_internal_energy)
     (*_internal_energy)[_qp] = _fp.e_from_p_T(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k);
   if (_compute_enthalpy)
-    (*_enthalpy)[_qp] = _fp.h(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k);
+    (*_enthalpy)[_qp] = _fp.h_from_p_T(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k);
 }
 
 void
@@ -168,7 +168,7 @@ PorousFlowSingleComponentFluid::computeQpProperties()
   if (_compute_enthalpy)
   {
     Real h, dh_dp, dh_dT;
-    _fp.h_dpT(_porepressure[_qp][_phase_num], Tk, h, dh_dp, dh_dT);
+    _fp.h_from_p_T(_porepressure[_qp][_phase_num], Tk, h, dh_dp, dh_dT);
     (*_enthalpy)[_qp] = h;
     (*_denthalpy_dp)[_qp] = dh_dp;
     (*_denthalpy_dT)[_qp] = dh_dT;

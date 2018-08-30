@@ -256,7 +256,7 @@ BrineFluidProperties::h(Real pressure, Real temperature, Real xnacl) const
 
   // The brine enthalpy is then given by the enthalpy of water at temperature Th
   // Note: water enthalpy requires temperature in Kelvin
-  return _water_fp->h(pressure, Th + _T_c2k);
+  return _water_fp->h_from_p_T(pressure, Th + _T_c2k);
 }
 
 void

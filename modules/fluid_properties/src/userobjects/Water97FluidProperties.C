@@ -686,7 +686,7 @@ Water97FluidProperties::s(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::h(Real pressure, Real temperature) const
+Water97FluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   Real enthalpy, pi, tau, delta;
 
@@ -730,7 +730,7 @@ Water97FluidProperties::h(Real pressure, Real temperature) const
 }
 
 void
-Water97FluidProperties::h_dpT(
+Water97FluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   Real enthalpy, pi, tau, delta, denthalpy_dp, denthalpy_dT;
@@ -1565,11 +1565,11 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
 
   if (pressure >= p273 && pressure <= p623)
   {
-    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, vaporTemperature(pressure)))
+    if (enthalpy >= h_from_p_T(pressure, 273.15) && enthalpy <= h_from_p_T(pressure, vaporTemperature(pressure)))
       region = 1;
-    else if (enthalpy > h(pressure, vaporTemperature(pressure)) && enthalpy <= h(pressure, 1073.15))
+    else if (enthalpy > h_from_p_T(pressure, vaporTemperature(pressure)) && enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
-    else if (enthalpy > h(pressure, 1073.15) && enthalpy <= h(pressure, 2273.15))
+    else if (enthalpy > h_from_p_T(pressure, 1073.15) && enthalpy <= h_from_p_T(pressure, 2273.15))
       region = 5;
     else
       throw MooseException("Enthalpy " + Moose::stringify(enthalpy) + " is out of range in " +
@@ -1577,13 +1577,13 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
   }
   else if (pressure > p623 && pressure <= 50.0e6)
   {
-    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, 623.15))
+    if (enthalpy >= h_from_p_T(pressure, 273.15) && enthalpy <= h_from_p_T(pressure, 623.15))
       region = 1;
-    else if (enthalpy > h(pressure, 623.15) && enthalpy <= h(pressure, b23T(pressure)))
+    else if (enthalpy > h_from_p_T(pressure, 623.15) && enthalpy <= h_from_p_T(pressure, b23T(pressure)))
       region = 3;
-    else if (enthalpy > h(pressure, b23T(pressure)) && enthalpy <= h(pressure, 1073.15))
+    else if (enthalpy > h_from_p_T(pressure, b23T(pressure)) && enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
-    else if (enthalpy > h(pressure, 1073.15) && enthalpy <= h(pressure, 2273.15))
+    else if (enthalpy > h_from_p_T(pressure, 1073.15) && enthalpy <= h_from_p_T(pressure, 2273.15))
       region = 5;
     else
       throw MooseException("Enthalpy " + Moose::stringify(enthalpy) + " is out of range in " +
@@ -1591,11 +1591,11 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
   }
   else if (pressure > 50.0e6 && pressure <= 100.0e6)
   {
-    if (enthalpy >= h(pressure, 273.15) && enthalpy <= h(pressure, 623.15))
+    if (enthalpy >= h_from_p_T(pressure, 273.15) && enthalpy <= h_from_p_T(pressure, 623.15))
       region = 1;
-    else if (enthalpy > h(pressure, 623.15) && enthalpy <= h(pressure, b23T(pressure)))
+    else if (enthalpy > h_from_p_T(pressure, 623.15) && enthalpy <= h_from_p_T(pressure, b23T(pressure)))
       region = 3;
-    else if (enthalpy > h(pressure, b23T(pressure)) && enthalpy <= h(pressure, 1073.15))
+    else if (enthalpy > h_from_p_T(pressure, b23T(pressure)) && enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
     else
       throw MooseException("Enthalpy " + Moose::stringify(enthalpy) + " is out of range in " +

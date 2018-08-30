@@ -55,8 +55,8 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
-  ABS_TEST(_fp->h(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
-  ABS_TEST(_fp2->h(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp->henryConstant(T), henry, tol);
 
   p = 1.0E7;
@@ -72,8 +72,8 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
-  ABS_TEST(_fp->h(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
-  ABS_TEST(_fp2->h(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp->henryConstant(T), henry, tol);
 }
 
