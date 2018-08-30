@@ -1,8 +1,10 @@
 [Tests]
+  issues = '#1478'
+  design = 'actions/Action.md'
   [./test_meta_action]
     type = 'Exodiff'
     input = 'meta_action_test.i'
     exodiff = 'out.e'
-    group = 'requirements'
+    requirement = "The Action system shall allow `Action` objects to create other `Action` objects."
   [../]
 []

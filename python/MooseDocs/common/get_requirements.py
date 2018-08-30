@@ -64,10 +64,16 @@ def _add_requirements(out, location, filename):
                 LOG.error(msg, child.name, filename)
                 local_issues = ''
 
+            text = child['requirement']
+            if 'MOOSE_TEST_NAME' in text:
+                idx = filename.index('/tests/')
+                name = os.path.join(os.path.dirname(filename[idx+7:]), child.name)
+                text = text.replace('MOOSE_TEST_NAME', name)
+
             req = Requirement(name=child.name,
                               path=os.path.relpath(os.path.dirname(filename), location),
                               filename=filename,
-                              text=unicode(child['requirement']),
+                              text=unicode(text),
                               design=local_design.split(),
                               issues=local_issues.split())
             group = os.path.relpath(filename, location).split('/')[0]

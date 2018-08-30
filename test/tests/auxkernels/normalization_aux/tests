@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#4281'
+  design = 'auxkernels/NormalizationAux.md'
   [./normalization_aux]
     type = 'Exodiff'
     input = 'normalization_aux.i'
     exodiff = 'normalization_aux_out.e'
+    requirement = "MOOSE shall include the ability to normalize a variable based on a Postprocessor value."
   [../]
 []

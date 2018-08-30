@@ -1,7 +1,10 @@
 [Tests]
+  issues = ''
+  design = 'source/auxkernels/QuotientAux.md'
   [./quotient_aux]
     type = 'Exodiff'
     input = 'quotient_aux.i'
     exodiff = 'quotient_aux_out.e'
+    requirement = "MOOSE shall support the ability to compute the quotient of two variables."
   [../]
 []

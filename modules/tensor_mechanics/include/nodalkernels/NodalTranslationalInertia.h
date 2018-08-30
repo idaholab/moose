@@ -37,7 +37,7 @@ protected:
   virtual Real computeQpJacobian() override;
 
   /// Mass associated with the node
-  const Real & _mass;
+  const Real _mass;
 
   /// Old value of displacement
   const VariableValue & _u_old;
@@ -62,6 +62,9 @@ protected:
 
   /// Variable number corresponding to the acceleration aux variable
   unsigned int _accel_num;
+
+  /// Map between boundary nodes and nodal mass
+  std::map<dof_id_type, Real> _node_id_to_mass;
 };
 
 #endif /* NODALTRANSLATIONALINERTIA_H */

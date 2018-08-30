@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#10619'
+  design = 'actions/Action.md'
   [./circle_quads]
     type = 'Exodiff'
     input = 'circle_quads.i'
     exodiff = 'circle_quads_out.e'
+    requirement = "The Action system shall allow the creation of `Action` objects with multiple tasks."
   [../]
 []

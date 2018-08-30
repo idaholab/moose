@@ -80,4 +80,14 @@
     cli_args = 'Materials/strain/y_orientation="0.5 0.5 0.0" Outputs/exodus=false Outputs/csv=false'
     expect_err = 'ComputeIncrementalBeamStrain: y_orientation should be perpendicular to the axis of the beam.'
   [../]
+  [./torsion_1]
+    type = 'Exodiff'
+    input = 'torsion_1.i'
+    exodiff = 'torsion_1_out.e'
+  [../]
+  [./torison_2]
+    type = 'Exodiff'
+    input = 'torsion_2.i'
+    exodiff = 'torsion_2_out.e'
+  [../]
 []

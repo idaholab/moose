@@ -130,6 +130,13 @@ protected:
   bool _use_displaced_mesh;
 
   /**
+   * Set to true to set up translational and acceleration AuxVariables and
+   * the corresponding AuxKernels using the action when the dynamic kernels
+   * or nodal kernels are not set by the action.
+   **/
+  bool _add_dynamic_variables;
+
+  /**
    * Set to true to use consistent mass and inertia matrices to calculate
    * inertial forces/torques in dynamic beam simulations
    **/

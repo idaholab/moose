@@ -112,6 +112,9 @@ LineElementAction::beamParameters()
                        0.0,
                        "First moment of area of the beam about z asix. Can be supplied "
                        "as either a number or a variable name.");
+  params.addCoupledVar("Ix",
+                       "Second moment of area of the beam about x axis. Can be supplied as "
+                       "either a number or a variable name.");
   params.addCoupledVar("Iy",
                        "Second moment of area of the beam about y axis. Can be supplied as "
                        "either a number or a variable name.");
@@ -120,6 +123,13 @@ LineElementAction::beamParameters()
                        "either a number or a variable name.");
 
   // Common parameters for both dynamic consistent and nodal mass/inertia
+  params.addParam<bool>("add_dynamic_variables",
+                        "Adds translational and rotational velocity and acceleration aux variables "
+                        "and sets up the corresponding AuxKernels for calculating these variables "
+                        "using Newmark time integration. When dynamic_consistent_inertia, "
+                        "dynamic_nodal_rotational_inertia or dynamic_nodal_translational_inertia "
+                        "are set to true, these variables are automatically set up.");
+
   params.addParam<std::vector<VariableName>>("velocities", "Translational velocity variables");
   params.addParam<std::vector<VariableName>>("accelerations",
                                              "Translational acceleration variables");
@@ -165,6 +175,9 @@ LineElementAction::beamParameters()
       "If set to true, nodal mass matrix is used for the inertial force calculation.");
   params.addRangeCheckedParam<Real>(
       "nodal_mass", "nodal_mass>0.0", "Mass associated with the node");
+  params.addParam<FileName>(
+      "nodal_mass_file",
+      "The file containing the nodal positions and the corresponding nodal masses.");
 
   // dynamic nodal rotational inertia
   params.addParam<bool>(
@@ -200,21 +213,40 @@ LineElementAction::LineElementAction(const InputParameters & params)
     _accelerations(0),
     _rot_velocities(0),
     _rot_accelerations(0),
-    _save_in(getParam<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_ids(),
-    _strain_type(getParam<MooseEnum>("strain_type").getEnum<Strain>()),
-    _rotation_type(getParam<MooseEnum>("rotation_type").getEnum<Strain>()),
-    _dynamic_consistent_inertia(getParam<bool>("dynamic_consistent_inertia")),
-    _dynamic_nodal_translational_inertia(getParam<bool>("dynamic_nodal_translational_inertia")),
-    _dynamic_nodal_rotational_inertia(getParam<bool>("dynamic_nodal_rotational_inertia")),
-    _truss(getParam<bool>("truss"))
+    _add_dynamic_variables(false)
 {
   // check if a container block with common parameters is found
   auto action = _awh.getActions<CommonLineElementAction>();
   if (action.size() == 1)
     _pars.applyParameters(action[0]->parameters());
+
+  // Set values to variables after common parameters are applied
+  _save_in = getParam<std::vector<AuxVariableName>>("save_in");
+  _diag_save_in = getParam<std::vector<AuxVariableName>>("diag_save_in");
+  _strain_type = getParam<MooseEnum>("strain_type").getEnum<Strain>();
+  _rotation_type = getParam<MooseEnum>("rotation_type").getEnum<Strain>();
+  _dynamic_consistent_inertia = getParam<bool>("dynamic_consistent_inertia");
+  _dynamic_nodal_translational_inertia = getParam<bool>("dynamic_nodal_translational_inertia");
+  _dynamic_nodal_rotational_inertia = getParam<bool>("dynamic_nodal_rotational_inertia");
+  if (_dynamic_consistent_inertia || _dynamic_nodal_rotational_inertia ||
+      _dynamic_nodal_translational_inertia)
+    _add_dynamic_variables = true;
+
+  if (params.isParamSetByUser("add_dynamic_variables"))
+  {
+    bool user_defined_add_dynamic_variables = getParam<bool>("add_dynamic_variables");
+    if (!_add_dynamic_variables && user_defined_add_dynamic_variables)
+      _add_dynamic_variables = true;
+    else if (_add_dynamic_variables && !user_defined_add_dynamic_variables)
+      mooseError("LineElementAction: When using 'dynamic_consistent_inertia', "
+                 "'dynamic_nodal_rotational_inertia' or '_dynamic_nodal_translational_inertia', "
+                 "the velocity and acceleration AuxVariables and the corresponding AuxKernels are "
+                 "automatically set by the action and this cannot be turned off by setting "
+                 "'add_dynamic_variables' to false.");
+  }
+  _truss = getParam<bool>("truss");
 
   if (!isParamValid("displacements"))
     paramError("displacements",
@@ -272,8 +304,7 @@ LineElementAction::LineElementAction(const InputParameters & params)
                  "beam elements.");
 
     // Parameters required for dynamic simulation using beams
-    if (_dynamic_consistent_inertia || _dynamic_nodal_translational_inertia ||
-        _dynamic_nodal_rotational_inertia)
+    if (_add_dynamic_variables)
     {
       if (!isParamValid("velocities") || !isParamValid("accelerations") ||
           !isParamValid("rotational_velocities") || !isParamValid("rotational_accelerations"))
@@ -305,9 +336,11 @@ LineElementAction::LineElementAction(const InputParameters & params)
                  "density value should be provided as input using `density` for creating the "
                  "consistent mass/inertia matrix required for dynamic beam simulation.");
 
-    if (_dynamic_nodal_translational_inertia && !isParamValid("nodal_mass"))
+    if (_dynamic_nodal_translational_inertia &&
+        (!isParamValid("nodal_mass") && !isParamValid("nodal_mass_file")))
       paramError("nodal_mass",
-                 "LineElementAction: `nodal_mass` should be provided as input to calculate "
+                 "LineElementAction: `nodal_mass` or `nodal_mass_file` should be provided as input "
+                 "to calculate "
                  "inertial forces on beam due to nodal mass.");
 
     if (_dynamic_nodal_rotational_inertia &&
@@ -592,9 +625,7 @@ LineElementAction::actAddKernels()
 void
 LineElementAction::actAddAuxVariables()
 {
-  if ((_dynamic_consistent_inertia || _dynamic_nodal_rotational_inertia ||
-       _dynamic_nodal_translational_inertia) &&
-      !_truss)
+  if (_add_dynamic_variables && !_truss)
   {
     for (auto vel : _velocities)
     {
@@ -633,9 +664,7 @@ LineElementAction::actAddAuxVariables()
 void
 LineElementAction::actAddAuxKernels()
 {
-  if ((_dynamic_consistent_inertia || _dynamic_nodal_rotational_inertia ||
-       _dynamic_nodal_translational_inertia) &&
-      !_truss)
+  if (_add_dynamic_variables && !_truss)
   {
     auto params = _factory.getValidParams("NewmarkAccelAux");
     params.applyParameters(parameters(), {"boundary"});

@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#1891'
+  design = 'source/auxkernels/SolutionAux.md source/userobject/SolutionUserObject.md'
   [./build]
     # Builds the solution for: test, direct, solution_aux_scale. output_error
     type = 'Exodiff'
     input = 'build.i'
     exodiff = 'build_out.e'
+    requirement = "The 'MOOSE_TEST_NAME' test shall create an output file for testing the 'SolutionAux' object."
   [../]
 
   [./test]
@@ -11,6 +14,7 @@
     input = 'solution_aux.i'
     exodiff = 'solution_aux_out.e'
     prereq = 'build'
+    requirement = "The SolutionAux object shall be capable of initializing an auxiliary variable from an existing solution."
   [../]
 
   [./direct]
@@ -18,30 +22,35 @@
     input = 'solution_aux_direct.i'
     exodiff = 'solution_aux_direct_out.e'
     prereq = 'build'
+    requirement = "The SolutionAux object shall be capable of initializing an auxiliary variable from an existing solution using a direct degree-of-freedom copy for identical meshes."
   [../]
 
   [./exodus]
     type = 'Exodiff'
     input = 'solution_aux_exodus.i'
     exodiff = 'solution_aux_exodus_out.e'
+    requirement = "The SolutionAux object shall be capable of populating an auxiliary variable from an ExodusII file."
   [../]
 
   [./exodus_file_extension]
     type = 'Exodiff'
     input = 'solution_aux_exodus_file_extension.i'
     exodiff = 'solution_aux_exodus_file_extension_out.e'
+    requirement = "The SolutionAux object shall be capable of populating an auxiliary variable from an ExodusII file with a custom extension (e.g., *.e-s003)."
   [../]
 
   [./exodus_elem_map]
     type = 'Exodiff'
     input = 'solution_aux_exodus_elem_map.i'
     exodiff = 'solution_aux_exodus_elem_map_out.e'
+    requirement = "The SolutionAux object shall be capable of reading elemental data for the largest timestep."
   [../]
 
   [./exodus_elemental]
     type = 'Exodiff'
     input = 'solution_aux_exodus_elemental.i'
     exodiff = 'solution_aux_exodus_elemental_out.e'
+    requirement = "The SolutionAux object shall be capable of reading elemental data for a specific timestep."
   [../]
 
   [./exodus_elemental_only]
@@ -49,24 +58,28 @@
     type = 'Exodiff'
     input = 'solution_aux_exodus_elemental_only.i'
     exodiff = 'solution_aux_exodus_elemental_only_out.e'
+    requirement = "The SolutionAux object shall be capable of restricting reading to a single elemental variable."
   [../]
 
   [./exodus_direct]
     type = 'Exodiff'
     input = 'solution_aux_exodus_direct.i'
     exodiff = 'solution_aux_exodus_direct_out.e'
+    requirement = "The SolutionAux object shall be capable of initializing an auxiliary variable from an existing ExodusII file using a direct degree-of-freedom copy for identical meshes."
   [../]
 
   [./exodus_interp]
     type = 'Exodiff'
     input = 'solution_aux_exodus_interp.i'
     exodiff = 'solution_aux_exodus_interp_out.e'
+    requirement = "The SolutionAux object shall be capable of setting an auxiliary variable with temporal interpolation."
   [../]
 
   [./exodus_interp_restart1]
     type = 'Exodiff'
     input = 'solution_aux_exodus_interp_restart1.i'
     exodiff = 'solution_aux_exodus_interp_restart1_out.e'
+    requirement = "The 'MOOSE_TEST_NAME' shall create a restart file for subsequent tests."
   [../]
 
   [./exodus_interp_restart2]
@@ -75,24 +88,29 @@
     exodiff = 'solution_aux_exodus_interp_restart2_out.e'
     prereq = exodus_interp_restart1
     recover = false
+    requirement = "The SolutionAux object shall be capable of restart."
   [../]
 
   [./exodus_interp_direct]
     type = 'Exodiff'
     input = 'solution_aux_exodus_interp_direct.i'
     exodiff = 'solution_aux_exodus_interp_direct_out.e'
+    requirement = "The SolutionAux object shall be capable of setting an auxiliary variable with temporal interpolation using a direct degree-of-freedom copy for identical meshes."
   [../]
 
   [./multiple_input]
     type = 'Exodiff'
     input = 'solution_aux_multi_var.i'
     exodiff = 'solution_aux_multi_var_out.e'
+    requirement = "The SolutionAux object shall be capable of accessing specific variables from a SolutionUserObject."
   [../]
 
   [./multiple_input_error]
     type = 'RunException'
     input = 'solution_aux_multi_err.i'
     expect_err = 'The SolutionUserObject contains multiple variables, \w+'
+    requirement = "The SolutionAux object shall produce an error if the 'from_variable' parameter is not set and the supplied UserObject has multiple variables."
+
   [../]
 
   [./solution_aux_scale]
@@ -100,6 +118,7 @@
     input = 'solution_aux_scale.i'
     exodiff = 'solution_aux_scale_out.e'
     prereq = 'build'
+    requirement = "The SolutionUserObject object shall be capable of scaling and translating the supplied data."
   [../]
 
   [./output_error]
@@ -110,6 +129,7 @@
     # This test throws an error from a threaded region. Rather than lock the error region,
     # we'll just avoid running it with multiple threads.
     max_threads = 1
+    requirement = "The SolutionAux object shall error if data for the supplied variable is not found in the SolutionUserObject data."
   [../]
 
   [./aux_nonlinear_solution]
@@ -117,6 +137,7 @@
     type = Exodiff
     input = 'aux_nonlinear_solution.i'
     exodiff = 'aux_nonlinear_solution_out.e'
+    requirement = "The 'MOOSE_TEST_NAME' test shall create an XDA and XDR output file for testing the 'SolutionAux' object with auxiliary variables."
   [../]
 
   [./aux_nonlinear_solution_from_xda]
@@ -124,6 +145,7 @@
     input = 'aux_nonlinear_solution_xda.i'
     exodiff = 'aux_nonlinear_solution_xda_out.e'
     prereq = aux_nonlinear_solution
+    requirement = "The SolutionAux object shall be capable of setting values using an auxiliary variable from an XDA file."
   [../]
 
   [./aux_nonlinear_solution_from_xdr]
@@ -131,6 +153,7 @@
     input = 'aux_nonlinear_solution_xdr.i'
     exodiff = 'aux_nonlinear_solution_xdr_out.e'
     prereq = aux_nonlinear_solution
+    requirement = "The SolutionAux object shall be capable of setting values using an auxiliary variable from an XDR file."
 
     # This test reads a binary file that was written with 4-byte dof
     # ids.  At this time, it is only possible to read it back in with
@@ -142,6 +165,7 @@
     # This builds the XDA file for the 'aux_nonlinear_solution_adapt_from_xda' test below
     type = RunApp
     input = 'aux_nonlinear_solution_adapt.i'
+    requirement = "The 'MOOSE_TEST_NAME' test shall create an XDA output file for testing the 'SolutionAux' object with adaptivity."
   [../]
 
   [./aux_nonlinear_solution_adapt_from_xda]
@@ -149,6 +173,7 @@
     input = 'aux_nonlinear_solution_adapt_xda.i'
     exodiff = 'aux_nonlinear_solution_adapt_xda_out.e'
     prereq = aux_nonlinear_solution_adapt
+    requirement = "The SolutionAux object shall be capable of setting values using an auxiliary variable from an XDA file with adaptivity."
   [../]
 
   [./thread_test]
@@ -157,5 +182,6 @@
     csvdiff = 'thread_xda_out.csv'
     min_threads = 2
     prereq = aux_nonlinear_solution_from_xda
+    requirement = "The SolutionAux object shall be capable to reading auxiliary variables when operating on multiple threads."
   [../]
 []
