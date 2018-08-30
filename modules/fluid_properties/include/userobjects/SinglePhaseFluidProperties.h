@@ -349,10 +349,12 @@ public:
   /**
    * Thermal expansion coefficient from pressure and temperature
    *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return beta (1/K)
    */
   virtual Real beta_from_p_T(Real p, Real T) const;
+  virtual Real beta(Real pressure, Real temperature) const;
 
   /**
    * Molar mass [kg/mol]
@@ -551,17 +553,6 @@ public:
    * @return s (J/kg/K)
    */
   virtual Real s(Real pressure, Real temperature) const;
-
-  /**
-   * Isobaric thermal expansion coefficient, defined as
-   * 1/v (dv/dT)_p, where v is the volume, and the derivative wrt temperature is
-   * taken at constant pressure.
-   * Note: this is equivalent to -1/rho (drho/dT)_p, which is used in the calculation
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return beta (1/K)
-   */
-  virtual Real beta(Real pressure, Real temperature) const;
 
   /**
    * Henry's law constant for dissolution in water

@@ -43,7 +43,7 @@ TEST_F(IdealGasFluidPropertiesPTTest, properties)
 
   p = 1.0e6;
   T = 300.0;
-  REL_TEST(_fp->beta(p, T), 1.0 / T, tol);
+  REL_TEST(_fp->beta_from_p_T(p, T), 1.0 / T, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), cp, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), cv, tol);
   REL_TEST(_fp->c_from_p_T(p, T), std::sqrt(cp * R * T / (cv * molar_mass)), tol);

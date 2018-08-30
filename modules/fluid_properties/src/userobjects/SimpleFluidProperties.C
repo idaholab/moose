@@ -69,7 +69,7 @@ SimpleFluidProperties::molarMass() const
   return _molar_mass;
 }
 
-Real SimpleFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::beta_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_expansion;
 }

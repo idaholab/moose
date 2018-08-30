@@ -244,9 +244,7 @@ SinglePhaseFluidProperties::gamma_from_p_T(Real pressure, Real temperature) cons
 Real
 SinglePhaseFluidProperties::beta(Real pressure, Real temperature) const
 {
-  Real rho, drho_dp, drho_dT;
-  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  return -drho_dT / rho;
+  return beta_from_p_T(pressure, temperature);
 }
 
 Real

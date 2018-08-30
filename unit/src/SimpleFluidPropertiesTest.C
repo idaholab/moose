@@ -44,7 +44,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   Real p = 1.0E3;
   Real T = 200.0;
 
-  ABS_TEST(_fp->beta(p, T), thermal_exp, tol);
+  ABS_TEST(_fp->beta_from_p_T(p, T), thermal_exp, tol);
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
   ABS_TEST(_fp->cv_from_p_T(p, T), cv, tol);
   ABS_TEST(_fp->c_from_p_T(p, T), std::sqrt(bulk_modulus / _fp->rho_from_p_T(p, T)), tol);
@@ -61,7 +61,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
 
   p = 1.0E7;
   T = 300.0;
-  ABS_TEST(_fp->beta(p, T), thermal_exp, tol);
+  ABS_TEST(_fp->beta_from_p_T(p, T), thermal_exp, tol);
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
   ABS_TEST(_fp->cv_from_p_T(p, T), cv, tol);
   ABS_TEST(_fp->c_from_p_T(p, T), std::sqrt(bulk_modulus / _fp->rho_from_p_T(p, T)), tol);
