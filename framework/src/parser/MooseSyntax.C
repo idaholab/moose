@@ -101,7 +101,6 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("SetupPreconditionerAction", "Preconditioning/*");
   registerSyntax("AddFieldSplitAction", "Preconditioning/*/*");
 
-  registerSyntax("DetermineSystemType", "Executioner");
   registerSyntax("CreateExecutionerAction", "Executioner");
   registerSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
   registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");

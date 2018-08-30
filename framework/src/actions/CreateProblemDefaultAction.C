@@ -16,6 +16,7 @@
 #include "CreateExecutionerAction.h"
 
 registerMooseAction("MooseApp", CreateProblemDefaultAction, "create_problem_default");
+registerMooseAction("MooseApp", CreateProblemDefaultAction, "determine_system_type");
 
 template <>
 InputParameters
@@ -39,6 +40,26 @@ CreateProblemDefaultAction::CreateProblemDefaultAction(InputParameters parameter
 void
 CreateProblemDefaultAction::act()
 {
+  if (_current_task == "determine_system_type")
+  {
+    // Determine whether the Executioner is derived from EigenExecutionerBase and
+    // set a flag on MooseApp that can be used during problem construction.
+    bool use_nonlinear = true;
+    bool use_eigenvalue = false;
+    auto p = _awh.getActionByTask<CreateExecutionerAction>("setup_executioner");
+    if (p)
+    {
+      auto & exparams = p->getObjectParams();
+      use_nonlinear = !(exparams.isParamValid("_eigen") && exparams.get<bool>("_eigen"));
+      use_eigenvalue =
+          (exparams.isParamValid("_use_eigen_value") && exparams.get<bool>("_use_eigen_value"));
+    }
+
+    _app.useNonlinear() = use_nonlinear;
+    _app.useEigenvalue() = use_eigenvalue;
+    return;
+  }
+
   // act only if we have mesh
   if (_mesh.get() != NULL)
   {

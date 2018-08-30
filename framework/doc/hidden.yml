@@ -88,7 +88,7 @@
 - /DiracKernels/FunctionDiracSource
 - /Distributions/AddDistributionAction
 - /Executioner/CreateExecutionerAction
-- /Executioner/DetermineSystemType
+- /Executioner/CreateProblemDefaultAction
 - /Executioner/InversePowerMethod
 - /Executioner/NonlinearEigen
 - /Executioner/Steady
