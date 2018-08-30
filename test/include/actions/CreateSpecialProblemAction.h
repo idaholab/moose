@@ -17,6 +17,9 @@ class CreateSpecialProblemAction;
 template <>
 InputParameters validParams<CreateSpecialProblemAction>();
 
+/**
+ * Small test meta-action that creates a CreateProblemAction based on available system information.
+ */
 class CreateSpecialProblemAction : public Action
 {
 public:

@@ -100,7 +100,7 @@ CreateProblemAction::act()
         mooseError("Problem has to be of a FEProblemBase type");
 
       // if users provide a problem type, the type has to be an EigenProblem or its derived
-      // subclass when uing an eigen executioner
+      // subclass when using an eigen executioner
       if (_app.useEigenvalue() && _type != "EigenProblem" &&
           !(std::dynamic_pointer_cast<EigenProblem>(_problem)))
         mooseError("Problem has to be of a EigenProblem (or derived subclass) type when using "
@@ -198,7 +198,7 @@ CreateProblemAction::checkSanity(const std::list<Action *> & action_list) const
   }
 
   if (counter++ > 1)
-    mooseError("Too many CreateProblemActions in the system, Make sure that you don't have "
+    mooseError("Too many CreateProblemActions in the system. Make sure that you don't have "
                "multiple user-defined Actions that create Problems!");
 
   // We'll keep the Parser Generated block unless type isn't specified.

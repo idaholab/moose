@@ -1,3 +1,7 @@
+# This test demonstrates that a Problem can be created through an Action (possibly associated with
+# special syntax), that may or may not even have a type specified.
+# See the custom "TestProblem" block below.
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -10,9 +14,8 @@
   elem_type = QUAD4
 []
 
-# This test demonstrates that a Problem can be created through an Action (possibly associated with
-# special syntax), that may or may not even have a type specified.
 [TestProblem]
+  # Creates a custom problem through a meta-action.
   name = 'MOOSE Action Test problem'
 []
 

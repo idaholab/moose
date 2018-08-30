@@ -2,17 +2,17 @@
 
 The Problem class is one of the core extension points in MOOSE. Problems
 are designed to hold the `EquationSystems` objects (from libMesh) that
-house the numerical systems we are ultimiately solving for our computing.
+house the numerical systems we are ultimately solving for our computing.
 
-Fortunatntely when you are first getting started with MOOSE you normally
+Fortunately when you are first getting started with MOOSE you normally
 don't have to worry or do anything special with the Problem object. MOOSE
-automatically constructs a suiteable Problem for your simulation type
+automatically constructs a suitable Problem for your simulation type
 taking into account the other types of objects present in the input file.
 Most simulations use the `FEProblem` class, which contains a single
 `NonlinearSystem` and single `AuxiliarySystem`. The `NonlinearSystem`
-contains the Matrix and vectors used for solving the equations implemented
+contains the matrix and vectors used for solving the equations implemented
 through a combination of other objects in your simulations (`Kernels`, `BCs`,
-etc.). The AuxiliarySystem houses the solution vectors use to hold
+etc.). The `AuxiliarySystem` houses the solution vectors use to hold
 computed solutions or values.
 
 As your application grows in complexity, you may find it useful or
