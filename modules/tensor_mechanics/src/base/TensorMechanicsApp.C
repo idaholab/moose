@@ -102,7 +102,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_material");
 
   registerTask("validate_coordinate_systems", /*is_required=*/false);
-  addTaskDependency("validate_coordinate_systems", "create_problem");
+  addTaskDependency("validate_coordinate_systems", "create_problem_complete");
 }
 
 // External entry point for dynamic execute flag registration

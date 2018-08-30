@@ -1507,16 +1507,12 @@ MooseApp::createMinimalApp()
   // Problem
   {
     // Build the Action parameters
-    InputParameters action_params = _action_factory.getValidParams("CreateProblemAction");
-    action_params.set<std::string>("type") = "FEProblem";
+    InputParameters action_params = _action_factory.getValidParams("CreateProblemDefaultAction");
+    action_params.set<bool>("solve") = false;
 
     // Create the action
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _action_factory.create("CreateProblemAction", "Problem", action_params));
-
-    // Set the object parameters
-    InputParameters & params = action->getObjectParams();
-    params.set<bool>("solve") = false;
+    std::shared_ptr<Action> action = std::static_pointer_cast<Action>(
+        _action_factory.create("CreateProblemDefaultAction", "Problem", action_params));
 
     // Add Action to the warehouse
     _action_warehouse.addActionBlock(action);

@@ -112,7 +112,6 @@ InputParameters
 validParams<FEProblemBase>()
 {
   InputParameters params = validParams<SubProblem>();
-  params.addPrivateParam<MooseMesh *>("mesh");
   params.addParam<unsigned int>("null_space_dimension", 0, "The dimension of the nullspace");
   params.addParam<unsigned int>(
       "transpose_null_space_dimension", 0, "The dimension of the transpose nullspace");
@@ -150,6 +149,46 @@ validParams<FEProblemBase>()
                         false,
                         "True to skip the NonlinearSystem check for work to do (e.g. Make sure "
                         "that there are variables to solve for).");
+
+  /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
+  /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
+  ///    be set for the whole domain
+  /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
+  /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
+  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
+  MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
+  MooseEnum rz_coord_axis("X=0 Y=1", "Y");
+  params.addParam<MultiMooseEnum>(
+      "coord_type", coord_types, "Type of the coordinate system per block param");
+  params.addParam<MooseEnum>(
+      "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addParam<bool>(
+      "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
+  params.addParam<bool>("material_coverage_check",
+                        true,
+                        "Set to false to disable material->subdomain coverage check");
+  params.addParam<bool>("parallel_barrier_messaging",
+                        true,
+                        "Displays messaging from parallel "
+                        "barrier notifications when executing "
+                        "or transferring to/from Multiapps "
+                        "(default: true)");
+
+  params.addParam<FileNameNoExtension>("restart_file_base",
+                                       "File base name used for restart (e.g. "
+                                       "<path>/<filebase> or <path>/LATEST to "
+                                       "grab the latest file available)");
+
+  params.addParam<std::vector<TagName>>("extra_tag_vectors",
+                                        "Extra vectors to add to the system that can be filled by "
+                                        "objects which compute residuals and Jacobians (Kernels, "
+                                        "BCs, etc.) by setting tags on them.");
+
+  params.addParam<std::vector<TagName>>("extra_tag_matrices",
+                                        "Extra matrices to add to the system that can be filled "
+                                        "by objects which compute residuals and Jacobians "
+                                        "(Kernels, BCs, etc.) by setting tags on them.");
+
   return params;
 }
 
@@ -209,14 +248,14 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _needs_old_newton_iter(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
-    _kernel_coverage_check(false),
-    _material_coverage_check(false),
+    _kernel_coverage_check(getParam<bool>("kernel_coverage_check")),
+    _material_coverage_check(getParam<bool>("material_coverage_check")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
     _has_exception(false),
-    _parallel_barrier_messaging(true),
+    _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _line_search(nullptr),
@@ -316,6 +355,54 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _resurrector = libmesh_make_unique<Resurrector>(*this);
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+
+  setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                 getParam<MultiMooseEnum>("coord_type"));
+  setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
+
+  if (isParamValid("restart_file_base"))
+  {
+    std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
+
+    std::size_t slash_pos = restart_file_base.find_last_of("/");
+    std::string path = restart_file_base.substr(0, slash_pos);
+    std::string file = restart_file_base.substr(slash_pos + 1);
+
+    // If the user specified LATEST as the file in their directory path, find the file with the
+    // latest timestep and the largest serial number.
+    if (file == "LATEST")
+    {
+      std::list<std::string> dir_list(1, path);
+      std::list<std::string> files = MooseUtils::getFilesInDirs(dir_list);
+      restart_file_base = MooseUtils::getLatestAppCheckpointFileBase(files);
+
+      if (restart_file_base == "")
+        mooseError("Unable to find suitable restart file");
+    }
+
+    _console << "\nUsing " << restart_file_base << " for restart.\n\n";
+    setRestartFile(restart_file_base);
+  }
+}
+
+void
+FEProblemBase::createTagVectors()
+{
+  // add vectors and their tags to system
+  auto & vectors = getParam<std::vector<TagName>>("extra_tag_vectors");
+  for (auto & vector : vectors)
+  {
+    auto tag = addVectorTag(vector);
+    _nl->addVector(tag, false, GHOSTED);
+  }
+
+  // add matrices and their tags
+  auto & matrices = getParam<std::vector<TagName>>("extra_tag_matrices");
+  for (auto & matrix : matrices)
+  {
+    auto tag = addMatrixTag(matrix);
+    _nl->addMatrix(tag);
+  }
 }
 
 void

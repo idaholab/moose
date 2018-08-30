@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CREATEPROBLEMACTION_H
-#define CREATEPROBLEMACTION_H
+#ifndef CREATEPROBLEMDEFAULTACTION_H
+#define CREATEPROBLEMDEFAULTACTION_H
 
 // MOOSE includes
-#include "MooseObjectAction.h"
+#include "Action.h"
 
-class CreateProblemAction;
+class CreateProblemDefaultAction;
 
 template <>
-InputParameters validParams<CreateProblemAction>();
+InputParameters validParams<CreateProblemDefaultAction>();
 
-class CreateProblemAction : public MooseObjectAction
+class CreateProblemDefaultAction : public Action
 {
 public:
-  CreateProblemAction(InputParameters parameters);
+  CreateProblemDefaultAction(InputParameters parameters);
 
   virtual void act() override;
 };
 
-#endif /* CREATEPROBLEMACTION_H */
+#endif /* CREATEPROBLEMDEFAULTACTION_H */
