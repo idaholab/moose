@@ -751,7 +751,7 @@ CO2FluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 }
 
 Real
-CO2FluidProperties::k(Real pressure, Real temperature) const
+CO2FluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
   // Require density first
   Real density = rho_from_p_T(pressure, temperature);
@@ -759,18 +759,18 @@ CO2FluidProperties::k(Real pressure, Real temperature) const
 }
 
 void
-CO2FluidProperties::k_dpT(
+CO2FluidProperties::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  k = this->k(pressure, temperature);
+  k = this->k_from_p_T(pressure, temperature);
   // Calculate derivatives using finite differences. Note: this will be slow as
   // multiple calculations of density are required
   const Real eps = 1.0e-6;
   const Real peps = pressure * eps;
   const Real Teps = temperature * eps;
 
-  dk_dp = (this->k(pressure + peps, temperature) - k) / peps;
-  dk_dT = (this->k(pressure, temperature + Teps) - k) / Teps;
+  dk_dp = (this->k_from_p_T(pressure + peps, temperature) - k) / peps;
+  dk_dT = (this->k_from_p_T(pressure, temperature + Teps) - k) / Teps;
 }
 
 Real

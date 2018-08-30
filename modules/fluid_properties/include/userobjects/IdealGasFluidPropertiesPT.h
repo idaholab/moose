@@ -37,10 +37,10 @@ public:
 
   virtual Real c_from_p_T(Real pressure, Real temperature) const override;
 
-  virtual Real k(Real pressure, Real temperature) const override;
+  virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void
-  k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
+  k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   virtual Real s_from_p_T(Real pressure, Real temperature) const override;
 

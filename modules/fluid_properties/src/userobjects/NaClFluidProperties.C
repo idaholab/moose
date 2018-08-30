@@ -199,7 +199,7 @@ NaClFluidProperties::rho_mu_dpT(Real /*pressure*/,
 }
 
 Real
-NaClFluidProperties::k(Real /*pressure*/, Real temperature) const
+NaClFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Correlation requires temperature in Celcius
   Real Tc = temperature - _T_c2k;
@@ -208,7 +208,7 @@ NaClFluidProperties::k(Real /*pressure*/, Real temperature) const
 }
 
 void
-NaClFluidProperties::k_dpT(
+NaClFluidProperties::k_from_p_T(
     Real /*pressure*/, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   // Correlation requires temperature in Celcius

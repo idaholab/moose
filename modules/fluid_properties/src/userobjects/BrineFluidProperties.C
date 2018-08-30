@@ -352,7 +352,7 @@ BrineFluidProperties::k(Real pressure, Real temperature, Real xnacl) const
   Real Tc = temperature - _T_c2k;
 
   Real S = 100.0 * _Mnacl * mol / (1.0 + _Mnacl * mol);
-  Real lambdaw = _water_fp->k(pressure, temperature);
+  Real lambdaw = _water_fp->k_from_p_T(pressure, temperature);
   Real lambda = 1.0 - (2.3434e-3 - 7.924e-6 * Tc + 3.924e-8 * Tc * Tc) * S +
                 (1.06e-5 - 2.0e-8 * Tc - 1.2e-10 * Tc * Tc) * S * S;
 

@@ -48,8 +48,8 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
   ABS_TEST(_fp->cv_from_p_T(p, T), cv, tol);
   ABS_TEST(_fp->c_from_p_T(p, T), std::sqrt(bulk_modulus / _fp->rho_from_p_T(p, T)), tol);
-  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
-  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
   ABS_TEST(_fp->s_from_p_T(p, T), entropy, tol);
   ABS_TEST(_fp->rho_from_p_T(p, T), density0 * std::exp(p / bulk_modulus - thermal_exp * T), tol);
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
@@ -65,8 +65,8 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
   ABS_TEST(_fp->cv_from_p_T(p, T), cv, tol);
   ABS_TEST(_fp->c_from_p_T(p, T), std::sqrt(bulk_modulus / _fp->rho_from_p_T(p, T)), tol);
-  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
-  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
   ABS_TEST(_fp->s_from_p_T(p, T), entropy, tol);
   ABS_TEST(_fp->rho_from_p_T(p, T), density0 * std::exp(p / bulk_modulus - thermal_exp * T), tol);
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);

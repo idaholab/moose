@@ -145,9 +145,9 @@ TEST_F(CO2FluidPropertiesTest, thermalConductivity)
   REL_TEST(_fp->k_from_rho_T(18.579, 300.0), 17.248e-3, tol);
   REL_TEST(_fp->k_from_rho_T(11.899, 450.0), 29.377e-3, tol);
 
-  REL_TEST(_fp->k(1.0e6, 250.0), 1.34504e-2, tol);
-  REL_TEST(_fp->k(1.0e6, 300.0), 1.72483e-2, tol);
-  REL_TEST(_fp->k(1.0e6, 450.0), 2.93767e-2, tol);
+  REL_TEST(_fp->k_from_p_T(1.0e6, 250.0), 1.34504e-2, tol);
+  REL_TEST(_fp->k_from_p_T(1.0e6, 300.0), 1.72483e-2, tol);
+  REL_TEST(_fp->k_from_p_T(1.0e6, 450.0), 2.93767e-2, tol);
 }
 
 /**

@@ -90,13 +90,13 @@ SimpleFluidProperties::c_from_p_T(Real pressure, Real temperature) const
   return std::sqrt(_bulk_modulus / rho_from_p_T(pressure, temperature));
 }
 
-Real SimpleFluidProperties::k(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::k_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
 
 void
-SimpleFluidProperties::k_dpT(
+SimpleFluidProperties::k_from_p_T(
     Real /*pressure*/, Real /*temperature*/, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   k = _thermal_conductivity;

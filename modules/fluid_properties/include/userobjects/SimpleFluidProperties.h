@@ -56,11 +56,11 @@ public:
   virtual Real c_from_p_T(Real pressure, Real temperature) const override;
 
   /// Thermal conductivity (W/m/K)
-  virtual Real k(Real pressure, Real temperature) const override;
+  virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
   /// Thermal conductivity and its derivatives wrt pressure and temperature
   virtual void
-  k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
+  k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   /// Specific entropy (J/kg/K)
   virtual Real s_from_p_T(Real pressure, Real temperature) const override;

@@ -596,14 +596,14 @@ Water97FluidProperties::rho_mu_dpT(Real pressure,
 }
 
 Real
-Water97FluidProperties::k(Real pressure, Real temperature) const
+Water97FluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
   Real rho = this->rho_from_p_T(pressure, temperature);
   return this->k_from_rho_T(rho, temperature);
 }
 
 void
-Water97FluidProperties::k_dpT(
+Water97FluidProperties::k_from_p_T(
     Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
 {
   mooseError(name(), "k_dpT() is not implemented");

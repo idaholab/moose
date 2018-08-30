@@ -461,13 +461,13 @@ TEST_F(Water97FluidPropertiesTest, properties)
   ABS_TEST(_fp->mu_from_p_T(2e6, 1173.15), 4.42823959629e-5, 1e-12);
 
   // Thermal conductivity
-  REL_TEST(_fp->k(1.0e6, 323.15), 0.641, 1.0e-4);
-  REL_TEST(_fp->k(20.0e6, 623.15), 0.4541, 1.0e-4);
-  REL_TEST(_fp->k(50.0e6, 773.15), 0.2055, 1.0e-4);
+  REL_TEST(_fp->k_from_p_T(1.0e6, 323.15), 0.641, 1.0e-4);
+  REL_TEST(_fp->k_from_p_T(20.0e6, 623.15), 0.4541, 1.0e-4);
+  REL_TEST(_fp->k_from_p_T(50.0e6, 773.15), 0.2055, 1.0e-4);
 
-  ABS_TEST(_fp->k(1.0e6, 323.15), 0.640972, 5e-7);
-  ABS_TEST(_fp->k(20.0e6, 623.15), 0.454131, 7e-7);
-  ABS_TEST(_fp->k(50.0e6, 773.15), 0.205485, 5e-7);
+  ABS_TEST(_fp->k_from_p_T(1.0e6, 323.15), 0.640972, 5e-7);
+  ABS_TEST(_fp->k_from_p_T(20.0e6, 623.15), 0.454131, 7e-7);
+  ABS_TEST(_fp->k_from_p_T(50.0e6, 773.15), 0.205485, 5e-7);
 
   // Backwards equation T(p,h)
   // Region 1

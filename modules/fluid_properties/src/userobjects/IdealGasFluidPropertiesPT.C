@@ -71,16 +71,16 @@ IdealGasFluidPropertiesPT::c_from_p_T(Real /*pressure*/, Real temperature) const
   return std::sqrt(_cp * _R * temperature / (_cv * _molar_mass));
 }
 
-Real IdealGasFluidPropertiesPT::k(Real /*pressure*/, Real /*temperature*/) const
+Real IdealGasFluidPropertiesPT::k_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
 
 void
-IdealGasFluidPropertiesPT::k_dpT(
+IdealGasFluidPropertiesPT::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  k = this->k(pressure, temperature);
+  k = this->k_from_p_T(pressure, temperature);
   dk_dp = 0;
   dk_dT = 0;
 }

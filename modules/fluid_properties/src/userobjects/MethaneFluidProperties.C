@@ -216,7 +216,7 @@ MethaneFluidProperties::rho_mu_dpT(Real pressure,
 }
 
 Real
-MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
@@ -231,7 +231,7 @@ MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::k_dpT(
+MethaneFluidProperties::k_from_p_T(
     Real /*pressure*/, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
