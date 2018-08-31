@@ -41,6 +41,7 @@
   [../]
   [./h+]
     initial_condition = 1.0e-7
+    scaling = 1e6
   [../]
   [./hco3-]
   [../]
