@@ -1,13 +1,18 @@
 [Tests]
+  issues = ''
   [./sinneumann_test]
     type = 'Exodiff'
     input = 'sin_neumann_test.i'
     exodiff = 'sin_neumann_test_out.e'
+    design = 'source/bcs/SinNeumannBC.md'
+    requirement = "MOOSE shall include the ability to apply a Neumann boundary condition according to a sin function."
   [../]
 
   [./sindirichlet_test]
     type = 'Exodiff'
     input = 'sin_dirichlet_test.i'
     exodiff = 'sin_dirichlet_test_out.e'
+    design = 'source/bcs/SinDirichletBC.md'
+    requirement = "MOOSE shall include the ability to apply a Dirichlet boundary condition according to a sin function."
   [../]
 []

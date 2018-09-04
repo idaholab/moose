@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#6327'
+  design = "syntax/BCs/index.md"
   [./test_lap_bc]
     type = 'Exodiff'
     input = 'test_lap_bc.i'
     exodiff = 'out.e'
+    requirement = "MOOSE shall properly compute second derivatives within BoundaryCondition objects."
   [../]
 []
