@@ -19,6 +19,7 @@ class Requirement(object):
         self.issues = issues
         self.label = None # added by get_requirements function
         self.satisfied = satisfied
+        self.prerequisites = []
 
     def __str__(self):
         frmt = '{}:\n    Text: {}\n    Design: {}\n    Issues: {}'
@@ -80,5 +81,11 @@ def _add_requirements(out, location, filename):
                               design=local_design.split(),
                               issues=local_issues.split(),
                               satisfied=satisfied)
+
             group = os.path.relpath(filename, location).split('/')[0]
+
+            prereq = child.get('prereq', None)
+            if prereq is not None:
+                req.prerequisites = set(prereq.split(' '))
+
             out[group].append(req)

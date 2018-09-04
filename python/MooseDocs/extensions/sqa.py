@@ -100,6 +100,8 @@ class SQARequirementsCommand(command.CommandComponent):
                                  "the 'link' setting must be true.")
         config['link-issues'] = (True, "Enable/disable the link of the test issues only, " \
                                  "the 'link' setting must be true.")
+        config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, " \
+                                        "the 'link' setting must be true.")
 
         return config
 
@@ -110,11 +112,11 @@ class SQARequirementsCommand(command.CommandComponent):
             matrix = SQARequirementMatrix(parent,
                                           heading=tokens.String(None, content=unicode(group)))
             for req in requirements:
-                self._addRequirement(matrix, req)
+                self._addRequirement(matrix, req, requirements)
 
         return parent
 
-    def _addRequirement(self, parent, req):
+    def _addRequirement(self, parent, req, requirements):
         item = SQARequirementMatrixItem(parent,
                                         label=unicode(req.label),
                                         satisfied=req.satisfied,
@@ -147,6 +149,17 @@ class SQARequirementsCommand(command.CommandComponent):
                     url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
                     tokens.Link(p, url=url, string=unicode(issue))
 
+            if self.settings['link-prerequisites'] and req.prerequisites:
+                labels = []
+                for prereq in req.prerequisites:
+                    for other in requirements:
+                        if other.name == prereq:
+                            labels.append(other.label)
+
+                p = tokens.Paragraph(item, 'p')
+                tokens.String(p, content=u'Prerequisites: {}'.format(' '.join(labels)))
+
+
 class SQACrossReferenceCommand(SQARequirementsCommand):
     COMMAND = 'sqa'
     SUBCOMMAND = 'cross-reference'
@@ -164,7 +177,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
             matrix = SQARequirementMatrix(parent, heading=link)
 
             for req in requirements:
-                self._addRequirement(matrix, req)
+                self._addRequirement(matrix, req, requirements)
 
         return parent
 
