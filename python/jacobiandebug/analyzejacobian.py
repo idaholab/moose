@@ -349,7 +349,7 @@ if __name__ == '__main__':
     dofmapfilename = basename + '_' + dofoutname + '.json'
     if not options.noauto :
         mooseparams = moosebaseparams[:]
-        mooseparams.extend(['Problem/solve=false', 'BCs/active=', 'Outputs/' + dofoutname+ '/type=DOFMap', 'Outputs/active=' + dofoutname, 'Outputs/file_base=' + basename + '_' + dofoutname])
+        mooseparams.extend(['Problem/solve=false', 'BCs/active=', 'Outputs/' + dofoutname+ '/type=DOFMap', 'Outputs/active=' + dofoutname, 'Outputs/file_base=' + basename + '_' + dofoutname, '--no-gdb-backtrace'])
         if options.cli_args != None:
             mooseparams.extend([options.cli_args])
         if options.debug :
@@ -425,7 +425,7 @@ if __name__ == '__main__':
 
         mooseparams.extend(petsc_test_options + ['-mat_fd_type', 'ds',
                                                  'BCs/active=', 'Outputs/exodus=false', 'Outputs/csv=false',
-                                                 'Outputs/active=', 'Executioner/solve_type=NEWTON'])
+                                                 'Outputs/active=', 'Executioner/solve_type=NEWTON', '--no-gdb-backtrace'])
     if options.cli_args != None:
         mooseparams.extend([options.cli_args])
 
