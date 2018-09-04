@@ -1508,7 +1508,7 @@ MooseApp::createMinimalApp()
   {
     // Build the Action parameters
     InputParameters action_params = _action_factory.getValidParams("CreateProblemDefaultAction");
-    action_params.set<bool>("solve") = false;
+    action_params.set<bool>("_solve") = false;
 
     // Create the action
     std::shared_ptr<Action> action = std::static_pointer_cast<Action>(

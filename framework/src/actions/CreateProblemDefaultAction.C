@@ -14,6 +14,7 @@
 #include "EigenProblem.h"
 #include "MooseApp.h"
 #include "CreateExecutionerAction.h"
+#include "CreateProblemAction.h"
 
 registerMooseAction("MooseApp", CreateProblemDefaultAction, "create_problem_default");
 registerMooseAction("MooseApp", CreateProblemDefaultAction, "determine_system_type");
@@ -23,12 +24,7 @@ InputParameters
 validParams<CreateProblemDefaultAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<bool>("solve",
-                        true,
-                        "Whether or not to actually solve the Nonlinear system.  "
-                        "This is handy in the case that all you want to do is "
-                        "execute AuxKernels, Transfers, etc. without actually "
-                        "solving anything");
+  params.addPrivateParam<bool>("_solve");
   return params;
 }
 
@@ -73,9 +69,16 @@ CreateProblemDefaultAction::act()
         type = "FEProblem";
       auto params = _factory.getValidParams(type);
 
+      // apply common parameters of the object held by CreateProblemAction to honor user inputs in
+      // [Problem]
+      auto p = _awh.getActionByTask<CreateProblemAction>("create_problem");
+      if (p)
+        params.applyParameters(p->getObjectParams());
+
       params.set<MooseMesh *>("mesh") = _mesh.get();
       params.set<bool>("use_nonlinear") = _app.useNonlinear();
-      params.set<bool>("solve") = getParam<bool>("solve");
+      if (_pars.isParamSetByUser("_solve"))
+        params.set<bool>("solve") = getParam<bool>("_solve");
 
       _problem = _factory.create<FEProblemBase>(type, "MOOSE Problem", params);
     }

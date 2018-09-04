@@ -32,7 +32,7 @@ void
 CreateProblemAction::act()
 {
   // build the problem only if we have mesh
-  if (_mesh.get() != NULL)
+  if (_mesh.get() != NULL && _pars.isParamSetByUser("type"))
   {
     // when this action is built by parser with Problem input block, this action
     // must act i.e. create a problem. Thus if a problem has been created, it will error out.
@@ -41,12 +41,6 @@ CreateProblemAction::act()
 
     _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
     _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
-
-    // we can change the type only because FEProblem and EigenProblem have the same valid
-    // parameters.
-    // Ideally, type should be required but it will require large change on existing files.
-    if (_app.useEigenvalue() && !_pars.isParamSetByUser("type"))
-      _type = "EigenProblem";
 
     _problem =
         _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
