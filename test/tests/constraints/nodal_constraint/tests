@@ -1,10 +1,13 @@
 [Tests]
+  issues = ''
+  design = 'syntax/Constraints/index.md'
   [./test]
     type = 'Exodiff'
     input = 'nodal_constraint_test.i'
     exodiff = 'nodal_constraint_test_out.e'
     max_parallel = 1
     max_threads = 1 #6511
+    requirement = "MOOSE shall support the ability to constrain nodal values."
   [../]
 
   [./displaced_test]
@@ -13,5 +16,6 @@
     exodiff = 'nodal_constraint_displaced_test_out.e'
     max_parallel = 1
     max_threads = 1 #6511
+    requirement = "MOOSE shall support the ability to constrain nodal values using a displaced mesh."
   [../]
 []

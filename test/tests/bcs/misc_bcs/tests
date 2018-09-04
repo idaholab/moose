@@ -19,7 +19,7 @@
     type = 'Exodiff'
     input = 'vector_neumann_bc_test.i'
     exodiff = 'vector_neumann_bc_test_out.e'
-    requirement = "MOOSE shall support Neumann type boundary conditions where the specified value is defined as the value of a vector ($v$) in the direction of the boundary outward facing normal ($\hat{n}) (i.e., $v\cdot\hat{n}$)."
+    requirement = "MOOSE shall support Neumann type boundary conditions where the specified value is defined as the value of a vector, $v$, in the direction of the boundary outward facing normal, $\hat{n}$ (i.e., $v\cdot\hat{n}$)."
   [../]
 
   [./weak_gradient_bc_test]
