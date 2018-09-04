@@ -141,11 +141,14 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
 {
   auto obj_ids = _store->query(conds);
 
+  std::lock_guard<std::mutex> lock(_obj_cache_mutex);
   _obj_cache.push_back({});
   auto query_id = _obj_cache.size() - 1;
   auto & vec = _obj_cache.back();
-
-  _query_cache[std::move(conds)] = query_id;
+  {
+    std::lock_guard<std::mutex> lock(_query_cache_mutex);
+    _query_cache[std::move(conds)] = query_id;
+  }
 
   std::lock_guard<std::mutex> o_lock(_obj_mutex);
   for (auto & id : obj_ids)
@@ -185,6 +188,7 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
 const std::vector<MooseObject *> &
 TheWarehouse::query(int query_id)
 {
+  std::lock_guard<std::mutex> lock(_obj_cache_mutex);
   if (static_cast<size_t>(query_id) >= _obj_cache.size())
     throw std::runtime_error("unknown query id");
   return _obj_cache[query_id];
@@ -193,25 +197,24 @@ TheWarehouse::query(int query_id)
 size_t
 TheWarehouse::queryID(const std::vector<std::unique_ptr<Attribute>> & conds)
 {
-  std::lock_guard<std::mutex> lock(_cache_mutex);
-  auto it = _query_cache.find(conds);
-  if (it == _query_cache.end())
   {
-    std::vector<std::unique_ptr<Attribute>> conds_clone;
-    for (auto & cond : conds)
-      conds_clone.emplace_back(cond->clone());
-    return prepare(std::move(conds_clone));
+    std::lock_guard<std::mutex> lock(_query_cache_mutex);
+    auto it = _query_cache.find(conds);
+    if (it != _query_cache.end())
+      return it->second;
   }
-  return it->second;
+
+  std::vector<std::unique_ptr<Attribute>> conds_clone;
+  conds_clone.resize(conds.size());
+  for (size_t i = 0; i < conds.size(); i++)
+    conds_clone[i] = conds[i]->clone();
+  return prepare(std::move(conds_clone));
 }
 
 size_t
 TheWarehouse::count(const std::vector<std::unique_ptr<Attribute>> & conds)
 {
-  auto query_id = queryID(conds);
-
-  std::lock_guard<std::mutex> lock(_cache_mutex);
-  auto & objs = _obj_cache[query_id];
+  auto & objs = query(queryID(conds));
   size_t count = 0;
   for (auto obj : objs)
     if (obj->enabled())

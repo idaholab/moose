@@ -268,7 +268,6 @@ private:
   template <typename T>
   std::vector<T *> & queryInto(int query_id, std::vector<T *> & results, bool show_all = false)
   {
-    std::lock_guard<std::mutex> lock(_cache_mutex);
     auto & objs = query(query_id);
     results.clear();
     results.reserve(objs.size());
@@ -307,7 +306,8 @@ private:
   std::vector<std::unique_ptr<Attribute>> _attrib_list;
 
   std::mutex _obj_mutex;
-  std::mutex _cache_mutex;
+  std::mutex _query_cache_mutex;
+  std::mutex _obj_cache_mutex;
 };
 
 #endif // THEWAREHOUSE_H
