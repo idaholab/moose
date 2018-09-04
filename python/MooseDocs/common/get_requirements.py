@@ -9,7 +9,8 @@ LOG = logging.getLogger(__name__)
 
 class Requirement(object):
     """struct for storing Requirement information."""
-    def __init__(self, name=None, path=None, filename=None, text=None, design=None, issues=None):
+    def __init__(self, name=None, path=None, filename=None, text=None, design=None, issues=None,
+                 satisfied=True):
         self.name = name
         self.path = path
         self.filename = filename
@@ -17,6 +18,7 @@ class Requirement(object):
         self.design = design
         self.issues = issues
         self.label = None # added by get_requirements function
+        self.satisfied = satisfied
 
     def __str__(self):
         frmt = '{}:\n    Text: {}\n    Design: {}\n    Issues: {}'
@@ -70,11 +72,13 @@ def _add_requirements(out, location, filename):
                 name = os.path.join(os.path.dirname(filename[idx+7:]), child.name)
                 text = text.replace('MOOSE_TEST_NAME', name)
 
+            satisfied = False if (child['skip'] or child['deleted']) else True
             req = Requirement(name=child.name,
                               path=os.path.relpath(os.path.dirname(filename), location),
                               filename=filename,
                               text=unicode(text),
                               design=local_design.split(),
-                              issues=local_issues.split())
+                              issues=local_issues.split(),
+                              satisfied=satisfied)
             group = os.path.relpath(filename, location).split('/')[0]
             out[group].append(req)

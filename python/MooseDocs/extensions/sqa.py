@@ -79,7 +79,8 @@ class SQARequirementMatrix(tokens.OrderedList):
     PROPERTIES = [tokens.Property('heading', ptype=tokens.Token)]
 
 class SQARequirementMatrixItem(tokens.ListItem):
-    PROPERTIES = [tokens.Property('label', ptype=unicode, required=True)]
+    PROPERTIES = [tokens.Property('label', ptype=unicode, required=True),
+                  tokens.Property('satisfied', ptype=bool, default=True)]
 
 class SQARequirementCrossReference(tokens.Token):
     pass
@@ -114,7 +115,10 @@ class SQARequirementsCommand(command.CommandComponent):
         return parent
 
     def _addRequirement(self, parent, req):
-        item = SQARequirementMatrixItem(parent, label=unicode(req.label), id_=req.path)
+        item = SQARequirementMatrixItem(parent,
+                                        label=unicode(req.label),
+                                        satisfied=req.satisfied,
+                                        id_=req.path)
         self.translator.reader.parse(item, req.text)
 
         if self.settings['link']:
@@ -366,4 +370,9 @@ class RenderSQARequirementMatrixItem(core.RenderListItem):
         if id_:
             num.addClass('tooltipped')
             num['data-tooltip'] = id_
+
+        if not token.satisfied:
+            num = html.Tag(li, 'i', string=u'block',
+                           class_='material-icons moose-requirement-unsatisfied')
+
         return html.Tag(li, 'span', class_='moose-requirement-content')
