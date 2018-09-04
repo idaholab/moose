@@ -19,6 +19,13 @@ solution variables individually. When the $l^2$ norm of the residual for each so
 less than either the relative tolerance times the $l^2$ norm of the corresponding reference variable
 or the absolute tolerance, the solution is considered converged.
 
+For some cases, it is more appropriate to group several variables together to check convergence of their grouped solution rather than checking the convergence of the variables individually.  
+For example, in 2D and 3D mechanics solutions, there are multiple displacement variables, and because they have similar physical meaning, it often makes sense to treat them as one vector,
+which helps avoid issues that may be encountered if the model configuration is such that the reactions in one direction are much lower than in other directions.
+
+When variables are grouped together, the $l^2$ norm of the grouped residual for those variables is used to check convergence.
+The optional parameter `group_variables` is used to provide one or more lists of variable names which are to be grouped together.
+
 Use of this procedure requires that the user provide physically meaningful reference quantities. The
 vector of the reaction loads (in the case of mechanics) or integrated fluxes (in the case of
 diffusion problems) is typically suitable for this purpose, as it provides a measure of the loading
@@ -49,6 +56,13 @@ the option `save_in` is set in the Tensor Mechanics Action
 and the temperature `saved` variable is applied in the heat conduction kernel
 
 !listing modules/combined/test/tests/reference_residual/reference_residual.i start=Kernels end=Functions
+
+## Example Input syntax to group variables
+
+!listing modules/combined/test/tests/reference_residual/group_variables.i block=Problem
+
+Multiple groupings of variables can be provided in `group_variables` by separating them by  semicolon.
+Convergence for those variables that are not given in `group_variables` is checked individually. A given variable can only be included in one group.
 
 !syntax parameters /Problem/ReferenceResidualProblem
 
