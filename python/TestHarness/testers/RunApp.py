@@ -43,6 +43,7 @@ class RunApp(Tester):
         params.addParam('allow_unused',   True, "Whether or not unused parameters are allowed in the input file.  Can be globally overridden by setting 'allow_unused = False' in the testroot file.");
         params.addParam('allow_override', True, "Whether or not overriding a parameter/block in the input file generates an error.  Can be globally overridden by setting 'allow_override = False' in the testroot file.");
         params.addParam('allow_deprecated', True, "Whether or not deprecated warnings are allowed.  Setting to False will cause deprecation warnings to be treated as test failures.  We do NOT recommend you globally set this permanently to False!  Deprecations are a part of the normal development flow and _SHOULD_ be allowed!")
+        params.addParam('no_error_deprecated', False, "Don't pass --error-deprecated on the command line even when running the TestHarness with --error-deprecated")
 
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -142,7 +143,7 @@ class RunApp(Tester):
         if '--error-override' not in cli_args and not specs["allow_override"]:
             cli_args.append('--error-override')
 
-        if '--error-deprecated' not in cli_args and (not specs["allow_deprecated"] or options.error_deprecated):
+        if '--error-deprecated' not in cli_args and not specs["no_error_deprecated"] and (not specs["allow_deprecated"] or options.error_deprecated):
             cli_args.append('--error-deprecated')
 
         if self.getCheckInput():
