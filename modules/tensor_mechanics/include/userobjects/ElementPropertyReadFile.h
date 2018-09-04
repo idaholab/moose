@@ -11,6 +11,7 @@
 #define ELEMENTPROPERTYREADFILE_H
 
 #include "GeneralUserObject.h"
+#include "DelimitedFileReader.h"
 
 /**
  * Read properties from file - grain or element
@@ -46,6 +47,11 @@ public:
   virtual void readGrainData();
 
   /**
+   * This function Read block data from file
+   */
+  virtual void readBlockData();
+
+  /**
    * This function generates grain center point
    * Presently random generated
    */
@@ -68,6 +74,12 @@ public:
   Real getGrainData(const Elem *, unsigned int) const;
 
   /**
+   * This function assign properties to element read from file with grain  based properties
+   * Grain distribution in the RVE can be Periodic or non-periodic (default)
+   */
+  Real getBlockData(const Elem *, unsigned int) const;
+
+  /**
    * This function calculates minimum distance between 2 points
    * considering periodicity of the simulation volume
    */
@@ -76,18 +88,28 @@ public:
 protected:
   ///Name of file containing property values
   std::string _prop_file_name;
+  // Name of file containing grain center values
+  std::string _points_file_name;
+  // MOOSE Utility: Delimited file reader, for reading property values file
+  MooseUtils::DelimitedFileReader _prop_file_reader;
+  // MOOSE Utility: Delimited file reader, for reading grain center values file
+  MooseUtils::DelimitedFileReader _points_file_reader;
   ///Store property values read from file
   std::vector<Real> _data;
   ///Number of properties in a row
   unsigned int _nprop;
   ///Number of grains (for property read based on grains)
   unsigned int _ngrain;
+  ///Number of blocks (for property read based on grains)
+  unsigned int _nblock;
   ///Type of read - element or grain
   MooseEnum _read_type;
   ///Random seed - used for generating grain centers
   unsigned int _rand_seed;
   ///Type of grain structure - non-periodic default
   MooseEnum _rve_type;
+  ///Type of grain initialization
+  MooseEnum _method;
 
   MooseMesh & _mesh;
   std::vector<Point> _center;
