@@ -100,7 +100,7 @@ class SQARequirementsCommand(command.CommandComponent):
                                  "the 'link' setting must be true.")
         config['link-issues'] = (True, "Enable/disable the link of the test issues only, " \
                                  "the 'link' setting must be true.")
-        config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, " \
+        config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, "\
                                         "the 'link' setting must be true.")
 
         return config

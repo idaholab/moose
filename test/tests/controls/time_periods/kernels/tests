@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#5676'
+  design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
   [./test]
     type = Exodiff
     input = kernels.i
     exodiff = kernels_out.e
+    requirement = "The Control system shall be capable of activating or deactivating Kernel objects with time."
   [../]
 []

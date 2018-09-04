@@ -1,12 +1,16 @@
 [Tests]
+  issues = '#5676'
+  design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
   [./dirichlet]
     type = Exodiff
     input = bcs.i
     exodiff = bcs_out.e
+    requirement = "The Control system shall be capable of activating or deactivating NodalBC objects with time."
   [../]
   [./integrated]
     type = Exodiff
     input = bcs_integrated.i
     exodiff = bcs_integrated_out.e
+    requirement = "The Control system shall be capable of activating or deactivating IntegratedBC objects with time."
   [../]
 []

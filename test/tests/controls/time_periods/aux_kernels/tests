@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#5676'
+  design = 'syntax/Controls/index.md source/controls/TimePeriod.md'
   [./test]
     # Test the ability to control multiple AuxKernels
     type = Exodiff
     input = 'control.i'
     exodiff = 'control_out.e'
+    requirement = "The Control system shall be capable of activating or deactivating AuxKernel objects with time."
   [../]
 []

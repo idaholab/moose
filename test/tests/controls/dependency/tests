@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#9483 #5676'
+  design = 'syntax/Controls/index.md'
   [./test]
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    requirement = "The Control system shall support explicitly defined dependencies."
   [../]
 []
