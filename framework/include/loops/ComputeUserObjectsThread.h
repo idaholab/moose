@@ -15,6 +15,10 @@
 
 #include "libmesh/elem_range.h"
 
+class InternalSideUserObject;
+class ElementUserObject;
+class ShapeElementUserObject;
+
 // libMesh forward declarations
 namespace libMesh
 {
@@ -68,6 +72,9 @@ private:
   }
 
   const TheWarehouse::Query _query;
+  std::vector<InternalSideUserObject *> _internal_side_objs;
+  std::vector<ElementUserObject *> _element_objs;
+  std::vector<ShapeElementUserObject *> _shape_element_objs;
 };
 
 // determine when we need to run user objects based on whether any initial conditions or aux

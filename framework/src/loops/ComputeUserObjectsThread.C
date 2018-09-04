@@ -76,6 +76,10 @@ ComputeUserObjectsThread::subdomainChanged()
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
+
+  querySubdomain(Interfaces::InternalSideUserObject, _internal_side_objs);
+  querySubdomain(Interfaces::ElementUserObject, _element_objs);
+  querySubdomain(Interfaces::ShapeElementUserObject, _shape_element_objs);
 }
 
 void
@@ -89,15 +93,11 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  std::vector<UserObject *> userobjs;
-  querySubdomain(Interfaces::ElementUserObject, userobjs);
-  for (const auto & uo : userobjs)
+  for (const auto & uo : _element_objs)
     uo->execute();
 
   // UserObject Jacobians
-  std::vector<ShapeElementUserObject *> shapers;
-  querySubdomain(Interfaces::ShapeElementUserObject, shapers);
-  if (_fe_problem.currentlyComputingJacobian() && shapers.size() > 0)
+  if (_fe_problem.currentlyComputingJacobian() && _shape_element_objs.size() > 0)
   {
     // Prepare shape functions for ShapeElementUserObjects
     std::vector<MooseVariableFEBase *> jacobian_moose_vars =
@@ -108,7 +108,7 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
       std::vector<dof_id_type> & dof_indices = jvar->dofIndices();
 
       _fe_problem.prepareShapes(jvar_id, _tid);
-      for (const auto uo : shapers)
+      for (const auto uo : _shape_element_objs)
         uo->executeJacobianWrapper(jvar_id, dof_indices);
     }
   }
@@ -163,9 +163,7 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   // Get the global id of the element and the neighbor
   const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-  std::vector<InternalSideUserObject *> userobjs;
-  querySubdomain(Interfaces::InternalSideUserObject, userobjs);
-  if (userobjs.size() == 0)
+  if (_internal_side_objs.size() == 0)
     return;
   if (!((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
         (neighbor->level() < elem->level())))
@@ -182,7 +180,7 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
   _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-  for (const auto & uo : userobjs)
+  for (const auto & uo : _internal_side_objs)
     if (!uo->blockRestricted() || uo->hasBlocks(neighbor->subdomain_id()))
       uo->execute();
 }
