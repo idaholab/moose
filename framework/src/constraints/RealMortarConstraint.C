@@ -26,8 +26,8 @@ validParams<RealMortarConstraint>()
   params.addRequiredParam<unsigned>("master_id", "The id of the master boundary sideset.");
   params.addRequiredParam<unsigned>("slave_id", "The id of the slave boundary sideset.");
   params.registerRelationshipManagers("AugmentSparsityOnInterface");
-  params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
-  params.addParam<VariableName>("slave_variable", "Variable on master surface");
+  params.addRequiredParam<VariableName>("primal_variable", "The primal variable");
+  params.addRequiredParam<VariableName>("lm_variable", "The lagrange multiplier variable");
   return params;
 }
 
@@ -48,20 +48,13 @@ RealMortarConstraint::RealMortarConstraint(const InputParameters & parameters)
     _coord(_assembly.coordTransformation()),
     _current_elem(_assembly.elem()),
 
-    _master_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
-    _slave_var(
-        isParamValid("slave_variable")
-            ? _subproblem.getStandardVariable(_tid, getParam<VariableName>("slave_variable"))
-            : _subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
-    _lambda(_var.sln()),
+    _primal_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("primal_variable"))),
+    _lambda_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("lm_variable"))),
 
-    _test_master(_master_var.phi()),
-    _grad_test_master(_master_var.gradPhi()),
-    _phi_master(_master_var.phi()),
+    _test_primal(_primal_var.phi()),
+    _grad_test_primal(_primal_var.gradPhi()),
+    _phi_primal(_primal_var.phi()),
 
-    _test_slave(_slave_var.phi()),
-    _grad_test_slave(_slave_var.gradPhi()),
-    _phi_slave(_slave_var.phi()),
     _slave_id(getParam<unsigned>("slave_id")),
     _master_id(getParam<unsigned>("master_id")),
     _amg(_fe_problem.getMortarInterface(std::make_pair(_slave_id, _master_id)))
@@ -81,8 +74,7 @@ void
 RealMortarConstraint::computeJacobian()
 {
   _phi = _assembly.getFE(_var.feType(), _dim - 1)->get_phi(); // yes we need to do a copy here
-  std::vector<std::vector<Real>> phi_master;
-  std::vector<std::vector<Real>> phi_slave;
+  std::vector<std::vector<Real>> phi_primal;
 
   DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
 

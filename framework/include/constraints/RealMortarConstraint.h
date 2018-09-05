@@ -62,11 +62,6 @@ protected:
   FEProblemBase & _fe_problem;
   unsigned int _dim;
 
-  /// Boundary ID for the slave surface
-  BoundaryID _slave;
-  /// Boundary ID for the master surface
-  BoundaryID _master;
-
   const MooseArray<Point> & _q_point;
   QBase *& _qrule;
   const MooseArray<Real> & _JxW;
@@ -82,16 +77,11 @@ protected:
   std::vector<std::vector<Real>> _test;
   std::vector<std::vector<Real>> _phi;
 
-  MooseVariable & _master_var;
-  MooseVariable & _slave_var;
+  MooseVariable & _primal_var;
+  MooseVariable & _lambda_var;
 
   /**
-   * The values of Lagrange multipliers in quadrature points
-   */
-  const VariableValue & _lambda;
-
-  /**
-   * Values of the constrained variable on the master side
+   * Values of the primal variable on the master side
    */
   std::vector<Real> _u_master;
   std::vector<RealGradient> _grad_u_master;
@@ -107,16 +97,16 @@ protected:
   /**
    * Values of test functions on the master side
    */
-  const VariableTestValue & _test_master;
-  const VariableTestGradient & _grad_test_master;
+  const VariableTestValue & _test_primal;
+  const VariableTestGradient & _grad_test_primal;
 
   /**
    * Values of shape function on the master side
    */
-  const VariablePhiValue & _phi_master;
+  const VariablePhiValue & _phi_primal;
 
   /**
-   * Values of the constrained variable on the slave side
+   * Values of the primal variable on the slave side
    */
   std::vector<Real> _u_slave;
   std::vector<RealGradient> _grad_u_slave;
@@ -126,21 +116,13 @@ protected:
    */
   std::vector<Point> _phys_points_slave;
   /**
-   * Element on the master side
+   * Element on the slave side
    */
   const Elem * _elem_slave;
-  /**
-   * Values of test functions on the slave side
-   */
-  const VariableTestValue & _test_slave;
-  const VariableTestGradient & _grad_test_slave;
 
-  /**
-   * Values of shape function on the slave side
-   */
-  const VariablePhiValue & _phi_slave;
-
+  /// Boundary ID for the slave surface
   unsigned _slave_id;
+  /// Boundary ID for the master surface
   unsigned _master_id;
 
   AutomaticMortarGeneration & _amg;
