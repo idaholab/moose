@@ -37,6 +37,8 @@ def check_requirement(filename):
     if messages:
         print 'ERROR in {}'.format(filename)
         print '\n'.join(messages) + '\n'
+        return 1
+    return 0
 
 if __name__ == '__main__':
 
@@ -54,7 +56,6 @@ if __name__ == '__main__':
     cmd = ['git', 'diff', '{}/{}'.format(opt.remote, opt.branch), '--name-only']
     for filename in subprocess.check_output(cmd).split('\n'):
         if os.path.basename(filename) in opt.specs:
-            check_requirement(os.path.join(root, filename))
-            count += 1
+            count += check_requirement(os.path.join(root, filename))
 
     sys.exit(count)
