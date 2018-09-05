@@ -1,15 +1,12 @@
 [Tests]
+  issues = ''
+  design = 'source/dampers/ConstantDamper.md'
   [./testdamper]
     type = 'Exodiff'
     input = 'constant_damper_test.i'
     exodiff = 'out.e'
-    scale_refine = 5
-  [../]
-
-  [./testverifydamping]
-    type = 'RunApp'
-    input = 'constant_damper_test.i'
     expect_out = '8 Nonlinear'
-    prereq = 'testdamper'
+    scale_refine = 5
+    requirement = "MOOSE shall include the ability to reduce the change in nonlinear residual based on a constant value."
   [../]
 []
