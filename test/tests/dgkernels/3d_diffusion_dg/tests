@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#869'
+  design = 'source/bcs/DGFunctionDiffusionDirichletBC.md source/dgkernels/DGDiffusion.md'
   [./test]
     type = 'Exodiff'
     input = '3d_diffusion_dg_test.i'
@@ -6,5 +8,6 @@
     group = 'adaptive'
     max_parallel = 1
     valgrind = 'HEAVY'
+    requirement = "MOOSE shall support solving 3D diffusion using the discontinuous Galerkin method."
   [../]
 []

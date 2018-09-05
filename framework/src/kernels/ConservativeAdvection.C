@@ -23,7 +23,7 @@ validParams<ConservativeAdvection>()
   params.addParam<MooseEnum>("upwinding_type",
                              upwinding_type,
                              "Type of upwinding used.  None: Typically results in overshoots and "
-                             "undershoots, but numerical diffusion is minimised.  Full: Overshoots "
+                             "undershoots, but numerical diffusion is minimized.  Full: Overshoots "
                              "and undershoots are avoided, but numerical diffusion is large");
   return params;
 }
