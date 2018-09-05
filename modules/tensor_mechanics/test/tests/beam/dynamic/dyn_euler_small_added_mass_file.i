@@ -357,5 +357,5 @@
   file_base = dyn_euler_small_added_mass_out
   exodus = true
   csv = true
-  print_perf_log = true
+  perf_graph = true
 []
