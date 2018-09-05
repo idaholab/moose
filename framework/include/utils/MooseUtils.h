@@ -40,6 +40,24 @@ class MultiMooseEnum;
 namespace MooseUtils
 {
 
+/**
+ * Returns the the given file path in canonical, absolute path form.
+ */
+std::string absPath(const std::string & path);
+
+/**
+ * locates and returns the path to the governing 'moosestyle.i' configuration file for the
+ * specified directory (i.e. the style config that would be used to format a file in curr_dir). If
+ * none is found, an empty string is returned.
+ */
+std::string discoverHitFormatFile(const std::string & curr_dir = ".");
+
+/**
+ * formats the content in to_format using the governing 'moosestyle.i' file for the current
+ * working directory. the formatted results are written to dst.
+ */
+void formatHit(const std::string & fname, std::istream & to_format, std::ostream & dst);
+
 /// Computes and returns the Levenshtein distance between strings s1 and s2.
 int levenshteinDist(const std::string & s1, const std::string & s2);
 

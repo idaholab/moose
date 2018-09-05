@@ -102,6 +102,8 @@ validParams<MooseApp>()
   params.addCommandLineParam<std::string>(
       "dump", "--dump [search_string]", "Shows a dump of available input file syntax.");
   params.addCommandLineParam<bool>(
+      "format", "--format", "automatically format the given input file");
+  params.addCommandLineParam<bool>(
       "registry", "--registry", "Lists all known objects and actions.");
   params.addCommandLineParam<bool>(
       "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format.");
@@ -687,6 +689,19 @@ MooseApp::setupOptions()
       Moose::out << it.first << "\n";
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
+  }
+  else if (isParamValid("format"))
+  {
+    if (!isParamValid("input_file"))
+      mooseError("format flag requires specifying an input file with '-i'");
+    std::string fname = getParam<std::string>("input_file");
+    std::ifstream f(fname);
+    std::stringstream dst;
+    MooseUtils::formatHit(fname, f, dst);
+    std::ofstream output(fname);
+    output << dst.str();
+    _ready_to_exit = true;
+    return;
   }
   else if (_input_filename != "" ||
            isParamValid("input_file")) // They already specified an input filename

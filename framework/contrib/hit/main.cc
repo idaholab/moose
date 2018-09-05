@@ -227,8 +227,7 @@ findParam(int argc, char ** argv)
 //     []
 //
 // where all fields are optional and the sorting section is also optional.  If the sorting section
-// is present, you can have as many patterns as you want, but each pattern section must have
-// 'section' and 'order' fields.
+// is present, you can have as many patterns as you want.
 int
 format(int argc, char ** argv)
 {

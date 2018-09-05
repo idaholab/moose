@@ -22,9 +22,10 @@
 ///     section_entry => parameter | section
 ///     parameter => PATH EQUALS param_value
 ///     param_value => string | NUMBER | BOOL
-///     string => UNQUOTED_STRING_BODY
-///             | SINGLE_QUOTE SINGLE_QUOTE_BODY SINGLE_QUOTE
-///             | DOUBLE_QUOTE DOUBLE_QUOTE_BODY DOUBLE_QUOTE
+///     string => UNQUOTED_STRING_BODY | string_sequence
+///     string_sequence => quoted_body | string_sequence quoted_body
+///     quoted_body => SINGLE_QUOTE SINGLE_QUOTE_BODY SINGLE_QUOTE
+///                      | DOUBLE_QUOTE DOUBLE_QUOTE_BODY DOUBLE_QUOTE
 ///
 /// Where the terminals are defined as:
 ///
@@ -32,7 +33,7 @@
 ///     RIGHT_BRACKET = "]"
 ///     EQUALS = "="
 ///     NUMBER = [+-]?[0-9]*(\.[0-9]*)?([eE][+-][0-9]+)?
-///     PATH = [a-zA-Z0-9_./:<>+\-]+
+///     PATH = [a-zA-Z0-9_./:<>+\-\*]+
 ///     CLOSING_PATH = "../" | ""
 ///     BOOL = TRUE|true|YES|yes|ON|on|FALSE|false|NO|no|OFF|off
 ///     UNQUOTED_STRING_BODY = [^ \t\n\[]+
@@ -456,7 +457,7 @@ public:
   Formatter();
 
   /// Constructs a formatter that formats hit text according to the configuration parameters
-  /// specified in hit_config - which is the text of a hit document of the following form:
+  /// specified in hit_config - which is the text content of a hit document of the following form:
   ///
   ///     [format]
   ///       # these parameters set the correspondingly named Formatter member variables.  See them
@@ -470,23 +471,31 @@ public:
   ///       # the hit file being formatted.  Each section name is a regex (limited to valid hit
   ///       # identifier characters). The fields and subsections within each section specify an
   ///       # order; any field values are ignored. See the docs for that function for more details.
+  ///       # The sorting rules are example-based. Sorting is performed depth-first by rules in
+  ///       # lexical order
   ///       [sorting]
+  ///         [.*]
+  ///           [.*]
+  ///             # 'first' fields in doubly-nested section go first. This rule must go first in
+  ///             # order to not override any later-specified ordering of higher-level sections
+  ///             # that would occur because the higher-level section matchers for this rule
+  ///             # would match every section.
+  ///             first = FooBar
+  ///           []
+  ///         []
   ///         [foo]        # section 'foo' goes first (before other sections)
   ///           bar = bla  # field 'bar' (in the foo section) goes first
   ///           ** = bla   # double glob is placeholder for unordered fields/sections
   ///           baz = bla  # field 'baz' goes last
   ///         []
-  ///         [.*]
-  ///           [.*]
-  ///             first = bla # fields named 'first' at double nested level go first
-  ///           []
-  ///         []
   ///       []
   ///     []
   ///
-  /// All fields are optional and the sorting section is also optional.  If the sorting section
-  /// is present, you can have as many patterns as you like, but each pattern section must have
-  /// one set of "section" and "order" fields.
+  /// All fields are optional and the sorting section is also optional.  If the sorting section is
+  /// present, you can have as many patterns as you like.  Sorting priority is deterimined by
+  /// patterns' lexical order. If a section/field sorting identifier or regular expression matches
+  /// a part of a HIT input file, that rule will overwrite/override any sorting done by a lexically
+  /// prior rule match.
   Formatter(const std::string & fname, const std::string & hit_config);
 
   /// Formats the given input hit text (using fname to report better syntax errors) and returns

@@ -20,12 +20,14 @@
 // External includes
 #include "pcrecpp.h"
 #include "tinydir.h"
+#include "hit.h"
 
 // C++ includes
 #include <iostream>
 #include <fstream>
 #include <istream>
 #include <iterator>
+#include <cstdlib>
 
 // System includes
 #include <sys/stat.h>
@@ -38,6 +40,68 @@ std::string getLatestCheckpointFileHelper(const std::list<std::string> & checkpo
 
 namespace MooseUtils
 {
+
+std::string
+absPath(const std::string & path)
+{
+  char abspath[PATH_MAX + 1];
+  realpath(path.c_str(), abspath);
+  return std::string(abspath);
+}
+
+std::string
+discoverHitFormatFileInner(const std::string & curr_dir, int level)
+{
+  const int maxlevel = 10;
+  const std::string stylefile("moosestyle.i");
+
+  auto fname = curr_dir + "/" + stylefile;
+  if (pathExists(fname))
+    return fname;
+
+  auto next_dir = curr_dir + "/..";
+  if (absPath(next_dir) == absPath(curr_dir) || level >= maxlevel)
+    return "";
+  return discoverHitFormatFileInner(next_dir, level + 1);
+}
+
+std::string
+discoverHitFormatFile(const std::string & curr_dir)
+{
+  return discoverHitFormatFileInner(curr_dir, 0);
+}
+
+void
+formatHit(const std::string & fname, std::istream & to_format, std::ostream & dst)
+{
+  std::string stylefile = discoverHitFormatFile();
+  std::ifstream s(stylefile);
+  std::string style_input((std::istreambuf_iterator<char>(s)), std::istreambuf_iterator<char>());
+
+  hit::Formatter fmt;
+  if (!stylefile.empty())
+  {
+    try
+    {
+      fmt = hit::Formatter(stylefile, style_input);
+    }
+    catch (std::exception & err)
+    {
+      mooseError("invalid format style ", err.what());
+    }
+  }
+
+  try
+  {
+    std::string input((std::istreambuf_iterator<char>(to_format)),
+                      std::istreambuf_iterator<char>());
+    dst << fmt.format(fname, input);
+  }
+  catch (std::exception & err)
+  {
+    mooseError(err.what());
+  }
+}
 
 // this implementation is copied from
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
