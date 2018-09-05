@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#2880'
+  design = 'syntax/Functions/index.md'
   [./test]
     type = 'Exodiff'
     input = 'default_function.i'
     exodiff = 'default_function_out.e'
+    requirement = "The Function system shall include the ability to set default values for input parameters expecting a function name."
   [../]
 []

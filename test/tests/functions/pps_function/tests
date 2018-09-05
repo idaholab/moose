@@ -1,7 +1,10 @@
 [Tests]
+  issues = ''
+  design = 'syntax/Postprocessors/index.md'
   [./test_pp_function_test]
     type = 'Exodiff'
     input = 'pp_function.i'
     exodiff = 'out.e'
+    requirement = "The Function object shall support the ability to couple Postprocessor values."
   [../]
 []

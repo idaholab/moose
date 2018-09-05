@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#2272'
+  design = 'source/functions/PiecewiseConstant.md'
   [./test]
     type = 'Exodiff'
     input = 'piecewise_constant.i'
     exodiff = 'piecewise_constant_out.e'
+    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs and returns an explicit value from the supplied data when queried (i.e., linear interpolation is not performed)."
   [../]
 []

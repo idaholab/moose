@@ -1,7 +1,10 @@
 [Tests]
+  issues = ''
+  design = 'syntax/Functions/index.md'
   [./test]
     type = 'Exodiff'
     input = 'function_setup_test.i'
     exodiff = 'out.e'
+    requirement = "The Function object shall include a callback executed during each timestep."
   [../]
 []

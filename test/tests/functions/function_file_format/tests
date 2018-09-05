@@ -1,7 +1,10 @@
 [Tests]
+  issues = ''
+  design = 'syntax/Functions/index.md source/functions/PiecewiseLinear.md'
   [./test]
     type = 'Exodiff'
     input = 'function_file_format_test.i'
     exodiff = 'out.e'
+    requirement = "The Function system shall include the ability to read comma or space separated data and perform linear interpolation using the supplied data."
   [../]
 []

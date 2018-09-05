@@ -1,68 +1,82 @@
 [Tests]
+  issues = ''
+  design = 'source/functions/SolutionFunction.md'
   [./test]
     # The XDA/XDR files for this test are created with test/tests/auxkernels/solution_aux/build.i
     type = 'Exodiff'
     input = 'solution_function_test.i'
     exodiff = 'out.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from XDA mesh and solution files."
   [../]
 
   [./exodus_interp_test]
     type = 'Exodiff'
     input = 'solution_function_exodus_interp_test.i'
     exodiff = 'solution_function_exodus_interp_test_out.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file with temporal interpolation."
   [../]
 
   [./exodus_test]
     type = 'Exodiff'
     input = 'solution_function_exodus_test.i'
     exodiff = 'solution_function_exodus_test_out.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file."
   [../]
 
   [./rot1]
     type = 'Exodiff'
     input = 'solution_function_rot1.i'
     exodiff = 'solution_function_rot1.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 45 degrees about the z-axis."
   [../]
   [./rot2]
     type = 'Exodiff'
     input = 'solution_function_rot2.i'
     exodiff = 'solution_function_rot2.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 45 degrees about the y-axis."
   [../]
   [./rot3]
     type = 'Exodiff'
     input = 'solution_function_rot3.i'
     exodiff = 'solution_function_rot3.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 90 degrees about the z-axis and 45 degress about the x-axis."
   [../]
   [./rot4]
     type = 'Exodiff'
     input = 'solution_function_rot4.i'
     exodiff = 'solution_function_rot4.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 45 degrees about the z-axis for a 2D domain."
   [../]
   [./scale_transl]
     type = 'Exodiff'
     input = 'solution_function_scale_transl.i'
     exodiff = 'solution_function_scale_transl.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and scaled by a factor in the x and y directions as well as translated in the x-direction."
   [../]
   [./scale_mult]
     type = 'Exodiff'
     input = 'solution_function_scale_mult.i'
     exodiff = 'solution_function_scale_mult.e'
+    requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and scaled by a factor of two in the x and y directions."
   [../]
   [./nonexistent_var_err]
     type = 'RunException'
     input = 'solution_function_rot1.i'
     cli_args = 'Functions/solution_fcn/from_variable=nonexistent_var'
     expect_err = "Value requested for nonexistent variable 'nonexistent_var' in the 'solution_uo' SolutionUserObject"
+    requirement = "The SolutionFunction object shall error if a variable that does not exist is requested."
   [../]
   [./solution_function_grad_p1]
     type = 'Exodiff'
     input = 'solution_function_grad_p1.i'
     exodiff = 'solution_function_grad_p1.e'
+    requirement = "The 'MOOSE_TEST_NAME' test shall create an output for the 'solution_function_grad_p2' test."
   [../]
   [./solution_function_grad_p2]
     type = 'Exodiff'
     input = 'solution_function_grad_p2.i'
     exodiff = 'solution_function_grad_p2.e'
     prereq = solution_function_grad_p1
+    requirement = "The SolutionFunction object shall be capable of evaluating the gradient of a solution read from an Exodus file."
   [../]
 []

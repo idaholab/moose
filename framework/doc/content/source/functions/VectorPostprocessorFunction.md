@@ -1,4 +1,3 @@
-
 # VectorPostprocessorFunction
 
 !syntax description /Functions/VectorPostprocessorFunction

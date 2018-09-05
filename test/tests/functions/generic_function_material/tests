@@ -1,8 +1,11 @@
 [Tests]
+  issues = ''
+  design = 'source/materials/GenericFunctionMaterial.md'
   [./test]
     type = 'Exodiff'
     input = 'generic_function_material_test.i'
     exodiff = 'generic_function_material_test_out.e'
     scale_refine = 5
+    requirement = "The Material system shall support defining properties within the input file that are associated with functions."
   [../]
 []
