@@ -16,7 +16,7 @@
     velocity = '1 0 0'
   [../]
   [./diffusion]
-    type = MatDiffusion
+    type = MatDiffusionTest
     variable = u
     prop_name = 'k'
   [../]

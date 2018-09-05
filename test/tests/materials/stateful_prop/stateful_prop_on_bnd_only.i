@@ -18,7 +18,7 @@
 
 [Kernels]
   [./heat]
-    type = MatDiffusion
+    type = MatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
   [../]

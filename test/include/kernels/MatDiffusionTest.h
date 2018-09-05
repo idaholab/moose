@@ -7,22 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MATDIFFUSION_H
-#define MATDIFFUSION_H
+#ifndef MATDIFFUSIONTEST_H
+#define MATDIFFUSIONTEST_H
 
 #include "Kernel.h"
 #include "MaterialProperty.h"
 
 // Forward Declaration
-class MatDiffusion;
+class MatDiffusionTest;
 
 template <>
-InputParameters validParams<MatDiffusion>();
+InputParameters validParams<MatDiffusionTest>();
 
-class MatDiffusion : public Kernel
+class MatDiffusionTest : public Kernel
 {
 public:
-  MatDiffusion(const InputParameters & parameters);
+  MatDiffusionTest(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -33,4 +33,4 @@ protected:
   const MaterialProperty<Real> * _diff;
 };
 
-#endif // MATDIFFUSION_H
+#endif // MATDIFFUSIONTEST_H

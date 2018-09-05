@@ -3,7 +3,7 @@
 # user-defined Material (MTMaterial) is providing a
 # Real property named "matp" that varies spatially
 # throughout the domain. This property is used as a
-# coefficient by MatDiffusion. It is also output
+# coefficient by MatDiffusionTest. It is also output
 # by MaterialRealAux for visualization purposes.
 #
 # @Requirement F4.10
@@ -37,7 +37,7 @@
 
 [Kernels]
   [./diff]
-    type = MatDiffusion
+    type = MatDiffusionTest
     variable = u
     prop_name = matp
   [../]
