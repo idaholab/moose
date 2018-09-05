@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#1491'
+  design = 'syntax/Executioner/index.md'
   [./test]
     type = 'Exodiff'
     input = 'adapt_and_modify.i'
@@ -6,5 +8,6 @@
     rel_err = 5.e-5
     recover = false
     abs_zero = 1.e-8
+    requirement = "The Executioner system shall support the ability to create custom objects with custom execution callbacks."
   [../]
 []

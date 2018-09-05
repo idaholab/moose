@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#7866 #7790'
+  design = 'syntax/Executioner/index.md'
   [./test_singular]
     type = 'CSVDiff'
     input = 'singular.i'
