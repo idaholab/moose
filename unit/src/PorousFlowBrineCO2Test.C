@@ -865,8 +865,9 @@ TEST_F(PorousFlowBrineCO2Test, totalMassFraction)
   const Real T = 350.0;
   const Real Xnacl = 0.1;
   const Real s = 0.2;
+  const unsigned qp = 0;
 
-  Real Z = _fp->totalMassFraction(p, T, Xnacl, s);
+  Real Z = _fp->totalMassFraction(p, T, Xnacl, s, qp);
 
   // Test that the saturation calculated in this fluid state using Z is equal to s
   FluidStatePhaseEnum phase_state;
