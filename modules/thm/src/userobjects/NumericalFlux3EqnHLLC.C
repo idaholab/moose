@@ -39,15 +39,15 @@ NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
 {
   // extract the conserved variables and area
 
-  const Real rhoA1 = U1[VAR_RHOA];
-  const Real rhouA1 = U1[VAR_RHOUA];
-  const Real rhoEA1 = U1[VAR_RHOEA];
-  const Real A1 = U1[VAR_A];
+  const Real rhoA1 = U1[CONS_VAR_RHOA];
+  const Real rhouA1 = U1[CONS_VAR_RHOUA];
+  const Real rhoEA1 = U1[CONS_VAR_RHOEA];
+  const Real A1 = U1[CONS_VAR_AREA];
 
-  const Real rhoA2 = U2[VAR_RHOA];
-  const Real rhouA2 = U2[VAR_RHOUA];
-  const Real rhoEA2 = U2[VAR_RHOEA];
-  const Real A2 = U2[VAR_A];
+  const Real rhoA2 = U2[CONS_VAR_RHOA];
+  const Real rhouA2 = U2[CONS_VAR_RHOUA];
+  const Real rhoEA2 = U2[CONS_VAR_RHOEA];
+  const Real A2 = U2[CONS_VAR_AREA];
 
   // areas are assumed be equal, so name the area to be either side
   mooseAssert(std::abs(A2 - A1) < 1e-15, "Left and right areas must be equal.");
@@ -186,15 +186,15 @@ NumericalFlux3EqnHLLC::calcJacobian(const std::vector<Real> & U1,
 {
   // extract the conserved variables and area
 
-  const Real rhoA1 = U1[VAR_RHOA];
-  const Real rhouA1 = U1[VAR_RHOUA];
-  const Real rhoEA1 = U1[VAR_RHOEA];
-  const Real A1 = U1[VAR_A];
+  const Real rhoA1 = U1[CONS_VAR_RHOA];
+  const Real rhouA1 = U1[CONS_VAR_RHOUA];
+  const Real rhoEA1 = U1[CONS_VAR_RHOEA];
+  const Real A1 = U1[CONS_VAR_AREA];
 
-  const Real rhoA2 = U2[VAR_RHOA];
-  const Real rhouA2 = U2[VAR_RHOUA];
-  const Real rhoEA2 = U2[VAR_RHOEA];
-  const Real A2 = U2[VAR_A];
+  const Real rhoA2 = U2[CONS_VAR_RHOA];
+  const Real rhouA2 = U2[CONS_VAR_RHOUA];
+  const Real rhoEA2 = U2[CONS_VAR_RHOEA];
+  const Real A2 = U2[CONS_VAR_AREA];
 
   const Real rho1 = rhoA1 / A1;
   const Real rhou1 = rhouA1 / A1;

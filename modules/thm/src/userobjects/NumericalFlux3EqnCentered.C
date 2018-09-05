@@ -43,10 +43,10 @@ NumericalFlux3EqnCentered::calcFlux(const std::vector<Real> & U1,
 std::vector<Real>
 NumericalFlux3EqnCentered::computeFlux(const std::vector<Real> & U) const
 {
-  const Real rhoA = U[VAR_RHOA];
-  const Real rhouA = U[VAR_RHOUA];
-  const Real rhoEA = U[VAR_RHOEA];
-  const Real A = U[VAR_A];
+  const Real rhoA = U[CONS_VAR_RHOA];
+  const Real rhouA = U[CONS_VAR_RHOUA];
+  const Real rhoEA = U[CONS_VAR_RHOEA];
+  const Real A = U[CONS_VAR_AREA];
 
   const Real rho = rhoA / A;
   const Real vel = rhouA / rhoA;
@@ -81,10 +81,10 @@ NumericalFlux3EqnCentered::calcJacobian(const std::vector<Real> & U1,
 DenseMatrix<Real>
 NumericalFlux3EqnCentered::computeJacobian(const std::vector<Real> & U) const
 {
-  const Real rhoA = U[VAR_RHOA];
-  const Real rhouA = U[VAR_RHOUA];
-  const Real rhoEA = U[VAR_RHOEA];
-  const Real A = U[VAR_A];
+  const Real rhoA = U[CONS_VAR_RHOA];
+  const Real rhouA = U[CONS_VAR_RHOUA];
+  const Real rhoEA = U[CONS_VAR_RHOEA];
+  const Real A = U[CONS_VAR_AREA];
 
   const Real v = A / rhoA;
   const Real dv_drhoA = RELAP7::dv_darhoA(A, rhoA);
