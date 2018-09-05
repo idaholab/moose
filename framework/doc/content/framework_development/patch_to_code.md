@@ -64,3 +64,11 @@ At the point where a MOOSE developer believes your code is fit for inclusion in 
 ## 6. Inactive Pull Request Policy
 
 Pull Requests that remain inactive with unaddressed comments or failed tests for a period of +30 days+ may be closed by any member of the MOOSE team at their discretion. These Pull Requests may be reopened by the original developer or an interested party at any time if activity resumes. These unmerged PRs can be found by using the filter ```is:unmerged.```
+
+
+## 7. Software Quality Policy
+
+MOOSE follows stringent guidelines for software quality. The testing system is designed
+in a manner to shield day-to-day development from any associated burdens. However, we do require
+that all new code is documented in a specific manner to meet the guidelines, please refer to
+[generate.md] for additional information.
