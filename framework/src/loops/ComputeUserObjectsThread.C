@@ -229,7 +229,7 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   for (const auto & uo : objects)
     uo->execute();
 
-  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+  // _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 }
 
 void

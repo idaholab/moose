@@ -5526,9 +5526,11 @@ FEProblemBase::needBoundaryMaterialOnInterface(BoundaryID bnd_id, THREAD_ID tid)
   {
     _bnd_mat_interface_cache[tid][bnd_id] = false;
 
-    if (_nl->needBoundaryMaterialOnInterface(bnd_id, tid))
-      _bnd_mat_interface_cache[tid][bnd_id] = true;
-    else if (_interface_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
+    // if (_nl->needBoundaryMaterialOnInterface(bnd_id, tid))
+    //   _bnd_mat_interface_cache[tid][bnd_id] = true;
+    // else if (_interface_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
+    //   _bnd_mat_interface_cache[tid][bnd_id] = true;
+    if (_interface_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
       _bnd_mat_interface_cache[tid][bnd_id] = true;
   }
 
