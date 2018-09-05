@@ -60,38 +60,41 @@ PorousFlowCapillaryPressureBW::PorousFlowCapillaryPressureBW(const InputParamete
   _log_ext = false;
 }
 
-Real PorousFlowCapillaryPressureBW::capillaryPressureCurve(Real /*saturation*/) const
+Real
+PorousFlowCapillaryPressureBW::capillaryPressureCurve(Real /*saturation*/, unsigned /*qp*/) const
 {
   mooseError("PorousFlowCapillaryPressureBW::capillaryPressure not implemented");
   return 0.0;
 }
 
-Real PorousFlowCapillaryPressureBW::dCapillaryPressureCurve(Real /*saturation*/) const
+Real
+PorousFlowCapillaryPressureBW::dCapillaryPressureCurve(Real /*saturation*/, unsigned /*qp*/) const
 {
   mooseError("PorousFlowCapillaryPressureBW::dCapillaryPressure not implemented");
   return 0.0;
 }
 
-Real PorousFlowCapillaryPressureBW::d2CapillaryPressureCurve(Real /*saturation*/) const
+Real
+PorousFlowCapillaryPressureBW::d2CapillaryPressureCurve(Real /*saturation*/, unsigned /*qp*/) const
 {
   mooseError("PorousFlowCapillaryPressureBW::d2CapillaryPressure not implemented");
   return 0.0;
 }
 
 Real
-PorousFlowCapillaryPressureBW::effectiveSaturation(Real pc) const
+PorousFlowCapillaryPressureBW::effectiveSaturation(Real pc, unsigned /*qp*/) const
 {
   return PorousFlowBroadbridgeWhite::effectiveSaturation(pc, _c, _sn, _ss, _las);
 }
 
 Real
-PorousFlowCapillaryPressureBW::dEffectiveSaturation(Real pc) const
+PorousFlowCapillaryPressureBW::dEffectiveSaturation(Real pc, unsigned /*qp*/) const
 {
   return PorousFlowBroadbridgeWhite::dEffectiveSaturation(pc, _c, _sn, _ss, _las);
 }
 
 Real
-PorousFlowCapillaryPressureBW::d2EffectiveSaturation(Real pc) const
+PorousFlowCapillaryPressureBW::d2EffectiveSaturation(Real pc, unsigned /*qp*/) const
 {
   return PorousFlowBroadbridgeWhite::d2EffectiveSaturation(pc, _c, _sn, _ss, _las);
 }

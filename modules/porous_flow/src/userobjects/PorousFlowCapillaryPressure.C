@@ -26,7 +26,10 @@ validParams<PorousFlowCapillaryPressure>()
   params.addParam<bool>("log_extension",
                         true,
                         "Use a logarithmic extension for low saturation to avoid capillary "
-                        "pressure going to infinity. Default is true");
+                        "pressure going to infinity. Default is true.  Set to false if your "
+                        "capillary pressure depends on spatially-dependent variables other than "
+                        "saturation, as the log-extension C++ code for this case has yet to be "
+                        "implemented");
   params.addClassDescription("Capillary pressure base class");
   return params;
 }
@@ -58,30 +61,30 @@ PorousFlowCapillaryPressure::initialSetup()
 }
 
 Real
-PorousFlowCapillaryPressure::capillaryPressure(Real saturation) const
+PorousFlowCapillaryPressure::capillaryPressure(Real saturation, unsigned qp) const
 {
   if (_log_ext && saturation < _sat_ext)
     return capillaryPressureLogExt(saturation);
   else
-    return capillaryPressureCurve(saturation);
+    return capillaryPressureCurve(saturation, qp);
 }
 
 Real
-PorousFlowCapillaryPressure::dCapillaryPressure(Real saturation) const
+PorousFlowCapillaryPressure::dCapillaryPressure(Real saturation, unsigned qp) const
 {
   if (_log_ext && saturation < _sat_ext)
     return dCapillaryPressureLogExt(saturation);
   else
-    return dCapillaryPressureCurve(saturation);
+    return dCapillaryPressureCurve(saturation, qp);
 }
 
 Real
-PorousFlowCapillaryPressure::d2CapillaryPressure(Real saturation) const
+PorousFlowCapillaryPressure::d2CapillaryPressure(Real saturation, unsigned qp) const
 {
   if (_log_ext && saturation < _sat_ext)
     return d2CapillaryPressureLogExt(saturation);
   else
-    return d2CapillaryPressureCurve(saturation);
+    return d2CapillaryPressureCurve(saturation, qp);
 }
 
 Real
