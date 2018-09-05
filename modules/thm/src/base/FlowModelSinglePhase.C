@@ -352,7 +352,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
 
   // numerical flux user object
   {
-    const std::string class_name = "Euler1DVarAreaHLLCFlux";
+    const std::string class_name = "NumericalFlux3EqnHLLC";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("fluid_properties") = fp_name;
     params.set<ExecFlagEnum>("execute_on") = lin_execute_on;
