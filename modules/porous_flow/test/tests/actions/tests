@@ -28,7 +28,6 @@
     type = RunApp
     input = addjoiner.i
     threading = '!pthreads'
-    no_error_deprecated = true
   [../]
   [./addjoiner_exception]
     type = RunException
