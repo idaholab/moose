@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#1476'
+  design = 'source/constraints/CoupledTiedValueConstraint.md'
   [./test]
     type = 'Exodiff'
     input = 'coupled_tied_value_constraint.i'
     exodiff = 'out.e'
+    requirement = "MOOSE shall include ability to force the value of a variable to be the same on both sides of an interface using Lagrange multipliers."
   [../]
 []

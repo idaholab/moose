@@ -1,4 +1,6 @@
 [Tests]
+  issues = '11722'
+  design = 'source/constraints/EqualValueEmbeddedConstraint.md'
   [1D_2D_kinematic]
     type = 'Exodiff'
     input = 'embedded_constraint.i'
@@ -6,6 +8,7 @@
     exodiff = '1D_2D_kinematic_out.e'
     abs_zero = 1e-9
     mesh_mode = REPLICATED
+    requirement = "MOOSE shall support embedded constraints between a 1D and 2D subdomain, using a kinematic formulation."
   []
   [1D_2D_penalty]
     type = 'Exodiff'
@@ -15,6 +18,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '1D_2D_kinematic'
+    requirement = "MOOSE shall support embedded constraints between a 1D and 2D subdomain, using a penalty formulation."
   []
   [1D_3D_kinematic]
     type = 'Exodiff'
@@ -24,6 +28,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '1D_2D_penalty'
+    requirement = "MOOSE shall support embedded constraints between a 1D and 2D subdomain, using a kinematic formulation."
   []
   [1D_3D_penalty]
     type = 'Exodiff'
@@ -33,6 +38,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '1D_3D_kinematic'
+    requirement = "MOOSE shall support embedded constraints between a 1D and 3D subdomain, using a penalty formulation."
   []
   [2D_2D_kinematic]
     type = 'Exodiff'
@@ -42,6 +48,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '1D_3D_penalty'
+    requirement = "MOOSE shall support embedded constraints between 2D subdomains, using a kinematic formulation."
   []
   [2D_2D_penalty]
     type = 'Exodiff'
@@ -51,6 +58,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '2D_2D_kinematic'
+    requirement = "MOOSE shall support embedded constraints between 2D subdomains, using a penalty formulation."
   []
   [2D_3D_kinematic]
     type = 'Exodiff'
@@ -60,6 +68,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '2D_2D_penalty'
+    requirement = "MOOSE shall support embedded constraints between a 2D and 3D subdomain, using a kinematic formulation."
   []
   [2D_3D_penalty]
     type = 'Exodiff'
@@ -69,6 +78,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '2D_3D_kinematic'
+    requirement = "MOOSE shall support embedded constraints between a 2D and 3D subdomain, using a penalty formulation."
   []
   [3D_3D_kinematic]
     type = 'Exodiff'
@@ -78,6 +88,7 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '2D_3D_penalty'
+    requirement = "MOOSE shall support embedded constraints between 3D subdomains, using a kinematic formulation."
   []
   [3D_3D_penalty]
     type = 'Exodiff'
@@ -87,5 +98,6 @@
     abs_zero = 1e-9
     mesh_mode = REPLICATED
     prereq = '3D_3D_kinematic'
+    requirement = "MOOSE shall support embedded constraints between 3D subdomains, using a penalty formulation."
   []
 []

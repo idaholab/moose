@@ -1,7 +1,10 @@
 [Tests]
+  design = 'syntax/BCs/index.md'
+  issues = ''
   [./test]
     type = 'Exodiff'
     input = 'conditional_bc_test.i'
     exodiff = 'out.e'
+    requirement = "MOOSE shall support the creation of BoundaryCondition objects that support conditional activation."
   [../]
 []

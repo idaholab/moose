@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#668'
+  design = 'syntax/DiracKernels/index.md'
   [./nonlinear_source]
     type = 'Exodiff'
     input = 'nonlinear_source.i'
     exodiff = 'nonlinear_source_out.e'
+    requirement = "DiracKernel objects shall support the computation of off diagonal Jacobian terms."
   [../]
 []

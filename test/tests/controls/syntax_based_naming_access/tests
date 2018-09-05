@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#5676'
+  design = 'syntax/Controls/index.md'
   [./param]
     # Test that all parameters with the same name change
     type = Exodiff
     input = param.i
     exodiff = param_out.e
+    requirement = "The Control system shall allow multiple parameters to be changed by the parameter name alone using input syntax format."
   [../]
 
   [./object_param]
@@ -11,6 +14,7 @@
     type = Exodiff
     input = object_param.i
     exodiff = object_param_out.e
+    requirement = "The Control system shall allow multiple parameters to be changed given the object and parameter names using input syntax format."
   [../]
 
   [./system_object_param]
@@ -18,6 +22,7 @@
     type = Exodiff
     input = system_object_param.i
     exodiff = system_object_param_out.e
+    requirement = "The Control system shall allow for a single parameter to be changes given the input syntax, object name, and parameter name."
   [../]
 
   [./system_asterisk_param]
@@ -25,5 +30,6 @@
     type = Exodiff
     input = system_asterisk_param.i
     exodiff = system_asterisk_param_out.e
+    requirement = "The Control system shall allow for multiple parameters to be changed given input syntax and a parameter name."
   [../]
 []

@@ -1,13 +1,17 @@
 [Tests]
+  issues = '#687'
+  design = 'syntax/Mesh/index.md syntax/BCs/index.md'
   [./test_hex]
     type = 'Exodiff'
     input = 'sideset_from_nodeset_test.i'
     exodiff = 'cube_hex_out.e'
+    requirement = "MOOSE shall support creating sidesets from nodesets for hexahedron elements to use with Boundary Condition objects."
   [../]
 
   [./test_tet]
     type = 'Exodiff'
     input = 'sideset_from_nodeset_test2.i'
     exodiff = 'cube_tet_out.e'
+    requirement = "MOOSE shall support creating sidesets from nodesets for tetrahedron elements to use with Boundary Condition objects."
   [../]
 []

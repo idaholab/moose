@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#5676'
+  design = 'syntax/Controls/index.md'
   [./base_object_param]
     # Test that all aspects of the name may be specified using base class name
     type = Exodiff
     input = base_object_param.i
     exodiff = base_object_param_out.e
+    requirement = "The Control system shall support the modification of a single parameter using the objects base class name, object name, and parameter name."
   [../]
 
   [./base_param]
@@ -11,5 +14,6 @@
     type = Exodiff
     input = base_param.i
     exodiff = base_param_out.e
+    requirement = "The Control system shall support the modification of multiple parameters using the objects base class and the parameter name."
   [../]
 []

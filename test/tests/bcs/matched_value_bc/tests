@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#656'
+  design = 'syntax/BCs/index.md'
   [./test]
     type = 'Exodiff'
     input = 'matched_value_bc_test.i'
     exodiff = 'out.e'
+    requirement = "MOOSE shall support matching variable values on a boundary."
   [../]
 []

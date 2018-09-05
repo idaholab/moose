@@ -1,4 +1,6 @@
 [Tests]
+  design = 'source/outputs/Checkpoint.md'
+  issues = ''
   [./test_files]
     type = 'CheckFiles'
     input = 'checkpoint_interval.i'
@@ -28,6 +30,7 @@
     # The suffixes of these files change when running in parallel or with threads
     max_parallel = 1
     max_threads = 1
+    requirement = "MOOSE shall support output suitable for restarting an application."
   [../]
 
   [./test_recover]
@@ -37,5 +40,7 @@
     input = 'checkpoint_interval.i'
     exodiff = 'checkpoint_interval_out.e'
     prereq = 'test_files'
+    issues = '#2395'
+    requirement = "MOOSE shall be capable of restarting a simulation from previously exported data."
   [../]
 []

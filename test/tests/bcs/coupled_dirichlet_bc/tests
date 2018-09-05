@@ -1,7 +1,10 @@
 [Tests]
+  design = 'syntax/BCs/index.md'
+  issues = '#656'
   [./test]
     type = 'Exodiff'
     input = 'coupled_dirichlet_bc.i'
     exodiff = 'out.e'
+    requirement = "MOOSE shall support the creation of BoundaryCondition objects that couple to nonlinear variables."
   [../]
 []
