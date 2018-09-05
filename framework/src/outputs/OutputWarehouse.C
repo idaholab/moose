@@ -182,7 +182,9 @@ OutputWarehouse::mooseConsole()
     // Reset
     _console_buffer.clear();
     _console_buffer.str("");
-
+  }
+  else
+  {
     if (!_buffer_action_console_outputs)
     {
       // this will cause messages to console before its construction immediately flushed and
