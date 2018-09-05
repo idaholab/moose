@@ -150,8 +150,12 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
 void
 GapHeatTransfer::initialSetup()
 {
-  GapConductance::setGapGeometryParameters(
-      _pars, _assembly.coordSystem(), _gap_geometry_type, _p1, _p2);
+  GapConductance::setGapGeometryParameters(_pars,
+                                           _assembly.coordSystem(),
+                                           _fe_problem.getAxisymmetricRadialCoord(),
+                                           _gap_geometry_type,
+                                           _p1,
+                                           _p2);
 }
 
 Real
