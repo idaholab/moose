@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
+#include "MortarData.h"
 #include "PostprocessorData.h"
 #include "VectorPostprocessorData.h"
 #include "Adaptivity.h"
@@ -76,6 +77,7 @@ class KernelBase;
 class IntegratedBCBase;
 class LineSearch;
 class UserObject;
+class AutomaticMortarGeneration;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1203,6 +1205,9 @@ public:
 
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
+  virtual void updateMortarMesh();
+
+  AutomaticMortarGeneration & getMortarInterface(const std::pair<unsigned, unsigned> &);
 
   virtual void possiblyRebuildGeomSearchPatches();
 
@@ -1777,6 +1782,7 @@ protected:
   MooseMesh * _displaced_mesh;
   std::shared_ptr<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
+  MortarData _mortar_data;
 
   bool _reinit_displaced_elem;
   bool _reinit_displaced_face;

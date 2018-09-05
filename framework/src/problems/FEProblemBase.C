@@ -233,6 +233,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #endif
     _displaced_mesh(nullptr),
     _geometric_search_data(*this, _mesh),
+    _mortar_data(*this),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _input_file_saved(false),
@@ -761,6 +762,8 @@ FEProblemBase::initialSetup()
   // Update the nearest node searches (has to be called after the problem is all set up)
   // We do this here because this sets up the Element's DoFs to ghost
   updateGeomSearch(GeometricSearchData::NEAREST_NODE);
+
+  updateMortarMesh();
 
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if (_displaced_mesh)
@@ -4941,6 +4944,18 @@ FEProblemBase::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 
   if (_displaced_problem)
     _displaced_problem->updateGeomSearch(type);
+}
+
+void
+FEProblemBase::updateMortarMesh()
+{
+  _mortar_data.update();
+}
+
+AutomaticMortarGeneration &
+FEProblemBase::getMortarInterface(const std::pair<unsigned, unsigned> & slave_master_pair)
+{
+  return _mortar_data.getMortarInterface(slave_master_pair);
 }
 
 void
