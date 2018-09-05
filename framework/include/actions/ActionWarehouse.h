@@ -148,6 +148,34 @@ public:
     return action_vector;
   }
 
+  /**
+   * Retrieve the action on a specific task with its type.
+   * Error will be thrown if more than one actions are found.
+   * @param task The task name.
+   * @return The action pointer. Null means that such an action does not exist.
+   */
+  template <class T>
+  const T * getActionByTask(const std::string & task)
+  {
+    const auto it = _action_blocks.find(task);
+    if (it == _action_blocks.end())
+      return nullptr;
+
+    T * p = nullptr;
+    for (const auto & action : it->second)
+    {
+      T * tp = dynamic_cast<T *>(action);
+      if (tp)
+      {
+        if (p)
+          mooseError("More than one actions have been detected in getActionByTask");
+        else
+          p = tp;
+      }
+    }
+    return p;
+  }
+
   void setFinalTask(const std::string & task);
 
   /**
