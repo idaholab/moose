@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#7060'
+  design = 'syntax/DiracKernels/index.md'
   [./multiplicity]
     type = 'CSVDiff'
     input = 'multiplicity.i'
     csvdiff = 'multiplicity_out.csv'
+    requirement = "The DiracKernel system shall allow for duplicate source locations to be defined."
   [../]
 []

@@ -1,18 +1,23 @@
 [Tests]
+  issues = '#7720 #2379'
+  design = 'syntax/DiracKernels/index.md'
   [./material_point_source_test]
     type = 'Exodiff'
     input = 'material_point_source.i'
     exodiff = 'out.e'
+    requirement = "The DiracKernel system shall allow material properties to be utilized."
   [../]
   [./material_error_check_old]
     type = 'RunException'
     input = 'material_error_check.i'
     expect_err = 'Stateful material properties not allowed for this object\. Old property for \S+ was requested.'
+    requirement = "DiracKernel objects shall report an error if a material property from a previous timestep is requested."
   [../]
   [./material_error_check_older]
     type = 'RunException'
     input = 'material_error_check.i'
     cli_args = 'DiracKernels/material_source/prop_state=older'
     expect_err = 'Stateful material properties not allowed for this object\. Older property for \S+ was requested.'
+    requirement = "DiracKernel objects shall report an error if a material property from two previous timesteps is requested."
   [../]
 []

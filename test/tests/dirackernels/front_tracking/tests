@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#2357'
+  design = 'syntax/DiracKernels/index.md'
   [./test]
     type = 'Exodiff'
     input = 'front_tracking.i'
     exodiff = 'front_tracking_out.e'
+    requirement = "The DiracKernel system shall allow for source locations to be set by a coupled UserObject."
   [../]
 []
