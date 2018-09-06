@@ -53,19 +53,19 @@ public:
   const RELAP7::FlowModelID & getFlowModelID() const;
 
   /**
-   * Gets the RDG conservative flux user object name
+   * Gets the numerical conservative flux user object name
    */
   const UserObjectName & getRDGConservativeFluxUserObjectName() const
   {
-    return _rdg_conservative_flux_name;
+    return _numerical_conservative_flux_name;
   }
 
   /**
-   * Gets the RDG non-conservative flux user object name
+   * Gets the numerical non-conservative flux user object name
    */
   const UserObjectName & getRDGNonConservativeFluxUserObjectName() const
   {
-    return _rdg_nonconservative_flux_name;
+    return _numerical_nonconservative_flux_name;
   }
 
   /**
@@ -90,11 +90,11 @@ protected:
   /// Name of fluid properties user object
   const UserObjectName & _fp_name;
 
-  /// rDG conservative flux user object name
-  const UserObjectName _rdg_conservative_flux_name;
+  /// Numerical conservative flux user object name
+  const UserObjectName _numerical_conservative_flux_name;
 
-  /// rDG non-conservative flux user object name
-  const UserObjectName _rdg_nonconservative_flux_name;
+  /// Numerical non-conservative flux user object name
+  const UserObjectName _numerical_nonconservative_flux_name;
 
   /// rDG interfacial variables user object name
   const UserObjectName _rdg_int_var_uo_name;
