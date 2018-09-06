@@ -52,7 +52,7 @@ SolidWall::addMooseObjects1Phase()
     }
 
     // BCs
-    createRDGBoundaryConditions1Phase(boundary_flux_name);
+    addWeakBC3Eqn(boundary_flux_name);
   }
 }
 
@@ -94,7 +94,7 @@ SolidWall::addMooseObjects2Phase()
     }
 
     // BCs
-    createRDGBoundaryConditions2Phase(boundary_flux_name);
+    addWeakBC7Eqn(boundary_flux_name);
   }
 }
 

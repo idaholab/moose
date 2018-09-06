@@ -21,18 +21,18 @@ protected:
   virtual void setupMesh() override;
 
   /**
-   * Creates the boundary condition objects for 1-phase rDG
+   * Creates the boundary condition objects for 1-phase flow
    *
    * @param[in] boundary_flux_name   name of the boundary flux user object
    */
-  void createRDGBoundaryConditions1Phase(const std::string & boundary_flux_name);
+  void addWeakBC3Eqn(const std::string & boundary_flux_name);
 
   /**
-   * Creates the boundary condition objects for 2-phase rDG
+   * Creates the boundary condition objects for 2-phase flow
    *
    * @param[in] boundary_flux_name   name of the boundary flux user object
    */
-  void createRDGBoundaryConditions2Phase(const std::string & boundary_flux_name);
+  void addWeakBC7Eqn(const std::string & boundary_flux_name);
 
   /// The name of the connect pipe
   std::string _connected_pipe_name;
