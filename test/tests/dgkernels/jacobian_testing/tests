@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#629'
+  design = 'syntax/DGKernels/index.md'
   [./jacobian_test]
     type = AnalyzeJacobian
     input = coupled_dg_jac_test.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
     mesh_mode = REPLICATED
+    requirement = "The DGCoupledDiffusion object shall compute the correct Jacobian."
   [../]
 []

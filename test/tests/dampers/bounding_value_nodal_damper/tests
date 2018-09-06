@@ -1,9 +1,12 @@
 [Tests]
+  issues = '#7856'
+  design = 'source/dampers/BoundingValueNodalDamper.md'
   [./bounding_value_max]
     type = 'RunException'
     input = 'bounding_value_max_test.i'
     expect_out = 'Damping factor: 0.3333'
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+    requirement = "MOOSE shall include the ability to reduce the change in nonlinear residual based on a maximum value on nodes."
   [../]
   [./bounding_value_min]
     type = 'RunException'
@@ -11,5 +14,6 @@
     cli_args = "Kernels/source/function='-t'"
     expect_out = 'Damping factor: 0.3333'
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+    requirement = "MOOSE shall include the ability to reduce the change in nonlinear residual based on a minimum value on nodes."
   [../]
 []

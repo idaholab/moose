@@ -79,7 +79,8 @@ class SQARequirementMatrix(tokens.OrderedList):
     PROPERTIES = [tokens.Property('heading', ptype=tokens.Token)]
 
 class SQARequirementMatrixItem(tokens.ListItem):
-    PROPERTIES = [tokens.Property('label', ptype=unicode, required=True)]
+    PROPERTIES = [tokens.Property('label', ptype=unicode, required=True),
+                  tokens.Property('satisfied', ptype=bool, default=True)]
 
 class SQARequirementCrossReference(tokens.Token):
     pass
@@ -99,6 +100,8 @@ class SQARequirementsCommand(command.CommandComponent):
                                  "the 'link' setting must be true.")
         config['link-issues'] = (True, "Enable/disable the link of the test issues only, " \
                                  "the 'link' setting must be true.")
+        config['link-prerequisites'] = (True, "Enable/disable the link of the test prerequisites, "\
+                                        "the 'link' setting must be true.")
 
         return config
 
@@ -109,12 +112,15 @@ class SQARequirementsCommand(command.CommandComponent):
             matrix = SQARequirementMatrix(parent,
                                           heading=tokens.String(None, content=unicode(group)))
             for req in requirements:
-                self._addRequirement(matrix, req)
+                self._addRequirement(matrix, req, requirements)
 
         return parent
 
-    def _addRequirement(self, parent, req):
-        item = SQARequirementMatrixItem(parent, label=unicode(req.label), id_=req.path)
+    def _addRequirement(self, parent, req, requirements):
+        item = SQARequirementMatrixItem(parent,
+                                        label=unicode(req.label),
+                                        satisfied=req.satisfied,
+                                        id_=req.path)
         self.translator.reader.parse(item, req.text)
 
         if self.settings['link']:
@@ -143,6 +149,17 @@ class SQARequirementsCommand(command.CommandComponent):
                     url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
                     tokens.Link(p, url=url, string=unicode(issue))
 
+            if self.settings['link-prerequisites'] and req.prerequisites:
+                labels = []
+                for prereq in req.prerequisites:
+                    for other in requirements:
+                        if other.name == prereq:
+                            labels.append(other.label)
+
+                p = tokens.Paragraph(item, 'p')
+                tokens.String(p, content=u'Prerequisites: {}'.format(' '.join(labels)))
+
+
 class SQACrossReferenceCommand(SQARequirementsCommand):
     COMMAND = 'sqa'
     SUBCOMMAND = 'cross-reference'
@@ -160,7 +177,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
             matrix = SQARequirementMatrix(parent, heading=link)
 
             for req in requirements:
-                self._addRequirement(matrix, req)
+                self._addRequirement(matrix, req, requirements)
 
         return parent
 
@@ -366,4 +383,9 @@ class RenderSQARequirementMatrixItem(core.RenderListItem):
         if id_:
             num.addClass('tooltipped')
             num['data-tooltip'] = id_
+
+        if not token.satisfied:
+            num = html.Tag(li, 'i', string=u'block',
+                           class_='material-icons moose-requirement-unsatisfied')
+
         return html.Tag(li, 'span', class_='moose-requirement-content')

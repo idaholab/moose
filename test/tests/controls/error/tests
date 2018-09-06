@@ -1,10 +1,13 @@
 [Tests]
+  issues = '#5676'
+  design = 'syntax/Controls/index.md'
   [./non_controllable_error]
     # Test non-controllable parameter error
     type = RunException
     input = 'non_controllable_error.i'
     expect_err = "The desired parameter 'Kernels/diff/non_controllable"
     match_literal = true
+    requirement = "The Control system shall error if an attempt to alter a non-controllable parameter is performed."
   [../]
 
   [./multiple_params_found_warning]
@@ -13,6 +16,7 @@
     input = 'multiple_parameters_found.i'
     expect_out = "The following controlled parameters are being retrieved"
     allow_warnings = true
+    requirement = "The Control system shall error if multiple controllable parameters exists, but only a single parameter is expected to be controlled."
   [../]
 
   [./no_param_found]
@@ -21,6 +25,7 @@
     input = 'no_parameter_found.i'
     expect_err = "The desired parameter 'unknown_param_name' was not located"
     match_literal = true
+    requirement = "The Control system shall error if an unknown parameter is supplied for control."
   [../]
 
   [./tid_warehouse_error]
@@ -29,6 +34,7 @@
     input = 'tid_warehouse_error.i'
     expect_err = "Attempting to access a thread id \(12345\) greater than the number allowed by the storage item \(1\)"
     method = 'dbg'
+    requirement = "The Control system shall error if a thread id greater than the number of threads available is supplied when retrieving a Control object."
   [../]
 
   [./disable_executioner]
@@ -36,6 +42,7 @@
     type = RunException
     input = 'disable_executioner.i'
     expect_err = "The desired parameter 'Executioner::\*/enable"
+    requirement = "The Control system shall error if an attempt is made to disable the Executioner."
   [../]
 
   [./non_existing_dependency]
@@ -43,5 +50,6 @@
     type = RunException
     input = 'non_existing_dependency.i'
     expect_err = "The Control \"no-control\" was not created, did you make a spelling mistake or forget to include it in your input file\?"
+    requirement = "The Control system shall error if an invalid control name is supplied to the Control dependency resolution procedure."
   [../]
 []

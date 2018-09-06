@@ -1,8 +1,10 @@
 [Tests]
+  issues = ''
+  design = 'bcs/FunctionDirichletBC.md'
   [./test]
     type = 'Exodiff'
     input = 'function_dirichlet_bc_test.i'
     exodiff = 'out.e'
-    group = 'requirements'
+    requirement = "MOOSE shall support Dirichlet type boundary conditions defined by a function."
   [../]
 []

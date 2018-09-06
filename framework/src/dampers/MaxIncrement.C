@@ -22,7 +22,7 @@ validParams<MaxIncrement>()
   params.addParam<MooseEnum>(
       "increment_type",
       increment_type,
-      "Type of increment to compare against max_increment. 'absolue': use variable increment. "
+      "Type of increment to compare against max_increment. 'absolute': use variable increment. "
       "'fractional': use variable increment divided by the variable value.");
   return params;
 }

@@ -1,37 +1,45 @@
 [Tests]
+  issues = '#1871'
+  design = 'syntax/NodalNormals/index.md'
   [./circle_tris]
     type = 'Exodiff'
     input = 'circle_tris.i'
     exodiff = 'circle_tris_out.e'
+    requirement = "MOOSE shall be capable of computing the nodal normals for triangle elements."
   [../]
 
   [./circle_quads]
     type = 'Exodiff'
     input = 'circle_quads.i'
     exodiff = 'circle_quads_out.e'
+    requirement = "MOOSE shall be capable of computing the nodal normals for quadrilateral elements."
   [../]
 
   [./cylinder_hexes]
     type = 'Exodiff'
     input = 'cylinder_hexes.i'
     exodiff = 'cylinder_hexes_out.e'
+    requirement = "MOOSE shall be capable of computing the nodal normals for first order hexahedron elements."
   [../]
 
   [./cylinder_hexes_2nd]
     type = 'Exodiff'
     input = 'cylinder_hexes_2nd.i'
     exodiff = 'cylinder_hexes_2nd_out.e'
+    requirement = "MOOSE shall be capable of computing the nodal normals for second order hexahedron elements."
   [../]
 
   [./cylinder_hexes_1st_2nd]
     type = 'Exodiff'
     input = 'cylinder_hexes_1st_2nd.i'
     exodiff = 'cylinder_hexes_1st_2nd_out.e'
+    requirement = "MOOSE shall be capable of computing the first order nodal normals for second order hexahedron elements."
   [../]
 
   [./small_sqaure]
     type = 'Exodiff'
     input = 'square_quads.i'
     exodiff = 'square_quads_out.e'
+    requirement = "MOOSE shall be capable of computing the nodal normals for quadrilateral elements on a square domain."
   [../]
 []

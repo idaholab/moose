@@ -1,8 +1,11 @@
 [Tests]
+  issues = ''
+  design = 'source/constraints/TiedValueConstraint.md'
   [./test]
     type = 'Exodiff'
     input = 'tied_value_constraint_test.i'
     exodiff = 'out.e'
     max_parallel = 1
+    requirement = "MOOSE shall include ability to force the value of a variable to be the same on both sides of an interface."
   [../]
 []
