@@ -4,7 +4,7 @@
 namespace RELAP77Eqn
 {
 /// Number of conservative solution variables, plus cross-sectional area
-static const unsigned int _n_var = 8;
+static const unsigned int N_CONS_VAR = 8;
 
 /// Indices for conservative solution variables, plus cross-sectional area
 enum ConservativeVariableIndex
@@ -20,7 +20,7 @@ enum ConservativeVariableIndex
 };
 
 /// Number of primitive solution variables in a phase
-static const unsigned int _n_local_primitive_var = 5;
+static const unsigned int N_LOCAL_PRIM_VAR = 5;
 
 /// Indices for primitive solution variables in a phase
 enum LocalPrimitiveVariableIndex
@@ -33,7 +33,7 @@ enum LocalPrimitiveVariableIndex
 };
 
 /// Number of equations
-static const unsigned int _n_eq = 7;
+static const unsigned int N_EQ = 7;
 
 /// Indices for equations
 enum EquationIndex
@@ -48,7 +48,7 @@ enum EquationIndex
 };
 
 /// Number of local equations (per phase)
-static const unsigned int _n_local_eq = 4;
+static const unsigned int N_LOCAL_EQ = 4;
 
 /// Local indices (arbitrary phase) for equations
 enum LocalEquationIndex
@@ -60,9 +60,9 @@ enum LocalEquationIndex
 };
 
 /// Total number of slopes
-static const unsigned int _n_slopes = 8;
+static const unsigned int N_SLOPES = 8;
 /// Number of slopes that are limited
-static const unsigned int _n_slopes_limited = 7;
+static const unsigned int N_LIMITED_SLOPES = 7;
 
 /// Indices for slope array
 enum SlopeIndex
@@ -78,7 +78,7 @@ enum SlopeIndex
 };
 
 /// Number of phases
-static const unsigned int _n_phases = 2;
+static const unsigned int N_PHASE = 2;
 
 /// Phase indices
 enum PhaseIndex
