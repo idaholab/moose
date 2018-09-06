@@ -40,14 +40,13 @@ void
 ElementSideNeighborLayers::attachRelationshipManagersInternal(
     Moose::RelationshipManagerType rm_type)
 {
-  if ((_app.isSplitMesh() || _mesh.isDistributedMesh()) && _element_side_neighbor_layers > 1)
+  if ((_app.isSplitMesh() || _mesh.isDistributedMesh() || rm_type ==  Moose::RelationshipManagerType::Algebraic) && _element_side_neighbor_layers > 1)
   {
     if (!_default_coupling)
     {
       _default_coupling = libmesh_make_unique<DefaultCoupling>();
       _default_coupling->set_n_levels(_element_side_neighbor_layers);
     }
-
     if (rm_type == Moose::RelationshipManagerType::Geometric)
       attachGeometricFunctorHelper(*_default_coupling);
     else

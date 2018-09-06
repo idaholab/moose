@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "Executioner.h"
 #include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
+#include "DisplacedProblem.h"
 
 template <>
 InputParameters
@@ -30,6 +32,13 @@ AlgebraicRelationshipManager::AlgebraicRelationshipManager(const InputParameters
 void
 AlgebraicRelationshipManager::attachAlgebraicFunctorHelper(GhostingFunctor & gf) const
 {
-  // TODO: Need to figure out Nonlinear versus Aux
-  _app.getExecutioner()->feProblem().getNonlinearSystemBase().dofMap().add_coupling_functor(gf);
+  // We need to atttach ghosting functor for both NonlinearSystem and AuxiliarySystem
+  // since they have their own  dofMaps
+  _app.getExecutioner()->feProblem().getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(gf);
+  _app.getExecutioner()->feProblem().getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(gf);
+  // We need to do the same thing for displaced problem
+  if (_app.getExecutioner()->feProblem().getDisplacedProblem()) {
+    _app.getExecutioner()->feProblem().getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(gf);
+    _app.getExecutioner()->feProblem().getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(gf);
+  }
 }

@@ -39,7 +39,7 @@ validParams<RelationshipManager>()
    * deleted. Depending on the mesh size and EquationSystems size, this may have a significant
    * impact on total memory usage during the problem setup phase.
    */
-  params.addPrivateParam<Moose::RelationshipManagerType>("rm_type");
+  params.addParam<Moose::RelationshipManagerType>("rm_type", " rm ");
 
   // Set by MOOSE
   params.addPrivateParam<MooseMesh *>("mesh");
