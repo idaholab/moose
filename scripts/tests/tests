@@ -1,0 +1,10 @@
+[Tests]
+  [sqa_check]
+    type = PythonUnitTest
+    input = test_sqa_check.py
+    buffer = True
+    issues = '#9638'
+    design = 'MooseDocs/generate.md'
+    requirement = "MOOSE shall include a utility for examining test specifications for SQA content."
+  []
+[]
