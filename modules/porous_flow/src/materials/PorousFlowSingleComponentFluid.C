@@ -129,7 +129,7 @@ void
 PorousFlowSingleComponentFluid::initQpStatefulProperties()
 {
   if (_compute_rho_mu)
-    (*_density)[_qp] = _fp.rho(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k);
+    (*_density)[_qp] = _fp.rho_from_p_T(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k);
   if (_compute_internal_energy)
     (*_internal_energy)[_qp] = _fp.e(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k);
   if (_compute_enthalpy)

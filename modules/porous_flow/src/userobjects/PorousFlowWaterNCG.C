@@ -411,7 +411,7 @@ PorousFlowWaterNCG::saturationTwoPhase(Real pressure,
   const Real liquid_pressure = pressure;
 
   Real liquid_density, liquid_ddensity_dp, liquid_ddensity_dT;
-  _water_fp.rho_dpT(
+  _water_fp.rho_from_p_T(
       liquid_pressure, temperature, liquid_density, liquid_ddensity_dp, liquid_ddensity_dT);
 
   // The gas saturation in the two phase case

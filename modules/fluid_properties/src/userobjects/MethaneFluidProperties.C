@@ -79,16 +79,16 @@ MethaneFluidProperties::triplePointTemperature() const
 }
 
 Real
-MethaneFluidProperties::rho(Real pressure, Real temperature) const
+MethaneFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
   return pressure * _Mch4 / (_R * temperature);
 }
 
 void
-MethaneFluidProperties::rho_dpT(
+MethaneFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = _Mch4 / (_R * temperature);
   drho_dT = -pressure * _Mch4 / (_R * temperature * temperature);
 }
@@ -121,7 +121,7 @@ MethaneFluidProperties::rho_e_dpT(Real pressure,
                                   Real & de_dT) const
 {
   Real density, ddensity_dp, ddensity_dT;
-  rho_dpT(pressure, temperature, density, ddensity_dp, ddensity_dT);
+  rho_from_p_T(pressure, temperature, density, ddensity_dp, ddensity_dT);
   rho = density;
   drho_dp = ddensity_dp;
   drho_dT = ddensity_dT;
@@ -136,16 +136,16 @@ MethaneFluidProperties::rho_e_dpT(Real pressure,
 Real
 MethaneFluidProperties::c(Real pressure, Real temperature) const
 {
-  return std::sqrt(gamma(pressure, temperature) * _R * temperature / _Mch4);
+  return std::sqrt(gamma_from_p_T(pressure, temperature) * _R * temperature / _Mch4);
 }
 
 Real
-MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= T <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
     throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (280K, 1080K) in " + name() + ": cp()");
+                         "K out of range (280K, 1080K) in " + name() + ": cp_from_p_T()");
 
   Real specific_heat = 0.0;
   if (temperature < 755.0)
@@ -160,9 +160,9 @@ MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
 }
 
 Real
-MethaneFluidProperties::cv(Real pressure, Real temperature) const
+MethaneFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
-  return cp(pressure, temperature) - _R / _Mch4;
+  return cp_from_p_T(pressure, temperature) - _R / _Mch4;
 }
 
 Real
@@ -197,7 +197,7 @@ MethaneFluidProperties::mu_dpT(
 void
 MethaneFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   mu = this->mu(pressure, temperature);
 }
 
@@ -211,7 +211,7 @@ MethaneFluidProperties::rho_mu_dpT(Real pressure,
                                    Real & dmu_dp,
                                    Real & dmu_dT) const
 {
-  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
@@ -288,7 +288,7 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
   // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
     throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (280K, 1080K) in " + name() + ": cp()");
+                         "K out of range (280K, 1080K) in " + name() + ": cp_from_p_T()");
 
   Real enthalpy = 0.0;
   if (temperature < 755.0)

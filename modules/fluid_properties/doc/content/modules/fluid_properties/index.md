@@ -31,7 +31,7 @@ corresponding method names) are provided:
 - Dynamic viscosity: `mu(volume, energy)`
 - Thermal conductivity: `k(volume, energy)`
 - Specific entropy: `s(volume, energy)`
-- Density: `rho(pressure, temperature)`
+- Density: `rho_from_p_T(pressure, temperature)`
 - Enthalpy: `h(pressure, temperature)`
 - Internal energy: `e(pressure, density)`
 - Thermal expansion coefficient: `beta(pressure, temperature)`
@@ -51,7 +51,7 @@ method names) are:
 
 - String representing fluid name: `fluidName()`
 - Molar mass (kg/mol): `molarMass()`
-- Density (kg/m$^3$): `rho(pressure, temperature)`
+- Density (kg/m$^3$): `rho_from_p_T(pressure, temperature)`
 - Internal energy (J/kg): `e(pressure, temperature)`
 - Enthalpy (J/kg): `h(pressure, temperature)`
 - Specific entropy (J/kg/K): `s(pressure, temperature)`
