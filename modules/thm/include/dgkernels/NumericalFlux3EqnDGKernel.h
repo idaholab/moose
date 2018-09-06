@@ -66,8 +66,8 @@ protected:
   const MaterialProperty<Real> & _rhoEA2;
   const MaterialProperty<Real> & _p2;
 
-  /// RDG flux user object
-  const RDGFluxBase & _rdg_flux;
+  /// Numerical flux user object
+  const RDGFluxBase & _numerical_flux;
 
   // coupled variable indices
   const unsigned int _rhoA_var;
