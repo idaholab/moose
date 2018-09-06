@@ -2,7 +2,6 @@
 #define BOUNDARYFLUX3EQNBC_H
 
 #include "OneDIntegratedBC.h"
-#include "RDGIndices3Eqn.h"
 #include "BoundaryFluxBase.h"
 
 class BoundaryFlux3EqnBC;
@@ -14,7 +13,7 @@ InputParameters validParams<BoundaryFlux3EqnBC>();
  * Boundary conditions for the 1-D, 1-phase, variable-area Euler equations
  * using a boundary flux user object
  */
-class BoundaryFlux3EqnBC : public OneDIntegratedBC, public RDGIndices3Eqn
+class BoundaryFlux3EqnBC : public OneDIntegratedBC
 {
 public:
   BoundaryFlux3EqnBC(const InputParameters & parameters);

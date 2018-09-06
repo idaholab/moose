@@ -1,5 +1,6 @@
 #include "BoundaryFlux3EqnBC.h"
 #include "MooseVariable.h"
+#include "RELAP7Indices3Eqn.h"
 
 registerMooseObject("RELAP7App", BoundaryFlux3EqnBC);
 
@@ -25,7 +26,6 @@ validParams<BoundaryFlux3EqnBC>()
 
 BoundaryFlux3EqnBC::BoundaryFlux3EqnBC(const InputParameters & parameters)
   : OneDIntegratedBC(parameters),
-    RDGIndices3Eqn(),
 
     _A_elem(coupledValue("A_elem")),
     _A_linear(coupledValue("A_linear")),
@@ -76,9 +76,9 @@ std::map<unsigned int, unsigned int>
 BoundaryFlux3EqnBC::getIndexMapping() const
 {
   std::map<unsigned int, unsigned int> jmap;
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, EQ_MASS));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, EQ_MOMENTUM));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, EQ_ENERGY));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, RELAP73Eqn::EQ_MASS));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, RELAP73Eqn::EQ_MOMENTUM));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, RELAP73Eqn::EQ_ENERGY));
 
   return jmap;
 }
