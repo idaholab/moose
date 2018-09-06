@@ -10,7 +10,7 @@
 #ifndef GHOSTUSEROBJECT_H
 #define GHOSTUSEROBJECT_H
 
-#include "GeneralUserObject.h"
+#include "ElementUserObject.h"
 
 // Forward Declarations
 class GhostUserObject;
@@ -22,7 +22,7 @@ InputParameters validParams<GhostUserObject>();
  * User object to calculate ghosted elements on a single processor or the union across all
  * processors.
  */
-class GhostUserObject : public GeneralUserObject
+class GhostUserObject : public ElementUserObject
 {
 public:
   GhostUserObject(const InputParameters & parameters);
@@ -30,12 +30,15 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
+  virtual void threadJoin(const UserObject &) override;
 
-  unsigned long getElementalValue(dof_id_type element_id) const;
+  Real getElementalValue(dof_id_type element_id) const;
 
 protected:
-  std::set<dof_id_type> _ghost_data;
+  std::map<dof_id_type, Real> _ghost_data;
   dof_id_type _rank;
+
+  const VariableValue & _variable;
 };
 
 #endif // GHOSTUSEROBJECT_H
