@@ -10,7 +10,6 @@ validParams<NumericalFlux3EqnBase>()
 
 NumericalFlux3EqnBase::NumericalFlux3EqnBase(const InputParameters & parameters)
   : RDGFluxBase(parameters),
-    RDGIndices3Eqn(),
 
     _last_region_index(0)
 {

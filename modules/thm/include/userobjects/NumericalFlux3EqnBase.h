@@ -2,7 +2,6 @@
 #define NUMERICALFLUX3EQNBASE_H
 
 #include "RDGFluxBase.h"
-#include "RDGIndices3Eqn.h"
 
 class NumericalFlux3EqnBase;
 
@@ -18,7 +17,7 @@ InputParameters validParams<NumericalFlux3EqnBase>();
  * is important to ensure that all are tested. To help with this, an interface
  * is added to retrieve the last entered region.
  */
-class NumericalFlux3EqnBase : public RDGFluxBase, public RDGIndices3Eqn
+class NumericalFlux3EqnBase : public RDGFluxBase
 {
 public:
   NumericalFlux3EqnBase(const InputParameters & parameters);
