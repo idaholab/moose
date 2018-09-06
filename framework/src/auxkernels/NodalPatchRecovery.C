@@ -20,11 +20,11 @@ validParams<NodalPatchRecovery>()
                              orders,
                              "Polynomial order used in least squares fitting of material property "
                              "over the local patch of elements connected to a given node");
-  params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
-  // TODO make this class work with relationship manager
-  // params.registerRelationshipManagers("ElementSideNeighborLayers");
-  // params.addPrivateParam<unsigned int short>("element_side_neighbor_layers", 2);
+  params.registerRelationshipManagers("ElementSideNeighborLayers");
+  params.addParam<unsigned short>("element_side_neighbor_layers", 2, "Number of layers to ghost");
+
+  params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
   return params;
 }
@@ -43,16 +43,6 @@ NodalPatchRecovery::NodalPatchRecovery(const InputParameters & parameters)
   if (_patch_polynomial_order < static_cast<unsigned int>(_var.order()))
     mooseWarning("Specified 'patch_polynomial_order' is lower than the AuxVariable's order");
 
-  // TODO remove the manual ghosting once relationship manager is working correctly
-  // no need to ghost if this aux is elemental
-  if (isNodal())
-  {
-    MeshBase & meshhelper = _mesh.getMesh();
-    meshhelper.allow_renumbering(false);
-    for (const auto & elem :
-         as_range(meshhelper.semilocal_elements_begin(), meshhelper.semilocal_elements_end()))
-      _fe_problem.addGhostedElem(elem->id());
-  }
 }
 
 std::vector<std::vector<unsigned int>>
@@ -163,12 +153,6 @@ NodalPatchRecovery::compute()
     AuxKernel::compute();
     return;
   }
-
-  // Limit current use of NodalPatchRecovery to a single processor
-  if (_communicator.size() > 1)
-    mooseError("The nodal patch recovery option, which calculates the Zienkiewicz-Zhu patch "
-               "recovery for nodal variables (family = LAGRANGE), is not currently implemented for "
-               "parallel runs. Run in serial if you must use the nodal patch capability");
 
   // Use Zienkiewicz-Zhu patch recovery for nodal variables
   reinitPatch();
