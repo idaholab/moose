@@ -27,7 +27,7 @@ validParams<PenetrationAux>()
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription("Auxililary Kernel for computing several geometry related quantities "
+  params.addClassDescription("Auxiliary Kernel for computing several geometry related quantities "
                              "between two contacting bodies.");
 
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");

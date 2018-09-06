@@ -1,22 +1,27 @@
 [Tests]
+  issues = '#3901'
+  design = 'source/auxkernels/GapValueAux.md syntax/Mesh/index.md'
   [./never]
     type = 'Exodiff'
     input = 'never.i'
     exodiff = 'never_out.e'
     use_old_floor = True
     allow_warnings = true
+    requirement = "MOOSE shall support a means for updating the geometric search patch dynamically that may be disabled."
   [../]
   [./auto]
     type = 'Exodiff'
     input = 'auto.i'
     exodiff = 'auto_out.e'
     use_old_floor = True
+    requirement = "MOOSE shall support a means for updating the geometric search patch dynamically that automatically determines when an update to the patch shall occur."
   [../]
   [./always]
     type = 'Exodiff'
     input = 'always.i'
     exodiff = 'always_out.e'
     use_old_floor = True
+    requirement = "MOOSE shall support a means for updating the geometric search patch dynamically that updates the patch prior to each solve."
   [../]
   [./nonlinear_iter]
     type = 'Exodiff'
@@ -25,6 +30,7 @@
     exodiff = 'always_out.e'
     use_old_floor = True
     prereq = always
+    requirement = "MOOSE shall support a means for updating the geometric search patch dynamically that updates the patch prior to each iteration."
   [../]
   [./never_warning]
     type = RunException
@@ -32,5 +38,6 @@
     cli_args = 'Outputs/file_base=never_warning_out'
     expect_err = "Warning in PenetrationLocator. Penetration is not detected for one or more slave nodes. This could be because those slave nodes simply do not project to faces on the master surface. However, this could also be because contact should be enforced on those nodes, but the faces that they project to are outside the contact patch, which will give an erroneous result. Use appropriate options for 'patch_size' and 'patch_update_strategy' in the Mesh block to avoid this issue. Setting 'patch_update_strategy=iteration' is recommended because it completely avoids this potential issue. Also note that this warning is printed only once, so a similar situation could occur multiple times during the simulation but this warning is printed only at the first occurrence."
     prereq = never
+    requirement = "The MOOSE penetration locator system shall error if penetration is not detected."
   [../]
 []
