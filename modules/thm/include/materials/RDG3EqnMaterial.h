@@ -3,7 +3,7 @@
 
 #include "Material.h"
 #include "SinglePhaseFluidProperties.h"
-#include "Euler1DVarAreaSlopes.h"
+#include "RDGSlopes3Eqn.h"
 
 class RDG3EqnMaterial;
 
@@ -41,7 +41,7 @@ protected:
   MaterialProperty<Real> & _rhoEA;
 
   /// slopes user object
-  const Euler1DVarAreaSlopes & _slopes_uo;
+  const RDGSlopes3Eqn & _slopes_uo;
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;

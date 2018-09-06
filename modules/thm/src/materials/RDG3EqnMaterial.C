@@ -40,7 +40,7 @@ RDG3EqnMaterial::RDG3EqnMaterial(const InputParameters & parameters)
     _rhoA(declareProperty<Real>("rhoA")),
     _rhouA(declareProperty<Real>("rhouA")),
     _rhoEA(declareProperty<Real>("rhoEA")),
-    _slopes_uo(getUserObject<Euler1DVarAreaSlopes>("slopes_uo")),
+    _slopes_uo(getUserObject<RDGSlopes3Eqn>("slopes_uo")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
