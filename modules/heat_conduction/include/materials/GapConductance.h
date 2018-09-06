@@ -38,6 +38,7 @@ public:
 
   static void setGapGeometryParameters(const InputParameters & params,
                                        const Moose::CoordinateSystemType coord_sys,
+                                       unsigned int axisymmetric_radial_coord,
                                        GAP_GEOMETRY & gap_geometry_type,
                                        Point & p1,
                                        Point & p2);

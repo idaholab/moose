@@ -172,12 +172,14 @@ GapConductance::GapConductance(const InputParameters & parameters)
 void
 GapConductance::initialSetup()
 {
-  setGapGeometryParameters(_pars, _coord_sys, _gap_geometry_type, _p1, _p2);
+  setGapGeometryParameters(
+      _pars, _coord_sys, _fe_problem.getAxisymmetricRadialCoord(), _gap_geometry_type, _p1, _p2);
 }
 
 void
 GapConductance::setGapGeometryParameters(const InputParameters & params,
                                          const Moose::CoordinateSystemType coord_sys,
+                                         unsigned int axisymmetric_radial_coord,
                                          GAP_GEOMETRY & gap_geometry_type,
                                          Point & p1,
                                          Point & p2)
@@ -221,8 +223,17 @@ GapConductance::setGapGeometryParameters(const InputParameters & params,
         ::mooseError("The 'cylinder_axis_point_1' and 'cylinder_axis_point_2' cannot be specified "
                      "with axisymmetric models.  The y-axis is used as the cylindrical axis of "
                      "symmetry.");
-      p1 = Point(0, 0, 0);
-      p2 = Point(0, 1, 0);
+
+      if (axisymmetric_radial_coord == 0) // R-Z problem
+      {
+        p1 = Point(0, 0, 0);
+        p2 = Point(0, 1, 0);
+      }
+      else // Z-R problem
+      {
+        p1 = Point(0, 0, 0);
+        p2 = Point(1, 0, 0);
+      }
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
       ::mooseError("'gap_geometry_type = CYLINDER' cannot be used with models having a spherical "

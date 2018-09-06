@@ -23,6 +23,15 @@
     compiler = 'CLANG GCC'
   [../]
 
+  [./ZR]
+    type = Exodiff
+    input = 'gap_heat_transfer_htonly_zr_test.i'
+    exodiff = 'gap_heat_transfer_htonly_zr_test_out.e'
+    abs_zero = 1e-9
+    rel_err = 5e-3
+    compiler = 'CLANG GCC'
+  [../]
+
   [./RSpherical]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_rspherical.i'
