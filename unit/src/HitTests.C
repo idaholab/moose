@@ -502,6 +502,22 @@ TEST(HitTests, Formatter)
   }
 }
 
+TEST(HitTests, Field_clone)
+{
+  std::string name = "foo";
+  auto kind = hit::Field::Kind::Int;
+  std::string val = "42";
+  std::string comment_text = "inline comment text";
+
+  std::unique_ptr<hit::Field> n(new hit::Field(name, kind, val));
+  n->addChild(new hit::Comment(comment_text, hit::Comment::Inline));
+
+  auto clone = n->clone();
+
+  EXPECT_EQ(clone->children().size(), n->children().size())
+      << "field node failed to clone its children";
+}
+
 struct SortCase
 {
   struct Pattern
@@ -520,7 +536,7 @@ TEST(HitTests, Formatter_sorting)
   // clang-format off
   SortCase cases[] = {
       {
-        "name",
+        "switch",
         "order = bar outof = foo",
         "outof = foo\norder = bar",
         {
@@ -528,10 +544,17 @@ TEST(HitTests, Formatter_sorting)
            {"pattern2", {"param1", "param2"}}
         }
       }, {
-        "name",
+        "keepsame",
         "order = bar outof = foo",
         "order = bar\noutof = foo",
         {
+        }
+      }, {
+        "handle-comments",
+        "order = bar\n# block comment\noutof = foo # inline comment",
+        "# block comment\noutof = foo # inline comment\norder = bar",
+        {
+           {"", {"outof", "order"}},
         }
       }
   };

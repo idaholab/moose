@@ -491,7 +491,10 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
 Node *
 Field::clone()
 {
-  return new Field(_field, _kind, _val);
+  auto n = new Field(_field, _kind, _val);
+  for (auto child : children())
+    n->addChild(child->clone());
+  return n;
 }
 
 Field::Kind
@@ -875,8 +878,8 @@ parseComment(Parser * p, Node * n)
     p->error(tok, "the parser is broken");
 
   auto comment = p->emit(new Comment(tok.val, isinline));
-  if (tok.type == TokType::InlineComment && n->children().size() > 0)
-    n->children()[n->children().size() - 1]->addChild(comment);
+  if (isinline && n->children().size() > 0)
+    n->children().back()->addChild(comment);
   else
     n->addChild(comment);
 }
@@ -1138,46 +1141,39 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
                      std::vector<Node *> & sorted,
                      std::vector<Node *> & unused)
 {
-  std::vector<bool> skips(nodes.size(), false);
+  std::vector<bool> done(nodes.size(), false);
 
   for (auto next : order)
   {
-    for (unsigned int i = 0; i < nodes.size(); i++)
+    // use int for i so that "i-1 != 0" when i is zero.
+    for (int i = 0; static_cast<size_t>(i) < nodes.size(); i++)
     {
-      if (skips[i])
+      if (done[i])
         continue;
 
-      auto comment = nodes[i];
-      Node * field = nullptr;
-      if (i + 1 < nodes.size())
-        field = nodes[i + 1];
+      Node * comment = nullptr;
+      Node * field = nodes[i];
+      if ((i - 1 > 0) && nodes[i - 1]->type() == NodeType::Comment)
+        comment = nodes[i - 1];
 
-      if ((comment->type() == NodeType::Comment || comment->type() == NodeType::Blank) && field &&
-          (field->type() == NodeType::Field || field->type() == NodeType::Section))
-        i++;
-      else if (comment->type() == NodeType::Field || comment->type() == NodeType::Section)
-      {
-        field = comment;
-        comment = nullptr;
-      }
-      else
+      if (field->type() != NodeType::Field && field->type() != NodeType::Section)
         continue;
 
       if (matches(next, field->path(), false))
       {
-        if (comment != nullptr)
+        if (comment)
         {
+          done[i - 1] = true;
           sorted.push_back(comment);
-          skips[i + 1] = true;
         }
-        skips[i] = true;
+        done[i] = true;
         sorted.push_back(field);
       }
     }
   }
 
-  for (unsigned int i = 0; i < skips.size(); i++)
-    if (skips[i] == false)
+  for (unsigned int i = 0; i < done.size(); i++)
+    if (!done[i])
       unused.push_back(nodes[i]);
 }
 
