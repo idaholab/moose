@@ -472,6 +472,19 @@ FEProblemBase::addExtraVectors()
   _aux->addExtraVectors();
 }
 
+ConstElemRange *
+FEProblemBase::getEvaluableElementRange()
+{
+  if (!_evaluable_local_elem_range)
+  {
+    _evaluable_local_elem_range =
+        libmesh_make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
+                                            _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
+  }
+
+  return _evaluable_local_elem_range.get();
+}
+
 void
 FEProblemBase::initialSetup()
 {
@@ -614,7 +627,7 @@ FEProblemBase::initialSetup()
       _all_materials.initialSetup(tid);
     }
 
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ConstElemRange & elem_range = *getEvaluableElementRange();
     ComputeMaterialsObjectThread cmt(*this,
                                      _material_data,
                                      _bnd_material_data,
@@ -768,7 +781,7 @@ FEProblemBase::initialSetup()
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
        _neighbor_material_props.hasStatefulProperties()))
   {
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    ConstElemRange & elem_range = *getEvaluableElementRange();
     ComputeMaterialsObjectThread cmt(*this,
                                      _material_data,
                                      _bnd_material_data,
