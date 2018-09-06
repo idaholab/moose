@@ -143,22 +143,22 @@ BreakMeshByBlockManual_3Blocks::addInterfaceBoundary()
   SubdomainID interface_id = 100;
   if (!_split_interface)
   {
-    elem = _mesh_ptr->getMesh().elem(0);
+    elem = _mesh_ptr->getMesh().elem_ptr(0);
     boundary_info.add_side(elem->id(), 4, interface_id);
 
-    elem = _mesh_ptr->getMesh().elem(1);
+    elem = _mesh_ptr->getMesh().elem_ptr(1);
     boundary_info.add_side(elem->id(), 4, interface_id);
 
-    elem = _mesh_ptr->getMesh().elem(2);
+    elem = _mesh_ptr->getMesh().elem_ptr(2);
     boundary_info.add_side(elem->id(), 4, interface_id);
 
-    elem = _mesh_ptr->getMesh().elem(3);
+    elem = _mesh_ptr->getMesh().elem_ptr(3);
     boundary_info.add_side(elem->id(), 4, interface_id);
 
-    elem = _mesh_ptr->getMesh().elem(4);
+    elem = _mesh_ptr->getMesh().elem_ptr(4);
     boundary_info.add_side(elem->id(), 3, interface_id);
 
-    elem = _mesh_ptr->getMesh().elem(6);
+    elem = _mesh_ptr->getMesh().elem_ptr(6);
     boundary_info.add_side(elem->id(), 0, interface_id);
 
     // rename the boundary
@@ -166,28 +166,28 @@ BreakMeshByBlockManual_3Blocks::addInterfaceBoundary()
   }
   else
   {
-    elem = _mesh_ptr->getMesh().elem(0);
+    elem = _mesh_ptr->getMesh().elem_ptr(0);
     boundary_info.add_side(elem->id(), 4, 0);
 
-    elem = _mesh_ptr->getMesh().elem(2);
+    elem = _mesh_ptr->getMesh().elem_ptr(2);
     boundary_info.add_side(elem->id(), 4, 0);
 
-    elem = _mesh_ptr->getMesh().elem(3);
+    elem = _mesh_ptr->getMesh().elem_ptr(3);
     boundary_info.add_side(elem->id(), 4, 0);
 
     // rename the boundary
     boundary_info.sideset_name(0) = "Block1_Block2";
 
-    elem = _mesh_ptr->getMesh().elem(1);
+    elem = _mesh_ptr->getMesh().elem_ptr(1);
     boundary_info.add_side(elem->id(), 4, 4);
 
     // rename the boundary
     boundary_info.sideset_name(4) = "Block1_Block3";
 
-    elem = _mesh_ptr->getMesh().elem(4);
+    elem = _mesh_ptr->getMesh().elem_ptr(4);
     boundary_info.add_side(elem->id(), 3, 5);
 
-    elem = _mesh_ptr->getMesh().elem(6);
+    elem = _mesh_ptr->getMesh().elem_ptr(6);
     boundary_info.add_side(elem->id(), 0, 5);
 
     // rename the boundary

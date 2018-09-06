@@ -1269,7 +1269,7 @@ build_cube(UnstructuredMesh & mesh,
   // Set RemoteElem neighbors
   for (auto & elem_ptr : mesh.element_ptr_range())
     for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      if (!elem_ptr->neighbor(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
+      if (!elem_ptr->neighbor_ptr(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
         elem_ptr->set_neighbor(s, const_cast<RemoteElem *>(remote_elem));
 
   if (verbose)
@@ -1303,7 +1303,14 @@ build_cube(UnstructuredMesh & mesh,
   if (verbose)
     Moose::out << "Getting ready to prepare for use" << std::endl;
 
-  mesh.prepare_for_use(true, true); // No need to renumber or find neighbors - done did it.
+  // No need to renumber or find neighbors - done did it.
+  // Avoid deprecation message/error by _also_ setting
+  // allow_renumbering(false). This is a bit silly, but we want to
+  // catch cases where people are purely using the old "skip"
+  // interface and not the new flag setting one.
+  mesh.allow_renumbering(false);
+  mesh.prepare_for_use(/*skip_renumber (ignored!) = */ false,
+                       /*skip_find_neighbors = */ true);
 
   if (verbose)
     for (auto & elem_ptr : mesh.element_ptr_range())
