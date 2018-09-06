@@ -44,7 +44,7 @@ SolidWall::addMooseObjects1Phase()
     // boundary flux user object
     const std::string boundary_flux_name = genName(name(), "boundary_flux");
     {
-      const std::string class_name = "Euler1DVarAreaWallBoundaryFlux";
+      const std::string class_name = "BoundaryFlux3EqnGhostWall";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("rdg_flux") = _rdg_conservative_flux_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
