@@ -46,7 +46,7 @@ SolidWall::addMooseObjects1Phase()
     {
       const std::string class_name = "BoundaryFlux3EqnGhostWall";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("rdg_flux") = _rdg_conservative_flux_name;
+      params.set<UserObjectName>("numerical_flux") = _numerical_conservative_flux_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim.addUserObject(class_name, boundary_flux_name, params);
     }
@@ -86,8 +86,9 @@ SolidWall::addMooseObjects2Phase()
     {
       const std::string class_name = "BoundaryFlux7EqnGhostWall";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("rdg_conservative_flux") = _rdg_conservative_flux_name;
-      params.set<UserObjectName>("rdg_nonconservative_flux") = _rdg_nonconservative_flux_name;
+      params.set<UserObjectName>("numerical_conservative_flux") = _numerical_conservative_flux_name;
+      params.set<UserObjectName>("numerical_nonconservative_flux") =
+          _numerical_nonconservative_flux_name;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim.addUserObject(class_name, boundary_flux_name, params);
     }
