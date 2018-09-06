@@ -59,7 +59,7 @@ if __name__ == '__main__':
     count = 0
     cmd = ['git', 'diff', '{}/{}'.format(opt.remote, opt.branch), '--name-only']
     for filename in subprocess.check_output(cmd).split('\n'):
-        if os.path.basename(filename) in opt.specs:
+        if os.path.isfile(filename) and (os.path.basename(filename) in opt.specs):
             count += check_requirement(os.path.join(root, filename))
 
     sys.exit(count)
