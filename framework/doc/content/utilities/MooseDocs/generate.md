@@ -121,3 +121,27 @@ These items are provided in the associated "tests" file. For example,
   [../]
 []
 ```
+
+It is also possible to provide a common value for 'design' and 'issues' at the top level of a test
+specification as shown below. If 'design' or 'issues' appear again within a block the top level
+values are overridden.
+
+```
+[Tests]
+  design = 'MyObject.md'
+  issues = '#12345'
+  [one]
+    type = CSVDiff
+    input = one.i
+    csvdiff = one_out.csv
+    requirement = "MyObject must compute the correct value."
+  []
+  [two]
+    type = RunException
+    input = two.i
+    expect_err = "You can not do that"
+    requirement = "MyObject shall produce an error when a parameter is wrong."
+    issues = "#54321"
+  []
+[]
+```
