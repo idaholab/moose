@@ -32,6 +32,11 @@ public:
   InputParameters & getObjectParams() { return _moose_object_pars; }
 
   /**
+   * Constant version of retreiving the parameters of the object to be created by this action
+   */
+  const InputParameters & getObjectParams() const { return _moose_object_pars; }
+
+  /**
    * Return the object type to be created
    */
   const std::string & getMooseObjectType() const { return _type; }

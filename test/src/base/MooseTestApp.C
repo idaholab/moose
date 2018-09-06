@@ -100,6 +100,9 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("AddMatAndKernel", "AddMatAndKernel");
 
   registerSyntax("MetaNodalNormalsAction", "MetaNodalNormals");
+
+  // For testing the ability to create problems in user defined Actions
+  registerSyntax("CreateSpecialProblemAction", "TestProblem");
 }
 
 // External entry point for dynamic execute flag registration

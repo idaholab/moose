@@ -10,8 +10,6 @@
 #include "CreateProblemAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
-#include "EigenProblem.h"
-#include "NonlinearSystemBase.h"
 #include "MooseApp.h"
 
 registerMooseAction("MooseApp", CreateProblemAction, "create_problem");
@@ -20,51 +18,13 @@ template <>
 InputParameters
 validParams<CreateProblemAction>()
 {
-  MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
-  MooseEnum rz_coord_axis("X=0 Y=1", "Y");
-
   InputParameters params = validParams<MooseObjectAction>();
-  params.set<std::string>("type") = "FEProblem";
+  params.addParam<std::string>("type", "FEProblem", "Problem type");
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
-  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
-  params.addParam<MultiMooseEnum>(
-      "coord_type", coord_types, "Type of the coordinate system per block param");
-  params.addParam<MooseEnum>(
-      "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
-  params.addParam<bool>(
-      "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
-  params.addParam<bool>("material_coverage_check",
-                        true,
-                        "Set to false to disable material->subdomain coverage check");
-  params.addParam<bool>("parallel_barrier_messaging",
-                        true,
-                        "Displays messaging from parallel "
-                        "barrier notifications when executing "
-                        "or transferring to/from Multiapps "
-                        "(default: true)");
-
-  params.addParam<FileNameNoExtension>("restart_file_base",
-                                       "File base name used for restart (e.g. "
-                                       "<path>/<filebase> or <path>/LATEST to "
-                                       "grab the latest file available)");
-
-  params.addParam<std::vector<TagName>>("extra_tag_vectors",
-                                        "Extra vectors to add to the system that can be filled by "
-                                        "objects which compute residuals and Jacobians (Kernels, "
-                                        "BCs, etc.) by setting tags on them.");
-
-  params.addParam<std::vector<TagName>>("extra_tag_matrices",
-                                        "Extra matrices to add to the system that can be filled "
-                                        "by objects which compute residuals and Jacobians "
-                                        "(Kernels, BCs, etc.) by setting tags on them.");
-
   return params;
 }
 
-CreateProblemAction::CreateProblemAction(InputParameters parameters)
-  : MooseObjectAction(parameters),
-    _blocks(getParam<std::vector<SubdomainName>>("block")),
-    _coord_sys(getParam<MultiMooseEnum>("coord_type"))
+CreateProblemAction::CreateProblemAction(InputParameters parameters) : MooseObjectAction(parameters)
 {
 }
 
@@ -72,79 +32,17 @@ void
 CreateProblemAction::act()
 {
   // build the problem only if we have mesh
-  if (_mesh.get() != NULL)
+  if (_mesh.get() != NULL && _pars.isParamSetByUser("type"))
   {
-    {
-      _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
-      _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
+    // when this action is built by parser with Problem input block, this action
+    // must act i.e. create a problem. Thus if a problem has been created, it will error out.
+    if (_problem)
+      mooseError("Trying to build a problem but problem has already existed");
 
-      _problem =
-          _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
-      if (!_problem.get())
-        mooseError("Problem has to be of a FEProblemBase type");
+    _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
+    _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
 
-      // if users provide a problem type, the type has to be an EigenProblem or its derived subclass
-      // when uing an eigen executioner
-      if (_app.useEigenvalue() && _type != "EigenProblem" &&
-          !(std::dynamic_pointer_cast<EigenProblem>(_problem)))
-        mooseError("Problem has to be of a EigenProblem (or derived subclass) type when using "
-                   "eigen executioner");
-    }
-    // set up the problem
-    _problem->setCoordSystem(_blocks, _coord_sys);
-    _problem->setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
-    _problem->setKernelCoverageCheck(getParam<bool>("kernel_coverage_check"));
-    _problem->setMaterialCoverageCheck(getParam<bool>("material_coverage_check"));
-    _problem->setParallelBarrierMessaging(getParam<bool>("parallel_barrier_messaging"));
-
-    if (isParamValid("restart_file_base"))
-    {
-      std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
-
-      std::size_t slash_pos = restart_file_base.find_last_of("/");
-      std::string path = restart_file_base.substr(0, slash_pos);
-      std::string file = restart_file_base.substr(slash_pos + 1);
-
-      /**
-       * If the user specified LATEST as the file in their directory path, find the file with the
-       * latest timestep and the largest serial number.
-       */
-      if (file == "LATEST")
-      {
-        std::list<std::string> dir_list(1, path);
-        std::list<std::string> files = MooseUtils::getFilesInDirs(dir_list);
-        restart_file_base = MooseUtils::getLatestAppCheckpointFileBase(files);
-
-        if (restart_file_base == "")
-          mooseError("Unable to find suitable restart file");
-      }
-
-      _console << "\nUsing " << restart_file_base << " for restart.\n\n";
-      _problem->setRestartFile(restart_file_base);
-    }
-
-    // Create etra vectors and matrices if any
-    CreateTagVectors();
-  }
-}
-
-void
-CreateProblemAction::CreateTagVectors()
-{
-  // add vectors and their tags to system
-  auto & vectors = getParam<std::vector<TagName>>("extra_tag_vectors");
-  auto & nl = _problem->getNonlinearSystemBase();
-  for (auto & vector : vectors)
-  {
-    auto tag = _problem->addVectorTag(vector);
-    nl.addVector(tag, false, GHOSTED);
-  }
-
-  // add matrices and their tags
-  auto & matrices = getParam<std::vector<TagName>>("extra_tag_matrices");
-  for (auto & matrix : matrices)
-  {
-    auto tag = _problem->addMatrixTag(matrix);
-    nl.addMatrix(tag);
+    _problem =
+        _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
   }
 }

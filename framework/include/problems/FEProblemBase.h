@@ -1486,6 +1486,9 @@ public:
   bool constJacobian() const;
 
 protected:
+  /// Create extra tagged vectors and matrices
+  void createTagVectors();
+
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
