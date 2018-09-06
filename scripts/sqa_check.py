@@ -3,6 +3,10 @@ import os
 import sys
 import subprocess
 import argparse
+
+moose_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(moose_dir, 'python'))
+
 import mooseutils
 
 def get_options():
