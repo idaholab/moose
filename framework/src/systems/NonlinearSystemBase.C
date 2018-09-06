@@ -45,6 +45,7 @@
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraint.h"
+#include "RealMortarConstraint.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
 #include "ScalarKernel.h"
@@ -1148,6 +1149,11 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
       _fe_problem.addCachedResidual(tid);
     }
   }
+
+  // go over real mortarn constraints
+  auto & mortar_constraints = _constraints.getActiveRealMortarConstraints();
+  for (auto & mortar_constraint : mortar_constraints)
+    mortar_constraint->computeResidual();
 
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;

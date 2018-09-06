@@ -19,6 +19,7 @@ class NodeFaceConstraint;
 class MortarConstraint;
 class ElemElemConstraint;
 class NodeElemConstraint;
+class RealMortarConstraint;
 
 /**
  * Warehouse for storing constraints
@@ -42,6 +43,7 @@ public:
   const std::vector<std::shared_ptr<NodalConstraint>> & getActiveNodalConstraints() const;
   const std::vector<std::shared_ptr<MortarConstraint>> &
   getActiveMortarConstraints(const std::string & interface) const;
+  const std::vector<std::shared_ptr<RealMortarConstraint>> & getActiveRealMortarConstraints() const;
   const std::vector<std::shared_ptr<ElemElemConstraint>> &
   getActiveElemElemConstraints(InterfaceID interface_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
@@ -88,6 +90,9 @@ protected:
 
   /// MortarConstraints
   std::map<std::string, MooseObjectWarehouse<MortarConstraint>> _mortar_constraints;
+
+  /// RealMortarConstraints
+  MooseObjectWarehouse<RealMortarConstraint> _real_mortar_constraints;
 
   /// ElemElemConstraints (non-displaced)
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;

@@ -60,6 +60,7 @@ protected:
   virtual Real computeQpJacobian();
 
   FEProblemBase & _fe_problem;
+  SystemBase & _sys;
   unsigned int _dim;
 
   const MooseArray<Point> & _q_point;

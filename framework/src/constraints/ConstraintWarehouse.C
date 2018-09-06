@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "ElemElemConstraint.h"
 #include "MortarConstraint.h"
+#include "RealMortarConstraint.h"
 #include "MooseVariable.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
@@ -30,6 +31,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   // Cast the the possible Contraint types
   std::shared_ptr<NodeFaceConstraint> nfc = std::dynamic_pointer_cast<NodeFaceConstraint>(object);
   std::shared_ptr<MortarConstraint> ffc = std::dynamic_pointer_cast<MortarConstraint>(object);
+  std::shared_ptr<RealMortarConstraint> mc =
+      std::dynamic_pointer_cast<RealMortarConstraint>(object);
   std::shared_ptr<NodalConstraint> nc = std::dynamic_pointer_cast<NodalConstraint>(object);
   std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
   std::shared_ptr<NodeElemConstraint> nec = std::dynamic_pointer_cast<NodeElemConstraint>(object);
@@ -54,6 +57,10 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     const std::string & interface = ffc->getParam<std::string>("interface");
     _mortar_constraints[interface].addObject(ffc);
   }
+
+  // RealMortarConstraint
+  else if (mc)
+    _real_mortar_constraints.addObject(mc);
 
   // ElemElemConstraint
   else if (ec)
@@ -129,6 +136,12 @@ ConstraintWarehouse::getActiveMortarConstraints(const std::string & interface) c
               "Unable to locate storage for MortarConstraint objects for the given interface: "
                   << interface);
   return it->second.getActiveObjects();
+}
+
+const std::vector<std::shared_ptr<RealMortarConstraint>> &
+ConstraintWarehouse::getActiveRealMortarConstraints() const
+{
+  return _real_mortar_constraints.getActiveObjects();
 }
 
 const std::vector<std::shared_ptr<ElemElemConstraint>> &
