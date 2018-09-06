@@ -15,6 +15,15 @@ int findParam(int argc, char ** argv);
 int validate(int argc, char ** argv);
 int format(int argc, char ** argv);
 
+std::string
+absPath(const std::string & path)
+{
+  char abspath[PATH_MAX + 1];
+  realpath(path.c_str(), abspath);
+  return std::string(abspath);
+}
+
+
 int
 main(int argc, char ** argv)
 {
@@ -210,20 +219,35 @@ findParam(int argc, char ** argv)
 // the style file is of the format:
 //
 //     [format]
-//         indent_string = "  "
-//         line_length = 100
-//         canonical_section_markers = true
+//       # these parameters set the correspondingly named Formatter member variables.  See them
+//       # for detailed descriptions of what they do.
+//       indent_string = "  "
+//       line_length = 100
+//       canonical_section_markers = true
 //
-//         [sorting]
-//             [pattern]
-//                 section = "[^/]+/[^/]+"
-//                 order = "type"
-//             []
-//             [pattern]
-//                 section = ""
-//                 order = "Mesh ** Executioner Outputs"
-//             []
+//       # This section specifies parameter/section sorgin order as provided by the formatter's
+//       # addPattern member function. The content for this section mirrors the structure of
+//       # the hit file being formatted.  Each section name is a regex (limited to valid hit
+//       # identifier characters). The fields and subsections within each section specify an
+//       # order; any field values are ignored. See the docs for that function for more details.
+//       # The sorting rules are example-based. Sorting is performed depth-first by rules in
+//       # lexical order
+//       [sorting]
+//         [.*]
+//           [.*]
+//             # 'first' fields in doubly-nested section go first. This rule must go first in
+//             # order to not override any later-specified ordering of higher-level sections
+//             # that would occur because the higher-level section matchers for this rule
+//             # would match every section.
+//             first = FooBar
+//           []
 //         []
+//         [foo]        # section 'foo' goes first (before other sections)
+//           bar = bla  # field 'bar' (in the foo section) goes first
+//           ** = bla   # double glob is placeholder for unordered fields/sections
+//           baz = bla  # field 'baz' goes last
+//         []
+//       []
 //     []
 //
 // where all fields are optional and the sorting section is also optional.  If the sorting section
@@ -235,7 +259,7 @@ format(int argc, char ** argv)
   flags.add("h", "print help");
   flags.add("help", "print help");
   flags.add("i", "modify file(s) inplace");
-  flags.add("style", "hit style file detailing format to use", "");
+  flags.add("style", "hit style file detailing format to use", ".hit-format");
 
   auto positional = parseOpts(argc, argv, flags);
 
@@ -253,39 +277,23 @@ format(int argc, char ** argv)
 
   hit::Formatter fmt;
 
-  if (flags.have("style"))
-  {
-    try
-    {
-      std::string fname(flags.val("style"));
-      std::ifstream f(fname);
-      std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-      fmt = hit::Formatter(flags.val("style"), input);
-    }
-    catch (std::exception & err)
-    {
-      std::cerr << "invalid format style " << err.what() << "\n";
-      return 1;
-    }
-  }
-
   int ret = 0;
   for (int i = 0; i < positional.size(); i++)
   {
     std::string fname(positional[i]);
     std::ifstream f(fname);
-    std::string input(std::istreambuf_iterator<char>(f), {});
 
     try
     {
-      auto fmted = fmt.format(fname, input);
       if (flags.have("i"))
       {
+        std::stringstream dst;
+        hit::format(fname, f, dst, flags.val("style"));
         std::ofstream output(fname);
-        output << fmted;
+        output << dst.str();
       }
       else
-        std::cout << fmted;
+        hit::format(fname, f, std::cout, flags.val("style"));
     }
     catch (std::exception & err)
     {

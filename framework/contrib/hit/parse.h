@@ -543,6 +543,19 @@ private:
   std::vector<Pattern> _patterns;
 };
 
+/// locates and returns the path to the governing configuration file specified by file_name for the
+/// specified directory (i.e. the style config that would be used to format a file in dir). If
+/// none is found, an empty string is returned.  The current directory is searched for the
+/// specified file_name; if none is found, the parent directory is searched, etc. until one or
+/// none is found.
+std::string
+discoverFormatFile(const std::string & dir, const std::string file_name);
+
+void format(const std::string & file_name,
+            std::istream & file_contents,
+            std::ostream & dst,
+            const std::string & style_file_name = ".hit-format");
+
 } // namespace hit
 
 #endif

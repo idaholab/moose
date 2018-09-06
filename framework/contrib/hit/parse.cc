@@ -7,6 +7,9 @@
 #include <iterator>
 #include <memory>
 #include <regex>
+#include <sstream>
+#include <fstream>
+#include <limits.h>
 
 #include "parse.h"
 
@@ -1175,6 +1178,64 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
   for (unsigned int i = 0; i < done.size(); i++)
     if (!done[i])
       unused.push_back(nodes[i]);
+}
+
+std::string
+absPath(const std::string & path)
+{
+  char abspath[PATH_MAX + 1];
+  realpath(path.c_str(), abspath);
+  return std::string(abspath);
+}
+
+bool pathExists(const std::string & filename)
+{
+  return static_cast<bool>(std::ifstream(filename));
+}
+
+std::string
+discoverFormatFileInner(const std::string & curr_dir, const std::string & file_name, int level)
+{
+  const int maxlevel = 10;
+
+  auto fpath = curr_dir + "/" + file_name;
+  if (pathExists(fpath))
+    return fpath;
+
+  auto next_dir = curr_dir + "/..";
+  if (absPath(next_dir) == absPath(curr_dir) || level >= maxlevel)
+    return "";
+  return discoverFormatFileInner(next_dir, file_name, level + 1);
+}
+
+std::string
+discoverFormatFile(const std::string & dir, const std::string file_name)
+{
+  return discoverFormatFileInner(dir, file_name, 0);
+}
+
+void
+format(const std::string & file_name, std::istream & file_contents, std::ostream & dst, const std::string & style_file_name)
+{
+  std::string stylefile = hit::discoverFormatFile(".", style_file_name);
+  std::ifstream s(stylefile);
+  std::string style_input((std::istreambuf_iterator<char>(s)), std::istreambuf_iterator<char>());
+
+  hit::Formatter fmt;
+
+  try
+  {
+    if (!stylefile.empty())
+      fmt = hit::Formatter(stylefile, style_input);
+  }
+  catch (std::exception & err)
+  {
+    throw Error(std::string("invalid style configuration file: ") + err.what());
+  }
+
+  std::string input((std::istreambuf_iterator<char>(file_contents)),
+                    std::istreambuf_iterator<char>());
+  dst << fmt.format(file_name, input);
 }
 
 #define EOF TMPEOF
