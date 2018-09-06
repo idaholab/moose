@@ -89,7 +89,7 @@ introductory theory pages on the various models:
 - [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
 - Crystal Plasticity
 - [C0 Timoshenko Beam](tensor_mechanics/C0TimoshenkoBeam.md)
-
+- [Dynamics](tensor_mechanics/Dynamics.md)
 
 !col-end!
 !row-end!
