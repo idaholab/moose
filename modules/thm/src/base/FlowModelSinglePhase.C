@@ -362,7 +362,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
   // advection
   {
     // mass
-    const std::string class_name = "Euler1DVarAreaDGKernel";
+    const std::string class_name = "NumericalFlux3EqnDGKernel";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOA;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
