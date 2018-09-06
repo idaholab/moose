@@ -34,11 +34,27 @@ AlgebraicRelationshipManager::attachAlgebraicFunctorHelper(GhostingFunctor & gf)
 {
   // We need to atttach ghosting functor for both NonlinearSystem and AuxiliarySystem
   // since they have their own  dofMaps
-  _app.getExecutioner()->feProblem().getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(gf);
-  _app.getExecutioner()->feProblem().getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(gf);
+  _app.getExecutioner()
+      ->feProblem()
+      .getNonlinearSystemBase()
+      .dofMap()
+      .add_algebraic_ghosting_functor(gf);
+  _app.getExecutioner()->feProblem().getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(
+      gf);
   // We need to do the same thing for displaced problem
-  if (_app.getExecutioner()->feProblem().getDisplacedProblem()) {
-    _app.getExecutioner()->feProblem().getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(gf);
-    _app.getExecutioner()->feProblem().getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(gf);
+  if (_app.getExecutioner()->feProblem().getDisplacedProblem())
+  {
+    _app.getExecutioner()
+        ->feProblem()
+        .getDisplacedProblem()
+        ->nlSys()
+        .dofMap()
+        .add_algebraic_ghosting_functor(gf);
+    _app.getExecutioner()
+        ->feProblem()
+        .getDisplacedProblem()
+        ->auxSys()
+        .dofMap()
+        .add_algebraic_ghosting_functor(gf);
   }
 }

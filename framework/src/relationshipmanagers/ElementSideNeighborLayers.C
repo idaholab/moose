@@ -40,7 +40,9 @@ void
 ElementSideNeighborLayers::attachRelationshipManagersInternal(
     Moose::RelationshipManagerType rm_type)
 {
-  if ((_app.isSplitMesh() || _mesh.isDistributedMesh() || rm_type ==  Moose::RelationshipManagerType::Algebraic) && _element_side_neighbor_layers > 1)
+  if ((_app.isSplitMesh() || _mesh.isDistributedMesh() ||
+       rm_type == Moose::RelationshipManagerType::Algebraic) &&
+      _element_side_neighbor_layers > 1)
   {
     if (!_default_coupling)
     {
