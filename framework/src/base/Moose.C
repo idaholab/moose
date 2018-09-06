@@ -75,6 +75,9 @@ addActionTypes(Syntax & syntax)
   /**** Register Actions ****/
   /**************************/
   registerMooseObjectTask("create_problem",               Problem,                false);
+  registerMooseObjectTask("create_problem_default",       Problem,                false);
+  registerMooseObjectTask("set_problem_parameters",       Problem,                false);
+
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
 
   // This task does not construct an object, but it needs all of the parameters that
@@ -182,6 +185,7 @@ addActionTypes(Syntax & syntax)
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
   registerTask("setup_variable_complete", false);
+  registerTask("create_problem_complete", false);
   registerTask("ready_to_init", true);
 
   // Output related actions
@@ -218,6 +222,9 @@ addActionTypes(Syntax & syntax)
                            "(setup_mesh_complete)"
                            "(determine_system_type)"
                            "(create_problem)"
+                           "(create_problem_default)"
+                           "(set_problem_parameters)"
+                           "(create_problem_complete)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
