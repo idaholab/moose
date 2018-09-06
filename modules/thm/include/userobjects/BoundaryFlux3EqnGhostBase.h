@@ -10,8 +10,8 @@ template <>
 InputParameters validParams<BoundaryFlux3EqnGhostBase>();
 
 /**
- * Computes boundary fluxes for the 1-D, variable-area Euler equations using an
- * RDG flux user object and a ghost cell solution
+ * Computes boundary fluxes for the 1-D, variable-area Euler equations using a
+ * numerical flux user object and a ghost cell solution
  */
 class BoundaryFlux3EqnGhostBase : public BoundaryFluxBase
 {
@@ -49,8 +49,8 @@ protected:
    */
   virtual DenseMatrix<Real> getGhostCellSolutionJacobian(const std::vector<Real> & U1) const = 0;
 
-  /// RDG flux user object
-  const RDGFluxBase & _rdg_flux;
+  /// Numerical flux user object
+  const RDGFluxBase & _numerical_flux;
 };
 
 #endif

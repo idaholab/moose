@@ -7,15 +7,15 @@ validParams<BoundaryFlux3EqnGhostBase>()
   InputParameters params = validParams<BoundaryFluxBase>();
 
   params.addClassDescription("Computes boundary fluxes for the 1-D, variable-area Euler equations "
-                             "using an RDG flux user object and a ghost cell solution");
+                             "using a numerical flux user object and a ghost cell solution");
 
-  params.addRequiredParam<UserObjectName>("rdg_flux", "Name of RDG flux user object");
+  params.addRequiredParam<UserObjectName>("numerical_flux", "Name of numerical flux user object");
 
   return params;
 }
 
 BoundaryFlux3EqnGhostBase::BoundaryFlux3EqnGhostBase(const InputParameters & parameters)
-  : BoundaryFluxBase(parameters), _rdg_flux(getUserObject<RDGFluxBase>("rdg_flux"))
+  : BoundaryFluxBase(parameters), _numerical_flux(getUserObject<RDGFluxBase>("numerical_flux"))
 {
 }
 
@@ -28,7 +28,7 @@ BoundaryFlux3EqnGhostBase::calcFlux(unsigned int iside,
 {
   const std::vector<Real> U2 = getGhostCellSolution(U1);
 
-  flux = _rdg_flux.getFlux(iside, ielem, U1, U2, normal, _tid);
+  flux = _numerical_flux.getFlux(iside, ielem, U1, U2, normal, _tid);
 }
 
 void
@@ -40,8 +40,8 @@ BoundaryFlux3EqnGhostBase::calcJacobian(unsigned int iside,
 {
   const std::vector<Real> U2 = getGhostCellSolution(U1);
 
-  const auto & pdF_pdU1 = _rdg_flux.getJacobian(true, iside, ielem, U1, U2, normal, _tid);
-  const auto & dF_dU2 = _rdg_flux.getJacobian(false, iside, ielem, U1, U2, normal, _tid);
+  const auto & pdF_pdU1 = _numerical_flux.getJacobian(true, iside, ielem, U1, U2, normal, _tid);
+  const auto & dF_dU2 = _numerical_flux.getJacobian(false, iside, ielem, U1, U2, normal, _tid);
 
   // compute dF/dU1 = pdF/pdU1 + dF/dU2 * dU2/dU1
   J = getGhostCellSolutionJacobian(U1);
