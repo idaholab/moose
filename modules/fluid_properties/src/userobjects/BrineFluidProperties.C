@@ -121,7 +121,7 @@ BrineFluidProperties::rho(Real pressure, Real temperature, Real xnacl) const
 
   // The density of water at temperature Tv
   // Note: convert Tv to Kelvin to calculate water density
-  water_density = _water_fp->rho(pressure, Tv + _T_c2k);
+  water_density = _water_fp->rho_from_p_T(pressure, Tv + _T_c2k);
 
   // The brine density is given by the water density scaled by the ratio of
   // brine molar mass to pure water molar mass
@@ -312,7 +312,7 @@ BrineFluidProperties::cp(Real pressure, Real temperature, Real xnacl) const
   // The brine isobaric heat capacity is then given by the isobaric heat
   // capacity of water at temperature Th multiplied by q2
   // Note: water isobaric heat capacity requires temperature in Kelvin
-  return q2 * _water_fp->cp(pressure, Th + _T_c2k);
+  return q2 * _water_fp->cp_from_p_T(pressure, Th + _T_c2k);
 }
 
 Real

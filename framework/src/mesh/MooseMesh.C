@@ -741,7 +741,7 @@ MooseMesh::nodeToElemMap()
 
       for (const auto & elem : getMesh().active_element_ptr_range())
         for (unsigned int n = 0; n < elem->n_nodes(); n++)
-          _node_to_elem_map[elem->node(n)].push_back(elem->id());
+          _node_to_elem_map[elem->node_id(n)].push_back(elem->id());
 
       _node_to_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
     }
@@ -1888,7 +1888,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
     if ((parent_side != -1 && !elem->is_child_on_side(child, parent_side)))
       continue;
 
-    const Elem * child_elem = elem->child(child);
+    const Elem * child_elem = elem->child_ptr(child);
 
     if (child_side != -1)
     {
@@ -2127,9 +2127,18 @@ MooseMesh::buildSideList(std::vector<dof_id_type> & el,
                          std::vector<unsigned short int> & sl,
                          std::vector<boundary_id_type> & il)
 {
-  mooseDeprecated("The version of MooseMesh::buildSideList() taking three arguments is"
+#ifdef LIBMESH_ENABLE_DEPRECATED
+  mooseDeprecated("The version of MooseMesh::buildSideList() taking three arguments is "
                   "deprecated, call the version that returns a vector of tuples instead.");
   getMesh().get_boundary_info().build_side_list(el, sl, il);
+#else
+  libmesh_ignore(el);
+  libmesh_ignore(sl);
+  libmesh_ignore(il);
+  mooseError("The version of MooseMesh::buildSideList() taking three "
+             "arguments is not available in your version of libmesh, call the "
+             "version that returns a vector of tuples instead.");
+#endif
 }
 
 std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
@@ -2438,11 +2447,12 @@ MooseMesh::ghostGhostedBoundaries()
 
         // The entries of connected_nodes_to_ghost need to be
         // non-constant, so that they will work in things like
-        // UpdateDisplacedMeshThread.  Therefore, we are using the
-        // "old" interface to get a non-const Node pointer from a
-        // constant Elem.
+        // UpdateDisplacedMeshThread. The container returned by
+        // family_tree contains const Elems even when the Elem
+        // it is called on is non-const, so once that interface
+        // gets fixed we can remove this const_cast.
         for (unsigned int n = 0; n < felem->n_nodes(); ++n)
-          connected_nodes_to_ghost.insert(felem->get_node(n));
+          connected_nodes_to_ghost.insert(const_cast<Node *>(felem->node_ptr(n)));
       }
     }
   }

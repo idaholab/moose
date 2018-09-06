@@ -75,7 +75,7 @@ template <typename T>
 void
 setLinearSolverDefaults(FEProblemBase & problem, LinearSolver<T> & linear_solver)
 {
-  petscSetKSPDefaults(problem, libmesh_cast_ref<PetscLinearSolver<T> &>(linear_solver).ksp());
+  petscSetKSPDefaults(problem, libMesh::cast_ref<PetscLinearSolver<T> &>(linear_solver).ksp());
 }
 
 /**

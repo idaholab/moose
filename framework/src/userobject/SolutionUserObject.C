@@ -377,7 +377,7 @@ SolutionUserObject::directValue(const Elem * elem, const std::string & var_name)
 
   // Get the element id and associated dof
   dof_id_type elem_id = elem->id();
-  dof_id_type dof_id = _system->get_mesh().elem(elem_id)->dof_number(sys_num, var_num, 0);
+  dof_id_type dof_id = _system->get_mesh().elem_ptr(elem_id)->dof_number(sys_num, var_num, 0);
 
   // Return the desired value
   return directValue(dof_id);
@@ -533,7 +533,7 @@ SolutionUserObject::updateExodusTimeInterpolation(Real time)
       for (const auto & var_name : _system_variables)
       {
         if (_local_variable_nodal[var_name])
-          _exodusII_io->copy_nodal_solution(*_system, var_name, _exodus_index1 + 1);
+          _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
         else
           _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
       }
@@ -545,7 +545,7 @@ SolutionUserObject::updateExodusTimeInterpolation(Real time)
       for (const auto & var_name : _system_variables)
       {
         if (_local_variable_nodal[var_name])
-          _exodusII_io->copy_nodal_solution(*_system2, var_name, _exodus_index2 + 1);
+          _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
         else
           _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
       }

@@ -53,8 +53,8 @@ TwoCircleMarker::computeElementMarker()
 {
   Point centroid = _current_elem->centroid();
 
-  if (((centroid - _p1).size() < _r1) ||
-      (((centroid - _p2).size() < _r2) && (_fe_problem.time() < _shut_off_time)))
+  if (((centroid - _p1).norm() < _r1) ||
+      (((centroid - _p2).norm() < _r2) && (_fe_problem.time() < _shut_off_time)))
     return _inside;
 
   return _outside;

@@ -90,6 +90,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
                                              Real temperature,
                                              Real Xnacl,
                                              Real Z,
+                                             unsigned qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
@@ -120,7 +121,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::LIQUID:
     {
       // Calculate the liquid properties
-      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0);
+      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0, qp);
       liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
       break;
@@ -135,7 +136,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
       saturationTwoPhase(pressure, temperature, Xnacl, Z, fsp);
 
       // Calculate the liquid properties
-      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0 - gas.saturation);
+      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0 - gas.saturation, qp);
       liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
       break;
@@ -151,7 +152,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
 
   // Save pressures to FluidStateProperties object
   gas.pressure = pressure;
-  liquid.pressure = pressure - _pc_uo.capillaryPressure(liquid.saturation);
+  liquid.pressure = pressure - _pc_uo.capillaryPressure(liquid.saturation, qp);
 }
 
 void
@@ -533,7 +534,7 @@ PorousFlowBrineCO2::equilibriumMassFractions(Real pressure,
                                              Real & dYh2o_dX) const
 {
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+  _co2_fp.rho_from_p_T(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
 
   // Mole fractions at equilibrium
   Real xco2, dxco2_dp, dxco2_dT, dxco2_dX, yh2o, dyh2o_dp, dyh2o_dT, dyh2o_dX;
@@ -980,7 +981,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
 {
   // CO2 density and derivatives wrt pressure and temperature
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+  _co2_fp.rho_from_p_T(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
 
   if (temperature <= _Tlower)
   {
@@ -1017,7 +1018,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
 
     // Equilibrium mole fractions and derivatives at the upper temperature
     Real xco2_upper, yh2o_upper;
-    Real co2_density_upper = _co2_fp.rho(pressure, _Tupper);
+    Real co2_density_upper = _co2_fp.rho_from_p_T(pressure, _Tupper);
 
     solveEquilibriumMoleFractionHighTemp(
         pressure, _Tupper, Xnacl, co2_density_upper, xco2_upper, yh2o_upper);
@@ -1100,7 +1101,7 @@ PorousFlowBrineCO2::equilibriumMoleFractionsLowTemp(Real pressure,
 
   // CO2 density and derivatives wrt pressure and temperature
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+  _co2_fp.rho_from_p_T(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
 
   // Assume infinite dilution (yh20 = 0 and xco2 = 0) in low temperature regime
   Real A, dA_dp, dA_dT, B, dB_dp, dB_dT;
@@ -1403,10 +1404,8 @@ PorousFlowBrineCO2::partialDensityCO2(Real temperature,
 }
 
 Real
-PorousFlowBrineCO2::totalMassFraction(Real pressure,
-                                      Real temperature,
-                                      Real Xnacl,
-                                      Real saturation) const
+PorousFlowBrineCO2::totalMassFraction(
+    Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned qp) const
 {
   // Check whether the input pressure and temperature are within the region of validity
   checkVariables(pressure, temperature);
@@ -1442,7 +1441,7 @@ PorousFlowBrineCO2::totalMassFraction(Real pressure,
 
   // Liquid properties
   const Real liquid_saturation = 1.0 - saturation;
-  const Real liquid_pressure = pressure - _pc_uo.capillaryPressure(liquid_saturation);
+  const Real liquid_pressure = pressure - _pc_uo.capillaryPressure(liquid_saturation, qp);
   liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
   // The total mass fraction of ncg (z) can now be calculated

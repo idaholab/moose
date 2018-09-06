@@ -45,7 +45,8 @@ PorousFlowFluidStateBrineCO2::thermophysicalProperties()
   // The FluidProperty objects use temperature in K
   Real Tk = _temperature[_qp] + _T_c2k;
 
-  _fs_uo.thermophysicalProperties(_gas_porepressure[_qp], Tk, _Xnacl[_qp], (*_Z[0])[_qp], _fsp);
+  _fs_uo.thermophysicalProperties(
+      _gas_porepressure[_qp], Tk, _Xnacl[_qp], (*_Z[0])[_qp], _qp, _fsp);
 }
 
 void
@@ -63,7 +64,7 @@ PorousFlowFluidStateBrineCO2::computeQpProperties()
       _dsaturation_dvar[_qp][ph][_Xvar] = _fsp[ph].dsaturation_dX;
 
     // Derivative of capillary pressure
-    Real dpc = _pc_uo.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation);
+    Real dpc = _pc_uo.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation, _qp);
 
     // Derivative of porepressure wrt variables
     if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
@@ -111,7 +112,7 @@ PorousFlowFluidStateBrineCO2::computeQpProperties()
     if (!_nodal_material)
     {
       // Second derivative of capillary pressure
-      Real d2pc = _pc_uo.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation);
+      Real d2pc = _pc_uo.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation, _qp);
 
       (*_grads_qp)[_qp][_aqueous_phase_number] +=
           _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];

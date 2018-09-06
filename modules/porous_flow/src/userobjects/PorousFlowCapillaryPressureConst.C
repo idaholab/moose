@@ -30,23 +30,40 @@ PorousFlowCapillaryPressureConst::PorousFlowCapillaryPressureConst(
   _log_ext = false;
 }
 
-Real PorousFlowCapillaryPressureConst::effectiveSaturation(Real /*pc*/) const { return 1.0; }
-
-Real PorousFlowCapillaryPressureConst::dEffectiveSaturation(Real /*pc*/) const { return 0.0; }
-
-Real PorousFlowCapillaryPressureConst::d2EffectiveSaturation(Real /*pc*/) const { return 0.0; }
-
-Real PorousFlowCapillaryPressureConst::capillaryPressureCurve(Real /*saturation*/) const
+Real
+PorousFlowCapillaryPressureConst::effectiveSaturation(Real /*pc*/, unsigned /*qp*/) const
 {
-  return _pc;
+  return 1.0;
 }
 
-Real PorousFlowCapillaryPressureConst::dCapillaryPressureCurve(Real /*saturation*/) const
+Real
+PorousFlowCapillaryPressureConst::dEffectiveSaturation(Real /*pc*/, unsigned /*qp*/) const
 {
   return 0.0;
 }
 
-Real PorousFlowCapillaryPressureConst::d2CapillaryPressureCurve(Real /*saturation*/) const
+Real
+PorousFlowCapillaryPressureConst::d2EffectiveSaturation(Real /*pc*/, unsigned /*qp*/) const
+{
+  return 0.0;
+}
+
+Real
+PorousFlowCapillaryPressureConst::capillaryPressureCurve(Real /*saturation*/, unsigned /*qp*/) const
+{
+  return _pc;
+}
+
+Real
+PorousFlowCapillaryPressureConst::dCapillaryPressureCurve(Real /*saturation*/,
+                                                          unsigned /*qp*/) const
+{
+  return 0.0;
+}
+
+Real
+PorousFlowCapillaryPressureConst::d2CapillaryPressureCurve(Real /*saturation*/,
+                                                           unsigned /*qp*/) const
 {
   return 0.0;
 }

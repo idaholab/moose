@@ -97,6 +97,7 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real
 }
 
 Real IdealGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
+
 Real
 IdealGasFluidProperties::cp() const
 {
@@ -104,6 +105,7 @@ IdealGasFluidProperties::cp() const
 }
 
 Real IdealGasFluidProperties::cv_from_v_e(Real, Real) const { return _cv; }
+
 Real
 IdealGasFluidProperties::cv() const
 {
@@ -254,7 +256,8 @@ Real
 IdealGasFluidProperties::rho_from_p_T(Real p, Real T) const
 {
   if ((_gamma - 1.0) * p == 0.0)
-    throw MooseException(name() + ": Invalid gamma or pressure detected in rho(pressure = " +
+    throw MooseException(name() +
+                         ": Invalid gamma or pressure detected in rho_from_p_T(pressure = " +
                          Moose::stringify(p) + ", gamma = " + Moose::stringify(_gamma) + ")");
 
   return p / (_gamma - 1.0) / _cv / T;

@@ -44,7 +44,7 @@ CircleMarker::computeElementMarker()
 {
   Point centroid = _current_elem->centroid();
 
-  if ((centroid - _p).size() < _r)
+  if ((centroid - _p).norm() < _r)
     return _inside;
 
   return _outside;

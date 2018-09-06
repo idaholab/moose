@@ -55,9 +55,15 @@ IdealGasFluidPropertiesPT::molarMass() const
   return _molar_mass;
 }
 
-Real IdealGasFluidPropertiesPT::cp(Real /*pressure*/, Real /*temperature*/) const { return _cp; }
+Real IdealGasFluidPropertiesPT::cp_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _cp;
+}
 
-Real IdealGasFluidPropertiesPT::cv(Real /*pressure*/, Real /*temperature*/) const { return _cv; }
+Real IdealGasFluidPropertiesPT::cv_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _cv;
+}
 
 Real
 IdealGasFluidPropertiesPT::c(Real /*pressure*/, Real temperature) const
@@ -85,16 +91,16 @@ Real IdealGasFluidPropertiesPT::s(Real /*pressure*/, Real /*temperature*/) const
 }
 
 Real
-IdealGasFluidPropertiesPT::rho(Real pressure, Real temperature) const
+IdealGasFluidPropertiesPT::rho_from_p_T(Real pressure, Real temperature) const
 {
   return pressure * _molar_mass / (_R * temperature);
 }
 
 void
-IdealGasFluidPropertiesPT::rho_dpT(
+IdealGasFluidPropertiesPT::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   drho_dp = _molar_mass / (_R * temperature);
   drho_dT = -pressure * _molar_mass / (_R * temperature * temperature);
 }
@@ -125,7 +131,7 @@ IdealGasFluidPropertiesPT::rho_e_dpT(Real pressure,
                                      Real & de_dT) const
 {
   Real density, ddensity_dp, ddensity_dT;
-  rho_dpT(pressure, temperature, density, ddensity_dp, ddensity_dT);
+  rho_from_p_T(pressure, temperature, density, ddensity_dp, ddensity_dT);
   rho = density;
   drho_dp = ddensity_dp;
   drho_dT = ddensity_dT;
@@ -154,7 +160,7 @@ IdealGasFluidPropertiesPT::mu_dpT(
 void
 IdealGasFluidPropertiesPT::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
-  rho = this->rho(pressure, temperature);
+  rho = this->rho_from_p_T(pressure, temperature);
   mu = this->mu(pressure, temperature);
 }
 
@@ -168,7 +174,7 @@ IdealGasFluidPropertiesPT::rho_mu_dpT(Real pressure,
                                       Real & dmu_dp,
                                       Real & dmu_dT) const
 {
-  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 

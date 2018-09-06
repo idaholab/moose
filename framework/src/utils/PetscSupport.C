@@ -299,7 +299,7 @@ petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason
   // Prior to PETSc 3.0.0, you could call KSPDefaultConverged with a NULL context
   // pointer, as it was unused.
   KSPDefaultConverged(ksp, n, rnorm, reason, PETSC_NULL);
-#elif PETSC_RELEASE_LESS_THAN(3, 5, 0)
+#elif PETSC_VERSION_LESS_THAN(3, 5, 0)
   // As of PETSc 3.0.0, you must call KSPDefaultConverged with a
   // non-NULL context pointer which must be created with
   // KSPDefaultConvergedCreate(), and destroyed with
@@ -405,7 +405,7 @@ petscNonlinearConverged(SNES snes,
   // Whether or not to force SNESSolve() take at least one iteration regardless of the initial
   // residual norm
   PetscBool force_iteration = PETSC_FALSE;
-#if !PETSC_RELEASE_LESS_THAN(3, 8, 4)
+#if !PETSC_VERSION_LESS_THAN(3, 8, 4)
   ierr = SNESGetForceIteration(snes, &force_iteration);
   CHKERRABORT(problem.comm().get(), ierr);
 #endif
