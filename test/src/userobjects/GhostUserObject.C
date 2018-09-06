@@ -52,8 +52,7 @@ void
 GhostUserObject::execute()
 {
   auto my_processor_id = processor_id();
-  auto & dof_map = _fe_problem.getNonlinearSystem().dofMap();
-
+  
   if (_rank == DofObject::invalid_processor_id || my_processor_id == _rank)
   {
     const auto & mesh = _subproblem.mesh().getMesh();
