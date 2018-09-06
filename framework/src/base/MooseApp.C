@@ -424,6 +424,20 @@ MooseApp::setupOptions()
 {
   TIME_SECTION(_setup_options_timer);
 
+  if (isParamValid("format"))
+  {
+    if (!isParamValid("input_file"))
+      mooseError("format flag requires specifying an input file with '-i'");
+    std::string fname = getParam<std::string>("input_file");
+    std::ifstream f(fname);
+    std::stringstream dst;
+    MooseUtils::formatHit(fname, f, dst);
+    std::ofstream output(fname);
+    output << dst.str();
+    _ready_to_exit = true;
+    return;
+  }
+
   // MOOSE was updated to have the ability to register execution flags in similar fashion as
   // objects. However, this change requires all *App.C/h files to be updated with the new
   // registerExecFlags method. To avoid breaking all applications the default MOOSE flags
@@ -689,19 +703,6 @@ MooseApp::setupOptions()
       Moose::out << it.first << "\n";
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
-  }
-  else if (isParamValid("format"))
-  {
-    if (!isParamValid("input_file"))
-      mooseError("format flag requires specifying an input file with '-i'");
-    std::string fname = getParam<std::string>("input_file");
-    std::ifstream f(fname);
-    std::stringstream dst;
-    MooseUtils::formatHit(fname, f, dst);
-    std::ofstream output(fname);
-    output << dst.str();
-    _ready_to_exit = true;
-    return;
   }
   else if (_input_filename != "" ||
            isParamValid("input_file")) // They already specified an input filename
