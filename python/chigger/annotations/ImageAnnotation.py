@@ -8,13 +8,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import math
-import vtk
-import mooseutils
-from ..geometric import CubeSource
 from ImageAnnotationSource import ImageAnnotationSource
 from .. import base
-from .. import geometric
 
 class ImageAnnotation(base.ChiggerResult):
     """
@@ -36,23 +31,25 @@ class ImageAnnotation(base.ChiggerResult):
     @staticmethod
     def validKeyBindings():
         bindings = base.ChiggerResult.validKeyBindings()
-        bindings.add('w', ImageAnnotation._setWidth, desc="Increase the scale of the image by 0.01.")
-        bindings.add('w', ImageAnnotation._setWidth, shift=True, desc="Decrease the scale of the image by 0.01.")
-        bindings.add('a', ImageAnnotation._setOpacity, desc="Increase the opacity (alpha) of the image by 0.05.")
-        bindings.add('a', ImageAnnotation._setOpacity, shift=True, desc="Decrease the opacity (alpha) of the image by 0.05.")
+        bindings.add('w', ImageAnnotation._setWidth,
+                     desc="Increase the scale of the image by 0.01.")
+        bindings.add('w', ImageAnnotation._setWidth, shift=True,
+                     desc="Decrease the scale of the image by 0.01.")
+        bindings.add('a', ImageAnnotation._setOpacity,
+                     desc="Increase the opacity (alpha) of the image by 0.05.")
+        bindings.add('a', ImageAnnotation._setOpacity, shift=True,
+                     desc="Decrease the opacity (alpha) of the image by 0.05.")
         return bindings
 
     def __init__(self, **kwargs):
         super(ImageAnnotation, self).__init__(ImageAnnotationSource(), **kwargs)
 
-    def onActivate(self, window, active):
+    def setActive(self, active):
         """
-        Activate/deactive highlighting for the image.
+        Overrides the default active highlighting.
         """
-        super(ImageAnnotation, self).onActivate(window, active)
-
         if active:
-            self._sources[0].getVTKActor().GetProperty().SetBackingColor(1,0,0)
+            self._sources[0].getVTKActor().GetProperty().SetBackingColor(1, 0, 0)
             self._sources[0].getVTKActor().GetProperty().SetBacking(True)
 
         else:
@@ -65,7 +62,7 @@ class ImageAnnotation(base.ChiggerResult):
         self.setOption('position', position)
         self.printOption('position')
 
-    def _setWidth(self, window, binding):
+    def _setWidth(self, window, binding): #pylint: disable=unused-argument
         """
         Callback for setting the image width.
         """
@@ -75,7 +72,7 @@ class ImageAnnotation(base.ChiggerResult):
             self.setOption('width', width)
             self.printOption('width')
 
-    def _setOpacity(self, window, binding):
+    def _setOpacity(self, window, binding): #pylint: disable=unused-argument
         """
         Callback for changing opacity.
         """

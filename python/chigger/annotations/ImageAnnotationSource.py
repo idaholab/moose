@@ -29,9 +29,11 @@ class ImageAnnotationSource(base.ChiggerSource2D):
                                   "a PNG or just the name of a PNG located in the chigger/logos "
                                   "directory.", vtype=str)
         opt.add('width', vtype=float,
-                doc="The image width as a fraction of the window width (None maintains image dimension).")
+                doc="The image width as a fraction of the window width "
+                    "(None maintains image dimension).")
         opt.add('height', vtype=float,
-                doc="The image height as a fraction of the window width (None maintains image dimension).")
+                doc="The image height as a fraction of the window width "
+                    "(None maintains image dimension).")
         opt.add('position', (0.5, 0.5), vtype=float, size=2,
                 doc="The position of the image within the viewport, in relative coordinates.")
         opt.add('horizontal_alignment', 'center', allow=('left', 'center', 'right'),
@@ -49,8 +51,8 @@ class ImageAnnotationSource(base.ChiggerSource2D):
         self.__resize.SetInputConnection(self.__reader.GetOutputPort())
 
         # This is required to get the image to appear
-        self._vtkmapper.SetColorWindow(255); # width of the color range to map to
-        self._vtkmapper.SetColorLevel(127.5); # center of the color range to map to
+        self._vtkmapper.SetColorWindow(255)  # width of the color range to map to
+        self._vtkmapper.SetColorLevel(127.5) # center of the color range to map to
 
     def getVTKSource(self):
         """
@@ -80,7 +82,6 @@ class ImageAnnotationSource(base.ChiggerSource2D):
             self.__reader.Update()
             image_size = list(self.__reader.GetOutput().GetDimensions())
             aspect = float(image_size[0]) / float(image_size[1]) # w/h
-            image_output_size = image_size
 
             if self.isOptionValid('width') and self.isOptionValid('height'):
                 image_size[0] = int(window_size[0] * self.applyOption('width'))

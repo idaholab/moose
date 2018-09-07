@@ -15,7 +15,7 @@ def callback(reader, event, timestep):
 
 # Read Exodus Data
 reader = vtk.vtkExodusIIReader()
-creader.AddObserver(TIMESTEP_CHANGED, callback)
+reader.AddObserver(TIMESTEP_CHANGED, callback)
 reader.SetFileName(filename)
 reader.UpdateInformation()
 reader.SetTimeStep(10)

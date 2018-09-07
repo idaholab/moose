@@ -28,7 +28,8 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
     def validKeyBindings():
         bindings = utils.KeyBindingMixin.validKeyBindings()
         bindings.add('r', MainWindowObserver._nextResult, desc="Select the next result object.")
-        bindings.add('r', MainWindowObserver._previousResult, shift=True, desc="Select the previous result object.")
+        bindings.add('r', MainWindowObserver._previousResult, shift=True,
+                     desc="Select the previous result object.")
         bindings.add('t', MainWindowObserver._deactivateResult, desc="Clear selection(s).")
         bindings.add('h', MainWindowObserver._printHelp, desc="Display the help for this object.")
         return bindings
@@ -43,29 +44,30 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
         Add the KeyPressEvent and MouseMoveEvent for this object.
         """
         super(MainWindowObserver, self).init(*args, **kwargs)
-        self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.KeyPressEvent,  self._onKeyPressEvent)
-        self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.MouseMoveEvent, self._onMouseMoveEvent)
+        self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.KeyPressEvent,
+                                                    self._onKeyPressEvent)
+        self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.MouseMoveEvent,
+                                                    self._onMouseMoveEvent)
 
-    def _nextResult(self, window, binding):
+    def _nextResult(self, window, binding): #pylint: disable=no-self-use, unused-argument
         """
         Keybinding callback: Activate the "next" result object.
         """
         window.nextActive()
-        active = window.getActive()
 
-    def _previousResult(self, window, binding):
+    def _previousResult(self, window, binding): #pylint: disable=no-self-use, unused-argument
         """
         Keybinding callback: Activate the "previous" result object.
         """
         window.nextActive(reverse=True)
 
-    def _deactivateResult(self, window, binding):
+    def _deactivateResult(self, window, binding): #pylint: disable=no-self-use, unused-argument
         """
         Keybinding callback: Deactivate all results.
         """
         window.setActive(None)
 
-    def _printHelp(self, window, binding):
+    def _printHelp(self, window, binding): #pylint: disable=unused-argument
         """
         Keybinding callback: Display the available controls for this object.
         """
@@ -94,7 +96,8 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
 
         for key, desc in out:
             key = mooseutils.colorText('{0: >{w}}: '.format(key, w=n), 'GREEN')
-            print '\n'.join(textwrap.wrap(desc, 100, initial_indent=key, subsequent_indent=' '*(n + 2)))
+            print '\n'.join(textwrap.wrap(desc, 100, initial_indent=key,
+                                          subsequent_indent=' '*(n + 2)))
 
     def _onKeyPressEvent(self, obj, event): #pylint: disable=unused-argument
         """
@@ -117,7 +120,7 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
 
         self._window.update()
 
-    def _onMouseMoveEvent(self, obj, event):
+    def _onMouseMoveEvent(self, obj, event): #pylint: disable=unused-argument
         """
         The function to be called by the vtkInteractor MouseMoveEvent (see init)
         """
@@ -125,6 +128,6 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
         if (result is not None) and hasattr(result, 'onMouseMoveEvent'):
             loc = obj.GetEventPosition()
             sz = result.getVTKRenderer().GetSize()
-            position=(loc[0]/float(sz[0]), loc[1]/float(sz[1]))
+            position = (loc[0]/float(sz[0]), loc[1]/float(sz[1]))
             result.onMouseMoveEvent(position)
             self._window.update()

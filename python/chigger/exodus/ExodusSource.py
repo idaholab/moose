@@ -45,15 +45,18 @@ class ExodusSource(base.ChiggerSource):
         opt.add('nodeset', None, vtype=list,
                 doc="A list of nodeset ids or names to display, use [] to display all nodesets.")
         opt.add('boundary', None, vtype=list,
-                doc="A list of boundary ids (sideset) ids or names to display, use [] to display all sidesets.")
+                doc="A list of boundary ids (sideset) ids or names to display, use [] to display " \
+                    "all sidesets.")
         opt.add('block', [], vtype=list,
-                doc="A list of subdomain (block) ids or names to display, use [] to display all blocks.")
+                doc="A list of subdomain (block) ids or names to display, use [] to display all " \
+                    "blocks.")
 
         opt.add('representation', 'surface', allow=('surface', 'wireframe', 'points'),
                 doc="View volume representation.")
 
         opt.add('range', vtype=float, size=2,
-                doc="The range of data to display on the volume and colorbar; range takes precedence of min/max.")
+                doc="The range of data to display on the volume and colorbar; range takes " \
+                    "precedence of min/max.")
         opt.add('min', vtype=float, doc="The minimum range.")
         opt.add('max', vtype=float, doc="The maximum range.")
 

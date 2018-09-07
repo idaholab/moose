@@ -10,9 +10,9 @@
 
 import vtk
 import mooseutils
+from Line import Line
 from .. import base
 from .. import utils
-from Line import Line
 
 class Graph(base.ChiggerResultBase):
     """
@@ -26,8 +26,10 @@ class Graph(base.ChiggerResultBase):
         """
         opt = base.ChiggerResultBase.validOptions()
         opt.add('color_scheme', vtype=str, doc="The VTK color scheme to utilize.")
-        opt.add('xaxis', default=utils.AxisOptions.validOptions(), doc="The settings for the x-axis.")
-        opt.add('yaxis', default=utils.AxisOptions.validOptions(), doc="The settings for the y-axis.")
+        opt.add('xaxis', default=utils.AxisOptions.validOptions(),
+                doc="The settings for the x-axis.")
+        opt.add('yaxis', default=utils.AxisOptions.validOptions(),
+                doc="The settings for the y-axis.")
         opt.add('x2axis', default=utils.AxisOptions.validOptions(),
                 doc="The settings for the secondary x-axis (top).")
         opt.add('y2axis', default=utils.AxisOptions.validOptions(),
@@ -52,7 +54,8 @@ class Graph(base.ChiggerResultBase):
         bindings.add('f', Graph._setFont, desc="Increase the font size by 1 point.")
         bindings.add('f', Graph._setFont, shift=True, desc="Decrease the font size by 1 point.")
         bindings.add('l', Graph._setLineThickness, desc="Increase the line thickness by 1 point.")
-        bindings.add('l', Graph._setLineThickness, shift=True, desc="Decrease the line thickness by 1 point.")
+        bindings.add('l', Graph._setLineThickness, shift=True,
+                     desc="Decrease the line thickness by 1 point.")
         return bindings
 
     def __init__(self, *args, **kwargs):
@@ -195,14 +198,14 @@ class Graph(base.ChiggerResultBase):
         if self._vtkchart.GetHiddenAxisBorder() < vtkaxis.GetLabelProperties().GetFontSize():
             self._vtkchart.SetHiddenAxisBorder(vtkaxis.GetLabelProperties().GetFontSize())
 
-    def _setFont(self, window, binding):
+    def _setFont(self, window, binding): #pylint: disable=unused-argument
         """Keybinding method."""
         step = -1 if binding.shift else 1
         sz = self.getOption('font_size') + step
         self.update(font_size=sz)
         self.printOption('font_size')
 
-    def _setLineThickness(self, window, binding):
+    def _setLineThickness(self, window, binding): #pylint: disable=unused-argument
         """Keybinding method."""
         increment = -1 if binding.shift else 1
         for plt in self._plots:

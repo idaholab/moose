@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 import vtk
-import random
-
 
 class Move(object):
     def __init__(self, window):

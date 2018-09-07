@@ -9,11 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #!/usr/bin/env python2
-import sys
 import textwrap
-import array
-from collections import OrderedDict
-import traceback
 import mooseutils
 
 class Option(object):
@@ -35,43 +31,45 @@ class Option(object):
                    array flag.
     """
 
-    def __init__(self, name, default=None, doc=None, vtype=None, allow=None, size=None, array=False):
+    def __init__(self, name, default=None, doc=None, vtype=None, allow=None, size=None,
+                 array=False):
 
-        self.__name = name        # option name
-        self.__value = None       # current value
-        self.__default = default  # default value
-        self.__vtype = vtype      # option type
-        self.__allow = allow      # list of allowed values
-        self.__applied = False    # applies status, see Options class
-        self.__doc = doc          # documentation string
-        self.__array = array      # create an array
-        self.__size = size        # array size
+        self.__name = name       # option name
+        self.__value = None      # current value
+        self.__default = default # default value
+        self.__vtype = vtype     # option type
+        self.__allow = allow     # list of allowed values
+        self.__applied = False   # applies status, see Options class
+        self.__doc = doc         # documentation string
+        self.__array = array     # create an array
+        self.__size = size       # array size
 
         if (self.__name is not None) and (not isinstance(self.__name, (str, unicode))):
-            msg = "The supplied 'name' argument must be a 'str' or 'unicode', but {} was provided.".format(type(self.__name))
-            raise TypeError(msg)
+            msg = "The supplied 'name' argument must be a 'str' or 'unicode', but {} was provided."
+            raise TypeError(msg.format(type(self.__name)))
 
         if (self.__doc is not None) and (not isinstance(self.__doc, (str, unicode))):
-            msg = "The supplied 'doc' argument must be a 'str' or 'unicode', but {} was provided.".format(type(self.__doc))
-            raise TypeError(msg)
+            msg = "The supplied 'doc' argument must be a 'str' or 'unicode', but {} was provided."
+            raise TypeError(msg.format(type(self.__doc)))
 
         if (self.__vtype is not None) and (not isinstance(self.__vtype, type)):
-            msg = "The supplied 'vtype' argument must be a 'type', but {} was provided.".format(type(self.__vtype))
-            raise TypeError(msg)
+            msg = "The supplied 'vtype' argument must be a 'type', but {} was provided."
+            raise TypeError(msg.format(type(self.__vtype)))
 
         if (self.__allow is not None) and (not isinstance(self.__allow, tuple)):
-            msg = "The supplied 'allow' argument must be a 'tuple', but {} was provided.".format(type(self.__allow))
-            raise TypeError(msg)
+            msg = "The supplied 'allow' argument must be a 'tuple', but {} was provided."
+            raise TypeError(msg.format(type(self.__allow)))
 
         if (self.__vtype is not None) and (self.__allow is not None):
             for value in self.__allow:
                 if not isinstance(value, self.__vtype):
-                    msg = "The supplied 'allow' argument must be a 'tuple' of {} items, but a {} item was provided.".format(self.__vtype, type(value))
-                    raise TypeError(msg)
+                    msg = "The supplied 'allow' argument must be a 'tuple' of {} items, but a {} " \
+                            "item was provided."
+                    raise TypeError(msg.format(self.__vtype, type(value)))
 
         if (self.__size is not None) and (not isinstance(self.__size, int)):
-            msg = "The supplied 'size' argument must be a 'int', but {} was provided.".format(type(self.__size))
-            raise TypeError(msg)
+            msg = "The supplied 'size' argument must be a 'int', but {} was provided."
+            raise TypeError(msg.format(type(self.__size)))
 
         elif self.__size is not None:
             self.__array = True
@@ -140,13 +138,14 @@ class Option(object):
             return
 
         if self.__array and not isinstance(val, tuple):
-            msg = "'{}' was defined as an array, which require {} for assignment, but a {} was provided."
+            msg = "'{}' was defined as an array, which require {} for assignment, but a {} was " \
+                  "provided."
             mooseutils.mooseWarning(msg.format(self.name, tuple, type(val)))
             return
 
         if self.__array:
             for v in val:
-                if (self.__vtype is not None):
+                if self.__vtype is not None:
                     try:
                         v = self.__vtype(v)
                     except (ValueError, TypeError):
@@ -158,8 +157,9 @@ class Option(object):
                     return
 
             if self.__size is not None:
-                if (len(val) != self.__size):
-                    msg = "'{}' was defined as an array with length {} but a value with length {} was provided."
+                if len(val) != self.__size:
+                    msg = "'{}' was defined as an array with length {} but a value with length {} "\
+                          "was provided."
                     mooseutils.mooseWarning(msg.format(self.name, self.__size, len(val)))
                     return
 

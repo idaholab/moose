@@ -18,7 +18,7 @@ outline = vtk.vtkOutlineSource()
 outline.SetBounds(source.GetOutput().GetBounds())
 #outline.SetInputConnection(source.GetOutputPort())
 #outline.GetProperty().SetColor(1,0,0)
-.get
+
 mapper2 = vtk.vtkPolyDataMapper2D()
 mapper2.SetInputConnection(outline.GetOutputPort())
 

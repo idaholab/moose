@@ -59,7 +59,7 @@ class ChiggerSource(ChiggerFilterSourceBase):
             x, y, z = self.applyOption('rotation')
             self._vtkactor.RotateX(x)
             self._vtkactor.RotateY(y)
-            self._vtkactor.RotateZ(z),
+            self._vtkactor.RotateZ(z)
 
         if self.isOptionValid('edges') and \
            hasattr(self._vtkactor.GetProperty(), 'SetEdgeVisibility'):

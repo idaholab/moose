@@ -31,8 +31,9 @@ class SingleShotObserver(ChiggerObserver):
         self._window.getVTKInteractor().CreateOneShotTimer(self.getOption('duration'))
         self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.TimerEvent, self._callback)
 
-    def onTimer(self, obj, event):
-        raise NotImplementedError("The 'onTimer(obj, event)' method must be implemented.")
+    def onTimer(self, obj, event): #pylint: disable=no-self-use, unused-argument
+        """The 'onTimer(obj, event)' method must be implemented."""
+        return None
 
     def _callback(self, obj, event): #pylint: disable=unused-argument
         """

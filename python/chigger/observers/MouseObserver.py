@@ -27,7 +27,8 @@ class MouseObserver(ChiggerObserver):
         Add the MouseMoveEvent for this object.
         """
         super(MouseObserver, self).init(*args)
-        return self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.MouseMoveEvent, self.__callback)
+        return self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.MouseMoveEvent,
+                                                           self.__callback)
 
     def onMouseMove(self, pos, obj, event):
         raise NotImplementedError("The 'onMouseMove(pos, obj, event)' method must be implemented.")
@@ -40,8 +41,8 @@ class MouseObserver(ChiggerObserver):
             obj, event: Required by VTK.
         """
         result = self._window.getActive()
-        if (result is not None):
+        if result is not None:
             loc = obj.GetEventPosition()
             sz = result.getVTKRenderer().GetSize()
-            position=(loc[0]/float(sz[0]), loc[1]/float(sz[1]))
+            position = (loc[0]/float(sz[0]), loc[1]/float(sz[1]))
             self.onMouseMove(position, obj, event)

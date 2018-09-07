@@ -28,7 +28,7 @@ class OutlineResult(base.ChiggerResult):
                                             viewport=result.getOption('viewport'),
                                             **kwargs)
 
-    def __highlightChiggerResult(self, result):
+    def __highlightChiggerResult(self, result): #pylint: disable=no-self-use
         """
         Highlight the individual sources of a ChiggerResult.
         """
@@ -40,7 +40,7 @@ class OutlineResult(base.ChiggerResult):
                 sources.append(OutlineSource(src))
         return sources
 
-    def __highlightChiggerResultBase(self, result):
+    def __highlightChiggerResultBase(self, result): #pylint: disable=no-self-use
         """
         Highlight the viewport of a ChiggerResultBase.
         """

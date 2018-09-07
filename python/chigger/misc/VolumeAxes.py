@@ -7,12 +7,8 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
-import vtk
-import mooseutils
-from .. import utils
-from .. import base
 from VolumeAxesSource import VolumeAxesSource
+from .. import base
 
 class VolumeAxes(base.ChiggerResult):
     """
@@ -27,7 +23,9 @@ class VolumeAxes(base.ChiggerResult):
         return opt
 
     def __init__(self, result, **kwargs):
-        super(VolumeAxes, self).__init__(VolumeAxesSource(), renderer=result.getVTKRenderer(), **kwargs)
+        super(VolumeAxes, self).__init__(VolumeAxesSource(),
+                                         renderer=result.getVTKRenderer(),
+                                         **kwargs)
         self._result = result
 
     def update(self, **kwargs):

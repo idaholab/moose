@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import vtk
-import numpy as np
 
 specifiedTime = 1.5
 

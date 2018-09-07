@@ -7,14 +7,11 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import collections
-import textwrap
 import vtk
-import mooseutils
 
 import chigger
-from .. import utils
 from ChiggerObject import ChiggerObject
+from .. import utils
 
 class ChiggerResultBase(ChiggerObject, utils.KeyBindingMixin):
     """
@@ -105,7 +102,7 @@ class ChiggerResultBase(ChiggerObject, utils.KeyBindingMixin):
         size = self.getVTKRenderer().GetSize()
         return [origin[0], origin[0] + size[0], origin[1], origin[1] + size[1], 0, 0]
 
-    def _printCamera(self, *args):
+    def _printCamera(self, *args): #pylint: disable=unused-argument
         """Keybinding callback."""
         print '\n'.join(utils.print_camera(self._vtkrenderer.GetActiveCamera()))
 
@@ -136,7 +133,7 @@ class ChiggerResultBase(ChiggerObject, utils.KeyBindingMixin):
             if self.__highlight is None:
                 self.__highlight = chigger.geometric.OutlineResult(self,
                                                                    interactive=False,
-                                                                   color=(1,0,0),
+                                                                   color=(1, 0, 0),
                                                                    line_width=5)
             self.getRenderWindow().append(self.__highlight)
 

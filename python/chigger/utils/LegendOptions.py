@@ -11,7 +11,7 @@
 import vtk
 from Options import Options
 
-def validOptions():
+def validOptions(): #pylint: disable=invalid-name
     """
     Options specific to the legend.
     """
@@ -25,7 +25,7 @@ def validOptions():
     opt.add('font_size', vtype=int, doc="The legend label test size in points.")
     opt.add('point', size=2, vtype=float, doc="The location of the legend anchor point.")
     opt.add('horizontal_alignment', default='right', vtype=str, allow=('left', 'center', 'right'),
-            doc= "The horizontal alignment of the legend with respect to the anchor point.")
+            doc="The horizontal alignment of the legend with respect to the anchor point.")
     opt.add('vertical_alignment', default='top', vtype=str, allow=('top', 'center', 'bottom'),
             doc="The vertical alignment of the legend with respect to the anchor point.")
     opt.add('border', default=False, vtype=bool, doc="Show the legend border.")
@@ -33,7 +33,7 @@ def validOptions():
     opt.add('border_width', doc="The border width.", vtype=float)
     return opt
 
-def setOptions(vtkchart, vtkrenderer, opt):
+def setOptions(vtkchart, vtkrenderer, opt): #pylint: disable=invalid-name
     """
     A method for updating the legend options.
     """

@@ -29,7 +29,7 @@ class TestObserver(SingleShotObserver):
         vtkinteractor.SetKeySym(None)
         vtkinteractor.SetShiftKey(False)
 
-    def moveMouse(self, x, y):
+    def moveMouse(self, x, y): #pylint: disable=invalid-name
         """
         Simulate a mouse movement.
 

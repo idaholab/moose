@@ -24,7 +24,8 @@ class ChiggerBackground(base.ChiggerResultBase):
                 doc="The second background color, when supplied this creates a gradient " \
                     "background, only applied when the 'layer' option is zero. A background " \
                     "result is automatically added when chigger.RenderWindow is utilized.")
-        opt.add('gradient_background', False, doc="Enable/disable the use of a gradient background.")
+        opt.add('gradient_background', False,
+                doc="Enable/disable the use of a gradient background.")
 
         opt.set('layer', 0)
         opt.set('interactive', False)
@@ -38,7 +39,8 @@ class ChiggerBackground(base.ChiggerResultBase):
         super(ChiggerBackground, self).update(**kwargs)
 
         if self.getOption('layer') != 0:
-            raise ValueError("The 'layer' option must be set to zero for background settings to apply.")
+            msg = "The 'layer' option must be set to zero for background settings to apply."
+            raise ValueError(msg)
 
         if self.isOptionValid('background'):
             self._vtkrenderer.SetBackground(self.applyOption('background'))

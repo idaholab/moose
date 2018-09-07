@@ -59,12 +59,13 @@ class ColorBar(base.ChiggerResult):
 
         bindings.add('w', lambda s, *args: ColorBar._increment(s, 0.005, 'width', *args),
                      desc="Increase the width of the colorbar by 0.005.")
-        bindings.add('w', lambda s, *args: ColorBar._increment(s, -0.005, 'width', *args), shift=True,
+        bindings.add('w', lambda s, *args: ColorBar._increment(s, -0.005, 'width', *args),
+                     shift=True,
                      desc="Decrease the width of the colorbar by 0.005.")
         bindings.add('l', lambda s, *args: ColorBar._increment(s, 0.005, 'length', *args),
                      desc="Increase the length of the colorbar by 0.005.")
-        bindings.add('l', lambda s, *args: ColorBar._increment(s, -0.005, 'length', *args), shift=True,
-                     desc="Decrease the length of the colorbar by 0.005.")
+        bindings.add('l', lambda s, *args: ColorBar._increment(s, -0.005, 'length', *args),
+                     shift=True, desc="Decrease the length of the colorbar by 0.005.")
         bindings.add('f', lambda s, *args: ColorBar._incrementFont(s, 1),
                      desc="Increase the font size by 1 point (when result is selected).")
         bindings.add('f', lambda s, *args: ColorBar._incrementFont(s, -1), shift=True,
@@ -87,7 +88,7 @@ class ColorBar(base.ChiggerResult):
         super(ColorBar, self).update(**kwargs)
 
         # Convenience names for the various sources
-        plane, axis0, axis1 = self._sources
+        plane, axis0, axis1 = self._sources #pylint: disable=unbalanced-tuple-unpacking
 
         # Origin
         loc = self.getOption('location').lower()
@@ -135,7 +136,7 @@ class ColorBar(base.ChiggerResult):
         # Update the bar position
         plane.setOptions(origin=(pos[0], pos[1], 0),
                          point1=(p0[0], p0[1], 0),
-                         point2=(p1[0], p1[1],0))
+                         point2=(p1[0], p1[1], 0))
 
         # Set the colormap for the bar
         rng = self.getOption('cmap_range')
@@ -162,7 +163,7 @@ class ColorBar(base.ChiggerResult):
         self.setOption('colorbar_origin', position)
         self.printOption('colorbar_origin')
 
-    def _increment(self, increment, name, *args):
+    def _increment(self, increment, name, *args): #pylint: disable=unused-argument
         """
         Helper for changing the width and length of the colorbar.
         """
@@ -171,12 +172,12 @@ class ColorBar(base.ChiggerResult):
             self.printOption(name)
             self.setOption(name, value)
 
-    def _incrementFont(self, increment, *args):
+    def _incrementFont(self, increment, *args): #pylint: disable=unused-argument
         """
         Helper for changing the font sizes.
         """
 
-        def set_font_size(ax):
+        def set_font_size(ax): #pylint: disable=invalid-name
             """Helper for setting both the label and tile fonts."""
             fz_tick = ax.getVTKSource().GetLabelProperties().GetFontSize() + increment
             fz_title = ax.getVTKSource().GetTitleProperties().GetFontSize() + increment
@@ -188,10 +189,9 @@ class ColorBar(base.ChiggerResult):
                 ax.setOption('title_font_size', fz_title)
                 ax.printOption('title_font_size')
 
-        _, axis0, axis1 = self._sources
+        _, axis0, axis1 = self._sources #pylint: disable=unbalanced-tuple-unpacking
         set_font_size(axis0)
         set_font_size(axis1)
-
 
     @staticmethod
     def __setAxisPosition(axis, pt0, pt1, location):

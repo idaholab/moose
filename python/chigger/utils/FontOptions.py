@@ -10,7 +10,7 @@
 
 from Options import Options
 
-def validOptions():
+def validOptions(): #pylint: disable=invalid-name
     """
     Returns options for vtk fonts.
     """
@@ -25,8 +25,7 @@ def validOptions():
     opt.add('font_size', 24, "The text font size.", vtype=int)
     return opt
 
-
-def applyOptions(tprop, options):
+def applyOptions(tprop, options): #pylint: disable=invalid-name
     """
     Applies font options to vtkTextProperty object.
 
@@ -46,7 +45,8 @@ def applyOptions(tprop, options):
         tprop.SetJustification(idx)
 
     if options.isOptionValid('vertical_justification'):
-        idx = options.raw('vertical_justification').allow.index(options.applyOption('vertical_justification'))
+        idx = options.raw('vertical_justification').allow.index(
+            options.applyOption('vertical_justification'))
         tprop.SetVerticalJustification(idx)
 
     if options.isOptionValid('text_opacity'):

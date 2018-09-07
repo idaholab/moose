@@ -7,14 +7,8 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
-#!/usr/bin/env python2
-import sys
 from collections import OrderedDict
-import traceback
-
 from Option import Option
-
 import mooseutils
 
 class Options(object):
@@ -136,7 +130,7 @@ class Options(object):
         else:
             opt.value = value
 
-    def get(self, name, apply=False):
+    def get(self, name, apply=False): #pylint: disable=redefined-builtin
         """
         Overload for accessing the parameter value by name with []
 
@@ -203,7 +197,8 @@ class Options(object):
         # Update from Options object
         for opt in args:
             if not isinstance(opt, Options):
-                mooseutils.mooseWarning("The supplied arguments must be Options objects or key, value pairs.")
+                mooseutils.mooseWarning("The supplied arguments must be Options objects or key, " \
+                                        "value pairs.")
             else:
                 for key in opt.keys():
                     if self.hasOption(key):
@@ -226,7 +221,7 @@ class Options(object):
                 msg += ' '*1 + key
             mooseutils.mooseError(msg)
 
-    def string(self, **kwargs):
+    def string(self, **kwargs): #pylint: disable=unused-argument
         """
         Functions to output the options to a string
         """

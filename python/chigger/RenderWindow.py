@@ -14,15 +14,8 @@ import vtk
 
 import base
 import observers
-import geometric
 import misc
 import mooseutils
-
-class ChiggerInteractorStyle(vtk.vtkInteractorStyleUser):
-    def OnKeyPress(self, *args, **kwargs):
-        print 'hello'
-        pass
-
 
 class RenderWindow(base.ChiggerObject):
     """
@@ -38,7 +31,7 @@ class RenderWindow(base.ChiggerObject):
                 doc="The size of the window, expects a list of two items")
         opt.add('style', default='interactive', vtype=str,
                 allow=('interactive', 'modal', 'interactive2D'),
-                doc="The interaction style ('interactive' enables 3D interaction, 'interactive2D' " \
+                doc="The interaction style ('interactive' enables 3D interaction, 'interactive2D' "\
                     "disables out-of-plane interaction, and 'modal' disables all interaction.")
         opt.add('test', default='--test' in sys.argv, vtype=bool,
                 doc="When True the interaction is disabled and the window closes immediately " \

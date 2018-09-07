@@ -14,7 +14,6 @@ from MultiAppExodusReader import MultiAppExodusReader
 import mooseutils
 from .. import base
 from .. import utils
-from .. import geometric
 
 class ExodusResult(base.ChiggerResult):
     """
@@ -62,7 +61,6 @@ class ExodusResult(base.ChiggerResult):
         self._reader = reader
 
         # Build the ExodusSource objects
-        #TODO: Create an ExodusReaderResult object to allow other items to use the reader, for automatic time updating stuff...
         if isinstance(reader, ExodusReader):
             sources = [ExodusSource(reader)]
         elif isinstance(reader, MultiAppExodusReader):
@@ -131,7 +129,7 @@ class ExodusResult(base.ChiggerResult):
         b = self.getBounds()
         return ((b[1]-b[0])/2., (b[3]-b[2])/2., (b[5]-b[4])/2.)
 
-    def _updateOpacity(self, window, binding):
+    def _updateOpacity(self, window, binding): #pylint: disable=unused-argument
         opacity = self.getOption('opacity')
         if binding.shift:
             if opacity > 0.05:
@@ -142,10 +140,9 @@ class ExodusResult(base.ChiggerResult):
         self.update(opacity=opacity)
         self.printOption('opacity')
 
-
-    def _updateColorMap(self, window, binding):
+    def _updateColorMap(self, window, binding): #pylint: disable=unused-argument
         step = 1 if not binding.shift else -1
-        available = self._sources[0]._colormap.names()
+        available = self._sources[0]._colormap.names() #pylint: disable=protected-access
         index = available.index(self.getOption('cmap'))
 
         n = len(available)
@@ -158,7 +155,7 @@ class ExodusResult(base.ChiggerResult):
         self.setOption('cmap', available[index])
         self.printOption('cmap')
 
-    def _updateTimestep(self, window, binding):
+    def _updateTimestep(self, window, binding): #pylint: disable=unused-argument
         step = 1 if not binding.shift else -1
         current = self._reader.getTimeData().timestep + step
         n = len(self._reader.getTimes())

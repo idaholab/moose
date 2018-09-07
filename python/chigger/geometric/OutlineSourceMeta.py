@@ -10,7 +10,6 @@
 import vtk
 import GeometricSourceMeta
 
-
 def create(base_type):
     source_type = GeometricSourceMeta.create(base_type)
     class OutlineSourceMeta(source_type):
@@ -25,7 +24,8 @@ def create(base_type):
             return opt
 
         def __init__(self, input_source, **kwargs):
-            super(OutlineSourceMeta, self).__init__(vtkgeometric_type=vtk.vtkOutlineSource, **kwargs)
+            super(OutlineSourceMeta, self).__init__(vtkgeometric_type=vtk.vtkOutlineSource,
+                                                    **kwargs)
             self._input_source = input_source
 
         def update(self, **kwargs):
@@ -37,9 +37,4 @@ def create(base_type):
             if self.isOptionValid('line_width'):
                 self._vtkactor.GetProperty().SetLineWidth(self.applyOption('line_width'))
 
-            #xmin, xmax = self._input_source.getBounds()
-            #print xmin, xmax
-            #self._vtksource.SetBounds(xmin[0], xmax[0], xmin[1], xmax[1], xmin[2], xmax[2])
-            #if not self._vtksource.GetNumberOfInputConnections(0):
-            #self._vtksource.SetInputConnection(self._input_source.getVTKMapper().GetInputConnection(0,0))
     return OutlineSourceMeta

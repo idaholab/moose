@@ -191,16 +191,16 @@ class ExodusReader(base.ChiggerObject):
             if self.isOptionValid('displacements'):
                 self.__vtkreader.SetApplyDisplacements(self.applyOption('displacements'))
             if self.isOptionValid('displacement_magnitude'):
-                self.__vtkreader.SetDisplacementMagnitude(self.applyOption('displacement_magnitude'))
+                self.__vtkreader.SetDisplacementMagnitude(
+                    self.applyOption('displacement_magnitude'))
 
             # Set the geometric objects to load (i.e., subdomains, nodesets, sidesets)
             active_blockinfo = self.__getActiveBlocks()
-            for object_type in ExodusReader.BLOCK_TYPES:
-                for data in self.__blockinfo:
-                    if (not active_blockinfo) or (data in active_blockinfo):
-                        self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 1)
-                    else:
-                        self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 0)
+            for data in self.__blockinfo:
+                if (not active_blockinfo) or (data in active_blockinfo):
+                    self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 1)
+                else:
+                    self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 0)
 
             # According to the VTK documentation setting this to False (not the default) speeds
             # up data loading. In my testing I was seeing load times cut in half or more with
@@ -352,7 +352,6 @@ class ExodusReader(base.ChiggerObject):
         # Timestep
         timestep = -1
         n = len(self.__timedata)-1
-        self.__use_time_interpolation = False
         if self.isOptionValid('timestep'):
             timestep = self.applyOption('timestep')
 
@@ -398,8 +397,7 @@ class ExodusReader(base.ChiggerObject):
         Returns an empty list if all should be enabled.
         """
         output = []
-        for param, object_type in zip(['block', 'boundary', 'nodeset'],
-                                      [self.BLOCK, self.SIDESET, self.NODESET]):
+        for param in ['block', 'boundary', 'nodeset']:
             if self.isOptionValid(param):
                 blocks = self.applyOption(param)
                 for data in self.__blockinfo:
@@ -544,11 +542,9 @@ class ExodusReader(base.ChiggerObject):
                               (ExodusReader.BOUNDARY, 'Boundaries'),
                               (ExodusReader.NODESET, 'Nodesets')]:
             out += '\n{}:\n'.format(mooseutils.colorText(name, 'GREEN'))
-            names = []
             for info in blockinfo[vtkenum].itervalues():
                 if info.name != info.number:
                     out += '  {} ({})\n'.format(info.name, info.number)
                 else:
                     out += '  {}\n'.format(info.number)
-
         return out

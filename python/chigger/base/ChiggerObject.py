@@ -22,7 +22,7 @@ class ChiggerObject(object):
     @staticmethod
     def validOptions():
         """
-        All object should define a static validOptions method to add new key, value options. (public)
+        Objects should define a static validOptions method to add new key, value options. (public)
         """
         opt = utils.Options()
         opt.add('name', vtype=str,
@@ -112,7 +112,8 @@ class ChiggerObject(object):
         if args:
             for sub in args:
                 if not self.options().hasOption(sub):
-                    mooseutils.mooseError("The supplied sub-option '{}' does not exist.".format(sub))
+                    msg = "The supplied sub-option '{}' does not exist.".format(sub)
+                    mooseutils.mooseError(msg)
                 self._options.get(sub).update(**kwargs)
 
         # Main options case

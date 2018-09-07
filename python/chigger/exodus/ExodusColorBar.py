@@ -7,6 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+#pylint: enable=missing-docstring
 
 import mooseutils
 from .. import base
@@ -49,8 +50,8 @@ class ExodusColorBar(misc.ColorBar):
         """
         if not args:
             opts = base.ColorMap.validOptions()
-            for i, result in enumerate(self._results):
-                for key, value in opts.iteritems():
+            for result in self._results:
+                for key in opts.keys():
                     kwargs[key] = result.getOption(key)
 
             if self.getOption('viewport') is None:
@@ -69,7 +70,7 @@ class ExodusColorBar(misc.ColorBar):
         primary = self.getOption('primary')
         secondary = self.getOption('secondary')
 
-        def set_axis_options_helper(ax, result):
+        def set_axis_options_helper(ax, result): #pylint: disable=invalid-name
             """Helper for setting axis options."""
             ax.set('lim', result[0].getVTKMapper().GetScalarRange())
             if ax.get('title') is None:

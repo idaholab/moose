@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
+import mooseutils
 from .. import base
 from .. import utils
 

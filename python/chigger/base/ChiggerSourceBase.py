@@ -11,7 +11,6 @@
 import vtk
 import mooseutils
 from ChiggerObject import ChiggerObject
-from .. import utils
 
 class ChiggerSourceBase(ChiggerObject):
     """
@@ -102,13 +101,8 @@ class ChiggerSourceBase(ChiggerObject):
         if self.isOptionValid('visible'):
             self._vtkactor.SetVisibility(self.applyOption('visible'))
 
-    def getResult(self):
-        return self.__result
-
-    def getBounds(self):
+    def getBounds(self): #pylint: disable=no-self-use
         """
         Return the bounding box of the results.
         """
-        raise NotImplementedError("The getBounds method must be implemented in {}.".format(type(self)))
-        #self.update()
-        #return utils.get_bounds(self)
+        return None

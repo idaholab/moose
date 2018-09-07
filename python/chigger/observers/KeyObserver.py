@@ -27,7 +27,8 @@ class KeyObserver(ChiggerObserver):
         Add the KeyPressEvent for this object.
         """
         super(KeyObserver, self).init(*args)
-        return self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.KeyPressEvent,  self.__callback)
+        return self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.KeyPressEvent,
+                                                           self.__callback)
 
     def onKeyPress(self, key, shift, obj, event):
         raise NotImplementedError("The 'onKeyPress(key, obj, event)' method must be implemented.")
