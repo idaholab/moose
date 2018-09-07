@@ -42,7 +42,7 @@ namespace MooseUtils
 {
 
 // TODO:
-//     - [ ] create script to format (and check formatting on) all moose-repo input files.
+//     - [x] create script to format (and check formatting on) all moose-repo input files.
 //     - [ ] create git pre-commit hook (script) to verify formatting on input files
 //     - [ ] create canonical moosestyle.i config file
 //     - [ ] create CIVET pre-check for inputu file formatting

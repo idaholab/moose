@@ -11,7 +11,7 @@ PYTHONCFLAGS ?= `$(pyconfig) --cflags`
 PYTHONLDFLAGS ?= `$(pyconfig) --ldflags`
 
 hit: main.cc parse.cc lex.cc lex.h parse.h
-	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
+	$(CXX) -std=c++11 -g -O2 $(CXXFLAGS) $< parse.cc lex.cc -o $@
 
 rewrite: rewrite.cc parse.cc lex.cc lex.h parse.h
 	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@

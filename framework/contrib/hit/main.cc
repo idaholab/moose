@@ -260,6 +260,7 @@ format(int argc, char ** argv)
   flags.add("help", "print help");
   flags.add("i", "modify file(s) inplace");
   flags.add("style", "hit style file detailing format to use", ".hit-format");
+  flags.add("check", "only check the file");
 
   auto positional = parseOpts(argc, argv, flags);
 
@@ -285,7 +286,20 @@ format(int argc, char ** argv)
 
     try
     {
-      if (flags.have("i"))
+      if (flags.have("check"))
+      {
+        std::stringstream dst;
+        hit::format(fname, f, dst, flags.val("style"));
+
+        std::ifstream tmp(fname);
+        std::string orig((std::istreambuf_iterator<char>(tmp)), std::istreambuf_iterator<char>());
+        if (dst.str() != orig)
+        {
+          std::cout << fname << ": is not formatted properly\n";
+          ret = 1;
+        }
+      }
+      else if (flags.have("i"))
       {
         std::stringstream dst;
         hit::format(fname, f, dst, flags.val("style"));
