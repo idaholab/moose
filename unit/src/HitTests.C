@@ -423,6 +423,7 @@ TEST(HitTests, RenderCases)
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        0},
+      {"preserve quotes around empty string with nonzero maxlen", "foo = ''", "foo = ''", 100},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)

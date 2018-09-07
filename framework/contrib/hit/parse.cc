@@ -475,7 +475,8 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
     }
 
     // add any remaining partial chunk of the string value
-    if (pos < unquoted.size())
+    // the second term is to handle cases where we still want to quote empty strings
+    if (pos < unquoted.size() || unquoted.size() == 0)
     {
       // again only add leading newline and indentation for greater chunks after the first.
       if (pos > 0)
