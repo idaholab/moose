@@ -94,15 +94,14 @@ rdm
 ```
 
 Leave that terminal open in the background and get back to your old terminal.
-Then change into your application directory (or `moose/modules/combined`) and run
+Then change into your application directory (or `moose/modules`) and run
 
 ```bash
-make cleanall
-make -n | grep -v bin/libtool | rc -c -
+MOOSE_UNITY=false make compile_commands.json && rc -J .
 ```
 
 This will cause make to transmit a list of all compile commands to the rtags demon. The rtags demon
-will immediately start indexing all MOOSE sourcecode files (you can observe the process in the rdm
+will immediately start indexing all MOOSE source code files (you can observe the process in the rdm
 terminal window).
 
 You can now press `alt+,` in Atom with the cursor on any symbol (even macros) to jump to its
