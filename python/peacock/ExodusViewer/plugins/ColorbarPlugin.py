@@ -91,7 +91,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         # to do a few things with the core chigger objects.
         self._window = None   # RenderWindow (from VTKWindowPlugin)
         self._result = None   # ExodusResult (from VTKWindowPlugin)
-        self._colorbar = None # ExodusColorbar (created by this plugin)
+        self._colorbar = chigger.misc.ColorBar(layer=3, highlight_active=False)
 
         # Call widget setup methods
         self.setup()
@@ -152,7 +152,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Add the colorbar after the result is changed.
         """
         self._result = result
-        self.updateColorbarOptions()
+        #self.updateColorbarOptions()
 
     def onResetWindow(self):
         """
@@ -205,15 +205,23 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         visible = self.ColorBarToggle.isChecked()
         if visible:
-            if self._colorbar is None:
-                self._colorbar = chigger.exodus.ExodusColorBar(self._result, layer=3)
-
             if self._colorbar not in self._window:
                 self._window.append(self._colorbar)
 
-        elif (self._colorbar in self._window) and (self._colorbar is not None):
+            lim = list(self._result.getRange(local=self.ColorBarRangeType.isChecked()))
+            if self._result.isOptionValid('min'):
+                lim[0] = self._result.getOption('min')
+            if self._result.isOptionValid('max'):
+                lim[1] = self._result.getOption('max')
+
+            self._colorbar.setOptions('primary',
+                                      title=self._variable,
+                                      lim=tuple(lim))
+            self._colorbar.setOptions(cmap=self._result.getOption('cmap'),
+                                      cmap_reverse=self.ColorMapReverse.isChecked())
+
+        elif (self._colorbar in self._window):
             self._window.remove(self._colorbar)
-            self._colorbar = None
 
     @staticmethod
     def _setLimitHelper(mode, qobject):

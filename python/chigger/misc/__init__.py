@@ -10,4 +10,5 @@
 
 from ColorBar import ColorBar
 from ChiggerBackground import ChiggerBackground
+from VolumeAxesSource import VolumeAxesSource
 from VolumeAxes import VolumeAxes

@@ -5,7 +5,6 @@
     command = simple.py
     imagediff = 'simple.png'
     cli_args = '--test'
-    cli_args = '--test'
   [../]
 
   [./simple_camera]
@@ -13,7 +12,6 @@
     type = ImageDiff
     command = simple_camera.py
     imagediff = 'simple_camera.png'
-    cli_args = '--test'
     cli_args = '--test'
   [../]
 []

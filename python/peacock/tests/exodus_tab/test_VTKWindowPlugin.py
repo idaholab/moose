@@ -17,10 +17,8 @@ import vtk
 import time
 from PyQt5 import QtWidgets
 
-import chigger
 from peacock.ExodusViewer.plugins.VTKWindowPlugin import main
 from peacock.utils import Testing
-
 
 class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
     """
@@ -47,7 +45,7 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
         self.sleepIfSlow()
-        self._widget, self._window = main(size=[600,600])
+        self._widget, self._window = main(size=(600,600))
         self._window.onSetFilename(self._filename)
         self._window.onSetVariable('diffused')
         self._window.onWindowRequiresUpdate()
@@ -137,7 +135,7 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         """
         self.assertIsNone(self._window._window.getOption('style'))
         self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(),
-                              chigger.base.KeyPressInteractorStyle)
+                              vtk.vtkInteractorStyleJoystickCamera)
 
         self._window.onSetFilename(Testing.get_chigger_input('displace.e'))
         self._window.onWindowRequiresUpdate()

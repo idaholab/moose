@@ -174,8 +174,6 @@ class ExodusReader(base.ChiggerObject):
 
         # Initialize data, these methods only perform work if needed
         self.__initializeTimeInformation()
-        self.__initializeBlockInformation()
-        self.__initializeVariableInformation()
 
         # Initialize the current time data
         self.__current = self.__getTimeInformation()
@@ -185,6 +183,9 @@ class ExodusReader(base.ChiggerObject):
             self.__vtkreader.SetTimeStep(self.__current.index)
             self.__vtkreader.UpdateInformation()
             self.__vtkreader.Modified()
+
+            self.__initializeBlockInformation()
+            self.__initializeVariableInformation()
 
             # Displacement Settings
             if self.isOptionValid('displacements'):
@@ -460,9 +461,6 @@ class ExodusReader(base.ChiggerObject):
         Queries the vtkExodusIIReader object for the subdomain, sideset, nodeset information.
         (private)
         """
-        if self.__blockinfo:
-            return
-
         # Index to be used with the vtkExtractBlock::AddIndex method
         index = 0
 
@@ -484,9 +482,6 @@ class ExodusReader(base.ChiggerObject):
         """
         Queries the vtkExodusIIReader for the current time information. (private)
         """
-        if self.__variableinfo:
-            return
-
         unsorted = dict()
         for variable_type in ExodusReader.VARIABLE_TYPES:
             for i in range(self.__vtkreader.GetNumberOfObjectArrays(variable_type)):

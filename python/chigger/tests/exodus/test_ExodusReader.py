@@ -180,7 +180,24 @@ class TestExodusReader(unittest.TestCase):
         reader.update()
         self.assertEqual(reader.getVTKReader().GetNumberOfTimeSteps(), 2)
 
+    def testVariableReload(self):
+        print '\n'
 
+        filenames = ['../input/simple_diffusion_out.e', '../input/simple_diffusion_new_var_out.e']
+        common = 'common.e'
+        shutil.copy(filenames[0], common)
+        reader = chigger.exodus.ExodusReader(common)
+        variables = reader.getVariableInformation()
+        self.assertIn('aux', variables)
+        self.assertIn('u', variables)
+        self.assertNotIn('New_0', variables)
+
+        time.sleep(1.5) # make sure modified time is different (MacOS requires > 1s)
+        shutil.copy(filenames[1], common)
+        variables = reader.getVariableInformation()
+        self.assertIn('aux', variables)
+        self.assertIn('u', variables)
+        self.assertIn('New_0', variables)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

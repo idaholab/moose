@@ -84,14 +84,14 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Return the default options for the ExodusResult object.
         """
-        return dict()
+        return dict(highlight_active=False)
 
     @staticmethod
     def getDefaultWindowOptions():
         """
         Return the default options for the RenderWindow object.
         """
-        return dict()
+        return dict(default_observer=None)
 
     def __init__(self, size=None, **kwargs):
         super(VTKWindowPlugin, self).__init__(**kwargs)
@@ -114,6 +114,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._result = None
         self._window = chigger.RenderWindow(vtkwindow=self.__qvtkinteractor.GetRenderWindow(),
                                             vtkinteractor=self.__qvtkinteractor.GetRenderWindow().GetInteractor(),
+                                            reset_camera=False,
                                             size=size)
         self._reader_options = self.getDefaultReaderOptions()
         self._result_options = self.getDefaultResultOptions()
@@ -164,7 +165,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         Slot for changing the variable, this is generally called from the FilePlugin signal.
         """
         super(VTKWindowPlugin, self).onSetVariable(variable)
-        self.onReaderOptionsChanged({'variable':self._variable})
+        self.onReaderOptionsChanged({'variables':(self._variable,)})
         self.onResultOptionsChanged({'variable':self._variable})
 
     def onSetComponent(self, component):
@@ -223,19 +224,13 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._reset()
             self._setLoadingMessage('No file selected.')
 
-        if self._window.needsUpdate():# and (self._reader is not None):
-            self._window.update()
-
-            for result in self._window:
-                result.getVTKRenderer().DrawOn()
-
-            if self._reader is not None:
-                self.updateWindow.emit(self._window, self._reader, self._result)
-
-            if self._reader is not None:
-                err = self._reader.getErrorObserver()
-                if err:
-                    mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
+        # Update the RenderWindow
+        self._window.update()
+        if self._reader is not None:
+            self.updateWindow.emit(self._window, self._reader, self._result)
+            err = self._reader.getErrorObserver()
+            if err:
+                mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
 
     def onCameraChanged(self, view, position, focal):
         """
@@ -330,7 +325,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         if self._initialized:
 
             # Clear all data
-            self._window.reset()
             self._window.clear()
             self._adjustTimers(start=['initialize'], stop=['update'])
             self._result = None
@@ -366,7 +360,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._result.update()
 
         # Set the interaction mode (2D/3D)
-        bmin, bmax = self._result.getBounds()
+        bnds = self._result.getBounds()
+        bmin = (bnds[0], bnds[2], bnds[4])
+        bmax = (bnds[1], bnds[3], bnds[5])
         if abs(bmax[-1] - bmin[-1]) < 1e-10:
             self._window.setOption('style', 'interactive2D')
         else:
@@ -379,6 +375,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._window.setOptions(**self._window_options)
         self.setupWindow.emit(self._window)
         self._window.update()
+        self._window.setActive(self._result)
 
         # Store/load camera
         data = self._cameras.get(self._filename, None)
@@ -497,9 +494,8 @@ if __name__ == "__main__":
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
-    filename = 'none.e'
-    widget, window = main(size=[600,600])
-    #window.onSetFilename(filename)
-    #window.onSetVariable('diffused')
-    #window.onWindowRequiresUpdate()
+    widget, window = main()
+    window.onSetFilename(filename)
+    window.onSetVariable('diffused')
+    window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

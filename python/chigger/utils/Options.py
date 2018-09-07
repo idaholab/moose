@@ -244,7 +244,7 @@ class Options(object):
         output = []
         sub_output = dict()
         for key in self.keys():
-            opt = self[key]
+            opt = self.get(key)
 
             if isinstance(opt, Options):
                 items, _ = opt.toScriptString()

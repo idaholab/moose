@@ -41,7 +41,7 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         # The file to open
         self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
         self._filenames.append(self.temp_file)
-        self._widget, self._window = main(size=[600,600])
+        self._widget, self._window = main(size=(600,600))
 
     def testInitial(self):
         """
@@ -312,7 +312,7 @@ class TestFilePluginNewVariable(Testing.PeacockImageTestCase):
         """
         self._filenames = Testing.get_chigger_input_list('simple_diffusion_out.e',
                                                          'simple_diffusion_new_var_out.e')
-        self._widget, self._window = main(size=[600,600])
+        self._widget, self._window = main(size=(600,600))
 
     def testInitial(self):
         shutil.copy(self._filenames[0], self.temp_file)

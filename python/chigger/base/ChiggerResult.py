@@ -49,24 +49,26 @@ class ChiggerResult(ChiggerResultBase):
 
     def __init__(self, *sources, **kwargs):
         super(ChiggerResult, self).__init__(renderer=kwargs.pop('renderer', None), **kwargs)
-        self._sources = list()#list(sources)
 
+        self._sources = list()
         for src in sources:
-            self.addSource(src)
+            self._addSource(src)
 
         self.setOptions(**kwargs)
 
+    def init(self, window):
+        super(ChiggerResult, self).init(window)
+        for src in self._sources:
+            self._vtkrenderer.AddActor(src.getVTKActor())
+
+    def deinit(self):
+        for src in self._sources:
+            self._vtkrenderer.RemoveActor(src.getVTKActor())
 
     def getSources(self):
         return self._sources
 
-    def getBounds(self):
-        """
-        Return the bounding box of the results.
-        """
-        return utils.get_vtk_bounds_min_max(*[src.getBounds() for src in self._sources])
-
-    def addSource(self, source):
+    def _addSource(self, source):
         if not isinstance(source, self.SOURCE_TYPE):
             msg = 'The supplied source type of {} must be of type {}.'
             raise mooseutils.MooseException(msg.format(source.__class__.__name__,
@@ -75,12 +77,13 @@ class ChiggerResult(ChiggerResultBase):
         self._sources.append(source)
         source.setVTKRenderer(self._vtkrenderer)
         source._ChiggerSourceBase__result = self
-        self._vtkrenderer.AddActor(source.getVTKActor())
 
-    def removeSource(self, source):
-        source.setVTKRenderer(None)
-        self._vtkrenderer.RemoveActor(source.getVTKActor())
-        self._sources.remove(source)
+
+    def getBounds(self):
+        """
+        Return the bounding box of the results.
+        """
+        return utils.get_vtk_bounds_min_max(*[src.getBounds() for src in self._sources])
 
     def setOptions(self, *args, **kwargs):
         """
@@ -134,14 +137,6 @@ class ChiggerResult(ChiggerResultBase):
         """
         rngs = [src.getRange(local=local) for src in self._sources]
         return utils.get_min_max(*rngs)
-
-    def reset(self):
-        """
-        Remove actors from renderer.
-        """
-        super(ChiggerResult, self).reset()
-        for src in self._sources:
-            self._vtkrenderer.RemoveActor(src.getVTKActor())
 
     def __iter__(self):
         """

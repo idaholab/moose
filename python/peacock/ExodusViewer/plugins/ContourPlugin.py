@@ -80,13 +80,19 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if not self.hasState():
             self.setChecked(False)
 
+    def onSetEnableWidget(self, value):
+        """
+        Remove default enabling of widget, this happens in updateOptions based on variable type.
+        """
+        pass
+
     def updateOptions(self):
         """
         Called when contours are toggled or the count or levels are changed.
         """
-
         # Return if the variable information is not set
         if self._varinfo is None:
+            self.setEnabled(False)
             return
 
         # Enable if the variable is valid for contours
@@ -95,7 +101,7 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         else:
             self.setEnabled(False)
 
-        checked = self.isChecked()
+        checked = self.isChecked() and self.isEnabled()
         self.ContourCount.setEnabled(checked)
         self.ContourLevels.setEnabled(checked)
 
@@ -106,7 +112,7 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             text = self.ContourLevels.text()
             if len(text) > 0:
                 try:
-                    options['levels'] = [float(item) for item in re.split('[;,\s]', str(text))]
+                    options['levels'] = tuple(float(item) for item in re.split('[;,\s]', str(text)))
                     self.ContourCount.setEnabled(False)
                 except:
                     self.ContourCount.setEnabled(False)
@@ -196,6 +202,6 @@ if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e')
-    widget, window = main(size=[600,600])
+    widget, window = main()
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

@@ -41,6 +41,8 @@ class ChiggerResultBase(ChiggerObject, utils.KeyBindingMixin):
                     "relative position to the entire window (0 to 1).")
         opt.add('camera', None, vtype=vtk.vtkCamera,
                 doc="The VTK camera to utilize for viewing the results.")
+        opt.add('highlight_active', default=True, vtype=bool,
+                doc="When the result is activate enable/disable the 'highlighting'.")
         return opt
 
     @staticmethod
@@ -55,12 +57,7 @@ class ChiggerResultBase(ChiggerObject, utils.KeyBindingMixin):
         self._vtkrenderer = renderer if renderer != None else vtk.vtkRenderer()
         self._vtkrenderer.SetInteractive(False)
         self._render_window = None
-
-    def setRenderWindow(self, window):
-        """
-        Set the chigger.RenderWindow object (this should not be called).
-        """
-        self._render_window = window
+        self.__highlight = None
 
     def getRenderWindow(self):
         """
@@ -109,4 +106,39 @@ class ChiggerResultBase(ChiggerObject, utils.KeyBindingMixin):
         return [origin[0], origin[0] + size[0], origin[1], origin[1] + size[1], 0, 0]
 
     def _printCamera(self, *args):
+        """Keybinding callback."""
         print '\n'.join(utils.print_camera(self._vtkrenderer.GetActiveCamera()))
+
+    def init(self, window):
+        """
+        Initialize the object. This an internal method, DO NOT USE!
+
+        When a ChiggerResultBase object is ADDED to the RenderWindow this is called automatically.
+        """
+        self._render_window = window
+
+    def deinit(self):
+        """
+        De-Initialize the object. This an internal method, DO NOT USE!
+
+        When a ChiggerResultBase object is REMOVED to the RenderWindow this is called automatically.
+        """
+        pass
+
+    def setActive(self, value):
+        """
+        Activate method. This is an internal method, DO NOT USE!
+
+        Use RenderWindow.setActive() to activate/deactivate result objects.
+        """
+        self._vtkrenderer.SetInteractive(value)
+        if value and self.getOption('highlight_active'):
+            if self.__highlight is None:
+                self.__highlight = chigger.geometric.OutlineResult(self,
+                                                                   interactive=False,
+                                                                   color=(1,0,0),
+                                                                   line_width=5)
+            self.getRenderWindow().append(self.__highlight)
+
+        elif self.__highlight is not None:
+            self.getRenderWindow().remove(self.__highlight)

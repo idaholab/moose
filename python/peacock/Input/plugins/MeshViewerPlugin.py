@@ -30,7 +30,8 @@ class MeshViewerPlugin(VTKWindowPlugin):
         """
         Return the default options for the ExodusResult object.
         """
-        return dict(representation='wireframe')
+        return dict(representation='wireframe', highlight_active=False)
+
 
     def __init__(self, **kwargs):
         super(MeshViewerPlugin, self).__init__(**kwargs)
@@ -69,14 +70,14 @@ class MeshViewerPlugin(VTKWindowPlugin):
         if not self._highlight:
             self._highlight = chigger.exodus.ExodusResult(self._reader,
                                                           renderer=self._result.getVTKRenderer(),
-                                                          color=[1,0,0])
+                                                          color=(1,0,0),
+                                                          highlight_active=False)
 
         if (block or boundary or nodeset):
             self._highlight.setOptions(block=block, boundary=boundary, nodeset=nodeset)
-            self._highlight.setOptions(edges=True, edge_width=3, edge_color=[1,0,0], point_size=5)
+            self._highlight.setOptions(edges=True, edge_width=3, edge_color=(1,0,0), point_size=5)
             self._window.append(self._highlight)
         else:
-            self._highlight.reset()
             self._window.remove(self._highlight)
             self._highlight = None
 
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     from PyQt5 import QtWidgets
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mesh_only.e')
-    widget, window = main(size=[600,600])
+    widget, window = main()
     window.onSetFilename(filename)
     window.onSetVariable('diffused')
     window.onWindowRequiresUpdate()

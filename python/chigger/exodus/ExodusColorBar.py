@@ -65,7 +65,6 @@ class ExodusColorBar(misc.ColorBar):
         Extracts the settings from the ExodusResult object to define the correct settings for the
         colorbar.
         """
-
         n = len(self._results)
         primary = self.getOption('primary')
         secondary = self.getOption('secondary')
@@ -73,7 +72,7 @@ class ExodusColorBar(misc.ColorBar):
         def set_axis_options_helper(ax, result):
             """Helper for setting axis options."""
             ax.set('lim', result[0].getVTKMapper().GetScalarRange())
-            if (not ax.isOptionValid('title')) and (ax.get('title') is None):
+            if ax.get('title') is None:
                 ax.set('title', result[0].getVTKMapper().GetArrayName())
 
         # Primary

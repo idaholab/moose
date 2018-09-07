@@ -52,12 +52,18 @@ class RenderWindow(base.ChiggerObject):
                 doc="Set the number of multi-samples.")
         opt.add('antialiasing', default=0, vtype=int,
                 doc="Number of antialiasing frames to perform (set vtkRenderWindow::SetAAFrames).")
+        opt.add('reset_camera', vtype=bool, default=True,
+                doc="Automatically reset the camera clipping range on update.")
 
         # Observers
         opt.add('observers', default=[], vtype=list,
                 doc="A list of ChiggerObserver objects, once added they are not " \
                     "removed. Hence, changing the observers in this list will not " \
                     "remove existing objects.")
+        opt.add('default_observer',
+                default=observers.MainWindowObserver(),
+                vtype=observers.ChiggerObserver,
+                doc="Define the default observer for the window.")
 
         # Background settings
         background = misc.ChiggerBackground.validOptions()
@@ -122,25 +128,22 @@ class RenderWindow(base.ChiggerObject):
                 msg = 'The supplied result type of {} must be of type {}.'.format(n, t)
                 raise mooseutils.MooseException(msg)
             self._results.append(result)
-            result.setRenderWindow(self)
+            result.init(self)
 
     def remove(self, *args):
         """
         Remove result object(s) from the window.
         """
         for result in args:
-            actors = result.getVTKRenderer().GetActors()
-            for source in result.getSources():
-                result.getVTKRenderer().RemoveActor(source.getVTKActor())
-
+            result.deinit()
             if result.getVTKRenderer().GetActors().GetNumberOfItems() == 0:
                 self.__vtkwindow.RemoveRenderer(result.getVTKRenderer())
             if result in self._results:
                 self._results.remove(result)
 
         # Reset active if it was removed
-        if self.__active and (self.__active not in self._results):
-            self.setActive(None)
+        #if self.__active and (self.__active not in self._results):
+        #    self.setActive(None)
 
         self.update()
 
@@ -155,48 +158,33 @@ class RenderWindow(base.ChiggerObject):
         """
         Set the active result object for interaction.
         """
-        if self.__active is not None:
-            self.__active.getVTKRenderer().SetInteractive(False)
 
-            if self.__highlight is not None:
-                self.remove(self.__highlight)
-                self.__highlight = None
+        # Deactivate current active result, if it exists and differs
+        if (self.__active is not None) and (self.__active is not result):
+            self.__active.setActive(False)
 
-            if hasattr(self.__active, 'onHighlight'):
-                self.__active.onHighlight(self, False)
-
+        # Deactivate all results, this is done by using the background renderer
         if result is None:
             self.__active = None
             self.__background.getVTKRenderer().SetInteractive(True)
             if self.getVTKInteractorStyle():
                 self.getVTKInteractorStyle().SetCurrentRenderer(self.__background.getVTKRenderer())
                 self.getVTKInteractorStyle().SetEnabled(False)
-            print 'No active object.'
 
+        # Activate the supplied result
         else:
             self.__active = result
-            if self.getVTKInteractorStyle():
-                self.getVTKInteractorStyle().SetEnabled(True)
-                self.getVTKInteractorStyle().SetCurrentRenderer(self.__active.getVTKRenderer())
-
-
-                if hasattr(self.__active, 'onHighlight'):
-                    self.__active.onHighlight(self, True)
-                else:
-                    # Creates a OutlineResult to higlight the data. The original version of this
-                    # relied on the VTK based HighlightProp. However, the highlighting for 2D objects
-                    # was not very good.
-                    self.__highlight = geometric.OutlineResult(self.__active, interactive=False,
-                                                               color=(1,0,0), line_width=5)
-                    self.append(self.__highlight)
-
-                print 'Activated: {}'.format(self.__active.title())
-
-
-            self.__active.getVTKRenderer().SetInteractive(True)
+            self.__background.getVTKRenderer().SetInteractive(False)
+            self.getVTKInteractorStyle().SetEnabled(True)
+            self.getVTKInteractorStyle().SetCurrentRenderer(self.__active.getVTKRenderer())
+            self.__active.setActive(True)
+            #if self.getOption('highlight_active'):
+            #    print 'Activate: {}'.format(self.__active.title())
 
     def nextActive(self, reverse=False):
-
+        """
+        Highlight the next ChiggerResult object.
+        """
         step = 1 if not reverse else -1
         available = [result for result in self._results if result.getOption('interactive')]
         if (self.__active is None) and step == 1:
@@ -234,9 +222,6 @@ class RenderWindow(base.ChiggerObject):
             self.__vtkinteractor.Initialize()
             self.__vtkinteractor.Start()
 
-        #if self.getOption('style') == 'test':
-        #    self.__vtkwindow.Finalize()
-
     def update(self, **kwargs):
         """
         Updates the child results and renders the results.
@@ -263,9 +248,10 @@ class RenderWindow(base.ChiggerObject):
             self.__vtkinteractor.SetInteractorStyle(self.__vtkinteractorstyle)
             self.__vtkinteractor.RemoveObservers(vtk.vtkCommand.CharEvent)
 
-            main_observer = observers.MainWindowObserver()
-            main_observer.init(self)
-            self._observers.add(main_observer)
+            main_observer = self.getOption('default_observer')
+            if main_observer is not None:
+                main_observer.init(self)
+                self._observers.add(main_observer)
 
         # Background settings
         self._results[0].update(background=self._options.get('background'),
@@ -321,11 +307,12 @@ class RenderWindow(base.ChiggerObject):
 
         self.__vtkwindow.Render()
 
-        for result in self._results:
-            if result.isOptionValid('camera'):
-                result.getVTKRenderer().ResetCameraClippingRange()
-            else:
-                result.getVTKRenderer().ResetCamera()
+        if self.getOption('reset_camera'):
+            for result in self._results:
+                if result.isOptionValid('camera'):
+                    result.getVTKRenderer().ResetCameraClippingRange()
+                else:
+                    result.getVTKRenderer().ResetCamera()
 
     def resetCamera(self):
         """

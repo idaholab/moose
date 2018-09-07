@@ -84,7 +84,6 @@ class ColorBar(base.ChiggerResult):
         Inputs:
             see ChiggerResult
         """
-        # Call base class method
         super(ColorBar, self).update(**kwargs)
 
         # Convenience names for the various sources
@@ -157,6 +156,9 @@ class ColorBar(base.ChiggerResult):
         self.__setAxisPosition(axis1, p0, p1, location)
 
     def onMouseMoveEvent(self, position):
+        """
+        Update the colorbar origin.
+        """
         self.setOption('colorbar_origin', position)
         self.printOption('colorbar_origin')
 

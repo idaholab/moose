@@ -108,7 +108,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
             if item.checkState() == QtCore.Qt.Checked:
                 blocks.append(str(item.data(QtCore.Qt.UserRole)))
 
-        return blocks if blocks else None
+        return tuple(blocks) if blocks else None
 
     def _callbackItemChanged(self, item):
         """

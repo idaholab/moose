@@ -27,7 +27,7 @@ class TestExodusViewer2(Testing.PeacockImageTestCase):
     _filename = Testing.get_chigger_input('diffusion_4.e')
 
     def setUp(self):
-        self._widget, self._main_window = main(size=[400,400])
+        self._widget, self._main_window = main(size=(400,400))
         self._widget.onSetFilenames([self._filename])
         self._window = self._widget.currentWidget().VTKWindowPlugin
 

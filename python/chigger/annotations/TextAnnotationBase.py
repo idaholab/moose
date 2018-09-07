@@ -76,7 +76,8 @@ class TextAnnotationBase(base.ChiggerResult):
             self.update(position=position)
             self.printOption('position')
 
-    def onHighlight(self, window, active):
+    def setActive(self, active):
         """Overrides the default active highlighting."""
-        for src in self.getSources():
-            src.getVTKActor().GetTextProperty().SetFrame(active)
+        if self.getOption('highlight_active'):
+            for src in self.getSources():
+                src.getVTKActor().GetTextProperty().SetFrame(active)

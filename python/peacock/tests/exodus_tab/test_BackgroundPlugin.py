@@ -35,7 +35,7 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
     def createWidget(self):
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
-        self._widget, self._window, self._main = main(size=[600,600])
+        self._widget, self._window, self._main = main(size=(600,600))
         self._window.onSetFilename(self._filename)
         self._window.onSetVariable('diffused')
         self._window.onWindowRequiresUpdate()

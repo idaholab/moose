@@ -34,18 +34,22 @@ class TestObserver(SingleShotObserver):
         Simulate a mouse movement.
 
         Inputs:
-            x[float]: Position relative to the current renderer size in the horizontal direction.
-            y[float]: Position relative to the current renderer size in the vertical direction.
+            x[float]: Position relative to the current window size in the horizontal direction.
+            y[float]: Position relative to the current window size in the vertical direction.
         """
-        result = self._window.getActive()
-        if result:
 
-            # Compute the mouse position
-            vtkrenderer = result.getVTKRenderer()
-            sz = vtkrenderer.GetSize()
-            pos = [sz[0] * x, sz[1] * y]
+        # Determine relative position
+        sz = self._window.getVTKWindow().GetSize()
+        pos = [sz[0] * x, sz[1] * y]
 
-            # Move the mouse
-            vtkinteractor = self._window.getVTKInteractor()
-            vtkinteractor.SetEventPosition(int(pos[0]), int(pos[1]))
-            vtkinteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent, vtkinteractor)
+        # Move the mouse
+        vtkinteractor = self._window.getVTKInteractor()
+        vtkinteractor.SetEventPosition(int(pos[0]), int(pos[1]))
+        vtkinteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent, vtkinteractor)
+
+    def pressLeftMouseButton(self):
+        """
+        Simulate a left mouse click.
+        """
+        vtkinteractor = self._window.getVTKInteractor()
+        vtkinteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent, vtkinteractor)

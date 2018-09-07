@@ -13,7 +13,6 @@ import vtk
 import mooseutils
 from ChiggerObserver import ChiggerObserver
 from .. import utils
-from ..geometric import OutlineResult
 
 class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
     """
@@ -44,23 +43,31 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
         Add the KeyPressEvent and MouseMoveEvent for this object.
         """
         super(MainWindowObserver, self).init(*args, **kwargs)
-
         self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.KeyPressEvent,  self._onKeyPressEvent)
         self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.MouseMoveEvent, self._onMouseMoveEvent)
 
     def _nextResult(self, window, binding):
+        """
+        Keybinding callback: Activate the "next" result object.
+        """
         window.nextActive()
         active = window.getActive()
 
     def _previousResult(self, window, binding):
+        """
+        Keybinding callback: Activate the "previous" result object.
+        """
         window.nextActive(reverse=True)
 
     def _deactivateResult(self, window, binding):
+        """
+        Keybinding callback: Deactivate all results.
+        """
         window.setActive(None)
 
     def _printHelp(self, window, binding):
         """
-        Display the available controls for this object.
+        Keybinding callback: Display the available controls for this object.
         """
 
         # Object name/type
@@ -74,6 +81,9 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
 
     @staticmethod
     def __printKeyBindings(bindings):
+        """
+        Helper for printing keybindings.
+        """
         n = 0
         out = []
         for key, value in bindings.iteritems():
@@ -88,7 +98,7 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
 
     def _onKeyPressEvent(self, obj, event): #pylint: disable=unused-argument
         """
-        The function to be called by the RenderWindow.
+        The function to be called by the vtkInteractor KeyPressEvent (see init).
 
         Inputs:
             obj, event: Required by VTK.
@@ -108,6 +118,9 @@ class MainWindowObserver(ChiggerObserver, utils.KeyBindingMixin):
         self._window.update()
 
     def _onMouseMoveEvent(self, obj, event):
+        """
+        The function to be called by the vtkInteractor MouseMoveEvent (see init)
+        """
         result = self._window.getActive()
         if (result is not None) and hasattr(result, 'onMouseMoveEvent'):
             loc = obj.GetEventPosition()

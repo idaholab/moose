@@ -80,6 +80,9 @@ class ExodusResult(base.ChiggerResult):
     def update(self, **kwargs):
         super(ExodusResult, self).update(**kwargs)
 
+        # Update the ExodusReader objects
+        self._reader.update()
+
         # Do not mess with the range if there is a source without a variable
         if any([src.getCurrentVariableInformation() is None for src in self._sources]):
             return

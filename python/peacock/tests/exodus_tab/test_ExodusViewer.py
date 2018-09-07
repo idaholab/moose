@@ -41,7 +41,7 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         settings.clear()
         settings.sync()
 
-        self._widget, self._main_window = main(size=[400,400])
+        self._widget, self._main_window = main(size=(400,400))
         self._widget.onSetFilenames([self._filename])
 
         # Start with 'diffused' variable

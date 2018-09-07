@@ -322,8 +322,10 @@ def main(size=None):
 if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e', 'foo.e')
+    #filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e', 'foo.e')
     #filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
-    widget, _ = main(size=[600,600])
+    filenames = Testing.get_chigger_input_list('simple_diffusion_out.e',
+                                               'simple_diffusion_new_var_out.e')
+    widget, _ = main()
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())
