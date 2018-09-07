@@ -37,7 +37,7 @@ validParams<MultiSmoothSuperellipsoidIC>()
       "semiaxis_b", "Vector of mean semiaxis values in the y direction for the ellipse");
   params.addRequiredParam<std::vector<Real>>(
       "semiaxis_c",
-      "Vector of mean semiaxis values in the z direction for the ellipse, must be set to 1 if 2D.");
+      "Vector of mean semiaxis values in the z direction for the ellipse, must be greater than 0 even if 2D.");
   params.addParam<std::vector<Real>>(
       "exponent",
       std::vector<Real>(),
@@ -108,10 +108,16 @@ MultiSmoothSuperellipsoidIC::initialSetup()
                "be the same size.");
 
   if (_semiaxis_variation_type != 2 &&
-      (nv != _semiaxis_a_variation.size() || nv != _semiaxis_b_variation.size() ||
-       nv != _semiaxis_c_variation.size()))
+     (nv != _semiaxis_a_variation.size() || nv != _semiaxis_b_variation.size() ||
+      nv != _semiaxis_c_variation.size()))
     mooseError("Vectors for numbub, semiaxis_a_variation, semiaxis_b_variation, and "
-               "semiaxis_c_variation must be the same size.");
+                "semiaxis_c_variation must be the same size.");
+
+  if (_semiaxis_variation_type == 2 &&
+     (_semiaxis_a_variation.size() > 0 || _semiaxis_b_variation.size() > 0 ||
+      _semiaxis_c_variation.size() > 0))
+    mooseWarning("Values were provided for semiaxis_a/b/c_variation but semiaxis_variation_type is set "
+               "to 'none' in 'MultiSmoothSuperellipsoidIC'.");
 
   for (_gk = 0; _gk < nv; ++_gk)
   {
@@ -122,16 +128,6 @@ MultiSmoothSuperellipsoidIC::initialSetup()
       _top_right(i) = _mesh.getMaxInDimension(i);
     }
     _range = _top_right - _bottom_left;
-
-    if (_semiaxis_a_variation[_gk] > 0.0 && _semiaxis_variation_type == 2)
-      mooseError("If Semiaxis_a_variation > 0.0, you must pass in a Semiaxis_variation_type in "
-                 "MultiSmoothSuperellipsoidIC");
-    if (_semiaxis_b_variation[_gk] > 0.0 && _semiaxis_variation_type == 2)
-      mooseError("If Semiaxis_b_variation > 0.0, you must pass in a Semiaxis_variation_type in "
-                 "MultiSmoothSuperellipsoidIC");
-    if (_semiaxis_c_variation[_gk] > 0.0 && _semiaxis_variation_type == 2)
-      mooseError("If Semiaxis_c_variation > 0.0, you must pass in a Semiaxis_variation_type in "
-                 "MultiSmoothSuperellipsoidIC");
 
     SmoothSuperellipsoidBaseIC::initialSetup();
   }
@@ -221,7 +217,7 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidCenters()
     }
 
     if (num_tries == _max_num_tries)
-      mooseError("Too many tries in MultiSmoothCircleIC");
+      mooseError("max_num_tries reached in 'MultiSmoothSuperellipsoidIC'.");
 
   accept:
     continue;
