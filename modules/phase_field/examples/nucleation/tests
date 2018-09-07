@@ -4,4 +4,9 @@
     input = 'cahn_hilliard.i'
     check_input = True
   [../]
+  [./refine]
+    type = RunApp
+    input = 'refine.i'
+    check_input = True
+  [../]
 []
