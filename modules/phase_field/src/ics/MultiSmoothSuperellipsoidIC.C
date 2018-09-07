@@ -316,4 +316,3 @@ MultiSmoothSuperellipsoidIC::checkExtremes(unsigned int i, unsigned int j)
 
   return false;
 }
-
