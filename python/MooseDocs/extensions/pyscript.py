@@ -1,13 +1,9 @@
 #pylint: disable=missing-docstring
-import re
 import os
-from MooseDocs import common
-from MooseDocs.common import exceptions
-import chigger
 import MooseDocs
+from MooseDocs import common
 from MooseDocs.extensions import command, table, floats
 from MooseDocs.tree import tokens
-
 
 def make_extension(**kwargs):
     return PyScriptExtension(**kwargs)
@@ -50,7 +46,8 @@ class ChiggerKeybindings(command.CommandComponent):
         if rows:
             tokens.Heading(parent, level=2, string=u"Available Keybindings")
             tbl = table.builder(rows, headings=['Binding', 'Description'])
-            tbl.parent = floats.create_float(parent, self.extension, self.settings, **self.attributes)
+            tbl.parent = floats.create_float(parent, self.extension, self.settings,
+                                             **self.attributes)
 
         return parent
 
@@ -79,8 +76,10 @@ class ChiggerOptions(command.CommandComponent):
 
         if rows:
             tokens.Heading(parent, level=2, string=u"Available Options")
-            tbl = table.builder(rows, headings=['Name', 'Default', 'Type', 'Size', 'Allowed', 'Description'])
-            tbl.parent = floats.create_float(parent, self.extension, self.settings, **self.attributes)
+            tbl = table.builder(rows, headings=['Name', 'Default', 'Type', 'Size', 'Allowed',
+                                                'Description'])
+            tbl.parent = floats.create_float(parent, self.extension, self.settings,
+                                             **self.attributes)
         return parent
 
 class ChiggerTests(command.CommandComponent):
@@ -102,7 +101,7 @@ class ChiggerTests(command.CommandComponent):
 
         ul = tokens.UnorderedList(None, class_='moose-list-chigger-tests')
         for root, _, files in os.walk(location):
-            for name in filter(lambda n: n.endswith('.py'), files):
+            for name in filter(lambda n: n.endswith('.py'), files): #pylint: disable=deprecated-lambda
                 filename = os.path.join(root, name)
                 local = unicode(filename.replace(MooseDocs.ROOT_DIR, '').strip('/'))
                 content = common.read(filename)
