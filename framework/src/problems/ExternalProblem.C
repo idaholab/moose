@@ -38,6 +38,9 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
    * Variables, which will be used in the external problem.
    */
   newAssemblyArray(*_nl);
+
+  // Create extra vectors and matrices if any
+  createTagVectors();
 }
 
 void

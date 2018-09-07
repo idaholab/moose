@@ -35,6 +35,9 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   _nl = _nl_sys;
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
   newAssemblyArray(*_nl_sys);
+
+  // Create extra vectors and matrices if any
+  createTagVectors();
 }
 
 void

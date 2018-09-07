@@ -4,12 +4,14 @@
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=DeprecatedKernel'
     expect_out = 'Deprecated Object: DeprecatedKernel'
+    no_error_deprecated = true
   [../]
   [./expired]
     type = 'RunApp'
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=ExpiredKernel'
     expect_out = 'Expired on Mon Jan'
+    no_error_deprecated = true
   [../]
   [./expired_error]
     type = 'RunException'
@@ -23,5 +25,6 @@
     input = 'deprecation.i'
     cli_args = 'Kernels/diff/type=OldNamedKernel'
     expect_out = 'Replace OldNamedKernel with RenamedKernel'
+    no_error_deprecated = true
   [../]
 []

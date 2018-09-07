@@ -7,22 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DETERMINESYSTEMTYPE_H
-#define DETERMINESYSTEMTYPE_H
+#ifndef CREATEPROBLEMDEFAULTACTION_H
+#define CREATEPROBLEMDEFAULTACTION_H
 
-#include "MooseObjectAction.h"
+// MOOSE includes
+#include "Action.h"
 
-class DetermineSystemType;
+class CreateProblemDefaultAction;
 
 template <>
-InputParameters validParams<DetermineSystemType>();
+InputParameters validParams<CreateProblemDefaultAction>();
 
-class DetermineSystemType : public MooseObjectAction
+class CreateProblemDefaultAction : public Action
 {
 public:
-  DetermineSystemType(InputParameters parameters);
+  CreateProblemDefaultAction(InputParameters parameters);
 
   virtual void act() override;
 };
 
-#endif /* DETERMINESYSTEMTYPE_H */
+#endif /* CREATEPROBLEMDEFAULTACTION_H */

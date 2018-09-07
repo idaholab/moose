@@ -21,7 +21,8 @@ validParams<MooseTestProblem>()
 
 MooseTestProblem::MooseTestProblem(const InputParameters & params) : FEProblem(params)
 {
-  _console << "Hello, I am your FEProblemBase-derived class and my name is '" << this->name() << "'"
+  _console << "Hello, I am your FEProblemBase-derived class with coordinate type "
+           << getParam<MultiMooseEnum>("coord_type") << " and my name is '" << this->name() << "'"
            << std::endl;
 }
 

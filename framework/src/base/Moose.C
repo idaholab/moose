@@ -188,6 +188,10 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_material_output", true);
   registerTask("check_output", true);
 
+  registerTask("create_problem_default", true);
+  registerTask("create_problem_custom", false);
+  registerTask("create_problem_complete", false);
+
   /**************************/
   /****** Dependencies ******/
   /**************************/
@@ -218,6 +222,9 @@ addActionTypes(Syntax & syntax)
                            "(setup_mesh_complete)"
                            "(determine_system_type)"
                            "(create_problem)"
+                           "(create_problem_custom)"
+                           "(create_problem_default)"
+                           "(create_problem_complete)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"

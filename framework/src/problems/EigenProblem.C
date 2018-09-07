@@ -59,6 +59,9 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
+
+  // Create extra vectors and matrices if any
+  createTagVectors();
 }
 
 #if LIBMESH_HAVE_SLEPC

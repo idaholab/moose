@@ -39,6 +39,9 @@ FEProblem::FEProblem(const InputParameters & parameters)
   initNullSpaceVectors(parameters, *_nl_sys);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
+
+  // Create extra vectors and matrices if any
+  createTagVectors();
 }
 
 void

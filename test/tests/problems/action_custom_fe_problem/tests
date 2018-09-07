@@ -1,0 +1,39 @@
+[Tests]
+  issues = '#12002'
+  design = 'Problem/index.md'
+
+  [./no_problem_block]
+    type = 'RunApp'
+    input = 'action_custom_fe_problem_test.i'
+    expect_out = 'Hello, I am your FEProblemBase-derived class with coordinate type XYZ and my name is \S+'
+
+    requirement = 'The system shall allow the creation of a custom problem through a user-defined Action.'
+  [../]
+
+  [./with_problem_block_without_type]
+    type = 'RunApp'
+    input = 'action_custom_fe_problem_test.i'
+    expect_out = 'Hello, I am your FEProblemBase-derived class with coordinate type RZ and my name is \S+'
+    cli_args = 'Problem/coord_type=RZ'
+
+    requirement = 'The system shall support the creation of a custom problem with parameters in Problem block.'
+  [../]
+
+  [./with_problem_block_with_wrong_type]
+    type = 'RunException'
+    input = 'action_custom_fe_problem_test.i'
+    expect_err = 'TestProblem input block requires Problem/type to be MooseTestProblem'
+    cli_args = 'Problem/coord_type=RZ Problem/type=FEProblem'
+
+    requirement = 'The system shall error out when Problem block type is not specified.'
+  [../]
+
+  [./with_problem_block_with_type]
+    type = 'RunApp'
+    input = 'action_custom_fe_problem_test.i'
+    expect_out = 'Hello, I am your FEProblemBase-derived class with coordinate type RZ and my name is \S+'
+    cli_args = 'Problem/coord_type=RZ Problem/type=MooseTestProblem'
+
+    requirement = 'The system shall support the creation of a custom problem through Problem block with type specified.'
+  [../]
+[]
