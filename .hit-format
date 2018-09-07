@@ -1,0 +1,22 @@
+[format]
+
+  [sorting]
+    [.*]
+      [.*]
+        type = foo
+      []
+    []
+
+    [Mesh]
+    []
+
+    [**]
+    []
+
+    [Executioner]
+    []
+
+    [Outputs]
+    []
+  []
+[]
