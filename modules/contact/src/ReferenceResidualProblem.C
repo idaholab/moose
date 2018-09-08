@@ -50,7 +50,7 @@ validParams<ReferenceResidualProblem>()
 }
 
 ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & params)
-  : FEProblem(params)
+  : FEProblem(params), _use_group_variables(false)
 {
   if (params.isParamValid("solution_variables"))
     _soln_var_names = params.get<std::vector<std::string>>("solution_variables");
@@ -64,9 +64,10 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
                ")");
 
   if (params.isParamValid("group_variables"))
-    _group_variables = &(params.get<std::vector<std::vector<std::string>>>("group_variables"));
-  else
-    _group_variables = nullptr;
+  {
+    _group_variables = params.get<std::vector<std::vector<std::string>>>("group_variables");
+    _use_group_variables = true;
+  }
 
   _accept_mult = params.get<Real>("acceptable_multiplier");
   _accept_iters = params.get<int>("acceptable_iterations");
@@ -75,23 +76,50 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
 ReferenceResidualProblem::~ReferenceResidualProblem() {}
 
 void
+ReferenceResidualProblem::addSolutionVariables(std::set<std::string> & sol_vars)
+{
+  for (const auto & var : sol_vars)
+    _soln_var_names.push_back(var);
+}
+
+void
+ReferenceResidualProblem::addReferenceResidualVariables(std::set<std::string> & ref_vars)
+{
+  for (const auto & var : ref_vars)
+    _ref_resid_var_names.push_back(var);
+}
+
+void
+ReferenceResidualProblem::addGroupVariables(std::set<std::string> & group_vars)
+{
+  std::vector<std::string> group_vars_vector;
+
+  for (const auto & var : group_vars)
+    group_vars_vector.push_back(var);
+
+  _group_variables.push_back(group_vars_vector);
+
+  _use_group_variables = true;
+}
+
+void
 ReferenceResidualProblem::initialSetup()
 {
   _variable_group_num_index.resize(_soln_var_names.size());
 
   unsigned int group_variable_num = 0;
-  if (_group_variables)
+  if (_use_group_variables)
   {
-    for (unsigned int i = 0; i < (*_group_variables).size(); ++i)
+    for (unsigned int i = 0; i < _group_variables.size(); ++i)
     {
-      group_variable_num += (*_group_variables)[i].size();
-      if ((*_group_variables)[i].size() == 1)
+      group_variable_num += _group_variables[i].size();
+      if (_group_variables[i].size() == 1)
         mooseError(" In the 'group_variables' parameter, variable ",
-                   (*_group_variables)[i][0],
+                   _group_variables[i][0],
                    " is not grouped with other variables.");
     }
 
-    unsigned int size = _soln_var_names.size() - group_variable_num + (*_group_variables).size();
+    unsigned int size = _soln_var_names.size() - group_variable_num + _group_variables.size();
     _group_ref_resid.resize(size);
     _group_resid.resize(size);
     _group_soln_var_names.resize(size);
@@ -99,7 +127,6 @@ ReferenceResidualProblem::initialSetup()
   }
   else
   {
-    _group_variables = nullptr;
     _group_ref_resid.resize(_soln_var_names.size());
     _group_resid.resize(_soln_var_names.size());
     _group_soln_var_names.resize(_soln_var_names.size());
@@ -107,11 +134,11 @@ ReferenceResidualProblem::initialSetup()
   }
 
   std::set<std::string> check_duplicate;
-  if (_group_variables)
+  if (_use_group_variables)
   {
-    for (unsigned int i = 0; i < (*_group_variables).size(); ++i)
-      for (unsigned int j = 0; j < (*_group_variables)[i].size(); ++j)
-        check_duplicate.insert((*_group_variables)[i][j]);
+    for (unsigned int i = 0; i < _group_variables.size(); ++i)
+      for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
+        check_duplicate.insert(_group_variables[i][j]);
 
     if (check_duplicate.size() != group_variable_num)
       mooseError(
@@ -167,19 +194,19 @@ ReferenceResidualProblem::initialSetup()
   }
 
   unsigned int ungroup_index = 0;
-  if (_group_variables)
-    ungroup_index = (*_group_variables).size();
+  if (_use_group_variables)
+    ungroup_index = _group_variables.size();
 
   for (unsigned int i = 0; i < _soln_vars.size(); ++i)
   {
     bool find_group = false;
-    if (_group_variables)
+    if (_use_group_variables)
     {
-      for (unsigned int j = 0; j < (*_group_variables).size(); ++j)
+      for (unsigned int j = 0; j < _group_variables.size(); ++j)
       {
-        if (std::find((*_group_variables)[j].begin(),
-                      (*_group_variables)[j].end(),
-                      s.variable_name(_soln_vars[i])) != (*_group_variables)[j].end())
+        if (std::find(_group_variables[j].begin(),
+                      _group_variables[j].end(),
+                      s.variable_name(_soln_vars[i])) != _group_variables[j].end())
         {
           _variable_group_num_index[i] = j;
           find_group = true;
@@ -198,18 +225,18 @@ ReferenceResidualProblem::initialSetup()
     }
   }
 
-  if (_group_variables)
+  if (_use_group_variables)
   {
-    for (unsigned int i = 0; i < (*_group_variables).size(); ++i)
+    for (unsigned int i = 0; i < _group_variables.size(); ++i)
     {
       bool same_variable = true;
-      if ((*_group_variables)[i].size() > 1)
+      if (_group_variables[i].size() > 1)
       {
-        for (unsigned int j = 0; j < (*_group_variables)[i].size(); ++j)
+        for (unsigned int j = 0; j < _group_variables[i].size(); ++j)
         {
           for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
           {
-            if ((*_group_variables)[i][j] == s.variable_name(var_num))
+            if (_group_variables[i][j] == s.variable_name(var_num))
             {
               if (j == 0)
                 same_variable = nonlinear_sys.isScalarVariable(_soln_vars[var_num]);
@@ -234,14 +261,14 @@ ReferenceResidualProblem::initialSetup()
     if (_group_soln_var_names[_variable_group_num_index[i]].empty())
     {
       _group_soln_var_names[_variable_group_num_index[i]] = _soln_var_names[i];
-      if (_group_variables && _variable_group_num_index[i] < (*_group_variables).size())
+      if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
         _group_soln_var_names[_variable_group_num_index[i]] += " (grouped) ";
     }
 
     if (_group_ref_resid_var_names[_variable_group_num_index[i]].empty())
     {
       _group_ref_resid_var_names[_variable_group_num_index[i]] = _ref_resid_var_names[i];
-      if (_group_variables && _variable_group_num_index[i] < (*_group_variables).size())
+      if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
         _group_ref_resid_var_names[_variable_group_num_index[i]] += " (grouped) ";
     }
   }
