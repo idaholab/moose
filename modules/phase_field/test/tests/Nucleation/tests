@@ -65,4 +65,10 @@
     exodiff = 'soft_out.e'
     recover = false
   [../]
+
+  [./marker]
+    type = 'Exodiff'
+    input = 'marker.i'
+    exodiff = 'marker_out.e-s002'
+  [../]
 []
