@@ -50,6 +50,25 @@ public:
                                    const Real rtol,
                                    const Real ref_resid);
 
+  /**
+   * Add solution variables to ReferenceResidualProblem.
+   * @param sol_vars A set of solution variables that need to be added to ReferenceResidualProblem.
+   */
+  void addSolutionVariables(std::set<std::string> & sol_vars);
+
+  /**
+   * Add reference residual variables to ReferenceResidualProblem.
+   * @param ref_vars A set of reference residual variables that need to be added to
+   * ReferenceResidualProblem.
+   */
+  void addReferenceResidualVariables(std::set<std::string> & ref_vars);
+
+  /**
+   * Add a set of variables that need to be grouped together.
+   * @param group_vars A set of solution variables that need to be grouped.
+   */
+  void addGroupVariables(std::set<std::string> & group_vars);
+
 protected:
   ///@{
   /// List of solution variable names whose reference residuals will be stored,
@@ -98,7 +117,10 @@ protected:
   std::vector<Real> _scaling_factors;
 
   /// Name of variables that are grouped together to check convergence
-  const std::vector<std::vector<std::string>> * _group_variables;
+  std::vector<std::vector<std::string>> _group_variables;
+
+  /// True if any variables are grouped
+  bool _use_group_variables;
 };
 
 #endif /* REFERENCERESIDUALPROBLEM_H */
