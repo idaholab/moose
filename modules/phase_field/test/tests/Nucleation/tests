@@ -3,6 +3,9 @@
     type = 'Exodiff'
     input = 'material.i'
     exodiff = 'material_out.e'
+    requirement = "The nucleation material shall generate a free energy contribution proportional to the map value"
+    design = 'materials/DiscreteNucleation.md'
+    issues = '#5472'
   [../]
 
   [./parallel]
@@ -12,6 +15,9 @@
     min_parallel = 4
     max_parallel = 4
     rel_err = 1e-3
+    requirement = "The nucleation system shall insert nuclei in a manner independen of the domain decomposition and parallelization"
+    design = 'userobjects/DiscreteNucleationInserter.md'
+    issues = '#5472'
   [../]
 
   #
@@ -24,6 +30,9 @@
     cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=material_recover'
     prereq = 'material'
     recover = false
+    requirement = "The nucleation system shall recoverable"
+    design = 'materials/DiscreteNucleation.md'
+    issues = '#5472'
   [../]
   [./material_recover2]
     # Recover the solve from part1 with a specified file
@@ -34,6 +43,9 @@
     prereq = 'material_recover1'
     delete_output_before_running = false
     recover = false
+    requirement = "The nucleation system shall recoverable"
+    design = 'materials/DiscreteNucleation.md'
+    issues = '#5472'
   [../]
 
   #
@@ -46,6 +58,9 @@
     cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=parallel_recover'
     prereq = 'parallel'
     recover = false
+    requirement = "The nucleation system shall recoverable"
+    design = 'userobjects/DiscreteNucleationInserter.md'
+    issues = '#5472'
   [../]
   [./parallel_recover2]
     # Recover the solve from part1 with a specified file
@@ -57,6 +72,9 @@
     prereq = 'parallel_recover1'
     delete_output_before_running = false
     recover = false
+    requirement = "The nucleation system shall recoverable"
+    design = 'userobjects/DiscreteNucleationInserter.md'
+    issues = '#5472'
   [../]
 
   [./soft]
@@ -64,11 +82,17 @@
     input = 'soft.i'
     exodiff = 'soft_out.e'
     recover = false
+    requirement = "The map shall provide the capability of defining soft interfaces for initial nuclei"
+    design = 'userobjects/DiscreteNucleationMap.md'
+    issues = '#5526'
   [../]
 
   [./marker]
     type = 'Exodiff'
     input = 'marker.i'
     exodiff = 'marker_out.e-s002'
+    requirement = "The marker shall trigger refinement of the nucleus insertion area"
+    design = 'markers/DiscreteNucleationMarker.md'
+    issues = '#12099'
   [../]
 []
