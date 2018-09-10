@@ -25,7 +25,7 @@ adaptivity, and a postprocessor:
   variables and their target concentrations (using the data from the DiscreteNucleationMap).
 - [`DiscreteNucleationMarker`](markers/DiscreteNucleationMarker.md)  - a marker
   that triggers refinement at the point of nucleus insertion.
-- [`DiscreteNucleationTimestep`](postprocessors/DiscreteNucleationTimestep.md)  - a
+- [`DiscreteNucleationTimeStep`](postprocessors/DiscreteNucleationTimeStep.md) - a
   postprocessor to provide a time step limit for new nuclei to use with
   [IterationAdaptiveDT](/IterationAdaptiveDT.md)
 

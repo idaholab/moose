@@ -1,4 +1,3 @@
-
 # DiscreteNucleation
 
 !syntax description /Materials/DiscreteNucleation
