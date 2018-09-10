@@ -22,6 +22,7 @@ validParams<GeometricalFlowComponent>()
 GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & parameters)
   : GeometricalComponent(parameters),
     _fp_name(getParam<UserObjectName>("fp")),
+    _numerical_flux_name(genName(name(), "numerical_flux")),
     _numerical_conservative_flux_name(genName(name(), "numerical_conservative_flux")),
     _numerical_nonconservative_flux_name(genName(name(), "numerical_nonconservative_flux")),
     _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),

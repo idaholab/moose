@@ -153,10 +153,8 @@ protected:
   std::shared_ptr<const FlowModel> _flow_model;
   /// The name of the fluid property user object
   UserObjectName _fp_name;
-  /// Numerical conservative flux user object names
-  std::vector<UserObjectName> _numerical_conservative_flux_names;
-  /// Numerical non-conservative flux user object names
-  std::vector<UserObjectName> _numerical_nonconservative_flux_names;
+  /// Numerical flux user object names
+  std::vector<UserObjectName> _numerical_flux_names;
   /// rDG interfacial variables user object names
   std::vector<UserObjectName> _rdg_int_var_uo_names;
   /// Use implicit time integration for rDG

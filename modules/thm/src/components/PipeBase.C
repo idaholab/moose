@@ -36,6 +36,7 @@ PipeBase::init()
   pars.set<Simulation *>("_sim") = &_sim;
   pars.set<PipeBase *>("_pipe") = this;
   pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
+  pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   pars.set<UserObjectName>("numerical_conservative_flux") = _numerical_conservative_flux_name;
   pars.set<bool>("implicit_rdg") = _implicit_rdg;
   if (_model_id == RELAP7::FM_SINGLE_PHASE)

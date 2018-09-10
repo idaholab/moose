@@ -82,9 +82,7 @@ FlowConnection::init()
 
         fp_names.push_back(comp.getFluidPropertiesName());
         flow_model_ids.push_back(comp.getFlowModelID());
-        _numerical_conservative_flux_names.push_back(comp.getRDGConservativeFluxUserObjectName());
-        _numerical_nonconservative_flux_names.push_back(
-            comp.getRDGNonConservativeFluxUserObjectName());
+        _numerical_flux_names.push_back(comp.getNumericalFluxUserObjectName());
         _rdg_int_var_uo_names.push_back(comp.getRDGInterfacialVariablesUserObjectName());
         implicit_rdg_flags.push_back(comp.getImplicitRDGFlag());
         spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
