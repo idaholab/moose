@@ -49,10 +49,8 @@ protected:
   /// Name of the boundary this component attaches to
   BoundaryName _input;
 
-  /// Numerical conservative flux user object name
-  UserObjectName _numerical_conservative_flux_name;
-  /// Numerical non-conservative flux user object name
-  UserObjectName _numerical_nonconservative_flux_name;
+  /// Numerical flux user object name
+  UserObjectName _numerical_flux_name;
   /// rDG interfacial variables user object name
   UserObjectName _rdg_int_var_uo_name;
 };
