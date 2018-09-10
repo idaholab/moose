@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <sstream>
 #include <set>
+#include <list>
 #include <iterator>
 #include <memory>
 #include <regex>
@@ -1147,31 +1148,92 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
 {
   std::vector<bool> done(nodes.size(), false);
 
+  // keep any leading comments/blanks
+  for (size_t i = 0; static_cast<size_t>(i) < nodes.size(); i++)
+  {
+    auto n = nodes[i];
+    // find the first section/field node
+    if (n->type() == NodeType::Section || n->type() == NodeType::Field)
+    {
+      // then walk backwards
+      for (int j = i - 1; j > 0; j--)
+      {
+        auto n = nodes[j];
+        // and stop at the first non-comment node indicating the end of the attached comment block
+        if (n->type() != NodeType::Comment)
+        {
+          // then walk forward adding all preceding lines to the "header" section that always goes
+          // first
+          for (int k = 0; k <= j; k++)
+          {
+            sorted.push_back(nodes[k]);
+            done[k] = true;
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  // loop over the sort patterns applying each (one at a time) to every node in the set
   for (auto next : order)
   {
     // use int for i so that "i-1 != 0" when i is zero.
     for (int i = 0; static_cast<size_t>(i) < nodes.size(); i++)
     {
+      Node * field = nodes[i];
+
+      // only perform the sort/move operation is the centered/main "field" node is actually a
+      // field or section and if we haven't already sorted/moved it with a previous matched pattern.
       if (done[i])
         continue;
-
-      Node * comment = nullptr;
-      Node * field = nodes[i];
-      if ((i - 1 > 0) && nodes[i - 1]->type() == NodeType::Comment)
-        comment = nodes[i - 1];
-
       if (field->type() != NodeType::Field && field->type() != NodeType::Section)
         continue;
 
+      std::list<size_t> before;
+      std::list<size_t> after;
+
+      // collect all comments that form a block that is attached to the current field/section
+      for (int j = i - 1; j >= 0; j--)
+      {
+        if (nodes[j]->type() != NodeType::Comment)
+        {
+          // If the section we are sorting/moving is at the end of the set, we want to move any
+          // preceding blank lines with the section to its new location except they will be moved
+          // to trail the section - unless this section is being sorted/moved to the same (i.e.
+          // last) position in which case we don't need to do anything special.  This prevents
+          // trailing newlines before the close of the parent section and preserves a blank line
+          // between this section and whatever will come after it next since it will no longer be
+          // the last section in its parent block.
+          if (static_cast<size_t>(i) == nodes.size() - 1 && sorted.size() != i &&
+              nodes[j]->type() == NodeType::Blank && !done[j])
+            after.push_back(j);
+          break;
+        }
+        before.push_front(j);
+      }
+
+      // any trailing blank will get moved with this field/section
+      if ((static_cast<size_t>(i + 1) < nodes.size()) && nodes[i + 1]->type() == NodeType::Blank && !done[i + 1])
+        after.push_back(i + 1);
+
       if (matches(next, field->path(), false))
       {
-        if (comment)
+        for (auto index : before)
         {
-          done[i - 1] = true;
-          sorted.push_back(comment);
+          done[index] = true;
+          sorted.push_back(nodes[index]);
         }
+
         done[i] = true;
         sorted.push_back(field);
+
+        for (auto index : after)
+        {
+          done[index] = true;
+          sorted.push_back(nodes[index]);
+        }
       }
     }
   }

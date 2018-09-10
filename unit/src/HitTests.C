@@ -557,6 +557,13 @@ TEST(HitTests, Formatter_sorting)
         {
            {"", {"outof", "order"}},
         }
+      }, {
+        "move newline padding with sorted sections",
+        "[second]\n[]\n\n[first]\n[]",
+        "[first]\n[]\n\n[second]\n[]",
+        {
+           {"", {"first", "second"}},
+        }
       }
   };
   // clang-format on
