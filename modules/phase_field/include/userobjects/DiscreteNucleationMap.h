@@ -37,6 +37,10 @@ public:
 
   const std::vector<Real> & nuclei(const Elem *) const;
 
+  const DiscreteNucleationInserter & getInserter() const { return _inserter; }
+  std::pair<Real, Real> getRadiusAndWidth() const { return std::make_pair(_radius, _int_width); }
+  Real getPeriodic() const { return _periodic; }
+
 protected:
   /// Did the mesh change since the last execution of this PP?
   bool _mesh_changed;
