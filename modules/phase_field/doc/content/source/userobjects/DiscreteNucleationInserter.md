@@ -1,4 +1,3 @@
-
 # DiscreteNucleationInserter
 
 !syntax description /UserObjects/DiscreteNucleationInserter

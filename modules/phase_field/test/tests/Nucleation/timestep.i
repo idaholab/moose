@@ -1,0 +1,95 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
+  nz = 0
+  xmin = 0
+  xmax = 20
+  ymin = 0
+  ymax = 20
+  elem_type = QUAD4
+[]
+
+[Variables]
+  [./c]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[BCs]
+  [./left]
+    type = DirichletBC
+    boundary = left
+    variable = c
+    value = 0
+  [../]
+  [./right]
+    type = DirichletBC
+    boundary = right
+    variable = c
+    value = 1
+  [../]
+  [./Periodic]
+    [./all]
+      auto_direction = y
+    [../]
+  [../]
+[]
+
+[Kernels]
+  [./c]
+    type = Diffusion
+    #D_name = F
+    variable = c
+  [../]
+  [./dt]
+    type = TimeDerivative
+    variable = c
+  [../]
+[]
+
+[UserObjects]
+  [./inserter]
+    type = DiscreteNucleationInserter
+    hold_time = 1
+    probability = 0.0005
+  [../]
+  [./map]
+    type = DiscreteNucleationMap
+    radius = 3.27
+    periodic = c
+    inserter = inserter
+  [../]
+[]
+
+[Postprocessors]
+  [./dt]
+    type = TimestepSize
+  [../]
+  [./dtnuc]
+    type = DiscreteNucleationTimeStep
+    inserter = inserter
+    dt_max = 0.5
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = 'NEWTON'
+  num_steps = 10
+
+  [./TimeStepper]
+    type = IterationAdaptiveDT
+    optimal_iterations = 8
+    iteration_window = 2
+    postprocessor_dtlim = dtnuc
+    dt = 1
+  [../]
+[]
+
+[Outputs]
+  execute_on = 'timestep_end'
+  csv = true
+[]

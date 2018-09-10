@@ -12,8 +12,8 @@ are not intrinsic to the phase field method. We introduce nucleation by
 artificially triggering and stabilizing the formation of nuclei through local
 modifications of the free energy density.
 
-The system comprises two user objects, a material class, and a marker for mesh
-adaptivity:
+The system comprises two user objects, a material class, a marker for mesh
+adaptivity, and a postprocessor:
 
 - [`DiscreteNucleationInserter`](/DiscreteNucleationInserter.md) - a user object
   that maintains a global list of currently active nucleus positions.
@@ -25,6 +25,9 @@ adaptivity:
   variables and their target concentrations (using the data from the DiscreteNucleationMap).
 - [`DiscreteNucleationMarker`](markers/DiscreteNucleationMarker.md)  - a marker
   that triggers refinement at the point of nucleus insertion.
+- [`DiscreteNucleationTimeStep`](postprocessors/DiscreteNucleationTimeStep.md) - a
+  postprocessor to provide a time step limit for new nuclei to use with
+  [IterationAdaptiveDT](/IterationAdaptiveDT.md)
 
 ## Discussion
 

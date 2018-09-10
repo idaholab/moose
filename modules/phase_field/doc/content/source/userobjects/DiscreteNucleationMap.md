@@ -1,4 +1,3 @@
-
 # DiscreteNucleationMap
 
 !syntax description /UserObjects/DiscreteNucleationMap
