@@ -173,10 +173,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     // Since rDG uses this kernel and rDG usually uses elemental area by default,
     // a linear area variable must be used specifically.
-    if (_spatial_discretization == rDG)
-      params.set<std::vector<VariableName>>("A") = {AREA + "_linear"};
-    else
-      params.set<std::vector<VariableName>>("A") = {AREA};
+    params.set<std::vector<VariableName>>("A") = {_A_linear_name};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("p") = PRESSURE;
     params.set<MaterialPropertyName>("alpha") = UNITY;
@@ -369,7 +366,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOA;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
-    params.set<std::vector<VariableName>>("A_linear") = {AREA + "_linear"};
+    params.set<std::vector<VariableName>>("A_linear") = {_A_linear_name};
     params.set<std::vector<VariableName>>("A") = {AREA};
     params.set<std::vector<VariableName>>("rhoA") = {RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};

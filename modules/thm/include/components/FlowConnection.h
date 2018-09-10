@@ -153,6 +153,8 @@ protected:
   std::shared_ptr<const FlowModel> _flow_model;
   /// The name of the fluid property user object
   UserObjectName _fp_name;
+  /// Linear cross-sectional area variable names
+  std::vector<AuxVariableName> _A_linear_names;
   /// Numerical flux user object names
   std::vector<UserObjectName> _numerical_flux_names;
   /// rDG interfacial variables user object names
