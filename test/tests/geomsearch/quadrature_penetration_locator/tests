@@ -1,9 +1,12 @@
 [Tests]
+  issues = ''
+  design = 'source/auxkernels/PenetrationAux.md'
   [./qpl]
     type = 'Exodiff'
     input = 'quadrature_penetration_locator.i'
     exodiff = 'quadrature_penetration_locator_out.e'
     group = 'geometric'
+    requirement = "The PenetrationAux object shall compute the distance between two overlapping boundaries using a constant monomial auxiliary variable."
   [../]
 
   [./1d_qpl]
@@ -11,5 +14,6 @@
     input = '1d_quadrature_penetration.i'
     exodiff = '1d_quadrature_penetration_out.e'
     group = 'geometric'
+    requirement = "The PenetrationAux object shall compute the distance between two overlapping boundaries using a constant monomial auxiliary variable in 1D."
   [../]
 []

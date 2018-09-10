@@ -1,7 +1,10 @@
 [Tests]
+  issues = ''
+  design = 'source/auxkernels/PenetrationAux.md source/auxkernels/GapValueAux.md'
   [./test]
     type = 'Exodiff'
     input = '2d_interior_boundary_penetration_locator.i'
     exodiff = '2d_interior_boundary_penetration_locator_out.e'
+    requirement = "MOOSE shall be capable of computing the distance as well as transfer data between interior boundaries on a 2D domain."
   [../]
 []

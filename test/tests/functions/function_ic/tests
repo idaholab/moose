@@ -1,7 +1,10 @@
 [Tests]
+  issues = ''
+  design = 'source/ics/FunctionIC.md'
   [./test]
     type = 'Exodiff'
     input = 'function_ic_test.i'
     exodiff = 'out.e'
+    requirement = "MOOSE shall include an InitialCondition object capable of setting values base on a supplied function."
   [../]
 []

@@ -1,22 +1,28 @@
 [Tests]
+  issues = '#4828'
+  design = 'source/functions/LinearCombinationFunction.md'
   [./except1]
     type = 'RunException'
     input = 'except1.i'
     expect_err = "LinearCombinationFunction: The number of functions must equal the number of w values"
+    requirement = "The LinearCombinationFunction shall report an error if the parameters listing the functions differs in size than the list of coefficients."
   [../]
   [./lcf1]
     type = 'CSVDiff'
     input = 'lcf1.i'
     csvdiff = 'lcf1.csv'
+    requirement = "The LinearCombinationFunction shall be capable of computing the sum of function values, each multiplied by a scale factor."
   [../]
   [./lcf_grad]
     type = 'CSVDiff'
     input = 'lcf_grad.i'
     csvdiff = 'lcf_grad.csv'
+    requirement = "The LinearCombinationFunction shall be capable of computing the sum of function gradients, each multiplied by a scale factor."
   [../]
   [./lcf_vector]
     type = 'Exodiff'
     input = 'lcf_vector.i'
     exodiff = 'lcf_vector_out.e'
+    requirement = "The LinearCombinationFunction shall be capable of computing the sum of vector functions, each multiplied by a scale factor."
   [../]
 []

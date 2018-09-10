@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#7489'
+  design = 'syntax/Executioner/index.md'
   [./test]
     type = CSVDiff
     input = arbitrary_execute.i
     csvdiff = arbitrary_execute_out.csv
     expect_out = "Flag\sName:\sJUST_GO"
+    requirement = "The Executioner system shall support the creation of custom objects with arbitrary execution flags."
   [../]
 []
