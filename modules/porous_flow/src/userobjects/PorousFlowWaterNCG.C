@@ -257,7 +257,8 @@ PorousFlowWaterNCG::gasProperties(Real pressure,
                      dncg_viscosity_dp0,
                      dncg_viscosity_dT);
 
-  _ncg_fp.h_from_p_T(Yncg * pressure, temperature, ncg_enthalpy, dncg_enthalpy_dp0, dncg_enthalpy_dT);
+  _ncg_fp.h_from_p_T(
+      Yncg * pressure, temperature, ncg_enthalpy, dncg_enthalpy_dp0, dncg_enthalpy_dT);
 
   // Vapor density, viscosity and enthalpy calculated using partial pressure
   // X1 * psat (Raoult's law)
@@ -363,7 +364,8 @@ PorousFlowWaterNCG::liquidProperties(Real pressure,
   enthalpyOfDissolution(temperature, hdis, dhdis_dT);
 
   Real water_enthalpy, dwater_enthalpy_dp, dwater_enthalpy_dT;
-  _water_fp.h_from_p_T(pressure, temperature, water_enthalpy, dwater_enthalpy_dp, dwater_enthalpy_dT);
+  _water_fp.h_from_p_T(
+      pressure, temperature, water_enthalpy, dwater_enthalpy_dp, dwater_enthalpy_dT);
 
   // Enthalpy of gaseous CO2
   Real ncg_enthalpy, dncg_enthalpy_dp, dncg_enthalpy_dT;

@@ -538,7 +538,8 @@ public:
    * @param[out] derivative of thermal conductivity wrt pressure
    * @param[out] derivative of thermal conductivity wrt temperature
    */
-  virtual void k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const;
+  virtual void
+  k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const;
   virtual void k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const;
 
   /**

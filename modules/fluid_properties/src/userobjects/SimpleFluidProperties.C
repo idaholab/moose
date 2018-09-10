@@ -162,7 +162,10 @@ SimpleFluidProperties::rho_e_dpT(Real pressure,
   de_dT = denergy_dT;
 }
 
-Real SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const { return _viscosity; }
+Real SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _viscosity;
+}
 
 void
 SimpleFluidProperties::mu_from_p_T(
@@ -197,7 +200,8 @@ SimpleFluidProperties::rho_mu_dpT(Real pressure,
 Real
 SimpleFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
-  return e_from_p_T(pressure, temperature) + _pp_coeff * pressure / rho_from_p_T(pressure, temperature);
+  return e_from_p_T(pressure, temperature) +
+         _pp_coeff * pressure / rho_from_p_T(pressure, temperature);
 }
 
 void
