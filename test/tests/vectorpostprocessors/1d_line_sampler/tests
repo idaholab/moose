@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#9500'
+  design = 'source/vectorpostprocessors/LineMaterialRealSampler.md'
+  [./test]
+    type = 'CSVDiff'
+    input = '1d_line_sampler.i'
+    csvdiff = '1d_line_sampler_out_my_vpp_0001.csv'
+    requirement = "Line sampling shall account for floating point precision error."
+  [../]
+[]

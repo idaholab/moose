@@ -1,4 +1,17 @@
 [Tests]
+  issues = ''
+  design = 'source/auxkernels/PenetrationAux.md'
+
+  [./pl_test1]
+    type = 'Exodiff'
+    input = 'pl_test1.i'
+    exodiff = 'pl_test1_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, disjoint surfaces of a moving interface in 3D."
+  [../]
+
   [./pl_test1q]
     type = 'Exodiff'
     input = 'pl_test1q.i'
@@ -6,33 +19,7 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
-  [../]
-
-  [./pl_test1qtt]
-    type = 'Exodiff'
-    input = 'pl_test1qtt.i'
-    exodiff = 'pl_test1qtt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
-
-  [./pl_test2qtt]
-    type = 'Exodiff'
-    input = 'pl_test2qtt.i'
-    exodiff = 'pl_test2qtt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
-
-  [./pl_test2q]
-    type = 'Exodiff'
-    input = 'pl_test2q.i'
-    exodiff = 'pl_test2q_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, disjoint surfaces of a moving interface in 3D using second order elements."
   [../]
 
   [./pl_test1tt]
@@ -42,43 +29,17 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, disjoint surfaces of a moving interface in 3D using a tangential tolerance of for the distance."
   [../]
 
-  [./pl_test4q]
+  [./pl_test1qtt]
     type = 'Exodiff'
-    input = 'pl_test4q.i'
-    exodiff = 'pl_test4q_out.e'
-    abs_zero = 1e-09
+    input = 'pl_test1qtt.i'
+    exodiff = 'pl_test1qtt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
-  [../]
-
-  [./pl_test1]
-    type = 'Exodiff'
-    input = 'pl_test1.i'
-    exodiff = 'pl_test1_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
-
-  [./pl_test2tt]
-    type = 'Exodiff'
-    input = 'pl_test2tt.i'
-    exodiff = 'pl_test2tt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
-  [../]
-
-  [./pl_test3]
-    type = 'Exodiff'
-    input = 'pl_test3.i'
-    exodiff = 'pl_test3_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, disjoint surfaces of a moving interface in 3D using a tangential tolerance of for the distance and second order elements."
   [../]
 
   [./pl_test2]
@@ -88,15 +49,47 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, overlapping surfaces of a moving interface in 3D."
   [../]
 
-  [./pl_test4]
+  [./pl_test2q]
     type = 'Exodiff'
-    input = 'pl_test4.i'
-    exodiff = 'pl_test4_out.e'
+    input = 'pl_test2q.i'
+    exodiff = 'pl_test2q_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, overlapping surfaces of a moving interface in 3D with second order elements."
+  [../]
+
+  [./pl_test2tt]
+    type = 'Exodiff'
+    input = 'pl_test2tt.i'
+    exodiff = 'pl_test2tt_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, overlapping surfaces of a moving interface in 3D using a tangential tolerance for the distance."
+  [../]
+
+  [./pl_test2qtt]
+    type = 'Exodiff'
+    input = 'pl_test2qtt.i'
+    exodiff = 'pl_test2qtt_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between two parallel, overlapping surfaces of a moving interface in 3D using a tangential tolerance for the distance and second order elements."
+  [../]
+
+  [./pl_test3]
+    type = 'Exodiff'
+    input = 'pl_test3.i'
+    exodiff = 'pl_test3_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and convex disjoint surfaces of a moving interface in 3D."
   [../]
 
   [./pl_test3q]
@@ -107,15 +100,7 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
-  [../]
-
-  [./pl_test4tt]
-    type = 'Exodiff'
-    input = 'pl_test4tt.i'
-    exodiff = 'pl_test4tt_out.e'
-    group = 'geometric'
-    custom_cmp = exclude_elem_id.cmp
-    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and convex disjoint surfaces of a moving interface in 3D and second order elements."
   [../]
 
   [./pl_test3tt]
@@ -125,5 +110,37 @@
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
     allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and convex disjoint surfaces of a moving interface in 3D using a tangential tolerance of for the distance and second order elements."
+  [../]
+
+  [./pl_test4]
+    type = 'Exodiff'
+    input = 'pl_test4.i'
+    exodiff = 'pl_test4_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and concave disjoint surfaces of a moving interface in 3D."
+  [../]
+
+  [./pl_test4q]
+    type = 'Exodiff'
+    input = 'pl_test4q.i'
+    exodiff = 'pl_test4q_out.e'
+    abs_zero = 1e-09
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and concave disjoint surfaces of a moving interface in 3D using second order elements."
+  [../]
+
+  [./pl_test4tt]
+    type = 'Exodiff'
+    input = 'pl_test4tt.i'
+    exodiff = 'pl_test4tt_out.e'
+    group = 'geometric'
+    custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
+    requirement = "The PenetrationAux object shall be capable of computing the distance, tangential distance, normal, closest point, side id, and element id between a flat and concave disjoint surfaces of a moving interface in 3D using a tangential tolerance of for the distance."
   [../]
 []

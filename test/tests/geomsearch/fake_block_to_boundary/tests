@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#3964'
+  design = 'source/auxkernels/NearestNodeDistanceAux.md'
   [./test]
     type = 'Exodiff'
     input = 'fake_block_to_boundary.i'
     exodiff = 'fake_block_to_boundary_out.e'
+    requirement = "The NearestNodeDistanceAux object shall be capable of computing the shortest distance between a boundary and subdomain."
   [../]
 []

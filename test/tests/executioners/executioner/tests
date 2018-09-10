@@ -1,15 +1,19 @@
 [Tests]
+  design = 'syntax/Executioner/index.md'
+  issues = ''
   [./test_steady_adapt]
     type = 'Exodiff'
     input = 'steady-adapt.i'
     exodiff = 'out_steady_adapt.e-s004'
     group = 'adaptive'
+    requirement = "MOOSE shall support adaptive solves for steady-state execution."
   [../]
 
   [./test_steady_state_check]
     type = 'Exodiff'
     input = 'steady_state_check_test.i'
     exodiff = 'out_ss_check.e'
+    requirement = "MOOSE shall be able to detect steady state conditions during execution."
   [../]
 
   [./test_steady]
@@ -17,6 +21,7 @@
     input = 'steady.i'
     exodiff = 'out_steady.e'
     abs_zero = 1e-9
+    requirement = "MOOSE shall be capable of solving a steady state diffusion problem."
   [../]
 
   [./test_transient]
@@ -24,5 +29,6 @@
     input = 'transient.i'
     exodiff = 'out_transient.e'
     group = 'requirements'
+    requirement = "MOOSE shall be capable of solving a transient diffusion problem."
   [../]
 []

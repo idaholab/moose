@@ -3,5 +3,16 @@
     type = RunApp
     input = 'cahn_hilliard.i'
     check_input = True
+    requirement = "The nucleation sysyem shall have an example for use with conserved order parameters"
+    design = 'phase_field/Nucleation/DiscreteNucleation.md'
+    issues = '#5472'
+  [../]
+  [./refine]
+    type = RunApp
+    input = 'refine.i'
+    check_input = True
+    requirement = "The nucleation marker shall have an example"
+    design = 'Markers/DiscreteNucleationMarker.md'
+    issues = '#12099'
   [../]
 []

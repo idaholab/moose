@@ -1,17 +1,22 @@
 [Tests]
+  issues = ''
+  design = 'source/auxkernels/PenetrationAux.md'
   [./test]
     type = 'Exodiff'
     input = 'penetration_locator_test.i'
     exodiff = 'out.e'
-    group = 'requirements geometric'
+    group = 'geometric'
+    requirement = "The PenetrationAux object shall compute the distance between two boundaries in 3D that overlap."
   [../]
 
   [./parallel_test]
     type = 'Exodiff'
     input = 'penetration_locator_test.i'
     exodiff = 'out.e'
-    group = 'requirements geometric'
+    group = 'geometric'
+    min_parallel = 3
     max_parallel = 3
     prereq = 'test'
+    requirement = "The PenetrationAux object shall compute, in parallel, the distance between two boundaries in 3D that overlap."
   [../]
 []

@@ -1,8 +1,10 @@
 [Tests]
+  issues = '#5560'
+  design = 'source/controls/TimePeriod.md'
   [./test]
     type = 'Exodiff'
     input = 'time_period_test.i'
     exodiff = 'time_period_test_out.e'
-    allow_warnings = true # deprecated message allowed
+    requirement = "MOOSE shall support controlling what objects are executing based on start and end times."
   [../]
 []

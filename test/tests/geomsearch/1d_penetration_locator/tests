@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#1693'
+  design = 'source/auxkernels/PenetrationAux.md'
   [./test]
     type = 'Exodiff'
     input = '1d_penetration_locator.i'
     exodiff = '1d_penetration_locator_out.e'
+    requirement = "MOOSE shall be capable of computing the distance between two disjoint boundaries on a 1D domain."
   [../]
 []
