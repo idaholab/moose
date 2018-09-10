@@ -71,15 +71,15 @@ FlowModelSinglePhase::addMooseObjects()
 
   const std::string fp_name = pars.get<UserObjectName>("fp");
 
-  ExecFlagEnum lin_execute_on(MooseUtils::getDefaultExecFlagEnum());
-  lin_execute_on = {EXEC_LINEAR};
+  ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
+  execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // numerical flux user object
   {
     const std::string class_name = "NumericalFlux3EqnHLLC";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("fluid_properties") = fp_name;
-    params.set<ExecFlagEnum>("execute_on") = lin_execute_on;
+    params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, _numerical_flux_name, params);
   }
 
@@ -356,9 +356,6 @@ FlowModelSinglePhase::addMooseObjects()
 void
 FlowModelSinglePhase::addRDGMooseObjects()
 {
-  ExecFlagEnum lin_execute_on(MooseUtils::getDefaultExecFlagEnum());
-  lin_execute_on = {EXEC_LINEAR};
-
   // advection
   {
     // mass
