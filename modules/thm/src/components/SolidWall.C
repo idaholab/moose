@@ -39,7 +39,7 @@ SolidWall::addMooseObjects1Phase()
   else if (_spatial_discretization == FlowModel::rDG)
   {
     ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_LINEAR, EXEC_NONLINEAR};
+    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
     // boundary flux user object
     const std::string boundary_flux_name = genName(name(), "boundary_flux");
@@ -79,7 +79,7 @@ SolidWall::addMooseObjects2Phase()
   else if (_spatial_discretization == FlowModel::rDG)
   {
     ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_LINEAR, EXEC_NONLINEAR};
+    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
     // boundary flux user object
     const std::string boundary_flux_name = genName(name(), "boundary_flux");
