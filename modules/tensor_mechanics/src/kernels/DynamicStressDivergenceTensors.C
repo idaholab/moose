@@ -97,7 +97,8 @@ DynamicStressDivergenceTensors::computeQpJacobian()
   if (_static_initialization && _t == _dt)
     return StressDivergenceTensors::computeQpJacobian();
   else if (_dt > 0)
-    return StressDivergenceTensors::computeQpJacobian() * (1.0 + _alpha + _zeta[_qp] / _dt);
+    return StressDivergenceTensors::computeQpJacobian() *
+           (1.0 + _alpha + (1.0 + _alpha) * _zeta[_qp] / _dt);
   else
     return 0.0;
 }
@@ -117,7 +118,7 @@ DynamicStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
       return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
     else if (_dt > 0)
       return StressDivergenceTensors::computeQpOffDiagJacobian(jvar) *
-             (1.0 + _alpha + _zeta[_qp] / _dt);
+             (1.0 + _alpha + (1.0 + _alpha) * _zeta[_qp] / _dt);
     else
       return 0.0;
   }
