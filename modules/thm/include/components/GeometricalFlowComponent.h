@@ -82,12 +82,6 @@ protected:
   /// Numerical flux user object name
   const UserObjectName _numerical_flux_name;
 
-  /// Numerical conservative flux user object name
-  const UserObjectName _numerical_conservative_flux_name;
-
-  /// Numerical non-conservative flux user object name
-  const UserObjectName _numerical_nonconservative_flux_name;
-
   /// rDG interfacial variables user object name
   const UserObjectName _rdg_int_var_uo_name;
 

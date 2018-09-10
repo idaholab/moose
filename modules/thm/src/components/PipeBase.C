@@ -37,22 +37,17 @@ PipeBase::init()
   pars.set<PipeBase *>("_pipe") = this;
   pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-  pars.set<UserObjectName>("numerical_conservative_flux") = _numerical_conservative_flux_name;
   pars.set<bool>("implicit_rdg") = _implicit_rdg;
   if (_model_id == RELAP7::FM_SINGLE_PHASE)
     _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);
   else if (_model_id == RELAP7::FM_TWO_PHASE)
   {
-    pars.set<UserObjectName>("numerical_nonconservative_flux") =
-        _numerical_nonconservative_flux_name;
     pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
 
     _flow_model = std::make_shared<FlowModelTwoPhase>(name(), pars);
   }
   else if (_model_id == RELAP7::FM_TWO_PHASE_NCG)
   {
-    pars.set<UserObjectName>("numerical_nonconservative_flux") =
-        _numerical_nonconservative_flux_name;
     pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
     const TwoPhaseNCGFluidProperties & fp =
         _sim.getUserObject<TwoPhaseNCGFluidProperties>(_fp_name);
