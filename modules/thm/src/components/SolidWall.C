@@ -28,6 +28,23 @@ SolidWall::check() const
 void
 SolidWall::addMooseObjects1Phase()
 {
+  ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
+  userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+  // boundary flux user object
+  const std::string boundary_flux_name = genName(name(), "boundary_flux");
+  {
+    const std::string class_name = "BoundaryFlux3EqnGhostWall";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+    params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
+    _sim.addUserObject(class_name, boundary_flux_name, params);
+  }
+
+  // BCs
+  addWeakBC3Eqn(boundary_flux_name);
+
+  // Strongly impose zero velocity for CG
   if (_spatial_discretization == FlowModel::CG)
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
@@ -35,24 +52,6 @@ SolidWall::addMooseObjects1Phase()
     params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "rhou"), params);
-  }
-  else if (_spatial_discretization == FlowModel::rDG)
-  {
-    ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
-    // boundary flux user object
-    const std::string boundary_flux_name = genName(name(), "boundary_flux");
-    {
-      const std::string class_name = "BoundaryFlux3EqnGhostWall";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-      params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-      _sim.addUserObject(class_name, boundary_flux_name, params);
-    }
-
-    // BCs
-    addWeakBC3Eqn(boundary_flux_name);
   }
 }
 
