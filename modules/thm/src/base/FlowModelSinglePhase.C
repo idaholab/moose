@@ -67,11 +67,24 @@ FlowModelSinglePhase::addMooseObjects()
 {
   FlowModel::addCommonMooseObjects();
 
+  const InputParameters & pars = _pipe.parameters();
+
+  const std::string fp_name = pars.get<UserObjectName>("fp");
+
+  ExecFlagEnum lin_execute_on(MooseUtils::getDefaultExecFlagEnum());
+  lin_execute_on = {EXEC_LINEAR};
+
+  // numerical flux user object
+  {
+    const std::string class_name = "NumericalFlux3EqnHLLC";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<UserObjectName>("fluid_properties") = fp_name;
+    params.set<ExecFlagEnum>("execute_on") = lin_execute_on;
+    _sim.addUserObject(class_name, _numerical_flux_name, params);
+  }
+
   if (_spatial_discretization == rDG)
     addRDGMooseObjects();
-
-  const InputParameters & pars = _pipe.parameters();
-  const std::string fp_name = pars.get<UserObjectName>("fp");
 
   // coupling vectors
   std::vector<VariableName> cv_rho(1, DENSITY);
@@ -346,18 +359,8 @@ FlowModelSinglePhase::addMooseObjects()
 void
 FlowModelSinglePhase::addRDGMooseObjects()
 {
-  const UserObjectName & fp_name = _pipe.parameters().get<UserObjectName>("fp");
   ExecFlagEnum lin_execute_on(MooseUtils::getDefaultExecFlagEnum());
   lin_execute_on = {EXEC_LINEAR};
-
-  // numerical flux user object
-  {
-    const std::string class_name = "NumericalFlux3EqnHLLC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<UserObjectName>("fluid_properties") = fp_name;
-    params.set<ExecFlagEnum>("execute_on") = lin_execute_on;
-    _sim.addUserObject(class_name, _numerical_flux_name, params);
-  }
 
   // advection
   {
