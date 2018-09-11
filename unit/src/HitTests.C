@@ -597,6 +597,13 @@ TEST(HitTests, Formatter_sorting)
         {
            {"", {"**", "bar", "foo"}},
         }
+      }, {
+        "inline section comment must follow sorted section",
+        "[foo]\n[]\n[bar]\n[] # hello",
+        "[bar]\n[] # hello\n[foo]\n[]",
+        {
+           {"", {"bar"}},
+        }
       }
   };
   // clang-format on

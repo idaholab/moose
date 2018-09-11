@@ -329,6 +329,8 @@ public:
   render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
   virtual Node * clone() override;
 
+  bool isinline() { return _isinline; }
+
 private:
   std::string _text;
   bool _isinline;

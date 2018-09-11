@@ -889,7 +889,7 @@ parseComment(Parser * p, Node * n)
     p->error(tok, "the parser is broken");
 
   auto comment = p->emit(new Comment(tok.val, isinline));
-  if (isinline && n->children().size() > 0 && n->children().back()->type() != NodeType::Section)
+  if (isinline && n->children().size() > 0 && n->children().back()->type() == NodeType::Field)
     n->children().back()->addChild(comment);
   else
     n->addChild(comment);
@@ -1225,8 +1225,14 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
       }
 
       // any trailing blank will get moved with this field/section
-      if (after.empty() && (static_cast<size_t>(i + 1) < nodes.size()) &&
-          nodes[i + 1]->type() == NodeType::Blank && !done[i + 1])
+      Node * trailing =
+          static_cast<size_t>(i + 1) < nodes.size() && !done[i + 1] ? nodes[i + 1] : nullptr;
+      if (after.empty() && trailing && trailing->type() == NodeType::Blank)
+        after.push_back(i + 1);
+
+      // any trailing inline comment will also move/sort with the field/section
+      auto c = trailing ? dynamic_cast<Comment *>(trailing) : nullptr;
+      if (c && c->isinline())
         after.push_back(i + 1);
 
       if (matches(next, field->path(), false))
