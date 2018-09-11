@@ -1,4 +1,3 @@
-
 # MatDiffusion
 
 !syntax description /Kernels/MatDiffusion
