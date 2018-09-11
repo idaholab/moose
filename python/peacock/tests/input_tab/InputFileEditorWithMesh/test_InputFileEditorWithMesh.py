@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import platform
 from peacock.Input.InputFileEditorWithMesh import InputFileEditorWithMesh
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QApplication
 from peacock.Input.ExecutableInfo import ExecutableInfo
@@ -44,7 +44,7 @@ class BaseTests(Testing.PeacockTester):
 
     def newWidget(self):
         main_win = QMainWindow()
-        w = InputFileEditorWithMesh(size=[640,640])
+        w = InputFileEditorWithMesh(size=(640,640))
         main_win.setCentralWidget(w)
         app_info = ExecutableInfo()
         app_info.setPath(Testing.find_moose_test_exe())
@@ -328,22 +328,26 @@ class Tests(BaseTests):
         sdiffusion_image = "meshrender_camera_moved.png"
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(sdiffusion_image)
-        self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
+        if platform.system() != 'Darwin':
+            self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
 
         other = "spherical_average.i"
         w.setInputFile(other)
         other_image = "meshrender_3d.png"
         w.MeshViewerPlugin.onCameraChanged((0.2, 0.5, 0.8), (-30, 10, -20), (0, 5, 0))
         w.vtkwin.onWrite(other_image)
-        self.assertFalse(Testing.gold_diff(other_image, .98))
+        if platform.system() != 'Darwin':
+            self.assertFalse(Testing.gold_diff(other_image, .98))
 
         w.setInputFile(sdiffusion)
         w.vtkwin.onWrite(sdiffusion_image)
-        self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
+        if platform.system() != 'Darwin':
+            self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
 
         w.setInputFile(other)
         w.vtkwin.onWrite(other_image)
-        self.assertFalse(Testing.gold_diff(other_image, .98))
+        if platform.system() != 'Darwin':
+            self.assertFalse(Testing.gold_diff(other_image, .98))
 
 if __name__ == '__main__':
     Testing.run_tests()

@@ -28,13 +28,12 @@ class TestColorbarPlugin(Testing.PeacockImageTestCase):
 
         # The file to open
         self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
-        self._widget, self._window = main(size=[400,400])
+        self._widget, self._window = main(size=(400,400))
         self._widget.FilePlugin.onSetFilenames(self._filenames)
 
         # Start with 'diffused' variable
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
-
 
     def testInitial(self):
         """
@@ -53,6 +52,8 @@ class TestColorbarPlugin(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.ColorbarPlugin.ColorMapList.currentText(), 'default')
         self.assertFalse(self._widget.ColorbarPlugin.ColorMapReverse.isChecked())
         self.assertTrue(self._widget.ColorbarPlugin.ColorBarToggle.isChecked())
+
+        print 'NAME:', self._window._result[0].getVTKMapper().GetArrayName()
         self.assertImage('testInitial.png')
 
     def testRange(self):

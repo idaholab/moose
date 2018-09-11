@@ -217,18 +217,18 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         Apply ExodusResult options.
         """
         if self.ColorbarBlackFontToggle.isChecked() and self._set_result_color:
-            self.resultOptionsChanged.emit({'color':[0,0,0]})
+            self.resultOptionsChanged.emit({'color':(0,0,0)})
         elif self._set_result_color:
-            self.resultOptionsChanged.emit({'color':[1,1,1]})
+            self.resultOptionsChanged.emit({'color':(1,1,1)})
 
     def updateColorbarOptions(self):
         """
         Apply the ExodusColorbar options.
         """
         if self.ColorbarBlackFontToggle.isChecked():
-            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[0,0,0])})
+            self.colorbarOptionsChanged.emit({'primary':dict(font_color=(0,0,0))})
         else:
-            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[1,1,1])})
+            self.colorbarOptionsChanged.emit({'primary':dict(font_color=(1,1,1))})
 
     def updateWindowOptions(self):
         """
@@ -237,19 +237,19 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         if self.GradientToggle.isChecked():
             top = self._top.getRgb()
             bottom = self._bottom.getRgb()
-            background = [bottom[0]/255., bottom[1]/255., bottom[2]/255.]
-            background2 = [top[0]/255., top[1]/255., top[2]/255.]
+            background = (bottom[0]/255., bottom[1]/255., bottom[2]/255.)
+            background2 = (top[0]/255., top[1]/255., top[2]/255.)
         elif self.BlackPreset.isChecked():
-            background = [0, 0, 0]
+            background = (0, 0, 0)
             background2 = None
 
         elif self.WhitePreset.isChecked():
-            background = [1, 1, 1]
+            background = (1, 1, 1)
             background2 = None
 
         else:
             solid = self._solid.getRgb()
-            background = [solid[0]/255., solid[1]/255., solid[2]/255.]
+            background = (solid[0]/255., solid[1]/255., solid[2]/255.)
             background2 = None
 
         self.windowOptionsChanged.emit({'background':background,

@@ -17,7 +17,6 @@ from ChiggerSource2D import ChiggerSource2D
 
 from ChiggerResultBase import ChiggerResultBase
 from ChiggerResult import ChiggerResult
-from KeyPressInteractorStyle import KeyPressInteractorStyle
 
 from ColorMap import ColorMap
 
@@ -31,19 +30,22 @@ def create_single_source_result(source_type):
     needed based on the type provided.
 
     Inputs:
-        SOURCE_TYPE: The type of source to attach to a ChiggerResult object.
+        source_type: The type of source to attach to a ChiggerResult object.
     """
     class ChiggerResultMeta(ChiggerResult):
         """
         Meta class for creating ChiggerResult classes of different types.
         """
         @staticmethod
-        def getOptions():
-            opt = ChiggerResult.getOptions()
-            opt += source_type.getOptions()
+        def validOptions():
+            opt = ChiggerResult.validOptions()
+            opt += source_type.validOptions()
             return opt
 
         def __init__(self, **kwargs):
             super(ChiggerResultMeta, self).__init__(source_type(), **kwargs)
+
+        #def update(self, **kwargs):
+        #    super(ChiggerResultMeta, self).update(**kwargs)
 
     return ChiggerResultMeta

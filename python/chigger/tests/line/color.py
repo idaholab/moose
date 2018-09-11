@@ -12,8 +12,8 @@
 import chigger
 
 # Create a graph
-graph = chigger.graphs.Graph(xaxis={'lim':[0,10], 'num_ticks':3, 'title':'x'},
-                             yaxis={'lim':[0,30], 'num_ticks':5, 'title':'y'},
+graph = chigger.graphs.Graph(xaxis={'lim':(0,10), 'num_ticks':3, 'title':'x'},
+                             yaxis={'lim':(0,30), 'num_ticks':5, 'title':'y'},
                              color_scheme='citrus', legend={'visible':False})
 
 # Generate data
@@ -28,9 +28,9 @@ line1 = chigger.graphs.Line(x, y1, label='y1')
 line2 = chigger.graphs.Line(x, y2, label='y2')
 
 # Add lines to graph
-graph.setOptions(lines=[line0, line1, line2])
+graph.setOptions(lines=(line0, line1, line2))
 
 # Window
-window = chigger.RenderWindow(graph, size=[500, 250], test=True)
+window = chigger.RenderWindow(graph, size=(500, 250), test=True)
 window.write('color.png')
 window.start()

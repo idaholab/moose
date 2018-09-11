@@ -16,13 +16,13 @@ class ResultGroup(ChiggerResult):
     """
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerResult.getOptions()
+    def validOptions():
+        opt = ChiggerResult.validOptions()
         return opt
 
     def __init__(self, **kwargs):
-        super(ResultGroup, self).__init__(**kwargs)
         self._results = []
+        super(ResultGroup, self).__init__(**kwargs)
 
     def getResults(self):
         """
@@ -56,12 +56,6 @@ class ResultGroup(ChiggerResult):
         """
         for result in self._results:
             result.setOptions(*args, **kwargs)
-
-    def needsUpdate(self):
-        """
-        Check if the group needs to be updated.
-        """
-        return any([result.needsUpdate() for result in self._results])
 
     def add(self, result, *args, **kwargs):
         """

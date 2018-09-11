@@ -8,9 +8,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import math
-import vtk
-
 from ImageAnnotationSource import ImageAnnotationSource
 from .. import base
 
@@ -23,87 +20,64 @@ class ImageAnnotation(base.ChiggerResult):
     """
 
     @staticmethod
-    def getOptions():
+    def validOptions():
         """
         Return the default options for this object.
         """
-        opt = base.ChiggerResult.getOptions()
-        opt.add('position', (0.5, 0.5), "The position of the image center within the viewport, in "
-                                        "relative coordinates.", vtype=tuple)
-        opt.add('width', 0.25, "The logo width as a fraction of the window width, this is ignored "
-                               "if 'scale' option is set.")
-        opt.add('horizontal_alignment', 'center', "The position horizontal position alignment.",
-                allow=['left', 'center', 'right'])
-        opt.add('vertical_alignment', 'center', "The position vertical position alignment.",
-                allow=['bottom', 'center', 'top'])
-        opt.add('scale', None, "The scale of the image. (By default the image is scaled by the "
-                               "width.)", vtype=float)
-        opt += ImageAnnotationSource.getOptions()
+        opt = base.ChiggerResult.validOptions()
+        opt += ImageAnnotationSource.validOptions()
         return opt
+
+    @staticmethod
+    def validKeyBindings():
+        bindings = base.ChiggerResult.validKeyBindings()
+        bindings.add('w', ImageAnnotation._setWidth,
+                     desc="Increase the scale of the image by 0.01.")
+        bindings.add('w', ImageAnnotation._setWidth, shift=True,
+                     desc="Decrease the scale of the image by 0.01.")
+        bindings.add('a', ImageAnnotation._setOpacity,
+                     desc="Increase the opacity (alpha) of the image by 0.05.")
+        bindings.add('a', ImageAnnotation._setOpacity, shift=True,
+                     desc="Decrease the opacity (alpha) of the image by 0.05.")
+        return bindings
 
     def __init__(self, **kwargs):
         super(ImageAnnotation, self).__init__(ImageAnnotationSource(), **kwargs)
-        self._vtkcamera = self._vtkrenderer.MakeCamera()
-        self._vtkrenderer.SetInteractive(False)
 
-    def update(self, **kwargs):
+    def setActive(self, active):
         """
-        Updates the 3D camera to place the image in the defined location.
+        Overrides the default active highlighting.
         """
-        super(ImageAnnotation, self).update(**kwargs)
+        if active:
+            self._sources[0].getVTKActor().GetProperty().SetBackingColor(1, 0, 0)
+            self._sources[0].getVTKActor().GetProperty().SetBacking(True)
 
-        renderer = self.getVTKRenderer()
-
-        # Coordinate transormation object
-        tr = vtk.vtkCoordinate()
-        tr.SetCoordinateSystemToNormalizedViewport()
-
-        # Size of window
-        window = renderer.GetRenderWindow().GetSize()
-
-        # Size of image
-        size = self._sources[-1].getVTKSource().GetOutput().GetDimensions()
-
-        # Image scale
-        if self.isOptionValid('scale'):
-            scale = self.getOption('scale')
         else:
-            scale = float(window[0])/float(size[0]) * self.getOption('width')
+            self._sources[0].getVTKActor().GetProperty().SetBacking(False)
 
-        # Compute the camera distance
-        angle = self._vtkcamera.GetViewAngle()
-        d = window[1]*0.5 / math.tan(math.radians(angle*0.5))
+    def onMouseMoveEvent(self, position):
+        """
+        Re-position the image based on the mouse position.
+        """
+        self.setOption('position', position)
+        self.printOption('position')
 
-        # Determine the image position
-        if self.isOptionValid('position'):
-            p = self.getOption('position')
-            tr.SetValue(p[0], p[1], 0)
-            position = list(tr.GetComputedDisplayValue(renderer))
+    def _setWidth(self, window, binding): #pylint: disable=unused-argument
+        """
+        Callback for setting the image width.
+        """
+        step = -0.01 if binding.shift else 0.01
+        width = self.getOption('width') + step
+        if width > 0 and (width <= 1):
+            self.setOption('width', width)
+            self.printOption('width')
 
-        # Adjust for off-center alignments
-        if self.getOption('horizontal_alignment') == 'left':
-            position[0] = position[0] + (size[0]*0.5*scale)
-        elif self.getOption('horizontal_alignment') == 'right':
-            position[0] = position[0] - (size[0]*0.5*scale)
-
-        if self.getOption('vertical_alignment') == 'top':
-            position[1] = position[1] - (size[1]*0.5*scale)
-        elif self.getOption('vertical_alignment') == 'bottom':
-            position[1] = position[1] + (size[1]*0.5*scale)
-
-        # Reference position (middle of window)
-        tr.SetValue(0.5, 0.5, 0)
-        ref = tr.GetComputedDisplayValue(renderer)
-
-        # Camera offsets
-        x = (ref[0] - position[0]) * 1/scale
-        y = (ref[1] - position[1]) * 1/scale
-
-        # Set the camera
-        self._vtkcamera.SetViewUp(0, 1, 0)
-        self._vtkcamera.SetPosition(size[0]/2. + x, size[1]/2. + y, d * 1/scale)
-        self._vtkcamera.SetFocalPoint(size[0]/2. + x, size[1]/2. + y, 0)
-
-        # Update the renderer
-        renderer.SetActiveCamera(self._vtkcamera)
-        renderer.ResetCameraClippingRange()
+    def _setOpacity(self, window, binding): #pylint: disable=unused-argument
+        """
+        Callback for changing opacity.
+        """
+        step = -0.05 if binding.shift else 0.05
+        opacity = self.getOption('opacity') + step
+        if opacity > 0 and opacity < 1:
+            self.setOption('opacity', opacity)
+            self.printOption('opacity')

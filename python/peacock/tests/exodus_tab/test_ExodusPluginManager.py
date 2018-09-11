@@ -45,7 +45,7 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
-        self._widget, self._main_window = main(size=[600,600])
+        self._widget, self._main_window = main(size=(600,600))
         self._window = self._widget.VTKWindowPlugin
         self._widget.FilePlugin.onSetFilenames(self._filenames)
 
@@ -156,7 +156,7 @@ class TestExodusPluginManager(Testing.PeacockImageTestCase):
         """
 
         # Test that the script is created
-        self._window._window.setOptions(test=True, size=[600,600])
+        self._window._window.setOptions(test=True, size=(600,600))
         self._widget.OutputPlugin.write.emit(self._repr_script)
         self.assertTrue(os.path.exists(self._repr_script))
 

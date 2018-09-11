@@ -89,4 +89,10 @@
     separate = True
     display_required = True
   [../]
+  [./PeacockObserver]
+    type = ImageDiff
+    command = test_PeacockObserver.py
+    imagediff = PeacockObserver.png
+    display_required = True
+  [../]
 []

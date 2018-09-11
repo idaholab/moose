@@ -24,8 +24,14 @@ for i in range(n):
         data.SetValue(idx, i+j)
         idx += 1
 
-plane0 = chigger.geometric.PlaneSource2D(origin=[100,100,0], point1=[100,200,0], point2=[200,100,0], resolution=[n,m], cmap='viridis', data=data)
+plane0 = chigger.geometric.PlaneSource2D(origin=(100,100,0),
+                                         point1=(100,200,0),
+                                         point2=(200,100,0),
+                                         resolution=(n,m),
+                                         cmap='viridis',
+                                         data=data)
+
 result = chigger.base.ChiggerResult(plane0)
-window = chigger.RenderWindow(result, size=[300,300], test=True)
+window = chigger.RenderWindow(result, size=(300,300), test=True)
 window.write('plane_source.png')
 window.start()

@@ -22,6 +22,6 @@ clip = chigger.filters.PlaneClipper()
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
 mug = chigger.exodus.ExodusResult(reader, camera=camera, cmap='viridis', filters=[clip])
 
-window = chigger.RenderWindow(mug, size=[300,300], test=True)
+window = chigger.RenderWindow(mug, size=(300,300), test=True)
 window.write('clip.png')
 window.start()

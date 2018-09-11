@@ -18,14 +18,17 @@ class LineSource(BaseType):
     """
 
     @staticmethod
-    def getOptions():
+    def validOptions():
         """
         Return the default options for this object.
         """
-        opt = BaseType.getOptions()
-        opt.add('resolution', 100, "The number of points sampled over the line.")
-        opt.add('point1', [0, 0, 0], "The starting point of the line.")
-        opt.add('point2', [1, 1, 0], "The ending point of the line.")
+        opt = BaseType.validOptions()
+        opt.add('resolution', default=100, vtype=int,
+                doc="The number of points sampled over the line.")
+        opt.add('point1', default=(0, 0, 0), size=3, vtype=float,
+                doc="The starting point of the line.")
+        opt.add('point2', default=(1, 1, 0), size=3, vtype=float,
+                doc="The ending point of the line.")
         return opt
 
     def __init__(self, **kwargs):
@@ -38,12 +41,10 @@ class LineSource(BaseType):
         super(LineSource, self).update(**kwargs)
 
         if self.isOptionValid('resolution'):
-            self._vtksource.SetResolution(self.getOption('resolution'))
+            self._vtksource.SetResolution(self.applyOption('resolution'))
 
         if self.isOptionValid('point1'):
-            self._vtksource.SetPoint1(self.getOption('point1'))
+            self._vtksource.SetPoint1(self.applyOption('point1'))
 
         if self.isOptionValid('point2'):
-            self._vtksource.SetPoint2(self.getOption('point2'))
-
-        self._vtksource.Update()
+            self._vtksource.SetPoint2(self.applyOption('point2'))

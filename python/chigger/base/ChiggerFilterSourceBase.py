@@ -38,9 +38,10 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
     FILTER_TYPES = []
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerSourceBase.getOptions()
-        opt.add('filters', [], "A list of Filter objects to apply to this mapper.")
+    def validOptions():
+        opt = ChiggerSourceBase.validOptions()
+        opt.add('filters', default=[], vtype=list,
+                doc="A list of Filter objects to apply to this mapper.")
         return opt
 
     def __init__(self, *args, **kwargs):
@@ -56,7 +57,7 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
         be connected to the first filter, if then exist, or the vtkAbstractMapper object. See the
         'update' method for this class for how the connections are made.
         """
-        raise mooseutils.MooseException('The {}."getSource()" method must be overridden by your '
+        raise mooseutils.MooseException('The {}."getVTKSource()" method must be overridden by your '
                                         'mapper object and return the source vtk object to connect '
                                         'to the filers and mapper.'.format(self.__class__.__name__))
 
@@ -65,15 +66,6 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
         Return the list of filter objects.
         """
         return self._filters
-
-    def needsUpdate(self):
-        """
-        Return True if the object needs to be updated.
-        """
-        changed = [super(ChiggerFilterSourceBase, self).needsUpdate()]
-        for f in self._filters:
-            changed.append(f.needsUpdate())
-        return any(changed)
 
     def update(self, **kwargs):
         """
@@ -88,10 +80,8 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
 
         # Initialize and update filters
         for f in self._filters:
-            if f.needsInitialize():
-                f.initializeFilter(self)
-            if f.needsUpdate():
-                f.update()
+            f.initializeFilter(self)
+            f.update()
 
     def __connectFilters(self):
         """

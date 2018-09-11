@@ -47,7 +47,7 @@ class TestOutputPlugin(Testing.PeacockImageTestCase):
         Loads an Exodus file in the VTKWindowWidget object using a structure similar to the ExodusViewer widget.
         """
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
-        self._widget, self._window, self._main = main(size=[600,600])
+        self._widget, self._window, self._main = main(size=(600,600))
         self._window.onSetFilename(self._filename)
         self._window.onSetVariable('diffused')
         self._window.onWindowRequiresUpdate()

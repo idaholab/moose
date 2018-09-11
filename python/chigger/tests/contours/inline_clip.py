@@ -21,10 +21,10 @@ clip = chigger.filters.PlaneClipper()
 contour = chigger.filters.ContourFilter()
 
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-result = chigger.exodus.ExodusResult(reader, variable='convected', camera=camera, cmap='viridis', filters=[contour, clip])
-result.setOptions('colorbar', visible=False)
+result = chigger.exodus.ExodusResult(reader, variable='convected', camera=camera, cmap='viridis',
+                                     filters=[contour, clip])
 
-window = chigger.RenderWindow(result, size=[300,300], test=True)
+window = chigger.RenderWindow(result, size=(300,300), test=True)
 
 window.write('inline_clip.png')
 window.start()

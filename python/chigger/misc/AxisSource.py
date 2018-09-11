@@ -20,9 +20,9 @@ class AxisSource(base.ChiggerFilterSourceBase):
     VTKACTOR_TYPE = vtk.vtkContextActor
 
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerFilterSourceBase.getOptions()
-        opt += utils.AxisOptions.get_options()
+    def validOptions():
+        opt = base.ChiggerFilterSourceBase.validOptions()
+        opt += utils.AxisOptions.validOptions()
         return opt
 
     def __init__(self, **kwargs):
@@ -46,5 +46,11 @@ class AxisSource(base.ChiggerFilterSourceBase):
             see ChiggerFilterSourceBase
         """
         super(AxisSource, self).update(**kwargs)
-        utils.AxisOptions.set_options(self._vtksource, self._options)
+        utils.AxisOptions.setOptions(self._vtksource, self._options)
         self._vtksource.Update()
+
+    def getBounds(self):
+
+        p0 = self._vtksource.GetPosition1()
+        p1 = self._vtksource.GetPosition2()
+        return [p0[0], p1[0], p0[1], p1[1], 0, 0]

@@ -97,7 +97,7 @@ class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             origin = [0.5, 0.5, 0.5]
             origin[index] = self.ClipSlider.sliderPosition()/float(self._increments-1)
 
-            self._clipper.setOptions(normal=normal, origin=origin)
+            self._clipper.setOptions(normal=tuple(normal), origin=tuple(origin))
             self.addFilter.emit(self._clipper)
         else:
             self.removeFilter.emit(self._clipper)
@@ -167,6 +167,6 @@ if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e')
-    widget, window = main(size=[600,600])
+    widget, window = main()
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

@@ -19,10 +19,8 @@ camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
 
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
 mug = chigger.exodus.ExodusResult(reader, variable='diffused', camera=camera, cmap='viridis')
-
-extents = chigger.misc.VolumeAxes(mug)
-extents.setOptions('xaxis', color=[1,0,0], minor_ticks=True)
-window = chigger.RenderWindow(mug, extents, size=[300,300], antialiasing=10, test=True)
+extents = chigger.misc.VolumeAxes(mug, xaxis={'minor_ticks':True, 'color':(1,0,0)})
+window = chigger.RenderWindow(mug, extents, size=(300,300), antialiasing=10)
 
 window.write('extents.png')
 window.start()

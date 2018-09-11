@@ -31,7 +31,6 @@ class TestVTKWriters(unittest.TestCase):
             if os.path.exists(filename):
                 os.remove(filename)
 
-
     def setUp(self):
         """
         Create a window to export.
@@ -39,7 +38,7 @@ class TestVTKWriters(unittest.TestCase):
         file_name = '../input/mug_blocks_out.e'
         self._reader = chigger.exodus.ExodusReader(file_name, adaptive=False)
         self._result = chigger.exodus.ExodusResult(self._reader, cmap='viridis')
-        self._window = chigger.RenderWindow(self._result, size=[300,300], style='test')
+        self._window = chigger.RenderWindow(self._result, size=(300,300), test=True)
 
     def testFormats(self):
         """

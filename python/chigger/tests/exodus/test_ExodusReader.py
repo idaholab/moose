@@ -63,8 +63,6 @@ class TestExodusReader(unittest.TestCase):
 
         # Current Time
         reader.setOptions(timestep=None, time=1.01)
-        if reader.needsUpdate():
-            reader.update()
         tdata = reader.getTimeData()
         self.assertAlmostEqual(tdata.time, 1)
         self.assertEqual(tdata.timestep, 10)
@@ -104,7 +102,7 @@ class TestExodusReader(unittest.TestCase):
         """
         Test that field data can be accessed.
         """
-        reader = chigger.exodus.ExodusReader(self.single, variables=['func_pp'])
+        reader = chigger.exodus.ExodusReader(self.single, variables=('func_pp',))
         for i, r in enumerate(range(0,21,2)):
             reader.update(timestep=i)
             self.assertAlmostEqual(reader.getGlobalData('func_pp'), r/10.)
@@ -125,29 +123,24 @@ class TestExodusReader(unittest.TestCase):
         Test that adaptive timestep files load correctly.
         """
         reader = chigger.exodus.ExodusReader(self.multiple)
-        reader.update()
 
         # Times
         self.assertEqual(reader.getTimes(), [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5])
 
         # Time
         reader.setOptions(timestep=None, time=1.01)
-        if reader.needsUpdate():
-            reader.update()
         tdata = reader.getTimeData()
         self.assertAlmostEqual(tdata.time, 1)
         self.assertEqual(tdata.timestep, 2)
         self.assertEqual(tdata.index, 0)
         self.assertEqual(tdata.filename, self.multiple + '-s002')
 
-        # Wait and the "update" the first few files
+        # Wait and then "update" the first few files
         time.sleep(1.5)
         for i in range(6):
             mooseutils.touch(self.testfiles[i])
 
         reader.setOptions(time=None, timestep=-1)
-        if reader.needsUpdate():
-            reader.update()
         tdata = reader.getTimeData()
         self.assertEqual(reader.getTimes(), [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0])
         self.assertAlmostEqual(tdata.time, 3.0)
@@ -164,7 +157,7 @@ class TestExodusReader(unittest.TestCase):
         with self.assertRaisesRegexp(IOError, 'The file foo.e is not a valid filename.'):
             chigger.exodus.ExodusReader('foo.e')
 
-        reader = chigger.exodus.ExodusReader(self.single, variables=['convected', 'func_pp'])
+        reader = chigger.exodus.ExodusReader(self.single, variables=('convected', 'func_pp'))
         with self.assertRaisesRegexp(mooseutils.MooseException, 'The variable "convected" must be a global variable.'):
             reader.getGlobalData('convected')
 
@@ -187,7 +180,24 @@ class TestExodusReader(unittest.TestCase):
         reader.update()
         self.assertEqual(reader.getVTKReader().GetNumberOfTimeSteps(), 2)
 
+    def testVariableReload(self):
+        print '\n'
 
+        filenames = ['../input/simple_diffusion_out.e', '../input/simple_diffusion_new_var_out.e']
+        common = 'common.e'
+        shutil.copy(filenames[0], common)
+        reader = chigger.exodus.ExodusReader(common)
+        variables = reader.getVariableInformation()
+        self.assertIn('aux', variables)
+        self.assertIn('u', variables)
+        self.assertNotIn('New_0', variables)
+
+        time.sleep(1.5) # make sure modified time is different (MacOS requires > 1s)
+        shutil.copy(filenames[1], common)
+        variables = reader.getVariableInformation()
+        self.assertIn('aux', variables)
+        self.assertIn('u', variables)
+        self.assertIn('New_0', variables)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

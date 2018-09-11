@@ -15,10 +15,12 @@ import subprocess
 import numpy as np
 import vtk
 import mooseutils
-from Options import Option, Options
+from Option import Option
+from Options import Options
 import AxisOptions
 import FontOptions
 import LegendOptions
+from KeyBindingMixin import KeyBinding, KeyBindingMixin
 
 def get_active_filenames(basename, pattern=None):
     """
@@ -63,19 +65,31 @@ def copy_adaptive_exodus_test_files(testbase):
         shutil.copy(src, dst)
     return sorted(testfiles)
 
-def get_bounds_min_max(*all_bounds):
-    """
-    Returns min,max bounds arrays provided a list of bounds sets.
-    """
-    xmin = [float('inf'), float('inf'), float('inf')]
-    xmax = [float('-inf'), float('-inf'), float('-inf')]
+#def get_bounds_min_max(*all_bounds):
+#    """
+#    Returns min,max bounds arrays provided a list of bounds sets.
+#    """
+#    bnds = get_vtk_bounds_min_max(*all_bounds)
+#    return (bnds[0], bnds[2], bnds[4]), (bnds[1], bnds[3], bnds[5])
 
+    #xmin = [float('inf'), float('inf'), float('inf')]
+    #xmax = [float('-inf'), float('-inf'), float('-inf')]
+
+    #for bounds in all_bounds:
+    #    for i, j in enumerate([0, 2, 4]):
+    #        xmin[i] = min(xmin[i], bounds[j])
+    #    for i, j in enumerate([1, 3, 5]):
+    #        xmax[i] = max(xmax[i], bounds[j])
+    #return xmin, xmax
+
+def get_vtk_bounds_min_max(*all_bounds):
+    bnds = [float('inf'), float('-inf'), float('inf'), float('-inf'), float('inf'), float('-inf')]
     for bounds in all_bounds:
-        for i, j in enumerate([0, 2, 4]):
-            xmin[i] = min(xmin[i], bounds[j])
-        for i, j in enumerate([1, 3, 5]):
-            xmax[i] = max(xmax[i], bounds[j])
-    return xmin, xmax
+        for i in [0, 2, 4]:
+            bnds[i] = min(bnds[i], bounds[i])
+        for i in [1, 3, 5]:
+            bnds[i] = max(bnds[i], bounds[i])
+    return bnds
 
 def get_bounds(*sources):
     """
@@ -83,14 +97,21 @@ def get_bounds(*sources):
     """
     bnds = []
     for src in sources:
-        bnds.append(src.getVTKMapper().GetBounds())
-    return get_bounds_min_max(*bnds)
+        if src is None:
+            continue
+        elif isinstance(src.getVTKActor(), vtk.vtkActor2D):
+            bnds.append(src.getVTKActor().GetBounds())
+        elif src.getVTKMapper() is not None:
+            bnds.append(src.getVTKMapper().GetBounds())
+    return get_vtk_bounds_min_max(*bnds)
 
 def compute_distance(*sources):
     """
     Returns the distance across the bounding box for all supplied sources.
     """
-    xmin, xmax = get_bounds(*sources)
+    bnds = get_bounds(*sources)
+    xmin = [bnds[0], bnds[2], bnds[4]]
+    xmax = [bnds[1], bnds[3], bnds[5]]
     return np.linalg.norm(np.array(xmax) - np.array(xmin))
 
 def get_min_max(*pairs):

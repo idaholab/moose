@@ -31,7 +31,7 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
 
         # The file to open
         self._filename = Testing.get_chigger_input('mug_blocks_out.e')
-        self._widget, self._window = main(size=[600,600])
+        self._widget, self._window = main(size=(600,600))
         self._widget.FilePlugin.onSetFilenames([self._filename])
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
@@ -99,7 +99,7 @@ class TestContourPlugin(Testing.PeacockImageTestCase):
         self._widget.ContourPlugin.ContourLevels.setText('wrong')
         self._widget.ContourPlugin.ContourLevels.editingFinished.emit()
         self.assertEqual(self._widget.ContourPlugin.ContourLevels.styleSheet(), u'color:#ff0000')
-        self.assertImage('testInitial.png')
+        self.assertImage('testContourLevels.png')
 
     def testState(self):
         """

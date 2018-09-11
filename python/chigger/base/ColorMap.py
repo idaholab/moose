@@ -15,6 +15,7 @@ import xml.etree.ElementTree as xml
 # Import matplotlib, if it exists
 try:
     from matplotlib import cm
+    import matplotlib.pyplot as plt
     import numpy as np
     USE_MATPLOTLIB = True
 except ImportError:
@@ -50,12 +51,16 @@ class ColorMap(ChiggerObject):
     """
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerObject.getOptions()
-        opt.add('cmap', 'default', "The colormap name.")
-        opt.add('cmap_reverse', False, "Reverse the order of colormap.")
-        opt.add('cmap_num_colors', 256, "Number of colors to use (matplotlib only).")
-        opt.add('cmap_range', [0, 1], "Set the data range for the color map to display.")
+    def validOptions():
+        opt = ChiggerObject.validOptions()
+        opt.add('cmap', default='default', vtype=str,
+                doc="The colormap name.")
+        opt.add('cmap_reverse', default=False, vtype=bool,
+                doc="Reverse the order of colormap.")
+        opt.add('cmap_num_colors', default=256, vtype=int,
+                doc="Number of colors to use (matplotlib only).")
+        opt.add('cmap_range', default=(0, 1), vtype=float, size=2,
+                doc="Set the data range for the color map to display.")
         return opt
 
     # The table is only needed once
@@ -73,7 +78,7 @@ class ColorMap(ChiggerObject):
         """
         names = ['default']
         if USE_MATPLOTLIB:
-            names += dir(cm)
+            names += plt.colormaps()
         names += self._data.keys()
         return names
 

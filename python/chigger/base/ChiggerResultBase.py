@@ -7,11 +7,13 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import vtk
-from ChiggerObject import ChiggerObject
 
-class ChiggerResultBase(ChiggerObject):
+import chigger
+from ChiggerObject import ChiggerObject
+from .. import utils
+
+class ChiggerResultBase(ChiggerObject, utils.KeyBindingMixin):
     """
     Base class for objects to be displayed with a single vtkRenderer object.
 
@@ -24,28 +26,41 @@ class ChiggerResultBase(ChiggerObject):
     Inputs:
         see ChiggerObject
     """
+    @staticmethod
+    def validOptions():
+        opt = ChiggerObject.validOptions()
+        opt.add('interactive', default=True,
+                doc="Control if the object may be selected with key bindings.")
+        opt.add('layer', default=1, vtype=int,
+                doc="The VTK layer within the render window.")
+        opt.add('viewport', default=(0., 0., 1., 1.), vtype=float, size=4,
+                doc="A list given the viewport coordinates [x_min, y_min, x_max, y_max], in " \
+                    "relative position to the entire window (0 to 1).")
+        opt.add('camera', None, vtype=vtk.vtkCamera,
+                doc="The VTK camera to utilize for viewing the results.")
+        opt.add('highlight_active', default=True, vtype=bool,
+                doc="When the result is activate enable/disable the 'highlighting'.")
+        return opt
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerObject.getOptions()
-        opt.add('layer', 1, "The VTK layer within the render window.", vtype=int)
-        opt.add('viewport', [0, 0, 1, 1], "A list given the viewport coordinates [x_min, y_min, "
-                                          "x_max, y_max], in relative position to the entire "
-                                          "window (0 to 1).", vtype=list)
-        opt.add('background', [0, 0, 0], "The background color, only applied when the 'layer' "
-                                         "option is zero. A background result is automatically "
-                                         "added when chigger.RenderWindow is utilized.")
-        opt.add('background2', None, "The second background color, when supplied this creates a "
-                                     "gradient background, only applied when the 'layer' option is "
-                                     "zero. A background result is automatically added when "
-                                     "chigger.RenderWindow is utilized.", vtype=list)
-        opt.add('gradient_background', False, "Enable/disable the use of a gradient background.")
-        opt.add('camera', "The VTK camera to utilize for viewing the results.", vtype=vtk.vtkCamera)
-        return opt
+    def validKeyBindings():
+        bindings = utils.KeyBindingMixin.validKeyBindings()
+        bindings.add('c', ChiggerResultBase._printCamera,
+                     desc="Display the camera settings for this object.")
+        return bindings
 
     def __init__(self, renderer=None, **kwargs):
         super(ChiggerResultBase, self).__init__(**kwargs)
         self._vtkrenderer = renderer if renderer != None else vtk.vtkRenderer()
+        self._vtkrenderer.SetInteractive(False)
+        self._render_window = None
+        self.__highlight = None
+
+    def getRenderWindow(self):
+        """
+        Return the chigger.RenderWindow object.
+        """
+        return self._render_window
 
     def getVTKRenderer(self):
         """
@@ -67,20 +82,60 @@ class ChiggerResultBase(ChiggerObject):
 
         # Render layer
         if self.isOptionValid('layer'):
-            self._vtkrenderer.SetLayer(self.getOption('layer'))
+            self._vtkrenderer.SetLayer(self.applyOption('layer'))
 
         # Viewport
         if self.isOptionValid('viewport'):
-            self._vtkrenderer.SetViewport(self.getOption('viewport'))
-
-        # Background (only gets applied if layer=0)
-        self._vtkrenderer.SetBackground(self.getOption('background'))
-        if self.isOptionValid('background2'):
-            self._vtkrenderer.SetBackground2(self.getOption('background2'))
-
-        if self.isOptionValid('gradient_background'):
-            self._vtkrenderer.SetGradientBackground(self.getOption('gradient_background'))
+            self._vtkrenderer.SetViewport(self.applyOption('viewport'))
 
         # Camera
         if self.isOptionValid('camera'):
-            self._vtkrenderer.SetActiveCamera(self.getOption('camera'))
+            self._vtkrenderer.SetActiveCamera(self.applyOption('camera'))
+
+    def getBounds(self):
+        """
+        Return the bounding box of the results.
+
+        By default this returns the bounding box of the viewport.
+        """
+        origin = self.getVTKRenderer().GetOrigin()
+        size = self.getVTKRenderer().GetSize()
+        return [origin[0], origin[0] + size[0], origin[1], origin[1] + size[1], 0, 0]
+
+    def _printCamera(self, *args): #pylint: disable=unused-argument
+        """Keybinding callback."""
+        print '\n'.join(utils.print_camera(self._vtkrenderer.GetActiveCamera()))
+
+    def init(self, window):
+        """
+        Initialize the object. This an internal method, DO NOT USE!
+
+        When a ChiggerResultBase object is ADDED to the RenderWindow this is called automatically.
+        """
+        self._render_window = window
+
+    def deinit(self):
+        """
+        De-Initialize the object. This an internal method, DO NOT USE!
+
+        When a ChiggerResultBase object is REMOVED to the RenderWindow this is called automatically.
+        """
+        pass
+
+    def setActive(self, value):
+        """
+        Activate method. This is an internal method, DO NOT USE!
+
+        Use RenderWindow.setActive() to activate/deactivate result objects.
+        """
+        self._vtkrenderer.SetInteractive(value)
+        if value and self.getOption('highlight_active'):
+            if self.__highlight is None:
+                self.__highlight = chigger.geometric.OutlineResult(self,
+                                                                   interactive=False,
+                                                                   color=(1, 0, 0),
+                                                                   line_width=5)
+            self.getRenderWindow().append(self.__highlight)
+
+        elif self.__highlight is not None:
+            self.getRenderWindow().remove(self.__highlight)

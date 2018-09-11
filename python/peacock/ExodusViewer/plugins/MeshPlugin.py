@@ -45,6 +45,8 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self._transform = chigger.filters.TransformFilter()
         self._extents = None
+        self._result = None
+        self._window = None
 
         # QGroupBox settings
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -115,22 +117,24 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self.setup()
 
+    def onSetupWindow(self, window):
+        self._window = window
+        #self.updateOptions()
+
     def onSetupResult(self, result):
         """
         Create the filters and load the stored state when the ExodusResult is created.
         """
         self._extents = chigger.misc.VolumeAxes(result)
-        if self.Extents.isChecked():
-            self._extents.update()
-        else:
-            self._extents.reset()
+        self.updateOptions()
 
     def onResetWindow(self):
         """
         Delete filters when the window is destroyed.
         """
-        self._extents.reset()
+        self._window.remove(self._extents)
         self._extents = None
+        self.updateOptions()
 
     def _loadPlugin(self):
         """
@@ -185,29 +189,33 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         result_options = dict()
         result_options['representation'] = str(self.Representation.currentText()).lower()
         result_options['edges'] = self.ViewMeshToggle.isChecked()
-        result_options['edge_color'] = [0, 0, 0]
+        result_options['edge_color'] = (0, 0, 0)
         self.resultOptionsChanged.emit(result_options)
 
-    def updateOptions(self):
+    def updateExtentsOptions(self):
         """
         Updates the results for the changes to the mesh view.
         """
-        scale = [self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value()]
-        if scale != [1, 1, 1]:
+        scale = (self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value())
+        if scale != (1, 1, 1):
             self._transform.setOption('scale', scale)
             self.addFilter.emit(self._transform)
         else:
             self.removeFilter.emit(self._transform)
 
-        if self._extents is not None:
+        if (self._window is not None) and (self._extents is not None):
             if self.Extents.isChecked():
-                self._extents.update()
+                self._window.append(self._extents)
             else:
-                self._extents.reset()
+                self._window.remove(self._extents)
 
-        # Emit the update signal with the new arguments
+    def updateOptions(self):
+        """
+        Update all options.
+        """
         self.updateReaderOptions()
         self.updateResultOptions()
+        self.updateExtentsOptions()
 
     def _setupDisplacementToggle(self, qobject):
         """
@@ -365,6 +373,6 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'displace.e')
     #filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
-    widget, window = main(size=[600,600])
+    widget, window = main()
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

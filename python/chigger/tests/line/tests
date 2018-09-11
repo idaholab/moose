@@ -4,6 +4,7 @@
     command = line.py
     imagediff = 'line.png'
     allowed_linux = 0.94
+    cli_args = '--test'
   [../]
 
   [./single_point]
@@ -11,6 +12,7 @@
     command = single_point.py
     imagediff = 'single_point.png'
     allowed_linux = 0.94
+    cli_args = '--test'
   [../]
 
   [./empty]
@@ -18,6 +20,7 @@
     command = empty.py
     imagediff = 'empty.png'
     allowed_linux = 0.935
+    cli_args = '--test'
   [../]
 
   [./color]
@@ -25,6 +28,7 @@
     command = color.py
     imagediff = 'color.png'
     allowed_linux = 0.94
+    cli_args = '--test'
   [../]
 
   [./legend]
@@ -33,6 +37,7 @@
     imagediff = 'legend.png'
     allowed_linux = 0.94
     allowed_darwin = 0.96
+    cli_args = '--test'
   [../]
 
   [./update]
@@ -40,6 +45,7 @@
     command = update.py
     imagediff = 'update_0.png update_1.png update_2.png update_3.png update_4.png update_5.png'
     allowed_linux = 0.93
+    cli_args = '--test'
   [../]
 
   [./secondary]
@@ -47,6 +53,7 @@
     command = secondary.py
     imagediff = 'secondary_initial.png secondary_0.png secondary_1.png secondary_2.png secondary_3.png'
     allowed_linux = 0.94
+    cli_args = '--test'
   [../]
 
   [./tracer]
@@ -55,5 +62,6 @@
     imagediff = 'tracer_1.png tracer_3.png tracer_5.png'
     allowed_darwin = 0.97
     allowed_linux = 0.96
+    cli_args = '--test'
   [../]
 []

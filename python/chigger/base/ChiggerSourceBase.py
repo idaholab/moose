@@ -33,8 +33,8 @@ class ChiggerSourceBase(ChiggerObject):
     VTKMAPPER_TYPE = vtk.vtkAbstractMapper
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerObject.getOptions()
+    def validOptions():
+        opt = ChiggerObject.validOptions()
         opt.add('visible', True, "Toggle the visibility of the object.")
         return opt
 
@@ -61,8 +61,7 @@ class ChiggerSourceBase(ChiggerObject):
         if self._vtkmapper:
             self._vtkactor.SetMapper(self._vtkmapper)
 
-        self._vtkrenderer = None # This is set automatically by ChiggerResult object.
-        self._parent = None # Set by ChiggerResult
+        self._vtkrenderer = None # set automatically by ChiggerResult object.
 
     def getVTKActor(self):
         """
@@ -99,6 +98,11 @@ class ChiggerSourceBase(ChiggerObject):
             see ChiggerObject
         """
         super(ChiggerSourceBase, self).update(**kwargs)
-
         if self.isOptionValid('visible'):
-            self._vtkactor.SetVisibility(self.getOption('visible'))
+            self._vtkactor.SetVisibility(self.applyOption('visible'))
+
+    def getBounds(self): #pylint: disable=no-self-use
+        """
+        Return the bounding box of the results.
+        """
+        return None

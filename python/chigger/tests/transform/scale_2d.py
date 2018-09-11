@@ -11,12 +11,12 @@
 
 import chigger
 
-transform = chigger.filters.TransformFilter(scale=[3,1,1])
+transform = chigger.filters.TransformFilter(scale=(3,1,1))
 
 reader = chigger.exodus.ExodusReader('../input/step10_micro_out.e')
 mug = chigger.exodus.ExodusResult(reader, variable='phi', cmap='viridis', filters=[transform])
 
-window = chigger.RenderWindow(mug, size=[300,300], style='interactive2D', test=True)
+window = chigger.RenderWindow(mug, size=(300,300), style='interactive2D', test=True)
 
 window.write('scale_2d.png')
 window.start()

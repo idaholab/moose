@@ -4,6 +4,7 @@
     command = vector_magnitude.py
     imagediff = 'vector_magnitude.png'
     allowed_linux = 0.975
+    cli_args = '--test'
   [../]
 
   [./x_component]
@@ -11,6 +12,7 @@
     command = vector_x.py
     imagediff = 'vector_x.png'
     allowed_linux = 0.965
+    cli_args = '--test'
   [../]
 
   [./y_component]
@@ -18,5 +20,6 @@
     command = vector_y.py
     imagediff = 'vector_y.png'
     allowed_linux = 0.965
+    cli_args = '--test'
   [../]
 []

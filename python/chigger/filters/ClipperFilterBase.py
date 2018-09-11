@@ -18,13 +18,15 @@ class ClipperFilterBase(ChiggerFilterBase):
     CLIPFUNCTION_TYPE = vtk.vtkImplicitFunction
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerFilterBase.getOptions()
-        opt.add('normalized', True, "When True supplied position arguments are supplied in "
-                                    "normalized coordinates (0-1) with respect to the object "
-                                    "bounding box.")
-        opt.add('inside_out', False, "When True the clipping criteria is reversed "
-                                     "(see vtkClipDataSet::SetInsideOut)")
+    def validOptions():
+        opt = ChiggerFilterBase.validOptions()
+        opt.add('normalized', default=True, vtype=bool,
+                doc="When True supplied position arguments are supplied in "
+                    "normalized coordinates (0-1) with respect to the object "
+                    "bounding box.")
+        opt.add('inside_out', default=False, vtype=bool,
+                doc="When True the clipping criteria is reversed "
+                    "(see vtkClipDataSet::SetInsideOut)")
         return opt
 
     def __init__(self, vtkclipfunction=None, **kwargs):
@@ -40,7 +42,7 @@ class ClipperFilterBase(ChiggerFilterBase):
         super(ClipperFilterBase, self).update(**kwargs)
 
         if self.isOptionValid('inside_out'):
-            self._vtkfilter.SetInsideOut(self.getOption('inside_out'))
+            self._vtkfilter.SetInsideOut(self.applyOption('inside_out'))
 
     def getPosition(self, position):
         """
@@ -49,12 +51,10 @@ class ClipperFilterBase(ChiggerFilterBase):
         Args:
             position[list]: The position to convert, note nothing occurs if 'normalized=False'.
         """
-        if self._source.needsUpdate():
-            self._source.update()
         bounds = self._source.getBounds()
         normalized = self.getOption('normalized')
         if normalized:
-            for i in range(3):
-                scale = bounds[1][i] - bounds[0][i]
-                position[i] = position[i]*scale + bounds[0][i]
+            for i, j in enumerate([0, 2, 4]):
+                scale = bounds[j+1] - bounds[j]
+                position[i] = position[i]*scale + bounds[j]
         return position

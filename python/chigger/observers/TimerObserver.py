@@ -14,24 +14,27 @@ class TimerObserver(ChiggerObserver):
     Class for creating timers to be passed in to RenderWindow object.
     """
     @staticmethod
-    def getOptions():
-        opt = ChiggerObserver.getOptions()
-        opt.add('duration', 1000, "The repeat interval, in milliseconds, of the timer.", vtype=int)
-        opt.add('count', None, "The maximum number of timer calls before terminating timer loop.",
-                vtype=int)
-        opt.add('terminate', False, "Terminate the VTK window when the 'count' is reached.")
+    def validOptions():
+        opt = ChiggerObserver.validOptions()
+        opt.add('duration', default=1000, vtype=int,
+                doc="The repeat interval, in milliseconds, of the timer.")
+        opt.add('count', vtype=int,
+                doc="The maximum number of timer calls before terminating timer loop.")
+        opt.add('terminate', default=False, vtype=bool,
+                doc="Terminate the VTK window when the 'count' is reached.")
         return opt
 
     def __init__(self, **kwargs):
-        super(TimerObserver, self).__init__(vtk.vtkCommand.TimerEvent, **kwargs)
+        super(TimerObserver, self).__init__(**kwargs)
         self._count = 0
 
-    def addObserver(self, event, vtkinteractor):
+    def init(self, *args, **kwargs):
         """
-        Add the TimerEvent for this object.
+        Add a repeating timer.
         """
-        vtkinteractor.CreateRepeatingTimer(self.getOption('duration'))
-        return vtkinteractor.AddObserver(event, self._callback)
+        super(TimerObserver, self).init(*args, **kwargs)
+        self._window.getVTKInteractor().CreateRepeatingTimer(self.getOption('duration'))
+        self._window.getVTKInteractor().AddObserver(vtk.vtkCommand.TimerEvent, self._callback)
 
     def count(self):
         """
@@ -39,13 +42,8 @@ class TimerObserver(ChiggerObserver):
         """
         return self._count
 
-    def update(self, **kwargs):
-        """
-        Update the window object.
-        """
-        super(TimerObserver, self).update(**kwargs)
-        if self._window.needsUpdate():
-            self._window.update()
+    def onTimer(self, obj, event):
+        raise NotImplementedError("The 'onTimer(obj, event)' method must be implemented.")
 
     def _callback(self, obj, event): #pylint: disable=unused-argument
         """
@@ -57,7 +55,7 @@ class TimerObserver(ChiggerObserver):
         if self.isOptionValid('count') and (self._count >= self.getOption('count')):
             self._window.getVTKInteractor().DestroyTimer()
             if self.getOption('terminate'):
-                self._window.getVTKInteractor().TerminateApp()
+                self.terminate()
             return
-        self.update()
         self._count += 1
+        self.onTimer(obj, event)

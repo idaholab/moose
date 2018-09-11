@@ -31,7 +31,8 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.materialicon',
                       'MooseDocs.extensions.acronym',
                       'MooseDocs.extensions.contents',
-                      'MooseDocs.extensions.plotly']
+                      'MooseDocs.extensions.plotly',
+                      'MooseDocs.extensions.pyscript']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'

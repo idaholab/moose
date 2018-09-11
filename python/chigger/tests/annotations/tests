@@ -4,6 +4,15 @@
     type = ImageDiff
     command = image_annotation.py
     imagediff = 'image_annotation.png'
+    cli_args = '--test'
+  [../]
+
+  [./image_height]
+    # Test displaying an image using width and height
+    type = ImageDiff
+    command = image_annotation_height.py
+    imagediff = 'image_annotation_height.png'
+    cli_args = '--test'
   [../]
 
   [./logo]
@@ -11,6 +20,7 @@
     type = ImageDiff
     command = logo_annotation.py
     imagediff = 'logo_annotation.png'
+    cli_args = '--test'
   [../]
 
   [./text]
@@ -18,6 +28,7 @@
     type = ImageDiff
     command = text_annotation.py
     imagediff = 'text_annotation.png'
+    cli_args = '--test'
   [../]
 
   [./time]
@@ -25,6 +36,7 @@
     type = ImageDiff
     command = time_annotation.py
     imagediff = 'time_annotation.png'
+    cli_args = '--test'
   [../]
 
   [./time_change]
@@ -32,5 +44,13 @@
     type = ImageDiff
     command = time_annotation_change.py
     imagediff = 'time_annotation_change_0.png time_annotation_change_9.png'
+    cli_args = '--test'
+  [../]
+
+  [./math]
+    type = ImageDiff
+    command = math_annotation.py
+    imagediff = 'math_annotation.png'
+    cli_args = '--test'
   [../]
 []

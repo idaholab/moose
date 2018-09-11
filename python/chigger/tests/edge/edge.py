@@ -18,13 +18,11 @@ camera.SetPosition(3.7586, -11.8847, 9.5357)
 camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
 
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-exodus0 = chigger.exodus.ExodusSource(reader, block=['1'])
-exodus0.update()
-exodus1 = chigger.exodus.ExodusSource(reader, block=['76'], edges=True, edge_color=[1,0,0], edge_width=1)
-exodus1.update()
+exodus0 = chigger.exodus.ExodusSource(reader, block=('1',), variable='diffused')
+exodus1 = chigger.exodus.ExodusSource(reader, block=('76',), variable='diffused',
+                                      edges=True, edge_color=(1,0,0), edge_width=1)
 
-result = chigger.base.ChiggerResult(exodus0, exodus1, variable='diffused', camera=camera)
-window = chigger.RenderWindow(result, size=[300, 300], test=True)
-window.update(); window.resetCamera()
+result = chigger.base.ChiggerResult(exodus0, exodus1, camera=camera)
+window = chigger.RenderWindow(result, size=(300, 300), test=True)
 window.write('edge.png')
 window.start()

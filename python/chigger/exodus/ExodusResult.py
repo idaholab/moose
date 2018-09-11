@@ -20,9 +20,9 @@ class ExodusResult(base.ChiggerResult):
     Result object to displaying ExodusII data from a single reader.
     """
     @staticmethod
-    def getOptions():
-        opt = base.ChiggerResult.getOptions()
-        opt += ExodusSource.getOptions()
+    def validOptions():
+        opt = base.ChiggerResult.validOptions()
+        opt += ExodusSource.validOptions()
         opt.add('explode', None, "When multiple sources are being used (e.g., NemesisReader) "
                                  "setting this to a value will cause the various sources to be "
                                  "'exploded' away from the center of the entire object.",
@@ -31,7 +31,34 @@ class ExodusResult(base.ChiggerResult):
 
         return opt
 
+    @staticmethod
+    def validKeyBindings():
+
+        bindings = base.ChiggerResult.validKeyBindings()
+
+        # Opacity keybindings
+        bindings.add('a', ExodusResult._updateOpacity,
+                     desc='Increase the alpha (opacity) by 1%.')
+        bindings.add('a', ExodusResult._updateOpacity, shift=True,
+                     desc='Decrease the alpha (opacity) by 1%.')
+
+        # Colormap keybindings
+        bindings.add('m', ExodusResult._updateColorMap,
+                     desc="Toggle through available colormaps.")
+        bindings.add('m', ExodusResult._updateColorMap, shift=True,
+                     desc="Toggle through available colormaps, in reverse direction.")
+
+        # Time keybindngs
+        bindings.add('t', ExodusResult._updateTimestep,
+                     desc="Increase timestep by 1.")
+        bindings.add('t', ExodusResult._updateTimestep, shift=True,
+                     desc="Decrease the timestep by 1.")
+
+        return bindings
+
     def __init__(self, reader, **kwargs):
+
+        self._reader = reader
 
         # Build the ExodusSource objects
         if isinstance(reader, ExodusReader):
@@ -46,8 +73,13 @@ class ExodusResult(base.ChiggerResult):
         # Supply the sources to the base class
         super(ExodusResult, self).__init__(*sources, **kwargs)
 
+        self.__outline_result = None
+
     def update(self, **kwargs):
         super(ExodusResult, self).update(**kwargs)
+
+        # Update the ExodusReader objects
+        self._reader.update()
 
         # Do not mess with the range if there is a source without a variable
         if any([src.getCurrentVariableInformation() is None for src in self._sources]):
@@ -73,7 +105,7 @@ class ExodusResult(base.ChiggerResult):
 
         # Explode
         if self.isOptionValid('explode'):
-            factor = self.getOption('explode')
+            factor = self.applyOption('explode')
             m = self.getCenter()
             for src in self._sources:
                 c = src.getVTKActor().GetCenter()
@@ -87,17 +119,48 @@ class ExodusResult(base.ChiggerResult):
         NOTE: For the range to be restricted by block/boundary/nodest the reader must have
               "squeeze=True", which can be much slower.
         """
-        self.checkUpdateState()
-        rngs = []
-        for src in self._sources:
-            rng = src.getRange(**kwargs)
-            if None not in rng:
-                rngs.append(rng)
+        rngs = [src.getRange(**kwargs) for src in self._sources]
         return utils.get_min_max(*rngs)
 
     def getCenter(self):
         """
         Return the center (based on the bounds) of all the objects.
         """
-        a, b = self.getBounds()
-        return ((b[0]-a[0])/2., (b[1]-a[1])/2., (b[2]-a[2])/2.)
+        b = self.getBounds()
+        return ((b[1]-b[0])/2., (b[3]-b[2])/2., (b[5]-b[4])/2.)
+
+    def _updateOpacity(self, window, binding): #pylint: disable=unused-argument
+        opacity = self.getOption('opacity')
+        if binding.shift:
+            if opacity > 0.05:
+                opacity -= 0.05
+        else:
+            if opacity <= 0.95:
+                opacity += 0.05
+        self.update(opacity=opacity)
+        self.printOption('opacity')
+
+    def _updateColorMap(self, window, binding): #pylint: disable=unused-argument
+        step = 1 if not binding.shift else -1
+        available = self._sources[0]._colormap.names() #pylint: disable=protected-access
+        index = available.index(self.getOption('cmap'))
+
+        n = len(available)
+        index += step
+        if index == n:
+            index = 0
+        elif index < 0:
+            index = n - 1
+
+        self.setOption('cmap', available[index])
+        self.printOption('cmap')
+
+    def _updateTimestep(self, window, binding): #pylint: disable=unused-argument
+        step = 1 if not binding.shift else -1
+        current = self._reader.getTimeData().timestep + step
+        n = len(self._reader.getTimes())
+        if current == n:
+            current = 0
+        self._reader.setOption('time', None)
+        self._reader.setOption('timestep', current)
+        self._reader.printOption('timestep')

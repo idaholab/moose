@@ -17,8 +17,9 @@ class ExodusResultLineSampler(ChiggerResult):
     """
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerResult.getOptions()
+    def validOptions():
+        opt = ChiggerResult.validOptions()
+        opt += ExodusSourceLineSampler.validOptions()
         return opt
 
     def __init__(self, exodus_result, **kwargs):

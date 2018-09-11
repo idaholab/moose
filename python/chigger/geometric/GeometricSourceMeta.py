@@ -20,11 +20,11 @@ def create(base_type):
         Base class for geometric objects (e.g., cube, sphere, plane, etc.)
         """
         @staticmethod
-        def getOptions():
+        def validOptions():
             """
             Return the default options for this object.
             """
-            opt = base_type.getOptions()
+            opt = base_type.validOptions()
             opt.add('position', None, "The position of the object.", vtype=list)
             opt.add('scale', None, "The scale of the object.", vtype=float)
             return opt

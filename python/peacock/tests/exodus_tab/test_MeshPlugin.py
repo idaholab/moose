@@ -28,7 +28,7 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
 
         # The file to open
         self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
-        self._widget, self._window = main(size=[600,600])
+        self._widget, self._window = main(size=(600,600))
         self._widget.FilePlugin.onSetFilenames(self._filenames)
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
@@ -107,9 +107,11 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         """
         Test the extents toggle.
         """
-        self._widget.MeshPlugin.Extents.setChecked(True)
+        self._widget.MeshPlugin.Extents.setCheckState(QtCore.Qt.Checked)
+        self._widget.MeshPlugin.Extents.stateChanged.emit(True)
         self.assertImage('testExtents.png')
-        self._widget.MeshPlugin.Extents.setChecked(False)
+        self._widget.MeshPlugin.Extents.setCheckState(QtCore.Qt.Unchecked)
+        self._widget.MeshPlugin.Extents.stateChanged.emit(False)
         self.assertImage('testInitial.png')
 
     def testDisplacements(self):
@@ -123,7 +125,7 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         self._widget.FilePlugin.VariableList.setCurrentIndex(2) # distance
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
         self._window._reader.update(timestep=4)
-        self._window._result.update(camera=None, colorbar={'visible':False}, block=['2'])
+        self._window._result.update(block=['2'])
         self._window.onWindowRequiresUpdate()
         self.assertImage('testDisplacementInitial.png')
 
@@ -243,7 +245,7 @@ class TestMeshPlugin2(Testing.PeacockImageTestCase):
 
         # The file to open
         self._filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
-        self._widget, self._window = main(size=[600,600])
+        self._widget, self._window = main(size=(600,600))
         self._widget.FilePlugin.onSetFilenames(self._filenames)
         self._window.onWindowRequiresUpdate()
 

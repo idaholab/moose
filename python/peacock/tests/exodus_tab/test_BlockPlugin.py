@@ -29,7 +29,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
 
         # The file to open
         self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
-        self._widget, self._window = main(size=[600,600])
+        self._widget, self._window = main(size=(600,600))
         self._widget.FilePlugin.onSetFilenames(self._filenames)
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
@@ -46,13 +46,13 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         Test the block selection.
         """
         # By default all blocks should be selected
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1', '76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1', '76'))
 
         # Uncheck a block
         item =  self._widget.BlockPlugin.BlockSelector.StandardItemModel.item(2)
         item.setCheckState(QtCore.Qt.Unchecked)
         self._widget.BlockPlugin.BlockSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1',))
         self.assertImage('testBlocks.png')
 
         # Uncheck "all"
@@ -66,7 +66,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item =  self._widget.BlockPlugin.BlockSelector.StandardItemModel.item(0)
         item.setCheckState(QtCore.Qt.Checked)
         self._widget.BlockPlugin.BlockSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1', '76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1', '76'))
         self.assertImage('testBlocksAll.png')
 
     def testSidesets(self):
@@ -86,14 +86,15 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item =  self._widget.BlockPlugin.SidesetSelector.StandardItemModel.item(0)
         item.setCheckState(QtCore.Qt.Checked)
         self._widget.BlockPlugin.SidesetSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), sorted(['top', 'bottom']))
+        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(),
+                         tuple(sorted(['top', 'bottom'])))
         self.assertImage('testSidesetsAll.png')
 
         # Uncheck a sideset
         item =  self._widget.BlockPlugin.SidesetSelector.StandardItemModel.item(1)
         item.setCheckState(QtCore.Qt.Unchecked)
         self._widget.BlockPlugin.SidesetSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), ['top'])
+        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), ('top', ))
         self.assertImage('testSidesets.png')
 
         # Uncheck "all"
@@ -108,7 +109,8 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item =  self._widget.BlockPlugin.SidesetSelector.StandardItemModel.item(0)
         item.setCheckState(QtCore.Qt.Checked)
         self._widget.BlockPlugin.SidesetSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), sorted(['top', 'bottom']))
+        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(),
+                         tuple(sorted(['top', 'bottom'])))
         self.assertImage('testSidesetsAll.png')
 
     def testNodesets(self):
@@ -127,14 +129,14 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item =  self._widget.BlockPlugin.NodesetSelector.StandardItemModel.item(0)
         item.setCheckState(QtCore.Qt.Checked)
         self._widget.BlockPlugin.NodesetSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), ['1', '2'])
+        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), ('1', '2'))
         self.assertImage('testNodesetsAll.png', allowed=0.97)
 
         # Uncheck a nodeet
         item =  self._widget.BlockPlugin.NodesetSelector.StandardItemModel.item(1)
         item.setCheckState(QtCore.Qt.Unchecked)
         self._widget.BlockPlugin.NodesetSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), ['2'])
+        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), ('2',))
         self.assertImage('testNodesets.png')
 
         # Uncheck "all"
@@ -148,7 +150,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item =  self._widget.BlockPlugin.NodesetSelector.StandardItemModel.item(0)
         item.setCheckState(QtCore.Qt.Checked)
         self._widget.BlockPlugin.NodesetSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), ['1', '2'])
+        self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), ('1', '2'))
         self.assertImage('testNodesetsAll.png', allowed=0.97)
 
     def testState(self):
@@ -156,7 +158,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         Test that state is stored with variable changes.
         """
         # Initial state
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1', '76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1', '76'))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
 
@@ -165,14 +167,14 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item.setCheckState(QtCore.Qt.Unchecked)
         self._widget.BlockPlugin.BlockSelector.StandardItemModel.itemChanged.emit(item)
 
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('76',))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
 
         # Change to 'convected' and check that all blocks are selected
         self._widget.FilePlugin.VariableList.setCurrentIndex(1)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1', '76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1', '76'))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
 
@@ -185,22 +187,22 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item.setCheckState(QtCore.Qt.Checked)
         self._widget.BlockPlugin.SidesetSelector.StandardItemModel.itemChanged.emit(item)
 
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1'])
-        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), ['top'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1',))
+        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), ('top',))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
 
         # Go back to first item
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('76',))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
 
         # Back to convected
         self._widget.FilePlugin.VariableList.setCurrentIndex(1)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1'])
-        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), ['top'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1',))
+        self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), ('top',))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
 
     def testState2(self):
@@ -208,7 +210,7 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         Test state change with changing filename.
         """
         # Initial state
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['1', '76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('1', '76'))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
 
@@ -216,21 +218,21 @@ class TestBlockPlugin(Testing.PeacockImageTestCase):
         item = self._widget.BlockPlugin.BlockSelector.StandardItemModel.item(1)
         item.setCheckState(QtCore.Qt.Unchecked)
         self._widget.BlockPlugin.BlockSelector.StandardItemModel.itemChanged.emit(item)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('76',))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
 
         # Change files
         self._widget.FilePlugin.FileList.setCurrentIndex(1)
         self._widget.FilePlugin.FileList.currentIndexChanged.emit(1)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['0'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('0',))
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
 
         # Change files back
         self._widget.FilePlugin.FileList.setCurrentIndex(0)
         self._widget.FilePlugin.FileList.currentIndexChanged.emit(0)
-        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ['76'])
+        self.assertEqual(self._widget.BlockPlugin.BlockSelector.getBlocks(), ('76',))
         self.assertEqual(self._widget.BlockPlugin.NodesetSelector.getBlocks(), None)
         self.assertEqual(self._widget.BlockPlugin.SidesetSelector.getBlocks(), None)
 

@@ -31,7 +31,7 @@ class TestGoldDiffPlugin(Testing.PeacockImageTestCase):
         self.sleepIfSlow()
         # The file to open
         self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e')
-        self._widget, self._window = main(size=[400,400])
+        self._widget, self._window = main(size=(400,400))
         self._widget.FilePlugin.onSetFilenames(self._filenames)
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)

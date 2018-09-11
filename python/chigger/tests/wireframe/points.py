@@ -18,8 +18,7 @@ camera.SetPosition(15.6131, -0.3930, 0.0186)
 camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
 
 reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-mug = chigger.exodus.ExodusResult(reader, block=[76], representation='points', camera=camera, color=[0,1,0])
-window = chigger.RenderWindow(mug, size=[300,300], test=True)
-window.update();window.resetCamera() #TODO: This is needed to make results render correctly, not sure why
+mug = chigger.exodus.ExodusResult(reader, block=(76,), representation='points', camera=camera, color=(0,1,0))
+window = chigger.RenderWindow(mug, size=(300,300), test=True)
 window.write('points.png')
 window.start()

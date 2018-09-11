@@ -20,10 +20,10 @@ class ChiggerResult(ChiggerResultBase):
 
     Any options supplied to this object are automatically passed down to the ChiggerFilterSourceBase
     objects contained by this class, if the applicable. To have the settings of the contained source
-    objects appear in this objects option dump then simply add the settings to the static getOptions
-    method of the derived class. This is not done here because this class is designed to accept
-    arbitrary ChiggerFilterSourceBase object which may have varying settings, see ExodusResult for
-    an example of a single type implementation based on this class.
+    objects appear in this objects option dump then simply add the settings to the static
+    validOptions method of the derived class. This is not done here because this class is designed
+    to accept arbitrary ChiggerFilterSourceBase object which may have varying settings, see
+    ExodusResult for an example of a single type implementation based on this class.
 
     Inputs:
         *sources: A tuple of ChiggerFilterSourceBase object to render.
@@ -33,39 +33,67 @@ class ChiggerResult(ChiggerResultBase):
     SOURCE_TYPE = ChiggerSourceBase
 
     @staticmethod
-    def getOptions():
-        opt = ChiggerResultBase.getOptions()
+    def validOptions():
+        opt = ChiggerResultBase.validOptions()
         return opt
 
+    @staticmethod
+    def validKeyBindings():
+        bindings = ChiggerResultBase.validKeyBindings()
+        bindings.add('o', lambda s, *args: ChiggerResultBase.printOptions(s),
+                     desc="Display the available key, value options for this result.")
+        bindings.add('o', lambda s, *args: ChiggerResultBase.printSetOptions(s), shift=True,
+                     desc="Display the available key, value options as a 'setOptions' method call.")
+        return bindings
+
     def __init__(self, *sources, **kwargs):
-        super(ChiggerResult, self).__init__(**kwargs)
-        self._sources = sources
+        super(ChiggerResult, self).__init__(renderer=kwargs.pop('renderer', None), **kwargs)
+
+        self._sources = list()
+        for src in sources:
+            self._addSource(src)
+
+        self.setOptions(**kwargs)
+
+    def init(self, window):
+        """
+        Initialize the result object with the RenderWindow.
+        """
+        super(ChiggerResult, self).init(window)
         for src in self._sources:
-            src._parent = self #pylint: disable=protected-access
+            self._vtkrenderer.AddActor(src.getVTKActor())
 
-    def needsUpdate(self):
+    def deinit(self):
         """
-        Checks if this object or any of the contained ChiggerFilterSourceBase object require update.
-        (override)
+        Clean up the object prior to removal from RenderWindow.
         """
-        return super(ChiggerResult, self).needsUpdate() or \
-               any([src.needsUpdate() for src in self._sources])
-
-    def updateOptions(self, *args):
-        """
-        Apply the supplied option objects to this object and the contained ChiggerFilterSourceBase
-        objects. (override)
-
-        Inputs:
-            see ChiggerResultBase
-        """
-        changed = [self.needsUpdate()]
-        changed.append(super(ChiggerResult, self).updateOptions(*args))
         for src in self._sources:
-            changed.append(src.updateOptions(*args))
-        changed = any(changed)
-        self.setNeedsUpdate(changed)
-        return changed
+            self._vtkrenderer.RemoveActor(src.getVTKActor())
+
+    def getSources(self):
+        """
+        Return the list of ChiggerSource objects.
+        """
+        return self._sources
+
+    def _addSource(self, source):
+        """
+        Add a new chigger source object to the result.
+        """
+        if not isinstance(source, self.SOURCE_TYPE):
+            msg = 'The supplied source type of {} must be of type {}.'
+            raise mooseutils.MooseException(msg.format(source.__class__.__name__,
+                                                       self.SOURCE_TYPE.__name__))
+
+        self._sources.append(source)
+        source.setVTKRenderer(self._vtkrenderer)
+        source._ChiggerSourceBase__result = self #pylint: disable=protected-access
+
+    def getBounds(self):
+        """
+        Return the bounding box of the results.
+        """
+        return utils.get_vtk_bounds_min_max(*[src.getBounds() for src in self._sources])
 
     def setOptions(self, *args, **kwargs):
         """
@@ -75,13 +103,26 @@ class ChiggerResult(ChiggerResultBase):
         Inputs:
             see ChiggerResultBase
         """
-        changed = [self.needsUpdate()]
-        changed.append(super(ChiggerResult, self).setOptions(*args, **kwargs))
+        super(ChiggerResult, self).setOptions(*args, **kwargs)
         for src in self._sources:
-            changed.append(src.setOptions(*args, **kwargs))
-        changed = any(changed)
-        self.setNeedsUpdate(changed)
-        return changed
+            valid = src.validOptions()
+            if args:
+                for sub in args:
+                    if sub in valid:
+                        src.setOptions(sub, **kwargs)
+            else:
+                for key, value in kwargs.iteritems():
+                    if key in src._options: #pylint: disable=protected-access
+                        src.setOption(key, value)
+
+    def setOption(self, key, value):
+        """
+        Set an individual option for this class and associated source objects.
+        """
+        super(ChiggerResult, self).setOption(key, value)
+        for src in self._sources:
+            if key in src._options: #pylint: disable=protected-access
+                src.setOption(key, value)
 
     def update(self, **kwargs):
         """
@@ -91,32 +132,8 @@ class ChiggerResult(ChiggerResultBase):
             see ChiggerResultBase
         """
         super(ChiggerResult, self).update(**kwargs)
-
         for src in self._sources:
-            if src.needsUpdate():
-                src.update()
-
-    def getSources(self):
-        """
-        Return the list of ChiggerSource objects.
-        """
-        return self._sources
-
-    def getBounds(self, check=True):
-        """
-        Return the bounding box of the results.
-
-        Inputs:
-            check[bool]: (Default: True) When True, perform an update check and raise an exception
-                                         if object is not up-to-date. This should not be used.
-
-        TODO: For Peacock, on linux check=False must be set, but I am not sure why.
-        """
-        if check:
-            self.checkUpdateState()
-        elif self.needsUpdate():
-            self.update()
-        return utils.get_bounds(*self._sources)
+            src.update(**kwargs)
 
     def getRange(self, local=False):
         """
@@ -127,29 +144,6 @@ class ChiggerResult(ChiggerResultBase):
         """
         rngs = [src.getRange(local=local) for src in self._sources]
         return utils.get_min_max(*rngs)
-
-    def reset(self):
-        """
-        Remove actors from renderer.
-        """
-
-        super(ChiggerResult, self).reset()
-        for src in self._sources:
-            self._vtkrenderer.RemoveViewProp(src.getVTKActor())
-
-    def initialize(self):
-        """
-        Initialize by adding actors to renderer.
-        """
-        super(ChiggerResult, self).initialize()
-        for src in self._sources:
-            if not isinstance(src, self.SOURCE_TYPE):
-                n = src.__class__.__name__
-                t = self.SOURCE_TYPE.__name__
-                msg = 'The supplied source type of {} must be of type {}.'.format(n, t)
-                raise mooseutils.MooseException(msg)
-            src.setVTKRenderer(self._vtkrenderer)
-            self._vtkrenderer.AddViewProp(src.getVTKActor())
 
     def __iter__(self):
         """
@@ -162,6 +156,7 @@ class ChiggerResult(ChiggerResultBase):
         """
         Provide [] access to the source objects.
         """
+        self.update()
         return self._sources[index]
 
     def __len__(self):

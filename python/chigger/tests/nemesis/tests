@@ -3,10 +3,12 @@
     type = ImageDiff
     command = nemesis.py
     imagediff = 'nemesis.png'
+    cli_args = '--test'
   [../]
   [./explode]
     type = ImageDiff
     command = explode.py
     imagediff = 'explode.png'
+    cli_args = '--test'
   [../]
 []
