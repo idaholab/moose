@@ -572,14 +572,14 @@ TEST(HitTests, Formatter_sorting)
       }, {
         "leading comments not attached to section/field stay in header",
         "# header comment\n\n[hello]\n[]\n# section comment\n[section]\n[]",
-        "# header comment\n\n# section comment\n[section]\n[]\n[hello]\n[]",
+        "# header comment\n\n# section comment\n[section]\n[]\n\n[hello]\n[]",
         {
            {"", {"section", "hello"}},
         }
       }, {
         "multi-line block comment stays attached",
         "[foo]\n[]\n# a comment that takes\n# more than one line\n[bar]\n[]",
-        "# a comment that takes\n# more than one line\n[bar]\n[]\n[foo]\n[]",
+        "# a comment that takes\n# more than one line\n[bar]\n[]\n\n[foo]\n[]",
         {
            {"", {"bar", "foo"}},
         }
@@ -592,17 +592,24 @@ TEST(HitTests, Formatter_sorting)
         }
       }, {
         "footer section sorts not in reverse",
-        "[foo]\n[]\n[bar]\n[]",
-        "[bar]\n[]\n[foo]\n[]",
+        "[foo]\n[]\n\n[bar]\n[]",
+        "[bar]\n[]\n\n[foo]\n[]",
         {
            {"", {"**", "bar", "foo"}},
         }
       }, {
         "inline section comment must follow sorted section",
-        "[foo]\n[]\n[bar]\n[] # hello",
-        "[bar]\n[] # hello\n[foo]\n[]",
+        "[foo]\n[]\n\n[bar]\n[] # hello",
+        "[bar]\n[] # hello\n\n[foo]\n[]",
         {
            {"", {"bar"}},
+        }
+      }, {
+        "newline inserted after previously last section when above sections sort below",
+        "[foo]\n[]\n\n[bar]\n[]",
+        "[bar]\n[]\n\n[foo]\n[]",
+        {
+           {"", {"**", "foo"}},
         }
       }
   };

@@ -1120,6 +1120,14 @@ Formatter::walk(const std::string & fullpath, const std::string & /*nodepath*/, 
         backorder.push_back(field);
     }
 
+    // This prevents sections from ending up with no intervening blank lines if we end up placing
+    // some currently mid-sorted sections after the current last section.  This doesn't cause
+    // problems when rendering because sections already omit rendering any trailing blank line
+    // child node.
+    if (n->children().size() > 1 && n->children().back()->type() != NodeType::Field &&
+        n->children().back()->type() != NodeType::Blank)
+      n->addChild(new Blank());
+
     auto nodes = n->children();
 
     std::vector<Node *> fronthalf;
@@ -1224,16 +1232,26 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
         before.push_front(j);
       }
 
-      // any trailing blank will get moved with this field/section
-      Node * trailing =
-          static_cast<size_t>(i + 1) < nodes.size() && !done[i + 1] ? nodes[i + 1] : nullptr;
-      if (after.empty() && trailing && trailing->type() == NodeType::Blank)
-        after.push_back(i + 1);
+      for (int j = i + 1; static_cast<size_t>(j) < nodes.size(); j++)
+      {
+        if (done[j])
+          break;
 
-      // any trailing inline comment will also move/sort with the field/section
-      auto c = trailing ? dynamic_cast<Comment *>(trailing) : nullptr;
-      if (c && c->isinline())
-        after.push_back(i + 1);
+        auto trailing = nodes[j];
+        auto c = dynamic_cast<Comment *>(trailing);
+        // any trailing blank will get moved with this field/section
+        if (trailing && trailing->type() == NodeType::Blank)
+        {
+          after.push_back(j);
+          break;
+        }
+        else if (c && c->isinline())
+          // any trailing inline comment must move/sort with the field/section
+          after.push_back(j);
+        else
+          break;
+      }
+
 
       if (matches(next, field->path(), false))
       {
