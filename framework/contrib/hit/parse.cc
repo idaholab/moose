@@ -889,7 +889,7 @@ parseComment(Parser * p, Node * n)
     p->error(tok, "the parser is broken");
 
   auto comment = p->emit(new Comment(tok.val, isinline));
-  if (isinline && n->children().size() > 0)
+  if (isinline && n->children().size() > 0 && n->children().back()->type() != NodeType::Section)
     n->children().back()->addChild(comment);
   else
     n->addChild(comment);

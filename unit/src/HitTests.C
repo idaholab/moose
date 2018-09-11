@@ -425,6 +425,10 @@ TEST(HitTests, RenderCases)
        0},
       {"preserve quotes around empty string with nonzero maxlen", "foo = ''", "foo = ''", 100},
       {"skip rendering trailing blank lines", "[foo]\n[]\n\n\n", "[foo]\n[]", 0},
+      {"inline comments on sections don't walk up tree",
+       "[foo]\n  bar = 42\n[] # hello",
+       "[foo]\n  bar = 42\n[] # hello",
+       0},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
