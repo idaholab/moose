@@ -282,6 +282,12 @@ MethaneFluidProperties::s_from_p_T(Real /*pressure*/, Real temperature) const
   return entropy * 1000.0;
 }
 
+void
+MethaneFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
 Real
 MethaneFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
 {

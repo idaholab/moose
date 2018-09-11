@@ -64,6 +64,7 @@ public:
 
   /// Specific entropy (J/kg/K)
   virtual Real s_from_p_T(Real pressure, Real temperature) const override;
+  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
 
   /// Density from pressure and temperature (kg/m^3)
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;

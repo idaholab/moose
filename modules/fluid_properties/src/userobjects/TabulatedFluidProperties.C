@@ -512,6 +512,12 @@ TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
     return _fp.s_from_p_T(pressure, temperature);
 }
 
+void
+TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
 Real
 TabulatedFluidProperties::henryConstant(Real temperature) const
 {

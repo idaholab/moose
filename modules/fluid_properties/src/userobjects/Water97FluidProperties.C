@@ -685,6 +685,12 @@ Water97FluidProperties::s_from_p_T(Real pressure, Real temperature) const
   return entropy;
 }
 
+void
+Water97FluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
 Real
 Water97FluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {

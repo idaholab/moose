@@ -151,6 +151,7 @@ public:
   k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   virtual Real s_from_p_T(Real pressure, Real temperature) const override;
+  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
 
   virtual Real henryConstant(Real temperature) const override;
 

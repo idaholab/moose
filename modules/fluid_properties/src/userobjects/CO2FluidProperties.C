@@ -822,6 +822,12 @@ CO2FluidProperties::s_from_p_T(Real pressure, Real temperature) const
   return _Rco2 * (tau * dphiSW_dt(delta, tau) - phiSW(delta, tau));
 }
 
+void
+CO2FluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
 Real
 CO2FluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {

@@ -109,6 +109,12 @@ Real SimpleFluidProperties::s_from_p_T(Real /*pressure*/, Real /*temperature*/) 
   return _specific_entropy;
 }
 
+void
+SimpleFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
 Real
 SimpleFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
