@@ -393,10 +393,16 @@ Section::render(int indent, const std::string & indent_text, int maxlen)
     s = "\n" + strRepeat(indent_text, indent) + "[" + _path + "]";
 
   for (auto child : children())
+  {
+    // skip rendering trailing blank lines in sections
+    if (child == children().back() && child->type() == NodeType::Blank)
+      break;
+
     if (path() == "")
       s += child->render(indent, indent_text, maxlen);
     else
       s += child->render(indent + 1, indent_text, maxlen);
+  }
 
   if (path() != "" && tokens().size() > 4)
     s += "\n" + strRepeat(indent_text, indent) + "[" + tokens()[4].val + "]";
@@ -1115,6 +1121,7 @@ Formatter::walk(const std::string & fullpath, const std::string & /*nodepath*/, 
     }
 
     auto nodes = n->children();
+
     std::vector<Node *> fronthalf;
     std::vector<Node *> unused;
     sortGroup(nodes, frontorder, fronthalf, unused);
@@ -1127,7 +1134,7 @@ Formatter::walk(const std::string & fullpath, const std::string & /*nodepath*/, 
     std::vector<Node *> children;
     children.insert(children.end(), fronthalf.begin(), fronthalf.end());
     children.insert(children.end(), unused.begin(), unused.end());
-    children.insert(children.end(), backhalf.rbegin(), backhalf.rend());
+    children.insert(children.end(), backhalf.begin(), backhalf.end());
 
     for (unsigned int i = 0; i < children.size(); i++)
       children[i] = children[i]->clone();
@@ -1197,6 +1204,9 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
       // collect all comments that form a block that is attached to the current field/section
       for (int j = i - 1; j >= 0; j--)
       {
+        if (done[j])
+          break;
+
         if (nodes[j]->type() != NodeType::Comment)
         {
           // If the section we are sorting/moving is at the end of the set, we want to move any
@@ -1207,8 +1217,7 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
           // between this section and whatever will come after it next since it will no longer be
           // the last section in its parent block.
           if (static_cast<size_t>(i) == nodes.size() - 1 &&
-              sorted.size() != static_cast<size_t>(i) && nodes[j]->type() == NodeType::Blank &&
-              !done[j])
+              sorted.size() != static_cast<size_t>(i) && nodes[j]->type() == NodeType::Blank)
             after.push_back(j);
           break;
         }
@@ -1216,7 +1225,8 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
       }
 
       // any trailing blank will get moved with this field/section
-      if ((static_cast<size_t>(i + 1) < nodes.size()) && nodes[i + 1]->type() == NodeType::Blank && !done[i + 1])
+      if (after.empty() && (static_cast<size_t>(i + 1) < nodes.size()) &&
+          nodes[i + 1]->type() == NodeType::Blank && !done[i + 1])
         after.push_back(i + 1);
 
       if (matches(next, field->path(), false))

@@ -414,7 +414,7 @@ TEST(HitTests, RenderCases)
        "foo='why'\n' separate '  'strings?'",
        "foo = 'why separate strings?'",
        0},
-      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'\n", 0},
+      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'", 0},
       {"preserve block comment (#10889)",
        "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
        "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
@@ -424,6 +424,7 @@ TEST(HitTests, RenderCases)
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
        0},
       {"preserve quotes around empty string with nonzero maxlen", "foo = ''", "foo = ''", 100},
+      {"skip rendering trailing blank lines", "[foo]\n[]\n\n\n", "[foo]\n[]", 0},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
@@ -577,6 +578,20 @@ TEST(HitTests, Formatter_sorting)
         "# a comment that takes\n# more than one line\n[bar]\n[]\n[foo]\n[]",
         {
            {"", {"bar", "foo"}},
+        }
+      }, {
+        "trailing blank line attached to footer sorting section doesn't sort into middle",
+        "[foo]\n[]\n\n[bar]\n[]\n\n",
+        "[bar]\n[]\n\n[foo]\n[]",
+        {
+           {"", {"**", "foo"}},
+        }
+      }, {
+        "footer section sorts not in reverse",
+        "[foo]\n[]\n[bar]\n[]",
+        "[bar]\n[]\n[foo]\n[]",
+        {
+           {"", {"**", "bar", "foo"}},
         }
       }
   };
