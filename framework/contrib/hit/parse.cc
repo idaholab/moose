@@ -1206,8 +1206,9 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
           // trailing newlines before the close of the parent section and preserves a blank line
           // between this section and whatever will come after it next since it will no longer be
           // the last section in its parent block.
-          if (static_cast<size_t>(i) == nodes.size() - 1 && sorted.size() != i &&
-              nodes[j]->type() == NodeType::Blank && !done[j])
+          if (static_cast<size_t>(i) == nodes.size() - 1 &&
+              sorted.size() != static_cast<size_t>(i) && nodes[j]->type() == NodeType::Blank &&
+              !done[j])
             after.push_back(j);
           break;
         }

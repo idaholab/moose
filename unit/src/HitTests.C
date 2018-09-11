@@ -564,11 +564,25 @@ TEST(HitTests, Formatter_sorting)
         {
            {"", {"first", "second"}},
         }
+      }, {
+        "leading comments not attached to section/field stay in header",
+        "# header comment\n\n[hello]\n[]\n# section comment\n[section]\n[]",
+        "# header comment\n\n# section comment\n[section]\n[]\n[hello]\n[]",
+        {
+           {"", {"section", "hello"}},
+        }
+      }, {
+        "multi-line block comment stays attached",
+        "[foo]\n[]\n# a comment that takes\n# more than one line\n[bar]\n[]",
+        "# a comment that takes\n# more than one line\n[bar]\n[]\n[foo]\n[]",
+        {
+           {"", {"bar", "foo"}},
+        }
       }
   };
   // clang-format on
 
-  for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
+  for (size_t i = 0; i < sizeof(cases) / sizeof(SortCase); i++)
   {
     auto test = cases[i];
     std::string got;
