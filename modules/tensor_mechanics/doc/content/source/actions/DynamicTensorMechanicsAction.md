@@ -1,15 +1,9 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# DynamicTensorMechanicsAction
-
-!alert construction title=Undocumented Class
-The DynamicTensorMechanicsAction has not been documented, if you would like to contribute to MOOSE by writing
-documentation, please see [/generate.md]. The content contained on this page explains the typical
-documentation associated with an action; however, what is contained is ultimately determined by what
-is necessary to make the documentation clear for users.
+# DynamicTensorMechanics
 
 !syntax description /Kernels/DynamicTensorMechanics/DynamicTensorMechanicsAction
 
-!syntax parameters /Kernels/DynamicTensorMechanics/DynamicTensorMechanicsAction
+## Description
 
-!bibtex bibliography
+This action creates the [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) kernel input blocks in all coordinate directions. More information about the usage of this action can be found at [Dynamics](/Dynamics.md)
+
+!syntax parameters /Kernels/DynamicTensorMechanics/DynamicTensorMechanicsAction

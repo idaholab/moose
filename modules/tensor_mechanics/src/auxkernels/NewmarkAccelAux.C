@@ -16,9 +16,10 @@ InputParameters
 validParams<NewmarkAccelAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Computes the current acceleration using the Newmark method.");
   params.addRequiredCoupledVar("displacement", "displacement variable");
   params.addRequiredCoupledVar("velocity", "velocity variable");
-  params.addRequiredParam<Real>("beta", "beta parameter");
+  params.addRequiredParam<Real>("beta", "beta parameter for Newmark method");
   return params;
 }
 

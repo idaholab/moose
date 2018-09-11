@@ -1,19 +1,13 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # InertialForce
 
-!alert construction title=Undocumented Class
-The InertialForce has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /Kernels/InertialForce
+
+## Description
+
+This class computes the inertial force using a consistent mass matrix and also computes the mass proportional Rayleigh damping. More information about the residual calculation and usage can be found at [Dynamics](Dynamics.md). Each InertialForce kernel calculates the force only along one coordinate direction. So, a separate InertialForce input block should be set up for each coordinate direction.
 
 !syntax parameters /Kernels/InertialForce
 
 !syntax inputs /Kernels/InertialForce
 
 !syntax children /Kernels/InertialForce
-
-!bibtex bibliography

@@ -95,4 +95,13 @@
     design = 'markers/DiscreteNucleationMarker.md'
     issues = '#12099'
   [../]
+
+  [./timestep]
+    type = 'CSVDiff'
+    input = 'timestep.i'
+    csvdiff = 'timestep_out.csv'
+    requirement = "The nucleation time step porocessor shall return a timestep limit that can be applied to cut the simulation timestep as new nuclei are inserted"
+    design = 'postprocessors/DiscreteNucleationTimeStep.md'
+    issues = '#12104'
+  [../]
 []
