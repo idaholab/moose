@@ -60,6 +60,7 @@ public:
   virtual Real p_from_h_s(Real h, Real s) const override;
   virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
+  virtual Real T_from_p_h(Real p, Real h) const override;
   virtual Real molarMass() const override;
 
   virtual Real gamma() const;

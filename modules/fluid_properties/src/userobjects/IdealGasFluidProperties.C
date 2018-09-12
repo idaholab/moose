@@ -357,3 +357,9 @@ IdealGasFluidProperties::molarMass() const
 {
   return _R / R_universal;
 }
+
+Real
+IdealGasFluidProperties::T_from_p_h(Real, Real h) const
+{
+  return h / _gamma / _cv;
+}

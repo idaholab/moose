@@ -63,4 +63,6 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
 
   ABS_TEST(_fp->e_from_p_T(p, T), 8.397412646416575e4, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_CONSISTENCY);
 }

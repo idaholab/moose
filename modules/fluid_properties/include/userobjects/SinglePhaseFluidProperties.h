@@ -349,6 +349,15 @@ public:
   virtual Real beta_from_p_T(Real p, Real T) const;
 
   /**
+   * Temperature from pressure and specific enthalpy
+   *
+   * @param[in] pressure   pressure (Pa)
+   * @param[in] enthalpy   enthalpy (J/kg)
+   * @return Temperature (K)
+   */
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const;
+
+  /**
    * Molar mass [kg/mol]
    *
    * @return molar mass
