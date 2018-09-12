@@ -42,7 +42,7 @@ def inputTreeToString(root):
             if child != last_child:
                 hit_node.addChild(hit.NewBlank())
 
-    return hit_node.render()
+    return hit.format('TMP', hit_node.render())
 
 def addNode(parent_hit_node, entry):
     """

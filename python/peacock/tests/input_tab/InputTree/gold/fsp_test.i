@@ -60,14 +60,6 @@
   []
 []
 
-[Executioner]
-  # This is setup automatically in MOOSE (SetupPBPAction.C)
-  # petsc_options = '-snes_mf_operator'
-  # petsc_options_iname = '-pc_type'
-  # petsc_options_value =  'asm'
-  type = Steady
-[]
-
 [Preconditioning]
   [FSP]
     # It is the starting point of splitting
@@ -102,6 +94,14 @@
       petsc_options_value = '     hypre  preonly'
     []
   []
+[]
+
+[Executioner]
+  # This is setup automatically in MOOSE (SetupPBPAction.C)
+  # petsc_options = '-snes_mf_operator'
+  # petsc_options_iname = '-pc_type'
+  # petsc_options_value =  'asm'
+  type = Steady
 []
 
 [Outputs]

@@ -32,6 +32,15 @@
   []
 []
 
+[VectorPostprocessors]
+  [foo]
+    type = LineValueSampler
+    num_points = 10
+    end_point = '1 0 0'
+    start_point = '0 0 0'
+  []
+[]
+
 [Executioner]
   # Preconditioned JFNK (default)
   type = Steady
@@ -42,13 +51,4 @@
 
 [Outputs]
   exodus = true
-[]
-
-[VectorPostprocessors]
-  [foo]
-    type = LineValueSampler
-    num_points = 10
-    end_point = '1 0 0'
-    start_point = '0 0 0'
-  []
 []

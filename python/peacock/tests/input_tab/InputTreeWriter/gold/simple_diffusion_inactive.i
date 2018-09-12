@@ -1,4 +1,3 @@
-inactive = 'Kernels BCs Executioner'
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -6,6 +5,7 @@ inactive = 'Kernels BCs Executioner'
   ny = 10
 []
 
+inactive = 'Kernels BCs Executioner'
 [Variables]
   [u]
   []
