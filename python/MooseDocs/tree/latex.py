@@ -98,10 +98,12 @@ class Command(NodeBase):
 
     def write(self):
         out = self.start #pylint: disable=no-member
-        out += '\\%s{' % self.name
-        for child in self.children:
-            out += child.write()
-        out += '}' + self.end #pylint: disable=no-member
+        out += '\\%s' % self.name
+        if self.children:
+            out += '{'
+            for child in self.children:
+                out += child.write()
+            out += '}' + self.end #pylint: disable=no-member
         return out
 
 class CustomCommand(Command):

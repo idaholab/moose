@@ -56,8 +56,9 @@ def main(options):
                 gold = out.replace(out_dir, gold_dir)
 
                 if options.update_gold:
-                    if not os.path.isdir(gold_dir):
-                        os.makedirs(gold_dir)
+                    dirname = os.path.dirname(gold)
+                    if not os.path.isdir(dirname):
+                        os.makedirs(dirname)
                     shutil.copyfile(out, gold)
                 else:
                     diff = mooseutils.unidiff(out, gold, color=True, num_lines=1)
