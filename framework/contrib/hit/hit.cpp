@@ -716,13 +716,14 @@ struct __pyx_opt_args_3hit_NewComment {
 /* "hit.pyx":219
  * # constructors are python objects.  So the Node constructor does nothing and this function
  * # actually sets the internal cnode member pointer.
- * cdef _initpynode(chit.Node* n, own=False):             # <<<<<<<<<<<<<<
- *     pyn = Node(own=own)
+ * cdef _initpynode(chit.Node* n, own=False, fname=''):             # <<<<<<<<<<<<<<
+ *     pyn = Node(own=own, fname=fname)
  *     pyn._cnode = n
  */
 struct __pyx_opt_args_3hit__initpynode {
   int __pyx_n;
   PyObject *own;
+  PyObject *fname;
 };
 
 /* "hit.pyx":66
@@ -1189,6 +1190,7 @@ static const char __pyx_k_parse[] = "parse";
 static const char __pyx_k_utf_8[] = "utf-8";
 static const char __pyx_k_String[] = "String";
 static const char __pyx_k_encode[] = "encode";
+static const char __pyx_k_format[] = "format";
 static const char __pyx_k_indent[] = "indent";
 static const char __pyx_k_maxlen[] = "maxlen";
 static const char __pyx_k_module[] = "__module__";
@@ -1210,19 +1212,23 @@ static const char __pyx_k_fullpath[] = "fullpath";
 static const char __pyx_k_qualname[] = "__qualname__";
 static const char __pyx_k_FieldKind[] = "FieldKind";
 static const char __pyx_k_TypeError[] = "TypeError";
+static const char __pyx_k_file_name[] = "file_name";
 static const char __pyx_k_is_inline[] = "is_inline";
 static const char __pyx_k_metaclass[] = "__metaclass__";
 static const char __pyx_k_node_type[] = "node_type";
 static const char __pyx_k_NewComment[] = "NewComment";
 static const char __pyx_k_NewSection[] = "NewSection";
+static const char __pyx_k_hit_format[] = ".hit-format";
 static const char __pyx_k_style_file[] = "style_file";
 static const char __pyx_k_indent_text[] = "indent_text";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
+static const char __pyx_k_file_content[] = "file_content";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
 static const char __pyx_k_unknown_NodeType[] = "unknown NodeType ";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_unknown_Field_Kind[] = "unknown Field::Kind ";
+static const char __pyx_k_hit_style_file_name[] = "hit_style_file_name";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static PyObject *__pyx_n_s_All;
 static PyObject *__pyx_n_s_Blank;
@@ -1254,10 +1260,15 @@ static PyObject *__pyx_n_s_dst;
 static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_enter;
 static PyObject *__pyx_n_s_exit;
+static PyObject *__pyx_n_s_file_content;
+static PyObject *__pyx_n_s_file_name;
 static PyObject *__pyx_n_s_fname;
+static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fullpath;
 static PyObject *__pyx_n_s_hit;
+static PyObject *__pyx_kp_s_hit_format;
 static PyObject *__pyx_kp_s_hit_pyx;
+static PyObject *__pyx_n_s_hit_style_file_name;
 static PyObject *__pyx_n_s_indent;
 static PyObject *__pyx_n_s_indent_text;
 static PyObject *__pyx_n_s_input;
@@ -1331,6 +1342,7 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
 static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_fname, PyObject *__pyx_v_input); /* proto */
 static PyObject *__pyx_pf_3hit_10explode(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_n); /* proto */
 static PyObject *__pyx_pf_3hit_12merge(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_src, struct __pyx_obj_3hit_Node *__pyx_v_dst); /* proto */
+static PyObject *__pyx_pf_3hit_14format(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_file_name, PyObject *__pyx_v_file_content, PyObject *__pyx_v_hit_style_file_name); /* proto */
 static PyObject *__pyx_tp_new_3hit_Formatter(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_3hit_Node(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_int_0;
@@ -1347,7 +1359,9 @@ static PyObject *__pyx_tuple__10;
 static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__12;
 static PyObject *__pyx_tuple__15;
+static PyObject *__pyx_tuple__17;
 static PyObject *__pyx_codeobj__16;
+static PyObject *__pyx_codeobj__18;
 
 /* "hit.pyx":15
  *     Blank = 'Blank'
@@ -6111,13 +6125,14 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
 /* "hit.pyx":219
  * # constructors are python objects.  So the Node constructor does nothing and this function
  * # actually sets the internal cnode member pointer.
- * cdef _initpynode(chit.Node* n, own=False):             # <<<<<<<<<<<<<<
- *     pyn = Node(own=own)
+ * cdef _initpynode(chit.Node* n, own=False, fname=''):             # <<<<<<<<<<<<<<
+ *     pyn = Node(own=own, fname=fname)
  *     pyn._cnode = n
  */
 
 static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt_args_3hit__initpynode *__pyx_optional_args) {
   PyObject *__pyx_v_own = ((PyObject *)Py_False);
+  PyObject *__pyx_v_fname = ((PyObject *)__pyx_kp_s__5);
   struct __pyx_obj_3hit_Node *__pyx_v_pyn = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -6127,19 +6142,23 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
       __pyx_v_own = __pyx_optional_args->own;
+      if (__pyx_optional_args->__pyx_n > 1) {
+        __pyx_v_fname = __pyx_optional_args->fname;
+      }
     }
   }
 
   /* "hit.pyx":220
  * # actually sets the internal cnode member pointer.
- * cdef _initpynode(chit.Node* n, own=False):
- *     pyn = Node(own=own)             # <<<<<<<<<<<<<<
+ * cdef _initpynode(chit.Node* n, own=False, fname=''):
+ *     pyn = Node(own=own, fname=fname)             # <<<<<<<<<<<<<<
  *     pyn._cnode = n
  *     return pyn
  */
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 220, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_own, __pyx_v_own) < 0) __PYX_ERR(0, 220, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_fname, __pyx_v_fname) < 0) __PYX_ERR(0, 220, __pyx_L1_error)
   __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_3hit_Node), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 220, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6147,8 +6166,8 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
   __pyx_t_2 = 0;
 
   /* "hit.pyx":221
- * cdef _initpynode(chit.Node* n, own=False):
- *     pyn = Node(own=own)
+ * cdef _initpynode(chit.Node* n, own=False, fname=''):
+ *     pyn = Node(own=own, fname=fname)
  *     pyn._cnode = n             # <<<<<<<<<<<<<<
  *     return pyn
  * 
@@ -6156,7 +6175,7 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
   __pyx_v_pyn->_cnode = __pyx_v_n;
 
   /* "hit.pyx":222
- *     pyn = Node(own=own)
+ *     pyn = Node(own=own, fname=fname)
  *     pyn._cnode = n
  *     return pyn             # <<<<<<<<<<<<<<
  * 
@@ -6170,8 +6189,8 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
   /* "hit.pyx":219
  * # constructors are python objects.  So the Node constructor does nothing and this function
  * # actually sets the internal cnode member pointer.
- * cdef _initpynode(chit.Node* n, own=False):             # <<<<<<<<<<<<<<
- *     pyn = Node(own=own)
+ * cdef _initpynode(chit.Node* n, own=False, fname=''):             # <<<<<<<<<<<<<<
+ *     pyn = Node(own=own, fname=fname)
  *     pyn._cnode = n
  */
 
@@ -6193,7 +6212,7 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
  *     cdef chit.Node* node = chit.parse(fname, input)
- *     return _initpynode(node, own=True)
+ *     return _initpynode(node, own=True, fname=fname)
  */
 
 /* Python wrapper */
@@ -6273,7 +6292,7 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
  * 
  * def parse(fname, input):
  *     cdef chit.Node* node = chit.parse(fname, input)             # <<<<<<<<<<<<<<
- *     return _initpynode(node, own=True)
+ *     return _initpynode(node, own=True, fname=fname)
  * 
  */
   __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_fname); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 225, __pyx_L1_error)
@@ -6289,13 +6308,14 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
   /* "hit.pyx":226
  * def parse(fname, input):
  *     cdef chit.Node* node = chit.parse(fname, input)
- *     return _initpynode(node, own=True)             # <<<<<<<<<<<<<<
+ *     return _initpynode(node, own=True, fname=fname)             # <<<<<<<<<<<<<<
  * 
  * cpdef explode(Node n):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5.__pyx_n = 1;
+  __pyx_t_5.__pyx_n = 2;
   __pyx_t_5.own = Py_True;
+  __pyx_t_5.fname = __pyx_v_fname;
   __pyx_t_4 = __pyx_f_3hit__initpynode(__pyx_v_node, &__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 226, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
@@ -6307,7 +6327,7 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
  *     cdef chit.Node* node = chit.parse(fname, input)
- *     return _initpynode(node, own=True)
+ *     return _initpynode(node, own=True, fname=fname)
  */
 
   /* function exit code */
@@ -6322,7 +6342,7 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
 }
 
 /* "hit.pyx":228
- *     return _initpynode(node, own=True)
+ *     return _initpynode(node, own=True, fname=fname)
  * 
  * cpdef explode(Node n):             # <<<<<<<<<<<<<<
  *     n._cnode = chit.explode(n._cnode)
@@ -6364,7 +6384,7 @@ static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n, CYT
   goto __pyx_L0;
 
   /* "hit.pyx":228
- *     return _initpynode(node, own=True)
+ *     return _initpynode(node, own=True, fname=fname)
  * 
  * cpdef explode(Node n):             # <<<<<<<<<<<<<<
  *     n._cnode = chit.explode(n._cnode)
@@ -6441,6 +6461,7 @@ static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *__pyx_v_src, str
  * cpdef merge(Node src, Node dst):
  *     chit.merge(src._cnode, dst._cnode)             # <<<<<<<<<<<<<<
  * 
+ * def format(file_name, file_content, hit_style_file_name='.hit-format'):
  */
   try {
     hit::merge(__pyx_v_src->_cnode, __pyx_v_dst->_cnode);
@@ -6552,6 +6573,142 @@ static PyObject *__pyx_pf_3hit_12merge(CYTHON_UNUSED PyObject *__pyx_self, struc
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("hit.merge", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "hit.pyx":235
+ *     chit.merge(src._cnode, dst._cnode)
+ * 
+ * def format(file_name, file_content, hit_style_file_name='.hit-format'):             # <<<<<<<<<<<<<<
+ *     return chit.format(file_name, file_content, hit_style_file_name)
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_3hit_15format(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_3hit_15format = {"format", (PyCFunction)__pyx_pw_3hit_15format, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3hit_15format(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_file_name = 0;
+  PyObject *__pyx_v_file_content = 0;
+  PyObject *__pyx_v_hit_style_file_name = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("format (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_file_name,&__pyx_n_s_file_content,&__pyx_n_s_hit_style_file_name,0};
+    PyObject* values[3] = {0,0,0};
+    values[2] = ((PyObject *)__pyx_kp_s_hit_format);
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_file_name)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_file_content)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("format", 0, 2, 3, 1); __PYX_ERR(0, 235, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_hit_style_file_name);
+          if (value) { values[2] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "format") < 0)) __PYX_ERR(0, 235, __pyx_L3_error)
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_file_name = values[0];
+    __pyx_v_file_content = values[1];
+    __pyx_v_hit_style_file_name = values[2];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("format", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 235, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("hit.format", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_3hit_14format(__pyx_self, __pyx_v_file_name, __pyx_v_file_content, __pyx_v_hit_style_file_name);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_3hit_14format(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_file_name, PyObject *__pyx_v_file_content, PyObject *__pyx_v_hit_style_file_name) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  std::string __pyx_t_1;
+  std::string __pyx_t_2;
+  std::string __pyx_t_3;
+  std::string __pyx_t_4;
+  PyObject *__pyx_t_5 = NULL;
+  __Pyx_RefNannySetupContext("format", 0);
+
+  /* "hit.pyx":236
+ * 
+ * def format(file_name, file_content, hit_style_file_name='.hit-format'):
+ *     return chit.format(file_name, file_content, hit_style_file_name)             # <<<<<<<<<<<<<<
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_file_name); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_string_from_py_std__in_string(__pyx_v_file_content); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_v_hit_style_file_name); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 236, __pyx_L1_error)
+  try {
+    __pyx_t_4 = hit::format(__pyx_t_1, __pyx_t_2, __pyx_t_3);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    __PYX_ERR(0, 236, __pyx_L1_error)
+  }
+  __pyx_t_5 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_r = __pyx_t_5;
+  __pyx_t_5 = 0;
+  goto __pyx_L0;
+
+  /* "hit.pyx":235
+ *     chit.merge(src._cnode, dst._cnode)
+ * 
+ * def format(file_name, file_content, hit_style_file_name='.hit-format'):             # <<<<<<<<<<<<<<
+ *     return chit.format(file_name, file_content, hit_style_file_name)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("hit.format", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -7119,10 +7276,15 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_n_s_enter, __pyx_k_enter, sizeof(__pyx_k_enter), 0, 0, 1, 1},
   {&__pyx_n_s_exit, __pyx_k_exit, sizeof(__pyx_k_exit), 0, 0, 1, 1},
+  {&__pyx_n_s_file_content, __pyx_k_file_content, sizeof(__pyx_k_file_content), 0, 0, 1, 1},
+  {&__pyx_n_s_file_name, __pyx_k_file_name, sizeof(__pyx_k_file_name), 0, 0, 1, 1},
   {&__pyx_n_s_fname, __pyx_k_fname, sizeof(__pyx_k_fname), 0, 0, 1, 1},
+  {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
   {&__pyx_n_s_fullpath, __pyx_k_fullpath, sizeof(__pyx_k_fullpath), 0, 0, 1, 1},
   {&__pyx_n_s_hit, __pyx_k_hit, sizeof(__pyx_k_hit), 0, 0, 1, 1},
+  {&__pyx_kp_s_hit_format, __pyx_k_hit_format, sizeof(__pyx_k_hit_format), 0, 0, 1, 0},
   {&__pyx_kp_s_hit_pyx, __pyx_k_hit_pyx, sizeof(__pyx_k_hit_pyx), 0, 0, 1, 0},
+  {&__pyx_n_s_hit_style_file_name, __pyx_k_hit_style_file_name, sizeof(__pyx_k_hit_style_file_name), 0, 0, 1, 1},
   {&__pyx_n_s_indent, __pyx_k_indent, sizeof(__pyx_k_indent), 0, 0, 1, 1},
   {&__pyx_n_s_indent_text, __pyx_k_indent_text, sizeof(__pyx_k_indent_text), 0, 0, 1, 1},
   {&__pyx_n_s_input, __pyx_k_input, sizeof(__pyx_k_input), 0, 0, 1, 1},
@@ -7289,12 +7451,24 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
  *     cdef chit.Node* node = chit.parse(fname, input)
- *     return _initpynode(node, own=True)
+ *     return _initpynode(node, own=True, fname=fname)
  */
   __pyx_tuple__15 = PyTuple_Pack(3, __pyx_n_s_fname, __pyx_n_s_input, __pyx_n_s_node); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
   __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_hit_pyx, __pyx_n_s_parse, 224, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 224, __pyx_L1_error)
+
+  /* "hit.pyx":235
+ *     chit.merge(src._cnode, dst._cnode)
+ * 
+ * def format(file_name, file_content, hit_style_file_name='.hit-format'):             # <<<<<<<<<<<<<<
+ *     return chit.format(file_name, file_content, hit_style_file_name)
+ * 
+ */
+  __pyx_tuple__17 = PyTuple_Pack(3, __pyx_n_s_file_name, __pyx_n_s_file_content, __pyx_n_s_hit_style_file_name); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(0, 235, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
+  __pyx_codeobj__18 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_hit_pyx, __pyx_n_s_format, 235, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -7678,11 +7852,23 @@ PyMODINIT_FUNC PyInit_hit(void)
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
  *     cdef chit.Node* node = chit.parse(fname, input)
- *     return _initpynode(node, own=True)
+ *     return _initpynode(node, own=True, fname=fname)
  */
   __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_3hit_9parse, NULL, __pyx_n_s_hit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 224, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_parse, __pyx_t_2) < 0) __PYX_ERR(0, 224, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "hit.pyx":235
+ *     chit.merge(src._cnode, dst._cnode)
+ * 
+ * def format(file_name, file_content, hit_style_file_name='.hit-format'):             # <<<<<<<<<<<<<<
+ *     return chit.format(file_name, file_content, hit_style_file_name)
+ * 
+ */
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_3hit_15format, NULL, __pyx_n_s_hit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 235, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_format, __pyx_t_2) < 0) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "hit.pyx":2
