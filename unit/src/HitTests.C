@@ -182,7 +182,7 @@ TEST(HitTests, ExplodeParentless)
   try
   {
     n = hit::explode(n);
-    EXPECT_EQ("[foo]\n  [bar]\n  []\n[]", n->render());
+    EXPECT_EQ("[foo]\n  [bar]\n  []\n[]\n", n->render());
   }
   catch (std::exception & err)
   {
@@ -365,7 +365,7 @@ TEST(HitTests, RenderParentlessSection)
   try
   {
     std::string got = n->render();
-    EXPECT_EQ("[mypath]\n[]", got);
+    EXPECT_EQ("[mypath]\n[]\n", got);
   }
   catch (std::exception & err)
   {
@@ -400,34 +400,34 @@ struct RenderCase
 TEST(HitTests, RenderCases)
 {
   RenderCase cases[] = {
-      {"root level fields", "foo=bar boo=far", "foo = bar\nboo = far", 0},
-      {"single section", "[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]", 0},
-      {"remove leading newline", "\n[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]", 0},
-      {"preserve consecutive newline", "[foo]\n\nbar=baz[../]", "[foo]\n\n  bar = baz\n[../]", 0},
+      {"root level fields", "foo=bar boo=far", "foo = bar\nboo = far\n", 0},
+      {"single section", "[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]\n", 0},
+      {"remove leading newline", "\n[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]\n", 0},
+      {"preserve consecutive newline", "[foo]\n\nbar=baz[../]", "[foo]\n\n  bar = baz\n[../]\n", 0},
       {"reflow long string",
        "foo='hello my name is joe and I work in a button factory'",
-       "foo = 'hello my name is joe '\n      'and I work in a '\n      'button factory'",
+       "foo = 'hello my name is joe '\n      'and I work in a '\n      'button factory'\n",
        28},
-      {"don't reflow unquoted string", "foo=unquotedstring", "foo = unquotedstring", 5},
-      {"reflow unbroken string", "foo='longstring'", "foo = 'longst'\n      'ring'", 12},
+      {"don't reflow unquoted string", "foo=unquotedstring", "foo = unquotedstring\n", 5},
+      {"reflow unbroken string", "foo='longstring'", "foo = 'longst'\n      'ring'\n", 12},
       {"reflow pre-broken strings",
        "foo='why'\n' separate '  'strings?'",
-       "foo = 'why separate strings?'",
+       "foo = 'why separate strings?'\n",
        0},
-      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'", 0},
+      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'\n", 0},
       {"preserve block comment (#10889)",
        "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
-       "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
+       "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]\n",
        0},
       {"preserve block comment 2 (#10889)",
        "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
-       "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
+       "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]\n",
        0},
-      {"preserve quotes around empty string with nonzero maxlen", "foo = ''", "foo = ''", 100},
-      {"skip rendering trailing blank lines", "[foo]\n[]\n\n\n", "[foo]\n[]", 0},
+      {"preserve quotes around empty string with nonzero maxlen", "foo = ''", "foo = ''\n", 100},
+      {"skip rendering trailing blank lines", "[foo]\n[]\n\n\n", "[foo]\n[]\n", 0},
       {"inline comments on sections don't walk up tree",
        "[foo]\n  bar = 42\n[] # hello",
-       "[foo]\n  bar = 42\n[] # hello",
+       "[foo]\n  bar = 42\n[] # hello\n",
        0},
   };
 
@@ -456,7 +456,7 @@ TEST(HitTests, MergeTree)
     auto root2 = hit::parse("TESTCASE", "foo/baz/boo=42");
     hit::explode(root2);
     hit::merge(root2, root1);
-    EXPECT_EQ("[foo]\n  bar = 42\n  [baz]\n    boo = 42\n  []\n[]", root1->render());
+    EXPECT_EQ("[foo]\n  bar = 42\n  [baz]\n    boo = 42\n  []\n[]\n", root1->render());
   }
 
   {
@@ -479,16 +479,16 @@ TEST(HitTests, Formatter)
   RenderCase cases[] = {
       {"[format]line_length=100[]",
        "foo='line longer than 20 characters'",
-       "foo = 'line longer than 20 characters'",
+       "foo = 'line longer than 20 characters'\n",
        0},
       {"[format]line_length=20[]",
        "foo='line longer than 20 characters'",
-       "foo = 'line longer '\n      'than 20 '\n      'characters'",
+       "foo = 'line longer '\n      'than 20 '\n      'characters'\n",
        0},
-      {"[format]canonical_section_markers=true[]", "[./foo][../]", "[foo]\n[]", 0},
-      {"[format]canonical_section_markers=false[]", "[./foo][../]", "[./foo]\n[../]", 0},
-      {"[format]indent_string='    '[]", "[foo]bar=42[]", "[foo]\n    bar = 42\n[]", 0},
-      {"[format]indent_string='      '[]", "[foo]bar=42[]", "[foo]\n      bar = 42\n[]", 0},
+      {"[format]canonical_section_markers=true[]", "[./foo][../]", "[foo]\n[]\n", 0},
+      {"[format]canonical_section_markers=false[]", "[./foo][../]", "[./foo]\n[../]\n", 0},
+      {"[format]indent_string='    '[]", "[foo]bar=42[]", "[foo]\n    bar = 42\n[]\n", 0},
+      {"[format]indent_string='      '[]", "[foo]bar=42[]", "[foo]\n      bar = 42\n[]\n", 0},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
@@ -544,7 +544,7 @@ TEST(HitTests, Formatter_sorting)
       {
         "switch",
         "order = bar outof = foo",
-        "outof = foo\norder = bar",
+        "outof = foo\norder = bar\n",
         {
            {"", {"outof", "order"}},
            {"pattern2", {"param1", "param2"}}
@@ -552,62 +552,62 @@ TEST(HitTests, Formatter_sorting)
       }, {
         "keepsame",
         "order = bar outof = foo",
-        "order = bar\noutof = foo",
+        "order = bar\noutof = foo\n",
         {
         }
       }, {
         "handle-comments",
         "order = bar\n# block comment\noutof = foo # inline comment",
-        "# block comment\noutof = foo # inline comment\norder = bar",
+        "# block comment\noutof = foo # inline comment\norder = bar\n",
         {
            {"", {"outof", "order"}},
         }
       }, {
         "move newline padding with sorted sections",
         "[second]\n[]\n\n[first]\n[]",
-        "[first]\n[]\n\n[second]\n[]",
+        "[first]\n[]\n\n[second]\n[]\n",
         {
            {"", {"first", "second"}},
         }
       }, {
         "leading comments not attached to section/field stay in header",
         "# header comment\n\n[hello]\n[]\n# section comment\n[section]\n[]",
-        "# header comment\n\n# section comment\n[section]\n[]\n\n[hello]\n[]",
+        "# header comment\n\n# section comment\n[section]\n[]\n\n[hello]\n[]\n",
         {
            {"", {"section", "hello"}},
         }
       }, {
         "multi-line block comment stays attached",
         "[foo]\n[]\n# a comment that takes\n# more than one line\n[bar]\n[]",
-        "# a comment that takes\n# more than one line\n[bar]\n[]\n\n[foo]\n[]",
+        "# a comment that takes\n# more than one line\n[bar]\n[]\n\n[foo]\n[]\n",
         {
            {"", {"bar", "foo"}},
         }
       }, {
         "trailing blank line attached to footer sorting section doesn't sort into middle",
         "[foo]\n[]\n\n[bar]\n[]\n\n",
-        "[bar]\n[]\n\n[foo]\n[]",
+        "[bar]\n[]\n\n[foo]\n[]\n",
         {
            {"", {"**", "foo"}},
         }
       }, {
         "footer section sorts not in reverse",
         "[foo]\n[]\n\n[bar]\n[]",
-        "[bar]\n[]\n\n[foo]\n[]",
+        "[bar]\n[]\n\n[foo]\n[]\n",
         {
            {"", {"**", "bar", "foo"}},
         }
       }, {
         "inline section comment must follow sorted section",
         "[foo]\n[]\n\n[bar]\n[] # hello",
-        "[bar]\n[] # hello\n\n[foo]\n[]",
+        "[bar]\n[] # hello\n\n[foo]\n[]\n",
         {
            {"", {"bar"}},
         }
       }, {
         "newline inserted after previously last section when above sections sort below",
         "[foo]\n[]\n\n[bar]\n[]",
-        "[bar]\n[]\n\n[foo]\n[]",
+        "[bar]\n[]\n\n[foo]\n[]\n",
         {
            {"", {"**", "foo"}},
         }

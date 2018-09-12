@@ -412,6 +412,8 @@ Section::render(int indent, const std::string & indent_text, int maxlen)
   if (indent == 0 &&
       ((root() == this && s[0] == '\n') || (parent() && parent()->children()[0] == this)))
     s = s.substr(1);
+  if (indent == 0 && root() == this && s[s.size() - 1] != '\n')
+    s += "\n";
   return s;
 }
 
