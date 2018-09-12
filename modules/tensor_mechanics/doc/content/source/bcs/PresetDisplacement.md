@@ -1,14 +1,8 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PresetDisplacement
 
-!alert construction title=Undocumented Class
-The PresetDisplacement has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /BCs/PresetDisplacement
+
+The PresetDisplacement class takes a displacement time history as input (provided using a function), differentiates it twice using backward Euler method to obtain the corresponding acceleration time history. This acceleration time history is then integrated using Newmark time integration method to obtain a modified displacement time history which is prescribed at the user provided boundary in the direction corresponding to the displacement variable provided as input. This modification in displacement time history ensures that there are no numerical errors in the acceleration or velocity response. 
 
 !syntax parameters /BCs/PresetDisplacement
 

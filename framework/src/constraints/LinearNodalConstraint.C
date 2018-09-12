@@ -18,6 +18,8 @@ InputParameters
 validParams<LinearNodalConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
+  params.addClassDescription(
+      "Constrains slave node to move as a linear combination of master nodes.");
   params.addRequiredParam<std::vector<unsigned int>>("master", "The master node IDs.");
   params.addParam<std::vector<unsigned int>>("slave_node_ids", "The list of slave node ids");
   params.addParam<BoundaryName>(

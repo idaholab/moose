@@ -6,8 +6,8 @@
     input = '2_block.i'
     exodiff = '2_block_out.e'
 
-    requirement = "The LineElementAction class shall correctly create the beam/truss input blocks"
-                  " required for the simulation."
+    requirement = "The LineElementAction class shall correctly create the objects"
+                  " required for a mechanics simulation using beam or truss elements."
   [../]
   [./2_block_common_action]
     type = 'Exodiff'
@@ -34,8 +34,8 @@
     expect_err = 'LineElementAction: Wrong combination of `use_displaced_mesh`, `strain_type` and `rotation_type`.'
 
     requirement = "The LineElementAction class shall produce an error if the user provided"
-                  " inputs for strain type, rotation type and use of displaced"
-                  " mesh are not compatible."
+                  " inputs for `strain_type`, `rotation_type` and `use_displaced_mesh`"
+                  " parameters are not compatible."
   [../]
   [./beam_action_test3]
     type = 'RunException'
@@ -43,8 +43,9 @@
     cli_args = 'Modules/TensorMechanics/LineElementMaster/block_1/displacements="disp_x" Modules/TensorMechanics/LineElementMaster/block_1/rotations="rot_x" Modules/TensorMechanics/LineElementMaster/block_1/save_in="res_x res_y"'
     expect_err = 'LineElementAction: Number of save_in variables should equal to the number of displacement variables'
 
-    requirement = "The LineElementAction class shall produce an error if the number of save in"
-                  " variables differs from the number of displacement variables."
+    requirement = "The LineElementAction class shall produce an error if the number"
+                  " of variables listed in the `save_in` parameter differs from"
+                  " the number of displacement variables."
   [../]
   [./beam_action_test4]
     type = 'RunException'
@@ -52,8 +53,9 @@
     cli_args = 'Modules/TensorMechanics/LineElementMaster/block_1/displacements="disp_x" Modules/TensorMechanics/LineElementMaster/block_1/rotations="rot_x" Modules/TensorMechanics/LineElementMaster/block_1/diag_save_in="res_x res_y"'
     expect_err = 'LineElementAction: Number of diag_save_in variables should equal to the number of displacement variables'
 
-    requirement = "The LineElementAction class shall produce an error if the number of diagonal"
-                  " save in variables differs from the number of displacement variables."
+    requirement = "The LineElementAction class shall produce an error if the number of"
+                  " variables listed in the `diag_save_in` parameter differs from the"
+                  " number of displacement variables."
   [../]
   [./beam_action_test5]
     type = 'RunException'
@@ -80,7 +82,7 @@
     cli_args = 'Modules/TensorMechanics/LineElementMaster/block_1/displacements="disp_x" Modules/TensorMechanics/LineElementMaster/block_1/rotations="rot_x"'
     expect_err = 'LineElementAction: `y_orientation`, `area`, `Iy` and `Iz` should be provided for'
 
-    requirement = "The LineElmentAction class shall produce an error if the moment of"
+    requirement = "The LineElementAction class shall produce an error if the moment of"
                   " inertia, area and orientation of the beam are not provided"
                   " as input."
   [../]
@@ -92,7 +94,7 @@
 
     requirement = "The LineElementAction class shall produce an error if translational and"
                   " rotational velocities and accelerations are not provided as"
-                  " input for dynamic beam simulations."
+                  " input for dynamic simulations using beam elements."
   [../]
   [./beam_action_test9]
     type = 'RunException'
@@ -102,7 +104,7 @@
 
     requirement = "The LineElementAction class shall produce an error if the number of"
                   " translational and rotational velocities and accelerations"
-                  " differs from the number of displacements variables."
+                  " differs from the number of displacement variables."
   [../]
   [./beam_action_test10]
     type = 'RunException'
@@ -111,8 +113,8 @@
     expect_err = 'LineElementAction: Newmark time integration parameters `beta` and `gamma` should be provided as input to perform dynamic simulations using beams.'
 
     requirement = "The LineElementAction class shall produce an error if Newmark time"
-                  " integration parameters (beta and gamma) are not provided"
-                  " as input for dynamic beam simulations."
+                  " integration parameters (`beta` and `gamma`) are not provided"
+                  " as input for dynamic simulations using beam elements."
   [../]
   [./beam_action_test11]
     type = 'RunException'
@@ -121,7 +123,7 @@
     expect_err = 'LineElementAction: Either name of the density material property or a constant density value should be provided as input using `density` for creating the consistent mass/inertia matrix required for dynamic beam simulation.'
 
     requirement = "The LineElementAction class shall produce an error if density is not"
-                  " provided as input for dynamic beam simulations using the consistent"
+                  " provided as input for dynamic beam simulations using beams elements with consistent"
                   " mass/inertia matrix."
   [../]
   [./beam_action_test12]
@@ -131,7 +133,7 @@
     expect_err = 'LineElementAction: `nodal_mass` or `nodal_mass_file` should be provided as input to calculate inertial forces on beam due to nodal mass.'
 
     requirement = "The LineElementAction class shall produce an error if nodal mass is not"
-                  " provided as input for dynamic beam simulations using the nodal"
+                  " provided as input for dynamic beam simulations using beam elements with nodal"
                   " mass matrix."
   [../]
   [./beam_action_test13]
@@ -139,8 +141,9 @@
     input = 'beam_action_chk.i'
     cli_args = 'Modules/TensorMechanics/LineElementMaster/block_1/displacements="disp_x" Modules/TensorMechanics/LineElementMaster/block_1/rotations="rot_x" Modules/TensorMechanics/LineElementMaster/block_1/area=1.0 Modules/TensorMechanics/LineElementMaster/block_1/rotational_velocities="rot_vel_x" Modules/TensorMechanics/LineElementMaster/block_1/beta=0.25 Modules/TensorMechanics/LineElementMaster/block_1/density=1.0 Modules/TensorMechanics/LineElementMaster/block_1/nodal_mass=0.1'
     expect_err = 'LineElementAction: `nodal_Ixx`, `nodal_Iyy`, `nodal_Izz` should be provided as input to calculate inertial torque on beam due to nodal inertia.'
+
     requirement = "The LineElementAction class shall produce an error if nodal inertia"
-                  " is not provided as input for dynamic simulations using the nodal"
+                  " is not provided as input for dynamic beam simulations using beam elements with nodal"
                   " inertia matrix."
   [../]
   [./beam_action_test14]
@@ -167,8 +170,8 @@
     cli_args = 'Modules/TensorMechanics/LineElementMaster/dynamic_nodal_translational_inertia=true'
     expect_err = 'LineElementAction: Variable names for translational and rotational velocities and accelerations should be provided as input to perform dynamic simulation using beam elements'
 
-    requirement = "The LineElementAction class shall produce an error if dynamic simulation"
+    requirement = "The LineElementAction class shall produce an error if `dynamic_nodal_translational_inertia`"
                   " is set to true in the common action block but the subblocks do"
-                  " not have the parameters required for a dynamic simulation."
+                  " not have the parameters required for a dynamic beam simulation using beam elements."
   [../]
 []

@@ -7,8 +7,8 @@
     exodiff = 'timoshenko_small_strain_y_out.e'
 
     requirement = "The mechanics system shall accurately predict the"
-                  " static bending response of a Timoshenko beam under small"
-                  " deformations in the y direction."
+                  " static bending response of a Timoshenko beam modeled using"
+                  " beam elements under small deformations in the y direction."
   [../]
   [./timoshenko_small_strain_z]
     type = 'Exodiff'
@@ -16,8 +16,8 @@
     exodiff = 'timoshenko_small_strain_z_out.e'
 
     requirement = "The mechanics system shall accurately predict the"
-                  " static bending response of a Timoshenko beam under small"
-                  " deformations in the z direction."
+                  " static bending response of a Timoshenko beam modeled using"
+                  " beam elements under small deformations in the z direction."
   [../]
   [./euler_small_strain_y]
     type = 'Exodiff'
@@ -25,8 +25,8 @@
     exodiff = 'euler_small_strain_y_out.e'
 
     requirement = "The mechanics system shall accurately predict the"
-                  " static bending response of a Euler-Bernoulli beam under small"
-                  " deformations in the y direction."
+                  " static bending response of a Euler-Bernoulli beam modeled using"
+                  " beam elements under small deformations in the y direction."
   [../]
   [./euler_small_strain_z]
     type = 'Exodiff'
@@ -34,8 +34,8 @@
     exodiff = 'euler_small_strain_z_out.e'
 
     requirement = "The mechanics system shall accurately predict the"
-                  " static bending response of a Euler-Bernoulli beam under small"
-                  " deformations in the z direction."
+                  " static bending response of a Euler-Bernoulli beam modeled using"
+                  " beam elements under small deformations in the z direction."
   [../]
   [./euler_finite_rot_y]
     type = 'Exodiff'
@@ -43,8 +43,8 @@
     exodiff = 'euler_finite_rot_y_out.e'
 
     requirement = "The mechanics system shall accurately predict the"
-                  " static bending response of a Euler-Bernoulli beam under finite"
-                  " deformations in the y direction."
+                  " static bending response of a Euler-Bernoulli beam modeled using"
+                  " beam elements under finite deformations in the y direction."
   [../]
   [./euler_finite_rot_z]
     type = 'Exodiff'
@@ -52,8 +52,8 @@
     exodiff = 'euler_finite_rot_z_out.e'
 
     requirement = "The mechanics system shall accurately predict the"
-                  " static bending response of a Euler-Bernoulli beam under finite"
-                  " deformations in the z direction."
+                  " static bending response of a Euler-Bernoulli beam modeled using"
+                  " beam elements under finite deformations in the z direction."
   [../]
   [./euler_small_y_with_action]
     type = 'Exodiff'
@@ -61,9 +61,9 @@
     exodiff = 'euler_small_strain_y_out.e'
     prereq = euler_small_strain_y
 
-    requirement = "The LineElementAction class shall accruately create the input blocks"
+    requirement = "The LineElementAction class shall accurately create the objects"
                   " required to model the static bending response of an Euler-Bernoulli"
-                  " beam under small deformations."
+                  " beam modeled using beam elements under small deformations."
   [../]
   [./euler_finite_y_with_action]
     type = 'Exodiff'
@@ -71,9 +71,9 @@
     exodiff = 'euler_finite_rot_y_out.e'
     prereq = euler_finite_rot_y
 
-    requirement = "The LineElementAction class shall accurately create the input blocks"
+    requirement = "The LineElementAction class shall accurately create the objects"
                   " required to model the static bending response of an Euler-Bernoulli"
-                  " beam under finite deformations."
+                  " beam modeled using beam elements under finite deformations."
   [../]
   [./euler_pipe_axial_disp]
     type = 'CSVDiff'
@@ -81,7 +81,7 @@
     csvdiff = 'euler_pipe_axial_disp_out.csv'
 
     requirement = "The mechanics system shall accurately predict the axial displacement"
-                  " of an Euler-Bernoulli pipe."
+                  " of an Euler-Bernoulli pipe modeled using beam elements."
   [../]
   [./euler_pipe_axial_force]
     type = 'CSVDiff'
@@ -89,7 +89,7 @@
     csvdiff = 'euler_pipe_axial_force_out.csv'
 
     requirement = "The mechanics system shall accurately predict the axial forces"
-                  " on an Euler-Bernoulli pipe."
+                  " on an Euler-Bernoulli pipe modeled using beam elements."
   [../]
   [./euler_pipe_bend]
     type = 'CSVDiff'
@@ -97,7 +97,7 @@
     csvdiff = 'euler_pipe_bend_out.csv'
 
     requirement = "The mechanics system shall accurately predict the bending response"
-                  " of an Euler-Bernoulli pipe."
+                  " of an Euler-Bernoulli pipe modeled using beam elements."
   [../]
   [./error_displacements1]
      type = 'RunException'
@@ -142,7 +142,7 @@
     exodiff = 'torsion_1_out.e'
 
     requirement = "The mechanics system shall accurately predict the torsional response"
-                  " of a beam with auto-calculated polar moment of inertia."
+                  " of a beam modeled using beam elements with auto-calculated polar moment of inertia."
   [../]
   [./torison_2]
     type = 'Exodiff'
@@ -150,6 +150,6 @@
     exodiff = 'torsion_2_out.e'
 
     requirement = "The mechanics system shall accurately predict the torsional response"
-                  " of a beam with user provided polar moment of inertia."
+                  " of a beam modeled using beam elements with user provided polar moment of inertia."
   [../]
 []

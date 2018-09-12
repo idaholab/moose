@@ -5,6 +5,11 @@
     exodiff = 'hht_test_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system using Hilber-Hughes-Taylor (HHT) time integration."
+    design = "Dynamics.md"
+    issues = "#5559"
   [../]
   [./newmark]
     type = 'Exodiff'
@@ -12,5 +17,10 @@
     exodiff = 'newmark_test_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system using Newmark time integration."
+    design = "Dynamics.md"
+    issues = "#5559"
   [../]
 []

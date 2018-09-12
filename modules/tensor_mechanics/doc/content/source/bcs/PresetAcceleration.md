@@ -1,14 +1,8 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PresetAcceleration
 
-!alert construction title=Undocumented Class
-The PresetAcceleration has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /BCs/PresetAcceleration
+
+The PresetAcceleration class takes an acceleration time history (provided using a function) as input and converts the acceleration into displacement using Newmark time integration method. This displacement is then prescribed at the user provided boundary in the direction corresponding to the displacement variable provided as input.
 
 !syntax parameters /BCs/PresetAcceleration
 

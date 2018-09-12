@@ -5,6 +5,12 @@
     exodiff = 'rayleigh_hht_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system with both Rayleigh damping and numerical"
+                  " damping resulting from Hilber-Hughes-Taylor (HHT) time integration."
+    design = "Dynamics.md"
+    issues = "#5559"
   [../]
   [./newmark]
     type = 'Exodiff'
@@ -12,6 +18,11 @@
     exodiff = 'rayleigh_newmark_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system with a constant Rayleigh damping."
+    design = "Dynamics.md"
+    issues = "#5559"
   [../]
   [./newmark_material]
     type = 'Exodiff'
@@ -20,5 +31,11 @@
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
     prereq = 'newmark'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system with Rayleigh damping provided as a"
+                  " material property."
+    design = "Dynamics.md"
+    issues = "#5559"
   [../]
 []

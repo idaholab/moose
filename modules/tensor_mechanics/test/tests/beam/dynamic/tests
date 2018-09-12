@@ -6,34 +6,37 @@
     input = 'dyn_euler_small.i'
     exodiff = 'dyn_euler_small_out.e'
 
-    requirement = "The dynamic system shall correctly predict the natural frequencies"
-                  " of an Euler-Bernoulli beam with consistent mass/inertia."
+    requirement = "The mechanics system shall correctly predict the natural frequencies"
+                  " of an Euler-Bernoulli beam modeled using beam elements with"
+                  " consistent mass/inertia."
   [../]
   [./dyn_timoshenko]
     type = 'Exodiff'
     input = 'dyn_timoshenko_small.i'
     exodiff = 'dyn_timoshenko_small_out.e'
 
-    requirement = "The dynamic system shall correctly predict the natural frequencies"
-                  " of a Timoshenko beam with consistent mass/inertia."
+    requirement = "The mechanics system shall correctly predict the natural frequencies"
+                  " of a Timoshenko beam modeled using beam elements with consistent"
+                  " mass/inertia."
   [../]
   [./dyn_euler_rayleigh_hht]
     type = 'Exodiff'
     input = 'dyn_euler_small_rayleigh_hht.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
 
-    requirement = "The dynamic system shall correctly predict the natural frequencies"
-                  " of an Euler-Bernoulli beam in the presence of Rayleigh damping"
-                  " and numerical damping induced by HHT time integration."
+    requirement = "The mechanics system shall correctly predict the natural frequencies"
+                  " of an Euler-Bernoulli beam modeled using beam elements in the"
+                  " presence of Rayleigh damping and numerical damping introduced"
+                  " by Hilber-Hughes-Taylor (HHT) time integration."
   [../]
   [./dyn_euler_added_mass]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass.i'
     exodiff = 'dyn_euler_small_added_mass_out.e'
 
-    requirement = "The dynamic system shall correctly predict the natural frequencies"
-                  " of a massless Euler-Bernoulli beam with a nodal masses placed"
-                  " at the ends."
+    requirement = "The mechanics system shall correctly predict the natural frequencies"
+                  " of a massless Euler-Bernoulli beam modeled using beam elements"
+                  " with a nodal masses placed at the ends."
   [../]
   [./dyn_euler_added_mass_file]
     type = 'Exodiff'
@@ -42,9 +45,10 @@
     exodiff = 'dyn_euler_small_added_mass_out.e'
     prereq = 'dyn_euler_added_mass'
 
-    requirement = "The dynamic system shall correctly predict the natural frequencies"
-                  " of a massless Euler-Bernoulli beam with added nodal masses when"
-                  " the location and values of the masses are provided using a csv file."
+    requirement = "The mechanics system shall correctly predict the natural frequencies"
+                  " of a massless Euler-Bernoulli beam modeled using beam elements"
+                  " with added nodal masses when the location and values of the"
+                  " masses are provided using a csv file."
   [../]
   [./dyn_euler_added_mass_gravity]
     type = 'Exodiff'
@@ -53,9 +57,9 @@
     exodiff = 'dyn_euler_small_added_mass_out.e'
     prereq = 'dyn_euler_added_mass_file'
 
-    requirement = "The dynamic system shall correctly model the beam's response"
-                  " under gravitational force (proportional to nodal mass) is"
-                  " applied to the beam."
+    requirement = "The mechanics system shall correctly model the response of a beam"
+                  " modeled using beam elements when gravitational force"
+                  " (proportional to nodal mass) is applied to the beam."
   [../]
   [./dyn_euler_added_mass_gravity_2]
     type = 'Exodiff'
@@ -64,9 +68,9 @@
     exodiff = 'dyn_euler_small_added_mass_out.e'
     prereq = 'dyn_euler_added_mass_gravity'
 
-    requirement = "The dynamic system shall correctly model the beam's response"
-                  " under gravitational force when the nodal mass distribution is"
-                  " provided using a csv file."
+    requirement = "The mechanics system shall correctly model the response of a beam"
+                  " modeled using beam elements under gravitational force when"
+                  " the nodal mass distribution is provided using a csv file."
   [../]
   [./add_dynamic_variables_action]
     type = 'Exodiff'
@@ -74,8 +78,9 @@
     exodiff = 'dyn_euler_small_added_mass_out.e'
     prereq = 'dyn_euler_added_mass_gravity_2'
 
-    requirement = "The LineElementAction shall create the translational & rotational"
-                  " velocities and accelerations required for a dynamic beam simulation."
+    requirement = "The LineElementAction shall create the translational and rotational"
+                  " velocities and accelerations required for a dynamic simulation"
+                  " using beam elements."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
   [../]
   [./dyn_euler_added_mass_inertia_damping]
@@ -83,8 +88,9 @@
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
 
-    requirement = "The dynamic system shall correctly model the beam's response"
-                  " in the presence of nodal mass, nodal inertia and Rayleigh damping."
+    requirement = "The mechanics system shall correctly model the response of a beam"
+                  " modeled using beam elements in the presence of nodal mass,"
+                  " nodal inertia and Rayleigh damping."
   [../]
   [./dyn_euler_rayleigh_hht_action]
     type = 'Exodiff'
@@ -93,9 +99,9 @@
     prereq = 'dyn_euler_rayleigh_hht'
 
     requirement = "The LineElementAction shall correctly create the input blocks"
-                  " required for a dynamic beam simulation using consistent mass/inertia"
-                  " matrix in the presence of Rayleigh damping and numerical damping"
-                  " in the form of HHT time integration."
+                  " required for a dynamic beam simulation using beam elements and"
+                  " a consistent mass/inertia matrix in the presence of Rayleigh"
+                  " damping and numerical damping in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
   [../]
   [./dyn_euler_added_mass_inertia_damping_action]
@@ -105,9 +111,9 @@
     prereq = 'dyn_euler_added_mass_inertia_damping'
 
     requirement = "The LineElmentAction shall correctly create the input blocks"
-                  " required for a dynamic beam simulation using nodal mass/inertia"
+                  " required for a dynamic beam simulation using beam elements and nodal mass/inertia"
                   " matrix in the presence of Rayleigh damping and numerical damping"
-                  " in the form of HHT time integration."
+                  " in the form of Hilber-Hughes-Taylor (HHT) time integration."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
   [../]
   [./dyn_euler_added_mass2]
@@ -115,8 +121,8 @@
     input = 'dyn_euler_small_added_mass2.i'
     csvdiff = 'dyn_euler_small_added_mass2_out.csv'
 
-    requirement = "The dynamic system shall correctly predict the natural frequency"
-                  " of a cantilever beam with a mass at the free end."
+    requirement = "The mechanics system shall correctly predict the natural frequency"
+                  " of a cantilever beam modeled using beam elements with a mass at the free end."
   [../]
   [./error_1]
     type = 'RunException'
@@ -125,7 +131,7 @@
     expect_err = "InertialForceBeam: The number of variables supplied in 'displacements' and 'rotations' must match."
 
     requirement = "The InertialForceBeam class shall produce an error if the number of"
-                  " provided for rotations differ that provided for displacements."
+                  " variables provided for rotations differs from that provided for displacements."
   [../]
   [./error_2]
     type = 'RunException'
@@ -144,7 +150,7 @@
     expect_err = "NodalRotationalInertia: The moment of inertia tensor should be positive definite."
 
     requirement = "The NodalRotationalInertia class shall produce an error if the"
-                  " the user provided nodal inertia is not positive definite."
+                  " user provided nodal inertia is not positive definite."
   [../]
   [./error_4]
     type = 'RunException'
@@ -268,9 +274,9 @@
     cli_args = 'Modules/TensorMechanics/LineElementMaster/all/add_dynamic_variables=false Outputs/csv=false Outputs/exodus=false'
     expect_err = "LineElementAction: When using 'dynamic_consistent_inertia', 'dynamic_nodal_rotational_inertia' or '_dynamic_nodal_translational_inertia', the velocity and acceleration AuxVariables and the corresponding AuxKernels are automatically set by"
 
-    requirement = "The LineElmentAction class shall produce an error if add_dynamic_variables"
-                  " option is set to false while dynamic_consistent_inertia,"
-                  " dynamic_nodal_rotational_inertia or dynamic_nodal_translational_inertia"
+    requirement = "The LineElementAction class shall produce an error if `add_dynamic_variables`"
+                  " option is set to false while `dynamic_consistent_inertia`,"
+                  " `dynamic_nodal_rotational_inertia` or `dynamic_nodal_translational_inertia`"
                   " options are set to true."
     design = "C0TimoshenkoBeam.md LineElementMaster/index.md"
   [../]
