@@ -3,6 +3,9 @@
     type = Exodiff
     input = 'pressure_test.i'
     exodiff = 'pressure_test_out.e'
+    issues = '#4781'
+    design = 'syntax/BCs/Pressure/index.md'
+    requirement = 'The Pressure boundary condition action shall create the objects needed to apply pressure boundary conditions on a 3D model as demonstrated by correctly computing the response of an elastic small-strain isotropic unit cube with pressure applied on three faces to create a hydrostatic pressure.'
   [../]
   [./3D_Bbar]
     type = Exodiff
@@ -10,5 +13,8 @@
     exodiff = 'pressure_test_out.e'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = '3D'
+    issues = '#4781 #8235'
+    design = 'syntax/BCs/Pressure/index.md'
+    requirement = 'The Pressure boundary condition action shall create the objects needed to apply pressure boundary conditions on a 3D model as demonstrated by correctly computing the response of an elastic small-strain isotropic unit cube with pressure applied on three faces to create a hydrostatic pressure using the volumetric locking correction b-bar formulation.'
   [../]
 []

@@ -4,5 +4,8 @@
     input = 'anisotropic_patch_test.i'
     exodiff = 'anisotropic_patch_test_out.e'
     scale_refine = 1
+    issues = '#4716 #7555'
+    design = 'source/Materials/ComputeLinearElasticStress.md source/Materials/ComputeSmallStrain.md syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The mechanics system shall be capable of accurately computing the elastic response of an anisotropic elastic material where 6 components of a symmetric elasticity tensor are output on an irregular patch of elements with total small strain assumptions'
   [../]
 []
