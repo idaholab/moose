@@ -44,6 +44,7 @@ cdef extern from "parse.h" namespace "hit":
     Node * parse(string fname, string input) except +
     Node * explode(Node * n) except +
     void merge(Node * src, Node * dst) except +
+    string format(string file_name, string file_content, string style_file_name) except +
 
 cdef extern from "parse.h" namespace "hit":
     cdef cppclass Formatter:

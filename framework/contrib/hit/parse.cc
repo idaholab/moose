@@ -1312,6 +1312,16 @@ discoverFormatFile(const std::string & dir, const std::string file_name)
   return discoverFormatFileInner(dir, file_name, 0);
 }
 
+std::string
+format(const std::string & file_name, const std::string & file_contents, const std::string & style_file_name)
+{
+  std::stringstream src;
+  src << file_contents;
+  std::stringstream dst;
+  format(file_name, src, dst, style_file_name);
+  return dst.str();
+}
+
 void
 format(const std::string & file_name, std::istream & file_contents, std::ostream & dst, const std::string & style_file_name)
 {

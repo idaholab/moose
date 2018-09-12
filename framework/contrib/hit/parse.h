@@ -553,6 +553,10 @@ private:
 std::string
 discoverFormatFile(const std::string & dir, const std::string file_name);
 
+std::string format(const std::string & file_name,
+                   const std::string & file_contents,
+                   const std::string & style_file_name = ".hit-format");
+
 void format(const std::string & file_name,
             std::istream & file_contents,
             std::ostream & dst,

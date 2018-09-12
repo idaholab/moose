@@ -216,14 +216,14 @@ cdef class Node:
 # this function is a hack to get around the fact that cython assumes all arguments to class
 # constructors are python objects.  So the Node constructor does nothing and this function
 # actually sets the internal cnode member pointer.
-cdef _initpynode(chit.Node* n, own=False):
-    pyn = Node(own=own)
+cdef _initpynode(chit.Node* n, own=False, fname=''):
+    pyn = Node(own=own, fname=fname)
     pyn._cnode = n
     return pyn
     
 def parse(fname, input):
     cdef chit.Node* node = chit.parse(fname, input)
-    return _initpynode(node, own=True)
+    return _initpynode(node, own=True, fname=fname)
 
 cpdef explode(Node n):
     n._cnode = chit.explode(n._cnode)
@@ -231,4 +231,7 @@ cpdef explode(Node n):
 
 cpdef merge(Node src, Node dst):
     chit.merge(src._cnode, dst._cnode)
+
+def format(file_name, file_content, hit_style_file_name='.hit-format'):
+    return chit.format(file_name, file_content, hit_style_file_name)
 
