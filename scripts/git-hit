@@ -1,0 +1,22 @@
+#!/bin/bash
+
+hit_cmd="hit"
+
+
+if ! hash hit 2>/dev/null; then
+    if [ -n "$MOOSE_DIR" ]; then
+        (cd ${MOOSE_DIR}/framework/contrib/hit && make) &> /dev/null
+        hit_cmd="${MOOSE_DIR}/framework/contrib/hit/hit"
+    fi
+fi
+
+args="$@"
+hit_cmd="$hit_cmd format -i"
+
+if [[ $(echo "$args" | grep '\--check' -o) == "--check" ]]; then
+    args=$(echo "$args" | sed 's/--check//g')
+    hit_cmd="$hit_cmd --check"
+fi
+
+git diff --name-only --relative $args | grep -E '\.i$|/tests$' | xargs $hit_cmd
+

@@ -41,14 +41,24 @@ echo '#!/bin/bash
 
 # Pre-commit hook to run clang-format on all staged c++ files.
 
-# paths to all c++ source and header files
-cpp_file_paths="framework/src framework/include modules/*/src modules/*/include test unit examples tutorials stork"
+patch=$(git clang-format --diff -- $(git diff --staged --name-only -- framework/src framework/include modules/*/src modules/*/include test unit examples tutorials stork))
+if [[ "$patch" =~ "no modified files to format" || "$patch" =~ "clang-format did not modify any files" ]]; then
+    echo "" > /dev/null
+else
+    echo ""
+    echo "Your code is not properly formatted." >&2
+    echo "Run 'git clang-format' to resolve the following issues:" >&2
+    echo ""
+    echo "$patch"
+    exit 1
+fi
 
-# get names of all staged files that are added, copied, modified, or renamed; exclude deleted files
-changed_cpp_files=`git diff --staged --diff-filter=ACMR --name-only -- $cpp_file_paths`
-
-git clang-format -- $changed_cpp_files
-git add $changed_cpp_files
+./scripts/git-hit --staged --check
+if [[ $? -ne 0 ]]; then
+    echo "One or more HIT files are not properly formatted." >&2
+    echo "Run './scripts/git-hit' to resolve the issues." >&2
+    exit 1
+fi
 ' > $hookfile
 
 chmod a+x $hookfile
