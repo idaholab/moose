@@ -56,7 +56,7 @@ public:
    *
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
-   * @returns sound speed
+   * @return sound speed
    */
   virtual Real T_from_v_e(Real v, Real e) const;
 
