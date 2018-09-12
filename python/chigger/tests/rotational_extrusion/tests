@@ -1,0 +1,10 @@
+[Tests]
+  [./exodus]
+    type = ImageDiff
+    command = rotational_extrusion.py
+    imagediff = rotational_extrusion.png
+    design = 'chigger/index.md'
+    issues = '#12128'
+    requirement = "Chigger shall include the ability to rotate and extrude a 2D ExodusII result."
+  [../]
+[]

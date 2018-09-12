@@ -26,7 +26,7 @@ class ExodusSource(base.ChiggerSource):
         **kwargs: see ChiggerSource
     """
     FILTER_TYPES = [filters.ContourFilter, filters.ClipperFilterBase, filters.GeometryFilter,
-                    filters.TransformFilter, filters.TubeFilter]
+                    filters.TransformFilter, filters.TubeFilter, filters.RotationalExtrusionFilter]
 
     @staticmethod
     def getOptions():

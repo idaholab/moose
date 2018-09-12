@@ -41,11 +41,14 @@ class ChiggerResultBase(ChiggerObject):
                                      "chigger.RenderWindow is utilized.", vtype=list)
         opt.add('gradient_background', False, "Enable/disable the use of a gradient background.")
         opt.add('camera', "The VTK camera to utilize for viewing the results.", vtype=vtk.vtkCamera)
+        opt.add('light', None, "Add a headlight with the supplied intensity.", vtype=float)
         return opt
 
     def __init__(self, renderer=None, **kwargs):
         super(ChiggerResultBase, self).__init__(**kwargs)
         self._vtkrenderer = renderer if renderer != None else vtk.vtkRenderer()
+        self._vtklight = vtk.vtkLight()
+        self._vtklight.SetLightTypeToHeadlight()
 
     def getVTKRenderer(self):
         """
@@ -84,3 +87,8 @@ class ChiggerResultBase(ChiggerObject):
         # Camera
         if self.isOptionValid('camera'):
             self._vtkrenderer.SetActiveCamera(self.getOption('camera'))
+
+        # Headlight
+        if self.isOptionValid('light'):
+            self._vtklight.SetIntensity(1.5)
+            self._vtkrenderer.AddLight(self._vtklight)

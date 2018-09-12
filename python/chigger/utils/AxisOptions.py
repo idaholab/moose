@@ -35,7 +35,7 @@ def get_options():
             allow=['left', 'right', 'top', 'bottom'])
     opt.add('axis_point1', [0, 0], 'Starting location of axis, in absolute viewport coordinates.')
     opt.add('axis_point2', [0, 0], 'Ending location of axis, in absolute viewport coordinates.')
-    opt.add('axis_scale', 1, "The axis scaling factor.")
+    opt.add('axis_scale', 1, "The axis scaling factor.", vtype=float)
     opt.add('zero_tol', 1e-10, "Tolerance for considering limits to be the same.")
     return opt
 
@@ -74,7 +74,8 @@ def set_options(vtkaxis, opt):
         else:
             vtkaxis.SetCustomTickPositions(None, None)
             vtkaxis.SetBehavior(vtk.vtkAxis.FIXED)
-            vtkaxis.SetRange(*lim)
+            scale = opt['axis_scale']
+            vtkaxis.SetRange(lim[0] * scale, lim[1] * scale)
             vtkaxis.RecalculateTickSpacing()
     else:
         vtkaxis.SetBehavior(vtk.vtkAxis.AUTO)
@@ -123,6 +124,3 @@ def set_options(vtkaxis, opt):
 
     if opt.isOptionValid('axis_point2'):
         vtkaxis.SetPoint2(*opt['axis_point2'])
-
-    if opt.isOptionValid('axis_scale'):
-        vtkaxis.SetScalingFactor(opt['axis_scale'])
