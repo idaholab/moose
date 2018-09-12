@@ -265,7 +265,7 @@ class MarkdownNode(FileNode):
         if (self._index is None) and (self._result is not None):
             self._index = []
             for section in anytree.search.findall_by_attr(self._result, 'section'):
-                name = self.name
+                name = self.name.replace('_', ' ')
                 if name.endswith('.md'):
                     name = name[:-3]
                 text = section['data-section-text']
