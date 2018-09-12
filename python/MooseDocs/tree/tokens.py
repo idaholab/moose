@@ -42,6 +42,8 @@ class Token(NodeBase):
         node = self
         #pylint: disable=protected-access
         while node._info is None: # use _info to prevent infinite loop
+            if node.parent is None:
+                break
             node = node.parent
         return node._info
 

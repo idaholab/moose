@@ -19,7 +19,7 @@
 
 [Kernels]
   [./heat]
-    type = MatDiffusion
+    type = MatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
     prop_state = 'old'                  # Use the "Old" value to compute conductivity

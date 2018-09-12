@@ -25,7 +25,7 @@
 
 [Kernels]
   [./diff]
-    type = MatDiffusion # A Laplacian operator
+    type = MatDiffusionTest # A Laplacian operator
     variable = T
     prop_name = 'thermal_conductivity'
   [../]

@@ -2,6 +2,9 @@
   [./add_mat_and_kernel]
     type = RunApp
     input = 'add_mat_and_kernel.i'
-    expect_out = '\[Kernels\]\n  \[\./kern1\]\n    type \= MatDiffusion\n    prop_name \= prop1\n    variable \= var1\n  \[\.\./\]\n\[\]\n\n\[Materials\]\n  \[\./mat1\]\n    type \= GenericConstantMaterial\n    prop_names \= prop1\n    prop_values \= 42\n  \[\.\./\]\n\[\]\n\n\[Variables\]\n  \[\./var1\]\n  \[\.\./\]\n\[\]'
+    expect_out = '\[Kernels\]\n  \[\./kern1\]\n    type \= MatDiffusionTest\n    prop_name \= prop1\n    variable \= var1\n  \[\.\./\]\n\[\]\n\n\[Materials\]\n  \[\./mat1\]\n    type \= GenericConstantMaterial\n    prop_names \= prop1\n    prop_values \= 42\n  \[\.\./\]\n\[\]\n\n\[Variables\]\n  \[\./var1\]\n  \[\.\./\]\n\[\]'
+    issues = "#8875"
+    design = "DumpObjectsProblem.md"
+    requirement = "MOOSE shall have a capability to dump the equivalent input file syntax for all objects added by a given action."
   [../]
 []
