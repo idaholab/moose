@@ -104,4 +104,29 @@
     design = 'postprocessors/DiscreteNucleationTimeStep.md'
     issues = '#12104'
   [../]
+
+  [./data]
+    type = 'CSVDiff'
+    input = 'data.i'
+    csvdiff = 'data_out.csv'
+    requirement = "The nucleation data porocessor shall return the number of currently active nuclei or whether a change to the nucleus list has occurred"
+    design = 'postprocessors/DiscreteNucleationData.md'
+    issues = '#12114'
+  [../]
+  [./auxkernel]
+    type = 'Exodiff'
+    input = 'auxkernel.i'
+    exodiff = 'auxkernel_out.e'
+    requirement = "The nucleation auxkernel evaluates the nucleation map onto an elemental aux variable"
+    design = 'auxkernels/DiscreteNucleationAux.md'
+    issues = '#12114'
+  [../]
+  [./force]
+    type = 'Exodiff'
+    input = 'force.i'
+    exodiff = 'force_out.e'
+    requirement = "The nucleation force kernel returns a forcing function based on the nucleation map"
+    design = 'auxkernels/DiscreteNucleationAux.md'
+    issues = '#12114'
+  [../]
 []
