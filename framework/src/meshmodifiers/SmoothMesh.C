@@ -20,6 +20,10 @@ validParams<SmoothMesh>()
 {
   InputParameters params = validParams<MeshModifier>();
 
+  params.addClassDescription("Utilizes a simple Laplacian based smoother to attempt to improve "
+                             "mesh quality.  Will not move boundary nodes or nodes along "
+                             "block/subdomain boundaries");
+
   params.addParam<unsigned int>("iterations", 1, "The number of smoothing iterations to do.");
 
   return params;
