@@ -163,7 +163,7 @@ PointValueAtXFEMInterface::getElemContainingPoint(const Point & p, bool positive
       positive = true;
   }
 
-  const Elem * elem2;
+  const Elem * elem2 = nullptr;
   bool found = false;
   for (auto & pair : *_elem_pairs)
   {
