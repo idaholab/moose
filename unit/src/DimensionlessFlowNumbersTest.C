@@ -33,3 +33,15 @@ TEST(DimensionlessFlowNumbersTest, laplace)
   EXPECT_EQ(fp::laplace(1., 1., 1., 1.), 1.);
   EXPECT_NEAR(fp::laplace(72.8e-3, 998., 2.234, 8.9e-4), 204910907.20868585, 1e-12);
 }
+
+TEST(DimensionlessFlowNumbersTest, thermal_diffusivity)
+{
+  EXPECT_EQ(fp::thermalDiffusivity(1., 1., 1.), 1.);
+  EXPECT_NEAR(fp::thermalDiffusivity(1.5, 0.15, 2416.0), 0.0041390728476821195, 1e-12);
+}
+
+TEST(DimensionlessFlowNumbersTest, peclet)
+{
+  EXPECT_EQ(fp::peclet(1., 1., 1.), 1.);
+  EXPECT_NEAR(fp::peclet(10., 0.014, 1.5), 0.09333333333333334, 1e-12);
+}

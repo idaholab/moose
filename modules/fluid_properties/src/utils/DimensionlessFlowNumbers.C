@@ -37,4 +37,16 @@ laplace(Real sigma, Real rho, Real L, Real mu)
   return sigma * rho * L / (mu * mu);
 }
 
+Real
+thermalDiffusivity(Real k, Real rho, Real cp)
+{
+  return k / (rho * cp);
+}
+
+Real
+peclet(Real vel, Real L, Real diffusivity)
+{
+  return std::fabs(vel) * L / diffusivity;
+}
+
 } // namespace fp

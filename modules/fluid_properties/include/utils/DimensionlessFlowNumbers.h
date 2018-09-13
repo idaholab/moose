@@ -62,6 +62,26 @@ Real grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real g
  */
 Real laplace(Real sigma, Real rho, Real L, Real mu);
 
+/**
+ * Compute thermal diffusivity
+ *
+ * @param k Thermal conductivity [W/m-K]
+ * @param rho Density [kg/m^3]
+ * @param cp Isobaric specific heat [J/K]
+ * @return Thermal diffusivity
+ */
+Real thermalDiffusivity(Real k, Real rho, Real cp);
+
+/**
+ * Compute Peclet number
+ *
+ * @param vel Velocity [m/s]
+ * @param L  Characteristic length [m]
+ * @param diffusivity Diffusivity
+ * @return Peclet number
+ */
+Real peclet(Real vel, Real L, Real diffusivity);
+
 } // namespace fp
 
 #endif
