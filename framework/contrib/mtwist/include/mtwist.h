@@ -413,7 +413,7 @@ extern double		mt_64_to_double;
  * saves the cost of a modulus operation in the critical path.
  */
 MT_EXTERN MT_INLINE uint32_t mts_lrand(
-    register mt_state*	state)		/* State for the PRNG */
+    mt_state*	state)		/* State for the PRNG */
     {
     uint32_t random_value; /* Pseudorandom value generated */
 
@@ -442,7 +442,7 @@ MT_EXTERN MT_INLINE uint32_t mts_lrand(
  * nearly-identical internal implementations of mts_lrand.
  */
 MT_EXTERN MT_INLINE uint64_t mts_llrand(
-    register mt_state*	state)		/* State for the PRNG */
+    mt_state*	state)		/* State for the PRNG */
     {
     uint32_t random_value_1; /* 1st pseudorandom value generated */
     uint32_t random_value_2; /* 2nd pseudorandom value generated */
@@ -484,7 +484,7 @@ MT_EXTERN MT_INLINE uint64_t mts_llrand(
  * 32 bits of precision.  Use mts_ldrand to get 64 bits of precision.
  */
 MT_EXTERN MT_INLINE double mts_drand(
-    register mt_state*	state)		/* State for the PRNG */
+    mt_state*	state)		/* State for the PRNG */
     {
     uint32_t random_value; /* Pseudorandom value generated */
 
@@ -503,7 +503,7 @@ MT_EXTERN MT_INLINE double mts_drand(
  * mts_drand for more speed but less precision.
  */
 MT_EXTERN MT_INLINE double mts_ldrand(
-    register mt_state*	state)		/* State for the PRNG */
+    mt_state*	state)		/* State for the PRNG */
     {
 #ifdef UINT64_MAX
     uint64_t		final_value;	/* Final (integer) value */
