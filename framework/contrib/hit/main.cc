@@ -231,7 +231,7 @@ findParam(int argc, char ** argv)
 //       # identifier characters). The fields and subsections within each section specify an
 //       # order; any field values are ignored. See the docs for that function for more details.
 //       # The sorting rules are example-based. Sorting is performed depth-first by rules in
-//       # lexical order
+//       # lexical order - first rule to match a section/field wins for determining order.
 //       [sorting]
 //         [.*]
 //           [.*]

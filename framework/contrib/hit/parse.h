@@ -478,10 +478,7 @@ public:
   ///       [sorting]
   ///         [.*]
   ///           [.*]
-  ///             # 'first' fields in doubly-nested section go first. This rule must go first in
-  ///             # order to not override any later-specified ordering of higher-level sections
-  ///             # that would occur because the higher-level section matchers for this rule
-  ///             # would match every section.
+  ///             # 'first' fields in doubly-nested section go first.
   ///             first = FooBar
   ///           []
   ///         []
@@ -495,9 +492,8 @@ public:
   ///
   /// All fields are optional and the sorting section is also optional.  If the sorting section is
   /// present, you can have as many patterns as you like.  Sorting priority is deterimined by
-  /// patterns' lexical order. If a section/field sorting identifier or regular expression matches
-  /// a part of a HIT input file, that rule will overwrite/override any sorting done by a lexically
-  /// prior rule match.
+  /// patterns' lexical order. If multiple section/field sorting identifiers or regular expressions matche
+  /// a certain part of a HIT input file, the first rule wins and the second will not affect the ordering.
   Formatter(const std::string & fname, const std::string & hit_config);
 
   /// Formats the given input hit text (using fname to report better syntax errors) and returns
