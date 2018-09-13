@@ -1,10 +1,16 @@
 [format]
 
   [sorting]
+    inactive = foo
     [.*]
-      [.*]
-        type = foo
-      []
+      .*/inactive = foo
+    []
+    [.*/.*]
+      inactive = foo
+      type = foo
+    []
+
+    [GlobalParams]
     []
 
     [Mesh]
@@ -14,6 +20,9 @@
     []
 
     [Executioner]
+    []
+
+    [Postprocessors]
     []
 
     [Outputs]
