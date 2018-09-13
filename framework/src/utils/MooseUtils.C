@@ -41,15 +41,6 @@ std::string getLatestCheckpointFileHelper(const std::list<std::string> & checkpo
 namespace MooseUtils
 {
 
-// TODO:
-//     - [x] create script to format (and check formatting on) all moose-repo input files.
-//     - [ ] create git pre-commit hook (script) to verify formatting on input files
-//     - [ ] create canonical moosestyle.i config file
-//     - [ ] create CIVET pre-check for inputu file formatting
-//     - [ ] (maybe) create git 'moose-format' plugin for formatting input files.
-//     - [ ] auto-format all moose-repo input files.
-//     - [ ] (maybe) create a merge-hook for helping rebases across the big auto-format commit.
-
 void
 formatHit(const std::string & fname, std::istream & to_format, std::ostream & dst)
 {
