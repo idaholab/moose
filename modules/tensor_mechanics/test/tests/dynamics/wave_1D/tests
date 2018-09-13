@@ -1,10 +1,16 @@
 [tests]
+  design = "Dynamics.md"
+  issues = "#5559"
   [./hht]
     type = 'Exodiff'
     input = 'wave_hht.i'
     exodiff = 'wave_hht_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall correctly predict 1D wave propagation"
+                   " in a linear elastic material with numerical damping resulting"
+                   " from Hilber-Hughes-Taylor (HHT) time integration."
   [../]
   [./newmark]
     type = 'Exodiff'
@@ -12,6 +18,10 @@
     exodiff = 'wave_newmark_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall correctly predict 1D wave propagation"
+                   " in a linear elastic material with no numerical or structural"
+                   " damping."
   [../]
   [./rayleigh_hht]
     type = 'Exodiff'
@@ -19,6 +29,10 @@
     exodiff = 'wave_rayleigh_hht_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall correctly predict 1D wave propagation"
+                   " in a linear elastic material with both Rayleigh damping and"
+                   " numerical damping resulting from Hilber-Hughes-Taylor (HHT) time integration."
   [../]
   [./rayleigh_newmark]
     type = 'Exodiff'
@@ -26,5 +40,8 @@
     exodiff = 'wave_rayleigh_newmark_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall correctly predict 1D wave propagation"
+                   " in a linear elastic material with Rayleigh damping."
   [../]
 []

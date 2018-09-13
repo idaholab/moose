@@ -6,6 +6,11 @@
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
     compiler = 'GCC CLANG'
+
+    requirement = "The PresetDisplacement class shall accurately prescribe the"
+                  " displacement at the given boundary."
+    design = "Dynamics.md PresetDisplacement.md"
+    issues = "#7642"
   [../]
   [./displacement_bc_gravity]
     type = 'Exodiff'
@@ -14,5 +19,11 @@
     custom_cmp = 'displacement.cmp'
     use_old_floor = true
     compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately conduct a static analysis in"
+                  " a small number of time steps to equilibrate the system under gravity"
+                  " before starting the dynamic analysis."
+    design = "Dynamics.md"
+    issues = "#7642"
   [../]
 []

@@ -4,7 +4,7 @@
     input = 'thermal_expansion_small.i'
     exodiff = 'thermal_expansion_small_out.e'
 
-    requirement = "ComputeThermalExpansionEigenstrainBeam shall correctly calculate eigenstrains"
+    requirement = "The ComputeThermalExpansionEigenstrainBeam class shall correctly calculate eigenstrains"
                   " due to changes in temperature."
     design = "ComputeThermalEigenstrainBeam.md"
     issues = "#10313"
@@ -14,7 +14,7 @@
     input = 'eigenstrain_from_var.i'
     exodiff = 'eigenstrain_from_var_out.e'
 
-    requirement = "ComputeEigenstrainBeamFromVariable shall correctly transfer eigenstrains from"
+    requirement = "The ComputeEigenstrainBeamFromVariable class shall correctly transfer eigenstrains from"
                   " auxvariables into eigenstrain material property."
     design = "ComputeEigenstrainBeamFromVariable.md"
     issues = "#10313"
@@ -25,7 +25,7 @@
     cli_args = "Materials/thermal/displacement_eigenstrain_variables='thermal_eig zero1' Outputs/csv=false Outputs/exodus=false"
     expect_err = "ComputeEigenstrainBeamFromVariable: If the displacement or rotational eigenstrains are provided, it should contain 3 variables corresponding to the three components in the global coordinate system."
 
-    requirement = "ComputeEigenstrainBeamFromVariable shall report an error if less than 3"
+    requirement = "The ComputeEigenstrainBeamFromVariable class shall report an error if less than 3"
                   " displacement or rotational eigenstrains are provided by the user."
     design = "ComputeEigenstrainBeamFromVariable.md"
     issues = "#10313"

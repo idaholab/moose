@@ -5,5 +5,10 @@
     exodiff = 'disp_mid_out.e'
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
+
+    requirement = "The LinearNodalConstraint class shall constrain the slave nodes"
+                  " to move as a linear combination of the master nodes."
+    design = "LinearNodalConstraint.md"
+    issues = "#5783"
   [../]
 []

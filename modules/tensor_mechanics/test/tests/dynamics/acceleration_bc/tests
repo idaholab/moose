@@ -5,5 +5,10 @@
     exodiff = 'AccelerationBC_test_out.e'
     abs_zero = 1e-08
     compiler = 'GCC CLANG'
+
+    requirement = "The PresetAcceleration class shall accurately prescribe the"
+                  " acceleration at the given boundary."
+    design = "Dynamics.md PresetAcceleration.md"
+    issues = "#7642"
   [../]
 []
