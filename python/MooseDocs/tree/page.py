@@ -238,7 +238,7 @@ class MarkdownNode(FileNode):
         if self.source and os.path.exists(self.source):
             LOG.debug('READ %s', self.source)
             self._modified = os.path.getmtime(self.source)
-            self.content = common.read(self.source) #pylint: disable=attribute-defined-outside-init
+            self.content = common.read(self.source).lstrip('\n') #pylint: disable=attribute-defined-outside-init
 
     def modified(self):
         """

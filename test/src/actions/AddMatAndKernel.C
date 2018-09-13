@@ -51,10 +51,10 @@ AddMatAndKernel::act()
     addVariable(var_name);
   else if (_current_task == "add_kernel")
   {
-    InputParameters params = _factory.getValidParams("MatDiffusion");
+    InputParameters params = _factory.getValidParams("MatDiffusionTest");
     params.set<NonlinearVariableName>("variable") = var_name;
     params.set<MaterialPropertyName>("prop_name") = "prop1";
-    _problem->addKernel("MatDiffusion", "kern1", params);
+    _problem->addKernel("MatDiffusionTest", "kern1", params);
   }
   else if (_current_task == "add_material")
   {

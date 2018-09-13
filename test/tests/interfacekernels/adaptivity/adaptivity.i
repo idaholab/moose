@@ -62,7 +62,7 @@
 
 [Kernels]
   [./diff]
-    type = MatDiffusion
+    type = MatDiffusionTest
     variable = u
     prop_name = diffusivity
     block = 0
@@ -79,7 +79,7 @@
     block = 0
   [../]
   [./diffn]
-    type = MatDiffusion
+    type = MatDiffusionTest
     variable = u_neighbor
     prop_name = diffusivity
     block = 1

@@ -56,7 +56,7 @@ public:
    *
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
-   * @returns sound speed
+   * @return sound speed
    */
   virtual Real T_from_v_e(Real v, Real e) const;
 
@@ -347,6 +347,15 @@ public:
    * @param[in] T   temperature
    */
   virtual Real beta_from_p_T(Real p, Real T) const;
+
+  /**
+   * Temperature from pressure and specific enthalpy
+   *
+   * @param[in] pressure   pressure (Pa)
+   * @param[in] enthalpy   enthalpy (J/kg)
+   * @return Temperature (K)
+   */
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const;
 
   /**
    * Molar mass [kg/mol]

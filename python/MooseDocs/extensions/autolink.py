@@ -204,7 +204,11 @@ class RenderAutoShortcutLink(AutoLinkMixin, components.RenderComponent):
             tok = self.findHeading(page)
 
         tag['href'] = href
-        for n in tok.children:
-            self.translator.renderer.process(tag, n)
+        if tok is not None:
+            for n in tok.children:
+                self.translator.renderer.process(tag, n)
+        else:
+            msg = "Failed to locate a heading for '{}'."
+            raise exceptions.RenderException(token.info, msg, page.source)
 
         return tag

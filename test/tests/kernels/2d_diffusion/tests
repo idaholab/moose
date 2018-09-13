@@ -5,6 +5,9 @@
     exodiff = 'out.e'
     scale_refine = 5
     group = 'requirements'
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
+    issues = '#6397'
+    design = '/DirichletBC.md'
   [../]
 
   [./testneumann]
@@ -12,6 +15,18 @@
     input = '2d_diffusion_neumannbc_test.i'
     exodiff = 'neumannbc_out.e'
     scale_refine = 5
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
+    issues = '#1410'
+    design = '/NeumannBC.md'
+  [../]
+
+  [./testmatdiffusion]
+    type = 'Exodiff'
+    input = 'matdiffusion.i'
+    exodiff = 'matdiffusion_out.e'
+    requirement = 'MOOSE shall provide a diffusion kernel that obtains the diffusion coefficient from a material property'
+    issues = '#12074'
+    design = 'MatDiffusion.md'
   [../]
 
   [./testbodyforce]
@@ -19,6 +34,9 @@
     input = '2d_diffusion_bodyforce_test.i'
     exodiff = 'bodyforce_out.e'
     scale_refine = 5
+    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
+    issues = '#6136'
+    design = '/BodyForce.md'
   [../]
 
   [./test_jacobian]
@@ -26,6 +44,9 @@
     input = '2d_diffusion_test.i'
     cli_args = 'Outputs/exodus=false'
     recover = false
+    requirement = 'MOOSE shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
+    issues = '#2337'
+    design = '2018_07_12.md'
   [../]
 
   [./test_force_iteration]
@@ -35,6 +56,9 @@
     cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/petsc_options_iname=-snes_force_iteration Executioner/petsc_options_value=1'
     petsc_version = '>=3.8.4'
     prereq = testdirichlet
+    requirement = 'MOOSE shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
+    issues = '#10594'
+    design = 'Transient.md'
   [../]
 
   [./actual_linear_solver]

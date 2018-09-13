@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MatDiffusion.h"
+#include "MatDiffusionTest.h"
 
-registerMooseObject("MooseTestApp", MatDiffusion);
+registerMooseObject("MooseTestApp", MatDiffusionTest);
 
 template <>
 InputParameters
-validParams<MatDiffusion>()
+validParams<MatDiffusionTest>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<MaterialPropertyName>(
@@ -25,7 +25,7 @@ validParams<MatDiffusion>()
   return params;
 }
 
-MatDiffusion::MatDiffusion(const InputParameters & parameters) : Kernel(parameters)
+MatDiffusionTest::MatDiffusionTest(const InputParameters & parameters) : Kernel(parameters)
 {
   MooseEnum prop_state = getParam<MooseEnum>("prop_state");
 
@@ -38,13 +38,13 @@ MatDiffusion::MatDiffusion(const InputParameters & parameters) : Kernel(paramete
 }
 
 Real
-MatDiffusion::computeQpResidual()
+MatDiffusionTest::computeQpResidual()
 {
   return (*_diff)[_qp] * _grad_test[_i][_qp] * _grad_u[_qp];
 }
 
 Real
-MatDiffusion::computeQpJacobian()
+MatDiffusionTest::computeQpJacobian()
 {
   return (*_diff)[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }

@@ -174,6 +174,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
 
         for node, requirements in design.iteritems():
             link = autolink.AutoShortcutLink(None, key=unicode(node.fullpath))
+            link.info = info
             matrix = SQARequirementMatrix(parent, heading=link)
 
             for req in requirements:

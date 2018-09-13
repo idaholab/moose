@@ -3,7 +3,7 @@
 # user-defined Material (MTMaterial) is providing a
 # Real property named "matp" that varies spatially
 # throughout the domain. This property is used as a
-# coefficient by MatDiffusion.
+# coefficient by MatDiffusionTest.
 #
 # This test verifies that when a material is restricted
 # to a boundary, that MOOSE correctly reports that the
@@ -30,7 +30,7 @@
 
 [Kernels]
   [./diff]
-    type = MatDiffusion
+    type = MatDiffusionTest
     variable = u
     prop_name = matp
   [../]
