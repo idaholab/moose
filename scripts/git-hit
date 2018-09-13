@@ -7,6 +7,15 @@ if ! hash hit 2>/dev/null; then
     if [ -n "$MOOSE_DIR" ]; then
         (cd ${MOOSE_DIR}/framework/contrib/hit && make) &> /dev/null
         hit_cmd="${MOOSE_DIR}/framework/contrib/hit/hit"
+    else
+        moosedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+        if [ -f "$moosedir/framework/contrib/hit/Makefile" ]; then
+            (cd ${moosedir}/framework/contrib/hit && make) &> /dev/null
+            hit_cmd="${moosedir}/framework/contrib/hit/hit"
+        else
+            echo "hit command not found" >&2
+            exit 1
+        fi
     fi
 fi
 
