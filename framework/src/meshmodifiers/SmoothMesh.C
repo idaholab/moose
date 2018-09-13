@@ -9,8 +9,12 @@
 
 #include "SmoothMesh.h"
 
+// MOOSE includes
+#include "MooseMesh.h"
+
 // libMesh includes
 #include "libmesh/mesh_smoother_laplace.h"
+#include "libmesh/unstructured_mesh.h"
 
 registerMooseObject("MooseApp", SmoothMesh);
 
