@@ -12,6 +12,7 @@
 
 // System Includes
 #include <stack>
+#include <memory>
 
 namespace MooseUtils
 {
