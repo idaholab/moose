@@ -25,7 +25,7 @@ validParams<Receiver>()
 Receiver::Receiver(const InputParameters & params)
   : GeneralPostprocessor(params),
     _initialize_old(getParam<bool>("initialize_old")),
-    _my_value(getPostprocessorValueByName(name()))
+    _my_value(_fe_problem.getPostprocessorValue(_pp_name))
 {
 }
 

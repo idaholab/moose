@@ -219,13 +219,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         "neighbor_material_props", &_mesh)),
     _pps_data(*this),
     _vpps_data(*this),
+    // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
-    _general_user_objects(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _threaded_general_user_objects(_app.getExecuteOnEnum()),
-    _nodal_user_objects(_app.getExecuteOnEnum()),
-    _elemental_user_objects(_app.getExecuteOnEnum()),
-    _side_user_objects(_app.getExecuteOnEnum()),
-    _internal_side_user_objects(_app.getExecuteOnEnum()),
     _multi_apps(_app.getExecuteOnEnum()),
     _transient_multi_apps(_app.getExecuteOnEnum()),
     _transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
@@ -636,28 +631,13 @@ FEProblemBase::initialSetup()
   std::set<std::string> depend_objects_ic = _ics.getDependObjects();
   std::set<std::string> depend_objects_aux = _aux->getDependObjects();
 
-  _general_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux);
-  _general_user_objects.initialSetup();
-  _general_user_objects.sort();
+  // This replaces all prior updateDependObjects calls on the old user object warehouses.
+  std::vector<UserObject *> userobjs;
+  theWarehouse().build().system("UserObject").queryInto(userobjs);
+  groupUserObjects(theWarehouse(), userobjs, depend_objects_ic, depend_objects_aux);
 
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
-  {
-    _nodal_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
-    _nodal_user_objects.initialSetup(tid);
-
-    _elemental_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
-    _elemental_user_objects.initialSetup(tid);
-
-    _side_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
-    _side_user_objects.initialSetup(tid);
-
-    _internal_side_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
-    _internal_side_user_objects.initialSetup(tid);
-
-    _threaded_general_user_objects.updateDependObjects(depend_objects_ic, depend_objects_aux, tid);
-    _threaded_general_user_objects.initialSetup(tid);
-    _threaded_general_user_objects.sort(tid);
-  }
+  for (auto obj : userobjs)
+    obj->initialSetup();
 
   // check if jacobian calculation is done in userobject
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
@@ -912,15 +892,12 @@ FEProblemBase::timestepSetup()
     _internal_side_indicators.timestepSetup(tid);
     _indicators.timestepSetup(tid);
     _markers.timestepSetup(tid);
-
-    // Timestep setup of all UserObjects
-    _nodal_user_objects.timestepSetup(tid);
-    _elemental_user_objects.timestepSetup(tid);
-    _side_user_objects.timestepSetup(tid);
-    _internal_side_user_objects.timestepSetup(tid);
-    _threaded_general_user_objects.timestepSetup(tid);
   }
-  _general_user_objects.timestepSetup();
+
+  std::vector<UserObject *> userobjs;
+  theWarehouse().build().system("UserObject").queryInto(userobjs);
+  for (auto obj : userobjs)
+    obj->timestepSetup();
 
   // Timestep setup of output objects
   _app.getOutputWarehouse().timestepSetup();
@@ -991,30 +968,31 @@ void
 FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 {
   std::set<MooseVariableFEBase *> uo_jacobian_moose_vars;
-  const auto & e_objects = _elemental_user_objects.getActiveObjects(tid);
-  for (const auto & uo : e_objects)
   {
-    std::shared_ptr<ShapeElementUserObject> shape_element_uo =
-        std::dynamic_pointer_cast<ShapeElementUserObject>(uo);
-    if (shape_element_uo)
+    std::vector<ShapeElementUserObject *> objs;
+    theWarehouse()
+        .build()
+        .interfaces(Interfaces::ShapeElementUserObject)
+        .thread(tid)
+        .queryInto(objs);
+    for (const auto & uo : objs)
     {
-      _calculate_jacobian_in_uo = shape_element_uo->computeJacobianFlag();
-      const std::set<MooseVariableFEBase *> & mv_deps = shape_element_uo->jacobianMooseVariables();
+      _calculate_jacobian_in_uo = uo->computeJacobianFlag();
+      const std::set<MooseVariableFEBase *> & mv_deps = uo->jacobianMooseVariables();
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
-  const auto & s_objects = _side_user_objects.getActiveObjects(tid);
-  for (const auto & uo : s_objects)
   {
-    std::shared_ptr<ShapeSideUserObject> shape_side_uo =
-        std::dynamic_pointer_cast<ShapeSideUserObject>(uo);
-    if (shape_side_uo)
+    std::vector<ShapeSideUserObject *> objs;
+    theWarehouse().build().interfaces(Interfaces::ShapeSideUserObject).thread(tid).queryInto(objs);
+    for (const auto & uo : objs)
     {
-      _calculate_jacobian_in_uo = shape_side_uo->computeJacobianFlag();
-      const std::set<MooseVariableFEBase *> & mv_deps = shape_side_uo->jacobianMooseVariables();
+      _calculate_jacobian_in_uo = uo->computeJacobianFlag();
+      const std::set<MooseVariableFEBase *> & mv_deps = uo->jacobianMooseVariables();
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
+
   _uo_jacobian_moose_vars[tid].assign(uo_jacobian_moose_vars.begin(), uo_jacobian_moose_vars.end());
   std::sort(
       _uo_jacobian_moose_vars[tid].begin(), _uo_jacobian_moose_vars[tid].end(), sortMooseVariables);
@@ -2643,7 +2621,7 @@ FEProblemBase::addPostprocessor(std::string pp_name,
                                 InputParameters parameters)
 {
   // Check for name collision
-  if (_all_user_objects.hasActiveObject(name))
+  if (hasUserObject(name))
     mooseError(std::string("A UserObject with the name \"") + name +
                "\" already exists.  You may not add a Postprocessor by the same name.");
 
@@ -2657,7 +2635,7 @@ FEProblemBase::addVectorPostprocessor(std::string pp_name,
                                       InputParameters parameters)
 {
   // Check for name collision
-  if (_all_user_objects.hasActiveObject(name))
+  if (hasUserObject(name))
     mooseError(std::string("A UserObject with the name \"") + name +
                "\" already exists.  You may not add a VectorPostprocessor by the same name.");
 
@@ -2687,24 +2665,29 @@ FEProblemBase::addUserObject(std::string user_object_name,
     parameters.set<SubProblem *>("_subproblem") = this;
   }
 
+  UserObject * primary = nullptr;
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // Create the UserObject
     std::shared_ptr<UserObject> user_object =
         _factory.create<UserObject>(user_object_name, name, parameters, tid);
+    if (tid == 0)
+      primary = user_object.get();
+    else
+      user_object->setPrimaryThreadCopy(primary);
+
+    // TODO: delete this line after apps have been updated to not call getUserObjects
     _all_user_objects.addObject(user_object, tid);
 
+    theWarehouse().add(user_object, "UserObject");
+
     // Attempt to create all the possible UserObject types
-    std::shared_ptr<ElementUserObject> euo =
-        std::dynamic_pointer_cast<ElementUserObject>(user_object);
-    std::shared_ptr<SideUserObject> suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
-    std::shared_ptr<InternalSideUserObject> isuo =
-        std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
-    std::shared_ptr<NodalUserObject> nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
-    std::shared_ptr<GeneralUserObject> guo =
-        std::dynamic_pointer_cast<GeneralUserObject>(user_object);
-    std::shared_ptr<GeneralUserObject> tguo =
-        std::dynamic_pointer_cast<ThreadedGeneralUserObject>(user_object);
+    auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
+    auto suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
+    auto isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
+    auto nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
+    auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
+    auto tguo = std::dynamic_pointer_cast<ThreadedGeneralUserObject>(user_object);
 
     // Account for displaced mesh use
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -2715,38 +2698,27 @@ FEProblemBase::addUserObject(std::string user_object_name,
         _reinit_displaced_face = true;
     }
 
-    // Add the object to the correct warehouse
-    if (tguo)
-      _threaded_general_user_objects.addObject(guo, tid);
-    else if (guo)
-    {
-      _general_user_objects.addObject(guo);
+    if (guo && !tguo)
       break;
-    }
-    else if (nuo)
-      _nodal_user_objects.addObject(nuo, tid);
-    else if (suo)
-      _side_user_objects.addObject(suo, tid);
-    else if (isuo)
-      _internal_side_user_objects.addObject(isuo, tid);
-    else if (euo)
-      _elemental_user_objects.addObject(euo, tid);
   }
 }
 
 const UserObject &
 FEProblemBase::getUserObjectBase(const std::string & name) const
 {
-  if (_all_user_objects.hasActiveObject(name))
-    return *(_all_user_objects.getActiveObject(name).get());
-
-  mooseError("Unable to find user object with name '" + name + "'");
+  std::vector<UserObject *> objs;
+  theWarehouse().build().thread(0).name(name).queryInto(objs);
+  if (objs.empty())
+    mooseError("Unable to find user object with name '" + name + "'");
+  return *(objs[0]);
 }
 
 bool
 FEProblemBase::hasUserObject(const std::string & name) const
 {
-  return _all_user_objects.hasActiveObject(name);
+  std::vector<UserObject *> objs;
+  theWarehouse().build().thread(0).name(name).queryInto(objs);
+  return !objs.empty();
 }
 
 bool
@@ -2988,23 +2960,71 @@ FEProblemBase::computeAuxiliaryKernels(const ExecFlagType & type)
   _aux->compute(type);
 }
 
+// Finalize, threadJoin, and update PP values of Elemental/Nodal/Side/InternalSideUserObjects
+void
+FEProblemBase::joinAndFinalize(TheWarehouse::Builder query, bool isgen)
+{
+  std::vector<UserObject *> objs;
+  query.queryInto(objs);
+  if (!isgen)
+  {
+    // join all threaded user objects (i.e. not regular general user objects) to the primary thread
+    for (auto obj : objs)
+      if (obj->primaryThreadCopy())
+        obj->primaryThreadCopy()->threadJoin(*obj);
+  }
+
+  query.thread(0).queryInto(objs);
+
+  // finalize objects and retrieve/store any postproessor values
+  for (auto obj : objs)
+  {
+    if (isgen && dynamic_cast<ThreadedGeneralUserObject *>(obj))
+      continue;
+    if (isgen)
+    {
+      // general user objects are not run in their own threaded loop object - so run them here
+      obj->initialize();
+      obj->execute();
+    }
+
+    obj->finalize();
+
+    // These have to be stored piecemeal (with every call to this function) because general
+    // postprocessors (which run last after other userobjects have been completed) might depend on
+    // them being stored.  This wouldn't be a problem if all userobjects satisfied the dependency
+    // resolver interface and could be sorted appropriately with the general userobjects, but they
+    // don't.
+    auto pp = dynamic_cast<Postprocessor *>(obj);
+    if (pp)
+      _pps_data.storeValue(pp->PPName(), pp->getValue());
+    auto vpp = dynamic_cast<VectorPostprocessor *>(obj);
+    if (vpp)
+      _vpps_data.broadcastScatterVectors(vpp->PPName());
+  }
+}
+
 void
 FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group)
 {
-  // Get convenience reference to active warehouse
-  const MooseObjectWarehouse<ElementUserObject> & elemental = _elemental_user_objects[group][type];
-  const MooseObjectWarehouse<SideUserObject> & side = _side_user_objects[group][type];
-  const MooseObjectWarehouse<InternalSideUserObject> & internal_side =
-      _internal_side_user_objects[group][type];
-  const MooseObjectWarehouse<NodalUserObject> & nodal = _nodal_user_objects[group][type];
-  const MooseObjectWarehouse<GeneralUserObject> & general = _general_user_objects[group][type];
-  const MooseObjectWarehouse<GeneralUserObject> & threaded_general =
-      _threaded_general_user_objects[group][type];
+  TheWarehouse::Builder query = theWarehouse().build().system("UserObject").exec_on(type);
+  if (group == Moose::PRE_IC)
+    query.pre_ic(true);
+  else if (group == Moose::PRE_AUX)
+    query.pre_aux(true);
+  else if (group == Moose::POST_AUX)
+    query.pre_aux(false);
 
-  if (!elemental.hasActiveObjects() && !side.hasActiveObjects() &&
-      !internal_side.hasActiveObjects() && !nodal.hasActiveObjects() &&
-      !general.hasActiveObjects() && !threaded_general.hasActiveObjects())
-    // Nothing to do, return early
+  std::vector<GeneralUserObject *> genobjs;
+  query.clone().interfaces(Interfaces::GeneralUserObject).queryInto(genobjs);
+
+  std::vector<UserObject *> userobjs;
+  query.clone()
+      .interfaces(Interfaces::ElementUserObject | Interfaces::NodalUserObject |
+                  Interfaces::SideUserObject | Interfaces::InternalSideUserObject)
+      .queryInto(userobjs);
+
+  if (userobjs.empty() && genobjs.empty())
     return;
 
   TIME_SECTION(_compute_user_objects_timer);
@@ -3015,122 +3035,62 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   // Perform Residual/Jacobian setups
   if (type == EXEC_LINEAR)
   {
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      elemental.residualSetup(tid);
-      side.residualSetup(tid);
-      internal_side.residualSetup(tid);
-      nodal.residualSetup(tid);
-      threaded_general.residualSetup(tid);
-    }
-    general.residualSetup();
+    for (auto obj : userobjs)
+      obj->residualSetup();
+    for (auto obj : genobjs)
+      obj->residualSetup();
   }
-
   else if (type == EXEC_NONLINEAR)
   {
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-    {
-      elemental.jacobianSetup(tid);
-      side.jacobianSetup(tid);
-      internal_side.jacobianSetup(tid);
-      nodal.jacobianSetup(tid);
-      threaded_general.jacobianSetup(tid);
-    }
-    general.jacobianSetup();
+    for (auto obj : userobjs)
+      obj->jacobianSetup();
+    for (auto obj : genobjs)
+      obj->jacobianSetup();
   }
 
-  // Initialize Elemental/Side/InternalSideUserObjects
-  initializeUserObjects<ElementUserObject>(elemental);
-  initializeUserObjects<SideUserObject>(side);
-  initializeUserObjects<InternalSideUserObject>(internal_side);
+  for (auto obj : userobjs)
+    obj->initialize();
 
   // Execute Elemental/Side/InternalSideUserObjects
-  if (elemental.hasActiveObjects() || side.hasActiveObjects() || internal_side.hasActiveObjects())
+  if (!userobjs.empty())
   {
-    ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), elemental, side, internal_side);
+    ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+
+    // non-nodal user objects have to be finalized separately before the nodal user objects run
+    // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
+    // Also there is one instance in rattlesnake where an elemental user object's finalize depends
+    // on a side user object having been finalized first :-(
+    joinAndFinalize(query.clone().interfaces(Interfaces::SideUserObject));
+    joinAndFinalize(query.clone().interfaces(Interfaces::InternalSideUserObject));
+    joinAndFinalize(query.clone().interfaces(Interfaces::ElementUserObject));
   }
-
-  // Finalize, threadJoin, and update PP values of Elemental/Side/InternalSideUserObjects
-  finalizeUserObjects<SideUserObject>(side);
-  finalizeUserObjects<InternalSideUserObject>(internal_side);
-  finalizeUserObjects<ElementUserObject>(elemental);
-
-  // Initialize Nodal
-  initializeUserObjects<NodalUserObject>(nodal);
 
   // Execute NodalUserObjects
-  if (nodal.hasActiveObjects())
+  if (query.clone().interfaces(Interfaces::NodalUserObject).count() > 0)
   {
-    ComputeNodalUserObjectsThread cnppt(*this, nodal);
+    ComputeNodalUserObjectsThread cnppt(*this, query);
     Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
+    joinAndFinalize(query.clone().interfaces(Interfaces::NodalUserObject));
   }
 
-  // Finalize, threadJoin, and update PP values of Nodal
-  finalizeUserObjects<NodalUserObject>(nodal);
-
-  if (threaded_general.hasActiveObjects())
+  std::vector<GeneralUserObject *> tguos_zero;
+  query.clone().thread(0).interfaces(Interfaces::ThreadedGeneralUserObject).queryInto(tguos_zero);
+  if (!tguos_zero.empty())
   {
-    for (std::size_t i = 0; i < threaded_general.getActiveObjects(0).size(); ++i)
+    for (auto obj : tguos_zero)
     {
-      std::vector<std::shared_ptr<GeneralUserObject>> tguos(libMesh::n_threads());
-      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-        tguos[tid] = threaded_general.getActiveObjects(tid)[i];
-
-      initializeUserObjects<GeneralUserObject>(threaded_general);
-
-      for (auto & object : tguos)
-        object->initialize();
+      std::vector<GeneralUserObject *> tguos;
+      auto q = query.clone().name(obj->name()).interfaces(Interfaces::ThreadedGeneralUserObject);
+      q.queryInto(tguos);
 
       ComputeThreadedGeneralUserObjectsThread ctguot(*this);
       Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
-
-      // Join threaded user objects down to thread 0
-      const auto & object = tguos[0];
-      for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-        object->threadJoin(*(tguos[tid]));
-
-      // Finalize them and save off PP values
-      std::set<std::string> vpps_finalized;
-      for (auto & object : tguos)
-      {
-        object->finalize();
-
-        auto pp = std::dynamic_pointer_cast<Postprocessor>(object);
-        if (pp)
-          _pps_data.storeValue(pp->PPName(), pp->getValue());
-
-        auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(object);
-        if (vpp)
-          vpps_finalized.insert(vpp->PPName());
-      }
-
-      // Broadcast/Scatter any VPPs that need it
-      for (auto & vpp_name : vpps_finalized)
-        _vpps_data.broadcastScatterVectors(vpp_name);
+      joinAndFinalize(q);
     }
   }
 
-  // Execute GeneralUserObjects
-  if (general.hasActiveObjects())
-  {
-    const auto & objects = general.getActiveObjects();
-    for (const auto & obj : objects)
-    {
-      obj->initialize();
-      obj->execute();
-      obj->finalize();
-
-      std::shared_ptr<Postprocessor> pp = std::dynamic_pointer_cast<Postprocessor>(obj);
-      if (pp)
-        _pps_data.storeValue(obj->name(), pp->getValue());
-
-      auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(obj);
-
-      if (vpp)
-        _vpps_data.broadcastScatterVectors(vpp->PPName());
-    }
-  }
+  joinAndFinalize(query.clone().interfaces(Interfaces::GeneralUserObject), true);
 }
 
 void
@@ -3212,15 +3172,9 @@ FEProblemBase::updateActiveObjects()
     _all_materials.updateActive(tid);
     _materials.updateActive(tid);
     _discrete_materials.updateActive(tid);
-    _nodal_user_objects.updateActive(tid);
-    _elemental_user_objects.updateActive(tid);
-    _side_user_objects.updateActive(tid);
-    _internal_side_user_objects.updateActive(tid);
-    _threaded_general_user_objects.updateActive(tid);
     _samplers.updateActive(tid);
   }
 
-  _general_user_objects.updateActive();
   _control_warehouse.updateActive();
   _multi_apps.updateActive();
   _transient_multi_apps.updateActive();
@@ -5222,7 +5176,9 @@ FEProblemBase::checkUserObjects()
   // and the blocks that they are defined on
   std::set<std::string> names;
 
-  const auto & objects = _all_user_objects.getActiveObjects();
+  std::vector<UserObject *> objects;
+  theWarehouse().build().interfaces(Interfaces::UserObject).queryInto(objects);
+
   for (const auto & obj : objects)
     names.insert(obj->name());
 
@@ -5570,8 +5526,12 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 
     if (_nl->needBoundaryMaterialOnSide(bnd_id, tid) || _aux->needMaterialOnSide(bnd_id))
       _bnd_mat_side_cache[tid][bnd_id] = true;
-
-    else if (_side_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
+    else if (theWarehouse()
+                 .build()
+                 .thread(tid)
+                 .interfaces(Interfaces::SideUserObject)
+                 .boundary(bnd_id)
+                 .count() > 0)
       _bnd_mat_side_cache[tid][bnd_id] = true;
   }
 
@@ -5587,7 +5547,12 @@ FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID t
 
     if (_nl->needSubdomainMaterialOnSide(subdomain_id, tid))
       _block_mat_side_cache[tid][subdomain_id] = true;
-    else if (_internal_side_user_objects.hasActiveBlockObjects(subdomain_id, tid))
+    else if (theWarehouse()
+                 .build()
+                 .thread(tid)
+                 .interfaces(Interfaces::InternalSideUserObject)
+                 .subdomain(subdomain_id)
+                 .count() > 0)
       _block_mat_side_cache[tid][subdomain_id] = true;
   }
 

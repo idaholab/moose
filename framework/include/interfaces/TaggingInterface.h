@@ -52,9 +52,9 @@ public:
 
   bool isMatrixTagged() { return _matrix_tags.size() > 0; }
 
-  const std::set<TagID> & getVectorTags() { return _vector_tags; }
+  const std::set<TagID> & getVectorTags() const { return _vector_tags; }
 
-  const std::set<TagID> & getMatrixTags() { return _matrix_tags; }
+  const std::set<TagID> & getMatrixTags() const { return _matrix_tags; }
 
   /**
    * Prepare data for computing element residual the according to active tags.
