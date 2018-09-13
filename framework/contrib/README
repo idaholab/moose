@@ -95,6 +95,8 @@ mtwist-1.1/
   |*---------------------------------------------------------------------------------*|
   |* Copyright: Geoff Kuenning                                                       *|
   |* License: lgpl v3 (http://www.gnu.org/copyleft/lesser.html)                      *|
+  |* Local changes: We removed the register storage class specifier from mtwist.h    *|
+  |* because it is deprecated and triggers -Wdeprecated warnings.                    *|
   /***********************************************************************************\
 
 pcre/
