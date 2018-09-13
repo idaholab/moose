@@ -39,7 +39,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint on a stationary interface for one variable.
+    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint on a stationary interface for one variable.'
     design = 'XFEMSingleVariableConstraint.md'
     issues = '#6572'
   [../]
