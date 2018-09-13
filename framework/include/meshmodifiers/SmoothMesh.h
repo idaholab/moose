@@ -29,6 +29,9 @@ public:
 
 private:
   virtual void modify() override;
+
+  /// The number of smoothing passes to do
+  unsigned int _iterations;
 };
 
 #endif // SMOOTHMESH_H

@@ -44,5 +44,6 @@
 [MeshModifiers]
   [smooth]
     type = SmoothMesh
+    iterations = 5
   []
 []

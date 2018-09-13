@@ -19,10 +19,16 @@ InputParameters
 validParams<SmoothMesh>()
 {
   InputParameters params = validParams<MeshModifier>();
+
+  params.addParam<unsigned int>("iterations", 1, "The number of smoothing iterations to do.");
+
   return params;
 }
 
-SmoothMesh::SmoothMesh(const InputParameters & parameters) : MeshModifier(parameters) {}
+SmoothMesh::SmoothMesh(const InputParameters & parameters)
+  : MeshModifier(parameters), _iterations(getParam<unsigned int>("iterations"))
+{
+}
 
 void
 SmoothMesh::modify()
@@ -33,5 +39,5 @@ SmoothMesh::modify()
 
   LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(_mesh_ptr->getMesh()));
 
-  lms.smooth(5);
+  lms.smooth(_iterations);
 }
