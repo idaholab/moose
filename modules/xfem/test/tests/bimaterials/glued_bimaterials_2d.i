@@ -259,11 +259,19 @@
     type = ComputeLinearElasticStress
     base_name = B
   [../]
-  [./combined]
-    type = LevelSetBiMaterialStress
+  [./combined_stress]
+    type = LevelSetBiMaterialRankTwo
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
     level_set_var = ls
+    prop_name = stress
+  [../]
+  [./combined_dstressdstrain]
+    type = LevelSetBiMaterialRankFour
+    levelset_positive_base = 'A'
+    levelset_negative_base = 'B'
+    level_set_var = ls
+    prop_name = Jacobian_mult
   [../]
 []
 

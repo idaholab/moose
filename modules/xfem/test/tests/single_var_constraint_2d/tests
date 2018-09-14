@@ -6,6 +6,9 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint across a propagating XFEM interface for one variable.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#6572'
   [../]
   [./propagating_2field_1constraint]
     type = Exodiff
@@ -14,6 +17,9 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint across a propagating XFEM interface for one variable in a problem with another variable that does not have a constraint across that interface.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#6572'
   [../]
   [./propagating_2field_2constraint]
     type = Exodiff
@@ -22,6 +28,9 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply zero-jump, zero-flux-jump constraints across a propagating XFEM interface for two variables.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#6572'
   [../]
   [./stationary_equal]
     type = Exodiff
@@ -30,6 +39,9 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, zero-flux-jump constraint on a stationary interface for one variable.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#6572'
   [../]
   [./stationary_fluxjump]
     type = Exodiff
@@ -38,6 +50,9 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply a zero-jump, nonzero-flux-jump constraint on a stationary interface for one variable.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#6572'
   [../]
   [./stationary_jump]
     type = Exodiff
@@ -46,6 +61,9 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, zero-flux-jump constraint on a stationary interface for one variable.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#6572'
   [../]
   [./stationary_jump_fluxjump]
     type = Exodiff
@@ -55,5 +73,19 @@
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
     abs_zero = 1e-8
+    requirement = 'The XFEM module shall provide an ability to apply a nonzero-jump, nonzero-flux-jump constraint on a stationary interface for one variable.'
+    design = 'XFEMSingleVariableConstraint.md'
+    issues = '#6572'
+  [../]
+  [./equal_value]
+    type = Exodiff
+    input = equal_value.i
+    exodiff = 'equal_value_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM module shall provide an ability to apply a two-sided equal value constraint on a stationary interface for one variable.'
+    design = 'XFEMEqualValueAtInterface.md'
+    issues = '#11750'
   [../]
 []
