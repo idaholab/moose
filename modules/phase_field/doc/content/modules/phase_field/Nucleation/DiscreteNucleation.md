@@ -49,13 +49,13 @@ the simulation.
 
 ### Free energy penalty based nucleation
 
-The free energy penalty based approaces eschew directly modifying conserved
+The free energy penalty based approaches eschew directly modifying conserved
 concentration and non-conserved order parameter fields. Instead they bias the
-thermodynamocs of the system in a way that drives the formation of nuclei at the
+thermodynamics of the system in a way that drives the formation of nuclei at the
 locations provided by the discrete nucleation system. Simply stated the local
 free energy density is modified to make the nucleated state a lower energy
 state. This causes solute to diffuse toward the nucleation site (in the
-conserved case) brings about a change in a non-conserved order parameter field.
+conserved case) and brings about a change in a non-conserved order parameter field.
 Moose provides the [`DiscreteNucleation`](materials/DiscreteNucleation.md)
 material, which implements a simple harmonic form of such a penalty, but
 advanced users are free to implement their own free energy modifications
@@ -84,8 +84,9 @@ approach.
 
 Nucleation of new grains in a polycrystalline model with
 [GrainTracker](/GrainTracker.md) requires the use of reserved (or staging) order
-parameters in which new grain nuclei can be inserted and successively get piched
-up and remapped onto the evolving order parameters.
+parameters (order parameters which the grain tracker detects new grains in, but
+never uses as a target for remapping) in which new grain nuclei can be inserted and
+successively get picked up and remapped onto the evolving order parameters.
 
 Apply both a [DiscreteNucleationForce](/DiscreteNucleationForce.md) and a
 [Reaction](/Reaction.md) kernel to a reserved order parameter and set the
