@@ -6,6 +6,9 @@
     compiler = 'CLANG GCC'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
                 Materials/stress/type=ComputeLinearElasticStress'
+    issues = '#6256 #7555'
+    design = 'source/Materials/ComputeRSphericalSmallStrain.md source/Materials/stress/ComputeLinearElasticStress.md syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The ComputeRSphericalSmallStrain class, called through the TensorMechanicsMaster action, shall compute the total linearized solution for the displacement of a solid isotropic elastic sphere with a pressure applied to the outer surface using a 1D spherical symmetric formulation with total small strain assumptions.'
   [../]
   [./smallStrain_1DSphere_incremental]
     type = Exodiff
@@ -15,11 +18,17 @@
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     prereq = 'smallStrain_1DSphere'
+    issues = '#6256 #7555'
+    design = 'source/Materials/ComputeRSphericalIncrementalStrain.md source/Materials/stress/ComputeFiniteStrainElasticStress.md syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The ComputeRSphericalIncrementalStrain class, called through the TensorMechanicsMaster action, shall find the linearized incremental strain displacement of a solid isotropic elastic sphere with a pressure applied to the outer surface using a 1D spherical symmetric formulation with incremental small strain assumptions.'
   [../]
   [./finiteStrain_1DSphere_hollow]
     type = Exodiff
     input = 'finiteStrain_1DSphere_hollow.i'
     exodiff = 'finiteStrain_1DSphere_hollow_out.e'
     compiler = 'CLANG GCC'
+    issues = '#6256 #7555'
+    design = 'source/Materials/ComputeRSphericalFStrain.md source/Materials/stress/ComputeFiniteStrainElasticStress.md syntax/Modules/TensorMechanics/Master/index.md'
+    requirement = 'The ComputeRSphericalFiniteStrain class, called through the TensorMechanicsMaster action, shall find the finite incremental strain displacement of a thick walled hollow isotropic elastic sphere under an applied load using a 1D spherical symmetric fomulation with incremental finite strain assumptions.'
   [../]
 []
