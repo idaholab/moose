@@ -164,10 +164,11 @@ public:
   template <typename T>
   void reg(const std::string & obj_name, const std::string & file = "", int line = -1)
   {
-    reg(obj_name, &buildObject<T>, &validParams<T>, "", "", file, line);
+    reg("", obj_name, &buildObject<T>, &validParams<T>, "", "", file, line);
   }
 
-  void reg(const std::string & obj_name,
+  void reg(const std::string & label,
+           const std::string & obj_name,
            const buildPtr & build_ptr,
            const paramsPtr & params_ptr,
            const std::string & deprecated_time = "",
@@ -210,7 +211,7 @@ public:
                      const std::string & file,
                      int line)
   {
-    reg(obj_name, &buildObject<T>, &validParams<T>, t_str, "", file, line);
+    reg("", obj_name, &buildObject<T>, &validParams<T>, t_str, "", file, line);
   }
 
   /**
@@ -229,7 +230,7 @@ public:
                    const std::string & file,
                    int line)
   {
-    reg(dep_obj, &buildObject<T>, &validParams<T>, time_str, replacement_name, file, line);
+    reg("", dep_obj, &buildObject<T>, &validParams<T>, time_str, replacement_name, file, line);
   }
 
   /**
@@ -389,6 +390,11 @@ protected:
 
   /// Constructed Moose Object types
   std::set<std::string> _constructed_types;
+
+  /// set<label/appname, objectname> used to track if an object previously added is being added
+  /// again - which is okay/allowed, while still allowing us to detect/reject cases of duplicate
+  /// object name registration where the label/appname is not identical.
+  std::set<std::pair<std::string, std::string>> _objects_by_label;
 };
 
 #endif /* FACTORY_H */

@@ -18,7 +18,8 @@ Factory::Factory(MooseApp & app) : _app(app) {}
 Factory::~Factory() {}
 
 void
-Factory::reg(const std::string & obj_name,
+Factory::reg(const std::string & label,
+             const std::string & obj_name,
              const buildPtr & build_ptr,
              const paramsPtr & params_ptr,
              const std::string & deprecated_time,
@@ -26,6 +27,11 @@ Factory::reg(const std::string & obj_name,
              const std::string & file,
              int line)
 {
+  // do nothing if we have already added this exact object before
+  auto key = std::make_pair(label, obj_name);
+  if (_objects_by_label.find(key) != _objects_by_label.end())
+    return;
+
   /*
    * If _registerable_objects has been set the user has requested that we only register some
    * subset
@@ -38,16 +44,14 @@ Factory::reg(const std::string & obj_name,
   if (_registerable_objects.empty() ||
       _registerable_objects.find(obj_name) != _registerable_objects.end())
   {
-    if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
-    {
-      _name_to_build_pointer[obj_name] = build_ptr;
-      _name_to_params_pointer[obj_name] = params_ptr;
-    }
-    else
-      mooseError("Object '" + obj_name + "' registered in multiple files: ",
+    if (_name_to_build_pointer.find(obj_name) != _name_to_build_pointer.end())
+      mooseError("Object '" + obj_name + "' registered from multiple files: ",
                  file,
                  " and ",
                  _name_to_line.getInfo(obj_name).file());
+    _name_to_build_pointer[obj_name] = build_ptr;
+    _name_to_params_pointer[obj_name] = params_ptr;
+    _objects_by_label.insert(key);
   }
   _name_to_line.addInfo(obj_name, file, line);
 
