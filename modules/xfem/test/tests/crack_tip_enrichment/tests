@@ -6,6 +6,11 @@
     map = false
     unique_id = true
     superlu = true
+    requirement = 'The XFEM module shall have the capability to perform crack '
+                  'tip enrichment in 2D.'
+    design = 'LineSegmentCutUserObject.md '
+             'CrackTipEnrichmentStressDivergenceTensors.md'
+    issues = '#10042'
   [../]
   [./crack_tip_enrichment_penny_crack_3d]
     type = Exodiff
@@ -15,5 +20,10 @@
     unique_id = true
     heavy = true
     superlu = true
+    requirement = 'The XFEM module shall have the capability to perform crack '
+                  'tip enrichment in 3D.'
+    design = 'CircleCutUserObject.md '
+             'CrackTipEnrichmentStressDivergenceTensors.md'
+    issues = '#10042'
   [../]
 []
