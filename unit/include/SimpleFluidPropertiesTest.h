@@ -18,13 +18,10 @@ class SimpleFluidPropertiesTest : public MooseObjectUnitTest
 public:
   SimpleFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    registerObjects(_factory);
     buildObjects();
   }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(SimpleFluidProperties); }
-
   void buildObjects()
   {
     InputParameters uo_params = _factory.getValidParams("SimpleFluidProperties");

@@ -16,15 +16,9 @@
 class PorousFlowFluidStateFlashTest : public MooseObjectUnitTest
 {
 public:
-  PorousFlowFluidStateFlashTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    registerObjects(_factory);
-    buildObjects();
-  }
+  PorousFlowFluidStateFlashTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(PorousFlowFluidStateFlash); }
-
   void buildObjects()
   {
     InputParameters uo_params = _factory.getValidParams("PorousFlowFluidStateFlash");

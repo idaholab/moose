@@ -10,6 +10,9 @@
 #include "BrineFluidPropertiesTest.h"
 #include "FluidPropertiesTestUtils.h"
 
+#include "Water97FluidProperties.h"
+#include "NaClFluidProperties.h"
+
 /**
  * Test that the fluid name is correctly returned
  */

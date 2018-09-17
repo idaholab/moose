@@ -19,6 +19,8 @@ Syntax::Syntax() : _actions_to_syntax_valid(false) {}
 void
 Syntax::registerTaskName(const std::string & task, bool should_auto_build)
 {
+  if (_registered_tasks.count(task) > 0)
+    return;
   _tasks.addItem(task);
   _registered_tasks[task] = should_auto_build;
 }

@@ -22,6 +22,8 @@ class MooseUnitApp : public MooseApp
 public:
   MooseUnitApp(const InputParameters & parameters);
   virtual ~MooseUnitApp();
+
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 };
 
 #endif /* MOOSEUNITAPP_H */

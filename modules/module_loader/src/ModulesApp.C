@@ -86,14 +86,7 @@ validParams<ModulesApp>()
 
 ModulesApp::ModulesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ModulesApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  ModulesApp::registerExecFlags(_factory);
+  ModulesApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 ModulesApp::~ModulesApp() {}
@@ -116,8 +109,9 @@ ModulesApp__registerObjects(Factory & factory)
 {
   ModulesApp::registerObjects(factory);
 }
+
 void
-ModulesApp::registerObjects(Factory & factory)
+registerObjectsInner(Factory & factory)
 {
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerObjects(factory);
@@ -186,14 +180,22 @@ ModulesApp::registerObjects(Factory & factory)
   clearUnusedWarnings(factory);
 }
 
+void
+ModulesApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::registerObjects");
+  registerObjectsInner(factory);
+}
+
 // External entry point for dynamic syntax association
 extern "C" void
 ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   ModulesApp::associateSyntax(syntax, action_factory);
 }
+
 void
-ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory)
 {
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
@@ -262,6 +264,13 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   clearUnusedWarnings(syntax, action_factory);
 }
 
+void
+ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::associateSyntax");
+  associateSyntaxInner(syntax, action_factory);
+}
+
 // External entry point for dynamic object registration
 extern "C" void
 ModulesApp__registerExecFlags(Factory & factory)
@@ -269,7 +278,7 @@ ModulesApp__registerExecFlags(Factory & factory)
   ModulesApp::registerExecFlags(factory);
 }
 void
-ModulesApp::registerExecFlags(Factory & factory)
+registerExecFlagsInner(Factory & factory)
 {
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerExecFlags(factory);
@@ -332,4 +341,25 @@ ModulesApp::registerExecFlags(Factory & factory)
 #endif
 
   clearUnusedWarnings(factory);
+}
+void
+ModulesApp::registerExecFlags(Factory & factory)
+{
+  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::registerExecFlags");
+  registerExecFlagsInner(factory);
+}
+
+extern "C" void
+ModulesApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  ModulesApp::registerAll(f, af, s);
+}
+
+void
+ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  Moose::registerAll(f, af, s);
+  registerObjectsInner(f);
+  associateSyntaxInner(s, af);
+  registerExecFlagsInner(f);
 }

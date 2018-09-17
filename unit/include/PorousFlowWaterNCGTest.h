@@ -21,19 +21,10 @@ class PorousFlowWaterNCGTest : public MooseObjectUnitTest
 public:
   PorousFlowWaterNCGTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    registerObjects(_factory);
     buildObjects();
   }
 
 protected:
-  void registerObjects(Factory & factory)
-  {
-    registerUserObject(PorousFlowCapillaryPressureVG);
-    registerUserObject(Water97FluidProperties);
-    registerUserObject(CO2FluidProperties);
-    registerUserObject(PorousFlowWaterNCG);
-  }
-
   void buildObjects()
   {
     InputParameters pc_params = _factory.getValidParams("PorousFlowCapillaryPressureVG");

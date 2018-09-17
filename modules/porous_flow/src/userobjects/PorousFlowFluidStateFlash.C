@@ -9,6 +9,8 @@
 
 #include "PorousFlowFluidStateFlash.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFluidStateFlash);
+
 template <>
 InputParameters
 validParams<PorousFlowFluidStateFlash>()

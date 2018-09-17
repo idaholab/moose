@@ -34,6 +34,14 @@ validParams<MooseTestApp>()
   return params;
 }
 
+MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
+{
+  MooseTestApp::registerAll(
+      _factory, _action_factory, _syntax, !getParam<bool>("disallow_test_objects"));
+}
+
+MooseTestApp::~MooseTestApp() {}
+
 void
 MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
@@ -62,13 +70,11 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
   }
 }
 
-MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
+void
+MooseTestApp::registerApps()
 {
-  MooseTestApp::registerAll(
-      _factory, _action_factory, _syntax, !getParam<bool>("disallow_test_objects"));
+  registerApp(MooseTestApp);
 }
-
-MooseTestApp::~MooseTestApp() {}
 
 extern "C" void
 MooseTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
@@ -81,63 +87,4 @@ extern "C" void
 MooseTestApp__registerApps()
 {
   MooseTestApp::registerApps();
-}
-void
-MooseTestApp::registerApps()
-{
-  registerApp(MooseTestApp);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-MooseTestApp__registerObjects(Factory & factory)
-{
-  MooseTestApp::registerObjects(factory);
-}
-void
-MooseTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"MooseTestApp"});
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-MooseTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  MooseTestApp::associateSyntax(syntax, action_factory);
-}
-
-void
-MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"MooseTestApp"});
-
-  // and add more
-  registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
-  registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
-  registerSyntaxTask("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
-
-  registerSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
-  registerSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
-  registerSyntax("TestGetActionsAction", "TestGetActions");
-  registerSyntax("BadAddKernelAction", "BadKernels/*");
-
-  registerSyntax("AddMatAndKernel", "AddMatAndKernel");
-
-  registerSyntax("MetaNodalNormalsAction", "MetaNodalNormals");
-
-  // For testing the ability to create problems in user defined Actions
-  registerSyntax("CreateSpecialProblemAction", "TestProblem");
-}
-
-// External entry point for dynamic execute flag registration
-extern "C" void
-MooseTestApp__registerExecFlags(Factory & factory)
-{
-  MooseTestApp::registerExecFlags(factory);
-}
-void
-MooseTestApp::registerExecFlags(Factory & factory)
-{
-  registerExecFlag(EXEC_JUST_GO);
 }

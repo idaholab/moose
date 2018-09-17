@@ -18,20 +18,9 @@
 class GeneralVaporMixtureFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  GeneralVaporMixtureFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    registerObjects(_factory);
-    buildObjects();
-  }
+  GeneralVaporMixtureFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
-  void registerObjects(Factory & factory)
-  {
-    registerUserObject(StiffenedGasFluidProperties);
-    registerUserObject(IdealGasFluidProperties);
-    registerUserObject(GeneralVaporMixtureFluidProperties);
-  }
-
   void buildObjects()
   {
     const std::string fp_steam_name = "fp_steam";
