@@ -48,7 +48,7 @@ template <typename T>
 class NumericVector;
 template <typename T>
 class SparseMatrix;
-}
+} // namespace libMesh
 
 /**
  * Nonlinear system to be solved
@@ -506,6 +506,12 @@ public:
    * @return Boolean if IntegratedBCs are active
    */
   bool needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const;
+
+  /**
+   * Indicated whether this system needs material properties on an interface.
+   * @return Boolean if InterafceKernels are active
+   */
+  bool needBoundaryMaterialOnInterface(BoundaryID bnd_id, THREAD_ID tid) const;
 
   /**
    * Indicates whether this system needs material properties on internal sides.

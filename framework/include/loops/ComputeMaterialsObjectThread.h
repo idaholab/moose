@@ -40,6 +40,7 @@ public:
   virtual void subdomainChanged() override;
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
 
   void join(const ComputeMaterialsObjectThread & /*y*/);

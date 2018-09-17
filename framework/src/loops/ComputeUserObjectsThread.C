@@ -13,6 +13,7 @@
 #include "ElementUserObject.h"
 #include "ShapeElementUserObject.h"
 #include "SideUserObject.h"
+#include "InterfaceUserObject.h"
 #include "ShapeSideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
@@ -26,11 +27,13 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(
     SystemBase & sys,
     const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
     const MooseObjectWarehouse<SideUserObject> & side_user_objects,
+    const MooseObjectWarehouse<InterfaceUserObject> & interface_user_objects,
     const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects)
   : ThreadedElementLoop<ConstElemRange>(problem),
     _soln(*sys.currentSolution()),
     _elemental_user_objects(elemental_user_objects),
     _side_user_objects(side_user_objects),
+    _interface_user_objects(interface_user_objects),
     _internal_side_user_objects(internal_side_user_objects)
 {
 }
@@ -41,6 +44,7 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x,
     _soln(x._soln),
     _elemental_user_objects(x._elemental_user_objects),
     _side_user_objects(x._side_user_objects),
+    _interface_user_objects(x._interface_user_objects),
     _internal_side_user_objects(x._internal_side_user_objects)
 {
 }
@@ -55,15 +59,18 @@ ComputeUserObjectsThread::subdomainChanged()
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _elemental_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _side_user_objects.updateBoundaryVariableDependency(needed_moose_vars, _tid);
+  _interface_user_objects.updateBoundaryVariableDependency(needed_moose_vars, _tid);
   _internal_side_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
 
   std::set<unsigned int> needed_mat_props;
   _elemental_user_objects.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
   _side_user_objects.updateBoundaryMatPropDependency(needed_mat_props, _tid);
+  _interface_user_objects.updateBoundaryMatPropDependency(needed_mat_props, _tid);
   _internal_side_user_objects.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
 
   _elemental_user_objects.subdomainSetup(_subdomain, _tid);
   _side_user_objects.subdomainSetup(_tid);
+  _interface_user_objects.subdomainSetup(_tid);
   _internal_side_user_objects.subdomainSetup(_subdomain, _tid);
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
@@ -189,6 +196,40 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
     else if (uo->hasBlocks(neighbor->subdomain_id()))
       uo->execute();
   }
+}
+
+void
+ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
+{
+  // Pointer to the neighbor we are currently working on.
+  const Elem * neighbor = elem->neighbor_ptr(side);
+
+  // Get the global id of the element and the neighbor
+  const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
+
+  if (!_interface_user_objects.hasActiveBoundaryObjects(bnd_id, _tid))
+    return;
+
+  if (!((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
+        (neighbor->level() < elem->level())))
+    return;
+
+  _fe_problem.prepareFace(elem, _tid);
+  _fe_problem.reinitNeighbor(elem, side, _tid);
+
+  // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
+  _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+  SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
+  _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+  const auto & objects = _interface_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
+  for (const auto & uo : objects)
+    uo->execute();
+
+  // _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 }
 
 void

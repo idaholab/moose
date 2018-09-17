@@ -33,6 +33,7 @@ public:
       SystemBase & sys,
       const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
       const MooseObjectWarehouse<SideUserObject> & side_user_objects,
+      const MooseObjectWarehouse<InterfaceUserObject> & interface_user_objects,
       const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects);
   // Splitting Constructor
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
@@ -42,6 +43,7 @@ public:
   virtual void onElement(const Elem * elem) override;
   virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void post() override;
   virtual void subdomainChanged() override;
 
@@ -54,6 +56,7 @@ protected:
   /// Storage for UserObjects (see FEProblemBase::computeUserObjects)
   const MooseObjectWarehouse<ElementUserObject> & _elemental_user_objects;
   const MooseObjectWarehouse<SideUserObject> & _side_user_objects;
+  const MooseObjectWarehouse<InterfaceUserObject> & _interface_user_objects;
   const MooseObjectWarehouse<InternalSideUserObject> & _internal_side_user_objects;
   ///@}
 };
