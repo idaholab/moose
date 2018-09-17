@@ -23,9 +23,9 @@
 
 !media large_media/examples/ex9-out1.png
        caption=Beginning
-       style=width:100%;
+       style=width:50%;
 
 !media large_media/examples/ex9-out2.png
        caption=End 
-       style=width:100%;
+       style=width:50%;
 

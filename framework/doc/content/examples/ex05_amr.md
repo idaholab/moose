@@ -32,7 +32,7 @@
        caption=Adaptivity Step 6
        style=width:50%;
 
-!media large_media/examples/ex5-out.png
+!media large_media/examples/ex5_out.png
        caption=Example 5 Output
        style=width:50%;
 

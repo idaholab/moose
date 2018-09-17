@@ -4,9 +4,9 @@ The problem is time-dependent diffusion with Dirichlet boundary conditions of 0 
 
 To achieve this, we need 3 objects working together : 
 
-1. `BlockAverageValue` : A `UserObject` that computes the average value of a variable on each block of the domain and provides `averageValue()` for retrieving the average value on a particular block.
-2. `BlockAverageDiffusionMaterial` : A `Material` that computes "diffusivity" based on the average value of a variable as computes by a `BlockAverageValue` `UserObject`.
-3. `ExampleDiffusion` : The same `Kernel` we have seen before that uses a "diffusivity" material property. The main purpose of this class is to provide the `averageValue` method that acepts a `SubdomainID`, which is simply an integer value specifying whcih block of the mesh to perform the average value calculation.
+-  `BlockAverageValue` : A `UserObject` that computes the average value of a variable on each block of the domain and provides `averageValue()` for retrieving the average value on a particular block.
+-  `BlockAverageDiffusionMaterial` : A `Material` that computes "diffusivity" based on the average value of a variable as computes by a `BlockAverageValue` `UserObject`.
+-  `ExampleDiffusion` : The same `Kernel` we have seen before that uses a "diffusivity" material property. The main purpose of this class is to provide the `averageValue` method that acepts a `SubdomainID`, which is simply an integer value specifying whcih block of the mesh to perform the average value calculation.
 
 [](---)
 

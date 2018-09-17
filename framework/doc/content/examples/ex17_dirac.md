@@ -16,6 +16,6 @@
 
 ## Outputs
 
-!media large_media/examples/ex17-dirac-out.md
+!media large_media/examples/ex17-dirac-out.png
        caption=Example 17 Results
        style=width:50%;

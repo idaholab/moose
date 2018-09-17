@@ -4,24 +4,25 @@
 
 ## Problem statement
 
-This problem considers a coupled systems of equations on a 3-D domain $$\Omega$$ : find $u$$ and $$v$$ such that 
-$$ -\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0$$ and
+This problem considers a coupled systems of equations on a 3-D domain $\Omega$ : find $u$ and $v$ such that 
+$-\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0$ and
 
-$$ -\nabla \cdot \nabla v = 0$$,
+$-\nabla \cdot \nabla v = 0$,
 
-where $$u=v=0$$ on the top boundary and $$u=2$$ and $$v=1$$ on the bottom boundary. The remaining boundaries are natural boundaries: $$\nabla u \cdot \hat{n} = 0$$ and $$\nabla v \cdot \hat{n} = 0$$. The domain, $$\Omega$$, is the same as utilized in Example 2.
+where $u=v=0$ on the top boundary and $u=2$$ and $v=1$ on the bottom boundary. The remaining boundaries are natural boundaries: $\nabla u \cdot \hat{n} = 0$ and $\nabla v \cdot \hat{n} = 0$. The domain, $\Omega$, is the same as utilized in Example 2.
 
 The weak form of this equation, in inner-product notation, is given by:
 
-$$ (\nabla u_h, \nabla \phi_i) + (\nabla\vec{v} \cdot \nabla u, \phi_i)= 0 \quad \forall  \phi_i $$ and
+$(\nabla u_h, \nabla \phi_i) + (\nabla\vec{v} \cdot \nabla u, \phi_i)= 0 \quad \forall  \phi_i$ and
 
-$$ (\nabla\vec{v}, \nabla\phi_i)= 0 \quad \forall  \phi_i $$,
+$(\nabla\vec{v}, \nabla\phi_i)= 0 \quad \forall  \phi_i$,
 
-where $$\phi_i$$ are the test functions and $$u_h$$ and $$v_h$$ are the finite element solutions.
+where $\phi_i$ are the test functions and $u_h$ and $v_h$ are the finite element solutions.
 
 [](---)
 
 ## Create Convection Kernel
+
 The convection component of the problem requires the creation of a a new `Kernel`, as described in Example 02. Here the `Kernel` must utilize a coupled variable rather than a known constant. 
 
 The header for this object, "ExampleConvection.h" is little changed from the previous example, with one exception, a member is defined to store the gradient of the coupled variable:
@@ -33,21 +34,25 @@ The source filem "ExampleConvection.C", after including the header, defines the 
 [ExampleConvection.C](https://github.com/idaholab/moose/blob/devel/examples/ex03_coupling/src/kernels/ExampleConvection.C)
 
 Finally, the `computeQpResiduals` and `computeQpJacobian` then utilize the coupled value to compute the desired residuals and jacobians.
-```
+
+```cpp
 Real ExampleConvection::computeQpResidual()
 {
   return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_u[_qp]);
 }
+```
 
+```cpp
 Real ExampleConvection::computeQpJacobian()
 {
   return _test[_i][_qp]*(_grad_some_variable[_qp]*_grad_phi[_j][_qp]);
 }
-``` 
+```
 
-[](---)
+ 
 
 ## Register Kernel
+
 As done in Example 2, the newly created object must be registered. This is accomplished by including the "Convection.h" file and the following in `ExampleApp::registerObjects` method of `src/base/ExampleApp.C` within the example 3 directory of MOOSE (`examples/ex03_coupling`).
 
 ```cpp
@@ -57,6 +62,7 @@ registerKernel(ExampleConvection);
 [](---)
 
 ## Input File Syntax
+
 First, the mesh is defined by loading a file "mug.e".
 
 ```puppet
@@ -154,6 +160,7 @@ Finally, the `Executioner` block is setup for solving the problem an the `Output
 ## Running the Problem
 
 This example may be run using Peacock or by running the following commands form the command line.
+
 ```
 cd ~/projects/moose/examples/ex03_coupling
 make -j8
@@ -173,19 +180,17 @@ This will generate the results file, out.e, as shown in Figure 1 and 2. This fil
 
 # 1D exact solution
 
-- A simplified 1D analog of this problem is given as follows, where $$u(0)=0$$ and $$u(1)=1$$:
-$$$ -\epsilon \frac{d^2 u}{d x^2} + \frac{d u}{d x} = 0 $$$
+ A simplified 1D analog of this problem is given as follows, where $u(0)=0$ and $u(1)=1$:
+$-\epsilon \frac{d^2 u}{d x^2} + \frac{d u}{d x} = 0$
 
-
-- The exact solution to this problem is
-$$$
-u = \frac{\exp\left(\frac{x}{\epsilon}\right) - 1}{\exp\left(\frac{1}{\epsilon}\right) - 1}
-$$$
+The exact solution to this problem is
+$u = \frac{\exp\left(\frac{x}{\epsilon}\right) - 1}{\exp\left(\frac{1}{\epsilon}\right) - 1}$
 
 
 [](---)
 
 ## Complete Source Files
+
 [ex03.i](https://github.com/idaholab/moose/blob/devel/examples/ex03_coupling/ex03.i)      
 
 [ExampleConvection.h](https://github.com/idaholab/moose/blob/devel/examples/ex03_coupling/include/kernels/ExampleConvection.h)

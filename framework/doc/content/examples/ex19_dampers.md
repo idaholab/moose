@@ -7,6 +7,7 @@
 ## Example 19 Results
 
 Damping = 1.0 
+
 ```text
     Outputting Initial Condition
       True Initial Nonlinear Residual: 10.4403
@@ -17,6 +18,7 @@ Damping = 1.0
 ```
 
 Damping = 0.9 
+
 ```text
     Outputting Initial Condition
       True Initial Nonlinear Residual: 10.4403

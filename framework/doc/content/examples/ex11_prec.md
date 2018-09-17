@@ -13,13 +13,14 @@ Block diagonal preconditioning uses kernels' and integrated boundary conditions'
 
 The Single Matrix Preconditioner builds its matrix using kernels' and integrated BCs' `computeQpJacobian` +and+ `computeQpOffDiagJacobian` methods, the latter of which is responsible for the contributions of coupled variables. A good, simple example of a `computeQpOffDiagJacobian` method is in [CoupledForce](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/CoupledForce.C). `CoupledForce` contributes a waek-form residual equal to 
 
-$$R_i = -\psi_i v$$
+$R_i = -\psi_i v$
 
 To determine the corresponding off-diagonal Jacobian contribution, one must take the deriative:
 
-$$\frac{\partial R_i}{\partial v_j} = -\psi_i \frac{\partial v}{\partial v_j} = -\psi_i \phi_j$$
+$\frac{\partial R_i}{\partial v_j} = -\psi_i \frac{\partial v}{\partial v_j} = -\psi_i \phi_j$
 
 To make use of user-specified `computeQpOffDiagJacobian` methods, one should specify in his/her input file:
+
 ```
 [Preconditioning]
   [./smp]
@@ -32,6 +33,7 @@ To make use of user-specified `computeQpOffDiagJacobian` methods, one should spe
 The user may also choose to omit certain off-diagonal entries from their `SMP` matrix; this is outlined in the detailed [Preconditioning article](http://mooseframework.org/wiki/MooseSystems/Preconditioners/).
 
 To build a preconditioning matrix through finite differencing of the residuals, the user can specify in his/her input file:
+
 ```
 [Preconditioning]
   [./fdp]
@@ -46,6 +48,7 @@ This will create a near-perfect preconditioning matrix; however, it is extremely
 
 
 ## Complete source files
+
 [default.i](https://github.com/idaholab/moose/blob/devel/examples/ex11_prec/default.i)
 
 [smp.i](https://github.com/idaholab/moose/blob/devel/examples/ex11_prec/smp.i)

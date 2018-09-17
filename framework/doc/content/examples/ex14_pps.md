@@ -10,7 +10,7 @@
 
 !media large_media/examples/ex14-out.png
        caption=Example 14 Output
-       style=width:100%;
+       style=width:50%;
 
 
 ```text

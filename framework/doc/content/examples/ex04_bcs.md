@@ -37,7 +37,7 @@
        style=width:50%;
 
 !media large_media/examples/ex04_bc_03.png
-       style=width:100%;
+       style=width:30%;
 
 
 
