@@ -6,9 +6,8 @@
     map = false
     unique_id = true
     requirement = 'The XFEM module shall have the capability of cutting '
-                  'through a quad element at the two nodes opposite to each '
-                  'other to split the element into two separate equally sized '
-                  'triangular elements.'
+                  'directly through multiple nodes of a single QUAD4 element '
+                  'in 2D.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
   [../]
@@ -20,8 +19,8 @@
     unique_id = true
     requirement = 'The XFEM module shall be able to perform mesh cuts on any '
                   'combination of the edges of elements and through elements '
-                  'including allowing cuts that go through the element's nodes '
-                  'on the same mesh.'
+                  'including allowing cuts that go through the nodes on the '
+                  'same mesh.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
   [../]
@@ -44,7 +43,7 @@
     map = false
     unique_id = true
     requirement = 'The XFEM module shall be capable of propagating an existing '
-                  'crack front along a prescribed cut.' 
+                  'crack front along a prescribed cut in 2D.'
     design = 'LineSegmentCutUserObject.md'
     issues = '#6320'
   [../]

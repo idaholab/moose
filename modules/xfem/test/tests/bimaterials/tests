@@ -8,9 +8,10 @@
     map = false
     unique_id = true
     requirement = 'The XFEM module shall have the capability to calculate '
-                  'displacement in two glued, layered materials with the '
-                  'interface location and global stress determined by a '
-                  'level set function.'
+                  'mechanical response in two glued, layered materials with '
+                  'the interface location and material properties applied to '
+                  'on each side of the boundary determined by a level set '
+                  'function.'
     design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
     issues = '#10421'
   [../]
@@ -23,10 +24,10 @@
     map = false
     unique_id = true
     requirement = 'The XFEM module shall have the capability to calculate '
-                  'displacement in a composite material matrix with an '
-                  'inclusion with the location of the inclusion location '
-                  'and global stress determined by a prescribed level set '
-                  'function.' 
+                  'mechanical response in a composite material matrix with an '
+                  'inclusion with the location of the inclusion boundary '
+                  'and material properties applied to the matrix and inclusion '
+                  'determined by a prescribed level set function.' 
     design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
     issues = '#10421'
   [../]

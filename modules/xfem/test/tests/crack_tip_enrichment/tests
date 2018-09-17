@@ -6,8 +6,8 @@
     map = false
     unique_id = true
     superlu = true
-    requirement = 'The XFEM module shall have the capability to perform crack '
-                  'tip enrichment in 2D.'
+    requirement = 'The XFEM module shall have the capability to include '
+                  'near-tip enrichment functions in 2D mechanics simulations.'
     design = 'LineSegmentCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'
@@ -20,8 +20,8 @@
     unique_id = true
     heavy = true
     superlu = true
-    requirement = 'The XFEM module shall have the capability to perform crack '
-                  'tip enrichment in 3D.'
+    requirement = 'The XFEM module shall have the capability to include '
+                  'near-tip enrichment functions in 3D mechanics simulations.'
     design = 'CircleCutUserObject.md '
              'CrackTipEnrichmentStressDivergenceTensors.md'
     issues = '#10042'

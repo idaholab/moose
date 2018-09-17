@@ -2,10 +2,10 @@
 
 !syntax description /UserObjects/CircleCutUserObject
 
-The (CircleCutUserObject) defines the boundary of a circular cut for XFEM to 
+The `CircleCutUserObject` defines the boundary of a circular cut for XFEM to
 make on a 3 dimensional mesh. The user enters three points in the cut_data
 parameter in x, y, and z coordinates: first the center point of the circle,
-followed by two vertices on the boundary of the circle. The object calculates
+followed by two points on the boundary of the circle. The object calculates
 the radius and angle of the circle (with respect to the x-y plane), verifies
 that the points define a circle (rather than an ellipse), and has logic to
 determine if a given point is inside the cut plane.
