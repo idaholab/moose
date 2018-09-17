@@ -57,7 +57,7 @@ This will generate the results file, ex2_out.e, as shown in Figure 1 and 2. This
        style=width:50%;
 
 !media large_media/examples/ex20_out_10.png
-       caption=Figure 2	: Example 20 results after ten	time steps
+       caption=Figure 2: Example 20 results after ten time steps
        style=width:50%;
 
 

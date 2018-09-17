@@ -9,7 +9,7 @@ $-\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0$ and
 
 $-\nabla \cdot \nabla v = 0$,
 
-where $u=v=0$ on the top boundary and $u=2$$ and $v=1$ on the bottom boundary. The remaining boundaries are natural boundaries: $\nabla u \cdot \hat{n} = 0$ and $\nabla v \cdot \hat{n} = 0$. The domain, $\Omega$, is the same as utilized in Example 2.
+where $u=v=0$ on the top boundary and $u=2$ and $v=1$ on the bottom boundary. The remaining boundaries are natural boundaries: $\nabla u \cdot \hat{n} = 0$ and $\nabla v \cdot \hat{n} = 0$. The domain, $\Omega$, is the same as utilized in Example 2.
 
 The weak form of this equation, in inner-product notation, is given by:
 
