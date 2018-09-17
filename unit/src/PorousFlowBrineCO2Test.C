@@ -474,8 +474,8 @@ TEST_F(PorousFlowBrineCO2Test, gasProperties)
   Real gas_enthalpy = fsp[1].enthalpy;
 
   Real density = _co2_fp->rho_from_p_T(p, T);
-  Real viscosity = _co2_fp->mu(p, T);
-  Real enthalpy = _co2_fp->h(p, T);
+  Real viscosity = _co2_fp->mu_from_p_T(p, T);
+  Real enthalpy = _co2_fp->h_from_p_T(p, T);
 
   ABS_TEST(gas_density, density, 1.0e-8);
   ABS_TEST(gas_viscosity, viscosity, 1.0e-8);
@@ -578,7 +578,7 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
   Real brine_enthalpy = _brine_fp->h(p, T, Xnacl);
   Real hdis, dhdis_dT;
   _fp->enthalpyOfDissolution(T, hdis, dhdis_dT);
-  Real co2_enthalpy = _co2_fp->h(p, T);
+  Real co2_enthalpy = _co2_fp->h_from_p_T(p, T);
   Real enthalpy = (1.0 - Z) * brine_enthalpy + Z * (co2_enthalpy + hdis);
 
   ABS_TEST(liquid_density, density, 1.0e-12);

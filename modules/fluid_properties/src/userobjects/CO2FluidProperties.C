@@ -519,14 +519,14 @@ CO2FluidProperties::rho_from_p_T(
 }
 
 Real
-CO2FluidProperties::mu(Real pressure, Real temperature) const
+CO2FluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
   Real rho = this->rho_from_p_T(pressure, temperature);
   return this->mu_from_rho_T(rho, temperature);
 }
 
 void
-CO2FluidProperties::mu_dpT(
+CO2FluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   Real rho, drho_dp, drho_dT;
@@ -542,7 +542,7 @@ CO2FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1000.0 || density > 1400.0)
-    throw MooseException("Parameters out of range in " + name() + ": mu()");
+    throw MooseException("Parameters out of range in " + name() + ": mu_from_rho_T()");
 
   Real Tstar = temperature / 251.196;
 
@@ -659,7 +659,7 @@ CO2FluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT)
 }
 
 Real
-CO2FluidProperties::e(Real pressure, Real temperature) const
+CO2FluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
   // Require density first
   Real density = rho_from_p_T(pressure, temperature);
@@ -671,7 +671,7 @@ CO2FluidProperties::e(Real pressure, Real temperature) const
 }
 
 void
-CO2FluidProperties::e_dpT(
+CO2FluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   // Require density first
@@ -701,11 +701,11 @@ CO2FluidProperties::rho_e_dpT(Real pressure,
                               Real & de_dT) const
 {
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  e_dpT(pressure, temperature, e, de_dp, de_dT);
+  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
 }
 
 Real
-CO2FluidProperties::c(Real pressure, Real temperature) const
+CO2FluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   // Require density first
   Real density = rho_from_p_T(pressure, temperature);
@@ -751,7 +751,7 @@ CO2FluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 }
 
 Real
-CO2FluidProperties::k(Real pressure, Real temperature) const
+CO2FluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
   // Require density first
   Real density = rho_from_p_T(pressure, temperature);
@@ -759,18 +759,18 @@ CO2FluidProperties::k(Real pressure, Real temperature) const
 }
 
 void
-CO2FluidProperties::k_dpT(
+CO2FluidProperties::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  k = this->k(pressure, temperature);
+  k = this->k_from_p_T(pressure, temperature);
   // Calculate derivatives using finite differences. Note: this will be slow as
   // multiple calculations of density are required
   const Real eps = 1.0e-6;
   const Real peps = pressure * eps;
   const Real Teps = temperature * eps;
 
-  dk_dp = (this->k(pressure + peps, temperature) - k) / peps;
-  dk_dT = (this->k(pressure, temperature + Teps) - k) / Teps;
+  dk_dp = (this->k_from_p_T(pressure + peps, temperature) - k) / peps;
+  dk_dT = (this->k_from_p_T(pressure, temperature + Teps) - k) / Teps;
 }
 
 Real
@@ -811,7 +811,7 @@ CO2FluidProperties::k_from_rho_T(Real density, Real temperature) const
 }
 
 Real
-CO2FluidProperties::s(Real pressure, Real temperature) const
+CO2FluidProperties::s_from_p_T(Real pressure, Real temperature) const
 {
   // Require density first
   Real density = rho_from_p_T(pressure, temperature);
@@ -822,8 +822,14 @@ CO2FluidProperties::s(Real pressure, Real temperature) const
   return _Rco2 * (tau * dphiSW_dt(delta, tau) - phiSW(delta, tau));
 }
 
+void
+CO2FluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
 Real
-CO2FluidProperties::h(Real pressure, Real temperature) const
+CO2FluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
   // Require density first
   Real density = rho_from_p_T(pressure, temperature);
@@ -835,7 +841,7 @@ CO2FluidProperties::h(Real pressure, Real temperature) const
 }
 
 void
-CO2FluidProperties::h_dpT(
+CO2FluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   // Require density first

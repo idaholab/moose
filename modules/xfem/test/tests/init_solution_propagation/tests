@@ -8,5 +8,8 @@
     # XFEM requires --enable-unique-ids in libmesh
     min_parallel=4
     unique_id = true
+    requirement = 'The XFEM module shall retain the values of auxiliary variables on child nodes and elements after running the cutting algorithm, and initialize solution variables on newly created nodes with values from parent nodes in parallel'
+    design = 'XFEM/index.md'
+    issues = '#8763'
   [../]
 []

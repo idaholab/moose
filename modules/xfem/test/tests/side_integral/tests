@@ -1,10 +1,13 @@
 [Tests]
+  design = 'XFEM/index.md'
+  issues = '#6320'
   [./side_integral_xfem]
     type = Exodiff
     input = side_integral.i
     exodiff = 'side_integral_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall properly integrate quantities on sides of cut elements that are intersected by the cutting plane in 2D'
   [../]
   [./side_integral_3d_xfem]
     type = Exodiff
@@ -12,5 +15,6 @@
     exodiff = 'side_integral_3d_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall properly integrate quantities on sides of cut elements that are intersected by the cutting plane in 3D'
   [../]
 []

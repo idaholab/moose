@@ -43,18 +43,18 @@ TEST_F(IdealGasFluidPropertiesPTTest, properties)
 
   p = 1.0e6;
   T = 300.0;
-  REL_TEST(_fp->beta(p, T), 1.0 / T, tol);
+  REL_TEST(_fp->beta_from_p_T(p, T), 1.0 / T, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), cp, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), cv, tol);
-  REL_TEST(_fp->c(p, T), std::sqrt(cp * R * T / (cv * molar_mass)), tol);
-  REL_TEST(_fp->k(p, T), thermal_conductivity, tol);
-  REL_TEST(_fp->k(p, T), thermal_conductivity, tol);
-  REL_TEST(_fp->s(p, T), entropy, tol);
+  REL_TEST(_fp->c_from_p_T(p, T), std::sqrt(cp * R * T / (cv * molar_mass)), tol);
+  REL_TEST(_fp->k_from_p_T(p, T), thermal_conductivity, tol);
+  REL_TEST(_fp->k_from_p_T(p, T), thermal_conductivity, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), entropy, tol);
   REL_TEST(_fp->rho_from_p_T(p, T), p * molar_mass / (R * T), tol);
-  REL_TEST(_fp->e(p, T), cv * T, tol);
-  REL_TEST(_fp->mu(p, T), viscosity, tol);
-  REL_TEST(_fp->mu(p, T), viscosity, tol);
-  REL_TEST(_fp->h(p, T), cp * T, tol);
+  REL_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
+  REL_TEST(_fp->mu_from_p_T(p, T), viscosity, tol);
+  REL_TEST(_fp->mu_from_p_T(p, T), viscosity, tol);
+  REL_TEST(_fp->h_from_p_T(p, T), cp * T, tol);
   ABS_TEST(_fp->henryConstant(T), henry, tol);
 }
 

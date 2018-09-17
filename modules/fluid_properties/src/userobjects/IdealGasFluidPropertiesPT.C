@@ -66,28 +66,34 @@ Real IdealGasFluidPropertiesPT::cv_from_p_T(Real /*pressure*/, Real /*temperatur
 }
 
 Real
-IdealGasFluidPropertiesPT::c(Real /*pressure*/, Real temperature) const
+IdealGasFluidPropertiesPT::c_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return std::sqrt(_cp * _R * temperature / (_cv * _molar_mass));
 }
 
-Real IdealGasFluidPropertiesPT::k(Real /*pressure*/, Real /*temperature*/) const
+Real IdealGasFluidPropertiesPT::k_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
 
 void
-IdealGasFluidPropertiesPT::k_dpT(
+IdealGasFluidPropertiesPT::k_from_p_T(
     Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  k = this->k(pressure, temperature);
+  k = this->k_from_p_T(pressure, temperature);
   dk_dp = 0;
   dk_dT = 0;
 }
 
-Real IdealGasFluidPropertiesPT::s(Real /*pressure*/, Real /*temperature*/) const
+Real IdealGasFluidPropertiesPT::s_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
+}
+
+void
+IdealGasFluidPropertiesPT::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
 }
 
 Real
@@ -106,16 +112,16 @@ IdealGasFluidPropertiesPT::rho_from_p_T(
 }
 
 Real
-IdealGasFluidPropertiesPT::e(Real /*pressure*/, Real temperature) const
+IdealGasFluidPropertiesPT::e_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return _cv * temperature;
 }
 
 void
-IdealGasFluidPropertiesPT::e_dpT(
+IdealGasFluidPropertiesPT::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  e = this->e(pressure, temperature);
+  e = this->e_from_p_T(pressure, temperature);
   de_dp = 0.0;
   de_dT = _cv;
 }
@@ -137,22 +143,22 @@ IdealGasFluidPropertiesPT::rho_e_dpT(Real pressure,
   drho_dT = ddensity_dT;
 
   Real energy, denergy_dp, denergy_dT;
-  e_dpT(pressure, temperature, energy, denergy_dp, denergy_dT);
+  e_from_p_T(pressure, temperature, energy, denergy_dp, denergy_dT);
   e = energy;
   de_dp = denergy_dp;
   de_dT = denergy_dT;
 }
 
-Real IdealGasFluidPropertiesPT::mu(Real /*pressure*/, Real /*temperature*/) const
+Real IdealGasFluidPropertiesPT::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _viscosity;
 }
 
 void
-IdealGasFluidPropertiesPT::mu_dpT(
+IdealGasFluidPropertiesPT::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
   dmu_dp = 0.0;
   dmu_dT = 0.0;
 }
@@ -161,7 +167,7 @@ void
 IdealGasFluidPropertiesPT::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
   rho = this->rho_from_p_T(pressure, temperature);
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
 }
 
 void
@@ -175,20 +181,20 @@ IdealGasFluidPropertiesPT::rho_mu_dpT(Real pressure,
                                       Real & dmu_dT) const
 {
   this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+  this->mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real
-IdealGasFluidPropertiesPT::h(Real /*pressure*/, Real temperature) const
+IdealGasFluidPropertiesPT::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return _cp * temperature;
 }
 
 void
-IdealGasFluidPropertiesPT::h_dpT(
+IdealGasFluidPropertiesPT::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  h = this->h(pressure, temperature);
+  h = this->h_from_p_T(pressure, temperature);
   dh_dp = 0.0;
   dh_dT = _cp;
 }

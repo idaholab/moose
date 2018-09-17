@@ -1,4 +1,6 @@
 [Tests]
+  design = 'XFEM/index.md'
+  issues = '#6320'
   [./solid_mechanics_moment_fitting]
     type = Exodiff
     input = solid_mechanics_moment_fitting.i
@@ -6,6 +8,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
+    requirement = 'The XFEM module shall permit the use of the moment fitting algorithm to compute integration point weights for partial elements on 2D solid mechanics problems'
   [../]
   [./diffusion_moment_fitting_four_points]
     type = Exodiff
@@ -13,6 +16,7 @@
     exodiff = 'diffusion_moment_fitting_four_points_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall permit the use of the moment fitting algorithm to compute integration point weights for partial elements on 2D problems with a 4-point integration rule'
   [../]
   [./diffusion_moment_fitting_six_points]
     type = Exodiff
@@ -20,5 +24,6 @@
     exodiff = 'diffusion_moment_fitting_six_points_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall permit the use of the moment fitting algorithm to compute integration point weights for partial elements on 2D problems with a 6-point integration rule'
   [../]
 []

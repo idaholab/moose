@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'element_quality_aux.i'
+    exodiff = 'element_quality_aux_out.e'
+    requirement = "MOOSE shall be able to compute and visualize element quality metrics"
+    design = 'ElementQualityAux.md'
+    issues = '#12131'
+  [../]
+[]
