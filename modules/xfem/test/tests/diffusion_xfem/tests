@@ -5,6 +5,12 @@
     exodiff = 'diffusion_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM Module shall have the capability to run 2D '
+                  'diffusion problems with prescribed values on the domain '
+                  'boundary (Dirichlet conditions) with a fixed position '
+                  'discontinuous interface through mesh elements.'
+    design = 'LineSegmentCutUserObject.md'
+    issues = '#6320'
   [../]
   [./diffusion_xfem_flux_bc]
     type = Exodiff
@@ -12,6 +18,14 @@
     exodiff = 'diffusion_flux_bc_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM Module shall have the capability to run 2D '
+                  'diffusion problems with prescribed solution values on the '
+                  'domain boundary (Dirichlet conditions) and prescribed '
+                  'boundary flux values (Neumann conditions) with a fixed '
+                  'position discontinuous interface defined by a geometric cut '
+                  'user object.'
+    design = 'LineSegmentCutUserObject.md'
+    issues = '#6320'
   [../]
   [./levelsetcut2d]
     type = Exodiff
@@ -19,6 +33,13 @@
     exodiff = 'levelsetcut2d_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM Module shall have the capability to run 2D '
+                  'diffusion problems with a fixed position discontinuous '
+                  'interface defined by the location of the zero values of '
+                  'a level set function with the level set variable '
+                  'being a Moose Variable.'
+    design = 'LevelSetCutUserObject.md'
+    issues = '#6320'
   [../]
   [./levelsetcut2d_aux]
     type = Exodiff
@@ -26,6 +47,13 @@
     exodiff = 'levelsetcut2d_aux_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM Module shall have the capability to run 2D '
+                  'diffusion problems with a fixed position discontinuous '
+                  'interface defined by the location of the zero values of '
+                  'a prescribed level set function with the level set variable '
+                  'being a Moose AuxVariable.'
+    design = 'LevelSetCutUserObject.md'
+    issues = '#6320'
   [../]
   [./levelsetcut3d]
     type = Exodiff
@@ -33,5 +61,12 @@
     exodiff = 'levelsetcut3d_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM Module shall have the capability to run 3D '
+                  'diffusion problems with a fixed position discontinuous '
+                  'interface defined by the location of the zero values of '
+                  'a prescribed level set function with the level set variable '
+                  'being a Moose AuxVariable.'
+    design = 'LevelSetCutUserObject.md'
+    issues = '#6320'
   [../]
 []

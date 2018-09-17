@@ -1,14 +1,17 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # RectangleCutUserObject
 
-!alert construction title=Undocumented Class
-The RectangleCutUserObject has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /UserObjects/RectangleCutUserObject
+
+The `RectangleCutUserObject` defines the boundary of a rectangular cut for XFEM
+to make on a 3 dimensional mesh. The cut_data parameter is a vector of length
+twelve that defines the x, y , and z Real values of the four vertices that form
+the rectangular cut. The object calculates the midpoint of the rectangular cut
+and normal, and includes logic to determine if a given point is located within
+the cut plane.
+
+## Example Input Syntax
+
+!listing test/tests/solid_mechanics_basic/edge_crack_3d.i block=UserObjects
 
 !syntax parameters /UserObjects/RectangleCutUserObject
 

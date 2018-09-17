@@ -1,12 +1,18 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # EllipseCutUserObject
 
-!alert construction title=Undocumented Class
-The EllipseCutUserObject has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
+!syntax description /UserObjects/EllipseCutUserObject
+
+The `EllipseCutUserObject` defines the boundary of an elliptical cut for XFEM
+to make on a 3 dimensional mesh. The user enters three points in the cut_data
+parameter in x, y, z coordinates: the center point of the ellipse (must be
+specified first), followed by points on the edge of the ellipse at the
+longest and shortest axes (in any order). The object calculates the two radii,
+verifies that the points provided are located within the same plane, and has
+logic to determine whether a given point is located inside the cut plane.
+
+## Example Input Syntax
+
+!listing test/tests/solid_mechanics_basic/elliptical_crack.i block=UserObjects
 
 !syntax description /UserObjects/EllipseCutUserObject
 
