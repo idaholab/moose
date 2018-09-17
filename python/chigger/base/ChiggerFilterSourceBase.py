@@ -51,8 +51,7 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
     def getVTKSource(self):
         """
         Return the "source" vtk object. (abstract)
-
-        Deriving classes must override this method. The VTK object returned from this function will
+        classes must override this method. The VTK object returned from this function will
         be connected to the first filter, if then exist, or the vtkAbstractMapper object. See the
         'update' method for this class for how the connections are made.
         """

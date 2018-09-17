@@ -32,6 +32,7 @@ def create(base_type):
             plane = geometric.PlaneSource()
             plane2D = geometric.PlaneSource2D()
         """
+        FILTER_TYPES = []
 
         @staticmethod
         def getOptions():

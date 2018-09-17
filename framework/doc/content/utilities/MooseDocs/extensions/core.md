@@ -140,9 +140,10 @@ List items may contain lists, code, or any other markdown content and the item c
 span many lines. The continuation is specified by indenting the content to be included within the
 item by two spaces, as shown in [unordered-nested-example].
 
-!devel example caption=Unordered list basic syntax. id=unordered-basic-example
+!devel! example caption=Unordered list basic syntax. id=unordered-basic-example
 - Item 1
 - Item 2
+!devel-end!
 
 !devel! example caption=Lists can contain other markdown content. id=unordered-nested-example
 - Item with code
