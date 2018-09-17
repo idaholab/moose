@@ -396,12 +396,12 @@ class RenderSyntaxToken(components.RenderComponent):
         errors = []
 
         groups = list(token.syntax.groups)
-        if 'MOOSE' in groups:
-            groups.remove('MOOSE')
-            groups.insert(0, 'MOOSE')
+        if 'MooseApp' in groups:
+            groups.remove('MooseApp')
+            groups.insert(0, 'MooseApp')
 
         collection = html.Tag(None, 'ul', class_='collection with-header')
-        n_groups = len(active_groups)
+        n_groups = len(groups)
         for group in groups:
 
             if active_groups and group.lower() not in active_groups:
