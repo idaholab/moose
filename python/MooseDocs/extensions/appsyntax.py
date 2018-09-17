@@ -396,12 +396,12 @@ class RenderSyntaxToken(components.RenderComponent):
         errors = []
 
         groups = list(token.syntax.groups)
-        if 'MOOSE' in groups:
-            groups.remove('MOOSE')
-            groups.insert(0, 'MOOSE')
+        if 'MooseApp' in groups:
+            groups.remove('MooseApp')
+            groups.insert(0, 'MooseApp')
 
         collection = html.Tag(None, 'ul', class_='collection with-header')
-        n_groups = len(active_groups)
+        n_groups = len(groups)
         for group in groups:
 
             if active_groups and group.lower() not in active_groups:
@@ -605,8 +605,12 @@ def _insert_parameter(parent, name, param):
     html.Tag(p, 'span', string=u'C++ Type:')
     html.String(p, content=cpp_type)
 
-    p = html.Tag(body, 'p', class_='moose-parameter-description')
+    if 'options' in param:
+        p = html.Tag(body, 'p', class_='moose-parameter-description-options')
+        html.Tag(p, 'span', string=u'Options:')
+        html.String(p, content=param['options'])
 
+    p = html.Tag(body, 'p', class_='moose-parameter-description')
     desc = param['description']
     if desc:
         html.Tag(header, 'span', class_='moose-parameter-header-description', string=unicode(desc))

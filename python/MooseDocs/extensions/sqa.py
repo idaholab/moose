@@ -148,6 +148,7 @@ class SQARequirementsCommand(command.CommandComponent):
                 for issue in req.issues:
                     url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
                     tokens.Link(p, url=url, string=unicode(issue))
+                    tokens.Space(p)
 
             if self.settings['link-prerequisites'] and req.prerequisites:
                 labels = []
