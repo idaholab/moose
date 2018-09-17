@@ -163,6 +163,8 @@ using libMesh::out;
  * Register objects that are in MOOSE
  */
 
+void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+
 void registerObjects(Factory & factory);
 void registerObjects(Factory & factory, const std::set<std::string> & obj_labels);
 void addActionTypes(Syntax & syntax);

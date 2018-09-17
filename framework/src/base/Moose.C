@@ -19,6 +19,7 @@
 #include "Factory.h"
 #include "PetscSupport.h"
 #include "Syntax.h"
+#include "MooseSyntax.h"
 
 #include <unistd.h>
 
@@ -44,8 +45,18 @@ namespace Moose
 {
 
 void
+registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  registerObjects(f, {"MooseApp"});
+  associateSyntax(s, af);
+  registerActions(s, af, {"MooseApp"});
+  registerExecFlags(f);
+}
+
+void
 registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   registerObjects(factory, {"MooseApp"});
 }
 
@@ -302,6 +313,7 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of registerActions");
   registerActions(syntax, action_factory, {"MooseApp"});
 }
 

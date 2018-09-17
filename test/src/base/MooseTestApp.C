@@ -34,22 +34,47 @@ validParams<MooseTestApp>()
   return params;
 }
 
-MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
+void
+MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  bool use_test_objs = !getParam<bool>("disallow_test_objects");
+  Moose::registerAll(f, af, s);
+  Registry::registerObjectsTo(f, {"MooseTestApp"});
+  Registry::registerActionsTo(af, {"MooseTestApp"});
 
-  Moose::registerObjects(_factory);
-  Moose::associateSyntax(_syntax, _action_factory);
-  Moose::registerExecFlags(_factory);
   if (use_test_objs)
   {
-    MooseTestApp::registerObjects(_factory);
-    MooseTestApp::associateSyntax(_syntax, _action_factory);
-    MooseTestApp::registerExecFlags(_factory);
+    auto & syntax = s;  // for resiterSyntax macros
+    auto & factory = f; // for resiterSyntax macros
+
+    registerExecFlag(EXEC_JUST_GO);
+
+    registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
+    registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
+    registerSyntaxTask("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
+    registerSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
+    registerSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
+    registerSyntax("TestGetActionsAction", "TestGetActions");
+    registerSyntax("BadAddKernelAction", "BadKernels/*");
+    registerSyntax("AddMatAndKernel", "AddMatAndKernel");
+    registerSyntax("MetaNodalNormalsAction", "MetaNodalNormals");
+    // For testing the ability to create problems in user defined Actions
+    registerSyntax("CreateSpecialProblemAction", "TestProblem");
   }
 }
 
+MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
+{
+  MooseTestApp::registerAll(
+      _factory, _action_factory, _syntax, !getParam<bool>("disallow_test_objects"));
+}
+
 MooseTestApp::~MooseTestApp() {}
+
+extern "C" void
+MooseTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  MooseTestApp::registerAll(f, af, s);
+}
 
 // External entry point for dynamic application loading
 extern "C" void

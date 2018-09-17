@@ -23,6 +23,11 @@ ActionFactory::reg(const std::string & name,
                    const std::string & file,
                    int line)
 {
+  auto key = std::make_pair(name, task);
+  if (_current_objs.count(key) > 0)
+    return;
+  _current_objs.insert(key);
+
   BuildInfo build_info;
   build_info._build_pointer = obj_builder;
   build_info._params_pointer = ref_params;
