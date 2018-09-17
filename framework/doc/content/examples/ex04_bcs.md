@@ -30,13 +30,13 @@
 
 ## Outputs
 
-!media media/examples/ex04_bc_01.png
+!media large_media/examples/ex04_bc_01.png
        style=width:50%;
 
-!media media/examples/ex04_bc_02.png
+!media large_media/examples/ex04_bc_02.png
        style=width:50%;
 
-!media media/examples/ex04_bc_03.png
+!media large_media/examples/ex04_bc_03.png
        style=width:100%;
 
 
@@ -46,9 +46,9 @@
 
 ## Periodic example
 
-!media media/examples/ex04_out_pbc.png
+!media large_media/examples/ex04_out_pbc.png
        style=width:50%;
 
-!media media/examples/ex04_out_trap.png
+!media large_media/examples/ex04_out_trap.png
        style=width:50%;
 

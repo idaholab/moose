@@ -16,6 +16,7 @@
 
 ## Output
 
-!media media/examples/ex10-out.png
+!media large_media/examples/ex10-out.png
        caption=Example 10 Output
        style=width:50%;
+

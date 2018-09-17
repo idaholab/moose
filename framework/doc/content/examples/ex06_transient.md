@@ -24,9 +24,9 @@
 
 ## Outputs
 
-!media media/examples/ex6-1-out.png
+!media large_media/examples/ex6-1-out.png
        style=width:50%;
 
-!media media/examples/ex6-2-out.png
+!media large_media/examples/ex6-2-out.png
        style=width:50%;
 

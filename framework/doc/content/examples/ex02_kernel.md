@@ -1,5 +1,5 @@
   # Overview
-This example builds on [Example 1](/wiki/MooseExamples/Example_01) and introduces how to create a custom`Kernel, which is the mechanism for adding custom physics into `MOOSE`.
+This example builds on Example 1 and introduces how to create a custom `Kernel`, which is the mechanism for adding custom physics into `MOOSE`.
 
 # Problem Statement
 
@@ -38,14 +38,14 @@ In general, adding a new objectto MOOSE requires only two steps :
 
 ## Register object
 
-Within your application, which was generated using [Stork](http://mooseframework.com/create-an-app/), the newly created object must be registered. For this example, the application source code is `/src/base/ExampleApp.C`. To add the `Kernel` created above, simply include the header and register it within the `registerObjects` method.
+Within your application, which was generated using Stork, the newly created object must be registered. For this example, the application source code is `/src/base/ExampleApp.C`. To add the `Kernel` created above, simply include the header and register it within the `registerObjects` method.
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex02_kernel/src/base/ExampleApp.C)
 
 [](---)
 
 # Input File Syntax
-The only difference between this example and [Example 1](/wiki/MooseExamples/Example_01) is that the custom Kernel object created above must be included. Since this new object was registered, it is available and accessed using similar syntax to the `Diffusion` kernel. Thus, the `[Kernels]` block in the input file becomes:
+The only difference between this example and Example 1 is that the custom Kernel object created above must be included. Since this new object was registered, it is available and accessed using similar syntax to the `Diffusion` kernel. Thus, the `[Kernels]` block in the input file becomes:
 
 ```puppet
 [Kernels]
@@ -66,16 +66,16 @@ Note, the variable name was also changed in this example to `convected`.
 [](---)
 
 # Running the Problem
-This example may be run using [Peacock][gui] or by running the following commands form the command line.
+This example may be run using Peacock or by running the following commands form the command line.
 ```
 cd ~/projects/moose/examples/ex02_kernel
 make -j8
 ./ex02-opt -i ex02.i
 ```
 
-This will generate the results file, out.e, as shown in Figure 2. This file may be viewed using [Peacock][gui] or an external application that supports the Exodus II format (e.g., Paraview).
+This will generate the results file, out.e, as shown in Figure 2. This file may be viewed using Peacock or an external application that supports the Exodus II format (e.g., Paraview).
 
-!media media/examples/ex02_out.png
+!media large_media/examples/ex02_out.png
        caption=Example 02 Results
        style=width:50%;
 
@@ -93,8 +93,5 @@ This will generate the results file, out.e, as shown in Figure 2. This file may 
 
 [ex02_oversample.i](https://github.com/idaholab/moose/blob/devel/examples/ex02_kernel/ex02_oversample.i)
 
- [moose]: https://mooseframework.org
- [kernel]: http://www.mooseframework.org/docs/doxygen/moose/classKernel.html
- [gui]: http://mooseframework.org/wiki/Peacock
 
 

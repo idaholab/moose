@@ -43,11 +43,11 @@
 
 ## Outputs
 
-!media media/examples/ex08_convected.png
+!media large_media/examples/ex08_convected.png
        caption=Convection
        style=width:50%;
 
-!media media/examples/ex08_diffused.png
+!media large_media/examples/ex08_diffused.png
        caption=Diffusion
        style=width:50%;
 

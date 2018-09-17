@@ -1,6 +1,6 @@
 # Example 11 : Preconditioning
 
-For a detailed discussion on preconditioning in MOOSE, see the wiki systems page [here](http://mooseframework.org/wiki/MooseSystems/Preconditioners/). 
+For a detailed discussion on preconditioning in MOOSE, see this page [here](http://mooseframework.org/moose/syntax/Preconditioning/index.html#c744ca79-9e34-48ee-b346-4752d76916c1). 
 
 To summarize, an accurate and complete preconditioning matrix can be important for an efficient Preconditioned Jacobian-Free Newton-Krylove (PJFNK) solve. It's absolutely essential for `solve_type = NEWTON`. MOOSE has ultiple options for buiding the preconditioning matrix :
 
@@ -43,7 +43,7 @@ To build a preconditioning matrix through finite differencing of the residuals, 
 
 This will create a near-perfect preconditioning matrix; however, it is extremely slow and will only work in serial. `FDP` should only be used for debugging purposes.
 
-For information on the last preconditioning option, `PBP`, which is more nuanced, we refer the reader to the dedicated [wiki page](http://mooseframework.org/wiki/MooseSystems/Preconditioners/).
+
 
 ## Complete source files
 [default.i](https://github.com/idaholab/moose/blob/devel/examples/ex11_prec/default.i)

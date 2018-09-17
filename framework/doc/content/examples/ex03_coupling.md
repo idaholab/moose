@@ -9,7 +9,7 @@ $$ -\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0$$ and
 
 $$ -\nabla \cdot \nabla v = 0$$,
 
-where $$u=v=0$$ on the top boundary and $$u=2$$ and $$v=1$$ on the bottom boundary. The remaining boundaries are natural boundaries: $$\nabla u \cdot \hat{n} = 0$$ and $$\nabla v \cdot \hat{n} = 0$$. The domain, $$\Omega$$, is the same as utilized in [Example 2](..\Example_02).
+where $$u=v=0$$ on the top boundary and $$u=2$$ and $$v=1$$ on the bottom boundary. The remaining boundaries are natural boundaries: $$\nabla u \cdot \hat{n} = 0$$ and $$\nabla v \cdot \hat{n} = 0$$. The domain, $$\Omega$$, is the same as utilized in Example 2.
 
 The weak form of this equation, in inner-product notation, is given by:
 
@@ -22,7 +22,7 @@ where $$\phi_i$$ are the test functions and $$u_h$$ and $$v_h$$ are the finite e
 [](---)
 
 ## Create Convection Kernel
-The convection component of the problem requires the creation of a a new `Kernel`, as described in [Example 02](../Example_02). Here the `Kernel` must utilize a coupled variable rather than a known constant. 
+The convection component of the problem requires the creation of a a new `Kernel`, as described in Example 02. Here the `Kernel` must utilize a coupled variable rather than a known constant. 
 
 The header for this object, "ExampleConvection.h" is little changed from the previous example, with one exception, a member is defined to store the gradient of the coupled variable:
 
@@ -48,7 +48,7 @@ Real ExampleConvection::computeQpJacobian()
 [](---)
 
 ## Register Kernel
-As done in [Example 2](../Example_02), the newly created object must be registered. This is accomplished by including the "Convection.h" file and the following in `ExampleApp::registerObjects` method of `src/base/ExampleApp.C` within the example 3 directory of MOOSE (`examples/ex03_coupling`).
+As done in Example 2, the newly created object must be registered. This is accomplished by including the "Convection.h" file and the following in `ExampleApp::registerObjects` method of `src/base/ExampleApp.C` within the example 3 directory of MOOSE (`examples/ex03_coupling`).
 
 ```cpp
 registerKernel(ExampleConvection); 
@@ -153,20 +153,20 @@ Finally, the `Executioner` block is setup for solving the problem an the `Output
 
 ## Running the Problem
 
-This example may be run using [Peacock][gui] or by running the following commands form the command line.
+This example may be run using Peacock or by running the following commands form the command line.
 ```
 cd ~/projects/moose/examples/ex03_coupling
 make -j8
 ./ex03-opt -i ex03.i
 ```
 
-This will generate the results file, out.e, as shown in Figure 1 and 2. This file may be viewed using [Peacock][gui] or an external application that supports the Exodus II format (e.g., Paraview).
+This will generate the results file, out.e, as shown in Figure 1 and 2. This file may be viewed using Peacock or an external application that supports the Exodus II format (e.g., Paraview).
 
-!media media/examples/ex03_out_diffused.png
+!media large_media/examples/ex03_out_diffused.png
        caption=Example 03 Results, "diffused variable"
        style=width:50%;
 
-!media media/examples/ex03_out_convected.png
+!media large_media/examples/ex03_out_convected.png
        caption=Example 03 Results, "convected variable"
        style=width:50%;
 
@@ -194,7 +194,4 @@ $$$
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex03_coupling/src/base/ExampleApp.C)
 
- [moose]:https://mooseframework.org
- [kernel]:http://www.mooseframework.org/docs/doxygen/moose/classKernel.html
- [gui]:http://mooseframework.org/wiki/Peacock
 

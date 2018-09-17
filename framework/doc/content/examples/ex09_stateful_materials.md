@@ -21,11 +21,11 @@
 
 ## Outputs
 
-!media media/examples/ex9-out1.png
+!media large_media/examples/ex9-out1.png
        caption=Beginning
        style=width:100%;
 
-!media media/examples/ex9-out2.png
+!media large_media/examples/ex9-out2.png
        caption=End 
        style=width:100%;
 

@@ -24,8 +24,8 @@
 
 ## Outputs
 
-!media media/examples/ex18-diffused.png
+!media large_media/examples/ex18-diffused.png
        style=width:50%;
 
-!media media/examples/ex18-ode-plot.png
+!media large_media/examples/ex18-ode-plot.png
        style=width:50%;

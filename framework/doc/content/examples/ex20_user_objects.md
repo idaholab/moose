@@ -42,7 +42,7 @@ In order to utilize the "diffusivity" material property a Kernel that uses a mat
 
 ## Running the Problem
 
-This example may be run using [Peacock][gui] or by running the following commands form the command line.
+This example may be run using Peacock or by running the following commands from the command line.
 
 ```
 cd ~/projects/moose/examples/ex20_user_objects
@@ -50,13 +50,13 @@ make -j8
 ./ex20-opt -i ex20.i
 ```
 
-This will generate the results file, ex2_out.e, as shown in Figure 1 and 2. This file may be viewed using [Peacock][gui] or an external application that supports the Exodus II format (e.g., Paraview).
+This will generate the results file, ex2_out.e, as shown in Figure 1 and 2. This file may be viewed using Peacock or an external application that supports the Exodus II format (e.g., Paraview).
 
-!media media/examples/ex20_out_4.png
+!media large_media/examples/ex20_out_4.png
        caption=Figure 1 : Example 20 results after four time steps
        style=width:50%;
 
-!media media/examples/ex20_out_10.png
+!media large_media/examples/ex20_out_10.png
        caption=Figure 2	: Example 20 results after ten	time steps
        style=width:50%;
 
@@ -69,6 +69,3 @@ This will generate the results file, ex2_out.e, as shown in Figure 1 and 2. This
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex20_user_objects/src/base/ExampleApp.C)
 
- [moose]: https://mooseframework.org
- [kernel]: http://www.mooseframework.org/docs/doxygen/moose/classKernel.html
- [gui]: http://mooseframework.org/wiki/Peacock

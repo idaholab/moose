@@ -8,7 +8,7 @@
 
 ## Example 14 Output
 
-!media media/examples/ex14-out.png
+!media large_media/examples/ex14-out.png
        caption=Example 14 Output
        style=width:100%;
 
@@ -28,7 +28,7 @@ Postprocessor Values:
 +----------------+----------------+----------------+
 ```
 
-!media media/examples/ex14-conv-rate.png
+!media large_media/examples/ex14-conv-rate.png
        style=width:50%;
 
 [](---)

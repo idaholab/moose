@@ -3,12 +3,12 @@
 
   # Problem Statement
 
-- This example briefly describes the creation of a basic input file and the six required components for utilizing [`MOOSE`][moose] for solving a problem.
+- This example briefly describes the creation of a basic input file and the six required components for utilizing MOOSE for solving a problem.
 - We consider the steady-state diffusion equation on the 3-D domain $$ \Omega $$: find $$u$$ such that
 $$$ -\nabla \cdot \nabla u = 0 \in \Omega,$$$
 $$u = 1$$ on the bottom, $$u = 0$$ on the top and with $$\nabla u \cdot \hat{n} = 0$$ on the remaining boundaries.
 
-- The weak form ([see Finite Elements: The MOOSE Way](http://mooseframework.org/wiki/MooseTraining/FEM)) of this equation, in inner-product notation, is given by:
+- The weak form ([see Finite Elements Principles](http://mooseframework.org/moose/finite_element_concepts/fem_principles.html#853e90fc-2896-4cf3-8032-ec2f3406e1a4)) of this equation, in inner-product notation, is given by:
 $$$ (\nabla \phi_i, \nabla u_h) = 0 \quad \forall  \phi_i, $$$
 where $$\phi_i$$ are the test functions and $$u_h$$ is the finite element solution.
 
@@ -21,8 +21,7 @@ where $$\phi_i$$ are the test functions and $$u_h$$ is the finite element soluti
     - BCs
     - Executioner
     - Outputs
-- Documentation for these systems and all MOOSE systems is included on the wiki: [http://mooseframework.org/wiki/MooseSystems](http://mooseframework.org/wiki/MooseSystems)
-- A general overview of the basic MOOSE input file syntax is provided on the wiki: [http://mooseframework.org/wiki/MooseTraining/InputFile](http://mooseframework.org/wiki/MooseTraining/InputFile)
+
 
 [](---)
 ## Mesh
@@ -35,7 +34,7 @@ where $$\phi_i$$ are the test functions and $$u_h$$ is the finite element soluti
 []
 ```
 
-!media media/examples/mug_mesh.png
+!media large_media/examples/mug_mesh.png
        caption=mug.e mesh file
        style=width:50%;
 
@@ -59,10 +58,10 @@ where $$\phi_i$$ are the test functions and $$u_h$$ is the finite element soluti
 
 [](---)
 ## Kernels
-- The weak form of problem statement is represented by a Diffusion [`Kernel`][kernel] object.  
+- The weak form of problem statement is represented by a `Diffusion`` Kernel` object.  
 - In general, users write their own Kernels and store them in their own MOOSE-based application, but in this case the Diffusion Kernel is already defined in MOOSE.
 
-- Within the input file, to invoke the use of this object a sub-block is defined, named "diff", that utilizes the [`Diffusion`][diffusion] [`Kernel`][kernel] on the previously defined variable "diffused".
+- Within the input file, to invoke the use of this object a sub-block is defined, named "diff", that utilizes the `Diffusion` `Kernel` on the previously defined variable "diffused".
 
 ```text
 [Kernels]
@@ -75,8 +74,8 @@ where $$\phi_i$$ are the test functions and $$u_h$$ is the finite element soluti
 
 [](---)
 ## Boundary Conditions (BCs)
-- Boundary conditions are defined in a similar manner as [`Kernels`][kernel]. 
-- For the current problem two Dirichlet boundary conditions are required, again an object for this type of boundary is already defined in a C++ object within MOOSE: [`DirichletBC`][bc]. 
+- Boundary conditions are defined in a similar manner as `Kernels`. 
+- For the current problem two Dirichlet boundary conditions are required, again an object for this type of boundary is already defined in a C++ object within MOOSE: `DirichletBC`. 
 - In the input file the two boundary conditions are applied utilizing a single C++ object as follows.
 
 ```text
@@ -99,12 +98,12 @@ where $$\phi_i$$ are the test functions and $$u_h$$ is the finite element soluti
 - Within each of the two sub-blocks, named "top" and "bottom" by the user, the boundary conditions are linked to the associated variable ("variable = diffused") and boundary. 
 - The supplied mesh file, mug.e, prescribes and labels the boundaries "top" and "bottom", these are often numbers depending on how your mesh file was generated.
 
-- Note, the Neumann boundary condition for this problem is automatically satisfied, thus there is no need to define it. However, non-zero Neumann conditions as well as many others may be defined using existing MOOSE objects (e.g., [`NeumannBC`][bc2]) or using custom boundary conditions derived from the existing objects within MOOSE.
+- Note, the Neumann boundary condition for this problem is automatically satisfied, thus there is no need to define it. However, non-zero Neumann conditions as well as many others may be defined using existing MOOSE objects (e.g., `NeumannBC`) or using custom boundary conditions derived from the existing objects within MOOSE.
 
 [](---)
 ## Executioner
-- The type of problem to solve and the method for solving is defined within the [`Executioner`][exec] block. 
-- For this problem the type is [`Steady`][steady] and the method for solving is the default, Preconditioned Jacobain Free Newton Krylov.
+- The type of problem to solve and the method for solving is defined within the `Executioner` block. 
+- For this problem the type is `Steady` and the method for solving is the default, Preconditioned Jacobain Free Newton Krylov.
 
 ```text
 [Executioner]
@@ -136,9 +135,9 @@ make -j8
 ./ex01-opt -i ex01.i
 ```
 
-- This will generate the results file, out.e, as shown in Figure 2. This file may be viewed using [Peacock][gui] or an external application that supports the Exodus II format (e.g., Paraview).
+- This will generate the results file, out.e, as shown in Figure 2. This file may be viewed using Peacock or an external application that supports the Exodus II format (e.g., Paraview).
 
-!media media/examples/ex01_results.png
+!media large_media/examples/ex01_results.png
        caption= Example 1 Results
        style=width:50%;
 
@@ -169,11 +168,3 @@ make -j8
     * [C++](http://mooseframework.org/wiki/MooseTraining/CPP/) and object-oriented design
     * [The Anatomy of a MOOSE Object](http://mooseframework.org/wiki/MooseTraining/MooseObject/)
 
- [gui]: http://mooseframework.org/wiki/Peacock 
- [moose]: https://mooseframework.org
- [kernel]: http://www.mooseframework.org/docs/doxygen/moose/classKernel.html
- [diffusion]: http://www.mooseframework.org/docs/doxygen/moose/classDiffusion.html
- [bc]: http://www.mooseframework.org/docs/doxygen/moose/classDirichletBC.html
- [bc2]: http://www.mooseframework.org/docs/doxygen/moose/classNuemannBC.html
- [exec]: http://www.mooseframework.org/docs/doxygen/moose/classExecutioner.html
- [steady]: http://www.mooseframework.org/docs/doxygen/moose/classSteady.html

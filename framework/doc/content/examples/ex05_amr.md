@@ -4,35 +4,35 @@
 
 ## Results
 
-!media media/examples/ex5-mesh-0.png
+!media large_media/examples/ex5-mesh-0.png
        caption=Initial mesh
        style=width:50%;
 
-!media media/examples/ex5-mesh-1.png
+!media large_media/examples/ex5-mesh-1.png
        caption=Adaptivity Step 1 
        style=width:50%;
 
-!media media/examples/ex5-mesh-2.png
+!media large_media/examples/ex5-mesh-2.png
        caption=Adaptivity Step 2
        style=width:50%;
 
-!media media/examples/ex5-mesh-3.png
+!media large_media/examples/ex5-mesh-3.png
        caption=Adaptivity Step 3
        style=width:50%;
 
-!media media/examples/ex5-mesh-4.png
+!media large_media/examples/ex5-mesh-4.png
        caption=Adaptivity Step 4
        style=width:50%;
 
-!media media/examples/ex5-mesh-5.png
+!media large_media/examples/ex5-mesh-5.png
        caption=Adaptivity Step 5
        style=width:50%;
 
-!media media/examples/ex5-mesh-6.png
+!media large_media/examples/ex5-mesh-6.png
        caption=Adaptivity Step 6
        style=width:50%;
 
-!media media/examples/ex5-out.png
+!media large_media/examples/ex5-out.png
        caption=Example 5 Output
        style=width:50%;
 
