@@ -1,5 +1,4 @@
 [Tests]
-  requirement = 'MOOSE shall allow efficient execution of explicit solves'
   design = '/ActuallyExplicitEuler.md'
   issues = '10837'
 
@@ -7,18 +6,28 @@
     type = 'Exodiff'
     input = 'actually_explicit_euler.i'
     exodiff = 'actually_explicit_euler_out.e'
+
+    requirement = 'MOOSE shall have the ability to integrate in time using the
+      Forward Euler scheme efficiently, using the consistent mass matrix'
   [../]
 
   [./lumped]
     type = 'Exodiff'
     input = 'actually_explicit_euler_lumped.i'
     exodiff = 'actually_explicit_euler_lumped_out.e'
+
+    requirement = 'MOOSE shall have the ability to integrate in time using the
+      Forward Euler scheme efficiently, using the lumped mass matrix'
   [../]
 
   [./lump_preconditioned]
     type = 'Exodiff'
     input = 'actually_explicit_euler_lump_preconditioned.i'
     exodiff = 'actually_explicit_euler_lump_preconditioned_out.e'
+
+    requirement = 'MOOSE shall have the ability to integrate in time using the
+      Forward Euler scheme efficiently, using the consistent mass matrix, but
+      preconditioned using the lumped mass matrix'
   [../]
 
   [./diverged]
@@ -26,6 +35,9 @@
     input = 'diverged.i'
     expect_err = 'Solve failed and timestep already at or below dtmin'
     cli_args = '--no-trap-fpe'
+
+    requirement = 'MOOSE shall throw an error if the ActuallyExplicitEuler
+      time integration scheme, using consistent mass matrix, fails'
   [../]
 
   [./diverged_lumped]
@@ -33,6 +45,9 @@
     input = 'diverged.i'
     expect_err = 'Solve failed and timestep already at or below dtmin'
     cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lumped'
+
+    requirement = 'MOOSE shall throw an error if the ActuallyExplicitEuler
+      time integration scheme, using lumped mass matrix, fails'
   [../]
 
   [./diverged_lump_prec]
@@ -40,6 +55,10 @@
     input = 'diverged.i'
     expect_err = 'Solve failed and timestep already at or below dtmin'
     cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lump_preconditioned'
+
+    requirement = 'MOOSE shall throw an error if the ActuallyExplicitEuler
+      time integration scheme, using consistent mass matrix preconditioned by
+      the lumped mass matrix, fails'
   [../]
 
   [./nonlinear_residual]
