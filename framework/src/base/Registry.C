@@ -66,7 +66,8 @@ Registry::registerObjectsTo(Factory & f, const std::set<std::string> & labels)
       if (name.empty())
         name = obj._classname;
 
-      f.reg(name,
+      f.reg(obj._label,
+            name,
             obj._build_ptr,
             obj._params_ptr,
             obj._deprecated_time,
