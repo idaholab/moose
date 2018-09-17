@@ -605,8 +605,12 @@ def _insert_parameter(parent, name, param):
     html.Tag(p, 'span', string=u'C++ Type:')
     html.String(p, content=cpp_type)
 
-    p = html.Tag(body, 'p', class_='moose-parameter-description')
+    if 'options' in param:
+        p = html.Tag(body, 'p', class_='moose-parameter-description-options')
+        html.Tag(p, 'span', string=u'Options:')
+        html.String(p, content=param['options'])
 
+    p = html.Tag(body, 'p', class_='moose-parameter-description')
     desc = param['description']
     if desc:
         html.Tag(header, 'span', class_='moose-parameter-header-description', string=unicode(desc))
