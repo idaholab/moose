@@ -1,10 +1,13 @@
 [Tests]
+  design = 'XFEMPressure.md'
+  issues = '#6320'
   [./edge_2d_pressure]
     type = Exodiff
     input = edge_2d_pressure.i
     exodiff = 'edge_2d_pressure_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall permit application of pressure boundary conditions to XFEM cut surfaces in 2D'
   [../]
   [./edge_3d_pressure]
     type = Exodiff
@@ -12,6 +15,7 @@
     exodiff = 'edge_3d_pressure_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall permit application of pressure boundary conditions to XFEM cut surfaces in 3D'
   [../]
   [./inclined_edge_2d_pressure]
     type = Exodiff
@@ -19,6 +23,7 @@
     exodiff = 'inclined_edge_2d_pressure_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall permit application of pressure boundary conditions to inclined XFEM cut surfaces in 2D'
   [../]
   [./2d_pressure_displaced_mesh]
     type = Exodiff
@@ -26,5 +31,6 @@
     exodiff = '2d_pressure_displaced_mesh_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall permit application of pressure boundary conditions to XFEM cut surfaces in 2D finite deformation simulations'
   [../]
 []

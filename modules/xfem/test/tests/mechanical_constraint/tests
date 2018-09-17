@@ -7,5 +7,8 @@
     use_old_floor = true
     map = false
     unique_id = true
+    design = 'XFEM/index.md'
+    issues = '#6320'
+    requirement = 'The XFEM module shall permit applying a glued constraint across the XFEM interface for 2D solid mechanics problems.'
   [../]
 []
