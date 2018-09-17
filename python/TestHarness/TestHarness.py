@@ -844,8 +844,8 @@ class TestHarness:
         if opts.group == opts.not_group:
             print('ERROR: The group and not_group options cannot specify the same group')
             sys.exit(1)
-        if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
-            print('ERROR: --parallel and/or --threads can not be used with --valgrind')
+        if opts.valgrind_mode and opts.nthreads > 1:
+            print('ERROR: --threads can not be used with --valgrind')
             sys.exit(1)
         if opts.check_input and opts.no_check_input:
             print('ERROR: --check-input and --no-check-input can not be used together')
