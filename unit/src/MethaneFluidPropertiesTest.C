@@ -69,21 +69,21 @@ TEST_F(MethaneFluidPropertiesTest, properties)
   const Real tol = REL_TOL_EXTERNAL_VALUE;
 
   REL_TEST(_fp->rho_from_p_T(p, T), 55.13, tol);
-  REL_TEST(_fp->h(p, T), 708.5e3, tol);
-  REL_TEST(_fp->e(p, T), 527.131e3, tol);
-  REL_TEST(_fp->s(p, T), 11.30e3, tol);
+  REL_TEST(_fp->h_from_p_T(p, T), 708.5e3, tol);
+  REL_TEST(_fp->e_from_p_T(p, T), 527.131e3, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), 11.30e3, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), 2.375e3, tol);
   REL_TEST(_fp->cv_from_p_T(p, T), 1.857e3, tol);
-  REL_TEST(_fp->c(p, T), 481.7, tol);
-  REL_TEST(_fp->mu(p, T), 0.01276e-3, tol);
-  REL_TEST(_fp->k(p, T), 0.04113, tol);
+  REL_TEST(_fp->c_from_p_T(p, T), 481.7, tol);
+  REL_TEST(_fp->mu_from_p_T(p, T), 0.01276e-3, tol);
+  REL_TEST(_fp->k_from_p_T(p, T), 0.04113, tol);
 
   // Test s, h and cp for temperatures > 755K as well as these methods have a
   // different formulation in this regime
   T = 800.0;
 
-  REL_TEST(_fp->h(p, T), 2132.0e3, tol);
-  REL_TEST(_fp->s(p, T), 13.83e3, tol);
+  REL_TEST(_fp->h_from_p_T(p, T), 2132.0e3, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), 13.83e3, tol);
   REL_TEST(_fp->cp_from_p_T(p, T), 3.934e3, tol);
 }
 

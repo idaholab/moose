@@ -284,7 +284,7 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
                      dco2_viscosity_dp,
                      dco2_viscosity_dT);
 
-  _co2_fp.h_dpT(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
+  _co2_fp.h_from_p_T(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
 
   // Save the values to the FluidStateProperties object. Note that derivatives wrt z are 0
   gas.density = co2_density;
@@ -375,7 +375,7 @@ PorousFlowBrineCO2::liquidProperties(Real pressure,
 
   // Enthalpy of CO2
   Real co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT;
-  _co2_fp.h_dpT(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
+  _co2_fp.h_from_p_T(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
 
   // Enthalpy of dissolution
   Real hdis, dhdis_dT;

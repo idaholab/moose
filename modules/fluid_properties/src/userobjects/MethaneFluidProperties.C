@@ -94,18 +94,18 @@ MethaneFluidProperties::rho_from_p_T(
 }
 
 Real
-MethaneFluidProperties::e(Real pressure, Real temperature) const
+MethaneFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
-  return h(pressure, temperature) - _R * temperature / _Mch4;
+  return h_from_p_T(pressure, temperature) - _R * temperature / _Mch4;
 }
 
 void
-MethaneFluidProperties::e_dpT(
+MethaneFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  e = this->e(pressure, temperature);
+  e = this->e_from_p_T(pressure, temperature);
   Real enthalpy, enthalpy_dp, enthalpy_dT;
-  h_dpT(pressure, temperature, enthalpy, enthalpy_dp, enthalpy_dT);
+  h_from_p_T(pressure, temperature, enthalpy, enthalpy_dp, enthalpy_dT);
   de_dp = enthalpy_dp;
   de_dT = enthalpy_dT - _R / _Mch4;
 }
@@ -127,14 +127,14 @@ MethaneFluidProperties::rho_e_dpT(Real pressure,
   drho_dT = ddensity_dT;
 
   Real energy, denergy_dp, denergy_dT;
-  e_dpT(pressure, temperature, energy, denergy_dp, denergy_dT);
+  e_from_p_T(pressure, temperature, energy, denergy_dp, denergy_dT);
   e = energy;
   de_dp = denergy_dp;
   de_dT = denergy_dT;
 }
 
 Real
-MethaneFluidProperties::c(Real pressure, Real temperature) const
+MethaneFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   return std::sqrt(gamma_from_p_T(pressure, temperature) * _R * temperature / _Mch4);
 }
@@ -166,12 +166,12 @@ MethaneFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 }
 
 Real
-MethaneFluidProperties::mu(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
     throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (200K, 1000K) in " + name() + ": mu()");
+                         "K out of range (200K, 1000K) in " + name() + ": mu_from_p_T()");
 
   Real viscosity = 0.0;
   for (std::size_t i = 0; i < _a.size(); ++i)
@@ -181,11 +181,11 @@ MethaneFluidProperties::mu(Real /*pressure*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::mu_dpT(
+MethaneFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
 
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
   dmu_dp = 0.0;
 
   Real dmudt = 0.0;
@@ -198,7 +198,7 @@ void
 MethaneFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
   rho = this->rho_from_p_T(pressure, temperature);
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
 }
 
 void
@@ -212,11 +212,11 @@ MethaneFluidProperties::rho_mu_dpT(Real pressure,
                                    Real & dmu_dT) const
 {
   this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+  this->mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real
-MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
@@ -231,7 +231,7 @@ MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::k_dpT(
+MethaneFluidProperties::k_from_p_T(
     Real /*pressure*/, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
@@ -253,7 +253,7 @@ MethaneFluidProperties::k_dpT(
 }
 
 Real
-MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::s_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
@@ -282,8 +282,14 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
   return entropy * 1000.0;
 }
 
+void
+MethaneFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+}
+
 Real
-MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
@@ -309,10 +315,10 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::h_dpT(
+MethaneFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  h = this->h(pressure, temperature);
+  h = this->h_from_p_T(pressure, temperature);
   // Enthalpy doesn't depend on pressure
   dh_dp = 0.0;
 

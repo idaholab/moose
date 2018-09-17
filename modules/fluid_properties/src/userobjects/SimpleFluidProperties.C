@@ -69,7 +69,7 @@ SimpleFluidProperties::molarMass() const
   return _molar_mass;
 }
 
-Real SimpleFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::beta_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_expansion;
 }
@@ -85,18 +85,18 @@ Real SimpleFluidProperties::cv_from_p_T(Real /*pressure*/, Real /*temperature*/)
 }
 
 Real
-SimpleFluidProperties::c(Real pressure, Real temperature) const
+SimpleFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
   return std::sqrt(_bulk_modulus / rho_from_p_T(pressure, temperature));
 }
 
-Real SimpleFluidProperties::k(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::k_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
 
 void
-SimpleFluidProperties::k_dpT(
+SimpleFluidProperties::k_from_p_T(
     Real /*pressure*/, Real /*temperature*/, Real & k, Real & dk_dp, Real & dk_dT) const
 {
   k = _thermal_conductivity;
@@ -104,9 +104,15 @@ SimpleFluidProperties::k_dpT(
   dk_dT = 0;
 }
 
-Real SimpleFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::s_from_p_T(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
+}
+
+void
+SimpleFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
 }
 
 Real
@@ -125,16 +131,16 @@ SimpleFluidProperties::rho_from_p_T(
 }
 
 Real
-SimpleFluidProperties::e(Real /*pressure*/, Real temperature) const
+SimpleFluidProperties::e_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return _cv * temperature;
 }
 
 void
-SimpleFluidProperties::e_dpT(
+SimpleFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  e = this->e(pressure, temperature);
+  e = this->e_from_p_T(pressure, temperature);
   de_dp = 0.0;
   de_dT = _cv;
 }
@@ -156,19 +162,22 @@ SimpleFluidProperties::rho_e_dpT(Real pressure,
   drho_dT = ddensity_dT;
 
   Real energy, denergy_dp, denergy_dT;
-  e_dpT(pressure, temperature, energy, denergy_dp, denergy_dT);
+  e_from_p_T(pressure, temperature, energy, denergy_dp, denergy_dT);
   e = energy;
   de_dp = denergy_dp;
   de_dT = denergy_dT;
 }
 
-Real SimpleFluidProperties::mu(Real /*pressure*/, Real /*temperature*/) const { return _viscosity; }
+Real SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _viscosity;
+}
 
 void
-SimpleFluidProperties::mu_dpT(
+SimpleFluidProperties::mu_from_p_T(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
   dmu_dp = 0.0;
   dmu_dT = 0.0;
 }
@@ -177,7 +186,7 @@ void
 SimpleFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
   rho = this->rho_from_p_T(pressure, temperature);
-  mu = this->mu(pressure, temperature);
+  mu = this->mu_from_p_T(pressure, temperature);
 }
 
 void
@@ -191,20 +200,21 @@ SimpleFluidProperties::rho_mu_dpT(Real pressure,
                                   Real & dmu_dT) const
 {
   this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+  this->mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real
-SimpleFluidProperties::h(Real pressure, Real temperature) const
+SimpleFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
-  return e(pressure, temperature) + _pp_coeff * pressure / rho_from_p_T(pressure, temperature);
+  return e_from_p_T(pressure, temperature) +
+         _pp_coeff * pressure / rho_from_p_T(pressure, temperature);
 }
 
 void
-SimpleFluidProperties::h_dpT(
+SimpleFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  h = this->h(pressure, temperature);
+  h = this->h_from_p_T(pressure, temperature);
 
   Real density, ddensity_dp, ddensity_dT;
   rho_from_p_T(pressure, temperature, density, ddensity_dp, ddensity_dT);
