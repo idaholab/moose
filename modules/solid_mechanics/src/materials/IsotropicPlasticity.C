@@ -106,13 +106,9 @@ IsotropicPlasticity::computeResidual(const Real effectiveTrialStress, const Real
 
     // The order here is important.  The final term can be small, and we don't want it lost to
     // roundoff.
-    if (_legacy_return_mapping)
-      residual = (effectiveTrialStress - _hardening_variable[_qp] - _yield_stress) -
-                 (3 * _shear_modulus * scalar);
-    else
-      residual = (effectiveTrialStress - _hardening_variable[_qp] - _yield_stress) /
-                     (3.0 * _shear_modulus) -
-                 scalar;
+    residual =
+        (effectiveTrialStress - _hardening_variable[_qp] - _yield_stress) / (3.0 * _shear_modulus) -
+        scalar;
   }
 
   return residual;
@@ -123,12 +119,7 @@ IsotropicPlasticity::computeDerivative(const Real /*effectiveTrialStress*/, cons
 {
   Real derivative(1);
   if (_yield_condition > 0)
-  {
-    if (_legacy_return_mapping)
-      derivative = -3.0 * _shear_modulus - _hardening_slope;
-    else
-      derivative = -1.0 - _hardening_slope / (3.0 * _shear_modulus);
-  }
+    derivative = -1.0 - _hardening_slope / (3.0 * _shear_modulus);
 
   return derivative;
 }

@@ -112,21 +112,10 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/,
   returnMappingSolve(effective_trial_stress, scalar, _console);
 
   // compute inelastic and elastic strain increments
-  if (_legacy_return_mapping)
-  {
-    if (effective_trial_stress < 0.01)
-      effective_trial_stress = 0.01;
-
-    inelastic_strain_increment = dev_trial_stress;
-    inelastic_strain_increment *= (1.5 * scalar / effective_trial_stress);
-  }
+  if (scalar != 0.0)
+    inelastic_strain_increment = dev_trial_stress * (1.5 * scalar / effective_trial_stress);
   else
-  {
-    if (scalar != 0.0)
-      inelastic_strain_increment = dev_trial_stress * (1.5 * scalar / effective_trial_stress);
-    else
-      inelastic_strain_increment = 0.0;
-  }
+    inelastic_strain_increment = 0.0;
 
   strain_increment -= inelastic_strain_increment;
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + scalar;
