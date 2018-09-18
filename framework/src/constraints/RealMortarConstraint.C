@@ -101,9 +101,6 @@ RealMortarConstraint::computeResidual()
   UniquePtr<FEBase> slave_interior_fe_primal(FEBase::build(dim, fe_type_primal));
   const std::vector<std::vector<Real>> & slave_interior_phi_primal =
       slave_interior_fe_primal->get_phi();
-  const std::vector<std::vector<RealGradient>> & slave_interior_dphi_primal =
-      slave_interior_fe_primal->get_dphi();
-  const std::vector<Point> & slave_interior_normals = slave_interior_fe_primal->get_normals();
   const std::vector<Point> & slave_interior_xyz = slave_interior_fe_primal->get_xyz();
 
   // A finite element object for the interior element associated with
@@ -113,9 +110,6 @@ RealMortarConstraint::computeResidual()
   UniquePtr<FEBase> master_interior_fe_primal(FEBase::build(dim, fe_type_primal));
   const std::vector<std::vector<Real>> & master_interior_phi_primal =
       master_interior_fe_primal->get_phi();
-  const std::vector<std::vector<RealGradient>> & master_interior_dphi_primal =
-      master_interior_fe_primal->get_dphi();
-  const std::vector<Point> & master_interior_normals = master_interior_fe_primal->get_normals();
   const std::vector<Point> & master_interior_xyz = master_interior_fe_primal->get_xyz();
 
   // Vector to hold lambda dofs on lower-dimensional slave side elements
@@ -139,7 +133,20 @@ RealMortarConstraint::computeResidual()
   DenseVector<Real> F_primal_master;
   DenseVector<Real> F_lambda_slave;
 
-  libMesh::out << "About to loop over " << amg->mortar_segment_mesh.n_elem()
+  DenseVector<Real> u_primal_slave;
+  DenseVector<Real> u_primal_master;
+  DenseVector<Real> u_lambda_slave;
+
+  DenseVector<Real> dof_values_primal_slave;
+  DenseVector<Real> dof_values_primal_master;
+  DenseVector<Real> dof_values_lambda_slave;
+
+  const NumericVector<Real> & current_solution = *_sys.currentSolution();
+
+  // Array to hold custom quadrature point locations on the slave and master sides
+  std::vector<Point> custom_xi1_pts, custom_xi2_pts;
+
+  libMesh::out << "About to loop over " << _amg.mortar_segment_mesh.n_elem()
                << " mortar mesh segments." << std::endl;
 
   for (MeshBase::const_element_iterator
@@ -210,10 +217,6 @@ RealMortarConstraint::computeResidual()
     // mortar segment is simply msinfo.slave_elem.
     const Elem * slave_face_elem = msinfo.slave_elem;
 
-    // The length of the lower-dimensional slave element. Will be used in computing stabilization
-    // contributions.
-    const Real h_slave = slave_face_elem->volume();
-
     // Print the lower-dimensional element id. We can now ask for DOFs specifically for this
     // element. libMesh::out << "Lower-dimensional element id: " << slave_face_elem->id() <<
     // std::endl;
@@ -266,6 +269,26 @@ RealMortarConstraint::computeResidual()
 
     // Re-compute FE data on the mortar segment Elem (JxW_msm is the only thing we actually use.)
     fe_msm->reinit(msm_elem);
+
+    K_primal_slave_lambda_slave.resize(dof_indices_interior_slave_primal.size(),
+                                       dof_indices_slave_lambda.size());
+    K_primal_master_lambda_slave(dof_indices_interior_master_primal.size(),
+                                 dof_indices_slave_lambda.size());
+
+    K_lambda_slave_lambda_slave.resize(dof_indices_slave_lambda.size(),
+                                       dof_indices_slave_lambda.size());
+    K_lambda_slave_primal_slave.resize(dof_indices_slave_lambda.size(),
+                                       dof_indices_interior_slave_primal.size());
+    K_lambda_slave_primal_master.resize(dof_indices_slave_lambda.size(),
+                                        dof_indices_interior_master_primal.size());
+
+    F_primal_slave.resize(dof_indices_interior_slave_primal.size());
+    F_primal_master.resize(dof_indices_interior_master_primal.size());
+    F_lambda_slave.resize(dof_indices_slave_lambda.size());
+
+    u_primal_slave.resize(qrule_msm.n_points());
+    u_primal_master.resize(qrule_msm.n_points());
+    u_lambda_slave.resize(qrule_msm.n_points());
 
     {
       custom_xi1_pts.resize(qrule_msm.n_points());
@@ -381,7 +404,7 @@ RealMortarConstraint::computeResidual()
     // is the thermal conductivity of the air in the gap, and g is
     // the distance between the surfaces.
     std::vector<Real> heat_transfer_coeff(slave_interior_xyz.size());
-    if (gap_conductance && has_master)
+    if (has_master)
     {
       for (unsigned int qp = 0; qp < heat_transfer_coeff.size(); ++qp)
       {
@@ -392,8 +415,8 @@ RealMortarConstraint::computeResidual()
         if (gap < TOLERANCE * TOLERANCE)
           libmesh_error_msg("Error: gap "
                             << gap
-                            << " is approximately zero, the gap conductance approach will
-                            fail.");
+                            << " is approximately zero, the gap conductance approach will "
+                               "fail.");
 
         // TODO: Currently the numerator is a fixed constant, but it should be specifiable by the
         // user.
@@ -403,93 +426,128 @@ RealMortarConstraint::computeResidual()
         // std::endl;
       }
     }
-      // Compute slave/slave contribution to primal equation.
-      for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-        for (unsigned int i=0; i<K_slave_slave_primal.m(); ++i)
-          for (unsigned int j=0; j<K_slave_slave_primal.n(); ++j)
-            {
-              K_slave_slave_primal(i,j) += JxW_msm[qp] * slave_interior_phi_T[i][qp] * slave_face_phi_lambda[j][qp];
-            }
 
-      // In the continuity constrained case, the slave/slave
+    for (unsigned int qp = 0; qp < qrule_msm.n_points(); ++qp)
+    {
+      for (unsigned int i = 0; i < dof_indices_slave_lambda.size(); ++i)
+      {
+        auto idx = dof_indices_slave_lambda[i];
+        auto soln_local = current_solution(idx);
+
+        u_lambda_slave(qp) += soln_local * slave_face_phi_lambda[i][qp];
+      }
+      for (unsigned int i = 0; i < dof_indices_interior_slave_primal.size(); ++i)
+      {
+        auto idx = dof_indices_interior_slave_primal[i];
+        auto soln_local = current_solution(idx);
+
+        u_primal_slave(qp) += soln_local * slave_interior_phi_primal[i][qp];
+      }
+      for (unsigned int i = 0; i < dof_indices_interior_master_primal.size(); ++i)
+      {
+        auto idx = dof_indices_interior_master_primal[i];
+        auto soln_local = current_solution(idx);
+
+        u_primal_master(qp) += soln_local * master_interior_phi_primal[i][qp];
+      }
+    }
+
+    // Compute slave/slave contribution to primal equation.
+    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
+      for (unsigned int i = 0; i < K_primal_slave_lambda_slave.m(); ++i)
+      {
+        F_primal_slave(i) += JxW_msm[qp] * slave_interior_phi_primal[i][qp] * u_lambda_slave(qp);
+        for (unsigned int j = 0; j < K_primal_slave_lambda_slave.n(); ++j)
+          K_primal_slave_lambda_slave(i, j) +=
+              JxW_msm[qp] * slave_interior_phi_primal[i][qp] * slave_face_phi_lambda[j][qp];
+      }
+
+    // In the continuity constrained case, the slave/slave
+    // contribution to the LM equation is just the transpose of the
+    // primal contribution. In the gap conductance case, the heat
+    // transfer coefficient shows up, and there is a minus sign.
+    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
+      for (unsigned int i = 0; i < K_lambda_slave_primal_slave.m(); ++i)
+      {
+        F_lambda_slave(i) += JxW_msm[qp] * slave_face_phi_lambda[i][qp] *
+                             (u_lambda_slave(qp) -
+                              heat_transfer_coeff[qp] *
+                                  (u_primal_slave(qp) - (has_master ? u_primal_master(qp) : 0)));
+        for (unsigned int j = 0; j < K_lambda_slave_primal_slave.n(); ++j)
+          K_lambda_slave_primal_slave(i, j) += JxW_msm[qp] * (-heat_transfer_coeff[qp]) *
+                                               slave_interior_phi_primal[j][qp] *
+                                               slave_face_phi_lambda[i][qp];
+      }
+
+    // Compute the lambda/lambda contribution. If stailization is
+    // turned on for the continuity constrained problem, this will
+    // look like the (negative) mass matrix contribution. In the gap
+    // conductance problem, it is a positive mass matrix
+    // contribution. There are contributions from both the slave and
+    // master side in general for the continuity constrained
+    // problem, and when there is no master side Elem, h_master==0.
+    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
+      for (unsigned int i = 0; i < K_lambda_slave_lambda_slave.m(); ++i)
+        for (unsigned int j = 0; j < K_lambda_slave_lambda_slave.n(); ++j)
+          K_lambda_slave_lambda_slave(i, j) +=
+              JxW_msm[qp] * slave_face_phi_lambda[i][qp] * slave_face_phi_lambda[j][qp];
+
+    // Compute master/slave contributions to primal equation.
+    if (has_master)
+    {
+      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
+        for (unsigned int i = 0; i < K_primal_master_lambda_slave.m(); ++i)
+        {
+          F_primal_master(i) +=
+              -JxW_msm[qp] * master_interior_phi_primal[i][qp] * u_lambda_slave(qp);
+          for (unsigned int j = 0; j < K_primal_master_lambda_slave.n(); ++j)
+            K_primal_master_lambda_slave(i, j) +=
+                -JxW_msm[qp] * master_interior_phi_primal[i][qp] * slave_face_phi_lambda[j][qp];
+        }
+
+      // In the continuity constrained case, the master/slave
       // contribution to the LM equation is just the transpose of the
       // primal contribution. In the gap conductance case, the heat
-      // transfer coefficient shows up, and there is a minus sign.
-      if (!gap_conductance)
-        K_slave_slave_primal.get_transpose(K_slave_slave_lm);
-      else
-        {
-          for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-            for (unsigned int i=0; i<K_slave_slave_lm.m(); ++i)
-              for (unsigned int j=0; j<K_slave_slave_lm.n(); ++j)
-                {
-                  K_slave_slave_lm(i,j) += JxW_msm[qp] * (-heat_transfer_coeff[qp]) *
-                    slave_interior_phi_T[j][qp] * slave_face_phi_lambda[i][qp];
-                }
-        }
+      // transfer coefficient shows up, and there is a different sign.
+      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
+        for (unsigned int i = 0; i < K_lambda_slave_primal_master.m(); ++i)
+          for (unsigned int j = 0; j < K_lambda_slave_primal_master.n(); ++j)
+            K_lambda_slave_primal_master(i, j) += JxW_msm[qp] * heat_transfer_coeff[qp] *
+                                                  master_interior_phi_primal[j][qp] *
+                                                  slave_face_phi_lambda[i][qp];
+    }
 
-      // Compute the lambda/lambda contribution. If stailization is
-      // turned on for the continuity constrained problem, this will
-      // look like the (negative) mass matrix contribution. In the gap
-      // conductance problem, it is a positive mass matrix
-      // contribution. There are contributions from both the slave and
-      // master side in general for the continuity constrained
-      // problem, and when there is no master side Elem, h_master==0.
-      for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-        for (unsigned int i=0; i<K_lambda_lambda.m(); ++i)
-          for (unsigned int j=0; j<K_lambda_lambda.n(); ++j)
-            {
-              if (!gap_conductance)
-                K_lambda_lambda(i,j) += -delta * (h_slave + h_master) * JxW_msm[qp] *
-                  slave_face_phi_lambda[i][qp] * slave_face_phi_lambda[j][qp];
-              else
-                K_lambda_lambda(i,j) += JxW_msm[qp] * slave_face_phi_lambda[i][qp] * slave_face_phi_lambda[j][qp];
-            }
+    _sys.getVector(_sys.residualVectorTag()).add_vector(F_lambda_slave, dof_indices_slave_lambda);
+    _sys.getVector(_sys.residualVectorTag())
+        .add_vector(F_primal_slave, dof_indices_interior_slave_primal);
+    _sys.getVector(_sys.residualVectorTag())
+        .add_vector(F_primal_master, dof_indices_interior_master_primal);
 
-      // Compute master/slave contributions to primal equation.
-      if (has_master)
-        {
-          for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-            for (unsigned int i=0; i<K_master_slave_primal.m(); ++i)
-              for (unsigned int j=0; j<K_master_slave_primal.n(); ++j)
-                {
-                  K_master_slave_primal(i,j) += -JxW_msm[qp] * master_interior_phi_T[i][qp] * slave_face_phi_lambda[j][qp];
-                }
-
-          // In the continuity constrained case, the master/slave
-          // contribution to the LM equation is just the transpose of the
-          // primal contribution. In the gap conductance case, the heat
-          // transfer coefficient shows up, and there is a different sign.
-          if (!gap_conductance)
-            K_master_slave_primal.get_transpose(K_master_slave_lm);
-          else
-            {
-              for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-                for (unsigned int i=0; i<K_master_slave_lm.m(); ++i)
-                  for (unsigned int j=0; j<K_master_slave_lm.n(); ++j)
-                    {
-                      K_master_slave_lm(i,j) += JxW_msm[qp] * heat_transfer_coeff[qp] *
-                        master_interior_phi_T[j][qp] * slave_face_phi_lambda[i][qp];
-                    }
-            }
-        }
-
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(K_primal_slave_lambda_slave,
+                    dof_indices_interior_slave_primal,
+                    dof_indices_slave_lambda);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(K_primal_master_lambda_slave,
+                    dof_indices_interior_master_primal,
+                    dof_indices_slave_lambda);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(
+            K_lambda_slave_lambda_slave, dof_indices_slave_lambda, dof_indices_slave_lambda);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(K_lambda_slave_primal_slave,
+                    dof_indices_slave_lambda,
+                    dof_indices_interior_slave_primal);
+    _sys.getMatrix(_sys.systemMatrixTag())
+        .add_matrix(K_lambda_slave_primal_master,
+                    dof_indices_slave_lambda,
+                    dof_indices_interior_master_primal);
   }
-
 }
 
 void
 RealMortarConstraint::computeJacobian()
 {
-  _phi = _assembly.getFE(_var.feType(), _dim - 1)->get_phi(); // yes we need to do a copy here
-  std::vector<std::vector<Real>> phi_primal;
-
-  DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
-
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
-        Kee(_i, _j) += _JxW_lm[_qp] * _coord[_qp] * computeQpJacobian();
 }
 
 Real
