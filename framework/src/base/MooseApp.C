@@ -304,6 +304,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3))
 {
   Registry::addKnownLabel(_type);
+  Moose::registerAll(_factory, _action_factory, _syntax);
 
   if (isParamValid("_argc") && isParamValid("_argv"))
   {

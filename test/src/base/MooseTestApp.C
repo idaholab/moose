@@ -45,7 +45,6 @@ MooseTestApp::~MooseTestApp() {}
 void
 MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  Moose::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"MooseTestApp"});
   Registry::registerActionsTo(af, {"MooseTestApp"});
 
