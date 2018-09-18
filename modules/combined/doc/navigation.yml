@@ -12,6 +12,7 @@ Getting Started:
 Documentation:
     Syntax: syntax/index.md
     Source: source/index.md
+    Examples: examples/index.md
     Application Usage: application_usage/index.md
     Application Development: application_development/index.md
     Framework Development: framework_development/index.md
