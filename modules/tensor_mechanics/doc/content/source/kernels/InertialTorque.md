@@ -5,9 +5,11 @@
 ## Description
 
 This kernel computes the $i^{\mathrm{th}}$ component of inertial torque using
-$$
+
+\begin{equation}
 \rho \epsilon_{ijk}u_{j}\ddot{u}_{k} \ .
-$$
+\end{equation}
+
 In this equation $\rho$ is the material's density (a Material Property), $\epsilon_{ijk}$ is the
 permutation pseudotensor (the Levi-Cevita tensor), $u_{j}$ is the $j^{\mathrm{th}}$ component of
 displacement, and $\ddot{u}_{k}$ is the $k^{\mathrm{th}}$ component of the acceleration.

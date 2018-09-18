@@ -1,4 +1,3 @@
-
 # DerivativeTwoPhaseMaterial
 
 !syntax description /Materials/DerivativeTwoPhaseMaterial
@@ -9,9 +8,9 @@ For two phase models the `DerivativeTwoPhaseMaterial` can be used to combine two
 free energies into a global free energy (which the [`AllenCahn`](/AllenCahn.md)
 and [`Cahn-Hilliard`](/CahnHilliard.md) kernels use to evolve the system) as
 
-$$
+\begin{equation}
 F = \left(1-h(\eta)\right) F_a + h(\eta)F_b + Wg(\eta)
-$$
+\end{equation}
 
 !syntax parameters /Materials/DerivativeTwoPhaseMaterial
 

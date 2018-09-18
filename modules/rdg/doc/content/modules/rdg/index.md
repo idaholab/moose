@@ -137,7 +137,7 @@ a^- = \frac{1}{2}(v^{\perp}_{ji} - |v^{\perp}_{ji}|),
 where
 \begin{equation}
 v^{\perp}_{ij} = {\bf v}_{ij}\cdot{\bf n}_{ij}
-$$
+\end{equation}
 and
 \begin{equation}
 v^{\perp}_{ji} = {\bf v}_{ji}\cdot{\bf n}_{ij}.

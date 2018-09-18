@@ -4,9 +4,9 @@
 
 Implements
 
-$$
+\begin{equation}
 \pm P u,
-$$
+\end{equation}
 
 where the sign is determined by the `positive` parameter, $P$ (`prop_name`) is a
 material property, and $u$ is either a coupled variable (`coupled_var`)
