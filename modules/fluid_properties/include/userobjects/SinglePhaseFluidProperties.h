@@ -280,6 +280,14 @@ public:
   virtual void e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const;
 
   /**
+   * Pressure from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual Real p_from_T_v(Real T, Real v) const;
+
+  /**
    * Specific enthalpy from pressure and temperature
    *
    * @param[in] p   pressure (Pa)

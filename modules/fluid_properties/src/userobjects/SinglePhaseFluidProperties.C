@@ -499,6 +499,11 @@ SinglePhaseFluidProperties::e_from_p_rho(Real, Real, Real &, Real &, Real &) con
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
+Real SinglePhaseFluidProperties::p_from_T_v(Real, Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
 Real SinglePhaseFluidProperties::h_from_p_T(Real, Real) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
