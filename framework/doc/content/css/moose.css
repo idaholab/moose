@@ -446,7 +446,8 @@ li{
 
 .moose-parameter-description span,
 .moose-parameter-description-default span,
-.moose-parameter-description-cpptype span{
+.moose-parameter-description-cpptype span,
+.moose-parameter-description-options span{
     padding-right:10px;
     font-weight:100;
 }
@@ -636,7 +637,6 @@ footer.page-footer {
 
 /* REQUIREMENTS */
 .moose-requirements.collection.with-header .collection-header{
-    background-color: var(--inl-blue);
     color:white;
     background-color: var(--inl-blue);
     font-size:larger;
@@ -649,10 +649,10 @@ footer.page-footer {
 
 .moose-requirement-number{
     margin-right:1em;
-}g
+}
 
 /* MOOSE SYNTAX LISTS */
-.collection.with-header .moose-syntax-header{
+.collection.with-header .collection-header {
     color:white;
     background-color: var(--inl-blue);
     font-size:larger;
@@ -671,7 +671,6 @@ footer.page-footer {
     padding-left:10px;
     font-weight:100;
     color:#757575;
-
 }
 
 .collapsible-header{
