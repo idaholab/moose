@@ -168,7 +168,7 @@ Factory::restrictRegisterableObjects(const std::vector<std::string> & names)
   _registerable_objects.insert(names.begin(), names.end());
 }
 
-time_t
+std::time_t
 Factory::parseTime(const std::string t_str)
 {
   // The string must be a certain length to be valid
@@ -176,7 +176,7 @@ Factory::parseTime(const std::string t_str)
     mooseError("The deprecated time not formatted correctly; it must be given as mm/dd/yyyy HH:MM");
 
   // Store the time, the time must be specified as: mm/dd/yyyy HH:MM
-  time_t t_end;
+  std::time_t t_end;
   struct tm * t_end_info;
   time(&t_end);
   t_end_info = localtime(&t_end);
@@ -193,18 +193,18 @@ Factory::parseTime(const std::string t_str)
 void
 Factory::deprecatedMessage(const std::string obj_name)
 {
-  std::map<std::string, time_t>::iterator time_it = _deprecated_time.find(obj_name);
+  std::map<std::string, std::time_t>::iterator time_it = _deprecated_time.find(obj_name);
 
   // If the object is not deprecated return
   if (time_it == _deprecated_time.end())
     return;
 
   // Get the current time
-  time_t now;
+  std::time_t now;
   time(&now);
 
   // Get the stop time
-  time_t t_end = time_it->second;
+  std::time_t t_end = time_it->second;
 
   // Message storage
   std::ostringstream msg;

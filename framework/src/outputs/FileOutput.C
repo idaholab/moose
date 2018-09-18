@@ -16,7 +16,7 @@
 #include "FEProblem.h"
 
 #include <unistd.h>
-#include <time.h>
+#include <ctime>
 
 template <>
 InputParameters
@@ -77,7 +77,7 @@ FileOutput::FileOutput(const InputParameters & parameters)
       format = "%Y-%m-%dT%T%z";
 
     // Get the current time
-    time_t now;
+    std::time_t now;
     ::time(&now); // need :: to avoid confusion with time() method of Output class
 
     // Format the time

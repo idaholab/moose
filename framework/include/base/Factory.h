@@ -12,7 +12,7 @@
 
 #include <set>
 #include <vector>
-#include <time.h>
+#include <ctime>
 
 // MOOSE includes
 #include "MooseObject.h"
@@ -349,7 +349,7 @@ protected:
    * @param t_str String with the object expiration date, this must be in the form mm/dd/yyyy HH:MM
    * @return A time_t object with the expiration date
    */
-  time_t parseTime(std::string);
+  std::time_t parseTime(std::string);
 
   /**
    * Show the appropriate message for deprecated objects
@@ -377,7 +377,7 @@ protected:
   std::map<std::string, std::string> _name_to_class;
 
   /// Storage for deprecated object experiation dates
-  std::map<std::string, time_t> _deprecated_time;
+  std::map<std::string, std::time_t> _deprecated_time;
 
   /// Storage for the deprecated objects that have replacements
   std::map<std::string, std::string> _deprecated_name;

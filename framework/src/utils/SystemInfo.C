@@ -13,7 +13,6 @@
 
 #include "libmesh/libmesh_config.h"
 
-#include <ctime>
 #include <sstream>
 #include <sys/stat.h>
 #include <iomanip>
@@ -55,10 +54,10 @@ SystemInfo::getInfo() const
 
 // TODO: Update libmesh to handle this function "timestamp.h"
 std::string
-SystemInfo::getTimeStamp(time_t * time_stamp) const
+SystemInfo::getTimeStamp(std::time_t * time_stamp) const
 {
   struct tm * tm_struct;
-  time_t local_time;
+  std::time_t local_time;
 
 #ifdef LIBMESH_HAVE_LOCALE
   // Create time_put "facet"
