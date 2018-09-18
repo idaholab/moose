@@ -31,7 +31,7 @@ class TestExtension(unittest.TestCase):
         self.assertFalse(ext.called)
         content = page.PageNodeBase(None)
         t = Translator(content, Reader(RecursiveLexer('foo')), Renderer(), [ext])
-        t.init('')
+        t.init()
         self.assertTrue(ext.called)
         self.assertIs(ext.translator, t)
 

@@ -751,7 +751,7 @@ class TestRenderLabelHTML(testing.MooseDocsTestCase):
     def testWrite(self):
         node = tokens.Label(None, text=u'foo')
         html = node.write()
-        self.assertEqual(html, '')
+        self.assertEqual(html, '{\n  "attributes": {}, \n  "children": [], \n  "name": "Label", \n  "properties": {\n    "recursive": true, \n    "string": null, \n    "text": "foo"\n  }, \n  "type": "Label"\n}')
 
 class TestRenderLabelMaterialize(TestRenderLabelHTML):
     """Test renderering of RenderLabel with MaterializeRenderer"""

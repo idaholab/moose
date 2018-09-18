@@ -1,5 +1,4 @@
 """Module for common MooseDocs unittest related tasks."""
-import os
 import unittest
 import inspect
 
@@ -33,7 +32,7 @@ class MooseDocsTestCase(unittest.TestCase):
         content = self.setUpContent()
         self._translator = base.Translator(content, self._reader, self._renderer, extensions,
                                            **self.CONFIG)
-        self._translator.init(os.path.join(os.getenv('HOME'), '.local', 'share', 'moose', 'tmp'))
+        self._translator.init()
 
     def assertString(self, content, gold):
         """

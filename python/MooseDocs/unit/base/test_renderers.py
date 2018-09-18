@@ -63,7 +63,7 @@ class TestHTMLRenderer(unittest.TestCase):
         content = page.PageNodeBase(None)
         renderer = renderers.HTMLRenderer()
         translator = Translator(content, MarkdownReader(), renderer, [])
-        translator.init('')
+        translator.init()
         renderer.add(tokens.Paragraph, comp)
         renderer.render(ast)
         renderer.render(ast)
@@ -91,7 +91,7 @@ class TestHTMLRenderer(unittest.TestCase):
         content = page.PageNodeBase(None)
         renderer = renderers.HTMLRenderer()
         translator = Translator(content, MarkdownReader(), renderer, [])
-        translator.init('')
+        translator.init()
 
         renderer.add(tokens.Paragraph, ParComponent())
         renderer.add(tokens.String, StringComponent())
