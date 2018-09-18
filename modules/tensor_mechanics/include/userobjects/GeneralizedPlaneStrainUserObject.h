@@ -14,8 +14,12 @@
 #include "SubblockIndexProvider.h"
 
 class GeneralizedPlaneStrainUserObject;
-class RankTwoTensor;
-class RankFourTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
+template <typename>
+class RankFourTensorTempl;
+typedef RankFourTensorTempl<Real> RankFourTensor;
 class Function;
 
 template <>

@@ -15,7 +15,9 @@
 
 // Forward declarations
 class MooseEnum;
-class RankTwoTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 namespace libMesh
 {
@@ -100,9 +102,9 @@ Real L2norm(const RankTwoTensor & r2tensor);
 Real volumetricStrain(const RankTwoTensor & strain);
 
 /*
-* The first invariant of a tensor is the sum of the diagonal component; defined
-* in L. Malvern, Introduction to the Mechanics of a Continuous Mediam (1969) pg 89.
-*/
+ * The first invariant of a tensor is the sum of the diagonal component; defined
+ * in L. Malvern, Introduction to the Mechanics of a Continuous Mediam (1969) pg 89.
+ */
 Real firstInvariant(const RankTwoTensor & r2tensor);
 
 /*
@@ -111,7 +113,7 @@ Real firstInvariant(const RankTwoTensor & r2tensor);
  * Note that the Hjelmstad version of the second invariant is the negative of
  * the second invariant given in L. Malvern, Introduction to the Mechanics of a
  * Continuous Medium (1969) pg 89.
-*/
+ */
 Real secondInvariant(const RankTwoTensor & r2tensor);
 
 /*
@@ -192,7 +194,7 @@ Real hoopStress(const RankTwoTensor & stress,
  * @param point2 The end point of the rotation axis
  * @param curr_point The point corresponding to the stress (pass in & _q_point[_qp])
  * @param direction The direction vector in which the scalar stress value is calculated.
-*/
+ */
 Real radialStress(const RankTwoTensor & stress,
                   const Point & point1,
                   const Point & point2,

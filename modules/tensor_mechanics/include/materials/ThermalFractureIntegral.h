@@ -13,7 +13,9 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-class RankTwoTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 class ThermalFractureIntegral;
 

@@ -10,7 +10,9 @@
 #ifndef ELASTICITYTENSORTOOLS_H
 #define ELASTICITYTENSORTOOLS_H
 
-class RankFourTensor;
+template <typename>
+class RankFourTensorTempl;
+typedef RankFourTensorTempl<Real> RankFourTensor;
 
 namespace ElasticityTensorTools
 {

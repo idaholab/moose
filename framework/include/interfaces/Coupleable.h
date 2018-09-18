@@ -596,6 +596,20 @@ protected:
   virtual const DenseVector<Number> & coupledSolutionDoFsOlder(const std::string & var_name,
                                                                unsigned int comp = 0);
 
+  /**
+   * Template method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
+   * computing objects
+   */
+  template <ComputeStage compute_stage>
+  const typename VariableValueType<compute_stage>::type & adZero();
+
+  /**
+   * Template method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
+   * JACOBIAN computing objects
+   */
+  template <ComputeStage compute_stage>
+  const typename VariableGradientType<compute_stage>::type & adGradZero();
+
 protected:
   // Reference to the interface's input parameters
   const InputParameters & _c_parameters;
@@ -867,5 +881,25 @@ Coupleable::getADDefaultGradient()
 
 template <>
 VariableGradient & Coupleable::getADDefaultGradient<RESIDUAL>();
+
+template <ComputeStage compute_stage>
+const typename VariableValueType<compute_stage>::type &
+Coupleable::adZero()
+{
+  return _zero;
+}
+
+template <>
+const typename VariableValueType<JACOBIAN>::type & Coupleable::adZero<JACOBIAN>();
+
+template <ComputeStage compute_stage>
+const typename VariableGradientType<compute_stage>::type &
+Coupleable::adGradZero()
+{
+  return _grad_zero;
+}
+
+template <>
+const typename VariableGradientType<JACOBIAN>::type & Coupleable::adGradZero<JACOBIAN>();
 
 #endif /* COUPLEABLE_H */

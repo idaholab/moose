@@ -17,7 +17,9 @@
 
 class CrackFrontDefinition;
 class AuxiliarySystem;
-class RankTwoTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 // libMesh forward declarations
 namespace libMesh

@@ -22,6 +22,8 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/type_n_tensor.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 #include "metaphysicl/dualnumber.h"
 #include "metaphysicl/numberarray.h"
@@ -77,8 +79,10 @@
  */
 template <typename>
 class MooseArray;
-class RankTwoTensor;
-class RankFourTensor;
+template <typename>
+class RankTwoTensorTempl;
+template <typename>
+class RankFourTensorTempl;
 template <typename>
 class MaterialProperty;
 template <typename>
@@ -247,15 +251,52 @@ struct VariableSecondType<JACOBIAN>
 {
   typedef MooseArray<ADRealTensor> type;
 };
+
 template <ComputeStage compute_stage>
-struct ResidualReturnType
+struct RealType
 {
   typedef Real type;
 };
 template <>
-struct ResidualReturnType<JACOBIAN>
+struct RealType<JACOBIAN>
 {
   typedef ADReal type;
+};
+template <ComputeStage compute_stage>
+struct RealVectorValueType
+{
+  typedef RealVectorValue type;
+};
+template <>
+struct RealVectorValueType<JACOBIAN>
+{
+  typedef ADRealVectorValue type;
+};
+template <ComputeStage compute_stage>
+struct RealTensorValueType
+{
+  typedef RealTensorValue type;
+};
+template <>
+struct RealTensorValueType<JACOBIAN>
+{
+  typedef ADRealTensorValue type;
+};
+template <ComputeStage compute_stage>
+struct RankTwoTensorType
+{
+  typedef RankTwoTensor type;
+};
+template <>
+struct RankTwoTensorType<JACOBIAN>
+{
+  typedef ADRankTwoTensor type;
+};
+
+template <ComputeStage compute_stage>
+struct ResidualReturnType
+{
+  typedef typename RealType<compute_stage>::type type;
 };
 template <ComputeStage compute_stage, typename mat_prop_type>
 struct MaterialPropertyType

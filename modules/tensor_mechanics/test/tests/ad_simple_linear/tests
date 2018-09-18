@@ -1,0 +1,15 @@
+[Tests]
+  [./linear-hand-coded]
+    type = 'Exodiff'
+    input = 'linear-hand-coded.i'
+    exodiff = 'linear-out.e'
+    absent_out = '3 Nonlinear'
+  [../]
+  [./linear-ad]
+    type = 'Exodiff'
+    input = 'linear-ad.i'
+    exodiff = 'linear-out.e'
+    absent_out = '3 Nonlinear'
+    prereq = 'linear-hand-coded'
+  [../]
+[]

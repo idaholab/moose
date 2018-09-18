@@ -16,6 +16,8 @@
 #include "HashMap.h"
 #include "MooseError.h"
 #include "Backup.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
@@ -36,9 +38,9 @@
 #include <memory>
 
 // Forward declarations
-class ColumnMajorMatrix;
-class RankTwoTensor;
-class RankFourTensor;
+template <typename>
+class ColumnMajorMatrixTempl;
+typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
 namespace libMesh
 {
 template <typename T>
@@ -334,10 +336,6 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template <>
 void dataStore(std::ostream & stream, std::stringstream *& s, void * context);
-template <>
-void dataStore(std::ostream & stream, RankTwoTensor &, void *);
-template <>
-void dataStore(std::ostream & stream, RankFourTensor &, void *);
 
 inline void
 dataStore(std::ostream & stream, ADReal & dn, void * context)
@@ -345,6 +343,14 @@ dataStore(std::ostream & stream, ADReal & dn, void * context)
   dataStore(stream, dn.value(), context);
   for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
     dataStore(stream, dn.derivatives()[i], context);
+}
+
+template <size_t N>
+inline void
+dataStore(std::ostream & stream, ADReal (&dn)[N], void * context)
+{
+  for (size_t i = 0; i < N; ++i)
+    dataStore(stream, dn[i], context);
 }
 
 template <typename T>
@@ -401,6 +407,20 @@ dataStore(std::ostream & stream, VectorValue<T> & v, void * context)
     T r = v(i);
     dataStore(stream, r, context);
   }
+}
+
+template <typename T>
+void
+dataStore(std::ostream & stream, RankTwoTensorTempl<T> & rtt, void * context)
+{
+  dataStore(stream, rtt._coords, context);
+}
+
+template <typename T>
+void
+dataStore(std::ostream & stream, RankFourTensorTempl<T> & rft, void * context)
+{
+  dataStore(stream, rft._vals, context);
 }
 
 template <typename T>
@@ -578,10 +598,6 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 template <>
 void dataLoad(std::istream & stream, std::stringstream *& s, void * context);
-template <>
-void dataLoad(std::istream & stream, RankTwoTensor &, void *);
-template <>
-void dataLoad(std::istream & stream, RankFourTensor &, void *);
 
 inline void
 dataLoad(std::istream & stream, ADReal & dn, void * context)
@@ -651,6 +667,20 @@ dataLoad(std::istream & stream, VectorValue<T> & v, void * context)
     dataLoad(stream, r, context);
     v(i) = r;
   }
+}
+
+template <typename T>
+void
+dataLoad(std::istream & stream, RankTwoTensorTempl<T> & rtt, void * context)
+{
+  dataLoad(stream, rtt._coords, context);
+}
+
+template <typename T>
+void
+dataLoad(std::istream & stream, RankFourTensorTempl<T> & rft, void * context)
+{
+  dataLoad(stream, rft._vals, context);
 }
 
 template <typename T>

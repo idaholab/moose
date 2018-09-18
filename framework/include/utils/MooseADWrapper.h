@@ -3,6 +3,7 @@
 
 #include "MooseTypes.h"
 #include "MooseError.h"
+#include "RankTwoTensor.h"
 
 #include "libmesh/dense_matrix.h"
 #include "libmesh/vector_value.h"
@@ -137,6 +138,40 @@ public:
 private:
   libMesh::TensorValue<Real> _val;
   libMesh::TensorValue<ADReal> _dual_number;
+};
+
+template <>
+class MooseADWrapper<RankTwoTensorTempl<Real>>
+{
+public:
+  MooseADWrapper() : _val(), _dual_number() {}
+
+  typedef RankTwoTensorTempl<ADReal> DNType;
+
+  const RankTwoTensorTempl<Real> & value() const { return _val; }
+
+  RankTwoTensorTempl<Real> & value() { return _val; }
+
+  const RankTwoTensorTempl<ADReal> & dn(bool = true) const { return _dual_number; }
+
+  RankTwoTensorTempl<ADReal> & dn(bool = true) { return _dual_number; }
+
+  void copyValueToDualNumber()
+  {
+    for (decltype(LIBMESH_DIM) i = 0; i < LIBMESH_DIM; ++i)
+      for (decltype(LIBMESH_DIM) j = 0; j < LIBMESH_DIM; ++j)
+        _dual_number(i, j).value() = _val(i, j);
+  }
+  void copyDualNumberToValue()
+  {
+    for (decltype(LIBMESH_DIM) i = 0; i < LIBMESH_DIM; ++i)
+      for (decltype(LIBMESH_DIM) j = 0; j < LIBMESH_DIM; ++j)
+        _val(i, j) = _dual_number(i, j).value();
+  }
+
+private:
+  RankTwoTensorTempl<Real> _val;
+  RankTwoTensorTempl<ADReal> _dual_number;
 };
 
 #endif // MOOSEADWRAPPER_H

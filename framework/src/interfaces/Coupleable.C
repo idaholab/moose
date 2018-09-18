@@ -1490,3 +1490,17 @@ Coupleable::getADDefaultGradient<RESIDUAL>()
 {
   return _default_gradient;
 }
+
+template <>
+const typename VariableValueType<JACOBIAN>::type &
+Coupleable::adZero<JACOBIAN>()
+{
+  return _ad_zero;
+}
+
+template <>
+const typename VariableGradientType<JACOBIAN>::type &
+Coupleable::adGradZero<JACOBIAN>()
+{
+  return _ad_grad_zero;
+}
