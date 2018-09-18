@@ -1,4 +1,6 @@
 [Tests]
+  design = 'Mesh/index.md'
+
   [./mesh_only_test]
     type = 'Exodiff'
     input = 'mesh_only.i'
@@ -6,6 +8,19 @@
     exodiff = '3d_chimney.e'
     recover = false
     method = 'opt oprof'
+    issues = '#1568'
+    requirement = 'MOOSE shall allow writing out the mesh'
+  [../]
+
+  [./mesh_info]
+    type = 'RunApp'
+    input = 'mesh_only.i'
+    cli_args = '--mesh-only info_test.e'
+    recover = false
+    method = 'opt oprof'
+    expect_out = 'Mesh Information'
+    issues = '#11917 #11921'
+    requirement = 'MOOSE shall print out information about the mesh when writing out the mesh'
   [../]
 
   [./mesh_only_warning]
@@ -15,5 +30,7 @@
     cli_args = '--mesh-only Outputs/exodus=false'
     allow_warnings = true
     expect_out = 'The --mesh-only option should be followed by a file name.'
+    issues = '#1568'
+    requirement = 'MOOSE shall warn when using --mesh-only and there is no clear filename to use'
   [../]
 []
