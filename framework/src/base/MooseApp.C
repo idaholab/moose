@@ -1110,37 +1110,21 @@ MooseApp::dynamicAppRegistration(const std::string & app_name,
 }
 
 void
-MooseApp::dynamicObjectRegistration(const std::string & app_name,
-                                    Factory * factory,
-                                    std::string library_path,
-                                    const std::string & library_name)
+MooseApp::dynamicAllRegistration(const std::string & app_name,
+                                 Factory * factory,
+                                 ActionFactory * action_factory,
+                                 Syntax * syntax,
+                                 std::string library_path,
+                                 const std::string & library_name)
 {
   Parameters params;
   params.set<std::string>("app_name") = app_name;
   params.set<RegistrationType>("reg_type") = OBJECT;
-  params.set<std::string>("registration_method") = app_name + "__registerObjects";
+  params.set<std::string>("registration_method") = app_name + "__registerAll";
   params.set<std::string>("library_path") = library_path;
   params.set<std::string>("library_name") = library_name;
 
   params.set<Factory *>("factory") = factory;
-
-  dynamicRegistration(params);
-}
-
-void
-MooseApp::dynamicSyntaxAssociation(const std::string & app_name,
-                                   Syntax * syntax,
-                                   ActionFactory * action_factory,
-                                   std::string library_path,
-                                   const std::string & library_name)
-{
-  Parameters params;
-  params.set<std::string>("app_name") = app_name;
-  params.set<RegistrationType>("reg_type") = SYNTAX;
-  params.set<std::string>("registration_method") = app_name + "__associateSyntax";
-  params.set<std::string>("library_path") = library_path;
-  params.set<std::string>("library_name") = library_name;
-
   params.set<Syntax *>("syntax") = syntax;
   params.set<ActionFactory *>("action_factory") = action_factory;
 

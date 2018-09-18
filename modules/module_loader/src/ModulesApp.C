@@ -110,7 +110,7 @@ ModulesApp__registerObjects(Factory & factory)
   ModulesApp::registerObjects(factory);
 }
 
-void
+static void
 registerObjectsInner(Factory & factory)
 {
 #ifdef CHEMICAL_REACTIONS_ENABLED
@@ -194,7 +194,7 @@ ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   ModulesApp::associateSyntax(syntax, action_factory);
 }
 
-void
+static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory)
 {
 #ifdef CHEMICAL_REACTIONS_ENABLED
@@ -277,7 +277,7 @@ ModulesApp__registerExecFlags(Factory & factory)
 {
   ModulesApp::registerExecFlags(factory);
 }
-void
+static void
 registerExecFlagsInner(Factory & factory)
 {
 #ifdef CHEMICAL_REACTIONS_ENABLED

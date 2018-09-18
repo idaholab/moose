@@ -116,14 +116,17 @@ MooseEnumBase::addEnumerationName(const std::string & name, const int & value)
 void
 MooseEnumBase::addEnumerationItem(const MooseEnumItem & item)
 {
-  if (find(item.id()) != _items.end())
-    mooseError("The supplied id ",
-               item.id(),
-               " already exists in the enumeration, cannot not add '",
-               item,
-               "'.");
-  if (find(item.name()) != _items.end())
-    mooseError("The name '", item.name(), "' already exists in the enumeration.");
+  if (_items.count(item) == 0) // only error if the existing item is not identical to new item
+  {
+    if (find(item.id()) != _items.end())
+      mooseError("The supplied id ",
+                 item.id(),
+                 " already exists in the enumeration, cannot not add '",
+                 item,
+                 "'.");
+    if (find(item.name()) != _items.end())
+      mooseError("The name '", item.name(), "' already exists in the enumeration.");
+  }
 
   _items.insert(item);
 }

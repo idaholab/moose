@@ -30,7 +30,7 @@ ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
 
 ChemicalReactionsApp::~ChemicalReactionsApp() {}
 
-void
+static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
