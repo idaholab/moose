@@ -1,0 +1,7 @@
+[Tests]
+  [./require_foo_binary]
+    type = RunApp
+    input = good.i
+    require_binaries = 'foo_binary'
+  [../]
+[]

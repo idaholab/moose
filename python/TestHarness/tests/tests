@@ -117,4 +117,13 @@
     type = PythonUnitTest
     input = test_Recover.py
   [../]
+  [./binary_available_tests]
+    type = PythonUnitTest
+    input = test_RequireBinary.py
+  [../]
+  [./pbs_tests]
+    type = PythonUnitTest
+    input = test_PBS.py
+    require_binaries = 'qsub'
+  [../]
 []

@@ -92,6 +92,12 @@ class RunPBS(QueueManager):
         # PBS Project group
         template['pbs_project'] = '#PBS -P %s' % (self.options.queue_project)
 
+        # PBS Queue
+        if self.options.queue_queue:
+            template['pbs_queue'] = '#PBS -q %s' % (self.options.queue_queue)
+        else:
+            template['pbs_queue'] = ''
+
         # Redirect stdout to this location
         template['output'] = os.path.join(job.getTestDir(), 'qsub.output')
 
