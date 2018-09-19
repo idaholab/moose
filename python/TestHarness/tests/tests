@@ -1,5 +1,4 @@
 [Tests]
-    requirement = "TestHarness shall report a failure when encountering failures of certain types"
     design = 'TestHarness.md'
     issues = '#427'
   [./long_running]
@@ -56,6 +55,8 @@
   [./deleted]
     type = PythonUnitTest
     input = test_Deleted.py
+    requirement = "TestHarness shall report deleted tests as failures when specified with additional --extra-info options"
+                  "In all other cases, deleted tests will be treated as skipped tests"
   [../]
   [./dry_run]
     type = PythonUnitTest
@@ -117,6 +118,7 @@
   [./distributed_mesh]
     type = PythonUnitTest
     input = test_DistributedMesh.py
+    requirement = "TestHarness shall properly run tests using distributed mesh options"
     issues = '#9181'
   [../]
   [./allocations]
