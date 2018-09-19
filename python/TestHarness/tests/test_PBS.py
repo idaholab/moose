@@ -40,7 +40,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
     def testPBSQueue(self):
         """
-        Test argument "--queue-queue does-not-exist" fails, as this queue should not exist
+        Test argument '--pbs-queue does-not-exist' fails, as this queue should not exist
         """
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('--pbs-queue', 'does-not-exist', '--pbs', '_testPBS', '-i', 'always_ok')
