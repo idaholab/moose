@@ -10,7 +10,14 @@
 import subprocess, unittest, os
 from TestHarnessTestCase import TestHarnessTestCase
 
-@unittest.skipIf(subprocess.call(['qstat']) != 0, "PBS not available")
+def checkQstat():
+    try:
+        if subprocess.call(['qstat']) == 0:
+            return True
+    except:
+        pass
+
+@unittest.skipIf(checkQstat() != True, "PBS not available")
 class TestHarnessTester(TestHarnessTestCase):
     """
     Test general PBS functionality. There are some caveats however:
