@@ -158,8 +158,9 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _total_num_apps(0),
     _my_num_apps(0),
     _first_local_app(0),
-    _orig_comm(getParam<MPI_Comm>("_mpi_comm")),
-    _my_comm(MPI_COMM_SELF),
+    _orig_comm(_communicator.get()),
+    _my_communicator(),
+    _my_comm(_my_communicator.get()),
     _my_rank(0),
     _inflation(getParam<Real>("bounding_box_inflation")),
     _bounding_box_padding(getParam<Point>("bounding_box_padding")),
@@ -614,9 +615,9 @@ MultiApp::buildComm()
 {
   int ierr;
 
-  ierr = MPI_Comm_size(_orig_comm, &_orig_num_procs);
+  ierr = MPI_Comm_size(_communicator.get(), &_orig_num_procs);
   mooseCheckMPIErr(ierr);
-  ierr = MPI_Comm_rank(_orig_comm, &_orig_rank);
+  ierr = MPI_Comm_rank(_communicator.get(), &_orig_rank);
   mooseCheckMPIErr(ierr);
 
   struct utsname sysInfo;
@@ -658,7 +659,7 @@ MultiApp::buildComm()
 
   // In this case we need to divide up the processors that are going to work on each app
   int rank;
-  ierr = MPI_Comm_rank(_orig_comm, &rank);
+  ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
   unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
@@ -692,15 +693,15 @@ MultiApp::buildComm()
 
   if (_has_an_app)
   {
-    ierr = MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm);
-    mooseCheckMPIErr(ierr);
+    _communicator.split(_first_local_app, rank, _my_communicator);
+
     ierr = MPI_Comm_rank(_my_comm, &_my_rank);
     mooseCheckMPIErr(ierr);
   }
   else
   {
-    ierr = MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm);
-    mooseCheckMPIErr(ierr);
+    _communicator.split(MPI_UNDEFINED, rank, _my_communicator);
+
     _my_rank = 0;
   }
 }

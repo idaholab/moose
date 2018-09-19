@@ -215,7 +215,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   {
     int rank;
     int ierr;
-    ierr = MPI_Comm_rank(_orig_comm, &rank);
+    ierr = MPI_Comm_rank(_communicator.get(), &rank);
     mooseCheckMPIErr(ierr);
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
