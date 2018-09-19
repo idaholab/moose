@@ -749,10 +749,3 @@ def readOutput(f, e, options, max_size=100000):
         if e:
             output += e.read()      # Do not trim errors
     return output
-
-# loop through list of binaries and return bool if all binaries were found
-def binaryAvailable(binaries):
-    for binary in binaries:
-        if runCommand('which %s' % (binary)).find('ERROR') != -1:
-            return False
-    return True

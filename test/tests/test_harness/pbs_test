@@ -1,7 +1,0 @@
-[Tests]
-  [./pbs_always_ok]
-    type = RunApp
-    input = good.i
-    require_binaries = 'qsub'
-  [../]
-[]

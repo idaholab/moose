@@ -7,7 +7,7 @@
 #PBS -j oe
 #PBS -o <OUTPUT>
 #PBS -l place=free
-
+<PRE_COMMAND>
 JOB_NUM=${PBS_JOBID%\.*}
 
 export MV2_ENABLE_AFFINITY=0

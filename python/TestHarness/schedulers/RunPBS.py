@@ -98,6 +98,12 @@ class RunPBS(QueueManager):
         else:
             template['pbs_queue'] = ''
 
+        # Apply source command
+        if self.options.queue_source_command and os.path.exists(self.options.queue_source_command):
+            template['pre_command'] = 'source %s' % (os.path.abspath(self.options.queue_source_command))
+        else:
+            template['pre_command'] = ''
+
         # Redirect stdout to this location
         template['output'] = os.path.join(job.getTestDir(), 'qsub.output')
 
