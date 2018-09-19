@@ -1,0 +1,27 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'dot_prop_test.i'
+    exodiff = 'out.e'
+  [../]
+
+  [./test_cn]
+    type = 'Exodiff'
+    input = 'dot_prop_test.i'
+    cli_args = 'Executioner/scheme=crank-nicolson Outputs/file_base=out_cn'
+    exodiff = 'out_cn.e'
+  [../]
+
+  [./test_bdf2]
+    type = 'Exodiff'
+    input = 'dot_prop_test.i'
+    cli_args = 'Executioner/scheme=bdf2 Outputs/file_base=out_bdf2'
+    exodiff = 'out_bdf2.e'
+  [../]
+
+  [./error_test]
+    type = 'RunException'
+    input = 'dot_prop_error_test.i'
+    expect_err = 'Material has no property named: test_tensor'
+  [../]
+[]
