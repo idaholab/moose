@@ -1,8 +1,12 @@
 [Tests]
+  issues = '#12153'
+  design = 'materials/index.md'
+
   [./test]
     type = 'Exodiff'
     input = 'dot_prop_test.i'
     exodiff = 'out.e'
+    requirement = 'The system shall evaluate the time derivative of a real material property for all time integraton schemes.'
   [../]
 
   [./test_cn]
@@ -10,6 +14,7 @@
     input = 'dot_prop_test.i'
     cli_args = 'Executioner/scheme=crank-nicolson Outputs/file_base=out_cn'
     exodiff = 'out_cn.e'
+    requirement = 'The system shall evaluate the time derivative of a real material property for all time integraton schemes.'
   [../]
 
   [./test_bdf2]
@@ -17,11 +22,13 @@
     input = 'dot_prop_test.i'
     cli_args = 'Executioner/scheme=bdf2 Outputs/file_base=out_bdf2'
     exodiff = 'out_bdf2.e'
+    requirement = 'The system shall evaluate the time derivative of a real material property for all time integraton schemes.'
   [../]
 
   [./error_test]
     type = 'RunException'
     input = 'dot_prop_error_test.i'
     expect_err = 'Material has no property named: test_tensor'
+    requirement = 'The system shall error out for time derivative evaluation of a non-real material property.'
   [../]
 []
