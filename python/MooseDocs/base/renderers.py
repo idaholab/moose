@@ -637,16 +637,18 @@ class LatexRenderer(Renderer):
         sort_node(root)
 
         main = self._processPages(root)
-
         loc = self.translator['destination']
         with open(os.path.join(loc, 'main.tex'), 'w+') as fid:
             fid.write(main.write())
 
-        cmd = ['pdflatex', '-halt-on-error', os.path.join(loc, 'main.tex')]
+        main_tex = os.path.join(loc, 'main.tex')
+        LOG.info("Building complete LaTeX document: %s", main_tex)
+        cmd = ['pdflatex', '-halt-on-error', main_tex]
         try:
-            subprocess.check_output(cmd, cwd=loc)
+            subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            print e.message
+            msg = 'Failed to run command: {}'
+            raise exceptions.MooseDocsException(msg, ' '.join(cmd), error=e.output)
 
     def addPackage(self, *args):
         """
@@ -679,11 +681,10 @@ class LatexRenderer(Renderer):
                 node.result.children[0].parent = None
 
         doc = latex.Environment(main, 'document')
-        latex.Command(doc, 'maketitle', end='\n')
-
+        latex.Command(doc, 'maketitle')
         for node in nodes:
             node.write()
-            latex.Command(doc, 'input', string=unicode(node.destination), end='\n')
+            latex.Command(doc, 'input', string=unicode(node.destination), start='\n')
 
         return main
 

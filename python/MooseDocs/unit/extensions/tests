@@ -1,11 +1,6 @@
 [Tests]
   issues = '#6699'
   design = 'MooseDocs/index.md'
-  [core]
-    type = PythonUnitTest
-    input = test_core.py
-    requirement = "MooseDocs shall include an extension for common markdown syntax."
-  []
   [katex]
     type = PythonUnitTest
     input = test_katex.py
