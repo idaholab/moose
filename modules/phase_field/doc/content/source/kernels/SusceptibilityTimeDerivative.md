@@ -4,9 +4,9 @@
 
 Implements
 
-$$
+\begin{equation}
 F(u,a,b,\dots)\cdot\frac{\partial u}{\partial t},
-$$
+\end{equation}
 
 where $F$ (`f_name`) is a [FunctionMaterial](/FunctionMaterials.md) providing derivatives
 (for example defined using the [DerivativeParsedMaterial](/DerivativeParsedMaterial.md)),

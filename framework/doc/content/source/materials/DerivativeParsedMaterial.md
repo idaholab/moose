@@ -20,9 +20,9 @@ If a material property `M` is listed in `material_property_names` a special synt
 
 In phase field, an application would be the definition of a mobility term
 
-$$
+\begin{equation}
 M = \frac D{\frac{\partial^2 F}{\partial c^2}}
-$$
+\end{equation}
 
 containing the second derivative of a free energy $F$ as
 

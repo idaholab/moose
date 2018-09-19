@@ -8,13 +8,13 @@
 which differs from the [`DirichletBC`](/DirichletBC.md) class in the way in which it handles the enforcement.
 It is appropriate for partial differential equations (PDEs) in the form
 
-$$
+\begin{equation}
 \begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g && \quad \in \partial \Omega_D \\
   \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N
 \end{aligned}
-$$
+\end{equation}
 
 Instead of imposing the Dirichlet condition directly on the basis by replacing the
 equations associated with those degrees of freedom (DOFs) by the auxiliary equation
