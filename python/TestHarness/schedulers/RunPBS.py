@@ -100,7 +100,7 @@ class RunPBS(QueueManager):
 
         # Apply source command
         if self.options.queue_source_command and os.path.exists(self.options.queue_source_command):
-            template['pre_command'] = 'source %s' % (os.path.abspath(self.options.queue_source_command))
+            template['pre_command'] = 'source %s || exit 1' % (os.path.abspath(self.options.queue_source_command))
         else:
             template['pre_command'] = ''
 
