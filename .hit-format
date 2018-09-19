@@ -2,13 +2,6 @@
 
   [sorting]
     inactive = foo
-    [.*]
-      .*/inactive = foo
-    []
-    [.*/.*]
-      inactive = foo
-      type = foo
-    []
 
     [GlobalParams]
     []
@@ -19,13 +12,22 @@
     [**]
     []
 
-    [Executioner]
-    []
-
     [Postprocessors]
     []
 
     [Outputs]
     []
+
+    [Executioner]
+    []
+
+    [.*]
+      inactive = foo
+      [.*]
+        inactive = foo
+        type = foo
+      []
+    []
+
   []
 []

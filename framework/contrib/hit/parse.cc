@@ -1254,8 +1254,7 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
           break;
       }
 
-
-      if (matches(next, field->path(), false))
+      if (matches(field->path(), next, false))
       {
         for (auto index : before)
         {
