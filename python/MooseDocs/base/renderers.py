@@ -684,7 +684,8 @@ class LatexRenderer(Renderer):
         latex.Command(doc, 'maketitle')
         for node in nodes:
             node.write()
-            latex.Command(doc, 'input', string=unicode(node.destination), start='\n')
+            cmd = latex.Command(doc, 'input', start='\n')
+            latex.String(cmd, content=unicode(node.destination), escape=False)
 
         return main
 

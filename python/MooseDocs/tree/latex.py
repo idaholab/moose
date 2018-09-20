@@ -158,13 +158,14 @@ class String(NodeBase):
     """
     A node for containing string content, the parent must always be a Tag.
     """
-    PROPERTIES = [Property('content', default=u'', ptype=unicode)]
+    PROPERTIES = [Property('content', default=u'', ptype=unicode),
+                  Property('escape', default=True, ptype=bool)]
 
     def write(self):
         """
         Write to LaTeX string.
         """
-        out = escape(self.content)
+        out = escape(self.content) if self.escape else self.content
         for child in self.children:
             out += child.write()
         return out
