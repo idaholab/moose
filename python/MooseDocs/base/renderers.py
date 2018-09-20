@@ -415,35 +415,47 @@ class MaterializeRenderer(HTMLRenderer):
                 else:
                     add_to_nav(key1, value1, self.__navigation)
 
-        # Build the links
+        # Hamburger icon
+        hamburger = html.Tag(nav, 'a', href=u"#", class_="button-collapse")
+        hamburger['data-activates'] = "moose-mobile-menu"
+        html.Tag(hamburger, 'i', class_="material-icons", string=u'menu')
+
+        # Build menu
         top_ul = html.Tag(nav, 'ul', id="nav-mobile", class_="right hide-on-med-and-down")
-        for key1, value1 in self.__navigation.iteritems():
+        side_ul = html.Tag(nav, 'ul', id="moose-mobile-menu", class_="side-nav")
+        def menu_helper(ul):
+            """Add menu items to the supplied ul tag."""
 
-            if isinstance(value1, str):
-                top_li = html.Tag(top_ul, 'li')
-                a = html.Tag(top_li, 'a', href=value1, string=unicode(key1))
+            for key1, value1 in self.__navigation.iteritems():
+                if isinstance(value1, str):
+                    top_li = html.Tag(ul, 'li')
+                    a = html.Tag(top_li, 'a', href=value1, string=unicode(key1))
 
-            elif not isinstance(value1, dict):
-                href = value1.relativeDestination(root_page)
-                top_li = html.Tag(top_ul, 'li')
-                a = html.Tag(top_li, 'a', href=href, string=unicode(key1))
+                elif not isinstance(value1, dict):
+                    href = value1.relativeDestination(root_page)
+                    top_li = html.Tag(ul, 'li')
+                    a = html.Tag(top_li, 'a', href=href, string=unicode(key1))
 
-            else:
-                id_ = uuid.uuid4()
-                top_li = html.Tag(top_ul, 'li')
-                a = html.Tag(top_li, 'a', class_="dropdown-button", href="#!", string=unicode(key1))
-                a['data-activates'] = id_
-                a['data-constrainWidth'] = "false"
-                html.Tag(a, "i", class_='material-icons right', string=u'arrow_drop_down')
+                else:
+                    id_ = uuid.uuid4()
+                    top_li = html.Tag(ul, 'li')
+                    a = html.Tag(top_li, 'a', class_="dropdown-button", href="#!",
+                                 string=unicode(key1))
+                    a['data-activates'] = id_
+                    a['data-constrainWidth'] = "false"
+                    html.Tag(a, "i", class_='material-icons right', string=u'arrow_drop_down')
 
-                bot_ul = html.Tag(nav, 'ul', id_=id_, class_='dropdown-content')
-                for key2, node in value1.iteritems():
-                    bot_li = html.Tag(bot_ul, 'li')
-                    if isinstance(node, str):
-                        a = html.Tag(bot_li, 'a', href=node, string=unicode(key2))
-                    else:
-                        href = node.relativeDestination(root_page)
-                        a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
+                    bot_ul = html.Tag(nav, 'ul', id_=id_, class_='dropdown-content')
+                    for key2, node in value1.iteritems():
+                        bot_li = html.Tag(bot_ul, 'li')
+                        if isinstance(node, str):
+                            a = html.Tag(bot_li, 'a', href=node, string=unicode(key2))
+                        else:
+                            href = node.relativeDestination(root_page)
+                            a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
+
+        menu_helper(top_ul)
+        menu_helper(side_ul)
 
     def _addSearch(self, config, nav, root_page): #pylint: disable=no-self-use
         """
@@ -497,7 +509,8 @@ class MaterializeRenderer(HTMLRenderer):
         """
         name = config.get('name', None)
         if name:
-            html.Tag(nav, 'a', class_='left moose-logo', href=unicode(self.get('home', '#!')),
+            html.Tag(nav, 'a', class_='left moose-logo hide-on-med-and-down',
+                     href=unicode(self.get('home', '#!')),
                      string=unicode(name))
 
     def _addBreadcrumbs(self, config, container, root_page): #pylint: disable=no-self-use
