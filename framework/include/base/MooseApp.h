@@ -788,8 +788,7 @@ private:
   enum RegistrationType
   {
     APPLICATION,
-    OBJECT,
-    SYNTAX
+    REGALL
   };
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output

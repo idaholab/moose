@@ -72,7 +72,10 @@ public:
   /**
    * Less than operator. This is required for this class to work in maps and sets.
    */
-  bool operator<(const MooseEnumItem & other) const { return _id < other._id; }
+  bool operator<(const MooseEnumItem & other) const
+  {
+    return _id != other._id ? _id < other._id : _name < other._name;
+  }
 
   /**
    * ostream operator for string printing.
