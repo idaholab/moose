@@ -499,7 +499,46 @@ SinglePhaseFluidProperties::e_from_p_rho(Real, Real, Real &, Real &, Real &) con
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
+Real SinglePhaseFluidProperties::e_from_T_v(Real, Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+void
+SinglePhaseFluidProperties::e_from_T_v(Real , Real , Real & , Real & , Real & ) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
 Real SinglePhaseFluidProperties::p_from_T_v(Real, Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+void
+SinglePhaseFluidProperties::p_from_T_v(Real , Real , Real & , Real & , Real & ) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+Real SinglePhaseFluidProperties::h_from_T_v(Real, Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+void
+SinglePhaseFluidProperties::h_from_T_v(Real , Real , Real & , Real & , Real & ) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+Real SinglePhaseFluidProperties::s_from_T_v(Real, Real) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+void
+SinglePhaseFluidProperties::s_from_T_v(Real , Real , Real & , Real & , Real & ) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
