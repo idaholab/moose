@@ -1,120 +1,179 @@
 [Tests]
+    design = 'TestHarness.md'
+    issues = '#427'
   [./long_running]
     type = PythonUnitTest
     input = test_LongRunning.py
+    requirement = "TestHarness shall report a non-failing status after a predetermined time of no activity"
+    issues = '#9280'
   [../]
   [./csvdiffs]
     type = PythonUnitTest
     input = test_CSVDiffs.py
+    requirement = "TestHarness shall report a failure when encountering a CSV differential result"
+    issues = '#11250 #11251'
   [../]
   [./diff]
     type = PythonUnitTest
     input = test_Diff.py
+    requirement = "TestHarness shall report a failure when encountering differential result"
+    issues = '#8373'
   [../]
   [./diff_gold]
     type = PythonUnitTest
     input = test_DiffGold.py
+    requirement = "TestHarness shall report a failure when encountering differential result"
+    issues = '#10647'
   [../]
   [./cyclic]
     type = PythonUnitTest
     input = test_Cyclic.py
+    requirement = "TestHarness shall report a failure during a cyclic dependency event"
   [../]
   [./dependency_skip]
     type = PythonUnitTest
     input = test_DependencySkip.py
+    requirement = "TestHarness shall not perform a test if said test has a skipped dependency"
   [../]
   [./missing_gold]
     type = PythonUnitTest
     input = test_MissingGold.py
+    requirement = "TestHarness shall report a failure if a test is missing its gold file"
   [../]
   [./expect]
     type = PythonUnitTest
     input = test_Expect.py
+    requirement = "TestHarness shall report a failure if expected output is not report"
+    issues = "#9933"
   [../]
   [./duplicate]
     type = PythonUnitTest
     input = test_Duplicate.py
     prereq = should_execute
+    requirement = "TestHarness shall report a failure if test output causes a race condition"
   [../]
   [./deleted]
     type = PythonUnitTest
     input = test_Deleted.py
+    requirement = "TestHarness shall report deleted tests as failures when specified with additional --extra-info options"
+                  "In all other cases, deleted tests will be treated as skipped tests"
   [../]
   [./dry_run]
     type = PythonUnitTest
     input = test_DryRun.py
+    requirement = "TestHarness perform all operations required of it except executing a test"
+    issues = "#8637"
   [../]
   [./dislpay_required]
     type = PythonUnitTest
     input = test_DisplayRequired.py
+    requirement = "TestHarness shall run only tests designated with display_required."
+    issues = '#8700 #8701'
   [../]
   [./ignore]
     type = PythonUnitTest
     input = test_Ignore.py
+    requirement = "TestHarness shall allow users to ignore and override specified prerequisites"
   [../]
   [./timeout]
     type = PythonUnitTest
     input = test_Timeout.py
+    requirement = "TestHarness shall report a failure if a test exceeds a predetermined walltime"
   [../]
   [./unknown_prereq]
     type = PythonUnitTest
     input = test_UnknownPrereq.py
+    requirement = "TestHarness shall report a failure if a test depends on another non-existent test"
   [../]
   [./syntax]
     type = PythonUnitTest
     input = test_Syntax.py
+    requirement = "TestHarness shall report a failure due to issues with input files"
+    issues = "#9249"
   [../]
   [./required_objects]
     type = PythonUnitTest
     input = test_RequiredObjects.py
+    requirement = "TestHarness shall report a failure if a test requires an object not present in the executable"
+    issues = '#6781'
   [../]
   [./required_apps]
     type = PythonUnitTest
     input = test_RequiredApps.py
+    requirement = "TestHarness shall skip a test if required application is unavailable"
+    issues = '#11095'
   [../]
   [./should_execute]
     type = PythonUnitTest
     input = test_ShouldExecute.py
+    requirement = "TestHarness shall only perform the validation of test results without executing the test itself"
+    issues = '#9932'
   [../]
   [./report_skipped]
     type = PythonUnitTest
     input = test_ReportSkipped.py
+    requirement = "TestHarness shall skip syntax only tests if instructed to do so"
+    issues = '#9359'
   [../]
   [./distributed_mesh]
     type = PythonUnitTest
     input = test_DistributedMesh.py
+    requirement = "TestHarness shall properly run tests using distributed mesh options"
+    issues = '#9181'
   [../]
   [./allocations]
     type = PythonUnitTest
     input = test_Allocations.py
+    requirement = "TestHarness shall supply the necessary resources a test requires, and report when these resources are insufficient to run said test"
+    issues = '#10272'
   [../]
   [./extra_info]
     type = PythonUnitTest
     input = test_ExtraInfo.py
+    requirement = "TestHarness shall print all caveats pertaining to the test involved"
+    issues = '#10272'
   [../]
   [./parser_errors]
     type = PythonUnitTest
     input = test_ParserErrors.py
+    requirement = "TestHarness shall report a failure if a test file is not constructed properly or does not contain valid parameters"
+    issues = '#10400'
   [../]
   [./duplicate_test_names]
     type = PythonUnitTest
     input = test_DuplicateTestNames.py
+    requirement = "TestHarness shall skip tests having the same name contained in the tests file"
+    issues = '#10424'
   [../]
   [./arbitrary_tests]
     type = PythonUnitTest
     input = test_ArbitrarySpecFile.py
+    requirement = "TestHarness shall perform normal operating procedures on a single provided test spec file"
+    issues = '#11076'
   [../]
   [./write_results]
     type = PythonUnitTest
     input = test_WriteResults.py
     prereq = 'diff'
+    requirement = "TestHarness shall write the output (stdout|stderr) that an executed test generated to a file as designated by user supplied arguments"
+    issues = '#11116'
   [../]
   [./CSVDiffer]
     type = PythonUnitTest
     input = test_CSVDiffer.py
+    requirement = "TestHarness shall present a failure when encountering a CSV differential result."
+    issues = '#11250 #11251'
   [../]
   [./recover_tests]
     type = PythonUnitTest
     input = test_Recover.py
+    requirement = "TestHarness shall be able to perform recovery of a test"
+    issues = '#11492'
+  [../]
+  [./pbs_tests]
+    type = PythonUnitTest
+    input = test_PBS.py
+    requirement = "TestHarness shall be able to submit jobs to a PBS third party scheduler"
+    issues = '#12138'
   [../]
 []
