@@ -14,17 +14,23 @@ InputParameters
 validParams<AugmentSparsityOnInterface>()
 {
   InputParameters params = validParams<AlgebraicRelationshipManager>();
-  params.addRequiredParam<unsigned>("slave_id", "The id of the slave sideset");
-  params.addRequiredParam<unsigned>("master_id", "The id of the master sideset");
+  params.addRequiredParam<BoundaryID>("master_boundary_id",
+                                      "The id of the master boundary sideset.");
+  params.addRequiredParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
+  params.addRequiredParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
+  params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
   return params;
 }
 
 AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & params)
   : AlgebraicRelationshipManager(params), _amg(nullptr), _has_attached_amg(false)
 {
-  unsigned slave_id = getParam<unsigned>("slave_id");
-  unsigned master_id = getParam<unsigned>("master_id");
-  _interface = std::make_pair(slave_id, master_id);
+  BoundaryID slave_boundary_id = getParam<BoundaryID>("slave_boundary_id");
+  BoundaryID master_boundary_id = getParam<BoundaryID>("master_boundary_id");
+  _interface = std::make_pair(master_boundary_id, slave_boundary_id);
+  SubdomainID slave_subdomain_id = getParam<SubdomainID>("slave_subdomain_id");
+  SubdomainID master_subdomain_id = getParam<SubdomainID>("master_subdomain_id");
+  _subdomain_pair = std::make_pair(master_subdomain_id, slave_subdomain_id);
 }
 
 void
@@ -63,7 +69,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 {
   if (!_has_attached_amg)
   {
-    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(_interface);
+    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(_interface, _subdomain_pair);
     _has_attached_amg = true;
   }
 

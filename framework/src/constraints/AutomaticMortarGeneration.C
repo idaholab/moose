@@ -19,101 +19,17 @@ using namespace libMesh;
 
 const std::string AutomaticMortarGeneration::system_name = "Nodal Normals";
 
-AutomaticMortarGeneration::AutomaticMortarGeneration(MeshBase & mesh_in)
+AutomaticMortarGeneration::AutomaticMortarGeneration(
+    MeshBase & mesh_in,
+    const std::pair<BoundaryID, BoundaryID> & boundary_key,
+    const std::pair<SubdomainID, SubdomainID> & subdomain_key)
   : mesh(mesh_in), mortar_segment_mesh(mesh_in.comm()), h_max(0.)
 {
-}
-
-void
-AutomaticMortarGeneration::read_master_slave_boundary_id_pairs(GetPot & command_line)
-{
-  // The --master-slave-pairs command line option must be followed
-  // by a comma-separated (no spaces!) list of master/slave boundary
-  // id pairs. For example,
-  // --master-slave-pairs 2,1,8,7
-  // would set up the the master/slave pairs (2,1) and (8,7)
-  if (command_line.search(1, "--master-slave-pairs"))
-  {
-    std::string master_slave_pairs_list;
-    master_slave_pairs_list = command_line.next(master_slave_pairs_list);
-    // libMesh::out << "From command line, read master_slave_pairs_list=" << master_slave_pairs_list
-    // << std::endl;
-
-    // Parse through the list using the delimiter form of std::getline().
-    std::istringstream iss(master_slave_pairs_list);
-    std::string cell;
-    // Even entries (0,2,4,...) are master boundary ids
-    // Odd entries (1,3,4,...) are slave boundary ids
-    unsigned int ctr = 0;
-    boundary_id_type master_id, slave_id;
-
-    while (std::getline(iss, cell, ','))
-    {
-      // Use strtol to portably convert entries to
-      // integers. This doesn't catch the case where a floating
-      // point number, e.g. 0.1, is entered for an id, that will
-      // be parsed as 0.
-      char * endptr;
-      int id = cast_int<int>(std::strtol(cell.c_str(), &endptr, /*base=*/10));
-
-      // strtol sets the value of endptr to point to the first
-      // character after the number.  We only allow cases where
-      // the *entire* cell is a number, therefore endptr should
-      // point at the end of the string or else something went
-      // wrong.
-      if (endptr == cell.c_str() + cell.size())
-      {
-        if (ctr % 2 == 0)
-          // libMesh::out << "Read master id: " << id << std::endl;
-          master_id = id;
-        else
-          // libMesh::out << "Read slave id: " << id << std::endl;
-          slave_id = id;
-      }
-      else
-        libmesh_error_msg("Error converting '" << cell << "' to integer.");
-
-      // Every two entries, push back a new pair.
-      if (ctr % 2 != 0)
-        this->master_slave_boundary_id_pairs.push_back(std::make_pair(master_id, slave_id));
-
-      // Increment the counter
-      ctr++;
-    }
-
-    // Be sure there were an even number of entries
-    if (ctr % 2 != 0)
-      libmesh_error_msg("Error: must provide (master,slave) boundary ids in pairs!");
-
-    // Print the entries of the master_slave_boundary_id_pairs
-    // container and store them in the "requested_boundary_ids"
-    // containers.  Note: this used to be done by hand in the main
-    // program but the --slave-boundary-id and
-    // --master-boundary-id command line options are no longer
-    // supported.
-    for (const auto & pr : this->master_slave_boundary_id_pairs)
-    {
-      libMesh::out << "Master/slave boundary id pair: " << pr.first << ", " << pr.second
-                   << std::endl;
-      this->master_requested_boundary_ids.insert(pr.first);
-      this->slave_requested_boundary_ids.insert(pr.second);
-    }
-  }
-  else
-  {
-    // This command line option is required, we no longer default to
-    // 1 and 2 for the slave and master boundary ids.
-    libmesh_error_msg("Error, missing required \"--master-slave-pairs 2,1\" command line option.");
-  }
-
-  // Construct the AMG::master/slave_boundary_subdomain_ids sets from
-  // the master/slave boundary ids we just read in by adding a
-  // constant offset to them.
-  for (const auto & pr : this->master_slave_boundary_id_pairs)
-  {
-    this->master_boundary_subdomain_ids.insert(pr.first + this->boundary_subdomain_id_offset);
-    this->slave_boundary_subdomain_ids.insert(pr.second + this->boundary_subdomain_id_offset);
-  }
+  master_slave_boundary_id_pairs.push_back(boundary_key);
+  master_requested_boundary_ids.insert(boundary_key.first);
+  slave_requested_boundary_ids.insert(boundary_key.second);
+  master_boundary_subdomain_ids.insert(subdomain_key.first);
+  slave_boundary_subdomain_ids.insert(subdomain_key.second);
 }
 
 void

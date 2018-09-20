@@ -4953,9 +4953,11 @@ FEProblemBase::updateMortarMesh()
 }
 
 AutomaticMortarGeneration &
-FEProblemBase::getMortarInterface(const std::pair<unsigned, unsigned> & slave_master_pair)
+FEProblemBase::getMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
+    const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair)
 {
-  return _mortar_data.getMortarInterface(slave_master_pair);
+  return _mortar_data.getMortarInterface(master_slave_boundary_pair, master_slave_subdomain_pair);
 }
 
 void

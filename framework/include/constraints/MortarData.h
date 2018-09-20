@@ -12,12 +12,14 @@ class MortarData
 public:
   MortarData(SubProblem &);
 
-  AutomaticMortarGeneration & getMortarInterface(const std::pair<unsigned, unsigned> &);
+  AutomaticMortarGeneration &
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
+                     const std::pair<SubdomainID, SubdomainID> & subdomain_key);
 
   void update();
 
 protected:
-  std::map<std::pair<unsigned, unsigned>, std::unique_ptr<AutomaticMortarGeneration>>
+  std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>>
       _mortar_interfaces;
 
   SubProblem & _subproblem;

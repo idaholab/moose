@@ -34,6 +34,9 @@ using libMesh::boundary_id_type;
 using libMesh::dof_id_type;
 using libMesh::subdomain_id_type;
 
+typedef boundary_id_type BoundaryID;
+typedef subdomain_id_type SubdomainID;
+
 /**
  * This class is a container/interface for the objects involved in
  * automatic generation of mortar spaces.
@@ -51,19 +54,9 @@ public:
    * Must be constructed with a reference to the Mesh we are
    * generating mortar spaces for.
    */
-  AutomaticMortarGeneration(MeshBase & es_in);
-
-  /**
-   * Read the --master-slave-pairs command line option, which specifies
-   * ordered pairs of master and slave boundary ids that define a specific interface.
-   *
-   * The argument to this command line option must be a
-   * comma-separated (no spaces!) list of master/slave boundary id
-   * pairs. For example,
-   * --master-slave-pairs 2,1,8,7
-   * would set up the the master/slave pairs (2,1) and (8,7)
-   */
-  void read_master_slave_boundary_id_pairs(GetPot & command_line);
+  AutomaticMortarGeneration(MeshBase & mesh_in,
+                            const std::pair<BoundaryID, BoundaryID> & boundary_key,
+                            const std::pair<SubdomainID, SubdomainID> & subdomain_key);
 
   /**
    * Once the slave_requested_boundary_ids and

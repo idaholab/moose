@@ -113,9 +113,13 @@ protected:
   const Elem * _elem_slave;
 
   /// Boundary ID for the slave surface
-  unsigned _slave_id;
+  BoundaryID _slave_id;
   /// Boundary ID for the master surface
-  unsigned _master_id;
+  BoundaryID _master_id;
+  /// Subdomain ID for the slave surface
+  SubdomainID _slave_subdomain_id;
+  /// Subdomain ID for the master surface
+  SubdomainID _master_subdomain_id;
 
   AutomaticMortarGeneration & _amg;
 };

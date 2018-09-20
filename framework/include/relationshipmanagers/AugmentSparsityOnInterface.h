@@ -59,7 +59,8 @@ protected:
 
   bool _has_attached_amg;
 
-  std::pair<unsigned, unsigned> _interface;
+  std::pair<BoundaryID, BoundaryID> _interface;
+  std::pair<SubdomainID, SubdomainID> _subdomain_pair;
 };
 
 #endif

@@ -24,8 +24,11 @@ InputParameters
 validParams<RealMortarConstraint>()
 {
   InputParameters params = validParams<Constraint>();
-  params.addRequiredParam<unsigned>("master_id", "The id of the master boundary sideset.");
-  params.addRequiredParam<unsigned>("slave_id", "The id of the slave boundary sideset.");
+  params.addRequiredParam<BoundaryID>("master_boundary_id",
+                                      "The id of the master boundary sideset.");
+  params.addRequiredParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
+  params.addRequiredParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
+  params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
   params.registerRelationshipManagers("AugmentSparsityOnInterface");
   params.addRequiredParam<VariableName>("primal_variable", "The primal variable");
   params.addRequiredParam<VariableName>("lm_variable", "The lagrange multiplier variable");
@@ -57,9 +60,12 @@ RealMortarConstraint::RealMortarConstraint(const InputParameters & parameters)
     _grad_test_primal(_primal_var.gradPhi()),
     _phi_primal(_primal_var.phi()),
 
-    _slave_id(getParam<unsigned>("slave_id")),
-    _master_id(getParam<unsigned>("master_id")),
-    _amg(_fe_problem.getMortarInterface(std::make_pair(_slave_id, _master_id)))
+    _slave_id(getParam<BoundaryID>("slave_boundary_id")),
+    _master_id(getParam<BoundaryID>("master_boundary_id")),
+    _slave_subdomain_id(getParam<SubdomainID>("slave_subdomain_id")),
+    _master_subdomain_id(getParam<SubdomainID>("master_subdomain_id")),
+    _amg(_fe_problem.getMortarInterface(std::make_pair(_master_id, _slave_id),
+                                        std::make_pair(_master_subdomain_id, _slave_subdomain_id)))
 {
 }
 
