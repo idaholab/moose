@@ -1150,7 +1150,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  // go over real mortarn constraints
+  // go over real mortar constraints
   auto & mortar_constraints = _constraints.getActiveRealMortarConstraints();
   for (auto & mortar_constraint : mortar_constraints)
     mortar_constraint->computeResidual();
@@ -1963,6 +1963,11 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
       }
     }
   }
+
+  // go over real mortar constraints
+  auto & mortar_constraints = _constraints.getActiveRealMortarConstraints();
+  for (auto & mortar_constraint : mortar_constraints)
+    mortar_constraint->computeJacobian();
 
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;

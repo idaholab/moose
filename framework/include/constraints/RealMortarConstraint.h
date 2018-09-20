@@ -45,20 +45,11 @@ class RealMortarConstraint : public Constraint,
 public:
   RealMortarConstraint(const InputParameters & parameters);
 
-  /**
-   * Computes the residual for the current element.
-   */
   virtual void computeResidual();
 
-  /**
-   * Computes the Jacobian for the current element (i.e element of the Mortar interface).
-   */
   virtual void computeJacobian();
 
 protected:
-  virtual Real computeQpResidual() = 0;
-  virtual Real computeQpJacobian();
-
   FEProblemBase & _fe_problem;
   SystemBase & _sys;
   unsigned int _dim;
