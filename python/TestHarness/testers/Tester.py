@@ -471,8 +471,8 @@ class Tester(MooseObject):
                 tmp_reason = 'Valgrind==NONE'
             elif self.specs['valgrind'].upper() == 'HEAVY' and options.valgrind_mode.upper() == 'NORMAL':
                 tmp_reason = 'Valgrind==HEAVY'
-            elif int(self.specs['min_parallel']) > 1 or int(self.specs['min_threads']) > 1:
-                tmp_reason = 'Valgrind requires serial'
+            elif int(self.specs['min_threads']) > 1:
+                tmp_reason = 'Valgrind requires non-threaded'
             elif self.specs["check_input"]:
                 tmp_reason = 'check_input==True'
             if tmp_reason != '':

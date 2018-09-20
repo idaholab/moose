@@ -72,7 +72,7 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
 
   int rank;
   int ierr;
-  ierr = MPI_Comm_rank(_orig_comm, &rank);
+  ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
   bool last_solve_converged = true;

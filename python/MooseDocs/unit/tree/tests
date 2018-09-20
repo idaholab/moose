@@ -1,0 +1,39 @@
+[Tests]
+  issues = '#6699'
+  design = 'MooseDocs/index.md'
+  [./base]
+    type = PythonUnitTest
+    input = test_base.py
+    requirement = "MooseDocs shall include a tree node object with arbitrary property creation."
+  [../]
+  [./tokens]
+    type = PythonUnitTest
+    input = test_tokens.py
+    requirement = "MooseDocs shall include tree object suitable for abstract syntax trees."
+  [../]
+  [./html]
+    type = PythonUnitTest
+    input = test_html.py
+    requirement = "MooseDocs shall include tree object suitable for HTML."
+  [../]
+  [./latex]
+    type = PythonUnitTest
+    input = test_latex.py
+    requirement = "MooseDocs shall include tree object suitable for latex."
+  [../]
+  [./page]
+    type = PythonUnitTest
+    input = test_page.py
+    requirement = "MooseDocs shall include tree object suitable for file structures."
+  [../]
+  [./build_page_tree]
+    type = PythonUnitTest
+    input = test_build_page_tree.py
+    requirement = "MooseDocs shall include the ability to build a file tree from markdown files."
+  [../]
+  [./syntax]
+    type = PythonUnitTest
+    input = test_syntax_tree.py
+    requirement = "MooseDocs shall include the ability to build a MOOSE application syntax tree."
+  [../]
+[]

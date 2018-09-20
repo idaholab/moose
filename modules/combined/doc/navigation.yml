@@ -21,6 +21,7 @@ Documentation:
     Software Quality: sqa/index.md
     MooseDocs: utilities/MooseDocs/index.md
     Python: utilities/python/index.md
+    C++ Fundamentals : utilities/c++/index.md
 Help:
     Frequently Asked Questions: help/faq.md
     Developer Tools: help/development/index.md

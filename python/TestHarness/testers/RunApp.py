@@ -149,7 +149,6 @@ class RunApp(Tester):
         if self.getCheckInput():
             cli_args.append('--check-input')
 
-        timing_string = ' '
         if options.timing and specs["timing"]:
             cli_args.append('--timing')
             cli_args.append('Outputs/perf_graph=true')
@@ -174,12 +173,14 @@ class RunApp(Tester):
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())
 
-        if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
-            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(cli_args)
-        elif options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
-            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
-        else:
-            command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
+        command = specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(cli_args)
+        if options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
+            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + command
+        elif nthreads > 1:
+            command = command + ' --n-threads=' + str(nthreads)
+
+        if self.force_mpi or options.parallel or ncpus > 1:
+            command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + command
 
         return command
 

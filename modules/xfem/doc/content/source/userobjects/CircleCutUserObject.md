@@ -1,14 +1,18 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # CircleCutUserObject
 
-!alert construction title=Undocumented Class
-The CircleCutUserObject has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /UserObjects/CircleCutUserObject
+
+The `CircleCutUserObject` defines the boundary of a circular cut for XFEM to
+make on a 3 dimensional mesh. The user enters three points in the cut_data
+parameter in x, y, and z coordinates: first the center point of the circle,
+followed by two points on the boundary of the circle. The object calculates
+the radius and angle of the circle (with respect to the x-y plane), verifies
+that the points define a circle (rather than an ellipse), and has logic to
+determine if a given point is inside the cut plane.
+
+## Example Input Syntax
+
+!listing test/tests/solid_mechanics_basic/penny_crack.i block=UserObjects
 
 !syntax parameters /UserObjects/CircleCutUserObject
 

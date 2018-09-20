@@ -1,6 +1,5 @@
 """Defines Renderer objects that convert AST (from Reader) into an output format."""
 import os
-import re
 import logging
 import traceback
 import uuid
@@ -12,7 +11,7 @@ import mooseutils
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions, mixins
-from MooseDocs.tree import html, latex, base, page
+from MooseDocs.tree import html, latex, base, page, tokens
 
 LOG = logging.getLogger(__name__)
 
@@ -83,17 +82,6 @@ class Renderer(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObj
         self.translator.executeExtensionFunction('postRender', root, config)
         return root
 
-    def write(self, output): #pylint: disable=no-self-use
-        """
-        Write the rendered output content to a single string, this method automatically strips
-        all double new lines.
-
-        Inputs:
-            output[tree.base.NodeBase]: The output tree created by calling render.
-        """
-        text = output.write()
-        return re.sub(r'(\n{2,})', '\n', text, flags=re.MULTILINE)
-
     def process(self, parent, token):
         """
         Convert the AST defined in the token input into a output node of parent.
@@ -159,6 +147,7 @@ class HTMLRenderer(Renderer):
     Converts AST into HTML.
     """
     METHOD = 'createHTML'
+    EXTENSION = '.html'
 
     def createRoot(self, config):
         return html.Tag(None, 'body', class_='moose-content')
@@ -214,7 +203,6 @@ class MaterializeRenderer(HTMLRenderer):
 
     def createRoot(self, config):
         return html.Tag(None, '!DOCTYPE html', close=False)
-
 
     def _method(self, component):
         """
@@ -601,6 +589,7 @@ class LatexRenderer(Renderer):
     Renderer for converting AST to LaTeX.
     """
     METHOD = 'createLatex'
+    EXTENSION = '.tex'
 
     def __init__(self, *args, **kwargs):
         self._packages = set()
@@ -630,3 +619,28 @@ class LatexRenderer(Renderer):
         Add a LaTeX package to the list of packages for rendering.
         """
         self._packages.update(args)
+
+class JSONRenderer(Renderer):
+    """
+    Render the AST as a JSON file.
+    """
+    METHOD = 'dummy' # The AST can write JSON directly.
+    EXTENSION = '.json'
+
+    def createRoot(self, config): #pylint: disable=unused-argument
+        """
+        Return LaTeX root node.
+        """
+        return tokens.Token()
+
+    def _method(self, component):
+        """
+        Do not call any methods on the component, just create a new tree for writing JSON.
+        """
+        return self.__function
+
+    @staticmethod
+    def __function(token, parent):
+        """Replacement for Component function (see _method)."""
+        token.parent = parent
+        return token

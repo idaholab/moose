@@ -8,6 +8,8 @@ import shutil
 import anytree
 import livereload
 
+import mooseutils
+
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.tree import page
@@ -23,7 +25,7 @@ def command_line_options(subparser, parent):
     parser.add_argument('--config', default='config.yml',
                         help="The configuration file.")
     parser.add_argument('--destination',
-                        default=os.path.join(os.getenv('HOME'), '.local', 'share', 'moose', 'site'),
+                        default=None,
                         help="Destination for writing build content.")
     parser.add_argument('--serve', action='store_true',
                         help="Create a local live server.")
@@ -133,7 +135,9 @@ def main(options):
 
     # Create translator
     translator, _ = common.load_config(options.config)
-    translator.init(options.destination)
+    if options.destination:
+        translator.update(destination=mooseutils.eval_path(options.destination))
+    translator.init()
 
     # Replace "home" with local server
     if options.serve:
@@ -148,10 +152,10 @@ def main(options):
 
     # Clean when --files is NOT used or when --clean is used with --files.
     if ((options.files == []) or (options.files != [] and options.clean)) \
-       and os.path.exists(options.destination):
+       and os.path.exists(translator['destination']):
         log = logging.getLogger('MooseDocs.build')
-        log.info("Cleaning destination %s", options.destination)
-        shutil.rmtree(options.destination)
+        log.info("Cleaning destination %s", translator['destination'])
+        shutil.rmtree(translator['destination'])
 
     # Perform check
     if options.check:
@@ -168,4 +172,4 @@ def main(options):
     if options.serve:
         watcher = MooseDocsWatcher(translator, options)
         server = livereload.Server(watcher=watcher)
-        server.serve(root=options.destination, port=options.port)
+        server.serve(root=translator['destination'], port=options.port)

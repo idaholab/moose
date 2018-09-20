@@ -6,6 +6,11 @@
     map = false
     unique_id = true
     superlu = true
+    requirement = 'The XFEM module shall have the capability to include '
+                  'near-tip enrichment functions in 2D mechanics simulations.'
+    design = 'LineSegmentCutUserObject.md '
+             'CrackTipEnrichmentStressDivergenceTensors.md'
+    issues = '#10042'
   [../]
   [./crack_tip_enrichment_penny_crack_3d]
     type = Exodiff
@@ -15,5 +20,10 @@
     unique_id = true
     heavy = true
     superlu = true
+    requirement = 'The XFEM module shall have the capability to include '
+                  'near-tip enrichment functions in 3D mechanics simulations.'
+    design = 'CircleCutUserObject.md '
+             'CrackTipEnrichmentStressDivergenceTensors.md'
+    issues = '#10042'
   [../]
 []

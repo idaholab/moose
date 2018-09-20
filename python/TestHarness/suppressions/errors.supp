@@ -120,3 +120,56 @@
    fun:MatLUFactorNumeric_SuperLU_DIST
    ...
 }
+{
+   Unaddressable_bytes_max
+   Memcheck:User
+   ...
+   fun:PMPI_Allreduce
+   fun:*max*
+   ...
+}
+{
+   Unaddressable_bytes_sum
+   Memcheck:User
+   ...
+   fun:PMPI_Allreduce
+   fun:*sum*
+   ...
+}
+{
+   Unaddressable_bytes_min
+   Memcheck:User
+   ...
+   fun:PMPI_Allreduce
+   fun:*min*
+   ...
+}
+{
+   Undrs_byt_ata
+   Memcheck:User
+   ...
+   fun:PMPI_Alltoall
+   fun:*alltoall*
+   ...
+}
+{
+   Parmetis_all_to_all_false_positive
+   Memcheck:Cond
+   ...
+   fun:libparmetis__gkMPI_Alltoall
+   ...
+}
+{
+   Parmetis_scatter_false_positive
+   Memcheck:Cond
+   ...
+   fun:libparmetis__gkMPI_Scatterv
+   ...
+}
+{
+   Mumps_numvolsndrcv_false_positive
+   Memcheck:Cond
+   ...
+   fun:dmumps_numvolsndrcv_
+   ...
+}

@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#6699'
+  design = 'MooseDocs/index.md'
+  [materialize]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form materialize'
+    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support."
+  []
+  [html]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form html'
+    requirement = "MooseDocs shall be able to convert markdown to HTML."
+  []
+  [json]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form json'
+    requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files."
+  []
+  [latex]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form latex'
+    requirement = "MooseDocs shall be able to convert markdown to latex."
+  []
+[]

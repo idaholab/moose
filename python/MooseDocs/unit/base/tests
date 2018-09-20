@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#6699'
+  design = 'MooseDocs/index.md'
+  [components]
+    type = PythonUnitTest
+    input = test_components.py
+    requirement = "MooseDocs shall include a TokenComponent and RenderComponent objects for creating extensions."
+  []
+  [lexer]
+    type = PythonUnitTest
+    input = test_lexers.py
+    requirement = "MooseDocs shall include lexer object capable of recursively processing text."
+  []
+  [translator]
+    type = PythonUnitTest
+    input = test_translators.py
+    requirement = "MooseDocs shall include translator for converting from one file type to another."
+  []
+  [reader]
+    type = PythonUnitTest
+    input = test_readers.py
+    requirement = "MooseDocs shall include reader object for reading files."
+  []
+  [renderer]
+    type = PythonUnitTest
+    input = test_renderers.py
+    requirement = "MooseDocs shall include render object capable of converting an abstract syntax tree to arbitrary formats."
+
+  []
+[]

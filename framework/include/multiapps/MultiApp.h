@@ -14,6 +14,8 @@
 #include "SetupInterface.h"
 #include "Restartable.h"
 
+#include "libmesh/communicator.h"
+
 class MultiApp;
 class UserObject;
 class FEProblemBase;
@@ -347,11 +349,14 @@ protected:
   /// The number of the first app on this processor
   unsigned int _first_local_app;
 
-  /// The comm that was passed to us specifying our pool of processors
-  MPI_Comm _orig_comm;
+  /// The original comm handle
+  const MPI_Comm & _orig_comm;
+
+  /// The communicator object that holds the MPI_Comm that we're going to use
+  libMesh::Parallel::Communicator _my_communicator;
 
   /// The MPI communicator this object is going to use.
-  MPI_Comm _my_comm;
+  MPI_Comm & _my_comm;
 
   /// The number of processors in the original comm
   int _orig_num_procs;

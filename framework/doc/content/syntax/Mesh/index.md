@@ -23,6 +23,27 @@ of Mesh objects refer to the individual object pages listed below.
 
 !syntax list /Mesh objects=False actions=True subsystems=False
 
+## Outputing The Mesh
+
+Since MOOSE contains a lot of ability to read/generate/modify meshes - it's often useful to be able to run all of
+the Mesh related portions of the input file and then output the mesh.  This mesh can then be viewed (such as
+with Peacock) or used in other MOOSE input files for further combination/modification.
+
+This can be achieved by using the commandline option `--mesh-only`.  By default `--mesh-only` will write a
+mesh file with `_in.e` (the opposite of the `_out.e` that is appended from the output system)
+appended to the input file name.  You can also optionally provide a mesh filename to
+writeout using `--mesh-only output_file.e`.
+
+Here are a couple of examples showing the usage of `--mesh-only`:
+
+```
+# Will run all mesh related sections in input_file.i and write out input_file_in.e
+./myapp-opt -i input_file.i --mesh-only
+
+# Will do the same but write out mesh_file.e
+./myapp-opt -i input_file.i --mesh-only mesh_file.e
+```
+
 ## Named Entity Support
 
 Human-readable names can be assigned to blocks, sidesets, and nodesets. These names will be

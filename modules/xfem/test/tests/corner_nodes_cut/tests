@@ -5,6 +5,11 @@
     exodiff = 'corner_node_cut_twice_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall have the capability of cutting '
+                  'directly through multiple nodes of a single QUAD4 element '
+                  'in 2D.'
+    design = 'LineSegmentCutUserObject.md'
+    issues = '#6320'
   [../]
   [./corner_edge_cut]
     type = Exodiff
@@ -12,13 +17,12 @@
     exodiff = 'corner_edge_cut_out.e'
     map = false
     unique_id = true
-  [../]
-  [./edge_cut]
-    type = Exodiff
-    input = edge_cut.i
-    exodiff = 'edge_cut_out.e'
-    map = false
-    unique_id = true
+    requirement = 'The XFEM module shall be able to perform mesh cuts on any '
+                  'combination of the edges of elements and through elements '
+                  'including allowing cuts that go through the nodes on the '
+                  'same mesh.'
+    design = 'LineSegmentCutUserObject.md'
+    issues = '#6320'
   [../]
   [./corner_node_cut]
     type = Exodiff
@@ -26,6 +30,11 @@
     exodiff = 'corner_node_cut_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall have the capability of perfoming mesh '
+                  'cuts on the edges of elements such that only two new nodes '
+                  'are generated to separate the previously connected elements.'
+    design = 'LineSegmentCutUserObject.md'
+    issues = '#6320'
   [../]
   [./notch]
     type = Exodiff
@@ -33,5 +42,9 @@
     exodiff = 'notch_out.e'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall be capable of propagating an existing '
+                  'crack front along a prescribed cut in 2D.'
+    design = 'LineSegmentCutUserObject.md'
+    issues = '#6320'
   [../]
 []
