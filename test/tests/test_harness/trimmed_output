@@ -1,0 +1,7 @@
+[Tests]
+  [./trim_output]
+    type = RunApp
+    input = good.i
+    max_buffer_size = 100
+  [../]
+[]

@@ -41,6 +41,7 @@ class Tester(MooseObject):
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
         params.addParam('tags',      [], "A list of strings")
+        params.addParam('max_buffer_size', 100000, "Bytes allowed in stdout/stderr before it is subjected to being trimmed. Set to -1 to ignore output size restrictions")
 
         # Test Filters
         params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
@@ -312,7 +313,7 @@ class Tester(MooseObject):
         self.errfile.flush()
 
         # store the contents of output, and close the file
-        self.joined_out = util.readOutput(self.outfile, self.errfile, options)
+        self.joined_out = util.readOutput(self.outfile, self.errfile, options, max_size=self.specs['max_buffer_size'])
         self.outfile.close()
         self.errfile.close()
 

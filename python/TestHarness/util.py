@@ -717,7 +717,7 @@ def getOutputFromFiles(tester, options):
     for file_path in output_files:
         with open(file_path, 'r') as f:
             file_output += "#"*80 + "\nOutput from " + file_path \
-                           + "\n" + "#"*80 + "\n" + readOutput(f, None, options)
+                           + "\n" + "#"*80 + "\n" + readOutput(f, None, options, max_size=tester.specs['max_buffer_size'])
     return file_output
 
 # This function reads output from the file (i.e. the test output)
@@ -731,7 +731,7 @@ def readOutput(f, e, options, max_size=100000):
     f.seek(0)
     if e:
         e.seek(0)
-    if options.no_trimmed_output:
+    if options.no_trimmed_output or max_size == -1:
         output += f.read()
         if e:
             output += e.read()

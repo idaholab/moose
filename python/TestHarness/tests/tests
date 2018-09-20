@@ -176,4 +176,10 @@
     requirement = "TestHarness shall be able to submit jobs to a PBS third party scheduler"
     issues = '#12138'
   [../]
+  [./trim_output]
+    type = PythonUnitTest
+    input = test_TrimOutput.py
+    requirement = "TestHarness shall trim output once threshold is exceeded"
+    issues = '#12167'
+  [../]
 []
