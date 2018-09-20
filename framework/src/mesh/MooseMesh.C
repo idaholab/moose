@@ -2092,7 +2092,17 @@ MooseMesh::init()
     getMesh().skip_partitioning(skip_partitioning_later);
   }
   else // Normally just build the mesh
+  {
+    // Don't allow partitioning during building
+    if (_app.isSplitMesh())
+      getMesh().skip_partitioning(true);
+
     buildMesh();
+
+    // Re-enable partitioning so the splitter can partition!
+    if (_app.isSplitMesh())
+      getMesh().skip_partitioning(false);
+  }
 }
 
 unsigned int
