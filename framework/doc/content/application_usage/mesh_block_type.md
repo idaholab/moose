@@ -14,20 +14,22 @@
 
 | Extension   | Description                              |
 | :-          | :-                                       |
-| .dat        | Tecplot ASCII file                       |
-| .e, .exd    | Sandia's ExodusII format                 |
-| .fro        | ACDL's surface triangulation file        |
-| .gmv        | LANL's GMV (General Mesh Viewer) format  |
-| .mat        | Matlab triangular ASCII file (read only) |
-| .msh        | GMSH ASCII file                          |
-| .n, .nem    | Sandia's Nemesis format                  |
-| .plt        | Tecplot binary file (write only)         |
-| .node, .ele; .poly | TetGen ASCII file (read; write)   |
-| .inp        | Abaqus .inp format (read only)           |
-| .ucd        | AVS's ASCII UCD format                   |
-| .unv        | I-deas Universal format                  |
-| .xda, .xdr  | libMesh formats                          |
-| .vtk, .pvtu | Visualization Toolkit                    |
+| .dat        | [Tecplot ASCII file](https://people.sc.fsu.edu/~jburkardt/data/tec/tec.html)                       |
+| .e, .exd    | [Sandia's ExodusII format](https://nalu.readthedocs.io/en/latest/source/user/nalu_run/nalu_mesh.html)                 |
+| .fro        | [ACDL's surface triangulation file](https://www.reviversoft.com/file-extensions/fro)        |
+| .gmv        | [LANL's GMV (General Mesh Viewer) format](www.generalmeshviewer.com/)  |
+| .mat        | [Matlab triangular ASCII file](https://www.reviversoft.com/file-extensions/mat) (read only) |
+| .msh        | [GMSH ASCII file](http://www.manpagez.com/info/gmsh/gmsh-2.2.6/gmsh_63.php)                          |
+| .n, .nem    | [Sandia's Nemesis format](https://gsjaardema.github.io/seacas/)                  |
+| .plt        | [Tecplot binary file](http://home.ustc.edu.cn/~cbq/360_data_format_guide.pdf) (write only)         |
+| .node, .ele; .poly | [TetGen ASCII file](http://wias-berlin.de/software/tetgen/1.5/doc/manual/manual006.html) (read; write)   |
+| .inp        | [Abaqus .inp format](https://www.sharcnet.ca/Software/Abaqus610/Documentation/docs/v6.10/books/usb/default.htm?startat=pt01ch03s06aus34.html) (read only)           |
+| .ucd        | [AVS's ASCII UCD format](http://people.sc.fsu.edu/~jburkardt/data/ucd/ucd.html)                   |
+| .unv        | [I-deas Universal format](https://knowledge.autodesk.com/support/moldflow-insight/learn-explore/caas/CloudHelp/cloudhelp/2018/ENU/MoldflowInsight/files/GUID-03956F5F-D1C7-4E75-99ED-73F1E2ECF225-htm.html)                  |
+| .xda, .xdr  | [libMesh formats](https://sourceforge.net/p/libmesh/mailman/attachment/AD00A4C1B366594CB4B07B0A970306A90990AF91%40jsc-mail03.jsc.nasa.gov/1/)                          |
+| .vtk, .pvtu | [Visualization Toolkit](https://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf)                    |
+
+[](---)
 
 ### GeneratedMesh
 
@@ -66,6 +68,8 @@
   boundary_name = 'left right'
   []
   ```
+
+[](---)
 
 ## Example Name Support
 
@@ -137,6 +141,8 @@ An illustration for mesh in UNV file format and requirement of on-the-fly names 
   [../]
 []
 ```
+
+[](---)
 
 ## Parallel Mesh
 
