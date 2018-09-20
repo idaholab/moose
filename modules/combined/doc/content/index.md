@@ -2,7 +2,7 @@
 
 # HOME style=visibility:hidden;
 
-# MOOSE class=center style=font-weight:600;font-size:500%;
+!media media/moose_logo.png style=display:block;margin-left:auto;margin-right:auto;width:60%;
 
 # Multiphysics Object Oriented Simulation Environment class=center light style=font-size:300%
 
