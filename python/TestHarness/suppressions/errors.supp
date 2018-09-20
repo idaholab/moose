@@ -152,3 +152,24 @@
    fun:*alltoall*
    ...
 }
+{
+   Parmetis_all_to_all_false_positive
+   Memcheck:Cond
+   ...
+   fun:libparmetis__gkMPI_Alltoall
+   ...
+}
+{
+   Parmetis_scatter_false_positive
+   Memcheck:Cond
+   ...
+   fun:libparmetis__gkMPI_Scatterv
+   ...
+}
+{
+   Mumps_numvolsndrcv_false_positive
+   Memcheck:Cond
+   ...
+   fun:dmumps_numvolsndrcv_
+   ...
+}
