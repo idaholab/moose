@@ -410,7 +410,11 @@ class MaterializeRenderer(HTMLRenderer):
         top_ul = html.Tag(nav, 'ul', id="nav-mobile", class_="right hide-on-med-and-down")
         for key1, value1 in self.__navigation.iteritems():
 
-            if not isinstance(value1, dict):
+            if isinstance(value1, str):
+                top_li = html.Tag(top_ul, 'li')
+                a = html.Tag(top_li, 'a', href=value1, string=unicode(key1))
+
+            elif not isinstance(value1, dict):
                 href = value1.relativeDestination(root_page)
                 top_li = html.Tag(top_ul, 'li')
                 a = html.Tag(top_li, 'a', href=href, string=unicode(key1))
