@@ -371,7 +371,10 @@ def main(size=None):
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), BackgroundPlugin])
+    from peacock.ExodusViewer.plugins.ColorbarPlugin import ColorbarPlugin
+    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size),
+                                          BackgroundPlugin,
+                                          ColorbarPlugin])
     main_window = QtWidgets.QMainWindow()
     main_window.setCentralWidget(widget)
     menubar = main_window.menuBar()
