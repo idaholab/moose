@@ -144,11 +144,10 @@ class HeadingHash(components.TokenComponent):
                     r'^(?P<level>#{1,6}) '       # match 1 to 6 #'s at the beginning of line
                     r'(?P<inline>.*?) *'         # heading text that will be inline parsed
                     r'(?P<settings>\s+\w+=.*?)?' # optional match key, value settings
-                    r'(?=\n*\Z|\n{2,})',            # match up to end of string or newline(s)
+                    r'(?=\n*\Z|\n{2,})',         # match up to end of string or newline(s)
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
 
     def createToken(self, info, parent):
-        #content = unicode(info['inline']) #TODO: is there a better way?
         content = info['inline']
         heading = tokens.Heading(parent, level=info['level'].count('#'), **self.attributes)
         tokens.Label(heading, text=content)
@@ -333,7 +332,14 @@ class RenderHeading(components.RenderComponent):
                       'subparagraph']
 
     def createHTML(self, token, parent): #pylint: disable=no-self-use
-        return html.Tag(parent, 'h{}'.format(token.level), **token.attributes)
+        attr = token.attributes
+        id_ = attr.get('id')
+        if not id_:
+            func = lambda n: isinstance(n, tokens.Word)
+            words = [node.content.lower() for node in anytree.search.findall(token, filter_=func)]
+            attr['id'] = '-'.join(words)
+
+        return html.Tag(parent, 'h{}'.format(token.level), **attr)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
         return latex.Command(parent, self.LATEX_SECTIONS[token.level], start='\n')
