@@ -76,30 +76,16 @@ PowerLawCreepModel::computeStressFinalize(const SymmTensor & plasticStrainIncrem
 Real
 PowerLawCreepModel::computeResidual(const Real effectiveTrialStress, const Real scalar)
 {
-  if (_legacy_return_mapping)
-    return _coefficient *
-               std::pow(effectiveTrialStress - 3.0 * _shear_modulus * scalar, _n_exponent) *
-               _exponential * _expTime -
-           scalar / _dt;
-  else
-  {
-    const Real stress_delta = effectiveTrialStress - 3.0 * _shear_modulus * scalar;
-    Real creep_rate = _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _expTime;
-    return creep_rate * _dt - scalar;
-  }
+  const Real stress_delta = effectiveTrialStress - 3.0 * _shear_modulus * scalar;
+  Real creep_rate = _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _expTime;
+  return creep_rate * _dt - scalar;
 }
 
 Real
 PowerLawCreepModel::computeDerivative(const Real effectiveTrialStress, const Real scalar)
 {
-  if (_legacy_return_mapping)
-    return -3 * _coefficient * _shear_modulus * _n_exponent *
-               std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent - 1) *
-               _exponential * _expTime -
-           1 / _dt;
-  else
-    return -3.0 * _coefficient * _shear_modulus * _n_exponent *
-               std::pow(effectiveTrialStress - 3.0 * _shear_modulus * scalar, _n_exponent - 1.0) *
-               _exponential * _expTime * _dt -
-           1.0;
+  return -3.0 * _coefficient * _shear_modulus * _n_exponent *
+             std::pow(effectiveTrialStress - 3.0 * _shear_modulus * scalar, _n_exponent - 1.0) *
+             _exponential * _expTime * _dt -
+         1.0;
 }

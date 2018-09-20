@@ -207,20 +207,12 @@
     n_exponent = 5
     m_exponent = -0.5
     activation_energy = 0
-    relative_tolerance = 1e-5
-    absolute_tolerance = 1e-20
-    max_its = 30
-    legacy_return_mapping = true
   [../]
   [./plas]
     type = IsotropicPlasticity
     block = 0
     hardening_constant = 100
     yield_stress = 20
-    max_its = 30
-    relative_tolerance = 1e-5
-    absolute_tolerance = 1e-20
-    legacy_return_mapping = true
   [../]
 []
 

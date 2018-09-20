@@ -40,7 +40,6 @@ validParams<ElasticModel>()
   params.addParam<bool>("fission_rate_material", "dummy");
   params.addParam<bool>("gamma_transition", "dummy");
   params.addParam<bool>("hydrostatic_stress", "dummy");
-  params.addParam<bool>("legacy_return_mapping", "dummy");
   params.addParam<bool>("max_inelastic_increment", "dummy");
   params.addParam<bool>("max_its", "dummy");
   params.addParam<bool>("open_pore_compressibility_factor", "dummy");

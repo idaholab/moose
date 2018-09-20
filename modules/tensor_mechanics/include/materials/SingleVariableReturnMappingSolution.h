@@ -28,11 +28,6 @@ public:
   SingleVariableReturnMappingSolution(const InputParameters & parameters);
   virtual ~SingleVariableReturnMappingSolution() {}
 
-  /// Functions for setting old default tolerances with legacy_return_mapping:
-  void setMaxIts(unsigned int max_its) { _max_its = max_its; }
-  void setRelativeTolerance(Real relative_tolerance) { _relative_tolerance = relative_tolerance; }
-  void setAbsoluteTolerance(Real absolute_tolerance) { _absolute_tolerance = absolute_tolerance; }
-
 protected:
   /**
    * Perform the return mapping iterations
@@ -120,10 +115,6 @@ protected:
    */
   virtual void outputIterationSummary(std::stringstream * iter_output, const unsigned int total_it);
 
-  /// Whether to use the legacy return mapping algorithm and compute residuals in the legacy
-  /// manner.
-  bool _legacy_return_mapping;
-
   /// Whether to check to see whether iterative solution is within admissible range, and set within that range if outside
   bool _check_range;
 
@@ -149,11 +140,9 @@ private:
     EXCEEDED_ITERATIONS
   };
 
-  /// Maximum number of return mapping iterations (used only in legacy return mapping)
-  unsigned int _max_its;
-
-  /// Maximum number of return mapping iterations used in current procedure. Not settable by user.
-  const unsigned int _fixed_max_its;
+  /// Maximum number of return mapping iterations. This exists only to avoid an infinite loop, and is
+  /// is intended to be a large number that is not settable by the user.
+  const unsigned int _max_its;
 
   /// Whether to output iteration information all the time (regardless of whether iterations converge)
   const bool _internal_solve_full_iteration_history;
@@ -194,18 +183,6 @@ private:
   SolveState internalSolve(const Real effective_trial_stress,
                            Real & scalar,
                            std::stringstream * iter_output = nullptr);
-
-  /**
-   * Method called from within this class to perform the actual return mappping iterations.
-   * This version uses the legacy procedure.
-   * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
-   * @param iter_output            Output stream -- if null, no output is produced
-   * @return Whether the solution was successful
-   */
-  bool internalSolveLegacy(const Real effective_trial_stress,
-                           Real & scalar,
-                           std::stringstream * iter_output);
 
   /**
    * Check to see whether the residual is within the convergence limits.

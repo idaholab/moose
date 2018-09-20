@@ -25,7 +25,6 @@ validParams<SingleVariableReturnMappingSolution>()
   InputParameters params = emptyInputParameters();
 
   // Newton iteration control parameters
-  params.addParam<unsigned int>("max_its", 30, "Maximum number of Newton iterations");
   params.addParam<Real>(
       "relative_tolerance", 1e-8, "Relative convergence tolerance for Newton iteration");
   params.addParam<Real>(
@@ -35,15 +34,6 @@ validParams<SingleVariableReturnMappingSolution>()
                         "Factor applied to relative and absolute "
                         "tolerance for acceptable convergence if "
                         "iterations are no longer making progress");
-  params.addDeprecatedParam<bool>("legacy_return_mapping",
-                                  false,
-                                  "Perform iterations and compute residual "
-                                  "the same way as the previous "
-                                  "algorithm. Also use same old defaults for relative_tolerance, "
-                                  "absolute_tolerance, and max_its.",
-                                  "The 'legacy_return_mapping' option is being removed because the "
-                                  "new return mapping algorithm has been shown to work better in "
-                                  "all cases tested");
 
   // diagnostic output parameters
   MooseEnum internal_solve_output_on_enum("never on_error always", "on_error");
@@ -63,14 +53,12 @@ validParams<SingleVariableReturnMappingSolution>()
 
 SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     const InputParameters & parameters)
-  : _legacy_return_mapping(false),
-    _check_range(false),
+  : _check_range(false),
     _line_search(true),
     _bracket_solution(true),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
-    _max_its(parameters.get<unsigned int>("max_its")),
-    _fixed_max_its(1000), // Far larger than ever expected to be needed
+    _max_its(1000), // Far larger than ever expected to be needed
     _internal_solve_full_iteration_history(
         parameters.get<bool>("internal_solve_full_iteration_history")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
@@ -83,25 +71,6 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     _residual(0.0),
     _svrms_name(parameters.get<std::string>("_object_name"))
 {
-  if (parameters.get<bool>("legacy_return_mapping") == true)
-  {
-    if (!parameters.isParamSetByUser("relative_tolerance"))
-      _relative_tolerance = 1.e-5;
-    if (!parameters.isParamSetByUser("absolute_tolerance"))
-      _absolute_tolerance = 1.e-20;
-    if (!parameters.isParamSetByUser("max_its"))
-      _max_its = 30;
-    _line_search = false;
-    _bracket_solution = false;
-    _check_range = false;
-    _legacy_return_mapping = true;
-  }
-  else
-  {
-    if (parameters.isParamSetByUser("max_its"))
-      mooseWarning("Please remove the parameter 'max_its', as it is no longer used in the return "
-                   "mapping procedure.");
-  }
 }
 
 Real
@@ -127,80 +96,52 @@ SingleVariableReturnMappingSolution::returnMappingSolve(const Real effective_tri
   std::stringstream * iter_output =
       (_internal_solve_output_on == InternalSolveOutput::ALWAYS) ? new std::stringstream : nullptr;
 
-  if (!_legacy_return_mapping)
+  // do the internal solve and capture iteration info during the first round
+  // iff full history output is requested regardless of whether the solve failed or succeeded
+  auto solve_state = internalSolve(effective_trial_stress,
+                                   scalar,
+                                   _internal_solve_full_iteration_history ? iter_output : nullptr);
+  if (solve_state != SolveState::SUCCESS &&
+      _internal_solve_output_on != InternalSolveOutput::ALWAYS)
   {
-    // do the internal solve and capture iteration info during the first round
-    // iff full history output is requested regardless of whether the solve failed or succeeded
-    auto solve_state =
-        internalSolve(effective_trial_stress,
-                      scalar,
-                      _internal_solve_full_iteration_history ? iter_output : nullptr);
-    if (solve_state != SolveState::SUCCESS &&
-        _internal_solve_output_on != InternalSolveOutput::ALWAYS)
+    // output suppressed by user, throw immediately
+    if (_internal_solve_output_on == InternalSolveOutput::NEVER)
+      throw MooseException("");
+
+    // user expects some kind of output, if necessary setup output stream now
+    if (!iter_output)
+      iter_output = new std::stringstream;
+
+    // add the appropriate error message to the output
+    switch (solve_state)
     {
-      // output suppressed by user, throw immediately
-      if (_internal_solve_output_on == InternalSolveOutput::NEVER)
-        throw MooseException("");
+      case SolveState::NAN_INF:
+        *iter_output << "Encountered inf or nan in material return mapping iterations.\n";
+        break;
 
-      // user expects some kind of output, if necessary setup output stream now
-      if (!iter_output)
-        iter_output = new std::stringstream;
+      case SolveState::EXCEEDED_ITERATIONS:
+        *iter_output << "Exceeded maximum iterations in material return mapping iterations.\n";
+        break;
 
-      // add the appropriate error message to the output
-      switch (solve_state)
-      {
-        case SolveState::NAN_INF:
-          *iter_output << "Encountered inf or nan in material return mapping iterations.\n";
-          break;
-
-        case SolveState::EXCEEDED_ITERATIONS:
-          *iter_output << "Exceeded maximum iterations in material return mapping iterations.\n";
-          break;
-
-        default:
-          mooseError("Unhandled solver state");
-      }
-
-      // if full history output is only requested for failed solves we have to repeat
-      // the solve a second time
-      if (_internal_solve_full_iteration_history)
-        internalSolve(effective_trial_stress, scalar, iter_output);
-
-      // Append summary and throw exception
-      outputIterationSummary(iter_output, _iteration);
-      throw MooseException(iter_output->str());
+      default:
+        mooseError("Unhandled solver state");
     }
 
-    if (_internal_solve_output_on == InternalSolveOutput::ALWAYS)
-    {
-      // the solve did not fail but the user requested debug output anyways
-      outputIterationSummary(iter_output, _iteration);
-      console << iter_output->str();
-    }
+    // if full history output is only requested for failed solves we have to repeat
+    // the solve a second time
+    if (_internal_solve_full_iteration_history)
+      internalSolve(effective_trial_stress, scalar, iter_output);
+
+    // Append summary and throw exception
+    outputIterationSummary(iter_output, _iteration);
+    throw MooseException(iter_output->str());
   }
-  else
-  {
-    //
-    // DEPRECATED LEGACY SOLVE, please remove
-    //
 
-    if (!internalSolveLegacy(effective_trial_stress, scalar, iter_output))
-    {
-      if (iter_output)
-      {
-        outputIterationSummary(iter_output, _iteration);
-        mooseError(iter_output->str());
-      }
-      else
-      {
-        iter_output = new std::stringstream;
-        internalSolveLegacy(effective_trial_stress, scalar, iter_output);
-        outputIterationSummary(iter_output, _iteration);
-        mooseError(iter_output->str());
-      }
-    }
-    else if (iter_output)
-      console << iter_output->str();
+  if (_internal_solve_output_on == InternalSolveOutput::ALWAYS)
+  {
+    // the solve did not fail but the user requested debug output anyways
+    outputIterationSummary(iter_output, _iteration);
+    console << iter_output->str();
   }
 }
 
@@ -240,7 +181,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
   _residual_history.assign(_num_resids, std::numeric_limits<Real>::max());
   _residual_history[0] = _residual;
 
-  while (_iteration < _fixed_max_its && !converged(_residual, reference_residual) &&
+  while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, _residual, reference_residual))
   {
     scalar_increment = -_residual / computeDerivative(effective_trial_stress, scalar);
@@ -346,66 +287,10 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
   if (std::isnan(_residual) || std::isinf(_residual))
     return SolveState::NAN_INF;
 
-  if (_iteration == _fixed_max_its)
+  if (_iteration == _max_its)
     return SolveState::EXCEEDED_ITERATIONS;
 
   return SolveState::SUCCESS;
-}
-
-bool
-SingleVariableReturnMappingSolution::internalSolveLegacy(const Real effective_trial_stress,
-                                                         Real & scalar,
-                                                         std::stringstream * iter_output)
-{
-  scalar = 0.0;
-  unsigned int it = 0;
-  Real residual = 10.0;
-  Real norm_residual = 10.0;
-  Real first_norm_residual = 10.0;
-  std::string iter_str;
-
-  while (it < _max_its && norm_residual > _absolute_tolerance &&
-         (norm_residual / first_norm_residual) > _relative_tolerance)
-  {
-    residual = computeResidual(effective_trial_stress, scalar);
-    norm_residual = std::abs(residual);
-    if (it == 0)
-    {
-      first_norm_residual = norm_residual;
-      if (first_norm_residual == 0)
-        first_norm_residual = 1;
-    }
-
-    scalar -= residual / computeDerivative(effective_trial_stress, scalar);
-
-    if (iter_output)
-    {
-      iter_str = "Return mapping solve:\n iteration = " + Moose::stringify(it) + "\n" +
-                 +" effective trial stress = " + Moose::stringify(effective_trial_stress) + "\n" +
-                 +" scalar effective inelastic strain = " + Moose::stringify(scalar) + "\n" +
-                 +" relative residual = " + Moose::stringify(norm_residual / first_norm_residual) +
-                 "\n" + +" relative tolerance = " + Moose::stringify(_relative_tolerance) + "\n" +
-                 +" absolute residual = " + Moose::stringify(norm_residual) + "\n" +
-                 +" absolute tolerance = " + Moose::stringify(_absolute_tolerance) + "\n";
-    }
-    iterationFinalize(scalar);
-    ++it;
-  }
-
-  if (iter_output)
-    *iter_output << iter_str;
-
-  bool has_converged = true;
-
-  if (it == _max_its && norm_residual > _absolute_tolerance &&
-      (norm_residual / first_norm_residual) > _relative_tolerance)
-  {
-    has_converged = false;
-    if (iter_output)
-      *iter_output << "Exceeded maximum iterations in material return mapping iterations."
-                   << std::endl;
-  }
-  return has_converged;
 }
 
 bool
