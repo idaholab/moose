@@ -83,8 +83,9 @@ class CoreExtension(components.Extension):
 
         #TODO: Make a generic preamble method?
         if isinstance(renderer, renderers.LatexRenderer):
+            renderer.addPackage(u'amsmath')
+            renderer.addPackage(u'soul')
             renderer.addPackage(u'hyperref')
-            renderer.addPackage(u'ulem')
 
 # Documenting all these classes is far to repetitive and useless.
 #pylint: disable=missing-docstring
@@ -143,11 +144,10 @@ class HeadingHash(components.TokenComponent):
                     r'^(?P<level>#{1,6}) '       # match 1 to 6 #'s at the beginning of line
                     r'(?P<inline>.*?) *'         # heading text that will be inline parsed
                     r'(?P<settings>\s+\w+=.*?)?' # optional match key, value settings
-                    r'(?=\n*\Z|\n{2,})',            # match up to end of string or newline(s)
+                    r'(?=\n*\Z|\n{2,})',         # match up to end of string or newline(s)
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
 
     def createToken(self, info, parent):
-        #content = unicode(info['inline']) #TODO: is there a better way?
         content = info['inline']
         heading = tokens.Heading(parent, level=info['level'].count('#'), **self.attributes)
         tokens.Label(heading, text=content)
@@ -332,10 +332,17 @@ class RenderHeading(components.RenderComponent):
                       'subparagraph']
 
     def createHTML(self, token, parent): #pylint: disable=no-self-use
-        return html.Tag(parent, 'h{}'.format(token.level), **token.attributes)
+        attr = token.attributes
+        id_ = attr.get('id')
+        if not id_:
+            func = lambda n: isinstance(n, tokens.Word)
+            words = [node.content.lower() for node in anytree.search.findall(token, filter_=func)]
+            attr['id'] = '-'.join(words)
+
+        return html.Tag(parent, 'h{}'.format(token.level), **attr)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        return latex.Command(parent, self.LATEX_SECTIONS[token.level], start='\n', end='\n')
+        return latex.Command(parent, self.LATEX_SECTIONS[token.level], start='\n')
 
 class RenderLabel(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use,unused-argument
@@ -354,7 +361,8 @@ class RenderCode(components.RenderComponent):
         return pre
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        return latex.Environment(parent, 'verbatim', string=token.code)
+        return latex.Environment(parent, 'verbatim', string=token.code, after_begin='',
+                                 before_end='')
 
 class RenderShortcutLink(components.RenderComponent):
     def __init__(self, *args, **kwargs):
@@ -379,14 +387,9 @@ class RenderShortcutLink(components.RenderComponent):
     def createLatex(self, token, parent):
         cmd = latex.CustomCommand(parent, 'href')
         node = self.getShortcut(token)
-        if node.content is not None:
-            latex.Brace(cmd, string=node.content)
-        elif node.token:
-            for n in node.token.children:
-                self.translator.renderer.process(n, cmd)
-        else:
-            latex.Brace(cmd, string=node.link)
-        latex.Brace(cmd, string=unicode(token.key))
+
+        latex.Brace(cmd, string=node.link)
+        latex.Brace(cmd, string=node.string)
         return cmd
 
     def getShortcut(self, token):
@@ -451,7 +454,7 @@ class RenderParagraph(components.RenderComponent):
         return html.Tag(parent, 'p', **token.attributes)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        latex.CustomCommand(parent, 'par', start='\n', end='\n')
+        latex.CustomCommand(parent, 'par', start='\n', end=' ')
         return parent
 
 class RenderOrderedList(components.RenderComponent):
@@ -484,7 +487,7 @@ class RenderListItem(components.RenderComponent):
         return html.Tag(parent, 'li', **token.attributes)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        latex.CustomCommand(parent, 'item', start='\n')
+        latex.Command(parent, 'item')
         return parent
 
 class RenderString(components.RenderComponent):
@@ -499,7 +502,7 @@ class RenderQuote(components.RenderComponent):
         return html.Tag(parent, 'blockquote', **token.attributes)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        return latex.Environment(parent, 'quote')
+        return latex.Environment(parent, 'quote', after_begin='')
 
 class RenderStrong(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
@@ -508,13 +511,6 @@ class RenderStrong(components.RenderComponent):
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
         return latex.Command(parent, 'textbf')
 
-class RenderUnderline(components.RenderComponent):
-    def createHTML(self, token, parent): #pylint: disable=no-self-use
-        return html.Tag(parent, 'u', **token.attributes)
-
-    def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        return latex.Command(parent, 'underline')
-
 class RenderEmphasis(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
         return html.Tag(parent, 'em', **token.attributes)
@@ -522,34 +518,48 @@ class RenderEmphasis(components.RenderComponent):
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
         return latex.Command(parent, 'emph')
 
+class RenderUnderline(components.RenderComponent):
+    def createHTML(self, token, parent): #pylint: disable=no-self-use
+        return html.Tag(parent, 'u', **token.attributes)
+
+    def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
+        for n in parent.path:
+            if n.name in ['so', 'ul']:
+                msg = "Nested strikethrough and underline commands are not supported in LaTeX, " \
+                      "see the Soul package for details."
+                LOG.warning(msg)
+                return parent
+
+        return latex.Command(parent, 'ul')
+
 class RenderStrikethrough(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
         return html.Tag(parent, 'strike', **token.attributes)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        return latex.Command(parent, 'sout')
+
+        for n in parent.path:
+            if n.name in ['so', 'ul']:
+                msg = "Nested strikethrough and underline commands are not supported in LaTeX, " \
+                      "see the Soul package for details."
+                LOG.warning(msg)
+                return parent
+
+        return latex.Command(parent, 'so')
 
 class RenderSuperscript(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
         return html.Tag(parent, 'sup', **token.attributes)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        math = latex.InlineMath(parent)
-        latex.String(math, content=u'^{')
-        cmd = latex.Command(math, 'text')
-        latex.String(math, content=u'}')
-        return cmd
+        return latex.Command(parent, 'textsuperscript')
 
 class RenderSubscript(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
         return html.Tag(parent, 'sub', **token.attributes)
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        math = latex.InlineMath(parent)
-        latex.String(math, content=u'_{')
-        cmd = latex.Command(math, 'text')
-        latex.String(math, content=u'}')
-        return cmd
+        return latex.Command(parent, 'textsubscript')
 
 class RenderPunctuation(RenderString):
     def createHTML(self, token, parent): #pylint: disable=no-self-use

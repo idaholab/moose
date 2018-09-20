@@ -3,6 +3,7 @@ import os
 import logging
 import traceback
 import uuid
+import subprocess
 
 import anytree
 
@@ -117,6 +118,14 @@ class Renderer(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObj
         if el is not None:
             for child in token.children:
                 self.process(el, child)
+
+    def preExecute(self):
+        """Called by Translator prior to conversion."""
+        pass
+
+    def postExecute(self):
+        """Called by Translator after conversion."""
+        pass
 
     def _method(self, component):
         """
@@ -605,24 +614,84 @@ class LatexRenderer(Renderer):
         """
         return base.NodeBase()
 
-    def convert(self, root, ast, config): #pylint: disable=unused-argument
+    def postExecute(self):
         """
-        Built LaTeX tree from AST.
+        Combines all the LaTeX files into a single file.
+
+        Organizing the files is still a work in progress.
         """
-        latex.Command(root, 'documentclass', string=u'book', end='\n')
+        def sort_node(node):
+            """Helper to organize nodes files then directories."""
+            files = []
+            dirs = []
+            for child in node.children:
+                child.parent = None
+                if isinstance(child, page.DirectoryNode):
+                    dirs.append(child)
+                else:
+                    files.append(child)
+                sort_node(child)
 
-        for package in self._packages:
-            latex.Command(root, 'usepackage', string=package, end='\n')
+            for child in files:
+                child.parent = node
+            for child in dirs:
+                child.parent = node
 
-        doc = latex.Environment(root, 'document')
-        self.process(doc, ast)
-        return root
+        root = self.translator.root
+        sort_node(root)
+
+        main = self._processPages(root)
+        loc = self.translator['destination']
+        with open(os.path.join(loc, 'main.tex'), 'w+') as fid:
+            fid.write(main.write())
+
+        main_tex = os.path.join(loc, 'main.tex')
+        LOG.info("Building complete LaTeX document: %s", main_tex)
+        cmd = ['pdflatex', '-halt-on-error', main_tex]
+        try:
+            subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            msg = 'Failed to run command: {}'
+            raise exceptions.MooseDocsException(msg, ' '.join(cmd), error=e.output)
 
     def addPackage(self, *args):
         """
         Add a LaTeX package to the list of packages for rendering.
         """
         self._packages.update(args)
+
+    def _processPages(self, root):
+        """
+        Build a main latex file that includes the others.
+        """
+
+        main = base.NodeBase()
+        latex.Command(main, 'documentclass', string=u'report', end='')
+        for package in self._packages:
+            latex.Command(main, 'usepackage', string=package, start='\n', end='')
+
+        func = lambda n: isinstance(n, page.MarkdownNode)
+        nodes = [n for n in anytree.PreOrderIter(root, filter_=func)]
+        for node in nodes:
+
+            # If the parallel implementation was better this would not be needed.
+            node.tokenize()
+            node.render(node.ast)
+
+            if node.depth == 1:
+                title = latex.Command(main, 'title', start='\n')
+                for child in node.result.children[0]:#[0].children:
+                    child.parent = title
+                node.result.children[0].parent = None
+
+        doc = latex.Environment(main, 'document', end='\n')
+        latex.Command(doc, 'maketitle')
+        for node in nodes:
+            node.write()
+            cmd = latex.Command(doc, 'input', start='\n')
+            latex.String(cmd, content=unicode(node.destination), escape=False)
+
+        return main
 
 class JSONRenderer(Renderer):
     """

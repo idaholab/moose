@@ -15,11 +15,11 @@ class TestLatex(unittest.TestCase):
         self.assertEqual(latex.escape('_'), '\_')
         self.assertEqual(latex.escape('{'), '\{')
         self.assertEqual(latex.escape('}'), '\}')
-        self.assertEqual(latex.escape('^'), '\^')
-        self.assertEqual(latex.escape('~'), '\\textasciitilde\\')
-        self.assertEqual(latex.escape('\\'), '\\textbackslash\\')
-        self.assertEqual(latex.escape('<'), '\\textless\\')
-        self.assertEqual(latex.escape('>'), '\\textgreater\\')
+        self.assertEqual(latex.escape('^'), '{\\textasciicircum}')
+        self.assertEqual(latex.escape('~'), '{\\textasciitilde}')
+        self.assertEqual(latex.escape('\\'), '{\\textbackslash}')
+        self.assertEqual(latex.escape('<'), '{\\textless}')
+        self.assertEqual(latex.escape('>'), '{\\textgreater}')
 
     def testEnclosure(self):
         enc = latex.Enclosure(enclose=('#','@'))
@@ -43,7 +43,7 @@ class TestLatex(unittest.TestCase):
 
     def testCommand(self):
         cmd = latex.Command(None, 'foo')
-        self.assertEqual(cmd.write(), '\\foo{}')
+        self.assertEqual(cmd.write(), '\\foo')
 
         cmd = latex.Command(None, 'foo', string=u'bar')
         self.assertIsInstance(cmd(0), latex.String)
@@ -51,7 +51,7 @@ class TestLatex(unittest.TestCase):
         self.assertEqual(cmd.write(), '\\foo{bar}')
 
         cmd = latex.Command(None, 'foo', start='5', end='6')
-        self.assertEqual(cmd.write(), '5\\foo{}6')
+        self.assertEqual(cmd.write(), '5\\foo6')
 
     def testCustomCommand(self):
         cmd = latex.CustomCommand(None, 'foo')
@@ -67,7 +67,7 @@ class TestLatex(unittest.TestCase):
 
     def testEnvironment(self):
         env = latex.Environment(None, 'foo')
-        self.assertEqual(env.write(), '\n\\begin{foo}\n\n\\end{foo}\n')
+        self.assertEqual(env.write(), '\n\\begin{foo}\n\n\\end{foo}')
 
     def testString(self):
         s = latex.String(content=u'foo')

@@ -11,7 +11,6 @@
 import os
 import sys
 import subprocess
-import shutil
 import mooseutils
 import MooseDocs
 
@@ -25,6 +24,14 @@ def command_line_options(subparser, parent):
                         help="The desired output format to verify.")
     parser.add_argument('--update-gold', action='store_true',
                         help="Copy the rendered results to the gold directory.")
+
+def insert_moose_dir(content):
+    """Helper for adding '${MOOSE_DIR}' to content."""
+    return content.replace(os.getenv('MOOSE_DIR'), '${MOOSE_DIR}')
+
+def replace_moose_dir(content):
+    """Helper for replacing '${MOOSE_DIR}' in contents."""
+    return content.replace('${MOOSE_DIR}', os.getenv('MOOSE_DIR'))
 
 def main(options):
     """Test all files in output with those in the gold."""
@@ -53,14 +60,23 @@ def main(options):
             _, ext = os.path.splitext(fname)
             if ext in extensions:
                 out = os.path.join(root, fname)
+                with open(out, 'r') as fid:
+                    out_content = replace_moose_dir(fid.read())
+
+                out = os.path.join(root, fname)
                 gold = out.replace(out_dir, gold_dir)
+                with open(gold, 'r') as fid:
+                    gold_content = replace_moose_dir(fid.read())
 
                 if options.update_gold:
-                    if not os.path.isdir(gold_dir):
-                        os.makedirs(gold_dir)
-                    shutil.copyfile(out, gold)
+                    dirname = os.path.dirname(gold)
+                    if not os.path.isdir(dirname):
+                        os.makedirs(dirname)
+                    with open(gold, 'w+') as fid:
+                        fid.write(insert_moose_dir(gold_content))
                 else:
-                    diff = mooseutils.unidiff(out, gold, color=True, num_lines=1)
+                    diff = mooseutils.text_unidiff(out_content, gold_content,
+                                                   color=True, num_lines=1)
                     if diff:
                         print diff
                         errno = 1

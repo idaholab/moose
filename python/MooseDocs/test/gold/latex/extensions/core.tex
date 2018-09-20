@@ -1,0 +1,166 @@
+
+\chapter{\label{core-extension-tests}Core Extension Tests}
+\section{\label{code-blocks}Code Blocks}
+\begin{verbatim}
+text
+\end{verbatim}
+\begin{verbatim}
+int y;
+\end{verbatim}
+\begin{verbatim}
+for i in range(10):
+  print i
+\end{verbatim}
+\section{\label{quotations}Quotations}
+\subsection{\label{multiline-quotation}Multiline Quotation}
+\begin{quote}
+\par Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. \textbf{Duis} aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+\end{quote}
+\subsection{\label{nested-quotations-and-lists}Nested Quotations and Lists}
+\begin{quote}
+\par This is a quotation that contains a quotation.
+\begin{quote}
+\par This should be a nested quotation.
+\end{quote}
+\begin{itemize}
+\item
+\par A list. \item
+\par With two items
+\begin{quote}
+\par The second contains a quote as well, which has a numbered list.
+\begin{enumerate}
+\item
+\par one \item
+\par two
+\end{enumerate}
+\end{quote}
+\end{itemize}
+\end{quote}
+\section{\label{headings}Headings}
+\chapter{\label{one}One}
+\section{\label{two}Two}
+\subsection{\label{three}Three}
+\subsubsection{\label{four}Four}
+\paragraph{\label{five}Five}
+\subparagraph{\label{six}Six}
+\section{\label{heading-with-style}Heading with Style}
+\section{\label{unordered-lists}Unordered Lists}
+\subsection{\label{single-level-lists}Single level lists}
+\begin{itemize}
+\item
+\par Item 1 \item
+\par Item 2 \item
+\par Item 3 The third items has some content, this content contains paragraphs.
+\par This is a second paragraph in the list.
+\par \item
+\par Item 4 should be apart of the same list.
+\end{itemize}
+\begin{itemize}
+\item
+\par Item 1b: This should start a new list, because of the two blank lines. \item
+\par Item 2b
+\end{itemize}
+\subsection{\label{nested-lists}Nested lists}
+\begin{itemize}
+\item
+\par Item 1
+\begin{itemize}
+\item
+\par Item 1.1 \item
+\par Item 1.2
+\end{itemize}
+\par \item
+\par Item 2
+\begin{itemize}
+\item
+\par Item 2.1
+\begin{itemize}
+\item
+\par Item 2.1.1 \item
+\par Item 2.1.2
+\begin{quote}
+\par A quotation.
+\end{quote}
+\end{itemize}
+\par \item
+\par Item 2.2
+\end{itemize}
+\par \item
+\par Item 3
+\end{itemize}
+\section{\label{ordered-list}Ordered List}
+\subsection{\label{single-level-lists}Single level lists}
+\begin{enumerate}
+\item
+\par One \item
+\par Two \item
+\par Three Just like above, this should contain two paragraphs.
+\par This is a new paragraph.
+\par \item
+\par Four
+\end{enumerate}
+\subsection{\label{starting-number}Starting number}
+\begin{enumerate}
+\item
+\par Two \item
+\par Three
+\end{enumerate}
+\begin{enumerate}
+\item
+\par Forty-two \item
+\par Forty-three
+\end{enumerate}
+\begin{enumerate}
+\item
+\par Twelve thousand \emph{three} hundred and forty-five \item
+\par Twelve thousand three hundred and forty-six
+\begin{enumerate}
+\item
+\par A nested item with a \textbf{huge} number.
+\end{enumerate}
+\end{enumerate}
+\subsection{\label{nested-lists}Nested lists}
+\begin{enumerate}
+\item
+\par One
+\begin{enumerate}
+\item
+\par 1.1 \item
+\par 1.2 \item
+\par 1.3
+\end{enumerate}
+\par \item
+\par Two
+\begin{enumerate}
+\item
+\par 2.1 \item
+\par 2.2
+\begin{enumerate}
+\item
+\par \so{2.2.1} \item
+\par 2.2.2 \item
+\par 2.2.3
+\begin{quote}
+\par A quote.
+\begin{quote}
+\par Go deeper.
+\begin{enumerate}
+\item
+\par Fifty-four
+\end{enumerate}
+\end{quote}
+\end{quote}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\section{\label{shortcuts-and-shortcut-links.}Shortcuts and Shortcut links.}
+\par A popular search engine is \href{www.google.com}{google}.
+\section{\label{inline-formatting}Inline formatting}
+\par super\textsuperscript{script} not super {\textasciicircum}script{\textasciicircum}
+\par sub\textsubscript{script} not sub @script@
+\par \ul{underline} = not underlined=
+\par \emph{emphasis} * not emphasized*
+\par \textbf{bold} + not bold+
+\par \so{strike} {\textasciitilde} not strike{\textasciitilde}
+\par \texttt{mono} ` not mono`
+\par Yo, dawg I heard you like formatting, so I created \ul{underline formatted text that contains text with stikethrough that contains \textbf{bold formatting with \emph{emphasis that has some\textsuperscript{superscript text with a\textsubscript{subscript}}}}}, I hope you like it. 
