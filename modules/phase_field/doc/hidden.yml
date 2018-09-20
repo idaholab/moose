@@ -41,7 +41,6 @@
 - /ICs/RndBoundingBoxIC
 - /ICs/RndSmoothCircleIC
 - /ICs/SmoothCircleFromFileIC
-- /ICs/SmoothCircleIC
 - /ICs/SmoothSuperellipsoidIC
 - /ICs/SpecifiedSmoothCircleIC
 - /ICs/SpecifiedSmoothSuperellipsoidIC

@@ -55,6 +55,12 @@ protected:
   std::vector<Point> _centers;
   std::vector<Real> _radii;
 
+  enum class ProfileType
+  {
+    COS,
+    TANH
+  } _profile;
+
   MooseRandom _random;
 };
 
