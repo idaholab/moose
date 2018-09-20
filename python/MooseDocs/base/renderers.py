@@ -680,7 +680,7 @@ class LatexRenderer(Renderer):
                     child.parent = title
                 node.result.children[0].parent = None
 
-        doc = latex.Environment(main, 'document')
+        doc = latex.Environment(main, 'document', end='\n')
         latex.Command(doc, 'maketitle')
         for node in nodes:
             node.write()
