@@ -22,6 +22,7 @@
 
 // Forward declarations
 class FEProblemBase;
+class Function;
 
 /**
  * A wrapper class for creating and evaluating parsed functions via the
@@ -104,6 +105,12 @@ private:
   /// Vector of pointers to PP values
   std::vector<Real *> _scalar_vals;
 
+  /// Stores the relative location of variables (in _vars) that are connected to Functions
+  std::vector<unsigned int> _function_index;
+
+  /// Vector of functions
+  std::vector<Function *> _functions;
+
   /// Vector of pointers to the variables in libMesh::ParsedFunction
   std::vector<Real *> _addr;
 
@@ -117,9 +124,14 @@ private:
   void initialize();
 
   /**
-   * Updates postprocessor values for use in the libMesh::ParsedFunction
+   * Updates postprocessor and scalar values for use in the libMesh::ParsedFunction
    */
   void update();
+
+  /**
+   * Updates function values for use in the libMesh::ParsedFunction
+   */
+  void updateFunctionValues(Real t, const Point & pt);
 
   // moose_unit needs access
   friend class ParsedFunctionTest;

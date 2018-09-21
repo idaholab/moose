@@ -8,9 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseParsedFunctionWrapper.h"
-
 #include "FEProblem.h"
 #include "MooseVariableScalar.h"
+#include "Function.h"
 
 MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem,
                                                        const std::string & function_str,
@@ -26,13 +26,10 @@ MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem
   _function_ptr =
       libmesh_make_unique<ParsedFunction<Real, RealGradient>>(_function_str, &_vars, &_vals);
 
-  // Loop through the Postprocessor and Scalar variables and point the libMesh::ParsedFunction to
-  // the PostprocessorValue
-  for (const auto & index : _pp_index)
-    _addr.push_back(&_function_ptr->getVarAddress(_vars[index]));
-
-  for (const auto & index : _scalar_index)
-    _addr.push_back(&_function_ptr->getVarAddress(_vars[index]));
+  // loop through all discovered values and store their location, so we can propagate
+  // new values into libMesh::ParsedFunction
+  for (auto & v : _vars)
+    _addr.push_back(&_function_ptr->getVarAddress(v));
 }
 
 MooseParsedFunctionWrapper::~MooseParsedFunctionWrapper() {}
@@ -43,6 +40,7 @@ MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
 {
   // Update the postprocessor / libMesh::ParsedFunction references for the desired function
   update();
+  updateFunctionValues(t, p);
 
   // Evalute the function that returns a scalar
   return (*_function_ptr)(p, t);
@@ -53,6 +51,7 @@ DenseVector<Real>
 MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
 {
   update();
+  updateFunctionValues(t, p);
   DenseVector<Real> output(LIBMESH_DIM);
   (*_function_ptr)(p, t, output);
   return output;
@@ -81,6 +80,7 @@ MooseParsedFunctionWrapper::evaluateGradient(Real t, const Point & p)
 {
   // Update the postprocessor / libMesh::ParsedFunction references for the desired function
   update();
+  updateFunctionValues(t, p);
 
   // Evalute the gradient of the function
   return _function_ptr->gradient(p, t);
@@ -91,6 +91,7 @@ MooseParsedFunctionWrapper::evaluateDot(Real t, const Point & p)
 {
   // Update the postprocessor / libMesh::ParsedFunction references for the desired function
   update();
+  updateFunctionValues(t, p);
 
   // Evalute the time derivative
   return _function_ptr->dot(p, t);
@@ -138,16 +139,32 @@ MooseParsedFunctionWrapper::initialize()
       _scalar_index.push_back(i);
     }
 
+    // Case when a function is bound by the name given in the input values
+    else if (_feproblem.hasFunction(_vals_input[i]))
+    {
+      // The function
+      Function & fn = _feproblem.getFunction(_vals_input[i], _tid);
+
+      // Store a pointer to the function
+      _functions.push_back(&fn);
+
+      // Store a value into _vals
+      _vals.push_back(0);
+
+      // Store the location of this variable
+      _function_index.push_back(i);
+    }
+
     // Case when a Real is supplied, convert std::string to Real
     else
     {
       // Use istringstream to convert, if it fails produce an error, otherwise add the variable to
       // the _vals variable
       if (!(ss >> tmp) || !ss.eof())
-        mooseError(
-            "The input value '",
-            _vals_input[i],
-            "' was not understood, it must be a Real Number, Postprocessor, or Scalar Variable");
+        mooseError("The input value '",
+                   _vals_input[i],
+                   "' was not understood, it must be a Real Number, Postprocessor, Scalar Variable "
+                   "or Function name.");
       else
         _vals.push_back(tmp);
     }
@@ -158,8 +175,15 @@ void
 MooseParsedFunctionWrapper::update()
 {
   for (unsigned int i = 0; i < _pp_index.size(); ++i)
-    (*_addr[i]) = (*_pp_vals[i]);
+    (*_addr[_pp_index[i]]) = (*_pp_vals[i]);
 
   for (unsigned int i = 0; i < _scalar_index.size(); ++i)
-    (*_addr[i]) = (*_scalar_vals[i]);
+    (*_addr[_scalar_index[i]]) = (*_scalar_vals[i]);
+}
+
+void
+MooseParsedFunctionWrapper::updateFunctionValues(Real t, const Point & pt)
+{
+  for (unsigned int i = 0; i < _function_index.size(); ++i)
+    (*_addr[_function_index[i]]) = _functions[i]->value(t, pt);
 }
