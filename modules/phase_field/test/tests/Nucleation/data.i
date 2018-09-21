@@ -37,6 +37,21 @@
     inserter = inserter
     value = UPDATE
   [../]
+  [./nuc_rate]
+    type = DiscreteNucleationData
+    inserter = inserter
+    value = RATE
+  [../]
+  [./nuc_insertions]
+    type = DiscreteNucleationData
+    inserter = inserter
+    value = INSERTIONS
+  [../]
+  [./nuc_deletions]
+    type = DiscreteNucleationData
+    inserter = inserter
+    value = DELETIONS
+  [../]
 []
 
 [Executioner]

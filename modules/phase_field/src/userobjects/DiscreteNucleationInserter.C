@@ -33,7 +33,8 @@ DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & p
   : ElementUserObject(parameters),
     _probability(getMaterialProperty<Real>("probability")),
     _hold_time(getParam<Real>("hold_time")),
-    _changes_made(0),
+    _changes_made(0, 0),
+    _update_required(_app.isRecovering() || _app.isRestarting()),
     _global_nucleus_list(declareRestartableData("global_nucleus_list", NucleusList(0))),
     _local_nucleus_list(declareRestartableData("local_nucleus_list", NucleusList(0)))
 {
@@ -46,21 +47,19 @@ DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & p
     _insert_test = true;
   else
     _insert_test = false;
-
-  // force a map rebuild after restart or recover
-  _changes_made = _app.isRecovering() || _app.isRestarting();
 }
 
 void
 DiscreteNucleationInserter::initialize()
 {
-  _changes_made = 0;
+  // clear insertion and deletion counter
+  _changes_made = {0, 0};
 
   // insert test nucleus once
   if (_insert_test)
   {
     _local_nucleus_list.push_back(NucleusLocation(_hold_time, getParam<Point>("test")));
-    _changes_made++;
+    _changes_made.first++;
     _insert_test = false;
   }
 
@@ -75,14 +74,14 @@ DiscreteNucleationInserter::initialize()
         // remove entry (by replacing with last element and shrinking size by one)
         _local_nucleus_list[i] = _local_nucleus_list.back();
         _local_nucleus_list.pop_back();
-        _changes_made++;
+        _changes_made.second++;
       }
       else
         ++i;
     }
   }
 
-  // we reassemble this list at every timestep
+  // we reassemble this list at every time step
   _global_nucleus_list.clear();
 
   // clear total nucleation rate
@@ -103,7 +102,7 @@ DiscreteNucleationInserter::execute()
     {
       _local_nucleus_list.push_back(
           NucleusLocation(_fe_problem.dt() + _fe_problem.time() + _hold_time, _q_point[qp]));
-      _changes_made++;
+      _changes_made.first++;
     }
   }
 }
@@ -115,7 +114,12 @@ DiscreteNucleationInserter::threadJoin(const UserObject & y)
   const DiscreteNucleationInserter & uo = static_cast<const DiscreteNucleationInserter &>(y);
   _global_nucleus_list.insert(
       _global_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
-  _changes_made += uo._changes_made;
+
+  // sum up insertion and deletion counts
+  _changes_made.first += uo._changes_made.first;
+  _changes_made.second += uo._changes_made.second;
+
+  // integrate total nucleation rate
   _nucleation_rate += uo._nucleation_rate;
 }
 
@@ -157,8 +161,11 @@ DiscreteNucleationInserter::finalize()
   }
 
   // get the global number of changes (i.e. changes to _global_nucleus_list)
-  gatherSum(_changes_made);
+  gatherSum(_changes_made.first);
+  gatherSum(_changes_made.second);
 
   // gather the total nucleation rate
   gatherSum(_nucleation_rate);
+
+  _update_required = _changes_made.first > 0 || _changes_made.second > 0;
 }

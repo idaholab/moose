@@ -43,7 +43,9 @@ protected:
   {
     COUNT,
     UPDATE,
-    RATE
+    RATE,
+    INSERTIONS,
+    DELETIONS
   } _value_type;
 };
 

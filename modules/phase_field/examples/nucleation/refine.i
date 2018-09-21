@@ -61,7 +61,7 @@
     type = ParsedMaterial
     f_name = P
     args = c
-    function = 'if(c<0.21,c*1e-8,0)'
+    function = 'if(c<0.21,c*2e-8,0)'
     outputs = exodus
   [../]
   [./nucleation]
@@ -139,6 +139,16 @@
     p2nucleus = 0.05
     dt_max = 10
   [../]
+  [./update]
+    type = DiscreteNucleationData
+    value = UPDATE
+    inserter = inserter
+  [../]
+  [./count]
+    type = DiscreteNucleationData
+    value = COUNT
+    inserter = inserter
+  [../]
 []
 
 [Adaptivity]
@@ -182,7 +192,7 @@
   nl_rel_tol = 1.0e-10
   nl_abs_tol = 1.0e-10
   start_time = 0.0
-  num_steps = 100
+  num_steps = 120
 
   [./TimeStepper]
     type = IterationAdaptiveDT

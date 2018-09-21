@@ -37,7 +37,9 @@ validParams<DiscreteNucleationTimeStep>()
 DiscreteNucleationTimeStep::DiscreteNucleationTimeStep(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _inserter(getUserObject<DiscreteNucleationInserter>("inserter")),
-    _dt_nucleation(getParam<Real>("dt_max"))
+    _dt_nucleation(getParam<Real>("dt_max")),
+    _changes_made(_inserter.getInsertionsAndDeletions()),
+    _rate(_inserter.getRate())
 {
   //
   // We do a bisection search because math is hard
@@ -93,12 +95,16 @@ DiscreteNucleationTimeStep::DiscreteNucleationTimeStep(const InputParameters & p
 PostprocessorValue
 DiscreteNucleationTimeStep::getValue()
 {
-  if (_inserter.isMapUpdateRequired())
+  // check if a nucleus insertion has occurred...
+  if (_changes_made.first > 0)
+    // and cut back time step for nucleus formation
     return _dt_nucleation;
 
-  const Real rate = _inserter.getRate();
-  if (rate == 0.0)
+  // otherwise check the total nucleation rate in the domain...
+  if (_rate == 0.0)
+    // ...and return no limit on the time step if the rate is zero...
     return std::numeric_limits<Real>::max();
   else
-    return _max_lambda / rate;
+    // ...or return the maximum time step that satisfies the bound on the 2+ nuclei probability
+    return _max_lambda / _rate;
 }

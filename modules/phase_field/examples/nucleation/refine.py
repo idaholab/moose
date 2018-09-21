@@ -32,11 +32,10 @@ x = range(len(y1))
 line1 = chigger.graphs.Line(x, y1, width=2, color=[1,1,1], label='actual')
 line2 = chigger.graphs.Line(x, y2, width=2, color=[0,0.5,0], label='maximum')
 tracer = chigger.graphs.Line(color=[1,0,0], xtracer=True)
-graph = chigger.graphs.Graph(line2, line1, viewport=[0.5,0,1,1]) #, tracer
+graph = chigger.graphs.Graph(line2, line1, tracer, viewport=[0.5,0,1,1])
 graph.setOptions('xaxis', title='Step', font_size=18)
 graph.setOptions('yaxis', lim=[0,3000], title='timestep', font_size=18)
-# graph.setOptions('legend', visible=False)
-graph.setOptions('legend', point=[0.15, 0.9])
+graph.setOptions('legend', point=[0.15, 0.9], label_font_size=18)
 
 # window = chigger.RenderWindow(result, cbar, graph, size=[1200, 600], test=False)
 window = chigger.RenderWindow(result, graph, size=[1200, 600], test=False)

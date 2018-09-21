@@ -34,14 +34,18 @@ public:
   virtual void finalize();
 
   /// A nucleus has an expiration time and a location
-  typedef std::pair<Real, Point> NucleusLocation;
+  using NucleusLocation = std::pair<Real, Point>;
 
   /// Every MPI task should keep a full list of nuclei (in case they cross domains with their finite radii)
-  typedef std::vector<NucleusLocation> NucleusList;
+  using NucleusList = std::vector<NucleusLocation>;
+
+  // counter pair to track insertions and deletion in the current timestep
+  using NucleusChanges = std::pair<unsigned int, unsigned int>;
 
   const NucleusList & getNucleusList() const { return _global_nucleus_list; }
-  bool isMapUpdateRequired() const { return _changes_made > 0; }
-  Real getRate() const { return _nucleation_rate; }
+  bool isMapUpdateRequired() const { return _update_required; }
+  const Real & getRate() const { return _nucleation_rate; }
+  const NucleusChanges & getInsertionsAndDeletions() const { return _changes_made; }
 
 protected:
   /// Nucleation rate density (should be a material property implementing nucleation theory)
@@ -50,8 +54,11 @@ protected:
   /// Duration of time each nucleus is kept active after insertion
   Real _hold_time;
 
-  /// count the number of nucleus deletions and insertions
-  unsigned int _changes_made;
+  /// count the number of nucleus insertions and deletions
+  NucleusChanges _changes_made;
+
+  /// is a map update required
+  bool _update_required;
 
   /// the global list of all nuclei over all processors
   NucleusList & _global_nucleus_list;
