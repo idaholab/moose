@@ -423,7 +423,7 @@ class MaterializeRenderer(HTMLRenderer):
         # Build menu
         top_ul = html.Tag(nav, 'ul', id="nav-mobile", class_="right hide-on-med-and-down")
         side_ul = html.Tag(nav, 'ul', id="moose-mobile-menu", class_="side-nav")
-        def menu_helper(ul):
+        def menu_helper(ul): #pylint: disable=invalid-name
             """Add menu items to the supplied ul tag."""
 
             for key1, value1 in self.__navigation.iteritems():
