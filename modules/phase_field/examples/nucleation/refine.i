@@ -61,7 +61,7 @@
     type = ParsedMaterial
     f_name = P
     args = c
-    function = 'if(c<0.21,c*2e-8,0)'
+    function = 'if(c<0.21,c*1e-8,0)'
     outputs = exodus
   [../]
   [./nucleation]
@@ -136,7 +136,7 @@
   [./dtnuc]
     type = DiscreteNucleationTimeStep
     inserter = inserter
-    p2nucleus = 0.05
+    p2nucleus = 0.0005
     dt_max = 10
   [../]
   [./update]

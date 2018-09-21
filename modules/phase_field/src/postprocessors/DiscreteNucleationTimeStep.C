@@ -27,7 +27,7 @@ validParams<DiscreteNucleationTimeStep>()
       0.01,
       "p2nucleus > 0 & p2nucleus < 1",
       "Maximum probability for more than one nucleus to appear during a time "
-      "step. This will limit the time step base on the total nucleation rate for "
+      "step. This will limit the time step based on the total nucleation rate for "
       "the domain to make sure the probability for two or more nuclei to appear "
       "is always below the chosen number.");
   params.addRequiredParam<UserObjectName>("inserter", "DiscreteNucleationInserter user object");

@@ -37,10 +37,10 @@ line2 = chigger.graphs.Line(x, y2, width=2, color=[0,0.5,0], label='maximum')
 tracer = chigger.graphs.Line(color=[1,0,0], xtracer=True)
 graph = chigger.graphs.Graph(line2, line1, tracer, viewport=[0.5,0,1,1])
 graph.setOptions('xaxis', title='Step', font_size=18)
-graph.setOptions('yaxis', lim=[0,3000], title='timestep', font_size=18)
+graph.setOptions('yaxis', lim=[0,300], title='timestep', font_size=18)
 graph.setOptions('legend', point=[0.15, 0.9], label_font_size=18)
 
-moose = ImageAnnotation(filename='moose.png', position=[1, 1], opacity=0.5,
+moose = ImageAnnotation(filename='moose.png', position=[0.99, 0.975], opacity=0.5,
                        horizontal_alignment='right', vertical_alignment='top')
 
 # window = chigger.RenderWindow(result, cbar, graph, size=[1200, 600], test=False)
