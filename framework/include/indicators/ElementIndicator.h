@@ -62,14 +62,8 @@ protected:
   /// Time derivative of u
   const VariableValue & _u_dot;
 
-  /// Second time derivative of u
-  const VariableValue & _u_dotdot;
-
   /// Derivative of u_dot wrt u
   const VariableValue & _du_dot_du;
-
-  /// Derivative of u_dotdot wrt u
-  const VariableValue & _du_dotdot_du;
 
   /// Holds local indicator entries as their accumulated by this ElementIndicator
   DenseVector<Number> _local_indtr;

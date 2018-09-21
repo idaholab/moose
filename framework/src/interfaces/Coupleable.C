@@ -610,13 +610,13 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDotdot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
-  validateExecutionerType(var_name, "coupledDotdot");
+  validateExecutionerType(var_name, "coupledDotDot");
   MooseVariable * var = getVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding vector variable method");
@@ -624,16 +624,72 @@ Coupleable::coupledDotdot(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
   {
     if (_c_nodal)
-      return var->dofValuesDotdot();
+      return var->dofValuesDotDot();
     else
-      return var->uDotdot();
+      return var->uDotDot();
   }
   else
   {
     if (_c_nodal)
-      return var->dofValuesDotdotNeighbor();
+      return var->dofValuesDotDotNeighbor();
     else
-      return var->uDotdotNeighbor();
+      return var->uDotDotNeighbor();
+  }
+}
+
+const VariableValue &
+Coupleable::coupledDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  validateExecutionerType(var_name, "coupledDotOld");
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDotOld();
+    else
+      return var->uDotOld();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDotOldNeighbor();
+    else
+      return var->uDotOldNeighbor();
+  }
+}
+
+const VariableValue &
+Coupleable::coupledDotDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  validateExecutionerType(var_name, "coupledDotDotOld");
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      return var->dofValuesDotDotOld();
+    else
+      return var->uDotDotOld();
+  }
+  else
+  {
+    if (_c_nodal)
+      return var->dofValuesDotDotOldNeighbor();
+    else
+      return var->uDotDotOldNeighbor();
   }
 }
 
@@ -668,13 +724,13 @@ Coupleable::coupledVectorDot(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorDotdot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorDotDot(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_vector_value_zero;
 
-  validateExecutionerType(var_name, "coupledVectorDotdot");
+  validateExecutionerType(var_name, "coupledVectorDotDot");
   VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding standard variable method");
@@ -685,7 +741,7 @@ Coupleable::coupledVectorDotdot(const std::string & var_name, unsigned int comp)
       mooseError("Vector variables are not required to be continuous and so should not be used "
                  "with nodal compute objects");
     else
-      return var->uDotdot();
+      return var->uDotDot();
   }
   else
   {
@@ -693,7 +749,67 @@ Coupleable::coupledVectorDotdot(const std::string & var_name, unsigned int comp)
       mooseError("Vector variables are not required to be continuous and so should not be used "
                  "with nodal compute objects");
     else
-      return var->uDotdotNeighbor();
+      return var->uDotDotNeighbor();
+  }
+}
+
+const VectorVariableValue &
+Coupleable::coupledVectorDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_value_zero;
+
+  validateExecutionerType(var_name, "coupledVectorDotOld");
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      mooseError("Vector variables are not required to be continuous and so should not be used "
+                 "with nodal compute objects");
+    else
+      return var->uDotOld();
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("Vector variables are not required to be continuous and so should not be used "
+                 "with nodal compute objects");
+    else
+      return var->uDotOldNeighbor();
+  }
+}
+
+const VectorVariableValue &
+Coupleable::coupledVectorDotDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_value_zero;
+
+  validateExecutionerType(var_name, "coupledVectorDotDotOld");
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      mooseError("Vector variables are not required to be continuous and so should not be used "
+                 "with nodal compute objects");
+    else
+      return var->uDotDotOld();
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("Vector variables are not required to be continuous and so should not be used "
+                 "with nodal compute objects");
+    else
+      return var->uDotDotOldNeighbor();
   }
 }
 
@@ -726,13 +842,13 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDotdotDu(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
-  validateExecutionerType(var_name, "coupledDotdotDu");
+  validateExecutionerType(var_name, "coupledDotDotDu");
   MooseVariable * var = getVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding vector variable method");
@@ -740,16 +856,16 @@ Coupleable::coupledDotdotDu(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
   {
     if (_c_nodal)
-      return var->dofValuesDuDotdotDu();
+      return var->dofValuesDuDotDotDu();
     else
-      return var->duDotdotDu();
+      return var->duDotDotDu();
   }
   else
   {
     if (_c_nodal)
-      return var->dofValuesDuDotdotDuNeighbor();
+      return var->dofValuesDuDotDotDuNeighbor();
     else
-      return var->duDotdotDu();
+      return var->duDotDotDu();
   }
 }
 
@@ -867,7 +983,7 @@ Coupleable::coupledGradientDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableGradient &
-Coupleable::coupledGradientDotdot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientDotDot(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
@@ -882,9 +998,9 @@ Coupleable::coupledGradientDotdot(const std::string & var_name, unsigned int com
     mooseError("Call corresponding vector variable method");
 
   if (!_coupleable_neighbor)
-    return var->gradSlnDotdot();
+    return var->gradSlnDotDot();
   else
-    return var->gradSlnNeighborDotdot();
+    return var->gradSlnNeighborDotDot();
 }
 
 const VectorVariableGradient &
@@ -1227,24 +1343,61 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledNodalDotdot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalDotDot(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
-  validateExecutionerType(var_name, "coupledNodalDotdot");
+  validateExecutionerType(var_name, "coupledNodalDotDot");
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding vector variable method");
 
   if (!_coupleable_neighbor)
-    return var->dofValuesDotdot();
+    return var->dofValuesDotDot();
   else
-    return var->dofValuesDotdotNeighbor();
+    return var->dofValuesDotDotNeighbor();
 }
 
+const VariableValue &
+Coupleable::coupledNodalDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  validateExecutionerType(var_name, "coupledNodalDotOld");
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+    return var->dofValuesDotOld();
+  else
+    return var->dofValuesDotOldNeighbor();
+}
+
+const VariableValue &
+Coupleable::coupledNodalDotDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_value_zero;
+
+  validateExecutionerType(var_name, "coupledNodalDotDotOld");
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+    return var->dofValuesDotDotOld();
+  else
+    return var->dofValuesDotDotOldNeighbor();
+}
 const DenseVector<Number> &
 Coupleable::coupledSolutionDoFs(const std::string & var_name, unsigned int comp)
 {

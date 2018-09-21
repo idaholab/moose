@@ -25,7 +25,14 @@ MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
                                          Assembly & assembly,
                                          Moose::VarKindType var_kind,
                                          THREAD_ID tid)
-  : MooseVariableBase(var_num, fe_type, sys, var_kind, tid), _assembly(assembly)
+  : MooseVariableBase(var_num, fe_type, sys, var_kind, tid),
+    _assembly(assembly),
+    _need_u_dot(false),
+    _need_u_dotdot(false),
+    _need_u_dot_old(false),
+    _need_u_dotdot_old(false),
+    _need_du_dot_du(false),
+    _need_du_dotdot_du(false)
 {
   auto num_vector_tags = _sys.subproblem().numVectorTags();
 
@@ -46,6 +53,8 @@ MooseVariableScalar::~MooseVariableScalar()
 
   _u_dot.release();
   _u_dotdot.release();
+  _u_dot_old.release();
+  _u_dotdot_old.release();
   _du_dot_du.release();
   _du_dotdot_du.release();
 
@@ -67,7 +76,9 @@ MooseVariableScalar::reinit()
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
   const NumericVector<Real> & u_dot = _sys.solutionUDot();
-  const NumericVector<Real> & u_dotdot = _sys.solutionUDotdot();
+  const NumericVector<Real> & u_dotdot = _sys.solutionUDotDot();
+  const NumericVector<Real> & u_dot_old = *_sys.solutionUDotOld();
+  const NumericVector<Real> & u_dotdot_old = *_sys.solutionUDotDotOld();
   const Real & du_dot_du = _sys.duDotDu();
   const Real & du_dotdot_du = _sys.duDotdotDu();
   auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
@@ -83,8 +94,6 @@ MooseVariableScalar::reinit()
   _u.resize(n);
   _u_old.resize(n);
   _u_older.resize(n);
-  _u_dot.resize(n);
-  _u_dotdot.resize(n);
 
   for (auto & _tag_u : _vector_tag_u)
     _tag_u.resize(n);
@@ -95,8 +104,29 @@ MooseVariableScalar::reinit()
   _du_dot_du.clear();
   _du_dot_du.resize(n, du_dot_du);
 
-  _du_dotdot_du.clear();
-  _du_dotdot_du.resize(n, du_dotdot_du);
+  if (_need_u_dot)
+    _u_dot.resize(n);
+
+  if (_need_u_dotdot)
+    _u_dotdot.resize(n);
+
+  if (_need_u_dot_old)
+    _u_dot_old.resize(n);
+
+  if (_need_u_dotdot_old)
+    _u_dotdot_old.resize(n);
+
+  if (_need_du_dot_du)
+  {
+    _du_dot_du.clear();
+    _du_dot_du.resize(n, du_dot_du);
+  }
+
+  if (_need_du_dotdot_du)
+  {
+    _du_dotdot_du.clear();
+    _du_dotdot_du.resize(n, du_dotdot_du);
+  }
 
   // If we have an empty partition, or if we have a partition which
   // does not include any of the subdomains of a subdomain-restricted
@@ -107,8 +137,6 @@ MooseVariableScalar::reinit()
     current_solution.get(_dof_indices, &_u[0]);
     solution_old.get(_dof_indices, &_u_old[0]);
     solution_older.get(_dof_indices, &_u_older[0]);
-    u_dot.get(_dof_indices, &_u_dot[0]);
-    u_dotdot.get(_dof_indices, &_u_dotdot[0]);
 
     if (safe_access_tagged_vectors)
     {
@@ -127,6 +155,18 @@ MooseVariableScalar::reinit()
             _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(_dof_indices[i], _dof_indices[i]);
           }
     }
+
+    if (_need_u_dot)
+      u_dot.get(_dof_indices, &_u_dot[0]);
+
+    if (_need_u_dotdot)
+      u_dotdot.get(_dof_indices, &_u_dotdot[0]);
+
+    if (_need_u_dot_old)
+      u_dot_old.get(_dof_indices, &_u_dot_old[0]);
+
+    if (_need_u_dotdot_old)
+      u_dotdot_old.get(_dof_indices, &_u_dotdot_old[0]);
   }
   else
   {
@@ -141,8 +181,6 @@ MooseVariableScalar::reinit()
         current_solution.get(one_dof_index, &_u[i]);
         solution_old.get(one_dof_index, &_u_old[i]);
         solution_older.get(one_dof_index, &_u_older[i]);
-        u_dot.get(one_dof_index, &_u_dot[i]);
-        u_dotdot.get(one_dof_index, &_u_dotdot[i]);
 
         if (safe_access_tagged_vectors)
         {
@@ -160,6 +198,18 @@ MooseVariableScalar::reinit()
               _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(dof_index, dof_index);
             }
         }
+
+        if (_need_u_dot)
+          u_dot.get(one_dof_index, &_u_dot[i]);
+
+        if (_need_u_dotdot)
+          u_dotdot.get(one_dof_index, &_u_dotdot[i]);
+
+        if (_need_u_dot_old)
+          u_dot_old.get(one_dof_index, &_u_dot_old[i]);
+
+        if (_need_u_dotdot_old)
+          u_dotdot_old.get(one_dof_index, &_u_dotdot_old[i]);
       }
       else
       {
@@ -170,8 +220,6 @@ MooseVariableScalar::reinit()
         _u.resize(i);
         _u_old.resize(i);
         _u_older.resize(i);
-        _u_dot.resize(i);
-        _u_dotdot.resize(i);
 
         for (auto tag : active_coupleable_vector_tags)
           if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
@@ -180,6 +228,18 @@ MooseVariableScalar::reinit()
         for (auto tag : active_coupleable_matrix_tags)
           if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
             _matrix_tag_u[tag].resize(i);
+
+        if (_need_u_dot)
+          _u_dot.resize(i);
+
+        if (_need_u_dotdot)
+          _u_dotdot.resize(i);
+
+        if (_need_u_dot_old)
+          _u_dot_old.resize(i);
+
+        if (_need_u_dotdot_old)
+          _u_dotdot_old.resize(i);
 #else
         // If we can't catch errors at run-time, we can at least
         // propagate NaN values rather than invalid values, so that
@@ -187,8 +247,6 @@ MooseVariableScalar::reinit()
         _u[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_old[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_older[i] = std::numeric_limits<Real>::quiet_NaN();
-        _u_dot[i] = std::numeric_limits<Real>::quiet_NaN();
-        _u_dotdot[i] = std::numeric_limits<Real>::quiet_NaN();
 
         for (auto tag : active_coupleable_vector_tags)
           if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
@@ -197,6 +255,18 @@ MooseVariableScalar::reinit()
         for (auto tag : active_coupleable_matrix_tags)
           if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
             _matrix_tag_u[tag][i] = std::numeric_limits<Real>::quiet_NaN();
+
+        if (_need_u_dot)
+          _u_dot[i] = std::numeric_limits<Real>::quiet_NaN();
+
+        if (_need_u_dotdot)
+          _u_dotdot[i] = std::numeric_limits<Real>::quiet_NaN();
+
+        if (_need_u_dot_old)
+          _u_dot_old[i] = std::numeric_limits<Real>::quiet_NaN();
+
+        if (_need_u_dotdot_old)
+          _u_dotdot_old[i] = std::numeric_limits<Real>::quiet_NaN();
 #endif
       }
     }

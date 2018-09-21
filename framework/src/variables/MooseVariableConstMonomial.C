@@ -46,10 +46,23 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
 
   if (is_transient)
   {
-    _u_dot.resize(nqp);
-    _u_dotdot.resize(nqp);
-    _du_dot_du.resize(nqp);
-    _du_dotdot_du.resize(nqp);
+    if (_need_u_dot)
+      _u_dot.resize(nqp);
+
+    if (_need_u_dotdot)
+      _u_dotdot.resize(nqp);
+
+    if (_need_u_dot_old)
+      _u_dot_old.resize(nqp);
+
+    if (_need_u_dotdot_old)
+      _u_dotdot_old.resize(nqp);
+
+    if (_need_du_dot_du)
+      _du_dot_du.resize(nqp);
+
+    if (_need_du_dotdot_du)
+      _du_dotdot_du.resize(nqp);
 
     if (_need_u_old)
       _u_old.resize(nqp);
@@ -86,6 +99,10 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
       _dof_values_dot.resize(1);
     if (_need_dof_values_dotdot)
       _dof_values_dotdot.resize(1);
+    if (_need_dof_values_dot_old)
+      _dof_values_dot_old.resize(1);
+    if (_need_dof_values_dotdot_old)
+      _dof_values_dotdot_old.resize(1);
   }
 
   if (_need_solution_dofs)
@@ -104,8 +121,10 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
   Real soln_previous_nl = 0;
   Real u_dot = 0;
   Real u_dotdot = 0;
+  Real u_dot_old = 0;
+  Real u_dotdot_old = 0;
   const Real & du_dot_du = _sys.duDotDu();
-  const Real & du_dotdot_du = _sys.duDotdotDu();
+  const Real & du_dotdot_du = _sys.duDotDotDu();
 
   if (_need_dof_values)
     _dof_values[0] = soln;
@@ -135,7 +154,9 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
       _dof_values_older[0] = soln_older;
 
     u_dot = _sys.solutionUDot()(idx);
-    u_dotdot = _sys.solutionUDotdot()(idx);
+    u_dotdot = _sys.solutionUDotDot()(idx);
+    u_dot_old = (*_sys.solutionUDotOld())(idx);
+    u_dotdot_old = (*_sys.solutionUDotDotOld())(idx);
 
     if (_need_dof_values_dot)
       _dof_values_dot[0] = u_dot;
@@ -157,10 +178,23 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
 
   if (is_transient)
   {
-    _u_dot[0] = phi * u_dot;
-    _u_dotdot[0] = phi * u_dotdot;
-    _du_dot_du[0] = du_dot_du;
-    _du_dotdot_du[0] = du_dotdot_du;
+    if (_need_u_dot)
+      _u_dot[0] = phi * u_dot;
+
+    if (_need_u_dotdot)
+      _u_dotdot[0] = phi * u_dotdot;
+
+    if (_need_u_dot_old)
+      _u_dot_old[0] = phi * u_dot_old;
+
+    if (_need_u_dotdot_old)
+      _u_dotdot_old[0] = phi * u_dotdot_old;
+
+    if (_need_du_dot_du)
+      _du_dot_du[0] = du_dot_du;
+
+    if (_need_du_dotdot_du)
+      _du_dotdot_du[0] = du_dotdot_du;
 
     if (_need_u_old)
       _u_old[0] = phi * soln_old;
@@ -178,10 +212,23 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
 
     if (is_transient)
     {
-      _u_dot[qp] = _u_dot[0];
-      _u_dotdot[qp] = _u_dotdot[0];
-      _du_dot_du[qp] = _du_dot_du[0];
-      _du_dotdot_du[qp] = _du_dotdot_du[0];
+      if (_need_u_dot)
+        _u_dot[qp] = _u_dot[0];
+
+      if (_need_u_dotdot)
+        _u_dotdot[qp] = _u_dotdot[0];
+
+      if (_need_u_dot_old)
+        _u_dot_old[qp] = _u_dot_old[0];
+
+      if (_need_u_dotdot_old)
+        _u_dotdot_old[qp] = _u_dotdot_old[0];
+
+      if (_need_du_dot_du)
+        _du_dot_du[qp] = _du_dot_du[0];
+
+      if (_need_du_dotdot_du)
+        _du_dotdot_du[qp] = _du_dotdot_du[0];
 
       if (_need_u_old)
         _u_old[qp] = _u_old[0];
@@ -237,6 +284,10 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
       _dof_values_dot_neighbor.resize(1);
     if (_need_dof_values_dotdot_neighbor)
       _dof_values_dotdot_neighbor.resize(1);
+    if (_need_dof_values_dot_old_neighbor)
+      _dof_values_dot_old_neighbor.resize(1);
+    if (_need_dof_values_dotdot_old_neighbor)
+      _dof_values_dotdot_old_neighbor.resize(1);
   }
 
   if (_need_solution_dofs_neighbor)
@@ -254,6 +305,8 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
   Real soln_older = 0;
   Real u_dot = 0;
   Real u_dotdot = 0;
+  Real u_dot_old = 0;
+  Real u_dotdot_old = 0;
 
   if (_need_dof_values_neighbor)
     _dof_values_neighbor[0] = soln;
@@ -275,13 +328,21 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
       _dof_values_older_neighbor[0] = soln_older;
 
     u_dot = _sys.solutionUDot()(idx);
-    u_dotdot = _sys.solutionUDotdot()(idx);
+    u_dotdot = _sys.solutionUDotDot()(idx);
+    u_dot_old = (*_sys.solutionUDotOld())(idx);
+    u_dotdot_old = (*_sys.solutionUDotDotOld())(idx);
 
     if (_need_dof_values_dot_neighbor)
       _dof_values_dot_neighbor[0] = u_dot;
 
     if (_need_dof_values_dotdot_neighbor)
       _dof_values_dotdot_neighbor[0] = u_dotdot;
+
+    if (_need_dof_values_dot_old_neighbor)
+      _dof_values_dot_old_neighbor[0] = u_dot_old;
+
+    if (_need_dof_values_dotdot_old_neighbor)
+      _dof_values_dotdot_old_neighbor[0] = u_dotdot_old;
 
     if (_need_solution_dofs_old_neighbor)
       _solution_dofs_old_neighbor(0) = soln_old;

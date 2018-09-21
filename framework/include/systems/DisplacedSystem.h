@@ -80,16 +80,6 @@ public:
     return _undisplaced_system.currentSolution();
   }
 
-  virtual const NumericVector<Number> *& currentSolutionUDot() override
-  {
-    return _undisplaced_system.currentSolutionUDot();
-  }
-
-  virtual const NumericVector<Number> *& currentSolutionUDotdot() override
-  {
-    return _undisplaced_system.currentSolutionUDotdot();
-  }
-
   virtual NumericVector<Number> & solution() override { return _undisplaced_system.solution(); }
 
   virtual NumericVector<Number> & solutionUDot() override
@@ -97,13 +87,13 @@ public:
     return _undisplaced_system.solutionUDot();
   }
 
-  virtual NumericVector<Number> & solutionUDotdot() override
+  virtual NumericVector<Number> & solutionUDotDot() override
   {
-    return _undisplaced_system.solutionUDotdot();
+    return _undisplaced_system.solutionUDotDot();
   }
 
   virtual Number & duDotDu() override { return _undisplaced_system.duDotDu(); }
-  virtual Number & duDotdotDu() override { return _undisplaced_system.duDotdotDu(); }
+  virtual Number & duDotDotDu() override { return _undisplaced_system.duDotDotDu(); }
 
   /**
    * Return the residual copy from the NonlinearSystem
@@ -172,21 +162,17 @@ public:
 
   virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
 
-  virtual NumericVector<Number> & solutionUDotOld() override
+  virtual NumericVector<Number> * solutionUDotOld() override
   {
-    return *_sys.old_local_solution_dot;
+    return _undisplaced_system.solutionUDotOld();
   }
 
-  virtual NumericVector<Number> & solutionUDotdotOld() override
+  virtual NumericVector<Number> * solutionUDotDotOld() override
   {
-    return *_sys.old_local_solution_dotdot;
+    return _undisplaced_system.solutionUDotDotOld();
   }
 
   virtual NumericVector<Number> * solutionPreviousNewton() override { return NULL; }
-
-  virtual NumericVector<Number> * solutionUDotPreviousNewton() override { return NULL; }
-
-  virtual NumericVector<Number> * solutionUDotdotPreviousNewton() override { return NULL; }
 
   virtual TransientExplicitSystem & sys() { return _sys; }
 

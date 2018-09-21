@@ -469,8 +469,8 @@ SystemBase::saveOldSolutions()
 
   *_saved_old = solutionOld();
   *_saved_older = solutionOlder();
-  *_saved_dot_old = solutionUDotOld();
-  *_saved_dotdot_old = solutionUDotdotOld();
+  *_saved_dot_old = *solutionUDotOld();
+  *_saved_dotdot_old = *solutionUDotDotOld();
 }
 
 /**
@@ -493,13 +493,13 @@ SystemBase::restoreOldSolutions()
   }
   if (_saved_dot_old)
   {
-    solutionUDotOld() = *_saved_dot_old;
+    *solutionUDotOld() = *_saved_dot_old;
     removeVector("save_solution_dot_old");
     _saved_dot_old = NULL;
   }
   if (_saved_dotdot_old)
   {
-    solutionUDotdotOld() = *_saved_dotdot_old;
+    *solutionUDotDotOld() = *_saved_dotdot_old;
     removeVector("save_solution_dotdot_old");
     _saved_dotdot_old = NULL;
   }
@@ -954,14 +954,10 @@ SystemBase::copySolutionsBackwards()
   system().update();
   solutionOlder() = *currentSolution();
   solutionOld() = *currentSolution();
-  solutionUDotOld() = *currentSolutionUDot();
-  solutionUDotdotOld() = *currentSolutionUDotdot();
+  *solutionUDotOld() = solutionUDot();
+  *solutionUDotDotOld() = solutionUDotDot();
   if (solutionPreviousNewton())
-  {
     *solutionPreviousNewton() = *currentSolution();
-    *solutionUDotPreviousNewton() = *currentSolutionUDot();
-    *solutionUDotdotPreviousNewton() = *currentSolutionUDotdot();
-  }
 }
 
 /**
@@ -972,14 +968,10 @@ SystemBase::copyOldSolutions()
 {
   solutionOlder() = solutionOld();
   solutionOld() = *currentSolution();
-  solutionUDotOld() = *currentSolutionUDot();
-  solutionUDotdotOld() = *currentSolutionUDotdot();
+  *solutionUDotOld() = solutionUDot();
+  *solutionUDotDotOld() = solutionUDotDot();
   if (solutionPreviousNewton())
-  {
     *solutionPreviousNewton() = *currentSolution();
-    *solutionUDotPreviousNewton() = *currentSolutionUDot();
-    *solutionUDotdotPreviousNewton() = *currentSolutionUDotdot();
-  }
 }
 
 /**
@@ -989,17 +981,11 @@ void
 SystemBase::restoreSolutions()
 {
   *(const_cast<NumericVector<Number> *&>(currentSolution())) = solutionOld();
-  *(const_cast<NumericVector<Number> *&>(currentSolutionUDot())) = solutionUDotOld();
-  *(const_cast<NumericVector<Number> *&>(currentSolutionUDotdot())) = solutionUDotdotOld();
   solution() = solutionOld();
-  solutionUDot() = solutionUDotOld();
-  solutionUDotdot() = solutionUDotdotOld();
+  solutionUDot() = *solutionUDotOld();
+  solutionUDotDot() = *solutionUDotDotOld();
   if (solutionPreviousNewton())
-  {
     *solutionPreviousNewton() = solutionOld();
-    *solutionUDotPreviousNewton() = solutionUDotOld();
-    *solutionUDotdotPreviousNewton() = solutionUDotdotOld();
-  }
   system().update();
 }
 

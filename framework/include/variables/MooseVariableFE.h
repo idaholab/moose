@@ -290,7 +290,7 @@ public:
     _need_grad_dot = true;
     return _grad_u_dot;
   }
-  const FieldVariableGradient & gradSlnDotdot()
+  const FieldVariableGradient & gradSlnDotDot()
   {
     _need_grad_dotdot = true;
     return _grad_u_dotdot;
@@ -384,10 +384,41 @@ public:
     return _neighbor_ad_second_u;
   }
 
-  const FieldVariableValue & uDot() { return _u_dot; }
-  const FieldVariableValue & uDotdot() { return _u_dotdot; }
-  const VariableValue & duDotDu() { return _du_dot_du; }
-  const VariableValue & duDotdotDu() { return _du_dotdot_du; }
+  const FieldVariableValue & uDot()
+  {
+    _need_u_dot = true;
+    return _u_dot;
+  }
+
+  const FieldVariableValue & uDotDot()
+  {
+    _need_u_dotdot = true;
+    return _u_dotdot;
+  }
+
+  const FieldVariableValue & uDotOld()
+  {
+    _need_u_dot_old = true;
+    return _u_dot_old;
+  }
+
+  const FieldVariableValue & uDotDotOld()
+  {
+    _need_u_dotdot_old = true;
+    return _u_dotdot_old;
+  }
+
+  const VariableValue & duDotDu()
+  {
+    _need_du_dot_du = true;
+    return _du_dot_du;
+  }
+
+  const VariableValue & duDotDotDu()
+  {
+    _need_du_dotdot_du = true;
+    return _du_dotdot_du;
+  }
 
   const FieldVariableValue & slnNeighbor() { return _u_neighbor; }
   const FieldVariableValue & slnOldNeighbor()
@@ -426,7 +457,7 @@ public:
     _need_grad_neighbor_dot = true;
     return _grad_u_neighbor_dot;
   }
-  const FieldVariableGradient & gradSlnNeighborDotdot()
+  const FieldVariableGradient & gradSlnNeighborDotDot()
   {
     _need_grad_neighbor_dotdot = true;
     return _grad_u_neighbor_dotdot;
@@ -475,10 +506,41 @@ public:
     return _curl_u_older_neighbor;
   }
 
-  const FieldVariableValue & uDotNeighbor() { return _u_dot_neighbor; }
-  const FieldVariableValue & uDotdotNeighbor() { return _u_dotdot_neighbor; }
-  const VariableValue & duDotDuNeighbor() { return _du_dot_du_neighbor; }
-  const VariableValue & duDotdotDuNeighbor() { return _du_dotdot_du_neighbor; }
+  const FieldVariableValue & uDotNeighbor()
+  {
+    _need_u_dot_neighbor = true;
+    return _u_dot_neighbor;
+  }
+
+  const FieldVariableValue & uDotDotNeighbor()
+  {
+    _need_u_dotdot_neighbor = true;
+    return _u_dotdot_neighbor;
+  }
+
+  const FieldVariableValue & uDotOldNeighbor()
+  {
+    _need_u_dot_old_neighbor = true;
+    return _u_dot_old_neighbor;
+  }
+
+  const FieldVariableValue & uDotDotOldNeighbor()
+  {
+    _need_u_dotdot_old_neighbor = true;
+    return _u_dotdot_old_neighbor;
+  }
+
+  const VariableValue & duDotDuNeighbor()
+  {
+    _need_du_dot_du_neighbor = true;
+    return _du_dot_du_neighbor;
+  }
+
+  const VariableValue & duDotDotDuNeighbor()
+  {
+    _need_du_dotdot_du_neighbor = true;
+    return _du_dotdot_du_neighbor;
+  }
 
   /**
    * Helper function for computing values
@@ -528,12 +590,16 @@ public:
   const MooseArray<Number> & dofValuesPreviousNLNeighbor() override;
   const MooseArray<Number> & dofValuesDot() override;
   const MooseArray<Number> & dofValuesDotNeighbor() override;
-  const MooseArray<Number> & dofValuesDotdot() override;
-  const MooseArray<Number> & dofValuesDotdotNeighbor() override;
+  const MooseArray<Number> & dofValuesDotOld() override;
+  const MooseArray<Number> & dofValuesDotOldNeighbor() override;
+  const MooseArray<Number> & dofValuesDotDot() override;
+  const MooseArray<Number> & dofValuesDotDotNeighbor() override;
+  const MooseArray<Number> & dofValuesDotDotOld() override;
+  const MooseArray<Number> & dofValuesDotDotOldNeighbor() override;
   const MooseArray<Number> & dofValuesDuDotDu() override;
   const MooseArray<Number> & dofValuesDuDotDuNeighbor() override;
-  const MooseArray<Number> & dofValuesDuDotdotDu() override;
-  const MooseArray<Number> & dofValuesDuDotdotDuNeighbor() override;
+  const MooseArray<Number> & dofValuesDuDotDotDu() override;
+  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() override;
 
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
@@ -586,17 +652,21 @@ public:
   const OutputType & nodalValueOlder();
   const OutputType & nodalValuePreviousNL();
   const OutputType & nodalValueDot();
-  const OutputType & nodalValueDotdot();
+  const OutputType & nodalValueDotDot();
+  const OutputType & nodalValueDotOld();
+  const OutputType & nodalValueDotDotOld();
   const OutputType & nodalValueDuDotDu();
-  const OutputType & nodalValueDuDotdotDu();
+  const OutputType & nodalValueDuDotDotDu();
   const OutputType & nodalValueNeighbor();
   const OutputType & nodalValueOldNeighbor();
   const OutputType & nodalValueOlderNeighbor();
   const OutputType & nodalValuePreviousNLNeighbor();
   const OutputType & nodalValueDotNeighbor();
-  const OutputType & nodalValueDotdotNeighbor();
+  const OutputType & nodalValueDotDotNeighbor();
+  const OutputType & nodalValueDotOldNeighbor();
+  const OutputType & nodalValueDotDotOldNeighbor();
   const OutputType & nodalValueDuDotDuNeighbor();
-  const OutputType & nodalValueDuDotdotDuNeighbor();
+  const OutputType & nodalValueDuDotDotDuNeighbor();
   const MooseArray<Real> & nodalVectorTagValue(TagID tag);
   const MooseArray<Real> & nodalMatrixTagValue(TagID tag);
 
@@ -632,6 +702,13 @@ protected:
   bool _need_u_older;
   bool _need_u_previous_nl;
 
+  bool _need_u_dot;
+  bool _need_u_dotdot;
+  bool _need_u_dot_old;
+  bool _need_u_dotdot_old;
+  bool _need_du_dot_du;
+  bool _need_du_dotdot_du;
+
   bool _need_grad_old;
   bool _need_grad_older;
   bool _need_grad_previous_nl;
@@ -657,6 +734,13 @@ protected:
   bool _need_u_old_neighbor;
   bool _need_u_older_neighbor;
   bool _need_u_previous_nl_neighbor;
+
+  bool _need_u_dot_neighbor;
+  bool _need_u_dotdot_neighbor;
+  bool _need_u_dot_old_neighbor;
+  bool _need_u_dotdot_old_neighbor;
+  bool _need_du_dot_du_neighbor;
+  bool _need_du_dotdot_du_neighbor;
 
   bool _need_grad_old_neighbor;
   bool _need_grad_older_neighbor;
@@ -686,6 +770,8 @@ protected:
   bool _need_dof_values_previous_nl;
   bool _need_dof_values_dot;
   bool _need_dof_values_dotdot;
+  bool _need_dof_values_dot_old;
+  bool _need_dof_values_dotdot_old;
   bool _need_dof_du_dot_du;
   bool _need_dof_du_dotdot_du;
   bool _need_dof_values_neighbor;
@@ -694,6 +780,8 @@ protected:
   bool _need_dof_values_previous_nl_neighbor;
   bool _need_dof_values_dot_neighbor;
   bool _need_dof_values_dotdot_neighbor;
+  bool _need_dof_values_dot_old_neighbor;
+  bool _need_dof_values_dotdot_old_neighbor;
   bool _need_dof_du_dot_du_neighbor;
   bool _need_dof_du_dotdot_du_neighbor;
 
@@ -736,6 +824,10 @@ protected:
   MooseArray<Real> _dof_values_dot;
   /// nodal values of u_dotdot
   MooseArray<Real> _dof_values_dotdot;
+  /// nodal values of u_dot_old
+  MooseArray<Real> _dof_values_dot_old;
+  /// nodal values of u_dotdot_old
+  MooseArray<Real> _dof_values_dotdot_old;
   /// nodal values of derivative of u_dot wrt u
   MooseArray<Real> _dof_du_dot_du;
   /// nodal values of derivative of u_dotdot wrt u
@@ -747,6 +839,8 @@ protected:
   MooseArray<Real> _dof_values_previous_nl_neighbor;
   MooseArray<Real> _dof_values_dot_neighbor;
   MooseArray<Real> _dof_values_dotdot_neighbor;
+  MooseArray<Real> _dof_values_dot_old_neighbor;
+  MooseArray<Real> _dof_values_dotdot_old_neighbor;
   MooseArray<Real> _dof_du_dot_du_neighbor;
   MooseArray<Real> _dof_du_dotdot_du_neighbor;
 
@@ -843,6 +937,14 @@ protected:
   FieldVariableValue _u_dotdot, _u_dotdot_bak;
   FieldVariableValue _u_dotdot_neighbor, _u_dotdot_bak_neighbor;
 
+  /// u_dot_old (time derivative)
+  FieldVariableValue _u_dot_old, _u_dot_old_bak;
+  FieldVariableValue _u_dot_old_neighbor, _u_dot_old_bak_neighbor;
+
+  /// u_dotdot_old (second time derivative)
+  FieldVariableValue _u_dotdot_old, _u_dotdot_old_bak;
+  FieldVariableValue _u_dotdot_old_neighbor, _u_dotdot_old_bak_neighbor;
+
   /// derivative of u_dot wrt u
   VariableValue _du_dot_du, _du_dot_du_bak;
   VariableValue _du_dot_du_neighbor, _du_dot_du_bak_neighbor;
@@ -867,6 +969,10 @@ protected:
   OutputType _nodal_value_dot;
   /// nodal values of u_dotdot
   OutputType _nodal_value_dotdot;
+  /// nodal values of u_dot_old
+  OutputType _nodal_value_dot_old;
+  /// nodal values of u_dotdot_old
+  OutputType _nodal_value_dotdot_old;
 
   friend class NodeFaceConstraint;
   friend class NodeElemConstraint;

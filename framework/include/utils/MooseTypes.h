@@ -507,6 +507,7 @@ enum TimeIntegratorType
   TI_EXPLICIT_MIDPOINT,
   TI_LSTABLE_DIRK2,
   TI_EXPLICIT_TVD_RK_2,
+  TI_NEWMARK_BETA
 };
 
 /**

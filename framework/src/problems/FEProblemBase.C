@@ -4501,7 +4501,7 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
   TIME_SECTION(_compute_transient_implicit_residual_timer);
 
   _nl->setSolutionUDot(udot);
-  _nl->setSolutionUDotdot(udotdot);
+  _nl->setSolutionUDotDot(udotdot);
   _time = time;
   computeResidual(u, residual);
 }
@@ -4699,17 +4699,17 @@ FEProblemBase::computeTransientImplicitJacobian(Real time,
                                                 const NumericVector<Number> & udot,
                                                 const NumericVector<Number> & udotdot,
                                                 Real duDotDu_shift,
-                                                Real duDotdotDu_shift,
+                                                Real duDotDotDu_shift,
                                                 SparseMatrix<Number> & jacobian)
 {
   if (0)
   { // The current interface guarantees that the residual is called before Jacobian, thus udot has
     // already been set
-    _nl->setSolutionUDotdot(udotdot);
+    _nl->setSolutionUDotDot(udotdot);
     _nl->setSolutionUDot(udot);
   }
   _nl->duDotDu() = duDotDu_shift;
-  _nl->duDotdotDu() = duDotdotDu_shift;
+  _nl->duDotDotDu() = duDotDotDu_shift;
   _time = time;
   computeJacobian(u, jacobian);
 }

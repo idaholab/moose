@@ -1,0 +1,12 @@
+[Tests]
+  [./newmark_beta_default]
+    type = 'CSVDiff'
+    input = 'newmark_beta_default_parameters.i'
+    csvdiff = 'newmark_beta_default_parameters_out.csv'
+  [../]
+  [./newmark_beta_prescribed]
+    type = 'CSVDiff'
+    input = 'newmark_beta_prescribed_parameters.i'
+    csvdiff = 'newmark_beta_prescribed_parameters_out.csv'
+  [../]
+[]

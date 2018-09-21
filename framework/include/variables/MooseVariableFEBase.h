@@ -202,11 +202,27 @@ public:
   /**
    * Returns second time derivative of degrees of freedom
    */
-  virtual const MooseArray<Number> & dofValuesDotdot() = 0;
+  virtual const MooseArray<Number> & dofValuesDotDot() = 0;
   /**
    * Returns second time derivative of neighboring degrees of freedom
    */
-  virtual const MooseArray<Number> & dofValuesDotdotNeighbor() = 0;
+  virtual const MooseArray<Number> & dofValuesDotDotNeighbor() = 0;
+  /**
+   * Returns old time derivative of degrees of freedom
+   */
+  virtual const MooseArray<Number> & dofValuesDotOld() = 0;
+  /**
+   * Returns old time derivative of neighboring degrees of freedom
+   */
+  virtual const MooseArray<Number> & dofValuesDotOldNeighbor() = 0;
+  /**
+   * Returns old second time derivative of degrees of freedom
+   */
+  virtual const MooseArray<Number> & dofValuesDotDotOld() = 0;
+  /**
+   * Returns old second time derivative of neighboring degrees of freedom
+   */
+  virtual const MooseArray<Number> & dofValuesDotDotOldNeighbor() = 0;
   /**
    * Returns derivative of time derivative of degrees of freedom
    */
@@ -216,13 +232,13 @@ public:
    */
   virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() = 0;
   /**
-   * Returns derivative of time derivative of degrees of freedom
+   * Returns derivative of second time derivative of degrees of freedom
    */
-  virtual const MooseArray<Number> & dofValuesDuDotdotDu() = 0;
+  virtual const MooseArray<Number> & dofValuesDuDotDotDu() = 0;
   /**
-   * Returns derivative of time derivative of neighboring degrees of freedom
+   * Returns derivative of second time derivative of neighboring degrees of freedom
    */
-  virtual const MooseArray<Number> & dofValuesDuDotdotDuNeighbor() = 0;
+  virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() = 0;
 
   /**
    * Return phi size

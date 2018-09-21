@@ -55,10 +55,41 @@ public:
     return _matrix_tag_u[tag];
   }
 
-  VariableValue & uDot() { return _u_dot; }
-  VariableValue & uDotdot() { return _u_dotdot; }
-  VariableValue & duDotDu() { return _du_dot_du; }
-  VariableValue & duDotdotDu() { return _du_dotdot_du; }
+  VariableValue & uDot()
+  {
+    _need_u_dot = true;
+    return _u_dot;
+  }
+
+  VariableValue & uDotDot()
+  {
+    _need_u_dotdot = true;
+    return _u_dotdot;
+  }
+
+  VariableValue & uDotOld()
+  {
+    _need_u_dot_old = true;
+    return _u_dot_old;
+  }
+
+  VariableValue & uDotDotOld()
+  {
+    _need_u_dotdot_old = true;
+    return _u_dotdot_old;
+  }
+
+  VariableValue & duDotDu()
+  {
+    _need_du_dot_du = true;
+    return _du_dot_du;
+  }
+
+  VariableValue & duDotDotDu()
+  {
+    _need_du_dotdot_du = true;
+    return _du_dotdot_du;
+  }
 
   /**
    * Set the nodal value for this variable (to keep everything up to date
@@ -93,8 +124,17 @@ protected:
 
   VariableValue _u_dot;
   VariableValue _u_dotdot;
+  VariableValue _u_dot_old;
+  VariableValue _u_dotdot_old;
   VariableValue _du_dot_du;
   VariableValue _du_dotdot_du;
+
+  bool _need_u_dot;
+  bool _need_u_dotdot;
+  bool _need_u_dot_old;
+  bool _need_u_dotdot_old;
+  bool _need_du_dot_du;
+  bool _need_du_dotdot_du;
 };
 
 #endif /* MOOSEVARIABLESCALAR_H */

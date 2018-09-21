@@ -80,12 +80,15 @@ protected:
 
   /// Value(s) of the scalar variable
   VariableValue & _u;
+
   /// Old value(s) of the scalar variable
   VariableValue & _u_old;
+
+  /// Time derivative of u
   VariableValue & _u_dot;
-  VariableValue & _u_dotdot;
+
+  /// Derivative of u_dot with respect to u
   VariableValue & _du_dot_du;
-  VariableValue & _du_dotdot_du;
 };
 
 #endif /* SCALARKERNEL_H */

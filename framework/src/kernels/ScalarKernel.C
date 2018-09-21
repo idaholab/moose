@@ -61,9 +61,7 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _u_old(_var.slnOld()),
     _u_dot(_var.uDot()),
-    _u_dotdot(_var.uDotdot()),
-    _du_dot_du(_var.duDotDu()),
-    _du_dotdot_du(_var.duDotdotDu())
+    _du_dot_du(_var.duDotDu())
 {
 }
 

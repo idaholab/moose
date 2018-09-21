@@ -332,8 +332,6 @@ public:
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
   virtual void setSolution(const NumericVector<Number> & soln);
-  virtual void setSolutionUDot(const NumericVector<Number> & soln_dot);
-  virtual void setSolutionUDotdot(const NumericVector<Number> & soln_dotdot);
 
   /**
    * Update active objects of Warehouses owned by NonlinearSystemBase
@@ -354,10 +352,10 @@ public:
    * @note If the calling sequence for residual evaluation was changed, this could become an
    * explicit argument.
    */
-  virtual void setSolutionUDotdot(const NumericVector<Number> & udotdot);
+  virtual void setSolutionUDotDot(const NumericVector<Number> & udotdot);
 
   virtual NumericVector<Number> & solutionUDot() override;
-  virtual NumericVector<Number> & solutionUDotdot() override;
+  virtual NumericVector<Number> & solutionUDotDot() override;
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -375,14 +373,6 @@ public:
   NumericVector<Number> & residualVector(TagID tag);
 
   virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
-  virtual const NumericVector<Number> *& currentSolutionUDot() override
-  {
-    return _current_solution_dot;
-  }
-  virtual const NumericVector<Number> *& currentSolutionUDotdot() override
-  {
-    return _current_solution_dotdot;
-  }
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
@@ -575,26 +565,20 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
+  virtual NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
+
+  virtual NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
+
   virtual NumericVector<Number> * solutionPreviousNewton() override
   {
     return _solution_previous_nl;
   }
 
-  virtual NumericVector<Number> * solutionUDotPreviousNewton() override
-  {
-    return _solution_dot_previous_nl;
-  }
+  virtual void setSolutionUDotOld(const NumericVector<Number> & u_dot_old);
 
-  virtual NumericVector<Number> * solutionUDotdotPreviousNewton() override
-  {
-    return _solution_dotdot_previous_nl;
-  }
+  virtual void setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old);
 
   virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
-
-  virtual void setPreviousNewtonSolutionUDot(const NumericVector<Number> & soln_dot);
-
-  virtual void setPreviousNewtonSolutionUDotdot(const NumericVector<Number> & soln_dotdot);
 
   virtual TagID timeVectorTag() override { return _Re_time_tag; }
 
@@ -657,10 +641,6 @@ protected:
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
-  /// solution dot vector from nonlinear solver
-  const NumericVector<Number> * _current_solution_dot;
-  /// solution dotdot vector from nonlinear solver
-  const NumericVector<Number> * _current_solution_dotdot;
   /// ghosted form of the residual
   NumericVector<Number> * _residual_ghosted;
 
@@ -669,10 +649,6 @@ protected:
 
   /// Solution vector of the previous nonlinear iterate
   NumericVector<Number> * _solution_previous_nl;
-  /// Solution vector of the previous nonlinear iterate
-  NumericVector<Number> * _solution_dot_previous_nl;
-  /// Solution vector of the previous nonlinear iterate
-  NumericVector<Number> * _solution_dotdot_previous_nl;
 
   /// Copy of the residual vector
   NumericVector<Number> & _residual_copy;
@@ -684,6 +660,12 @@ protected:
   NumericVector<Number> * _u_dot;
   /// solution vector for u^dotdot
   NumericVector<Number> * _u_dotdot;
+
+  /// old solution vector for u^dot
+  NumericVector<Number> * _u_dot_old;
+  /// old solution vector for u^dotdot
+  NumericVector<Number> * _u_dotdot_old;
+
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
   /// \f$ {du^dotdot}\over{du} \f$

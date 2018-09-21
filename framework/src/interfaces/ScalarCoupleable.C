@@ -210,14 +210,31 @@ ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int co
 }
 
 VariableValue &
-ScalarCoupleable::coupledScalarDotdot(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::coupledScalarDotDot(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
-  validateExecutionerType(var_name, "coupledScalarDotdot");
+  validateExecutionerType(var_name, "coupledScalarDotDot");
   MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->uDotdot();
+  return var->uDotDot();
 }
 
+VariableValue &
+ScalarCoupleable::coupledScalarDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  validateExecutionerType(var_name, "coupledScalarDotOld");
+  MooseVariableScalar * var = getScalarVar(var_name, comp);
+  return var->uDotOld();
+}
+
+VariableValue &
+ScalarCoupleable::coupledScalarDotDotOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  validateExecutionerType(var_name, "coupledScalarDotDotOld");
+  MooseVariableScalar * var = getScalarVar(var_name, comp);
+  return var->uDotDotOld();
+}
 VariableValue &
 ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int comp)
 {
@@ -228,12 +245,12 @@ ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int 
 }
 
 VariableValue &
-ScalarCoupleable::coupledScalarDotdotDu(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::coupledScalarDotDotDu(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
-  validateExecutionerType(var_name, "coupledScalarDotdotDu");
+  validateExecutionerType(var_name, "coupledScalarDotDotDu");
   MooseVariableScalar * var = getScalarVar(var_name, comp);
-  return var->duDotdotDu();
+  return var->duDotDotDu();
 }
 
 void

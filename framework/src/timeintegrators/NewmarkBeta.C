@@ -17,13 +17,21 @@ InputParameters
 validParams<NewmarkBeta>()
 {
   InputParameters params = validParams<TimeIntegrator>();
+  params.addClassDescription(
+      "Computes the first and second time derivative of variable using Newmark-Beta method.");
   params.addParam<Real>("beta", 0.25, "beta value");
   params.addParam<Real>("gamma", 0.5, "gamma value");
   return params;
 }
 
 NewmarkBeta::NewmarkBeta(const InputParameters & parameters)
-  : TimeIntegrator(parameters), _beta(getParam<Real>("beta")), _gamma(getParam<Real>("gamma"))
+  : TimeIntegrator(parameters),
+    _beta(getParam<Real>("beta")),
+    _gamma(getParam<Real>("gamma")),
+    _u_dot_old(*_sys.solutionUDotOld()),
+    _u_dotdot(_sys.solutionUDotDot()),
+    _u_dotdot_old(*_sys.solutionUDotDotOld()),
+    _du_dotdot_du(_sys.duDotDotDu())
 {
 }
 
@@ -32,12 +40,6 @@ NewmarkBeta::~NewmarkBeta() {}
 void
 NewmarkBeta::computeTimeDerivatives()
 {
-  // I think this is done TODO declare _u_dotdot
-  // I think this is done TODO declare _du_dotdot_du
-  // TODO store _u_dot_old (make _u_dot stateful)
-  // TODO store _u_dotdot_old (make _u_dotdot stateful)
-
-  NumericVector<Number> second_term, third_term;
   // compute second derivative
   // according to Newmark-Beta method
   // u_dotdot = first_term - second_term - third_term
@@ -47,12 +49,8 @@ NewmarkBeta::computeTimeDerivatives()
   _u_dotdot = *_solution;
   _u_dotdot -= _solution_old;
   _u_dotdot *= 1.0 / _beta / _dt / _dt;
-  second_term = _u_dot_old;
-  second_term *= 1.0 / _beta / _dt;
-  third_term = _u_dotdot_old;
-  third_term *= 0.5 / _beta - 1.0;
-  _u_dotdot -= second_term;
-  _u_dotdot -= third_term;
+  _u_dotdot.add(-1.0 / _beta / _dt, _u_dot_old);
+  _u_dotdot.add(-0.5 / _beta + 1.0, _u_dotdot_old);
 
   // compute first derivative
   // according to Newmark-Beta method
@@ -60,13 +58,9 @@ NewmarkBeta::computeTimeDerivatives()
   //       first_term = u_dot_old
   //      second_term = u_dotdot_old * (1 - gamma) * dt
   //       third_term = u_dotdot * gamma * dt
-  _u_dot = _solution_old;
-  second_term = _u_dotdot_old;
-  second_term *= (1.0 - _gamma) * _dt;
-  third_term = _u_dotdot;
-  third_term *= _gamma * _dt;
-  _u_dot += second_term;
-  _u_dot += third_term;
+  _u_dot = _u_dot_old;
+  _u_dot.add((1.0 - _gamma) * _dt, _u_dotdot_old);
+  _u_dot.add(_gamma * _dt, _u_dotdot);
 
   // make sure _u_dotdot and _u_dot are in good state
   _u_dotdot.close();
@@ -74,7 +68,7 @@ NewmarkBeta::computeTimeDerivatives()
 
   // used for Jacobian calculations
   _du_dotdot_du = 1.0 / _beta / _dt / _dt;
-  _du_dot_du = _gamma / _beta / dt;
+  _du_dot_du = _gamma / _beta / _dt;
 }
 
 void

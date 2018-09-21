@@ -157,14 +157,8 @@ protected:
   /// Time derivative of the variable this is acting on
   const VariableValue & _u_dot;
 
-  /// Second time derivative of the variable this is acting on
-  const VariableValue & _u_dotdot;
-
   /// Derivative of u_dot with respect to u
   const VariableValue & _du_dot_du;
-
-  /// Derivative of u_dotdot with respect to u
-  const VariableValue & _du_dotdot_du;
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;

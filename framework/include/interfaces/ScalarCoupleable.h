@@ -153,7 +153,24 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a time derivative VariableValue for the coupled variable
    */
-  virtual VariableValue & coupledScalarDotdot(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledScalarDotDot(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns the old time derivative of a scalar coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a time derivative VariableValue for the coupled variable
+   */
+  virtual VariableValue & coupledScalarDotOld(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns the old second time derivative of a scalar coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a time derivative VariableValue for the coupled variable
+   */
+  virtual VariableValue & coupledScalarDotDotOld(const std::string & var_name,
+                                                 unsigned int comp = 0);
 
   /**
    * Time derivative of a scalar coupled variable with respect to the coefficients
@@ -171,7 +188,7 @@ protected:
    * @return Reference to a VariableValue containing the time derivative of the coupled variable
    * with respect to the coefficients
    */
-  virtual VariableValue & coupledScalarDotdotDu(const std::string & var_name,
+  virtual VariableValue & coupledScalarDotDotDu(const std::string & var_name,
                                                 unsigned int comp = 0);
 
 protected:

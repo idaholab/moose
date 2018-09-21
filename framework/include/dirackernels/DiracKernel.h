@@ -216,12 +216,8 @@ protected:
 
   /// Time derivative of the solution
   const VariableValue & _u_dot;
-  /// Second time derivative of the solution
-  const VariableValue & _u_dotdot;
   /// Derivative of u_dot wrt u
   const VariableValue & _du_dot_du;
-  /// Derivative of u_dotdot wrt u
-  const VariableValue & _du_dotdot_du;
 
   /// drop duplicate points or consider them in residual and Jacobian
   const bool _drop_duplicate_points;

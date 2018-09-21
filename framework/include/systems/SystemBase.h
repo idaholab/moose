@@ -147,8 +147,6 @@ public:
    * This is typically a ghosted vector that comes in from the Nonlinear solver.
    */
   virtual const NumericVector<Number> *& currentSolution() = 0;
-  virtual const NumericVector<Number> *& currentSolutionUDot() = 0;
-  virtual const NumericVector<Number> *& currentSolutionUDotdot() = 0;
 
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
@@ -156,13 +154,11 @@ public:
   virtual NumericVector<Number> * solutionPreviousNewton() = 0;
 
   virtual Number & duDotDu() { return _du_dot_du; }
-  virtual Number & duDotdotDu() { return _du_dotdot_du; }
+  virtual Number & duDotDotDu() { return _du_dotdot_du; }
   virtual NumericVector<Number> & solutionUDot() { return *_u_dot_dummy_vec; }
-  virtual NumericVector<Number> & solutionUDotOld() = 0;
-  virtual NumericVector<Number> * solutionUDotPreviousNewton() = 0;
-  virtual NumericVector<Number> & solutionUDotdot() { return *_u_dotdot_dummy_vec; }
-  virtual NumericVector<Number> & solutionUDotdotOld() = 0;
-  virtual NumericVector<Number> * solutionUDotdotPreviousNewton() = 0;
+  virtual NumericVector<Number> * solutionUDotOld() = 0;
+  virtual NumericVector<Number> & solutionUDotDot() { return *_u_dotdot_dummy_vec; }
+  virtual NumericVector<Number> * solutionUDotDotOld() = 0;
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();

@@ -43,9 +43,7 @@ Kernel::Kernel(const InputParameters & parameters)
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
-    _u_dotdot(_var.uDotdot()),
-    _du_dot_du(_var.duDotDu()),
-    _du_dotdot_du(_var.duDotdotDu())
+    _du_dot_du(_var.duDotDu())
 {
   addMooseVariableDependency(mooseVariable());
   _save_in.resize(_save_in_strings.size());

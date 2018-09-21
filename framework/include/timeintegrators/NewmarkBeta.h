@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NewmarkBeta_H
-#define NewmarkBeta_H
+#ifndef NEWMARKBETA_H
+#define NEWMARKBETA_H
 
 #include "TimeIntegrator.h"
 
@@ -18,7 +18,7 @@ template <>
 InputParameters validParams<NewmarkBeta>();
 
 /**
- * Implicit Euler's method
+ * Newmark-Beta time integration method
  */
 class NewmarkBeta : public TimeIntegrator
 {
@@ -31,8 +31,22 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
+  /// Newmark time integration parameter-beta
   Real _beta;
-  Real _gamma;
-};
 
-#endif /* NewmarkBeta_H */
+  /// Newmark time integration parameter-gamma
+  Real _gamma;
+
+  /// solution vector for u^dot_old
+  const NumericVector<Number> & _u_dot_old;
+
+  /// solution vector for u^dotdot
+  NumericVector<Number> & _u_dotdot;
+
+  /// solution vector for u^dotdot_old
+  const NumericVector<Number> & _u_dotdot_old;
+
+  /// solution vector for \f$ {du^dotdot}\over{du} \f$
+  Real & _du_dotdot_du;
+};
+#endif /* NEWMARKBETA_H */

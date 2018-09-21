@@ -986,7 +986,7 @@ public:
                                         const NumericVector<Number> & udot,
                                         const NumericVector<Number> & udotdot,
                                         Real duDotDu_shift,
-                                        Real duDotdotDu_shift,
+                                        Real duDotDotDu_shift,
                                         SparseMatrix<Number> & jacobian);
 
   ////

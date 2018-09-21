@@ -130,16 +130,8 @@ protected:
 
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
-  /// solution vector for u^dot_old
-  const NumericVector<Number> & _u_dot_old;
-  /// solution vector for u^dotdot
-  NumericVector<Number> & _u_dotdot;
-  /// solution vector for u^dotdot_old
-  const NumericVector<Number> & _u_dotdot_old;
   /// solution vector for \f$ {du^dot}\over{du} \f$
   Real & _du_dot_du;
-  /// solution vector for \f$ {du^dotdot}\over{du} \f$
-  Real & _du_dotdot_du;
   /// solution vectors
   const NumericVector<Number> *& _solution;
   const NumericVector<Number> & _solution_old;
