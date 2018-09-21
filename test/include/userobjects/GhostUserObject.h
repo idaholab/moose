@@ -35,7 +35,8 @@ public:
 
 protected:
   std::set<dof_id_type> _ghost_data;
-  dof_id_type _rank;
+  const dof_id_type _rank;
+  const bool _show_evaluable;
 };
 
 #endif // GHOSTUSEROBJECT_H

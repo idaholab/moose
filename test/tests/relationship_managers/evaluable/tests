@@ -1,0 +1,20 @@
+[Tests]
+  [./evaluable_neighbors_replicated]
+    type = 'Exodiff'
+    input = 'evaluable.i'
+    exodiff = 'evaluable_out.e'
+
+    min_parallel = 3
+    max_parallel = 3
+  [../]
+
+  [./evaluable_neighbors_distribtued]
+    type = 'Exodiff'
+    input = 'evaluable.i'
+    exodiff = 'evaluable_neighbors_dist_out.e'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=evaluable_neighbors_dist_out'
+
+    min_parallel = 3
+    max_parallel = 3
+  [../]
+[]

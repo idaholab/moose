@@ -403,9 +403,10 @@ enum PatchUpdateType
  */
 enum class RelationshipManagerType : unsigned char
 {
-  Invalid = 0x0,
-  Geometric = 0x1,
-  Algebraic = 0x2
+  Default = 0,
+  Geometric = 1 << 0,
+  Algebraic = 1 << 1,
+  Coupling = 1 << 2
 };
 
 std::string stringify(const Moose::RelationshipManagerType & t);

@@ -559,6 +559,18 @@ FEProblemBase::addExtraVectors()
   _aux->addExtraVectors();
 }
 
+const ConstElemRange &
+FEProblemBase::getEvaluableElementRange()
+{
+  if (!_evaluable_local_elem_range)
+  {
+    _evaluable_local_elem_range =
+        libmesh_make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
+                                            _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
+  }
+  return *_evaluable_local_elem_range;
+}
+
 void
 FEProblemBase::initialSetup()
 {

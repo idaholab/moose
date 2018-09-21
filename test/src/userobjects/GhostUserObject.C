@@ -24,6 +24,8 @@ validParams<GhostUserObject>()
       "rank",
       DofObject::invalid_processor_id,
       "The rank for which the ghosted elements are recorded (Default: ALL)");
+  params.addParam<bool>(
+      "show_evaluable", false, "Instead of showing ghosts, shows evaluable elements");
 
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
 
@@ -37,7 +39,9 @@ validParams<GhostUserObject>()
 }
 
 GhostUserObject::GhostUserObject(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _rank(getParam<unsigned int>("rank"))
+  : GeneralUserObject(parameters),
+    _rank(getParam<unsigned int>("rank")),
+    _show_evaluable(getParam<bool>("show_evaluable"))
 {
 }
 
@@ -54,11 +58,19 @@ GhostUserObject::execute()
 
   if (_rank == DofObject::invalid_processor_id || my_processor_id == _rank)
   {
-    const auto & mesh = _subproblem.mesh().getMesh();
+    if (_show_evaluable)
+    {
+      for (const auto & current_elem : _fe_problem.getEvaluableElementRange())
+        _ghost_data.emplace(current_elem->id());
+    }
+    else
+    {
+      const auto & mesh = _subproblem.mesh().getMesh();
 
-    for (const auto & elem : mesh.active_element_ptr_range())
-      if (elem->processor_id() != my_processor_id)
-        _ghost_data.emplace(elem->id());
+      for (const auto & elem : mesh.active_element_ptr_range())
+        if (elem->processor_id() != my_processor_id)
+          _ghost_data.emplace(elem->id());
+    }
   }
 }
 

@@ -10,10 +10,9 @@
 #ifndef ELEMENTPOINTNEIGHBORS_H
 #define ELEMENTPOINTNEIGHBORS_H
 
-#include "GeometricRelationshipManager.h"
-#include "InputParameters.h"
+#include "AlgebraicRelationshipManager.h"
 
-#include "libmesh/ghost_point_neighbors.h"
+#include "libmesh/point_neighbor_coupling.h"
 
 // Forward declarations
 class ElementPointNeighbors;
@@ -30,7 +29,7 @@ InputParameters validParams<ElementPointNeighbors>();
  * every processor's partition. It is useful when non-local element resources are needed when using
  * DistributedMesh.
  */
-class ElementPointNeighbors : public GeometricRelationshipManager
+class ElementPointNeighbors : public AlgebraicRelationshipManager
 {
 public:
   ElementPointNeighbors(const InputParameters & parameters);
@@ -44,8 +43,12 @@ public:
                           map_type & coupled_elements) override;
 
 protected:
+  /// Size of the halo or stencil of elements available in each local processors partition. Only
+  /// applicable and necessary when using DistributedMesh.
+  unsigned short _element_point_neighbor_layers;
+
   /// The libMesh coupling object that provides this RM's functionality.
-  std::unique_ptr<GhostPointNeighbors> _point_coupling;
+  std::unique_ptr<PointNeighborCoupling> _point_coupling;
 };
 
 #endif /* ELEMENTPOINTNEIGHBORS_H */

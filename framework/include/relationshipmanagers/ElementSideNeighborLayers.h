@@ -10,7 +10,7 @@
 #ifndef ELEMENTSIDENEIGHBORLAYERS_H
 #define ELEMENTSIDENEIGHBORLAYERS_H
 
-#include "GeometricRelationshipManager.h"
+#include "AlgebraicRelationshipManager.h"
 
 #include "libmesh/default_coupling.h"
 
@@ -28,7 +28,7 @@ InputParameters validParams<ElementSideNeighborLayers>();
  * ElementSideNeighborLayers is used to increase the halo or stencil depth of each processor's
  * partition. It is useful when non-local element resources are needed when using DistributedMesh.
  */
-class ElementSideNeighborLayers : public GeometricRelationshipManager
+class ElementSideNeighborLayers : public AlgebraicRelationshipManager
 {
 public:
   ElementSideNeighborLayers(const InputParameters & parameters);

@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<ElementSideNeighborLayers>()
 {
-  InputParameters params = validParams<GeometricRelationshipManager>();
+  InputParameters params = validParams<AlgebraicRelationshipManager>();
 
   params.addRangeCheckedParam<unsigned short>(
       "element_side_neighbor_layers",
@@ -31,20 +31,24 @@ validParams<ElementSideNeighborLayers>()
 }
 
 ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & parameters)
-  : GeometricRelationshipManager(parameters),
+  : AlgebraicRelationshipManager(parameters),
     _element_side_neighbor_layers(getParam<unsigned short>("element_side_neighbor_layers"))
 {
 }
 
-void ElementSideNeighborLayers::attachRelationshipManagersInternal(
-    Moose::RelationshipManagerType /*rm_type*/)
+void
+ElementSideNeighborLayers::attachRelationshipManagersInternal(
+    Moose::RelationshipManagerType rm_type)
 {
   if ((_app.isSplitMesh() || _mesh.isDistributedMesh()) && _element_side_neighbor_layers > 1)
   {
     _default_coupling = libmesh_make_unique<DefaultCoupling>();
     _default_coupling->set_n_levels(_element_side_neighbor_layers);
 
-    attachGeometricFunctorHelper(*_default_coupling);
+    if (rm_type == Moose::RelationshipManagerType::Geometric)
+      attachGeometricFunctorHelper(*_default_coupling);
+    else
+      attachAlgebraicFunctorHelper(*_default_coupling);
   }
 }
 
