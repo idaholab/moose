@@ -13,6 +13,9 @@ from mooseutils import colorText
 from collections import OrderedDict
 import json
 
+## readOutput threshold in bytes (100k)
+MAX_BUFFER_SIZE=100000
+
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
@@ -723,7 +726,7 @@ def getOutputFromFiles(tester, options):
 # This function reads output from the file (i.e. the test output)
 # but trims it down to the specified size.  It'll save the first two thirds
 # of the requested size and the last third trimming from the middle
-def readOutput(f, e, options, max_size=100000):
+def readOutput(f, e, options, max_size=MAX_BUFFER_SIZE):
     first_part = int(max_size*(2.0/3.0))
     second_part = int(max_size*(1.0/3.0))
     output = ''

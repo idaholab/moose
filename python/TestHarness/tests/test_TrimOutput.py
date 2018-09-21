@@ -15,4 +15,11 @@ class TestHarnessTester(TestHarnessTestCase):
         Verify output exceeded buffer, and is therfore trimmed
         """
         output = self.runTests('--no-color', '-i', 'trimmed_output', '-v')
-        self.assertNotIn('Ouput trimmed', output)
+        self.assertIn('Output trimmed', output)
+
+    def testNoTrimOutput(self):
+        """
+        Verify trimming did not take place
+        """
+        output = self.runTests('--no-color', '-i', 'always_ok', '-v')
+        self.assertNotIn('Output trimmed', output)

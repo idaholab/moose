@@ -179,7 +179,7 @@
   [./trim_output]
     type = PythonUnitTest
     input = test_TrimOutput.py
-    requirement = "TestHarness shall trim output once threshold is exceeded"
+    requirement = "TestHarness shall trim output once threshold has exceeded"
     issues = '#12167'
   [../]
 []
