@@ -10,7 +10,7 @@
 #ifndef INERTIALFORCE_H
 #define INERTIALFORCE_H
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 #include "Material.h"
 
 // Forward Declarations
@@ -19,7 +19,7 @@ class InertialForce;
 template <>
 InputParameters validParams<InertialForce>();
 
-class InertialForce : public Kernel
+class InertialForce : public TimeKernel
 {
 public:
   InertialForce(const InputParameters & parameters);
@@ -31,13 +31,20 @@ protected:
 
 private:
   const MaterialProperty<Real> & _density;
-  const VariableValue & _u_old;
-  const VariableValue & _vel_old;
-  const VariableValue & _accel_old;
+  const VariableValue * _u_old;
+  const VariableValue * _vel_old;
+  const VariableValue * _accel_old;
   const Real _beta;
   const Real _gamma;
   const MaterialProperty<Real> & _eta;
   const Real _alpha;
+
+  // Velocity and acceleration calculated by time integrator
+  const VariableValue * _u_dot;
+  const VariableValue * _u_dotdot;
+  const VariableValue * _u_dot_old;
+  const VariableValue * _du_dot_du;
+  const VariableValue * _du_dotdot_du;
 };
 
 #endif // INERTIALFORCE_H

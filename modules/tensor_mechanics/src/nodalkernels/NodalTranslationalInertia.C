@@ -24,14 +24,14 @@ template <>
 InputParameters
 validParams<NodalTranslationalInertia>()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = validParams<TimeNodalKernel>();
   params.addClassDescription("Computes the interial forces and mass proportional damping terms "
                              "corresponding to nodal mass.");
-  params.addRequiredCoupledVar("velocity", "velocity variable");
-  params.addRequiredCoupledVar("acceleration", "acceleration variable");
-  params.addRequiredRangeCheckedParam<Real>(
+  params.addCoupledVar("velocity", "velocity variable");
+  params.addCoupledVar("acceleration", "acceleration variable");
+  params.addRangeCheckedParam<Real>(
       "beta", "beta>0.0", "beta parameter for Newmark Time integration");
-  params.addRequiredRangeCheckedParam<Real>(
+  params.addRangeCheckedParam<Real>(
       "gamma", "gamma>0.0", "gamma parameter for Newmark Time integration");
   params.addRangeCheckedParam<Real>("eta",
                                     0.0,
@@ -51,19 +51,36 @@ validParams<NodalTranslationalInertia>()
 }
 
 NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & parameters)
-  : NodalKernel(parameters),
+  : TimeNodalKernel(parameters),
     _mass(isParamValid("mass") ? getParam<Real>("mass") : 0.0),
-    _u_old(_var.dofValuesOld()),
-    _beta(getParam<Real>("beta")),
-    _gamma(getParam<Real>("gamma")),
+    _beta(isParamValid("beta") ? getParam<Real>("beta") : 0.1),
+    _gamma(isParamValid("gamma") ? getParam<Real>("gamma") : 0.1),
     _eta(getParam<Real>("eta")),
-    _alpha(getParam<Real>("alpha")),
-    _aux_sys(_fe_problem.getAuxiliarySystem())
+    _alpha(getParam<Real>("alpha"))
 {
-  MooseVariable * vel_variable = getVar("velocity", 0);
-  _vel_num = vel_variable->number();
-  MooseVariable * accel_variable = getVar("acceleration", 0);
-  _accel_num = accel_variable->number();
+  if (isParamValid("beta") && isParamValid("gamma") && isParamValid("velocity") &&
+      isParamValid("acceleration"))
+  {
+    _u_old = &(_var.dofValuesOld());
+    _aux_sys = &(_fe_problem.getAuxiliarySystem());
+
+    MooseVariable * vel_variable = getVar("velocity", 0);
+    _vel_num = vel_variable->number();
+    MooseVariable * accel_variable = getVar("acceleration", 0);
+    _accel_num = accel_variable->number();
+  }
+  else if (!isParamValid("beta") && !isParamValid("gamma") && !isParamValid("velocity") &&
+           !isParamValid("acceleration"))
+  {
+    _vel = &(_var.dofValuesDot());
+    _vel_old = &(_var.dofValuesDotOld());
+    _accel = &(_var.dofValuesDotDot());
+    _du_dot_du = &(_var.duDotDu());
+    _du_dotdot_du = &(_var.duDotDotDu());
+  }
+  else
+    mooseError("NodalTranslationalInertia: Either all or none of `beta`, `gamma`, `velocity` and "
+               "`acceleration` should be provided as input.");
 
   if (!isParamValid("nodal_mass_file") && !isParamValid("mass"))
     mooseError(
@@ -135,18 +152,25 @@ NodalTranslationalInertia::computeQpResidual()
         mooseError("NodalTranslationalInertia: Unable to find an entry for the current node in the "
                    "_node_id_to_mass map.");
     }
-    const NumericVector<Number> & aux_sol_old = _aux_sys.solutionOld();
 
-    mooseAssert(_beta > 0.0, "NodalTranslationalInertia: Beta parameter should be positive.");
+    if (isParamValid("beta"))
+    {
+      mooseAssert(_beta > 0.0, "NodalTranslationalInertia: Beta parameter should be positive.");
+      const NumericVector<Number> & aux_sol_old = _aux_sys->solutionOld();
 
-    const Real vel_old = aux_sol_old(_current_node->dof_number(_aux_sys.number(), _vel_num, 0));
-    const Real accel_old = aux_sol_old(_current_node->dof_number(_aux_sys.number(), _accel_num, 0));
+      const Real vel_old = aux_sol_old(_current_node->dof_number(_aux_sys->number(), _vel_num, 0));
+      const Real accel_old =
+          aux_sol_old(_current_node->dof_number(_aux_sys->number(), _accel_num, 0));
 
-    const Real accel =
-        1. / _beta *
-        (((_u[_qp] - _u_old[_qp]) / (_dt * _dt)) - vel_old / _dt - accel_old * (0.5 - _beta));
-    const Real vel = vel_old + (_dt * (1 - _gamma)) * accel_old + _gamma * _dt * accel;
-    return mass * (accel + vel * _eta * (1 + _alpha) - _alpha * _eta * vel_old);
+      const Real accel =
+          1. / _beta *
+          (((_u[_qp] - (*_u_old)[_qp]) / (_dt * _dt)) - vel_old / _dt - accel_old * (0.5 - _beta));
+      const Real vel = vel_old + (_dt * (1 - _gamma)) * accel_old + _gamma * _dt * accel;
+      return mass * (accel + vel * _eta * (1 + _alpha) - _alpha * _eta * vel_old);
+    }
+    else
+      return mass * ((*_accel)[_qp] + (*_vel)[_qp] * _eta * (1.0 + _alpha) -
+                     _alpha * _eta * (*_vel_old)[_qp]);
   }
 }
 
@@ -170,6 +194,10 @@ NodalTranslationalInertia::computeQpJacobian()
         mooseError("NodalTranslationalInertia: Unable to find an entry for the current node in the "
                    "_node_id_to_mass map.");
     }
-    return mass / (_beta * _dt * _dt) + _eta * (1 + _alpha) * mass * _gamma / _beta / _dt;
+
+    if (isParamValid("beta"))
+      return mass / (_beta * _dt * _dt) + _eta * (1 + _alpha) * mass * _gamma / _beta / _dt;
+    else
+      return mass * (*_du_dotdot_du)[_qp] + _eta * (1.0 + _alpha) * mass * (*_du_dot_du)[_qp];
   }
 }

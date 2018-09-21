@@ -29,6 +29,20 @@
                   " by Hilber-Hughes-Taylor (HHT) time integration."
     rel_err = 7e-6
   [../]
+  [./dyn_euler_rayleigh_hht_ti]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_rayleigh_hht_ti.i'
+    exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
+    rel_err = 1e-5
+  
+    requirement = "The mechanics system shall correctly predict the natural frequencies"
+                  " of an Euler-Bernoulli beam modeled using beam elements in the"
+                  " presence of Rayleigh damping and numerical damping introduced"
+                  " by Hilber-Hughes-Taylor (HHT) time integration when using the"
+                  " velocity and acceleration computed using the Newmark-Beta time integrator."
+    issues = "#12185"
+    prereq = 'dyn_euler_rayleigh_hht_action'
+  [../]
   [./dyn_euler_added_mass]
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass.i'
@@ -91,6 +105,18 @@
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements in the presence of nodal mass,"
                   " nodal inertia and Rayleigh damping."
+  [../]
+  [./dyn_euler_added_mass_inertia_damping_ti]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_inertia_damping_ti.i'
+    exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
+
+    requirement = "The mechanics system shall correctly model the response of a beam"
+                  " modeled using beam elements in the presence of nodal mass,"
+                  " nodal inertia and Rayleigh damping when using the velocity and"
+                  " accelerations computed by the Newmark-Beta time integrator."
+    issues = "#12185"
+    prereq = "dyn_euler_added_mass_inertia_damping_action"
   [../]
   [./dyn_euler_rayleigh_hht_action]
     type = 'Exodiff'
