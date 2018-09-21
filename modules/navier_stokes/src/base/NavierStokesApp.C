@@ -27,67 +27,20 @@ registerKnownLabel("NavierStokesApp");
 
 NavierStokesApp::NavierStokesApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  NavierStokesApp::registerObjectDepends(_factory);
-  NavierStokesApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  NavierStokesApp::associateSyntaxDepends(_syntax, _action_factory);
-  NavierStokesApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  NavierStokesApp::registerExecFlags(_factory);
+  NavierStokesApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 NavierStokesApp::~NavierStokesApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-NavierStokesApp__registerApps()
-{
-  NavierStokesApp::registerApps();
-}
 void
 NavierStokesApp::registerApps()
 {
   registerApp(NavierStokesApp);
 }
 
-void
-NavierStokesApp::registerObjectDepends(Factory & factory)
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  FluidPropertiesApp::registerObjects(factory);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-NavierStokesApp__registerObjects(Factory & factory)
-{
-  NavierStokesApp::registerObjects(factory);
-}
-void
-NavierStokesApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"NavierStokesApp"});
-}
-
-void
-NavierStokesApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
-{
-  FluidPropertiesApp::associateSyntax(syntax, action_factory);
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  NavierStokesApp::associateSyntax(syntax, action_factory);
-}
-void
-NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"NavierStokesApp"});
-
   // Create the syntax
   registerSyntax("AddNavierStokesVariablesAction", "Modules/NavierStokes/Variables");
   registerSyntax("AddNavierStokesICsAction", "Modules/NavierStokes/ICs");
@@ -113,13 +66,57 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   addTaskDependency("add_navier_stokes_bcs", "add_bc");
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-NavierStokesApp__registerExecFlags(Factory & factory)
+void
+NavierStokesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  NavierStokesApp::registerExecFlags(factory);
+  FluidPropertiesApp::registerAll(f, af, s);
+  Registry::registerObjectsTo(f, {"NavierStokesApp"});
+  Registry::registerActionsTo(af, {"NavierStokesApp"});
+  associateSyntaxInner(s, af);
 }
+
+void
+NavierStokesApp::registerObjectDepends(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
+  FluidPropertiesApp::registerObjects(factory);
+}
+
+void
+NavierStokesApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"NavierStokesApp"});
+}
+
+void
+NavierStokesApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntaxDepends");
+  FluidPropertiesApp::associateSyntax(syntax, action_factory);
+}
+
+void
+NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"NavierStokesApp"});
+  associateSyntaxInner(syntax, action_factory);
+}
+
 void
 NavierStokesApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+NavierStokesApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  NavierStokesApp::registerAll(f, af, s);
+}
+extern "C" void
+NavierStokesApp__registerApps()
+{
+  NavierStokesApp::registerApps();
 }

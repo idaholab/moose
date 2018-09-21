@@ -24,24 +24,10 @@ registerKnownLabel("FluidPropertiesApp");
 
 FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  FluidPropertiesApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  FluidPropertiesApp::registerExecFlags(_factory);
+  FluidPropertiesApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 FluidPropertiesApp::~FluidPropertiesApp() {}
-
-// External entry point for dynamic application loading
-extern "C" void
-FluidPropertiesApp__registerApps()
-{
-  FluidPropertiesApp::registerApps();
-}
 
 void
 FluidPropertiesApp::registerApps()
@@ -49,46 +35,51 @@ FluidPropertiesApp::registerApps()
   registerApp(FluidPropertiesApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-FluidPropertiesApp__registerObjects(Factory & factory)
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  FluidPropertiesApp::registerObjects(factory);
+  registerSyntaxTask(
+      "AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
+  registerMooseObjectTask("add_fluid_properties", FluidProperties, false);
+  syntax.addDependency("add_fluid_properties", "init_displaced_problem");
+}
+
+void
+FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  Registry::registerObjectsTo(f, {"FluidPropertiesApp"});
+  Registry::registerActionsTo(af, {"FluidPropertiesApp"});
+  associateSyntaxInner(s, af);
 }
 
 void
 FluidPropertiesApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"FluidPropertiesApp"});
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-FluidPropertiesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  FluidPropertiesApp::associateSyntax(syntax, action_factory);
 }
 
 void
 FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"FluidPropertiesApp"});
-
-  registerSyntaxTask(
-      "AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
-
-  registerMooseObjectTask("add_fluid_properties", FluidProperties, false);
-
-  syntax.addDependency("add_fluid_properties", "init_displaced_problem");
+  associateSyntaxInner(syntax, action_factory);
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-FluidPropertiesApp__registerExecFlags(Factory & factory)
-{
-  FluidPropertiesApp::registerExecFlags(factory);
-}
 void
 FluidPropertiesApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+FluidPropertiesApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  FluidPropertiesApp::registerAll(f, af, s);
+}
+extern "C" void
+FluidPropertiesApp__registerApps()
+{
+  FluidPropertiesApp::registerApps();
 }

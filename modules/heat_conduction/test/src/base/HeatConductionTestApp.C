@@ -24,31 +24,23 @@ registerKnownLabel("HeatConductionTestApp");
 
 HeatConductionTestApp::HeatConductionTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  HeatConductionApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  HeatConductionApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  HeatConductionApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    HeatConductionTestApp::registerObjects(_factory);
-    HeatConductionTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  HeatConductionTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 HeatConductionTestApp::~HeatConductionTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-HeatConductionTestApp__registerApps()
+void
+HeatConductionTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  HeatConductionTestApp::registerApps();
+  HeatConductionApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"HeatConductionTestApp"});
+    Registry::registerActionsTo(af, {"HeatConductionTestApp"});
+  }
 }
+
 void
 HeatConductionTestApp::registerApps()
 {
@@ -56,37 +48,30 @@ HeatConductionTestApp::registerApps()
   registerApp(HeatConductionTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-HeatConductionTestApp__registerObjects(Factory & factory)
-{
-  HeatConductionTestApp::registerObjects(factory);
-}
 void
 HeatConductionTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"HeatConductionTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-HeatConductionTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  HeatConductionTestApp::associateSyntax(syntax, action_factory);
-}
 void
 HeatConductionTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"HeatConductionTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-HeatConductionTestApp__registerExecFlags(Factory & factory)
-{
-  HeatConductionTestApp::registerExecFlags(factory);
-}
 void
 HeatConductionTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+HeatConductionTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  HeatConductionTestApp::registerAll(f, af, s);
+}
+extern "C" void
+HeatConductionTestApp__registerApps()
+{
+  HeatConductionTestApp::registerApps();
 }

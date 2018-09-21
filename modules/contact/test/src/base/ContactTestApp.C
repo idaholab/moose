@@ -24,31 +24,23 @@ registerKnownLabel("ContactTestApp");
 
 ContactTestApp::ContactTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  ContactApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ContactApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  ContactApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    ContactTestApp::registerObjects(_factory);
-    ContactTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  ContactTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 ContactTestApp::~ContactTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-ContactTestApp__registerApps()
+void
+ContactTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  ContactTestApp::registerApps();
+  ContactApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"ContactTestApp"});
+    Registry::registerActionsTo(af, {"ContactTestApp"});
+  }
 }
+
 void
 ContactTestApp::registerApps()
 {
@@ -56,37 +48,30 @@ ContactTestApp::registerApps()
   registerApp(ContactTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-ContactTestApp__registerObjects(Factory & factory)
-{
-  ContactTestApp::registerObjects(factory);
-}
 void
 ContactTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"ContactTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-ContactTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  ContactTestApp::associateSyntax(syntax, action_factory);
-}
 void
 ContactTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"ContactTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-ContactTestApp__registerExecFlags(Factory & factory)
-{
-  ContactTestApp::registerExecFlags(factory);
-}
 void
 ContactTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+ContactTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  ContactTestApp::registerAll(f, af, s);
+}
+extern "C" void
+ContactTestApp__registerApps()
+{
+  ContactTestApp::registerApps();
 }

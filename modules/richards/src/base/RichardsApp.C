@@ -24,20 +24,28 @@ registerKnownLabel("RichardsApp");
 
 RichardsApp::RichardsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  RichardsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  RichardsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  RichardsApp::registerExecFlags(_factory);
-
   mooseDeprecated("Please use the PorousFlow module instead.  If Richards contains functionality "
                   "not included in PorousFlow, please contact the moose-users google group");
+  RichardsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 RichardsApp::~RichardsApp() {}
+
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+{
+  registerSyntaxTask("Q2PAction", "Q2P", "add_kernel");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_aux_variable");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_function");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_postprocessor");
+}
+void
+RichardsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  Registry::registerObjectsTo(f, {"RichardsApp"});
+  Registry::registerActionsTo(af, {"RichardsApp"});
+  associateSyntaxInner(s, af);
+}
 
 void
 RichardsApp::registerApps()
@@ -48,27 +56,20 @@ RichardsApp::registerApps()
 void
 RichardsApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"RichardsApp"});
 }
 
 void
 RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"RichardsApp"});
-
-  registerSyntaxTask("Q2PAction", "Q2P", "add_kernel");
-  registerSyntaxTask("Q2PAction", "Q2P", "add_aux_variable");
-  registerSyntaxTask("Q2PAction", "Q2P", "add_function");
-  registerSyntaxTask("Q2PAction", "Q2P", "add_postprocessor");
+  associateSyntaxInner(syntax, action_factory);
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-RichardsApp__registerExecFlags(Factory & factory)
-{
-  RichardsApp::registerExecFlags(factory);
-}
 void
 RichardsApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
 }
