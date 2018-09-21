@@ -36,8 +36,7 @@ graph = chigger.graphs.Graph(line2, line1, viewport=[0.5,0,1,1]) #, tracer
 graph.setOptions('xaxis', title='Step', font_size=18)
 graph.setOptions('yaxis', lim=[0,3000], title='timestep', font_size=18)
 # graph.setOptions('legend', visible=False)
-graph.update()
-graph.setOptions('legend', point=[0.7,0.7])
+graph.setOptions('legend', point=[0.15, 0.9])
 
 # window = chigger.RenderWindow(result, cbar, graph, size=[1200, 600], test=False)
 window = chigger.RenderWindow(result, graph, size=[1200, 600], test=False)

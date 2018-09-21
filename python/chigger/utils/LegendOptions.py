@@ -66,7 +66,7 @@ def set_options(vtkchart, vtkrenderer, opt):
         coord = vtk.vtkCoordinate()
         coord.SetCoordinateSystemToNormalizedViewport()
         coord.SetValue(pt[0], pt[1], 0)
-        loc = coord.GetComputedDisplayValue(vtkrenderer)
+        loc = coord.GetComputedViewportValue(vtkrenderer)
         legend.SetPoint(*loc)
     else:
         legend.SetVerticalAlignment(eval('vtk.vtkChartLegend.' +
