@@ -19,7 +19,7 @@ validParams<DiscreteNucleationTimeStep>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addClassDescription(
-      "Return a timestep limit for nucleation event to be used by IterationAdaptiveDT");
+      "Return a time step limit for nucleation event to be used by IterationAdaptiveDT");
   params.addRequiredParam<Real>("dt_max",
                                 "Time step to cut back to at the start of a nucleation event");
   params.addRangeCheckedParam<Real>(

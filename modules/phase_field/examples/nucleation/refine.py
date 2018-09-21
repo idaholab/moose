@@ -10,6 +10,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import chigger
+from chigger.annotations import ImageAnnotation
+from chigger.utils import img2mov
+
 import mooseutils
 import vtk
 
@@ -37,8 +40,11 @@ graph.setOptions('xaxis', title='Step', font_size=18)
 graph.setOptions('yaxis', lim=[0,3000], title='timestep', font_size=18)
 graph.setOptions('legend', point=[0.15, 0.9], label_font_size=18)
 
+moose = ImageAnnotation(filename='moose.png', position=[1, 1], opacity=0.5,
+                       horizontal_alignment='right', vertical_alignment='top')
+
 # window = chigger.RenderWindow(result, cbar, graph, size=[1200, 600], test=False)
-window = chigger.RenderWindow(result, graph, size=[1200, 600], test=False)
+window = chigger.RenderWindow(result, graph, moose, size=[1200, 600], test=False)
 
 for i in range(len(x)):
     tracer.setOptions(x=[x[i]], y=[0])
@@ -46,3 +52,5 @@ for i in range(len(x)):
     window.write('refine_%04d.png' % i)
 
 window.start()
+
+img2mov('refine_????.png', 'refine2.mp4', num_threads=4, duration=15)
