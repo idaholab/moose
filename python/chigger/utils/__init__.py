@@ -161,7 +161,7 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
         quality[int]: The ffmpeg quality setting (ranges from 1 to 31).
         dry_run[bool]: When True the command is not executed.
         factor[float]: Output framerate adjustment to help guarantee no dropped frames, if you see
-                       drooped frames in ffmpeg output, increase this number.
+                       dropped frames in ffmpeg output, increase this number.
     """
 
     # Compute framerate from the duration if framerate is not given
@@ -169,22 +169,11 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
         n = len(glob.glob(pattern))
         framerate = n/duration
 
-    # Determine the video codec
-    _, ext = os.path.splitext(output)
-    if ext == '.mov':
-        codec = 'mpeg2video'
-    elif ext == '.mp4':
-        codec = 'mpeg4'
-    else:
-        msg = "Unsupported output format {}, please use '.mov' or '.mp4'"
-        raise mooseutils.MooseException(msg.format(ffmpeg))
-
     # Build the command
     cmd = [ffmpeg]
     cmd += ['-pattern_type', 'glob']
     cmd += ['-framerate', str(framerate)]
     cmd += ['-i', pattern]
-    cmd += ['-c:v', codec]
     cmd += ['-b:v', bitrate]
     cmd += ['-pix_fmt', 'yuv420p']
     cmd += ['-q:v', str(quality)]
