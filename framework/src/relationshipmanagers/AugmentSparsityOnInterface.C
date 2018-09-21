@@ -7,6 +7,8 @@
 // libMesh includes
 #include "libmesh/elem.h"
 
+registerMooseObject("MooseApp", AugmentSparsityOnInterface);
+
 using namespace libMesh;
 
 template <>

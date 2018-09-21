@@ -52,65 +52,6 @@ public:
 protected:
   FEProblemBase & _fe_problem;
   SystemBase & _sys;
-  unsigned int _dim;
-
-  const MooseArray<Point> & _q_point;
-  QBase *& _qrule;
-  const MooseArray<Real> & _JxW;
-  const MooseArray<Real> & _coord;
-
-  std::vector<Real> _JxW_lm;
-
-  /**
-   * Current element on the interface (i.e in the mortar space)
-   */
-  const Elem *& _current_elem;
-
-  std::vector<std::vector<Real>> _test;
-  std::vector<std::vector<Real>> _phi;
-
-  MooseVariable & _primal_var;
-  MooseVariable & _lambda_var;
-
-  /**
-   * Values of the primal variable on the master side
-   */
-  std::vector<Real> _u_master;
-  std::vector<RealGradient> _grad_u_master;
-
-  /**
-   * Physical points on the master side
-   */
-  std::vector<Point> _phys_points_master;
-  /**
-   * Element on the master side
-   */
-  const Elem * _elem_master;
-  /**
-   * Values of test functions on the master side
-   */
-  const VariableTestValue & _test_primal;
-  const VariableTestGradient & _grad_test_primal;
-
-  /**
-   * Values of shape function on the master side
-   */
-  const VariablePhiValue & _phi_primal;
-
-  /**
-   * Values of the primal variable on the slave side
-   */
-  std::vector<Real> _u_slave;
-  std::vector<RealGradient> _grad_u_slave;
-
-  /**
-   * Physical points on the slave side
-   */
-  std::vector<Point> _phys_points_slave;
-  /**
-   * Element on the slave side
-   */
-  const Elem * _elem_slave;
 
   /// Boundary ID for the slave surface
   BoundaryID _slave_id;
@@ -122,6 +63,8 @@ protected:
   SubdomainID _master_subdomain_id;
 
   AutomaticMortarGeneration & _amg;
+
+  MooseVariable & _lambda_var;
 };
 
 #endif /* REALMORTARCONSTRAINT_H */

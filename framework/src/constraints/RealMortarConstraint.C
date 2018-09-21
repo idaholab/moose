@@ -19,6 +19,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", RealMortarConstraint);
+
 template <>
 InputParameters
 validParams<RealMortarConstraint>()
@@ -29,9 +31,8 @@ validParams<RealMortarConstraint>()
   params.addRequiredParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
   params.addRequiredParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
   params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
-  params.registerRelationshipManagers("AugmentSparsityOnInterface");
-  params.addRequiredParam<VariableName>("primal_variable", "The primal variable");
-  params.addRequiredParam<VariableName>("lm_variable", "The lagrange multiplier variable");
+  // params.registerRelationshipManagers("AugmentSparsityOnInterface");
+  params.addRequiredParam<NonlinearVariableName>("lm_variable", "The lagrange multiplier variable");
   return params;
 }
 
@@ -45,27 +46,15 @@ RealMortarConstraint::RealMortarConstraint(const InputParameters & parameters)
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _dim(_mesh.dimension()),
-
-    _q_point(_assembly.qPoints()),
-    _qrule(_assembly.qRule()),
-    _JxW(_assembly.JxW()),
-    _coord(_assembly.coordTransformation()),
-    _current_elem(_assembly.elem()),
-
-    _primal_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("primal_variable"))),
-    _lambda_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("lm_variable"))),
-
-    _test_primal(_primal_var.phi()),
-    _grad_test_primal(_primal_var.gradPhi()),
-    _phi_primal(_primal_var.phi()),
 
     _slave_id(getParam<BoundaryID>("slave_boundary_id")),
     _master_id(getParam<BoundaryID>("master_boundary_id")),
     _slave_subdomain_id(getParam<SubdomainID>("slave_subdomain_id")),
     _master_subdomain_id(getParam<SubdomainID>("master_subdomain_id")),
     _amg(_fe_problem.getMortarInterface(std::make_pair(_master_id, _slave_id),
-                                        std::make_pair(_master_subdomain_id, _slave_subdomain_id)))
+                                        std::make_pair(_master_subdomain_id, _slave_subdomain_id))),
+    _lambda_var(
+        _sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("lm_variable")))
 {
 }
 
@@ -83,7 +72,7 @@ RealMortarConstraint::computeResidual()
 
   // Get a constant reference to the Finite Element type
   // for the first (and only) variable in the system.
-  auto primal_var_number = _primal_var.number();
+  auto primal_var_number = _var.number();
   auto lambda_var_number = _lambda_var.number();
   FEType fe_type_primal = dof_map.variable_type(primal_var_number),
          fe_type_lambda = dof_map.variable_type(lambda_var_number);
@@ -139,8 +128,8 @@ RealMortarConstraint::computeResidual()
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
-  libMesh::out << "About to loop over " << _amg.mortar_segment_mesh.n_elem()
-               << " mortar mesh segments." << std::endl;
+  // libMesh::out << "About to loop over " << _amg.mortar_segment_mesh.n_elem()
+  //              << " mortar mesh segments." << std::endl;
 
   for (MeshBase::const_element_iterator
            el = _amg.mortar_segment_mesh.active_local_elements_begin(),
@@ -200,7 +189,7 @@ RealMortarConstraint::computeResidual()
     const Elem * slave_ip = msinfo.slave_elem->interior_parent();
 
     // Look up which side of the interior parent we are.
-    unsigned int slave_side_id = _amg.lower_elem_to_side_id.at(msinfo.slave_elem);
+    unsigned int slave_side_id = slave_ip->which_side_am_i(msinfo.slave_elem);
 
     // libMesh::out << "slave mesh elem has interior parent " << slave_ip->id() << std::endl;
     // libMesh::out << "slave mesh elem is side " << slave_side_id << " of this parent." <<
@@ -241,7 +230,7 @@ RealMortarConstraint::computeResidual()
     {
       // Set the master interior parent and side ids.
       master_ip = msinfo.master_elem->interior_parent();
-      master_side_id = _amg.lower_elem_to_side_id.at(msinfo.master_elem);
+      master_side_id = master_ip->which_side_am_i(msinfo.master_elem);
 
       // Store the length of the edge element for use in stabilization terms.
       h_master = msinfo.master_elem->volume();
@@ -480,7 +469,7 @@ RealMortarConstraint::computeJacobian()
 
   // Get a constant reference to the Finite Element type
   // for the first (and only) variable in the system.
-  auto primal_var_number = _primal_var.number();
+  auto primal_var_number = _var.number();
   auto lambda_var_number = _lambda_var.number();
   FEType fe_type_primal = dof_map.variable_type(primal_var_number),
          fe_type_lambda = dof_map.variable_type(lambda_var_number);
@@ -535,8 +524,8 @@ RealMortarConstraint::computeJacobian()
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
-  libMesh::out << "About to loop over " << _amg.mortar_segment_mesh.n_elem()
-               << " mortar mesh segments." << std::endl;
+  // libMesh::out << "About to loop over " << _amg.mortar_segment_mesh.n_elem()
+  //              << " mortar mesh segments." << std::endl;
 
   for (MeshBase::const_element_iterator
            el = _amg.mortar_segment_mesh.active_local_elements_begin(),
@@ -596,7 +585,7 @@ RealMortarConstraint::computeJacobian()
     const Elem * slave_ip = msinfo.slave_elem->interior_parent();
 
     // Look up which side of the interior parent we are.
-    unsigned int slave_side_id = _amg.lower_elem_to_side_id.at(msinfo.slave_elem);
+    auto slave_side_id = slave_ip->which_side_am_i(msinfo.slave_elem);
 
     // libMesh::out << "slave mesh elem has interior parent " << slave_ip->id() << std::endl;
     // libMesh::out << "slave mesh elem is side " << slave_side_id << " of this parent." <<
@@ -637,7 +626,7 @@ RealMortarConstraint::computeJacobian()
     {
       // Set the master interior parent and side ids.
       master_ip = msinfo.master_elem->interior_parent();
-      master_side_id = _amg.lower_elem_to_side_id.at(msinfo.master_elem);
+      master_side_id = master_ip->which_side_am_i(msinfo.master_elem);
 
       // Store the length of the edge element for use in stabilization terms.
       h_master = msinfo.master_elem->volume();

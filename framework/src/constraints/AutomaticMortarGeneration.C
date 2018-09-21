@@ -469,7 +469,7 @@ AutomaticMortarGeneration::compute_nodal_normals()
     const Elem * interior_parent = slave_elem->interior_parent();
 
     // Look up which side of the interior parent slave_elem is.
-    unsigned int s = this->lower_elem_to_side_id.at(slave_elem);
+    unsigned int s = interior_parent->which_side_am_i(slave_elem);
 
     // libMesh::out << "In compute_nodal_normal(), found lower dimensional element "
     //              << slave_elem->id()
@@ -801,6 +801,222 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
   //     libMesh::out << "Key: Slave node id=" << key.first->id() << ", Slave elem id=" <<
   //     key.second->id() << std::endl; libMesh::out << "Val: xi^(2)=" << val.first << ", Master
   //     elem id=" << val.second->id() << std::endl;
+  //   }
+}
+
+// Inverse map master nodes onto their corresponding slave elements for each master/slave pair.
+void
+AutomaticMortarGeneration::project_master_nodes()
+{
+  // For each master/slave boundary id pair, call the
+  // project_master_nodes_single_pair() helper function.
+  for (const auto & pr : master_slave_boundary_id_pairs)
+    project_master_nodes_single_pair(pr.first + boundary_subdomain_id_offset,
+                                     pr.second + boundary_subdomain_id_offset);
+}
+
+void
+AutomaticMortarGeneration::project_master_nodes_single_pair(
+    subdomain_id_type lower_dimensional_master_subdomain_id,
+    subdomain_id_type lower_dimensional_slave_subdomain_id)
+{
+  // Build a Nanoflann object on the lower-dimensional slave elements of the Mesh.
+  NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(mesh, lower_dimensional_slave_subdomain_id);
+  subdomain_kd_tree_t kd_tree(
+      3, mesh_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(/*max leaf=*/10));
+
+  // Construct the KD tree for lower-dimensional elements in the volume mesh.
+  kd_tree.buildIndex();
+
+  for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
+                                        end_el = mesh.active_elements_end();
+       el != end_el;
+       ++el)
+  {
+    const Elem * master_side_elem = *el;
+
+    // If this is not one of the lower-dimensional master side elements, go on to the next one.
+    if (master_side_elem->subdomain_id() != lower_dimensional_master_subdomain_id)
+      continue;
+
+    // For each node on this side, find the nearest node on the master side using the KDTree, then
+    // search in nearby elements for where it projects along the nodal normal direction.
+    for (unsigned int n = 0; n < master_side_elem->n_nodes(); ++n)
+    {
+      // Get a pointer to this node.
+      const Node * master_node = master_side_elem->node_ptr(n);
+
+      // Get the nodal neighbors connected to this master node.
+      const std::vector<const Elem *> & master_node_neighbors =
+          this->nodes_to_master_elem_map.at(master_node->id());
+
+      // Check whether we have already successfully inverse mapped this master node and skip if so.
+      auto master_key = std::make_pair(master_node, master_node_neighbors[0]);
+      if (master_node_and_elem_to_xi1_slave_elem.count(master_key))
+        continue;
+
+      // Data structure for performing Nanoflann searches.
+      Real query_pt[3] = {(*master_node)(0), (*master_node)(1), (*master_node)(2)};
+
+      // The number of results we want to get.  We'll look for a
+      // "few" nearest nodes, hopefully that is enough to let us
+      // figure out which lower-dimensional Elem on the slave side
+      // we are across from.
+      const size_t num_results = 3;
+
+      // Initialize result_set and do the search.
+      std::vector<size_t> ret_index(num_results);
+      std::vector<Real> out_dist_sqr(num_results);
+      nanoflann::KNNResultSet<Real> result_set(num_results);
+      result_set.init(&ret_index[0], &out_dist_sqr[0]);
+      kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParams(10));
+
+      // If this flag gets set in the loop below, we can break out of the outer r-loop as well.
+      bool projection_succeeded = false;
+
+      // Once we've rejected a candidate for a given
+      // master_node, there's no reason to check it
+      // again.
+      std::set<const Elem *> rejected_slave_elem_candidates;
+
+      // Loop over the closest nodes, check whether the slave node successfully projects into
+      // either of the closest neighbors, stop when the projection succeeds.
+      for (unsigned r = 0; r < result_set.size(); ++r)
+      {
+        // Verify that the squared distance we compute is the same as nanoflann's
+        if (std::abs((mesh.point(ret_index[r]) - *master_node).norm_sq() - out_dist_sqr[r]) >
+            TOLERANCE)
+          libmesh_error_msg("Lower-dimensional element squared distance verification failed.");
+
+        // Get a reference to the vector of lower dimensional elements from the
+        // nodes_to_slave_elem_map.
+        const std::vector<const Elem *> & slave_elem_candidates =
+            this->nodes_to_slave_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
+
+        // Print the Elems connected to this node on the slave mesh side.
+        for (unsigned int e = 0; e < slave_elem_candidates.size(); ++e)
+        {
+          const Elem * slave_elem_candidate = slave_elem_candidates[e];
+
+          // If we've already rejected this candidate, we don't need to check it again.
+          if (rejected_slave_elem_candidates.count(slave_elem_candidate))
+            continue;
+
+          Point nodal_normal0 =
+                    this->slave_node_to_nodal_normal.at(slave_elem_candidate->node_ptr(0)),
+                nodal_normal1 =
+                    this->slave_node_to_nodal_normal.at(slave_elem_candidate->node_ptr(1));
+
+          // Node positions of the candidate slave Elem.
+          Point slave0 = slave_elem_candidate->point(0), slave1 = slave_elem_candidate->point(1);
+
+          // Use equation 2.4.6 from Bin Yang's dissertation to try and solve for
+          // the position on the slave element where this master came from.  This
+          // requires a Newton iteration in general.
+          Real xi1 = 0.; // initial guess
+
+          unsigned int current_iterate = 0, max_iterates = 10;
+
+          // Newton iteration loop - this to converge in 1 iteration when it
+          // succeeds, and possibly two iterations when it converges to a
+          // xi outside the reference element. I don't know any reason why it should
+          // only take 1 iteration -- the Jacobian is not constant in general...
+          do
+          {
+            // Compute x^(1) at the current value of xi.
+            Point x1 = 0.5 * (1 - xi1) * slave0 + 0.5 * (1 + xi1) * slave1;
+
+            // Compute u = x^(1) - (*master_node) and du at the current xi.
+            Point u = x1 - (*master_node);
+            Point du = -0.5 * slave0 + 0.5 * slave1;
+
+            // Compute v = the nodal normal and dv at the current xi.
+            Point v = 0.5 * (1 - xi1) * nodal_normal0 + 0.5 * (1 + xi1) * nodal_normal1;
+            Point dv = -0.5 * nodal_normal0 + 0.5 * nodal_normal1;
+
+            // Compute F(xi) the residual. If it's small enough, break out of the loop.
+            Real F = u(0) * v(1) - u(1) * v(0);
+
+            if (std::abs(F) < TOLERANCE)
+              break;
+
+            // Compute dF
+            Real dF = (u(0) * dv(1) + du(0) * v(1)) - (u(1) * dv(0) + du(1) * v(0));
+
+            // Compute Newton update
+            Real dxi1 = -F / dF;
+
+            // Update xi1
+            xi1 += dxi1;
+          } while (++current_iterate < max_iterates);
+
+          // Check for convergence to a valid solution...
+          if (std::abs(xi1) <= 1. + TOLERANCE)
+          {
+            // libMesh::out << "xi1 = " << xi1 << ", Projection successful!" << std::endl;
+            // Point on_slave_elem = slave0 * 0.5 * (1-xi1) + slave1 * 0.5 * (1+xi1);
+            // libMesh::out << "Point on slave Elem is: " << on_slave_elem << std::endl;
+            if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
+            {
+              // Special case: xi1=+/-1.
+              // We shouldn't get here, because this master node should already
+              // have been mapped during the project_slave_nodes() routine.
+              libmesh_error_msg("We should never get here, aligned master nodes should already "
+                                "have been mapped.");
+            }
+            else // somewhere in the middle of the Elem
+            {
+              // Add entry to master_node_and_elem_to_xi1_slave_elem
+              //
+              // Note: we originally duplicated the map values for the keys (node, left_neighbor)
+              // and (node, right_neighbor) but I don't think that should be necessary. Instead we
+              // just do it for neighbor 0, but really maybe we don't even need to do that since we
+              // can always look up the neighbors later given the Node... keeping it like this helps
+              // to maintain the "symmetry" of the two containers.
+              const Elem * neigh = master_node_neighbors[0];
+              for (unsigned int nid = 0; nid < neigh->n_nodes(); ++nid)
+              {
+                const Node * neigh_node = neigh->node_ptr(nid);
+                if (master_node == neigh_node)
+                {
+                  auto key = std::make_pair(neigh_node, neigh);
+                  auto val = std::make_pair(xi1, slave_elem_candidate);
+                  master_node_and_elem_to_xi1_slave_elem.insert(std::make_pair(key, val));
+                }
+              }
+            }
+
+            projection_succeeded = true;
+            break; // out of e-loop
+          }
+          else
+          {
+            // The current master_point is not in this Elem, so keep track of the rejects.
+            rejected_slave_elem_candidates.insert(slave_elem_candidate);
+          }
+        } // end e-loop over candidate elems
+
+        if (projection_succeeded)
+          break; // out of r-loop
+      }          // r-loop
+
+      if (!projection_succeeded)
+      {
+        libMesh::out << "Failed to find point from which master node "
+                     << static_cast<const Point &>(*master_node) << " was projected." << std::endl;
+      }
+    } // loop over side nodes
+  }   // end loop over elements for finding where master points would have projected from.
+
+  // Print new container entries
+  // for (const auto & pr : master_node_and_elem_to_xi1_slave_elem)
+  //   {
+  //     auto key = pr.first;
+  //     auto val = pr.second;
+  //
+  //     libMesh::out << "Key: Master node id=" << key.first->id() << ", master elem id=" <<
+  //     key.second->id() << std::endl; libMesh::out << "Val: xi^(1)=" << val.first << ", Slave elem
+  //     id=" << val.second->id() << std::endl;
   //   }
 }
 

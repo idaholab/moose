@@ -1,0 +1,92 @@
+[Mesh]
+  file = nodal_normals_test_offset_nonmatching_gap.e
+[]
+
+[MeshModifiers]
+  [./master]
+    type = LowerDBlockFromSideset
+    sidesets = '2'
+    new_block_id = '20'
+  [../]
+  [./slave]
+    type = LowerDBlockFromSideset
+    sidesets = '1'
+    new_block_id = '10'
+  [../]
+[]
+
+[Problem]
+  kernel_coverage_check = false
+[]
+
+[Variables]
+  [./T]
+    block = '1 2'
+  [../]
+  [./lambda]
+    block = '10'
+  [../]
+[]
+
+[BCs]
+  [./neumann]
+    type = FunctionGradientNeumannBC
+    exact_solution = exact_soln
+    variable = T
+    boundary = '3 4 5 6 7 8'
+  [../]
+[]
+
+[Kernels]
+  [./conduction]
+    type = Diffusion
+    variable = T
+    block = '1 2'
+  [../]
+  [./sink]
+    type = Reaction
+    variable = T
+    block = '1 2'
+  [../]
+  [./forcing_function]
+    type = BodyForce
+    variable = T
+    function = forcing_function
+    block = '1 2'
+  [../]
+[]
+
+[Functions]
+  [./forcing_function]
+    type = ParsedFunction
+    value = '-4 + x^2 + y^2'
+  [../]
+  [./exact_soln]
+    type = ParsedFunction
+    value = 'x^2 + y^2'
+  [../]
+[]
+
+[Constraints]
+  [./mortar]
+    type = RealMortarConstraint
+    master_boundary_id = 2
+    slave_boundary_id = 1
+    master_subdomain_id = 20
+    slave_subdomain_id = 10
+    variable = T
+    lm_variable = lambda
+  [../]
+[]
+
+[Executioner]
+  solve_type = NEWTON
+  type = Steady
+  petsc_options = '-snes_fd'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+[]
+
+[Outputs]
+  exodus = true
+[]
