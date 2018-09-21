@@ -872,6 +872,9 @@ class TestHarness:
         if opts.queue_cleanup and not opts.pbs:
             print('ERROR: --queue-cleanup can not be used without additional queue options')
             sys.exit(1)
+        if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
+            print('ERROR: pre-source supplied but path does not exist')
+            sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
         # We can not support running two spec files during one launch into a third party queue manager.
