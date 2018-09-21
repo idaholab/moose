@@ -38,6 +38,13 @@ protected:
 
   /// User specified nucleation time step
   const Real _dt_nucleation;
+
+  /**
+   * Maximum total event expectation value that is low enough so that the
+   * probability for more than one * nucleation event to occurr in a single
+   * timestep is below a user specified value
+   */
+  Real _max_lambda;
 };
 
 #endif // DISCRETENUCLEATIONTIMESTEP_H

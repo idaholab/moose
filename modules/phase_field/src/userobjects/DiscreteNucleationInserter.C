@@ -84,6 +84,9 @@ DiscreteNucleationInserter::initialize()
 
   // we reassemble this list at every timestep
   _global_nucleus_list.clear();
+
+  // clear total nucleation rate
+  _nucleation_rate = 0.0;
 }
 
 void
@@ -92,12 +95,17 @@ DiscreteNucleationInserter::execute()
   // check each qp for potential nucleation
   // TODO: we might as well place the nuclei at random positions within the element...
   for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    if (getRandomReal() < _probability[qp] * _JxW[qp] * _coord[qp] * _fe_problem.dt())
+  {
+    const Real rate = _probability[qp] * _JxW[qp] * _coord[qp];
+    _nucleation_rate += rate;
+
+    if (getRandomReal() < rate * _fe_problem.dt())
     {
       _local_nucleus_list.push_back(
           NucleusLocation(_fe_problem.dt() + _fe_problem.time() + _hold_time, _q_point[qp]));
       _changes_made++;
     }
+  }
 }
 
 void
@@ -108,6 +116,7 @@ DiscreteNucleationInserter::threadJoin(const UserObject & y)
   _global_nucleus_list.insert(
       _global_nucleus_list.end(), uo._local_nucleus_list.begin(), uo._local_nucleus_list.end());
   _changes_made += uo._changes_made;
+  _nucleation_rate += uo._nucleation_rate;
 }
 
 void
@@ -149,4 +158,7 @@ DiscreteNucleationInserter::finalize()
 
   // get the global number of changes (i.e. changes to _global_nucleus_list)
   gatherSum(_changes_made);
+
+  // gather the total nucleation rate
+  gatherSum(_nucleation_rate);
 }

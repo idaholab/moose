@@ -41,6 +41,7 @@ public:
 
   const NucleusList & getNucleusList() const { return _global_nucleus_list; }
   bool isMapUpdateRequired() const { return _changes_made > 0; }
+  Real getRate() const { return _nucleation_rate; }
 
 protected:
   /// Nucleation rate density (should be a material property implementing nucleation theory)
@@ -60,6 +61,9 @@ protected:
 
   /// insert test location
   bool _insert_test;
+
+  /// total nucleation rate
+  Real _nucleation_rate;
 };
 
 #endif // DISCRETENUCLEATIONINSERTER_H

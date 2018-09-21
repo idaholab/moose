@@ -42,7 +42,8 @@ protected:
   enum class ValueType
   {
     COUNT,
-    UPDATE
+    UPDATE,
+    RATE
   } _value_type;
 };
 
