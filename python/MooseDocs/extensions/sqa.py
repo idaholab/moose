@@ -63,6 +63,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(SQADocumentItemCommand())
         self.addCommand(SQACrossReferenceCommand())
         self.addCommand(SQARequirementsMatrixCommand())
+        self.addCommand(SQAVerificationCommand())
 
         renderer.add(SQATemplateItem, RenderSQATemplateItem())
         renderer.add(SQARequirementMatrix, RenderSQARequirementMatrix())
@@ -78,9 +79,15 @@ class SQATemplateItem(tokens.Token):
 class SQARequirementMatrix(tokens.OrderedList):
     PROPERTIES = [tokens.Property('heading', ptype=tokens.Token)]
 
+class SQAVandVMatrix(SQARequirementMatrix):
+    pass
+
 class SQARequirementMatrixItem(tokens.ListItem):
     PROPERTIES = [tokens.Property('label', ptype=unicode, required=True),
                   tokens.Property('satisfied', ptype=bool, default=True)]
+
+class SQAVandVMatrixItem(SQARequirementMatrixItem):
+    pass
 
 class SQARequirementCrossReference(tokens.Token):
     pass
@@ -160,7 +167,6 @@ class SQARequirementsCommand(command.CommandComponent):
                 p = tokens.Paragraph(item, 'p')
                 tokens.String(p, content=u'Prerequisites: {}'.format(' '.join(labels)))
 
-
 class SQACrossReferenceCommand(SQARequirementsCommand):
     COMMAND = 'sqa'
     SUBCOMMAND = 'cross-reference'
@@ -229,7 +235,6 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
                 child.parent = matrix_item
 
         return parent
-
 
 class SQATemplateLoadCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -311,6 +316,47 @@ class SQADocumentItemCommand(command.CommandComponent):
 
     def createToken(self, info, parent):
         return SQADocumentItem(parent, key=self.settings['key'])
+
+class SQAVerificationCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = ('verification', 'validation')
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        return config
+
+    def createToken(self, info, parent):
+
+        matrix = SQARequirementMatrix(parent)
+        for requirements in self.extension.requirements.itervalues():
+            for req in requirements:
+                if getattr(req, info['subcommand']):
+                    self._addRequirement(matrix, req)
+
+        return parent
+
+    def _addRequirement(self, parent, req):
+        item = SQARequirementMatrixItem(parent,
+                                        label=unicode(req.label),
+                                        satisfied=req.satisfied,
+                                        id_=req.path)
+        self.translator.reader.parse(item, req.text)
+
+        p = tokens.Paragraph(item, 'p')
+        tokens.String(p, content=u'Specification: ')
+
+        with codecs.open(req.filename, encoding='utf-8') as fid:
+            content = fid.read()
+            floats.ModalLink(p, 'a', tooltip=False, url=u"#",
+                             string=u"{}:{}".format(req.path, req.name),
+                             title=tokens.String(None, content=unicode(req.filename)),
+                             content=tokens.Code(None, language=u'text', code=content))
+
+        p = tokens.Paragraph(item, 'p')
+        tokens.String(p, content=u'Details: ')
+        filename = u'{}/{}.md'.format(req.path, req.name)
+        autolink.AutoShortcutLink(p, key=unicode(filename))
 
 class RenderSQATemplateItem(components.RenderComponent):
 

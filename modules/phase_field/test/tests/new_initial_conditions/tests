@@ -1,0 +1,11 @@
+[Tests]
+  [./SmoothCircleIC_tanh]
+    type = Exodiff
+    input = 'SmoothCircleIC_tanh.i'
+    exodiff = 'SmoothCircleIC_tanh_out.e'
+    scale_refine = 1
+    requirement = 'A smooth circle initial condition with a hyperbolic tangent profile shall be provided'
+    design = 'ics/SmoothCircleIC.md'
+    issues = '#12143'
+  [../]
+[]

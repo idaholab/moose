@@ -91,7 +91,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         # to do a few things with the core chigger objects.
         self._window = None   # RenderWindow (from VTKWindowPlugin)
         self._result = None   # ExodusResult (from VTKWindowPlugin)
-        self._colorbar = None # ExodusColorbar (created by this plugin)
+        self._colorbar = None # Colorbar (created by this plugin)
 
         # Call widget setup methods
         self.setup()
@@ -160,6 +160,13 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         self._window = None
         self._result = None
+
+    def onColorbarOptionsChanged(self, options):
+        """
+        Attached to BackgroundPlugin.
+        """
+        if self._colorbar is not None:
+            self._colorbar.setOptions(**options)
 
     def updateOptions(self):
         """

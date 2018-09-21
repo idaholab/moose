@@ -19,6 +19,10 @@ Extensions:
     disable_defaults: True
     core:
         type: MooseDocs.extensions.core
+    float:
+        type: MooseDocs.extensions.floats
+    autolink:
+        type: MooseDocs.extensions.autolink
 
 Translator:
     type: MooseDocs.base.Translator

@@ -220,6 +220,9 @@ class Translator(mixins.ConfigObject):
         common.check_type('num_threads', num_threads, int)
         self.__assertInitialize()
 
+        self.renderer.preExecute()
+
+
         # Log start message and time
         LOG.info("Building Pages...")
         start = time.time()
@@ -264,8 +267,10 @@ class Translator(mixins.ConfigObject):
             iname = os.path.join(self.get('destination'), 'js', 'search_index.js')
             if not os.path.isdir(os.path.dirname(iname)):
                 os.makedirs(os.path.dirname(iname))
-                items = [v for v in array if v]
-                common.write(iname, 'var index_data = {};'.format(json.dumps(items)))
+            items = [v for v in array if v]
+            common.write(iname, 'var index_data = {};'.format(json.dumps(items)))
+
+        self.renderer.postExecute()
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""

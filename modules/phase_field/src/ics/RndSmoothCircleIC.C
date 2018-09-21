@@ -32,6 +32,8 @@ RndSmoothCircleIC::RndSmoothCircleIC(const InputParameters & parameters)
     _variation_invalue(parameters.get<Real>("variation_invalue")),
     _variation_outvalue(parameters.get<Real>("variation_outvalue"))
 {
+  if (_profile == ProfileType::TANH)
+    paramError("profile", "Hyperbolic tangent profile is not supported for this IC");
 }
 
 Real

@@ -1594,12 +1594,6 @@ SolidModel::createConstitutiveModel(const std::string & cm_name)
 
   Factory & factory = _app.getFactory();
   InputParameters params = factory.getValidParams(cm_name);
-  // These set_attributes calls are to make isParamSetByUser() work correctly on
-  // these parameters in the ConstitutiveModel class, and are needed only for the
-  // legacy_return_mapping option.
-  params.set_attributes("absolute_tolerance", false);
-  params.set_attributes("relative_tolerance", false);
-  params.set_attributes("max_its", false);
 
   params += parameters();
   MooseSharedPointer<ConstitutiveModel> cm =

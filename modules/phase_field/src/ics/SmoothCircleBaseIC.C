@@ -8,10 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SmoothCircleBaseIC.h"
-
-// MOOSE includes
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+
+#include "libmesh/utility.h"
 
 template <>
 InputParameters
@@ -29,6 +29,9 @@ validParams<SmoothCircleBaseIC>()
                         "numerical problems with higher order shape "
                         "functions and overlapping circles.");
   params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
+  MooseEnum profileType("COS TANH", "COS");
+  params.addParam<MooseEnum>(
+      "profile", profileType, "Functional dependence for the interface profile");
   return params;
 }
 
@@ -40,9 +43,14 @@ SmoothCircleBaseIC::SmoothCircleBaseIC(const InputParameters & parameters)
     _int_width(parameters.get<Real>("int_width")),
     _3D_spheres(parameters.get<bool>("3D_spheres")),
     _zero_gradient(parameters.get<bool>("zero_gradient")),
-    _num_dim(_3D_spheres ? 3 : 2)
+    _num_dim(_3D_spheres ? 3 : 2),
+    _profile(getParam<MooseEnum>("profile").getEnum<ProfileType>())
 {
   _random.seed(_tid, getParam<unsigned int>("rand_seed"));
+
+  if (_int_width <= 0.0 && _profile == ProfileType::TANH)
+    paramError("int_width",
+               "Interface width has to be strictly positive for the hyperbolic tangent profile");
 }
 
 void
@@ -111,18 +119,31 @@ SmoothCircleBaseIC::computeCircleValue(const Point & p, const Point & center, co
   // Compute the distance between the current point and the center
   Real dist = _mesh.minPeriodicDistance(_var.number(), l_p, l_center);
 
-  // Return value
-  Real value = _outvalue; // Outside circle
-
-  if (dist <= radius - _int_width / 2.0) // Inside circle
-    value = _invalue;
-  else if (dist < radius + _int_width / 2.0) // Smooth interface
+  switch (_profile)
   {
-    Real int_pos = (dist - radius + _int_width / 2.0) / _int_width;
-    value = _outvalue + (_invalue - _outvalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
-  }
+    case ProfileType::COS:
+    {
+      // Return value
+      Real value = _outvalue; // Outside circle
 
-  return value;
+      if (dist <= radius - _int_width / 2.0) // Inside circle
+        value = _invalue;
+      else if (dist < radius + _int_width / 2.0) // Smooth interface
+      {
+        Real int_pos = (dist - radius + _int_width / 2.0) / _int_width;
+        value = _outvalue + (_invalue - _outvalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+      }
+      return value;
+    }
+
+    case ProfileType::TANH:
+      return (_invalue - _outvalue) * 0.5 *
+                 (std::tanh(libMesh::pi * (radius - dist) / _int_width) + 1.0) +
+             _outvalue;
+
+    default:
+      mooseError("Internal error.");
+  }
 }
 
 RealGradient
@@ -140,19 +161,31 @@ SmoothCircleBaseIC::computeCircleGradient(const Point & p,
   // Compute the distance between the current point and the center
   Real dist = _mesh.minPeriodicDistance(_var.number(), l_p, l_center);
 
-  Real DvalueDr = 0.0;
+  // early return if we are probing the center of the circle
+  if (dist == 0.0)
+    return 0.0;
 
-  if (dist < radius + _int_width / 2.0 && dist > radius - _int_width / 2.0)
+  Real DvalueDr = 0.0;
+  switch (_profile)
   {
-    Real int_pos = (dist - radius + _int_width / 2.0) / _int_width;
-    Real Dint_posDr = 1.0 / _int_width;
-    DvalueDr = Dint_posDr * (_invalue - _outvalue) *
-               (-std::sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
+    case ProfileType::COS:
+      if (dist < radius + _int_width / 2.0 && dist > radius - _int_width / 2.0)
+      {
+        const Real int_pos = (dist - radius + _int_width / 2.0) / _int_width;
+        const Real Dint_posDr = 1.0 / _int_width;
+        DvalueDr = Dint_posDr * (_invalue - _outvalue) *
+                   (-std::sin(int_pos * libMesh::pi) * libMesh::pi) / 2.0;
+      }
+      break;
+
+    case ProfileType::TANH:
+      DvalueDr = -(_invalue - _outvalue) * 0.5 / _int_width * libMesh::pi *
+                 (1.0 - Utility::pow<2>(std::tanh(4.0 * (radius - dist) / _int_width)));
+      break;
+
+    default:
+      mooseError("Internal error.");
   }
 
-  // Set gradient over the smooth interface
-  if (dist != 0.0)
-    return _mesh.minPeriodicVector(_var.number(), center, p) * (DvalueDr / dist);
-  else
-    return 0.0;
+  return _mesh.minPeriodicVector(_var.number(), center, p) * (DvalueDr / dist);
 }

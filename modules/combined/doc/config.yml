@@ -21,7 +21,7 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE
     repo: https://github.com/idaholab/moose
-    home: https://www.mooseframework.org/moose
+    home: https://www.mooseframework.org
     navigation: !include modules/combined/doc/navigation.yml
     google_analytics: True
 
