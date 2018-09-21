@@ -25,7 +25,7 @@ The purpose of these lists is two fold:
 
 ## Idaho National Laboratory Applications
 
-Please contact the [MOOSE-users](contact_us.md) email list if you are interested in using one of these applications.
+Please contact the [MOOSE-users](help/contact_us.md) email list if you are interested in using one of these applications.
 
 - MARMOT - Nuclear materials phase field and mechanics application
 - RATTLESNAKE - FEM Diffusion, SN, and PN code
@@ -39,6 +39,6 @@ Please contact the [MOOSE-users](contact_us.md) email list if you are interested
 
 ## Private Apps
 
-- [HOGNOSE-Dev](https://github.com/shortlab/hognose-dev) - Development (private) repo for HOGNOSE 
+- [HOGNOSE-Dev](https://github.com/shortlab/hognose-dev) - Development (private) repo for HOGNOSE
 - [MAMBA-Dev](https://github.com/shortlab/mamba-dev) - Development (private) repo for MAMBA
 - [GRIME-Dev](https://github.com/shortlab/grime-dev) - Development (private) repo for GRIME
