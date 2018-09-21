@@ -35,6 +35,14 @@
     allowed_darwin = 0.96
   [../]
 
+  [./legend_viewport]
+    type = ImageDiff
+    command = legend_viewport.py
+    imagediff = 'legend_viewport.png'
+    allowed_linux = 0.94
+    allowed_darwin = 0.96
+  [../]
+
   [./update]
     type = ImageDiff
     command = update.py

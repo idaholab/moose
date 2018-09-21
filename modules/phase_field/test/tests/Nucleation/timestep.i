@@ -71,6 +71,7 @@
   [./dtnuc]
     type = DiscreteNucleationTimeStep
     inserter = inserter
+    p2nucleus = 0.1
     dt_max = 0.5
   [../]
 []
