@@ -98,7 +98,14 @@ DiscreteNucleationInserter::execute()
     const Real rate = _probability[qp] * _JxW[qp] * _coord[qp];
     _nucleation_rate += rate;
 
-    if (getRandomReal() < rate * _fe_problem.dt())
+    const Real random = getRandomReal();
+
+    // We check the random number against the inverse of the zero probability.
+    // for performance reasons we do a quick check against the linearized form of
+    // that probability, which is always strictly larger than the actual probability.
+    // The expression below should short circuit and the expensive exponential
+    // should rarely get evaluated
+    if (random < rate * _fe_problem.dt() && random < (1.0 - std::exp(-rate * _fe_problem.dt())))
     {
       _local_nucleus_list.push_back(
           NucleusLocation(_fe_problem.dt() + _fe_problem.time() + _hold_time, _q_point[qp]));
