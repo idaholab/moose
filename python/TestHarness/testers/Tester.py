@@ -41,7 +41,8 @@ class Tester(MooseObject):
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
         params.addParam('tags',      [], "A list of strings")
-        params.addParam('max_buffer_size', None, "Bytes allowed in stdout/stderr before it is subjected to being trimmed. Set to -1 to ignore output size restrictions")
+        params.addParam('max_buffer_size', None, "Bytes allowed in stdout/stderr before it is subjected to being trimmed. Set to -1 to ignore output size restrictions. "
+                                                 "If 'max_buffer_size' is not set, the default value of 'None' triggers a reasonable value (e.g. 100 kB)")
 
         # Test Filters
         params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
