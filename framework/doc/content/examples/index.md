@@ -32,7 +32,7 @@
 
 [Example 17 : Adding a Dirac Kernel](examples/ex17_dirac.md)
 
-[Example 18 : ODE Coupling](examples/ex17_dirac.md)
+[Example 18 : ODE Coupling](examples/ex18_scalar_kernel.md)
 
 [Example 19 : Newton Damping](examples/ex19_dampers.md)
 
