@@ -20,7 +20,7 @@ camera.SetFocalPoint(250.0000, 250.0000, 0.0000)
 
 reader = chigger.exodus.ExodusReader('refine_out.e', timestep=0)
 result = chigger.exodus.ExodusResult(reader, variable='c', viewport=[0,0,0.5,1], opacity=1,
-                                     range=[0, 1], camera=camera)
+                                     edges=True, edge_color=[1,1,1], range=[0, 1], camera=camera)
 cbar = chigger.exodus.ExodusColorBar(result, font_size=18)
 result.update()
 

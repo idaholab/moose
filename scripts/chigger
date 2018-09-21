@@ -37,11 +37,7 @@ def command_line_options():
     movie_parser.add_argument('--output', '-o', type=str,
                               help="The output filename, including the extension.")
 
-    if sys.platform == 'darwin':
-        ffmpeg = os.path.join(os.environ['HOME'], 'ffmpeg')
-    else:
-        ffmpeg = '/usr/bin/ffmpeg'
-    movie_parser.add_argument('--ffmpeg', type=str, default=ffmpeg,
+    movie_parser.add_argument('--ffmpeg', type=str, default='ffmpeg',
                               help="The ffmpeg executable to utilized (default: %(default)s).")
     movie_parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(),
                               help="The number of threads to utilize for conversion "
