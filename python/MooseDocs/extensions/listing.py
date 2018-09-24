@@ -124,9 +124,10 @@ class FileListingCommand(LocalListingCommand):
 
         # Add bottom modal
         if self.settings['link']:
+            rel_filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
             code = tokens.Code(None, language=lang, code=common.read(filename))
-            floats.ModalLink(flt, url=unicode(filename), bottom=True, content=code,
-                             string=u'({})'.format(os.path.relpath(filename, MooseDocs.ROOT_DIR)),
+            floats.ModalLink(flt, url=unicode(rel_filename), bottom=True, content=code,
+                             string=u'({})'.format(rel_filename),
                              title=tokens.String(None, content=unicode(filename)))
 
         return parent

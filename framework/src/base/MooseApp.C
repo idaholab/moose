@@ -737,7 +737,7 @@ MooseApp::setupOptions()
   else if (getParam<bool>("apptype"))
   {
     Moose::perf_log.disable_logging();
-    Moose::out << type() << std::endl;
+    Moose::out << "MooseApp Type: " << type() << std::endl;
     _ready_to_exit = true;
   }
   else
