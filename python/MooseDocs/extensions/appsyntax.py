@@ -2,6 +2,7 @@
 import os
 import collections
 import logging
+import re
 
 import anytree
 
@@ -93,7 +94,14 @@ class AppSyntaxExtension(command.CommandExtension):
                                                   hide=self['hide'],
                                                   allow_test_objects=self['allow-test-objects'])
 
-                    self._app_type = mooseutils.runExe(exe, ['--type']).strip(' \n')
+                    out = mooseutils.runExe(exe, ['--type'])
+                    match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
+                    if match:
+                        self._app_type = match.group("type")
+                    else:
+                        msg = "Failed to determine application type by running the following:\n"
+                        msg += "    {} --type".format(exe)
+                        LOG.error(msg)
 
                 except Exception as e: #pylint: disable=broad-except
                     msg = "Failed to load application executable from '%s', " \
