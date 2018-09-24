@@ -28,6 +28,7 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
   master_slave_boundary_id_pairs.push_back(boundary_key);
   master_requested_boundary_ids.insert(boundary_key.first);
   slave_requested_boundary_ids.insert(boundary_key.second);
+  master_slave_subdomain_id_pairs.push_back(subdomain_key);
   master_boundary_subdomain_ids.insert(subdomain_key.first);
   slave_boundary_subdomain_ids.insert(subdomain_key.second);
 }
@@ -539,9 +540,8 @@ AutomaticMortarGeneration::project_slave_nodes()
 {
   // For each master/slave boundary id pair, call the
   // project_slave_nodes_single_pair() helper function.
-  for (const auto & pr : master_slave_boundary_id_pairs)
-    project_slave_nodes_single_pair(pr.first + boundary_subdomain_id_offset,
-                                    pr.second + boundary_subdomain_id_offset);
+  for (const auto & pr : master_slave_subdomain_id_pairs)
+    project_slave_nodes_single_pair(pr.first, pr.second);
 }
 
 void
@@ -810,9 +810,8 @@ AutomaticMortarGeneration::project_master_nodes()
 {
   // For each master/slave boundary id pair, call the
   // project_master_nodes_single_pair() helper function.
-  for (const auto & pr : master_slave_boundary_id_pairs)
-    project_master_nodes_single_pair(pr.first + boundary_subdomain_id_offset,
-                                     pr.second + boundary_subdomain_id_offset);
+  for (const auto & pr : master_slave_subdomain_id_pairs)
+    project_master_nodes_single_pair(pr.first, pr.second);
 }
 
 void

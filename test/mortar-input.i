@@ -79,12 +79,18 @@
   [../]
 []
 
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options = '-snes_fd'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type -snes_linesearch_type'
+  petsc_options_value = 'lu       basic'
 []
 
 [Outputs]

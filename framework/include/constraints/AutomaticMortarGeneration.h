@@ -192,6 +192,10 @@ public:
   // are offset from their respective interior parent's subdomain ids.
   const subdomain_id_type boundary_subdomain_id_offset = 1000;
 
+  // A list of master/slave subdomain id pairs corresponding to each
+  // side of the mortar interface.
+  std::vector<std::pair<subdomain_id_type, subdomain_id_type>> master_slave_subdomain_id_pairs;
+
   // The slave/master lower-dimensional boundary subdomain ids are the
   // slave/master *boundary* ids offset by the value above.
   std::set<subdomain_id_type> slave_boundary_subdomain_ids;

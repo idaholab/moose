@@ -650,8 +650,8 @@ RealMortarConstraint::computeJacobian()
 
     K_primal_slave_lambda_slave.resize(dof_indices_interior_slave_primal.size(),
                                        dof_indices_slave_lambda.size());
-    K_primal_master_lambda_slave(dof_indices_interior_master_primal.size(),
-                                 dof_indices_slave_lambda.size());
+    K_primal_master_lambda_slave.resize(dof_indices_interior_master_primal.size(),
+                                        dof_indices_slave_lambda.size());
 
     K_lambda_slave_lambda_slave.resize(dof_indices_slave_lambda.size(),
                                        dof_indices_slave_lambda.size());
