@@ -42,7 +42,10 @@ protected:
   enum class ValueType
   {
     COUNT,
-    UPDATE
+    UPDATE,
+    RATE,
+    INSERTIONS,
+    DELETIONS
   } _value_type;
 };
 

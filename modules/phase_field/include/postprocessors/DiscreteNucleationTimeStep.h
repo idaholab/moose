@@ -11,16 +11,17 @@
 #define DISCRETENUCLEATIONTIMESTEP_H
 
 #include "GeneralPostprocessor.h"
+#include "DiscreteNucleationInserter.h"
 
 class DiscreteNucleationTimeStep;
-class DiscreteNucleationInserter;
 
 template <>
 InputParameters validParams<DiscreteNucleationTimeStep>();
 
 /**
  * Returns a user defined timestep limit for the simulation step right after the
- * introduction of a new nucleus.
+ * introduction of a new nucleus and between nucleation events to control the probability
+ * of two or more nuclei appearing in one timestep.
  */
 class DiscreteNucleationTimeStep : public GeneralPostprocessor
 {
@@ -38,6 +39,19 @@ protected:
 
   /// User specified nucleation time step
   const Real _dt_nucleation;
+
+  /// nucleus count changes performed by the inserter
+  const DiscreteNucleationInserter::NucleusChanges & _changes_made;
+
+  /// total nucleation rate integrated over teh entire domain
+  const Real & _rate;
+
+  /**
+   * Maximum total event expectation value that is low enough so that the
+   * probability for more than one * nucleation event to occurr in a single
+   * timestep is below a user specified value
+   */
+  Real _max_lambda;
 };
 
 #endif // DISCRETENUCLEATIONTIMESTEP_H

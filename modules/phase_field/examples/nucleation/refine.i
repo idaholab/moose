@@ -61,7 +61,7 @@
     type = ParsedMaterial
     f_name = P
     args = c
-    function = c*5e-8
+    function = 'if(c<0.21,c*1e-8,0)'
     outputs = exodus
   [../]
   [./nucleation]
@@ -128,6 +128,27 @@
   [./ndof]
     type = NumDOFs
   [../]
+  [./rate]
+    type = DiscreteNucleationData
+    value = RATE
+    inserter = inserter
+  [../]
+  [./dtnuc]
+    type = DiscreteNucleationTimeStep
+    inserter = inserter
+    p2nucleus = 0.0005
+    dt_max = 10
+  [../]
+  [./update]
+    type = DiscreteNucleationData
+    value = UPDATE
+    inserter = inserter
+  [../]
+  [./count]
+    type = DiscreteNucleationData
+    value = COUNT
+    inserter = inserter
+  [../]
 []
 
 [Adaptivity]
@@ -171,19 +192,21 @@
   nl_rel_tol = 1.0e-10
   nl_abs_tol = 1.0e-10
   start_time = 0.0
-  num_steps = 1200
+  num_steps = 120
 
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 10
     growth_factor = 1.5
     cutback_factor = 0.5
-    optimal_iterations = 6
+    optimal_iterations = 8
     iteration_window = 2
+    postprocessor_dtlim = dtnuc
   [../]
 []
 
 [Outputs]
   exodus = true
+  csv = true
   print_linear_residuals = false
 []

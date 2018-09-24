@@ -18,11 +18,13 @@ validParams<DiscreteNucleationData>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addClassDescription("Output diagnostic data on a DiscreteNucleationInserter");
   params.addRequiredParam<UserObjectName>("inserter", "DiscreteNucleationInserter user object");
-  MooseEnum valueType("COUNT UPDATE", "COUNT");
-  params.addRequiredParam<MooseEnum>(
-      "value",
-      valueType,
-      "Select to output number of active nuclei or wether a change to the nucleus list occurred");
+  MooseEnum valueType("COUNT UPDATE RATE INSERTIONS DELETIONS", "COUNT");
+  params.addRequiredParam<MooseEnum>("value",
+                                     valueType,
+                                     "Select to output number of active nuclei, wether a change to "
+                                     "the nucleus list occurred, the total rate over the entire "
+                                     "domain, and numbers of insertions and deletions applied to "
+                                     "the nucleus list.");
   return params;
 }
 
@@ -44,6 +46,15 @@ DiscreteNucleationData::getValue()
 
     case ValueType::UPDATE:
       return _inserter.isMapUpdateRequired();
+
+    case ValueType::RATE:
+      return _inserter.getRate();
+
+    case ValueType::INSERTIONS:
+      return _inserter.getInsertionsAndDeletions().first;
+
+    case ValueType::DELETIONS:
+      return _inserter.getInsertionsAndDeletions().second;
 
     default:
       mooseError("Invalid value type");

@@ -42,7 +42,7 @@ class TestChiggerCommandUtility(unittest.TestCase):
         pattern = os.path.join('..', 'field_data', 'gold', 'plot_current_*.png')
         out = self.execute('img2mov', pattern, '-o', 'output.mov', '--dry-run', '-j', '4', '--duration', '30')
         gold = 'ffmpeg -pattern_type glob -framerate 0 -i ../field_data/gold/plot_current_*.png ' \
-               '-c:v mpeg2video -b:v 10M -pix_fmt yuv420p -q:v 1 -threads 4 -framerate 0 output.mov'
+               '-b:v 10M -pix_fmt yuv420p -q:v 1 -threads 4 -framerate 0 output.mov'
         self.assertIn(gold, out)
 
 if __name__ == '__main__':
