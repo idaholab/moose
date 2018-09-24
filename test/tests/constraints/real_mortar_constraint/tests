@@ -1,0 +1,7 @@
+[Tests]
+  [./real_mortar_gap_conductance]
+    type = Exodiff
+    input = 'mortar-input.i'
+    exodiff = 'mortar-input_out.e'
+  [../]
+[]
