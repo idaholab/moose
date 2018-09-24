@@ -51,6 +51,12 @@ public:
                   const std::string & separator = std::string("/"));
 
   /**
+   * This class requires a virtual (but default) desctructor since it
+   * has virtual functions.
+   */
+  virtual ~MooseObjectName() = default;
+
+  /**
    * Build an object given a raw parameter name (e.g., from an input file parameter)
    */
   MooseObjectName(std::string name);
