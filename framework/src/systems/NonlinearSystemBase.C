@@ -453,6 +453,11 @@ NonlinearSystemBase::addDGKernel(std::string dg_kernel_name,
   }
 
   _doing_dg = true;
+
+  if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
+    _has_save_in = true;
+  if (parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
+    _has_diag_save_in = true;
 }
 
 void
