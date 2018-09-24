@@ -33,7 +33,7 @@ class ControllableItem
 {
 public:
   ControllableItem(const MooseObjectParameterName & name, libMesh::Parameters::Value * value);
-  ~ControllableItem() = default;
+  virtual ~ControllableItem() = default;
 
   ControllableItem(const ControllableItem &) = default;
   ControllableItem(ControllableItem &&) = default;
