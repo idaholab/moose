@@ -31,7 +31,7 @@ validParams<RealMortarConstraint>()
   params.addRequiredParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
   params.addRequiredParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
   params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
-  // params.registerRelationshipManagers("AugmentSparsityOnInterface");
+  params.registerRelationshipManagers("AugmentSparsityOnInterface");
   params.addRequiredParam<NonlinearVariableName>("lm_variable", "The lagrange multiplier variable");
   return params;
 }
@@ -128,9 +128,6 @@ RealMortarConstraint::computeResidual()
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
-  // libMesh::out << "About to loop over " << _amg.mortar_segment_mesh.n_elem()
-  //              << " mortar mesh segments." << std::endl;
-
   for (MeshBase::const_element_iterator
            el = _amg.mortar_segment_mesh.active_local_elements_begin(),
            end_el = _amg.mortar_segment_mesh.active_local_elements_end();
@@ -149,11 +146,6 @@ RealMortarConstraint::computeResidual()
     // Jacobian error.
     Real elem_volume = msm_elem->volume();
 
-    // libMesh::out << "Computing element integral contributions for mortar segment mesh Elem " <<
-    // msm_elem->id()
-    //              << " which has length " << elem_volume
-    //              << std::endl;
-
     if (elem_volume < TOLERANCE)
       continue;
 
@@ -163,27 +155,8 @@ RealMortarConstraint::computeResidual()
     // There may be no contribution from the master side if it is not "in contact".
     bool has_slave = msinfo.slave_elem ? true : false, has_master = msinfo.has_master();
 
-    // Print the slave and master (if available) elements associated
-    // with this mortar segment. Note: these are lower-dimensional
-    // elements from the *surface* meshes, they will not have the
-    // DOFs that we actually need on them.
-    if (has_slave)
-    {
-      // libMesh::out << "Mortar segment is associated with slave mesh Elem " <<
-      // msinfo.slave_elem->id() << std::endl; libMesh::out << "xi^(1) = [" << msinfo.xi1_a << ", "
-      // << msinfo.xi1_b << "]" << std::endl;
-    }
-    else
+    if (!has_slave)
       libmesh_error_msg("Error, mortar segment has no slave element associated with it!");
-
-    // if (has_master)
-    //   {
-    //     libMesh::out << "Mortar segment is associated with master mesh Elem " <<
-    //     msinfo.master_elem->id() << std::endl; libMesh::out << "xi^(2) = [" << msinfo.xi2_a << ",
-    //     " << msinfo.xi2_b << "]" << std::endl;
-    //   }
-
-    // Need to figure out which Elems that have system DOFs these correspond to.
 
     // Pointer to the interior parent.
     const Elem * slave_ip = msinfo.slave_elem->interior_parent();
@@ -191,35 +164,15 @@ RealMortarConstraint::computeResidual()
     // Look up which side of the interior parent we are.
     unsigned int slave_side_id = slave_ip->which_side_am_i(msinfo.slave_elem);
 
-    // libMesh::out << "slave mesh elem has interior parent " << slave_ip->id() << std::endl;
-    // libMesh::out << "slave mesh elem is side " << slave_side_id << " of this parent." <<
-    // std::endl;
-
     // The lower-dimensional slave side element associated with this
     // mortar segment is simply msinfo.slave_elem.
     const Elem * slave_face_elem = msinfo.slave_elem;
-
-    // Print the lower-dimensional element id. We can now ask for DOFs specifically for this
-    // element. libMesh::out << "Lower-dimensional element id: " << slave_face_elem->id() <<
-    // std::endl;
 
     // Get the temperature and lambda dof indices for the slave element side.
     dof_map.dof_indices(slave_face_elem, dof_indices_slave_lambda, lambda_var_number);
 
     // Get temperature dof indices associated with the interior slave Elem.
     dof_map.dof_indices(slave_ip, dof_indices_interior_slave_primal, primal_var_number);
-
-    // Print the degree of freedom indices for the lambda variable on this lower-dimensional
-    // element. libMesh::out << "lambda DOFs for the lower-dimensional slave element: "; for
-    // (dof_id_type i=0; i<dof_indices_slave_lambda.size(); ++i)
-    //   libMesh::out << dof_indices_slave_lambda[i] << " ";
-    // libMesh::out << std::endl;
-
-    // Print the degree of freedom indices for the T variable on the slave interior element.
-    // libMesh::out << "T DOFs for the slave interior element: ";
-    // for (dof_id_type i=0; i<dof_indices_interior_slave_primal.size(); ++i)
-    //   libMesh::out << dof_indices_interior_slave_primal[i] << " ";
-    // libMesh::out << std::endl;
 
     // These only get initialized if there is a master Elem associated to this segment.
     const Elem * master_ip = libmesh_nullptr;
@@ -235,18 +188,8 @@ RealMortarConstraint::computeResidual()
       // Store the length of the edge element for use in stabilization terms.
       h_master = msinfo.master_elem->volume();
 
-      // libMesh::out << "master mesh elem has interior parent " << master_ip->id() << std::endl;
-      // libMesh::out << "master mesh elem is side " << master_side_id << " of this parent." <<
-      // std::endl;
-
       // Get temperature dof indices associated with the interior master Elem.
       dof_map.dof_indices(master_ip, dof_indices_interior_master_primal, primal_var_number);
-
-      // Print the degree of freedom indices for the T variable on the slave interior element.
-      // libMesh::out << "T DOFs for the master interior element: ";
-      // for (dof_id_type i=0; i<dof_indices_interior_master_primal.size(); ++i)
-      //   libMesh::out << dof_indices_interior_master_primal[i] << " ";
-      // libMesh::out << std::endl;
     }
 
     // Re-compute FE data on the mortar segment Elem (JxW_msm is the only thing we actually use.)
@@ -262,15 +205,13 @@ RealMortarConstraint::computeResidual()
 
     {
       custom_xi1_pts.resize(qrule_msm.n_points());
-      // libMesh::out << "xi^(1) points: ";
+
       for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
       {
         Real eta = qrule_msm.qp(qp)(0);
         Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
         custom_xi1_pts[qp] = xi1_eta;
-        // libMesh::out << xi1_eta << " ";
       }
-      // libMesh::out << std::endl;
 
       // When you don't provide a weights array, the FE object uses
       // a dummy rule with all 1's. You should probably never use
@@ -279,94 +220,20 @@ RealMortarConstraint::computeResidual()
 
       // Reinit the slave interior FE on the side in question at the custom qps.
       slave_interior_fe_primal->reinit(slave_ip, slave_side_id, TOLERANCE, &custom_xi1_pts);
-
-      // libMesh::out << "Slave element lambda phi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<slave_face_phi_lambda.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " << std::setw(12) <<
-      //         slave_face_phi_lambda[i][qp] << " ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element normal vectors:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << std::setw(12) << slave_interior_normals[qp] <<
-      //   std::endl;
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element dphi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<slave_interior_dphi_primal.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " <<
-      //         slave_interior_dphi_primal[i][qp] << "   &    ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element phi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<slave_interior_phi_primal.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " <<
-      //         slave_interior_phi_primal[i][qp]
-      //         << " ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element xyz(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << slave_interior_xyz[qp] << " ";
-      // libMesh::out << std::endl;
     }
 
     if (has_master)
     {
       custom_xi2_pts.resize(qrule_msm.n_points());
-      // libMesh::out << "xi^(2) points: ";
       for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
       {
         Real eta = qrule_msm.qp(qp)(0);
         Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
         custom_xi2_pts[qp] = xi2_eta;
-        // libMesh::out << xi2_eta << " ";
       }
-      // libMesh::out << std::endl;
 
       // Reinit the master interior FE on the side in question at the custom qps.
       master_interior_fe_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
-
-      // libMesh::out << "Master interior element normal vectors:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << std::setw(12) << master_interior_normals[qp] <<
-      //   std::endl;
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Master interior element dphi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<master_interior_dphi_primal.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " <<
-      //         master_interior_dphi_primal[i][qp] << "   &    ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Master interior element xyz(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << master_interior_xyz[qp] << " ";
-      // libMesh::out << std::endl;
     }
 
     // For the gap conductance problem, compute the gap heat
@@ -379,7 +246,6 @@ RealMortarConstraint::computeResidual()
       for (unsigned int qp = 0; qp < heat_transfer_coeff.size(); ++qp)
       {
         Real gap = (slave_interior_xyz[qp] - master_interior_xyz[qp]).norm();
-        // libMesh::out << "gap = " << gap << std::endl;
 
         // Avoid division by zero. We currently only support strictly nonzero gap sizes.
         if (gap < TOLERANCE * TOLERANCE)
@@ -391,9 +257,6 @@ RealMortarConstraint::computeResidual()
         // TODO: Currently the numerator is a fixed constant, but it should be specifiable by the
         // user.
         heat_transfer_coeff[qp] = 0.03 / gap;
-
-        // libMesh::out << "heat_transfer_coeff[" << qp << "] = " << heat_transfer_coeff[qp] <<
-        // std::endl;
       }
     }
 
@@ -524,9 +387,6 @@ RealMortarConstraint::computeJacobian()
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
-  // libMesh::out << "About to loop over " << _amg.mortar_segment_mesh.n_elem()
-  //              << " mortar mesh segments." << std::endl;
-
   for (MeshBase::const_element_iterator
            el = _amg.mortar_segment_mesh.active_local_elements_begin(),
            end_el = _amg.mortar_segment_mesh.active_local_elements_end();
@@ -545,11 +405,6 @@ RealMortarConstraint::computeJacobian()
     // Jacobian error.
     Real elem_volume = msm_elem->volume();
 
-    // libMesh::out << "Computing element integral contributions for mortar segment mesh Elem " <<
-    // msm_elem->id()
-    //              << " which has length " << elem_volume
-    //              << std::endl;
-
     if (elem_volume < TOLERANCE)
       continue;
 
@@ -559,27 +414,8 @@ RealMortarConstraint::computeJacobian()
     // There may be no contribution from the master side if it is not "in contact".
     bool has_slave = msinfo.slave_elem ? true : false, has_master = msinfo.has_master();
 
-    // Print the slave and master (if available) elements associated
-    // with this mortar segment. Note: these are lower-dimensional
-    // elements from the *surface* meshes, they will not have the
-    // DOFs that we actually need on them.
-    if (has_slave)
-    {
-      // libMesh::out << "Mortar segment is associated with slave mesh Elem " <<
-      // msinfo.slave_elem->id() << std::endl; libMesh::out << "xi^(1) = [" << msinfo.xi1_a << ", "
-      // << msinfo.xi1_b << "]" << std::endl;
-    }
-    else
+    if (!has_slave)
       libmesh_error_msg("Error, mortar segment has no slave element associated with it!");
-
-    // if (has_master)
-    //   {
-    //     libMesh::out << "Mortar segment is associated with master mesh Elem " <<
-    //     msinfo.master_elem->id() << std::endl; libMesh::out << "xi^(2) = [" << msinfo.xi2_a << ",
-    //     " << msinfo.xi2_b << "]" << std::endl;
-    //   }
-
-    // Need to figure out which Elems that have system DOFs these correspond to.
 
     // Pointer to the interior parent.
     const Elem * slave_ip = msinfo.slave_elem->interior_parent();
@@ -587,35 +423,15 @@ RealMortarConstraint::computeJacobian()
     // Look up which side of the interior parent we are.
     auto slave_side_id = slave_ip->which_side_am_i(msinfo.slave_elem);
 
-    // libMesh::out << "slave mesh elem has interior parent " << slave_ip->id() << std::endl;
-    // libMesh::out << "slave mesh elem is side " << slave_side_id << " of this parent." <<
-    // std::endl;
-
     // The lower-dimensional slave side element associated with this
     // mortar segment is simply msinfo.slave_elem.
     const Elem * slave_face_elem = msinfo.slave_elem;
-
-    // Print the lower-dimensional element id. We can now ask for DOFs specifically for this
-    // element. libMesh::out << "Lower-dimensional element id: " << slave_face_elem->id() <<
-    // std::endl;
 
     // Get the temperature and lambda dof indices for the slave element side.
     dof_map.dof_indices(slave_face_elem, dof_indices_slave_lambda, lambda_var_number);
 
     // Get temperature dof indices associated with the interior slave Elem.
     dof_map.dof_indices(slave_ip, dof_indices_interior_slave_primal, primal_var_number);
-
-    // Print the degree of freedom indices for the lambda variable on this lower-dimensional
-    // element. libMesh::out << "lambda DOFs for the lower-dimensional slave element: "; for
-    // (dof_id_type i=0; i<dof_indices_slave_lambda.size(); ++i)
-    //   libMesh::out << dof_indices_slave_lambda[i] << " ";
-    // libMesh::out << std::endl;
-
-    // Print the degree of freedom indices for the T variable on the slave interior element.
-    // libMesh::out << "T DOFs for the slave interior element: ";
-    // for (dof_id_type i=0; i<dof_indices_interior_slave_primal.size(); ++i)
-    //   libMesh::out << dof_indices_interior_slave_primal[i] << " ";
-    // libMesh::out << std::endl;
 
     // These only get initialized if there is a master Elem associated to this segment.
     const Elem * master_ip = libmesh_nullptr;
@@ -631,18 +447,8 @@ RealMortarConstraint::computeJacobian()
       // Store the length of the edge element for use in stabilization terms.
       h_master = msinfo.master_elem->volume();
 
-      // libMesh::out << "master mesh elem has interior parent " << master_ip->id() << std::endl;
-      // libMesh::out << "master mesh elem is side " << master_side_id << " of this parent." <<
-      // std::endl;
-
       // Get temperature dof indices associated with the interior master Elem.
       dof_map.dof_indices(master_ip, dof_indices_interior_master_primal, primal_var_number);
-
-      // Print the degree of freedom indices for the T variable on the slave interior element.
-      // libMesh::out << "T DOFs for the master interior element: ";
-      // for (dof_id_type i=0; i<dof_indices_interior_master_primal.size(); ++i)
-      //   libMesh::out << dof_indices_interior_master_primal[i] << " ";
-      // libMesh::out << std::endl;
     }
 
     // Re-compute FE data on the mortar segment Elem (JxW_msm is the only thing we actually use.)
@@ -662,15 +468,12 @@ RealMortarConstraint::computeJacobian()
 
     {
       custom_xi1_pts.resize(qrule_msm.n_points());
-      // libMesh::out << "xi^(1) points: ";
       for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
       {
         Real eta = qrule_msm.qp(qp)(0);
         Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
         custom_xi1_pts[qp] = xi1_eta;
-        // libMesh::out << xi1_eta << " ";
       }
-      // libMesh::out << std::endl;
 
       // When you don't provide a weights array, the FE object uses
       // a dummy rule with all 1's. You should probably never use
@@ -679,94 +482,20 @@ RealMortarConstraint::computeJacobian()
 
       // Reinit the slave interior FE on the side in question at the custom qps.
       slave_interior_fe_primal->reinit(slave_ip, slave_side_id, TOLERANCE, &custom_xi1_pts);
-
-      // libMesh::out << "Slave element lambda phi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<slave_face_phi_lambda.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " << std::setw(12) <<
-      //         slave_face_phi_lambda[i][qp] << " ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element normal vectors:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << std::setw(12) << slave_interior_normals[qp] <<
-      //   std::endl;
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element dphi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<slave_interior_dphi_primal.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " <<
-      //         slave_interior_dphi_primal[i][qp] << "   &    ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element phi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<slave_interior_phi_primal.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " <<
-      //         slave_interior_phi_primal[i][qp]
-      //         << " ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Slave interior element xyz(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << slave_interior_xyz[qp] << " ";
-      // libMesh::out << std::endl;
     }
 
     if (has_master)
     {
       custom_xi2_pts.resize(qrule_msm.n_points());
-      // libMesh::out << "xi^(2) points: ";
       for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
       {
         Real eta = qrule_msm.qp(qp)(0);
         Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
         custom_xi2_pts[qp] = xi2_eta;
-        // libMesh::out << xi2_eta << " ";
       }
-      // libMesh::out << std::endl;
 
       // Reinit the master interior FE on the side in question at the custom qps.
       master_interior_fe_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
-
-      // libMesh::out << "Master interior element normal vectors:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << std::setw(12) << master_interior_normals[qp] <<
-      //   std::endl;
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Master interior element dphi_i(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   {
-      //     for (std::size_t i=0; i<master_interior_dphi_primal.size(); ++i)
-      //       {
-      //         libMesh::out << "[i=" << i << "][qp=" << qp << "]: " <<
-      //         master_interior_dphi_primal[i][qp] << "   &    ";
-      //       }
-      //     libMesh::out << std::endl;
-      //   }
-      // libMesh::out << std::endl;
-
-      // libMesh::out << "Master interior element xyz(x_qp) values:" << std::endl;
-      // for (unsigned int qp=0; qp<qrule_msm.n_points(); qp++)
-      //   libMesh::out << "[qp=" << qp << "]: " << master_interior_xyz[qp] << " ";
-      // libMesh::out << std::endl;
     }
 
     // For the gap conductance problem, compute the gap heat
@@ -779,7 +508,6 @@ RealMortarConstraint::computeJacobian()
       for (unsigned int qp = 0; qp < heat_transfer_coeff.size(); ++qp)
       {
         Real gap = (slave_interior_xyz[qp] - master_interior_xyz[qp]).norm();
-        // libMesh::out << "gap = " << gap << std::endl;
 
         // Avoid division by zero. We currently only support strictly nonzero gap sizes.
         if (gap < TOLERANCE * TOLERANCE)
@@ -791,9 +519,6 @@ RealMortarConstraint::computeJacobian()
         // TODO: Currently the numerator is a fixed constant, but it should be specifiable by the
         // user.
         heat_transfer_coeff[qp] = 0.03 / gap;
-
-        // libMesh::out << "heat_transfer_coeff[" << qp << "] = " << heat_transfer_coeff[qp] <<
-        // std::endl;
       }
     }
 
