@@ -71,6 +71,7 @@
   [./dtnuc]
     type = DiscreteNucleationTimeStep
     inserter = inserter
+    p2nucleus = 0.1
     dt_max = 0.5
   [../]
 []
@@ -78,7 +79,7 @@
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  num_steps = 10
+  num_steps = 20
 
   [./TimeStepper]
     type = IterationAdaptiveDT

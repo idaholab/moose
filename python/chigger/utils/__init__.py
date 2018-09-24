@@ -145,7 +145,7 @@ def animate(pattern, output, delay=20, restart_delay=500, loop=True):
     cmd += [output]
     subprocess.call(cmd)
 
-def img2mov(pattern, output, ffmpeg=None, duration=60, framerate=None, bitrate='10M',
+def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitrate='10M',
             num_threads=1, quality=1, dry_run=False, output_framerate_increase=0):
     """
     Use ffmpeg to convert a series of images to a movie.
@@ -161,43 +161,19 @@ def img2mov(pattern, output, ffmpeg=None, duration=60, framerate=None, bitrate='
         quality[int]: The ffmpeg quality setting (ranges from 1 to 31).
         dry_run[bool]: When True the command is not executed.
         factor[float]: Output framerate adjustment to help guarantee no dropped frames, if you see
-                       drooped frames in ffmpeg output, increase this number.
+                       dropped frames in ffmpeg output, increase this number.
     """
-
-    # Locate ffmpeg
-    if ffmpeg is None:
-        if os.path.exists('/usr/bin/ffmpeg'):
-            ffmpeg = '/usr/bin/ffmpeg'
-    if ffmpeg is None:
-        if os.path.exists(os.path.join(os.getenv('HOME'), 'ffmpeg')):
-            ffmpeg = os.path.join(os.getenv('HOME'), 'ffmpeg')
-
-    ffmpeg = os.path.abspath(ffmpeg)
-    if not os.path.exists(ffmpeg) and not dry_run:
-        msg = "The ffmpeg executable was not located: {}"
-        raise mooseutils.MooseException(msg.format(ffmpeg))
 
     # Compute framerate from the duration if framerate is not given
     if not framerate:
         n = len(glob.glob(pattern))
         framerate = n/duration
 
-    # Determine the video codec
-    _, ext = os.path.splitext(output)
-    if ext == '.mov':
-        codec = 'mpeg2video'
-    elif ext == '.mp4':
-        codec = 'mpeg4'
-    else:
-        msg = "Unsupported output format {}, please use '.mov'"
-        raise mooseutils.MooseException(msg.format(ffmpeg))
-
     # Build the command
     cmd = [ffmpeg]
     cmd += ['-pattern_type', 'glob']
     cmd += ['-framerate', str(framerate)]
     cmd += ['-i', pattern]
-    cmd += ['-c:v', codec]
     cmd += ['-b:v', bitrate]
     cmd += ['-pix_fmt', 'yuv420p']
     cmd += ['-q:v', str(quality)]
