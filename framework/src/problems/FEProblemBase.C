@@ -763,8 +763,6 @@ FEProblemBase::initialSetup()
   // We do this here because this sets up the Element's DoFs to ghost
   updateGeomSearch(GeometricSearchData::NEAREST_NODE);
 
-  updateMortarMesh();
-
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if (_displaced_mesh)
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
@@ -4070,6 +4068,8 @@ FEProblemBase::init()
 
   if (!_skip_nl_system_check && _solve && n_vars == 0)
     mooseError("No variables specified in the FEProblemBase '", name(), "'.");
+
+  updateMortarMesh();
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 

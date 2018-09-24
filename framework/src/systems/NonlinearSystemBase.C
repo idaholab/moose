@@ -1970,11 +1970,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   for (auto & mortar_constraint : mortar_constraints)
     mortar_constraint->computeJacobian();
 
-  jacobian.close();
-
-  PetscMatrix<Number> & petsc_jacobian = static_cast<PetscMatrix<Number> &>(jacobian);
-  MatSetOption(petsc_jacobian.mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
 

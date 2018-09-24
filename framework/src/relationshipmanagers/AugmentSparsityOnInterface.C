@@ -46,13 +46,8 @@ void
 AugmentSparsityOnInterface::attachRelationshipManagersInternal(
     Moose::RelationshipManagerType rm_type)
 {
-  if (_app.isSplitMesh() || _mesh.isDistributedMesh())
-  {
-    if (rm_type == Moose::RelationshipManagerType::Geometric)
-      attachGeometricFunctorHelper(*this);
-    else
-      attachAlgebraicFunctorHelper(*this);
-  }
+  if (rm_type == Moose::RelationshipManagerType::Algebraic)
+    attachAlgebraicFunctorHelper(*this);
 }
 
 std::string
