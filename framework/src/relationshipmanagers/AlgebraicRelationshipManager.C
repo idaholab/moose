@@ -20,7 +20,7 @@ validParams<AlgebraicRelationshipManager>()
 {
   InputParameters params = validParams<GeometricRelationshipManager>();
 
-  params.set<Moose::RelationshipManagerType>("rm_type") = Moose::RelationshipManagerType::Algebraic;
+  params.set<Moose::RelationshipManagerType>("rm_type") = Moose::RelationshipManagerType::ALGEBRAIC;
   return params;
 }
 

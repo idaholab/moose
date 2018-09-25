@@ -29,6 +29,7 @@ std::map<std::string, WhichEigenPairs> which_eigen_pairs_to_enum;
 std::map<std::string, LineSearchType> line_search_type_to_enum;
 std::map<std::string, TimeIntegratorType> time_integrator_to_enum;
 std::map<std::string, MffdType> mffd_type_to_enum;
+std::map<std::string, RelationshipManagerType> rm_type_to_enum;
 
 void
 initQuadratureType()
@@ -166,6 +167,18 @@ initMffdType()
   {
     mffd_type_to_enum["DS"] = MFFD_DS;
     mffd_type_to_enum["WP"] = MFFD_WP;
+  }
+}
+
+void
+initRMType()
+{
+  if (rm_type_to_enum.empty())
+  {
+    rm_type_to_enum["DEFAULT"] = RelationshipManagerType::DEFAULT;
+    rm_type_to_enum["GEOMETRIC"] = RelationshipManagerType::GEOMETRIC;
+    rm_type_to_enum["ALGEBRAIC"] = RelationshipManagerType::ALGEBRAIC;
+    rm_type_to_enum["COUPLING"] = RelationshipManagerType::COUPLING;
   }
 }
 
@@ -323,10 +336,14 @@ stringify(const Moose::RelationshipManagerType & t)
 {
   switch (t)
   {
-    case Moose::RelationshipManagerType::Geometric:
-      return "Geometric";
-    case Moose::RelationshipManagerType::Algebraic:
-      return "Algebraic";
+    case Moose::RelationshipManagerType::DEFAULT:
+      return "DEFAULT";
+    case Moose::RelationshipManagerType::GEOMETRIC:
+      return "GEOMETRIC";
+    case Moose::RelationshipManagerType::ALGEBRAIC:
+      return "ALGEBRAIC";
+    case Moose::RelationshipManagerType::COUPLING:
+      return "COUPLING";
     default:
       return "ERROR";
   }

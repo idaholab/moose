@@ -27,8 +27,8 @@ void
 AddRelationshipManager::act()
 {
   Moose::RelationshipManagerType rm_type =
-      (_current_task == "add_geometric_rm" ? Moose::RelationshipManagerType::Geometric
-                                           : Moose::RelationshipManagerType::Algebraic);
+      (_current_task == "add_geometric_rm" ? Moose::RelationshipManagerType::GEOMETRIC
+                                           : Moose::RelationshipManagerType::ALGEBRAIC);
 
   const auto & all_action_ptrs = _awh.allActionBlocks();
   for (const auto & action_ptr : all_action_ptrs)

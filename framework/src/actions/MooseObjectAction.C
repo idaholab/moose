@@ -54,17 +54,18 @@ void MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType /
      * RMs. For generic MooseObjects, we'd like to add RMs as early as possible, but we'll have to
      * be careful not to add them twice!
      */
-    auto new_name = name() + '_' + buildable_type + "_rm";
+    auto new_name = name() + '_' + buildable_type.first + "_rm";
     if (_app.hasRelationshipManager(new_name))
       continue;
 
-    auto rm_params = _factory.getValidParams(buildable_type);
+    auto rm_params = _factory.getValidParams(buildable_type.first);
     rm_params.applyParameters(_moose_object_pars);
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+    //    rm_params.set<Moose::RelationshipManagerType>("rm_type") = buildable_type.second;
 
     if (rm_params.areAllRequiredParamsValid())
     {
-      auto rm_obj = _factory.create<RelationshipManager>(buildable_type, new_name, rm_params);
+      auto rm_obj = _factory.create<RelationshipManager>(buildable_type.first, new_name, rm_params);
 
       _app.addRelationshipManager(rm_obj);
     }

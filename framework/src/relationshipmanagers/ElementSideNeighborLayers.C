@@ -45,7 +45,7 @@ ElementSideNeighborLayers::attachRelationshipManagersInternal(
     _default_coupling = libmesh_make_unique<DefaultCoupling>();
     _default_coupling->set_n_levels(_element_side_neighbor_layers);
 
-    if (rm_type == Moose::RelationshipManagerType::Geometric)
+    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
       attachGeometricFunctorHelper(*_default_coupling);
     else
       attachAlgebraicFunctorHelper(*_default_coupling);

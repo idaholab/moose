@@ -43,7 +43,7 @@ ElementPointNeighbors::attachRelationshipManagersInternal(Moose::RelationshipMan
     _point_coupling = libmesh_make_unique<PointNeighborCoupling>();
     _point_coupling->set_n_levels(_element_point_neighbor_layers);
 
-    if (rm_type == Moose::RelationshipManagerType::Geometric)
+    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
       attachGeometricFunctorHelper(*_point_coupling);
     else
       attachAlgebraicFunctorHelper(*_point_coupling);

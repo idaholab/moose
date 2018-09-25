@@ -54,7 +54,7 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
         "mesh", "Mesh is null in GeometricRelationshipManager ctor")),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
-    _cached_callbacks(Moose::RelationshipManagerType::Default),
+    _cached_callbacks(Moose::RelationshipManagerType::DEFAULT),
     _has_set_remote_elem_removal_flag(false)
 {
 }
@@ -62,8 +62,8 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
 void
 RelationshipManager::attachRelationshipManagers(Moose::RelationshipManagerType when_type)
 {
-  Moose::RelationshipManagerType early = Moose::RelationshipManagerType::Geometric;
-  Moose::RelationshipManagerType late = Moose::RelationshipManagerType::Algebraic;
+  Moose::RelationshipManagerType early = Moose::RelationshipManagerType::GEOMETRIC;
+  Moose::RelationshipManagerType late = Moose::RelationshipManagerType::ALGEBRAIC;
 
   /**
    * If we cannot attach the geometric functor early, we have to prevent the mesh from deleting
@@ -102,15 +102,15 @@ RelationshipManager::attachRelationshipManagers(Moose::RelationshipManagerType w
     // a DistributedMesh simulation, or we are running with DistributedMesh.
     if ((_app.isSplitMesh() || _mesh.isDistributedMesh()))
     {
-      attachRelationshipManagersInternal(Moose::RelationshipManagerType::Geometric);
-      _cached_callbacks |= Moose::RelationshipManagerType::Geometric;
+      attachRelationshipManagersInternal(Moose::RelationshipManagerType::GEOMETRIC);
+      _cached_callbacks |= Moose::RelationshipManagerType::GEOMETRIC;
     }
   }
 
   // Attach the Algebraic RelationshipManager were appropriate (only late)
-  if (getType() == Moose::RelationshipManagerType::Algebraic && when_type == late)
+  if (getType() == Moose::RelationshipManagerType::ALGEBRAIC && when_type == late)
   {
-    attachRelationshipManagersInternal(Moose::RelationshipManagerType::Algebraic);
-    _cached_callbacks |= Moose::RelationshipManagerType::Algebraic;
+    attachRelationshipManagersInternal(Moose::RelationshipManagerType::ALGEBRAIC);
+    _cached_callbacks |= Moose::RelationshipManagerType::ALGEBRAIC;
   }
 }
