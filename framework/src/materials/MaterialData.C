@@ -9,9 +9,10 @@
 
 #include "MaterialData.h"
 #include "Material.h"
+#include "MaterialProperty.h"
 
 MaterialData::MaterialData(MaterialPropertyStorage & storage)
-  : _storage(storage), _n_qpoints(0), _swapped(false)
+  : _storage(storage), _n_qpoints(0), _has_dot_properties(false), _swapped(false)
 {
 }
 
@@ -38,6 +39,8 @@ MaterialData::resize(unsigned int n_qpoints)
     _props_old.resizeItems(n_qpoints);
   if (_storage.hasOlderProperties())
     _props_older.resizeItems(n_qpoints);
+  if (_has_dot_properties)
+    _props_dot.resizeItems(n_qpoints);
   _n_qpoints = n_qpoints;
 }
 

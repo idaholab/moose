@@ -196,3 +196,41 @@ MaterialPropertyInterface::checkExecutionStage()
     mooseError("Material properties must be retrieved during object construction to ensure correct "
                "problem integrity validation.");
 }
+
+const MaterialProperty<Real> &
+MaterialPropertyInterface::getMaterialPropertyDot(const std::string & name)
+{
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Dot property for \"",
+               name,
+               "\" was requested.");
+
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  std::istringstream ss(name);
+  Real real_value;
+  if (ss >> real_value && ss.eof())
+    return getZeroMaterialProperty<Real>(name);
+
+  return getMaterialPropertyDotByName(prop_name);
+}
+
+const MaterialProperty<Real> &
+MaterialPropertyInterface::getMaterialPropertyDotByName(const MaterialPropertyName & name)
+{
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Dot property for \"",
+               name,
+               "\" was requested.");
+
+  // mark property as requested
+  markMatPropRequested(name);
+
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
+  return _material_data->getPropertyDot<Real>(name);
+}

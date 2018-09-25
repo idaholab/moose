@@ -2470,7 +2470,11 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
       _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
 
     if (_materials.hasActiveBlockObjects(blk_id, tid))
+    {
       _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
+      if (hasTimeIntegrator())
+        _nl->getTimeIntegrator()->computeDotProperties(Moose::BLOCK_MATERIAL_DATA, tid);
+    }
   }
 }
 
@@ -2495,6 +2499,9 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
     if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reinit(
           _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (hasTimeIntegrator())
+      _nl->getTimeIntegrator()->computeDotProperties(Moose::FACE_MATERIAL_DATA, tid);
   }
 }
 
@@ -2520,6 +2527,9 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
     if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reinit(
           _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (hasTimeIntegrator())
+      _nl->getTimeIntegrator()->computeDotProperties(Moose::NEIGHBOR_MATERIAL_DATA, tid);
   }
 }
 
@@ -2542,6 +2552,9 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 
     if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
       _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
+
+    if (hasTimeIntegrator())
+      _nl->getTimeIntegrator()->computeDotProperties(Moose::BOUNDARY_MATERIAL_DATA, tid);
   }
 }
 

@@ -105,6 +105,10 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<Real> & getMaterialPropertyDot(const std::string &)
+  {
+    mooseError("Material should not call getMaterialPropertyDot");
+  }
   ///@}
 
   ///@{
@@ -117,6 +121,10 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
+  const MaterialProperty<Real> & getMaterialPropertyDotByName(const std::string &)
+  {
+    mooseError("Material should not call getMaterialPropertyDot");
+  }
   ///@}
 
   ///@{

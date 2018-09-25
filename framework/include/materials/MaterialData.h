@@ -92,12 +92,16 @@ public:
   MaterialProperties & props() { return _props; }
   MaterialProperties & propsOld() { return _props_old; }
   MaterialProperties & propsOlder() { return _props_older; }
+  MaterialProperties & propsDot() { return _props_dot; }
   ///@}
 
   /// Returns true if the property exists - defined by any material (i.e. not
   /// necessarily just this one).
   template <typename T>
   bool haveProperty(const std::string & prop_name) const;
+
+  /// Returns true if time derivative (Dot) of properties has ever been requested.
+  bool hasDotProperties() const { return _has_dot_properties; }
 
   ///@{
   /**
@@ -112,6 +116,8 @@ public:
   MaterialProperty<T> & getPropertyOld(const std::string & prop_name);
   template <typename T>
   MaterialProperty<T> & getPropertyOlder(const std::string & prop_name);
+  template <typename T>
+  MaterialProperty<T> & getPropertyDot(const std::string & prop_name);
   ///@}
 
   /**
@@ -143,11 +149,15 @@ protected:
   /// Number of quadrature points
   unsigned int _n_qpoints;
 
+  /// To indicate if time derivative of property is ever requested
+  bool _has_dot_properties;
+
   ///@{
   /// Holds material properties for currently selected element (and possibly a side), they are being copied from _storage
   MaterialProperties _props;
   MaterialProperties _props_old;
   MaterialProperties _props_older;
+  MaterialProperties _props_dot;
   ///@}
 
   /**
@@ -193,6 +203,8 @@ MaterialData::resizeProps(unsigned int size)
     _props_old.resize(n, nullptr);
   if (_props_older.size() < n)
     _props_older.resize(n, nullptr);
+  if (_props_dot.size() < n)
+    _props_dot.resize(n, nullptr);
 
   if (_props[size] == nullptr)
     _props[size] = new MaterialProperty<T>;
@@ -261,6 +273,30 @@ MaterialProperty<T> &
 MaterialData::getPropertyOlder(const std::string & name)
 {
   return declareHelper<T>(_props_older, name, _storage.addPropertyOlder(name));
+}
+
+template <typename T>
+MaterialProperty<T> &
+MaterialData::getPropertyDot(const std::string & name)
+{
+  auto dot_prop_id = getPropertyId(name);
+
+  resizeProps<Real>(dot_prop_id);
+
+  auto prop = dynamic_cast<MaterialProperty<T> *>(_props[dot_prop_id]);
+  if (!prop)
+    mooseError("Material has no property named: " + name);
+
+  if (_props_dot[dot_prop_id] == nullptr)
+  {
+    getPropertyOld<T>(name);
+    getPropertyOlder<T>(name);
+    _props_dot[dot_prop_id] = new MaterialProperty<T>;
+  }
+
+  _has_dot_properties = true;
+
+  return *dynamic_cast<MaterialProperty<T> *>(_props_dot[dot_prop_id]);
 }
 
 #endif /* MATERIALDATA_H */

@@ -33,6 +33,7 @@ public:
   virtual void init() override;
   virtual int order() override { return 2; }
   virtual void computeTimeDerivatives() override;
+  virtual void computeDotProperties(Moose::MaterialDataType type, THREAD_ID tid = 0) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual void postStep() override;
 

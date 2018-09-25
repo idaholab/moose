@@ -14,6 +14,7 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
+#include "FEProblemBase.h"
 
 template <>
 InputParameters
@@ -68,4 +69,30 @@ TimeIntegrator::getNumLinearIterationsLastSolve() const
       static_cast<NonlinearSolver<Real> &>(*_nonlinear_implicit_system->nonlinear_solver);
 
   return nonlinear_solver.get_total_linear_iterations();
+}
+
+void
+TimeIntegrator::computeDotProperties(Moose::MaterialDataType type, THREAD_ID tid) const
+{
+  auto material_data = _fe_problem.getMaterialData(type, tid);
+  if (!material_data->hasDotProperties())
+    return;
+
+  const auto & props = material_data->props();
+  const auto & old_props = material_data->propsOld();
+  auto & dot_props = material_data->propsDot();
+
+  auto n = dot_props.size();
+  for (decltype(n) i = 0; i < n; ++i)
+  {
+    // skip properties that have not been required for time derivatives
+    if (!dot_props[i])
+      continue;
+
+    auto & dot_prop = dynamic_cast<MaterialProperty<Real> &>(*dot_props[i]);
+    auto & prop = dynamic_cast<const MaterialProperty<Real> &>(*props[i]);
+    auto & old_prop = dynamic_cast<const MaterialProperty<Real> &>(*old_props[i]);
+    for (unsigned int qp = 0; qp < prop.size(); ++qp)
+      dot_prop[qp] = (prop[qp] - old_prop[qp]) / _dt;
+  }
 }

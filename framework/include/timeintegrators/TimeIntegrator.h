@@ -110,6 +110,11 @@ public:
    */
   virtual unsigned int getNumLinearIterations() const { return _n_linear_iterations; }
 
+  /**
+   * Evaluate time derivative of properties
+   */
+  virtual void computeDotProperties(Moose::MaterialDataType type, THREAD_ID tid = 0) const;
+
 protected:
   /**
    * Gets the number of nonlinear iterations in the most recent solve.

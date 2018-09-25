@@ -59,6 +59,7 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const MaterialProperty<Real> & getMaterialPropertyDot(const std::string & name);
   ///@}
 
   ///@{
@@ -74,6 +75,7 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
+  const MaterialProperty<Real> & getMaterialPropertyDotByName(const MaterialPropertyName & name);
   ///@}
 
   /**
@@ -247,6 +249,9 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> & _mi_boundary_ids;
+
+  /// Zero real material property
+  std::unique_ptr<MaterialProperty<Real>> _zero_real_property;
 };
 
 /**
