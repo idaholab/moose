@@ -29,6 +29,13 @@
     type = 'RunException'
     input = 'dot_prop_error_test.i'
     expect_err = 'Material has no property named: test_tensor'
-    requirement = 'The system shall error out for time derivative evaluation of a non-real material property.'
+    requirement = 'The system shall error out for time derivative evaluations of a non-real material property.'
+  [../]
+
+  [./error2_test]
+    type = 'RunException'
+    input = 'dot_prop_error2_test.i'
+    expect_err = 'Material should not call getMaterialPropertyDot'
+    requirement = 'The system shall error out for using a time derivative of material properties within a material.'
   [../]
 []
