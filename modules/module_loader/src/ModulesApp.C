@@ -91,28 +91,16 @@ ModulesApp::ModulesApp(const InputParameters & parameters) : MooseApp(parameters
 
 ModulesApp::~ModulesApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-ModulesApp__registerApps()
-{
-  ModulesApp::registerApps();
-}
 void
 ModulesApp::registerApps()
 {
   registerApp(ModulesApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-ModulesApp__registerObjects(Factory & factory)
+void
+ModulesApp::registerObjects(Factory & factory)
 {
-  ModulesApp::registerObjects(factory);
-}
-
-static void
-registerObjectsInner(Factory & factory)
-{
+  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::registerObjects");
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerObjects(factory);
 #endif
@@ -181,22 +169,9 @@ registerObjectsInner(Factory & factory)
 }
 
 void
-ModulesApp::registerObjects(Factory & factory)
+ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::registerObjects");
-  registerObjectsInner(factory);
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  ModulesApp::associateSyntax(syntax, action_factory);
-}
-
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory)
-{
+  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::associateSyntax");
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
 #endif
@@ -265,21 +240,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
-ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+ModulesApp::registerExecFlags(Factory & factory)
 {
-  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::associateSyntax");
-  associateSyntaxInner(syntax, action_factory);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-ModulesApp__registerExecFlags(Factory & factory)
-{
-  ModulesApp::registerExecFlags(factory);
-}
-static void
-registerExecFlagsInner(Factory & factory)
-{
+  mooseDeprecated("use registerAll instead of registerExecFlags");
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerExecFlags(factory);
 #endif
@@ -342,11 +305,72 @@ registerExecFlagsInner(Factory & factory)
 
   clearUnusedWarnings(factory);
 }
+
 void
-ModulesApp::registerExecFlags(Factory & factory)
+ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  mooseDeprecated("use ModulesApp::registerAll instead of ModulesApp::registerExecFlags");
-  registerExecFlagsInner(factory);
+#ifdef CHEMICAL_REACTIONS_ENABLED
+  ChemicalReactionsApp::registerAll(f, af, s);
+#endif
+
+#ifdef CONTACT_ENABLED
+  ContactApp::registerAll(f, af, s);
+#endif
+
+#ifdef FLUID_PROPERTIES_ENABLED
+  FluidPropertiesApp::registerAll(f, af, s);
+#endif
+
+#ifdef HEAT_CONDUCTION_ENABLED
+  HeatConductionApp::registerAll(f, af, s);
+#endif
+
+#ifdef LEVEL_SET_ENABLED
+  LevelSetApp::registerAll(f, af, s);
+#endif
+
+#ifdef MISC_ENABLED
+  MiscApp::registerAll(f, af, s);
+#endif
+
+#ifdef NAVIER_STOKES_ENABLED
+  NavierStokesApp::registerAll(f, af, s);
+#endif
+
+#ifdef PHASE_FIELD_ENABLED
+  PhaseFieldApp::registerAll(f, af, s);
+#endif
+
+#ifdef POROUS_FLOW_ENABLED
+  PorousFlowApp::registerAll(f, af, s);
+#endif
+
+#ifdef RDG_ENABLED
+  RdgApp::registerAll(f, af, s);
+#endif
+
+#ifdef RICHARDS_ENABLED
+  RichardsApp::registerAll(f, af, s);
+#endif
+
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::registerAll(f, af, s);
+#endif
+
+#ifdef STOCHASTIC_TOOLS_ENABLED
+  StochasticToolsApp::registerAll(f, af, s);
+#endif
+
+#ifdef TENSOR_MECHANICS_ENABLED
+  TensorMechanicsApp::registerAll(f, af, s);
+#endif
+
+#ifdef XFEM_ENABLED
+  XFEMApp::registerAll(f, af, s);
+#endif
+
+  clearUnusedWarnings(f);
+  clearUnusedWarnings(s, af);
 }
 
 extern "C" void
@@ -355,11 +379,8 @@ ModulesApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ModulesApp::registerAll(f, af, s);
 }
 
-void
-ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+extern "C" void
+ModulesApp__registerApps()
 {
-  Moose::registerAll(f, af, s);
-  registerObjectsInner(f);
-  associateSyntaxInner(s, af);
-  registerExecFlagsInner(f);
+  ModulesApp::registerApps();
 }
