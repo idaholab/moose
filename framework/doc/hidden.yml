@@ -133,7 +133,6 @@
 - /Functions/ParsedFunction
 - /Functions/ParsedGradFunction
 - /Functions/ParsedVectorFunction
-- /Functions/PiecewiseMultilinear
 - /Functions/SolutionFunction
 - /Functions/SplineFunction
 - /Functions/VectorPostprocessorFunction

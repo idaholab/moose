@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PIECEWISEMULTILINEAR_H
-#define PIECEWISEMULTILINEAR_H
+#ifndef PIECEWISEMULTICONSTANT_H
+#define PIECEWISEMULTICONSTANT_H
 
 #include "PiecewiseMultiInterpolation.h"
 
@@ -22,18 +22,22 @@ class GriddedData;
  * Gridded data can be 1D, 2D, 3D or 4D.
  * See GriddedData for examples of file format.
  */
-class PiecewiseMultilinear;
+class PiecewiseMulticonstant;
 
 template <>
-InputParameters validParams<PiecewiseMultilinear>();
+InputParameters validParams<PiecewiseMulticonstant>();
 
-class PiecewiseMultilinear : public PiecewiseMultiInterpolation
+class PiecewiseMulticonstant : public PiecewiseMultiInterpolation
 {
 public:
-  PiecewiseMultilinear(const InputParameters & parameters);
+  PiecewiseMulticonstant(const InputParameters & parameters);
 
 protected:
   virtual Real sample(const std::vector<Real> & pt) override;
+
+private:
+  /// direction where to look for value if interpolation order is constant
+  MultiMooseEnum _direction;
 };
 
-#endif // PIECEWISEMULTILINEAR_H
+#endif // PiecewiseMulticonstant_H
