@@ -87,38 +87,38 @@ private:
   /// List of the values for the variables supplied by the user
   const std::vector<std::string> & _vals_input;
 
-  /// Storage for the values
-  std::vector<Real> _vals;
+  /// Storage for the initial values of _vars variables used by the libMesh::ParsedFunction object
+  std::vector<Real> _initial_vals;
 
   /// Pointer to the libMesh::ParsedFunction object
   std::unique_ptr<ParsedFunction<Real>> _function_ptr;
 
-  /// Stores the relative location of variables (in _vars) that are connected to Postprocessors
+  /// Stores indices into _addr variable that are connected to Postprocessors
   std::vector<unsigned int> _pp_index;
 
-  /// Vector of pointers to PP values
+  /// Vector of pointers to postprocessor values this parsed function is using
   std::vector<const Real *> _pp_vals;
 
-  /// Stores the relative location of variables (in _vars) that are connected to Scalar Variables
+  /// Stores indicies into _addr variable that are connected to Scalar Variables
   std::vector<unsigned int> _scalar_index;
 
-  /// Vector of pointers to PP values
+  /// Vector of pointers to scalar variables values
   std::vector<Real *> _scalar_vals;
 
-  /// Stores the relative location of variables (in _vars) that are connected to Functions
+  /// Stores indices into _addr that are connected to Functions this libMesh::ParsedFunction is using
   std::vector<unsigned int> _function_index;
 
-  /// Vector of functions
+  /// Vector of Functions this parsed function is using
   std::vector<Function *> _functions;
 
-  /// Vector of pointers to the variables in libMesh::ParsedFunction
+  /// Pointers to the variables that store the values of _vars inside the libMesh::ParsedFunction object
   std::vector<Real *> _addr;
 
   /// The thread id passed from owning Function object
   const THREAD_ID _tid;
 
   /**
-   * Initialization method that prepares the vars and vals for use
+   * Initialization method that prepares the _vars and _initial_vals for use
    * by the libMesh::ParsedFunction object allocated in the constructor
    */
   void initialize();

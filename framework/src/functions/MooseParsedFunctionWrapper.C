@@ -11,6 +11,7 @@
 #include "FEProblem.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
+#include "MooseUtils.h"
 
 MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem,
                                                        const std::string & function_str,
@@ -19,15 +20,11 @@ MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem
                                                        const THREAD_ID tid)
   : _feproblem(feproblem), _function_str(function_str), _vars(vars), _vals_input(vals), _tid(tid)
 {
-  // Initialize (prepares Postprocessor values)
   initialize();
 
-  // Create the libMesh::ParsedFunction
-  _function_ptr =
-      libmesh_make_unique<ParsedFunction<Real, RealGradient>>(_function_str, &_vars, &_vals);
+  _function_ptr = libmesh_make_unique<ParsedFunction<Real, RealGradient>>(
+      _function_str, &_vars, &_initial_vals);
 
-  // loop through all discovered values and store their location, so we can propagate
-  // new values into libMesh::ParsedFunction
   for (auto & v : _vars)
     _addr.push_back(&_function_ptr->getVarAddress(v));
 }
@@ -38,11 +35,8 @@ template <>
 Real
 MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
 {
-  // Update the postprocessor / libMesh::ParsedFunction references for the desired function
   update();
   updateFunctionValues(t, p);
-
-  // Evalute the function that returns a scalar
   return (*_function_ptr)(p, t);
 }
 
@@ -72,28 +66,22 @@ MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
                              ,
                          output(2)
 #endif
-                             );
+  );
 }
 
 RealGradient
 MooseParsedFunctionWrapper::evaluateGradient(Real t, const Point & p)
 {
-  // Update the postprocessor / libMesh::ParsedFunction references for the desired function
   update();
   updateFunctionValues(t, p);
-
-  // Evalute the gradient of the function
   return _function_ptr->gradient(p, t);
 }
 
 Real
 MooseParsedFunctionWrapper::evaluateDot(Real t, const Point & p)
 {
-  // Update the postprocessor / libMesh::ParsedFunction references for the desired function
   update();
   updateFunctionValues(t, p);
-
-  // Evalute the time derivative
   return _function_ptr->dot(p, t);
 }
 
@@ -103,70 +91,38 @@ MooseParsedFunctionWrapper::initialize()
   // Loop through all the input values supplied by the users.
   for (unsigned int i = 0; i < _vals_input.size(); ++i)
   {
-    Real tmp; // desired type
-    std::istringstream ss(
-        _vals_input[i]); // istringstream object for conversion from std::string to Real
-
     // Case when a Postprocessor is found by the name given in the input values
     if (_feproblem.hasPostprocessor(_vals_input[i]))
     {
-      // The PP value
       Real & pp_val = _feproblem.getPostprocessorValue(_vals_input[i]);
-
-      // Store a pointer to the Postprocessor value
+      _initial_vals.push_back(pp_val);
       _pp_vals.push_back(&pp_val);
-
-      // Store the value for passing to the the libMesh::ParsedFunction
-      _vals.push_back(pp_val);
-
-      // Store the location of this variable
       _pp_index.push_back(i);
     }
 
-    // Case when a scalar variable is bound by the name given in the input values
+    // Case when a scalar variable is found by the name given in the input values
     else if (_feproblem.hasScalarVariable(_vals_input[i]))
     {
-      // The scalar variable
       Real & scalar_val = _feproblem.getScalarVariable(_tid, _vals_input[i]).sln()[0];
-
-      // Store a pointer to the scalar value
+      _initial_vals.push_back(scalar_val);
       _scalar_vals.push_back(&scalar_val);
-
-      // Store the value for passing to the the libMesh::ParsedFunction
-      _vals.push_back(scalar_val);
-
-      // Store the location of this variable
       _scalar_index.push_back(i);
     }
 
-    // Case when a function is bound by the name given in the input values
+    // Case when a function is found by the name given in the input values
     else if (_feproblem.hasFunction(_vals_input[i]))
     {
-      // The function
       Function & fn = _feproblem.getFunction(_vals_input[i], _tid);
-
-      // Store a pointer to the function
+      _initial_vals.push_back(0);
       _functions.push_back(&fn);
-
-      // Store a value into _vals
-      _vals.push_back(0);
-
-      // Store the location of this variable
       _function_index.push_back(i);
     }
 
-    // Case when a Real is supplied, convert std::string to Real
+    // Case when a Real is supplied
     else
     {
-      // Use istringstream to convert, if it fails produce an error, otherwise add the variable to
-      // the _vals variable
-      if (!(ss >> tmp) || !ss.eof())
-        mooseError("The input value '",
-                   _vals_input[i],
-                   "' was not understood, it must be a Real Number, Postprocessor, Scalar Variable "
-                   "or Function name.");
-      else
-        _vals.push_back(tmp);
+      Real val = MooseUtils::convert<Real>(_vals_input[i], true);
+      _initial_vals.push_back(val);
     }
   }
 }
