@@ -38,7 +38,7 @@ ElementPointNeighbors::ElementPointNeighbors(const InputParameters & parameters)
 void
 ElementPointNeighbors::attachRelationshipManagersInternal(Moose::RelationshipManagerType rm_type)
 {
-  if ((_app.isSplitMesh() || _mesh.isDistributedMesh()))
+  if (_app.isSplitMesh() || _mesh.isDistributedMesh())
   {
     _point_coupling = libmesh_make_unique<PointNeighborCoupling>();
     _point_coupling->set_n_levels(_element_point_neighbor_layers);

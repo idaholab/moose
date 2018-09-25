@@ -30,21 +30,21 @@
 
 [AuxKernels]
   [evaluable0]
-    type = RMAux
+    type = ElementUOAux
     variable = evaluable0
-    rm_user_object = evaluable_uo0
+    element_user_object = evaluable_uo0
     execute_on = initial
   []
   [evaluable1]
-    type = RMAux
+    type = ElementUOAux
     variable = evaluable1
-    rm_user_object = evaluable_uo1
+    element_user_object = evaluable_uo1
     execute_on = initial
   []
   [evaluable2]
-    type = RMAux
+    type = ElementUOAux
     variable = evaluable2
-    rm_user_object = evaluable_uo2
+    element_user_object = evaluable_uo2
     execute_on = initial
   []
   [proc]
@@ -56,21 +56,21 @@
 
 [UserObjects]
   [evaluable_uo0]
-    type = AlgebraicRMTester
+    type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 2
     show_evaluable = true
     rank = 0
   []
   [evaluable_uo1]
-    type = AlgebraicRMTester
+    type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 2
     show_evaluable = true
     rank = 1
   []
   [evaluable_uo2]
-    type = AlgebraicRMTester
+    type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 2
     show_evaluable = true

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RelationshipManager.h"
+#include "MooseApp.h"
 
 template <>
 InputParameters
@@ -100,7 +101,7 @@ RelationshipManager::attachRelationshipManagers(Moose::RelationshipManagerType w
   {
     // We only need to attach GeometricRelationshipManagers when we are splitting the mesh for
     // a DistributedMesh simulation, or we are running with DistributedMesh.
-    if ((_app.isSplitMesh() || _mesh.isDistributedMesh()))
+    if (_app.isSplitMesh() || _mesh.isDistributedMesh())
     {
       attachRelationshipManagersInternal(Moose::RelationshipManagerType::GEOMETRIC);
       _cached_callbacks |= Moose::RelationshipManagerType::GEOMETRIC;

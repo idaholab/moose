@@ -61,7 +61,7 @@ void MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType /
     auto rm_params = _factory.getValidParams(buildable_type.first);
     rm_params.applyParameters(_moose_object_pars);
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
-    //    rm_params.set<Moose::RelationshipManagerType>("rm_type") = buildable_type.second;
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") = buildable_type.second;
 
     if (rm_params.areAllRequiredParamsValid())
     {

@@ -27,9 +27,9 @@
 
 [AuxKernels]
   [./random_elemental]
-    type = RMAux
+    type = ElementUOAux
     variable = ghosted_elements
-    rm_user_object = ghost_uo
+    element_user_object = neighbor_layers_tester
     execute_on = initial
 
   [../]
@@ -41,8 +41,8 @@
 []
 
 [UserObjects]
-  [./ghost_uo]
-    type = AlgebraicRMTester
+  [./neighbor_layers_tester]
+    type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 1
   [../]

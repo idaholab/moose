@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AlgebraicRMTester.h"
+#include "ElemSideNeighborLayersTester.h"
 #include "MooseMesh.h"
 
 // invalid_processor_id
 #include "libmesh/dof_object.h"
 
-registerMooseObject("MooseTestApp", AlgebraicRMTester);
+registerMooseObject("MooseTestApp", ElemSideNeighborLayersTester);
 
 template <>
 InputParameters
-validParams<AlgebraicRMTester>()
+validParams<ElemSideNeighborLayersTester>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<ElementUOProvider>();
   params.addParam<unsigned int>(
       "rank",
       DofObject::invalid_processor_id,
@@ -38,21 +38,21 @@ validParams<AlgebraicRMTester>()
   return params;
 }
 
-AlgebraicRMTester::AlgebraicRMTester(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+ElemSideNeighborLayersTester::ElemSideNeighborLayersTester(const InputParameters & parameters)
+  : ElementUOProvider(parameters),
     _rank(getParam<unsigned int>("rank")),
     _show_evaluable(getParam<bool>("show_evaluable"))
 {
 }
 
 void
-AlgebraicRMTester::initialize()
+ElemSideNeighborLayersTester::initialize()
 {
   _ghost_data.clear();
 }
 
 void
-AlgebraicRMTester::execute()
+ElemSideNeighborLayersTester::execute()
 {
   auto my_processor_id = processor_id();
 
@@ -75,13 +75,14 @@ AlgebraicRMTester::execute()
 }
 
 void
-AlgebraicRMTester::finalize()
+ElemSideNeighborLayersTester::finalize()
 {
   _communicator.set_union(_ghost_data);
 }
 
 unsigned long
-AlgebraicRMTester::getElementalValue(dof_id_type element_id) const
+ElemSideNeighborLayersTester::getElementalValueLong(dof_id_type element_id,
+                                                    const std::string & /*field_name*/) const
 {
   return _ghost_data.find(element_id) != _ghost_data.end();
 }
