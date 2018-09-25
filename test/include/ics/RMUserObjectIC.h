@@ -13,20 +13,20 @@
 #include "InitialCondition.h"
 #include "MooseMesh.h"
 
-class GhostUserObjectIC;
-class GhostUserObject;
+class RMUserObjectIC;
+class AlgebraicRMTester;
 
 template <>
-InputParameters validParams<GhostUserObjectIC>();
+InputParameters validParams<RMUserObjectIC>();
 
 /**
  * This initial condition builds a data structure that is queried
  * for initial condition information
  */
-class GhostUserObjectIC : public InitialCondition
+class RMUserObjectIC : public InitialCondition
 {
 public:
-  GhostUserObjectIC(const InputParameters & parameters);
+  RMUserObjectIC(const InputParameters & parameters);
 
   virtual Real value(const Point & /*p*/);
 
@@ -34,7 +34,7 @@ private:
   MooseMesh & _mesh;
   std::map<dof_id_type, Real> _data;
 
-  const GhostUserObject & _ghost_uo;
+  const AlgebraicRMTester & _rm_uo;
 };
 
 #endif /* GHOSTUSEROBJECTIC_H */

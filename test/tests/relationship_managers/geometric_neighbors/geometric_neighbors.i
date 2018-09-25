@@ -27,9 +27,9 @@
 
 [AuxKernels]
   [./random_elemental]
-    type = GhostAux
+    type = RMAux
     variable = ghosted_elements
-    ghost_user_object = ghost_uo
+    rm_user_object = ghost_uo
     execute_on = initial
 
   [../]
@@ -42,7 +42,7 @@
 
 [UserObjects]
   [./ghost_uo]
-    type = GhostUserObject
+    type = AlgebraicRMTester
     execute_on = initial
     element_side_neighbor_layers = 1
   [../]

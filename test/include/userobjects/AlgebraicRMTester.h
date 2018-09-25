@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GHOSTUSEROBJECT_H
-#define GHOSTUSEROBJECT_H
+#ifndef ALGEBRAICRMTESTER_H
+#define ALGEBRAICRMTESTER_H
 
 #include "GeneralUserObject.h"
 
 // Forward Declarations
-class GhostUserObject;
+class AlgebraicRMTester;
 
 template <>
-InputParameters validParams<GhostUserObject>();
+InputParameters validParams<AlgebraicRMTester>();
 
 /**
  * User object to calculate ghosted elements on a single processor or the union across all
  * processors.
  */
-class GhostUserObject : public GeneralUserObject
+class AlgebraicRMTester : public GeneralUserObject
 {
 public:
-  GhostUserObject(const InputParameters & parameters);
+  AlgebraicRMTester(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -39,4 +39,4 @@ protected:
   const bool _show_evaluable;
 };
 
-#endif // GHOSTUSEROBJECT_H
+#endif // ALGEBRAICRMTESTER_H

@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GhostUserObject.h"
+#include "AlgebraicRMTester.h"
 #include "MooseMesh.h"
 
 // invalid_processor_id
 #include "libmesh/dof_object.h"
 
-registerMooseObject("MooseTestApp", GhostUserObject);
+registerMooseObject("MooseTestApp", AlgebraicRMTester);
 
 template <>
 InputParameters
-validParams<GhostUserObject>()
+validParams<AlgebraicRMTester>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addParam<unsigned int>(
@@ -38,7 +38,7 @@ validParams<GhostUserObject>()
   return params;
 }
 
-GhostUserObject::GhostUserObject(const InputParameters & parameters)
+AlgebraicRMTester::AlgebraicRMTester(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _rank(getParam<unsigned int>("rank")),
     _show_evaluable(getParam<bool>("show_evaluable"))
@@ -46,13 +46,13 @@ GhostUserObject::GhostUserObject(const InputParameters & parameters)
 }
 
 void
-GhostUserObject::initialize()
+AlgebraicRMTester::initialize()
 {
   _ghost_data.clear();
 }
 
 void
-GhostUserObject::execute()
+AlgebraicRMTester::execute()
 {
   auto my_processor_id = processor_id();
 
@@ -75,13 +75,13 @@ GhostUserObject::execute()
 }
 
 void
-GhostUserObject::finalize()
+AlgebraicRMTester::finalize()
 {
   _communicator.set_union(_ghost_data);
 }
 
 unsigned long
-GhostUserObject::getElementalValue(dof_id_type element_id) const
+AlgebraicRMTester::getElementalValue(dof_id_type element_id) const
 {
   return _ghost_data.find(element_id) != _ghost_data.end();
 }

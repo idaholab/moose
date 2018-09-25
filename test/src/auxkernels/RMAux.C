@@ -7,33 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GhostAux.h"
-#include "GhostUserObject.h"
+#include "RMAux.h"
+#include "AlgebraicRMTester.h"
 
-registerMooseObject("MooseTestApp", GhostAux);
+registerMooseObject("MooseTestApp", RMAux);
 
 template <>
 InputParameters
-validParams<GhostAux>()
+validParams<RMAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<UserObjectName>("ghost_user_object",
-                                  "The GhostUserObject where this Aux pulls values from");
+  params.addParam<UserObjectName>("rm_user_object",
+                                  "The RMUserObject where this Aux pulls values from");
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   params.addClassDescription("Aux Kernel to display ghosted elements from a single processor or "
                              "the union on all processors");
   return params;
 }
 
-GhostAux::GhostAux(const InputParameters & params)
-  : AuxKernel(params), _ghost_uo(getUserObject<GhostUserObject>("ghost_user_object"))
+RMAux::RMAux(const InputParameters & params)
+  : AuxKernel(params), _rm_uo(getUserObject<AlgebraicRMTester>("rm_user_object"))
 {
   if (isNodal())
     mooseError("This AuxKernel only supports Elemental fields");
 }
 
 Real
-GhostAux::computeValue()
+RMAux::computeValue()
 {
-  return _ghost_uo.getElementalValue(_current_elem->id());
+  return _rm_uo.getElementalValue(_current_elem->id());
 }

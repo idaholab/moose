@@ -30,21 +30,21 @@
 
 [AuxKernels]
   [evaluable0]
-    type = GhostAux
+    type = RMAux
     variable = evaluable0
-    ghost_user_object = evaluable_uo0
+    rm_user_object = evaluable_uo0
     execute_on = initial
   []
   [evaluable1]
-    type = GhostAux
+    type = RMAux
     variable = evaluable1
-    ghost_user_object = evaluable_uo1
+    rm_user_object = evaluable_uo1
     execute_on = initial
   []
   [evaluable2]
-    type = GhostAux
+    type = RMAux
     variable = evaluable2
-    ghost_user_object = evaluable_uo2
+    rm_user_object = evaluable_uo2
     execute_on = initial
   []
   [proc]
@@ -56,21 +56,21 @@
 
 [UserObjects]
   [evaluable_uo0]
-    type = GhostUserObject
+    type = AlgebraicRMTester
     execute_on = initial
     element_side_neighbor_layers = 2
     show_evaluable = true
     rank = 0
   []
   [evaluable_uo1]
-    type = GhostUserObject
+    type = AlgebraicRMTester
     execute_on = initial
     element_side_neighbor_layers = 2
     show_evaluable = true
     rank = 1
   []
   [evaluable_uo2]
-    type = GhostUserObject
+    type = AlgebraicRMTester
     execute_on = initial
     element_side_neighbor_layers = 2
     show_evaluable = true

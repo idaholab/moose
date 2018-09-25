@@ -13,26 +13,25 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class GhostAux;
-class GhostUserObject;
+class RMAux;
+class AlgebraicRMTester;
 
 template <>
-InputParameters validParams<GhostAux>();
+InputParameters validParams<RMAux>();
 
 /**
- * This AuxKernel retrieves values from the GhostUserObject
- * and displays them in an elemental aux field. This class
- * throws an error if used on a Lagrange basis.
+ * This AuxKernel retrieves values from the RMTest object and displays them in an elemental aux
+ * field. This class throws an error if used on a Lagrange basis.
  */
-class GhostAux : public AuxKernel
+class RMAux : public AuxKernel
 {
 public:
-  GhostAux(const InputParameters & params);
+  RMAux(const InputParameters & params);
 
 protected:
   virtual Real computeValue() override;
 
-  const GhostUserObject & _ghost_uo;
+  const AlgebraicRMTester & _rm_uo;
 };
 
 #endif // GHOSTAUX_H
