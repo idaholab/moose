@@ -228,7 +228,7 @@ outputRelationshipManagerInformation(const MooseApp & app)
   if (info_strings.size())
   {
     for (const auto & info_pair : info_strings)
-      oss << std::setw(console_field_width) << std::string("  ") + info_pair.first << ": "
+      oss << std::setw(console_field_width) << std::string("  ") + info_pair.first + ": "
           << info_pair.second << '\n';
     oss << '\n';
   }

@@ -63,6 +63,76 @@
     max_parallel = 3
   [../]
 
+  [./algebraic_neighbor_one_layer_2D]
+    requirement = 'Enable algebraic relationship manager'
+    design = '/relationship_manager.md'
+    issues = '#11981'
+    type = 'Exodiff'
+    input = 'algebraic_neighbors.i'
+    cli_args = 'Outputs/file_base=algebraic_neighbor_one_layer_2D'
+    exodiff = 'algebraic_neighbor_one_layer_2D.e'
+
+    petsc_version = '>=3.8.3'
+    min_parallel = 3
+    max_parallel = 3
+  [../]
+
+  [./algebraic_neighbor_two_layers_2D]
+    requirement = 'Enable algebraic relationship manager'
+    design = '/relationship_manager.md'
+    issues = '#11981'
+    type = 'Exodiff'
+    input = 'algebraic_neighbors.i'
+    cli_args = 'Outputs/file_base=algebraic_neighbor_two_layers_2D UserObjects/ghost_uo/element_side_neighbor_layers=2'
+    exodiff = 'algebraic_neighbor_two_layers_2D.e'
+
+    petsc_version = '>=3.8.3'
+    min_parallel = 3
+    max_parallel = 3
+  [../]
+
+  [./algebraic_neighbor_two_layers_2D_replicated]
+    requirement = 'Enable algebraic relationship manager'
+    design = '/relationship_manager.md'
+    issues = '#11981'
+    type = 'Exodiff'
+    input = 'algebraic_neighbors.i'
+    cli_args = 'Outputs/file_base=algebraic_neighbor_two_layers_2D_replicated Mesh/parallel_type=replicated UserObjects/ghost_uo/element_side_neighbor_layers=2'
+    exodiff = 'algebraic_neighbor_two_layers_2D_replicated.e'
+
+    petsc_version = '>=3.8.3'
+    min_parallel = 3
+    max_parallel = 3
+  [../]
+
+  [./algebraic_neighbor_one_layer_3D]
+    requirement = 'Enable algebraic relationship manager'
+    design = '/relationship_manager.md'
+    issues = '#11981'
+    type = 'Exodiff'
+    input = 'algebraic_neighbors.i'
+    cli_args = 'Outputs/file_base=algebraic_neighbor_one_layer_3D Mesh/dim=3 Mesh/nz=8'
+    exodiff = 'algebraic_neighbor_one_layer_3D.e'
+
+    petsc_version = '>=3.8.3'
+    min_parallel = 3
+    max_parallel = 3
+  [../]
+
+  [./algebraic_neighbor_two_layers_3D]
+    requirement = 'Enable algebraic relationship manager'
+    design = '/relationship_manager.md'
+    issues = '#11981'
+    type = 'Exodiff'
+    input = 'algebraic_neighbors.i'
+    cli_args = 'Outputs/file_base=algebraic_neighbor_two_layers_3D Mesh/dim=3 Mesh/nz=8 UserObjects/ghost_uo/element_side_neighbor_layers=2'
+    exodiff = 'algebraic_neighbor_two_layers_3D.e'
+
+    petsc_version = '>=3.8.3'
+    min_parallel = 3
+    max_parallel = 3
+  [../]
+
 #  TODO: Need a mesh that can trigger this test case
 #  [./geometric_point_neighbor]
 #    type = 'Exodiff'

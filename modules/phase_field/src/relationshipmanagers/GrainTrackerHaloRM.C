@@ -25,6 +25,7 @@ validParams<GrainTrackerHaloRM>()
       "halo_level>=1 & halo_level<=10",
       "The thickness of the halo surrounding each feature.");
 
+  params.set<Moose::RelationshipManagerType>("rm_type") = Moose::RelationshipManagerType::Geometric;
   return params;
 }
 

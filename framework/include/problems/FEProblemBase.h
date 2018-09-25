@@ -1299,6 +1299,8 @@ public:
    */
   void parentOutputPositionChanged();
 
+  ConstElemRange * getEvaluableElementRange();
+
   ///@{
   /**
    * These methods are used to determine whether stateful material properties need to be stored on
@@ -1728,6 +1730,8 @@ protected:
 #endif // LIBMESH_HAVE_PETSC
 
   std::shared_ptr<LineSearch> _line_search;
+
+  std::unique_ptr<ConstElemRange> _evaluable_local_elem_range;
 
 private:
   bool _error_on_jacobian_nonzero_reallocation;
