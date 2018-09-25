@@ -3,6 +3,10 @@
   dim = 2
   nx = 8
   ny = 8
+
+  # We are testing geometric ghosted functors
+  # so we have to use distributed mesh
+  parallel_type = distributed
 []
 
 [GlobalParams]
@@ -11,43 +15,41 @@
 []
 
 [Variables]
-  [u]
-    order = FIRST
-    family = LAGRANGE
-  []
+  [./u]
+  [../]
 []
 
 [AuxVariables]
-  [evaluable0]
+  [ghosting0]
   []
-  [evaluable1]
+  [ghosting1]
   []
-  [evaluable2]
+  [ghosting2]
   []
   [proc]
   []
 []
 
 [AuxKernels]
-  [evaluable0]
+  [ghosting0]
     type = ElementUOAux
-    variable = evaluable0
-    element_user_object = evaluable_uo0
-    field_name = "evaluable"
+    variable = ghosting0
+    element_user_object = ghosting_uo0
+    field_name = "ghosted"
     execute_on = initial
   []
-  [evaluable1]
+  [ghosting1]
     type = ElementUOAux
-    variable = evaluable1
-    element_user_object = evaluable_uo1
-    field_name = "evaluable"
+    variable = ghosting1
+    element_user_object = ghosting_uo1
+    field_name = "ghosted"
     execute_on = initial
   []
-  [evaluable2]
+  [ghosting2]
     type = ElementUOAux
-    variable = evaluable2
-    element_user_object = evaluable_uo2
-    field_name = "evaluable"
+    variable = ghosting2
+    element_user_object = ghosting_uo2
+    field_name = "ghosted"
     execute_on = initial
   []
   [proc]
@@ -58,19 +60,19 @@
 []
 
 [UserObjects]
-  [evaluable_uo0]
+  [ghosting_uo0]
     type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 2
     rank = 0
   []
-  [evaluable_uo1]
+  [ghosting_uo1]
     type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 2
     rank = 1
   []
-  [evaluable_uo2]
+  [ghosting_uo2]
     type = ElemSideNeighborLayersTester
     execute_on = initial
     element_side_neighbor_layers = 2

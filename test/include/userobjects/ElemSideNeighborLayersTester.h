@@ -34,8 +34,9 @@ public:
 
 protected:
   std::set<dof_id_type> _ghost_data;
+  std::set<dof_id_type> _evaluable_data;
+
   const dof_id_type _rank;
-  const bool _show_evaluable;
 };
 
 #endif // ELEMSIDENEIGHBORLAYERSTESTER_H

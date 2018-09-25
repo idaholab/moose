@@ -24,8 +24,6 @@ validParams<ElemSideNeighborLayersTester>()
       "rank",
       DofObject::invalid_processor_id,
       "The rank for which the ghosted elements are recorded (Default: ALL)");
-  params.addParam<bool>(
-      "show_evaluable", false, "Instead of showing ghosts, shows evaluable elements");
 
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
 
@@ -39,9 +37,7 @@ validParams<ElemSideNeighborLayersTester>()
 }
 
 ElemSideNeighborLayersTester::ElemSideNeighborLayersTester(const InputParameters & parameters)
-  : ElementUOProvider(parameters),
-    _rank(getParam<unsigned int>("rank")),
-    _show_evaluable(getParam<bool>("show_evaluable"))
+  : ElementUOProvider(parameters), _rank(getParam<unsigned int>("rank"))
 {
 }
 
@@ -58,19 +54,14 @@ ElemSideNeighborLayersTester::execute()
 
   if (_rank == DofObject::invalid_processor_id || my_processor_id == _rank)
   {
-    if (_show_evaluable)
-    {
-      for (const auto & current_elem : _fe_problem.getEvaluableElementRange())
-        _ghost_data.emplace(current_elem->id());
-    }
-    else
-    {
-      const auto & mesh = _subproblem.mesh().getMesh();
+    for (const auto & current_elem : _fe_problem.getEvaluableElementRange())
+      _evaluable_data.emplace(current_elem->id());
 
-      for (const auto & elem : mesh.active_element_ptr_range())
-        if (elem->processor_id() != my_processor_id)
-          _ghost_data.emplace(elem->id());
-    }
+    const auto & mesh = _subproblem.mesh().getMesh();
+
+    for (const auto & elem : mesh.active_element_ptr_range())
+      if (elem->processor_id() != my_processor_id)
+        _ghost_data.emplace(elem->id());
   }
 }
 
@@ -78,11 +69,17 @@ void
 ElemSideNeighborLayersTester::finalize()
 {
   _communicator.set_union(_ghost_data);
+  _communicator.set_union(_evaluable_data);
 }
 
 unsigned long
 ElemSideNeighborLayersTester::getElementalValueLong(dof_id_type element_id,
-                                                    const std::string & /*field_name*/) const
+                                                    const std::string & field_name) const
 {
-  return _ghost_data.find(element_id) != _ghost_data.end();
+  if (field_name == "evaluable")
+    return _evaluable_data.find(element_id) != _evaluable_data.end();
+  else if (field_name == "ghosted")
+    return _ghost_data.find(element_id) != _ghost_data.end();
+
+  return -1;
 }

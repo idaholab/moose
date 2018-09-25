@@ -32,6 +32,13 @@ AlgebraicRelationshipManager::AlgebraicRelationshipManager(const InputParameters
 void
 AlgebraicRelationshipManager::attachAlgebraicFunctorHelper(GhostingFunctor & gf) const
 {
+  /**
+   * If the user has restricted or demoted this RelationshipManager type (e.g. We only want the
+   * geometric portion) - do nothing.
+   */
+  if (_rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+    return;
+
   auto & problem = _app.getExecutioner()->feProblem();
 
   problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(gf);

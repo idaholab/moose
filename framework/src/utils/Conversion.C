@@ -330,19 +330,34 @@ stringToEnum<MffdType>(const std::string & s)
   return mffd_type_to_enum[upper];
 }
 
+template <>
+RelationshipManagerType
+stringToEnum<RelationshipManagerType>(const std::string & s)
+{
+  initRMType();
+
+  std::string upper(s);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  if (!rm_type_to_enum.count(upper))
+    mooseError("Unknown RelationshipManager type: ", upper);
+
+  return rm_type_to_enum[upper];
+}
+
 // Definition in MooseTypes.h
 std::string
-stringify(const Moose::RelationshipManagerType & t)
+stringify(const RelationshipManagerType & t)
 {
   switch (t)
   {
-    case Moose::RelationshipManagerType::DEFAULT:
+    case RelationshipManagerType::DEFAULT:
       return "DEFAULT";
-    case Moose::RelationshipManagerType::GEOMETRIC:
+    case RelationshipManagerType::GEOMETRIC:
       return "GEOMETRIC";
-    case Moose::RelationshipManagerType::ALGEBRAIC:
+    case RelationshipManagerType::ALGEBRAIC:
       return "ALGEBRAIC";
-    case Moose::RelationshipManagerType::COUPLING:
+    case RelationshipManagerType::COUPLING:
       return "COUPLING";
     default:
       return "ERROR";
