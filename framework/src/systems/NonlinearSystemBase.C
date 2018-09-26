@@ -47,6 +47,8 @@
 #include "NodeElemConstraint.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
+#include "LMConstraint.h"
+#include "TangentialLMConstraint.h"
 #include "ScalarKernel.h"
 #include "Parser.h"
 #include "Split.h"
@@ -1835,7 +1837,8 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
             _fe_problem.prepareAssembly(0);
             for (const auto & nfc : constraints)
             {
-              if (dynamic_cast<LMConstraint *>(nfc) || dynamic_cast<TangentialLMConstraint *>(nfc))
+              if (std::dynamic_pointer_cast<LMConstraint>(nfc) ||
+                  std::dynamic_pointer_cast<TangentialLMConstraint>(nfc))
               {
                 std::vector<dof_id_type> slave_dofs(1, nfc->variable().nodalDofIndex());
                 nfc->_Kee.resize(1, 1);

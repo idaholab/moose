@@ -12,6 +12,9 @@
 
 #include "libmesh/perf_log.h"
 #include "libmesh/libmesh_common.h"
+#ifdef LIBMESH_HAVE_PETSC
+#include <petscvec.h>
+#endif
 #include "XTermConstants.h"
 
 #include <set>
@@ -113,8 +116,6 @@ extern const ExecFlagType EXEC_SAME_AS_MULTIAPP;
 void mooseVecView(NumericVector<Real> & vec);
 void mooseMatView(SparseMatrix<Real> & mat);
 Real mooseVecEntry(NumericVector<Real> & vec, const unsigned i);
-
-typedef struct Vec Vec;
 
 PetscScalar moosePetscVecEntry(Vec x, const unsigned i);
 #endif
