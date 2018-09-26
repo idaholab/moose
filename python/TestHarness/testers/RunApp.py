@@ -81,6 +81,12 @@ class RunApp(Tester):
             self.setStatus(self.skip)
             return False
 
+        if self.specs.isValid('min_threads') or self.specs.isValid('max_threads'):
+            if 'NONE' in options._checks['threading'] and self.getThreads(options) > 1:
+                self.addCaveats('threading_model=None')
+                self.setStatus(self.skip)
+                return False
+
         return True
 
     def getThreads(self, options):
