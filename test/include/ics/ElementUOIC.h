@@ -35,7 +35,7 @@ private:
 
   const ElementUOProvider & _elem_uo;
   const std::string _field_name;
-  const std::string _field_type;
+  const MooseEnum _field_type;
 };
 
 #endif /* ELEMENTUOIC_H */

@@ -32,13 +32,17 @@ validParams<ElementUOIC>()
 ElementUOIC::ElementUOIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
-    _elem_uo(getUserObject<ElementUOProvider>("element_user_object"))
+    _elem_uo(getUserObject<ElementUOProvider>("element_user_object")),
+    _field_name(isParamValid("field_name") ? getParam<std::string>("field_name") : "default"),
+    _field_type(getParam<MooseEnum>("field_type"))
 {
 }
 
 Real
 ElementUOIC::value(const Point & /*p*/)
 {
+  mooseAssert(_current_elem, "Current Elem is nullptr");
+
   if (_field_type == "long")
     return _elem_uo.getElementalValueLong(_current_elem->id(), _field_name);
   else

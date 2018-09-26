@@ -30,12 +30,13 @@
 
 [AuxKernels]
   [./random_elemental]
-    type = GhostAux
+    type = ElementUOAux
     variable = ghosted_elements
-    ghost_user_object = ghost_uo
+    element_user_object = ghost_uo
+    field_name = "ghosted"
     execute_on = initial
   [../]
-  [./proc ]
+  [./proc]
     type = ProcessorIDAux
     variable = proc
     execute_on = initial
@@ -44,7 +45,7 @@
 
 [UserObjects]
   [./ghost_uo]
-    type = GhostUserObject
+    type = ElemSideNeighborLayersGeomTester
     execute_on = initial
     element_side_neighbor_layers = 2
   [../]

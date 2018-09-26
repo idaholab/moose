@@ -17,8 +17,8 @@ InputParameters
 validParams<ElementUOAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<UserObjectName>("element_user_object",
-                                  "The ElementUOProvider where this Aux pulls values from");
+  params.addRequiredParam<UserObjectName>("element_user_object",
+                                          "The ElementUOProvider where this Aux pulls values from");
 
   params.addParam<std::string>("field_name",
                                "The field name to retrieve from the ElementUOProvider");
