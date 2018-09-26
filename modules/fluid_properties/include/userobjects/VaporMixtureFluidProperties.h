@@ -161,6 +161,25 @@ public:
   virtual Real c_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
+   * Sound speed and its derivatives from pressure and temperature
+   *
+   * @param[in] p   pressure
+   * @param[in] T   temperature
+   * @param[in] x   vapor mass fraction values
+   * @param[out] c       sound speed
+   * @param[out] dc_dp   derivative of sound speed w.r.t. pressure
+   * @param[out] dc_dT   derivative of sound speed w.r.t. temperature
+   * @param[out] dc_dx   derivative of sound speed w.r.t. vapor mass fraction values
+   */
+  virtual void c_from_p_T(Real p,
+                          Real T,
+                          std::vector<Real> x,
+                          Real & c,
+                          Real & dc_dp,
+                          Real & dc_dT,
+                          std::vector<Real> & dc_dx) const = 0;
+
+  /**
    * Isobaric (constant-pressure) specific heat from pressure and temperature
    *
    * @return Isobaric (constant-pressure) specific heat

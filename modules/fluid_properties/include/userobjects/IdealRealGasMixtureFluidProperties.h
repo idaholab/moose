@@ -7,71 +7,57 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GENERALVAPORMIXTUREFLUIDPROPERTIES_H
-#define GENERALVAPORMIXTUREFLUIDPROPERTIES_H
+#ifndef IDEALREALGASMIXTUREFLUIDPROPERTIES_H
+#define IDEALREALGASMIXTUREFLUIDPROPERTIES_H
 
 #include "VaporMixtureFluidProperties.h"
 
-class GeneralVaporMixtureFluidProperties;
+class IdealRealGasMixtureFluidProperties;
 class SinglePhaseFluidProperties;
 
 template <>
-InputParameters validParams<GeneralVaporMixtureFluidProperties>();
+InputParameters validParams<IdealRealGasMixtureFluidProperties>();
 
 /**
  * Class for fluid properties of an arbitrary vapor mixture
  *
- * This model assumes that the gases occupy separate volumes, but share the same
- * pressure \f$p\f$ and temperature \f$T\f$. Specific volume and specific
- * internal energy have the following mixture relations, where \f$i\f$ denotes
- * the index of the gas in the mixture, and the lack of a subscript denotes the
- * mixture quantity:
- * \f[
- *   v = \sum\limits_i^N x_i v_i(p, T) ,
- * \f]
- * \f[
- *   e = \sum\limits_i^N x_i e_i(p, T) .
- * \f]
- * Here \f$v_i(p, T)\f$ and \f$e_i(p, T)\f$ denote the equation-of-state calls
- * from the respective gas from \f$p\f$ and \f$T\f$. Therefore, if \f$v\f$ and
- * \f$e\f$ are known, then to get \f$p\f$ and \f$T\f$, a size-2 nonlinear system
- * needs to be solved.
+ *
  */
-class GeneralVaporMixtureFluidProperties : public VaporMixtureFluidProperties
+class IdealRealGasMixtureFluidProperties : public VaporMixtureFluidProperties
 {
 public:
-  GeneralVaporMixtureFluidProperties(const InputParameters & parameters);
-  virtual ~GeneralVaporMixtureFluidProperties();
+  IdealRealGasMixtureFluidProperties(const InputParameters & parameters);
+  virtual ~IdealRealGasMixtureFluidProperties();
 
   virtual unsigned int getNumberOfSecondaryVapors() const override { return _n_secondary_vapors; }
-  virtual Real p_from_v_e(Real v, Real e, const std::vector<Real> & x) const override;
+  virtual Real p_from_v_e(Real v, Real e, std::vector<Real> x) const override;
   virtual void p_from_v_e(Real v,
                           Real e,
-                          const std::vector<Real> & x,
+                          std::vector<Real> x,
                           Real & p,
                           Real & dp_dv,
                           Real & dp_de,
                           std::vector<Real> & dp_dx) const override;
-  virtual Real T_from_v_e(Real v, Real e, const std::vector<Real> & x) const override;
+  virtual Real T_from_v_e(Real v, Real e, std::vector<Real> x) const override;
   virtual void T_from_v_e(Real v,
                           Real e,
-                          const std::vector<Real> & x,
+                          std::vector<Real> x,
                           Real & T,
                           Real & dT_dv,
                           Real & dT_de,
                           std::vector<Real> & dT_dx) const override;
-  virtual Real rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual Real rho_from_p_T(Real p, Real T, std::vector<Real> x) const override;
   virtual void rho_from_p_T(Real p,
                             Real T,
-                            const std::vector<Real> & x,
+                            std::vector<Real> x,
                             Real & rho,
                             Real & drho_dp,
                             Real & drho_dT,
                             std::vector<Real> & drho_dx) const override;
-  virtual Real e_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual Real e_from_p_T(Real p, Real T, std::vector<Real> x) const override;
   virtual void e_from_p_T(Real p,
                           Real T,
-                          const std::vector<Real> & x,
+                          std::vector<Real> x,
                           Real & e,
                           Real & de_dp,
                           Real & de_dT,
@@ -96,7 +82,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real v_from_p_T(Real p, Real T, const std::vector<Real> & x) const;
+  virtual Real v_from_p_T(Real p, Real T, std::vector<Real> x) const;
 
   /**
    * Specific volume and its derivatives from pressure and temperature
@@ -112,7 +98,7 @@ public:
    */
   virtual void v_from_p_T(Real p,
                           Real T,
-                          const std::vector<Real> & x,
+                          std::vector<Real> x,
                           Real & v,
                           Real & dv_dp,
                           Real & dv_dT,
@@ -127,7 +113,7 @@ public:
    * @param[out] p  pressure
    * @param[out] T  temperature
    */
-  void p_T_from_v_e(Real v, Real e, const std::vector<Real> & x, Real & p, Real & T) const;
+  void p_T_from_v_e(Real v, Real e, std::vector<Real> x, Real & p, Real & T) const;
 
   /**
    * Pressure and temperature from specific volume and specific internal energy
@@ -146,7 +132,7 @@ public:
    */
   void p_T_from_v_e(Real v,
                     Real e,
-                    const std::vector<Real> & x,
+                    std::vector<Real> x,
                     Real & p,
                     Real & dp_dv,
                     Real & dp_de,
@@ -155,6 +141,36 @@ public:
                     Real & dT_dv,
                     Real & dT_de,
                     std::vector<Real> & dT_dx) const;
+
+  // new functions from (T,v,x)
+  Real p_from_T_v(Real T, Real v, std::vector<Real> x) const;
+  void p_from_T_v(Real T, Real v, std::vector<Real> x, Real & p, Real & dp_dT, Real & dp_dv) const;
+  void p_from_T_v(Real T,
+                  Real v,
+                  std::vector<Real> x,
+                  Real & p,
+                  Real & dp_dT,
+                  Real & dp_dv,
+                  std::vector<Real> & dp_dx) const;
+  Real e_from_T_v(Real T, Real v, std::vector<Real> x) const;
+  void e_from_T_v(Real T,
+                  Real v,
+                  std::vector<Real> x,
+                  Real & e,
+                  Real & de_dT,
+                  Real & de_dv,
+                  std::vector<Real> & de_dx) const;
+  void s_from_T_v(Real T, Real v, std::vector<Real> x, Real & s, Real & ds_dT, Real & ds_dv) const;
+
+  Real c_from_T_v(Real T, Real v, std::vector<Real> x) const;
+
+  void c_from_T_v(Real T,
+                  Real v,
+                  std::vector<Real> x,
+                  Real & c,
+                  Real & dc_dT,
+                  Real & dc_dv,
+                  std::vector<Real> & dc_dx) const;
 
 protected:
   /// Primary vapor fluid properties
@@ -167,23 +183,25 @@ protected:
   /// Number of secondary vapors
   const unsigned int _n_secondary_vapors;
 
-  /// Initial guess for pressure
-  const Real _p_initial_guess;
-  /// Initial guess for temperature
-  const Real _T_initial_guess;
-  /// Damping factor for Newton updates
-  const Real _newton_damping;
-  /// Relative tolerance for Newton iteration
-  const Real _newton_rel_tol;
-  /// Maximum iterations for Newton iteration
-  const unsigned int _newton_max_its;
-  /// Option to update guesses after each converged solve
-  const bool _update_guesses;
+  /*
+    /// Initial guess for pressure
+    const Real _p_initial_guess;
+    /// Initial guess for temperature
+    const Real _T_initial_guess;
+    /// Damping factor for Newton updates
+    const Real _newton_damping;
+    /// Relative tolerance for Newton iteration
+    const Real _newton_rel_tol;
+    /// Maximum iterations for Newton iteration
+    const unsigned int _newton_max_its;
+    /// Option to update guesses after each converged solve
+    const bool _update_guesses;
 
-  /// Current guess for pressure (in case guess is chosen to be changed)
-  mutable Real _p_guess;
-  /// Current guess for temperature (in case guess is chosen to be changed)
-  mutable Real _T_guess;
+    /// Current guess for pressure (in case guess is chosen to be changed)
+    mutable Real _p_guess;
+    /// Current guess for temperature (in case guess is chosen to be changed)
+    mutable Real _T_guess;
+  */
 };
 
-#endif /* GENERALVAPORMIXTUREFLUIDPROPERTIES_H */
+#endif /* IDEALREALGASMIXTUREFLUIDPROPERTIES_H */

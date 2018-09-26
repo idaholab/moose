@@ -262,6 +262,18 @@ GeneralVaporMixtureFluidProperties::c_from_p_T(Real p, Real T, const std::vector
   return v * std::sqrt(-1. / dv_dp_s);
 }
 
+void
+GeneralVaporMixtureFluidProperties::c_from_p_T(Real /*p*/,
+                                               Real /*T*/,
+                                               std::vector<Real> /*x*/,
+                                               Real & /*c*/,
+                                               Real & /*dc_dp*/,
+                                               Real & /*dc_dT*/,
+                                               std::vector<Real> & /*dc_dx*/) const
+{
+  mooseError("Not Implemented.");
+}
+
 Real
 GeneralVaporMixtureFluidProperties::cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {

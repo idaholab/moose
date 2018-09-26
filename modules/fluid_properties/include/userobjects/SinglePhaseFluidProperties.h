@@ -285,6 +285,21 @@ public:
    * @param[in] T     temperature
    * @param[in] v     specific volume
    */
+  virtual Real e_spndl_from_v(Real v) const;
+
+  /**
+   * Specific internal energy from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual void v_e_spndl_from_T(Real T, Real & v, Real & e) const;
+
+  /**
+   * Specific volume and specific internal energy from temerature at the vapor spinodal
+   *
+   * @param[in] T     temerature
+   */
   virtual Real e_from_T_v(Real T, Real v) const;
 
   /**
@@ -354,6 +369,14 @@ public:
    * @param[out] ds_dv   derivative of specific entropy w.r.t. specific volume
    */
   virtual void s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real & ds_dv) const;
+
+  /**
+   * Specific isochoric heat capacity from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual Real cv_from_T_v(Real T, Real v) const;
 
   /**
    * Specific enthalpy from pressure and temperature
