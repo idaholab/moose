@@ -556,7 +556,7 @@ bool _throw_on_error = false;
 
 #ifdef LIBMESH_HAVE_PETSC
 void
-moose_vec_view(NumericVector<Real> & vec)
+mooseVecView(NumericVector<Real> & vec)
 {
   PetscVector<Real> & petsc_vec = dynamic_cast<PetscVector<Real> &>(vec);
 
@@ -564,7 +564,7 @@ moose_vec_view(NumericVector<Real> & vec)
 }
 
 void
-moose_mat_view(SparseMatrix<Real> & mat)
+mooseMatView(SparseMatrix<Real> & mat)
 {
   PetscMatrix<Real> & petsc_mat = dynamic_cast<PetscMatrix<Real> &>(mat);
 
@@ -572,7 +572,7 @@ moose_mat_view(SparseMatrix<Real> & mat)
 }
 
 Real
-moose_vec_entry(NumericVector<Real> & vec, const unsigned i)
+mooseVecEntry(NumericVector<Real> & vec, const unsigned i)
 {
   PetscVector<Real> & petsc_vec = dynamic_cast<PetscVector<Real> &>(vec);
 
@@ -580,7 +580,7 @@ moose_vec_entry(NumericVector<Real> & vec, const unsigned i)
 }
 
 PetscScalar
-moose_petsc_vec_entry(Vec x, const unsigned i)
+moosePetscVecEntry(Vec x, const unsigned i)
 {
   const PetscScalar * read_only_values;
   VecGetArrayRead(x, &read_only_values);

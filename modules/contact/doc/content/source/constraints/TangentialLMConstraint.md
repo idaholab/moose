@@ -23,7 +23,7 @@ where:
 and $\vec{v}_T$ is the tangential velocity, $\vec{t}_T$ is the tangential
 stress, $\mu$ is the friction coefficient, and $p_N$ is the normal contact
 pressure. The KKT conditions are implemented using a Nonlinear Complimentarity
-Function (NCP), specifically the Fischer-Burmeister function:
+Problem (NCP) function, specifically the Fischer-Burmeister function:
 
 \begin{equation}
     \phi_{FB}(a, b) = a + b - \sqrt{a^2 + b^2}

@@ -110,12 +110,13 @@ extern const ExecFlagType EXEC_SAME_AS_MULTIAPP;
 #endif
 
 #ifdef LIBMESH_HAVE_PETSC
-void moose_vec_view(NumericVector<Real> & vec);
-void moose_mat_view(SparseMatrix<Real> & mat);
-Real moose_vec_entry(NumericVector<Real> & vec, const unsigned i);
+void mooseVecView(NumericVector<Real> & vec);
+void mooseMatView(SparseMatrix<Real> & mat);
+Real mooseVecEntry(NumericVector<Real> & vec, const unsigned i);
 
-#include <petscsnes.h>
-PetscScalar moose_petsc_vec_entry(Vec x, const unsigned i);
+typedef struct Vec Vec;
+
+PetscScalar moosePetscVecEntry(Vec x, const unsigned i);
 #endif
 
 namespace Moose
