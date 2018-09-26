@@ -15,6 +15,7 @@
 #include "BoundaryRestrictable.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 #include "KernelBase.h"
+#include "BoundaryCondition.h"
 #include "Material.h"
 #include "MaterialProperty.h"
 #include "MooseVariableFE.h"
@@ -144,7 +145,7 @@ private:
 
   // check if the speciified variable name is not the variable this kernel is acting on (always true
   // for any other type of object)
-  bool isNotKernelVariable(const VariableName & name);
+  bool isNotObjectVariable(const VariableName & name);
 
   /// Reference to FEProblemBase
   FEProblemBase & _dmi_fe_problem;
@@ -327,8 +328,8 @@ DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyNam
       // if the derivative exists make sure the variable is coupled
       if (haveMaterialProperty<U>(propertyName(base, cj)))
       {
-        // kernels to not have the variable they are acting on in coupled_moose_vars
-        bool is_missing = isNotKernelVariable(jname);
+        // kernels and BCs to not have the variable they are acting on in coupled_moose_vars
+        bool is_missing = isNotObjectVariable(jname);
 
         for (unsigned int k = 0; k < ncoupled; ++k)
           if (this->_coupled_moose_vars[k]->name() == jname)
@@ -440,17 +441,20 @@ DerivativeMaterialInterface<T>::validateDerivativeMaterialPropertyBase(const std
 
 template <class T>
 inline bool
-DerivativeMaterialInterface<T>::isNotKernelVariable(const VariableName & name)
+DerivativeMaterialInterface<T>::isNotObjectVariable(const VariableName & name)
 {
   // try to cast this to a Kernel pointer
-  KernelBase * k = dynamic_cast<KernelBase *>(this);
+  KernelBase * kernel_ptr = dynamic_cast<KernelBase *>(this);
+  if (kernel_ptr != nullptr)
+    return kernel_ptr->variable().name() != name;
 
-  // This interface is not templated on a class derived from Kernel
-  if (k == NULL)
-    return true;
+  // try to cast this to a BoundaryCondition pointer
+  BoundaryCondition * bc_ptr = dynamic_cast<BoundaryCondition *>(this);
+  if (bc_ptr != nullptr)
+    return bc_ptr->variable().name() != name;
 
-  // We are templated on a kernel class, so we check if the kernel variable
-  return k->variable().name() != name;
+  // This interface is not templated on a class derived from either Kernel or BC
+  return true;
 }
 
 #endif // DERIVATIVEMATERIALINTERFACE_H
