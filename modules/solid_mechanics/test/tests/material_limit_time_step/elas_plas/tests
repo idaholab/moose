@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'nafems_nl1_lim.i'
     exodiff = 'nafems_nl1_lim_out.e'
+    abs_zero = 1e-9
   [../]
   [./nl1_lim_on_initial]
     type = 'CSVDiff'
@@ -15,6 +16,7 @@
     type = 'Exodiff'
     input = 'nafems_nl1_lim_no_comb.i'
     exodiff = 'nafems_nl1_lim_out.e'
+    abs_zero = 1e-9
     cli_args = 'Outputs/file_base=nafems_nl1_lim_out'
     prereq = 'nl1_lim'
   [../]

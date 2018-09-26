@@ -3,6 +3,8 @@
     type = 'Exodiff'
     input = 'nafems_nl1_lim.i'
     exodiff = 'nafems_nl1_lim_out.e'
+    abs_zero = 1e-9
+    requirement = 'The system to limit the analysis time step based on material behavior shall correctly function when used with an isotropic plasticity model.'
   [../]
   [./nl1_lim_on_initial]
     type = 'CSVDiff'

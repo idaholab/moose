@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'stress_concentration.i'
     exodiff = 'stress_concentration_out.e'
-    abs_zero = 2e-5
+    custom_cmp = 'stress_concentration_out.cmp'
     max_parallel = 1 #This restriction will be removed once #12036 is resolved.
     mesh_mode = replicated
     requirement = "In areas of high concentration gradients, the Zienkiewicz-Zhu implementation shall recover the specified material property."
