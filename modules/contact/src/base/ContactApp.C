@@ -24,53 +24,14 @@ registerKnownLabel("ContactApp");
 
 ContactApp::ContactApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  ContactApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ContactApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  ContactApp::registerExecFlags(_factory);
+  ContactApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 ContactApp::~ContactApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-ContactApp__registerApps()
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  ContactApp::registerApps();
-}
-void
-ContactApp::registerApps()
-{
-  registerApp(ContactApp);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-ContactApp__registerObjects(Factory & factory)
-{
-  ContactApp::registerObjects(factory);
-}
-void
-ContactApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"ContactApp"});
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  ContactApp::associateSyntax(syntax, action_factory);
-}
-void
-ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ContactApp"});
-
   registerSyntax("ContactAction", "Contact/*");
 
   registerSyntax("ContactPenetrationAuxAction", "Contact/*");
@@ -86,13 +47,47 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.addDependency("output_penetration_info_vars", "add_output");
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-ContactApp__registerExecFlags(Factory & factory)
+void
+ContactApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  ContactApp::registerExecFlags(factory);
+  Registry::registerObjectsTo(f, {"ContactApp"});
+  Registry::registerActionsTo(af, {"ContactApp"});
+  associateSyntaxInner(s, af);
 }
+
+void
+ContactApp::registerApps()
+{
+  registerApp(ContactApp);
+}
+
+void
+ContactApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"ContactApp"});
+}
+
+void
+ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"ContactApp"});
+  associateSyntaxInner(syntax, action_factory);
+}
+
 void
 ContactApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+ContactApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  ContactApp::registerAll(f, af, s);
+}
+extern "C" void
+ContactApp__registerApps()
+{
+  ContactApp::registerApps();
 }

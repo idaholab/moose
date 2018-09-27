@@ -25,33 +25,23 @@ registerKnownLabel("XFEMTestApp");
 
 XFEMTestApp::XFEMTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  XFEMApp::registerObjectDepends(_factory);
-  XFEMApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  XFEMApp::associateSyntaxDepends(_syntax, _action_factory);
-  XFEMApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  XFEMApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    XFEMTestApp::registerObjects(_factory);
-    XFEMTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  XFEMTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 XFEMTestApp::~XFEMTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-XFEMTestApp__registerApps()
+void
+XFEMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  XFEMTestApp::registerApps();
+  XFEMApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"XFEMTestApp"});
+    Registry::registerActionsTo(af, {"XFEMTestApp"});
+  }
 }
+
 void
 XFEMTestApp::registerApps()
 {
@@ -59,37 +49,30 @@ XFEMTestApp::registerApps()
   registerApp(XFEMTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-XFEMTestApp__registerObjects(Factory & factory)
-{
-  XFEMTestApp::registerObjects(factory);
-}
 void
 XFEMTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"XFEMTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-XFEMTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  XFEMTestApp::associateSyntax(syntax, action_factory);
-}
 void
 XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"XFEMTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-XFEMTestApp__registerExecFlags(Factory & factory)
-{
-  XFEMTestApp::registerExecFlags(factory);
-}
 void
 XFEMTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+XFEMTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  XFEMTestApp::registerAll(f, af, s);
+}
+extern "C" void
+XFEMTestApp__registerApps()
+{
+  XFEMTestApp::registerApps();
 }

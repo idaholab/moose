@@ -9,7 +9,7 @@
 
 #include "MooseUnitApp.h"
 #include "Moose.h"
-#include "MooseSyntax.h"
+#include "ModulesApp.h"
 
 template <>
 InputParameters
@@ -22,9 +22,13 @@ validParams<MooseUnitApp>()
 MooseUnitApp::MooseUnitApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
+  MooseUnitApp::registerAll(_factory, _action_factory, _syntax);
+}
 
-  Moose::registerObjects(_factory);
-  Moose::associateSyntax(_syntax, _action_factory);
+void
+MooseUnitApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  ModulesApp::registerAll(f, af, s);
 }
 
 MooseUnitApp::~MooseUnitApp() {}

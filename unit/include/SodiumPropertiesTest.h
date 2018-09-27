@@ -18,13 +18,10 @@ class SodiumPropertiesTest : public MooseObjectUnitTest
 public:
   SodiumPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    registerObjects(_factory);
     buildObjects();
   }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(SodiumProperties); }
-
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("SodiumProperties");

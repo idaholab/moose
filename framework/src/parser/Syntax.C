@@ -17,25 +17,28 @@
 Syntax::Syntax() : _actions_to_syntax_valid(false) {}
 
 void
-Syntax::registerTaskName(const std::string & task, bool is_required)
+Syntax::registerTaskName(const std::string & task, bool should_auto_build)
 {
-  if (_registered_tasks.find(task) != _registered_tasks.end())
-    mooseError("A ", task, " is already registered.  Do you need to use appendTaskName instead?");
-
+  if (_registered_tasks.count(task) > 0)
+    return;
   _tasks.addItem(task);
-  _registered_tasks[task] = is_required;
+  _registered_tasks[task] = should_auto_build;
 }
 
 void
 Syntax::registerTaskName(const std::string & task,
                          const std::string & moose_object_type,
-                         bool is_required)
+                         bool should_auto_build)
 {
+  auto range = _moose_systems_to_tasks.equal_range(moose_object_type);
+  for (auto it = range.first; it != range.second; ++it)
+    if (it->second == task)
+      return;
+
   if (_registered_tasks.find(task) != _registered_tasks.end())
     mooseError("A ", task, " is already registered.  Do you need to use appendTaskName instead?");
 
-  _tasks.addItem(task);
-  _registered_tasks[task] = is_required;
+  registerTaskName(task, should_auto_build);
   _moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
 }
 
@@ -125,13 +128,13 @@ Syntax::registerActionSyntax(const std::string & action,
                              const std::string & file,
                              int line)
 {
-  ActionInfo action_info;
-  action_info._action = action;
-  action_info._task = task;
+  auto range = _syntax_to_actions.equal_range(syntax);
+  for (auto it = range.first; it != range.second; ++it)
+    if (it->second._action == action && it->second._task == task)
+      return;
 
-  _syntax_to_actions.insert(std::make_pair(syntax, action_info));
+  _syntax_to_actions.insert(std::make_pair(syntax, ActionInfo{action, task}));
   _syntax_to_line.addInfo(syntax, action, task, file, line);
-
   _actions_to_syntax_valid = false;
 }
 

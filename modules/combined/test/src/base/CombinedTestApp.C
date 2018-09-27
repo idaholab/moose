@@ -42,32 +42,38 @@ registerKnownLabel("CombinedTestApp");
 
 CombinedTestApp::CombinedTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  CombinedApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  CombinedApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  CombinedApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    CombinedTestApp::registerObjects(_factory);
-    CombinedTestApp::associateSyntax(_syntax, _action_factory);
-    CombinedTestApp::registerExecFlags(_factory);
-  }
+  CombinedTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 CombinedTestApp::~CombinedTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-CombinedTestApp__registerApps()
+void
+CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  CombinedTestApp::registerApps();
+  CombinedApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"CombinedTestApp"});
+    Registry::registerActionsTo(af, {"CombinedTestApp"});
+    ChemicalReactionsTestApp::registerAll(f, af, s, use_test_objs);
+    ContactTestApp::registerAll(f, af, s, use_test_objs);
+    FluidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
+    HeatConductionTestApp::registerAll(f, af, s, use_test_objs);
+    MiscTestApp::registerAll(f, af, s, use_test_objs);
+    NavierStokesTestApp::registerAll(f, af, s, use_test_objs);
+    PhaseFieldTestApp::registerAll(f, af, s, use_test_objs);
+    RichardsTestApp::registerAll(f, af, s, use_test_objs);
+    SolidMechanicsTestApp::registerAll(f, af, s, use_test_objs);
+    StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
+    TensorMechanicsTestApp::registerAll(f, af, s, use_test_objs);
+    XFEMTestApp::registerAll(f, af, s, use_test_objs);
+    PorousFlowTestApp::registerAll(f, af, s, use_test_objs);
+    RdgTestApp::registerAll(f, af, s, use_test_objs);
+    LevelSetTestApp::registerAll(f, af, s, use_test_objs);
+  }
 }
+
 void
 CombinedTestApp::registerApps()
 {
@@ -75,12 +81,6 @@ CombinedTestApp::registerApps()
   registerApp(CombinedTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-CombinedTestApp__registerObjects(Factory & factory)
-{
-  CombinedTestApp::registerObjects(factory);
-}
 void
 CombinedTestApp::registerObjects(Factory & factory)
 {
@@ -101,12 +101,6 @@ CombinedTestApp::registerObjects(Factory & factory)
   LevelSetTestApp::registerObjects(factory);
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-CombinedTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  CombinedTestApp::associateSyntax(syntax, action_factory);
-}
 void
 CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
@@ -127,12 +121,6 @@ CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   LevelSetTestApp::associateSyntax(syntax, action_factory);
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-CombinedTestApp__registerExecFlags(Factory & factory)
-{
-  CombinedTestApp::registerExecFlags(factory);
-}
 void
 CombinedTestApp::registerExecFlags(Factory & factory)
 {
@@ -151,4 +139,15 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   PorousFlowTestApp::registerExecFlags(factory);
   RdgTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
+}
+
+extern "C" void
+CombinedTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  CombinedTestApp::registerAll(f, af, s);
+}
+extern "C" void
+CombinedTestApp__registerApps()
+{
+  CombinedTestApp::registerApps();
 }

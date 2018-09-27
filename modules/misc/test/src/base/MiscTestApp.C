@@ -24,32 +24,23 @@ registerKnownLabel("MiscTestApp");
 
 MiscTestApp::MiscTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  MiscApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  MiscApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  MiscApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    MiscTestApp::registerObjects(_factory);
-    MiscTestApp::associateSyntax(_syntax, _action_factory);
-    MiscTestApp::registerExecFlags(_factory);
-  }
+  MiscTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 MiscTestApp::~MiscTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-MiscTestApp__registerApps()
+void
+MiscTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  MiscTestApp::registerApps();
+  MiscApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"MiscTestApp"});
+    Registry::registerActionsTo(af, {"MiscTestApp"});
+  }
 }
+
 void
 MiscTestApp::registerApps()
 {
@@ -57,37 +48,30 @@ MiscTestApp::registerApps()
   registerApp(MiscTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-MiscTestApp__registerObjects(Factory & factory)
-{
-  MiscTestApp::registerObjects(factory);
-}
 void
 MiscTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"MiscTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-MiscTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  MiscTestApp::associateSyntax(syntax, action_factory);
-}
 void
 MiscTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"MiscTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-MiscTestApp__registerExecFlags(Factory & factory)
-{
-  MiscTestApp::registerExecFlags(factory);
-}
 void
 MiscTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+MiscTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  MiscTestApp::registerAll(f, af, s);
+}
+extern "C" void
+MiscTestApp__registerApps()
+{
+  MiscTestApp::registerApps();
 }

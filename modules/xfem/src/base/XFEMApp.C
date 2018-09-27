@@ -27,27 +27,33 @@ registerKnownLabel("XFEMApp");
 XFEMApp::XFEMApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
-
-  Moose::registerObjects(_factory);
-  XFEMApp::registerObjectDepends(_factory);
-  XFEMApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  XFEMApp::associateSyntaxDepends(_syntax, _action_factory);
-  XFEMApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  XFEMApp::registerExecFlags(_factory);
+  XFEMApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 XFEMApp::~XFEMApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-XFEMApp__registerApps()
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  XFEMApp::registerApps();
+  registerTask("setup_xfem", false);
+  syntax.addDependency("setup_xfem", "setup_adaptivity");
+  registerSyntax("XFEMAction", "XFEM");
 }
+
+void
+XFEMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  Registry::registerObjectsTo(f, {"XFEMApp"});
+  Registry::registerActionsTo(af, {"XFEMApp"});
+  associateSyntaxInner(s, af);
+
+  SolidMechanicsApp::registerAll(f, af, s);
+  TensorMechanicsApp::registerAll(f, af, s);
+
+  auto & factory = f; // for registerExecFlags macro
+  registerExecFlag(EXEC_XFEM_MARK);
+}
+
 void
 XFEMApp::registerApps()
 {
@@ -57,53 +63,48 @@ XFEMApp::registerApps()
 void
 XFEMApp::registerObjectDepends(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
   SolidMechanicsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-XFEMApp__registerObjects(Factory & factory)
-{
-  XFEMApp::registerObjects(factory);
-}
 void
 XFEMApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"XFEMApp"});
 }
 
 void
 XFEMApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntaxDepends");
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-XFEMApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  XFEMApp::associateSyntax(syntax, action_factory);
-}
 void
 XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"XFEMApp"});
-
-  registerTask("setup_xfem", false);
-  syntax.addDependency("setup_xfem", "setup_adaptivity");
-  registerSyntax("XFEMAction", "XFEM");
+  associateSyntaxInner(syntax, action_factory);
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-XFEMApp__registerExecFlags(Factory & factory)
-{
-  XFEMApp::registerExecFlags(factory);
-}
 void
 XFEMApp::registerExecFlags(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
   registerExecFlag(EXEC_XFEM_MARK);
+}
+
+extern "C" void
+XFEMApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  XFEMApp::registerAll(f, af, s);
+}
+extern "C" void
+XFEMApp__registerApps()
+{
+  XFEMApp::registerApps();
 }

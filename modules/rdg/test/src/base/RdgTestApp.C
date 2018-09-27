@@ -24,31 +24,23 @@ registerKnownLabel("RdgTestApp");
 
 RdgTestApp::RdgTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  RdgApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  RdgApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  RdgApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    RdgTestApp::registerObjects(_factory);
-    RdgTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  RdgTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 RdgTestApp::~RdgTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-RdgTestApp__registerApps()
+void
+RdgTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  RdgTestApp::registerApps();
+  RdgApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"RdgTestApp"});
+    Registry::registerActionsTo(af, {"RdgTestApp"});
+  }
 }
+
 void
 RdgTestApp::registerApps()
 {
@@ -56,37 +48,30 @@ RdgTestApp::registerApps()
   registerApp(RdgTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-RdgTestApp__registerObjects(Factory & factory)
-{
-  RdgTestApp::registerObjects(factory);
-}
 void
 RdgTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"RdgTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-RdgTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  RdgTestApp::associateSyntax(syntax, action_factory);
-}
 void
 RdgTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"RdgTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-RdgTestApp__registerExecFlags(Factory & factory)
-{
-  RdgTestApp::registerExecFlags(factory);
-}
 void
 RdgTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+RdgTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  RdgTestApp::registerAll(f, af, s);
+}
+extern "C" void
+RdgTestApp__registerApps()
+{
+  RdgTestApp::registerApps();
 }

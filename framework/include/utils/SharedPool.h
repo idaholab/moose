@@ -80,8 +80,11 @@ public:
   {
     // if the pool is empty - create one
     if (_pool.empty())
+    {
+      _num_created++;
       return std::move(ptr_type(new T(std::forward<Args>(args)...),
                                 ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}}));
+    }
     else
     {
       ptr_type tmp(_pool.top().release(),
@@ -98,9 +101,13 @@ public:
 
   size_t size() const { return _pool.size(); }
 
+  size_t num_created() const { return _num_created; }
+
 private:
   std::shared_ptr<SharedPool<T> *> _this_ptr;
   std::stack<std::unique_ptr<T>> _pool;
+
+  size_t _num_created = 0;
 };
 }
 

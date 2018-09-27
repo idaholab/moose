@@ -415,18 +415,15 @@ public:
    * attempts to load a dynamic library and register it when it is needed. Throws an error if
    * no suitable library is found that contains the app_name in question.
    */
-  void dynamicObjectRegistration(const std::string & app_name,
-                                 Factory * factory,
-                                 std::string library_path,
-                                 const std::string & library_name);
+  void dynamicAllRegistration(const std::string & app_name,
+                              Factory * factory,
+                              ActionFactory * action_factory,
+                              Syntax * syntax,
+                              std::string library_path,
+                              const std::string & library_name);
   void dynamicAppRegistration(const std::string & app_name,
                               std::string library_path,
                               const std::string & library_name);
-  void dynamicSyntaxAssociation(const std::string & app_name,
-                                Syntax * syntax,
-                                ActionFactory * action_factory,
-                                std::string library_path,
-                                const std::string & library_name);
   ///@}
 
   /**
@@ -791,8 +788,7 @@ private:
   enum RegistrationType
   {
     APPLICATION,
-    OBJECT,
-    SYNTAX
+    REGALL
   };
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output

@@ -20,19 +20,9 @@ class TabulatedFluidProperties;
 class TabulatedFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  TabulatedFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    registerObjects(_factory);
-    buildObjects();
-  }
+  TabulatedFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
-  void registerObjects(Factory & factory)
-  {
-    registerUserObject(CO2FluidProperties);
-    registerUserObject(TabulatedFluidProperties);
-  }
-
   void buildObjects()
   {
     InputParameters co2_uo_params = _factory.getValidParams("CO2FluidProperties");

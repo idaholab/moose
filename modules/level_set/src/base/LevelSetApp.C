@@ -28,15 +28,7 @@ registerKnownLabel("LevelSetApp");
 LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
-
-  Moose::registerObjects(_factory);
-  LevelSetApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  LevelSetApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  LevelSetApp::registerExecFlags(_factory);
+  LevelSetApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 void
@@ -45,46 +37,49 @@ LevelSetApp::registerApps()
   registerApp(LevelSetApp);
 }
 
+static void
+registerExecFlagsInner(Factory & factory)
+{
+  registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
+  registerExecFlag(LevelSet::EXEC_COMPUTE_MARKERS);
+}
+
+void
+LevelSetApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+{
+  Registry::registerObjectsTo(f, {"LevelSetApp"});
+  Registry::registerActionsTo(af, {"LevelSetApp"});
+  registerExecFlagsInner(f);
+}
+
 void
 LevelSetApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"LevelSetApp"});
 }
 
 void
 LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"LevelSetApp"});
 }
-
 void
 LevelSetApp::registerExecFlags(Factory & factory)
 {
-  registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
-  registerExecFlag(LevelSet::EXEC_COMPUTE_MARKERS);
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+  registerExecFlagsInner(factory);
 }
 
 // Dynamic Library Entry Points - DO NOT MODIFY
 extern "C" void
+LevelSetApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  LevelSetApp::registerAll(f, af, s);
+}
+extern "C" void
 LevelSetApp__registerApps()
 {
   LevelSetApp::registerApps();
-}
-
-extern "C" void
-LevelSetApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  LevelSetApp::associateSyntax(syntax, action_factory);
-}
-
-extern "C" void
-LevelSetApp__registerExecFlags(Factory & factory)
-{
-  LevelSetApp::registerExecFlags(factory);
-}
-
-extern "C" void
-LevelSetApp__registerObjects(Factory & factory)
-{
-  LevelSetApp::registerObjects(factory);
 }

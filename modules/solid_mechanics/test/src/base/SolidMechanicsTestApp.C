@@ -24,33 +24,23 @@ registerKnownLabel("SolidMechanicsTestApp");
 
 SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  SolidMechanicsApp::registerObjectDepends(_factory);
-  SolidMechanicsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  SolidMechanicsApp::associateSyntaxDepends(_syntax, _action_factory);
-  SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  SolidMechanicsApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    SolidMechanicsTestApp::registerObjects(_factory);
-    SolidMechanicsTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  SolidMechanicsTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 SolidMechanicsTestApp::~SolidMechanicsTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-SolidMechanicsTestApp__registerApps()
+void
+SolidMechanicsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  SolidMechanicsTestApp::registerApps();
+  SolidMechanicsApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"SolidMechanicsTestApp"});
+    Registry::registerActionsTo(af, {"SolidMechanicsTestApp"});
+  }
 }
+
 void
 SolidMechanicsTestApp::registerApps()
 {
@@ -58,37 +48,30 @@ SolidMechanicsTestApp::registerApps()
   registerApp(SolidMechanicsTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-SolidMechanicsTestApp__registerObjects(Factory & factory)
-{
-  SolidMechanicsTestApp::registerObjects(factory);
-}
 void
 SolidMechanicsTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"SolidMechanicsTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-SolidMechanicsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  SolidMechanicsTestApp::associateSyntax(syntax, action_factory);
-}
 void
 SolidMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"SolidMechanicsTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-SolidMechanicsTestApp__registerExecFlags(Factory & factory)
-{
-  SolidMechanicsTestApp::registerExecFlags(factory);
-}
 void
 SolidMechanicsTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+SolidMechanicsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  SolidMechanicsTestApp::registerAll(f, af, s);
+}
+extern "C" void
+SolidMechanicsTestApp__registerApps()
+{
+  SolidMechanicsTestApp::registerApps();
 }

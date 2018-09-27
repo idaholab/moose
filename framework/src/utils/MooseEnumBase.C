@@ -116,6 +116,9 @@ MooseEnumBase::addEnumerationName(const std::string & name, const int & value)
 void
 MooseEnumBase::addEnumerationItem(const MooseEnumItem & item)
 {
+  if (_items.count(item) > 0) // do nothing for identical insertions
+    return;
+
   if (find(item.id()) != _items.end())
     mooseError("The supplied id ",
                item.id(),

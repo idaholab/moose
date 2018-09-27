@@ -10,12 +10,4 @@
 #ifndef MOOSESYNTAX_H
 #define MOOSESYNTAX_H
 
-class Syntax;
-class ActionFactory;
-
-namespace Moose
-{
-void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-}
-
 #endif // MOOSESYNTAX_H

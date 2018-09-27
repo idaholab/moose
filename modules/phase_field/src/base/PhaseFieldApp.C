@@ -24,53 +24,14 @@ registerKnownLabel("PhaseFieldApp");
 
 PhaseFieldApp::PhaseFieldApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  PhaseFieldApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  PhaseFieldApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  PhaseFieldApp::registerExecFlags(_factory);
+  PhaseFieldApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 PhaseFieldApp::~PhaseFieldApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-PhaseFieldApp__registerApps()
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  PhaseFieldApp::registerApps();
-}
-void
-PhaseFieldApp::registerApps()
-{
-  registerApp(PhaseFieldApp);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-PhaseFieldApp__registerObjects(Factory & factory)
-{
-  PhaseFieldApp::registerObjects(factory);
-}
-void
-PhaseFieldApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PhaseFieldApp"});
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-PhaseFieldApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  PhaseFieldApp::associateSyntax(syntax, action_factory);
-}
-void
-PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PhaseFieldApp"});
-
   registerSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
   registerSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
   registerSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
@@ -102,13 +63,48 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("GrandPotentialKernelAction", "Modules/PhaseField/GrandPotential");
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-PhaseFieldApp__registerExecFlags(Factory & factory)
+void
+PhaseFieldApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  PhaseFieldApp::registerExecFlags(factory);
+  Registry::registerObjectsTo(f, {"PhaseFieldApp"});
+  Registry::registerActionsTo(af, {"PhaseFieldApp"});
+  associateSyntaxInner(s, af);
 }
+
+void
+PhaseFieldApp::registerApps()
+{
+  registerApp(PhaseFieldApp);
+}
+
+void
+PhaseFieldApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"PhaseFieldApp"});
+}
+
+void
+PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"PhaseFieldApp"});
+  associateSyntaxInner(syntax, action_factory);
+}
+
 void
 PhaseFieldApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+PhaseFieldApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  PhaseFieldApp::registerAll(f, af, s);
+}
+extern "C" void
+PhaseFieldApp__registerApps()
+{
+  PhaseFieldApp::registerApps();
 }

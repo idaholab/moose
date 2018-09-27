@@ -17,15 +17,9 @@
 class Water97FluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  Water97FluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    registerObjects(_factory);
-    buildObjects();
-  }
+  Water97FluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(Water97FluidProperties); }
-
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("Water97FluidProperties");

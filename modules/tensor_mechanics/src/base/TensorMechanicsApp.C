@@ -24,53 +24,14 @@ registerKnownLabel("TensorMechanicsApp");
 
 TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  TensorMechanicsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  TensorMechanicsApp::registerExecFlags(_factory);
+  TensorMechanicsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 TensorMechanicsApp::~TensorMechanicsApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-TensorMechanicsApp_registerApps()
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  TensorMechanicsApp::registerApps();
-}
-void
-TensorMechanicsApp::registerApps()
-{
-  registerApp(TensorMechanicsApp);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-TensorMechanicsApp__registerObjects(Factory & factory)
-{
-  TensorMechanicsApp::registerObjects(factory);
-}
-void
-TensorMechanicsApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"TensorMechanicsApp"});
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-TensorMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  TensorMechanicsApp::associateSyntax(syntax, action_factory);
-}
-void
-TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"TensorMechanicsApp"});
-
   registerSyntax("EmptyAction", "BCs/CavityPressure");
   registerSyntax("CavityPressureAction", "BCs/CavityPressure/*");
   registerSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
@@ -105,13 +66,48 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-TensorMechanicsApp__registerExecFlags(Factory & factory)
+void
+TensorMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  TensorMechanicsApp::registerExecFlags(factory);
+  Registry::registerObjectsTo(f, {"TensorMechanicsApp"});
+  Registry::registerActionsTo(af, {"TensorMechanicsApp"});
+  associateSyntaxInner(s, af);
 }
+
+void
+TensorMechanicsApp::registerApps()
+{
+  registerApp(TensorMechanicsApp);
+}
+
+void
+TensorMechanicsApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"TensorMechanicsApp"});
+}
+
+void
+TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"TensorMechanicsApp"});
+  associateSyntaxInner(syntax, action_factory);
+}
+
 void
 TensorMechanicsApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+TensorMechanicsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  TensorMechanicsApp::registerAll(f, af, s);
+}
+extern "C" void
+TensorMechanicsApp_registerApps()
+{
+  TensorMechanicsApp::registerApps();
 }

@@ -23,6 +23,7 @@ public:
   ChemicalReactionsApp(const InputParameters & parameters);
   virtual ~ChemicalReactionsApp();
 
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
   static void registerApps();
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);

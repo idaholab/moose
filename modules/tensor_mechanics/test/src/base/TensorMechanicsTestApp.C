@@ -24,30 +24,21 @@ registerKnownLabel("TensorMechanicsTestApp");
 
 TensorMechanicsTestApp::TensorMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  TensorMechanicsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  TensorMechanicsApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    TensorMechanicsTestApp::registerObjects(_factory);
-    TensorMechanicsTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  TensorMechanicsTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 TensorMechanicsTestApp::~TensorMechanicsTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-TensorMechanicsTestApp__registerApps()
+void
+TensorMechanicsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  TensorMechanicsTestApp::registerApps();
+  TensorMechanicsApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"TensorMechanicsTestApp"});
+    Registry::registerActionsTo(af, {"TensorMechanicsTestApp"});
+  }
 }
 void
 TensorMechanicsTestApp::registerApps()
@@ -56,37 +47,30 @@ TensorMechanicsTestApp::registerApps()
   registerApp(TensorMechanicsTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-TensorMechanicsTestApp__registerObjects(Factory & factory)
-{
-  TensorMechanicsTestApp::registerObjects(factory);
-}
 void
 TensorMechanicsTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"TensorMechanicsTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-TensorMechanicsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  TensorMechanicsTestApp::associateSyntax(syntax, action_factory);
-}
 void
 TensorMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"TensorMechanicsTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-TensorMechanicsTestApp__registerExecFlags(Factory & factory)
-{
-  TensorMechanicsTestApp::registerExecFlags(factory);
-}
 void
 TensorMechanicsTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+TensorMechanicsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  TensorMechanicsTestApp::registerAll(f, af, s);
+}
+extern "C" void
+TensorMechanicsTestApp__registerApps()
+{
+  TensorMechanicsTestApp::registerApps();
 }

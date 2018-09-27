@@ -304,6 +304,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3))
 {
   Registry::addKnownLabel(_type);
+  Moose::registerAll(_factory, _action_factory, _syntax);
 
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -1109,37 +1110,21 @@ MooseApp::dynamicAppRegistration(const std::string & app_name,
 }
 
 void
-MooseApp::dynamicObjectRegistration(const std::string & app_name,
-                                    Factory * factory,
-                                    std::string library_path,
-                                    const std::string & library_name)
+MooseApp::dynamicAllRegistration(const std::string & app_name,
+                                 Factory * factory,
+                                 ActionFactory * action_factory,
+                                 Syntax * syntax,
+                                 std::string library_path,
+                                 const std::string & library_name)
 {
   Parameters params;
   params.set<std::string>("app_name") = app_name;
-  params.set<RegistrationType>("reg_type") = OBJECT;
-  params.set<std::string>("registration_method") = app_name + "__registerObjects";
+  params.set<RegistrationType>("reg_type") = REGALL;
+  params.set<std::string>("registration_method") = app_name + "__registerAll";
   params.set<std::string>("library_path") = library_path;
   params.set<std::string>("library_name") = library_name;
 
   params.set<Factory *>("factory") = factory;
-
-  dynamicRegistration(params);
-}
-
-void
-MooseApp::dynamicSyntaxAssociation(const std::string & app_name,
-                                   Syntax * syntax,
-                                   ActionFactory * action_factory,
-                                   std::string library_path,
-                                   const std::string & library_name)
-{
-  Parameters params;
-  params.set<std::string>("app_name") = app_name;
-  params.set<RegistrationType>("reg_type") = SYNTAX;
-  params.set<std::string>("registration_method") = app_name + "__associateSyntax";
-  params.set<std::string>("library_path") = library_path;
-  params.set<std::string>("library_name") = library_name;
-
   params.set<Syntax *>("syntax") = syntax;
   params.set<ActionFactory *>("action_factory") = action_factory;
 
@@ -1286,18 +1271,13 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
           (*reg_ptr)();
           break;
         }
-        case OBJECT:
+        case REGALL:
         {
-          typedef void (*register_app_t)(Factory *);
+          typedef void (*register_app_t)(Factory *, ActionFactory *, Syntax *);
           register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_method);
-          (*reg_ptr)(params.get<Factory *>("factory"));
-          break;
-        }
-        case SYNTAX:
-        {
-          typedef void (*register_app_t)(Syntax *, ActionFactory *);
-          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_method);
-          (*reg_ptr)(params.get<Syntax *>("syntax"), params.get<ActionFactory *>("action_factory"));
+          (*reg_ptr)(params.get<Factory *>("factory"),
+                     params.get<ActionFactory *>("action_factory"),
+                     params.get<Syntax *>("syntax"));
           break;
         }
         default:
