@@ -71,7 +71,7 @@ ChemicalReactionsTestApp::registerExecFlags(Factory & /*factory*/)
 }
 
 extern "C" void
-ChemicalReactionsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+ChemicalReactionsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   ChemicalReactionsTestApp::registerAll(f, af, s);
 }
