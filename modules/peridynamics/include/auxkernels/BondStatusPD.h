@@ -32,8 +32,15 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  /// Option of which failure criterion to be used, with critical_stretch as default
-  MooseEnum _failure_criterion;
+  /// Enum class used to control which failure criterion to use
+  enum class FailureCriterion
+  {
+    CriticalStretch,
+    MaximumTensileStress
+  };
+
+  /// Enum used to control which failure criterion to use
+  const FailureCriterion _failure_criterion;
 
   /// Bond_status variable
   const MooseVariableFEBase & _bond_status_var;
@@ -41,7 +48,10 @@ protected:
   /// Critical AuxVariable
   const VariableValue & _critical_val;
 
+  /// Material property containing the mechanical stretch
   const MaterialProperty<Real> & _mechanical_stretch;
+
+  /// Material property containing the stress
   const MaterialProperty<RankTwoTensor> * _stress;
 };
 

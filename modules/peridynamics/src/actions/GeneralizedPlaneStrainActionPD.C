@@ -43,12 +43,12 @@ validParams<GeneralizedPlaneStrainActionPD>()
   params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed out-of-plane pressure");
   params.addParam<bool>("full_jacobian",
                         false,
-                        "Parameter to set whether to use the nonlocal full jacobian formulation "
-                        "for the scalar components or not");
+                        "Parameter to set whether to use the nonlocal full Jacobian formulation "
+                        "for the scalar components");
   params.addParam<bool>(
       "use_displaced_mesh",
       false,
-      "Parameter to set whether to use the displaced mesh for computation or not");
+      "Parameter to set whether to use the displaced mesh for computation");
   params.addParam<std::vector<SubdomainName>>("block",
                                               "List of ids of the blocks (subdomains) that the "
                                               "GeneralizedPlaneStrainActionPD will be applied "
@@ -85,18 +85,13 @@ GeneralizedPlaneStrainActionPD::act()
   if (_current_task == "add_kernel")
   {
     std::string k_type;
-    switch (_formulation)
-    {
-      case 0:
+    if (_formulation ==  "OrdinaryState")
         k_type = "GeneralizedPlaneStrainOffDiagOSPD"; // Based on ordinary state-based model
-        break;
-      case 1:
-        k_type = "GeneralizedPlaneStrainOffDiagNOSPD"; // Based on bond-associated non-rodinary
-                                                       // state-based model
-        break;
-      default:
-        mooseError("Unsupported PD formulation. Choose from: OrdinaryState or NonOrdinaryState");
-    }
+    else if (_formulation ==  "NonOrdinaryState")
+      k_type = "GeneralizedPlaneStrainOffDiagNOSPD"; // Based on bond-associated non-ordinary
+                                                     // state-based model
+    else
+      paramError("formulation", "Unsupported peridynamic formulation. Choose from: OrdinaryState or NonOrdinaryState");
 
     InputParameters params = _factory.getValidParams(k_type);
 
@@ -144,17 +139,12 @@ GeneralizedPlaneStrainActionPD::act()
   else if (_current_task == "add_user_object")
   {
     std::string uo_type;
-    switch (_formulation)
-    {
-      case 0:
-        uo_type = "GeneralizedPlaneStrainUserObjectOSPD";
-        break;
-      case 1:
-        uo_type = "GeneralizedPlaneStrainUserObjectNOSPD";
-        break;
-      default:
-        mooseError("Unsupported PD formulation. Choose from: OrdinaryState or NonOrdinaryState");
-    }
+    if (_formulation ==  "OrdinaryState")
+      uo_type = "GeneralizedPlaneStrainUserObjectOSPD";
+    else if (_formulation ==  "NonOrdinaryState")
+      uo_type = "GeneralizedPlaneStrainUserObjectNOSPD";
+    else
+      paramError("formulation", "Unsupported peridynamic formulation. Choose from: OrdinaryState or NonOrdinaryState");
 
     InputParameters params = _factory.getValidParams(uo_type);
 

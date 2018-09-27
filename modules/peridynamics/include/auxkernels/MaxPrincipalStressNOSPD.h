@@ -29,9 +29,10 @@ public:
 protected:
   Real computeValue() override;
 
-  /// Bond_status variable
+  /// bond_status variable
   const MooseVariableFEBase & _bond_status_var;
 
+  /// Stress material property
   const MaterialProperty<RankTwoTensor> & _stress;
 };
 
