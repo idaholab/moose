@@ -146,8 +146,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _stick_lock_iterations(getParam<unsigned int>("stick_lock_iterations")),
     _stick_unlock_factor(getParam<Real>("stick_unlock_factor")),
     _update_stateful_data(true),
-    _residual_copy(static_cast<NonlinearSystemBase &>(*getParam<SystemBase *>("_nl_sys"))
-                       .getResidualNonTimeVector()),
+    _residual_copy(_sys.residualGhosted()),
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint),
     _var_objects(3, nullptr),
