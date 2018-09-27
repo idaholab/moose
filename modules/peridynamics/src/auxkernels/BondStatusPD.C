@@ -20,7 +20,7 @@ validParams<BondStatusPD>()
   params.addClassDescription("Class for updating the bond status based on different failure "
                              "criteria: critical stretch and "
                              "maximum principal stress");
-  MooseEnum FailureCriteriaType("Critical_Stretch Maximum_Tensile_Stress", "Critical_Stretch");
+  MooseEnum FailureCriteriaType("CriticalStretch MaximumTensileStress", "CriticalStretch");
   params.addParam<MooseEnum>(
       "failure_criterion", FailureCriteriaType, "Which failure criterion to be used");
   params.addRequiredCoupledVar("critical_variable", "Name of critical AuxVariable");
@@ -31,7 +31,7 @@ validParams<BondStatusPD>()
 
 BondStatusPD::BondStatusPD(const InputParameters & parameters)
   : AuxKernelBasePD(parameters),
-    _failure_criterion(getParam<MooseEnum>("failure_criterion")),
+    _failure_criterion(getParam<MooseEnum>("failure_criterion").getEnum<FailureCriterion>()),
     _bond_status_var(_subproblem.getVariable(_tid, "bond_status")),
     _critical_val(coupledValue("critical_variable")),
     _mechanical_stretch(getMaterialProperty<Real>("mechanical_stretch")),
@@ -39,10 +39,10 @@ BondStatusPD::BondStatusPD(const InputParameters & parameters)
 {
   switch (_failure_criterion)
   {
-    case 0:
+    case FailureCriterion::CriticalStretch:
       break;
 
-    case 1:
+    case FailureCriterion::MaximumTensileStress:
     {
       if (hasMaterialProperty<RankTwoTensor>("stress"))
         _stress = &getMaterialProperty<RankTwoTensor>("stress");
@@ -53,8 +53,8 @@ BondStatusPD::BondStatusPD(const InputParameters & parameters)
     }
 
     default:
-      mooseError("Unsupported PD failure criterion. Choose from: Critical_Stretch and "
-                 "Maximum_Principal_Stress");
+      paramError("failure_criterion", "Unsupported PD failure criterion. Choose from: CriticalStretch and "
+                 "MaximumPrincipalStress");
   }
 }
 
@@ -65,11 +65,11 @@ BondStatusPD::computeValue()
 
   switch (_failure_criterion)
   {
-    case 0:
+    case FailureCriterion::CriticalStretch:
       val = _mechanical_stretch[0];
       break;
 
-    case 1:
+    case FailureCriterion::MaximumTensileStress:
     {
       RankTwoTensor avg_stress = 0.5 * ((*_stress)[0] + (*_stress)[1]);
       std::vector<Real> eigvals(LIBMESH_DIM, 0.0);
@@ -82,8 +82,8 @@ BondStatusPD::computeValue()
     }
 
     default:
-      mooseError("Unsupported PD failure criterion. Choose from: Critical_Stretch and "
-                 "Maximum_Principal_Stress");
+      paramError("failure_criterion", "Unsupported PD failure criterion. Choose from: CriticalStretch and "
+                 "MaximumPrincipalStress");
   }
 
   if (_bond_status_var.getElementalValue(_current_elem) > 0.5 && val < _critical_val[0])
