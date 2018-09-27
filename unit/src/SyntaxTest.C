@@ -34,7 +34,7 @@ TEST_F(SyntaxTest, errorChecks)
 {
   try
   {
-    _syntax.registerTaskName("first", true);
+    _syntax.registerTaskName("first", "FakeSystem", true);
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
@@ -47,7 +47,7 @@ TEST_F(SyntaxTest, errorChecks)
 
   try
   {
-    _syntax.registerTaskName("second_mo", false);
+    _syntax.registerTaskName("second_mo", "FakeSystem", false);
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)

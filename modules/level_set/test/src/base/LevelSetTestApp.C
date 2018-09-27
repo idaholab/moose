@@ -25,33 +25,23 @@ registerKnownLabel("LevelSetTestApp");
 LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
-
-  Moose::registerObjects(_factory);
-  LevelSetApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  LevelSetApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  LevelSetApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    LevelSetTestApp::registerObjects(_factory);
-    LevelSetTestApp::associateSyntax(_syntax, _action_factory);
-    LevelSetTestApp::registerExecFlags(_factory);
-  }
+  LevelSetTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 LevelSetTestApp::~LevelSetTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-LevelSetTestApp__registerApps()
+void
+LevelSetTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  LevelSetTestApp::registerApps();
+  LevelSetApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"LevelSetTestApp"});
+    Registry::registerActionsTo(af, {"LevelSetTestApp"});
+  }
 }
+
 void
 LevelSetTestApp::registerApps()
 {
@@ -59,37 +49,30 @@ LevelSetTestApp::registerApps()
   registerApp(LevelSetTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-LevelSetTestApp__registerObjects(Factory & factory)
-{
-  LevelSetTestApp::registerObjects(factory);
-}
 void
 LevelSetTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"LevelSetTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-LevelSetTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  LevelSetTestApp::associateSyntax(syntax, action_factory);
-}
 void
 LevelSetTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"LevelSetTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-LevelSetTestApp__registerExecFlags(Factory & factory)
-{
-  LevelSetTestApp::registerExecFlags(factory);
-}
 void
 LevelSetTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+LevelSetTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  LevelSetTestApp::registerAll(f, af, s);
+}
+extern "C" void
+LevelSetTestApp__registerApps()
+{
+  LevelSetTestApp::registerApps();
 }

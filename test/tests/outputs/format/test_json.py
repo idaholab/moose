@@ -260,7 +260,7 @@ class TestJSON(unittest.TestCase):
         fname = fi.keys()[0]
         # Clang seems to have the full path name for __FILE__
         # gcc seems to just use the path that is given on the command line, which won't include "framework"
-        self.assertTrue(fname.endswith(os.path.join("src", "parser", "MooseSyntax.C")))
+        self.assertTrue(fname.endswith(os.path.join("src", "base", "Moose.C")), 'file "{}" found instead'.format(fname))
         self.assertGreater(fi[fname], 0)
 
         fi = adapt["tasks"]["set_adaptivity_options"]["file_info"]

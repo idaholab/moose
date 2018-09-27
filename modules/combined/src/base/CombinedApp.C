@@ -42,39 +42,45 @@ registerKnownLabel("CombinedApp");
 
 CombinedApp::CombinedApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  CombinedApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  CombinedApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  CombinedApp::registerExecFlags(_factory);
+  CombinedApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 CombinedApp::~CombinedApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-CombinedApp__registerApps()
-{
-  CombinedApp::registerApps();
-}
 void
 CombinedApp::registerApps()
 {
   registerApp(CombinedApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-CombinedApp__registerObjects(Factory & factory)
+void
+CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  CombinedApp::registerObjects(factory);
+  Registry::registerObjectsTo(f, {"CombinedApp"});
+  Registry::registerActionsTo(af, {"CombinedApp"});
+
+  ChemicalReactionsApp::registerAll(f, af, s);
+  ContactApp::registerAll(f, af, s);
+  FluidPropertiesApp::registerAll(f, af, s);
+  FunctionalExpansionToolsApp::registerAll(f, af, s);
+  HeatConductionApp::registerAll(f, af, s);
+  LevelSetApp::registerAll(f, af, s);
+  MiscApp::registerAll(f, af, s);
+  NavierStokesApp::registerAll(f, af, s);
+  PhaseFieldApp::registerAll(f, af, s);
+  PorousFlowApp::registerAll(f, af, s);
+  RdgApp::registerAll(f, af, s);
+  RichardsApp::registerAll(f, af, s);
+  SolidMechanicsApp::registerAll(f, af, s);
+  StochasticToolsApp::registerAll(f, af, s);
+  TensorMechanicsApp::registerAll(f, af, s);
+  XFEMApp::registerAll(f, af, s);
 }
+
 void
 CombinedApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   ChemicalReactionsApp::registerObjects(factory);
   ContactApp::registerObjects(factory);
   FluidPropertiesApp::registerObjects(factory);
@@ -93,15 +99,10 @@ CombinedApp::registerObjects(Factory & factory)
   XFEMApp::registerObjects(factory);
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-CombinedApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  CombinedApp::associateSyntax(syntax, action_factory);
-}
 void
 CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);
   FluidPropertiesApp::associateSyntax(syntax, action_factory);
@@ -120,15 +121,10 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   XFEMApp::associateSyntax(syntax, action_factory);
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-CombinedApp__registerExecFlags(Factory & factory)
-{
-  CombinedApp::registerExecFlags(factory);
-}
 void
 CombinedApp::registerExecFlags(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
   ChemicalReactionsApp::registerExecFlags(factory);
   ContactApp::registerExecFlags(factory);
   FluidPropertiesApp::registerExecFlags(factory);
@@ -144,4 +140,15 @@ CombinedApp::registerExecFlags(Factory & factory)
   PorousFlowApp::registerExecFlags(factory);
   RdgApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
+}
+
+extern "C" void
+CombinedApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  CombinedApp::registerAll(f, af, s);
+}
+extern "C" void
+CombinedApp__registerApps()
+{
+  CombinedApp::registerApps();
 }

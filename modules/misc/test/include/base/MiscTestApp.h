@@ -23,6 +23,7 @@ public:
   virtual ~MiscTestApp();
 
   static void registerApps();
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);

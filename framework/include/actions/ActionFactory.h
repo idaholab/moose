@@ -133,6 +133,9 @@ protected:
 
   FileLineInfoMap _name_to_line;
   std::multimap<std::string, std::string> _task_to_action_map;
+
+  /// set<objectname, task> used to track if an object previously added is being added again
+  std::set<std::pair<std::string, std::string>> _current_objs;
 };
 
 #endif /* ACTIONFACTORY_H */

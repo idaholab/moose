@@ -18,13 +18,10 @@ class NaClFluidPropertiesTest : public MooseObjectUnitTest
 public:
   NaClFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    registerObjects(_factory);
     buildObjects();
   }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(NaClFluidProperties); }
-
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("NaClFluidProperties");

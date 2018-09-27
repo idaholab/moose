@@ -24,34 +24,25 @@ registerKnownLabel("RichardsTestApp");
 
 RichardsTestApp::RichardsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  RichardsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  RichardsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  RichardsApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    RichardsTestApp::registerObjects(_factory);
-    RichardsTestApp::associateSyntax(_syntax, _action_factory);
-  }
-
   mooseDeprecated("Please use the PorousFlow module instead.  If Richards contains functionality "
                   "not included in PorousFlow, please contact the moose-users google group");
+  RichardsTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 RichardsTestApp::~RichardsTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-RichardsTestApp__registerApps()
+void
+RichardsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  RichardsTestApp::registerApps();
+  RichardsApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"RichardsTestApp"});
+    Registry::registerActionsTo(af, {"RichardsTestApp"});
+  }
 }
+
 void
 RichardsTestApp::registerApps()
 {
@@ -59,37 +50,30 @@ RichardsTestApp::registerApps()
   registerApp(RichardsTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-RichardsTestApp__registerObjects(Factory & factory)
-{
-  RichardsTestApp::registerObjects(factory);
-}
 void
 RichardsTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"RichardsTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-RichardsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  RichardsTestApp::associateSyntax(syntax, action_factory);
-}
 void
 RichardsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"RichardsTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-RichardsTestApp__registerExecFlags(Factory & factory)
-{
-  RichardsTestApp::registerExecFlags(factory);
-}
 void
 RichardsTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+RichardsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  RichardsTestApp::registerAll(f, af, s);
+}
+extern "C" void
+RichardsTestApp__registerApps()
+{
+  RichardsTestApp::registerApps();
 }

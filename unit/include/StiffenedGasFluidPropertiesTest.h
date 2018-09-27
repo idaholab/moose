@@ -18,13 +18,10 @@ class StiffenedGasFluidPropertiesTest : public MooseObjectUnitTest
 public:
   StiffenedGasFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    registerObjects(_factory);
     buildObjects();
   }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(StiffenedGasFluidProperties); }
-
   void buildObjects()
   {
     InputParameters eos_pars = _factory.getValidParams("StiffenedGasFluidProperties");

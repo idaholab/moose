@@ -55,15 +55,12 @@ DynamicObjectRegistrationAction::DynamicObjectRegistrationAction(InputParameters
         getParam<std::vector<std::string>>("register_objects_from");
     for (const auto & app_name : application_names)
     {
-      _app.dynamicObjectRegistration(app_name,
-                                     &_factory,
-                                     getParam<std::string>("library_path"),
-                                     getParam<std::string>("library_name"));
-      _app.dynamicSyntaxAssociation(app_name,
-                                    &_awh.syntax(),
-                                    &_action_factory,
-                                    getParam<std::string>("library_path"),
-                                    getParam<std::string>("library_name"));
+      _app.dynamicAllRegistration(app_name,
+                                  &_factory,
+                                  &_action_factory,
+                                  &_awh.syntax(),
+                                  getParam<std::string>("library_path"),
+                                  getParam<std::string>("library_name"));
     }
   }
 }

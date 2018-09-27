@@ -26,71 +26,19 @@ registerKnownLabel("PorousFlowApp");
 
 PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  PorousFlowApp::registerObjectDepends(_factory);
-  PorousFlowApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  PorousFlowApp::associateSyntaxDepends(_syntax, _action_factory);
-  PorousFlowApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  PorousFlowApp::registerExecFlags(_factory);
 }
 
 PorousFlowApp::~PorousFlowApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-PorousFlowApp__registerApps()
-{
-  PorousFlowApp::registerApps();
-}
 void
 PorousFlowApp::registerApps()
 {
   registerApp(PorousFlowApp);
 }
 
-void
-PorousFlowApp::registerObjectDepends(Factory & factory)
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  TensorMechanicsApp::registerObjects(factory);
-  FluidPropertiesApp::registerObjects(factory);
-  ChemicalReactionsApp::registerObjects(factory);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-PorousFlowApp__registerObjects(Factory & factory)
-{
-  PorousFlowApp::registerObjects(factory);
-}
-void
-PorousFlowApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PorousFlowApp"});
-}
-
-void
-PorousFlowApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
-{
-  TensorMechanicsApp::associateSyntax(syntax, action_factory);
-  FluidPropertiesApp::associateSyntax(syntax, action_factory);
-  ChemicalReactionsApp::associateSyntax(syntax, action_factory);
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-PorousFlowApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  PorousFlowApp::associateSyntax(syntax, action_factory);
-}
-void
-PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PorousFlowApp"});
-
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_user_object");
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_kernel");
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_material");
@@ -119,13 +67,63 @@ PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntaxTask("PorousFlowAddMaterialJoiner", "Materials", "add_joiners");
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-PorousFlowApp__registerExecFlags(Factory & factory)
+void
+PorousFlowApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  PorousFlowApp::registerExecFlags(factory);
+  TensorMechanicsApp::registerAll(f, af, s);
+  FluidPropertiesApp::registerAll(f, af, s);
+  ChemicalReactionsApp::registerAll(f, af, s);
+  Registry::registerObjectsTo(f, {"PorousFlowApp"});
+  Registry::registerActionsTo(af, {"PorousFlowApp"});
+  associateSyntaxInner(s, af);
 }
+
+void
+PorousFlowApp::registerObjectDepends(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
+  TensorMechanicsApp::registerObjects(factory);
+  FluidPropertiesApp::registerObjects(factory);
+  ChemicalReactionsApp::registerObjects(factory);
+}
+
+void
+PorousFlowApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"PorousFlowApp"});
+}
+
+void
+PorousFlowApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntaxDepends");
+  TensorMechanicsApp::associateSyntax(syntax, action_factory);
+  FluidPropertiesApp::associateSyntax(syntax, action_factory);
+  ChemicalReactionsApp::associateSyntax(syntax, action_factory);
+}
+
+void
+PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"PorousFlowApp"});
+  associateSyntaxInner(syntax, action_factory);
+}
+
 void
 PorousFlowApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+PorousFlowApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  PorousFlowApp::registerAll(f, af, s);
+}
+extern "C" void
+PorousFlowApp__registerApps()
+{
+  PorousFlowApp::registerApps();
 }

@@ -11,9 +11,8 @@
 #define BRINEFLUIDPROPERTIESTEST_H
 
 #include "MooseObjectUnitTest.h"
+
 #include "BrineFluidProperties.h"
-#include "Water97FluidProperties.h"
-#include "NaClFluidProperties.h"
 
 class BrineFluidProperties;
 class SinglePhaseFluidPropertiesPT;
@@ -21,20 +20,9 @@ class SinglePhaseFluidPropertiesPT;
 class BrineFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  BrineFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    registerObjects(_factory);
-    buildObjects();
-  }
+  BrineFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
-  void registerObjects(Factory & factory)
-  {
-    registerUserObject(BrineFluidProperties);
-    registerUserObject(Water97FluidProperties);
-    registerUserObject(NaClFluidProperties);
-  }
-
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("BrineFluidProperties");

@@ -26,13 +26,7 @@ registerKnownLabel("FunctionalExpansionToolsApp");
 FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(InputParameters parameters)
   : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  FunctionalExpansionToolsApp::registerObjectDepends(_factory);
-  FunctionalExpansionToolsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  FunctionalExpansionToolsApp::associateSyntaxDepends(_syntax, _action_factory);
-  FunctionalExpansionToolsApp::associateSyntax(_syntax, _action_factory);
+  FunctionalExpansionToolsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 FunctionalExpansionToolsApp::~FunctionalExpansionToolsApp() {}
@@ -44,44 +38,32 @@ FunctionalExpansionToolsApp::registerApps()
 }
 
 void
+FunctionalExpansionToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+{
+  Registry::registerObjectsTo(f, {"FunctionalExpansionToolsApp"});
+  Registry::registerActionsTo(af, {"FunctionalExpansionToolsApp"});
+}
+
+void
 FunctionalExpansionToolsApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"FunctionalExpansionToolsApp"});
 }
 
 void
 FunctionalExpansionToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"FunctionalExpansionToolsApp"});
   /* Uncomment Syntax parameters and register your new objects here! */
 }
 
-void
-FunctionalExpansionToolsApp::registerObjectDepends(Factory & /*factory*/)
-{
-}
-
-void
-FunctionalExpansionToolsApp::associateSyntaxDepends(Syntax & /*syntax*/,
-                                                    ActionFactory & /*action_factory*/)
-{
-}
-
-/***************************************************************************************************
- *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
- **************************************************************************************************/
 extern "C" void
-FunctionalExpansionToolsApp__registerApps()
+FunctionalExpansionToolsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  FunctionalExpansionToolsApp::registerApps();
+  FunctionalExpansionToolsApp::registerAll(f, af, s);
 }
-
-extern "C" void
-FunctionalExpansionToolsApp__registerObjects(Factory & factory)
-{
-  FunctionalExpansionToolsApp::registerObjects(factory);
-}
-
 extern "C" void
 FunctionalExpansionToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

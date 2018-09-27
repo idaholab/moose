@@ -24,31 +24,23 @@ registerKnownLabel("StochasticToolsTestApp");
 
 StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  StochasticToolsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  StochasticToolsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  StochasticToolsApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    StochasticToolsTestApp::registerObjects(_factory);
-    StochasticToolsTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  StochasticToolsTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 StochasticToolsTestApp::~StochasticToolsTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-StochasticToolsTestApp__registerApps()
+void
+StochasticToolsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  StochasticToolsTestApp::registerApps();
+  StochasticToolsApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"StochasticToolsTestApp"});
+    Registry::registerActionsTo(af, {"StochasticToolsTestApp"});
+  }
 }
+
 void
 StochasticToolsTestApp::registerApps()
 {
@@ -56,37 +48,30 @@ StochasticToolsTestApp::registerApps()
   registerApp(StochasticToolsTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-StochasticToolsTestApp__registerObjects(Factory & factory)
-{
-  StochasticToolsTestApp::registerObjects(factory);
-}
 void
 StochasticToolsTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"StochasticToolsTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-StochasticToolsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  StochasticToolsTestApp::associateSyntax(syntax, action_factory);
-}
 void
 StochasticToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"StochasticToolsTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-StochasticToolsTestApp__registerExecFlags(Factory & factory)
-{
-  StochasticToolsTestApp::registerExecFlags(factory);
-}
 void
 StochasticToolsTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+StochasticToolsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  StochasticToolsTestApp::registerAll(f, af, s);
+}
+extern "C" void
+StochasticToolsTestApp__registerApps()
+{
+  StochasticToolsTestApp::registerApps();
 }

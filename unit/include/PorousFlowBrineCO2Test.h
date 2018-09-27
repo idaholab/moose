@@ -21,23 +21,9 @@
 class PorousFlowBrineCO2Test : public MooseObjectUnitTest
 {
 public:
-  PorousFlowBrineCO2Test() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    registerObjects(_factory);
-    buildObjects();
-  }
+  PorousFlowBrineCO2Test() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
-  void registerObjects(Factory & factory)
-  {
-    registerUserObject(PorousFlowCapillaryPressureVG);
-    registerUserObject(BrineFluidProperties);
-    registerUserObject(Water97FluidProperties);
-    registerUserObject(NaClFluidProperties);
-    registerUserObject(CO2FluidProperties);
-    registerUserObject(PorousFlowBrineCO2);
-  }
-
   void buildObjects()
   {
     InputParameters pc_params = _factory.getValidParams("PorousFlowCapillaryPressureVG");

@@ -18,13 +18,10 @@ class IdealGasFluidPropertiesTest : public MooseObjectUnitTest
 public:
   IdealGasFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    registerObjects(_factory);
     buildObjects();
   }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(IdealGasFluidProperties); }
-
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("IdealGasFluidProperties");

@@ -25,26 +25,27 @@ registerKnownLabel("SolidMechanicsApp");
 
 SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  SolidMechanicsApp::registerObjectDepends(_factory);
-  SolidMechanicsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  SolidMechanicsApp::associateSyntaxDepends(_syntax, _action_factory);
-  SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  SolidMechanicsApp::registerExecFlags(_factory);
+  SolidMechanicsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 SolidMechanicsApp::~SolidMechanicsApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-SolidMechanicsApp__registerApps()
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  SolidMechanicsApp::registerApps();
+  registerSyntax("SolidMechanicsAction", "SolidMechanics/*");
 }
+
+void
+SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  Registry::registerObjectsTo(f, {"SolidMechanicsApp"});
+  Registry::registerActionsTo(af, {"SolidMechanicsApp"});
+  associateSyntaxInner(s, af);
+
+  TensorMechanicsApp::registerAll(f, af, s);
+}
+
 void
 SolidMechanicsApp::registerApps()
 {
@@ -54,47 +55,45 @@ SolidMechanicsApp::registerApps()
 void
 SolidMechanicsApp::registerObjectDepends(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjectsDepends");
   TensorMechanicsApp::registerObjects(factory);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-SolidMechanicsApp__registerObjects(Factory & factory)
-{
-  TensorMechanicsApp::registerObjects(factory);
-}
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"SolidMechanicsApp"});
 }
 
 void
 SolidMechanicsApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntaxDepends");
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  SolidMechanicsApp::associateSyntax(syntax, action_factory);
-}
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"SolidMechanicsApp"});
-  registerSyntax("SolidMechanicsAction", "SolidMechanics/*");
+  associateSyntaxInner(syntax, action_factory);
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-SolidMechanicsApp__registerExecFlags(Factory & factory)
-{
-  SolidMechanicsApp::registerExecFlags(factory);
-}
 void
 SolidMechanicsApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+SolidMechanicsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  SolidMechanicsApp::registerAll(f, af, s);
+}
+extern "C" void
+SolidMechanicsApp__registerApps()
+{
+  SolidMechanicsApp::registerApps();
 }

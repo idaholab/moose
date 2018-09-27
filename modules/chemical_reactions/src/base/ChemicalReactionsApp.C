@@ -25,52 +25,14 @@ registerKnownLabel("ChemicalReactionsApp");
 ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  ChemicalReactionsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  ChemicalReactionsApp::registerExecFlags(_factory);
+  ChemicalReactionsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 ChemicalReactionsApp::~ChemicalReactionsApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-ChemicalReactionsApp__registerApps()
+static void
+associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  ChemicalReactionsApp::registerApps();
-}
-void
-ChemicalReactionsApp::registerApps()
-{
-  registerApp(ChemicalReactionsApp);
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-ChemicalReactionsApp__registerObjects(Factory & factory)
-{
-  ChemicalReactionsApp::registerObjects(factory);
-}
-void
-ChemicalReactionsApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"ChemicalReactionsApp"});
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  ChemicalReactionsApp::associateSyntax(syntax, action_factory);
-}
-void
-ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ChemicalReactionsApp"});
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
@@ -79,13 +41,50 @@ ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fa
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-ChemicalReactionsApp__registerExecFlags(Factory & factory)
+void
+ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  ChemicalReactionsApp::registerExecFlags(factory);
+  Registry::registerObjectsTo(f, {"ChemicalReactionsApp"});
+  Registry::registerActionsTo(af, {"ChemicalReactionsApp"});
+  associateSyntaxInner(s, af);
 }
+
+void
+ChemicalReactionsApp::registerApps()
+{
+  registerApp(ChemicalReactionsApp);
+}
+
+void
+ChemicalReactionsApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"ChemicalReactionsApp"});
+}
+
+void
+ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"ChemicalReactionsApp"});
+  associateSyntaxInner(syntax, action_factory);
+}
+
 void
 ChemicalReactionsApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+ChemicalReactionsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  ChemicalReactionsApp::registerAll(f, af, s);
+}
+
+// External entry point for dynamic application loading
+extern "C" void
+ChemicalReactionsApp__registerApps()
+{
+  ChemicalReactionsApp::registerApps();
 }

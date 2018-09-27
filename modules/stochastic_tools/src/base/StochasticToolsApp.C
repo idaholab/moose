@@ -23,61 +23,51 @@ registerKnownLabel("StochasticToolsApp");
 
 StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  StochasticToolsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  StochasticToolsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  StochasticToolsApp::registerExecFlags(_factory);
+  StochasticToolsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 StochasticToolsApp::~StochasticToolsApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-StochasticToolsApp__registerApps()
+void
+StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
 {
-  StochasticToolsApp::registerApps();
+  Registry::registerObjectsTo(f, {"StochasticToolsApp"});
+  Registry::registerActionsTo(af, {"StochasticToolsApp"});
 }
+
 void
 StochasticToolsApp::registerApps()
 {
   registerApp(StochasticToolsApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-StochasticToolsApp__registerObjects(Factory & factory)
-{
-  StochasticToolsApp::registerObjects(factory);
-}
 void
 StochasticToolsApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"StochasticToolsApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-StochasticToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  StochasticToolsApp::associateSyntax(syntax, action_factory);
-}
 void
 StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"StochasticToolsApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-StochasticToolsApp__registerExecFlags(Factory & factory)
-{
-  StochasticToolsApp::registerExecFlags(factory);
-}
 void
 StochasticToolsApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+StochasticToolsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  StochasticToolsApp::registerAll(f, af, s);
+}
+extern "C" void
+StochasticToolsApp__registerApps()
+{
+  StochasticToolsApp::registerApps();
 }

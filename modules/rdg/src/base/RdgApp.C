@@ -24,61 +24,51 @@ registerKnownLabel("RdgApp");
 
 RdgApp::RdgApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  RdgApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  RdgApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  RdgApp::registerExecFlags(_factory);
+  RdgApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 RdgApp::~RdgApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-RdgApp__registerApps()
+void
+RdgApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
 {
-  RdgApp::registerApps();
+  Registry::registerObjectsTo(f, {"RdgApp"});
+  Registry::registerActionsTo(af, {"RdgApp"});
 }
+
 void
 RdgApp::registerApps()
 {
   registerApp(RdgApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-RdgApp__registerObjects(Factory & factory)
-{
-  RdgApp::registerObjects(factory);
-}
 void
 RdgApp::registerObjects(Factory & factory)
 {
+  mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"RdgApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-RdgApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  RdgApp::associateSyntax(syntax, action_factory);
-}
 void
 RdgApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"RdgApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-RdgApp__registerExecFlags(Factory & factory)
-{
-  RdgApp::registerExecFlags(factory);
-}
 void
 RdgApp::registerExecFlags(Factory & /*factory*/)
 {
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
+extern "C" void
+RdgApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  RdgApp::registerAll(f, af, s);
+}
+extern "C" void
+RdgApp__registerApps()
+{
+  RdgApp::registerApps();
 }
