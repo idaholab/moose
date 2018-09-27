@@ -128,8 +128,8 @@ MechanicsActionPD::act()
   else if (_current_task == "add_user_object")
   {
     // add ghosting UO
-    std::string uo_type = "GhostElemPD";
-    std::string uo_name = "GhostElemPD";
+    const std::string uo_type = "GhostElemPD";
+    const std::string uo_name = "GhostElemPD";
 
     InputParameters params = _factory.getValidParams(uo_type);
     params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
@@ -138,12 +138,12 @@ MechanicsActionPD::act()
   }
   else if (_current_task == "add_kernel")
   {
-    std::string kernel_type = getKernelType();
+    const std::string kernel_type = getKernelType();
     InputParameters params = getKernelParameters(kernel_type);
 
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
-      std::string kernel_name = "Peridynamics_" + Moose::stringify(i);
+      const std::string kernel_name = "Peridynamics_" + Moose::stringify(i);
 
       params.set<unsigned int>("component") = i;
       params.set<NonlinearVariableName>("variable") = _displacements[i];
@@ -165,38 +165,26 @@ MechanicsActionPD::getKernelType()
 {
   std::string type;
 
-  switch (_formulation)
+  if (_formulation == "Bond")
+    type = "MechanicsBPD";
+  else if (_formulation == "OrdinaryState")
+    type = "MechanicsOSPD";
+  else if (_formulation == "NonOrdinaryState")
   {
-    case 0: // bond based PD formulation
-      type = "MechanicsBPD";
-      break;
-
-    case 1: // ordinary state based PD formulation
-      type = "MechanicsOSPD";
-      break;
-
-    case 2: // non-ordinary state based PD formulation
-      switch (_stabilization)
-      {
-        case 0: // fictitious force-stabilized
-          type = "ForceStabilizedSmallStrainMechanicsNOSPD";
-          break;
-
-        case 1: // self-stabilized
-          if (_finite_strain_formulation)
-            type = "FiniteStrainMechanicsNOSPD";
-          else
-            type = "SmallStrainMechanicsNOSPD";
-          break;
-
-        default:
-          mooseError("Unknown PD stabilization scheme. Choose from: Force Self");
-      }
-      break;
-
-    default:
-      mooseError("Unsupported PD formulation. Choose from: Bond OrdinaryState NonOrdinaryState");
+    if (_stabilization == "Force")
+      type = "ForceStabilizedSmallStrainMechanicsNOSPD";
+    else if (_stabilization == "Self")
+    {
+      if (_finite_strain_formulation)
+        type = "FiniteStrainMechanicsNOSPD";
+      else
+        type = "SmallStrainMechanicsNOSPD";
+    }
+    else
+      paramError("stabilization", "Unknown PD stabilization scheme. Choose from: Force Self");
   }
+  else 
+    paramError("formulation", "Unsupported peridynamic formulation. Choose from: Bond OrdinaryState NonOrdinaryState");
 
   return type;
 }

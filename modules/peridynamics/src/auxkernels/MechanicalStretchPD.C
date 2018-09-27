@@ -16,7 +16,7 @@ InputParameters
 validParams<MechanicalStretchPD>()
 {
   InputParameters params = validParams<AuxKernelBasePD>();
-  params.addClassDescription("Class for outputing bond mechanical stretch value");
+  params.addClassDescription("Class for outputing bond mechanical stretch");
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
   return params;
