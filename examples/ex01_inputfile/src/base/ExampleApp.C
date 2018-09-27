@@ -23,28 +23,18 @@ validParams<ExampleApp>()
 ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
-
-  Moose::registerObjects(_factory);
-  ExampleApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ExampleApp::associateSyntax(_syntax, _action_factory);
+  ExampleApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 void
-ExampleApp::registerObjects(Factory & factory)
+ExampleApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
 {
-  Registry::registerObjectsTo(factory, {"ExampleApp"});
+  Registry::registerObjectsTo(f, {"ExampleApp"});
+  Registry::registerActionsTo(af, {"ExampleApp"});
 }
 
 void
 ExampleApp::registerApps()
 {
   registerApp(ExampleApp);
-}
-
-void
-ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ExampleApp"});
 }
