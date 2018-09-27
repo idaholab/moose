@@ -24,37 +24,21 @@ validParams<ExampleApp>()
 ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
-
-  Moose::registerObjects(_factory);
-  ExampleApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  ExampleApp::associateSyntax(_syntax, _action_factory);
+  ExampleApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 void
-ExampleApp::registerObjects(Factory & factory)
+ExampleApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
-  Registry::registerObjectsTo(factory, {"ExampleApp"});
-}
-
-void
-ExampleApp::registerApps()
-{
-  registerApp(ExampleApp);
-}
-
-void
-ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ExampleApp"});
+  Registry::registerObjectsTo(f, {"ExampleApp"});
+  Registry::registerActionsTo(af, {"ExampleApp"});
 
   /**
    * An Action is a little different than registering the other MOOSE
    * objects.  First, you need to register your Action like normal in its file with
    * the registerMooseAction macro. - e.g.:
    *
-   *     registerAction("ExampleApp", ConvectionDiffusionAction, "add_kernel");
+   *     registerMooseAction("ExampleApp", ConvectionDiffusionAction, "add_kernel");
    *
    * Then we need to tell the parser what new section name to look for and what
    * Action object to build when it finds it.  This is done directly on the syntax
@@ -65,4 +49,10 @@ ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    * path.
    */
   registerSyntax("ConvectionDiffusionAction", "ConvectionDiffusion");
+}
+
+void
+ExampleApp::registerApps()
+{
+  registerApp(ExampleApp);
 }
