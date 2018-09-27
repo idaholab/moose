@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  op_num = 7
+  op_num = 8
   var_name_base = gr
 []
 

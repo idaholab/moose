@@ -5033,6 +5033,8 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
 
+  _evaluable_local_elem_range.reset();
+
   reinitBecauseOfGhostingOrNewGeomObjects();
 
   // We need to create new storage for the new elements and copy stateful properties from the old

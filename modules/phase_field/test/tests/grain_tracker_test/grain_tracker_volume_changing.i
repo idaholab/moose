@@ -36,7 +36,7 @@
     type = PolycrystalVoronoi
     grain_num = 12 # Number of grains
     coloring_algorithm = jp
-    rand_seed = 10
+    rand_seed = 15
     output_adjacency_matrix = true
   [../]
   [./grain_tracker]

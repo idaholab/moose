@@ -10,7 +10,7 @@
 #ifndef GRAINTRACKERHALORM_H
 #define GRAINTRACKERHALORM_H
 
-#include "ElementSideNeighborLayers.h"
+#include "ElementPointNeighbors.h"
 
 // Forward declarations
 class GrainTrackerHaloRM;
@@ -22,7 +22,7 @@ InputParameters validParams<GrainTrackerHaloRM>();
  * GrainTrackerHaloRM is used to ensure a level of elements at least as thick as the desired halo
  * level is available on each processor's partition to support detecting grain interaction.
  */
-class GrainTrackerHaloRM : public ElementSideNeighborLayers
+class GrainTrackerHaloRM : public ElementPointNeighbors
 {
 public:
   GrainTrackerHaloRM(const InputParameters & parameters);

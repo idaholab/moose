@@ -45,7 +45,7 @@ PolycrystalVoronoi::PolycrystalVoronoi(const InputParameters & parameters)
     _file_name(getParam<FileName>("file_name"))
 {
   if (_file_name == "" && _grain_num == 0)
-    mooseError("grain_num must be provided if the grain centriods are not read from a file");
+    mooseError("grain_num must be provided if the grain centroids are not read from a file");
 
   if (_file_name != "" && _grain_num > 0)
     mooseWarning("grain_num is ignored and will be determined from the file.");

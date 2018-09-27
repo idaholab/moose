@@ -78,6 +78,7 @@
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'
     csvdiff = 'grain_tracker_remapping_test_out.csv'
+
     method = '!DBG' # slow test
     valgrind = 'HEAVY'
     # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
@@ -85,6 +86,19 @@
     prereq = 'test_remapping_serial'
 
     min_parallel = 8 # Test distributed merge work with grain tracker
+  [../]
+
+  [./test_poly_ic_handoff]
+    type = 'CSVDiff'
+    input = 'grain_tracker_remapping_test.i'
+    csvdiff = 'test_poly_ic_handoff_out.csv'
+
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=1 Executioner/Adaptivity/refine_fraction=0.7 Executioner/Adaptivity/max_h_level=2 Executioner/num_steps=1 Outputs/file_base=test_poly_ic_handoff_out'
+
+    method = '!DBG' # slow test
+    valgrind = 'NONE' # Exact same test used elsewhere
+    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+    petsc_version = '>=3.5.0'
   [../]
 
   [./remapping_with_reserve]
@@ -135,7 +149,7 @@
   [./tolerate_remap_failure]
     type = 'RunApp'
     input = 'grain_tracker_remapping_test.i'
-    cli_args = 'UserObjects/grain_tracker/tolerate_failure=true UserObjects/voronoi/grain_num=15 Executioner/num_steps=6 UserObjects/voronoi/coloring_algorithm=bt Outputs/exodus=false Outputs/csv=false'
+    cli_args = 'UserObjects/grain_tracker/tolerate_failure=true UserObjects/voronoi/grain_num=16 Executioner/num_steps=6 UserObjects/voronoi/coloring_algorithm=bt Outputs/exodus=false Outputs/csv=false'
     expect_out = "Unable to find any suitable order parameters for remapping"
     allow_warnings = true
     valgrind = 'NONE'

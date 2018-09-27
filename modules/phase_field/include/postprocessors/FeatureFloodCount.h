@@ -553,6 +553,9 @@ protected:
   /// The vector of coupled in variables cast to MooseVariable
   std::vector<MooseVariable *> _vars;
 
+  /// Reference to the dof_map containing the coupled variables
+  const DofMap & _dof_map;
+
   /// The threshold above (or below) where an entity may begin a new region (feature)
   const Real _threshold;
   Real _step_threshold;

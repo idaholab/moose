@@ -28,6 +28,7 @@ public:
   GrainTracker(const InputParameters & parameters);
   virtual ~GrainTracker();
 
+  virtual void meshChanged() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
@@ -242,6 +243,9 @@ private:
 
   /// Boolean to indicate whether this is a Steady or Transient solve
   const bool _is_transient;
+
+  /// Data structure to hold element ID ranges when using Distributed Mesh (populated on rank 0 only)
+  std::vector<std::pair<dof_id_type, dof_id_type>> _all_ranges;
 
   /// Timers
   const PerfID _finalize_timer;

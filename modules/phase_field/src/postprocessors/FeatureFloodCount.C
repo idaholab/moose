@@ -22,6 +22,7 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/point_locator_base.h"
+#include "libmesh/remote_elem.h"
 
 #include <algorithm>
 #include <limits>
@@ -170,6 +171,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     BoundaryRestrictable(this, false),
     _fe_vars(getCoupledMooseVars()),
     _vars(getCoupledStandardMooseVars()),
+    _dof_map(_vars[0]->dofMap()),
     _threshold(getParam<Real>("threshold")),
     _connecting_threshold(isParamValid("connecting_threshold")
                               ? getParam<Real>("connecting_threshold")
@@ -1185,8 +1187,16 @@ FeatureFloodCount::flood(const DofObject * dof_object,
                          std::size_t current_index,
                          FeatureData * feature)
 {
-  if (dof_object == nullptr)
+  if (dof_object == nullptr || dof_object == libMesh::remote_elem)
     return false;
+
+  if (_is_elemental)
+  {
+    const Elem & elem = static_cast<const Elem &>(*dof_object);
+
+    if (!_dof_map.is_evaluable(elem))
+      return false;
+  }
 
   // Retrieve the id of the current entity
   auto entity_id = dof_object->id();
@@ -1194,14 +1204,20 @@ FeatureFloodCount::flood(const DofObject * dof_object,
   // Has this entity already been marked? - if so move along
   if (current_index != invalid_size_t &&
       _entities_visited[current_index].find(entity_id) != _entities_visited[current_index].end())
-    return false;
+    return true;
 
   // See if the current entity either starts a new feature or continues an existing feature
   auto new_id = invalid_id; // Writable reference to hold an optional id;
   Status status =
       Status::INACTIVE; // Status is inactive until we find an entity above the starting threshold
+
   if (!isNewFeatureOrConnectedRegion(dof_object, current_index, feature, status, new_id))
+  {
+    // If we have an active feature, we just found a halo entity
+    if (feature)
+      feature->_halo_ids.insert(feature->_halo_ids.end(), entity_id);
     return false;
+  }
 
   mooseAssert(current_index != invalid_size_t, "current_index is invalid");
 
@@ -1472,7 +1488,12 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
      */
     neighbor_ancestor = elem->neighbor(i);
     if (neighbor_ancestor)
+    {
+      if (neighbor_ancestor == libMesh::remote_elem)
+        continue;
+
       neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+    }
     else // if (expand_halos_only /*&& feature->_periodic_nodes.empty()*/)
     {
       neighbor_ancestor = elem->topological_neighbor(i, mesh, *_point_locator, _pbs);
@@ -1540,10 +1561,12 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
     {
       if (expand_halos_only)
       {
+        auto entity_id = neighbor->id();
+
         if (topological_neighbor || disjoint_only)
-          feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), neighbor->id());
-        else
-          feature->_halo_ids.insert(feature->_halo_ids.end(), neighbor->id());
+          feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), entity_id);
+        else if (feature->_local_ids.find(entity_id) == feature->_local_ids.end())
+          feature->_halo_ids.insert(feature->_halo_ids.end(), entity_id);
       }
       else
       {
@@ -1561,7 +1584,8 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
          * When we only recurse on entities we own, we can never get more than one away from
          * a local entity which should be in the ghosted zone.
          */
-        if (curr_entity->processor_id() == my_processor_id)
+        if (curr_entity->processor_id() == my_processor_id ||
+            neighbor->processor_id() == my_processor_id)
         {
           /**
            * Premark neighboring entities with a halo mark. These
@@ -1572,11 +1596,8 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
           if (topological_neighbor || disjoint_only)
             feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), neighbor->id());
           else
-          {
             // If we didn't flood the immediate neighbor, mark it with a halo instead
-            if (!flood(neighbor, current_index, feature))
-              feature->_halo_ids.insert(feature->_halo_ids.end(), neighbor->id());
-          }
+            flood(neighbor, current_index, feature);
         }
       }
     }
@@ -1642,6 +1663,8 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
   // First update the primary bounding box (all topologically connected)
   for (auto & halo_id : _halo_ids)
     updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(halo_id));
+  for (auto & ghost_id : _ghosted_ids)
+    updateBBoxExtremesHelper(_bboxes[0], *mesh.elem(ghost_id));
 
   // Remove all of the IDs that are in the primary region
   std::list<dof_id_type> disjoint_elem_id_list;
@@ -1735,7 +1758,7 @@ FeatureFloodCount::FeatureData::boundingBoxesIntersect(const FeatureData & rhs) 
   // See if any of the bounding boxes in either FeatureData object intersect
   for (const auto & bbox_lhs : _bboxes)
     for (const auto & bbox_rhs : rhs._bboxes)
-      if (bbox_lhs.intersects(bbox_rhs))
+      if (bbox_lhs.intersects(bbox_rhs, libMesh::TOLERANCE * libMesh::TOLERANCE))
         return true;
 
   return false;
@@ -1918,18 +1941,14 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
   auto box_expanded = false;
   for (auto & bbox : _bboxes)
     for (auto j = beginIndex(rhs._bboxes); j < rhs._bboxes.size(); ++j)
-      if (bbox.intersects(rhs._bboxes[j]))
+    {
+      if (bbox.intersects(rhs._bboxes[j], libMesh::TOLERANCE * libMesh::TOLERANCE))
       {
         updateBBoxExtremes(bbox, rhs._bboxes[j]);
         intersected_boxes[j] = true;
         box_expanded = true;
       }
-
-  // Any bounding box in the rhs vector that doesn't intersect
-  // needs to be appended to the lhs vector
-  for (auto j = beginIndex(intersected_boxes); j < intersected_boxes.size(); ++j)
-    if (!intersected_boxes[j])
-      _bboxes.push_back(rhs._bboxes[j]);
+    }
 
   // Error check
   if (!box_expanded)
@@ -1945,6 +1964,12 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
 
     ::mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());
   }
+
+  // Any bounding box in the rhs vector that doesn't intersect
+  // needs to be appended to the lhs vector
+  for (auto j = beginIndex(intersected_boxes); j < intersected_boxes.size(); ++j)
+    if (!intersected_boxes[j])
+      _bboxes.push_back(rhs._bboxes[j]);
 }
 
 std::ostream &

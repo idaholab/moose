@@ -52,7 +52,7 @@ validParams<GrainTracker>()
   InputParameters params = validParams<FeatureFloodCount>();
   params += validParams<GrainTrackerInterface>();
 
-  params.registerRelationshipManagers("GrainTrackerHaloRM");
+  params.registerRelationshipManagers("GrainTrackerHaloRM", "GEOMETRIC");
 
   params.addClassDescription("Grain Tracker object for running reduced order parameter simulations "
                              "without grain coalescence.");
@@ -187,6 +187,31 @@ GrainTracker::initialize()
     _feature_sets_old.swap(_feature_sets);
 
   FeatureFloodCount::initialize();
+}
+
+void
+GrainTracker::meshChanged()
+{
+  // Update the element ID ranges for use when computing halo maps
+  if (_compute_halo_maps && _mesh.isDistributedMesh())
+  {
+    _all_ranges.clear();
+
+    auto range = std::make_pair(std::numeric_limits<dof_id_type>::max(),
+                                std::numeric_limits<dof_id_type>::min());
+    for (const auto & current_elem : _mesh.getMesh().active_local_element_ptr_range())
+    {
+      auto id = current_elem->id();
+      if (id < range.first)
+        range.first = id;
+      else if (id > range.second)
+        range.second = id;
+    }
+
+    _communicator.gather(0, range, _all_ranges);
+  }
+
+  FeatureFloodCount::meshChanged();
 }
 
 void
@@ -1481,6 +1506,8 @@ GrainTracker::communicateHaloMap()
     std::vector<std::pair<std::size_t, dof_id_type>> local_halo_ids;
     std::size_t counter = 0;
 
+    const bool isDistributedMesh = _mesh.isDistributedMesh();
+
     if (_is_master)
     {
       std::vector<std::vector<std::pair<std::size_t, dof_id_type>>> root_halo_ids(_n_procs);
@@ -1491,15 +1518,37 @@ GrainTracker::communicateHaloMap()
       {
         for (const auto & entity_pair : _halo_ids[var_index])
         {
-          DofObject * halo_entity;
-          if (_is_elemental)
-            halo_entity = _mesh.queryElemPtr(entity_pair.first);
-          else
-            halo_entity = _mesh.queryNodePtr(entity_pair.first);
+          auto entity_id = entity_pair.first;
+          if (isDistributedMesh)
+          {
+            // Check to see which contiguous range this entity ID falls into
+            auto range_it =
+                std::lower_bound(_all_ranges.begin(),
+                                 _all_ranges.end(),
+                                 entity_id,
+                                 [](const std::pair<dof_id_type, dof_id_type> range,
+                                    dof_id_type entity_id) { return range.second < entity_id; });
 
-          if (halo_entity)
-            root_halo_ids[halo_entity->processor_id()].push_back(
-                std::make_pair(var_index, entity_pair.first));
+            mooseAssert(range_it != _all_ranges.end(), "No range round?");
+
+            // Recover the index from the iterator
+            auto proc_id = std::distance(_all_ranges.begin(), range_it);
+
+            // Now add this halo entity to the map for the corresponding proc to scatter latter
+            root_halo_ids[proc_id].push_back(std::make_pair(var_index, entity_id));
+          }
+          else
+          {
+            DofObject * halo_entity;
+            if (_is_elemental)
+              halo_entity = _mesh.queryElemPtr(entity_id);
+            else
+              halo_entity = _mesh.queryNodePtr(entity_id);
+
+            if (halo_entity)
+              root_halo_ids[halo_entity->processor_id()].push_back(
+                  std::make_pair(var_index, entity_id));
+          }
         }
       }
 
@@ -1519,7 +1568,12 @@ GrainTracker::communicateHaloMap()
     for (const auto & halo_pair : local_halo_ids)
       _halo_ids[halo_pair.first].emplace(std::make_pair(halo_pair.second, halo_pair.first));
 
-    // Finally remove halo markings from stitch regions
+    /**
+     * Finally remove halo markings from interior regions. This step is necessary because we expand
+     * halos _before_ we do communication but that expansion can and will likely go into the
+     * interior of the grain (from a single processor's perspective). We could expand halos after
+     * merging, but that would likely be less scalable.
+     */
     for (const auto & grain : _feature_sets)
       for (auto local_id : grain._local_ids)
         _halo_ids[grain._var_index].erase(local_id);
