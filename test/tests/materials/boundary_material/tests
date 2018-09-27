@@ -1,15 +1,20 @@
 [Tests]
+  design = '/Materials/index.md'
   [./bnd_coupling_vol]
     type = 'Exodiff'
     input = 'bnd_coupling_vol.i'
     exodiff = 'bnd_coupling_vol_out.e'
-    abs_zero = 1e-9
+    abs_zero = 1e-8
     max_parallel = 1
+    issues = '#3141'
+    requirement = 'The system shall provide material properties in boundary restricted objects acting on nodal variables.'
   [../]
 
   [./elem_aux_bc_on_bnd]
     type = 'Exodiff'
     input = 'elem_aux_bc_on_bnd.i'
     exodiff = 'elem_aux_bc_on_bnd_out.e'
+    issues = '#3586'
+    requirement = 'The system shall provide material properties in boundary restricted objects acting on elemental variables.'
   [../]
 []
