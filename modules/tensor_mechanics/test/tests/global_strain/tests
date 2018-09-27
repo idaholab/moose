@@ -12,6 +12,7 @@
     type = 'Exodiff'
     input = 'global_strain_uniaxial.i'
     exodiff = 'global_strain_uniaxial_out.e'
+    rel_err = 5e-2
     requirement = "The globalstrain system shall check the volume change under
                    uniaxial stress while still maintaining periodicity
                    in all the directions in 3D."
