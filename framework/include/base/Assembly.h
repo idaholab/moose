@@ -41,8 +41,10 @@ class MooseMesh;
 class ArbitraryQuadrature;
 class SystemBase;
 class MooseVariableFEBase;
+class MooseVariableBase;
 template <typename>
 class MooseVariableFE;
+class MooseVariableScalar;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 class XFEMInterface;
@@ -548,6 +550,10 @@ public:
   void setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
 
   void addJacobian();
+  /**
+   * Adds element matrix for ivar rows and jvar columns
+   */
+  void addJacobianCoupledVarPair(MooseVariableBase * ivar, MooseVariableBase * jvar);
   void addJacobianNonlocal();
   void addJacobianBlock(SparseMatrix<Number> & jacobian,
                         unsigned int ivar,
@@ -574,6 +580,11 @@ public:
    * Takes the values that are currently in _sub_Kee and appends them to the cached values.
    */
   void cacheJacobian();
+
+  /**
+   * Caches element matrix for ivar rows and jvar columns
+   */
+  void cacheJacobianCoupledVarPair(MooseVariableBase * ivar, MooseVariableBase * jvar);
 
   /**
    * Takes the values that are currently in _sub_Keg and appends them to the cached values.
@@ -626,7 +637,7 @@ public:
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & couplingEntries()
   {
-    return _cm_entry;
+    return _cm_ff_entry;
   }
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & nonlocalCouplingEntries()
   {
@@ -1014,8 +1025,15 @@ protected:
   /// Coupling matrices
   const CouplingMatrix * _cm;
   const CouplingMatrix & _nonlocal_cm;
-  /// Entries in the coupling matrix (only for field variables)
-  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_entry;
+  /// Entries in the coupling matrix for field variables
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_ff_entry;
+  /// Entries in the coupling matrix for field variables vs scalar variables
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableScalar *>> _cm_fs_entry;
+  /// Entries in the coupling matrix for scalar variables vs field variables
+  std::vector<std::pair<MooseVariableScalar *, MooseVariableFEBase *>> _cm_sf_entry;
+  /// Entries in the coupling matrix for scalar variables
+  std::vector<std::pair<MooseVariableScalar *, MooseVariableScalar *>> _cm_ss_entry;
+  /// Entries in the coupling matrix for field variables for nonlocal calculations
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_nonlocal_entry;
   /// Flag that indicates if the jacobian block was used
   std::vector<std::vector<std::vector<unsigned char>>> _jacobian_block_used;

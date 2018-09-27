@@ -990,38 +990,55 @@ Assembly::init(const CouplingMatrix * cm)
 
   unsigned int n_vars = _sys.nVariables();
 
-  // I want the blocks to go by columns first to reduce copying of shape function in assembling
-  // "full" Jacobian
-  _cm_entry.clear();
+  _cm_ss_entry.clear();
+  _cm_sf_entry.clear();
+  _cm_fs_entry.clear();
+  _cm_ff_entry.clear();
 
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
+  auto & vars = _sys.getVariables(_tid);
 
-  for (const auto & jvar : vars)
+  _block_diagonal_matrix = true;
+  for (auto & ivar : vars)
   {
-    unsigned int j = jvar->number();
-    for (const auto & ivar : vars)
+    auto i = ivar->number();
+    for (const auto & j : ConstCouplingRow(i, *_cm))
     {
-      unsigned int i = ivar->number();
-      if ((*_cm)(i, j) != 0)
-        _cm_entry.push_back(std::make_pair(ivar, jvar));
+      if (_sys.isScalarVariable(j))
+      {
+        auto & jvar = _sys.getScalarVariable(_tid, j);
+        _cm_fs_entry.push_back(std::make_pair(ivar, &jvar));
+        _block_diagonal_matrix = false;
+      }
+      else
+      {
+        auto & jvar = _sys.getVariable(_tid, j);
+        _cm_ff_entry.push_back(std::make_pair(ivar, &jvar));
+        if (i != j)
+          _block_diagonal_matrix = false;
+      }
     }
   }
 
-  unsigned int max_rows_per_column = 0; // If this is 1 then we are using a block-diagonal
-                                        // preconditioner and we can save a bunch of memory.
-  for (unsigned int i = 0; i < n_vars; i++)
+  auto & scalar_vars = _sys.getScalarVariables(_tid);
+
+  for (auto & ivar : scalar_vars)
   {
-    unsigned int max_rows_per_this_column = 0;
-    for (unsigned int j = 0; j < n_vars; j++)
-    {
-      if ((*_cm)(i, j) != 0)
-        max_rows_per_this_column++;
-    }
-    max_rows_per_column = std::max(max_rows_per_column, max_rows_per_this_column);
+    auto i = ivar->number();
+    for (const auto & j : ConstCouplingRow(i, *_cm))
+      if (_sys.isScalarVariable(j))
+      {
+        auto & jvar = _sys.getScalarVariable(_tid, j);
+        _cm_ss_entry.push_back(std::make_pair(ivar, &jvar));
+      }
+      else
+      {
+        auto & jvar = _sys.getVariable(_tid, j);
+        _cm_sf_entry.push_back(std::make_pair(ivar, &jvar));
+      }
   }
 
-  if (max_rows_per_column == 1 && _sys.getScalarVariables(_tid).size() == 0)
-    _block_diagonal_matrix = true;
+  if (_block_diagonal_matrix && scalar_vars.size() != 0)
+    _block_diagonal_matrix = false;
 
   auto num_vector_tags = _sys.subproblem().numVectorTags();
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
@@ -1097,23 +1114,25 @@ void
 Assembly::initNonlocalCoupling()
 {
   _cm_nonlocal_entry.clear();
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  for (const auto & jvar : vars)
+
+  auto & vars = _sys.getVariables(_tid);
+
+  for (auto & ivar : vars)
   {
-    unsigned int j = jvar->number();
-    for (const auto & ivar : vars)
-    {
-      unsigned int i = ivar->number();
-      if (_nonlocal_cm(i, j) != 0)
-        _cm_nonlocal_entry.push_back(std::make_pair(ivar, jvar));
-    }
+    auto i = ivar->number();
+    for (const auto & j : ConstCouplingRow(i, _nonlocal_cm))
+      if (!_sys.isScalarVariable(j))
+      {
+        auto & jvar = _sys.getVariable(_tid, j);
+        _cm_nonlocal_entry.push_back(std::make_pair(ivar, &jvar));
+      }
   }
 }
 
 void
 Assembly::prepareJacobianBlock()
 {
-  for (const auto & it : _cm_entry)
+  for (const auto & it : _cm_ff_entry)
   {
     MooseVariableFEBase & ivar = *(it.first);
     MooseVariableFEBase & jvar = *(it.second);
@@ -1175,7 +1194,7 @@ Assembly::prepareNonlocal()
 void
 Assembly::prepareVariable(MooseVariableFEBase * var)
 {
-  for (const auto & it : _cm_entry)
+  for (const auto & it : _cm_ff_entry)
   {
     MooseVariableFEBase & ivar = *(it.first);
     MooseVariableFEBase & jvar = *(it.second);
@@ -1230,7 +1249,7 @@ Assembly::prepareVariableNonlocal(MooseVariableFEBase * var)
 void
 Assembly::prepareNeighbor()
 {
-  for (const auto & it : _cm_entry)
+  for (const auto & it : _cm_ff_entry)
   {
     MooseVariableFEBase & ivar = *(it.first);
     MooseVariableFEBase & jvar = *(it.second);
@@ -1846,220 +1865,171 @@ Assembly::addCachedJacobian()
   }
 }
 
+inline void
+Assembly::addJacobianCoupledVarPair(MooseVariableBase * ivar, MooseVariableBase * jvar)
+{
+  auto i = ivar->number();
+  auto j = jvar->number();
+  for (unsigned int tag = beginIndex(_jacobian_block_used); tag < _jacobian_block_used.size();
+       tag++)
+    if (_jacobian_block_used[tag][i][j] && _sys.hasMatrix(tag))
+      addJacobianBlock(_sys.getMatrix(tag),
+                       jacobianBlock(i, j, tag),
+                       ivar->dofIndices(),
+                       jvar->dofIndices(),
+                       ivar->scalingFactor());
+}
+
 void
 Assembly::addJacobian()
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  for (const auto & ivar : vars)
-    for (const auto & jvar : vars)
-      // We always assume tag start from zero and is continuous
-      for (unsigned int i = beginIndex(_jacobian_block_used); i < _jacobian_block_used.size(); i++)
-        if ((*_cm)(ivar->number(), jvar->number()) != 0 &&
-            _jacobian_block_used[i][ivar->number()][jvar->number()] && _sys.hasMatrix(i))
-          addJacobianBlock(_sys.getMatrix(i),
-                           jacobianBlock(ivar->number(), jvar->number(), i),
-                           ivar->dofIndices(),
-                           jvar->dofIndices(),
-                           ivar->scalingFactor());
+  for (const auto & it : _cm_ff_entry)
+    addJacobianCoupledVarPair(it.first, it.second);
 
-  // Possibly add jacobian contributions from off-diagonal blocks coming from the scalar variables
-  if (_sys.getScalarVariables(_tid).size() > 0)
-  {
-    const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
-    const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-    for (const auto & ivar : scalar_vars)
-    {
-      for (const auto & jvar : vars)
-      {
-        // We only add jacobian blocks for d(nl-var)/d(scalar-var) now (these we generated by
-        // kernels and BCs)
-        // jacobian blocks d(scalar-var)/d(nl-var) are added later with addJacobianScalar
-        for (unsigned int i = beginIndex(_jacobian_block_used); i < _jacobian_block_used.size();
-             i++)
-        {
-          if ((*_cm)(jvar->number(), ivar->number()) != 0 &&
-              _jacobian_block_used[i][jvar->number()][ivar->number()] && _sys.hasMatrix(i))
-            addJacobianBlock(_sys.getMatrix(i),
-                             jacobianBlock(jvar->number(), ivar->number(), i),
-                             jvar->dofIndices(),
-                             ivar->dofIndices(),
-                             jvar->scalingFactor());
+  for (const auto & it : _cm_sf_entry)
+    addJacobianCoupledVarPair(it.first, it.second);
 
-          if ((*_cm)(ivar->number(), jvar->number()) != 0 &&
-              _jacobian_block_used[i][ivar->number()][jvar->number()] && _sys.hasMatrix(i))
-            addJacobianBlock(_sys.getMatrix(i),
-                             jacobianBlock(ivar->number(), jvar->number(), i),
-                             ivar->dofIndices(),
-                             jvar->dofIndices(),
-                             ivar->scalingFactor());
-        }
-      }
-    }
-  }
+  for (const auto & it : _cm_fs_entry)
+    addJacobianCoupledVarPair(it.first, it.second);
 }
 
 void
 Assembly::addJacobianNonlocal()
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  for (const auto & ivar : vars)
-    for (const auto & jvar : vars)
-      for (auto tag = beginIndex(_jacobian_block_nonlocal_used);
-           tag < _jacobian_block_nonlocal_used.size();
-           tag++)
-        if (_nonlocal_cm(ivar->number(), jvar->number()) != 0 &&
-            _jacobian_block_nonlocal_used[tag][ivar->number()][jvar->number()] &&
-            _sys.hasMatrix(tag))
-          addJacobianBlock(_sys.getMatrix(tag),
-                           jacobianBlockNonlocal(ivar->number(), jvar->number(), tag),
-                           ivar->dofIndices(),
-                           jvar->allDofIndices(),
-                           ivar->scalingFactor());
+  for (const auto & it : _cm_nonlocal_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+    for (auto tag = beginIndex(_jacobian_block_nonlocal_used);
+         tag < _jacobian_block_nonlocal_used.size();
+         tag++)
+      if (_jacobian_block_nonlocal_used[tag][i][j] && _sys.hasMatrix(tag))
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNonlocal(i, j, tag),
+                         ivar->dofIndices(),
+                         jvar->allDofIndices(),
+                         ivar->scalingFactor());
+  }
 }
 
 void
 Assembly::addJacobianNeighbor()
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  for (const auto & ivar : vars)
-    for (const auto & jvar : vars)
-      for (auto tag = beginIndex(_jacobian_block_neighbor_used);
-           tag < _jacobian_block_neighbor_used.size();
-           tag++)
-        if ((*_cm)(ivar->number(), jvar->number()) != 0 &&
-            _jacobian_block_neighbor_used[tag][ivar->number()][jvar->number()] &&
-            _sys.hasMatrix(tag))
-        {
-          addJacobianBlock(
-              _sys.getMatrix(tag),
-              jacobianBlockNeighbor(Moose::ElementNeighbor, ivar->number(), jvar->number(), tag),
-              ivar->dofIndices(),
-              jvar->dofIndicesNeighbor(),
-              ivar->scalingFactor());
+  for (const auto & it : _cm_ff_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+    for (auto tag = beginIndex(_jacobian_block_neighbor_used);
+         tag < _jacobian_block_neighbor_used.size();
+         tag++)
+      if (_jacobian_block_neighbor_used[tag][i][j] && _sys.hasMatrix(tag))
+      {
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
+                         ivar->dofIndices(),
+                         jvar->dofIndicesNeighbor(),
+                         ivar->scalingFactor());
 
-          addJacobianBlock(
-              _sys.getMatrix(tag),
-              jacobianBlockNeighbor(Moose::NeighborElement, ivar->number(), jvar->number(), tag),
-              ivar->dofIndicesNeighbor(),
-              jvar->dofIndices(),
-              ivar->scalingFactor());
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndices(),
+                         ivar->scalingFactor());
 
-          addJacobianBlock(
-              _sys.getMatrix(tag),
-              jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar->number(), jvar->number(), tag),
-              ivar->dofIndicesNeighbor(),
-              jvar->dofIndicesNeighbor(),
-              ivar->scalingFactor());
-        }
+        addJacobianBlock(_sys.getMatrix(tag),
+                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
+                         ivar->dofIndicesNeighbor(),
+                         jvar->dofIndicesNeighbor(),
+                         ivar->scalingFactor());
+      }
+  }
+}
+
+inline void
+Assembly::cacheJacobianCoupledVarPair(MooseVariableBase * ivar, MooseVariableBase * jvar)
+{
+  auto i = ivar->number();
+  auto j = jvar->number();
+  for (unsigned int tag = beginIndex(_jacobian_block_used); tag < _jacobian_block_used.size();
+       tag++)
+    if (_jacobian_block_used[tag][i][j] && _sys.hasMatrix(tag))
+      cacheJacobianBlock(jacobianBlock(i, j, tag),
+                         ivar->dofIndices(),
+                         jvar->dofIndices(),
+                         ivar->scalingFactor(),
+                         tag);
 }
 
 void
 Assembly::cacheJacobian()
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  for (const auto & ivar : vars)
-    for (const auto & jvar : vars)
-      for (unsigned int i = beginIndex(_jacobian_block_used); i < _jacobian_block_used.size(); i++)
-        if ((*_cm)(ivar->number(), jvar->number()) != 0 &&
-            _jacobian_block_used[i][ivar->number()][jvar->number()] && _sys.hasMatrix(i))
-          cacheJacobianBlock(jacobianBlock(ivar->number(), jvar->number(), i),
-                             ivar->dofIndices(),
-                             jvar->dofIndices(),
-                             ivar->scalingFactor(),
-                             i);
+  for (const auto & it : _cm_ff_entry)
+    cacheJacobianCoupledVarPair(it.first, it.second);
 
-  // Possibly add jacobian contributions from off-diagonal blocks coming from the scalar variables
-  if (_sys.getScalarVariables(_tid).size() > 0)
-  {
-    const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
-    const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-    for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin();
-         it != scalar_vars.end();
-         ++it)
-    {
-      MooseVariableScalar & ivar = *(*it);
-      for (typename std::vector<MooseVariableFEBase *>::const_iterator jt = vars.begin();
-           jt != vars.end();
-           ++jt)
-      {
-        MooseVariableFEBase & jvar = *(*jt);
-        // We only add jacobian blocks for d(nl-var)/d(scalar-var) now (these we generated by
-        // kernels and BCs)
-        // jacobian blocks d(scalar-var)/d(nl-var) are added later with addJacobianScalar
-        for (unsigned int i = beginIndex(_jacobian_block_used); i < _jacobian_block_used.size();
-             i++)
-        {
-          if ((*_cm)(jvar.number(), ivar.number()) != 0 &&
-              _jacobian_block_used[i][jvar.number()][ivar.number()] && _sys.hasMatrix(i))
-            cacheJacobianBlock(jacobianBlock(jvar.number(), ivar.number(), i),
-                               jvar.dofIndices(),
-                               ivar.dofIndices(),
-                               jvar.scalingFactor(),
-                               i);
-          if ((*_cm)(ivar.number(), jvar.number()) != 0 &&
-              _jacobian_block_used[i][ivar.number()][jvar.number()] && _sys.hasMatrix(i))
-            cacheJacobianBlock(jacobianBlock(ivar.number(), jvar.number(), i),
-                               ivar.dofIndices(),
-                               jvar.dofIndices(),
-                               ivar.scalingFactor(),
-                               i);
-        }
-      }
-    }
-  }
+  for (const auto & it : _cm_fs_entry)
+    cacheJacobianCoupledVarPair(it.first, it.second);
+
+  for (const auto & it : _cm_sf_entry)
+    cacheJacobianCoupledVarPair(it.first, it.second);
 }
 
 void
 Assembly::cacheJacobianNonlocal()
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  for (const auto & ivar : vars)
-    for (const auto & jvar : vars)
-      for (auto tag = beginIndex(_jacobian_block_nonlocal_used);
-           tag < _jacobian_block_nonlocal_used.size();
-           tag++)
-        if (_nonlocal_cm(ivar->number(), jvar->number()) != 0 &&
-            _jacobian_block_nonlocal_used[tag][ivar->number()][jvar->number()] &&
-            _sys.hasMatrix(tag))
-          cacheJacobianBlockNonlocal(jacobianBlockNonlocal(ivar->number(), jvar->number(), tag),
-                                     ivar->dofIndices(),
-                                     jvar->allDofIndices(),
-                                     ivar->scalingFactor(),
-                                     tag);
+  for (const auto & it : _cm_nonlocal_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+    for (auto tag = beginIndex(_jacobian_block_nonlocal_used);
+         tag < _jacobian_block_nonlocal_used.size();
+         tag++)
+      if (_jacobian_block_nonlocal_used[tag][i][j] && _sys.hasMatrix(tag))
+        cacheJacobianBlockNonlocal(jacobianBlockNonlocal(i, j, tag),
+                                   ivar->dofIndices(),
+                                   jvar->allDofIndices(),
+                                   ivar->scalingFactor(),
+                                   tag);
+  }
 }
 
 void
 Assembly::cacheJacobianNeighbor()
 {
-  const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
-  for (const auto & ivar : vars)
-    for (const auto & jvar : vars)
-      for (auto tag = beginIndex(_jacobian_block_neighbor_used);
-           tag < _jacobian_block_neighbor_used.size();
-           tag++)
-        if ((*_cm)(ivar->number(), jvar->number()) != 0 &&
-            _jacobian_block_neighbor_used[tag][ivar->number()][jvar->number()] &&
-            _sys.hasMatrix(tag))
-        {
-          cacheJacobianBlock(
-              jacobianBlockNeighbor(Moose::ElementNeighbor, ivar->number(), jvar->number(), tag),
-              ivar->dofIndices(),
-              jvar->dofIndicesNeighbor(),
-              ivar->scalingFactor(),
-              tag);
-          cacheJacobianBlock(
-              jacobianBlockNeighbor(Moose::NeighborElement, ivar->number(), jvar->number(), tag),
-              ivar->dofIndicesNeighbor(),
-              jvar->dofIndices(),
-              ivar->scalingFactor(),
-              tag);
-          cacheJacobianBlock(
-              jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar->number(), jvar->number(), tag),
-              ivar->dofIndicesNeighbor(),
-              jvar->dofIndicesNeighbor(),
-              ivar->scalingFactor(),
-              tag);
-        }
+  for (const auto & it : _cm_ff_entry)
+  {
+    auto ivar = it.first;
+    auto jvar = it.second;
+    auto i = ivar->number();
+    auto j = jvar->number();
+
+    for (auto tag = beginIndex(_jacobian_block_neighbor_used);
+         tag < _jacobian_block_neighbor_used.size();
+         tag++)
+      if (_jacobian_block_neighbor_used[tag][i][j] && _sys.hasMatrix(tag))
+      {
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
+                           ivar->dofIndices(),
+                           jvar->dofIndicesNeighbor(),
+                           ivar->scalingFactor(),
+                           tag);
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
+                           ivar->dofIndicesNeighbor(),
+                           jvar->dofIndices(),
+                           ivar->scalingFactor(),
+                           tag);
+        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
+                           ivar->dofIndicesNeighbor(),
+                           jvar->dofIndicesNeighbor(),
+                           ivar->scalingFactor(),
+                           tag);
+      }
+  }
 }
 
 void
@@ -2158,17 +2128,8 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
 void
 Assembly::addJacobianScalar()
 {
-  const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
-  for (const auto & ivar : scalar_vars)
-    for (const auto & jvar : scalar_vars)
-      for (unsigned int i = beginIndex(_jacobian_block_used); i < _jacobian_block_used.size(); i++)
-        if ((*_cm)(ivar->number(), jvar->number()) != 0 &&
-            _jacobian_block_used[i][ivar->number()][jvar->number()] && _sys.hasMatrix(i))
-          addJacobianBlock(_sys.getMatrix(i),
-                           jacobianBlock(ivar->number(), jvar->number(), i),
-                           ivar->dofIndices(),
-                           jvar->dofIndices(),
-                           ivar->scalingFactor());
+  for (const auto & it : _cm_ss_entry)
+    addJacobianCoupledVarPair(it.first, it.second);
 }
 
 void
@@ -2177,14 +2138,7 @@ Assembly::addJacobianOffDiagScalar(unsigned int ivar)
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   MooseVariableScalar & var_i = _sys.getScalarVariable(_tid, ivar);
   for (const auto & var_j : vars)
-    for (unsigned int i = beginIndex(_jacobian_block_used); i < _jacobian_block_used.size(); i++)
-      if ((*_cm)(var_i.number(), var_j->number()) != 0 &&
-          _jacobian_block_used[i][var_i.number()][var_j->number()] && _sys.hasMatrix(i))
-        addJacobianBlock(_sys.getMatrix(i),
-                         jacobianBlock(var_i.number(), var_j->number(), i),
-                         var_i.dofIndices(),
-                         var_j->dofIndices(),
-                         var_i.scalingFactor());
+    addJacobianCoupledVarPair(&var_i, var_j);
 }
 
 void
