@@ -21,7 +21,6 @@
   [../]
   [./grain_tracker]
     type = GrainTracker
-    flood_entity_type = ELEMENTAL
     compute_halo_maps = true # For displaying HALO fields
     polycrystal_ic_uo = ebsd
   [../]

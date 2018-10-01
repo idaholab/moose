@@ -27,32 +27,22 @@
 [Variables]
   # order parameter
   [./eta]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   # hydrogen concentration
   [./c]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   # chemical potential
   [./w]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   # Liquid phase solute concentration
   [./cl]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 0.1
   [../]
   # Solid phase solute concentration
   [./cs]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 0.9
   [../]
 []
@@ -60,11 +50,12 @@
 [Functions]
   [./ic_func_eta]
     type = ParsedFunction
-    value = 0.5*(1.0-tanh((x)/sqrt(2.0)))
+    value = '0.5*(1.0-tanh((x)/sqrt(2.0)))'
   [../]
   [./ic_func_c]
     type = ParsedFunction
-    value = '0.9*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.1*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
+    value = '0.9 * (0.5 * (1.0-tanh(x/sqrt(2.0))))^3 * (6 * (0.5 * (1.0-tanh(x/sqrt(2.0))))^2 - 15*(0.5*(1.0-tanh(x/sqrt(2.0)))) + 10) +
+             0.1 * (1 - (0.5*(1.0-tanh(x/sqrt(2.0))))^3 * (6 * (0.5*(1.0-tanh(x/sqrt(2.0))))^2 - 15 * (0.5*(1.0-tanh(x/sqrt(2.0)))) + 10))'
   [../]
 []
 

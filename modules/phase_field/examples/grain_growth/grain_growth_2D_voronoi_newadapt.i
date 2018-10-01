@@ -21,12 +21,12 @@
   elem_type = QUAD4 # Type of elements used in the mesh
   uniform_refine = 3 # Initial uniform refinement of the mesh
 
-  parallel_type = replicated # Periodic BCs
+  parallel_type = replicated
 []
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 15 # Number of grains
+  op_num = 15        # Number of grains
   var_name_base = gr # Base name of grains
 []
 
@@ -110,8 +110,6 @@
 [Executioner]
   type = Transient # Type of executioner, here it is transient with an adaptive time step
   scheme = bdf2 # Type of time integration (2nd order backward euler), defaults to 1st order backward euler
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'

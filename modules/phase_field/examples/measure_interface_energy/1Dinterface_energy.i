@@ -59,7 +59,6 @@
     variable = w
     v = c
   [../]
-
 []
 
 [Functions]

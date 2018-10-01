@@ -85,7 +85,6 @@
     family = LAGRANGE
     initial_condition = 0.1
   [../]
-
 []
 
 [Functions]
@@ -101,9 +100,7 @@
     type = ParsedFunction
     value = '0.1*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.05*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
   [../]
-
 []
-
 
 [ICs]
   [./eta]
@@ -121,7 +118,6 @@
     type = FunctionIC
     function = ic_func_c2
   [../]
-
 []
 
 [Materials]
@@ -200,7 +196,6 @@
     fb_name  = fs
     args_a   = 'c1l'
     args_b   = 'c1s'
-
   [../]
 
   #
@@ -248,7 +243,6 @@
     mob_name = M
     variable = w2
   [../]
-
 
   #
   # Allen-Cahn Equation

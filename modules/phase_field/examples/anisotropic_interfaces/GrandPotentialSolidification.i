@@ -8,13 +8,15 @@
   ymin = -4
   ymax = 4
 []
- [GlobalParams]
+
+[GlobalParams]
   radius = 0.5
   int_width = 0.3
   x1 = 0.0
   y1 = 0.0
 []
- [Variables]
+
+[Variables]
   [./w]
   [../]
   [./etaa0]
@@ -24,7 +26,8 @@
   [./T]
   [../]
 []
- [ICs]
+
+[ICs]
   [./w]
     type = SmoothCircleIC
     variable = w
@@ -47,8 +50,9 @@
     invalue = 0.0
   [../]
 []
- [Kernels]
-# Order parameter eta_alpha0
+
+[Kernels]
+  # Order parameter eta_alpha0
   [./ACa0_bulk]
     type = ACGrGrMulti
     variable = etaa0
@@ -80,7 +84,7 @@
     type = TimeDerivative
     variable = etaa0
   [../]
-# Order parameter eta_beta0
+  # Order parameter eta_beta0
   [./ACb0_bulk]
     type = ACGrGrMulti
     variable = etab0
@@ -112,7 +116,7 @@
     type = TimeDerivative
     variable = etab0
   [../]
-#Chemical potential
+  # Chemical potential
   [./w_dot]
     type = SusceptibilityTimeDerivative
     variable = w
@@ -156,7 +160,6 @@
     coef = -5.0
   [../]
 []
-
 
 [Materials]
   [./ha]
@@ -237,38 +240,44 @@
     enable_jit = false
   [../]
 []
- [Preconditioning]
+
+[Preconditioning]
   [./SMP]
     type = SMP
     full = true
   [../]
 []
- [Executioner]
+
+[Executioner]
   type = Transient
   scheme = bdf2
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      31'
-   l_tol = 1.0e-3
+
+  l_tol = 1.0e-3
   l_max_its = 30
   nl_max_its = 15
   nl_rel_tol = 1.0e-8
   nl_abs_tol = 1e-8
   end_time = 3.0
+
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.0005
   [../]
+
   [./Adaptivity]
     initial_adaptivity = 3 # Number of times mesh is adapted to initial condition
-    refine_fraction = 0.7 # Fraction of high error that will be refined
+    refine_fraction = 0.7  # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-    max_h_level = 3 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+    max_h_level = 3        # Max number of refinements used, starting from initial mesh (before uniform refinement)
     weight_names = 'etaa0 etab0 w T'
     weight_values = '1 1 1 1'
   [../]
- []
- [Outputs]
+[]
+
+[Outputs]
   interval = 20
   exodus = true
 []

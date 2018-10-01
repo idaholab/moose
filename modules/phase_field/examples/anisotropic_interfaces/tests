@@ -6,4 +6,26 @@
     method = '!DBG'
     check_input = True
   [../]
+
+  [./GrandPotentialPlanarGrowth]
+    type = RunApp
+    input = 'GrandPotentialPlanarGrowth.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    method = '!DBG'
+    check_input = True
+  [../]
+  [./GrandPotentialSolidification]
+    type = RunApp
+    input = 'GrandPotentialSolidification.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    method = '!DBG'
+    check_input = True
+  [../]
+  [./GrandPotentialTwophaseAnisotropy]
+    type = RunApp
+    input = 'GrandPotentialTwophaseAnisotropy.i'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=0'
+    method = '!DBG'
+    check_input = True
+  [../]
 []

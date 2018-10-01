@@ -118,9 +118,9 @@
   [../]
   [./Adaptivity]
     initial_adaptivity = 3 # Number of times mesh is adapted to initial condition
-    refine_fraction = 0.7 # Fraction of high error that will be refined
+    refine_fraction = 0.7  # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-    max_h_level = 5 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+    max_h_level = 5        # Max number of refinements used, starting from initial mesh (before uniform refinement)
     weight_names = 'w T'
     weight_values = '1 0.5'
   [../]

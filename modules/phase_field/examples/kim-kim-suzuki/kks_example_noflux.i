@@ -64,10 +64,10 @@
   [../]
   [./ic_func_c]
     type = ParsedFunction
-    value = '0.9*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.1*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
+    value = '0.9 * (0.5 * (1.0-tanh(x/sqrt(2.0))))^3 * (6 * (0.5 * (1.0-tanh(x/sqrt(2.0))))^2 - 15*(0.5*(1.0-tanh(x/sqrt(2.0)))) + 10) +
+             0.1 * (1 - (0.5*(1.0-tanh(x/sqrt(2.0))))^3 * (6 * (0.5*(1.0-tanh(x/sqrt(2.0))))^2 - 15 * (0.5*(1.0-tanh(x/sqrt(2.0)))) + 10))'
   [../]
 []
-
 
 [ICs]
   [./eta]
@@ -230,7 +230,6 @@
   [../]
 []
 
-
 [VectorPostprocessors]
   [./c]
     type =  LineValueSampler
@@ -250,7 +249,6 @@
     sort_by =  id
     execute_on = timestep_end
   [../]
-
 []
 
 [Outputs]

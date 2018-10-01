@@ -18,12 +18,12 @@
   zmax = 300
   uniform_refine = 2 # Initial uniform refinement of the mesh
 
-  parallel_type = replicated # Periodic BCs
+  parallel_type = replicated
 []
 
 [GlobalParams]
   # Parameters used by several kernels that are defined globally to simplify input file
-  op_num = 9 # Number of order parameters used
+  op_num = 9         # Number of order parameters used
   var_name_base = gr # Base name of grains
 []
 
@@ -156,17 +156,15 @@
 [Executioner]
   type = Transient # Type of executioner, here it is transient with an adaptive time step
   scheme = bdf2 # Type of time integration (2nd order backward euler), defaults to 1st order backward euler
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   # Uses newton iteration to solve the problem.
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -mat_mffd_type'
   petsc_options_value = 'hypre boomeramg 101 ds'
 
-  l_max_its = 30 # Max number of linear iterations
-  l_tol = 1e-4 # Relative tolerance for linear solves
-  nl_max_its = 40 # Max number of nonlinear iterations
+  l_max_its = 30     # Max number of linear iterations
+  l_tol = 1e-4       # Relative tolerance for linear solves
+  nl_max_its = 40    # Max number of nonlinear iterations
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
 
   start_time = 0.0
@@ -180,7 +178,6 @@
 
   [./Adaptivity]
     # Block that turns on mesh adaptivity. Note that mesh will never coarsen beyond initial mesh (before uniform refinement)
-#    initial_adaptivity = 2 # Number of times mesh is adapted to initial condition
     refine_fraction = 0.6 # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
     max_h_level = 3 # Max number of refinements used, starting from initial mesh (before uniform refinement)

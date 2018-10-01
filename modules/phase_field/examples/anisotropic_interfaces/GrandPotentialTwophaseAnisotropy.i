@@ -43,14 +43,14 @@
   [./etaa0]
     type = SmoothCircleIC
     variable = etaa0
-    #Solid phase
+    # Solid phase
     outvalue = 0.0
     invalue = 1.0
   [../]
   [./etab0]
     type = SmoothCircleIC
     variable = etab0
-    #Liquid phase
+    # Liquid phase
     outvalue = 1.0
     invalue = 0.0
   [../]
@@ -73,9 +73,8 @@
   [../]
 []
 
-
 [Kernels]
-# Order parameter eta_alpha0
+  # Order parameter eta_alpha0
   [./ACa0_bulk]
     type = ACGrGrMulti
     variable = etaa0
@@ -107,7 +106,7 @@
     type = TimeDerivative
     variable = etaa0
   [../]
-# Order parameter eta_beta0
+  # Order parameter eta_beta0
   [./ACb0_bulk]
     type = ACGrGrMulti
     variable = etab0
@@ -139,7 +138,7 @@
     type = TimeDerivative
     variable = etab0
   [../]
-#Chemical potential
+  # Chemical potential
   [./w_dot]
     type = SusceptibilityTimeDerivative
     variable = w
@@ -169,7 +168,6 @@
     args = 'etaa0 etab0'
   [../]
 []
-
 
 [Materials]
   [./ha]
@@ -271,19 +269,20 @@
   nl_rel_tol = 1.0e-8
   nl_abs_tol = 1e-8
   end_time = 10.0
+
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
     dt = 0.0005
   [../]
+
   [./Adaptivity]
     initial_adaptivity = 3 # Number of times mesh is adapted to initial condition
-    refine_fraction = 0.7 # Fraction of high error that will be refined
+    refine_fraction = 0.7  # Fraction of high error that will be refined
     coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-    max_h_level = 3 # Max number of refinements used, starting from initial mesh (before uniform refinement)
+    max_h_level = 3        # Max number of refinements used, starting from initial mesh (before uniform refinement)
     weight_names = 'etaa0 etab0 w'
     weight_values = '1 1 1'
   [../]
-
 []
 
 [Outputs]
