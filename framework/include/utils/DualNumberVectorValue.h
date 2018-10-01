@@ -9,6 +9,8 @@
 #include "metaphysicl/compare_types.h"
 #include "metaphysicl/nddualnumber.h"
 
+#include <utility>
+
 namespace MetaPhysicL
 {
 template <typename T, bool reverseorder>
@@ -59,6 +61,26 @@ public:
   NotADuckDualNumber(const NotADuckDualNumber<TypeVector<T2>, D2> & type_vector)
     : DualNumber<VectorValue<T>, D>(type_vector.value(), type_vector.derivatives())
   {
+  }
+
+  template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
+  NotADuckDualNumber<VectorValue<T>, D> & operator=(const T2 & scalar)
+  {
+    this->value() = scalar;
+    auto size = this->derivatives().size();
+    for (decltype(size) i = 0; i < size; ++i)
+      this->derivatives()[i] = scalar;
+    return *this;
+  }
+  template <typename T2, typename D2>
+  NotADuckDualNumber<VectorValue<T>, D> &
+  operator=(const NotADuckDualNumber<TypeVector<T2>, D2> & vector)
+  {
+    this->value() = vector.value();
+    auto size = this->derivatives().size();
+    for (decltype(size) i = 0; i < size; ++i)
+      this->derivatives()[i] = vector.derivatives()[i];
+    return *this;
   }
 };
 }

@@ -1062,11 +1062,7 @@ MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned i
       _ad_grad_u[qp] = 0;
 
     if (_need_ad_second_u)
-    {
-      TensorValue<Real> value{};
-      NumberArray<AD_MAX_DOFS_PER_ELEM, TensorValue<Real>> derivatives{};
-      _ad_second_u[qp] = TensorDN<Real>(value, derivatives);
-    }
+      _ad_second_u[qp] = 0.;
   }
 
   for (unsigned int i = 0; i < num_dofs; i++)
@@ -1085,7 +1081,7 @@ MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned i
       _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
 
       if (_need_ad_grad_u)
-        _ad_grad_u[qp] += _ad_dofs[i] * _grad_phi[i][qp]; // Note: += does NOT work here!
+        _ad_grad_u[qp] += _ad_dofs[i] * _grad_phi[i][qp];
 
       if (_need_ad_second_u)
         _ad_second_u[qp] += _ad_dofs[i] * (*_second_phi)[i][qp];
@@ -1152,8 +1148,7 @@ MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const un
       _neighbor_ad_u[qp] += _neighbor_ad_dofs[i] * _phi_neighbor[i][qp];
 
       if (_need_neighbor_ad_grad_u)
-        _neighbor_ad_grad_u[qp] +=
-            _neighbor_ad_dofs[i] * _grad_phi_neighbor[i][qp]; // Note: += does NOT work here!
+        _neighbor_ad_grad_u[qp] += _neighbor_ad_dofs[i] * _grad_phi_neighbor[i][qp];
 
       if (_need_neighbor_ad_second_u)
         _neighbor_ad_second_u[qp] += _neighbor_ad_dofs[i] * (*_second_phi_neighbor)[i][qp];
