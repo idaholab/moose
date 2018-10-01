@@ -85,10 +85,10 @@ class TheWarehouseTest : public MooseObjectUnitTest
 public:
   TheWarehouseTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    w.registerAttrib<TestAttrib>("0", 0, 0);
-    w.registerAttrib<TestAttrib>("1", 1, 0);
-    w.registerAttrib<TestAttrib>("2", 2, 0);
-    w.registerAttrib<TestAttrib>("3", 3, 0);
+    w.registerAttribute<TestAttrib>("0", 0, 0);
+    w.registerAttribute<TestAttrib>("1", 1, 0);
+    w.registerAttribute<TestAttrib>("2", 2, 0);
+    w.registerAttribute<TestAttrib>("3", 3, 0);
   }
 
   std::shared_ptr<TestObject> obj(int val1, int val2, int val3, int val4)

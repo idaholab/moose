@@ -25,7 +25,7 @@ class TheWarehouse;
 
 /// Attribute is an abstract class that can be implemented in order to track custom metadata about
 /// MooseObject instances - enabling warehouse queries over the attribute.  Attribute subclasses
-/// must be registered with the warehouse (i.e. via TheWarehouse::registerAttrib) where they will
+/// must be registered with the warehouse (i.e. via TheWarehouse::registerAttribute) where they will
 /// be used *before* objects are added to that warehouse.  Specific Attribute instances cannot (and
 /// should not) generally be created before the class is registered with a warehouse.
 class Attribute
@@ -73,6 +73,33 @@ private:
 /// important even though you don't see it being called (directly) anywhere - it *IS* being used.
 bool operator==(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs);
 
+/// Used for hash function specialization for Attribute objects.
+inline void
+hash_combine(std::size_t & /*seed*/)
+{
+}
+
+/// Used to combine an existing hash value with the hash of one or more other values (v and rest).
+/// For example "auto h = std::hash("hello"); hash_combine(h, my_int_val, my_float_val, etc.);"
+template <typename T, typename... Rest>
+inline void
+hash_combine(std::size_t & seed, const T & v, Rest &&... rest)
+{
+  std::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  hash_combine(seed, std::forward<Rest>(rest)...);
+}
+
+/// Used for hash function specialization for Attribute objects.
+template <typename T, typename... Rest>
+inline void
+hash_combine(std::size_t & seed, const std::vector<T> & v, Rest &&... rest)
+{
+  for (auto & val : v)
+    hash_combine(seed, val);
+  hash_combine(seed, std::forward<Rest>(rest)...);
+}
+
 namespace std
 {
 /// This template specialization allows Attributes to be used as unordered map key.
@@ -101,33 +128,6 @@ public:
     return h;
   }
 };
-}
-
-/// Used for hash function specialization for Attribute objects.
-inline void
-hash_combine(std::size_t & /*seed*/)
-{
-}
-
-/// Used to combine an existing hash value with the hash of one or more other values (v and rest).
-/// For example "auto h = std::hash("hello"); hash_combine(h, my_int_val, my_float_val, etc.);"
-template <typename T, typename... Rest>
-inline void
-hash_combine(std::size_t & seed, const T & v, Rest &&... rest)
-{
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-  hash_combine(seed, std::forward<Rest>(rest)...);
-}
-
-/// Used for hash function specialization for Attribute objects.
-template <typename T, typename... Rest>
-inline void
-hash_combine(std::size_t & seed, const std::vector<T> & v, Rest &&... rest)
-{
-  for (auto & val : v)
-    hash_combine(seed, val);
-  hash_combine(seed, std::forward<Rest>(rest)...);
 }
 
 /// TheWarehouse is a container for MooseObjects that allows querying/filtering over various
@@ -217,13 +217,13 @@ public:
   /// registered attribute is returned - which is generally not needed used by users.
   ///
   /// As an example, to register a class with the constructor "YourAttribute(TheWarehouse& w, int
-  /// foo)", you would call "registerAttrib<YourAttribute>("your_attrib_name", constructor_arg1,
+  /// foo)", you would call "registerAttribute<YourAttribute>("your_attrib_name", constructor_arg1,
   /// ...)".  Custom attribute classes are required to pass an attribute name (i.e.
   /// "your_attrib_name") to the Attribute base class.  The dummy args are forwarded to the attrib
-  /// class' constructor. The name passed here into registerAttrib
+  /// class' constructor. The name passed here into registerAttribute
   /// must be the same string as the name passed to the Attribute base class's constructor.
   template <typename T, typename... Args>
-  unsigned int registerAttrib(const std::string & name, Args... dummy_args)
+  unsigned int registerAttribute(const std::string & name, Args... dummy_args)
   {
     auto it = _attrib_ids.find(name);
     if (it != _attrib_ids.end())
@@ -235,7 +235,7 @@ public:
   }
 
   /// Returns a unique ID associated with the given attribute name - i.e. an attribute and name
-  /// that were previously registered via calls to registerAttrib.  Users should generally *not*
+  /// that were previously registered via calls to registerAttribute.  Users should generally *not*
   /// need to use this function.
   inline unsigned int attribID(const std::string & name)
   {
