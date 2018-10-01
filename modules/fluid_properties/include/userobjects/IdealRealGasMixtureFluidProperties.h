@@ -54,6 +54,14 @@ public:
                             Real & drho_dp,
                             Real & drho_dT,
                             std::vector<Real> & drho_dx) const override;
+  /*
+  virtual void rho_from_p_T_num(Real p,
+        Real T,
+        std::vector<Real> x,
+        Real & rho,
+        Real & drho_dp,
+        Real & drho_dT,
+        std::vector<Real> & drho_dx) const;*/
   virtual Real e_from_p_T(Real p, Real T, std::vector<Real> x) const override;
   virtual void e_from_p_T(Real p,
                           Real T,
@@ -62,6 +70,14 @@ public:
                           Real & de_dp,
                           Real & de_dT,
                           std::vector<Real> & de_dx) const override;
+  /*
+  virtual void e_from_p_T_num(Real p,
+                              Real T,
+                              std::vector<Real> x,
+                              Real & e,
+                              Real & de_dp,
+                              Real & de_dT,
+                              std::vector<Real> & de_dx) const; */
   virtual Real c_from_p_T(Real p, Real T, std::vector<Real> x) const override;
   virtual void c_from_p_T(Real p,
                           Real T,
@@ -103,6 +119,14 @@ public:
                           Real & dv_dp,
                           Real & dv_dT,
                           std::vector<Real> & dv_dx) const;
+  /*
+  virtual void v_from_p_T_num(Real p,
+                              Real T,
+                              std::vector<Real> x,
+                              Real & v,
+                              Real & dv_dp,
+                              Real & dv_dT,
+                              std::vector<Real> & dv_dx) const; */
 
   /**
    * Pressure and temperature from specific volume and specific internal energy
@@ -130,6 +154,18 @@ public:
    * @param[out] dT_de   derivative of temperature w.r.t. specific internal energy
    * @param[out] dT_dx   derivative of temperature w.r.t. vapor mass fraction values
    */
+  /*
+  void p_T_from_v_e_num(Real v,
+                    Real e,
+                    std::vector<Real> x,
+                    Real & p,
+                    Real & dp_dv,
+                    Real & dp_de,
+                    std::vector<Real> & dp_dx,
+                    Real & T,
+                    Real & dT_dv,
+                    Real & dT_de,
+                    std::vector<Real> & dT_dx) const; */
   void p_T_from_v_e(Real v,
                     Real e,
                     std::vector<Real> x,
