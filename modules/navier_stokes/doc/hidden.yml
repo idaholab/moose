@@ -9,6 +9,7 @@
 - /BCs/MassFreeBC
 - /BCs/MomentumFreeBC
 - /BCs/EnergyFreeBC
+- /BCs/MomentumFreeSlipBC
 - /Kernels/DistributedForce
 - /Kernels/DistributedPower
 - /Kernels/MassConvectiveFlux
