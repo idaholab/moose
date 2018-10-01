@@ -313,6 +313,14 @@ public:
   }
 
   /**
+   * Releases any shared resources created as a side effect of creating an object through
+   * the Factory::create method(s). Currently, this object just moves the InputParameters object
+   * from the InputParameterWarehouse. Normally this method does not need to be explicitly called
+   * during a normal simulation.
+   */
+  void releaseSharedObjects(const MooseObject & moose_object, THREAD_ID tid = 0);
+
+  /**
    * Calling this object with a non-empty vector will cause this factory to ignore registrations
    * from any object
    * not contained within the list.

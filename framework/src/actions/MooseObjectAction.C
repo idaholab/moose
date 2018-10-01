@@ -67,7 +67,9 @@ void MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType /
     {
       auto rm_obj = _factory.create<RelationshipManager>(buildable_type.first, new_name, rm_params);
 
-      _app.addRelationshipManager(rm_obj);
+      // Delete the resources created on behalf of the RM if it ends up not being added to the App.
+      if (!_app.addRelationshipManager(rm_obj))
+        _factory.releaseSharedObjects(*rm_obj);
     }
   }
 }

@@ -268,9 +268,4 @@
 
 [Outputs]
   csv = true
-  [perf_graph]
-    type = PerfGraphOutput
-    execute_on = 'initial final' # Default is "final"
-    level = 2 # Default is 1
-  []
 []

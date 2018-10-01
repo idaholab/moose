@@ -58,10 +58,22 @@ ElementSideNeighborLayers::getInfo() const
   if (_default_coupling)
   {
     std::ostringstream oss;
-    oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << " layers)";
+    std::string layers = _element_side_neighbor_layers == 1 ? "layer" : "layers";
+
+    oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << layers << ')';
     return oss.str();
   }
   return "";
+}
+
+bool
+ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
+{
+  const auto * rm = dynamic_cast<const ElementSideNeighborLayers *>(&rhs);
+  if (!rm)
+    return false;
+  else
+    return _element_side_neighbor_layers == rm->_element_side_neighbor_layers;
 }
 
 void

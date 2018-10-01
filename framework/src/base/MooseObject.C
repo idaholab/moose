@@ -31,7 +31,8 @@ validParams<MooseObject>()
       "Adds user-defined labels for accessing object parameters via control logic.");
   params.addParamNamesToGroup("enable control_tags", "Advanced");
   params.addPrivateParam<std::string>("_type");        // The name of the class being built
-  params.addPrivateParam<std::string>("_object_name"); // the name passed to Factory::create
+  params.addPrivateParam<std::string>("_object_name"); // The name passed to Factory::create
+  params.addPrivateParam<std::string>("_unique_name"); // The unique name generated in the warehouse
   params.addPrivateParam<FEProblem *>("_fe_problem");
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
   params.addPrivateParam<EigenProblem *>("_eigen_problem");

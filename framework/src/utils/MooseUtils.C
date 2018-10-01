@@ -695,6 +695,14 @@ toUpper(const std::string & name)
   return upper;
 }
 
+std::string
+toLower(const std::string & name)
+{
+  std::string lower(name);
+  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+  return lower;
+}
+
 ExecFlagEnum
 getDefaultExecFlagEnum()
 {

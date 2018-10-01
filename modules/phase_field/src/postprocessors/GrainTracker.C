@@ -52,7 +52,9 @@ validParams<GrainTracker>()
   InputParameters params = validParams<FeatureFloodCount>();
   params += validParams<GrainTrackerInterface>();
 
-  params.registerRelationshipManagers("GrainTrackerHaloRM", "GEOMETRIC");
+  params.registerRelationshipManagers("GrainTrackerHaloRM ElementPointNeighbors",
+                                      "GEOMETRIC ALGEBRAIC");
+  params.addPrivateParam<unsigned short>("element_point_neighbor_layers", 1);
 
   params.addClassDescription("Grain Tracker object for running reduced order parameter simulations "
                              "without grain coalescence.");

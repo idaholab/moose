@@ -35,6 +35,7 @@ public:
 
   virtual void attachRelationshipManagersInternal(Moose::RelationshipManagerType rm_type) override;
   virtual std::string getInfo() const override;
+  virtual bool operator==(const RelationshipManager & rhs) const override;
 
   virtual void operator()(const MeshBase::const_element_iterator & range_begin,
                           const MeshBase::const_element_iterator & range_end,

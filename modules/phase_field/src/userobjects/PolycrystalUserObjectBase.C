@@ -35,6 +35,10 @@ validParams<PolycrystalUserObjectBase>()
                              PolycrystalUserObjectBase::coloringAlgorithms(),
                              PolycrystalUserObjectBase::coloringAlgorithmDescriptions());
 
+  params.registerRelationshipManagers("GrainTrackerHaloRM ElementPointNeighbors",
+                                      "GEOMETRIC ALGEBRAIC");
+  params.addPrivateParam<unsigned short>("element_point_neighbor_layers", 1);
+
   // Hide the output of the IC objects by default, it doesn't change over time
   params.set<std::vector<OutputName>>("outputs") = {"none"};
 
@@ -299,7 +303,6 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
       for (auto i = decltype(elem->n_neighbors())(0); i < elem->n_neighbors(); ++i)
       {
         const Elem * neighbor_ancestor = nullptr;
-        bool topological_neighbor = false;
 
         /**
          * Retrieve only the active neighbors for each side of this element, append them to the list
@@ -320,12 +323,8 @@ PolycrystalUserObjectBase::isNewFeatureOrConnectedRegion(const DofObject * dof_o
            * they are not present, this is a new region.
            */
           if (neighbor_ancestor)
-          {
             neighbor_ancestor->active_family_tree_by_topological_neighbor(
                 all_active_neighbors, elem, mesh, *_point_locator, _pbs, false);
-
-            topological_neighbor = true;
-          }
         }
       }
 

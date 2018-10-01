@@ -31,7 +31,8 @@ validParams<ElementPointNeighbors>()
 }
 
 ElementPointNeighbors::ElementPointNeighbors(const InputParameters & parameters)
-  : AlgebraicRelationshipManager(parameters)
+  : AlgebraicRelationshipManager(parameters),
+    _element_point_neighbor_layers(getParam<unsigned short>("element_point_neighbor_layers"))
 {
 }
 
@@ -56,10 +57,22 @@ ElementPointNeighbors::getInfo() const
   if (_point_coupling)
   {
     std::ostringstream oss;
-    oss << "ElementPointNeighborLayers (" << _element_point_neighbor_layers << " layers)";
+    std::string layers = _element_point_neighbor_layers == 1 ? "layer" : "layers";
+
+    oss << "ElementPointNeighborLayers (" << _element_point_neighbor_layers << layers << ')';
     return oss.str();
   }
   return "";
+}
+
+bool
+ElementPointNeighbors::operator==(const RelationshipManager & rhs) const
+{
+  const auto * rm = dynamic_cast<const ElementPointNeighbors *>(&rhs);
+  if (!rm)
+    return false;
+  else
+    return _element_point_neighbor_layers == rm->_element_point_neighbor_layers;
 }
 
 void
