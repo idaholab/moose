@@ -32,42 +32,38 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;
-  virtual Real getMinInDimension(unsigned int component) const override;
-  virtual Real getMaxInDimension(unsigned int component) const override;
 
 protected:
-  /// Number of elements in radial direction
-  const unsigned _nr;
+  /// Radius of the inner circle
+  const Real & _inner_radius;
 
-  /// Number of elements in angular direction
-  const unsigned _nt;
+  /// Radius of the outer circle. Logically, it's bigger that inner_radius.
+  const Real & _outer_radius;
 
-  /// Minimum radius
-  const Real _rmin;
+  /// Factor to increase initial_delta_r for each ring.
+  /// For a uniform grid : radial_bias = 1.0
+  Real _radial_bias;
 
-  /// Maximum radius
-  const Real _rmax;
+  /// Number of nodes on each ring.
+  const unsigned int & _nodes_per_ring;
 
-  /// Minimum angle
-  const Real _tmin;
+  /// Generate mesh of TRI6 elements instead of TRI3 elements.
+  const bool & _second_order;
 
-  /// Maximum angle
-  const Real _tmax;
+  /// Number of rings.You can't specify
+  /// both the number of rings and the radial bias if you want to match
+  /// a specified outer radius exactly... you have to leave one of
+  /// those parameters free so that it can be determined.
+  unsigned int _num_rings;
 
-  /// Bias on radial meshing
-  const Real _growth_r;
+  /// The boundary id to use for the cylinder.
+  const boundary_id_type &_cylinder_bid, _exterior_bid;
 
-  /// rmax = rmin + len + len*g + len*g^2 + len*g^3 + ... + len*g^(nr-1) = rmin + len*(1 - g^nr)/(1 - g)
-  const Real _len;
-
-  /// Whether a full annulus (as opposed to a sector) will needs to generate
-  const bool _full_annulus;
-
-  /// Subdomain ID of created quad elements
-  const SubdomainID _quad_subdomain_id;
-
-  /// Subdomain ID of created tri elements (that only exist if rmin=0)
-  const SubdomainID _tri_subdomain_id;
+  // Width of the initial layer of elements around the cylinder.
+  // This number should be approximately 2 * pi * inner_radius / nodes_per_ring
+  // to ensure that the initial layer of elements is almost
+  // equilateral
+  const Real _initial_delta_r;
 };
 
 #endif /* SPIRALANNULARMESH_H */

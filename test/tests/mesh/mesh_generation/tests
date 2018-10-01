@@ -71,4 +71,12 @@
     input = disc_sector.i
     exodiff = 'disc_sector_out.e'
   [../]
+
+  [./spiral_annular_mesh]
+    type = 'Exodiff'
+    input = 'spiral_mesh.i'
+    cli_args = '--mesh-only'
+    exodiff = 'spiral_mesh_in.e'
+    recover = false
+  [../]
 []

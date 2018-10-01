@@ -19,99 +19,51 @@ InputParameters
 validParams<SpiralAnnularMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
-  params.addRangeCheckedParam<unsigned int>(
-      "nr", 1, "nr>0", "Number of elements in the radial direction");
-  params.addRequiredRangeCheckedParam<unsigned int>(
-      "nt", "nt>0", "Number of elements in the angular direction");
   params.addRequiredRangeCheckedParam<Real>(
-      "rmin",
-      "rmin>=0.0",
-      "Inner radius.  If rmin=0 then a disc mesh (with no central hole) will be created.");
-  params.addRequiredParam<Real>("rmax", "Outer radius");
-  params.addParam<Real>("tmin", 0.0, "Minimum angle, measured anticlockwise from x axis");
-  params.addParam<Real>("tmax",
-                        2 * M_PI,
-                        "Maximum angle, measured anticlockwise from x axis.  If "
-                        "tmin=0 and tmax=2Pi an annular mesh is created.  "
-                        "Otherwise, only a sector of an annulus is created");
-  params.addRangeCheckedParam<Real>(
-      "growth_r", 1.0, "growth_r>0.0", "The ratio of radial sizes of successive rings of elements");
-  params.addParam<SubdomainID>(
-      "quad_subdomain_id", 0, "The subdomain ID given to the QUAD4 elements");
-  params.addParam<SubdomainID>("tri_subdomain_id",
-                               1,
-                               "The subdomain ID given to the TRI3 elements "
-                               "(these exist only if rmin=0, and they exist "
-                               "at the center of the disc");
-  params.addClassDescription("For rmin>0: creates an annular mesh of QUAD4 elements.  For rmin=0: "
-                             "creates a disc mesh of QUAD4 and TRI3 elements.  Boundary sidesets "
-                             "are created at rmax and rmin, and given these names.  If tmin!=0 and "
-                             "tmax!=2Pi, a sector of an annulus or disc is created.  In this case "
-                             "boundary sidesets are also created a tmin and tmax, and "
-                             "given these names");
+      "inner_radius", "inner_radius>0.", "The size of the inner circle.");
+  params.addRequiredRangeCheckedParam<Real>("outer_radius",
+                                            "outer_radius>0.",
+                                            "The size of the outer circle."
+                                            " Logically, it has to be greater than inner_radius");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "nodes_per_ring", "nodes_per_ring>0", "Number of nodes on each ring.");
+  params.addParam<bool>(
+      "my_second_order", false, "Generate mesh of TRI6 elements instead of TRI3 elements.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "num_rings", "num_rings>0", "The number of rings.");
+  params.addParam<boundary_id_type>(
+      "cylinder_bid", 1, "The boundary id to use for the cylinder (inner circle)");
+  params.addParam<boundary_id_type>(
+      "exterior_bid", 2, "The boundary id to use for the exterior (outer circle)");
+  params.addParam<Real>("initial_delta_r",
+                        "Width of the initial layer of elements around the cylinder."
+                        "This number should be approximately"
+                        " 2 * pi * inner_radius / nodes_per_ring to ensure that the"
+                        " initial layer of elements is almost equilateral");
+  params.addClassDescription("Creates an annual mesh based on TRI3 elements"
+                             " (it can also be TRI6 elements) on several rings.");
+
   return params;
 }
 
 SpiralAnnularMesh::SpiralAnnularMesh(const InputParameters & parameters)
   : MooseMesh(parameters),
-    _nr(getParam<unsigned int>("nr")),
-    _nt(getParam<unsigned int>("nt")),
-    _rmin(getParam<Real>("rmin")),
-    _rmax(getParam<Real>("rmax")),
-    _tmin(getParam<Real>("tmin")),
-    _tmax(getParam<Real>("tmax")),
-    _growth_r(getParam<Real>("growth_r")),
-    _len(_growth_r == 1.0 ? (_rmax - _rmin) / _nr
-                          : (_rmax - _rmin) * (1.0 - _growth_r) / (1.0 - std::pow(_growth_r, _nr))),
-    _full_annulus(_tmin == 0.0 && _tmax == 2 * M_PI),
-    _quad_subdomain_id(getParam<SubdomainID>("quad_subdomain_id")),
-    _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id"))
+    _inner_radius(getParam<Real>("inner_radius")),
+    _outer_radius(getParam<Real>("outer_radius")),
+    _radial_bias(1.0),
+    _nodes_per_ring(getParam<unsigned int>("nodes_per_ring")),
+    _second_order(getParam<bool>("my_second_order")),
+    _num_rings(getParam<unsigned int>("num_rings")),
+    _cylinder_bid(getParam<boundary_id_type>("cylinder_bid")),
+    _exterior_bid(getParam<boundary_id_type>("exterior_bid")),
+    _initial_delta_r(2 * libMesh::pi * _inner_radius / _nodes_per_ring)
 {
+
   // catch likely user errors
-  if (_rmax <= _rmin)
-    mooseError("SpiralAnnularMesh: rmax must be greater than rmin");
-  if (_tmax <= _tmin)
-    mooseError("SpiralAnnularMesh: tmax must be greater than tmin");
-  if (_tmax - _tmin > 2 * M_PI)
-    mooseError("SpiralAnnularMesh: tmax - tmin must be <= 2 Pi");
-  if (_nt <= (_tmax - _tmin) / M_PI)
-    mooseError(
-        "SpiralAnnularMesh: nt must be greater than (tmax - tmin) / Pi in order to avoid inverted "
-        "elements");
-  if (_quad_subdomain_id == _tri_subdomain_id)
-    mooseError("SpiralAnnularMesh: quad_subdomain_id must not equal tri_subdomain_id");
-}
-
-Real
-SpiralAnnularMesh::getMinInDimension(unsigned int component) const
-{
-  switch (component)
-  {
-    case 0:
-      return -_rmax;
-    case 1:
-      return -_rmax;
-    case 2:
-      return 0.0;
-    default:
-      mooseError("Invalid component");
-  }
-}
-
-Real
-SpiralAnnularMesh::getMaxInDimension(unsigned int component) const
-{
-  switch (component)
-  {
-    case 0:
-      return _rmax;
-    case 1:
-      return _rmax;
-    case 2:
-      return 0.0;
-    default:
-      mooseError("Invalid component");
-  }
+  if (_outer_radius <= _inner_radius)
+    mooseError("SpiralAnnularMesh: outer_radius must be greater than inner_radius");
+  if (_num_rings == 0)
+    mooseError("Cannot create mesh with _num_rings == 0");
 }
 
 std::unique_ptr<MooseMesh>
@@ -123,124 +75,232 @@ SpiralAnnularMesh::safeClone() const
 void
 SpiralAnnularMesh::buildMesh()
 {
-  const Real dt = (_tmax - _tmin) / _nt;
+  {
 
+    // Compute the radial bias given:
+    // .) the inner radius
+    // .) the outer radius
+    // .) the initial_delta_r
+    // .) the desired number of intervals
+    // Note: the exponent n used in the formula is one less than the
+    // number of rings the user requests.
+    Real alpha = 1.1;
+    int n = _num_rings - 1;
+
+    // lambda used to compute the residual and Jacobian for the Newton iterations.
+    // We capture parameters which don't need to change from the current scope at
+    // the time this lambda is declared. The values are not updated later, so we
+    // can't use this for e.g. f, df, and alpha.
+    auto newton = [this, n](Real & f, Real & df, const Real & alpha) {
+      f = (1. - std::pow(alpha, n + 1)) / (1. - alpha) -
+          (_outer_radius - _inner_radius) / _initial_delta_r;
+      df = (-(n + 1) * (1 - alpha) * std::pow(alpha, n) + (1. - std::pow(alpha, n + 1))) /
+           (1. - alpha) / (1. - alpha);
+    };
+
+    Real f, df;
+    newton(f, df, alpha);
+
+    while (std::abs(f) > 1.e-9)
+    {
+      // Compute and apply update.
+      Real dx = -f / df;
+      alpha += dx;
+      newton(f, df, alpha);
+    }
+
+    // Set radial basis to the value of alpha that we computed with Newton.
+    _radial_bias = alpha;
+  }
+
+  // The number of rings specified by the user does not include the ring at
+  // the surface of the cylinder itself, so we increment it by one now.
+  _num_rings += 1;
+
+  // Mesh we are eventually going to create.
   MeshBase & mesh = getMesh();
-  mesh.clear();
-  mesh.set_mesh_dimension(2);
-  mesh.set_spatial_dimension(2);
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  const unsigned num_angular_nodes = (_full_annulus ? _nt : _nt + 1);
-  const unsigned num_nodes =
-      (_rmin > 0.0 ? (_nr + 1) * num_angular_nodes : _nr * num_angular_nodes + 1);
-  const unsigned min_nonzero_layer_num = (_rmin > 0.0 ? 0 : 1);
-  std::vector<Node *> nodes(num_nodes);
-  unsigned node_id = 0;
+  // Data structure that holds pointers to the Nodes of each ring.
+  std::vector<std::vector<Node *>> ring_nodes(_num_rings);
 
-  // add nodes at rmax that aren't yet connected to any elements
-  Real current_r = _rmax;
-  for (unsigned angle_num = 0; angle_num < num_angular_nodes; ++angle_num)
+  // Initialize radius and delta_r variables.
+  Real radius = _inner_radius;
+  Real delta_r = _initial_delta_r;
+
+  // Node id counter.
+  unsigned int current_node_id = 0;
+
+  for (std::size_t r = 0; r < _num_rings; ++r)
   {
-    const Real angle = _tmin + angle_num * dt;
-    const Real x = current_r * std::cos(angle);
-    const Real y = current_r * std::sin(angle);
-    nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-    node_id++;
+    ring_nodes[r].resize(_nodes_per_ring);
+
+    // Add nodes starting from either theta=0 or theta=pi/nodes_per_ring
+    Real theta = r % 2 == 0 ? 0 : (libMesh::pi / _nodes_per_ring);
+    for (std::size_t n = 0; n < _nodes_per_ring; ++n)
+    {
+      ring_nodes[r][n] = mesh.add_point(Point(radius * std::cos(theta), radius * std::sin(theta)),
+                                        current_node_id++);
+      // Update angle
+      theta += 2 * libMesh::pi / _nodes_per_ring;
+    }
+
+    // Go to next ring
+    radius += delta_r;
+    delta_r *= _radial_bias;
   }
 
-  // add nodes at smaller radii, and connect them with elements
-  for (unsigned layer_num = _nr; layer_num > min_nonzero_layer_num; --layer_num)
+  // Add elements
+  for (std::size_t r = 0; r < _num_rings - 1; ++r)
   {
-    if (layer_num == 1)
-      current_r = _rmin; // account for precision loss
+    // even -> odd ring
+    if (r % 2 == 0)
+    {
+      // Inner ring (n, n*, n+1)
+      // Starred indices refer to nodes on the "outer" ring of this pair.
+      for (std::size_t n = 0; n < _nodes_per_ring; ++n)
+      {
+        // Wrap around
+        unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
+        Elem * elem = mesh.add_elem(new Tri3);
+        elem->set_node(0) = ring_nodes[r][n];
+        elem->set_node(1) = ring_nodes[r + 1][n];
+        elem->set_node(2) = ring_nodes[r][np1];
+
+        // Add interior faces to 'cylinder' sideset if we are on ring 0.
+        if (r == 0)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/2, _cylinder_bid);
+      }
+
+      // Outer ring (n*, n+1*, n+1)
+      for (std::size_t n = 0; n < _nodes_per_ring; ++n)
+      {
+        // Wrap around
+        unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
+        Elem * elem = mesh.add_elem(new Tri3);
+        elem->set_node(0) = ring_nodes[r + 1][n];
+        elem->set_node(1) = ring_nodes[r + 1][np1];
+        elem->set_node(2) = ring_nodes[r][np1];
+
+        // Add exterior faces to 'exterior' sideset if we're on the last ring.
+        // Note: this code appears in two places since we could end on either an even or odd ring.
+        if (r == _num_rings - 2)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/0, _exterior_bid);
+      }
+    }
     else
-      current_r -= _len * std::pow(_growth_r, layer_num - 1);
-
-    // add node at angle = _tmin
-    nodes[node_id] = mesh.add_point(
-        Point(current_r * std::cos(_tmin), current_r * std::sin(_tmin), 0.0), node_id);
-    node_id++;
-    for (unsigned angle_num = 1; angle_num < num_angular_nodes; ++angle_num)
     {
-      const Real angle = _tmin + angle_num * dt;
-      const Real x = current_r * std::cos(angle);
-      const Real y = current_r * std::sin(angle);
-      nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-      Elem * elem = mesh.add_elem(new Quad4);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
-      elem->set_node(3) = nodes[node_id - num_angular_nodes];
-      elem->subdomain_id() = _quad_subdomain_id;
-      node_id++;
+      // odd -> even ring
+      // Inner ring (n, n+1*, n+1)
+      for (std::size_t n = 0; n < _nodes_per_ring; ++n)
+      {
+        // Wrap around
+        unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
+        Elem * elem = mesh.add_elem(new Tri3);
+        elem->set_node(0) = ring_nodes[r][n];
+        elem->set_node(1) = ring_nodes[r + 1][np1];
+        elem->set_node(2) = ring_nodes[r][np1];
+      }
 
-      if (layer_num == _nr)
-        // add outer boundary (boundary_id = 1)
-        boundary_info.add_side(elem, 2, 1);
-      if (layer_num == 1)
-        // add inner boundary (boundary_id = 0)
-        boundary_info.add_side(elem, 0, 0);
-      if (!_full_annulus && angle_num == 1)
-        // add tmin boundary (boundary_id = 2)
-        boundary_info.add_side(elem, 1, 2);
-      if (!_full_annulus && angle_num == num_angular_nodes - 1)
-        // add tmin boundary (boundary_id = 3)
-        boundary_info.add_side(elem, 3, 3);
-    }
-    if (_full_annulus)
-    {
-      // add element connecting to node at angle=0
-      Elem * elem = mesh.add_elem(new Quad4);
-      elem->set_node(0) = nodes[node_id - num_angular_nodes];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
-      elem->set_node(3) = nodes[node_id - 2 * num_angular_nodes];
-      elem->subdomain_id() = _quad_subdomain_id;
+      // Outer ring (n*, n+1*, n)
+      for (std::size_t n = 0; n < _nodes_per_ring; ++n)
+      {
+        // Wrap around
+        unsigned int np1 = (n == _nodes_per_ring - 1) ? 0 : n + 1;
+        Elem * elem = mesh.add_elem(new Tri3);
+        elem->set_node(0) = ring_nodes[r + 1][n];
+        elem->set_node(1) = ring_nodes[r + 1][np1];
+        elem->set_node(2) = ring_nodes[r][n];
 
-      if (layer_num == _nr)
-        // add outer boundary (boundary_id = 1)
-        boundary_info.add_side(elem, 2, 1);
-      if (layer_num == 1)
-        // add inner boundary (boundary_id = 0)
-        boundary_info.add_side(elem, 0, 0);
+        // Add exterior faces to 'exterior' sideset if we're on the last ring.
+        if (r == _num_rings - 2)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/0, _exterior_bid);
+      }
     }
   }
 
-  // add single node at origin, if relevant
-  if (_rmin == 0.0)
+  // Sanity check: make sure all elements have positive area. Note: we
+  // can't use elem->volume() for this, as that always returns a
+  // positive area regardless of the node ordering.
+  // We compute (p1-p0) \cross (p2-p0) and check that the z-component is positive.
+  for (const auto & elem : mesh.element_ptr_range())
   {
-    nodes[node_id] = mesh.add_point(Point(0.0, 0.0, 0.0), node_id);
-    boundary_info.add_node(node_id, 0); // boundary_id=0 is centre
-    for (unsigned angle_num = 0; angle_num < num_angular_nodes - 1; ++angle_num)
-    {
-      Elem * elem = mesh.add_elem(new Tri3);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - num_angular_nodes + angle_num];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes + angle_num + 1];
-      elem->subdomain_id() = _tri_subdomain_id;
-    }
-    if (_full_annulus)
-    {
-      Elem * elem = mesh.add_elem(new Tri3);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes];
-      elem->subdomain_id() = _tri_subdomain_id;
-    }
+    Point cp = (elem->point(1) - elem->point(0)).cross(elem->point(2) - elem->point(0));
+    if (cp(2) < 0.)
+      mooseError("Invalid elem found with negative area");
   }
 
-  boundary_info.sideset_name(0) = "rmin";
-  boundary_info.sideset_name(1) = "rmax";
-  boundary_info.nodeset_name(0) = "rmin";
-  boundary_info.nodeset_name(1) = "rmax";
-  if (!_full_annulus)
+  // Create sideset names.
+  mesh.boundary_info->sideset_name(_cylinder_bid) = "cylinder";
+  mesh.boundary_info->sideset_name(_exterior_bid) = "exterior";
+
+  // Find neighbors, etc.
+  mesh.prepare_for_use();
+
+  if (_second_order)
+  // if (getParam<bool>("second_order"))
   {
-    boundary_info.sideset_name(2) = "tmin";
-    boundary_info.sideset_name(3) = "tmax";
-    boundary_info.nodeset_name(2) = "tmin";
-    boundary_info.nodeset_name(3) = "tmax";
+    mesh.all_second_order(/*full_ordered=*/true);
+    std::vector<unsigned int> nos;
+
+    // Loop over the elements, moving mid-edge nodes onto the
+    // nearest radius as applicable. For each element, exactly one
+    // edge should lie on the same radius, so we move only that
+    // mid-edge node.
+    for (const auto & elem : mesh.element_ptr_range())
+    {
+      // Make sure we are dealing only with triangles
+      libmesh_assert(elem->n_vertices() == 3);
+
+      // Compute vertex radii
+      Real radii[3] = {elem->point(0).norm(), elem->point(1).norm(), elem->point(2).norm()};
+
+      // Compute absolute differences between radii so we can determine which two are on the same
+      // circular arc.
+      Real dr[3] = {std::abs(radii[0] - radii[1]),
+                    std::abs(radii[1] - radii[2]),
+                    std::abs(radii[2] - radii[0])};
+
+      // Compute index of minimum dr.
+      auto index = std::distance(std::begin(dr), std::min_element(std::begin(dr), std::end(dr)));
+
+      // Make sure that the minimum found is also (almost) zero.
+      if (dr[index] > TOLERANCE)
+        mooseError("Error: element had no sides with nodes on same radius.");
+
+      // Get list of all local node ids on this side. The first
+      // two entries in nos correspond to the vertices, the last
+      // entry corresponds to the mid-edge node.
+      nos = elem->nodes_on_side(index);
+
+      // Compute the angles associated with nodes nos[0] and nos[1].
+      Real theta0 = std::atan2(elem->point(nos[0])(1), elem->point(nos[0])(0)),
+           theta1 = std::atan2(elem->point(nos[1])(1), elem->point(nos[1])(0));
+
+      // atan2 returns values in the range (-pi, pi).  If theta0
+      // and theta1 have the same sign, we can simply average them
+      // to get half of the acute angle between them. On the other
+      // hand, if theta0 and theta1 are of opposite sign _and_ both
+      // are larger than pi/2, we need to add 2*pi when averaging,
+      // otherwise we will get half of the _obtuse_ angle between
+      // them, and the point will flip to the other side of the
+      // circle (see below).
+      Real new_theta = 0.5 * (theta0 + theta1);
+
+      // It should not be possible for both:
+      // 1.) |theta0| > pi/2, and
+      // 2.) |theta1| < pi/2
+      // as this would not be a well-formed element.
+      if ((theta0 * theta1 < 0) && (std::abs(theta0) > 0.5 * libMesh::pi) &&
+          (std::abs(theta1) > 0.5 * libMesh::pi))
+        new_theta = 0.5 * (theta0 + theta1 + 2 * libMesh::pi);
+
+      // The new radius will be the radius of point nos[0] or nos[1] (they are the same!).
+      Real new_r = elem->point(nos[0]).norm();
+
+      // Finally, move the point to its new location.
+      elem->point(nos[2]) = Point(new_r * std::cos(new_theta), new_r * std::sin(new_theta), 0.);
+    }
   }
 
-  mesh.prepare_for_use(false);
+  mesh.write("bassi_rebay_mesh.e");
 }
