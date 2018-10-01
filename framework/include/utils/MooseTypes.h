@@ -87,7 +87,7 @@ class RankFourTensor;
 template <typename>
 class MaterialProperty;
 template <typename>
-class ADMaterialProperty;
+class ADMaterialPropertyObject;
 
 /**
  * MOOSE typedefs
@@ -248,14 +248,14 @@ struct MaterialPropertyType
 template <typename mat_prop_type>
 struct MaterialPropertyType<JACOBIAN, mat_prop_type>
 {
-  typedef ADMaterialProperty<mat_prop_type> type;
+  typedef ADMaterialPropertyObject<mat_prop_type> type;
 };
 
 #define ADResidual typename ResidualReturnType<compute_stage>::type
 #define ADVariableValue typename VariableValueType<compute_stage>::type
 #define ADVariableGradient typename VariableGradientType<compute_stage>::type
 #define ADVariableSecond typename VariableSecondType<compute_stage>::type
-#define ADMaterialPropertyType(Type) typename MaterialPropertyType<compute_stage, Type>::type
+#define ADMaterialProperty(Type) typename MaterialPropertyType<compute_stage, Type>::type
 
 typedef VariableTestValue ADVariableTestValue;
 typedef VariableTestGradient ADVariableTestGradient;

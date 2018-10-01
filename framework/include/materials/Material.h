@@ -102,7 +102,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
-  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
+  const ADMaterialPropertyObject<T> & getADMaterialProperty(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -116,7 +116,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
   template <typename T>
-  const ADMaterialProperty<T> & getADMaterialPropertyByName(const std::string & prop_name);
+  const ADMaterialPropertyObject<T> & getADMaterialPropertyByName(const std::string & prop_name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
   template <typename T>
@@ -134,7 +134,7 @@ public:
   template <typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
   template <typename T>
-  ADMaterialProperty<T> & declareADProperty(const std::string & prop_name);
+  ADMaterialPropertyObject<T> & declareADProperty(const std::string & prop_name);
   ///@}
 
   /**
@@ -307,14 +307,14 @@ Material::getMaterialProperty(const std::string & name)
 }
 
 template <typename T>
-const ADMaterialProperty<T> &
+const ADMaterialPropertyObject<T> &
 Material::getADMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant.
-  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  const ADMaterialPropertyObject<T> * default_property = defaultADMaterialProperty<T>(prop_name);
   if (default_property)
     return *default_property;
 
@@ -364,7 +364,7 @@ Material::getMaterialPropertyByName(const std::string & prop_name)
 }
 
 template <typename T>
-const ADMaterialProperty<T> &
+const ADMaterialPropertyObject<T> &
 Material::getADMaterialPropertyByName(const std::string & prop_name)
 {
   checkExecutionStage();
@@ -422,7 +422,7 @@ Material::declarePropertyOlder(const std::string & prop_name)
 }
 
 template <typename T>
-ADMaterialProperty<T> &
+ADMaterialPropertyObject<T> &
 Material::declareADProperty(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::CURRENT);

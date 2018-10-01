@@ -27,9 +27,9 @@ public:
 protected:
   virtual ADResidual computeQpResidual();
 
-  const ADMaterialPropertyType(Real) & _ad_diff_from_ad_prop;
+  const ADMaterialProperty(Real) & _ad_diff_from_ad_prop;
   const MaterialProperty<Real> & _regular_diff_from_ad_prop;
-  const ADMaterialPropertyType(Real) & _ad_diff_from_regular_prop;
+  const ADMaterialProperty(Real) & _ad_diff_from_regular_prop;
   const MaterialProperty<Real> & _regular_diff_from_regular_prop;
   const MooseEnum _prop_to_use;
 

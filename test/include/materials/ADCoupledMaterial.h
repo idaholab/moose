@@ -28,7 +28,7 @@ public:
 protected:
   virtual void computeQpProperties();
 
-  ADMaterialPropertyType(Real) & _ad_mat_prop;
+  ADMaterialProperty(Real) & _ad_mat_prop;
   MaterialProperty<Real> & _regular_mat_prop;
 
   const ADVariableValue & _coupled_var;

@@ -250,10 +250,10 @@ MaterialProperty<T>::load(std::istream & stream)
 }
 
 template <typename T>
-class ADMaterialProperty : public MaterialProperty<T>
+class ADMaterialPropertyObject : public MaterialProperty<T>
 {
 public:
-  ADMaterialProperty() : MaterialProperty<T>() {}
+  ADMaterialPropertyObject() : MaterialProperty<T>() {}
 
   /**
    * Get element i out of the array as a writeable reference.

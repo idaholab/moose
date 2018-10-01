@@ -56,7 +56,7 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
-  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
+  const ADMaterialPropertyObject<T> & getADMaterialProperty(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -73,7 +73,8 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
-  const ADMaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name);
+  const ADMaterialPropertyObject<T> &
+  getADMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
@@ -225,7 +226,7 @@ protected:
    * as a specialization for supported types and returns NULL in all other cases.
    */
   template <typename T>
-  const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name);
+  const ADMaterialPropertyObject<T> * defaultADMaterialProperty(const std::string & name);
 
   /**
    * True by default. If false, this class throws an error if any of
@@ -242,8 +243,8 @@ protected:
 
   /// Storage vector for MaterialProperty<Real> default objects
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
-  /// Storage vector for ADMaterialProperty<Real> default objects
-  std::vector<std::unique_ptr<ADMaterialProperty<Real>>> _default_ad_real_properties;
+  /// Storage vector for ADMaterialPropertyObject<Real> default objects
+  std::vector<std::unique_ptr<ADMaterialPropertyObject<Real>>> _default_ad_real_properties;
 
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
@@ -301,14 +302,14 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 }
 
 template <typename T>
-const ADMaterialProperty<T> &
+const ADMaterialPropertyObject<T> &
 MaterialPropertyInterface::getADMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant
-  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  const ADMaterialPropertyObject<T> * default_property = defaultADMaterialProperty<T>(prop_name);
   if (default_property)
     return *default_property;
 
@@ -367,7 +368,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
 
 // General version for types that do not accept default values
 template <typename T>
-const ADMaterialProperty<T> *
+const ADMaterialPropertyObject<T> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*/)
 {
   return NULL;
@@ -397,7 +398,7 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
 }
 
 template <typename T>
-const ADMaterialProperty<T> &
+const ADMaterialPropertyObject<T> &
 MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
 {
   checkExecutionStage();
