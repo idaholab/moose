@@ -24,6 +24,7 @@ validParams<ElementsAlongLine>()
 
   params.addRequiredParam<Point>("start", "The beginning of the line");
   params.addRequiredParam<Point>("end", "The end of the line");
+  params.addClassDescription("Outputs the IDs of every element intersected by a user-defined line");
   return params;
 }
 

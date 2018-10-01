@@ -1,19 +1,24 @@
 [Tests]
+  issues = '#6852'
+  design = 'ElementsAlongPlane.md'
   [./1d]
     type = 'CSVDiff'
     input = '1d.i'
     csvdiff = '1d_out_elems_0001.csv'
+    requirement = 'The ElementsAlongPlane VectorPostprocessor shall output the IDs of all elements intersected by a plane on a 1D mesh'
   [../]
 
   [./2d]
     type = 'CSVDiff'
     input = '2d.i'
     csvdiff = '2d_out_elems_0001.csv'
+    requirement = 'The ElementsAlongPlane VectorPostprocessor shall output the IDs of all elements intersected by a plane on a 2D mesh'
   [../]
 
   [./3d]
     type = 'CSVDiff'
     input = '3d.i'
     csvdiff = '3d_out_elems_0001.csv'
+    requirement = 'The ElementsAlongPlane VectorPostprocessor shall output the IDs of all elements intersected by a plane on a 3D mesh'
 [../]
 []
