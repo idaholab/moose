@@ -364,7 +364,7 @@
     system = constraint
     normalize_penalty = true
     tangential_tolerance = 1e-3
-    penalty = 1e+9
+    penalty = 5e+9
     al_penetration_tolerance = 1e-8
   [../]
 []
