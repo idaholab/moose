@@ -95,21 +95,22 @@ TheWarehouse::add(std::shared_ptr<MooseObject> obj, const std::string & system)
 {
   isValid(obj.get());
 
-  std::vector<std::unique_ptr<Attribute>> attribs;
-  readAttribs(obj.get(), system, attribs);
   size_t obj_id = 0;
   {
     std::lock_guard<std::mutex> lock(_obj_mutex);
     _objects.push_back(obj);
     obj_id = _objects.size() - 1;
     _obj_ids[obj.get()] = obj_id;
-  }
-  _store->add(obj_id, std::move(attribs));
 
-  // reset/invalidate the query cache since query results may have been affected by this warehouse
-  // insertion.
-  _obj_cache.clear();
-  _query_cache.clear();
+    // reset/invalidate the query cache since query results may have been affected by this warehouse
+    // insertion.
+    _obj_cache.clear();
+    _query_cache.clear();
+  }
+
+  std::vector<std::unique_ptr<Attribute>> attribs;
+  readAttribs(obj.get(), system, attribs);
+  _store->add(obj_id, std::move(attribs));
 }
 
 void
@@ -188,7 +189,6 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
 const std::vector<MooseObject *> &
 TheWarehouse::query(int query_id)
 {
-  std::lock_guard<std::mutex> lock(_obj_cache_mutex);
   if (static_cast<size_t>(query_id) >= _obj_cache.size())
     throw std::runtime_error("unknown query id");
   return _obj_cache[query_id];
@@ -214,7 +214,9 @@ TheWarehouse::queryID(const std::vector<std::unique_ptr<Attribute>> & conds)
 size_t
 TheWarehouse::count(const std::vector<std::unique_ptr<Attribute>> & conds)
 {
-  auto & objs = query(queryID(conds));
+  auto query_id = queryID(conds);
+  std::lock_guard<std::mutex> lock(_obj_cache_mutex);
+  auto & objs = query(query_id);
   size_t count = 0;
   for (auto obj : objs)
     if (obj->enabled())

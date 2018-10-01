@@ -282,6 +282,7 @@ private:
   template <typename T>
   std::vector<T *> & queryInto(int query_id, std::vector<T *> & results, bool show_all = false)
   {
+    std::lock_guard<std::mutex> lock(_obj_cache_mutex);
     auto & objs = query(query_id);
     results.clear();
     results.reserve(objs.size());
@@ -298,6 +299,8 @@ private:
   /// prepares a query and returns an associated query_id (i.e. for use with the query function).
   int prepare(std::vector<std::unique_ptr<Attribute>> conds);
 
+  /// callers of this function must lock _obj_cache_mutex as long as a reference to the returned
+  /// vector is being used.
   const std::vector<MooseObject *> & query(int query_id);
 
   void readAttribs(const MooseObject * obj,
