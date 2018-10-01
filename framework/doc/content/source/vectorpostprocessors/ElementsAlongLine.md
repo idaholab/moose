@@ -1,14 +1,17 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # ElementsAlongLine
-
-!alert construction title=Undocumented Class
-The ElementsAlongLine has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /VectorPostprocessors/ElementsAlongLine
+
+## Description
+
+The `ElementsAlongLine` class is a VectorPostprocessor that outputs the element ID of
+every element intersected by a line. The IDs are provided in a vector named `elem_ids`.
+
+The user defines the line using a start and end point. The line terminates at those points,
+so elements on the line beyond those points are not output.
+
+The IDs output from this class use the MOOSE interal numbering scheme, which starts
+with 0, so 1 should be added to them to translate them to the equivalent numbering in
+formats such as Exodus that start with 1.
 
 !syntax parameters /VectorPostprocessors/ElementsAlongLine
 
