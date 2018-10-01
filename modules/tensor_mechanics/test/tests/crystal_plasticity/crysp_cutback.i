@@ -87,12 +87,6 @@
     execute_on = timestep_end
     block = 0
   [../]
-  [./rotout]
-    type = CrystalPlasticityRotationOutAux
-    variable = rotout
-    execute_on = timestep_end
-    block = 0
-  [../]
   [./gss1]
     type = MaterialStdVectorAux
     variable = gss1

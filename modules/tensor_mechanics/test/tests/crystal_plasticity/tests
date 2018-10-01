@@ -1,4 +1,7 @@
 [Tests]
+  issues = 'svn'
+  design = "Somewhere in Pritam's head - certainly not documented"
+  requirements = 'Whatever Pritam wanted this stuff to do. Really we should just toss this in favor of the user object based system'
   [./test]
     type = 'Exodiff'
     input = 'crysp.i'

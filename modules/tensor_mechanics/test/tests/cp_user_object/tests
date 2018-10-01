@@ -4,7 +4,7 @@
     input = 'test.i'
     exodiff = 'test_out.e'
     issues = '#6097'
-    requiurement = 'MOOSE shall provide a plug-in based extensible crystal plasticity system'
+    requirement = 'MOOSE shall provide a plug-in based extensible crystal plasticity system'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./exception]
@@ -13,7 +13,7 @@
     exodiff = 'exception_out.e'
     allow_warnings = true
     issues = '#10133'
-    requiurement = 'A constitutive failure shall trigger an exception leading to a cut time step rather tahn a failed solve'
+    requirement = 'A constitutive failure shall trigger an exception leading to a cut time step rather than a failed solve'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./fileread]
@@ -21,7 +21,7 @@
     input = 'fileread.i'
     exodiff = 'fileread_out.e'
     issues = '#6097'
-    requiurement = 'The crystal plasticity system shall provide a function to read slip system parameters from files'
+    requirement = 'The crystal plasticity system shall provide a function to read slip system parameters from files'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./user_object]
@@ -29,7 +29,7 @@
     input = 'user_object.i'
     exodiff = 'user_object_out.e'
     issues = '#6097'
-    requiurement = 'The crystal plasticity system shall use pluggable user objects to dtermine the plasticity state variable evoluion'
+    requirement = 'The crystal plasticity system shall use pluggable user objects to dtermine the plasticity state variable evolution'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./save_euler]
@@ -37,7 +37,7 @@
     input = 'save_euler.i'
     exodiff = 'save_euler_out.e'
     issues = '#6097'
-    requiurement = 'The crystal plasticity system shall make local Euler angles at material points available for output'
+    requirement = 'The crystal plasticity system shall make local Euler angles at material points available for output'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./substep]
@@ -46,15 +46,15 @@
     exodiff = 'substep_out.e'
     allow_warnings = true
     issues = '#6097'
-    requiurement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
+    requirement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./linesearch]
     type = 'Exodiff'
     input = 'linesearch.i'
-    exodiff = 'lsearch_out.e'
+    exodiff = 'linesearch_out.e'
     issues = '#6097'
-    requiurement = 'The crystal plasticity system shall implement a line search capability for accellerated internal newton solves'
+    requirement = 'The crystal plasticity system shall implement a line search capability for accellerated internal Newton solves'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./orthotropic_rotation_Cijkl]
@@ -62,7 +62,7 @@
     input = 'orthotropic_rotation_Cijkl.i'
     csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
     issues = '#10629'
-    requiurement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at each material point'
+    requirement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at each material point'
     design = '/ComputeElasticityTensorCP.md'
   [../]
   [./user_object_Voce_BCC]
@@ -70,7 +70,7 @@
     input = 'user_object_Voce_BCC.i'
     exodiff = 'user_object_Voce_BCC_out.e'
     issues = '#11307'
-    requiurement = 'The crystal plasticity system shall provide a plugin user object implementing the Voce hardening law'
+    requirement = 'The crystal plasticity system shall provide a plugin user object implementing the Voce hardening law'
     design = '/CrystalPlasticityStateVarRateComponentVoce.md'
   [../]
   [./patch_recovery]

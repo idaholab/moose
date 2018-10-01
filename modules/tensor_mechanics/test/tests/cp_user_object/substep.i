@@ -7,10 +7,13 @@
 
 [Variables]
   [./ux]
+    block = 0
   [../]
   [./uy]
+    block = 0
   [../]
   [./uz]
+    block = 0
   [../]
 []
 
@@ -72,7 +75,7 @@
     index_i = 2
     execute_on = timestep_end
   [../]
-  [./gss1]
+  [./gss]
     type = MaterialStdVectorAux
     variable = gss
     property = state_var_gss
@@ -142,11 +145,10 @@
 [Materials]
   [./crysp]
     type = FiniteStrainUObasedCP
+    block = 0
     stol = 1e-2
     tan_mod_type = exact
-    maximum_substep_iteration = 200
-    use_line_search = true
-    min_line_search_step_size = 0.01
+    maximum_substep_iteration = 10
     uo_slip_rates = 'slip_rate_gss'
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
@@ -154,31 +156,38 @@
   [../]
   [./strain]
     type = ComputeFiniteStrain
+    block = 0
     displacements = 'ux uy uz'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP
+    block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
+
 []
 
 [Postprocessors]
   [./stress_zz]
     type = ElementAverageValue
     variable = stress_zz
+    block = 'ANY_BLOCK_ID 0'
   [../]
   [./fp_zz]
     type = ElementAverageValue
     variable = fp_zz
+    block = 'ANY_BLOCK_ID 0'
   [../]
   [./e_zz]
     type = ElementAverageValue
     variable = e_zz
+    block = 'ANY_BLOCK_ID 0'
   [../]
   [./gss]
     type = ElementAverageValue
     variable = gss
+    block = 'ANY_BLOCK_ID 0'
   [../]
 []
 
@@ -191,7 +200,9 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
+  dt = 2.0
+
+  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = -pc_hypre_type
@@ -200,13 +211,14 @@
   nl_rel_step_tol = 1e-10
   dtmax = 10.0
   nl_rel_tol = 1e-10
-  end_time = 1
-  dtmin = 0.02
+  end_time = 30.0
+  dtmin = 0.5
   num_steps = 10
   nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  file_base = crysp_lsearch_out
   exodus = true
+  csv = true
+  gnuplot = true
 []

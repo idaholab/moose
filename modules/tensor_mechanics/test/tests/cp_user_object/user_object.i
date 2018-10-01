@@ -7,6 +7,10 @@
   ny = 2
 []
 
+[GlobalParams]
+  volumetric_locking_correction = true
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -14,8 +18,11 @@
   [../]
 []
 
-[GlobalParams]
-  volumetric_locking_correction = true
+[Kernels]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
+  [../]
 []
 
 [AuxVariables]
@@ -31,19 +38,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./rotout]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./gss]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./euler1]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./euler2]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./euler3]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -96,27 +95,6 @@
     variable = gss
     property = state_var_gss
     index = 0
-    execute_on = timestep_end
-  [../]
-  [./euler1]
-    type = MaterialRealVectorValueAux
-    variable = euler1
-    property = Euler_angles
-    component = 0
-    execute_on = timestep_end
-  [../]
-  [./euler2]
-    type = MaterialRealVectorValueAux
-    variable = euler2
-    property = Euler_angles
-    component = 1
-    execute_on = timestep_end
-  [../]
-  [./euler3]
-    type = MaterialRealVectorValueAux
-    variable = euler3
-    property = Euler_angles
-    component = 2
     execute_on = timestep_end
   [../]
 []
@@ -239,13 +217,5 @@
 []
 
 [Outputs]
-  file_base = crysp_save_euler_out
   exodus = true
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y'
-    use_displaced_mesh = true
-  [../]
 []
