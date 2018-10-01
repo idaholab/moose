@@ -57,7 +57,7 @@ protected:
   unsigned int _num_rings;
 
   /// The boundary id to use for the cylinder.
-  const boundary_id_type &_cylinder_bid, _exterior_bid;
+  const boundary_id_type _cylinder_bid, _exterior_bid;
 
   // Width of the initial layer of elements around the cylinder.
   // This number should be approximately 2 * pi * inner_radius / nodes_per_ring

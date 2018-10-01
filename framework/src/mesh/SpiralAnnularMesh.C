@@ -99,15 +99,21 @@ SpiralAnnularMesh::buildMesh()
     };
 
     Real f, df;
+    int num_iter = 1;
     newton(f, df, alpha);
 
-    while (std::abs(f) > 1.e-9)
+    while (std::abs(f) > 1.e-9 && num_iter <= 25)
     {
       // Compute and apply update.
       Real dx = -f / df;
       alpha += dx;
       newton(f, df, alpha);
+      num_iter++;
     }
+
+    // In case the Newton iteration fails to converge.
+    if (num_iter > 25)
+      mooseError("Newton iteration failed to converge (more than 25 iterations).");
 
     // Set radial basis to the value of alpha that we computed with Newton.
     _radial_bias = alpha;
@@ -301,6 +307,4 @@ SpiralAnnularMesh::buildMesh()
       elem->point(nos[2]) = Point(new_r * std::cos(new_theta), new_r * std::sin(new_theta), 0.);
     }
   }
-
-  mesh.write("bassi_rebay_mesh.e");
 }
