@@ -47,6 +47,12 @@ public:
   /// this
   inline unsigned int id() const { return _id; }
 
+  /// This function must return a deterministic value that is uniquely determined by
+  /// the data the attribute holds (i.e. is initialized with).  Ideally, the data should be
+  /// uniformly and randomly distributed across the domain of size_t values - e.g. 1 and 2 should
+  /// hash to completely unrelated values.  Use of std::hash for POD is encouraged.  A convenience
+  /// hash_combine function is also provided to combine the results an existing hash with one or
+  /// more other values.
   virtual size_t hash() const = 0;
 
   /// initFrom reads and stores the desired meta-data from obj for later matching comparisons.
@@ -63,31 +69,13 @@ private:
   int _id = -1;
 };
 
-inline void
-hash_combine(std::size_t & /*seed*/)
-{
-}
-
-template <typename T, typename... Rest>
-inline void
-hash_combine(std::size_t & seed, const T & v, Rest &&... rest)
-{
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-  hash_combine(seed, std::forward<Rest>(rest)...);
-}
-
-template <typename T, typename... Rest>
-inline void
-hash_combine(std::size_t & seed, const std::vector<T> & v, Rest &&... rest)
-{
-  for (auto & val : v)
-    hash_combine(seed, val);
-  hash_combine(seed, std::forward<Rest>(rest)...);
-}
+/// TheWarehouse uses this operator function for indexing and caching queries. So this is
+/// important even though you don't see it being called (directly) anywhere - it *IS* being used.
+bool operator==(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs);
 
 namespace std
 {
+/// This template specialization allows Attributes to be used as unordered map key.
 template <>
 struct hash<Attribute>
 {
@@ -99,6 +87,8 @@ public:
     return h;
   }
 };
+
+/// This template specialization allows vector<Attribute> to be used as unordered map key.
 template <>
 struct hash<std::vector<std::unique_ptr<Attribute>>>
 {
@@ -113,9 +103,32 @@ public:
 };
 }
 
-/// TheWarehouse uses this operator function for indexing and caching queries. So this is
-/// important even though you don't see it being called (directly) anywhere - it *IS* being used.
-bool operator==(const std::unique_ptr<Attribute> & lhs, const std::unique_ptr<Attribute> & rhs);
+/// Used for hash function specialization for Attribute objects.
+inline void
+hash_combine(std::size_t & /*seed*/)
+{
+}
+
+/// Used to combine an existing hash value with the hash of one or more other values (v and rest).
+/// For example "auto h = std::hash("hello"); hash_combine(h, my_int_val, my_float_val, etc.);"
+template <typename T, typename... Rest>
+inline void
+hash_combine(std::size_t & seed, const T & v, Rest &&... rest)
+{
+  std::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  hash_combine(seed, std::forward<Rest>(rest)...);
+}
+
+/// Used for hash function specialization for Attribute objects.
+template <typename T, typename... Rest>
+inline void
+hash_combine(std::size_t & seed, const std::vector<T> & v, Rest &&... rest)
+{
+  for (auto & val : v)
+    hash_combine(seed, val);
+  hash_combine(seed, std::forward<Rest>(rest)...);
+}
 
 /// TheWarehouse is a container for MooseObjects that allows querying/filtering over various
 /// customizeable attributes.  The meta-data about the objects is read/stored when the objects are
@@ -204,19 +217,20 @@ public:
   /// registered attribute is returned - which is generally not needed used by users.
   ///
   /// As an example, to register a class with the constructor "YourAttribute(TheWarehouse& w, int
-  /// foo)", you would call "registerAttrib<YourAttribute>("your_attrib_name", 42 /* a dummy-value
-  /// */)". Custom attribute classes are required to pass an attribute name (i.e.
-  /// "your_attrib_name") to the Attribute base class.  The name passed here into registerAttrib
+  /// foo)", you would call "registerAttrib<YourAttribute>("your_attrib_name", constructor_arg1,
+  /// ...)".  Custom attribute classes are required to pass an attribute name (i.e.
+  /// "your_attrib_name") to the Attribute base class.  The dummy args are forwarded to the attrib
+  /// class' constructor. The name passed here into registerAttrib
   /// must be the same string as the name passed to the Attribute base class's constructor.
   template <typename T, typename... Args>
-  unsigned int registerAttrib(const std::string & name, Args... args)
+  unsigned int registerAttrib(const std::string & name, Args... dummy_args)
   {
     auto it = _attrib_ids.find(name);
     if (it != _attrib_ids.end())
       return it->second;
 
     _attrib_ids[name] = _attrib_list.size();
-    _attrib_list.push_back(std::unique_ptr<Attribute>(new T(*this, args...)));
+    _attrib_list.push_back(std::unique_ptr<Attribute>(new T(*this, dummy_args...)));
     return _attrib_list.size() - 1;
   }
 
