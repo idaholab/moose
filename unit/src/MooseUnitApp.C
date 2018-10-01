@@ -29,7 +29,7 @@ void
 MooseUnitApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   ModulesApp::registerAll(f, af, s);
-  Registry::registerObjectsTo(_factory, {"MooseUnitApp"});
+  Registry::registerObjectsTo(f, {"MooseUnitApp"});
 }
 
 MooseUnitApp::~MooseUnitApp() {}
