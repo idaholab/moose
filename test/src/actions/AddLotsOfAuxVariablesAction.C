@@ -9,7 +9,6 @@
 
 // MOOSE includes
 #include "AddLotsOfAuxVariablesAction.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
@@ -24,10 +23,6 @@
 #include "libmesh/explicit_system.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
-
-// System includes
-#include <sstream>
-#include <stdexcept>
 
 // class static initialization
 const Real AddLotsOfAuxVariablesAction::_abs_zero_tol = 1e-12;
