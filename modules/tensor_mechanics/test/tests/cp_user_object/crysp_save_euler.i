@@ -9,10 +9,8 @@
 
 [Variables]
   [./disp_x]
-    block = 0
   [../]
   [./disp_y]
-    block = 0
   [../]
 []
 
@@ -24,42 +22,30 @@
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./e_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./fp_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
-  [../]
-  [./rotout]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
   [../]
   [./gss]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./euler1]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./euler2]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./euler3]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
 []
 
@@ -88,7 +74,6 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-    block = 0
   [../]
   [./e_yy]
     type = RankTwoAux
@@ -97,7 +82,6 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-    block = 0
   [../]
   [./fp_yy]
     type = RankTwoAux
@@ -106,13 +90,6 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-    block = 0
-  [../]
-  [./rotout]
-    type = CrystalPlasticityRotationOutAux
-    variable = rotout
-    execute_on = timestep_end
-    block = 0
   [../]
   [./gss]
     type = MaterialStdVectorAux
@@ -120,7 +97,6 @@
     property = state_var_gss
     index = 0
     execute_on = timestep_end
-    block = 0
   [../]
   [./euler1]
     type = MaterialRealVectorValueAux
@@ -128,7 +104,6 @@
     property = Euler_angles
     component = 0
     execute_on = timestep_end
-    block = 0
   [../]
   [./euler2]
     type = MaterialRealVectorValueAux
@@ -136,7 +111,6 @@
     property = Euler_angles
     component = 1
     execute_on = timestep_end
-    block = 0
   [../]
   [./euler3]
     type = MaterialRealVectorValueAux
@@ -144,7 +118,6 @@
     property = Euler_angles
     component = 2
     execute_on = timestep_end
-    block = 0
   [../]
 []
 
@@ -203,7 +176,6 @@
 [Materials]
   [./crysp]
     type = FiniteStrainUObasedCP
-    block = 0
     stol = 1e-2
     tan_mod_type = exact
     uo_slip_rates = 'slip_rate_gss'
@@ -213,12 +185,10 @@
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    block = 0
     displacements = 'disp_x disp_y'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP
-    block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
     read_prop_user_object = prop_read
@@ -229,22 +199,18 @@
   [./stress_yy]
     type = ElementAverageValue
     variable = stress_yy
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./e_yy]
     type = ElementAverageValue
     variable = e_yy
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./fp_yy]
     type = ElementAverageValue
     variable = fp_yy
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./gss]
     type = ElementAverageValue
     variable = gss
-    block = 'ANY_BLOCK_ID 0'
   [../]
 []
 
@@ -258,8 +224,6 @@
 [Executioner]
   type = Transient
   dt = 0.01
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = -pc_hypre_type
@@ -272,7 +236,6 @@
   dtmin = 0.01
   num_steps = 10
   nl_abs_step_tol = 1e-10
-
 []
 
 [Outputs]

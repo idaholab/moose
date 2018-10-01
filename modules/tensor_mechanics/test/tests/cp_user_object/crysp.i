@@ -21,27 +21,18 @@
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./fp_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
-  [../]
-  [./rotout]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
   [../]
   [./e_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./gss]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
 []
 
@@ -67,7 +58,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
   [../]
   [./fp_zz]
     type = RankTwoAux
@@ -76,7 +66,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
   [../]
   [./e_zz]
     type = RankTwoAux
@@ -85,13 +74,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
-  [../]
-  [./rotout]
-    type = CrystalPlasticityRotationOutAux
-    variable = rotout
-    execute_on = timestep_end
-    block = 0
   [../]
   [./gss]
     type = MaterialStdVectorAux
@@ -99,7 +81,6 @@
     property = state_var_gss
     index = 0
     execute_on = timestep_end
-    block = 0
   [../]
 []
 
@@ -218,8 +199,6 @@
 [Executioner]
   type = Transient
   dt = 0.05
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = -pc_hypre_type
