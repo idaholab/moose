@@ -166,6 +166,11 @@ TEST_F(TheWarehouseTest, hashing)
 
 TEST_F(TheWarehouseTest, benchmark)
 {
+  bool run = false;
+  // run = true;
+  if (!run)
+    return;
+
   int n_objs = 1000;
   int n_queries = 2000;
   int n_repeat_query = 20000;
