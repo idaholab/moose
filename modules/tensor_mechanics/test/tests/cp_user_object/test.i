@@ -145,7 +145,6 @@
 [Materials]
   [./crysp]
     type = FiniteStrainUObasedCP
-    block = 0
     stol = 1e-2
     tan_mod_type = exact
     uo_slip_rates = 'slip_rate_gss'
@@ -155,12 +154,10 @@
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    block = 0
     displacements = 'ux uy uz'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP
-    block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
@@ -170,22 +167,18 @@
   [./stress_zz]
     type = ElementAverageValue
     variable = stress_zz
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./fp_zz]
     type = ElementAverageValue
     variable = fp_zz
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./e_zz]
     type = ElementAverageValue
     variable = e_zz
-    block = 'ANY_BLOCK_ID 0'
   [../]
   [./gss]
     type = ElementAverageValue
     variable = gss
-    block = 'ANY_BLOCK_ID 0'
   [../]
 []
 
