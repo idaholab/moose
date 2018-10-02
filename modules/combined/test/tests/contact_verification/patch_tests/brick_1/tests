@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#716'
+  design = 'syntax/Contact/index.md source/MechanicalContactConstraint.md'
   [./glued_kin]
     type = 'CSVDiff'
     input = 'brick1_template1.i'
@@ -9,6 +11,8 @@
     max_parallel = 1
     superlu = true
     prereq = 'glued_kin_sm'
+    requirement = "The Contact system shall enforce glued, kinematic contact
+    for 3D brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -20,6 +24,8 @@
     max_parallel = 1
     superlu = true
     prereq = 'glued_pen_sm'
+    requirement = "The Contact system shall enforce glued, penalty contact
+    for 3D brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -31,6 +37,8 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_kin_sm'
+    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    for 3D brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -42,6 +50,8 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_pen_sm'
+    requirement = "The Contact system shall enforce frictionless, penalty contact
+    for 3D brick geometry (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -53,6 +63,9 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_aug_sm'
+    requirement = "The Contact system shall enforce frictionless, Augmented
+    Lagrange contact for 3D brick geometry (NAFEMS CGS1 contact patch test
+    with matched nodes)."
   [../]
   [./glued_kin_sm]
     type = 'CSVDiff'
@@ -63,6 +76,9 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    requirement = "The Contact system shall enforce glued, kinematic contact
+    for 3D brick geometry with the deprecated solid mechanics module (NAFEMS
+    CGS1 contact patch test with matched nodes)."
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
@@ -73,6 +89,9 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    requirement = "The Contact system shall enforce glued, penalty contact
+    for 3D brick geometry with the deprecated solid mechanics module (NAFEMS
+    CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_kin_sm]
     type = 'CSVDiff'
@@ -83,6 +102,9 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    for 3D brick geometry with the deprecated solid mechanics module (NAFEMS
+    CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'
@@ -93,6 +115,9 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, penalty contact
+    for 3D brick geometry with the deprecated solid mechanics module (NAFEMS
+    CGS1 contact patch test with matched nodes)."
   [../]
   [./frictionless_aug_sm]
     type = 'CSVDiff'
@@ -103,6 +128,9 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, Augmented
+    Lagrange contact for 3D brick geometry with the deprecated solid mechanics
+    module (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./mu_0_2_aug]
     type = 'CSVDiff'
@@ -114,6 +142,9 @@
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_2_aug_sm'
+    requirement = "The Contact system shall enforce frictional, Augmented
+    Lagrange contact for 3D brick geometry (NAFEMS CGS1 contact patch test
+    with matched nodes)."
   [../]
   [./mu_0_2_aug_sm]
     type = 'CSVDiff'
@@ -124,6 +155,9 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    requirement = "The Contact system shall enforce frictional, Augmented
+    Lagrange contact for 3D brick geometry with the deprecated solid mechanics
+    module (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -134,6 +168,9 @@
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_2_pen_sm'
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 3D brick geometry (NAFEMS CGS1 contact patch test
+    with matched nodes)."
   [../]
   [./mu_0_2_pen_sm]
     type = 'CSVDiff'
@@ -143,5 +180,8 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 3D brick geometry with the deprecated solid mechanics
+    module (NAFEMS CGS1 contact patch test with matched nodes)."
   [../]
 []
