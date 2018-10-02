@@ -176,6 +176,9 @@ RinglebMesh::buildMesh()
     }
   }
 
+  // Find neighbors, etc.
+  mesh.prepare_for_use();
+
   if (_triangles)
     MeshTools::Modification::all_tri(mesh);
 
@@ -184,7 +187,4 @@ RinglebMesh::buildMesh()
   mesh.boundary_info->sideset_name(_outflow_bid) = "outflow";
   mesh.boundary_info->sideset_name(_inner_wall_bid) = "inner_wall";
   mesh.boundary_info->sideset_name(_outer_wall_bid) = "outer_wall";
-
-  // Find neighbors, etc.
-  mesh.prepare_for_use();
 }

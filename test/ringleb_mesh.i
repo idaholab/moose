@@ -6,4 +6,5 @@
   kmax = 1.2
   n_extra_q_pts = 4
   gamma = 1.4
+  # triangles = true
 []
