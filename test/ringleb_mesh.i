@@ -1,10 +1,10 @@
 [Mesh]
   type = RinglebMesh
   kmin = 0.7
-  num_k_pts = 10
-  num_q_pts = 10
+  num_k_pts = 9
+  num_q_pts = 20
   kmax = 1.2
-  n_extra_q_pts = 4
+  n_extra_q_pts = 2
   gamma = 1.4
-  # triangles = true
+  triangles = true
 []
