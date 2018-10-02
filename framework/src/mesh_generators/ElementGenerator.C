@@ -48,19 +48,23 @@ ElementGenerator::generate()
   if (!mesh)
     mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
 
+  std::vector<Node *> nodes;
+
+  nodes.reserve(_nodal_positions.size());
+
   // Add all the nodes
   for (auto & point : _nodal_positions)
-    mesh->add_point(point);
+    nodes.push_back(mesh->add_point(point));
 
   // Add all the elements
   for (dof_id_type i = 0; i < _element_connectivity.size(); i += 4)
   {
     auto elem = mesh->add_elem(new Quad4);
 
-    elem->set_node(0) = mesh->node_ptr(_element_connectivity[i]);
-    elem->set_node(1) = mesh->node_ptr(_element_connectivity[i + 1]);
-    elem->set_node(2) = mesh->node_ptr(_element_connectivity[i + 2]);
-    elem->set_node(3) = mesh->node_ptr(_element_connectivity[i + 3]);
+    elem->set_node(0) = nodes[_element_connectivity[i]];
+    elem->set_node(1) = nodes[_element_connectivity[i + 1]];
+    elem->set_node(2) = nodes[_element_connectivity[i + 2]];
+    elem->set_node(3) = nodes[_element_connectivity[i + 3]];
     elem->subdomain_id() = 0;
   }
 

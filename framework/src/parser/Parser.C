@@ -1127,6 +1127,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(DistributionName, string);
       setscalar(SamplerName, string);
       setscalar(TagName, string);
+      setscalar(MeshGeneratorName, string);
 
       setscalar(PostprocessorName, PostprocessorName);
 
