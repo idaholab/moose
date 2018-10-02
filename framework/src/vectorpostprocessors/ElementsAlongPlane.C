@@ -22,6 +22,8 @@ validParams<ElementsAlongPlane>()
 
   params.addRequiredParam<Point>("point", "Point in the plane");
   params.addRequiredParam<Point>("normal", "Normal vector to the plane");
+  params.addClassDescription(
+      "Outputs the IDs of every element intersected by a user-defined plane");
   return params;
 }
 
@@ -31,6 +33,7 @@ ElementsAlongPlane::ElementsAlongPlane(const InputParameters & parameters)
     _normal(getParam<Point>("normal")),
     _elem_ids(declareVector("elem_ids"))
 {
+  _fe_problem.mesh().errorIfDistributedMesh("ElementsAlongPlane");
 }
 
 void
