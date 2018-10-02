@@ -3,6 +3,9 @@
     type = 'Exodiff'
     input = 'mesh_generation_test.i'
     exodiff = 'out.e'
+    requirement = 'MOOSE shall generate a structured mesh on a Cartesian domain.'
+    design = 'mesh/GeneratedMesh.md'
+    issues = '#760'
   [../]
 
   [./mesh_bias]
@@ -11,6 +14,9 @@
     cli_args = '--mesh-only'
     exodiff = 'mesh_bias_in.e'
     recover = false
+    requirement = 'MOOSE shall generate first-order, structured meshes with biasing in the x, y, and z directions.'
+    design = 'mesh/GeneratedMesh.md'
+    issues = '#6129'
   [../]
 
   [./mesh_bias_quadratic]
@@ -19,56 +25,109 @@
     cli_args = 'Mesh/elem_type=HEX27 --mesh-only mesh_bias_quadratic_in.e'
     exodiff = 'mesh_bias_quadratic_in.e'
     recover = false
+    requirement = 'MOOSE shall generate second-order, structured meshes with biasing in the x, y, and z directions.'
+    design = 'mesh/GeneratedMesh.md'
+    issues = '#6129'
   [../]
 
   [./annular_except1]
     type = RunException
     input = annular_except1.i
     expect_err = 'AnnularMesh: rmax must be greater than rmin'
+    requirement = "MOOSE's annular mesh generator shall throw an error if the min radius is larger than the max radius."
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./annular_except2]
     type = RunException
     input = annular_except2.i
     expect_err = 'AnnularMesh: tmax must be greater than tmin'
+    requirement = "MOOSE's annular mesh generator shall throw an error if the min angle is >= the max angle."
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./annular_except3]
     type = RunException
     input = annular_except3.i
     expect_err = 'AnnularMesh: tmax - tmin must be <= 2 Pi'
+    requirement = "MOOSE's annular mesh generator shall throw an error if the angle separation is larger than 2*pi."
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./annular_except4]
     type = RunException
     input = annular_except4.i
     expect_err = 'AnnularMesh: nt must be greater than \(tmax - tmin\) / Pi in order to avoid inverted elements'
+    requirement = "MOOSE's annular mesh generator shall throw an error if the number of elements in the angular direction is too small."
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./annular_except5]
     type = RunException
     input = annular_except5.i
     expect_err = 'AnnularMesh: nt must be greater than \(tmax - tmin\) / Pi in order to avoid inverted elements'
+    requirement = "MOOSE's annular mesh generator shall throw an error if the number of elements in the angular direction is too small."
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./annular_except6]
     type = RunException
     input = annular_except6.i
     expect_err = 'AnnularMesh: quad_subdomain_id must not equal tri_subdomain_id'
+    requirement = "MOOSE's annular mesh generator shall throw an error if the quadrilateral and triangular subdomain ids are the same."
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./annulus]
     type = Exodiff
     input = annulus.i
     exodiff = 'annulus_out.e'
+    requirement = 'MOOSE shall have an algorithm for quad meshing an annulus.'
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./annulus_sector]
     type = Exodiff
     input = annulus_sector.i
     exodiff = 'annulus_sector_out.e'
+    requirement = 'MOOSE shall have an algorithm for quad meshing an annular sector.'
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./disc]
     type = Exodiff
     input = disc.i
     exodiff = 'disc_out.e'
+    requirement = 'MOOSE shall have an algorithm for quad meshing a circular region, including the origin.'
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
   [../]
+
   [./disc_sector]
     type = Exodiff
     input = disc_sector.i
     exodiff = 'disc_sector_out.e'
+    requirement = 'MOOSE shall have an algorithm for quad meshing a circular sector, including the origin.'
+    design = 'mesh/AnnularMesh.md'
+    issues = '#8432'
+  [../]
+
+  [./spiral_annular_mesh]
+    type = 'Exodiff'
+    input = 'spiral_mesh.i'
+    cli_args = '--mesh-only'
+    exodiff = 'spiral_mesh_in.e'
+    recover = false
+    requirement = 'MOOSE shall have an algorithm for meshing an annular region with triangular elements.'
+    design = 'mesh/SpiralAnnularMesh.md'
+    issues = '#12205'
   [../]
 []
