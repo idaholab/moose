@@ -1,4 +1,6 @@
 [Tests]
+  design = 'GlobalStrain/index.md'
+  issues = '#11314'
   [./strain]
     type = RunApp
     input = 'global_strain_pfm.i'
@@ -7,6 +9,8 @@
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
     check_input = True
     fparser_jit = True
+    requirement = "This shall correctly compute the deformation behavior using
+                   the globalstrain system for a multiphysics problem in 2D."
   [../]
   [./strain_3D]
     type = RunApp
@@ -15,5 +19,7 @@
     cli_args = 'Mesh/nx=2 Mesh/ny=2 Mesh/nz=2'
     check_input = True
     fparser_jit = True
+    requirement = "This shall correctly compute the deformation behavior using
+                   the globalstrain system for a multiphysics problem in 3D."
   [../]
 []

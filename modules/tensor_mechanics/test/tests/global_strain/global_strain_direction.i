@@ -130,7 +130,6 @@
 [Preconditioning]
   [./SMP]
     type = SMP
-    # coupled_groups = u_x,u_y
     full = true
   [../]
 []
@@ -139,11 +138,7 @@
   type = Transient
   scheme = bdf2
   solve_type = 'PJFNK'
-
   line_search = basic
-  # petsc_options = '-ksp_converged_reason -snes_converged_reason'
-  # petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  # petsc_options_value = '    asm        NONZERO                     1e-8'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
 
