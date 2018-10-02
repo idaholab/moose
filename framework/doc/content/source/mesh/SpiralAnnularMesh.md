@@ -11,7 +11,7 @@ Here are the required parameters :
 
 Given all these parameters, the radial bias will be computed automatically.
 
-It is also possible to specify if you want a second-order Mesh : TRI3 elements will become TRI6 elements. To do that, simply change the `my_second_order` parameter to `true`.
+It is also possible to specify if you want a second-order Mesh : TRI3 elements will become TRI6 elements. To do that, simply change the `use_tri6` parameter to `true`.
 
 ## Example Input File
 
@@ -20,7 +20,7 @@ For example, with the following input file :
 ```
 [Mesh]
   type = SpiralAnnularMesh
-  my_second_order = true
+  use_tri6 = true
   inner_radius = 1
   nodes_per_ring = 18
   outer_radius = 10

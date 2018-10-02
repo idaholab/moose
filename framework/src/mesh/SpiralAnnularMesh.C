@@ -26,11 +26,11 @@ validParams<SpiralAnnularMesh>()
                                             "The size of the outer circle."
                                             " Logically, it has to be greater than inner_radius");
   params.addRequiredRangeCheckedParam<unsigned int>(
-      "nodes_per_ring", "nodes_per_ring>0", "Number of nodes on each ring.");
+      "nodes_per_ring", "nodes_per_ring>5", "Number of nodes on each ring.");
   params.addParam<bool>(
-      "my_second_order", false, "Generate mesh of TRI6 elements instead of TRI3 elements.");
+      "use_tri6", false, "Generate mesh of TRI6 elements instead of TRI3 elements.");
   params.addRequiredRangeCheckedParam<unsigned int>(
-      "num_rings", "num_rings>0", "The number of rings.");
+      "num_rings", "num_rings>1", "The number of rings.");
   params.addParam<boundary_id_type>(
       "cylinder_bid", 1, "The boundary id to use for the cylinder (inner circle)");
   params.addParam<boundary_id_type>(
@@ -52,18 +52,15 @@ SpiralAnnularMesh::SpiralAnnularMesh(const InputParameters & parameters)
     _outer_radius(getParam<Real>("outer_radius")),
     _radial_bias(1.0),
     _nodes_per_ring(getParam<unsigned int>("nodes_per_ring")),
-    _second_order(getParam<bool>("my_second_order")),
+    _use_tri6(getParam<bool>("use_tri6")),
     _num_rings(getParam<unsigned int>("num_rings")),
     _cylinder_bid(getParam<boundary_id_type>("cylinder_bid")),
     _exterior_bid(getParam<boundary_id_type>("exterior_bid")),
     _initial_delta_r(2 * libMesh::pi * _inner_radius / _nodes_per_ring)
 {
-
   // catch likely user errors
   if (_outer_radius <= _inner_radius)
     mooseError("SpiralAnnularMesh: outer_radius must be greater than inner_radius");
-  if (_num_rings == 0)
-    mooseError("Cannot create mesh with _num_rings == 0");
 }
 
 std::unique_ptr<MooseMesh>
@@ -76,7 +73,6 @@ void
 SpiralAnnularMesh::buildMesh()
 {
   {
-
     // Compute the radial bias given:
     // .) the inner radius
     // .) the outer radius
@@ -242,8 +238,7 @@ SpiralAnnularMesh::buildMesh()
   // Find neighbors, etc.
   mesh.prepare_for_use();
 
-  if (_second_order)
-  // if (getParam<bool>("second_order"))
+  if (_use_tri6)
   {
     mesh.all_second_order(/*full_ordered=*/true);
     std::vector<unsigned int> nos;

@@ -35,20 +35,20 @@ public:
 
 protected:
   /// Radius of the inner circle
-  const Real & _inner_radius;
+  const Real _inner_radius;
 
   /// Radius of the outer circle. Logically, it's bigger that inner_radius.
-  const Real & _outer_radius;
+  const Real _outer_radius;
 
   /// Factor to increase initial_delta_r for each ring.
   /// For a uniform grid : radial_bias = 1.0
   Real _radial_bias;
 
   /// Number of nodes on each ring.
-  const unsigned int & _nodes_per_ring;
+  const unsigned int _nodes_per_ring;
 
   /// Generate mesh of TRI6 elements instead of TRI3 elements.
-  const bool & _second_order;
+  const bool _use_tri6;
 
   /// Number of rings.You can't specify
   /// both the number of rings and the radial bias if you want to match
