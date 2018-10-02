@@ -27,7 +27,7 @@ A combination of these may be used, to simulate, for instance, THM or HM couplin
 
 ## Evolution of porosity
 
-The evolution of the porosity is governed by [citep:chen2009]
+The evolution of the porosity is governed by [citep:detournayET93, chen2009]
 \begin{equation}
 \label{eq:phi_dog}
 \frac{\partial}{\partial t}(\phi + M) = (\alpha_{B} -
@@ -113,7 +113,7 @@ following requirements:
 ## Evolution of porosity for an isothermal, mineral-free, situation
 
 The evolution of porosity is fundamental to the coupling between flow and solid mechanics.  Consider
-the isothermal situation with no plasticity.
+the isothermal situation with no plasticity.  The following presentation is mostly drawn from [citep:detournayET93].
 
 Denote the change of a quantity, q, by $\Delta
 q$.  Recall that the porosity is defined by $\phi = V_{\mathrm{f}}/V$,
@@ -138,11 +138,11 @@ In most instances it is appropriate to write this equation as
 \frac{\Delta V}{V} = -\frac{1}{K}(P_{\mathrm{mech}} - \alpha_{B} \delta_{ij}\Delta P_{\mathrm{f}})
 \ .
 \end{equation}
-where the total mechanical pressure is
+(which is Detournay and Cheng Eqn$~$(20a)) where the total mechanical pressure is
 \begin{equation}
 P_{\mathrm{mech}} = - \textrm{Tr}\sigma/3 \ .
 \end{equation}
-and $K$ is the so-called *drained* bulk modulus $K = \delta_{ij}C_{ijkl}\delta_{kl}$.
+and $K$ is the so-called *drained* bulk modulus $K^{-1} = \delta_{ij}C_{ijkl}\delta_{kl}$.
 To find the evolution equation for porosity, a similar equation for
 $\Delta V_{\mathrm{f}}/V_{\mathrm{f}}$ must be derived.
 
@@ -153,7 +153,7 @@ Assuming linearity
 (\Delta\sigma_{ij}^{\mathrm{tot}} + B \delta_{ij}\Delta
 P_{\mathrm{f}}) \ .
 \end{equation}
-The Betti-Maxwell reciprocal theorem yields $A_{ij}$ and $B$, as is
+(This is Detournay and Cheng Eqn$~$(20b).)  The Betti-Maxwell reciprocal theorem yields $A_{ij}$ and $B$, as is
 now shown.
 
 The work increment is
@@ -193,6 +193,7 @@ Betti-Maxwell reciprocal theorem), which yields
 \label{eq:tildek}
 A_{ij} = \alpha_{B} C_{ijkl}\delta_{kl}/\phi \ .
 \end{equation}
+(This is Detournay and Cheng Eqn$~$(22).)
 
 Now to identify $B$.  Consider a so-called *ideal porous material*, which is characterised by a
 fully-connected pore space and a homogeneous and isotropic matrix material.  In this case, applying a
@@ -207,6 +208,7 @@ Substituting this equation, this specific pressure condition, and
 \begin{equation}
 B = 1 + \phi - \phi/{\alpha_{B}} \ .
 \end{equation}
+(This is Detournay and Cheng Eqns$~$(22), (24b), (37) and the definition of $\alpha_{B}$ in Table 1.)
 
 Now that $A_{ij}$ and $B$ have been identified, they may be
 substituted into [eq:deltavf].  Rearranging yields
