@@ -574,7 +574,7 @@ enum class RelationshipManagerType : unsigned char
 };
 
 std::string stringify(const Moose::RelationshipManagerType & t);
-}
+} // namespace Moose
 
 namespace libMesh
 {
@@ -682,5 +682,8 @@ DerivativeStringClass(MaterialName);
 
 /// Tag Name
 DerivativeStringClass(TagName);
+
+/// Name of MeshGenerators
+DerivativeStringClass(MeshGeneratorName);
 
 #endif // MOOSETYPES_H
