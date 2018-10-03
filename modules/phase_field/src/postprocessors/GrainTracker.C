@@ -516,6 +516,7 @@ GrainTracker::trackGrains()
       // clang-format on
 
       // We only need to examine grains that have matching variable indices
+      bool any_boxes_intersect = false;
       for (decltype(_feature_sets.size()) new_grain_index =
                std::distance(_feature_sets.begin(), start_it);
            new_grain_index < _feature_sets.size() &&
@@ -530,6 +531,7 @@ GrainTracker::trackGrains()
          */
         if (new_grain.boundingBoxesIntersect(old_grain))
         {
+          any_boxes_intersect = true;
           Real curr_centroid_diff = centroidRegionDistance(old_grain._bboxes, new_grain._bboxes);
           if (curr_centroid_diff <= min_centroid_diff)
           {
@@ -538,6 +540,10 @@ GrainTracker::trackGrains()
           }
         }
       }
+
+      if (_verbosity_level > 2 && !any_boxes_intersect)
+        _console << "\nNo intersecting bounding boxes found while trying to match grain "
+                 << old_grain;
 
       // found a match
       if (closest_match_index != invalid_size_t)

@@ -1494,7 +1494,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
 
       neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
     }
-    else // if (expand_halos_only /*&& feature->_periodic_nodes.empty()*/)
+    else
     {
       neighbor_ancestor = elem->topological_neighbor(i, mesh, *_point_locator, _pbs);
 
@@ -1514,6 +1514,15 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
 
         //        for (const auto neighbor : all_active_neighbors)
         //          feature->_disjoint_halo_ids.insert(neighbor->id());
+      }
+      else
+      {
+        /**
+         * This neighbor is NULL which means we need to expand the bounding box here in case this
+         * grain is up against multiple domain edges so we don't end up with a degenerate bounding
+         * box.
+         */
+        updateBBoxExtremesHelper(feature->_bboxes[0], *elem);
       }
     }
 

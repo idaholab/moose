@@ -219,9 +219,20 @@
     allow_test_objects = true
     petsc_version = '>=3.5.0'
 
-    requirement = 'The system shall properly create PolycrystalICs with halo extensions (elements) when using DistributedMesh'
+    requirement = 'The system shall properly create PolycrystalICs with halo extensions (elements) when using DistributedMesh.'
     issues = '#12216'
     design = 'PolycrystalICs.md'
+  [../]
+
+  [./one_grain]
+    type = 'CSVDiff'
+    input = 'one_grain.i'
+    csvdiff = 'one_grain_out.csv'
+    recover = false # no solve
+
+    requirement = 'The system shall properly handle a single feature or grain taking up the entire domain.'
+    issues = '#12216'
+    design = 'GrainTracker.md'
   [../]
 
   ###################################################
