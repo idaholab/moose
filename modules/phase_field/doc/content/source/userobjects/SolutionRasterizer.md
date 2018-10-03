@@ -29,10 +29,10 @@ The `SolutionRasterizer` user object is derived from the [`SolutionUserObject`](
 
 The following input can be executed with the MOOSE Phase Field module executable and will
 
-* load the mesh file `diffuse_out.e`
-* load the atomic coordinate file `in.xyz`
-* accept all atoms at the coordinates where the value of the non-linear variable `c` is above a value of `0.5`
-* write out the atomic coordinate file `out.xyz`
+- load the mesh file `diffuse_out.e`
+- load the atomic coordinate file `in.xyz`
+- accept all atoms at the coordinates where the value of the non-linear variable `c` is above a value of `0.5`
+- write out the atomic coordinate file `out.xyz`
 
 !listing modules/phase_field/test/tests/solution_rasterizer/raster.i
 
