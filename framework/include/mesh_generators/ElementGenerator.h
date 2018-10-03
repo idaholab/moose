@@ -28,6 +28,8 @@ public:
 
   std::unique_ptr<MeshBase> generate();
 
+  Elem * getElemType(const std::string & type);
+
 protected:
   /// Mesh that possibly comes from another generator
   std::unique_ptr<MeshBase> & _input;
@@ -37,6 +39,9 @@ protected:
 
   /// The connectivity of the elements to the nodes
   const std::vector<dof_id_type> & _element_connectivity;
+
+  /// The type of element to build.
+  const unsigned int _elem_type;
 };
 
 #endif // ELEMENTGENERATOR_H

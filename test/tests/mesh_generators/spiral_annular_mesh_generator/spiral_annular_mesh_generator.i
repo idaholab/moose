@@ -1,0 +1,18 @@
+[MeshGenerators]
+  [./samg]
+    type = SpiralAnnularMeshGenerator
+    use_tri6 = true
+    inner_radius = 1
+    nodes_per_ring = 18
+    outer_radius = 10
+    num_rings = 10
+  []
+[]
+
+[Mesh]
+  type = MeshGeneratorMesh
+[]
+
+[Outputs]
+  exodus = true
+[]

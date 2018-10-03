@@ -11,6 +11,7 @@
 #define MESHGENERATORMESH_H
 
 #include "MooseMesh.h"
+#include "MooseApp.h"
 
 class MeshGeneratorMesh;
 

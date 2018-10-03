@@ -45,5 +45,5 @@ std::unique_ptr<MeshBase> &
 MeshGenerator::getMeshByName(const MeshGeneratorName & input_mesh_generator)
 {
   _depends_on.push_back(input_mesh_generator);
-  return _app.getMeshGeneratorOutput(getParam<MeshGeneratorName>(input_mesh_generator));
+  return _app.getMeshGeneratorOutput(input_mesh_generator);
 }
