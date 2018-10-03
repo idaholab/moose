@@ -4,16 +4,16 @@
 
 This postprocessor collects various memory usage metrics:
 
-* physical memory (most relevant, tied to hardware RAM limitation)
-* virtual memory
-* major page faults (how often disk swap is accessed)
+- physical memory (most relevant, tied to hardware RAM limitation)
+- virtual memory
+- major page faults (how often disk swap is accessed)
 
 The data can be reduced in parallel as
 
-* maximum out of all MPI ranks
-* minimum out of all MPI ranks
-* average over all MPI ranks
-* total sum over all MPI ranks (default)
+- maximum out of all MPI ranks
+- minimum out of all MPI ranks
+- average over all MPI ranks
+- total sum over all MPI ranks (default)
 
 Physical memory statistics are available on Mac and Linux, virtual memory and
 page fault data is Linux only.
@@ -23,8 +23,8 @@ aggregates the per-process peak value of the chosen metric, which then can be
 output on `TIMESTEP_END`.
 
 !alert note
-Until October 2018 this Postprocessor defaulted to reporting _virtual memory_.
-This was changed to the more relavant _physical memory_ to avoid misleading
+Until October 2018 this Postprocessor defaulted to reporting *virtual memory*.
+This was changed to the more relavant *physical memory* to avoid misleading
 benchmark results to be generated.
 
 ## Implementation
