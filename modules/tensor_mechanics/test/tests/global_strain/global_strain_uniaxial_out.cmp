@@ -1,0 +1,54 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.83) Modified: 2015-08-20
+#             Authors:  Richard Drake, rrdrake@sandia.gov           
+#                       Greg Sjaardema, gdsjaar@sandia.gov          
+#             Run on    2018/09/26   15:49:19 MDT
+#  *****************************************************************
+
+#  FILE 1: /Users/spenbw/gitproj/githerd/moose/modules/tensor_mechanics/test/tests/global_strain/global_strain_uniaxial_out.e
+#   Title: global_strain_uniaxial_out.e
+#          Dim = 3, Blocks = 1, Nodes = 27, Elements = 8, Nodesets = 7, Sidesets = 6
+#          Vars: Global = 8, Nodal = 6, Element = 4, Nodeset = 0, Sideset = 0, Times = 2
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
+	l2err_e00        # min:               0 @ t1	max:   1.4285714e-09 @ t2
+	l2err_e11        # min:               0 @ t1	max:   4.7142858e-10 @ t2
+	global_strain_0  # min:               0 @ t1	max:     0.071428571 @ t2
+	global_strain_1  # min:               0 @ t1	max:     0.023571429 @ t2
+	global_strain_2  # min:               0 @ t1	max:     0.023571429 @ t2
+	global_strain_3  # min:               0 @ t1	max:               0 @ t1
+	global_strain_4  # min:               0 @ t1	max:               0 @ t1
+	global_strain_5  # min:               0 @ t1	max:               0 @ t1
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	disp_x  # min:               0 @ t1,n1	max:     0.071428571 @ t2,n10
+	disp_y  # min:               0 @ t1,n1	max:     0.023571429 @ t2,n13
+	disp_z  # min:               0 @ t1,n1	max:     0.023571429 @ t2,n19
+	u_x     # min:               0 @ t1,n1	max:   2.8217699e-17 @ t2,n22
+	u_y     # min:               0 @ t1,n1	max:   1.9363645e-32 @ t2,n2
+	u_z     # min:               0 @ t1,n1	max:   1.2009613e-32 @ t2,n22
+
+ELEMENT VARIABLES relative 1.e-6 floor 1.e-9
+	s00  # min:               0 @ t1,b0,e1	max:           5e+09 @ t2,b0,e1
+	s11  floor 1.e-6 # min:               0 @ t1,b0,e1	max:   1.1920929e-07 @ t2,b0,e1
+	e00  # min:               0 @ t1,b0,e1	max:     0.071428571 @ t2,b0,e1
+	e11  # min:               0 @ t1,b0,e1	max:     0.023571429 @ t2,b0,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+
