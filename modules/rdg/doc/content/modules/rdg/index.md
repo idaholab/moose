@@ -58,11 +58,11 @@ The cell-averaged conservative variable, $\psi_i$, is taken to be the unknown an
 where $V_i$ is the volume of the control volume $\Omega_i$. The following equation can then be
 derived using the divergence theorem,
 \begin{equation}
+\label{eq:fvm_divergence_theorem_bc}
   V_i\frac{{\rm d}\psi_i}{{\rm d}t}
 + \sum_{j \in N_i}\int_{\Gamma_{ij}}(\psi_{ij}{\bf v}_{ij})\cdot{\bf n}_{ij}~{\rm d}S
 + \sum_{\Gamma_{ib} \in \partial\Omega}\int_{\Gamma_{ib}}(\psi_{ib}{\bf v}_{ib})\cdot{\bf n}_{ib}~{\rm d}S
 = 0,
-\label{eq:fvm_divergence_theorem_bc}
 \end{equation}
 where $\Gamma_{ij}=\partial\Omega_i\cap\partial\Omega_j$ denotes an interior common face between cell
 $\Omega_i$ and $\Omega_j$, $\Gamma_{ib}=\partial\Omega_i\cap\partial\Omega$ denotes a face on the
