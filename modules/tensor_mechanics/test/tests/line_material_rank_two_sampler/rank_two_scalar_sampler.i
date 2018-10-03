@@ -58,8 +58,8 @@
 [VectorPostprocessors]
   [./vonmises]
     type = LineMaterialRankTwoScalarSampler
-    start = '0.1667 0.5 0.5'
-    end   = '0.8333 0.5 0.5'
+    start = '0.1667 0.4 0.45'
+    end   = '0.8333 0.6 0.55'
     property = stress
     scalar_type = VonMisesStress
     sort_by = id
