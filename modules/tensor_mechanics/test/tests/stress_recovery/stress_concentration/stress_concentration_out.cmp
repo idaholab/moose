@@ -1,0 +1,43 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.83) Modified: 2015-08-20
+#             Authors:  Richard Drake, rrdrake@sandia.gov           
+#                       Greg Sjaardema, gdsjaar@sandia.gov          
+#             Run on    2018/09/26   15:44:23 MDT
+#  *****************************************************************
+
+#  FILE 1: /Users/spenbw/gitproj/githerd/moose/modules/tensor_mechanics/test/tests/stress_recovery/stress_concentration/stress_concentration_out.e
+#   Title: stress_concentration_out.e
+#          Dim = 2, Blocks = 1, Nodes = 327, Elements = 295, Nodesets = 4, Sidesets = 4
+#          Vars: Global = 0, Nodal = 4, Element = 2, Nodeset = 0, Sideset = 0, Times = 2
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	disp_x               # min:               0 @ t1,n1	max:    0.0023741443 @ t2,n200
+	disp_y               # min:               0 @ t1,n1	max:            0.01 @ t2,n40
+	stress_xx_recovered  relative 1.e-3 # min:               0 @ t1,n1	max:       3805.3279 @ t2,n188
+	stress_yy_recovered  relative 1.e-3 # min:               0 @ t1,n1	max:       6659.7876 @ t2,n105
+
+ELEMENT VARIABLES relative 1.e-5 floor 1.e-10
+	stress_xx  # min:               0 @ t1,b1,e1	max:       1027.1882 @ t2,b1,e23
+	stress_yy  # min:               0 @ t1,b1,e1	max:       5342.0658 @ t2,b1,e30
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+

@@ -88,6 +88,7 @@
 [Executioner]
   type = Transient
   solve_type = PJFNK
+  nl_abs_tol = 1e-9
 
   start_time = 0.0
   dt = 1.0

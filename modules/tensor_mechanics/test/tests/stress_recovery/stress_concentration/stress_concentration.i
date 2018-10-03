@@ -133,8 +133,7 @@
   solve_type = NEWTON
   petsc_options_iname = '-ksp_type -pc_type'
   petsc_options_value = 'preonly   lu'
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-14
   l_max_its = 100
   nl_max_its = 30
 []
