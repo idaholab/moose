@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FileMeshGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -37,5 +38,5 @@ FileMeshGenerator::generate()
 
   mesh->read(_file_name);
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

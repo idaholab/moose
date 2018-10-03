@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<FileMeshGenerator>();
 
 /**
- * Generates individual elements given a list of nodal positions
+ * Generates a mesh by reading it from an file.
  */
 class FileMeshGenerator : public MeshGenerator
 {

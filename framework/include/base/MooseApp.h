@@ -23,6 +23,7 @@
 #include "TheWarehouse.h"
 
 #include "libmesh/parallel_object.h"
+#include "libmesh/mesh_base.h"
 
 // C++ includes
 #include <list>

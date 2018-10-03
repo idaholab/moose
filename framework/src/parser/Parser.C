@@ -1184,6 +1184,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(SamplerName, string);
       setvector(TagName, string);
       setvector(VariableName, VariableName);
+      setvector(MeshGeneratorName, string);
 
       // Double indexed types
       setvectorvector(Real);

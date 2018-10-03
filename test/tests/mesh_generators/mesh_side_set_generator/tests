@@ -1,0 +1,12 @@
+[Tests]
+  [./mesh_side_set_generator_test]
+    type = 'Exodiff'
+    input = 'mesh_side_set_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'mesh_side_set_generator_in.e'
+    requirement = 'MOOSE shall be able to create sidesets.'
+    design = 'mesh_generators/MeshSideSetGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+  [../]
+[]
