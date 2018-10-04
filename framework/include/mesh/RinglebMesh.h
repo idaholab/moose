@@ -33,6 +33,13 @@ public:
 
   virtual void buildMesh() override;
 
+  // This function computes the different parameters a, rho, p and J
+  std::vector<Real> arhopj(const Real & gamma, const std::vector<Real> & q, const int & index);
+
+  // This function computes the (x,y) coordinates of the nodes
+  // The vector `values` can be got with the `arhopj` function above
+  std::vector<Real> computexy(const std::vector<Real> values, const int & i, const int & index, const std::vector<Real> & ks, const std::vector<Real> & q);
+
 protected:
   /// Gamma
   const Real & _gamma;
@@ -40,7 +47,7 @@ protected:
   /// k is a streamline parameter, i.e. k=constant on each streamline.
   /// kmax corresponds to the "inner" wall. Choosing a larger
   /// kmax leads to a more "bullet"-shaped inner wall, a smaller kmax corresponds to a more "parabolic"
-  /// inner wall. Another possible kmax value is 1.5.
+  /// inner wall. A possible kmax value is 1.5.
   const Real & _kmax;
 
   /// kmin corresponds to the outer wall
@@ -49,7 +56,7 @@ protected:
   /// How many points to discretize the range q = (0.5, k) into.
   const int & _num_q_pts;
 
-  /// how many "extra" points should be inserted in the final element *in addition to* the equispaced q points.
+  /// how many "extra" points should be inserted in the nearest element from the horizontal *in additi  /// on to* the equispaced q points.
   const int & _n_extra_q_pts;
 
   /// how many points in the range k=(kmin, kmax).

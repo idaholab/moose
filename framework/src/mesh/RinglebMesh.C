@@ -64,125 +64,152 @@ RinglebMesh::safeClone() const
   return libmesh_make_unique<RinglebMesh>(*this);
 }
 
+std::vector<Real>
+RinglebMesh::arhopj(const Real & gamma,const std::vector<Real> & q, const int & index)
+{
+  std::vector<Real> values(4);
+  Real a = std::sqrt(1 - ((gamma - 1)/2.) * std::pow(q[index],2));
+  Real rho = std::pow(a, 2. / (gamma - 1));
+  Real p = (1./gamma) * std::pow(a, 2 * gamma / (gamma - 1));
+  Real J = 1. / a + 1. /(3. * std::pow(a,3)) + 1. / (5. * std::pow(a,5)) - 0.5 * std::log( (1+a) / (1-a) );
+  values = {a, rho, p, J};
+  return values;
+}
+
+std::vector<Real>
+RinglebMesh::computexy(const std::vector<Real> values, const int & i, const int & index, const std::vector<Real> & ks, const std::vector<Real> & q)
+{
+  std::vector<Real> xy(2);
+
+  // Compute x(q,k)
+  xy[0] = 0.5 / values[1] * (2. / ks[i] / ks[i] - 1. / q[index] / q[index]) - 0.5 * values[3];
+
+  // Compute the term that goes under the sqrt sign
+  // If 1 - (q/k)^2 is slightly negative, we make it zero.
+  Real sqrt_term = 1. - q[index] * q[index] / ks[i] / ks[i];
+  sqrt_term = std::max(sqrt_term, 0.);
+
+  // Compute y(q,k)
+  xy[1] = 1. / (ks[i] * values[1] * q[index]) * std::sqrt(sqrt_term);
+  
+  return xy;
+}
+
 void
 RinglebMesh::buildMesh()
 {
   MeshBase & mesh = getMesh();
 
-  // Data structure that holds pointers to the Nodes of the upper part of each streamline.
-  std::vector<std::vector<Node *>> stream_nodes_up(_num_k_pts);
+  /// Data structure that holds pointers to the Nodes of each streamline.
+  std::vector<std::vector<Node *>> stream_nodes(_num_k_pts);
 
-  // Node id counter.
+  /// Node id counter.
   int current_node_id = 0;
 
-  // Vector containing the regularly spaced k values
+  /// Vector containing the regularly spaced k values
   std::vector<Real> ks(_num_k_pts);
   Real diff = (_kmax-_kmin)/(_num_k_pts-1);
   for (int i = 0; i < _num_k_pts; i++)
-    ks[i] = _kmin+i*diff;
+    ks[i] = _kmin + i * diff;
 
   for (int i = 0; i < _num_k_pts; i++)
   {
-    stream_nodes_up[i].resize(2 * (_num_q_pts + _n_extra_q_pts));
+    stream_nodes[i].resize(2 * (_num_q_pts + _n_extra_q_pts));
 
-    //Vector containing the regularly spaced (and the extra q points) q values
+    /// Vector containing the regularly spaced (and the extra q points) q values
     std::vector<Real> q(_num_q_pts);
     Real diffq = (ks[i] - 0.5)/(_num_q_pts - 1);
     for (int j = 0; j < _num_q_pts; j++)
       q[j] = 0.5 + j * diffq;
 
-    // Add the extra q points
+    /// Add the extra q points
     for (int j = _num_q_pts; j < _num_q_pts + _n_extra_q_pts; j++)
     {
       std::vector<Real>::iterator it = q.end();
       q.insert(--it,  0.3 * q[j - 2] + 0.7 * q[j - 1]);
     }
 
-    Real a, rho, p, J, x, y, sqrt_term;
-    // Up
+    std::vector<Real> vals(4);
+    std::vector<Real> xy(2);
+    /// Create the nodes for the upper part
     for (int j = 0; j < _num_q_pts + _n_extra_q_pts; j++)
     {
       // Compute the different parameters
-      a = std::sqrt(1 - ((_gamma - 1)/2) * std::pow(q[j],2));
-      rho = std::pow(a, 2. / (_gamma - 1));
-      p = (1./_gamma) * std::pow(a, 2 * _gamma / (_gamma - 1));
-      J = 1. / a + 1. /(3. * std::pow(a,3)) + 1. / (5. * std::pow(a,5)) - 0.5 * std::log( (1+a) / (1-a) );
+      vals = arhopj(_gamma, q, j);
 
-      // Compute x(q,k)
-      x = 0.5 / rho * (2. / ks[i] / ks[i] - 1. / q[j] / q[j]) - 0.5 * J;
-
-      // Compute the term that goes under the sqrt sign
-      // If 1 - (q/k)^2 is slightly negative, we make it zero.
-      sqrt_term = 1. - q[j] * q[j] / ks[i] / ks[i];
-      sqrt_term = std::max(sqrt_term, 0.);
-
-      // Compute y(q,k)
-      y = 1. / (ks[i] * rho * q[j]) * std::sqrt(sqrt_term);
-
-      // Create a node with (x,y) coordinates if it's on the upper part of the mesh
-      // (x,-y) if it's on the lower part
-
-      stream_nodes_up[i][j] = mesh.add_point(Point(x,y), current_node_id++);
+      // Compute x and y
+      xy = computexy(vals, i, j, ks, q);
+      
+      // Create a node with (x,y) coordinates as it's on the upper part of the mesh
+      if (j != _num_q_pts + _n_extra_q_pts - 1)
+        stream_nodes[i][j] = mesh.add_point(Point(xy[0],xy[1]), current_node_id++);
       
     }
 
-    // Low
+    /// Create the nodes for the lower part
     for (int j = _num_q_pts + _n_extra_q_pts; j < 2 * (_num_q_pts + _n_extra_q_pts); j++)
     {
+      int index =  2 * (_num_q_pts + _n_extra_q_pts) - 1 - j;
       // Compute the different parameters
-      a = std::sqrt(1 - ((_gamma - 1)/2) * std::pow(q[2 * (_num_q_pts + _n_extra_q_pts) - 1 - j],2));
-      rho = std::pow(a, 2. / (_gamma - 1));
-      p = (1./_gamma) * std::pow(a, 2 * _gamma / (_gamma - 1));
-      J = 1. / a + 1. /(3. * std::pow(a,3)) + 1. / (5. * std::pow(a,5)) - 0.5 * std::log( (1+a) / (1-a) );
+      vals = arhopj(_gamma, q, index);
 
-      // Compute x(q,k)
-      x = 0.5 / rho * (2. / ks[i] / ks[i] - 1. / q[2 * (_num_q_pts + _n_extra_q_pts) - 1 - j] / q[2 * (_num_q_pts + _n_extra_q_pts) - 1 - j]) - 0.5 * J;
+      // Compute x and y
+      xy = computexy(vals, i, index, ks, q);
 
-      // Compute the term that goes under the sqrt sign
-      // If 1 - (q/k)^2 is slightly negative, we make it zero.
-      sqrt_term = 1. - q[2 * (_num_q_pts + _n_extra_q_pts) - 1 - j] * q[2 * (_num_q_pts + _n_extra_q_pts) - 1 - j] / ks[i] / ks[i];
-      sqrt_term = std::max(sqrt_term, 0.);
-
-      // Compute y(q,k)
-      y = 1. / (ks[i] * rho * q[2 * (_num_q_pts + _n_extra_q_pts) - 1 - j]) * std::sqrt(sqrt_term);
-
-      // Create a node with (x,y) coordinates if it's on the upper part of the mesh
-      // (x,-y) if it's on the lower part
-
-      stream_nodes_up[i][j] = mesh.add_point(Point(x,-y), current_node_id++);
+      // Create a node with (x,-y) coordinates as it's on the lower part of the mesh
+      stream_nodes[i][j] = mesh.add_point(Point(xy[0],-xy[1]), current_node_id++);
       
     }
   }
 
-  // Add elements
+  /// Add elements for the whole mesh
   for (int i = 0; i < _num_k_pts - 1; i++)
   {
     for (int j = 0; j < 2 * ( _num_q_pts + _n_extra_q_pts) - 1; j++)
     {
-      Elem * elem = mesh.add_elem(new Quad4);
-      elem->set_node(0) = stream_nodes_up[i][j];
-      elem->set_node(1) = stream_nodes_up[i][j + 1];
-      elem->set_node(2) = stream_nodes_up[i + 1][j + 1];
-      elem->set_node(3) = stream_nodes_up[i + 1][j];
+      /// This is done in order to avoid having two nodes at the exact same location (on the straight       /// line y=0)
+      if (j != _num_q_pts + _n_extra_q_pts -1 and j != _num_q_pts + _n_extra_q_pts - 2)
+      {  
+        Elem * elem = mesh.add_elem(new Quad4);
+        elem->set_node(0) = stream_nodes[i][j];
+        elem->set_node(1) = stream_nodes[i][j + 1];
+        elem->set_node(2) = stream_nodes[i + 1][j + 1];
+        elem->set_node(3) = stream_nodes[i + 1][j];
+        
+        if (i == 0)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/0, _outer_wall_bid);
+        if (j == 0)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/3, _inflow_bid);
+        if (j == 2 * (_num_q_pts + _n_extra_q_pts) - 2)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/1, _outflow_bid);
+        if (i == _num_k_pts -2)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/2, _inner_wall_bid);
+        
+      }
+      else if (j == _num_q_pts + _n_extra_q_pts - 2)
+      {
+        Elem * elem = mesh.add_elem(new Quad4);
+        elem->set_node(0) = stream_nodes[i][j];
+        elem->set_node(1) = stream_nodes[i][j + 2];
+        elem->set_node(2) = stream_nodes[i + 1][j + 2];
+        elem->set_node(3) = stream_nodes[i + 1][j];
 
-      if (i == 0)
-        mesh.boundary_info->add_side(elem->id(), /*side=*/0, _outer_wall_bid);
-      if (j == 0)
-        mesh.boundary_info->add_side(elem->id(), /*side=*/3, _inflow_bid);
-      if (j == 2 * (_num_q_pts + _n_extra_q_pts) - 2)
-        mesh.boundary_info->add_side(elem->id(), /*side=*/1, _outflow_bid);
-      if (i == _num_k_pts -2)
-        mesh.boundary_info->add_side(elem->id(), /*side=*/2, _inner_wall_bid);
+        if (i == 0)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/0, _outer_wall_bid);
+        if (i == _num_k_pts -2)
+          mesh.boundary_info->add_side(elem->id(), /*side=*/2, _inner_wall_bid);
+      }
     }
   }
 
-  // Find neighbors, etc.
+  /// Find neighbors, etc.
   mesh.prepare_for_use();
 
+  /// Create the triangular elements if required by the user
   if (_triangles)
     MeshTools::Modification::all_tri(mesh);
 
-  // Create sideset names.
+  /// Create sideset names.
   mesh.boundary_info->sideset_name(_inflow_bid) = "inflow";
   mesh.boundary_info->sideset_name(_outflow_bid) = "outflow";
   mesh.boundary_info->sideset_name(_inner_wall_bid) = "inner_wall";
