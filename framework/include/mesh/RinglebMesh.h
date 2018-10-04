@@ -38,7 +38,11 @@ public:
 
   // This function computes the (x,y) coordinates of the nodes
   // The vector `values` can be got with the `arhopj` function above
-  std::vector<Real> computexy(const std::vector<Real> values, const int & i, const int & index, const std::vector<Real> & ks, const std::vector<Real> & q);
+  std::vector<Real> computexy(const std::vector<Real> values,
+                              const int & i,
+                              const int & index,
+                              const std::vector<Real> & ks,
+                              const std::vector<Real> & q);
 
 protected:
   /// Gamma
