@@ -11,6 +11,7 @@
 
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
+#include "libmesh/mesh_modification.h"
 
 registerMooseObject("MooseApp", RinglebMesh);
 
