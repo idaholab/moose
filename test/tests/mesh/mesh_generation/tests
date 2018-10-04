@@ -137,5 +137,8 @@
     cli_args = '--mesh-only'
     exodiff = 'ringleb_mesh_in.e'
     recover = false
+    design = 'mesh/RinglebMesh.md'
+    requirement = 'MOOSE shall have an algotithm for meshing with triangular and/or quad elements'
+    issues = '#12246'
   [../]
 []
