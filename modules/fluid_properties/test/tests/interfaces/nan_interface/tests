@@ -4,6 +4,7 @@
     input = 'nan_interface.i'
     allow_test_objects = True
     method = 'DBG'
+    threading = '!pthreads'
 
     requirement = 'MOOSE shall provide an interface for using either quiet or signaling NaNs'
     design = '/NaNInterface.md'
@@ -16,6 +17,7 @@
     should_crash = True
     allow_test_objects = True
     method = 'DBG'
+    threading = '!pthreads'
 
     requirement = 'MOOSE shall provide an interface for using either quiet or signaling NaNs'
     design = '/NaNInterface.md'
@@ -27,6 +29,7 @@
     cli_args = 'Modules/FluidProperties/fp/use_quiet_nans=false'
     allow_test_objects = True
     method = 'OPT'
+    threading = '!pthreads'
 
     requirement = 'MOOSE shall provide an interface for using either quiet or signaling NaNs'
     design = '/NaNInterface.md'
