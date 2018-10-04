@@ -20,13 +20,24 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADCoupledMaterial<compute_stage>::ADCoupledMaterial(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _ad_mat_prop(this->template declareADProperty<Real>(
-        this->template getParam<MaterialPropertyName>("ad_mat_prop"))),
-    _regular_mat_prop(this->template declareProperty<Real>(
-        this->template getParam<MaterialPropertyName>("regular_mat_prop"))),
-    _coupled_var(this->template adCoupledValue<compute_stage>("coupled_var"))
+    _ad_mat_prop(adDeclareADProperty(Real)(adGetParam(MaterialPropertyName)("ad_mat_prop"))),
+    _regular_mat_prop(
+        adDeclareProperty(Real)(adGetParam(MaterialPropertyName)("regular_mat_prop"))),
+    _coupled_var(adCoupledValue("coupled_var"))
 {
 }
+
+// Note that the structure of the two (uncommented) methods below are for testing purposes only;
+// e.g. this material demonstrates that you get bad convergence when you drop the derivative
+// information from the coupled variable. A production version of this material would look like
+// this:
+//
+// template <ComputeStage compute_stage>
+// void
+// ADCoupledMaterial<compute_stage>::computeQpProperties()
+// {
+//   _ad_mat_prop[_qp] = 4.0 * _coupled_var[_qp];
+// }
 
 template <ComputeStage compute_stage>
 void

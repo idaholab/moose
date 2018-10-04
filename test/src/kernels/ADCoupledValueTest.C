@@ -16,7 +16,7 @@ defineADValidParams(ADCoupledValueTest,
 
 template <ComputeStage compute_stage>
 ADCoupledValueTest<compute_stage>::ADCoupledValueTest(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters), _v(this->template adCoupledValue<compute_stage>("v"))
+  : ADKernel<compute_stage>(parameters), _v(adCoupledValue("v"))
 {
 }
 

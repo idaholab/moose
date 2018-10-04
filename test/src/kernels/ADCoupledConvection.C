@@ -17,8 +17,7 @@ defineADValidParams(ADCoupledConvection,
 
 template <ComputeStage compute_stage>
 ADCoupledConvection<compute_stage>::ADCoupledConvection(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
-    _velocity_vector(this->template adCoupledGradient<compute_stage>("velocity_vector"))
+  : ADKernel<compute_stage>(parameters), _velocity_vector(adCoupledGradient("velocity_vector"))
 {
 }
 

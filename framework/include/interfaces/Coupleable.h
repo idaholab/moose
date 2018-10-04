@@ -26,6 +26,9 @@ template <typename T>
 class DenseVector;
 }
 
+#define adCoupledValue(Name) this->template adCoupledValueTemplate<compute_stage>(Name)
+#define adCoupledGradient(Name) this->template adCoupledGradientTemplate<compute_stage>(Name)
+
 /**
  * Interface for objects that needs coupling capabilities
  *
@@ -126,7 +129,7 @@ protected:
    */
   template <ComputeStage compute_stage>
   const typename VariableValueType<compute_stage>::type &
-  adCoupledValue(const std::string & var_name, unsigned int comp = 0);
+  adCoupledValueTemplate(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns value of a coupled variable for a given tag
@@ -240,7 +243,7 @@ protected:
    */
   template <ComputeStage compute_stage>
   const typename VariableGradientType<compute_stage>::type &
-  adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+  adCoupledGradientTemplate(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns an old gradient from previous time step of a coupled variable
@@ -659,7 +662,7 @@ private:
 
 template <ComputeStage compute_stage>
 const typename VariableValueType<compute_stage>::type &
-Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledValueTemplate(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name))
     return *getADDefaultValue<compute_stage>(var_name);
@@ -695,7 +698,7 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
 
 template <ComputeStage compute_stage>
 const typename VariableGradientType<compute_stage>::type &
-Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledGradientTemplate(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name)) // Return default 0
     return getADDefaultGradient<compute_stage>();

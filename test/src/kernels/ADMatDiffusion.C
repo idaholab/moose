@@ -31,11 +31,11 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADMatDiffusion<compute_stage>::ADMatDiffusion(const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
-    _ad_diff_from_ad_prop(this->template getADMaterialProperty<Real>("ad_mat_prop")),
-    _regular_diff_from_ad_prop(this->template getMaterialProperty<Real>("ad_mat_prop")),
-    _ad_diff_from_regular_prop(this->template getADMaterialProperty<Real>("regular_mat_prop")),
-    _regular_diff_from_regular_prop(this->template getMaterialProperty<Real>("regular_mat_prop")),
-    _prop_to_use(this->template getParam<MooseEnum>("prop_to_use"))
+    _ad_diff_from_ad_prop(adGetADMaterialProperty(Real)("ad_mat_prop")),
+    _regular_diff_from_ad_prop(adGetMaterialProperty(Real)("ad_mat_prop")),
+    _ad_diff_from_regular_prop(adGetADMaterialProperty(Real)("regular_mat_prop")),
+    _regular_diff_from_regular_prop(adGetMaterialProperty(Real)("regular_mat_prop")),
+    _prop_to_use(adGetParam(MooseEnum)("prop_to_use"))
 {
 }
 
