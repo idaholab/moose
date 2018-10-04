@@ -83,7 +83,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _error_on_grain_creation(getParam<bool>("error_on_grain_creation")),
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
-    _max_curr_grain_id(0),
+    _max_curr_grain_id(invalid_id),
     _is_transient(_subproblem.isTransient()),
     _finalize_timer(registerTimedSection("finalize", 1)),
     _remap_timer(registerTimedSection("remapGrains", 2)),
@@ -136,7 +136,7 @@ std::size_t
 GrainTracker::getTotalFeatureCount() const
 {
   // Note: This value is parallel consistent, see assignGrains()/trackGrains()
-  return _max_curr_grain_id + 1;
+  return _max_curr_grain_id == invalid_id ? 0 : _max_curr_grain_id + 1;
 }
 
 Point
@@ -405,17 +405,23 @@ GrainTracker::assignGrains()
    */
   if (_is_master)
   {
-    mooseAssert(!_feature_sets.empty(), "Feature sets empty!");
-
     // Find the largest grain ID, this requires sorting if the ID is not already set
     sortAndLabel();
-    _max_curr_grain_id = _feature_sets[_feature_sets.size() - 1]._id;
+
+    if (_feature_sets.empty())
+    {
+      _max_curr_grain_id = invalid_id;
+      _reserve_grain_first_index = 0;
+    }
+    else
+    {
+      _max_curr_grain_id = _feature_sets.back()._id;
+      _reserve_grain_first_index = _max_curr_grain_id + 1;
+    }
 
     for (auto & grain : _feature_sets)
       grain._status = Status::MARKED; // Mark the grain
 
-    // Set up the first reserve grain index based on the largest grain ID
-    _reserve_grain_first_index = _max_curr_grain_id + 1;
   } // is_master
 
   /*************************************************************
@@ -430,8 +436,9 @@ GrainTracker::assignGrains()
   buildFeatureIdToLocalIndices(_max_curr_grain_id);
 
   // Now trigger the newGrainCreated() callback on all ranks
-  for (auto new_id = decltype(_max_curr_grain_id)(0); new_id <= _max_curr_grain_id; ++new_id)
-    newGrainCreated(new_id);
+  if (_max_curr_grain_id != invalid_id)
+    for (auto new_id = decltype(_max_curr_grain_id)(0); new_id <= _max_curr_grain_id; ++new_id)
+      newGrainCreated(new_id);
 }
 
 void
@@ -1675,7 +1682,7 @@ GrainTracker::getNextUniqueID()
    * _reserve_grain_first_index IS a valid index. It does not
    * point to the last valid index of the non-reserved grains.
    */
-  _max_curr_grain_id = std::max(_max_curr_grain_id + 1,
+  _max_curr_grain_id = std::max(_max_curr_grain_id == invalid_id ? 0 : _max_curr_grain_id + 1,
                                 _reserve_grain_first_index + _n_reserve_ops /* no +1 here!*/);
 
   return _max_curr_grain_id;

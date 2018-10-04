@@ -23,7 +23,7 @@
 []
 
 [ICs]
-  [./gr1]
+  [./gr0]
     type = MultiSmoothCircleIC
     variable = gr0
     invalue = 1.0
