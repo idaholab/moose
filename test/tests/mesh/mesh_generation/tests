@@ -138,7 +138,7 @@
     exodiff = 'ringleb_mesh_in.e'
     recover = false
     design = 'mesh/RinglebMesh.md'
-    requirement = 'MOOSE shall have an algotithm for meshing with triangular and/or quad elements'
+    requirement = 'MOOSE shall have an algorithm for generating triangular and quadrilateral meshes for the Ringleb problem.'
     issues = '#12246'
   [../]
 []
