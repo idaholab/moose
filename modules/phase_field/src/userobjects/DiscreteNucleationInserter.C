@@ -69,7 +69,7 @@ DiscreteNucleationInserter::initialize()
     unsigned int i = 0;
     while (i < _local_nucleus_list.size())
     {
-      if (_local_nucleus_list[i].first + _fe_problem.dt() <= _fe_problem.time())
+      if (_local_nucleus_list[i].first <= _fe_problem.time())
       {
         // remove entry (by replacing with last element and shrinking size by one)
         _local_nucleus_list[i] = _local_nucleus_list.back();
@@ -107,8 +107,7 @@ DiscreteNucleationInserter::execute()
     // should rarely get evaluated
     if (random < rate * _fe_problem.dt() && random < (1.0 - std::exp(-rate * _fe_problem.dt())))
     {
-      _local_nucleus_list.push_back(
-          NucleusLocation(_fe_problem.dt() + _fe_problem.time() + _hold_time, _q_point[qp]));
+      _local_nucleus_list.push_back(NucleusLocation(_fe_problem.time() + _hold_time, _q_point[qp]));
       _changes_made.first++;
     }
   }
