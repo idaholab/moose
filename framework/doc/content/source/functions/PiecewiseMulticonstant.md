@@ -1,7 +1,7 @@
-# PiecewiseMultilinear
+# PiecewiseMulticonstant
 
-The `PiecewiseMultilinear` function provides the capability of multi-dimensional
-piecewise linear interpolation. The data is read from file provided in the
+The `PiecewiseMulticonstant` function provides the capability of multi-dimensional
+piecewise constant interpolation. The data is read from file provided in the
 `data_file` argument. Interpolation axes can be a selection of one or multiple of
 `x`, `y`, `z`, `t`, the number of interpolation axes is referred to as dimension
 of the interpolation.
@@ -20,12 +20,16 @@ corresponds to the i + j*Ni + k*Ni*Nj + l*Ni*Nj*Nk data value.  Here i>=0 corres
 the index along the first AXIS, j>=0 corresponding to the index along the second AXIS, etc,
 and Ni = number of grid points along the first AXIS, etc.
 
-!syntax description /Functions/PiecewiseMultilinear
+The `direction` parameter controls whether the function takes the value of the abscissa of the
+user-provided point to the right or left of the value at which the function is evaluated.
+A `direction` has to be provided for each dimension.
 
-!syntax parameters /Functions/PiecewiseMultilinear
+!syntax description /Functions/PiecewiseMulticonstant
 
-!syntax inputs /Functions/PiecewiseMultilinear
+!syntax parameters /Functions/PiecewiseMulticonstant
 
-!syntax children /Functions/PiecewiseMultilinear
+!syntax inputs /Functions/PiecewiseMulticonstant
+
+!syntax children /Functions/PiecewiseMulticonstant
 
 !bibtex bibliography

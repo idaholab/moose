@@ -11,23 +11,23 @@
   [./except2]
     type = 'RunException'
     input = 'except2.i'
-    expect_err = "PiecewiseMultilinear needs monotonically-increasing axis data.  Axis 0 contains non-monotonicity at value -1"
+    expect_err = "PiecewiseMultiInterpolation needs monotonically-increasing axis data.  Axis 0 contains non-monotonicity at value -1"
     max_parallel = 1
-    requirement = "The PiecewiseMultilinear object shall error if the supplied data is not monotonically increasing."
+    requirement = "The PiecewiseMultiInterpolation object shall error if the supplied data is not monotonically increasing."
   [../]
   [./except3]
     type = 'RunException'
     input = 'except3.i'
     expect_err = "According to AXIS statements in GriddedData, number of data points is 2 but 3 function values were read from file"
     max_parallel = 1
-    requirement = "The PiecewiseMultilinear object shall error if the number of requested functions differ than the number available from the file."
+    requirement = "The PiecewiseMultiInterpolation object shall error if the number of requested functions differ than the number available from the file."
   [../]
   [./except4]
     type = 'RunException'
     input = 'except4.i'
-    expect_err = "PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in your data file."
+    expect_err = "PiecewiseMultiInterpolation needs the AXES to be independent.  Check the AXIS lines in your data file."
     max_parallel = 1
-    requirement = "The PiecewiseMultilinear errors if the axes supplied are not independent."
+    requirement = "The PiecewiseMultiInterpolation errors if the axes supplied are not independent."
   [../]
   [./except5]
     type = 'RunException'
@@ -74,6 +74,13 @@
     rel_err = 1E-5
     use_old_floor = True
     requirement = "The PiecewiseMultilinear object shall perform interpolation on a 2D domain that compares to an equivalent known function."
+  [../]
+
+  [./twoD_const]
+    type = 'Exodiff'
+    input = 'twoD_const.i'
+    exodiff = 'twoD_const.e'
+    requirement = "The PiecewiseMultilinear object shall perform constant interpolation on a 2D domain."
   [../]
 
   [./fourDa]
