@@ -58,9 +58,9 @@ InternalSideFluxBase::getFlux(unsigned int iside,
     _cached_elem_id = ielem;
     _cached_neig_id = ineig;
 
-    calcFlux(iside, ielem, ineig, uvec1, uvec2, dwave, _flux_th);
+    calcFlux(iside, ielem, ineig, uvec1, uvec2, dwave, _flux);
   }
-  return _flux_th;
+  return _flux;
 }
 
 const DenseMatrix<Real> &
@@ -77,11 +77,11 @@ InternalSideFluxBase::getJacobian(Moose::DGResidualType type,
     _cached_elem_id = ielem;
     _cached_neig_id = ineig;
 
-    calcJacobian(iside, ielem, ineig, uvec1, uvec2, dwave, _jac1_th, _jac2_th);
+    calcJacobian(iside, ielem, ineig, uvec1, uvec2, dwave, _jac1, _jac2);
   }
 
   if (type == Moose::Element)
-    return _jac1_th;
+    return _jac1;
   else
-    return _jac2_th;
+    return _jac2;
 }

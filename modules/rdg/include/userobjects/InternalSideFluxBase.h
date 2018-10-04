@@ -116,11 +116,11 @@ protected:
   mutable unsigned int _cached_neig_id;
 
   /// flux vector of this side
-  mutable std::vector<Real> _flux_th;
+  mutable std::vector<Real> _flux;
   /// Jacobian matrix contribution to the "left" cell
-  mutable DenseMatrix<Real> _jac1_th;
+  mutable DenseMatrix<Real> _jac1;
   /// Jacobian matrix contribution to the "right" cell
-  mutable DenseMatrix<Real> _jac2_th;
+  mutable DenseMatrix<Real> _jac2;
 };
 
 #endif // INTERNALSIDEFLUXBASE_H

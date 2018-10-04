@@ -120,11 +120,11 @@ protected:
   mutable unsigned int _cached_side_id;
 
   /// flux vector
-  mutable std::vector<Real> _flux_th;
+  mutable std::vector<Real> _flux;
   /// Jacobian matrix contribution to the "left" cell
-  mutable DenseMatrix<Real> _jac1_th;
+  mutable DenseMatrix<Real> _jac1;
   /// Jacobian matrix contribution to the "right" cell
-  mutable DenseMatrix<Real> _jac2_th;
+  mutable DenseMatrix<Real> _jac2;
 };
 
 #endif // RDGFLUXBASE_H

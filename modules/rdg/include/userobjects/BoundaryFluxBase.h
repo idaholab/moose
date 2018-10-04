@@ -95,10 +95,10 @@ protected:
   mutable dof_id_type _cached_elem_id;
 
   /// Cached flux
-  mutable std::vector<Real> _flux_th;
+  mutable std::vector<Real> _flux;
 
   /// Cached flux Jacobian
-  mutable DenseMatrix<Real> _jac1_th;
+  mutable DenseMatrix<Real> _jac1;
 };
 
 #endif // BOUNDARYFLUXBASE_H

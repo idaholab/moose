@@ -57,9 +57,9 @@ RDGFluxBase::getFlux(const unsigned int iside,
     _cached_elem_id = ielem;
     _cached_side_id = iside;
 
-    calcFlux(uvec1, uvec2, normal, _flux_th);
+    calcFlux(uvec1, uvec2, normal, _flux);
   }
-  return _flux_th;
+  return _flux;
 }
 
 const DenseMatrix<Real> &
@@ -75,11 +75,11 @@ RDGFluxBase::getJacobian(const bool get_first_jacobian,
     _cached_elem_id = ielem;
     _cached_side_id = iside;
 
-    calcJacobian(uvec1, uvec2, normal, _jac1_th, _jac2_th);
+    calcJacobian(uvec1, uvec2, normal, _jac1, _jac2);
   }
 
   if (get_first_jacobian)
-    return _jac1_th;
+    return _jac1;
   else
-    return _jac2_th;
+    return _jac2;
 }

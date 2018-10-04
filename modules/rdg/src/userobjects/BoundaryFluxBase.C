@@ -55,9 +55,9 @@ BoundaryFluxBase::getFlux(unsigned int iside,
     _cached_elem_id = ielem;
     _cached_side_id = iside;
 
-    calcFlux(iside, ielem, uvec1, dwave, _flux_th);
+    calcFlux(iside, ielem, uvec1, dwave, _flux);
   }
-  return _flux_th;
+  return _flux;
 }
 
 const DenseMatrix<Real> &
@@ -71,7 +71,7 @@ BoundaryFluxBase::getJacobian(unsigned int iside,
     _cached_elem_id = ielem;
     _cached_side_id = iside;
 
-    calcJacobian(iside, ielem, uvec1, dwave, _jac1_th);
+    calcJacobian(iside, ielem, uvec1, dwave, _jac1);
   }
-  return _jac1_th;
+  return _jac1;
 }
