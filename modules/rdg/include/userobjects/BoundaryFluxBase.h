@@ -48,11 +48,6 @@ public:
   virtual const std::vector<Real> & getFlux(unsigned int iside,
                                             dof_id_type ielem,
                                             const std::vector<Real> & uvec1,
-                                            const RealVectorValue & dwave,
-                                            THREAD_ID tid) const;
-  virtual const std::vector<Real> & getFlux(unsigned int iside,
-                                            dof_id_type ielem,
-                                            const std::vector<Real> & uvec1,
                                             const RealVectorValue & dwave) const;
 
   /**
@@ -79,11 +74,6 @@ public:
   virtual const DenseMatrix<Real> & getJacobian(unsigned int iside,
                                                 dof_id_type ielem,
                                                 const std::vector<Real> & uvec1,
-                                                const RealVectorValue & dwave,
-                                                THREAD_ID tid) const;
-  virtual const DenseMatrix<Real> & getJacobian(unsigned int iside,
-                                                dof_id_type ielem,
-                                                const std::vector<Real> & uvec1,
                                                 const RealVectorValue & dwave) const;
 
   /**
@@ -104,16 +94,11 @@ protected:
   mutable unsigned int _cached_side_id;
   mutable dof_id_type _cached_elem_id;
 
-  /// Threaded storage for fluxes
-  mutable std::vector<std::vector<Real>> _flux;
+  /// Cached flux
   mutable std::vector<Real> _flux_th;
 
-  /// Threaded storage for jacobians
-  mutable std::vector<DenseMatrix<Real>> _jac1;
+  /// Cached flux Jacobian
   mutable DenseMatrix<Real> _jac1_th;
-
-private:
-  static Threads::spin_mutex _mutex;
 };
 
 #endif // BOUNDARYFLUXBASE_H

@@ -45,16 +45,9 @@ public:
    * @param[in] uvec1    vector of variables on the "left"
    * @param[in] uvec2    vector of variables on the "right"
    * @param[in] normal   vector of unit normal
-   * @param[in] tid      thread ID
    *
    * @return flux vector for an element/side combination
    */
-  virtual const std::vector<Real> & getFlux(const unsigned int iside,
-                                            const dof_id_type ielem,
-                                            const std::vector<Real> & uvec1,
-                                            const std::vector<Real> & uvec2,
-                                            const RealVectorValue & normal,
-                                            THREAD_ID tid) const;
   virtual const std::vector<Real> & getFlux(const unsigned int iside,
                                             const dof_id_type ielem,
                                             const std::vector<Real> & uvec1,
@@ -78,17 +71,9 @@ public:
    * @param[in] uvec1    vector of variables on the "left"
    * @param[in] uvec2    vector of variables on the "right"
    * @param[in] normal   vector of unit normal
-   * @param[in] tid      thread ID
    *
    * @return flux Jacobian matrix for an element/side combination
    */
-  virtual const DenseMatrix<Real> & getJacobian(const bool get_first_jacobian,
-                                                const unsigned int iside,
-                                                const dof_id_type ielem,
-                                                const std::vector<Real> & uvec1,
-                                                const std::vector<Real> & uvec2,
-                                                const RealVectorValue & normal,
-                                                THREAD_ID tid) const;
   virtual const DenseMatrix<Real> & getJacobian(const bool get_first_jacobian,
                                                 const unsigned int iside,
                                                 const dof_id_type ielem,
@@ -135,18 +120,11 @@ protected:
   mutable unsigned int _cached_side_id;
 
   /// flux vector
-  mutable std::vector<std::vector<Real>> _flux;
   mutable std::vector<Real> _flux_th;
   /// Jacobian matrix contribution to the "left" cell
-  mutable std::vector<DenseMatrix<Real>> _jac1;
   mutable DenseMatrix<Real> _jac1_th;
   /// Jacobian matrix contribution to the "right" cell
-  mutable std::vector<DenseMatrix<Real>> _jac2;
   mutable DenseMatrix<Real> _jac2_th;
-
-private:
-  /// mutual exclusion object for threading
-  static Threads::spin_mutex _mutex;
 };
 
 #endif // RDGFLUXBASE_H

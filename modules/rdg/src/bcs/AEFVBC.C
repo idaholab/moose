@@ -43,7 +43,7 @@ AEFVBC::computeQpResidual()
   std::vector<Real> uvec1 = {_u1[_qp]};
 
   // calculate the flux
-  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), uvec1, _normals[_qp], _tid);
+  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), uvec1, _normals[_qp]);
 
   // distribute the contribution to the current element
   return flux[_component] * _test[_i][_qp];
@@ -57,7 +57,7 @@ AEFVBC::computeQpJacobian()
   std::vector<Real> uvec1 = {_uc1[_qp]};
 
   // calculate the flux
-  auto & fjac1 = _flux.getJacobian(_current_side, _current_elem->id(), uvec1, _normals[_qp], _tid);
+  auto & fjac1 = _flux.getJacobian(_current_side, _current_elem->id(), uvec1, _normals[_qp]);
 
   // distribute the contribution to the current element
   return fjac1(_component, _component) * _phi[_j][_qp] * _test[_i][_qp];
