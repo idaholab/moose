@@ -510,7 +510,7 @@ ColumnMajorMatrix::identity()
 inline Real
 ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs) const
 {
-  mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows,
+  mooseAssert(_n_rows == rhs._n_rows && _n_cols == rhs._n_cols,
               "Matrices must be the same shape for a double contraction!");
 
   Real value = 0;
