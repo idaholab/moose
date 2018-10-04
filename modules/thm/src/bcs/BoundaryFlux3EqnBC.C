@@ -49,7 +49,7 @@ Real
 BoundaryFlux3EqnBC::computeQpResidual()
 {
   const std::vector<Real> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_elem[_qp]};
-  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, {_normal, 0, 0}, _tid);
+  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), U, {_normal, 0, 0});
 
   // Note that the ratio A_linear / A_elem is necessary because A_elem is passed
   // to the flux function, but A_linear is to be used on the boundary.
@@ -66,7 +66,7 @@ Real
 BoundaryFlux3EqnBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   const std::vector<Real> U = {_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp], _A_elem[_qp]};
-  const auto & J = _flux.getJacobian(_current_side, _current_elem->id(), U, {_normal, 0, 0}, _tid);
+  const auto & J = _flux.getJacobian(_current_side, _current_elem->id(), U, {_normal, 0, 0});
 
   return J(_equation_index, _jmap.at(jvar)) * _A_linear[_qp] / _A_elem[_qp] * _normal *
          _phi[_j][_qp] * _test[_i][_qp];
