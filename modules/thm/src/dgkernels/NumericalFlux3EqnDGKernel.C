@@ -61,7 +61,7 @@ NumericalFlux3EqnDGKernel::computeQpResidual(Moose::DGResidualType type)
   std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
 
   const std::vector<Real> & flux =
-      _numerical_flux.getFlux(_current_side, _current_elem->id(), U1, U2, _normals[_qp], _tid);
+      _numerical_flux.getFlux(_current_side, _current_elem->id(), U1, U2, _normals[_qp]);
 
   Real re = 0.0;
   switch (type)
@@ -89,11 +89,11 @@ NumericalFlux3EqnDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, 
   std::vector<Real> U1 = {_rhoA1_avg[_qp], _rhouA1_avg[_qp], _rhoEA1_avg[_qp], _A1_avg[_qp]};
   std::vector<Real> U2 = {_rhoA2_avg[_qp], _rhouA2_avg[_qp], _rhoEA2_avg[_qp], _A2_avg[_qp]};
 
-  const DenseMatrix<Real> & fjac1 = _numerical_flux.getJacobian(
-      true, _current_side, _current_elem->id(), U1, U2, _normals[_qp], _tid);
+  const DenseMatrix<Real> & fjac1 =
+      _numerical_flux.getJacobian(true, _current_side, _current_elem->id(), U1, U2, _normals[_qp]);
 
-  const DenseMatrix<Real> & fjac2 = _numerical_flux.getJacobian(
-      false, _current_side, _current_elem->id(), U1, U2, _normals[_qp], _tid);
+  const DenseMatrix<Real> & fjac2 =
+      _numerical_flux.getJacobian(false, _current_side, _current_elem->id(), U1, U2, _normals[_qp]);
 
   Real re = 0.0;
   switch (type)
