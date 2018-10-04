@@ -1354,6 +1354,8 @@ public:
    * Return a reference to the material warehouse of Material objects to be computed.
    */
   const MaterialWarehouse & getComputeMaterialWarehouse() const { return _materials; }
+  const MaterialWarehouse & getResidualMaterialsWarehouse() const { return _residual_materials; }
+  const MaterialWarehouse & getJacobianMaterialsWarehouse() const { return _jacobian_materials; }
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
 
   /**

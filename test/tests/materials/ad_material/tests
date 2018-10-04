@@ -45,4 +45,26 @@
     design = "jacobian_definition.md"
     issues = "#5658"
   [../]
+  [./stateful_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_stateful_material.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = 'AD shall work with stateful material properties and the Jacobian shall be beautiful'
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+  [./stateful_residual]
+    type = 'Exodiff'
+    exodiff = 'ad_stateful_material_exodus.e'
+    input = 'ad_stateful_material.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'stateful_jacobian'
+    requirement = 'The time evolution of the stateful diffusivity property shall show that AD works with stateful material properties'
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
 []
