@@ -21,7 +21,7 @@ validParams<BoundaryFluxBase>()
 }
 
 BoundaryFluxBase::BoundaryFluxBase(const InputParameters & parameters)
-  : GeneralUserObject(parameters)
+  : ThreadedGeneralUserObject(parameters)
 {
   _flux.resize(libMesh::n_threads());
   _jac1.resize(libMesh::n_threads());
@@ -44,6 +44,11 @@ BoundaryFluxBase::finalize()
 {
 }
 
+void
+BoundaryFluxBase::threadJoin(const UserObject &)
+{
+}
+
 const std::vector<Real> &
 BoundaryFluxBase::getFlux(unsigned int iside,
                           dof_id_type ielem,
@@ -62,6 +67,22 @@ BoundaryFluxBase::getFlux(unsigned int iside,
   return _flux[tid];
 }
 
+const std::vector<Real> &
+BoundaryFluxBase::getFlux(unsigned int iside,
+                          dof_id_type ielem,
+                          const std::vector<Real> & uvec1,
+                          const RealVectorValue & dwave) const
+{
+  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  {
+    _cached_elem_id = ielem;
+    _cached_side_id = iside;
+
+    calcFlux(iside, ielem, uvec1, dwave, _flux_th);
+  }
+  return _flux_th;
+}
+
 const DenseMatrix<Real> &
 BoundaryFluxBase::getJacobian(unsigned int iside,
                               dof_id_type ielem,
@@ -78,4 +99,20 @@ BoundaryFluxBase::getJacobian(unsigned int iside,
     calcJacobian(iside, ielem, uvec1, dwave, _jac1[tid]);
   }
   return _jac1[tid];
+}
+
+const DenseMatrix<Real> &
+BoundaryFluxBase::getJacobian(unsigned int iside,
+                              dof_id_type ielem,
+                              const std::vector<Real> & uvec1,
+                              const RealVectorValue & dwave) const
+{
+  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  {
+    _cached_elem_id = ielem;
+    _cached_side_id = iside;
+
+    calcJacobian(iside, ielem, uvec1, dwave, _jac1_th);
+  }
+  return _jac1_th;
 }
