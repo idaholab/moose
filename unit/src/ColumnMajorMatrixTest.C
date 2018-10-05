@@ -203,24 +203,29 @@ TEST_F(ColumnMajorMatrixTest, identityMatrix)
 
 TEST_F(ColumnMajorMatrixTest, contractionMatrix)
 {
-  ColumnMajorMatrix mat = two_mat;
-  ColumnMajorMatrix sec(2, 2);
+  ColumnMajorMatrix rhs(4, 1);
+  ColumnMajorMatrix lhs(4, 1);
 
-  sec(0, 0) = 4;
-  sec(1, 0) = 3;
-  sec(0, 1) = 2;
-  sec(1, 1) = 1;
+  rhs(0, 0) = 4;
+  rhs(1, 0) = 3;
+  rhs(2, 0) = 2;
+  rhs(3, 0) = 1;
 
-  EXPECT_EQ(mat.doubleContraction(sec), (1 * 4 + 2 * 3 + 3 * 2 + 4 * 1));
+  lhs(0, 0) = 1;
+  lhs(1, 0) = 2;
+  lhs(2, 0) = 3;
+  lhs(3, 0) = 4;
+
+  EXPECT_EQ(lhs.doubleContraction(rhs), (1 * 4 + 2 * 3 + 3 * 2 + 4 * 1));
 }
 
 TEST_F(ColumnMajorMatrixTest, normMatrix)
 {
-  ColumnMajorMatrix mat(2, 2);
+  ColumnMajorMatrix mat(4, 1);
   mat(0, 0) = 1;
   mat(1, 0) = 2;
-  mat(0, 1) = 2;
-  mat(1, 1) = 4;
+  mat(2, 0) = 2;
+  mat(3, 0) = 4;
 
   EXPECT_EQ(mat.norm(), 5);
 }
@@ -397,19 +402,19 @@ TEST_F(ColumnMajorMatrixTest, notEqualMatrix)
 
 TEST_F(ColumnMajorMatrixTest, kronecker)
 {
-  ColumnMajorMatrix rhs(2, 2);
-  rhs(0, 0) = 1;
-  rhs(0, 1) = 2;
-  rhs(1, 0) = 3;
-  rhs(1, 1) = 4;
-
   ColumnMajorMatrix lhs(2, 2);
-  lhs(0, 0) = 0;
-  lhs(0, 1) = 5;
-  lhs(1, 0) = 6;
-  lhs(1, 1) = 7;
+  lhs(0, 0) = 1;
+  lhs(0, 1) = 2;
+  lhs(1, 0) = 3;
+  lhs(1, 1) = 4;
 
-  ColumnMajorMatrix ans = rhs.kronecker(lhs);
+  ColumnMajorMatrix rhs(2, 2);
+  rhs(0, 0) = 0;
+  rhs(0, 1) = 5;
+  rhs(1, 0) = 6;
+  rhs(1, 1) = 7;
+
+  ColumnMajorMatrix ans = lhs.kronecker(rhs);
 
   EXPECT_EQ(ans(0, 0), 0);
   EXPECT_EQ(ans(0, 3), 10);
