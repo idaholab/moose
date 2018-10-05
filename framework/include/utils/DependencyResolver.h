@@ -131,7 +131,7 @@ private:
   std::set<std::pair<T, T>> _unique_deps;
 
   /// Extra items that need to come out in the sorted list but contain no dependencies
-  std::set<T> _independent_items;
+  std::vector<T> _independent_items;
 
   // A vector retaining the order in which items were added to the
   // resolver, to disambiguate ordering of items with no
@@ -228,7 +228,9 @@ template <typename T>
 void
 DependencyResolver<T>::addItem(const T & value)
 {
-  _independent_items.insert(value);
+  if (std::find(_independent_items.begin(), _independent_items.end(), value) ==
+      _independent_items.end())
+    _independent_items.push_back(value);
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
     _ordering_vector.push_back(value);
 }
