@@ -10,8 +10,8 @@
 
 import vtk
 import mooseutils
+import chigger
 from ChiggerFilterBase import ChiggerFilterBase
-from ..exodus import ExodusReader
 class ContourFilter(ChiggerFilterBase):
     """
     Filter for computing and visualizing contours.
@@ -36,7 +36,7 @@ class ContourFilter(ChiggerFilterBase):
         super(ContourFilter, self).update(**kwargs)
 
         varinfo = self._source.getCurrentVariableInformation()
-        if varinfo.object_type != ExodusReader.NODAL:
+        if varinfo.object_type != chigger.exodus.ExodusReader.NODAL:
             raise mooseutils.MooseException('ContourFilter currently only works with nodal '
                                             'variables.')
 

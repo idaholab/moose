@@ -10,12 +10,14 @@
 
 import vtk
 import GeometricSourceMeta
-from .. import base
+from .. import base, filters
+
 BaseType = GeometricSourceMeta.create(base.ChiggerSource)
 class LineSource(BaseType):
     """
     Single LineSource object.
     """
+    FILTER_TYPES = [filters.TubeFilter]
 
     @staticmethod
     def getOptions():
