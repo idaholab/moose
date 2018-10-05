@@ -151,6 +151,10 @@
 
     method = '!DBG' # slow test
     valgrind = 'HEAVY'
+
+    requirement = "The GrainTracker shall support beginning a simulation with no active grain structure."
+    issues = "#12200"
+    design = "GrainTracker.md"
   [../]
 
   [./test_ebsd]
