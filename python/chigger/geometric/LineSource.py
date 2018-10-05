@@ -54,7 +54,6 @@ class LineSource(BaseType):
         if self.isOptionValid('point2'):
             self._vtksource.SetPoint2(self.getOption('point2'))
 
-        #self._vtksource.Update()
         if self.isOptionValid('data'):
             data = self.getOption('data')
             n = len(data)

@@ -9,6 +9,7 @@
     type = ImageDiff
     command = line_source_data.py
     imagediff = 'line_source_data.png'
+    allowed_darwin = 0.974
   [../]
   [./line_data_tube]
     type = ImageDiff
