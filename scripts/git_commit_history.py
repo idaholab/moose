@@ -321,4 +321,4 @@ if __name__ == '__main__':
         fig.savefig(options.output)
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig('git_commit_history.pdf', format='pdf')
