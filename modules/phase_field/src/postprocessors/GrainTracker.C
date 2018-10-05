@@ -321,14 +321,14 @@ GrainTracker::finalize()
 
   updateFieldInfo();
   if (_verbosity_level > 1)
-    _console << "Finished inside of updateFieldInfo" << std::endl;
+    _console << "Finished inside of updateFieldInfo\n";
 
   // Set the first time flag false here (after all methods of finalize() have completed)
   _first_time = false;
 
   // TODO: Release non essential memory
   if (_verbosity_level > 0)
-    _console << "Finished inside of GrainTracker" << std::endl;
+    _console << "Finished inside of GrainTracker\n" << std::endl;
 }
 
 void
@@ -684,15 +684,78 @@ GrainTracker::trackGrains()
           {
             grain._id = other_grain._id;    // Set the duplicate ID
             grain._status = Status::MARKED; // Mark it
+
             if (_verbosity_level > 0)
-            {
-              _console << COLOR_YELLOW << "Split Grain Detected "
+              _console << COLOR_YELLOW << "Split Grain Detected #" << grain._id
                        << " (variable index: " << grain._var_index << ")\n"
                        << COLOR_DEFAULT;
-              if (_verbosity_level > 1)
-                _console << grain << other_grain;
-            }
+            if (_verbosity_level > 1)
+              _console << grain << other_grain;
           }
+        }
+
+        if (grain._var_index < _reserve_op_index)
+        {
+          /**
+           * The "try-harder loop":
+           * OK so we still have an extra grain in the new set that isn't matched up against the
+           * old set and since the order parameter isn't reserved. We aren't really expecting a new
+           * grain. Let's try to make a few more attempts to see if this is a split grain even
+           * though it failed to match the criteria above. This might happen if the halo front is
+           * advancing too fast!
+           *
+           * In this loop we'll make an attempt to match up this new grain to the old halos. If
+           * adaptivity is happening this could fail as elements in the new set may be at a
+           * different level than in the old set. If we get multiple matches, we'll compare the
+           * grain volumes (based on elements, not integrated to choose the closest).
+           *
+           * Future ideas:
+           * Look at the volume fraction of the new grain and overlay it over the volume fraction
+           * of the old grain (would require more saved information, or an aux field hanging around
+           * (subject to projection problems).
+           */
+          if (_verbosity_level > 1)
+            _console << COLOR_YELLOW
+                     << "Trying harder to detect a split grain while examining grain on variable "
+                        "index "
+                     << grain._var_index << '\n'
+                     << COLOR_DEFAULT;
+
+          std::vector<std::size_t> old_grain_indices;
+          for (auto old_grain_index = beginIndex(_feature_sets_old);
+               old_grain_index < _feature_sets_old.size();
+               ++old_grain_index)
+          {
+            auto & old_grain = _feature_sets_old[old_grain_index];
+
+            if (old_grain._status == Status::INACTIVE)
+              continue;
+
+            /**
+             * Note that the old grains we are looking at will already be marked from the earlier
+             * tracking phase. We are trying to see if this unmatched grain is part of a larger
+             * whole. To do that we'll look at the halos across the time step.
+             */
+            if (grain._var_index == old_grain._var_index &&
+                grain.boundingBoxesIntersect(old_grain) && grain.halosIntersect(old_grain))
+              old_grain_indices.push_back(old_grain_index);
+          }
+
+          if (old_grain_indices.size() == 1)
+          {
+            grain._id = _feature_sets_old[old_grain_indices[0]]._id;
+            grain._status = Status::MARKED;
+
+            if (_verbosity_level > 0)
+              _console << COLOR_YELLOW << "Split Grain Detected #" << grain._id
+                       << " (variable index: " << grain._var_index << ")\n"
+                       << COLOR_DEFAULT;
+          }
+          else if (old_grain_indices.size() > 1)
+            _console
+                << COLOR_RED << "Split Grain Likely Detected #" << grain._id
+                << " Need more information to find correct candidate - contact a developer!\n\n"
+                << COLOR_DEFAULT;
         }
 
         // Must be a nucleating grain (status is still not set)
@@ -701,6 +764,13 @@ GrainTracker::trackGrains()
           auto new_index = getNextUniqueID();
           grain._id = new_index;          // Set the ID
           grain._status = Status::MARKED; // Mark it
+
+          if (_verbosity_level > 0)
+            _console << COLOR_YELLOW << "Nucleating Grain Detected "
+                     << " (variable index: " << grain._var_index << ")\n"
+                     << COLOR_DEFAULT;
+          if (_verbosity_level > 1)
+            _console << grain;
         }
       }
     }
