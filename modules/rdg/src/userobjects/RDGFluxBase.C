@@ -22,7 +22,7 @@ validParams<RDGFluxBase>()
   return params;
 }
 
-RDGFluxBase::RDGFluxBase(const InputParameters & parameters) : GeneralUserObject(parameters)
+RDGFluxBase::RDGFluxBase(const InputParameters & parameters) : ThreadedGeneralUserObject(parameters)
 {
   _flux.resize(libMesh::n_threads());
   _jac1.resize(libMesh::n_threads());
@@ -46,6 +46,11 @@ RDGFluxBase::finalize()
 {
 }
 
+void
+RDGFluxBase::threadJoin(const UserObject &)
+{
+}
+
 const std::vector<Real> &
 RDGFluxBase::getFlux(const unsigned int iside,
                      const dof_id_type ielem,
@@ -63,6 +68,23 @@ RDGFluxBase::getFlux(const unsigned int iside,
     calcFlux(uvec1, uvec2, normal, _flux[tid]);
   }
   return _flux[tid];
+}
+
+const std::vector<Real> &
+RDGFluxBase::getFlux(const unsigned int iside,
+                     const dof_id_type ielem,
+                     const std::vector<Real> & uvec1,
+                     const std::vector<Real> & uvec2,
+                     const RealVectorValue & normal) const
+{
+  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  {
+    _cached_elem_id = ielem;
+    _cached_side_id = iside;
+
+    calcFlux(uvec1, uvec2, normal, _flux_th);
+  }
+  return _flux_th;
 }
 
 const DenseMatrix<Real> &
@@ -87,4 +109,26 @@ RDGFluxBase::getJacobian(const bool get_first_jacobian,
     return _jac1[tid];
   else
     return _jac2[tid];
+}
+
+const DenseMatrix<Real> &
+RDGFluxBase::getJacobian(const bool get_first_jacobian,
+                         const unsigned int iside,
+                         const dof_id_type ielem,
+                         const std::vector<Real> & uvec1,
+                         const std::vector<Real> & uvec2,
+                         const RealVectorValue & normal) const
+{
+  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  {
+    _cached_elem_id = ielem;
+    _cached_side_id = iside;
+
+    calcJacobian(uvec1, uvec2, normal, _jac1_th, _jac2_th);
+  }
+
+  if (get_first_jacobian)
+    return _jac1_th;
+  else
+    return _jac2_th;
 }

@@ -10,9 +10,8 @@
 #ifndef BOUNDARYFLUXBASE_H
 #define BOUNDARYFLUXBASE_H
 
-#include "GeneralUserObject.h"
+#include "ThreadedGeneralUserObject.h"
 
-// Forward Declarations
 class BoundaryFluxBase;
 
 template <>
@@ -29,14 +28,15 @@ InputParameters validParams<BoundaryFluxBase>();
  *
  *   2. Derived classes need to override `calcFlux` and `calcJacobian`.
  */
-class BoundaryFluxBase : public GeneralUserObject
+class BoundaryFluxBase : public ThreadedGeneralUserObject
 {
 public:
   BoundaryFluxBase(const InputParameters & parameters);
 
-  virtual void execute();
-  virtual void initialize();
-  virtual void finalize();
+  virtual void execute() override;
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject &) override;
 
   /**
    * Get the boundary flux vector
@@ -50,6 +50,10 @@ public:
                                             const std::vector<Real> & uvec1,
                                             const RealVectorValue & dwave,
                                             THREAD_ID tid) const;
+  virtual const std::vector<Real> & getFlux(unsigned int iside,
+                                            dof_id_type ielem,
+                                            const std::vector<Real> & uvec1,
+                                            const RealVectorValue & dwave) const;
 
   /**
    * Solve the Riemann problem on the boundary face
@@ -77,6 +81,10 @@ public:
                                                 const std::vector<Real> & uvec1,
                                                 const RealVectorValue & dwave,
                                                 THREAD_ID tid) const;
+  virtual const DenseMatrix<Real> & getJacobian(unsigned int iside,
+                                                dof_id_type ielem,
+                                                const std::vector<Real> & uvec1,
+                                                const RealVectorValue & dwave) const;
 
   /**
    * Compute the Jacobian matrix on the boundary face
@@ -98,9 +106,11 @@ protected:
 
   /// Threaded storage for fluxes
   mutable std::vector<std::vector<Real>> _flux;
+  mutable std::vector<Real> _flux_th;
 
   /// Threaded storage for jacobians
   mutable std::vector<DenseMatrix<Real>> _jac1;
+  mutable DenseMatrix<Real> _jac1_th;
 
 private:
   static Threads::spin_mutex _mutex;

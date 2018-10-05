@@ -5,6 +5,12 @@
     exodiff = '1d_aefv_square_wave_none_out.e'
     abs_zero = 1e-4
     rel_err = 5e-5
+    threading = '!pthreads'
+
+    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+                  'with no slope reconstruction.'
+    design = 'rdg/index.md'
+    issues = '#7967'
   [../]
   [./1d_aefv_square_wave_minmod]
     type = 'Exodiff'
@@ -13,6 +19,12 @@
     cli_args = 'UserObjects/lslope/scheme=minmod Outputs/Exodus/file_base=1d_aefv_square_wave_minmod_out'
     abs_zero = 1e-4
     rel_err = 5e-5
+    threading = '!pthreads'
+
+    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+                  'with Minmod slope reconstruction.'
+    design = 'rdg/index.md'
+    issues = '#7967'
   [../]
   [./1d_aefv_square_wave_mc]
     type = 'Exodiff'
@@ -21,6 +33,12 @@
     cli_args = 'UserObjects/lslope/scheme=mc Outputs/Exodus/file_base=1d_aefv_square_wave_mc_out'
     abs_zero = 1e-4
     rel_err = 5e-5
+    threading = '!pthreads'
+
+    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+                  'with MC slope reconstruction.'
+    design = 'rdg/index.md'
+    issues = '#7967'
   [../]
   [./1d_aefv_square_wave_superbee]
     type = 'Exodiff'
@@ -29,6 +47,12 @@
     cli_args = 'UserObjects/lslope/scheme=superbee Outputs/Exodus/file_base=1d_aefv_square_wave_superbee_out'
     abs_zero = 1e-4
     rel_err = 5e-5
+    threading = '!pthreads'
+
+    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+                  'with Superbee slope reconstruction.'
+    design = 'rdg/index.md'
+    issues = '#7967'
   [../]
   [./1d_block_restrictable]
     type = 'Exodiff'
@@ -36,5 +60,10 @@
     exodiff = 'block_restrictable_out.e'
     abs_zero = 1e-4
     rel_err = 5e-5
+    threading = '!pthreads'
+
+    requirement = 'MOOSE shall allow RDG user objects to be block-restrictable.'
+    design = 'rdg/index.md'
+    issues = '#8357'
   [../]
 []
