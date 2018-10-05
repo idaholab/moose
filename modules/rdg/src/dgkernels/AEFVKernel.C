@@ -49,7 +49,7 @@ AEFVKernel::computeQpResidual(Moose::DGResidualType type)
 
   // calculate the flux
   const auto & flux = _flux.getFlux(
-      _current_side, _current_elem->id(), _neighbor_elem->id(), uvec1, uvec2, _normals[_qp], _tid);
+      _current_side, _current_elem->id(), _neighbor_elem->id(), uvec1, uvec2, _normals[_qp]);
 
   // distribute the contribution to the current and neighbor elements
   switch (type)
@@ -79,8 +79,7 @@ AEFVKernel::computeQpJacobian(Moose::DGJacobianType type)
                                          _neighbor_elem->id(),
                                          uvec1,
                                          uvec2,
-                                         _normals[_qp],
-                                         _tid);
+                                         _normals[_qp]);
 
   const auto & fjac2 = _flux.getJacobian(Moose::Neighbor,
                                          _current_side,
@@ -88,8 +87,7 @@ AEFVKernel::computeQpJacobian(Moose::DGJacobianType type)
                                          _neighbor_elem->id(),
                                          uvec1,
                                          uvec2,
-                                         _normals[_qp],
-                                         _tid);
+                                         _normals[_qp]);
 
   // distribute the contribution to the current and neighbor elements
   switch (type)
