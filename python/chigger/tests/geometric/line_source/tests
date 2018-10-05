@@ -1,8 +1,19 @@
 [Tests]
-  [./test]
+  [./line]
     type = ImageDiff
     command = line_source.py
     imagediff = 'line_source.png'
     allowed_linux = 0.975
+  [../]
+  [./line_data]
+    type = ImageDiff
+    command = line_source_data.py
+    imagediff = 'line_source_data.png'
+    allowed_darwin = 0.974
+  [../]
+  [./line_data_tube]
+    type = ImageDiff
+    command = line_source_data_tube.py
+    imagediff = 'line_source_data_tube.png'
   [../]
 []
