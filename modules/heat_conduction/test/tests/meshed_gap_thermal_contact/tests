@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#716'
+  design = 'syntax/ThermalContact/index.md source/bcs/GapHeatTransfer.md'
   [./test]
     type = 'Exodiff'
     input = 'meshed_gap_thermal_contact.i'
@@ -7,6 +9,8 @@
     # It's possible for this test to hit the "negative temperature" error
     # because the test uses values 0 and 1 for boundary conditions and
     # the solver may find slightly negative values in this case.
+    requirement = "The ThermalContact system shall enforce heat transfer
+    across a meshed gap in a 2D plane geometry."
   [../]
 
   [./annulus]
@@ -14,5 +18,7 @@
     input = 'meshed_annulus_thermal_contact.i'
     exodiff = 'meshed_annulus_thermal_contact_out.e'
     allow_warnings = true
+    requirement = "The ThermalContact system shall enforce heat transfer
+    across a meshed circular annulus in a 2D plane geometry."
   [../]
 []
