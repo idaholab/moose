@@ -30,7 +30,7 @@ validParams<DiscreteNucleationData>()
 
 DiscreteNucleationData::DiscreteNucleationData(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _inserter(getUserObject<DiscreteNucleationInserter>("inserter")),
+    _inserter(getUserObject<DiscreteNucleationInserterBase>("inserter")),
     _nucleus_list(_inserter.getNucleusList()),
     _value_type(getParam<MooseEnum>("value").getEnum<ValueType>())
 {

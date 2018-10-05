@@ -11,7 +11,7 @@
 #define DISCRETENUCLEATIONTIMESTEP_H
 
 #include "GeneralPostprocessor.h"
-#include "DiscreteNucleationInserter.h"
+#include "DiscreteNucleationInserterBase.h"
 
 class DiscreteNucleationTimeStep;
 
@@ -35,13 +35,13 @@ public:
 
 protected:
   /// UserObject that manages nucleus insertion and deletion
-  const DiscreteNucleationInserter & _inserter;
+  const DiscreteNucleationInserterBase & _inserter;
 
   /// User specified nucleation time step
   const Real _dt_nucleation;
 
   /// nucleus count changes performed by the inserter
-  const DiscreteNucleationInserter::NucleusChanges & _changes_made;
+  const DiscreteNucleationInserterBase::NucleusChanges & _changes_made;
 
   /// total nucleation rate integrated over teh entire domain
   const Real & _rate;

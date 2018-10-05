@@ -11,7 +11,7 @@
 #define DISCRETENUCLEATIONMARKER_H
 
 #include "Marker.h"
-#include "DiscreteNucleationInserter.h"
+#include "DiscreteNucleationInserterBase.h"
 
 class DiscreteNucleationMarker;
 class DiscreteNucleationMap;
@@ -37,7 +37,7 @@ protected:
   int _periodic;
 
   /// UserObject that manages nucleus insertin and deletion
-  const DiscreteNucleationInserter & _inserter;
+  const DiscreteNucleationInserterBase & _inserter;
 
   /// Nucleus radius
   const Real _radius;
@@ -46,7 +46,7 @@ protected:
   const Real _int_width;
 
   /// list of nuclei maintained bu the inserter object
-  const DiscreteNucleationInserter::NucleusList & _nucleus_list;
+  const DiscreteNucleationInserterBase::NucleusList & _nucleus_list;
 };
 
 #endif // DISCRETENUCLEATIONMARKER_H
