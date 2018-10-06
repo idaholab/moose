@@ -26,7 +26,7 @@ InputParameters validParams<MooseObject>();
 // needed to avoid #include cycle with MooseApp and MooseObject
 [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 
-#define adGetParam(Type) this->template getParam<Type>
+#define adGetParam this->template getParam
 
 /**
  * Every object that can be built by the factory should be derived from this class.
