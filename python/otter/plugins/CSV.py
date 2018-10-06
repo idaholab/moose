@@ -17,7 +17,7 @@ class CSV(OtterDataSource):
 
     def validParams():
         params = OtterDataSource.validParams()
-        params.addRequiredParam('file', "The python/otter/plugins file to read.")
+        params.addRequiredParam('file', "The CSV file to read.")
         params.addRequiredParam('x_data', 'X data CSV column name')
         params.addRequiredParam('y_data', 'Y data CSV column name')
         return params
@@ -25,7 +25,6 @@ class CSV(OtterDataSource):
 
     def __init__(self, name, params):
         super(CSV, self).__init__(name, params)
-        self._specs = params
 
     # Called to compute the data
     def execute(self):

@@ -27,7 +27,7 @@ class OtterOutput(OtterObject):
     def registerDataSourceWarehouse(self, source_warehouse):
         self._source_warehouse = source_warehouse
 
-    # Called to launch the job
+    # Called to generate the output
     def execute(self):
         raise Exception("override this!")
 

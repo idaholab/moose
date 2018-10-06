@@ -17,7 +17,7 @@ class WriteCSV(OtterOutput):
     def validParams():
         params = OtterOutput.validParams()
         params.addRequiredParam('file', "The CSV file to write (each source y is written as a column, interpolated at the union of all x values).")
-        params.addRequiredParam('x_data', 'Column name for the x data points')
+        params.addRequiredParam('x_name', 'Column name for the x data points')
         params.addRequiredParam('sources', 'DataSources objects to write to a csv file')
         return params
     validParams = staticmethod(validParams)
@@ -25,7 +25,7 @@ class WriteCSV(OtterOutput):
     def __init__(self, name, params):
         super(WriteCSV, self).__init__(name, params)
         self._file = params['file']
-        self._x_name = params['x_data']
+        self._x_name = params['x_name']
         self._sources = params['sources'].split()
 
     # Called to launch the job
