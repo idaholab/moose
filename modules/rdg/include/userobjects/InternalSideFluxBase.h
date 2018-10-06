@@ -54,13 +54,6 @@ public:
                                             dof_id_type ineig,
                                             const std::vector<Real> & uvec1,
                                             const std::vector<Real> & uvec2,
-                                            const RealVectorValue & dwave,
-                                            THREAD_ID tid) const;
-  virtual const std::vector<Real> & getFlux(unsigned int iside,
-                                            dof_id_type ielem,
-                                            dof_id_type ineig,
-                                            const std::vector<Real> & uvec1,
-                                            const std::vector<Real> & uvec2,
                                             const RealVectorValue & dwave) const;
 
   /**
@@ -96,14 +89,6 @@ public:
                                                 dof_id_type ineig,
                                                 const std::vector<Real> & uvec1,
                                                 const std::vector<Real> & uvec2,
-                                                const RealVectorValue & dwave,
-                                                THREAD_ID tid) const;
-  virtual const DenseMatrix<Real> & getJacobian(Moose::DGResidualType type,
-                                                unsigned int iside,
-                                                dof_id_type ielem,
-                                                dof_id_type ineig,
-                                                const std::vector<Real> & uvec1,
-                                                const std::vector<Real> & uvec2,
                                                 const RealVectorValue & dwave) const;
 
   /**
@@ -131,17 +116,11 @@ protected:
   mutable unsigned int _cached_neig_id;
 
   /// flux vector of this side
-  mutable std::vector<std::vector<Real>> _flux;
-  mutable std::vector<Real> _flux_th;
+  mutable std::vector<Real> _flux;
   /// Jacobian matrix contribution to the "left" cell
-  mutable std::vector<DenseMatrix<Real>> _jac1;
-  mutable DenseMatrix<Real> _jac1_th;
+  mutable DenseMatrix<Real> _jac1;
   /// Jacobian matrix contribution to the "right" cell
-  mutable std::vector<DenseMatrix<Real>> _jac2;
-  mutable DenseMatrix<Real> _jac2_th;
-
-private:
-  static Threads::spin_mutex _mutex;
+  mutable DenseMatrix<Real> _jac2;
 };
 
 #endif // INTERNALSIDEFLUXBASE_H
