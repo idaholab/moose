@@ -25,7 +25,7 @@ DotErrorMaterial::DotErrorMaterial(const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<std::string>("property_name")),
     _mat_prop(declareProperty<Real>(_prop_name)),
-    _mat_prop_dot(getMaterialPropertyDot(_prop_name))
+    _mat_prop_dot(getMaterialPropertyDot<Real>(_prop_name))
 {
 }
 

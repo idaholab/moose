@@ -70,11 +70,15 @@ public:
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
   virtual void
-  qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp) = 0;
+  qpCopy(const unsigned int to_qp, const PropertyValue * rhs, const unsigned int from_qp) = 0;
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
+
+  virtual void copy(const PropertyValue * rhs) = 0;
+  virtual void scale(Real) = 0;
+  virtual void add(const PropertyValue *, Real) = 0;
 };
 
 template <>
@@ -153,7 +157,8 @@ public:
    * @param rhs The Property you want to copy _from_.
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
-  virtual void qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp);
+  virtual void
+  qpCopy(const unsigned int to_qp, const PropertyValue * rhs, const unsigned int from_qp);
 
   /**
    * Store the property into a binary stream
@@ -182,6 +187,16 @@ public:
   template <typename P>
   friend PropertyValue *
   _init_helper(int size, PropertyValue * prop, const std::vector<P> * the_type);
+
+  virtual void copy(const PropertyValue * rhs);
+  virtual void scale(Real)
+  {
+    mooseError("Material property type does not support multiplication with a real number");
+  }
+  virtual void add(const PropertyValue *, Real)
+  {
+    mooseError("Material property type does not support addition of another material property");
+  }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -234,11 +249,21 @@ MaterialProperty<T>::swap(PropertyValue * rhs)
 template <typename T>
 inline void
 MaterialProperty<T>::qpCopy(const unsigned int to_qp,
-                            PropertyValue * rhs,
+                            const PropertyValue * rhs,
                             const unsigned int from_qp)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
   _value[to_qp] = cast_ptr<const MaterialProperty<T> *>(rhs)->_value[from_qp];
+}
+
+template <typename T>
+inline void
+MaterialProperty<T>::copy(const PropertyValue * rhs)
+{
+  mooseAssert(rhs != NULL, "Assigning NULL?");
+  auto nqp = _value.size();
+  for (decltype(nqp) qp = 0; qp < nqp; ++qp)
+    _value[qp] = cast_ptr<const MaterialProperty<T> *>(rhs)->_value[qp];
 }
 
 template <typename T>
@@ -256,6 +281,15 @@ MaterialProperty<T>::load(std::istream & stream)
   for (unsigned int i = 0; i < _value.size(); i++)
     loadHelper(stream, _value[i], NULL);
 }
+
+template <>
+void MaterialProperty<Real>::scale(Real a);
+template <>
+void MaterialProperty<Real>::add(const PropertyValue * x, Real a);
+template <>
+void MaterialProperty<std::vector<Real>>::scale(Real a);
+template <>
+void MaterialProperty<std::vector<Real>>::add(const PropertyValue * x, Real a);
 
 /**
  * Container for storing material properties

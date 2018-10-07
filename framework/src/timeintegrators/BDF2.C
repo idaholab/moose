@@ -72,6 +72,12 @@ BDF2::computeDotProperties(Moose::MaterialDataType type, THREAD_ID tid) const
   if (!material_data->hasDotProperties())
     return;
 
+  if (_t_step == 1)
+  {
+    TimeIntegrator::computeDotProperties(type, tid);
+    return;
+  }
+
   const auto & props = material_data->props();
   const auto & old_props = material_data->propsOld();
   const auto & older_props = material_data->propsOlder();
@@ -84,13 +90,11 @@ BDF2::computeDotProperties(Moose::MaterialDataType type, THREAD_ID tid) const
     if (!dot_props[i])
       continue;
 
-    auto & dot_prop = dynamic_cast<MaterialProperty<Real> &>(*dot_props[i]);
-    auto & prop = dynamic_cast<const MaterialProperty<Real> &>(*props[i]);
-    auto & old_prop = dynamic_cast<const MaterialProperty<Real> &>(*old_props[i]);
-    auto & older_prop = dynamic_cast<const MaterialProperty<Real> &>(*older_props[i]);
-    for (unsigned int qp = 0; qp < prop.size(); ++qp)
-      dot_prop[qp] =
-          (prop[qp] * _weight[0] + old_prop[qp] * _weight[1] + older_prop[qp] * _weight[2]) / _dt;
+    dot_props[i]->copy(props[i]);
+    dot_props[i]->scale(_weight[0]);
+    dot_props[i]->add(old_props[i], _weight[1]);
+    dot_props[i]->add(older_props[i], _weight[2]);
+    dot_props[i]->scale(1 / _dt);
   }
 }
 

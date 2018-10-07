@@ -22,7 +22,7 @@ validParams<DotMaterialAux>()
 }
 
 DotMaterialAux::DotMaterialAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _dot(getMaterialPropertyDot("property_name"))
+  : AuxKernel(parameters), _dot(getMaterialPropertyDot<Real>("property_name"))
 {
 }
 

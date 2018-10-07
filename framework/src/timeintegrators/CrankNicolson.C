@@ -56,11 +56,9 @@ CrankNicolson::computeDotProperties(Moose::MaterialDataType type, THREAD_ID tid)
     if (!dot_props[i])
       continue;
 
-    auto & dot_prop = dynamic_cast<MaterialProperty<Real> &>(*dot_props[i]);
-    auto & prop = dynamic_cast<const MaterialProperty<Real> &>(*props[i]);
-    auto & old_prop = dynamic_cast<const MaterialProperty<Real> &>(*old_props[i]);
-    for (unsigned int qp = 0; qp < prop.size(); ++qp)
-      dot_prop[qp] = (prop[qp] - old_prop[qp]) / _dt * 2;
+    dot_props[i]->copy(props[i]);
+    dot_props[i]->add(old_props[i], -1.);
+    dot_props[i]->scale(2. / _dt);
   }
 }
 

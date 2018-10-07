@@ -59,7 +59,8 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
-  const MaterialProperty<Real> & getMaterialPropertyDot(const std::string & name);
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyDot(const std::string & name);
   ///@}
 
   ///@{
@@ -75,7 +76,8 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
-  const MaterialProperty<Real> & getMaterialPropertyDotByName(const MaterialPropertyName & name);
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyDotByName(const MaterialPropertyName & name);
   ///@}
 
   /**
@@ -334,6 +336,28 @@ MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
   return getMaterialPropertyOlderByName<T>(prop_name);
 }
 
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyDot(const std::string & name)
+{
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Dot property for \"",
+               name,
+               "\" was requested.");
+
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  std::istringstream ss(name);
+  Real real_value;
+  if (ss >> real_value && ss.eof())
+    return getZeroMaterialProperty<T>(name);
+
+  return getMaterialPropertyDotByName<T>(prop_name);
+}
+
 // General version for types that do not accept default values
 template <typename T>
 const MaterialProperty<T> *
@@ -399,6 +423,24 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return _material_data->getPropertyOlder<T>(name);
+}
+
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getMaterialPropertyDotByName(const MaterialPropertyName & name)
+{
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Dot property for \"",
+               name,
+               "\" was requested.");
+
+  // mark property as requested
+  markMatPropRequested(name);
+
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
+  return _material_data->getPropertyDot<T>(name);
 }
 
 template <typename T>
