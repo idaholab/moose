@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from OtterDataSource import OtterDataSource
-from FactorySystem import InputParameters
 from os import access, R_OK
 from os.path import isfile
 
@@ -17,13 +16,13 @@ import mooseutils
 class CSV(OtterDataSource):
     IS_PLUGIN = True
 
+    @staticmethod
     def validParams():
         params = OtterDataSource.validParams()
         params.addRequiredParam('file', "The CSV file to read.")
         params.addRequiredParam('x_data', 'X data CSV column name')
         params.addRequiredParam('y_data', 'Y data CSV column name')
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(CSV, self).__init__(name, params)

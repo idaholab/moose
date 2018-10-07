@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-import hit
 import os, sys
-from mooseutils import HitNode, hit_parse
+import hit
+from mooseutils import HitNode
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 
 if len(sys.argv) != 2:
-  print "Usage: otter.py file.plot\n";
-  sys.exit(1)
+    print "Usage: otter.py file.plot\n";
+    sys.exit(1)
 
 filename = sys.argv[1]
 
@@ -21,7 +21,7 @@ pathname = os.path.dirname(os.path.realpath(sys.argv[0]))
 pathname = os.path.abspath(pathname)
 factory.loadPlugins([pathname], 'plugins', "IS_PLUGIN")
 
-root_params = HitNode(hitnode=hit.parse('',''))
+root_params = HitNode(hitnode=hit.parse('', ''))
 parser.parse(filename, root_params)
 
 if parser.errors:
@@ -35,10 +35,10 @@ source_warehouse = {}
 # initial setup
 unordered_sources = []
 for obj in active_objects:
-    if obj._system == 'DataSource':
+    if obj.system == 'DataSource':
         unordered_sources.append(obj)
-        source_warehouse[obj._name] = obj
-    if obj._system == 'Output':
+        source_warehouse[obj.name] = obj
+    if obj.system == 'Output':
         obj.registerDataSourceWarehouse(source_warehouse)
 
 # fill in actual objects for each dependency
@@ -65,7 +65,7 @@ while not not unordered_sources:
             rejected.append(source)
 
     if not candidates:
-        print "Failed to resolve dependencies for " + ', '.join([obj._name for obj in unordered_sources])
+        print "Failed to resolve dependencies for " + ', '.join([obj.name for obj in unordered_sources])
         sys.exit(1)
 
     unordered_sources = rejected
@@ -77,5 +77,5 @@ for obj in ordered_sources:
 
 # execute outputs
 for obj in active_objects:
-    if obj._system == 'Output':
+    if obj.system == 'Output':
         obj.execute()

@@ -8,20 +8,18 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from OtterDataSource import OtterDataSource
-from FactorySystem import InputParameters
-
 import chigger
 
 class ExodusGlobal(OtterDataSource):
     IS_PLUGIN = True
 
+    @staticmethod
     def validParams():
         params = OtterDataSource.validParams()
         params.addRequiredParam('file', "The Exodus file to read.")
         params.addParam('x_data', 'X data from exodus to plot (if not specified time is used)')
         params.addParam('y_data', 'Y data from exodus to plot (if not specified time is used)')
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(ExodusGlobal, self).__init__(name, params)

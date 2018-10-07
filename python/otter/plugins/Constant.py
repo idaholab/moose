@@ -8,19 +8,16 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from OtterDataSource import OtterDataSource
-from FactorySystem import InputParameters
-
-import mooseutils
 
 class Constant(OtterDataSource):
     IS_PLUGIN = True
 
+    @staticmethod
     def validParams():
         params = OtterDataSource.validParams()
         params.addRequiredParam('x_values', 'List of X values')
         params.addRequiredParam('y_values', 'List of Y values')
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(Constant, self).__init__(name, params)

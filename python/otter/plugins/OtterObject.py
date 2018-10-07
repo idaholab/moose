@@ -8,10 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 class OtterObject(object):
-
     def __init__(self, name, params):
         self._specs = params
-        self._name = name
+        self.name = name
 
     # Called to launch the job
     def getData(self):

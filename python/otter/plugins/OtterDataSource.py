@@ -11,18 +11,17 @@ from OtterObject import OtterObject
 from FactorySystem import InputParameters
 
 class OtterDataSource(OtterObject):
-
+    @staticmethod
     def validParams():
         params = InputParameters()
         params.addRequiredParam('type', "The type of OtterDataSource object.")
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(OtterDataSource, self).__init__(name, params)
-        self._system = "DataSource"
         self._data = None
         self._source_dependencies = {}
+        self.system = "DataSource"
 
     # Called to get the computed the data
     def getData(self):
@@ -45,8 +44,8 @@ class OtterDataSource(OtterObject):
         if name not in self._source_dependencies:
             raise Exception("Trying to get a source that was not registered using registerDataSourceDependencies")
 
-        object = self._source_dependencies[name]
-        if object is None:
-            raise Exception("Failed to fulfill dependency on " + name + " in " + self._name)
+        obj = self._source_dependencies[name]
+        if obj is None:
+            raise Exception("Failed to fulfill dependency on " + name + " in " + self.name)
 
-        return object.getData()
+        return obj.getData()

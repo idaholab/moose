@@ -8,19 +8,17 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from OtterDataSource import OtterDataSource
-from FactorySystem import InputParameters
 from OtterUtils import dataUnion
-import mooseutils
 
 class Difference(OtterDataSource):
     IS_PLUGIN = True
 
+    @staticmethod
     def validParams():
         params = OtterDataSource.validParams()
         params.addRequiredParam('source1', 'The base data source')
         params.addRequiredParam('source2', 'The source to subtract from the base source')
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(Difference, self).__init__(name, params)

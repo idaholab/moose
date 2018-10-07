@@ -8,12 +8,12 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from OtterOutput import OtterOutput
-from FactorySystem import InputParameters
 import matplotlib.pyplot as plt
 
 class Plot(OtterOutput):
     IS_PLUGIN = True
 
+    @staticmethod
     def validParams():
         params = OtterOutput.validParams()
         params.addRequiredParam('file', "The Plot file to write (file extension determines the format).")
@@ -21,7 +21,6 @@ class Plot(OtterOutput):
         params.addParam('x_label', 'X-Axis label')
         params.addParam('y_label', 'Y-Axis label')
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(Plot, self).__init__(name, params)

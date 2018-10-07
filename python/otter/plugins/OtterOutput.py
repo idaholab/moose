@@ -11,16 +11,15 @@ from OtterObject import OtterObject
 from FactorySystem import InputParameters
 
 class OtterOutput(OtterObject):
-
+    @staticmethod
     def validParams():
         params = InputParameters()
         params.addRequiredParam('type', "The type of OtterOutput object.")
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(OtterOutput, self).__init__(name, params)
-        self._system = "Output"
+        self.system = "Output"
         self._source_warehouse = None
 
     # register all data source objects here
@@ -34,9 +33,9 @@ class OtterOutput(OtterObject):
     # get data by name
     def getDataFrom(self, name):
         if self._source_warehouse is None:
-            raise Exception("Internal error. Warehouse not registerd to output object " + self._name)
+            raise Exception("Internal error. Warehouse not registerd to output object " + self.name)
 
         if name not in self._source_warehouse:
-            raise Exception("Invalid data source '" + name + "' requested by output object " + self._name)
+            raise Exception("Invalid data source '" + name + "' requested by output object " + self.name)
 
         return self._source_warehouse[name].getData()

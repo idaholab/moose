@@ -8,19 +8,18 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from OtterOutput import OtterOutput
-from FactorySystem import InputParameters
 from OtterUtils import dataUnion
 
 class WriteCSV(OtterOutput):
     IS_PLUGIN = True
 
+    @staticmethod
     def validParams():
         params = OtterOutput.validParams()
         params.addRequiredParam('file', "The CSV file to write (each source y is written as a column, interpolated at the union of all x values).")
         params.addRequiredParam('x_name', 'Column name for the x data points')
         params.addRequiredParam('sources', 'DataSources objects to write to a csv file')
         return params
-    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         super(WriteCSV, self).__init__(name, params)
