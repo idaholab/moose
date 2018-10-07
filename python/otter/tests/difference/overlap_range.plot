@@ -19,6 +19,7 @@
 [csv]
   type = WriteCSV
   sources = 'diff'
+  replace_nan = -9999
   x_name = x
   file = overlap_range.csv
 []

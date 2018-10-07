@@ -9,6 +9,7 @@
 
 from OtterOutput import OtterOutput
 from OtterUtils import dataUnion
+import math
 
 class WriteCSV(OtterOutput):
     IS_PLUGIN = True
@@ -19,6 +20,7 @@ class WriteCSV(OtterOutput):
         params.addRequiredParam('file', "The CSV file to write (each source y is written as a column, interpolated at the union of all x values).")
         params.addRequiredParam('x_name', 'Column name for the x data points')
         params.addRequiredParam('sources', 'DataSources objects to write to a csv file')
+        params.addParam('replace_nan', 'Replace "Nan" value with this number')
         return params
 
     def __init__(self, name, params):
@@ -26,23 +28,30 @@ class WriteCSV(OtterOutput):
         self._file = params['file']
         self._x_name = params['x_name']
         self._sources = params['sources'].split()
+        self._replace_nan = None
+        if params.isValid("replace_nan"):
+            self._replace_nan = str(params['replace_nan'])
 
     # Called to launch the job
     def execute(self):
-        file = open(self._file, "w")
+        outfile = open(self._file, "w")
 
         headers = ','.join([self._x_name] + self._sources)
         datas = [self.getDataFrom(source) for source in self._sources]
-        file.write(headers + '\n')
+        outfile.write(headers + '\n')
         if len(datas) > 1:
             (data_x, data_ys) = dataUnion(datas)
         else:
             (data_x, data_ys) = (datas[0][0], [datas[0][1]])
 
+        replace_nan = self._replace_nan
         for i in range(len(data_x)):
             row = [str(data_x[i])]
             for data_y in data_ys:
-                row.append(str(data_y[i]))
-            file.write(','.join(row) + '\n')
+                if replace_nan is not None and math.isnan(data_y[i]):
+                    row.append(replace_nan)
+                else:
+                    row.append(str(data_y[i]))
+            outfile.write(','.join(row) + '\n')
 
-        file.close()
+        outfile.close()

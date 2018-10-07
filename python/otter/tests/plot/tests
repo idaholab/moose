@@ -6,6 +6,6 @@
     command = ../../otter.py
     cli_args = 'two_lines.plot'
     imagediff = 'two_lines.png'
+    requirement = "A plugin to generate plots as png files using one or more data sources shall be provided"
   [../]
-  requirement = "A plugin to generate plots as png files shall be provided"
 []
