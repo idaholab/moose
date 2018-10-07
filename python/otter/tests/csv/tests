@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#12263'
+  design = '/otter/README.md'
+  [./invalid_column]
+    type = RunException
+    command = ../../otter.py
+    cli_args = 'invalid_column.plot'
+    expect_err = "Column doesnotexist not found in 'test.csv'"
+    requirement = "Otter shall error out if a non-existent CSV file column is requested"
+  [../]
+  [./invalid_file]
+    type = RunException
+    command = ../../otter.py
+    cli_args = 'invalid_file.plot'
+    expect_err = "File doesnotexist.csv doesn't exist or isn't readable"
+    requirement = "Otter shall error out if a non-existent CSV file is requested"
+  [../]
+[]

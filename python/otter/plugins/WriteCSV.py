@@ -35,8 +35,11 @@ class WriteCSV(OtterOutput):
         headers = ','.join([self._x_name] + self._sources)
         datas = [self.getDataFrom(source) for source in self._sources]
         file.write(headers + '\n')
+        if len(datas) > 1:
+            (data_x, data_ys) = dataUnion(datas)
+        else:
+            (data_x, data_ys) = (datas[0][0], [datas[0][1]])
 
-        (data_x, data_ys) = dataUnion(datas)
         for i in range(len(data_x)):
             row = [str(data_x[i])]
             for data_y in data_ys:

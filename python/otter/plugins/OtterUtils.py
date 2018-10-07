@@ -10,30 +10,32 @@
 import math
 import numpy
 
+#
+# TODO: Fix union of datasets containing NaNs (they spread)
+#
 def dataUnion(data_list, tolerance=1e-9):
+    # create sorted copies of the data and a union of the x points
+    sorted_data = []
+    union_x = []
+    for data in data_list:
+        union_x = union_x + data[0]
+        sorted_data.append((sorted(data[0]), [x for _,x in sorted(zip(data[0],data[1]))]))
 
-  # create sorted copies of the data and a union of the x points
-  sorted_data = []
-  union_x = []
-  for data in data_list:
-    union_x = union_x + data[0]
-    sorted_data.append((sorted(data[0]), [x for _,x in sorted(zip(data[0],data[1]))]))
+    # quit early if no work is to be done
+    if not union_x:
+        return ([], [[]] * len(data_list))
 
-  # quit early if no work is to be done
-  if not union_x:
-      return ([], [[]] * len(data_list))
+    # prune union using tolerance
+    union_x.sort()
+    pruned_x = [union_x[0]]
+    if len(union_x) > 1:
+        for i in range(1, len(union_x)):
+            if math.fabs(union_x[i] - union_x[i-1]) >= tolerance:
+                pruned_x.append(union_x[i])
 
-  # prune union using tolerance
-  union_x = sorted(union_x)
-  pruned_x = [union_x[0]]
-  if len(union_x) > 1:
-    for i in range(1, len(union_x)):
-      if math.fabs(union_x[i] - union_x[i-1]) >= tolerance:
-        pruned_x.append(union_x[i])
+    # now interpolate all sets at the pruned x points
+    interpolated_ys = []
+    for data in sorted_data:
+        interpolated_ys.append(numpy.interp(pruned_x, data[0], data[1], numpy.nan, numpy.nan).tolist())
 
-  # now interpolate all sets at the pruned x points
-  interpolated_ys = []
-  for data in sorted_data:
-    interpolated_ys.append(numpy.interp(pruned_x, data[0], data[1], numpy.nan, numpy.nan).tolist())
-
-  return (pruned_x, interpolated_ys)
+    return (pruned_x, interpolated_ys)

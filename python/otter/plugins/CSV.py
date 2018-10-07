@@ -9,6 +9,8 @@
 
 from OtterDataSource import OtterDataSource
 from FactorySystem import InputParameters
+from os import access, R_OK
+from os.path import isfile
 
 import mooseutils
 
@@ -25,10 +27,18 @@ class CSV(OtterDataSource):
 
     def __init__(self, name, params):
         super(CSV, self).__init__(name, params)
+        self._file = params['file']
+        self._x_data = params['x_data']
+        self._y_data = params['y_data']
+        if not isfile(self._file) or not access(self._file, R_OK):
+            raise Exception("File %s doesn't exist or isn't readable" % self._file)
 
     # Called to compute the data
     def execute(self):
-        params = self._specs
         # Read data from file
-        data = mooseutils.PostprocessorReader(params['file'])
-        self._data = (data[params['x_data']].tolist(), data[params['y_data']].tolist())
+        data = mooseutils.PostprocessorReader(self._file)
+        if self._x_data not in data:
+            raise Exception("Column %s not found in '%s'" % (self._x_data, self._file))
+        if self._y_data not in data:
+            raise Exception("Column %s not found in '%s'" % (self._y_data, self._file))
+        self._data = (data[self._x_data].tolist(), data[self._y_data].tolist())

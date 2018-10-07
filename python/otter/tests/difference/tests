@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#12263'
+  design = '/otter/README.md'
+  [./same_points]
+    type = CSVDiff
+    command = '../../otter.py'
+    cli_args = 'same_points.plot'
+    csvdiff = 'same_points.csv'
+    requirement = "A point by point difference shall be computed if the ordinate spacing of the data sets is identical"
+  [../]
+  [./same_range]
+    type = CSVDiff
+    command = '../../otter.py'
+    cli_args = 'same_range.plot'
+    csvdiff = 'same_range.csv'
+    requirement = "A difference using linear interpolation on the union of all ordinate points shall be computed in the general case"
+  [../]
+  [./overlap_range]
+    type = CSVDiff
+    command = '../../otter.py'
+    cli_args = 'overlap_range.plot'
+    csvdiff = 'overlap_range.csv'
+    requirement = "If the differenced sources are not fully overlapping a NaN result shall be returned in teh non-overlapping regions"
+  [../]
+[]
