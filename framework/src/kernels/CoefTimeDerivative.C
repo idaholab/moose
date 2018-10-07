@@ -17,24 +17,39 @@ validParams<CoefTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
   params.addParam<Real>("Coefficient", 1, "The coefficient for the time derivative kernel");
+  params.addParam<MaterialPropertyName>(
+      "mat_prop_coef", 1.0, "Material property coefficient for the time derivative kernel");
+  params.addParam<bool>(
+      "prop_in_derivative", false, "Whether or not the property is inside time derivative");
   return params;
 }
 
 CoefTimeDerivative::CoefTimeDerivative(const InputParameters & parameters)
-  : TimeDerivative(parameters), _coef(getParam<Real>("Coefficient"))
+  : TimeDerivative(parameters),
+    _coef(getParam<Real>("Coefficient")),
+    _prop_coef(getMaterialProperty<Real>("mat_prop_coef"))
 {
+  if (getParam<bool>("prop_in_derivative"))
+    _prop_dot = &getMaterialPropertyDot<Real>("mat_prop_coef");
+  else
+    _prop_dot = nullptr;
 }
 
 Real
 CoefTimeDerivative::computeQpResidual()
 {
-  // We're reusing the TimeDerivative Kernel's residual
-  // so that we don't have to recode that.
-  return _coef * TimeDerivative::computeQpResidual();
+  if (_prop_dot)
+    return _test[_i][_qp] * _coef * (_prop_coef[_qp] * _u_dot[_qp] + (*_prop_dot)[_qp] * _u[_qp]);
+  else
+    return _test[_i][_qp] * _coef * _prop_coef[_qp] * _u_dot[_qp];
 }
 
 Real
 CoefTimeDerivative::computeQpJacobian()
 {
-  return _coef * TimeDerivative::computeQpJacobian();
+  if (_prop_dot)
+    return _test[_i][_qp] * _coef * _phi[_j][_qp] *
+           (_prop_coef[_qp] * _du_dot_du[_qp] + (*_prop_dot)[_qp]);
+  else
+    return _test[_i][_qp] * _coef * _phi[_j][_qp] * _prop_coef[_qp] * _du_dot_du[_qp];
 }

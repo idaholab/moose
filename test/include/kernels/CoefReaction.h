@@ -28,6 +28,7 @@ protected:
   virtual Real computeQpJacobian();
 
   Real _coef;
+  const MaterialProperty<Real> & _prop_coef;
 };
 
 #endif // COEFREACTION_H

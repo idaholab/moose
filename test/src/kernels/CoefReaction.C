@@ -17,22 +17,26 @@ validParams<CoefReaction>()
 {
   InputParameters params = validParams<Reaction>();
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
+  params.addParam<MaterialPropertyName>(
+      "mat_prop_coef", 1.0, "Material property coefficient of the term");
   return params;
 }
 
 CoefReaction::CoefReaction(const InputParameters & parameters)
-  : Reaction(parameters), _coef(getParam<Real>("coefficient"))
+  : Reaction(parameters),
+    _coef(getParam<Real>("coefficient")),
+    _prop_coef(getMaterialProperty<Real>("mat_prop_coef"))
 {
 }
 
 Real
 CoefReaction::computeQpResidual()
 {
-  return _coef * Reaction::computeQpResidual();
+  return _coef * _prop_coef[_qp] * Reaction::computeQpResidual();
 }
 
 Real
 CoefReaction::computeQpJacobian()
 {
-  return _coef * Reaction::computeQpJacobian();
+  return _coef * _prop_coef[_qp] * Reaction::computeQpJacobian();
 }

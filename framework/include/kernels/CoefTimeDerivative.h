@@ -36,5 +36,7 @@ protected:
    * material property from the Material class
    */
   Real _coef;
+  const MaterialProperty<Real> & _prop_coef;
+  const MaterialProperty<Real> * _prop_dot;
 };
 #endif // COEFTIMEDERIVATIVE_H
