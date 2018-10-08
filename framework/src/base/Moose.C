@@ -198,7 +198,7 @@ addActionTypes(Syntax & syntax)
   registerTask("ready_to_init", true);
 
   // Output related actions
-  registerTask("setup_material_output", true);
+  registerTask("add_output_aux_variables", true);
   registerTask("check_output", true);
 
   registerTask("create_problem_default", true);
@@ -268,7 +268,7 @@ addActionTypes(Syntax & syntax)
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
-                           "(setup_material_output)"
+                           "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
                            "(init_problem)"
                            "(setup_debug)"

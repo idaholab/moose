@@ -36,11 +36,6 @@ public:
 
   virtual void act() override;
 
-  /**
-   * Builds the objects necessary for material property output
-   */
-  void buildMaterialOutputObjects(FEProblemBase * problem_ptr);
-
 private:
   /**
    * Helper method for testing if the material exists as a block or boundary material
@@ -63,7 +58,9 @@ private:
    * act() method.
    */
   template <typename T>
-  void materialOutputHelper(const std::string & property_name, std::shared_ptr<Material> material);
+  std::vector<std::string> materialOutputHelper(const std::string & property_name,
+                                                std::shared_ptr<Material> material,
+                                                bool get_names_only);
 
   /**
    * A method for creating an AuxVariable and associated action
@@ -86,9 +83,6 @@ private:
   /// Map of variable name that contains the blocks to which the variable should be restricted
   std::map<std::string, std::set<SubdomainID>> _block_variable_map;
 
-  /// Set of variable names for boundary
-  std::set<std::string> _variable_names;
-
   /// List of variables for the current Material object
   std::set<std::string> _material_variable_names;
 
@@ -100,9 +94,10 @@ private:
 };
 
 template <typename T>
-void
+std::vector<std::string>
 MaterialOutputAction::materialOutputHelper(const std::string & /*property_name*/,
-                                           std::shared_ptr<Material> /*material*/)
+                                           std::shared_ptr<Material> /*material*/,
+                                           bool /*get_names_only*/)
 {
   mooseError("Unknown type, you must create a specialization of materialOutputHelper");
 }
