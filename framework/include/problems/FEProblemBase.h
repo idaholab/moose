@@ -1485,6 +1485,11 @@ public:
    */
   bool constJacobian() const;
 
+  /**
+   * Adds an Output object.
+   */
+  void addOutput(const std::string &, const std::string &, InputParameters);
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
