@@ -11,7 +11,7 @@
 #define DISCRETENUCLEATIONDATA_H
 
 #include "GeneralPostprocessor.h"
-#include "DiscreteNucleationInserter.h"
+#include "DiscreteNucleationInserterBase.h"
 
 class DiscreteNucleationData;
 
@@ -33,10 +33,10 @@ public:
 
 protected:
   /// UserObject that manages nucleus insertin and deletion
-  const DiscreteNucleationInserter & _inserter;
+  const DiscreteNucleationInserterBase & _inserter;
 
   /// list of nuclei maintained bu the inserter object
-  const DiscreteNucleationInserter::NucleusList & _nucleus_list;
+  const DiscreteNucleationInserterBase::NucleusList & _nucleus_list;
 
   /// Type of value to report back
   enum class ValueType
