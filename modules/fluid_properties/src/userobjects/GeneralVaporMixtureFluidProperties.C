@@ -68,7 +68,7 @@ GeneralVaporMixtureFluidProperties::GeneralVaporMixtureFluidProperties(
 GeneralVaporMixtureFluidProperties::~GeneralVaporMixtureFluidProperties() {}
 
 Real
-GeneralVaporMixtureFluidProperties::p_from_v_e(Real v, Real e, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::p_from_v_e(Real v, Real e, const std::vector<Real> & x) const
 {
   Real p, dp_dv, dp_de, T, dT_dv, dT_de;
   std::vector<Real> dp_dx(_n_secondary_vapors);
@@ -81,7 +81,7 @@ GeneralVaporMixtureFluidProperties::p_from_v_e(Real v, Real e, std::vector<Real>
 void
 GeneralVaporMixtureFluidProperties::p_from_v_e(Real v,
                                                Real e,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & p,
                                                Real & dp_dv,
                                                Real & dp_de,
@@ -93,7 +93,7 @@ GeneralVaporMixtureFluidProperties::p_from_v_e(Real v,
 }
 
 Real
-GeneralVaporMixtureFluidProperties::T_from_v_e(Real v, Real e, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::T_from_v_e(Real v, Real e, const std::vector<Real> & x) const
 {
   Real p, dp_dv, dp_de, T, dT_dv, dT_de;
   std::vector<Real> dp_dx(_n_secondary_vapors);
@@ -106,7 +106,7 @@ GeneralVaporMixtureFluidProperties::T_from_v_e(Real v, Real e, std::vector<Real>
 void
 GeneralVaporMixtureFluidProperties::T_from_v_e(Real v,
                                                Real e,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & T,
                                                Real & dT_dv,
                                                Real & dT_de,
@@ -118,7 +118,7 @@ GeneralVaporMixtureFluidProperties::T_from_v_e(Real v,
 }
 
 Real
-GeneralVaporMixtureFluidProperties::rho_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   return 1.0 / v_from_p_T(p, T, x);
 }
@@ -126,7 +126,7 @@ GeneralVaporMixtureFluidProperties::rho_from_p_T(Real p, Real T, std::vector<Rea
 void
 GeneralVaporMixtureFluidProperties::rho_from_p_T(Real p,
                                                  Real T,
-                                                 std::vector<Real> x,
+                                                 const std::vector<Real> & x,
                                                  Real & rho,
                                                  Real & drho_dp,
                                                  Real & drho_dT,
@@ -146,7 +146,7 @@ GeneralVaporMixtureFluidProperties::rho_from_p_T(Real p,
 }
 
 Real
-GeneralVaporMixtureFluidProperties::v_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::v_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
 
@@ -160,7 +160,7 @@ GeneralVaporMixtureFluidProperties::v_from_p_T(Real p, Real T, std::vector<Real>
 void
 GeneralVaporMixtureFluidProperties::v_from_p_T(Real p,
                                                Real T,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & v,
                                                Real & dv_dp,
                                                Real & dv_dT,
@@ -186,7 +186,7 @@ GeneralVaporMixtureFluidProperties::v_from_p_T(Real p,
 }
 
 Real
-GeneralVaporMixtureFluidProperties::e_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::e_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
 
@@ -200,7 +200,7 @@ GeneralVaporMixtureFluidProperties::e_from_p_T(Real p, Real T, std::vector<Real>
 void
 GeneralVaporMixtureFluidProperties::e_from_p_T(Real p,
                                                Real T,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & e,
                                                Real & de_dp,
                                                Real & de_dT,
@@ -226,7 +226,7 @@ GeneralVaporMixtureFluidProperties::e_from_p_T(Real p,
 }
 
 Real
-GeneralVaporMixtureFluidProperties::c_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::c_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
 
@@ -263,7 +263,7 @@ GeneralVaporMixtureFluidProperties::c_from_p_T(Real p, Real T, std::vector<Real>
 }
 
 Real
-GeneralVaporMixtureFluidProperties::cp_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real vp = _fp_primary->v_from_p_T(p, T);
@@ -281,7 +281,7 @@ GeneralVaporMixtureFluidProperties::cp_from_p_T(Real p, Real T, std::vector<Real
 }
 
 Real
-GeneralVaporMixtureFluidProperties::cv_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real vp = _fp_primary->v_from_p_T(p, T);
@@ -299,7 +299,7 @@ GeneralVaporMixtureFluidProperties::cv_from_p_T(Real p, Real T, std::vector<Real
 }
 
 Real
-GeneralVaporMixtureFluidProperties::mu_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real M_primary = _fp_primary->molarMass();
@@ -325,7 +325,7 @@ GeneralVaporMixtureFluidProperties::mu_from_p_T(Real p, Real T, std::vector<Real
 }
 
 Real
-GeneralVaporMixtureFluidProperties::k_from_p_T(Real p, Real T, std::vector<Real> x) const
+GeneralVaporMixtureFluidProperties::k_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real M_primary = _fp_primary->molarMass();
@@ -352,7 +352,7 @@ GeneralVaporMixtureFluidProperties::k_from_p_T(Real p, Real T, std::vector<Real>
 
 void
 GeneralVaporMixtureFluidProperties::p_T_from_v_e(
-    Real v, Real e, std::vector<Real> x, Real & p, Real & T) const
+    Real v, Real e, const std::vector<Real> & x, Real & p, Real & T) const
 {
   // The residuals are the following:
   // residual[0] = v(p,T,x) - v
@@ -440,7 +440,7 @@ GeneralVaporMixtureFluidProperties::p_T_from_v_e(
 void
 GeneralVaporMixtureFluidProperties::p_T_from_v_e(Real v,
                                                  Real e,
-                                                 std::vector<Real> x,
+                                                 const std::vector<Real> & x,
                                                  Real & p,
                                                  Real & dp_dv,
                                                  Real & dp_de,

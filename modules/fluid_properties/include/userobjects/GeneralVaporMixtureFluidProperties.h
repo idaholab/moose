@@ -44,43 +44,43 @@ public:
   virtual ~GeneralVaporMixtureFluidProperties();
 
   virtual unsigned int getNumberOfSecondaryVapors() const override { return _n_secondary_vapors; }
-  virtual Real p_from_v_e(Real v, Real e, std::vector<Real> x) const override;
+  virtual Real p_from_v_e(Real v, Real e, const std::vector<Real> & x) const override;
   virtual void p_from_v_e(Real v,
                           Real e,
-                          std::vector<Real> x,
+                          const std::vector<Real> & x,
                           Real & p,
                           Real & dp_dv,
                           Real & dp_de,
                           std::vector<Real> & dp_dx) const override;
-  virtual Real T_from_v_e(Real v, Real e, std::vector<Real> x) const override;
+  virtual Real T_from_v_e(Real v, Real e, const std::vector<Real> & x) const override;
   virtual void T_from_v_e(Real v,
                           Real e,
-                          std::vector<Real> x,
+                          const std::vector<Real> & x,
                           Real & T,
                           Real & dT_dv,
                           Real & dT_de,
                           std::vector<Real> & dT_dx) const override;
-  virtual Real rho_from_p_T(Real p, Real T, std::vector<Real> x) const override;
+  virtual Real rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
   virtual void rho_from_p_T(Real p,
                             Real T,
-                            std::vector<Real> x,
+                            const std::vector<Real> & x,
                             Real & rho,
                             Real & drho_dp,
                             Real & drho_dT,
                             std::vector<Real> & drho_dx) const override;
-  virtual Real e_from_p_T(Real p, Real T, std::vector<Real> x) const override;
+  virtual Real e_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
   virtual void e_from_p_T(Real p,
                           Real T,
-                          std::vector<Real> x,
+                          const std::vector<Real> & x,
                           Real & e,
                           Real & de_dp,
                           Real & de_dT,
                           std::vector<Real> & de_dx) const override;
-  virtual Real c_from_p_T(Real p, Real T, std::vector<Real> x) const override;
-  virtual Real cp_from_p_T(Real p, Real T, std::vector<Real> x) const override;
-  virtual Real cv_from_p_T(Real p, Real T, std::vector<Real> x) const override;
-  virtual Real mu_from_p_T(Real p, Real T, std::vector<Real> x) const override;
-  virtual Real k_from_p_T(Real p, Real T, std::vector<Real> x) const override;
+  virtual Real c_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual Real cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual Real cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual Real mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual Real k_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
 
   /**
    * Specific volume from pressure and temperature
@@ -89,7 +89,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real v_from_p_T(Real p, Real T, std::vector<Real> x) const;
+  virtual Real v_from_p_T(Real p, Real T, const std::vector<Real> & x) const;
 
   /**
    * Specific volume and its derivatives from pressure and temperature
@@ -105,7 +105,7 @@ public:
    */
   virtual void v_from_p_T(Real p,
                           Real T,
-                          std::vector<Real> x,
+                          const std::vector<Real> & x,
                           Real & v,
                           Real & dv_dp,
                           Real & dv_dT,
@@ -120,7 +120,7 @@ public:
    * @param[out] p  pressure
    * @param[out] T  temperature
    */
-  void p_T_from_v_e(Real v, Real e, std::vector<Real> x, Real & p, Real & T) const;
+  void p_T_from_v_e(Real v, Real e, const std::vector<Real> & x, Real & p, Real & T) const;
 
   /**
    * Pressure and temperature from specific volume and specific internal energy
@@ -139,7 +139,7 @@ public:
    */
   void p_T_from_v_e(Real v,
                     Real e,
-                    std::vector<Real> x,
+                    const std::vector<Real> & x,
                     Real & p,
                     Real & dp_dv,
                     Real & dp_de,
