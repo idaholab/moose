@@ -27,16 +27,6 @@ validParams<IdealRealGasMixtureFluidProperties>()
   params.addRequiredParam<std::vector<UserObjectName>>(
       "fp_secondary", "Name of fluid properties user object(s) for secondary vapor component(s)");
 
-  // params.addParam<Real>("p_initial_guess", 1e5, "Initial guess for mixture pressure");
-  // params.addParam<Real>("T_initial_guess", 400, "Initial guess for mixture temperature");
-  // params.addParam<Real>("newton_damping", 1.0, "Damping factor for Newton iteration");
-  // params.addParam<Real>("newton_rel_tol", 1e-6, "Relative tolerance for Newton iteration");
-  // params.addParam<unsigned int>("newton_max_its", 25, "Maximum iterations for Newton iteration");
-  // params.addParam<bool>("update_guesses",
-  //                      true,
-  //                      "Option to update guesses for pressure and temperature based on the "
-  //                      "converged values for the previous solve");
-
   // This is necessary because initialize() must be called before any interface
   // can be used (which can occur as early as initialization of variables).
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
@@ -48,22 +38,15 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
     const InputParameters & parameters)
   : VaporMixtureFluidProperties(parameters),
     _fp_secondary_names(getParam<std::vector<UserObjectName>>("fp_secondary")),
-    _n_secondary_vapors(_fp_secondary_names.size()) //,
-//_p_initial_guess(getParam<Real>("p_initial_guess")),
-//_T_initial_guess(getParam<Real>("T_initial_guess")),
-//_newton_damping(getParam<Real>("newton_damping")),
-//_newton_rel_tol(getParam<Real>("newton_rel_tol")),
-//_newton_max_its(getParam<unsigned int>("newton_max_its")),
-//_update_guesses(getParam<bool>("update_guesses"))
+    _n_secondary_vapors(_fp_secondary_names.size()),
+    R_molar(8.3144598),
+    T_mix_max(1300.)
 {
   _fp_primary = &getUserObject<SinglePhaseFluidProperties>("fp_primary");
 
   _fp_secondary.resize(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
     _fp_secondary[i] = &getUserObjectByName<SinglePhaseFluidProperties>(_fp_secondary_names[i]);
-
-  //_p_guess = _p_initial_guess;
-  //_T_guess = _T_initial_guess;
 }
 
 IdealRealGasMixtureFluidProperties::~IdealRealGasMixtureFluidProperties() {}
@@ -119,46 +102,7 @@ IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p, Real T, std::vector<Rea
 {
   return 1.0 / v_from_p_T(p, T, x);
 }
-/*
-void
-IdealRealGasMixtureFluidProperties::rho_from_p_T_num(Real p,
-                                                     Real T,
-                                                     std::vector<Real> x,
-                                                     Real & rho,
-                                                     Real & drho_dp,
-                                                     Real & drho_dT,
-                                                     std::vector<Real> & drho_dx) const
-{
-  Real v, dv_dp, dv_dT;
-  std::vector<Real> dv_dx;
-  v_from_p_T(p, T, x, v, dv_dp, dv_dT, dv_dx);
 
-  rho = 1.0 / v;
-  const Real drho_dv = -1.0 / (v * v);
-  drho_dp = drho_dv * dv_dp;
-  drho_dT = drho_dv * dv_dT;
-  drho_dx.resize(_n_secondary_vapors);
-  // Derivatives with respect to mass fractions are more complicated, so a
-  // finite difference approximation is used (temporary).
-  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
-  {
-    Real v_perturbed;
-    std::vector<Real> x_perturbed(x);
-    Real dx_i = 1e-6;
-    for (unsigned int j = 0; j < _n_secondary_vapors; j++)
-    {
-      if (j != i)
-      {
-        x_perturbed[j] =
-            x[j] * (1.0 - (x[i] + dx_i)) / (1.0 - x[i]); // recalculate new mass fractions
-      }
-    }
-    x_perturbed[i] += dx_i;
-    v_perturbed = v_from_p_T(p, T, x_perturbed);
-    drho_dx[i] = ((v_perturbed - v) / dx_i) * drho_dv;
-  }
-}
-*/
 void
 IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p,
                                                  Real T,
@@ -194,11 +138,11 @@ IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, std::vector<Real>
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
     sum += x[i] / _fp_secondary[i]->molarMass();
   Real M_star = 1. / sum;
-  Real v_ideal = 8.3144598 * T / (M_star * p); // R_univ should not be hardcoded here
+  Real v_ideal = R_molar * T / (M_star * p);
 
-  // the following parameters are valid for water
-  static const Real Tc = 647.096;
-  static const Real vc = 1. / 322.;
+  // check range of validity for primary (condensable) component
+  static const Real Tc = _fp_primary->criticalTemperature();
+  static const Real vc = 1. / _fp_primary->criticalDensity();
   Real v_spndl, e_spndl;
   if (T < Tc)
   {
@@ -209,9 +153,15 @@ IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, std::vector<Real>
     v_spndl = vc;
   }
 
-  // Initial estimate of a bracketing interval for the temperature
   Real lower_spec_volume = v_spndl * x_primary;
   Real upper_spec_volume = v_ideal; // p*v/(RT) <= 1
+
+  // Initial estimate of a bracketing interval for the temperature
+  Real p_max = p_from_T_v(T, lower_spec_volume, x);
+  if (p > p_max || upper_spec_volume < lower_spec_volume)
+  {
+    return NAN;
+  }
 
   // Use BrentsMethod to find temperature
   auto pressure_diff = [&T, &p, &x, this](Real v) { return this->p_from_T_v(T, v, x) - p; };
@@ -221,48 +171,7 @@ IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, std::vector<Real>
 
   return v;
 }
-/*
-void
-IdealRealGasMixtureFluidProperties::v_from_p_T_num(Real p,
-                                                   Real T,
-                                                   std::vector<Real> x,
-                                                   Real & v,
-                                                   Real & dv_dp,
-                                                   Real & dv_dT,
-                                                   std::vector<Real> & dv_dx) const
-{
-  Real p_unused, dp_dT, dp_dv;
-  std::vector<Real> dp_dx;
-  dp_dx.resize(_n_secondary_vapors);
 
-  v = v_from_p_T(p, T, x);
-  p_from_T_v(T, v, x, p_unused, dp_dT, dp_dv, dp_dx);
-
-  dv_dp = 1. / dp_dv;
-  dv_dT = -dp_dT / dp_dv;
-
-  dv_dx.resize(_n_secondary_vapors);
-  // Derivatives with respect to mass fractions are more complicated, so a
-  // finite difference approximation is used (temporary).
-  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
-  {
-    Real v_perturbed;
-    std::vector<Real> x_perturbed(x);
-    Real dx_i = 1e-6;
-    for (unsigned int j = 0; j < _n_secondary_vapors; j++)
-    {
-      if (j != i)
-      {
-        x_perturbed[j] =
-            x[j] * (1.0 - (x[i] + dx_i)) / (1.0 - x[i]); // recalculate new mass fractions
-      }
-    }
-    x_perturbed[i] += dx_i;
-    v_perturbed = v_from_p_T(p, T, x_perturbed);
-    dv_dx[i] = ((v_perturbed - v) / dx_i);
-  }
-}
-*/
 void
 IdealRealGasMixtureFluidProperties::v_from_p_T(Real p,
                                                Real T,
@@ -295,50 +204,7 @@ IdealRealGasMixtureFluidProperties::e_from_p_T(Real p, Real T, std::vector<Real>
   Real v = v_from_p_T(p, T, x);
   return e_from_T_v(T, v, x);
 }
-/*
-void
-IdealRealGasMixtureFluidProperties::e_from_p_T_num(Real p,
-                                                   Real T,
-                                                   std::vector<Real> x,
-                                                   Real & e,
-                                                   Real & de_dp,
-                                                   Real & de_dT,
-                                                   std::vector<Real> & de_dx) const
-{
-  Real v, de_dT_v, de_dv_T, p_unused, dp_dT_v, dp_dv_T;
-  std::vector<Real> de_dx_Tv, dp_dx_Tv;
-  de_dx_Tv.resize(_n_secondary_vapors);
-  dp_dx_Tv.resize(_n_secondary_vapors);
 
-  v = v_from_p_T(p, T, x);
-  e_from_T_v(T, v, x, e, de_dT_v, de_dv_T, de_dx_Tv);
-  p_from_T_v(T, v, x, p_unused, dp_dT_v, dp_dv_T, dp_dx_Tv);
-
-  de_dp = de_dv_T / dp_dv_T;
-  de_dT = de_dT_v - de_dv_T * dp_dT_v / dp_dv_T;
-
-  de_dx.resize(_n_secondary_vapors);
-  // Derivatives with respect to mass fractions are more complicated, so a
-  // finite difference approximation is used (temporary).
-  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
-  {
-    Real e_perturbed;
-    std::vector<Real> x_perturbed(x);
-    Real dx_i = 1e-6;
-    for (unsigned int j = 0; j < _n_secondary_vapors; j++)
-    {
-      if (j != i)
-      {
-        x_perturbed[j] =
-            x[j] * (1.0 - (x[i] + dx_i)) / (1.0 - x[i]); // recalculate new mass fractions
-      }
-    }
-    x_perturbed[i] += dx_i;
-    e_perturbed = e_from_p_T(p, T, x_perturbed);
-    de_dx[i] = ((e_perturbed - e) / dx_i);
-  }
-}
-*/
 void
 IdealRealGasMixtureFluidProperties::e_from_p_T(Real p,
                                                Real T,
@@ -530,8 +396,9 @@ IdealRealGasMixtureFluidProperties::p_T_from_v_e(
     Real v, Real e, std::vector<Real> x, Real & p, Real & T) const
 {
   Real v_primary = v / primaryMassFraction(x);
-  static const Real vc = 1. / 322.;
-  static const Real ec = 2.01573452419e6; // in J/kg
+  static const Real vc = 1. / _fp_primary->criticalDensity();
+  static const Real ec = _fp_primary->criticalInternalEnergy();
+  ; // in J/kg
   // Initial estimate of a bracketing interval for the temperature
   Real lower_temperature, upper_temperature;
   if (v_primary > vc)
@@ -544,7 +411,7 @@ IdealRealGasMixtureFluidProperties::p_T_from_v_e(
     lower_temperature = _fp_primary->T_from_v_e(v_primary, ec);
   }
 
-  upper_temperature = 1300.; // that should not be hardcoded here
+  upper_temperature = T_mix_max;
 
   // Use BrentsMethod to find temperature
   auto energy_diff = [&v, &e, &x, this](Real T) { return this->e_from_T_v(T, v, x) - e; };
@@ -554,60 +421,7 @@ IdealRealGasMixtureFluidProperties::p_T_from_v_e(
 
   p = p_from_T_v(T, v, x);
 }
-/*
-void
-IdealRealGasMixtureFluidProperties::p_T_from_v_e_num(Real v,
-                                                 Real e,
-                                                 std::vector<Real> x,
-                                                 Real & p,
-                                                 Real & dp_dv,
-                                                 Real & dp_de,
-                                                 std::vector<Real> & dp_dx,
-                                                 Real & T,
-                                                 Real & dT_dv,
-                                                 Real & dT_de,
-                                                 std::vector<Real> & dT_dx) const
-{
-  p_T_from_v_e(v, e, x, p, T);
 
-  // pressure and derivatives
-  Real p_unused, dp_dT_v, dp_dv_T;
-  std::vector<Real> dp_dx_Tv;
-  p_from_T_v(T, v, x, p_unused, dp_dT_v, dp_dv_T, dp_dx_Tv);
-
-  // internal energy and derivatives
-  Real e_unused, de_dT_v, de_dv_T;
-  std::vector<Real> de_dx_Tv;
-  e_from_T_v(T, v, x, e_unused, de_dT_v, de_dv_T, de_dx_Tv);
-
-  // Compute derivatives using the following rules:
-  dp_dv = dp_dv_T - dp_dT_v * de_dv_T / de_dT_v;
-  dp_de = dp_dT_v / de_dT_v;
-  dT_dv = -de_dv_T / de_dT_v;
-  dT_de = 1. / de_dT_v;
-
-  // Derivatives with respect to mass fractions are more complicated, so a
-  // finite difference approximation is used (this is expensive of course).
-  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
-  {
-    Real p_perturbed, T_perturbed;
-    std::vector<Real> x_perturbed(x);
-    Real dx_i = 1e-6;
-    for (unsigned int j = 0; j < _n_secondary_vapors; j++)
-    {
-      if (j != i)
-      {
-        x_perturbed[j] =
-            x[j] * (1.0 - (x[i] + dx_i)) / (1.0 - x[i]); // recalculate new mass fractions
-      }
-    }
-    x_perturbed[i] += dx_i;
-    p_T_from_v_e(v, e, x_perturbed, p_perturbed, T_perturbed);
-    dp_dx[i] = (p_perturbed - p) / dx_i;
-    dT_dx[i] = (T_perturbed - T) / dx_i;
-  }
-}
-*/
 void
 IdealRealGasMixtureFluidProperties::p_T_from_v_e(Real v,
                                                  Real e,
@@ -892,4 +706,161 @@ IdealRealGasMixtureFluidProperties::c_from_T_v(Real T,
     c_perturbed = c_from_T_v(T, v, x_perturbed);
     dc_dx[i] = ((c_perturbed - c) / dx_i);
   }
+}
+
+Real
+IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T, Real v, std::vector<Real> x) const
+{
+  Real p, dp_dT, dp_dv;
+  Real h, dh_dT, dh_dv;
+
+  p_from_T_v(T, v, x, p, dp_dT, dp_dv);
+
+  const Real x_primary = primaryMassFraction(x);
+
+  _fp_primary->h_from_T_v(T, v / x_primary, h, dh_dT, dh_dv);
+  Real cp = x_primary * (dh_dT - dh_dv * dp_dT / dp_dv);
+
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    _fp_secondary[i]->h_from_T_v(T, v / x[i], h, dh_dT, dh_dv);
+    cp += x[i] * (dh_dT - dh_dv * dp_dT / dp_dv);
+  }
+
+  return cp;
+}
+
+Real
+IdealRealGasMixtureFluidProperties::cv_from_T_v(Real T, Real v, std::vector<Real> x) const
+{
+  const Real x_primary = primaryMassFraction(x);
+  Real cv = x_primary * _fp_primary->cv_from_T_v(T, v / x_primary);
+
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    cv += x[i] * _fp_secondary[i]->cv_from_T_v(T, v / x[i]);
+  }
+
+  return cv;
+}
+
+Real
+IdealRealGasMixtureFluidProperties::mu_from_T_v(Real T, Real v, std::vector<Real> x) const
+{
+  const Real x_primary = primaryMassFraction(x);
+  Real M_primary = _fp_primary->molarMass();
+
+  Real sum = x_primary / M_primary;
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+    sum += x[i] / _fp_secondary[i]->molarMass();
+  Real M_star = 1. / sum;
+
+  Real vp = v / x_primary;
+  Real ep = _fp_primary->e_from_T_v(T, vp);
+  Real mu = x_primary * M_star / M_primary * _fp_primary->mu_from_v_e(vp, ep);
+
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    Real vi = v / x[i];
+    Real ei = _fp_secondary[i]->e_from_T_v(T, vp);
+    Real Mi = _fp_secondary[i]->molarMass();
+    mu += x[i] * M_star / Mi * _fp_secondary[i]->mu_from_v_e(vi, ei);
+  }
+
+  return mu;
+}
+
+Real
+IdealRealGasMixtureFluidProperties::k_from_T_v(Real T, Real v, std::vector<Real> x) const
+{
+  const Real x_primary = primaryMassFraction(x);
+  Real M_primary = _fp_primary->molarMass();
+
+  Real sum = x_primary / M_primary;
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+    sum += x[i] / _fp_secondary[i]->molarMass();
+  Real M_star = 1. / sum;
+
+  Real vp = v / x_primary;
+  Real ep = _fp_primary->e_from_T_v(T, vp);
+  Real k = x_primary * M_star / M_primary * _fp_primary->k_from_v_e(vp, ep);
+
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    Real vi = v / x[i];
+    Real ei = _fp_secondary[i]->e_from_T_v(T, vp);
+    Real Mi = _fp_secondary[i]->molarMass();
+    k += x[i] * M_star / Mi * _fp_secondary[i]->k_from_v_e(vi, ei);
+  }
+
+  return k;
+}
+
+Real
+IdealRealGasMixtureFluidProperties::xs_prim_from_p_T(Real p, Real T, std::vector<Real> x) const
+{
+  Real T_c = _fp_primary->criticalTemperature();
+  Real xs;
+  if (T > T_c)
+  {
+    // return 1. to indicate that no water would condense for
+    // given (p,T)
+    xs = 1.;
+  }
+  else
+  {
+    Real pp_sat = _fp_primary->pp_sat_from_p_T(p, T);
+    if (pp_sat < 0.)
+    {
+      // return 1. to indicate that no water would condense for
+      // given (p,T)
+      xs = 1.;
+    }
+    Real v_primary = _fp_primary->v_from_p_T(pp_sat, T);
+    Real pp_sat_secondary = p - pp_sat;
+
+    Real v_secondary;
+    if (_n_secondary_vapors == 1)
+    {
+      v_secondary = _fp_secondary[0]->v_from_p_T(pp_sat_secondary, T);
+    }
+    else
+    {
+      std::vector<Real> x_sec(_n_secondary_vapors);
+      const Real x_primary = primaryMassFraction(x);
+      Real sum = 0.;
+      for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+      {
+        x_sec[i] = x[i] / (1. - x_primary);
+        sum += x_sec[i] / _fp_secondary[i]->molarMass();
+      }
+      Real M_star = 1. / sum;
+      v_secondary = R_molar * T / (M_star * pp_sat_secondary);
+      int it = 0;
+      double f = 1., df_dvs, pp_sec, p_sec, dp_dT_sec, dp_dv_sec, dp_dT, dp_dv;
+      double tol_p = 1.e-8;
+      while (fabs(f / pp_sat_secondary) > tol_p)
+      {
+        pp_sec = 0.;
+        dp_dT = 0.;
+        dp_dv = 0.;
+        for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+        {
+          _fp_secondary[i]->p_from_T_v(T, v_secondary / x_sec[i], p_sec, dp_dT_sec, dp_dv_sec);
+          pp_sec += p_sec;
+          dp_dT += dp_dT_sec;
+          dp_dv += dp_dv_sec / x_sec[i];
+        }
+        f = pp_sec - pp_sat_secondary;
+        df_dvs = dp_dv;
+        v_secondary -= f / df_dvs;
+        if (it++ > 15)
+          return NAN;
+      }
+    }
+
+    xs = v_secondary / (v_primary + v_secondary);
+  }
+
+  return xs;
 }

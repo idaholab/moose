@@ -457,6 +457,15 @@ public:
   virtual Real beta(Real pressure, Real temperature) const;
 
   /**
+   * Partial pressure at saturation in a gas mixture
+   *
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return pp_sat (Pa)
+   */
+  virtual Real pp_sat_from_p_T(Real p, Real T) const;
+
+  /**
    * Temperature from pressure and specific enthalpy
    *
    * @param[in] pressure   pressure (Pa)
@@ -489,6 +498,12 @@ public:
    * @return critical density (kg/m^3)
    */
   virtual Real criticalDensity() const;
+
+  /**
+   * Critical specific internal energy
+   * @return specific internal energy (J/kg)
+   */
+  virtual Real criticalInternalEnergy() const;
 
   /**
    * Triple point pressure
