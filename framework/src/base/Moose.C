@@ -185,7 +185,6 @@ addActionTypes(Syntax & syntax)
   registerTask("set_global_params", false);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
-  registerTask("setup_debug", false);
   registerTask("setup_residual_debug", false);
   registerTask("setup_oversampling", false);
   registerTask("deprecated_block", false);
@@ -271,7 +270,6 @@ addActionTypes(Syntax & syntax)
                            "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
                            "(init_problem)"
-                           "(setup_debug)"
                            "(add_output)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
