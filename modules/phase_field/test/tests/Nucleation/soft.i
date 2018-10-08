@@ -42,11 +42,9 @@
 
 [UserObjects]
   [./inserter]
-    type = DiscreteNucleationInserter
+    type = DiscreteNucleationFromFile
     hold_time = 1
-    probability = 0
-    test = '0 0 0'
-    execute_on = 'TIMESTEP_END'
+    file = single.csv
   [../]
   [./map]
     type = DiscreteNucleationMap

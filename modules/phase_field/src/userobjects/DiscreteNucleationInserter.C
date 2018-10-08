@@ -18,35 +18,21 @@ template <>
 InputParameters
 validParams<DiscreteNucleationInserter>()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = validParams<DiscreteNucleationInserterBase>();
   params.addClassDescription("Manages the list of currently active nucleation sites and adds new "
                              "sites according to a given probability function.");
   params.addRequiredParam<MaterialPropertyName>(
       "probability", "Probability density for inserting a discrete nucleus");
   params.addRequiredParam<Real>("hold_time", "Time to keep each nucleus active");
-  params.addParam<Point>("test", "Insert a fixed nucleus at a point in the simulation cell");
-  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
   return params;
 }
 
 DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & parameters)
-  : ElementUserObject(parameters),
+  : DiscreteNucleationInserterBase(parameters),
     _probability(getMaterialProperty<Real>("probability")),
     _hold_time(getParam<Real>("hold_time")),
-    _changes_made(0, 0),
-    _update_required(_app.isRecovering() || _app.isRestarting()),
-    _global_nucleus_list(declareRestartableData("global_nucleus_list", NucleusList(0))),
     _local_nucleus_list(declareRestartableData("local_nucleus_list", NucleusList(0)))
 {
-  setRandomResetFrequency(EXEC_TIMESTEP_END);
-
-  // debugging code (this will insert the entry into every processors list, but duplicate entries in
-  // global should be OK)
-  // we also assume that time starts at 0! But hey, this is only for debugging anyways...
-  if (isParamValid("test"))
-    _insert_test = true;
-  else
-    _insert_test = false;
 }
 
 void
@@ -55,15 +41,7 @@ DiscreteNucleationInserter::initialize()
   // clear insertion and deletion counter
   _changes_made = {0, 0};
 
-  // insert test nucleus once
-  if (_insert_test)
-  {
-    _local_nucleus_list.push_back(NucleusLocation(_hold_time, getParam<Point>("test")));
-    _changes_made.first++;
-    _insert_test = false;
-  }
-
-  // expire entries from the local nucleus list (if the current timestep converged)
+  // expire entries from the local nucleus list (if the current time step converged)
   if (_fe_problem.converged())
   {
     unsigned int i = 0;

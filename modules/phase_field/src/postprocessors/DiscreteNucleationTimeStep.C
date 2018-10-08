@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DiscreteNucleationTimeStep.h"
-#include "DiscreteNucleationInserter.h"
+#include "DiscreteNucleationInserterBase.h"
 #include "MooseUtils.h"
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleationTimeStep);
@@ -36,7 +36,7 @@ validParams<DiscreteNucleationTimeStep>()
 
 DiscreteNucleationTimeStep::DiscreteNucleationTimeStep(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _inserter(getUserObject<DiscreteNucleationInserter>("inserter")),
+    _inserter(getUserObject<DiscreteNucleationInserterBase>("inserter")),
     _dt_nucleation(getParam<Real>("dt_max")),
     _changes_made(_inserter.getInsertionsAndDeletions()),
     _rate(_inserter.getRate())

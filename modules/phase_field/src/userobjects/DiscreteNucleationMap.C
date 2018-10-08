@@ -36,7 +36,7 @@ validParams<DiscreteNucleationMap>()
 DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _mesh_changed(false),
-    _inserter(getUserObject<DiscreteNucleationInserter>("inserter")),
+    _inserter(getUserObject<DiscreteNucleationInserterBase>("inserter")),
     _periodic(isCoupled("periodic") ? coupled("periodic") : -1),
     _radius(getParam<Real>("radius")),
     _int_width(getParam<Real>("int_width")),

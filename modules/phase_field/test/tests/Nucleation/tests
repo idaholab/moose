@@ -129,4 +129,13 @@
     design = 'auxkernels/DiscreteNucleationAux.md'
     issues = '#12114'
   [../]
+
+  [./file]
+    type = 'Exodiff'
+    input = 'file.i'
+    exodiff = 'file_out.e'
+    requirement = "The discrete nucleation system shall provide a deterministic nucleus inserter that uses tabulated time and location data from a file"
+    design = 'userobjects/DiscreteNucleationFromFile.md'
+    issues = '#12262'
+  [../]
 []
