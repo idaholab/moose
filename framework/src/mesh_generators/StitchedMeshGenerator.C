@@ -21,7 +21,7 @@ validParams<StitchedMeshGenerator>()
   InputParameters params = validParams<MeshGenerator>();
 
   params.addRequiredParam<std::vector<MeshFileName>>("files_names", "The mesh files to read.");
-  params.addRequiredParam<bool>("clear_stitched_boundary_ids", true, "Whether or not to clear the stitched boundary IDs");
+  params.addParam<bool>("clear_stitched_boundary_ids", true, "Whether or not to clear the stitched boundary IDs");
   params.addRequiredParam< std::vector<std::vector<std::string>> >("stitch_boundaries_pairs", "Pairs of boundaries to be stitched together");
 
   return params;
