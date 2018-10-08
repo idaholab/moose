@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#12263'
+  design = '/otter/README.md'
+  [./global]
+    type = CSVDiff
+    command = '../../otter.py'
+    cli_args = 'global.plot'
+    csvdiff = 'global.csv'
+    requirement = "A plugin to read global variable data from Exodus files shall be provided"
+  [../]
+[]

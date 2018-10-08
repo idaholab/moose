@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#12263'
+  design = '/otter/README.md'
+  [./cyclic_dependency]
+    type = RunException
+    command = ../../otter.py
+    cli_args = 'cyclic_dependency.plot'
+    expect_err = 'Failed to resolve dependencies for diff1, diff2'
+    requirement = "Otter shall error out with a meaningful message if a cyclic dependency is detected amon the data sources"
+  [../]
+[]

@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#12263'
+  design = '/otter/README.md'
+  [./constant]
+    type = CSVDiff
+    command = '../../otter.py'
+    cli_args = 'constant.plot'
+    csvdiff = 'constant.csv'
+    requirement = "A plugin to write data source as CSV files shall be provided"
+  [../]
+[]

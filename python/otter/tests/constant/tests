@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#12263'
+  design = ''
+  [./count_error]
+    type = RunException
+    command = ../../otter.py
+    cli_args = 'count_error.plot'
+    expect_err = 'Provide the same number of x_values as y_values'
+    requirement = "Otter shall ensure that teh data columns in the Constant data provider are of the same length"
+  [../]
+[]
