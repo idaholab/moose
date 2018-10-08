@@ -21,23 +21,23 @@
 // Declare the output helper specializations
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<Real>(
-    const std::string & material_name, std::shared_ptr<Material> material, bool get_names_only);
+    const std::string & material_name, const Material & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RealVectorValue>(
-    const std::string & material_name, std::shared_ptr<Material> material, bool get_names_only);
+    const std::string & material_name, const Material & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RealTensorValue>(
-    const std::string & material_name, std::shared_ptr<Material> material, bool get_names_only);
+    const std::string & material_name, const Material & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankTwoTensor>(
-    const std::string & material_name, std::shared_ptr<Material> material, bool get_names_only);
+    const std::string & material_name, const Material & material, bool get_names_only);
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankFourTensor>(
-    const std::string & material_name, std::shared_ptr<Material> material, bool get_names_only);
+    const std::string & material_name, const Material & material, bool get_names_only);
 
 registerMooseAction("MooseApp", MaterialOutputAction, "add_output_aux_variables");
 
@@ -74,8 +74,7 @@ MaterialOutputAction::act()
   _boundary_material_data = _problem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
 
   // A complete list of all Material objects
-  const std::vector<std::shared_ptr<Material>> & materials =
-      _problem->getMaterialWarehouse().getObjects();
+  const auto & material_ptrs = _problem->getMaterialWarehouse().getObjects();
 
   // Handle setting of material property output in [Outputs] sub-blocks
   // Output objects can enable material property output, the following code examines the parameters
@@ -108,7 +107,7 @@ MaterialOutputAction::act()
 
   // Loop through each material object
   std::set<std::string> material_names;
-  for (const auto & mat : materials)
+  for (const auto & mat : material_ptrs)
   {
     // Extract the names of the output objects to which the material properties will be exported
     std::set<OutputName> outputs = mat->getOutputs();
@@ -149,31 +148,31 @@ MaterialOutputAction::act()
         {
           if (hasProperty<Real>(name))
           {
-            curr_material_names = materialOutputHelper<Real>(name, mat, get_names_only);
+            curr_material_names = materialOutputHelper<Real>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
           else if (hasProperty<RealVectorValue>(name))
           {
-            curr_material_names = materialOutputHelper<RealVectorValue>(name, mat, get_names_only);
+            curr_material_names = materialOutputHelper<RealVectorValue>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
           else if (hasProperty<RealTensorValue>(name))
           {
-            curr_material_names = materialOutputHelper<RealTensorValue>(name, mat, get_names_only);
+            curr_material_names = materialOutputHelper<RealTensorValue>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
           else if (hasProperty<RankTwoTensor>(name))
           {
-            curr_material_names = materialOutputHelper<RankTwoTensor>(name, mat, get_names_only);
+            curr_material_names = materialOutputHelper<RankTwoTensor>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
           else if (hasProperty<RankFourTensor>(name))
           {
-            curr_material_names = materialOutputHelper<RankFourTensor>(name, mat, get_names_only);
+            curr_material_names = materialOutputHelper<RankFourTensor>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
@@ -222,53 +221,42 @@ MaterialOutputAction::act()
   }
 }
 
-std::shared_ptr<MooseObjectAction>
-MaterialOutputAction::createAction(const std::string & type,
-                                   const std::string & property_name,
-                                   const std::string & variable_name,
-                                   std::shared_ptr<Material> material)
+InputParameters
+MaterialOutputAction::getParams(const std::string & type,
+                                const std::string & property_name,
+                                const std::string & variable_name,
+                                const Material & material)
 {
   // Append the list of output variables for the current material
   _material_variable_names.insert(variable_name);
 
-  // Generate the name
-  std::ostringstream name;
-  name << material->name() << "_" << variable_name;
-
   // Set the action parameters
-  InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
-  action_params.set<std::string>("type") = type;
-  action_params.set<ActionWarehouse *>("awh") = &_awh;
-  action_params.set<std::string>("task") = "add_aux_kernel";
+  InputParameters params = _factory.getValidParams(type);
 
-  // Create the action
-  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create("AddKernelAction", name.str(), action_params));
+  params.set<MaterialPropertyName>("property") = property_name;
+  params.set<AuxVariableName>("variable") = variable_name;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
-  // Set the object parameters
-  InputParameters & object_params = action->getObjectParams();
-  object_params.set<MaterialPropertyName>("property") = property_name;
-  object_params.set<AuxVariableName>("variable") = variable_name;
-  object_params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-
-  if (material->boundaryRestricted())
-    object_params.set<std::vector<BoundaryName>>("boundary") = material->boundaryNames();
+  if (material.boundaryRestricted())
+    params.set<std::vector<BoundaryName>>("boundary") = material.boundaryNames();
   else
-    object_params.set<std::vector<SubdomainName>>("block") = material->blocks();
+    params.set<std::vector<SubdomainName>>("block") = material.blocks();
 
-  // Return the created action
-  return action;
+  return params;
 }
 
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name,
-                                                 std::shared_ptr<Material> material,
+                                                 const Material & material,
                                                  bool get_names_only)
 {
   std::vector<std::string> names = {property_name};
   if (!get_names_only)
-    _awh.addActionBlock(createAction("MaterialRealAux", property_name, property_name, material));
+  {
+    auto params = getParams("MaterialRealAux", property_name, property_name, material);
+    _problem->addAuxKernel("MaterialRealAux", material.name() + property_name, params);
+  }
 
   return names;
 }
@@ -276,13 +264,11 @@ MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_na
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name,
-                                                            std::shared_ptr<Material> material,
+                                                            const Material & material,
                                                             bool get_names_only)
 {
   std::array<char, 3> suffix = {{'x', 'y', 'z'}};
-
   std::vector<std::string> names(3);
-
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     std::ostringstream oss;
@@ -291,10 +277,9 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
 
     if (!get_names_only)
     {
-      std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-          createAction("MaterialRealVectorValueAux", property_name, oss.str(), material));
-      action->getObjectParams().set<unsigned int>("component") = i;
-      _awh.addActionBlock(action);
+      auto params = getParams("MaterialRealVectorValueAux", property_name, oss.str(), material);
+      params.set<unsigned int>("component") = i;
+      _problem->addAuxKernel("MaterialRealVectorValueAux", material.name() + oss.str(), params);
     }
   }
 
@@ -304,7 +289,7 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & property_name,
-                                                            std::shared_ptr<Material> material,
+                                                            const Material & material,
                                                             bool get_names_only)
 {
   std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
@@ -318,11 +303,10 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
 
       if (!get_names_only)
       {
-        std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-            createAction("MaterialRealTensorValueAux", property_name, oss.str(), material));
-        action->getObjectParams().set<unsigned int>("row") = i;
-        action->getObjectParams().set<unsigned int>("column") = j;
-        _awh.addActionBlock(action);
+        auto params = getParams("MaterialRealTensorValueAux", property_name, oss.str(), material);
+        params.set<unsigned int>("row") = i;
+        params.set<unsigned int>("column") = j;
+        _problem->addAuxKernel("MaterialRealTensorValueAux", material.name() + oss.str(), params);
       }
     }
 
@@ -332,7 +316,7 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & property_name,
-                                                          std::shared_ptr<Material> material,
+                                                          const Material & material,
                                                           bool get_names_only)
 {
   std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
@@ -346,11 +330,10 @@ MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & pr
 
       if (!get_names_only)
       {
-        std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-            createAction("MaterialRankTwoTensorAux", property_name, oss.str(), material));
-        action->getObjectParams().set<unsigned int>("i") = i;
-        action->getObjectParams().set<unsigned int>("j") = j;
-        _awh.addActionBlock(action);
+        auto params = getParams("MaterialRankTwoTensorAux", property_name, oss.str(), material);
+        params.set<unsigned int>("i") = i;
+        params.set<unsigned int>("j") = j;
+        _problem->addAuxKernel("MaterialRankTwoTensorAux", material.name() + oss.str(), params);
       }
     }
 
@@ -360,7 +343,7 @@ MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & pr
 template <>
 std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & property_name,
-                                                           std::shared_ptr<Material> material,
+                                                           const Material & material,
                                                            bool get_names_only)
 {
   std::vector<std::string> names(Utility::pow<4>(LIBMESH_DIM));
@@ -377,13 +360,14 @@ MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & p
 
           if (!get_names_only)
           {
-            std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-                createAction("MaterialRankFourTensorAux", property_name, oss.str(), material));
-            action->getObjectParams().set<unsigned int>("i") = i;
-            action->getObjectParams().set<unsigned int>("j") = j;
-            action->getObjectParams().set<unsigned int>("k") = k;
-            action->getObjectParams().set<unsigned int>("l") = l;
-            _awh.addActionBlock(action);
+            auto params =
+                getParams("MaterialRankFourTensorAux", property_name, oss.str(), material);
+            params.set<unsigned int>("i") = i;
+            params.set<unsigned int>("j") = j;
+            params.set<unsigned int>("k") = k;
+            params.set<unsigned int>("l") = l;
+            _problem->addAuxKernel(
+                "MaterialRankFourTensorAux", material.name() + oss.str(), params);
           }
         }
 

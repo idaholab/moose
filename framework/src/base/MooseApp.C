@@ -990,7 +990,10 @@ MooseApp::getCheckpointDirectories() const
   for (const auto & action : actions)
   {
     // Get the parameters from the MooseObjectAction
-    MooseObjectAction * moose_object_action = static_cast<MooseObjectAction *>(action);
+    MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(action);
+    if (!moose_object_action)
+      continue;
+
     const InputParameters & params = moose_object_action->getObjectParams();
 
     // Loop through the actions and add the necessary directories to the list to check
