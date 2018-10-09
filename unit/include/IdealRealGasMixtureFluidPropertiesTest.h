@@ -18,20 +18,9 @@
 class IdealRealGasMixtureFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  IdealRealGasMixtureFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
-  {
-    registerObjects(_factory);
-    buildObjects();
-  }
+  IdealRealGasMixtureFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
 
 protected:
-  void registerObjects(Factory & factory)
-  {
-    registerUserObject(StiffenedGasFluidProperties);
-    registerUserObject(IdealGasFluidProperties);
-    registerUserObject(IdealRealGasMixtureFluidProperties);
-  }
-
   void buildObjects()
   {
     const std::string fp_steam_name = "fp_steam";
@@ -71,9 +60,6 @@ protected:
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("fp_primary") = fp_steam_name;
       params.set<std::vector<UserObjectName>>("fp_secondary") = {fp_air_name};
-      params.set<Real>("newton_damping") = 0.5;
-      params.set<Real>("newton_rel_tol") = 1e-12;
-      params.set<unsigned int>("newton_max_its") = 50;
       _fe_problem->addUserObject(class_name, fp_mix_name, params);
       _fp_mix = &_fe_problem->getUserObject<IdealRealGasMixtureFluidProperties>(fp_mix_name);
     }

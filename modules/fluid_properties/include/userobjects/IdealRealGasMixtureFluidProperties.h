@@ -11,10 +11,10 @@
 #define IDEALREALGASMIXTUREFLUIDPROPERTIES_H
 
 #include "VaporMixtureFluidProperties.h"
+#include "NaNInterface.h"
 
 class IdealRealGasMixtureFluidProperties;
 class SinglePhaseFluidProperties;
-//CMK: class TwoPhaseFluidProperties;
 
 template <>
 InputParameters validParams<IdealRealGasMixtureFluidProperties>();
@@ -24,11 +24,10 @@ InputParameters validParams<IdealRealGasMixtureFluidProperties>();
  *
  *
  */
-class IdealRealGasMixtureFluidProperties : public VaporMixtureFluidProperties
+class IdealRealGasMixtureFluidProperties : public VaporMixtureFluidProperties, public NaNInterface
 {
 public:
   IdealRealGasMixtureFluidProperties(const InputParameters & parameters);
-  virtual ~IdealRealGasMixtureFluidProperties();
 
   /**
    * Number of secondary vapors (non-condensable components)
@@ -457,17 +456,10 @@ protected:
   std::vector<const SinglePhaseFluidProperties *> _fp_secondary;
   /// Names of secondary vapor fluid properties
   const std::vector<UserObjectName> _fp_secondary_names;
-
-  // CMK: /// liquid and two-phase properties of primary component
-  // CMK: const SinglePhaseFluidProperties * _fp_primary_liquid;
-  // CMK: const TwoPhaseFluidProperties * _fp_primary_twophase;
-
   /// Number of secondary vapors
   const unsigned int _n_secondary_vapors;
-
   /// molar (or universal) gas constant
   const Real R_molar;
-
   /// maximum temperature of all components
   const Real T_mix_max;
 };
