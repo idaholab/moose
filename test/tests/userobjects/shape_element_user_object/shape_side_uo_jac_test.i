@@ -75,9 +75,11 @@
   [./u]
     type = RandomIC
     variable = u
+    legacy_generator = false
   [../]
   [./pot]
     type = RandomIC
     variable = pot
+    legacy_generator = false
   [../]
 []

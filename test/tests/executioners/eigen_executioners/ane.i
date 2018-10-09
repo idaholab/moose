@@ -29,6 +29,7 @@
   [./uic]
     type = RandomIC
     variable = u
+    legacy_generator = false
   [../]
 []
 
