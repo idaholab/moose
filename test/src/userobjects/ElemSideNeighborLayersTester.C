@@ -81,5 +81,5 @@ ElemSideNeighborLayersTester::getElementalValueLong(dof_id_type element_id,
   else if (field_name == "ghosted")
     return _ghost_data.find(element_id) != _ghost_data.end();
 
-  return -1;
+  return std::numeric_limits<unsigned long>::max();
 }

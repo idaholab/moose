@@ -47,7 +47,13 @@ Real
 ElementUOAux::computeValue()
 {
   if (_field_type == "long")
-    return _elem_uo.getElementalValueLong(_current_elem->id(), _field_name);
+  {
+    auto value = _elem_uo.getElementalValueLong(_current_elem->id(), _field_name);
+    if (value == std::numeric_limits<unsigned long>::max())
+      return -1.0;
+    else
+      return value;
+  }
   else
     return _elem_uo.getElementalValueReal(_current_elem->id(), _field_name);
 }

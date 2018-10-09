@@ -1,7 +1,3 @@
-# This simulation predicts GB migration of a 2D copper polycrystal with 100 grains represented with 18 order parameters
-# Mesh adaptivity and time step adaptivity are used
-# An AuxVariable is used to calculate the grain boundary locations
-# Postprocessors are used to record time step and the number of grains
 [Mesh]
   # Mesh block.  Meshes can be read in or automatically generated
   type = GeneratedMesh
@@ -37,10 +33,8 @@
     grain_num = 12 # Number of grains
     coloring_algorithm = jp
     rand_seed = 10
-    output_adjacency_matrix = true
   []
   [grain_tracker]
-    # polycrystal_ic_uo = voronoi
     type = GrainTracker
     threshold = 0.2
     verbosity_level = 1
@@ -222,10 +216,6 @@
   []
 []
 
-[BCs]
-  # Boundary Condition block
-[]
-
 [Materials]
   [CuGrGr]
     # Material properties
@@ -260,10 +250,6 @@
   start_time = 0.0
   num_steps = 2
   dt = 300
-[]
-
-[Problem]
-  type = FEProblem
 []
 
 [Outputs]

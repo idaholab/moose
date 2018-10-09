@@ -341,7 +341,7 @@ protected:
 
   /**
    * This method will check if the current entity is above the supplied threshold and "mark" it. It
-   * will then inspect neighboring entities that are above the connecting threshold and add then to
+   * will then inspect neighboring entities that are above the connecting threshold and add them to
    * the current feature.
    *
    * @return Boolean indicating whether a new feature was found while exploring the current entity.

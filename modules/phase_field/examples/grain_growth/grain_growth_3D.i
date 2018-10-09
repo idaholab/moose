@@ -43,7 +43,6 @@
     grain_num = 25 # Number of grains
     rand_seed = 10
     coloring_algorithm = jp
-    output_adjacency_matrix = true
   [../]
   [./grain_tracker]
     type = GrainTracker
