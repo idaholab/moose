@@ -184,6 +184,7 @@
     variable = poro
     max = 0.5
     min = 0.1
+    legacy_generator = false
   [../]
   [./permx]
     type = FunctionIC

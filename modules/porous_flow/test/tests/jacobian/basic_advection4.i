@@ -25,16 +25,19 @@
     variable = P
     min = 2E5
     max = 4E5
+    legacy_generator = false
   [../]
   [./T]
     type = RandomIC
     variable = T
     min = 300
     max = 900
+    legacy_generator = false
   [../]
   [./u]
     type = RandomIC
     variable = u
+    legacy_generator = false
   [../]
 []
 

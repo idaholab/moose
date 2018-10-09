@@ -83,6 +83,7 @@
     variable = pgas
     min = 0
     max = 5E5
+    legacy_generator = false
   [../]
   [./conc_ic]
     type = RandomIC
@@ -90,6 +91,7 @@
     min = 0
     max = 20
     block = centre_block
+    legacy_generator = false
   [../]
 []
 

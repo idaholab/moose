@@ -66,6 +66,7 @@
       type = RandomIC
       min = 0.49
       max = 0.51
+      legacy_generator = false
     [../]
     block = 0
   [../]

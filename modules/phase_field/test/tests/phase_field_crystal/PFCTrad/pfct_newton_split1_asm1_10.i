@@ -13,6 +13,7 @@
       type = RandomIC
       min = -1
       max = 4
+      legacy_generator = false
     [../]
   [../]
   [./u]

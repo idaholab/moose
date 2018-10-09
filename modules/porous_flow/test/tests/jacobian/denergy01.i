@@ -25,6 +25,7 @@
     variable = temp
     max = 1.0
     min = 0.0
+    legacy_generator = false
   [../]
 []
 

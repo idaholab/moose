@@ -20,12 +20,14 @@
     variable = pressure
     min = 0
     max = 1
+    legacy_generator = false
   [../]
   [./conc_ic]
     type = RandomIC
     variable = conc
     min = -1
     max = 1
+    legacy_generator = false
   [../]
 []
 

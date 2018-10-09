@@ -29,18 +29,21 @@
     variable = pressure
     min = 1
     max = 5
+    legacy_generator = false
   [../]
   [./a]
     type = RandomIC
     variable = a
     max = 1
     min = 0
+    legacy_generator = false
   [../]
   [./b]
     type = RandomIC
     variable = b
     max = 1
     min = 0
+    legacy_generator = false
   [../]
 []
 

@@ -36,6 +36,7 @@
     max = 0.48774
     seed = 210
     variable = c
+    legacy_generator = false
   [../]
 []
 

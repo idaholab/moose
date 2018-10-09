@@ -36,36 +36,42 @@
     variable = disp_x
     min = -0.1
     max = 0.0
+    legacy_generator = false
   [../]
   [./disp_y]
     type = RandomIC
     variable = disp_y
     min = -0.1
     max = 0.0
+    legacy_generator = false
   [../]
   [./disp_z]
     type = RandomIC
     variable = disp_z
     min = -0.1
     max = 0.0
+    legacy_generator = false
   [../]
   [./pgas]
     type = RandomIC
     variable = pgas
     max = 0.01
     min = 0.0
+    legacy_generator = false
   [../]
   [./pwater]
     type = RandomIC
     variable = pwater
     max = 0.0
     min = -0.01
+    legacy_generator = false
   [../]
   [./temp]
     type = RandomIC
     variable = temp
     max = 1.0
     min = 0.0
+    legacy_generator = false
   [../]
 []
 

@@ -22,10 +22,12 @@
     variable = P
     min = -1
     max = 1
+    legacy_generator = false
   [../]
   [./u]
     type = RandomIC
     variable = u
+    legacy_generator = false
   [../]
 []
 

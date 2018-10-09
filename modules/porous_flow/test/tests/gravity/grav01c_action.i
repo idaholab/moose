@@ -21,6 +21,7 @@
       type = RandomIC
       min = -1
       max = 1
+      legacy_generator = false
     [../]
   [../]
 []

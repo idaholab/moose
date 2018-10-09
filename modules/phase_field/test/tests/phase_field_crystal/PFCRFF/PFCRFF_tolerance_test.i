@@ -21,6 +21,7 @@
       max = 0.8
       min = 0.2
       seed = 12345
+      legacy_generator = false
     [../]
   [../]
 []

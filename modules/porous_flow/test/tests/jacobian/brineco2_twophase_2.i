@@ -28,18 +28,21 @@
     min = 1e6
     max = 4e6
     variable = pgas
+    legacy_generator = false
   [../]
   [./z]
     type = RandomIC
     min = 0.2
     max = 0.8
     variable = zi
+    legacy_generator = false
   [../]
   [./xnacl]
     type = RandomIC
     min = 0.01
     max = 0.15
     variable = xnacl
+    legacy_generator = false
   [../]
 []
 

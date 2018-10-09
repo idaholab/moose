@@ -27,6 +27,7 @@
       type = RandomIC
       min = 0
       max = 0.1
+      legacy_generator = false
     [../]
   [../]
   [./eta2]
@@ -34,6 +35,7 @@
       type = RandomIC
       min = 0
       max = 0.1
+      legacy_generator = false
     [../]
   [../]
 []

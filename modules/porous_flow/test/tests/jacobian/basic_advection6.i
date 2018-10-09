@@ -24,16 +24,19 @@
     variable = P0
     min = -1
     max = 0
+    legacy_generator = false
   [../]
   [./P1]
     type = RandomIC
     variable = P1
     min = 0
     max = 1
+    legacy_generator = false
   [../]
   [./u]
     type = RandomIC
     variable = u
+    legacy_generator = false
   [../]
 []
 

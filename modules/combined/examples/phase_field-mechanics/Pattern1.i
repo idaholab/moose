@@ -80,6 +80,7 @@
       min = 0
       max = 0.8
       seed = 1235
+      legacy_generator = false
     [../]
   [../]
 

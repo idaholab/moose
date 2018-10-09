@@ -32,12 +32,14 @@
     min = 5e4
     max = 1e5
     variable = pgas
+    legacy_generator = false
   [../]
   [./z]
     type = RandomIC
     min = 0.9
     max = 0.99
     variable = zi
+    legacy_generator = false
   [../]
 []
 

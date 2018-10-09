@@ -21,6 +21,7 @@
   [./diffused]
      [./InitialCondition]
       type = RandomIC
+      legacy_generator = false
      [../]
   [../]
 

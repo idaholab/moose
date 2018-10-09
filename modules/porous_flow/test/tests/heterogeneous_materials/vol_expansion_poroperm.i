@@ -131,6 +131,7 @@
     variable = poro0
     max = 0.15
     min = 0.05
+    legacy_generator = false
   [../]
 []
 

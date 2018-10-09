@@ -23,10 +23,12 @@
   [./P]
     type = RandomIC
     variable = P
+    legacy_generator = false
   [../]
   [./u]
     type = RandomIC
     variable = u
+    legacy_generator = false
   [../]
 []
 

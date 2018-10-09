@@ -20,6 +20,7 @@
     variable = pressure
     min = -1
     max = 1
+    legacy_generator = false
   [../]
   [./conc_ic]
     type = RandomIC
@@ -27,6 +28,7 @@
     min = -1
     max = 1
     block = centre_block
+    legacy_generator = false
   [../]
 []
 

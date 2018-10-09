@@ -35,6 +35,7 @@
     variable = c
     min = 0.2
     max = 0.21
+    legacy_generator = false
   [../]
 []
 

@@ -96,23 +96,27 @@
     variable = p
     min = 0.5
     max = 1.5
+    legacy_generator = false
   [../]
   [./vel_x]
     type = RandomIC
     variable = vel_x
     min = 0.5
     max = 1.5
+    legacy_generator = false
   [../]
   [./vel_y]
     type = RandomIC
     variable = vel_y
     min = 0.5
     max = 1.5
+    legacy_generator = false
   [../]
   [./vel_z]
     type = RandomIC
     variable = vel_z
     min = 0.5
     max = 1.5
+    legacy_generator = false
   [../]
 []

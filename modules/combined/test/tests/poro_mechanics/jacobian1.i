@@ -35,24 +35,28 @@
     min = -0.1
     max = 0.1
     variable = disp_x
+    legacy_generator = false
   [../]
   [./disp_y]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_y
+    legacy_generator = false
   [../]
   [./disp_z]
     type = RandomIC
     min = -0.1
     max = 0.1
     variable = disp_z
+    legacy_generator = false
   [../]
   [./p]
     type = RandomIC
     min = -1
     max = 1
     variable = porepressure
+    legacy_generator = false
   [../]
 []
 
