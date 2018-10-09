@@ -228,7 +228,10 @@ CommonOutputAction::hasConsole()
        it != _awh.actionBlocksWithActionEnd("add_output");
        it++)
   {
-    MooseObjectAction * moa = static_cast<MooseObjectAction *>(*it);
+    MooseObjectAction * moa = dynamic_cast<MooseObjectAction *>(*it);
+    if (!moa)
+      continue;
+
     const std::string & type = moa->getMooseObjectType();
     InputParameters & params = moa->getObjectParams();
     if (type.compare("Console") == 0 && params.get<bool>("output_screen"))
