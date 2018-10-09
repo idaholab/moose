@@ -47,6 +47,7 @@ ElementalVariableValue::getValue()
 
   if (_element && (_element->processor_id() == processor_id()))
   {
+    _fe_problem.setCurrentSubdomainID(_element, 0);
     _subproblem.prepare(_element, _tid);
     _subproblem.reinitElem(_element, _tid);
 
