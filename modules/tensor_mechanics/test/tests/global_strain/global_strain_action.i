@@ -40,7 +40,7 @@
       [./stress_div]
         strain = SMALL
         add_variables = true
-        global_strain = global_strain
+        global_strain = global_strain #global strain contribution
         generate_output = 'strain_xx strain_xy strain_yy stress_xx stress_xy
                            stress_yy vonmises_stress'
       [../]
