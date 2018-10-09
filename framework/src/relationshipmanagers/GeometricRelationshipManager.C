@@ -16,7 +16,7 @@ validParams<GeometricRelationshipManager>()
 {
   InputParameters params = validParams<RelationshipManager>();
 
-  params.set<Moose::RelationshipManagerType>("rm_type") = Moose::RelationshipManagerType::Geometric;
+  params.set<Moose::RelationshipManagerType>("rm_type") = Moose::RelationshipManagerType::GEOMETRIC;
   return params;
 }
 

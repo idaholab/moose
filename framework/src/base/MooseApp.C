@@ -1542,14 +1542,22 @@ MooseApp::hasRelationshipManager(const std::string & name) const
                       }) != _relationship_managers.end();
 }
 
-void
+bool
 MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager)
 {
-  auto name = relationship_manager->name();
-  if (hasRelationshipManager(name))
-    mooseError("Duplicate RelationshipManager added: \"", name, "\"");
+  bool add = true;
+  for (const auto & rm : _relationship_managers)
+    if (*rm == *relationship_manager)
+    {
+      add = false;
+      break;
+    }
 
-  _relationship_managers.emplace_back(relationship_manager);
+  if (add)
+    _relationship_managers.emplace_back(relationship_manager);
+
+  // Inform the caller whether the object was added or not
+  return add;
 }
 
 void

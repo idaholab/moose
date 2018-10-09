@@ -52,7 +52,9 @@ validParams<GrainTracker>()
   InputParameters params = validParams<FeatureFloodCount>();
   params += validParams<GrainTrackerInterface>();
 
-  params.registerRelationshipManagers("GrainTrackerHaloRM");
+  params.registerRelationshipManagers("GrainTrackerHaloRM ElementPointNeighbors",
+                                      "GEOMETRIC ALGEBRAIC");
+  params.addPrivateParam<unsigned short>("element_point_neighbor_layers", 1);
 
   params.addClassDescription("Grain Tracker object for running reduced order parameter simulations "
                              "without grain coalescence.");
@@ -81,7 +83,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _error_on_grain_creation(getParam<bool>("error_on_grain_creation")),
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
-    _max_curr_grain_id(0),
+    _max_curr_grain_id(invalid_id),
     _is_transient(_subproblem.isTransient()),
     _finalize_timer(registerTimedSection("finalize", 1)),
     _remap_timer(registerTimedSection("remapGrains", 2)),
@@ -134,7 +136,7 @@ std::size_t
 GrainTracker::getTotalFeatureCount() const
 {
   // Note: This value is parallel consistent, see assignGrains()/trackGrains()
-  return _max_curr_grain_id + 1;
+  return _max_curr_grain_id == invalid_id ? 0 : _max_curr_grain_id + 1;
 }
 
 Point
@@ -187,6 +189,31 @@ GrainTracker::initialize()
     _feature_sets_old.swap(_feature_sets);
 
   FeatureFloodCount::initialize();
+}
+
+void
+GrainTracker::meshChanged()
+{
+  // Update the element ID ranges for use when computing halo maps
+  if (_compute_halo_maps && _mesh.isDistributedMesh())
+  {
+    _all_ranges.clear();
+
+    auto range = std::make_pair(std::numeric_limits<dof_id_type>::max(),
+                                std::numeric_limits<dof_id_type>::min());
+    for (const auto & current_elem : _mesh.getMesh().active_local_element_ptr_range())
+    {
+      auto id = current_elem->id();
+      if (id < range.first)
+        range.first = id;
+      else if (id > range.second)
+        range.second = id;
+    }
+
+    _communicator.gather(0, range, _all_ranges);
+  }
+
+  FeatureFloodCount::meshChanged();
 }
 
 void
@@ -294,14 +321,14 @@ GrainTracker::finalize()
 
   updateFieldInfo();
   if (_verbosity_level > 1)
-    _console << "Finished inside of updateFieldInfo" << std::endl;
+    _console << "Finished inside of updateFieldInfo\n";
 
   // Set the first time flag false here (after all methods of finalize() have completed)
   _first_time = false;
 
   // TODO: Release non essential memory
   if (_verbosity_level > 0)
-    _console << "Finished inside of GrainTracker" << std::endl;
+    _console << "Finished inside of GrainTracker\n" << std::endl;
 }
 
 void
@@ -378,17 +405,23 @@ GrainTracker::assignGrains()
    */
   if (_is_master)
   {
-    mooseAssert(!_feature_sets.empty(), "Feature sets empty!");
-
     // Find the largest grain ID, this requires sorting if the ID is not already set
     sortAndLabel();
-    _max_curr_grain_id = _feature_sets[_feature_sets.size() - 1]._id;
+
+    if (_feature_sets.empty())
+    {
+      _max_curr_grain_id = invalid_id;
+      _reserve_grain_first_index = 0;
+    }
+    else
+    {
+      _max_curr_grain_id = _feature_sets.back()._id;
+      _reserve_grain_first_index = _max_curr_grain_id + 1;
+    }
 
     for (auto & grain : _feature_sets)
       grain._status = Status::MARKED; // Mark the grain
 
-    // Set up the first reserve grain index based on the largest grain ID
-    _reserve_grain_first_index = _max_curr_grain_id + 1;
   } // is_master
 
   /*************************************************************
@@ -403,8 +436,9 @@ GrainTracker::assignGrains()
   buildFeatureIdToLocalIndices(_max_curr_grain_id);
 
   // Now trigger the newGrainCreated() callback on all ranks
-  for (auto new_id = decltype(_max_curr_grain_id)(0); new_id <= _max_curr_grain_id; ++new_id)
-    newGrainCreated(new_id);
+  if (_max_curr_grain_id != invalid_id)
+    for (auto new_id = decltype(_max_curr_grain_id)(0); new_id <= _max_curr_grain_id; ++new_id)
+      newGrainCreated(new_id);
 }
 
 void
@@ -489,6 +523,7 @@ GrainTracker::trackGrains()
       // clang-format on
 
       // We only need to examine grains that have matching variable indices
+      bool any_boxes_intersect = false;
       for (decltype(_feature_sets.size()) new_grain_index =
                std::distance(_feature_sets.begin(), start_it);
            new_grain_index < _feature_sets.size() &&
@@ -503,6 +538,7 @@ GrainTracker::trackGrains()
          */
         if (new_grain.boundingBoxesIntersect(old_grain))
         {
+          any_boxes_intersect = true;
           Real curr_centroid_diff = centroidRegionDistance(old_grain._bboxes, new_grain._bboxes);
           if (curr_centroid_diff <= min_centroid_diff)
           {
@@ -511,6 +547,10 @@ GrainTracker::trackGrains()
           }
         }
       }
+
+      if (_verbosity_level > 2 && !any_boxes_intersect)
+        _console << "\nNo intersecting bounding boxes found while trying to match grain "
+                 << old_grain;
 
       // found a match
       if (closest_match_index != invalid_size_t)
@@ -644,15 +684,78 @@ GrainTracker::trackGrains()
           {
             grain._id = other_grain._id;    // Set the duplicate ID
             grain._status = Status::MARKED; // Mark it
+
             if (_verbosity_level > 0)
-            {
-              _console << COLOR_YELLOW << "Split Grain Detected "
+              _console << COLOR_YELLOW << "Split Grain Detected #" << grain._id
                        << " (variable index: " << grain._var_index << ")\n"
                        << COLOR_DEFAULT;
-              if (_verbosity_level > 1)
-                _console << grain << other_grain;
-            }
+            if (_verbosity_level > 1)
+              _console << grain << other_grain;
           }
+        }
+
+        if (grain._var_index < _reserve_op_index)
+        {
+          /**
+           * The "try-harder loop":
+           * OK so we still have an extra grain in the new set that isn't matched up against the
+           * old set and since the order parameter isn't reserved. We aren't really expecting a new
+           * grain. Let's try to make a few more attempts to see if this is a split grain even
+           * though it failed to match the criteria above. This might happen if the halo front is
+           * advancing too fast!
+           *
+           * In this loop we'll make an attempt to match up this new grain to the old halos. If
+           * adaptivity is happening this could fail as elements in the new set may be at a
+           * different level than in the old set. If we get multiple matches, we'll compare the
+           * grain volumes (based on elements, not integrated to choose the closest).
+           *
+           * Future ideas:
+           * Look at the volume fraction of the new grain and overlay it over the volume fraction
+           * of the old grain (would require more saved information, or an aux field hanging around
+           * (subject to projection problems).
+           */
+          if (_verbosity_level > 1)
+            _console << COLOR_YELLOW
+                     << "Trying harder to detect a split grain while examining grain on variable "
+                        "index "
+                     << grain._var_index << '\n'
+                     << COLOR_DEFAULT;
+
+          std::vector<std::size_t> old_grain_indices;
+          for (auto old_grain_index = beginIndex(_feature_sets_old);
+               old_grain_index < _feature_sets_old.size();
+               ++old_grain_index)
+          {
+            auto & old_grain = _feature_sets_old[old_grain_index];
+
+            if (old_grain._status == Status::INACTIVE)
+              continue;
+
+            /**
+             * Note that the old grains we are looking at will already be marked from the earlier
+             * tracking phase. We are trying to see if this unmatched grain is part of a larger
+             * whole. To do that we'll look at the halos across the time step.
+             */
+            if (grain._var_index == old_grain._var_index &&
+                grain.boundingBoxesIntersect(old_grain) && grain.halosIntersect(old_grain))
+              old_grain_indices.push_back(old_grain_index);
+          }
+
+          if (old_grain_indices.size() == 1)
+          {
+            grain._id = _feature_sets_old[old_grain_indices[0]]._id;
+            grain._status = Status::MARKED;
+
+            if (_verbosity_level > 0)
+              _console << COLOR_YELLOW << "Split Grain Detected #" << grain._id
+                       << " (variable index: " << grain._var_index << ")\n"
+                       << COLOR_DEFAULT;
+          }
+          else if (old_grain_indices.size() > 1)
+            _console
+                << COLOR_RED << "Split Grain Likely Detected #" << grain._id
+                << " Need more information to find correct candidate - contact a developer!\n\n"
+                << COLOR_DEFAULT;
         }
 
         // Must be a nucleating grain (status is still not set)
@@ -661,6 +764,13 @@ GrainTracker::trackGrains()
           auto new_index = getNextUniqueID();
           grain._id = new_index;          // Set the ID
           grain._status = Status::MARKED; // Mark it
+
+          if (_verbosity_level > 0)
+            _console << COLOR_YELLOW << "Nucleating Grain Detected "
+                     << " (variable index: " << grain._var_index << ")\n"
+                     << COLOR_DEFAULT;
+          if (_verbosity_level > 1)
+            _console << grain;
         }
       }
     }
@@ -1481,6 +1591,8 @@ GrainTracker::communicateHaloMap()
     std::vector<std::pair<std::size_t, dof_id_type>> local_halo_ids;
     std::size_t counter = 0;
 
+    const bool isDistributedMesh = _mesh.isDistributedMesh();
+
     if (_is_master)
     {
       std::vector<std::vector<std::pair<std::size_t, dof_id_type>>> root_halo_ids(_n_procs);
@@ -1491,15 +1603,37 @@ GrainTracker::communicateHaloMap()
       {
         for (const auto & entity_pair : _halo_ids[var_index])
         {
-          DofObject * halo_entity;
-          if (_is_elemental)
-            halo_entity = _mesh.queryElemPtr(entity_pair.first);
-          else
-            halo_entity = _mesh.queryNodePtr(entity_pair.first);
+          auto entity_id = entity_pair.first;
+          if (isDistributedMesh)
+          {
+            // Check to see which contiguous range this entity ID falls into
+            auto range_it =
+                std::lower_bound(_all_ranges.begin(),
+                                 _all_ranges.end(),
+                                 entity_id,
+                                 [](const std::pair<dof_id_type, dof_id_type> range,
+                                    dof_id_type entity_id) { return range.second < entity_id; });
 
-          if (halo_entity)
-            root_halo_ids[halo_entity->processor_id()].push_back(
-                std::make_pair(var_index, entity_pair.first));
+            mooseAssert(range_it != _all_ranges.end(), "No range round?");
+
+            // Recover the index from the iterator
+            auto proc_id = std::distance(_all_ranges.begin(), range_it);
+
+            // Now add this halo entity to the map for the corresponding proc to scatter latter
+            root_halo_ids[proc_id].push_back(std::make_pair(var_index, entity_id));
+          }
+          else
+          {
+            DofObject * halo_entity;
+            if (_is_elemental)
+              halo_entity = _mesh.queryElemPtr(entity_id);
+            else
+              halo_entity = _mesh.queryNodePtr(entity_id);
+
+            if (halo_entity)
+              root_halo_ids[halo_entity->processor_id()].push_back(
+                  std::make_pair(var_index, entity_id));
+          }
         }
       }
 
@@ -1519,7 +1653,12 @@ GrainTracker::communicateHaloMap()
     for (const auto & halo_pair : local_halo_ids)
       _halo_ids[halo_pair.first].emplace(std::make_pair(halo_pair.second, halo_pair.first));
 
-    // Finally remove halo markings from stitch regions
+    /**
+     * Finally remove halo markings from interior regions. This step is necessary because we expand
+     * halos _before_ we do communication but that expansion can and will likely go into the
+     * interior of the grain (from a single processor's perspective). We could expand halos after
+     * merging, but that would likely be less scalable.
+     */
     for (const auto & grain : _feature_sets)
       for (auto local_id : grain._local_ids)
         _halo_ids[grain._var_index].erase(local_id);
@@ -1613,7 +1752,7 @@ GrainTracker::getNextUniqueID()
    * _reserve_grain_first_index IS a valid index. It does not
    * point to the last valid index of the non-reserved grains.
    */
-  _max_curr_grain_id = std::max(_max_curr_grain_id + 1,
+  _max_curr_grain_id = std::max(_max_curr_grain_id == invalid_id ? 0 : _max_curr_grain_id + 1,
                                 _reserve_grain_first_index + _n_reserve_ops /* no +1 here!*/);
 
   return _max_curr_grain_id;

@@ -107,6 +107,9 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+
+  [./proc_id]
+  [../]
 []
 
 [Kernels]
@@ -215,6 +218,11 @@
     field_display = CENTROID
     flood_counter = grain_tracker
   [../]
+  [./proc_id]
+    type = ProcessorIDAux
+    variable = proc_id
+    execute_on = initial
+  [../]
 []
 
 [BCs]
@@ -266,7 +274,6 @@
   exodus = true
   [./perf_graph]
     type = PerfGraphOutput
-    execute_on = 'initial final'  # Default is "final"
     level = 2                     # Default is 1
   [../]
 []

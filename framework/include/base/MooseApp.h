@@ -568,9 +568,18 @@ public:
    */
   void addExecFlag(const ExecFlagType & flag);
 
+  /**
+   * Returns a Boolean indicating whether a RelationshipManater exists with the same name.
+   */
   bool hasRelationshipManager(const std::string & name) const;
 
-  void addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
+  /**
+   * Transfers ownership of a RelationshipManager to the application for lifetime management.
+   * The RelationshipManager will NOT be duplicately added if an equivalent RelationshipManager
+   * is already active. In that case, it's possible that the object will be destroyed if the
+   * reference count drops to zero.
+   */
+  bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
   void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
 

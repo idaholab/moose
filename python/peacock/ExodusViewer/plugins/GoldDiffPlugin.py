@@ -131,7 +131,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if self.hasGoldWindow():
             self.GoldVTKWindow.onReaderOptionsChanged(options)
         if self.hasDiffWindow():
-            self.DiffTKWindow.onReaderOptionsChanged(options)
+            self.DiffVTKWindow.onReaderOptionsChanged(options)
 
     def onResultOptionsChanged(self, options):
         """
@@ -141,7 +141,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if self.hasGoldWindow():
             self.GoldVTKWindow.onResultOptionsChanged(options)
         if self.hasDiffWindow():
-            self.DiffTKWindow.onResultOptionsChanged(options)
+            self.DiffVTKWindow.onResultOptionsChanged(options)
 
     def onWindowOptionsChanged(self, options):
         """
@@ -151,7 +151,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if self.hasGoldWindow():
             self.GoldVTKWindow.onWindowOptionsChanged(options)
         if self.hasDiffWindow():
-            self.DiffTKWindow.onWindowOptionsChanged(options)
+            self.DiffVTKWindow.onWindowOptionsChanged(options)
 
     def onCameraChanged(self, *args):
         """

@@ -163,6 +163,12 @@ Factory::create(const std::string & obj_name,
 }
 
 void
+Factory::releaseSharedObjects(const MooseObject & moose_object, THREAD_ID tid)
+{
+  _app.getInputParameterWarehouse().removeInputParameters(moose_object, tid);
+}
+
+void
 Factory::restrictRegisterableObjects(const std::vector<std::string> & names)
 {
   _registerable_objects.insert(names.begin(), names.end());

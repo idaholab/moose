@@ -3,22 +3,35 @@
     type = 'Exodiff'
     input = 'EulerAngleVariables2RGBAux.i'
     exodiff = 'EulerAngleVariables2RGBAux_out.e'
-    max_time = 1000
-    recover = false
+
+    issues = "#7332"
+    design = "EulerAngleVariables2RGBAux.md"
+    requirement = "The system shall output an RGB field that can be interpreted as either a component
+                   or a combined Euler angle given a grain structure."
   [../]
 
   [./1phase_reconstruction]
     type = 'Exodiff'
     input = '1phase_reconstruction.i'
     exodiff = '1phase_reconstruction_out.e'
+
+    issues = "#9110"
+    design = "EBSD.md"
+    requirement = "The system shall support reading EBSD data and initializing a Polycrystal grain structure with that data."
   [../]
+
   [./1phase_reconstruction_40x40]
     type = 'Exodiff'
     input = '1phase_reconstruction.i'
 
     # Read in a 2-phase file but ignore phase
-    cli_args = 'Mesh/filename=ebsd_40x40_2_phase.txt GlobalParams/op_num=5 Outputs/file_base=1phase_reconstruction_40x40_out'
+    cli_args = 'Mesh/filename=ebsd_40x40_2_phase.txt GlobalParams/op_num=6 Outputs/file_base=1phase_reconstruction_40x40_out'
     exodiff = '1phase_reconstruction_40x40_out.e'
+
+    issues = "#9110"
+    design = "EBSD.md"
+    requirement = "The system shall support reading EBSD data to initalized Polycrystal grain structures while supporting
+                    reduced order parameter IC assignment."
   [../]
 
   [./1phase_evolution]
@@ -26,6 +39,10 @@
     input = '1phase_evolution.i'
     exodiff = '1phase_evolution_out.e'
     max_time = 1000
+
+    issues = "#9110"
+    design = "EBSD.md"
+    requirement = "The system shall support grain evolution when beginning from EBSD ICs."
   [../]
 
   [./2phase_reconstruction]
@@ -33,6 +50,10 @@
     input = '2phase_reconstruction.i'
     exodiff = '2phase_reconstruction_out.e'
     recover = false # issue #5188
+
+    issues = "#9110 #5920"
+    design = "EBSD.md"
+    requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs."
   [../]
 
   [./2phase_reconstruction2]
@@ -40,6 +61,11 @@
     input = '2phase_reconstruction2.i'
     exodiff = '2phase_reconstruction2_out.e'
     recover = false # issue #5188
+
+    issues = "#9110 #5920"
+    design = "EBSD.md"
+    requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs
+                   while supporting reduced order parameter IC assignment."
   [../]
 
   [./2phase_reconstruction3]
@@ -47,6 +73,10 @@
     input = '2phase_reconstruction3.i'
     exodiff = '2phase_reconstruction3_out.e'
     recover = false # issue #5188
+
+    issues = "#9110 #5920"
+    design = "EBSD.md"
+    requirement = "The system shall support reading EBSD data to initialize PolycrystalICs with discontinuous numbering."
   [../]
 
   [./2phase_reconstruction4]
@@ -54,6 +84,11 @@
     input = '2phase_reconstruction4.i'
     exodiff = '2phase_reconstruction4_out.e'
     recover = false # issue #5188
+
+    issues = "#9110 #5920"
+    design = "EBSD.md"
+    requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs
+                   while supporting reduced order parameter IC assignment and display the coloring."
   [../]
 
   [./regions_without_grains]
@@ -61,5 +96,10 @@
     input = 'euler2rgb_no_grain_region.i'
     csvdiff = 'euler2rgb_no_grain_region_out.csv'
     max_time = 1000
+
+    issues = "#9110 #5920"
+    design = "EBSD.md"
+    requirement = "The system shall support reading a single phase of EBSD data at a time to initialize PolycrystalICs
+                   and support regions within the domain that contain no grains at all."
   [../]
 []

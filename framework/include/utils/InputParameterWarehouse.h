@@ -122,6 +122,11 @@ private:
   addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
 
   /**
+   * Allows for the deletion and cleanup of an object while the simulation is running.
+   */
+  void removeInputParameters(const MooseObject & moose_object, THREAD_ID tid = 0);
+
+  /**
    * Returns a ControllableParameter object that contains all matches to ControllableItem objects
    * for the provided name.
    *
@@ -154,11 +159,14 @@ private:
   getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid = 0) const;
   InputParameters & getInputParameters(const MooseObjectName & object_name,
                                        THREAD_ID tid = 0) const;
-  ///@{
+  ///@}
 
-  /// The factory is allowed to call addInputParameters.
+  ///@{
+  /// The factory is allowed to call addInputParameters and removeInputParameters.
   friend MooseObjectPtr
   Factory::create(const std::string &, const std::string &, InputParameters, THREAD_ID, bool);
+  friend void Factory::releaseSharedObjects(const MooseObject &, THREAD_ID);
+  ///@}
 
   /// Only controls are allowed to call getControllableParameter. The
   /// Control::getControllableParameter is the only method that calls getControllableParameter.

@@ -10,8 +10,8 @@
 #ifndef DISTRIBUTIONINTERFACE_H
 #define DISTRIBUTIONINTERFACE_H
 
-#include "ParallelUniqueId.h"
 #include "InputParameters.h"
+#include "ParallelUniqueId.h"
 #include "FEProblemBase.h"
 
 // Forward declarations

@@ -454,7 +454,8 @@ public:
    *
    * @param names A space delimited list of RelationshipMangers that may be built by this object.
    */
-  void registerRelationshipManagers(const std::string & names);
+  void registerRelationshipManagers(const std::string & names,
+                                    const std::string & use_as_rm_types = "");
 
   /**
    * Returns the list of buildable types as a std::vector<std::string>
@@ -464,7 +465,8 @@ public:
   /**
    * Returns the list of buildable (or required) RelationshipManager object types for this object.
    */
-  const std::vector<std::string> & getBuildableRelationshipManagerTypes() const;
+  const std::vector<std::pair<std::string, Moose::RelationshipManagerType>> &
+  getBuildableRelationshipManagerTypes() const;
 
   ///@{
   /**
@@ -850,8 +852,11 @@ private:
   /// MooseObjectAction derived Actions.
   std::vector<std::string> _buildable_types;
 
-  /// The RelationshipManagers that this object may either build or requires
-  std::vector<std::string> _buildable_rm_types;
+  /// The RelationshipManagers that this object may either build or require.
+  /// The optional second argument may be supplied to "downgrade" the functionality of the corresponding
+  /// relationship manager (e.g. An AlgebraicRelationshipManager could be only used as a
+  /// GeometricRelationshipManager for a given simulation).
+  std::vector<std::pair<std::string, Moose::RelationshipManagerType>> _buildable_rm_types;
 
   /// This parameter collapses one level of nesting in the syntax blocks.  It is used
   /// in conjunction with MooseObjectAction derived Actions.
