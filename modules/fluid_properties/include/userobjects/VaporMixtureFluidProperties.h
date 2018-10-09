@@ -43,7 +43,7 @@ public:
    * @param[in] e   specific internal energy
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real p_from_v_e(Real v, Real e, std::vector<Real> x) const = 0;
+  virtual Real p_from_v_e(Real v, Real e, const std::vector<Real> & x) const = 0;
 
   /**
    * Pressure and its derivatives from specific volume and specific internal energy
@@ -58,7 +58,7 @@ public:
    */
   virtual void p_from_v_e(Real v,
                           Real e,
-                          std::vector<Real> x,
+                          const std::vector<Real> & x,
                           Real & p,
                           Real & dp_dv,
                           Real & dp_de,
@@ -71,7 +71,7 @@ public:
    * @param[in] e   specific internal energy
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real T_from_v_e(Real v, Real e, std::vector<Real> x) const = 0;
+  virtual Real T_from_v_e(Real v, Real e, const std::vector<Real> & x) const = 0;
 
   /**
    * Temperature and its derivatives from specific volume and specific internal energy
@@ -86,7 +86,7 @@ public:
    */
   virtual void T_from_v_e(Real v,
                           Real e,
-                          std::vector<Real> x,
+                          const std::vector<Real> & x,
                           Real & T,
                           Real & dT_dv,
                           Real & dT_de,
@@ -99,7 +99,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real rho_from_p_T(Real p, Real T, std::vector<Real> x) const = 0;
+  virtual Real rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
    * Density and its derivatives from pressure and temperature
@@ -115,7 +115,7 @@ public:
    */
   virtual void rho_from_p_T(Real p,
                             Real T,
-                            std::vector<Real> x,
+                            const std::vector<Real> & x,
                             Real & rho,
                             Real & drho_dp,
                             Real & drho_dT,
@@ -128,7 +128,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real e_from_p_T(Real p, Real T, std::vector<Real> x) const = 0;
+  virtual Real e_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
    * Specific internal energy and its derivatives from pressure and temperature
@@ -144,7 +144,7 @@ public:
    */
   virtual void e_from_p_T(Real p,
                           Real T,
-                          std::vector<Real> x,
+                          const std::vector<Real> & x,
                           Real & e,
                           Real & de_dp,
                           Real & de_dT,
@@ -158,7 +158,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real c_from_p_T(Real p, Real T, std::vector<Real> x) const = 0;
+  virtual Real c_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
    * Isobaric (constant-pressure) specific heat from pressure and temperature
@@ -168,7 +168,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real cp_from_p_T(Real p, Real T, std::vector<Real> x) const = 0;
+  virtual Real cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
    * Isochoric (constant-volume) specific heat from pressure and temperature
@@ -178,7 +178,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real cv_from_p_T(Real p, Real T, std::vector<Real> x) const = 0;
+  virtual Real cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
    * Dynamic viscosity from pressure and temperature
@@ -188,7 +188,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real mu_from_p_T(Real p, Real T, std::vector<Real> x) const = 0;
+  virtual Real mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
    * Thermal conductivity from pressure and temperature
@@ -198,7 +198,7 @@ public:
    * @param[in] T   temperature
    * @param[in] x   vapor mass fraction values
    */
-  virtual Real k_from_p_T(Real p, Real T, std::vector<Real> x) const = 0;
+  virtual Real k_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
 
   /**
    * Computes the mass fraction of the primary vapor given mass fractions of the
@@ -211,7 +211,7 @@ public:
    * where the mass fractions \f$x_i, i=2\ldots N\f$ correspond to the secondary
    * vapors.
    */
-  Real primaryMassFraction(std::vector<Real> x) const;
+  Real primaryMassFraction(const std::vector<Real> & x) const;
 };
 
 #endif /* VAPORMIXTUREFLUIDPROPERTIES_H */

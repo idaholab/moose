@@ -26,7 +26,7 @@ VaporMixtureFluidProperties::VaporMixtureFluidProperties(const InputParameters &
 VaporMixtureFluidProperties::~VaporMixtureFluidProperties() {}
 
 Real
-VaporMixtureFluidProperties::primaryMassFraction(std::vector<Real> x) const
+VaporMixtureFluidProperties::primaryMassFraction(const std::vector<Real> & x) const
 {
   return 1 - std::accumulate(x.begin(), x.end(), 0.0);
 }
