@@ -2,7 +2,7 @@
 
 The deformation gradient is a fundamental measure of deformation in continuum mechanics. It maps line segments in a reference configuration into line segments (consisting of the same material points) in a deformed configuration.
 
-In peridynamic theory, equivalent deformation gradients can be formulated using the weighted least squares numerical technique, given the fact that it is usually too many line segments connected at each individual material point. Based on the concept of weighted least squares technique, two types of deformation gradient can be formulated in a discretized peridynamics domain.
+In peridynamics theory, equivalent deformation gradients can be formulated using the weighted least squares numerical technique, given the fact that it is usually too many line segments connected at each individual material point. Based on the concept of weighted least squares technique, two types of deformation gradient can be formulated in a discretized peridynamics domain.
 
 ## Deformation gradient in Continuum Mechanics
 

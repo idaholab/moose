@@ -32,6 +32,9 @@ public:
 
   /// EXODUS finite element mesh
   MeshBase * _fe_mesh;
+
+  /// minimum spacing between nodes for the whole mesh
+  Real _min_spacing;
 };
 
 #endif /* FILEMESHPD_H */

@@ -6,6 +6,9 @@
     exodiff = 'center_crack_in.e'
     recover = false
     map = false
+    requirement = 'GeneratedMeshPD shall generate peridynamic mesh with pre-existing center crack.'
+    design = 'modules/peridynamics/GeneratedMeshPD.md'
+    issues = '#11561'
   [../]
 
   [./double_edged_cracks]
@@ -15,5 +18,8 @@
     exodiff = 'double_edged_cracks_in.e'
     recover = false
     map = false
+    requirement = 'GeneratedMeshPD shall generate peridynamic mesh with pre-existing double edged cracks.'
+    design = 'modules/peridynamics/GeneratedMeshPD.md'
+    issues = '#11561'
   [../]
 []

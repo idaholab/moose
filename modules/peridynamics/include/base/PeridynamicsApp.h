@@ -20,10 +20,11 @@ InputParameters validParams<PeridynamicsApp>();
 class PeridynamicsApp : public MooseApp
 {
 public:
-  PeridynamicsApp(InputParameters parameters);
+  PeridynamicsApp(const InputParameters & parameters);
   virtual ~PeridynamicsApp();
 
   static void registerApps();
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
   static void registerObjects(Factory & factory);
   static void registerObjectDepends(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);

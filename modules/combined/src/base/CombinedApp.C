@@ -74,6 +74,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   RichardsApp::registerAll(f, af, s);
   SolidMechanicsApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
+  PeridynamicsApp::registerAll(f, af, s);
   TensorMechanicsApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
 }

@@ -64,7 +64,9 @@ FileMeshPD::init()
   _dg_nodeinfo.resize(_total_nodes);
   _dg_bond_volumesum.resize(_total_nodes);
   _dg_node_volumesum.resize(_total_nodes);
+  _min_spacing = 1.0e8;
 
+  Real dist = 0.0;
   // loop through all fe elements to generate PD nodes structure
   for (MeshBase::element_iterator it = _fe_mesh->elements_begin(); it != _fe_mesh->elements_end();
        ++it)
@@ -76,8 +78,11 @@ FileMeshPD::init()
     for (unsigned int i = 0; i < fe_elem->n_neighbors(); ++i)
       if (fe_elem->neighbor(i) != NULL)
       {
-        spacing += (fe_elem->centroid() - fe_elem->neighbor(i)->centroid()).norm();
+        dist = (fe_elem->centroid() - fe_elem->neighbor(i)->centroid()).norm();
+        spacing += dist;
         nneighbors += 1;
+        if (dist < _min_spacing)
+          _min_spacing = dist;
       }
     _pdnode[fe_elem->id()].coord = fe_elem->centroid();
     _pdnode[fe_elem->id()].mesh_spacing = spacing / nneighbors;
@@ -194,13 +199,13 @@ FileMeshPD::buildMesh()
     Real Y = (_pdnode[i].coord)(1);
     Real Z = (_pdnode[i].coord)(2);
     Real dis = std::sqrt(X * X + Y * Y + Z * Z);
-    if (dis < 0.001)
+    if (dis < 0.001 * _min_spacing)
       pd_boundary_info.add_node(pd_mesh.node_ptr(i), 100);
-    if (std::abs(Y) < 0.001)
+    if (std::abs(Y) < 0.001 * _min_spacing)
       pd_boundary_info.add_node(pd_mesh.node_ptr(i), 101);
-    if (std::abs(X) < 0.001)
+    if (std::abs(X) < 0.001 * _min_spacing)
       pd_boundary_info.add_node(pd_mesh.node_ptr(i), 102);
-    if (std::abs(Z) < 0.001)
+    if (std::abs(Z) < 0.001 * _min_spacing)
       pd_boundary_info.add_node(pd_mesh.node_ptr(i), 103);
     pd_boundary_info.add_node(pd_mesh.node_ptr(i), 999);
   }

@@ -93,7 +93,7 @@
 
 [Materials]
   [./elastic_tensor]
-    type = SmallStrainVariableHorizonOSPD
+    type = SmallStrainConstantHorizonOSPD
     poissons_ratio = 0.3
     youngs_modulus = 1e6
     temperature = temp

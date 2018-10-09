@@ -36,7 +36,7 @@ protected:
   enum class FailureCriterion
   {
     CriticalStretch,
-    MaximumTensileStress
+    MaximumPrincipalStress
   };
 
   /// Enum used to control which failure criterion to use

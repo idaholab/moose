@@ -183,8 +183,10 @@ MechanicsActionPD::getKernelType()
     else
       paramError("stabilization", "Unknown PD stabilization scheme. Choose from: Force Self");
   }
-  else 
-    paramError("formulation", "Unsupported peridynamic formulation. Choose from: Bond OrdinaryState NonOrdinaryState");
+  else
+    paramError(
+        "formulation",
+        "Unsupported peridynamic formulation. Choose from: Bond OrdinaryState NonOrdinaryState");
 
   return type;
 }

@@ -56,7 +56,7 @@ RandomizeCriticalValuePD::execute()
     dof_id_type elem_i_dof = elem_i->dof_number(_aux.number(), _critical_var->number(), 0);
     Real rand_num = MooseRandom::randNormal(_mean, _standard_deviation);
     if (elem_i->processor_id() == processor_id())
-      _aux_sln.set(elem_i_dof, rand_num);
+      _aux_sln.set(elem_i_dof, std::abs(rand_num));
   }
 }
 
