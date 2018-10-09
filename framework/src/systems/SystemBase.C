@@ -88,9 +88,9 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _name(name),
     _vars(libMesh::n_threads()),
     _var_map(),
-    _dummy_vec(NULL),
-    _saved_old(NULL),
-    _saved_older(NULL),
+    _dummy_vec(nullptr),
+    _saved_old(nullptr),
+    _saved_older(nullptr),
     _var_kind(var_kind)
 {
 }
@@ -99,7 +99,7 @@ MooseVariableFEBase &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariableFEBase * var = dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_name));
-  if (var == NULL)
+  if (!var)
     mooseError("Variable '" + var_name + "' does not exist in this system");
   return *var;
 }
@@ -109,7 +109,7 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
 {
   MooseVariableFEBase * var =
       dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_number));
-  if (var == NULL)
+  if (!var)
     mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
@@ -132,7 +132,7 @@ MooseVariableScalar &
 SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariableScalar * var = dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_name));
-  if (var == NULL)
+  if (!var)
     mooseError("Scalar variable '" + var_name + "' does not exist in this system");
   return *var;
 }
@@ -142,7 +142,7 @@ SystemBase::getScalarVariable(THREAD_ID tid, unsigned int var_number)
 {
   MooseVariableScalar * var =
       dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_number));
-  if (var == NULL)
+  if (!var)
     mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
@@ -152,7 +152,7 @@ SystemBase::getVariableBlocks(unsigned int var_number)
 {
   mooseAssert(_var_map.find(var_number) != _var_map.end(), "Variable does not exist.");
   if (_var_map[var_number].empty())
-    return NULL;
+    return nullptr;
   else
     return &_var_map[var_number];
 }
@@ -472,13 +472,13 @@ SystemBase::restoreOldSolutions()
   {
     solutionOld() = *_saved_old;
     removeVector("save_solution_old");
-    _saved_old = NULL;
+    _saved_old = nullptr;
   }
   if (_saved_older)
   {
     solutionOlder() = *_saved_older;
     removeVector("save_solution_older");
-    _saved_older = NULL;
+    _saved_older = nullptr;
   }
 }
 
@@ -576,7 +576,7 @@ SystemBase::addVariable(const std::string & var_name,
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
   }
-  if (active_subdomains == NULL)
+  if (active_subdomains == nullptr)
     _var_map[var_num] = std::set<SubdomainID>();
   else
     for (const auto subdomain_id : *active_subdomains)
@@ -600,7 +600,7 @@ SystemBase::addScalarVariable(const std::string & var_name,
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
   }
-  if (active_subdomains == NULL)
+  if (active_subdomains == nullptr)
     _var_map[var_num] = std::set<SubdomainID>();
   else
     for (const auto subdomain_id : *active_subdomains)
