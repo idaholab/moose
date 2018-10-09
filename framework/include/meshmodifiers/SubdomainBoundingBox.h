@@ -48,6 +48,9 @@ private:
 
   /// Bounding box for testing element centroids against
   BoundingBox _bounding_box;
+
+  /// Whether or not restricting subdomain ID assignment for selected subdomains
+  bool _restricted;
 };
 
 #endif // SUBDOMAINBOUDINGBOX_H

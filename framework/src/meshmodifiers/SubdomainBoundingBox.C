@@ -32,6 +32,9 @@ validParams<SubdomainBoundingBox>()
       "block_name", "Subdomain name to set for inside/outside the bounding box (optional)");
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
+  params.addParam<std::vector<SubdomainName>>(
+      "restricted_subdomains",
+      "Only reset subdomain ID for given subdomains within the bounding box");
 
   return params;
 }
@@ -41,7 +44,8 @@ SubdomainBoundingBox::SubdomainBoundingBox(const InputParameters & parameters)
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id")),
     _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
-                  parameters.get<RealVectorValue>("top_right"))
+                  parameters.get<RealVectorValue>("top_right")),
+    _restricted(isParamValid("restricted_subdomains"))
 {
 }
 
@@ -52,13 +56,23 @@ SubdomainBoundingBox::modify()
   if (!_mesh_ptr)
     mooseError("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");
 
+  std::set<SubdomainID> restricted_ids;
+  if (_restricted)
+  {
+    auto names = getParam<std::vector<SubdomainName>>("restricted_subdomains");
+    auto ids = _mesh_ptr->getSubdomainIDs(names);
+    for (auto & id : ids)
+      restricted_ids.insert(id);
+  }
+
   // Loop over the elements
   for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
   {
     bool contains = _bounding_box.contains_point(elem->centroid());
-    if (contains && _location == "INSIDE")
+    bool restricted = _restricted ? restricted_ids.count(elem->subdomain_id()) > 0 : true;
+    if (contains && restricted && _location == "INSIDE")
       elem->subdomain_id() = _block_id;
-    else if (!contains && _location == "OUTSIDE")
+    else if (!contains && restricted && _location == "OUTSIDE")
       elem->subdomain_id() = _block_id;
   }
 

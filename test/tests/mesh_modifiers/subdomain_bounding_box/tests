@@ -19,4 +19,12 @@
     input = oriented_subdomain_bounding_box_outside.i
     exodiff = oriented_subdomain_bounding_box_outside_out.e
   [../]
+  [./restriction]
+    type = Exodiff
+    input = subdomain_bounding_box_restriction.i
+    exodiff = subdomain_bounding_box_restriction_out.e
+    requirement = "The system shall allow assigning subdomain ID of elements in a mesh with certain subdomain IDs within a bounding box."
+    design = 'SubdomainBoundingBox.md'
+    issues = '#12279'
+  [../]
 []
