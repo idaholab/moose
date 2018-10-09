@@ -3,6 +3,14 @@
   file = circle.e
 []
 
+[MeshModifiers]
+  [./cnode]
+    type = AddExtraNodeset
+    coord = '1000.0 0.0'
+    new_boundary = 10
+  [../]
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -66,7 +74,7 @@
   [./outer_y]
     type = PresetBC
     variable = disp_y
-    boundary = 2
+    boundary = '2 10'
     value = 0
   [../]
 []
@@ -106,7 +114,8 @@
   l_max_its = 30
   nl_max_its = 10
   nl_abs_tol = 1e-9
-  l_tol = 1e-04
+  nl_rel_tol = 1e-14
+  l_tol = 1e-4
 []
 
 [Outputs]

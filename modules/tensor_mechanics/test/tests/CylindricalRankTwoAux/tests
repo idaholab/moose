@@ -1,13 +1,20 @@
 [Tests]
+  issues = '#716'
+  design = 'syntax/Kernels/TensorMechanics/index.md source/auxkernels/CylindricalRankTwoAux.md'
   [./test]
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
+    requirement = "The Tensor Mechanics system shall support transformations
+    of a rank two tensor into cylindircal coordinates."
   [../]
   [./test_Bbar]
     type = 'Exodiff'
     input = 'test.i'
-    exodiff = 'test_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=test_bbar_out'
+    exodiff = 'test_bbar_out.e'
     prereq = 'test'
+    requirement = "The Tensor Mechanics system including volumetric locking
+    correction shall support transformations of a rank two tensor into cylindircal coordinates."
   [../]
 []
