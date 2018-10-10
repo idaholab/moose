@@ -50,10 +50,11 @@ validParams<GrainTrackerInterface>()
   params.addRangeCheckedParam<short>(
       "verbosity_level",
       1,
-      "verbosity_level>=0 & verbosity_level<=2",
+      "verbosity_level>=0 & verbosity_level<=3",
       "Level 0: Silent during normal operation, "
       "Level 1: Informational messages but no detailed grain structure printouts, "
-      "Level 2: Verbose output including data structure dumps.");
+      "Level 2: Verbose output including data structure dumps, "
+      "Level 3: Debugging mode.");
 
   params.addRequiredCoupledVarWithAutoBuild(
       "variable", "var_name_base", "op_num", "Array of coupled variables");

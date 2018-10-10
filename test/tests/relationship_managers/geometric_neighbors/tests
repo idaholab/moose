@@ -1,0 +1,31 @@
+[Tests]
+  [./geometric_edge_neighbor]
+    type = 'Exodiff'
+    input = 'geometric_edge_neighbors.i'
+    exodiff = 'geometric_edge_neighbors_out.e'
+    petsc_version = '>3.8'
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality"
+    issues = "#10455"
+  [../]
+
+  [./geometric_edge_neighbor_3D]
+    type = 'Exodiff'
+    input = 'geometric_edge_neighbors.i'
+    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=geometric_edge_neighbors_3D_out'
+    exodiff = 'geometric_edge_neighbors_3D_out.e'
+    petsc_version = '>3.8'
+    platform = 'DARWIN'
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality in 3D"
+    issues = "#10455"
+  [../]
+[]

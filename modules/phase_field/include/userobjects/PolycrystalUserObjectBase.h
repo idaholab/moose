@@ -169,6 +169,8 @@ protected:
 private:
   /// Temporary storage area for current grains at a point to avoid memory churn
   std::vector<unsigned int> _prealloc_tmp_grains;
+
+  std::map<dof_id_type, std::vector<unsigned int>> _entity_to_grain_cache;
 };
 
 #endif // POLYCRYSTALUSEROBJECTBASE_H

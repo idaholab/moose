@@ -7,26 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GHOSTUSEROBJECTIC_H
-#define GHOSTUSEROBJECTIC_H
+#ifndef ELEMENTUOIC_H
+#define ELEMENTUOIC_H
 
 #include "InitialCondition.h"
 #include "MooseMesh.h"
 
-class GhostUserObjectIC;
-class GhostUserObject;
+class ElementUOIC;
+class ElementUOProvider;
 
 template <>
-InputParameters validParams<GhostUserObjectIC>();
+InputParameters validParams<ElementUOIC>();
 
 /**
- * This initial condition builds a data structure that is queried
- * for initial condition information
+ * Initial Condition for returing values from an ElementUOProvider derived class.
  */
-class GhostUserObjectIC : public InitialCondition
+class ElementUOIC : public InitialCondition
 {
 public:
-  GhostUserObjectIC(const InputParameters & parameters);
+  ElementUOIC(const InputParameters & parameters);
 
   virtual Real value(const Point & /*p*/);
 
@@ -34,7 +33,9 @@ private:
   MooseMesh & _mesh;
   std::map<dof_id_type, Real> _data;
 
-  const GhostUserObject & _ghost_uo;
+  const ElementUOProvider & _elem_uo;
+  const std::string _field_name;
+  const MooseEnum _field_type;
 };
 
-#endif /* GHOSTUSEROBJECTIC_H */
+#endif /* ELEMENTUOIC_H */

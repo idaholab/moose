@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GhostUserObject.h"
+#include "ElemSideNeighborLayersTester.h"
 #include "MooseMesh.h"
 
 // invalid_processor_id
 #include "libmesh/dof_object.h"
 
-registerMooseObject("MooseTestApp", GhostUserObject);
+registerMooseObject("MooseTestApp", ElemSideNeighborLayersTester);
 
 template <>
 InputParameters
-validParams<GhostUserObject>()
+validParams<ElemSideNeighborLayersTester>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<ElementUOProvider>();
   params.addParam<unsigned int>(
       "rank",
       DofObject::invalid_processor_id,
@@ -36,24 +36,27 @@ validParams<GhostUserObject>()
   return params;
 }
 
-GhostUserObject::GhostUserObject(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _rank(getParam<unsigned int>("rank"))
+ElemSideNeighborLayersTester::ElemSideNeighborLayersTester(const InputParameters & parameters)
+  : ElementUOProvider(parameters), _rank(getParam<unsigned int>("rank"))
 {
 }
 
 void
-GhostUserObject::initialize()
+ElemSideNeighborLayersTester::initialize()
 {
   _ghost_data.clear();
 }
 
 void
-GhostUserObject::execute()
+ElemSideNeighborLayersTester::execute()
 {
   auto my_processor_id = processor_id();
 
   if (_rank == DofObject::invalid_processor_id || my_processor_id == _rank)
   {
+    for (const auto & current_elem : _fe_problem.getEvaluableElementRange())
+      _evaluable_data.emplace(current_elem->id());
+
     const auto & mesh = _subproblem.mesh().getMesh();
 
     for (const auto & elem : mesh.active_element_ptr_range())
@@ -63,13 +66,20 @@ GhostUserObject::execute()
 }
 
 void
-GhostUserObject::finalize()
+ElemSideNeighborLayersTester::finalize()
 {
   _communicator.set_union(_ghost_data);
+  _communicator.set_union(_evaluable_data);
 }
 
 unsigned long
-GhostUserObject::getElementalValue(dof_id_type element_id) const
+ElemSideNeighborLayersTester::getElementalValueLong(dof_id_type element_id,
+                                                    const std::string & field_name) const
 {
-  return _ghost_data.find(element_id) != _ghost_data.end();
+  if (field_name == "evaluable")
+    return _evaluable_data.find(element_id) != _evaluable_data.end();
+  else if (field_name == "ghosted")
+    return _ghost_data.find(element_id) != _ghost_data.end();
+
+  return std::numeric_limits<unsigned long>::max();
 }

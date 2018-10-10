@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<ElementSideNeighborLayers>()
 {
-  InputParameters params = validParams<GeometricRelationshipManager>();
+  InputParameters params = validParams<AlgebraicRelationshipManager>();
 
   params.addRangeCheckedParam<unsigned short>(
       "element_side_neighbor_layers",
@@ -31,20 +31,24 @@ validParams<ElementSideNeighborLayers>()
 }
 
 ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & parameters)
-  : GeometricRelationshipManager(parameters),
+  : AlgebraicRelationshipManager(parameters),
     _element_side_neighbor_layers(getParam<unsigned short>("element_side_neighbor_layers"))
 {
 }
 
-void ElementSideNeighborLayers::attachRelationshipManagersInternal(
-    Moose::RelationshipManagerType /*rm_type*/)
+void
+ElementSideNeighborLayers::attachRelationshipManagersInternal(
+    Moose::RelationshipManagerType rm_type)
 {
   if ((_app.isSplitMesh() || _mesh.isDistributedMesh()) && _element_side_neighbor_layers > 1)
   {
     _default_coupling = libmesh_make_unique<DefaultCoupling>();
     _default_coupling->set_n_levels(_element_side_neighbor_layers);
 
-    attachGeometricFunctorHelper(*_default_coupling);
+    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+      attachGeometricFunctorHelper(*_default_coupling);
+    else
+      attachAlgebraicFunctorHelper(*_default_coupling);
   }
 }
 
@@ -54,10 +58,22 @@ ElementSideNeighborLayers::getInfo() const
   if (_default_coupling)
   {
     std::ostringstream oss;
-    oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << " layers)";
+    std::string layers = _element_side_neighbor_layers == 1 ? "layer" : "layers";
+
+    oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << layers << ')';
     return oss.str();
   }
   return "";
+}
+
+bool
+ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
+{
+  const auto * rm = dynamic_cast<const ElementSideNeighborLayers *>(&rhs);
+  if (!rm)
+    return false;
+  else
+    return _element_side_neighbor_layers == rm->_element_side_neighbor_layers;
 }
 
 void

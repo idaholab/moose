@@ -51,6 +51,13 @@ public:
    */
   Moose::RelationshipManagerType getType() const { return _rm_type; }
 
+  //  bool compare(const RelationshipManager & rhs) { return *this == rhs; }
+
+  virtual bool operator==(const RelationshipManager & /*rhs*/) const
+  {
+    mooseError("Comparison operator required for this RelationshipManager required");
+  }
+
 protected:
   /**
    * This method should make the decision of whether or not RMs are needed for the current

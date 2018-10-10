@@ -1,0 +1,64 @@
+[Tests]
+  [./evaluable_neighbors_replicated]
+    type = 'Exodiff'
+    input = 'evaluable.i'
+    exodiff = 'evaluable_out.e'
+    petsc_version = '>3.8'
+    mesh_mode = 'REPLICATED'
+    dof_id_bytes = 4 # Metis gives different partitions with 64-bit dof indices
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall ghost additional solution information when running in parallel with an active RelationshipManager"
+    issues = "#10455 #11981"
+  [../]
+
+  [./evaluable_neighbors_distributed]
+    type = 'Exodiff'
+    input = 'evaluable.i'
+    exodiff = 'evaluable_neighbors_dist_out.e'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=evaluable_neighbors_dist_out'
+    petsc_version = '>3.8'
+    mesh_mode = 'DISTRIBUTED'
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall ghost additional solution information when running in parallel with an active RelationshipManager and using DistributedMesh"
+    issues = "#10455 #11981"
+  [../]
+
+  [./edge_neighbor]
+    type = 'Exodiff'
+    input = 'edge_neighbors.i'
+    exodiff = 'edge_neighbors_out.e'
+    petsc_version = '>3.8'
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall ghost additional neighboring elements surrounding a partition when running in parallel with DistributedMesh"
+    issues = "#10455 #11981"
+  [../]
+
+  [./edge_neighbor_3D]
+    type = 'Exodiff'
+    input = 'edge_neighbors.i'
+    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=edge_neighbors_3D_out'
+    exodiff = 'edge_neighbors_3D_out.e'
+    petsc_version = '>3.8'
+    platform = 'DARWIN'
+
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall ghost additional neighboring elements surrounding a partition when running in parallel with DistributedMesh with 3D"
+    issues = "#10455 #11981"
+  [../]
+[]

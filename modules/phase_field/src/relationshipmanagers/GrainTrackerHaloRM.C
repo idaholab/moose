@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<GrainTrackerHaloRM>()
 {
-  InputParameters params = validParams<ElementSideNeighborLayers>();
+  InputParameters params = validParams<ElementPointNeighbors>();
 
   params.addRangeCheckedParam<unsigned short>(
       "halo_level",
@@ -29,20 +29,20 @@ validParams<GrainTrackerHaloRM>()
 }
 
 GrainTrackerHaloRM::GrainTrackerHaloRM(const InputParameters & parameters)
-  : ElementSideNeighborLayers(parameters)
+  : ElementPointNeighbors(parameters)
 {
   // The grain tracker halo algorithm requires at least as many element neighbors as the required
   // halo level (See GrainTrackerInterface)
-  _element_side_neighbor_layers = getParam<unsigned short>("halo_level");
+  _element_point_neighbor_layers = getParam<unsigned short>("halo_level");
 }
 
 std::string
 GrainTrackerHaloRM::getInfo() const
 {
-  if (_default_coupling)
+  if (_point_coupling)
   {
     std::ostringstream oss;
-    oss << "GrainTrackerHaloRM (" << _element_side_neighbor_layers << " layers)";
+    oss << "GrainTrackerHaloRM (" << _element_point_neighbor_layers << " layers)";
     return oss.str();
   }
   return "";

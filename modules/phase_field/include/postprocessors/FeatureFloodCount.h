@@ -340,14 +340,13 @@ protected:
   virtual void updateFieldInfo();
 
   /**
-   * This method will "mark" all entities on neighboring elements that
-   * are above the supplied threshold. If feature is NULL, we are exploring
-   * for a new region to mark, otherwise we are in the recursive calls
-   * currently marking a region.
+   * This method will check if the current entity is above the supplied threshold and "mark" it. It
+   * will then inspect neighboring entities that are above the connecting threshold and add them to
+   * the current feature.
    *
    * @return Boolean indicating whether a new feature was found while exploring the current entity.
    */
-  bool flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
+  bool flood(const DofObject * dof_object, std::size_t current_index);
 
   /**
    * Return the starting comparison threshold to use when inspecting an entity during the flood
@@ -399,12 +398,8 @@ protected:
    * visiting neighbors. Since the logic is different for the elemental versus nodal case it's
    * easier to split them up.
    */
-  void visitNodalNeighbors(const Node * node,
-                           std::size_t current_index,
-                           FeatureData * feature,
-                           bool expand_halos_only);
+  void visitNodalNeighbors(const Node * node, FeatureData * feature, bool expand_halos_only);
   void visitElementalNeighbors(const Elem * elem,
-                               std::size_t current_index,
                                FeatureData * feature,
                                bool expand_halos_only,
                                bool disjoint_only);
@@ -418,7 +413,6 @@ protected:
   template <typename T>
   void visitNeighborsHelper(const T * curr_entity,
                             std::vector<const T *> neighbor_entities,
-                            std::size_t current_index,
                             FeatureData * feature,
                             bool expand_halos_only,
                             bool topological_neighbor,
@@ -552,6 +546,9 @@ protected:
   std::vector<MooseVariableFEBase *> _fe_vars;
   /// The vector of coupled in variables cast to MooseVariable
   std::vector<MooseVariable *> _vars;
+
+  /// Reference to the dof_map containing the coupled variables
+  const DofMap & _dof_map;
 
   /// The threshold above (or below) where an entity may begin a new region (feature)
   const Real _threshold;
@@ -732,6 +729,9 @@ private:
    * the _feature_sets vectors.
    */
   void consolidateMergedFeatures(std::vector<std::list<FeatureData>> * saved_data = nullptr);
+
+  /// The data structure for maintaining entities to flood during discovery
+  std::deque<const DofObject *> _entity_queue;
 
   /// Keeps track of whether we are distributing the merge work
   const bool _distribute_merge_work;

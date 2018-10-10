@@ -469,6 +469,12 @@ unsigned long long int convert<unsigned long long int>(const std::string & str,
 std::string toUpper(const std::string & name);
 
 /**
+ * Convert supplied string to lower case.
+ * @params name The string to convert upper case.
+ */
+std::string toLower(const std::string & name);
+
+/**
  * Returns a container that contains the content of second passed in container
  * inserted into the first passed in container (set or map union).
  */

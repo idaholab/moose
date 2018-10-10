@@ -45,6 +45,9 @@ LineSearchType stringToEnum<LineSearchType>(const std::string & s);
 template <>
 TimeIntegratorType stringToEnum<TimeIntegratorType>(const std::string & s);
 
+template <>
+RelationshipManagerType stringToEnum<RelationshipManagerType>(const std::string & s);
+
 // Vector conversions
 template <typename T>
 std::vector<T> vectorStringsToEnum(const MultiMooseEnum & v);

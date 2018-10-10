@@ -78,13 +78,25 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
       }
   }
 
-  // Set the name and tid parameters
+  // Set the name and tid parameters, and unique_name
+  std::stringstream oss;
+  oss << unique_name;
+
+  ptr->addPrivateParam<std::string>("_unique_name", oss.str());
   ptr->addPrivateParam<std::string>("_object_name", name);
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
   ptr->allowCopy(false); // no more copies allowed
 
   // Return a reference to the InputParameters object
   return *ptr;
+}
+
+void
+InputParameterWarehouse::removeInputParameters(const MooseObject & moose_object, THREAD_ID tid)
+{
+  auto moose_object_name_string = moose_object.parameters().get<std::string>("_unique_name");
+  MooseObjectName moose_object_name(moose_object_name_string);
+  _input_parameters[tid].erase(moose_object_name);
 }
 
 const InputParameters &

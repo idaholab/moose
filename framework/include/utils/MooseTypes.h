@@ -403,9 +403,10 @@ enum PatchUpdateType
  */
 enum class RelationshipManagerType : unsigned char
 {
-  Invalid = 0x0,
-  Geometric = 0x1,
-  Algebraic = 0x2
+  DEFAULT = 0,
+  GEOMETRIC = 1 << 0,
+  ALGEBRAIC = 1 << 1,
+  COUPLING = 1 << 2
 };
 
 std::string stringify(const Moose::RelationshipManagerType & t);
@@ -420,6 +421,8 @@ print_helper(std::ostream & os, const Moose::RelationshipManagerType * param)
   // Specialization so that we don't print out unprintable characters
   os << Moose::stringify(*param);
 }
+
+// End of Moose Namespace
 }
 
 template <>

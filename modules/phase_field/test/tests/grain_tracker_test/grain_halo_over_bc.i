@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 25
+  nx = 35
+  ny = 35
   xmax = 1000
   ymax = 1000
   elem_type = QUAD4
@@ -11,7 +11,7 @@
 []
 
 [GlobalParams]
-  op_num = '8'  # Number of order parameters used
+  op_num = 8  # Number of order parameters used
   var_name_base = 'gr'  # Base name of grains
 []
 

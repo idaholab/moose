@@ -185,7 +185,6 @@ addActionTypes(Syntax & syntax)
   registerTask("set_global_params", false);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
-  registerTask("setup_debug", false);
   registerTask("setup_residual_debug", false);
   registerTask("setup_oversampling", false);
   registerTask("deprecated_block", false);
@@ -198,12 +197,16 @@ addActionTypes(Syntax & syntax)
   registerTask("ready_to_init", true);
 
   // Output related actions
-  registerTask("setup_material_output", true);
+  registerTask("add_output_aux_variables", true);
   registerTask("check_output", true);
 
   registerTask("create_problem_default", true);
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
+
+  // Deprecated tasks
+  registerTask("setup_material_output", false);
+  registerTask("setup_debug", false);
 
   /**************************/
   /****** Dependencies ******/
@@ -268,10 +271,11 @@ addActionTypes(Syntax & syntax)
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
-                           "(setup_material_output)"
+                           "(setup_material_output)" // DEPRECATED: Remove by 12/31/2018
+                           "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
                            "(init_problem)"
-                           "(setup_debug)"
+                           "(setup_debug)" // DEPRECATED: Remove by 12/31/2018
                            "(add_output)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
