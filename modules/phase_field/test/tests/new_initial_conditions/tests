@@ -8,4 +8,23 @@
     design = 'ics/SmoothCircleIC.md'
     issues = '#12143'
   [../]
+
+  # prepare and relax a polycrystalline variable sample...
+  [./prepare_mesh]
+    type = RunApp
+    input = 'prepare_mesh.i'
+    requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided'
+    design = 'action/PolycrystalVariablesAction.md'
+    issues = '#12294'
+  [../]
+  # ...and load it in using the initial_from_file capability
+  [./PolycrystalVariables_initial_from_file]
+    type = Exodiff
+    input = 'PolycrystalVariables_initial_from_file.i'
+    exodiff = 'PolycrystalVariables_initial_from_file_out.e'
+    prereq = prepare_mesh
+    requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided'
+    design = 'action/PolycrystalVariablesAction.md'
+    issues = '#12294'
+  [../]
 []
