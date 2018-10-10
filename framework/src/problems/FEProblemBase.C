@@ -3042,7 +3042,12 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
                                    Interfaces::SideUserObject | Interfaces::InternalSideUserObject)
       .queryInto(userobjs);
 
-  if (userobjs.empty() && genobjs.empty())
+  std::vector<UserObject *> tgobjs;
+  query.clone()
+      .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+      .queryInto(tgobjs);
+
+  if (userobjs.empty() && genobjs.empty() && tgobjs.empty())
     return;
 
   TIME_SECTION(_compute_user_objects_timer);
@@ -3055,12 +3060,16 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   {
     for (auto obj : userobjs)
       obj->residualSetup();
+    for (auto obj : tgobjs)
+      obj->residualSetup();
     for (auto obj : genobjs)
       obj->residualSetup();
   }
   else if (type == EXEC_NONLINEAR)
   {
     for (auto obj : userobjs)
+      obj->jacobianSetup();
+    for (auto obj : tgobjs)
       obj->jacobianSetup();
     for (auto obj : genobjs)
       obj->jacobianSetup();
@@ -3072,16 +3081,10 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   // Execute Elemental/Side/InternalSideUserObjects
   if (!userobjs.empty())
   {
+    // non-nodal user objects have to be run separately before the nodal user objects run
+    // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
     ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
-
-    // non-nodal user objects have to be finalized separately before the nodal user objects run
-    // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
-    // Also there is one instance in rattlesnake where an elemental user object's finalize depends
-    // on a side user object having been finalized first :-(
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
   }
 
   // Execute NodalUserObjects
@@ -3091,6 +3094,17 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
   }
+
+  // BISON has an axial reloc elemental user object that has a finalize func that depends on a
+  // nodal user object having been run first. So these must go here or those tests fail :-(
+  // Also there is one instance in rattlesnake where an elemental user object's finalize depends
+  // on a side user object having been finalized first :-(
+  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
+  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
+  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
+
+  for (auto obj : tgobjs)
+    obj->initialize();
 
   std::vector<GeneralUserObject *> tguos_zero;
   query.clone()
