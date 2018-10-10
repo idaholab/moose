@@ -91,6 +91,7 @@ protected:
   Real _mu;
   Real _k;
   Real _molar_mass;
+  // properties at critical point
   Real _T_c;
   Real _rho_c;
   Real _e_c;

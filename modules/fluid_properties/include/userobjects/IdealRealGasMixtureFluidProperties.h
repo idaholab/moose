@@ -461,9 +461,9 @@ protected:
   /// Number of secondary vapors
   const unsigned int _n_secondary_vapors;
   /// molar (or universal) gas constant
-  const Real R_molar;
+  constexpr static const Real R_molar = 8.3144598;
   /// maximum temperature of all components
-  const Real T_mix_max;
+  const Real _T_mix_max;
 };
 
 #endif /* IDEALREALGASMIXTUREFLUIDPROPERTIES_H */
