@@ -71,13 +71,16 @@ GeometricalComponent::computeMeshTransformation()
   Real r = _dir.norm();
   Real theta = acos(_dir(2) / r);
   Real aphi = atan2(_dir(1), _dir(0));
-  // rows of transformation matrix
-  RealVectorValue x(
-      cos(-aphi) * cos(M_PI / 2. - theta), sin(-aphi), -cos(-aphi) * sin(M_PI / 2. - theta));
-  RealVectorValue y(
-      -sin(-aphi) * cos(M_PI / 2. - theta), cos(-aphi), sin(-aphi) * sin(M_PI / 2. - theta));
-  RealVectorValue z(sin(M_PI / 2. - theta), 0.0, cos(M_PI / 2. - theta));
-  _R = RealTensorValue(x, y, z);
+  // compute the transformation matrix
+  _R = RealTensorValue(cos(aphi) * sin(theta),
+                       -sin(aphi),
+                       -cos(aphi) * cos(theta),
+                       sin(aphi) * sin(theta),
+                       cos(aphi),
+                       -sin(aphi) * cos(theta),
+                       cos(theta),
+                       0.0,
+                       sin(theta));
 }
 
 void
