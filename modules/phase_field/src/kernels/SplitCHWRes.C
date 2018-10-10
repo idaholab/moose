@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<SplitCHWRes>()
 {
-  InputParameters params = SplitCHWResBase<Real>::validParams();
+  InputParameters params = validParams<SplitCHWResBase<>>();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential "
                              "variable with a scalar (isotropic) mobility");
   return params;
