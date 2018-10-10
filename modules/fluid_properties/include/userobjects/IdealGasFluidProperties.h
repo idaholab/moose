@@ -53,6 +53,15 @@ public:
   virtual Real e_from_p_rho(Real p, Real rho) const override;
   virtual void
   e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+  virtual Real e_from_T_v(Real T, Real v) const override;
+  virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
+  virtual Real p_from_T_v(Real T, Real v) const override;
+  virtual void p_from_T_v(Real T, Real v, Real & p, Real & dp_dT, Real & dp_dv) const override;
+  virtual Real h_from_T_v(Real T, Real v) const override;
+  virtual void h_from_T_v(Real T, Real v, Real & h, Real & dh_dT, Real & dh_dv) const override;
+  virtual Real s_from_T_v(Real T, Real v) const override;
+  virtual void s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real & ds_dv) const override;
+  virtual Real cv_from_T_v(Real T, Real v) const override;
   virtual Real h_from_p_T(Real p, Real T) const override;
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
   virtual Real e_from_p_T(Real p, Real T) const override;

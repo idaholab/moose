@@ -265,7 +265,7 @@ GeneralVaporMixtureFluidProperties::c_from_p_T(Real p, Real T, const std::vector
 void
 GeneralVaporMixtureFluidProperties::c_from_p_T(Real /*p*/,
                                                Real /*T*/,
-                                               std::vector<Real> /*x*/,
+                                               const std::vector<Real> & /*x*/,
                                                Real & /*c*/,
                                                Real & /*dc_dp*/,
                                                Real & /*dc_dT*/,

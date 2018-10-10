@@ -19,6 +19,7 @@ InputParameters
 validParams<IdealRealGasMixtureFluidProperties>()
 {
   InputParameters params = validParams<VaporMixtureFluidProperties>();
+  params += validParams<NaNInterface>();
 
   params.addClassDescription("Class for fluid properties of an arbitrary vapor mixture");
 
@@ -36,7 +37,8 @@ validParams<IdealRealGasMixtureFluidProperties>()
 
 IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
     const InputParameters & parameters)
-  : VaporMixtureFluidProperties(parameters), NaNInterface(this),
+  : VaporMixtureFluidProperties(parameters),
+    NaNInterface(this),
     _fp_secondary_names(getParam<std::vector<UserObjectName>>("fp_secondary")),
     _n_secondary_vapors(_fp_secondary_names.size()),
     R_molar(8.3144598),
@@ -50,7 +52,7 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
 }
 
 Real
-IdealRealGasMixtureFluidProperties::p_from_v_e(Real v, Real e, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::p_from_v_e(Real v, Real e, const std::vector<Real> & x) const
 {
   Real p, T;
   p_T_from_v_e(v, e, x, p, T);
@@ -61,7 +63,7 @@ IdealRealGasMixtureFluidProperties::p_from_v_e(Real v, Real e, std::vector<Real>
 void
 IdealRealGasMixtureFluidProperties::p_from_v_e(Real v,
                                                Real e,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & p,
                                                Real & dp_dv,
                                                Real & dp_de,
@@ -73,7 +75,7 @@ IdealRealGasMixtureFluidProperties::p_from_v_e(Real v,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::T_from_v_e(Real v, Real e, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::T_from_v_e(Real v, Real e, const std::vector<Real> & x) const
 {
   Real p, T;
   p_T_from_v_e(v, e, x, p, T);
@@ -84,7 +86,7 @@ IdealRealGasMixtureFluidProperties::T_from_v_e(Real v, Real e, std::vector<Real>
 void
 IdealRealGasMixtureFluidProperties::T_from_v_e(Real v,
                                                Real e,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & T,
                                                Real & dT_dv,
                                                Real & dT_de,
@@ -96,7 +98,7 @@ IdealRealGasMixtureFluidProperties::T_from_v_e(Real v,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   return 1.0 / v_from_p_T(p, T, x);
 }
@@ -104,7 +106,7 @@ IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p, Real T, std::vector<Rea
 void
 IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p,
                                                  Real T,
-                                                 std::vector<Real> x,
+                                                 const std::vector<Real> & x,
                                                  Real & rho,
                                                  Real & drho_dp,
                                                  Real & drho_dT,
@@ -126,7 +128,7 @@ IdealRealGasMixtureFluidProperties::rho_from_p_T(Real p,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real M_primary = _fp_primary->molarMass();
@@ -172,7 +174,7 @@ IdealRealGasMixtureFluidProperties::v_from_p_T(Real p, Real T, std::vector<Real>
 void
 IdealRealGasMixtureFluidProperties::v_from_p_T(Real p,
                                                Real T,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & v,
                                                Real & dv_dp,
                                                Real & dv_dT,
@@ -196,7 +198,7 @@ IdealRealGasMixtureFluidProperties::v_from_p_T(Real p,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::e_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::e_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   Real v = v_from_p_T(p, T, x);
   return e_from_T_v(T, v, x);
@@ -205,7 +207,7 @@ IdealRealGasMixtureFluidProperties::e_from_p_T(Real p, Real T, std::vector<Real>
 void
 IdealRealGasMixtureFluidProperties::e_from_p_T(Real p,
                                                Real T,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & e,
                                                Real & de_dp,
                                                Real & de_dT,
@@ -231,7 +233,7 @@ IdealRealGasMixtureFluidProperties::e_from_p_T(Real p,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::c_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::c_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   Real v;
   Real p_unused, dp_dT, dp_dv;
@@ -251,7 +253,7 @@ IdealRealGasMixtureFluidProperties::c_from_p_T(Real p, Real T, std::vector<Real>
 void
 IdealRealGasMixtureFluidProperties::c_from_p_T(Real p,
                                                Real T,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & c,
                                                Real & dc_dp,
                                                Real & dc_dT,
@@ -293,7 +295,7 @@ IdealRealGasMixtureFluidProperties::c_from_p_T(Real p,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::cp_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   Real p_unused, dp_dT, dp_dv;
   Real h, dh_dT, dh_dv;
@@ -316,7 +318,7 @@ IdealRealGasMixtureFluidProperties::cp_from_p_T(Real p, Real T, std::vector<Real
 }
 
 Real
-IdealRealGasMixtureFluidProperties::cv_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   Real v = v_from_p_T(p, T, x);
 
@@ -332,7 +334,7 @@ IdealRealGasMixtureFluidProperties::cv_from_p_T(Real p, Real T, std::vector<Real
 }
 
 Real
-IdealRealGasMixtureFluidProperties::mu_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   Real v = v_from_p_T(p, T, x);
 
@@ -360,7 +362,7 @@ IdealRealGasMixtureFluidProperties::mu_from_p_T(Real p, Real T, std::vector<Real
 }
 
 Real
-IdealRealGasMixtureFluidProperties::k_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::k_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
   Real v = v_from_p_T(p, T, x);
 
@@ -389,7 +391,7 @@ IdealRealGasMixtureFluidProperties::k_from_p_T(Real p, Real T, std::vector<Real>
 
 void
 IdealRealGasMixtureFluidProperties::p_T_from_v_e(
-    Real v, Real e, std::vector<Real> x, Real & p, Real & T) const
+    Real v, Real e, const std::vector<Real> & x, Real & p, Real & T) const
 {
   Real v_primary = v / primaryMassFraction(x);
   static const Real vc = 1. / _fp_primary->criticalDensity();
@@ -421,7 +423,7 @@ IdealRealGasMixtureFluidProperties::p_T_from_v_e(
 void
 IdealRealGasMixtureFluidProperties::p_T_from_v_e(Real v,
                                                  Real e,
-                                                 std::vector<Real> x,
+                                                 const std::vector<Real> & x,
                                                  Real & p,
                                                  Real & dp_dv,
                                                  Real & dp_de,
@@ -459,7 +461,7 @@ IdealRealGasMixtureFluidProperties::p_T_from_v_e(Real v,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::p_from_T_v(Real T, Real v, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::p_from_T_v(Real T, Real v, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real p = _fp_primary->p_from_T_v(T, v / x_primary);
@@ -474,7 +476,7 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T, Real v, std::vector<Real>
 
 void
 IdealRealGasMixtureFluidProperties::p_from_T_v(
-    Real T, Real v, std::vector<Real> x, Real & p, Real & dp_dT, Real & dp_dv) const
+    Real T, Real v, const std::vector<Real> & x, Real & p, Real & dp_dT, Real & dp_dv) const
 {
   Real p_primary, dp_dT_primary, dp_dv_primary;
   Real p_sec, dp_dT_sec, dp_dv_sec;
@@ -500,7 +502,7 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(
 void
 IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
                                                Real v,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & p,
                                                Real & dp_dT,
                                                Real & dp_dv,
@@ -550,7 +552,7 @@ IdealRealGasMixtureFluidProperties::p_from_T_v(Real T,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::e_from_T_v(Real T, Real v, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::e_from_T_v(Real T, Real v, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real e = x_primary * _fp_primary->e_from_T_v(T, v / x_primary);
@@ -566,7 +568,7 @@ IdealRealGasMixtureFluidProperties::e_from_T_v(Real T, Real v, std::vector<Real>
 void
 IdealRealGasMixtureFluidProperties::e_from_T_v(Real T,
                                                Real v,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & e,
                                                Real & de_dT,
                                                Real & de_dv,
@@ -621,7 +623,7 @@ IdealRealGasMixtureFluidProperties::e_from_T_v(Real T,
 
 void
 IdealRealGasMixtureFluidProperties::s_from_T_v(
-    Real T, Real v, std::vector<Real> x, Real & s, Real & ds_dT, Real & ds_dv) const
+    Real T, Real v, const std::vector<Real> & x, Real & s, Real & ds_dT, Real & ds_dv) const
 {
   Real s_primary, ds_dT_primary, ds_dv_primary, ds_dx_primary;
   Real s_sec, ds_dT_sec, ds_dv_sec;
@@ -645,7 +647,7 @@ IdealRealGasMixtureFluidProperties::s_from_T_v(
 }
 
 Real
-IdealRealGasMixtureFluidProperties::c_from_T_v(Real T, Real v, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::c_from_T_v(Real T, Real v, const std::vector<Real> & x) const
 {
   Real p, dp_dT, dp_dv;
   Real s, ds_dT, ds_dv;
@@ -663,7 +665,7 @@ IdealRealGasMixtureFluidProperties::c_from_T_v(Real T, Real v, std::vector<Real>
 void
 IdealRealGasMixtureFluidProperties::c_from_T_v(Real T,
                                                Real v,
-                                               std::vector<Real> x,
+                                               const std::vector<Real> & x,
                                                Real & c,
                                                Real & dc_dT,
                                                Real & dc_dv,
@@ -704,7 +706,7 @@ IdealRealGasMixtureFluidProperties::c_from_T_v(Real T,
 }
 
 Real
-IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T, Real v, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T, Real v, const std::vector<Real> & x) const
 {
   Real p, dp_dT, dp_dv;
   Real h, dh_dT, dh_dv;
@@ -726,7 +728,7 @@ IdealRealGasMixtureFluidProperties::cp_from_T_v(Real T, Real v, std::vector<Real
 }
 
 Real
-IdealRealGasMixtureFluidProperties::cv_from_T_v(Real T, Real v, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::cv_from_T_v(Real T, Real v, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real cv = x_primary * _fp_primary->cv_from_T_v(T, v / x_primary);
@@ -740,7 +742,7 @@ IdealRealGasMixtureFluidProperties::cv_from_T_v(Real T, Real v, std::vector<Real
 }
 
 Real
-IdealRealGasMixtureFluidProperties::mu_from_T_v(Real T, Real v, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::mu_from_T_v(Real T, Real v, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real M_primary = _fp_primary->molarMass();
@@ -766,7 +768,7 @@ IdealRealGasMixtureFluidProperties::mu_from_T_v(Real T, Real v, std::vector<Real
 }
 
 Real
-IdealRealGasMixtureFluidProperties::k_from_T_v(Real T, Real v, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::k_from_T_v(Real T, Real v, const std::vector<Real> & x) const
 {
   const Real x_primary = primaryMassFraction(x);
   Real M_primary = _fp_primary->molarMass();
@@ -792,7 +794,9 @@ IdealRealGasMixtureFluidProperties::k_from_T_v(Real T, Real v, std::vector<Real>
 }
 
 Real
-IdealRealGasMixtureFluidProperties::xs_prim_from_p_T(Real p, Real T, std::vector<Real> x) const
+IdealRealGasMixtureFluidProperties::xs_prim_from_p_T(Real p,
+                                                     Real T,
+                                                     const std::vector<Real> & x) const
 {
   Real T_c = _fp_primary->criticalTemperature();
   Real xs;
