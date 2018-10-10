@@ -9,6 +9,7 @@
 
 #include "GeneralizedPlaneStrainUserObjectNOSPD.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 #include "Function.h"
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainUserObjectNOSPD);

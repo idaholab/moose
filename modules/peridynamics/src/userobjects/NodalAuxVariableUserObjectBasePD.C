@@ -51,19 +51,6 @@ NodalAuxVariableUserObjectBasePD::execute()
 }
 
 void
-NodalAuxVariableUserObjectBasePD::threadJoin(const UserObject & uo)
-{
-  const NodalAuxVariableUserObjectBasePD & navuob =
-      static_cast<const NodalAuxVariableUserObjectBasePD &>(uo);
-  for (unsigned int i = 0; i < 2; ++i)
-  {
-    dof_id_type dof = _current_elem->get_node(i)->dof_number(_aux.number(), _aux_var->number(), 0);
-
-    _aux_sln.add(dof, navuob._aux_sln(dof));
-  }
-}
-
-void
 NodalAuxVariableUserObjectBasePD::finalize()
 {
   _aux_sln.close();

@@ -20,29 +20,26 @@ validParams<PeridynamicsTestApp>()
   return params;
 }
 
+registerKnownLabel("PeridynamicsTestApp");
+
 PeridynamicsTestApp::PeridynamicsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  PeridynamicsApp::registerObjectDepends(_factory);
-  PeridynamicsApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  PeridynamicsApp::associateSyntaxDepends(_syntax, _action_factory);
-  PeridynamicsApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  PeridynamicsApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    PeridynamicsTestApp::registerObjects(_factory);
-    PeridynamicsTestApp::associateSyntax(_syntax, _action_factory);
-    PeridynamicsTestApp::registerExecFlags(_factory);
-  }
+  PeridynamicsTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 PeridynamicsTestApp::~PeridynamicsTestApp() {}
+
+void
+PeridynamicsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+{
+  PeridynamicsApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"PeridynamicsTestApp"});
+    Registry::registerActionsTo(af, {"PeridynamicsTestApp"});
+  }
+}
 
 void
 PeridynamicsTestApp::registerApps()
@@ -52,50 +49,30 @@ PeridynamicsTestApp::registerApps()
 }
 
 void
-PeridynamicsTestApp::registerObjects(Factory & /*factory*/)
+PeridynamicsTestApp::registerObjects(Factory & factory)
 {
-  /* Uncomment Factory parameter and register your new test objects here! */
+  Registry::registerObjectsTo(factory, {"PeridynamicsTestApp"});
 }
 
 void
-PeridynamicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+PeridynamicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
-  /* Uncomment Syntax and ActionFactory parameters and register your new test objects here! */
+  Registry::registerActionsTo(action_factory, {"PeridynamicsTestApp"});
 }
 
 void
 PeridynamicsTestApp::registerExecFlags(Factory & /*factory*/)
 {
-  /* Uncomment Factory parameter and register your new execute flags here! */
 }
 
-/***************************************************************************************************
- *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
- **************************************************************************************************/
-// External entry point for dynamic application loading
+extern "C" void
+PeridynamicsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  PeridynamicsTestApp::registerAll(f, af, s);
+}
+
 extern "C" void
 PeridynamicsTestApp__registerApps()
 {
   PeridynamicsTestApp::registerApps();
-}
-
-// External entry point for dynamic object registration
-extern "C" void
-PeridynamicsTestApp__registerObjects(Factory & factory)
-{
-  PeridynamicsTestApp::registerObjects(factory);
-}
-
-// External entry point for dynamic syntax association
-extern "C" void
-PeridynamicsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  PeridynamicsTestApp::associateSyntax(syntax, action_factory);
-}
-
-// External entry point for dynamic execute flag registration
-extern "C" void
-PeridynamicsTestApp__registerExecFlags(Factory & factory)
-{
-  PeridynamicsTestApp::registerExecFlags(factory);
 }
