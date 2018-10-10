@@ -71,6 +71,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
           MooseVariableScalar * moose_scalar_var =
               &problem.getScalarVariable(_c_tid, coupled_var_name);
           _c_coupled_scalar_vars[name].push_back(moose_scalar_var);
+          _coupled_scalar_moose_vars.push_back(moose_scalar_var);
         }
         else
           mooseError(_c_name, ": Coupled variable '", coupled_var_name, "' was not found");
