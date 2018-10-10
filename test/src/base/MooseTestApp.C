@@ -43,21 +43,22 @@ MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parame
 MooseTestApp::~MooseTestApp() {}
 
 void
-MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+MooseTestApp::registerAll(Factory & factory,
+                          ActionFactory & af,
+                          Syntax & syntax,
+                          bool use_test_objs)
 {
-  Registry::registerObjectsTo(f, {"MooseTestApp"});
+  Registry::registerObjectsTo(factory, {"MooseTestApp"});
   Registry::registerActionsTo(af, {"MooseTestApp"});
 
   if (use_test_objs)
   {
-    auto & syntax = s;  // for resiterSyntax macros
-    auto & factory = f; // for resiterSyntax macros
-
     registerExecFlag(EXEC_JUST_GO);
 
     registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
     registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
     registerSyntaxTask("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
+    registerSyntaxTask("AddLotsOfVariablesAction", "LotsOfVariables/*", "add_variable");
     registerSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
     registerSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
     registerSyntax("TestGetActionsAction", "TestGetActions");

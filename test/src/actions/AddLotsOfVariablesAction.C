@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "AddLotsOfAuxVariablesAction.h"
+#include "AddLotsOfVariablesAction.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
@@ -16,6 +16,7 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
+// libMesh includes
 #include "libmesh/libmesh.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/equation_systems.h"
@@ -25,13 +26,13 @@
 #include "libmesh/fe.h"
 
 // class static initialization
-const Real AddLotsOfAuxVariablesAction::_abs_zero_tol = 1e-12;
+const Real AddLotsOfVariablesAction::_abs_zero_tol = 1e-12;
 
-registerMooseAction("MooseTestApp", AddLotsOfAuxVariablesAction, "meta_action");
+registerMooseAction("MooseTestApp", AddLotsOfVariablesAction, "meta_action");
 
 template <>
 InputParameters
-validParams<AddLotsOfAuxVariablesAction>()
+validParams<AddLotsOfVariablesAction>()
 {
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
@@ -44,20 +45,21 @@ validParams<AddLotsOfAuxVariablesAction>()
       "order", orders, "Specifies the order of the FE shape function to use for this variable");
   params.addParam<Real>(
       "initial_condition", 0.0, "Specifies the initial condition for this variable");
+  params.addParam<Real>("scaling", 1.0, "Specifies the initial condition for this variable");
   params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
 
   return params;
 }
 
-AddLotsOfAuxVariablesAction::AddLotsOfAuxVariablesAction(const InputParameters & parameters)
+AddLotsOfVariablesAction::AddLotsOfVariablesAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }
 
 void
-AddLotsOfAuxVariablesAction::act()
+AddLotsOfVariablesAction::act()
 {
-
+  const Real scale_factor = getParam<Real>("scaling");
   unsigned int number = getParam<unsigned int>("number");
   for (unsigned int cur_num = 0; cur_num < number; cur_num++)
   {
@@ -78,13 +80,13 @@ AddLotsOfAuxVariablesAction::act()
 
     if (fe_type.family == SCALAR)
     {
-      _problem->addAuxScalarVariable(var_name, fe_type.order);
+      _problem->addScalarVariable(var_name, fe_type.order);
       scalar_var = true;
     }
     else if (blocks.empty())
-      _problem->addAuxVariable(var_name, fe_type);
+      _problem->addVariable(var_name, fe_type, scale_factor);
     else
-      _problem->addAuxVariable(var_name, fe_type, &blocks);
+      _problem->addVariable(var_name, fe_type, scale_factor, &blocks);
 
     // Set initial condition
     Real initial = getParam<Real>("initial_condition");
