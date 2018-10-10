@@ -22,6 +22,7 @@
 #include "ScalarInitialCondition.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
+#include "MooseUtils.h"
 
 /// Free function used for a libMesh callback
 void
@@ -87,9 +88,9 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _name(name),
     _vars(libMesh::n_threads()),
     _var_map(),
-    _dummy_vec(NULL),
-    _saved_old(NULL),
-    _saved_older(NULL),
+    _dummy_vec(nullptr),
+    _saved_old(nullptr),
+    _saved_older(nullptr),
     _var_kind(var_kind)
 {
 }
@@ -98,7 +99,7 @@ MooseVariableFEBase &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariableFEBase * var = dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_name));
-  if (var == NULL)
+  if (!var)
     mooseError("Variable '" + var_name + "' does not exist in this system");
   return *var;
 }
@@ -108,7 +109,7 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
 {
   MooseVariableFEBase * var =
       dynamic_cast<MooseVariableFEBase *>(_vars[tid].getVariable(var_number));
-  if (var == NULL)
+  if (!var)
     mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
@@ -131,7 +132,7 @@ MooseVariableScalar &
 SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariableScalar * var = dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_name));
-  if (var == NULL)
+  if (!var)
     mooseError("Scalar variable '" + var_name + "' does not exist in this system");
   return *var;
 }
@@ -141,7 +142,7 @@ SystemBase::getScalarVariable(THREAD_ID tid, unsigned int var_number)
 {
   MooseVariableScalar * var =
       dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_number));
-  if (var == NULL)
+  if (!var)
     mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
@@ -151,7 +152,7 @@ SystemBase::getVariableBlocks(unsigned int var_number)
 {
   mooseAssert(_var_map.find(var_number) != _var_map.end(), "Variable does not exist.");
   if (_var_map[var_number].empty())
-    return NULL;
+    return nullptr;
   else
     return &_var_map[var_number];
 }
@@ -179,7 +180,7 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
-    std::set<dof_id_type> dof_indices_to_zero = aldit._all_dof_indices;
+    const std::set<dof_id_type> & dof_indices_to_zero = aldit._all_dof_indices;
 
     solution.close();
 
@@ -209,7 +210,7 @@ Order
 SystemBase::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
-  std::vector<MooseVariableFEBase *> vars = _vars[0].fieldVariables();
+  const std::vector<MooseVariableFEBase *> & vars = _vars[0].fieldVariables();
   for (const auto & var : vars)
   {
     FEType fe_type = var->feType();
@@ -246,8 +247,8 @@ SystemBase::prepare(THREAD_ID tid)
 void
 SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 {
-  if (_subproblem.hasActiveElementalMooseVariables(
-          tid)) // We only need to do something if the element prepare was restricted
+  // We only need to do something if the element prepare was restricted
+  if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     const std::set<MooseVariableFEBase *> & active_elemental_moose_variables =
         _subproblem.getActiveElementalMooseVariables(tid);
@@ -257,8 +258,8 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     const std::vector<MooseVariableFEBase *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
     {
-      if (&(var->sys()) == this && !active_elemental_moose_variables.count(
-                                       var)) // If it wasnt in the active list we need to prepare it
+      // If it wasn't in the active list, we need to prepare it
+      if (&(var->sys()) == this && !active_elemental_moose_variables.count(var))
       {
         var->prepare();
         newly_prepared_vars.push_back(var);
@@ -267,11 +268,11 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 
     // Make sure to resize the residual and jacobian datastructures for all the new variables
     if (resize_data)
-      for (unsigned int i = 0; i < newly_prepared_vars.size(); i++)
+      for (const auto var_ptr : newly_prepared_vars)
       {
-        _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
+        _subproblem.assembly(tid).prepareVariable(var_ptr);
         if (_subproblem.checkNonlocalCouplingRequirement())
-          _subproblem.assembly(tid).prepareVariableNonlocal(newly_prepared_vars[i]);
+          _subproblem.assembly(tid).prepareVariableNonlocal(var_ptr);
       }
   }
 }
@@ -471,13 +472,13 @@ SystemBase::restoreOldSolutions()
   {
     solutionOld() = *_saved_old;
     removeVector("save_solution_old");
-    _saved_old = NULL;
+    _saved_old = nullptr;
   }
   if (_saved_older)
   {
     solutionOlder() = *_saved_older;
     removeVector("save_solution_older");
-    _saved_older = NULL;
+    _saved_older = nullptr;
   }
 }
 
@@ -487,8 +488,8 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
   if (hasVector(vector_name))
     return getVector(vector_name);
 
-  NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
-  return *vec;
+  NumericVector<Number> & vec = system().add_vector(vector_name, project, type);
+  return vec;
 }
 
 NumericVector<Number> &
@@ -505,14 +506,14 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
 
   auto vector_name = _subproblem.vectorTagName(tag);
 
-  NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
+  NumericVector<Number> & vec = system().add_vector(vector_name, project, type);
 
   if (_tagged_vectors.size() < tag + 1)
     _tagged_vectors.resize(tag + 1);
 
-  _tagged_vectors[tag] = vec;
+  _tagged_vectors[tag] = &vec;
 
-  return *vec;
+  return vec;
 }
 
 void
@@ -575,13 +576,11 @@ SystemBase::addVariable(const std::string & var_name,
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
   }
-  if (active_subdomains == NULL)
+  if (active_subdomains == nullptr)
     _var_map[var_num] = std::set<SubdomainID>();
   else
-    for (std::set<SubdomainID>::iterator it = active_subdomains->begin();
-         it != active_subdomains->end();
-         ++it)
-      _var_map[var_num].insert(*it);
+    for (const auto subdomain_id : *active_subdomains)
+      _var_map[var_num].insert(subdomain_id);
 }
 
 void
@@ -601,13 +600,11 @@ SystemBase::addScalarVariable(const std::string & var_name,
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
   }
-  if (active_subdomains == NULL)
+  if (active_subdomains == nullptr)
     _var_map[var_num] = std::set<SubdomainID>();
   else
-    for (std::set<SubdomainID>::iterator it = active_subdomains->begin();
-         it != active_subdomains->end();
-         ++it)
-      _var_map[var_num].insert(*it);
+    for (const auto subdomain_id : *active_subdomains)
+      _var_map[var_num].insert(subdomain_id);
 }
 
 bool
@@ -765,7 +762,7 @@ void
 SystemBase::associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag)
 {
   mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot associate Matirx with matrix_tag : " << tag << "that does not exsit");
+              "Cannot associate Matrix with matrix_tag : " << tag << "that does not exist");
 
   if (_tagged_matrices.size() < tag + 1)
     _tagged_matrices.resize(tag + 1);
@@ -777,7 +774,7 @@ void
 SystemBase::disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag)
 {
   mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot disassociate Matirx with matrix_tag : " << tag << "that does not exsit");
+              "Cannot disassociate Matrix with matrix_tag : " << tag << "that does not exist");
 
   if (_tagged_matrices.size() < tag + 1)
     _tagged_matrices.resize(tag + 1);
@@ -792,7 +789,7 @@ void
 SystemBase::activeMatrixTag(TagID tag)
 {
   mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot active Matirx with matrix_tag : " << tag << "that does not exsit");
+              "Cannot active Matrix with matrix_tag : " << tag << "that does not exist");
 
   if (_matrix_tag_active_flags.size() < tag + 1)
     _matrix_tag_active_flags.resize(tag + 1);
@@ -804,7 +801,7 @@ void
 SystemBase::deactiveMatrixTag(TagID tag)
 {
   mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot deactive Matirx with matrix_tag : " << tag << "that does not exsit");
+              "Cannot deactivate Matrix with matrix_tag : " << tag << "that does not exist");
 
   if (_matrix_tag_active_flags.size() < tag + 1)
     _matrix_tag_active_flags.resize(tag + 1);
@@ -819,7 +816,7 @@ SystemBase::deactiveAllMatrixTags()
 
   _matrix_tag_active_flags.resize(num_matrix_tags);
 
-  for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+  for (decltype(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
     _matrix_tag_active_flags[tag] = false;
 }
 
@@ -830,7 +827,7 @@ SystemBase::activeAllMatrixTags()
 
   _matrix_tag_active_flags.resize(num_matrix_tags);
 
-  for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+  for (decltype(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
     if (hasMatrix(tag))
       _matrix_tag_active_flags[tag] = true;
     else
@@ -840,7 +837,7 @@ SystemBase::activeAllMatrixTags()
 bool
 SystemBase::matrixTagActive(TagID tag)
 {
-  mooseAssert(_subproblem.matrixTagExists(tag), "Matrix tag " << tag << " does not exsit");
+  mooseAssert(_subproblem.matrixTagExists(tag), "Matrix tag " << tag << " does not exist");
 
   return tag < _matrix_tag_active_flags.size() && _matrix_tag_active_flags[tag];
 }
@@ -878,9 +875,8 @@ SystemBase::copyVars(ExodusII_IO & io)
   int n_steps = io.get_num_time_steps();
 
   bool did_copy = false;
-  for (std::vector<VarCopyInfo>::iterator it = _var_to_copy.begin(); it != _var_to_copy.end(); ++it)
+  for (const auto & vci : _var_to_copy)
   {
-    VarCopyInfo & vci = *it;
     int timestep = -1;
 
     if (vci._timestep == "LATEST")
@@ -888,8 +884,8 @@ SystemBase::copyVars(ExodusII_IO & io)
       timestep = n_steps;
     else
     {
-      std::istringstream ss(vci._timestep);
-      if (!((ss >> timestep) && ss.eof()) || timestep > n_steps)
+      timestep = MooseUtils::convert<int>(vci._timestep);
+      if (timestep > n_steps)
         mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or "
                    "a valid integer between 1 and ",
                    n_steps,
