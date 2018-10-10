@@ -49,8 +49,8 @@ public:
   virtual ~Coupleable();
 
   /**
-   * Get the list of coupled variables
-   * @return The list of coupled variables
+   * Get the map of name to list of coupled FE variables
+   * @return The map of name to list of coupled FE variables
    */
   const std::map<std::string, std::vector<MooseVariableFEBase *>> & getCoupledVars()
   {
@@ -58,8 +58,8 @@ public:
   }
 
   /**
-   * Get the list of all coupled variables
-   * @return The list of all coupled variables
+   * Get the list of coupled FE variables
+   * @return The list of coupled FE variables
    */
   const std::vector<MooseVariableFEBase *> & getCoupledMooseVars() const
   {
@@ -82,6 +82,15 @@ public:
   const std::vector<VectorMooseVariable *> & getCoupledVectorMooseVars() const
   {
     return _coupled_vector_moose_vars;
+  }
+
+  /**
+   * Get the list of scalar coupled variables
+   * @return The list of scalar coupled variables
+   */
+  const std::vector<MooseVariableScalar *> & getCoupledScalarMooseVars() const
+  {
+    return _coupled_scalar_moose_vars;
   }
 
 protected:
@@ -474,10 +483,10 @@ protected:
   // Reference to FEProblemBase
   FEProblemBase & _c_fe_problem;
 
-  /// Coupled vars whose values we provide
+  /// Coupled FE vars whose values we provide
   std::map<std::string, std::vector<MooseVariableFEBase *>> _coupled_vars;
 
-  /// Vector of all coupled variables
+  /// Vector of all FE coupled variables
   std::vector<MooseVariableFEBase *> _coupled_moose_vars;
 
   /// Vector of standard coupled variables
@@ -485,6 +494,9 @@ protected:
 
   /// Vector of vector coupled variables
   std::vector<VectorMooseVariable *> _coupled_vector_moose_vars;
+
+  /// Vector of scalar coupled variables
+  std::vector<MooseVariableScalar *> _coupled_scalar_moose_vars;
 
   /// True if we provide coupling to nodal values
   bool _c_nodal;
