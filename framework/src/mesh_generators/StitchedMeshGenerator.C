@@ -9,8 +9,9 @@
 
 #include "StitchedMeshGenerator.h"
 
+#include "CastUniquePointer.h"
+
 #include "libmesh/replicated_mesh.h"
-#include "libmesh/face_quad4.h"
 
 registerMooseObject("MooseApp", StitchedMeshGenerator);
 
@@ -20,7 +21,7 @@ validParams<StitchedMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  params.addRequiredParam<std::vector<MeshFileName>>("files_names", "The mesh files to read.");
+  params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
   params.addParam<bool>("clear_stitched_boundary_ids", true, "Whether or not to clear the stitched boundary IDs");
   params.addRequiredParam< std::vector<std::vector<std::string>> >("stitch_boundaries_pairs", "Pairs of boundaries to be stitched together");
 
@@ -29,7 +30,7 @@ validParams<StitchedMeshGenerator>()
 
 StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-  _files_names(getParam<std::vector<MeshFileName>>("files_names")),
+  _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
   _clear_stitched_boundary_ids(getParam<bool>("clear_stitch_boundary_ids")),
   _stitch_boundaries_pairs(getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs"))
 {
@@ -38,19 +39,21 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 StitchedMeshGenerator::generate()
 {
-  auto mesh = libmesh_make_unique<ReplicatedMesh>(comm());
+  //std::unique_ptr<ReplicatedMesh> mesh = std::move(std::dynamic_pointer_cast<ReplicatedMesh>(getMeshByName(_input_names[0])));
+  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(getMeshByName(_input_names[0]));
+  //dynamic_cast<std::unique_ptr<ReplicatedMesh>&>(*mesh);
 
-  mesh->read(_files_names[0]);
-
-  _meshes.reserve(_files_names.size() - 1);
+  //mesh = getMeshByName(_names[0]))->clone();
+  _meshes.reserve(_input_names.size());
 
   // Read in all of the other meshes
-  for (auto i = beginIndex(_files_names, 1); i < _files_names.size(); ++i)
+  for (auto i = beginIndex(_input_names, 0); i < _input_names.size(); ++i)
   {
     _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(comm()));
-    _meshes.back()->read(_files_names[i]);
+    _meshes.back() = getMeshByName(_input_names[i])->clone();
   }
 
+  
   // Stich 'em
   for (auto i = beginIndex(_meshes); i < _meshes.size(); i++)
   {
@@ -59,8 +62,8 @@ StitchedMeshGenerator::generate()
     boundary_id_type first =  _meshes[i]->get_id_by_name(boundary_pair[0]);
     boundary_id_type second = _meshes[i]->get_id_by_name(boundary_pair[1]);
 
-    mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
+    //_meshes[0]->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
   }
-
+  
   return mesh;
 }

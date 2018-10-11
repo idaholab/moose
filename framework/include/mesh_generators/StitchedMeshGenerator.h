@@ -30,7 +30,7 @@ public:
 
 protected:
   /// The mesh files to read
-  const std::vector<MeshFileName> & _files_names;
+  const std::vector<MeshGeneratorName> & _input_names;
 
   /// Whether or not to clear (remove) the stitched boundary IDs
   const bool & _clear_stitched_boundary_ids;
@@ -42,7 +42,7 @@ protected:
   ///ReplicatedMesh * _original_mesh;
 
   /// The meshes to be stitched together.  The first entry will be the "real" mesh
-  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
+  std::vector<std::unique_ptr<MeshBase>> _meshes;
 };
 
 #endif // STITCHEDMESHGENERATOR_H
