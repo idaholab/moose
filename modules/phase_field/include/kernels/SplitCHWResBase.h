@@ -14,6 +14,13 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
+// Forward declarations
+template <typename T = void>
+class SplitCHWResBase;
+
+template <>
+InputParameters validParams<SplitCHWResBase<>>();
+
 /**
  * SplitCHWresBase implements the residual for the chemical
  * potential in the split form of the Cahn-Hilliard
@@ -26,14 +33,11 @@ class SplitCHWResBase : public DerivativeMaterialInterface<JvarMapKernelInterfac
 public:
   SplitCHWResBase(const InputParameters & parameters);
 
-  static InputParameters validParams();
-
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-private:
   const MaterialPropertyName _mob_name;
   const MaterialProperty<T> & _mob;
 
@@ -55,18 +59,6 @@ SplitCHWResBase<T>::SplitCHWResBase(const InputParameters & parameters)
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < nvar; ++i)
     _dmobdarg[i] = &getMaterialPropertyDerivative<T>(_mob_name, _coupled_moose_vars[i]->name());
-}
-
-template <typename T>
-InputParameters
-SplitCHWResBase<T>::validParams()
-{
-  InputParameters params = ::validParams<Kernel>();
-  params.addClassDescription(
-      "Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
-  params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of arguments of the mobility");
-  return params;
 }
 
 template <typename T>
