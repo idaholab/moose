@@ -13,21 +13,21 @@
 #include <map>
 #include "MooseTypes.h"
 #include "MooseArray.h"
+#include "MooseVariableFE.h"
+#include "InputParameters.h"
 
 // Forward declarations
-class InputParameters;
 class MooseVariableScalar;
 class MooseObject;
-class MooseVariableFEBase;
-template <typename>
-class MooseVariableFE;
-typedef MooseVariableFE<Real> MooseVariable;
-typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+
 namespace libMesh
 {
 template <typename T>
 class DenseVector;
 }
+
+#define adCoupledValue(Name) this->template adCoupledValueTemplate<compute_stage>(Name)
+#define adCoupledGradient(Name) this->template adCoupledGradientTemplate<compute_stage>(Name)
 
 /**
  * Interface for objects that needs coupling capabilities
@@ -119,6 +119,17 @@ protected:
    * @see Kernel::_u
    */
   virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns value of a coupled variable for use in Automatic Differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::value
+   */
+  template <ComputeStage compute_stage>
+  const typename VariableValueType<compute_stage>::type &
+  adCoupledValueTemplate(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns value of a coupled variable for a given tag
@@ -222,6 +233,17 @@ protected:
    */
   virtual const VariableGradient & coupledGradient(const std::string & var_name,
                                                    unsigned int comp = 0);
+
+  /**
+   * Returns gradient of a coupled variable for use in Automatic Differentation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  template <ComputeStage compute_stage>
+  const typename VariableGradientType<compute_stage>::type &
+  adCoupledGradientTemplate(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns an old gradient from previous time step of a coupled variable
@@ -498,6 +520,9 @@ protected:
   /// Will hold the default value for optional coupled variables.
   std::map<std::string, std::vector<VariableValue *>> _default_value;
 
+  /// Will hold the default value for optional coupled variables for automatic differentiation.
+  std::map<std::string, MooseArray<ADReal> *> _ad_default_value;
+
   /// Will hold the default value for optional vector coupled variables.
   std::map<std::string, VectorVariableValue *> _default_vector_value;
 
@@ -511,12 +536,22 @@ protected:
   VariableGradient _default_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
+  MooseArray<ADRealGradient> _ad_default_gradient;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  MooseArray<ADRealTensor> _ad_default_second;
 
   /// Zero value of a variable
   const VariableValue & _zero;
+  const MooseArray<ADReal> & _ad_zero;
+
   /// Zero gradient of a variable
   const VariableGradient & _grad_zero;
+  const MooseArray<ADRealGradient> & _ad_grad_zero;
+
   /// Zero second derivative of a variable
   const VariableSecond & _second_zero;
   /// Zero second derivative of a test function
@@ -590,6 +625,24 @@ private:
   VariableValue * getDefaultValue(const std::string & var_name, unsigned int comp);
 
   /**
+   * Helper method to return (and insert if necessary) the default value for Automatic
+   * Differentiation for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default value
+   * @return VariableValue * a pointer to the associated VarirableValue.
+   */
+  template <ComputeStage compare_stage>
+  typename VariableValueType<compare_stage>::type * getADDefaultValue(const std::string & var_name);
+
+  /**
+   * Helper method to return (and insert if necessary) the default gradient for Automatic
+   * Differentiation for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default gradient
+   * @return VariableGradient * a pointer to the associated VariableGradient.
+   */
+  template <ComputeStage compare_stage>
+  typename VariableGradientType<compare_stage>::type & getADDefaultGradient();
+
+  /**
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled vector variable.
    * @param var_name the name of the vector variable for which to retrieve a default value
@@ -606,5 +659,99 @@ private:
   /// Scalar variables coupled into this object (for error checking)
   std::map<std::string, std::vector<MooseVariableScalar *>> _c_coupled_scalar_vars;
 };
+
+template <ComputeStage compute_stage>
+const typename VariableValueType<compute_stage>::type &
+Coupleable::adCoupledValueTemplate(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name))
+    return *getADDefaultValue<compute_stage>(var_name);
+
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+    {
+      if (_c_is_implicit)
+        return var->adSln<compute_stage>();
+      else
+        mooseError("Not implemented");
+    }
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+    {
+      if (_c_is_implicit)
+        return var->adSlnNeighbor<compute_stage>();
+      else
+        mooseError("Not implemented");
+    }
+  }
+}
+
+template <ComputeStage compute_stage>
+const typename VariableGradientType<compute_stage>::type &
+Coupleable::adCoupledGradientTemplate(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return getADDefaultGradient<compute_stage>();
+
+  coupledCallback(var_name, false);
+  if (_c_nodal)
+    mooseError("Nodal variables do not have gradients");
+
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_is_implicit)
+      return var->adGradSln<compute_stage>();
+    else
+      mooseError("Not implemented");
+  }
+  else
+  {
+    if (_c_is_implicit)
+      return var->adGradSlnNeighbor<compute_stage>();
+    else
+      mooseError("Not implemented");
+  }
+}
+
+template <ComputeStage compute_stage>
+typename VariableValueType<compute_stage>::type *
+Coupleable::getADDefaultValue(const std::string & var_name)
+{
+  std::map<std::string, MooseArray<ADReal> *>::iterator default_value_it =
+      _ad_default_value.find(var_name);
+  if (default_value_it == _ad_default_value.end())
+  {
+    ADVariableValue * value =
+        new ADVariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name));
+    default_value_it = _ad_default_value.insert(std::make_pair(var_name, value)).first;
+  }
+
+  return default_value_it->second;
+}
+
+template <>
+VariableValue * Coupleable::getADDefaultValue<RESIDUAL>(const std::string & var_name);
+
+template <ComputeStage compute_stage>
+typename VariableGradientType<compute_stage>::type &
+Coupleable::getADDefaultGradient()
+{
+  return _ad_default_gradient;
+}
+
+template <>
+VariableGradient & Coupleable::getADDefaultGradient<RESIDUAL>();
 
 #endif /* COUPLEABLE_H */

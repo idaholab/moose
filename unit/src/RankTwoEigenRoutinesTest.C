@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 TEST(RankTwoEigenRoutines, symmetricEigenvalues)
 {
@@ -146,23 +147,23 @@ TEST(RankTwoEigenRoutines, dsymmetricEigenvalues)
 }
 
 /**
-* Validity of the second derivatives has been tested by splitting a 3x3 matrix into 2x2 matrices
-* Ex: 3x3 symmetric matrix
-*       a00 a01 a02
-*   A = a10 a11 a12
-*       a20 a21 a22
-* Upper left four elements and lower right four elements can be given by 2x2 matrices
-*       a10 a01   and  a11 a12
-*       a10 a11        a21 a22
-*
-* Now eigen values of the above 2x2 matrixes can be written as:
-*    lamda = 0.5*[(a00+a11) + or - sqrt[(a00+a11)^2-4(a00.a11-((a01+a10)/2)^2)]
-* By differentiating lamda with respect to a00, a01, a11, a12, a22
-* some elements of rank four tensor ie. a0000, a0001, a1100, a0101, a1111, a1112, a2211, a1212
-* (second derivatives) can be verified
-* Furthermore the validity of all the elements of rank four tensor has been tested in
-* "d2symmetricEigenvaluesTest2" method using finite difference method.
-*/
+ * Validity of the second derivatives has been tested by splitting a 3x3 matrix into 2x2 matrices
+ * Ex: 3x3 symmetric matrix
+ *       a00 a01 a02
+ *   A = a10 a11 a12
+ *       a20 a21 a22
+ * Upper left four elements and lower right four elements can be given by 2x2 matrices
+ *       a10 a01   and  a11 a12
+ *       a10 a11        a21 a22
+ *
+ * Now eigen values of the above 2x2 matrixes can be written as:
+ *    lamda = 0.5*[(a00+a11) + or - sqrt[(a00+a11)^2-4(a00.a11-((a01+a10)/2)^2)]
+ * By differentiating lamda with respect to a00, a01, a11, a12, a22
+ * some elements of rank four tensor ie. a0000, a0001, a1100, a0101, a1111, a1112, a2211, a1212
+ * (second derivatives) can be verified
+ * Furthermore the validity of all the elements of rank four tensor has been tested in
+ * "d2symmetricEigenvaluesTest2" method using finite difference method.
+ */
 TEST(RankTwoEigenRoutines, d2symmetricEigenvaluesTest1)
 {
   RankTwoTensor m2(1, 0, 0, 0, 2, 0, 0, 0, 3);
@@ -190,9 +191,9 @@ TEST(RankTwoEigenRoutines, d2symmetricEigenvaluesTest1)
 }
 
 /**
-* Second derivative of Eginvalues are compared with finite difference method
-* This method checks all the elements in RankFourTensor
-**/
+ * Second derivative of Eginvalues are compared with finite difference method
+ * This method checks all the elements in RankFourTensor
+ **/
 TEST(RankTwoEigenRoutines, d2symmetricEigenvaluesTest2)
 {
   RankTwoTensor m2(1, 0, 0, 0, 2, 0, 0, 0, 3);
@@ -251,7 +252,7 @@ TEST(RankTwoEigenRoutines, someIdentities)
   std::vector<Real> eigvals;
   m3.symmetricEigenvalues(eigvals);
 
-  Real mean = m3.trace() / 3.0;
+  Real mean = m3.tr() / 3.0;
   Real secondInvariant = m3.secondInvariant();
   Real shear = std::sqrt(secondInvariant);
   m3.thirdInvariant();

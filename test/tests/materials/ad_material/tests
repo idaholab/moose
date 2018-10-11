@@ -1,0 +1,70 @@
+[Tests]
+  [./test_adad]
+    type = 'Exodiff'
+    input = 'ad_material.i'
+    exodiff = 'ad_material_out.e'
+    absent_out = '7 Nonlinear'
+    allow_warnings = true
+    requirement = "The Jacobian from a material property declared as AD and gotten as AD shall be accurate"
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+  [./test_adreg]
+    type = 'Exodiff'
+    input = 'ad_material.i'
+    exodiff = 'ad_material_out.e'
+    prereq = 'test_adad'
+    cli_args = "ADKernels/diff/prop_to_use='adreg'"
+    expect_out = '14 Nonlinear'
+    allow_warnings = true
+    requirement = "The Jacobian from a material property declared as regular and gotten as AD shall be inaccurate"
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+  [./test_regad]
+    type = 'Exodiff'
+    input = 'ad_material.i'
+    exodiff = 'ad_material_out.e'
+    prereq = 'test_adreg'
+    cli_args = "ADKernels/diff/prop_to_use='regad'"
+    expect_out = '14 Nonlinear'
+    allow_warnings = true
+    requirement = "The Jacobian from a material property declared as AD and gotten as regular shall be inaccurate"
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+  [./test_regreg]
+    type = 'Exodiff'
+    input = 'ad_material.i'
+    exodiff = 'ad_material_out.e'
+    prereq = 'test_regad'
+    cli_args = "ADKernels/diff/prop_to_use='regreg'"
+    expect_out = '14 Nonlinear'
+    allow_warnings = true
+    requirement = "The Jacobian from a material property declared as regular and gotten as regular shall be inaccurate"
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+  [./stateful_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_stateful_material.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = 'AD shall work with stateful material properties and the Jacobian shall be beautiful'
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+  [./stateful_residual]
+    type = 'Exodiff'
+    exodiff = 'ad_stateful_material_exodus.e'
+    input = 'ad_stateful_material.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'stateful_jacobian'
+    requirement = 'The time evolution of the stateful diffusivity property shall show that AD works with stateful material properties'
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+[]

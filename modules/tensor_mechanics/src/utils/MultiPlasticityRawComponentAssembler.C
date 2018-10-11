@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiPlasticityRawComponentAssembler.h"
+#include "RankFourTensor.h"
 
 template <>
 InputParameters
@@ -347,13 +348,10 @@ MultiPlasticityRawComponentAssembler::buildActiveConstraints(const std::vector<R
 {
   mooseAssert(f.size() == _num_surfaces,
               "buildActiveConstraints called with f.size = " << f.size() << " while there are "
-                                                             << _num_surfaces
-                                                             << " surfaces");
+                                                             << _num_surfaces << " surfaces");
   mooseAssert(intnl.size() == _num_models,
-              "buildActiveConstraints called with intnl.size = " << intnl.size()
-                                                                 << " while there are "
-                                                                 << _num_models
-                                                                 << " models");
+              "buildActiveConstraints called with intnl.size = "
+                  << intnl.size() << " while there are " << _num_models << " models");
 
   if (_specialIC == "rock")
     buildActiveConstraintsRock(f, stress, intnl, Eijkl, act);

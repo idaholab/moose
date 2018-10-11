@@ -102,10 +102,6 @@ public:
 
 protected:
   /**
-   * Compute this Kernel's contribution to the residual at the current quadrature point
-   */
-  virtual Real computeQpResidual() = 0;
-  /**
    * Compute this Kernel's contribution to the Jacobian at the current quadrature point
    */
   virtual Real computeQpJacobian() { return 0; }

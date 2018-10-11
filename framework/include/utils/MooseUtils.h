@@ -536,4 +536,9 @@ ExecFlagEnum getDefaultExecFlagEnum();
 int stringToInteger(const std::string & input, bool throw_on_failure = false);
 } // MooseUtils namespace
 
+/**
+ * find, erase, length algorithm for removing a substring from a string
+ */
+void removeSubstring(std::string & main, const std::string & sub);
+
 #endif // MOOSEUTILS_H

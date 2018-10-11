@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TensorMechanicsPlasticMohrCoulombMulti.h"
+#include "RankFourTensor.h"
 
 // Following is for perturbing eigvenvalues.  This looks really bodgy, but works quite well!
 #include "MooseRandom.h"
@@ -715,14 +716,17 @@ TensorMechanicsPlasticMohrCoulombMulti::returnTip(const std::vector<Real> & eigv
          (n[0](0) - n[1](0) + n[1](1)) * n[2](2)) /
         trip;
     // eig_term = eigvals.(Cross[n[1], n[2]] + Cross[n[2], n[0]] + Cross[n[0], n[1]])/trip
-    Real eig_term = eigvals[0] * (-n[0](2) * n[1](1) + n[0](1) * n[1](2) + n[0](2) * n[2](1) -
-                                  n[1](2) * n[2](1) - n[0](1) * n[2](2) + n[1](1) * n[2](2)) /
+    Real eig_term = eigvals[0] *
+                    (-n[0](2) * n[1](1) + n[0](1) * n[1](2) + n[0](2) * n[2](1) -
+                     n[1](2) * n[2](1) - n[0](1) * n[2](2) + n[1](1) * n[2](2)) /
                     trip;
-    eig_term += eigvals[1] * (n[0](2) * n[1](0) - n[0](0) * n[1](2) - n[0](2) * n[2](0) +
-                              n[1](2) * n[2](0) + n[0](0) * n[2](2) - n[1](0) * n[2](2)) /
+    eig_term += eigvals[1] *
+                (n[0](2) * n[1](0) - n[0](0) * n[1](2) - n[0](2) * n[2](0) + n[1](2) * n[2](0) +
+                 n[0](0) * n[2](2) - n[1](0) * n[2](2)) /
                 trip;
-    eig_term += eigvals[2] * (n[0](0) * n[1](1) - n[1](1) * n[2](0) + n[0](1) * n[2](0) -
-                              n[0](1) * n[1](0) - n[0](0) * n[2](1) + n[1](0) * n[2](1)) /
+    eig_term += eigvals[2] *
+                (n[0](0) * n[1](1) - n[1](1) * n[2](0) + n[0](1) * n[2](0) - n[0](1) * n[1](0) -
+                 n[0](0) * n[2](1) + n[1](0) * n[2](1)) /
                 trip;
     // and finally, the equation we want to solve is:
     // x - eig_term + cohcot*cohcot_coeff = 0

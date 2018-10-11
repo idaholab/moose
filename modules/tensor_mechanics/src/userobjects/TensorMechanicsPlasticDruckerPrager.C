@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TensorMechanicsPlasticDruckerPrager.h"
+#include "RankFourTensor.h"
 #include "libmesh/utility.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPrager);
@@ -231,14 +232,16 @@ TensorMechanicsPlasticDruckerPrager::dbothAB(Real intnl, Real & daaa, Real & dbb
   switch (_mc_interpolation_scheme)
   {
     case 0: // outer_tip
-      daaa = 2.0 * std::sqrt(3.0) * (dC * cosphi / (3.0 - sinphi) + C * dcosphi / (3.0 - sinphi) +
-                                     C * cosphi * dsinphi / Utility::pow<2>(3.0 - sinphi));
+      daaa = 2.0 * std::sqrt(3.0) *
+             (dC * cosphi / (3.0 - sinphi) + C * dcosphi / (3.0 - sinphi) +
+              C * cosphi * dsinphi / Utility::pow<2>(3.0 - sinphi));
       dbbb = 2.0 / std::sqrt(3.0) *
              (dsinphi / (3.0 - sinphi) + sinphi * dsinphi / Utility::pow<2>(3.0 - sinphi));
       break;
     case 1: // inner_tip
-      daaa = 2.0 * std::sqrt(3.0) * (dC * cosphi / (3.0 + sinphi) + C * dcosphi / (3.0 + sinphi) -
-                                     C * cosphi * dsinphi / Utility::pow<2>(3.0 + sinphi));
+      daaa = 2.0 * std::sqrt(3.0) *
+             (dC * cosphi / (3.0 + sinphi) + C * dcosphi / (3.0 + sinphi) -
+              C * cosphi * dsinphi / Utility::pow<2>(3.0 + sinphi));
       dbbb = 2.0 / std::sqrt(3.0) *
              (dsinphi / (3.0 + sinphi) - sinphi * dsinphi / Utility::pow<2>(3.0 + sinphi));
       break;

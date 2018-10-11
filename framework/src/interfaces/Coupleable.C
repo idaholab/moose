@@ -26,7 +26,9 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
                        : true),
     _c_tid(_c_parameters.get<THREAD_ID>("_tid")),
     _zero(_c_fe_problem._zero[_c_tid]),
+    _ad_zero(_c_fe_problem._ad_zero[_c_tid]),
     _grad_zero(_c_fe_problem._grad_zero[_c_tid]),
+    _ad_grad_zero(_c_fe_problem._ad_grad_zero[_c_tid]),
     _second_zero(_c_fe_problem._second_zero[_c_tid]),
     _second_phi_zero(_c_fe_problem._second_phi_zero[_c_tid]),
     _vector_zero(_c_fe_problem._vector_zero[_c_tid]),
@@ -92,6 +94,8 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
   _default_vector_value_zero.resize(_coupleable_max_qps);
   _default_vector_gradient.resize(_coupleable_max_qps);
   _default_vector_curl.resize(_coupleable_max_qps);
+  _ad_default_gradient.resize(_coupleable_max_qps);
+  _ad_default_second.resize(_coupleable_max_qps);
 }
 
 Coupleable::~Coupleable()
@@ -102,12 +106,20 @@ Coupleable::~Coupleable()
       itt->release();
       delete itt;
     }
+  for (auto & it : _ad_default_value)
+  {
+    it.second->release();
+    delete it.second;
+  }
+
   _default_value_zero.release();
   _default_gradient.release();
   _default_second.release();
   _default_vector_value_zero.release();
   _default_vector_gradient.release();
   _default_vector_curl.release();
+  _ad_default_gradient.release();
+  _ad_default_second.release();
 }
 
 void
@@ -1174,4 +1186,18 @@ Coupleable::validateExecutionerType(const std::string & name, const std::string 
                name,
                "\" when using a \"Steady\" executioner is not allowed. This value is available "
                "only in transient simulations.");
+}
+
+template <>
+VariableValue *
+Coupleable::getADDefaultValue<RESIDUAL>(const std::string & var_name)
+{
+  return getDefaultValue(var_name, 0);
+}
+
+template <>
+VariableGradient &
+Coupleable::getADDefaultGradient<RESIDUAL>()
+{
+  return _default_gradient;
 }

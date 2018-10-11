@@ -9,6 +9,7 @@
 
 #include "RankTwoTensorTest.h"
 #include "RankTwoScalarTools.h"
+#include "RankFourTensor.h"
 
 TEST_F(RankTwoTensorTest, L2norm)
 {
@@ -103,12 +104,12 @@ TEST_F(RankTwoTensorTest, rotate)
 
 TEST_F(RankTwoTensorTest, trace)
 {
-  EXPECT_NEAR(0, _m0.trace(), 0.0001);
-  EXPECT_NEAR(3, _m1.trace(), 0.0001);
-  EXPECT_NEAR(6, _m2.trace(), 0.0001);
-  EXPECT_NEAR(5, _m3.trace(), 0.0001);
-  EXPECT_NEAR(5, _unsymmetric0.trace(), 0.0001);
-  EXPECT_NEAR(6, _unsymmetric1.trace(), 0.0001);
+  EXPECT_NEAR(0, _m0.tr(), 0.0001);
+  EXPECT_NEAR(3, _m1.tr(), 0.0001);
+  EXPECT_NEAR(6, _m2.tr(), 0.0001);
+  EXPECT_NEAR(5, _m3.tr(), 0.0001);
+  EXPECT_NEAR(5, _unsymmetric0.tr(), 0.0001);
+  EXPECT_NEAR(6, _unsymmetric1.tr(), 0.0001);
 }
 
 TEST_F(RankTwoTensorTest, secondInvariant)

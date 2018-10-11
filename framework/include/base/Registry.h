@@ -39,6 +39,34 @@
       Registry::add<classname>(                                                                    \
           {app, #classname, "", "", nullptr, nullptr, nullptr, __FILE__, __LINE__, "", ""})
 
+/// Add AD MooseObjects (e.g. both residual and jacobian objects) to the registry with the given app name/label.  classname is the (unquoted)
+/// c++ class template.  Each class template should only be registered once.
+#define registerADMooseObject(app, templatename)                                                   \
+  static char combineNames(dummyvar_for_registering_obj_##templatename##_residual, __LINE__) =     \
+      Registry::add<templatename<RESIDUAL>>({app,                                                  \
+                                             #templatename "<RESIDUAL>",                           \
+                                             "",                                                   \
+                                             "",                                                   \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             __FILE__,                                             \
+                                             __LINE__,                                             \
+                                             "",                                                   \
+                                             ""});                                                 \
+  static char combineNames(dummyvar_for_registering_obj_##templatename##_jacobian, __LINE__) =     \
+      Registry::add<templatename<JACOBIAN>>({app,                                                  \
+                                             #templatename "<JACOBIAN>",                           \
+                                             "",                                                   \
+                                             "",                                                   \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             nullptr,                                              \
+                                             __FILE__,                                             \
+                                             __LINE__,                                             \
+                                             "",                                                   \
+                                             ""})
+
 /// Add a MooseObject to the registry with the given app name/label under an alternate alias/name
 /// (quoted string) instead of the classname.
 #define registerMooseObjectAliased(app, classname, alias)                                          \

@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseEnum.h"
 #include "RankTwoTensor.h"
+#include "MooseError.h"
 
 namespace RankTwoScalarTools
 {

@@ -792,3 +792,11 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
 
   return keep_extension ? max_file : max_base;
 }
+
+void
+removeSubstring(std::string & main, const std::string & sub)
+{
+  std::string::size_type n = sub.length();
+  for (std::string::size_type i = main.find(sub); i != std::string::npos; i = main.find(sub))
+    main.erase(i, n);
+}

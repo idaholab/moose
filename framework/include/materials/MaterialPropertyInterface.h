@@ -27,6 +27,12 @@ InputParameters validParams();
 template <>
 InputParameters validParams<MaterialPropertyInterface>();
 
+#define adDeclareADProperty this->template declareADProperty
+#define adDeclareProperty this->template declareProperty
+#define adGetADMaterialProperty this->template getADMaterialProperty
+#define adGetMaterialProperty this->template getMaterialProperty
+#define adGetMaterialPropertyOld this->template getMaterialPropertyOld
+
 /**
  * \class MaterialPropertyInterface
  * \brief An interface for accessing Materials
@@ -56,6 +62,8 @@ public:
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
+  const ADMaterialPropertyObject<T> & getADMaterialProperty(const std::string & name);
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
@@ -70,6 +78,9 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
+  template <typename T>
+  const ADMaterialPropertyObject<T> &
+  getADMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
@@ -217,6 +228,13 @@ protected:
   const MaterialProperty<T> * defaultMaterialProperty(const std::string & name);
 
   /**
+   * Helper function to parse default material property values. This is implemented
+   * as a specialization for supported types and returns NULL in all other cases.
+   */
+  template <typename T>
+  const ADMaterialPropertyObject<T> * defaultADMaterialProperty(const std::string & name);
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -231,6 +249,8 @@ protected:
 
   /// Storage vector for MaterialProperty<Real> default objects
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
+  /// Storage vector for ADMaterialPropertyObject<Real> default objects
+  std::vector<std::unique_ptr<ADMaterialPropertyObject<Real>>> _default_ad_real_properties;
 
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
@@ -288,6 +308,21 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 }
 
 template <typename T>
+const ADMaterialPropertyObject<T> &
+MaterialPropertyInterface::getADMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const ADMaterialPropertyObject<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+
+  return getADMaterialPropertyByName<T>(prop_name);
+}
+
+template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
@@ -337,6 +372,14 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
   return NULL;
 }
 
+// General version for types that do not accept default values
+template <typename T>
+const ADMaterialPropertyObject<T> *
+MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*/)
+{
+  return NULL;
+}
+
 // Forward declare explicit specializations
 template <>
 const MaterialProperty<Real> *
@@ -358,6 +401,24 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return _material_data->getProperty<T>(name);
+}
+
+template <typename T>
+const ADMaterialPropertyObject<T> &
+MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
+{
+  checkExecutionStage();
+  checkMaterialProperty(name);
+
+  // mark property as requested
+  markMatPropRequested(name);
+
+  // Update the boolean flag.
+  _get_material_property_called = true;
+
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
+  return _material_data->getADProperty<T>(name);
 }
 
 template <typename T>

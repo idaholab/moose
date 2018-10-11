@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'ad_simple_diffusion.i'
+    exodiff = 'ad_simple_diffusion_out.e'
+    requirement = "Jacobian entries generated with AD for a simple diffusion problem shall be accurate"
+    design = "jacobian_definition.md ADDiffusion.md"
+    issues = "#5658"
+  [../]
+[]

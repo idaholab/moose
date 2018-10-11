@@ -9,6 +9,7 @@
 
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "RotationMatrix.h" // for rotVecToZ
+#include "RankFourTensor.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneTensileN);
 

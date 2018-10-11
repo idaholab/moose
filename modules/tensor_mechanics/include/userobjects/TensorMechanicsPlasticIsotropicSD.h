@@ -11,6 +11,7 @@
 #define TENSORMECHANICSPLASTICISOTROPICSD_H
 
 #include "TensorMechanicsPlasticJ2.h"
+#include "RankFourTensor.h"
 
 class TensorMechanicsPlasticIsotropicSD;
 
