@@ -118,6 +118,8 @@ Coupleable::~Coupleable()
   _default_vector_value_zero.release();
   _default_vector_gradient.release();
   _default_vector_curl.release();
+  _ad_default_gradient.release();
+  _ad_default_second.release();
 }
 
 void
