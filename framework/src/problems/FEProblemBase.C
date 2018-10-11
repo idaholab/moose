@@ -471,6 +471,8 @@ FEProblemBase::~FEProblemBase()
     _second_phi_zero[i].release();
     _vector_zero[i].release();
     _vector_curl_zero[i].release();
+    _ad_zero[i].release();
+    _ad_grad_zero[i].release();
   }
 }
 
