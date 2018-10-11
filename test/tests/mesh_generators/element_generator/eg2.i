@@ -7,6 +7,7 @@
                        0 1 0'
 
     element_connectivity = '0 1 2 3'
+    elem_type = "QUAD4"
   []
 
   [./eg2]
@@ -18,6 +19,7 @@
                        0 -1 0'
 
     element_connectivity = '0 1 2 3'
+    elem_type = "QUAD4"
   []
 []
 
