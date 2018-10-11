@@ -9,6 +9,8 @@
 
 #include "ForceStabilizedSmallStrainMechanicsNOSPD.h"
 #include "MeshBasePD.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 registerMooseObject("PeridynamicsApp", ForceStabilizedSmallStrainMechanicsNOSPD);
 

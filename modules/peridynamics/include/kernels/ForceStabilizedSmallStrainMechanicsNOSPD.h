@@ -11,9 +11,10 @@
 #define FORCESTABILIZEDSMALLSTRAINMECHANICSNOSPD_H
 
 #include "MechanicsBasePD.h"
-#include "RankTwoTensor.h"
 
 class ForceStabilizedSmallStrainMechanicsNOSPD;
+class RankTwoTensor;
+class RankFourTensor;
 
 template <>
 InputParameters validParams<ForceStabilizedSmallStrainMechanicsNOSPD>();

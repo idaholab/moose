@@ -11,6 +11,7 @@
 #include "MooseVariableScalar.h"
 #include "MeshBasePD.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainOffDiagOSPD);
 
