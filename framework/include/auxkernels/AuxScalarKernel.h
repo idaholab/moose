@@ -49,6 +49,12 @@ public:
   virtual ~AuxScalarKernel();
 
   /**
+   * Called just before the compute loop starts so an AuxKernel can initialize
+   * any internal datastructures
+   */
+  virtual void initialize() {}
+
+  /**
    * Evaluate the kernel
    */
   virtual void compute();
