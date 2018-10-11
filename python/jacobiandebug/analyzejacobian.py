@@ -419,7 +419,8 @@ if __name__ == '__main__':
     if not options.noauto :
         if new_petsc:
             petsc_test_options = ['-snes_test_jacobian', '-snes_test_jacobian_view', '-snes_type', 'ksponly',
-                                  '-ksp_type', 'preonly', '-pc_type', 'none', '-snes_convergence_test', 'skip']
+                                  '-ksp_type', 'preonly', '-pc_type', 'none', '-snes_convergence_test', 'skip',
+                                  '-snes_test_jacobian_display_threshold', '1e-10']
         else:
             petsc_test_options = ['-snes_type', 'test', '-snes_test_display']
 
