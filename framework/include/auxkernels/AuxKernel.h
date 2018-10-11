@@ -67,6 +67,12 @@ public:
   virtual ~AuxKernel();
 
   /**
+   * Called just before the compute loop starts so an AuxKernel can initialize
+   * any internal datastructures
+   */
+  virtual void initialize() {}
+
+  /**
    * Computes the value and stores it in the solution vector
    */
   virtual void compute();

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'ghosting_aux.i'
+    exodiff = 'ghosting_aux_out.e'
+  [../]
+[]
