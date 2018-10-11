@@ -12,10 +12,13 @@
 #include "Conversion.h"
 #include "Factory.h"
 #include "FEProblem.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/string_to_enum.h"
 
 registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "add_variable");
+registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "copy_nodal_vars");
+registerMooseAction("PhaseFieldApp", PolycrystalVariablesAction, "check_copy_nodal_vars");
 
 template <>
 InputParameters
@@ -34,6 +37,10 @@ validParams<PolycrystalVariablesAction>()
                              orders,
                              "Specifies the order of the FE "
                              "shape function to use for the order parameters");
+  params.addParam<bool>(
+      "initial_from_file",
+      false,
+      "Take the initial condition of all polycrystal variables from the mesh file");
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
   params.addRequiredParam<unsigned int>("op_num",
                                         "specifies the number of order parameters to create");
@@ -51,6 +58,9 @@ PolycrystalVariablesAction::PolycrystalVariablesAction(const InputParameters & p
 void
 PolycrystalVariablesAction::act()
 {
+  // take initial values from file?
+  bool initial_from_file = getParam<bool>("initial_from_file");
+
   // Loop through the number of order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
@@ -58,9 +68,26 @@ PolycrystalVariablesAction::act()
     std::string var_name = _var_name_base + Moose::stringify(op);
 
     // Add the variable
-    _problem->addVariable(var_name,
-                          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-                          getParam<Real>("scaling"));
+    if (_current_task == "add_variable")
+    {
+      _problem->addVariable(
+          var_name,
+          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+          getParam<Real>("scaling"));
+    }
+
+    // Setup initial from file if requested
+    if (initial_from_file)
+    {
+      if (_current_task == "check_copy_nodal_vars")
+        _app.setFileRestart() = true;
+
+      if (_current_task == "copy_nodal_vars")
+      {
+        auto * system = &_problem->getNonlinearSystemBase();
+        system->addVariableToCopy(var_name, var_name, "LATEST");
+      }
+    }
   }
 }
