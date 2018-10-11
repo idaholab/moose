@@ -167,7 +167,9 @@ def doc_tree(items):
                                                         name=key[i-1],
                                                         source=os.path.join(root, *dir_key))
 
-            # Create the file node
-            nodes[key] = create_file_node(nodes[key[:-1]], key[-1], filename)
+            # Create the file node, if it doesn't already exist. This enforces that the first
+            # item in the supplied content lists is the page that is rendered.
+            if key not in nodes:
+                nodes[key] = create_file_node(nodes[key[:-1]], key[-1], filename)
 
     return nodes[()]
