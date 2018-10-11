@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'ad_coupled_value.i'
+    exodiff = 'ad_coupled_value_out.e'
+    requirement = "Coupled variable value Jacobian entries generated with AD shall be accurate"
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  [../]
+[]

@@ -1,0 +1,56 @@
+[Tests]
+  [./1d]
+    type = 'Exodiff'
+    input = 'max_var_n_dofs_per_elem.i'
+    exodiff = '1d.e'
+    cli_args = 'Mesh/dim=1 Outputs/file_base=1d'
+    requirement = "The maximum number of degrees of freedom for a single variable on a 1D EDGE2 elem shall be 2"
+    design = "MaxVarNDofsPerElem.md"
+    issues = "#5658"
+  [../]
+  [./2d]
+    type = 'Exodiff'
+    input = 'max_var_n_dofs_per_elem.i'
+    exodiff = '2d.e'
+    cli_args = 'Mesh/dim=2 Outputs/file_base=2d'
+    requirement = "The maximum number of degrees of freedom for a single variable on a 2D QUAD4 elem shall be 4"
+    design = "MaxVarNDofsPerElem.md"
+    issues = "#5658"
+  [../]
+  [./2d_high_order]
+    type = 'Exodiff'
+    input = 'max_var_n_dofs_per_elem.i'
+    exodiff = '2d_high_order.e'
+    cli_args = 'Mesh/dim=2 Mesh/elem_type=quad9 Variables/u/order=SECOND Outputs/file_base=2d_high_order'
+    requirement = "The maximum number of degrees of freedom for a single variable on a 2D QUAD9 elem shall be 9"
+    design = "MaxVarNDofsPerElem.md"
+    issues = "#5658"
+  [../]
+  [./triangles]
+    type = 'Exodiff'
+    input = 'max_var_n_dofs_per_elem.i'
+    exodiff = 'triangles.e'
+    cli_args = 'Mesh/dim=2 Mesh/elem_type=tri3 Outputs/file_base=triangles'
+    requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI3 elem shall be 3"
+    design = "MaxVarNDofsPerElem.md"
+    issues = "#5658"
+  [../]
+  [./triangles_high_order]
+    type = 'Exodiff'
+    input = 'max_var_n_dofs_per_elem.i'
+    exodiff = 'triangles_high_order.e'
+    cli_args = 'Mesh/dim=2 Mesh/elem_type=tri6 Variables/u/order=SECOND Outputs/file_base=triangles_high_order'
+    requirement = "The maximum number of degrees of freedom for a single variable on a 2D TRI6 elem shall be 6"
+    design = "MaxVarNDofsPerElem.md"
+    issues = "#5658"
+  [../]
+  [./3d]
+    type = 'Exodiff'
+    input = 'max_var_n_dofs_per_elem.i'
+    exodiff = '3d.e'
+    cli_args = 'Mesh/dim=3  Outputs/file_base=3d'
+    requirement = "The maximum number of degrees of freedom for a single variable on a 3D HEX8 elem shall be 8"
+    design = "MaxVarNDofsPerElem.md"
+    issues = "#5658"
+  [../]
+[]

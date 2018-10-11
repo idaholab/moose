@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TensorMechanicsPlasticOrthotropic.h"
+#include "RankFourTensor.h"
 #include "libmesh/utility.h"
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticOrthotropic);

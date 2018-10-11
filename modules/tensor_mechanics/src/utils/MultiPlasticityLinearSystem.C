@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiPlasticityLinearSystem.h"
+#include "RankFourTensor.h"
 
 // Following is for perturbing distances in eliminating linearly-dependent directions
 #include "MooseRandom.h"

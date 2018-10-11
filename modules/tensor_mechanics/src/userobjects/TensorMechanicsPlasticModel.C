@@ -10,6 +10,7 @@
 //  Plastic Model base class.
 //
 #include "TensorMechanicsPlasticModel.h"
+#include "RankFourTensor.h"
 
 template <>
 InputParameters

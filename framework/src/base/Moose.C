@@ -102,9 +102,12 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
   appendMooseObjectTask  ("add_kernel",                   VectorKernel);
 
+  registerMooseObjectTask("add_ad_kernel",                ADKernel,               false);
+
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
   registerMooseObjectTask("add_material",                 Material,               false);
+  registerMooseObjectTask("add_ad_material",              ADMaterial,             false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
   registerMooseObjectTask("add_function",                 Function,               false);
   registerMooseObjectTask("add_distribution",             Distribution,           false);
@@ -270,7 +273,7 @@ addActionTypes(Syntax & syntax)
                            "(add_multi_app)"
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
-                           "(add_material)"
+                           "(add_material, add_ad_material)"
                            "(setup_material_output)" // DEPRECATED: Remove by 12/31/2018
                            "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
@@ -281,7 +284,7 @@ addActionTypes(Syntax & syntax)
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
-                           " add_nodal_kernel, add_dg_kernel, add_interface_kernel,"
+                           " add_ad_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel,"
                            " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
                            "(add_control)"
                            "(check_output)"
@@ -369,6 +372,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
   registerSyntaxTask("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
+  registerSyntaxTask("AddADKernelAction", "ADKernels/*", "add_ad_kernel");
+
   registerSyntaxTask("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
   registerSyntaxTask("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
@@ -418,6 +423,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddInitialConditionAction", "ICs/*", "add_ic");
 
   registerSyntax("AddMaterialAction", "Materials/*");
+  registerSyntaxTask("AddADMaterialAction", "ADMaterials/*", "add_ad_material");
 
   registerSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
   registerSyntax("AddPostprocessorAction", "Postprocessors/*");

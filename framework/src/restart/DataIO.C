@@ -10,6 +10,8 @@
 #include "DataIO.h"
 #include "MooseMesh.h"
 #include "ColumnMajorMatrix.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dense_matrix.h"
@@ -97,6 +99,20 @@ dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/)
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     for (unsigned int j = 0; i < LIBMESH_DIM; i++)
       stream.write((char *)&v(i, j), sizeof(v(i, j)));
+}
+
+template <>
+void
+dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
+{
+  dataStore(stream, rtt._coords, context);
+}
+
+template <>
+void
+dataStore(std::ostream & stream, RankFourTensor & rft, void * context)
+{
+  dataStore(stream, rft._vals, context);
 }
 
 template <>
@@ -294,6 +310,20 @@ dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/)
       stream.read((char *)&r, sizeof(r));
       v(i, j) = r;
     }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RankTwoTensor & rtt, void * context)
+{
+  dataLoad(stream, rtt._coords, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RankFourTensor & rft, void * context)
+{
+  dataLoad(stream, rft._vals, context);
 }
 
 template <>

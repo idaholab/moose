@@ -45,6 +45,11 @@ public:
 
   virtual VectorMooseVariable & variable() override { return _var; }
 
+  /**
+   * Compute this Kernel's contribution to the residual at the current quadrature point
+   */
+  virtual Real computeQpResidual() = 0;
+
 protected:
   /// This is a regular kernel so we cast to a regular MooseVariable
   VectorMooseVariable & _var;

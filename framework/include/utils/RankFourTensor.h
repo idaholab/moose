@@ -10,12 +10,19 @@
 #ifndef RANKFOURTENSOR_H
 #define RANKFOURTENSOR_H
 
-// MOOSE includes
-#include "DataIO.h"
+#include "Moose.h"
 
 #include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/tuple_of.h"
+
+#include <petscsys.h>
+
+using libMesh::Real;
+using libMesh::RealGradient;
+using libMesh::RealTensorValue;
+using libMesh::tuple_of;
 
 // Forward declarations
 class MooseEnum;
@@ -45,6 +52,8 @@ void mooseSetToZero<RankFourTensor>(RankFourTensor & v);
 class RankFourTensor
 {
 public:
+  typedef tuple_of<4, unsigned int> index_type;
+
   /// Initialization method
   enum InitMethod
   {
@@ -156,14 +165,7 @@ public:
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
-  template <class T>
-  void rotate(const T & R);
-
-  /**
-   * Rotate the tensor using
-   * C_ijkl = R_im R_jn R_ko R_lp C_mnop
-   */
-  void rotate(const RealTensorValue & R);
+  void rotate(const TypeTensor<Real> & R);
 
   /**
    * Transpose the tensor by swapping the first pair with the second pair of indices
@@ -341,44 +343,6 @@ protected:
   friend class RankThreeTensor;
 };
 
-template <>
-void dataStore(std::ostream &, RankFourTensor &, void *);
-
-template <>
-void dataLoad(std::istream &, RankFourTensor &, void *);
-
 inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
-
-template <class T>
-void
-RankFourTensor::rotate(const T & R)
-{
-  RankFourTensor old = *this;
-
-  int index = 0;
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      for (unsigned int k = 0; k < N; ++k)
-        for (unsigned int l = 0; l < N; ++l)
-        {
-          Real sum = 0.0;
-          int index2 = 0;
-          for (unsigned int m = 0; m < N; ++m)
-          {
-            Real a = R(i, m);
-            for (unsigned int n = 0; n < N; ++n)
-            {
-              Real ab = a * R(j, n);
-              for (unsigned int o = 0; o < N; ++o)
-              {
-                Real abc = ab * R(k, o);
-                for (unsigned int p = 0; p < N; ++p)
-                  sum += abc * R(l, p) * old._vals[index2++];
-              }
-            }
-          }
-          _vals[index++] = sum;
-        }
-}
 
 #endif // RANKFOURTENSOR_H

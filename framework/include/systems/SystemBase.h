@@ -400,6 +400,13 @@ public:
   virtual unsigned int nVariables() const;
 
   /**
+   * Gets the maximum number of dofs used by any one variable on any one element
+   *
+   * @return The max
+   */
+  size_t getMaxVarNDofsPerElem() { return _max_var_n_dofs_per_elem; }
+
+  /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
    * @param var_name The name of the variable to be zeroed.
    */
@@ -685,6 +692,9 @@ protected:
   Moose::VarKindType _var_kind;
 
   std::vector<VarCopyInfo> _var_to_copy;
+
+  /// Maximum number of dofs for any one variable on any one element
+  size_t _max_var_n_dofs_per_elem;
 };
 
 #define PARALLEL_TRY

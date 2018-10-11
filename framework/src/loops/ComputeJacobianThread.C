@@ -160,6 +160,9 @@ ComputeJacobianThread::subdomainChanged()
   // This one may be expensive, and hopefully we do not use it so often
   else
     _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+
+  for (auto & var : needed_moose_vars)
+    var->computingJacobian(true);
 }
 
 void

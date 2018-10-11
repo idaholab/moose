@@ -40,6 +40,8 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(
     _bnd_material_props(bnd_material_props),
     _neighbor_material_props(neighbor_material_props),
     _materials(_fe_problem.getComputeMaterialWarehouse()),
+    _residual_materials(_fe_problem.getResidualMaterialsWarehouse()),
+    _jacobian_materials(_fe_problem.getJacobianMaterialsWarehouse()),
     _discrete_materials(_fe_problem.getDiscreteMaterialWarehouse()),
     _assembly(assembly),
     _need_internal_side_material(false),
@@ -62,6 +64,8 @@ ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjec
     _bnd_material_props(x._bnd_material_props),
     _neighbor_material_props(x._neighbor_material_props),
     _materials(x._materials),
+    _residual_materials(x._residual_materials),
+    _jacobian_materials(x._jacobian_materials),
     _discrete_materials(x._discrete_materials),
     _assembly(x._assembly),
     _need_internal_side_material(x._need_internal_side_material),
@@ -79,14 +83,24 @@ ComputeMaterialsObjectThread::subdomainChanged()
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _materials.updateVariableDependency(needed_moose_vars, _tid);
+  if (_fe_problem.currentlyComputingJacobian())
+    _jacobian_materials.updateVariableDependency(needed_moose_vars, _tid);
+  else
+    _residual_materials.updateVariableDependency(needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 }
 
 void
 ComputeMaterialsObjectThread::onElement(const Elem * elem)
 {
+  MaterialWarehouse const * ad_materials;
+  if (_fe_problem.currentlyComputingJacobian())
+    ad_materials = &_jacobian_materials;
+  else
+    ad_materials = &_residual_materials;
   if (_materials.hasActiveBlockObjects(_subdomain, _tid) ||
-      _discrete_materials.hasActiveBlockObjects(_subdomain, _tid))
+      _discrete_materials.hasActiveBlockObjects(_subdomain, _tid) ||
+      ad_materials->hasActiveBlockObjects(_subdomain, _tid))
   {
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
@@ -105,6 +119,11 @@ ComputeMaterialsObjectThread::onElement(const Elem * elem)
       if (_materials.hasActiveBlockObjects(_subdomain, _tid))
         _material_props.initStatefulProps(*_material_data[_tid],
                                           _materials.getActiveBlockObjects(_subdomain, _tid),
+                                          n_points,
+                                          *elem);
+      if (ad_materials->hasActiveBlockObjects(_subdomain, _tid))
+        _material_props.initStatefulProps(*_material_data[_tid],
+                                          ad_materials->getActiveBlockObjects(_subdomain, _tid),
                                           n_points,
                                           *elem);
     }
@@ -152,6 +171,17 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem, unsigned int side, B
                                               face_n_points,
                                               *elem,
                                               side);
+      MaterialWarehouse const * ad_materials;
+      if (_fe_problem.currentlyComputingJacobian())
+        ad_materials = &_jacobian_materials;
+      else
+        ad_materials = &_residual_materials;
+      if (ad_materials->hasActiveBoundaryObjects(bnd_id, _tid))
+        _bnd_material_props.initStatefulProps(*_bnd_material_data[_tid],
+                                              ad_materials->getActiveBoundaryObjects(bnd_id, _tid),
+                                              face_n_points,
+                                              *elem,
+                                              side);
     }
   }
 }
@@ -182,6 +212,18 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             face_n_points,
             *elem,
             side);
+      MaterialWarehouse const * ad_materials;
+      if (_fe_problem.currentlyComputingJacobian())
+        ad_materials = &_jacobian_materials;
+      else
+        ad_materials = &_residual_materials;
+      if ((*ad_materials)[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(_subdomain, _tid))
+        _bnd_material_props.initStatefulProps(
+            *_bnd_material_data[_tid],
+            (*ad_materials)[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_subdomain, _tid),
+            face_n_points,
+            *elem,
+            side);
     }
 
     const Elem * neighbor = elem->neighbor_ptr(side);
@@ -209,6 +251,20 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
         _neighbor_material_props.initStatefulProps(
             *_neighbor_material_data[_tid],
             _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
+                neighbor->subdomain_id(), _tid),
+            face_n_points,
+            *neighbor,
+            neighbor_side);
+      MaterialWarehouse const * ad_materials;
+      if (_fe_problem.currentlyComputingJacobian())
+        ad_materials = &_jacobian_materials;
+      else
+        ad_materials = &_residual_materials;
+      if ((*ad_materials)[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(
+              neighbor->subdomain_id(), _tid))
+        _neighbor_material_props.initStatefulProps(
+            *_neighbor_material_data[_tid],
+            (*ad_materials)[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(
                 neighbor->subdomain_id(), _tid),
             face_n_points,
             *neighbor,
