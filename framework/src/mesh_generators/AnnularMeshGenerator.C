@@ -21,8 +21,6 @@ validParams<AnnularMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
-
   params.addRangeCheckedParam<unsigned int>(
       "nr", 1, "nr>0", "Number of elements in the radial direction");
   params.addRequiredRangeCheckedParam<unsigned int>(
@@ -59,7 +57,6 @@ validParams<AnnularMeshGenerator>()
 
 AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-    _input(getMesh("input")),
     _nr(getParam<unsigned int>("nr")),
     _nt(getParam<unsigned int>("nt")),
     _rmin(getParam<Real>("rmin")),
@@ -90,11 +87,7 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 AnnularMeshGenerator::generate()
 {
-  std::unique_ptr<MeshBase> mesh = std::move(_input);
-
-  // If there was no input mesh then let's just make a new one
-  if (!mesh)
-    mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
 
   const Real dt = (_tmax - _tmin) / _nt;
   

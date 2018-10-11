@@ -29,8 +29,6 @@ public:
   std::unique_ptr<MeshBase> generate();
 
 protected:
-  /// Mesh that possibly comes from another generator
-  std::unique_ptr<MeshBase> & _input;
 
   /// Number of elements in radial direction
   const unsigned _nr;
