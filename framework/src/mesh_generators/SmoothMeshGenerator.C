@@ -13,6 +13,8 @@
 #include "libmesh/mesh_smoother_laplace.h"
 #include "libmesh/unstructured_mesh.h"
 
+#include "CastUniquePointer.h"
+
 registerMooseObject("MooseApp", SmoothMeshGenerator);
 
 template <>
@@ -21,7 +23,7 @@ validParams<SmoothMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
+  params.addRequiredParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
   params.addClassDescription("Utilizes a simple Laplacian based smoother to attempt to improve "
                              "mesh quality.  Will not move boundary nodes or nodes along "
                              "block/subdomain boundaries");
@@ -42,13 +44,8 @@ SmoothMeshGenerator::SmoothMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 SmoothMeshGenerator::generate()
 {
-  //std::unique_ptr<MeshBase> mesh = dynamic_cast<std::unique_ptr<ReplicatedMesh>&>(*std::move(_input))->clone();
-  std::unique_ptr<MeshBase> mesh = std::move(_input);
-
-  // If there was no input mesh then let's just make a new one
-  // Is it pertinent ? No input would be useless...
-  if (!mesh)
-    mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  std::unique_ptr<MeshBase> old_mesh = std::move(_input);
+  auto mesh = dynamic_pointer_cast<ReplicatedMesh>(old_mesh);
 
   LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh));
 
