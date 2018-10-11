@@ -1,0 +1,12 @@
+[Tests]
+  [elem_var_value_test]
+    type = CSVDiff
+    input = elemental_variable_value.i
+    csvdiff = elemental_variable_value_out.csv
+    mesh_mode = REPLICATED # Node numbering needs to be disabled for ElementVariableValue
+
+    requirement = "The system shall support sampling a specific quantity integrated over a single element."
+    issues = "#9757 #12165"
+    design = "ElementalVariableValue.md"
+  []
+[]
