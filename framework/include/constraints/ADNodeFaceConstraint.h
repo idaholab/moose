@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODEFACECONSTRAINT_H
-#define NODEFACECONSTRAINT_H
+#ifndef ADNODEFACECONSTRAINT_H
+#define ADNODEFACECONSTRAINT_H
 
 // MOOSE includes
-#include "NodeFaceConstraintBase.h"
+#include "ADNodeFaceConstraintBase.h"
 
 // Forward Declarations
-class NodeFaceConstraint;
+class ADNodeFaceConstraint;
 
 template <>
-InputParameters validParams<NodeFaceConstraint>();
+InputParameters validParams<ADNodeFaceConstraint>();
 
 /**
- * A NodeFaceConstraint is used when you need to create constraints between
+ * A ADNodeFaceConstraint is used when you need to create constraints between
  * two surfaces in a mesh.  It works by allowing you to modify the residual
  * and jacobian entries on "this" side (the node side, also referred to as
  * the slave side) and the "other" side (the face side, also referred to as
@@ -28,11 +28,11 @@ InputParameters validParams<NodeFaceConstraint>();
  *
  * This is common for contact algorithms and other constraints.
  */
-class NodeFaceConstraint : public NodeFaceConstraintBase
+class ADNodeFaceConstraint : public ADNodeFaceConstraintBase
 {
 public:
-  NodeFaceConstraint(const InputParameters & parameters);
-  virtual ~NodeFaceConstraint();
+  ADNodeFaceConstraint(const InputParameters & parameters);
+  virtual ~ADNodeFaceConstraint();
 
   /**
    * Computes the residual Nodal residual.
