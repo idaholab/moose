@@ -39,18 +39,16 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 StitchedMeshGenerator::generate()
 {
-  //std::unique_ptr<ReplicatedMesh> mesh = std::move(std::dynamic_pointer_cast<ReplicatedMesh>(getMeshByName(_input_names[0])));
-  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(getMeshByName(_input_names[0]));
-  //dynamic_cast<std::unique_ptr<ReplicatedMesh>&>(*mesh);
+  // We put the first mesh in a local pointer
+  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<MeshBase, ReplicatedMesh>(getMeshByName(_input_names[0]));
 
-  //mesh = getMeshByName(_names[0]))->clone();
-  _meshes.reserve(_input_names.size());
+  _meshes.reserve(_input_names.size() - 1);
 
   // Read in all of the other meshes
-  for (auto i = beginIndex(_input_names, 0); i < _input_names.size(); ++i)
+  for (auto i = beginIndex(_input_names, 1); i < _input_names.size(); ++i)
   {
     _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(comm()));
-    _meshes.back() = getMeshByName(_input_names[i])->clone();
+    _meshes.back() = dynamic_pointer_cast<MeshBase, ReplicatedMesh>(getMeshByName(_input_names[i]));
   }
 
   
@@ -62,7 +60,7 @@ StitchedMeshGenerator::generate()
     boundary_id_type first =  _meshes[i]->get_id_by_name(boundary_pair[0]);
     boundary_id_type second = _meshes[i]->get_id_by_name(boundary_pair[1]);
 
-    //_meshes[0]->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
+    mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
   }
   
   return mesh;
