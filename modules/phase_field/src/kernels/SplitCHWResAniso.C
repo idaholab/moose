@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<SplitCHWResAniso>()
 {
-  InputParameters params = SplitCHWResBase<RealTensorValue>::validParams();
+  InputParameters params = validParams<SplitCHWResBase<>>();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential "
                              "variable with a tensor (anisotropic) mobility");
   return params;
