@@ -1,0 +1,26 @@
+Content:
+    - framework/doc/content
+    - modules/solid_properties/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Solid Properties Module
+    repo: https://github.com/idaholab/moose
+    home: /modules/solid_properties
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/solid_properties
+        hide:
+            framework: !include framework/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/solid_properties/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml
+    acronyms:
+        type: MooseDocs.extensions.acronym
+        acronyms: !include framework/doc/acronyms.yml

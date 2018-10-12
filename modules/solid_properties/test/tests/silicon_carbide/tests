@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct input file syntax for "
+      "declaring silicon carbide properties and their usage in providing "
+      "thermal materials."
+    design = 'ThermalSiliconCarbideProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
+[]
