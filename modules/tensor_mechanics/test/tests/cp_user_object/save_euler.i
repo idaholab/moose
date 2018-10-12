@@ -1,47 +1,51 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  elem_type = HEX8
-  displacements = 'ux uy uz'
+  dim = 2
+  elem_type = QUAD4
+  displacements = 'disp_x disp_y'
+  nx = 2
+  ny = 2
 []
 
 [Variables]
-  [./ux]
-    block = 0
+  [./disp_x]
   [../]
-  [./uy]
-    block = 0
-  [../]
-  [./uz]
-    block = 0
+  [./disp_y]
   [../]
 []
 
+[GlobalParams]
+  volumetric_locking_correction = true
+[]
+
 [AuxVariables]
-  [./stress_zz]
+  [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
-  [./fp_zz]
+  [./e_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
-  [./rotout]
+  [./fp_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
-  [../]
-  [./e_zz]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
   [../]
   [./gss]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
+  [../]
+  [./euler1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./euler2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./euler3]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -52,46 +56,40 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'ux uy uz'
-    use_displaced_mesh = true
+[UserObjects]
+  [./prop_read]
+    type = ElementPropertyReadFile
+    prop_file_name = 'euler_ang_file.txt'
+    # Enter file data as prop#1, prop#2, .., prop#nprop
+    nprop = 3
+    read_type = element
   [../]
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [./stress_yy]
     type = RankTwoAux
-    variable = stress_zz
+    variable = stress_yy
     rank_two_tensor = stress
-    index_j = 2
-    index_i = 2
+    index_j = 1
+    index_i = 1
     execute_on = timestep_end
-    block = 0
   [../]
-  [./fp_zz]
+  [./e_yy]
     type = RankTwoAux
-    variable = fp_zz
-    rank_two_tensor = fp
-    index_j = 2
-    index_i = 2
-    execute_on = timestep_end
-    block = 0
-  [../]
-  [./e_zz]
-    type = RankTwoAux
-    variable = e_zz
+    variable = e_yy
     rank_two_tensor = lage
-    index_j = 2
-    index_i = 2
+    index_j = 1
+    index_i = 1
     execute_on = timestep_end
-    block = 0
   [../]
-  [./rotout]
-    type = CrystalPlasticityRotationOutAux
-    variable = rotout
+  [./fp_yy]
+    type = RankTwoAux
+    variable = fp_yy
+    rank_two_tensor = fp
+    index_j = 1
+    index_i = 1
     execute_on = timestep_end
-    block = 0
   [../]
   [./gss]
     type = MaterialStdVectorAux
@@ -99,33 +97,47 @@
     property = state_var_gss
     index = 0
     execute_on = timestep_end
-    block = 0
+  [../]
+  [./euler1]
+    type = MaterialRealVectorValueAux
+    variable = euler1
+    property = Euler_angles
+    component = 0
+    execute_on = timestep_end
+  [../]
+  [./euler2]
+    type = MaterialRealVectorValueAux
+    variable = euler2
+    property = Euler_angles
+    component = 1
+    execute_on = timestep_end
+  [../]
+  [./euler3]
+    type = MaterialRealVectorValueAux
+    variable = euler3
+    property = Euler_angles
+    component = 2
+    execute_on = timestep_end
   [../]
 []
 
 [BCs]
-  [./symmy]
+  [./fix_x]
     type = PresetBC
-    variable = uy
-    boundary = bottom
+    variable = disp_x
+    boundary = 'left'
     value = 0
   [../]
-  [./symmx]
+  [./fix_y]
     type = PresetBC
-    variable = ux
-    boundary = left
-    value = 0
-  [../]
-  [./symmz]
-    type = PresetBC
-    variable = uz
-    boundary = back
+    variable = disp_y
+    boundary = 'bottom'
     value = 0
   [../]
   [./tdisp]
     type = FunctionPresetBC
-    variable = uz
-    boundary = front
+    variable = disp_y
+    boundary = top
     function = tdisp
   [../]
 []
@@ -164,10 +176,8 @@
 [Materials]
   [./crysp]
     type = FiniteStrainUObasedCP
-    block = 0
     stol = 1e-2
     tan_mod_type = exact
-    maximum_substep_iteration = 10
     uo_slip_rates = 'slip_rate_gss'
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
@@ -175,38 +185,32 @@
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    block = 0
-    displacements = 'ux uy uz'
+    displacements = 'disp_x disp_y'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP
-    block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
+    read_prop_user_object = prop_read
   [../]
-
 []
 
 [Postprocessors]
-  [./stress_zz]
+  [./stress_yy]
     type = ElementAverageValue
-    variable = stress_zz
-    block = 'ANY_BLOCK_ID 0'
+    variable = stress_yy
   [../]
-  [./fp_zz]
+  [./e_yy]
     type = ElementAverageValue
-    variable = fp_zz
-    block = 'ANY_BLOCK_ID 0'
+    variable = e_yy
   [../]
-  [./e_zz]
+  [./fp_yy]
     type = ElementAverageValue
-    variable = e_zz
-    block = 'ANY_BLOCK_ID 0'
+    variable = fp_yy
   [../]
   [./gss]
     type = ElementAverageValue
     variable = gss
-    block = 'ANY_BLOCK_ID 0'
   [../]
 []
 
@@ -219,9 +223,7 @@
 
 [Executioner]
   type = Transient
-  dt = 2.0
-
-  #Preconditioned JFNK (default)
+  dt = 0.01
   solve_type = 'PJFNK'
 
   petsc_options_iname = -pc_hypre_type
@@ -230,15 +232,19 @@
   nl_rel_step_tol = 1e-10
   dtmax = 10.0
   nl_rel_tol = 1e-10
-  end_time = 30.0
-  dtmin = 0.5
+  end_time = 1
+  dtmin = 0.01
   num_steps = 10
   nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  file_base = crysp_substep_out
   exodus = true
-  csv = true
-  gnuplot = true
+[]
+
+[Kernels]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y'
+    use_displaced_mesh = true
+  [../]
 []
