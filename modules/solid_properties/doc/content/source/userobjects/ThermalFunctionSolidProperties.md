@@ -4,7 +4,8 @@
 
 ## Description
 
-Thermal properties for an arbitrary solid a function of temperature.
+The `ThermalFunctionSolidProperties` class provides
+thermal properties for an arbitrary solid a function of temperature.
 Parsed function inputs are provided for density, thermal conductivity, and
 specific heat by parameterizing the time variable `t` as temperature.
 This user object can also be used to specify constant properties by
