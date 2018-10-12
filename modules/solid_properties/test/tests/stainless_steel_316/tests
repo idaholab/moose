@@ -1,0 +1,23 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct input file syntax for "
+      "declaring stainless steel 316 thermal solid properties and their usage "
+      "in providing thermal materials."
+    design = 'ThermalStainlessSteel316Properties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
+  [./test_with_derivatives]
+    type = Exodiff
+    input = 'test_with_derivatives.i'
+    exodiff = 'test_with_derivatives_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct calculation of thermal properties. "
+      "Derivatives were verified by cross-referencing against a finite difference approximation."
+    design = 'ThermalStainlessSteel316Properties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
+[]

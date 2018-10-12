@@ -32,6 +32,7 @@ POROUS_FLOW        := yes
 FLUID_PROPERTIES   := yes
 CHEMICAL_REACTIONS := yes
 RDG                := yes
+SOLID_PROPERTIES   := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 

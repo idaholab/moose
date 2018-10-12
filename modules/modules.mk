@@ -16,6 +16,7 @@ ifeq ($(ALL_MODULES),yes)
         RDG                         := yes
         RICHARDS                    := yes
         SOLID_MECHANICS             := yes
+        SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
         XFEM                        := yes
@@ -163,6 +164,14 @@ ifeq ($(SOLID_MECHANICS),yes)
   SUFFIX             := sm
   include $(FRAMEWORK_DIR)/app.mk
 endif
+
+ifeq ($(SOLID_PROPERTIES),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_properties
+  APPLICATION_NAME   := solid_properties
+  SUFFIX             := sp
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 
 ifeq ($(STOCHASTIC_TOOLS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools

@@ -1,0 +1,34 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct input file syntax for "
+      "declaring graphite properties and their usage in providing thermal materials."
+    design = 'ThermalGraphiteProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
+  [./test_above_100]
+    type = Exodiff
+    input = 'test_above_100.i'
+    exodiff = 'test_above_100_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct calculation of thermal properties "
+      "for temperatures above 100 degrees Celsius. Derivatives were verified by "
+      "cross-referencing against a finite difference approximation."
+    design = 'ThermalGraphiteProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
+  [./test_below_100]
+    type = Exodiff
+    input = 'test_below_100.i'
+    exodiff = 'test_below_100_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct calculation of thermal properties "
+      "for temperatures below 100 degrees Celsius. Derivatives were verified by "
+      "cross-referencing against a finite difference approximation."
+    design = 'ThermalGraphiteProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
+[]
