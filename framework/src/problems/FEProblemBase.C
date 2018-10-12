@@ -3038,8 +3038,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 
   std::vector<UserObject *> userobjs;
   query.clone()
-      .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::NodalUserObject |
-                                   Interfaces::SideUserObject | Interfaces::InternalSideUserObject)
+      .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
+                                   Interfaces::InternalSideUserObject)
       .queryInto(userobjs);
 
   std::vector<UserObject *> tgobjs;
@@ -3047,7 +3047,10 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
       .queryInto(tgobjs);
 
-  if (userobjs.empty() && genobjs.empty() && tgobjs.empty())
+  std::vector<UserObject *> nodal;
+  query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
+
+  if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
     return;
 
   TIME_SECTION(_compute_user_objects_timer);
@@ -3060,6 +3063,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   {
     for (auto obj : userobjs)
       obj->residualSetup();
+    for (auto obj : nodal)
+      obj->residualSetup();
     for (auto obj : tgobjs)
       obj->residualSetup();
     for (auto obj : genobjs)
@@ -3068,6 +3073,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   else if (type == EXEC_NONLINEAR)
   {
     for (auto obj : userobjs)
+      obj->jacobianSetup();
+    for (auto obj : nodal)
       obj->jacobianSetup();
     for (auto obj : tgobjs)
       obj->jacobianSetup();
@@ -3085,9 +3092,20 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
     ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+
+    // There is one instance in rattlesnake where an elemental user object's finalize depends
+    // on a side user object having been finalized first :-(
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
   }
 
   // Execute NodalUserObjects
+  // BISON has an axial reloc elemental user object that has a finalize func that depends on a
+  // nodal user object's prev value. So we can't initialize this until after elemental objects
+  // have been finalized :-(
+  for (auto obj : nodal)
+    obj->initialize();
   if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
   {
     ComputeNodalUserObjectsThread cnppt(*this, query);
@@ -3095,17 +3113,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
   }
 
-  // BISON has an axial reloc elemental user object that has a finalize func that depends on a
-  // nodal user object having been run first. So these must go here or those tests fail :-(
-  // Also there is one instance in rattlesnake where an elemental user object's finalize depends
-  // on a side user object having been finalized first :-(
-  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
-  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
-  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
-
   for (auto obj : tgobjs)
     obj->initialize();
-
   std::vector<GeneralUserObject *> tguos_zero;
   query.clone()
       .condition<AttribThread>(0)
