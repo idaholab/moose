@@ -21,34 +21,25 @@
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./fp_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
-  [../]
-  [./rotout]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
   [../]
   [./e_zz]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./gss]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
 []
 
 [Functions]
   [./tdisp]
     type = ParsedFunction
-    value = 0.1*t
+    value = 0.01*t
   [../]
 []
 
@@ -67,7 +58,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
   [../]
   [./fp_zz]
     type = RankTwoAux
@@ -76,7 +66,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
   [../]
   [./e_zz]
     type = RankTwoAux
@@ -85,13 +74,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 0
-  [../]
-  [./rotout]
-    type = CrystalPlasticityRotationOutAux
-    variable = rotout
-    execute_on = timestep_end
-    block = 0
   [../]
   [./gss]
     type = MaterialStdVectorAux
@@ -99,7 +81,6 @@
     property = state_var_gss
     index = 0
     execute_on = timestep_end
-    block = 0
   [../]
 []
 
@@ -167,6 +148,7 @@
     block = 0
     stol = 1e-2
     tan_mod_type = exact
+    maximum_substep_iteration = 10
     uo_slip_rates = 'slip_rate_gss'
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
@@ -183,6 +165,7 @@
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
+
 []
 
 [Postprocessors]
@@ -217,7 +200,7 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
+  dt = 2.0
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -228,12 +211,14 @@
   nl_rel_step_tol = 1e-10
   dtmax = 10.0
   nl_rel_tol = 1e-10
-  end_time = 1
-  dtmin = 0.01
+  end_time = 30.0
+  dtmin = 0.5
   num_steps = 10
   nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
   exodus = true
+  csv = true
+  gnuplot = true
 []

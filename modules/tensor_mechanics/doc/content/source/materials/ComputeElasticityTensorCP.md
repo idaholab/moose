@@ -67,7 +67,7 @@ tensor given in [eq:rotation_tensor] as noted in [eq:cp_elasticity_tensor_rotati
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/cp_user_object/crysp.i block=Materials/elasticity_tensor
+!listing modules/tensor_mechanics/test/tests/cp_user_object/test.i block=Materials/elasticity_tensor
 
 !syntax parameters /Materials/ComputeElasticityTensorCP
 
