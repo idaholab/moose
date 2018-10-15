@@ -45,4 +45,3 @@ TEST_F(ThermalFunctionSolidPropertiesTest, derivatives)
   REL_TEST(dcp_dT, dcp_dT_fd, REL_TOL_CONSISTENCY);
   REL_TEST(dk_dT, dk_dT_fd, REL_TOL_CONSISTENCY);
 }
-

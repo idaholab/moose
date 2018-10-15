@@ -10,15 +10,9 @@
 #include "ThermalGraphitePropertiesTest.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 
-TEST_F(ThermalGraphitePropertiesTest, name)
-{
-  EXPECT_EQ(_sp->solidName(), "thermal_graphite");
-}
+TEST_F(ThermalGraphitePropertiesTest, name) { EXPECT_EQ(_sp->solidName(), "thermal_graphite"); }
 
-TEST_F(ThermalGraphitePropertiesTest, molarMass)
-{
-  EXPECT_EQ(_sp->molarMass(), 12.0107e-3);
-}
+TEST_F(ThermalGraphitePropertiesTest, molarMass) { EXPECT_EQ(_sp->molarMass(), 12.0107e-3); }
 
 TEST_F(ThermalGraphitePropertiesTest, valuesAbove100)
 {
@@ -95,4 +89,3 @@ TEST_F(ThermalGraphitePropertiesTest, derivativesBelow100)
   REL_TEST(dcp_dT, dcp_dT_fd, 2.0 * REL_TOL_CONSISTENCY);
   REL_TEST(dk_dT, dk_dT_fd, 2.0 * REL_TOL_CONSISTENCY);
 }
-

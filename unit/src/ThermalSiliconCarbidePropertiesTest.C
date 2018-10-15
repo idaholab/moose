@@ -52,4 +52,3 @@ TEST_F(ThermalSiliconCarbidePropertiesTest, derivatives)
   REL_TEST(dk_dT, dk_dT_fd, REL_TOL_CONSISTENCY);
   REL_TEST(dk2_dT, dk2_dT_fd, REL_TOL_CONSISTENCY);
 }
-

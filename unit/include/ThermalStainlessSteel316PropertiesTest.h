@@ -23,7 +23,10 @@ public:
   }
 
 protected:
-  void registerObjects(Factory & factory) { registerUserObject(ThermalStainlessSteel316Properties); }
+  void registerObjects(Factory & factory)
+  {
+    registerUserObject(ThermalStainlessSteel316Properties);
+  }
 
   void buildObjects()
   {
