@@ -58,6 +58,12 @@ validParams<TensorMechanicsActionBase>()
   params.addParam<bool>("add_variables", false, "Add the displacement variables");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+  // Global Strain
+  params.addParam<MaterialPropertyName>(
+      "global_strain",
+      "Name of the global strain material to be applied in this strain calculation. "
+      "The global strain tensor is constant over the whole domain and allows visualization "
+      "of the deformed shape with the periodic BC");
 
   // Advanced
   params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");

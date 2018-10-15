@@ -26,12 +26,6 @@
 []
 
 [Variables]
-  [./u_x]
-  [../]
-  [./u_y]
-  [../]
-  [./u_z]
-  [../]
   [./global_strain]
     order = SIXTH
     family = SCALAR
@@ -40,6 +34,19 @@
 
 [Modules]
   [./TensorMechanics]
+    # Master action for generating the tensor mechanics kernels, variables,
+    # strain calculation material, and the auxilliary system for visualization
+    [./Master]
+      [./stress_div]
+        strain = SMALL
+        add_variables = true
+        global_strain = global_strain #global strain contribution
+        generate_output = 'strain_xx strain_xy strain_yy stress_xx stress_xy
+                           stress_yy vonmises_stress'
+      [../]
+    [../]
+    # GlobalStrain action for generating the objects associated with the global
+    # strain calculation and associated displacement visualization
     [./GlobalStrain]
       [./global_strain]
         scalar_global_strain = global_strain
@@ -47,61 +54,6 @@
         auxiliary_displacements = 'disp_x disp_y disp_z'
       [../]
     [../]
-  [../]
-[]
-
-[AuxVariables]
-  [./s00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./s11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./e00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./e11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./s00]
-    type = RankTwoAux
-    variable = s00
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-  [../]
-  [./s11]
-    type = RankTwoAux
-    variable = s11
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
-  [../]
-  [./e00]
-    type = RankTwoAux
-    variable = e00
-    rank_two_tensor = total_strain
-    index_i = 0
-    index_j = 0
-  [../]
-  [./e11]
-    type = RankTwoAux
-    variable = e11
-    rank_two_tensor = total_strain
-    index_i = 1
-    index_j = 1
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
   [../]
 []
 
@@ -120,23 +72,24 @@
     variable = u_x
     value = 0
   [../]
-  [./fix_y]
-    type = PresetBC
-    boundary = bottom
-    variable = u_y
-    value = 0
-  [../]
   [./centerfix_z]
     type = PresetBC
     boundary = 100
     variable = u_z
     value = 0
   [../]
+  # applied displacement
   [./appl_y]
     type = PresetBC
     boundary = top
     variable = u_y
     value = 0.033
+  [../]
+  [./fix_y]
+    type = PresetBC
+    boundary = bottom
+    variable = u_y
+    value = 0
   [../]
 []
 
@@ -146,10 +99,6 @@
     block = 0
     C_ijkl = '7 0.33'
     fill_method = symmetric_isotropic_E_nu
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-    global_strain = global_strain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
