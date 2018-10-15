@@ -288,6 +288,68 @@ IdealGasFluidProperties::e_from_p_rho(
 }
 
 Real
+IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/) const
+{
+  return _cv * T;
+}
+
+void
+IdealGasFluidProperties::e_from_T_v(Real T, Real /*v*/, Real & e, Real & de_dT, Real & de_dv) const
+{
+  e = _cv * T;
+  de_dT = _cv;
+  de_dv = 0.0;
+}
+
+Real
+IdealGasFluidProperties::p_from_T_v(Real T, Real v) const
+{
+  return (_gamma - 1.0) * _cv * T / v;
+}
+
+void
+IdealGasFluidProperties::p_from_T_v(Real T, Real v, Real & p, Real & dp_dT, Real & dp_dv) const
+{
+  p = (_gamma - 1.0) * _cv * T / v;
+  dp_dT = (_gamma - 1.0) * _cv / v;
+  dp_dv = -(_gamma - 1.0) * _cv * T / (v * v);
+}
+
+Real
+IdealGasFluidProperties::h_from_T_v(Real T, Real /*v*/) const
+{
+  return _gamma * _cv * T;
+}
+
+void
+IdealGasFluidProperties::h_from_T_v(Real T, Real /*v*/, Real & h, Real & dh_dT, Real & dh_dv) const
+{
+  h = _gamma * _cv * T;
+  dh_dT = _gamma * _cv;
+  dh_dv = 0.0;
+}
+
+Real
+IdealGasFluidProperties::s_from_T_v(Real T, Real v) const
+{
+  Real p = p_from_T_v(T, v);
+  return s_from_p_T(p, T);
+}
+
+void
+IdealGasFluidProperties::s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real & ds_dv) const
+{
+  Real p, dp_dT_v, dp_dv_T;
+  Real ds_dp_T, ds_dT_p;
+  p_from_T_v(T, v, p, dp_dT_v, dp_dv_T);
+  s_from_p_T(p, T, s, ds_dp_T, ds_dT_p);
+  ds_dT = ds_dT_p + ds_dp_T * dp_dT_v;
+  ds_dv = ds_dp_T * dp_dv_T;
+}
+
+Real IdealGasFluidProperties::cv_from_T_v(Real /*T*/, Real /*v*/) const { return _cv; }
+
+Real
 IdealGasFluidProperties::h_from_p_T(Real p, Real T) const
 {
   Real rho = rho_from_p_T(p, T);

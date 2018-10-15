@@ -213,6 +213,42 @@ public:
    * @return molar mass
    */
   virtual Real molarMass() const;
+
+  /**
+   * Critical pressure
+   * @return critical pressure (Pa)
+   */
+  virtual Real criticalPressure() const;
+
+  /**
+   * Critical temperature
+   * @return critical temperature (K)
+   */
+  virtual Real criticalTemperature() const;
+
+  /**
+   * Critical density
+   * @return critical density (kg/m^3)
+   */
+  virtual Real criticalDensity() const;
+
+  /**
+   * Critical specific internal energy
+   * @return specific internal energy (J/kg)
+   */
+  virtual Real criticalInternalEnergy() const;
+
+  /**
+   * Triple point pressure
+   * @return triple point pressure (Pa)
+   */
+  virtual Real triplePointPressure() const;
+
+  /**
+   * Triple point temperature
+   * @return triple point temperature (K)
+   */
+  virtual Real triplePointTemperature() const;
 };
 
 #endif /* HEMFLUIDPROPERTIES_H */

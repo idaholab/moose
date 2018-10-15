@@ -21,6 +21,18 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
   const Real s = _fp->s_from_v_e(v, e);
   const Real h = _fp->h_from_p_T(p, T);
 
+  Real e_inv = _fp->e_from_T_v(T, v);
+  REL_TEST(e_inv, e, 10.0 * REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->e_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
+  Real p_inv = _fp->p_from_T_v(T, v);
+  REL_TEST(p_inv, p, 10.0 * REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->p_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
+  REL_TEST(_fp->h_from_T_v(T, v), h, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->h_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
+  REL_TEST(_fp->s_from_T_v(T, v), s, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->s_from_T_v, T, v, 10.0 * REL_TOL_DERIVATIVE);
+  REL_TEST(_fp->cv_from_T_v(T, v), _fp->cv_from_v_e(v, e), REL_TOL_CONSISTENCY);
+
   REL_TEST(_fp->p_from_h_s(h, s), p, REL_TOL_CONSISTENCY);
   DERIV_TEST(_fp->p_from_h_s, h, s, REL_TOL_DERIVATIVE);
 

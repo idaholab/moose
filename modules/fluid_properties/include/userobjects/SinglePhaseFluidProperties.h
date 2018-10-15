@@ -280,12 +280,103 @@ public:
   virtual void e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const;
 
   /**
+   * Specific internal energy from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual Real e_spndl_from_v(Real v) const;
+
+  /**
+   * Specific internal energy from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual void v_e_spndl_from_T(Real T, Real & v, Real & e) const;
+
+  /**
+   * Specific volume and specific internal energy from temerature at the vapor spinodal
+   *
+   * @param[in] T     temerature
+   */
+  virtual Real e_from_T_v(Real T, Real v) const;
+
+  /**
+   * Specific internal energy and its derivatives from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   * @param[out] e       specific internal energy (J/kg)
+   * @param[out] de_dT   derivative of specific internal energy w.r.t. temperature
+   * @param[out] de_dv   derivative of specific internal energy w.r.t. specific volume
+   */
+  virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const;
+
+  /**
    * Pressure from temperature and specific volume
    *
    * @param[in] T     temperature
    * @param[in] v     specific volume
    */
   virtual Real p_from_T_v(Real T, Real v) const;
+
+  /**
+   * Pressure and its derivatives from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   * @param[out] p       pressure (Pa)
+   * @param[out] dp_dT   derivative of pressure w.r.t. temperature
+   * @param[out] dp_dv   derivative of pressure w.r.t. specific volume
+   */
+  virtual void p_from_T_v(Real T, Real v, Real & p, Real & dp_dT, Real & dp_dv) const;
+
+  /**
+   * Specific enthalpy from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual Real h_from_T_v(Real T, Real v) const;
+
+  /**
+   * Specific enthalpy and its derivatives from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   * @param[out] h       specific enthalpy (J/kg)
+   * @param[out] dh_dT   derivative of specific enthalpy w.r.t. temperature
+   * @param[out] dh_dv   derivative of specific enthalpy w.r.t. specific volume
+   */
+  virtual void h_from_T_v(Real T, Real v, Real & h, Real & dh_dT, Real & dh_dv) const;
+
+  /**
+   * Specific entropy from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual Real s_from_T_v(Real T, Real v) const;
+
+  /**
+   * Specific entropy and its derivatives from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   * @param[out] s       specific entropy (J/kg)
+   * @param[out] ds_dT   derivative of specific entropy w.r.t. temperature
+   * @param[out] ds_dv   derivative of specific entropy w.r.t. specific volume
+   */
+  virtual void s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real & ds_dv) const;
+
+  /**
+   * Specific isochoric heat capacity from temperature and specific volume
+   *
+   * @param[in] T     temperature
+   * @param[in] v     specific volume
+   */
+  virtual Real cv_from_T_v(Real T, Real v) const;
 
   /**
    * Specific enthalpy from pressure and temperature
@@ -366,6 +457,15 @@ public:
   virtual Real beta(Real pressure, Real temperature) const;
 
   /**
+   * Partial pressure at saturation in a gas mixture
+   *
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return pp_sat (Pa)
+   */
+  virtual Real pp_sat_from_p_T(Real p, Real T) const;
+
+  /**
    * Temperature from pressure and specific enthalpy
    *
    * @param[in] pressure   pressure (Pa)
@@ -398,6 +498,12 @@ public:
    * @return critical density (kg/m^3)
    */
   virtual Real criticalDensity() const;
+
+  /**
+   * Critical specific internal energy
+   * @return specific internal energy (J/kg)
+   */
+  virtual Real criticalInternalEnergy() const;
 
   /**
    * Triple point pressure
