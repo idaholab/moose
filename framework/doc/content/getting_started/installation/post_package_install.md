@@ -3,7 +3,7 @@ If you have any opened terminals at this point, you must close and re-open them 
 environment. The following instructions will ultimately fail if you do not.
 
 !alert! note
-Internal INL Users may obtain our redistributable packages on the following machines:
+Internal INL users may obtain the latest redistributable packages from the following location:
 
-- `rod.inl.gov:/raid/PROTOTYPE_PACKAGES`
+[http://rod.inl.gov/MOOSE_ENVIRONMENT_PACKAGES/](http://rod.inl.gov/MOOSE_ENVIRONMENT_PACKAGES/)
 !alert-end!
