@@ -65,6 +65,9 @@ protected:
   unsigned int _qp;
 
   std::unique_ptr<PointLocatorBase> _pl;
+
+  /// Postprocessor multiplying the variables
+  const Real & _pp_value;
 };
 
 #endif
