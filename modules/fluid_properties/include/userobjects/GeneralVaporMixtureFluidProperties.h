@@ -77,6 +77,13 @@ public:
                           Real & de_dT,
                           std::vector<Real> & de_dx) const override;
   virtual Real c_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
+  virtual void c_from_p_T(Real p,
+                          Real T,
+                          const std::vector<Real> & x,
+                          Real & c,
+                          Real & dc_dp,
+                          Real & dc_dT,
+                          std::vector<Real> & dc_dx) const override;
   virtual Real cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
   virtual Real cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;
   virtual Real mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const override;

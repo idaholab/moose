@@ -28,3 +28,38 @@ HEMFluidProperties::molarMass() const
 {
   mooseError(name(), ": molarMass is not implemented");
 }
+Real
+HEMFluidProperties::criticalPressure() const
+{
+  mooseError(name(), ": criticalPressure() is not implemented");
+}
+
+Real
+HEMFluidProperties::criticalTemperature() const
+{
+  mooseError(name(), ": criticalTemperature() is not implemented");
+}
+
+Real
+HEMFluidProperties::criticalDensity() const
+{
+  mooseError(name(), ": criticalDensity() is not implemented");
+}
+
+Real
+HEMFluidProperties::criticalInternalEnergy() const
+{
+  mooseError(name(), ": criticalInternalEnergy() is not implemented");
+}
+
+Real
+HEMFluidProperties::triplePointPressure() const
+{
+  mooseError(name(), ": triplePointPressure() is not implemented");
+}
+
+Real
+HEMFluidProperties::triplePointTemperature() const
+{
+  mooseError(name(), ": triplePointTemperature() is not implemented");
+}
