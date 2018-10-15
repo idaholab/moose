@@ -31,8 +31,7 @@ ThermalSolidProperties::solidName() const
   return _name;
 }
 
-Real
-ThermalSolidProperties::cp_from_T(Real) const
+Real ThermalSolidProperties::cp_from_T(Real) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
@@ -43,8 +42,7 @@ ThermalSolidProperties::cp_from_T(Real, Real &, Real &) const
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-Real
-ThermalSolidProperties::k_from_T(Real) const
+Real ThermalSolidProperties::k_from_T(Real) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
@@ -55,8 +53,7 @@ ThermalSolidProperties::k_from_T(Real, Real &, Real &) const
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-Real
-ThermalSolidProperties::rho_from_T(Real) const
+Real ThermalSolidProperties::rho_from_T(Real) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
@@ -72,11 +69,10 @@ ThermalSolidProperties::beta_from_T(Real T) const
 {
   Real rho, drho_dT;
   rho_from_T(T, rho, drho_dT);
-  return - drho_dT / rho;
+  return -drho_dT / rho;
 }
 
-Real
-ThermalSolidProperties::emissivity_from_T(Real) const
+Real ThermalSolidProperties::emissivity_from_T(Real) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }

@@ -17,7 +17,7 @@ validParams<AddSolidPropertiesAction>()
 {
   InputParameters params = validParams<AddUserObjectAction>();
   params.addClassDescription("Action allowing custom syntax for specifying "
-    "solid properties in input files");
+                             "solid properties in input files");
   return params;
 }
 

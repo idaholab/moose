@@ -7,11 +7,11 @@ MooseEnum getSurfaceEnum(const std::string & default_val);
 
 namespace surface
 {
-  enum SurfaceEnum
-  {
-    oxidized,
-    polished
-  };
+enum SurfaceEnum
+{
+  oxidized,
+  polished
+};
 }
 
 #endif

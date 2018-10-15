@@ -14,7 +14,8 @@ registerMooseObject("SolidPropertiesApp", ThermalFunctionSolidProperties);
 const std::string ThermalFunctionSolidProperties::_name = "thermal_function";
 
 template <>
-InputParameters validParams<ThermalFunctionSolidProperties>()
+InputParameters
+validParams<ThermalFunctionSolidProperties>()
 {
   InputParameters params = validParams<ThermalSolidProperties>();
   params.addClassDescription("Userobject defining thermal properties from functions.");
@@ -85,4 +86,3 @@ ThermalFunctionSolidProperties::rho_from_T(Real T, Real & rho, Real & drho_dT) c
   // temperature is actually computed as a time derivative
   drho_dT = _rho.timeDerivative(T, Point());
 }
-

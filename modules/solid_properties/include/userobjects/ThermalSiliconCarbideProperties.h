@@ -129,7 +129,8 @@ public:
 
 protected:
   /// enumeration for selecting the thermal conductivity model
-  enum ThermalSiliconCarbidePropertiesKModel {
+  enum ThermalSiliconCarbidePropertiesKModel
+  {
     snead,
     parfume
   };
