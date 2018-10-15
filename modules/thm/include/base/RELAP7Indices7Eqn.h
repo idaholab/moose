@@ -20,7 +20,7 @@ enum ConservativeVariableIndex
 };
 
 /// Number of primitive solution variables in a phase
-static const unsigned int N_LOCAL_PRIM_VAR = 5;
+static const unsigned int N_LOCAL_PRIM_VAR = 6;
 
 /// Indices for primitive solution variables in a phase
 enum LocalPrimitiveVariableIndex
@@ -29,7 +29,8 @@ enum LocalPrimitiveVariableIndex
   LOCAL_PRIM_VAR_DENSITY = 1,
   LOCAL_PRIM_VAR_VELOCITY = 2,
   LOCAL_PRIM_VAR_SPECIFIC_TOTAL_ENERGY = 3,
-  LOCAL_PRIM_VAR_PRESSURE = 4
+  LOCAL_PRIM_VAR_PRESSURE = 4,
+  LOCAL_PRIM_VAR_SOUND_SPEED = 5
 };
 
 /// Number of equations
