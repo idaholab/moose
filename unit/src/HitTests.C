@@ -252,6 +252,12 @@ TEST(HitTests, ParseFields)
        "foo",
        "barbaz",
        hit::Field::Kind::String},
+      {"path-normalize-find #12313",
+       "[foo][/bar]baz=42[][]",
+       "foo/bar/baz",
+       "42",
+       hit::Field::Kind::Int},
+
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
