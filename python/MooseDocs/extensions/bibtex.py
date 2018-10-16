@@ -29,6 +29,7 @@ class BibtexExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
+        config['duplicate_warning'] = (True, "Show a warning when duplicate entries detected.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -54,10 +55,12 @@ class BibtexExtension(command.CommandExtension):
 
             #TODO: https://bitbucket.org/pybtex-devs/pybtex/issues/93/
             #      databaseadd_entries-method-not-considering
+            warn = self.get('duplicate_warning')
             for key in db.entries:
                 if key in self.__database.entries:
-                    msg = "The BibTeX entry '%s' defined in %s already exists."
-                    LOG.warning(msg, key, bfile)
+                    if warn:
+                        msg = "The BibTeX entry '%s' defined in %s already exists."
+                        LOG.warning(msg, key, bfile)
                 else:
                     self.__database.add_entry(key, db.entries[key])
 
