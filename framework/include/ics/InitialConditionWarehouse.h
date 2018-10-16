@@ -13,12 +13,12 @@
 #include "MooseObjectWarehouseBase.h"
 #include "MooseTypes.h"
 
-class InitialCondition;
+class InitialConditionBase;
 
 /**
  * Warehouse for storing initial conditions
  */
-class InitialConditionWarehouse : public MooseObjectWarehouseBase<InitialCondition>
+class InitialConditionWarehouse : public MooseObjectWarehouseBase<InitialConditionBase>
 {
 public:
   InitialConditionWarehouse();
@@ -31,7 +31,7 @@ public:
   /**
    * Add object to the warehouse.
    */
-  void addObject(std::shared_ptr<InitialCondition> object, THREAD_ID tid, bool recurse = true);
+  void addObject(std::shared_ptr<InitialConditionBase> object, THREAD_ID tid, bool recurse = true);
 
   /**
    * Get a list of dependent UserObjects for this exec type

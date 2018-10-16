@@ -77,6 +77,11 @@ public:
   virtual const DenseVector<Number> & solutionDoFsOlderNeighbor() = 0;
 
   /**
+   * Prepare the initial condition
+   */
+  virtual void prepareIC() = 0;
+
+  /**
    * Compute values at interior quadrature points
    */
   virtual void computeElemValues() = 0;
@@ -100,10 +105,6 @@ public:
    * Compute nodal values of this variable
    */
   virtual void computeNodalValues() = 0;
-  /**
-   * Set the nodal value for this variable to keep everything up to date
-   */
-  virtual void setNodalValue(Number value, unsigned int idx = 0) = 0;
   /**
    * Set values for this variable to keep everything up to date
    */

@@ -7,9 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INITIALCONDITION_H
-#define INITIALCONDITION_H
+#ifndef VECTORINITIALCONDITION_H
+#define VECTORINITIALCONDITION_H
 
 #include "InitialConditionTempl.h"
 
-#endif // INITIALCONDITION_H
+#endif // VECTORINITIALCONDITION_H
