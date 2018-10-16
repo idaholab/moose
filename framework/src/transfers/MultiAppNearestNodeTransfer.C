@@ -593,7 +593,7 @@ MultiAppNearestNodeTransfer::bboxMinDistance(Point p, BoundingBox bbox)
         all_points[x + 2 * y + 4 * z] =
             Point(source_points[x](0), source_points[y](1), source_points[z](2));
 
-  Real min_distance = 0.;
+  Real min_distance = std::numeric_limits<Real>::max();
 
   for (unsigned int i = 0; i < 8; i++)
   {
