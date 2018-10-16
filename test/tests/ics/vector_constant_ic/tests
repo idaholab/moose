@@ -1,0 +1,10 @@
+[Tests]
+  [./vector_constant_ic]
+    type = 'Exodiff'
+    input = 'vector_constant_ic.i'
+    exodiff = 'vector_constant_ic_out.e'
+    design = 'VectorConstantIC.md'
+    requirement = 'The system shall allow to set constant vector-valued initial conditions.'
+    issues = '#12311'
+  [../]
+[]
