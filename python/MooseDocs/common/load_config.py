@@ -143,10 +143,10 @@ def _yaml_load_content(config):
     items = []
     if isinstance(options, list):
         for value in options:
-            items.insert(0, dict(root_dir=value, content=None))
+            items.append(dict(root_dir=value, content=None))
     elif isinstance(options, dict):
         for _, value in options.iteritems():
             content = value.get('content', None)
-            items.insert(0, dict(root_dir=value['root_dir'], content=content))
+            items.append(dict(root_dir=value['root_dir'], content=content))
 
     return MooseDocs.tree.build_page_tree.doc_tree(items)

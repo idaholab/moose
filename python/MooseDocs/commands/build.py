@@ -36,7 +36,9 @@ def command_line_options(subparser, parent):
     parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(),
                         help="Specify the number of threads to build pages with.")
     parser.add_argument('--port', default='8000', type=str,
-                        help="The local host port for live web server (default: %(default)s).")
+                        help="The host port for live web server (default: %(default)s).")
+    parser.add_argument('--host', default='127.0.0.1', type=str,
+                        help="The local host for live web server (default: %(default)s).")
     parser.add_argument('--clean', action='store_true',
                         help="Clean the destination directory when the '--files' option is used. "
                              "The destination directory is always cleaned otherwise.")
@@ -172,4 +174,4 @@ def main(options):
     if options.serve:
         watcher = MooseDocsWatcher(translator, options)
         server = livereload.Server(watcher=watcher)
-        server.serve(root=translator['destination'], port=options.port)
+        server.serve(root=translator['destination'], host=options.host, port=options.port)
