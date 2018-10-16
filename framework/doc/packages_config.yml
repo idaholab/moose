@@ -3,15 +3,15 @@ minimum_clang: 3.4.0
 minimum_intel: 2017
 mpich: 3.2
 openmpi: 1.10.2
-petsc_alt: 3.7.6
+petsc_alt: 3.9.4
+slepc_alt: 3.9.2
 petsc_default: 3.8.3
-slepc_alt: 3.7.3
 slepc_default: 3.8.2
 autoconf: 2.69
 utomake: 1.16
-gcc: 7.3.0
-llvm: 5.0.1
-llvm_release: 50
+gcc: 7.3.1
+llvm: 6.0.1
+llvm_release: 60
 cmake: 3.9.4
 gnuplot: 4.6.5
 doxygen: 1.8.11
@@ -46,10 +46,11 @@ conda_vtk: 7.1.0
 pip_pylint: 1.6.5
 pip_livereload: 2.5.1
 moose_packages:
-    osx10.13: moose-environment_osx-highsierra_8_x86_64.pkg
-    osx10.12: moose-environment_osx-sierra_8_x86_64.pkg
-    ubuntu16: moose-environment_ubuntu-16.04_8_x86_64.deb
-    ubuntu18: moose-environment_ubuntu-18.04_9_x86_64.deb
-    opensuse15: moose-environment_opensuse-15.0_7_x86_64.rpm
-    fedora28: moose-environment_fedora-28_9_x86_64.rpm
-    centos7: moose-environment_centos-7.5.1804_12_x86_64.rpm
+    osx10.14: moose-environment_osx-mojave_20181012_x86_64.pkg
+    osx10.13: moose-environment_osx-highsierra_20181012_x86_64.pkg
+    osx10.12: moose-environment_osx-sierra_20181012_x86_64.pkg
+    ubuntu16: moose-environment_ubuntu-16.04_20181012_x86_64.deb
+    ubuntu18: moose-environment_ubuntu-18.04_20181012_x86_64.deb
+    opensuse15: moose-environment_opensuse-15.0_20181012_x86_64.rpm
+    fedora28: moose-environment_fedora-28_20181012_x86_64.rpm
+    centos7: moose-environment_centos-7.5.1804_20181012_x86_64.rpm
