@@ -139,6 +139,11 @@ MultiAppNearestNodeTransfer::execute()
             target_local_nodes[i++] = node;
         }
 
+        // For error checking: keep track of all target_local_nodes
+        // which are successfully mapped to at least one domain where
+        // the nearest neighbor might be found.
+        std::set<Node *> local_nodes_found;
+
         for (const auto & node : target_local_nodes)
         {
           // Skip this node if the variable has no dofs at it.
@@ -159,23 +164,43 @@ MultiAppNearestNodeTransfer::execute()
                from0 += froms_per_proc[i_proc], i_proc++)
           {
             bool qp_found = false;
+
             for (unsigned int i_from = from0; i_from < from0 + froms_per_proc[i_proc] && !qp_found;
                  i_from++)
             {
+
               Real distance = bboxMinDistance(*node, bboxes[i_from]);
-              if (distance < nearest_max_distance || bboxes[i_from].contains_point(*node))
+
+              if (distance <= nearest_max_distance || bboxes[i_from].contains_point(*node))
               {
                 std::pair<unsigned int, unsigned int> key(i_to, node->id());
                 node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
                 outgoing_qps[i_proc].push_back(*node + _to_positions[i_to]);
                 qp_found = true;
+                local_nodes_found.insert(node);
               }
             }
           }
         }
+
+        // By the time we get to here, we should have found at least
+        // one candidate BoundingBox for every node in the
+        // target_local_nodes array that has dofs for the current
+        // variable in the current System.
+        for (const auto & node : target_local_nodes)
+          if (node->n_dofs(sys_num, var_num) && !local_nodes_found.count(node))
+            mooseError("No candidate BoundingBoxes found for node ",
+                       node->id(),
+                       " at position ",
+                       static_cast<Point &>(*node));
       }
       else // Elemental
       {
+        // For error checking: keep track of all local elements
+        // which are successfully mapped to at least one domain where
+        // the nearest neighbor might be found.
+        std::set<Elem *> local_elems_found;
+
         for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
         {
           Point centroid = elem->centroid();
@@ -202,16 +227,27 @@ MultiAppNearestNodeTransfer::execute()
                  i_from++)
             {
               Real distance = bboxMinDistance(centroid, bboxes[i_from]);
-              if (distance < nearest_max_distance || bboxes[i_from].contains_point(centroid))
+              if (distance <= nearest_max_distance || bboxes[i_from].contains_point(centroid))
               {
                 std::pair<unsigned int, unsigned int> key(i_to, elem->id());
                 node_index_map[i_proc][key] = outgoing_qps[i_proc].size();
                 outgoing_qps[i_proc].push_back(centroid + _to_positions[i_to]);
                 qp_found = true;
+                local_elems_found.insert(elem);
               }
             }
           }
         }
+
+        // Verify that we found at least one candidate bounding
+        // box for each local element with dofs for the current
+        // variable in the current System.
+        for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
+          if (elem->n_dofs(sys_num, var_num) && !local_elems_found.count(elem))
+            mooseError("No candidate BoundingBoxes found for Elem ",
+                       elem->id(),
+                       ", centroid = ",
+                       elem->centroid());
       }
     }
   }
@@ -260,6 +296,8 @@ MultiAppNearestNodeTransfer::execute()
 
     for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
     {
+      // We either use our own outgoing_qps or receive them from
+      // another processor.
       std::vector<Point> incoming_qps;
       if (i_proc == processor_id())
         incoming_qps = outgoing_qps[i_proc];
@@ -273,6 +311,10 @@ MultiAppNearestNodeTransfer::execute()
       }
 
       std::vector<Real> & outgoing_evals = processor_outgoing_evals[i_proc];
+      // Resize this vector to two times the size of the incoming_qps
+      // vector because we are going to store both the value from the nearest
+      // local node *and* the distance between the incoming_qp and that node
+      // for later comparison purposes.
       outgoing_evals.resize(2 * incoming_qps.size());
 
       for (unsigned int qp = 0; qp < incoming_qps.size(); qp++)
@@ -293,8 +335,17 @@ MultiAppNearestNodeTransfer::execute()
 
           for (unsigned int i_node = 0; i_node < local_nodes[i_local_from].size(); i_node++)
           {
+            // Compute distance between the current incoming_qp to local node i_node.
             Real current_distance =
                 (qpt - *(local_nodes[i_local_from][i_node]) - _from_positions[i_local_from]).norm();
+
+            // If an incoming_qp is equally close to two or more local nodes, then
+            // the first one we test will "win", even though any of the others could
+            // also potentially be chosen instead... there's no way to decide among
+            // the set of all equidistant points.
+            //
+            // outgoing_evals[2 * qp] is the current closest distance between a local point and the
+            // incoming_qp.
             if (current_distance < outgoing_evals[2 * qp])
             {
               // Assuming LAGRANGE!
@@ -303,6 +354,12 @@ MultiAppNearestNodeTransfer::execute()
                 dof_id_type from_dof =
                     local_nodes[i_local_from][i_node]->dof_number(from_sys_num, from_var_num, 0);
 
+                // The indexing of the outgoing_evals vector looks
+                // like [(distance, value), (distance, value), ...]
+                // for each incoming_qp. We only keep the value from
+                // the node with the smallest distance to the
+                // incoming_qp, and then we compare across all
+                // processors later and pick the closest one.
                 outgoing_evals[2 * qp] = current_distance;
                 outgoing_evals[2 * qp + 1] = (*from_sys.solution)(from_dof);
 
@@ -418,9 +475,15 @@ MultiAppNearestNodeTransfer::execute()
         if (node->n_dofs(sys_num, var_num) < 1)
           continue;
 
+        // If nothing is in the node_index_map for a given local node,
+        // it will get the value 0.
         Real best_val = 0;
         if (!_neighbors_cached)
         {
+          // Search through all the incoming evaluation points from
+          // different processors for the one with the closest
+          // point. If there are multiple values from other processors
+          // which are equidistant, the first one we check will "win".
           Real min_dist = std::numeric_limits<Real>::max();
           for (unsigned int i_from = 0; i_from < incoming_evals.size(); i_from++)
           {
@@ -430,6 +493,9 @@ MultiAppNearestNodeTransfer::execute()
             unsigned int qp_ind = node_index_map[i_from][key];
             if (incoming_evals[i_from][2 * qp_ind] >= min_dist)
               continue;
+
+            // If we made it here, we are going set a new value and
+            // distance because we found one that was closer.
             min_dist = incoming_evals[i_from][2 * qp_ind];
             best_val = incoming_evals[i_from][2 * qp_ind + 1];
 
@@ -578,6 +644,7 @@ MultiAppNearestNodeTransfer::bboxMaxDistance(Point p, BoundingBox bbox)
     if (distance > max_distance)
       max_distance = distance;
   }
+
   return max_distance;
 }
 
@@ -593,7 +660,7 @@ MultiAppNearestNodeTransfer::bboxMinDistance(Point p, BoundingBox bbox)
         all_points[x + 2 * y + 4 * z] =
             Point(source_points[x](0), source_points[y](1), source_points[z](2));
 
-  Real min_distance = 0.;
+  Real min_distance = std::numeric_limits<Real>::max();
 
   for (unsigned int i = 0; i < 8; i++)
   {
@@ -601,6 +668,7 @@ MultiAppNearestNodeTransfer::bboxMinDistance(Point p, BoundingBox bbox)
     if (distance < min_distance)
       min_distance = distance;
   }
+
   return min_distance;
 }
 
