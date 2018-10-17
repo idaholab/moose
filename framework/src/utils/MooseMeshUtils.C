@@ -11,6 +11,8 @@
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/boundary_info.h"
+#include "libmesh/replicated_mesh.h"
 
 namespace MooseMeshUtils
 {
@@ -53,6 +55,61 @@ void
   // from showing up when printing information, etc.
   if (delete_prev)
     boundary_info.remove_id(old_id);
+}
+
+
+std::vector<libMesh::boundary_id_type>
+getBoundaryIDs(const libMesh::MeshBase & mesh,
+               const std::vector<BoundaryName> & boundary_name,
+               bool generate_unknown)
+{
+  const libMesh::BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  const std::map<libMesh::boundary_id_type, std::string> & sideset_map = boundary_info.get_sideset_name_map();
+  const std::map<libMesh::boundary_id_type, std::string> & nodeset_map = boundary_info.get_nodeset_name_map();
+
+  std::set<libMesh::boundary_id_type> boundary_ids = boundary_info.get_boundary_ids();
+
+  // On a distributed mesh we may have boundary ids that only exist on
+  // other processors.
+  if (!mesh.is_replicated())
+    mesh.comm().set_union(boundary_ids);
+
+  libMesh::boundary_id_type max_boundary_id = boundary_ids.empty() ? 0 : *(boundary_ids.rbegin());
+
+  std::vector<libMesh::boundary_id_type> ids(boundary_name.size());
+  for (unsigned int i = 0; i < boundary_name.size(); i++)
+  {
+    if (boundary_name[i] == "ANY_BOUNDARY_ID")
+    {
+      ids.assign(boundary_ids.begin(), boundary_ids.end());
+      if (i)
+        mooseWarning("You passed \"ANY_BOUNDARY_ID\" in addition to other boundary_names.  This "
+                     "may be a logic error.");
+      break;
+    }
+
+    libMesh::boundary_id_type id;
+    std::istringstream ss(boundary_name[i]);
+
+    if (!(ss >> id) || !ss.eof())
+    {
+      /**
+       * If the conversion from a name to a number fails, that means that this must be a named
+       * boundary.  We will look in the complete map for this sideset and create a new name/ID pair
+       * if requested.
+       */
+      if (generate_unknown &&
+          !MooseUtils::doesMapContainValue(sideset_map, std::string(boundary_name[i])) &&
+          !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
+        id = ++max_boundary_id;
+      else
+        id = boundary_info.get_id_by_name(boundary_name[i]);
+    }
+
+    ids[i] = id;
+  }
+
+  return ids;
 }
 
 

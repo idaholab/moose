@@ -13,6 +13,9 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
 
+#include "MooseUtils.h"
+#include "MooseTypes.h"
+
 namespace MooseMeshUtils
 {
   // Changes the old ID to new ID in the mesh given in parameters
@@ -20,6 +23,11 @@ namespace MooseMeshUtils
                         const libMesh::boundary_id_type old_id,
                         const libMesh::boundary_id_type new_id,
                         bool delete_prev);
+
+  std::vector<libMesh::boundary_id_type>
+  getBoundaryIDs(const libMesh::MeshBase & mesh,
+                            const std::vector<BoundaryName> & boundary_name,
+                            bool generate_unknown);
 
 }
 
