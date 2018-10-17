@@ -67,7 +67,7 @@ protected:
   };
 
 private:
-  void changeID(const std::vector<BoundaryName> & names, BoundaryID old_id);
+  void changeID(MeshBase & mesh, const std::vector<BoundaryName> & names, BoundaryID old_id);
 };
 
 #endif // MESHEXTRUDERGENERATOR_H

@@ -1,0 +1,8 @@
+[Tests]
+  [./mesh_extruder_generator_test]
+    type = 'Exodiff'
+    input = 'extruder_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'extruder_generator_in.e'
+  [../]
+[]

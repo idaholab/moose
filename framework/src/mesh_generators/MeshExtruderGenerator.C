@@ -8,8 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshExtruderGenerator.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/boundary_info.h"
 
 registerMooseObject("MooseApp", MeshExtruderGenerator);
 
@@ -19,7 +21,7 @@ validParams<MeshExtruderGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
+  params.addParam<MeshGeneratorName>("input", "the mesh we want to extrude");
   params.addClassDescription("Takes a 1D or 2D mesh and extrudes the entire structure along the "
                              "specified axis increasing the dimensionality of the mesh.");
   params.addRequiredParam<RealVectorValue>("extrusion_vector",
@@ -66,15 +68,11 @@ MeshExtruderGenerator::MeshExtruderGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 MeshExtruderGenerator::generate()
 {
-  std::unique_ptr<MeshBase> mesh = std::move(_input);
+  std::unique_ptr<MeshBase> source_mesh = std::move(_input);
 
-  // If there was no input mesh then let's just make a new one
-  if (!mesh)
-    mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm());
 
-  std::unique_ptr<MeshBase> autre_mesh;
-
-  if (mesh->mesh_dimension() == 3)
+  if (source_mesh->mesh_dimension() == 3)
     mooseError("You cannot extrude a 3D mesh !");
 
   std::unique_ptr<QueryElemSubdomainID> elem_subdomain_id;
@@ -82,11 +80,10 @@ MeshExtruderGenerator::generate()
     elem_subdomain_id = libmesh_make_unique<QueryElemSubdomainID>(
         _existing_subdomains, _layers, _new_ids, _num_layers);
 
-  // The first argument to build_extrusion() is required to be UnstructuredMesh&, a common
-  // base class of both ReplicatedMesh and DistributedMesh, hence the dynamic_cast...
+  
   MeshTools::Generation::build_extrusion(
-      dynamic_cast<libMesh::UnstructuredMesh &>(*mesh),
-      *autre_mesh,// ???
+      *mesh,
+      *source_mesh,
       _num_layers,
       _extrusion_vector,
       elem_subdomain_id.get());
@@ -106,9 +103,9 @@ MeshExtruderGenerator::generate()
 
   // Update the IDs
   if (isParamValid("bottom_sideset"))
-    changeID(getParam<std::vector<BoundaryName>>("bottom_sideset"), old_bottom);
+    changeID(*mesh, getParam<std::vector<BoundaryName>>("bottom_sideset"), old_bottom);
   if (isParamValid("top_sideset"))
-    changeID(getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
+    changeID(*mesh, getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
 
   // Update the dimension
   mesh->set_mesh_dimension(mesh->mesh_dimension() + 1);
@@ -117,22 +114,19 @@ MeshExtruderGenerator::generate()
 }
 
 void
-MeshExtruderGenerator::changeID(const std::vector<BoundaryName> & names, BoundaryID old_id)
+MeshExtruderGenerator::changeID(MeshBase & mesh, const std::vector<BoundaryName> & names, BoundaryID old_id)
 {
-  std::unique_ptr<MeshBase> mesh = std::move(_input);
-  std::vector<BoundaryID> boundary_ids(names.size());
+  //std::unique_ptr<MeshBase> mesh = std::move(_input);
+  std::vector<boundary_id_type> boundary_ids =
+    MooseMeshUtils::getBoundaryIDs(mesh, names, true);
 
-  for (unsigned int i = 0; i < names.size(); i++)
-    boundary_ids[i] = mesh->get_id_by_name(names[i]);
-
-  // Must find the equivalent in libmesh
-  //if (std::find(boundary_ids.begin(), boundary_ids.end(), old_id) == boundary_ids.end())
-    //mesh->changeBoundaryId(old_id, boundary_ids[0], true);
+  if (std::find(boundary_ids.begin(), boundary_ids.end(), old_id) == boundary_ids.end())
+    MooseMeshUtils::changeBoundaryId(mesh, old_id, boundary_ids[0], true);
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
   {
-    mesh->get_boundary_info().sideset_name(boundary_ids[i]) = names[i];
-    mesh->get_boundary_info().nodeset_name(boundary_ids[i]) = names[i];
+    mesh.get_boundary_info().sideset_name(boundary_ids[i]) = names[i];
+    mesh.get_boundary_info().nodeset_name(boundary_ids[i]) = names[i];
   }
 }
 
