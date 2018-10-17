@@ -58,8 +58,6 @@ GhostingAux::initialize()
   }
   else // Algebraic
   {
-    std::cout << "Doing algebraic for pid: " << _pid << std::endl;
-
     auto current_func = _nl_sys.dofMap().algebraic_ghosting_functors_begin();
     const auto end_func = _nl_sys.dofMap().algebraic_ghosting_functors_end();
 

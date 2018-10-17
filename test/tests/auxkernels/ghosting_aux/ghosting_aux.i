@@ -44,24 +44,35 @@
 []
 
 [AuxVariables]
-  [ghosts1]
+  [pid]
     family = MONOMIAL
     order = CONSTANT
   []
-  [pid]
+  [algebraic1]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [geometric1]
     family = MONOMIAL
     order = CONSTANT
   []
 []
 
 [AuxKernels]
-  [ghosts1]
-    type = GhostingAux
-    pid = 1
-    variable = ghosts1
-  []
   [pid]
     type = ProcessorIDAux
     variable = pid
+  []
+  [geometric1]
+    type = GhostingAux
+    pid = 1
+    variable = geometric1
+    functor_type = geometric
+  []
+  [algebraic1]
+    type = GhostingAux
+    functor_type = algebraic
+    pid = 1
+    variable = algebraic1
   []
 []
