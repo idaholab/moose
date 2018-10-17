@@ -59,6 +59,14 @@
   [../]
 []
 
+[Postprocessors]
+  [./u_avg]
+    type = ElementAverageValue
+    variable = u
+    execute_on = 'initial timestep_end'
+  [../]
+[]
+
 # Vector Postprocessor System
 [VectorPostprocessors]
   [./line_sample]

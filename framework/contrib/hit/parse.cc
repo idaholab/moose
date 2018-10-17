@@ -337,6 +337,7 @@ Node::findInner(const std::string & path, const std::string & prefix)
     else
       fullpath = prefix + "/" + child->path();
 
+    fullpath = pathNorm(fullpath);
     if (fullpath == path)
       return child;
     else if (path.find(fullpath) == std::string::npos)
