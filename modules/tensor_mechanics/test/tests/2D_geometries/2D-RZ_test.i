@@ -33,24 +33,7 @@
   [./all]
     strain = SMALL
     add_variables = true
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 2
-    variable = stress_zz
-    execute_on = timestep_end
+    generate_output = 'stress_zz'
   [../]
 []
 
