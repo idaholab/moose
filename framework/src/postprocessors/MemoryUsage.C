@@ -11,12 +11,18 @@
 
 #include <array>
 #include <unistd.h>
+#include <mpi.h>
 #include <fstream>
 
 #ifdef __APPLE__
 #include <mach/task.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <sys/vmmeter.h>
+#else
+#include <sys/sysinfo.h>
 #endif
 
 registerMooseObject("MooseApp", MemoryUsage);
@@ -46,8 +52,55 @@ MemoryUsage::MemoryUsage(const InputParameters & parameters)
     _value_type(getParam<MooseEnum>("value_type").getEnum<ValueType>()),
     _value(0.0),
     _peak_value(0.0),
-    _report_peak_value(getParam<bool>("report_peak_value"))
+    _report_peak_value(getParam<bool>("report_peak_value")),
+    _memory_total(0)
 {
+  // get processor names and assign a unique number to each piece of hardware
+  int mpi_namelen;
+  char mpi_name[MPI_MAX_PROCESSOR_NAME];
+  MPI_Get_processor_name(mpi_name, &mpi_namelen);
+  std::string processor_name(mpi_name);
+
+  // gather all names at processor zero
+  std::vector<std::string> processor_names;
+  _communicator.gather(0, processor_name, processor_names);
+
+  // assign a unique numerical id to them on processor zero
+  unsigned int id = 0;
+  if (processor_id() == 0)
+  {
+    // map to assign an id to each processor name string
+    std::map<std::string, unsigned int> hardware_id_map;
+    auto nproc = processor_names.size();
+    _hardware_id.resize(nproc);
+    for (std::size_t i = 0; i < nproc; ++i)
+    {
+      auto it = hardware_id_map.lower_bound(processor_names[i]);
+      if (it == hardware_id_map.end() || it->first != processor_names[i])
+        it = hardware_id_map.emplace_hint(it, processor_names[i], id++);
+      _hardware_id[i] = it->second;
+    }
+    std::cout << "Running on " << id << " nodes\n";
+  }
+
+  for (auto id : _hardware_id)
+    std::cout << "Hardware id " << id << '\n';
+
+    // get available memory
+#ifdef __APPLE__
+  uint64_t hwmem_size;
+  size_t length = sizeof(hwmem_size);
+  if (0 > sysctlbyname("hw.memsize", &hwmem_size, &length, NULL, 0))
+    mooseWarning("Unable to query hardware memory size ", name());
+  _memory_total = hwmem_size;
+#else
+  struct sysinfo si_data;
+  if (sysinfo(&si_data))
+    mooseWarning("Unable to obtain system memory data in ", name());
+  _memory_total = si_data.totalram * si_data.mem_unit;
+#endif
+
+  std::cout << "Total RAM " << _memory_total << '\n';
 }
 
 void

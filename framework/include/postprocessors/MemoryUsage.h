@@ -56,6 +56,12 @@ protected:
 
   /// report peak value for multiple samples in a time step
   const bool _report_peak_value;
+
+  /// hardware IDs for each MPI rank (valid on rank zero only)
+  std::vector<unsigned int> _hardware_id;
+
+  /// total RAM installed
+  unsigned long long _memory_total;
 };
 
 #endif // MEMORYUSAGE_H
