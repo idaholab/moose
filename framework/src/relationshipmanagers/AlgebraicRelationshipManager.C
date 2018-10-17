@@ -41,13 +41,14 @@ AlgebraicRelationshipManager::attachAlgebraicFunctorHelper(GhostingFunctor & gf)
 
   auto & problem = _app.getExecutioner()->feProblem();
 
-  problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(gf);
-  problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(gf);
+  // The false's here keep the ghosting functor from getting added to the Mesh too
+  problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(gf, false);
+  problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(gf, false);
 
   // We need to do the same thing for displaced problem
   if (problem.getDisplacedProblem())
   {
-    problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(gf);
-    problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(gf);
+    problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(gf, false);
+    problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(gf, false);
   }
 }

@@ -315,6 +315,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _exec_multi_apps_timer(registerTimedSection("execMultiApps", 3)),
     _backup_multi_apps_timer(registerTimedSection("backupMultiApps", 5))
 {
+  // Possibly turn off default ghosting in libMesh
+  _eq.enable_default_ghosting(_default_ghosting);
 
   _time = 0.0;
   _time_old = 0.0;
