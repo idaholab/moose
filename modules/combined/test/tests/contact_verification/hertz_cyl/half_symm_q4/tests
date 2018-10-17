@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#716'
+  design = 'syntax/Contact/index.md source/MechanicalContactConstraint.md'
   [./glued_kin]
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
@@ -11,6 +13,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce glued, kinematic contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -24,6 +28,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce glued, penalty contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -41,6 +47,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -58,6 +66,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, penalty contact
+    for 2D Hertz half-symmetry cylindrical contact problem."
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -78,6 +88,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, Augmented
+    Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem."
   [../]
   [./mu_0_pen]
     type = 'CSVDiff'
@@ -92,6 +104,9 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
+    of 0."
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -107,6 +122,9 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
+    of 0.2."
   [../]
   [./mu_1_0_pen]
     type = 'CSVDiff'
@@ -121,6 +139,9 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictional, penalty
+    contact for 2D Hertz half-symmetry cylindrical contact problem with friction coefficient
+    of 1.0."
   [../]
   [./mu_0_2_aug]
     type = 'CSVDiff'
@@ -138,5 +159,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictional, Augmented
+    Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem."
   [../]
 []
