@@ -47,10 +47,14 @@ getTotalRAM()
 std::string
 getMPIProcessorName()
 {
+#ifdef LIBMESH_HAVE_MPI
   int mpi_namelen;
   char mpi_name[MPI_MAX_PROCESSOR_NAME];
   MPI_Get_processor_name(mpi_name, &mpi_namelen);
   return mpi_name;
+#else
+  return "serial";
+#endif
 }
 
 void
