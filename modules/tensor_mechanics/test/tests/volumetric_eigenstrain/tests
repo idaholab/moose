@@ -3,5 +3,9 @@
     type = 'CSVDiff'
     input = 'volumetric_eigenstrain.i'
     csvdiff = 'volumetric_eigenstrain_out.csv'
+    requirement = "The ComputeVolumetricEigenStrainClass shall correctly compute an eigenstrain tensor"
+                  " that results in a solution that exactly recovers the specified volumetric expansion."
+    design = "source/materials/ComputeVolumetricEigenstrain.md"
+    issues = "8615"
   [../]
 []
