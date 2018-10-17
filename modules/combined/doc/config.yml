@@ -22,12 +22,21 @@ Renderer:
     name: MOOSE
     repo: https://github.com/idaholab/moose
     home: https://www.mooseframework.org
-    navigation: !include modules/combined/doc/navigation.yml
     google_analytics: True
 
+Translators:
+    type: MooseDocs.base.Translator
+    incremental_build: False
+
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.navigation:
+        menu:
+            Getting Started: getting_started.menu.md
+            Documentation: documentation.menu.md
+            Help: help.menu.md
+            Wiki (deprecated): https://www.mooseframework.org/old/wiki
+            News: newsletter/index.md
+    MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/combined
         hide:
             framework: !include framework/doc/hidden.yml
@@ -67,14 +76,12 @@ Extensions:
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
             #tensor_mechanics: !include modules/tensor_mechanics/doc/remove.yml
             #xfem: !include modules/xfem/doc/remove.yml
-    globals:
-        type: MooseDocs.extensions.panoptic
+    MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
-    acronyms:
-        type: MooseDocs.extensions.acronym
+    MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
-    sqa:
-        type: MooseDocs.extensions.sqa
+    MooseDocs.extensions.sqa:
+        active: False
         requirement-groups:
             dgkernels: DGKernel Objects
             interfacekernels: InterfaceKernel Objects

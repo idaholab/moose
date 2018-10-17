@@ -1,10 +1,6 @@
 #pylint: disable=missing-docstring
-import re
 from MooseDocs import common
-from MooseDocs.common import exceptions
 from MooseDocs.extensions import command
-
-assert re
 
 def make_extension(**kwargs):
     return IncludeExtension(**kwargs)
@@ -12,9 +8,24 @@ def make_extension(**kwargs):
 class IncludeExtension(command.CommandExtension):
     """Enables the !include command for including files in other files."""
 
+    def __init__(self, *args, **kwargs):
+        super(IncludeExtension, self).__init__(*args, **kwargs)
+        self.__dependencies = set()
+
     def extend(self, reader, renderer):
         self.requires(command)
-        self.addCommand(IncludeCommand())
+        self.addCommand(reader, IncludeCommand())
+
+    def postRead(self, content, page, meta):
+        meta.initData('dependencies', set)
+
+    def postTokenize(self, ast, page, meta, reader):
+        meta.getData('dependencies').update(self.__dependencies)
+        self.__dependencies.clear()
+
+    def addDependency(self, page):
+        self.__dependencies.add(page.uid)
+
 
 class IncludeCommand(command.CommandComponent):
     COMMAND = 'include'
@@ -23,52 +34,15 @@ class IncludeCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['re'] = (None, "Extract content via a regex, if the 'content' group exists it " \
-                                 "is used as the desired content, otherwise group zero is used.")
-        settings['re-flags'] = ('re.M|re.S|re.U', "Regular expression flags commands pass to the " \
-                                                  "Python re module.")
-        settings['start'] = (None, "String contained on the starting line.")
-        settings['end'] = (None, "String contained on the ending line.")
+        settings.update(common.extractContentSettings())
         return settings
 
-    def createToken(self, info, parent):
+    def createToken(self, parent, info, page):
         """
-        NOTICE:
-        Ideally, this method would create a connection between the two pages so that when you
-        update the included page the livereload would run the including page. This doesn't work
-        because of the multiprocessing, which would be making a connection between object that
-        are on copies working on other processes from those that the livereload is watching.
-
-        TODO: A possible fix would be to just hack in a regex for !include into the livereload
-              watcher object itself, just need to implement it.
+        Tokenize the included content and create dependency between pages.
         """
-
-        master_page = self.translator.current
-        include_page = master_page.findall(info['subcommand'], exc=exceptions.TokenizeException)[0]
-
-        content = common.read(include_page.source) #TODO: copy existing tokens when not using re
-        if self.settings['re']:
-            content = common.regex(self.settings['re'], content, eval(self.settings['re-flags']))
-
-        elif self.settings['start'] or self.settings['end']:
-            lines = content.split('\n')
-            start_idx = None
-            end_idx = None
-            start = self.settings['start']
-            end = self.settings['end']
-
-            for i, line in enumerate(lines):
-                if (not start_idx) and (start in line):
-                    start_idx = i
-                if (not end_idx) and (end in line):
-                    end_idx = i
-
-            if start_idx is None:
-                start_idx = 0
-            if end_idx is None:
-                end_idx = -1
-
-            content = lines[start_idx:end_idx]
-
-        self.translator.reader.parse(parent, content)
+        include_page = self.findPage(info['subcommand'])
+        content, line = common.extractContent(self.reader.read(include_page), self.settings)
+        self.reader.tokenize(parent, content, include_page, line=line)
+        self.extension.addDependency(include_page)
         return parent

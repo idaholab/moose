@@ -11,10 +11,13 @@ from __future__ import print_function
 import os
 import re
 import collections
-import math
 import difflib
 import multiprocessing
 import subprocess
+import time
+import cProfile as profile
+import pstats
+import StringIO
 
 def colorText(string, color, **kwargs):
     """
@@ -216,9 +219,8 @@ def make_chunks(local, num=multiprocessing.cpu_count()):
         local[list]: A list of objects to break into chunks.
         num[int]: The number of chunks (defaults to number of threads available)
     """
-    num = int(math.ceil(len(local)/float(num)))
-    for i in range(0, len(local), num):
-        yield local[i:i + num]
+    k, m = divmod(len(local), num)
+    return (local[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in xrange(num))
 
 def check_file_size(base=os.getcwd(), size=1, ignore=None):
     """
@@ -314,10 +316,10 @@ def text_unidiff(out_content, gold_content, out_fname=None, gold_fname=None, col
 
     """
     diff = []
-    for line in difflib.unified_diff(out_content.splitlines(True),
-                                     gold_content.splitlines(True),
-                                     fromfile=out_fname,
-                                     tofile=gold_fname, n=num_lines):
+    for line in difflib.unified_diff(gold_content.splitlines(True),
+                                     out_content.splitlines(True),
+                                     fromfile=gold_fname,
+                                     tofile=out_fname, n=num_lines):
 
         if color:
             if line.startswith('-'):
@@ -353,3 +355,15 @@ def git_root_dir(working_dir=os.getcwd()):
         print("The supplied directory is not a git repository: {}".format(working_dir))
     except OSError:
         print("The supplied directory does not exist: {}".format(working_dir))
+
+def run_profile(function, *args, **kwargs):
+    """Run supplied function with python profiler."""
+    pr = profile.Profile()
+    start = time.time()
+    out = pr.runcall(function, *args, **kwargs)
+    print('Total Time:', time.time() - start)
+    s = StringIO.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
+    ps.print_stats()
+    print(s.getvalue())
+    return out

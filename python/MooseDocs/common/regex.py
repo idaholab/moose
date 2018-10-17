@@ -1,8 +1,8 @@
 #pylint: disable=missing-docstring
 import re
-from exceptions import TokenizeException
+from exceptions import MooseDocsException
 
-def regex(pattern, content, flags=None, exc=TokenizeException):
+def regex(pattern, content, flags=None):
     """
     Tool for searching for "content" within a regex and raising the desired exception if not found.
     """
@@ -14,6 +14,6 @@ def regex(pattern, content, flags=None, exc=TokenizeException):
             content = match.group()
     else:
         msg = "Failed to match regular expression: {}"
-        raise exc(msg, pattern)
+        raise MooseDocsException(msg, pattern)
 
     return content

@@ -8,7 +8,6 @@
 
 # An open source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
-
 !row!
 !col! class=s12 m4 l4 icon=flash_on
 ### Rapid Development class=center style=font-weight:200;

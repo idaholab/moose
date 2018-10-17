@@ -12,12 +12,12 @@ def check_filenames(filename):
     filenames = project_find(filename)
     if len(filenames) == 0:
         msg = "{} does not exist."
-        raise exceptions.TokenizeException(msg, filename)
+        raise exceptions.MooseDocsException(msg, filename)
     elif len(filenames) > 1:
         msg = "Multiple files located with matching name '{}':\n".format(filename)
         for f in filenames:
             msg += '    {}\n'.format(f)
-        raise exceptions.TokenizeException(msg)
+        raise exceptions.MooseDocsException(msg)
     else:
         filename = filenames[0]
 

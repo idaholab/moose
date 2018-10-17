@@ -2,6 +2,7 @@
 import base
 import html
 import tokens
-import page
-import build_page_tree
+import pages
+
+# TODO: move these to common
 from app_syntax import app_syntax

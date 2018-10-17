@@ -1,0 +1,80 @@
+
+\chapter{\label{listing-extension}Listing Extension}
+\section{\label{test-numbering}Test Numbering}
+\section{\label{test-captions}Test Captions}
+\begin{verbatim}no caption\end{verbatim}
+\section{\label{listing-with-space}Listing with space}
+\begin{verbatim}void function();
+
+void anotherFunction();
+\end{verbatim}
+\section{\label{language}Language}
+\begin{verbatim}void function();\end{verbatim}
+\section{\label{file-listing}File Listing}
+\begin{verbatim}
+
+
+
+
+
+
+
+
+\#include "Diffusion.h"
+
+registerMooseObject("MooseApp", Diffusion);
+
+template {\textless}{\textgreater}
+InputParameters
+validParams{\textless}Diffusion{\textgreater}()
+\{
+  InputParameters params = validParams{\textless}Kernel{\textgreater}();
+  params.addClassDescription("The Laplacian operator (\$-{\textbackslash}{\textbackslash}nabla {\textbackslash}{\textbackslash}cdot {\textbackslash}{\textbackslash}nabla u\$), with the weak "
+                             "form of \$({\textbackslash}{\textbackslash}nabla {\textbackslash}{\textbackslash}phi\_i, {\textbackslash}{\textbackslash}nabla u\_h)\$.");
+  return params;
+\}
+
+Diffusion::Diffusion(const InputParameters \& parameters) : Kernel(parameters) \{\}
+
+Real
+Diffusion::computeQpResidual()
+\{
+  return \_grad\_u[\_qp] * \_grad\_test[\_i][\_qp];
+\}
+
+Real
+Diffusion::computeQpJacobian()
+\{
+  return \_grad\_phi[\_j][\_qp] * \_grad\_test[\_i][\_qp];
+\}
+\end{verbatim}
+\begin{verbatim}template {\textless}{\textgreater}
+InputParameters
+validParams{\textless}Diffusion{\textgreater}()
+\{
+  InputParameters params = validParams{\textless}Kernel{\textgreater}();
+  params.addClassDescription("The Laplacian operator (\$-{\textbackslash}{\textbackslash}nabla {\textbackslash}{\textbackslash}cdot {\textbackslash}{\textbackslash}nabla u\$), with the weak "
+                             "form of \$({\textbackslash}{\textbackslash}nabla {\textbackslash}{\textbackslash}phi\_i, {\textbackslash}{\textbackslash}nabla u\_h)\$.");
+  return params;
+\}
+\end{verbatim}\href{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}{(framework/src/kernels/Diffusion.C)}
+\begin{verbatim}xxxxx[Mesh]
+xxxxx  type = GeneratedMesh
+xxxxx  dim = 2
+xxxxx  nx = 10
+xxxxx  ny = 10
+xxxxx[]
+xxxxx
+xxxxx[Kernels]
+xxxxx  [./diff]
+xxxxx    type = Diffusion
+xxxxx    variable = u
+xxxxx  [../]
+xxxxx[]
+\end{verbatim}\href{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}{(test/tests/kernels/simple\_diffusion/simple\_diffusion.i)}
+\begin{verbatim}[AuxKernels]
+    [./diff]
+      type = Diffusion
+      variable = u
+    [../]
+[./]\end{verbatim}\href{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}{(test/tests/kernels/simple\_diffusion/simple\_diffusion.i)}

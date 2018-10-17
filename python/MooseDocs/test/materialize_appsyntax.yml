@@ -1,0 +1,38 @@
+Content:
+    framework:
+        root_dir: framework/doc/content
+        content:
+            - source/mesh/**
+            - source/functions/**
+            - source/actions/CreateDisplacedProblemAction.md
+            - syntax/Mesh/**
+            - syntax/Postprocessors/**
+            - media/under-construction.gif
+            - contrib/**
+            - css/*
+            - js/*
+    test:
+        root_dir: python/MooseDocs/test/content
+        content:
+            - extensions/appsyntax.md
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    search: False
+    breadcrumbs: False
+    scrollspy: False
+    sections: False
+
+Extensions:
+    disable_defaults: True
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.materialicon: default
+    MooseDocs.extensions.appsyntax:
+        executable: ../../../modules/combined
+
+Translator:
+    type: MooseDocs.base.Translator
+    destination: ${MOOSE_DIR}/python/MooseDocs/test/output/materialize

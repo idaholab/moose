@@ -1,7 +1,7 @@
 """Helper for defining custom MooseDocs logging."""
 import logging
+import traceback
 import multiprocessing
-
 import mooseutils
 
 import MooseDocs
@@ -25,13 +25,13 @@ class MooseDocsFormatter(logging.Formatter):
 
     def format(self, record):
         """Format the supplied logging record and count the occurrences."""
-        msg = logging.Formatter.format(self, record)
-        msg = mooseutils.colorText(u'{}: {}'.format(record.name, msg), self.COLOR[record.levelname])
+        tid = multiprocessing.current_process().name
+        msg = u'{} ({}): {}'.format(record.name, tid, logging.Formatter.format(self, record))
 
         with self.COUNTS[record.levelname].get_lock():
             self.COUNTS[record.levelname].value += 1
 
-        return msg
+        return mooseutils.colorText(msg, self.COLOR[record.levelname])
 
 class MultiprocessingHandler(logging.StreamHandler):
     """A simple handler that locks when writing with multiprocessing."""
@@ -57,7 +57,6 @@ class MultiprocessingHandler(logging.StreamHandler):
         """Disable."""
         pass
 
-
 def init_logging(level=logging.INFO):
     """
     Call this function to initialize the MooseDocs logging formatter.
@@ -75,3 +74,9 @@ def init_logging(level=logging.INFO):
     log.setLevel(level)
     MooseDocs.LOG_LEVEL = level
     return log
+
+def report_exception(msg, *args):
+    """Helper to output exceptions in logs."""
+    msg = msg.format(*args)
+    msg += u'\n{}\n'.format(mooseutils.colorText(traceback.format_exc(), 'GREY'))
+    return msg

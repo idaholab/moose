@@ -15,7 +15,7 @@ MOOSE run_tests.
 import argparse
 import logging
 
-from commands import build, devel, check, update, profiler, verify
+from commands import build, check, verify
 from common import log
 
 def command_line_options():
@@ -36,10 +36,7 @@ def command_line_options():
                         help="Set the python logging level (default: %(default)s).")
 
     build.command_line_options(subparser, parent)
-    devel.command_line_options(subparser, parent)
     check.command_line_options(subparser, parent)
-    update.command_line_options(subparser, parent)
-    profiler.command_line_options(subparser, parent)
     verify.command_line_options(subparser, parent)
     return parser.parse_args()
 
@@ -53,14 +50,8 @@ def run():
 
     if options.command == 'build':
         build.main(options)
-    elif options.command == 'devel':
-        devel.main(options)
     elif options.command == 'check':
         check.main(options)
-    elif options.command == 'update':
-        update.main(options)
-    elif options.command == 'profile':
-        profiler.main(options)
     elif options.command == 'verify':
         verify.main(options)
 

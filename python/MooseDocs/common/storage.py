@@ -38,7 +38,7 @@ class Storage(object):
         """
 
         # Check the type
-        if not isinstance(obj, self._type):
+        if (self._type is not None) and (not isinstance(obj, self._type)):
             msg = 'Incorrect object provided, expected {} but received {}'
             msg = msg.format(self._type.__name__, type(obj).__name__)
             raise TypeError(msg)

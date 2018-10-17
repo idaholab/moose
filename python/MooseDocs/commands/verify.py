@@ -10,15 +10,22 @@
 #pylint: enable=missing-docstring
 import os
 import sys
+import re
 import subprocess
 import mooseutils
 import MooseDocs
 
+try:
+    import bs4
+except ImportError:
+    print "The BeutifulSoup package (bs4) is required for the verify command, " \
+          "it may be downloaded by running the following:\n" \
+          "    pip install --user bs4"
+    sys.exit(1)
+
 def command_line_options(subparser, parent):
     """Command line options for 'verify' command."""
-    parser = subparser.add_parser('verify', parents=[parent],
-                                  help="Verify that rendering is working as expected.")
-
+    parser = subparser.add_parser('verify', parents=[parent], help="Testing only, do not use.")
     parser.add_argument('-f', '--form', default='materialize',
                         choices=['materialize', 'html', 'json', 'latex'],
                         help="The desired output format to verify.")
@@ -29,9 +36,56 @@ def insert_moose_dir(content):
     """Helper for adding '${MOOSE_DIR}' to content."""
     return content.replace(os.getenv('MOOSE_DIR'), '${MOOSE_DIR}')
 
-def replace_moose_dir(content):
-    """Helper for replacing '${MOOSE_DIR}' in contents."""
-    return content.replace('${MOOSE_DIR}', os.getenv('MOOSE_DIR'))
+def replace_uuid4(content):
+    """Replace uuid.uuid4() numbers."""
+    return re.sub(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
+                  r'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', content)
+
+def update_gold_helper(gold, out_content):
+    """Update the gold files."""
+    dirname = os.path.dirname(gold)
+    if not os.path.isdir(dirname):
+        os.makedirs(dirname)
+    with open(gold, 'w') as fid:
+        print "WRITING GOLD: {}".format(gold)
+        fid.write(out_content)
+
+def compare(out_fname, out_dir, gold_dir, update_gold=False):
+    """Compare supplied file with gold counter part."""
+
+    errno = 0
+    gold_fname = out_fname.replace(out_dir, gold_dir)
+
+    # Read the content to be tested
+    with open(out_fname, 'r') as fid:
+        out_content = insert_moose_dir(replace_uuid4(fid.read()))
+
+    # Update gold content
+    if update_gold:
+        update_gold_helper(gold_fname, out_content)
+
+    if not os.path.exists(gold_fname):
+        print mooseutils.colorText('MISSING GOLD: {}'.format(gold_fname), 'RED')
+        errno = 1
+    else:
+        with open(gold_fname, 'r') as fid:
+            gold_content = fid.read()
+            gold_content = bs4.BeautifulSoup(gold_content, 'lxml').prettify()
+
+        out_content = bs4.BeautifulSoup(out_content, 'lxml').prettify()
+        diff = mooseutils.text_unidiff(out_content,
+                                       gold_content,
+                                       out_fname=out_fname,
+                                       gold_fname=gold_fname,
+                                       color=True, num_lines=2)
+        if diff:
+            print mooseutils.colorText("DIFF: {} != {}".format(out_fname, gold_fname), 'YELLOW')
+            print diff
+            errno = 1
+        else:
+            print mooseutils.colorText("PASS: {} == {}".format(out_fname, gold_fname), 'GREEN')
+
+    return errno
 
 def main(options):
     """Test all files in output with those in the gold."""
@@ -59,25 +113,6 @@ def main(options):
         for fname in files:
             _, ext = os.path.splitext(fname)
             if ext in extensions:
-                out = os.path.join(root, fname)
-                with open(out, 'r') as fid:
-                    out_content = replace_moose_dir(fid.read())
+                errno = compare(os.path.join(root, fname), out_dir, gold_dir, options.update_gold)
 
-                out = os.path.join(root, fname)
-                gold = out.replace(out_dir, gold_dir)
-                with open(gold, 'r') as fid:
-                    gold_content = replace_moose_dir(fid.read())
-
-                if options.update_gold:
-                    dirname = os.path.dirname(gold)
-                    if not os.path.isdir(dirname):
-                        os.makedirs(dirname)
-                    with open(gold, 'w+') as fid:
-                        fid.write(insert_moose_dir(gold_content))
-                else:
-                    diff = mooseutils.text_unidiff(out_content, gold_content,
-                                                   color=True, num_lines=1)
-                    if diff:
-                        print diff
-                        errno = 1
     sys.exit(errno)

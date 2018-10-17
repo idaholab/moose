@@ -7,7 +7,7 @@ import command
 import core
 import devel
 import floats
-import panoptic
+import common
 import include
 import media
 import package

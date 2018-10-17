@@ -8,10 +8,6 @@ def make_extension(**kwargs):
 class ConfigExtension(command.CommandExtension):
     """
     Allows the configuration items of objects to be changes on a per-page basis.
-
-    TODO: This should provide a means for updating configuration for all objects, including
-          Extension, Translator, and Reader. Currently, this only works for the Renderer, which
-          was the most immediate need.
     """
     @staticmethod
     def defaultConfig():
@@ -20,24 +16,26 @@ class ConfigExtension(command.CommandExtension):
 
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
-        self.local_config = dict()
 
-    def reinit(self):
-        self.local_config.clear()
+    def postRead(self, content, page, meta):
+        """Updates configuration items."""
+        if content:
+            for match in command.BlockInlineCommand.RE.finditer(content):
+                if match.group('command') == 'config':
+                    subcommand = match.group('subcommand')
+                    meta.initData(subcommand, dict)
+                    _, settings = common.match_settings(dict(), match.group('settings'))
+                    meta.getData(subcommand).update(**settings)
 
     def extend(self, reader, renderer):
-        self.addCommand(ConfigRendererCommand())
-
-    def preRender(self, root, config): #pylint: disable=unused-argument
-        config.update(self.local_config)
+        self.requires(command)
+        self.addCommand(reader, ConfigRendererCommand())
 
 class ConfigRendererCommand(command.CommandComponent):
+    """This does nothing but that serves to hide the command syntax from outputting."""
     COMMAND = 'config'
-    SUBCOMMAND = 'renderer'
+    SUBCOMMAND = '*'
     PARSE_SETTINGS = False
 
-    def createToken(self, info, parent):
-        defaults = self.translator.renderer.getConfig()
-        known, _ = common.match_settings(defaults, info['settings'])
-        self.extension.local_config = known
+    def createToken(self, parent, info, page):
         return parent
