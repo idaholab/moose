@@ -3,5 +3,11 @@
     type = Exodiff
     input = 'gravity_test.i'
     exodiff = 'gravity_test_out.e'
+    requirement = 'The tensor mechanics module shall have the capability of '
+                  'applying a body force term in the stress divergence '
+                  'equilibrium equation that accounts for the force of gravity '
+                  'on a solid object due to the object's own weight.' 
+    design = 'Gravity.md'
+    issues = '#4781'
   [../]
 []

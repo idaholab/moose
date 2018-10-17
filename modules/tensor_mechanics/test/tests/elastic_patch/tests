@@ -3,6 +3,12 @@
     type = 'Exodiff'
     input = 'elastic_patch.i'
     exodiff = 'elastic_patch_out.e'
+    requirement = 'The tensor mechanics module shall have the ability to '
+                  'compute constant stress components from prescribed linear '
+                  'displacements on a set of irregular hexes.'
+    design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
+             'ComputeFiniteStrainElasticStress.md'
+    issues = '#458'
   [../]
   [./elastic_patch_Bbar]
     type = 'Exodiff'
@@ -10,6 +16,13 @@
     exodiff = 'elastic_patch_out.e'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'elastic_patch'
+    requirement = 'The tensor mechanics module shall have the ability to '
+                  'compute constant stress components from prescribed linear '
+                  'displacements on a set of irregular hexes when using '
+                  'volumetric locking.'
+    design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
+             'ComputeFiniteStrainElasticStress.md VolumetricLocking.md'
+    issues = '#458'
   [../]
 
   [./elastic_patch_2Procs]
@@ -18,6 +31,13 @@
     exodiff = 'elastic_patch_out.e'
     min_parallel = 2
     prereq = 'elastic_patch_Bbar'
+    requirement = 'The tensor mechanics module shall have the ability to '
+                  'compute constant stress components from prescribed linear '
+                  'displacements on a set of irregular hexes when running on 2 '
+                  'nodes in parallel.'
+    design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
+             'ComputeFiniteStrainElasticStress.md'
+    issues = '#458'
   [../]
   [./elastic_patch_2Procs_Bbar]
     type = Exodiff
@@ -26,12 +46,25 @@
     min_parallel = 2
     prereq = 'elastic_patch_2Procs'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    requirement = 'The tensor mechanics module shall have the ability to '
+                  'compute constant stress components from prescribed linear '
+                  'displacements on a set of irregular hexes when employing '
+                  'volumetric locking and running on 2 nodes in parallel.'
+    design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
+             'ComputeFiniteStrainElasticStress.md VolumetricLocking.md'
+    issues = '#458'
   [../]
 
   [./elastic_patch_quadratic]
     type = Exodiff
     input = 'elastic_patch_quadratic.i'
     exodiff = 'elastic_patch_quadratic_out.e'
+    requirement = 'The tensor mechanics module shall have the ability to '
+                  'compute constant stress components from prescribed '
+                  'quadratic displacements on a set of irregular hexes.'
+    design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
+             'ComputeFiniteStrainElasticStress.md'
+    issues = '#620'
   [../]
   [./elastic_patch_quadratic_Bbar]
     type = Exodiff
@@ -39,5 +72,12 @@
     exodiff = 'elastic_patch_quadratic_out.e'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'elastic_patch_quadratic'
+    requirement = 'The tensor mechanics module shall have the ability to '
+                  'compute constant stress components from prescribed '
+                  'quadratic displacements on a set of irregular hexes when '
+                  'employing volumetric locking.'
+    design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
+             'ComputeFiniteStrainElasticStress.md VolumetricLocking.md'
+    issues = '#620'
  [../]
 []
