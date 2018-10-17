@@ -93,6 +93,24 @@ CSV::outputVectorPostprocessors()
   _write_vector_table = true;
 }
 
+std::string
+CSV::getVectorPostprocessorFileName(const std::string & vpp_name, bool include_time_step)
+{
+  std::ostringstream file_name;
+  file_name << _file_base;
+
+  auto short_name = MooseUtils::shortName(vpp_name);
+  if (short_name.size())
+    file_name << '_' << short_name;
+
+  if (include_time_step)
+    file_name << '_' << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+              << std::right << timeStep();
+  file_name << ".csv";
+
+  return file_name.str();
+}
+
 void
 CSV::output(const ExecFlagType & type)
 {
@@ -114,25 +132,20 @@ CSV::output(const ExecFlagType & type)
   {
     for (auto & it : _vector_postprocessor_tables)
     {
-      std::ostringstream output;
-      output << _file_base << "_" << MooseUtils::shortName(it.first);
-
-      if (!vpp_data.containsCompleteHistory(it.first))
-        output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
-               << std::right << timeStep();
-      output << ".csv";
-
+      auto vpp_name = it.first;
       it.second.setDelimiter(_delimiter);
       it.second.setPrecision(_precision);
       if (_sort_columns)
         it.second.sortColumns();
-      it.second.printCSV(output.str(), 1, _align);
+
+      auto include_time_suffix = !vpp_data.containsCompleteHistory(vpp_name);
+
+      it.second.printCSV(getVectorPostprocessorFileName(vpp_name, include_time_suffix), 1, _align);
 
       if (_time_data)
       {
-        std::ostringstream filename;
-        filename << _file_base << "_" << MooseUtils::shortName(it.first) << "_time.csv";
-        _vector_postprocessor_time_tables[it.first].printCSV(filename.str());
+        std::string file_name = _file_base + '_' + MooseUtils::shortName(vpp_name) + "_time.csv";
+        _vector_postprocessor_time_tables[vpp_name].printCSV(file_name);
       }
     }
   }
