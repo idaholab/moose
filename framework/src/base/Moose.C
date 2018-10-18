@@ -171,10 +171,12 @@ addActionTypes(Syntax & syntax)
   registerTask("prepare_mesh", false);
   registerTask("add_geometric_rm", true);
   registerTask("setup_mesh_complete", true); // calls prepare
+  registerTask("attach_geometric_rm", true);
 
   registerTask("init_displaced_problem", false);
 
   registerTask("add_algebraic_rm", true);
+  registerTask("attach_algebraic_rm", true);
   registerTask("init_problem", true);
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
@@ -234,6 +236,7 @@ addActionTypes(Syntax & syntax)
                            "(check_copy_nodal_vars)"
                            "(add_partitioner)"
                            "(add_geometric_rm)"
+                           "(attach_geometric_rm)"
                            "(init_mesh)"
                            "(prepare_mesh)"
                            "(add_mesh_modifier)"
@@ -278,6 +281,7 @@ addActionTypes(Syntax & syntax)
                            "(add_material)"
                            "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
+                           "(attach_algebraic_rm)"
                            "(init_problem)"
                            "(add_output)"
                            "(add_postprocessor)"
