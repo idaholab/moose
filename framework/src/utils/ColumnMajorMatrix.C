@@ -82,10 +82,9 @@ ColumnMajorMatrix::ColumnMajorMatrix(const TypeVector<Real> & col1,
 ColumnMajorMatrix
 ColumnMajorMatrix::kronecker(const ColumnMajorMatrix & rhs) const
 {
-  mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows,
-              "Matrices must be the same shape for a kronecker product!");
+  rhs.checkSquareness();
 
-  ColumnMajorMatrix ret_matrix(_n_rows * _n_rows, rhs._n_cols * rhs._n_cols);
+  ColumnMajorMatrix ret_matrix(_n_rows * rhs._n_rows, _n_cols * rhs._n_cols);
 
   for (unsigned int i = 0; i < _n_rows; i++)
     for (unsigned int j = 0; j < _n_cols; j++)
@@ -99,8 +98,8 @@ ColumnMajorMatrix::kronecker(const ColumnMajorMatrix & rhs) const
 ColumnMajorMatrix &
 ColumnMajorMatrix::operator=(const DenseMatrix<Real> & rhs)
 {
-  mooseAssert(_n_rows == rhs.m(), "different number of rows");
-  mooseAssert(_n_cols == rhs.n(), "different number of cols");
+  if (_n_rows != rhs.m() || _n_cols != rhs.n())
+    mooseError("ColumnMajorMatrix and DenseMatrix should be of the same shape.");
 
   _n_rows = rhs.m();
   _n_cols = rhs.n();
@@ -117,8 +116,8 @@ ColumnMajorMatrix::operator=(const DenseMatrix<Real> & rhs)
 ColumnMajorMatrix &
 ColumnMajorMatrix::operator=(const DenseVector<Real> & rhs)
 {
-  mooseAssert(_n_rows == rhs.size(), "different number of rows");
-  mooseAssert(_n_cols == 1, "different number of cols");
+  if (_n_rows != rhs.size() || _n_cols != 1)
+    mooseError("ColumnMajorMatrix and DenseVector should be of the same shape.");
 
   _n_rows = rhs.size();
   _n_cols = 1;
@@ -134,7 +133,7 @@ ColumnMajorMatrix::operator=(const DenseVector<Real> & rhs)
 void
 ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) const
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot solve eigen system of a non-square matrix!");
+  this->checkSquareness();
 
   char jobz = 'V';
   char uplo = 'U';
@@ -171,7 +170,7 @@ ColumnMajorMatrix::eigenNonsym(ColumnMajorMatrix & eval_real,
                                ColumnMajorMatrix & evec_right,
                                ColumnMajorMatrix & evec_left) const
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot solve eigen system of a non-square matrix!");
+  this->checkSquareness();
 
   ColumnMajorMatrix a(*this);
 
@@ -239,7 +238,8 @@ ColumnMajorMatrix::eigenNonsym(ColumnMajorMatrix & eval_real,
 void
 ColumnMajorMatrix::exp(ColumnMajorMatrix & z) const
 {
-  mooseAssert(_n_rows == _n_cols, "The Matrix being exponentiated is not square");
+  this->checkSquareness();
+
   ColumnMajorMatrix a(*this);
   ColumnMajorMatrix evals_real(_n_rows, 1), evals_img(_n_rows, 1), evals_real2(_n_rows, _n_cols);
   ColumnMajorMatrix evec_right(_n_rows, _n_cols), evec_left(_n_rows, _n_cols);
@@ -258,9 +258,8 @@ ColumnMajorMatrix::exp(ColumnMajorMatrix & z) const
 void
 ColumnMajorMatrix::inverse(ColumnMajorMatrix & invA) const
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot solve for inverse of a non-square matrix!");
-  mooseAssert(_n_rows == invA._n_cols && _n_cols == invA._n_rows,
-              "Matrices must be the same size for matrix inverse!");
+  this->checkSquareness();
+  this->checkShapeEquality(invA);
 
   int n = _n_rows;
   int return_value = 0;
@@ -287,4 +286,19 @@ ColumnMajorMatrix::inverse(ColumnMajorMatrix & invA) const
 
   if (return_value)
     mooseException("Error in LAPACK matrix-inverse calculation");
+}
+
+void
+ColumnMajorMatrix::checkSquareness() const
+{
+  if (_n_rows != _n_cols)
+    mooseError("ColumnMajorMatrix error: Unable to perform the operation on a non-square matrix.");
+}
+
+void
+ColumnMajorMatrix::checkShapeEquality(const ColumnMajorMatrix & rhs) const
+{
+  if (_n_rows != rhs._n_rows || _n_cols != rhs._n_cols)
+    mooseError("ColumnMajorMatrix error: Unable to perform the operation on matrices of different "
+               "shapes.");
 }

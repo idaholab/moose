@@ -9,6 +9,9 @@
 
 #include "ColumnMajorMatrixTest.h"
 
+// Moose includes
+#include "ColumnMajorMatrix.h"
+
 TEST_F(ColumnMajorMatrixTest, addMatrixScalar)
 {
   ColumnMajorMatrix as(3, 3);
@@ -173,10 +176,36 @@ TEST_F(ColumnMajorMatrixTest, setDiagMatrix)
   EXPECT_EQ(mat(1, 1), 9);
 }
 
+TEST_F(ColumnMajorMatrixTest, setDiagMatrixError)
+{
+  ColumnMajorMatrix mat(1, 2);
+  mat(0, 0) = 1;
+  mat(0, 1) = 1;
+
+  try
+  {
+    mat.setDiag(9);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "ColumnMajorMatrix error: Unable to perform the operation on a non-square matrix.") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
 TEST_F(ColumnMajorMatrixTest, trMatrix)
 {
-  EXPECT_EQ(a.tr(), 15);
-  EXPECT_EQ(two_mat.tr(), 5);
+  ColumnMajorMatrix mat(2, 2);
+  mat(0, 0) = 1;
+  mat(0, 1) = 2;
+  mat(1, 0) = 3;
+  mat(1, 1) = 4;
+  EXPECT_EQ(mat.tr(), 5);
 }
 
 TEST_F(ColumnMajorMatrixTest, zeroMatrix)
@@ -203,24 +232,64 @@ TEST_F(ColumnMajorMatrixTest, identityMatrix)
 
 TEST_F(ColumnMajorMatrixTest, contractionMatrix)
 {
-  ColumnMajorMatrix mat = two_mat;
-  ColumnMajorMatrix sec(2, 2);
+  ColumnMajorMatrix rhs(4, 1);
+  ColumnMajorMatrix lhs(4, 1);
 
-  sec(0, 0) = 4;
-  sec(1, 0) = 3;
-  sec(0, 1) = 2;
-  sec(1, 1) = 1;
+  rhs(0, 0) = 4;
+  rhs(1, 0) = 3;
+  rhs(2, 0) = 2;
+  rhs(3, 0) = 1;
 
-  EXPECT_EQ(mat.doubleContraction(sec), (1 * 4 + 2 * 3 + 3 * 2 + 4 * 1));
+  lhs(0, 0) = 1;
+  lhs(1, 0) = 2;
+  lhs(2, 0) = 3;
+  lhs(3, 0) = 4;
+
+  EXPECT_EQ(lhs.doubleContraction(rhs), (1 * 4 + 2 * 3 + 3 * 2 + 4 * 1));
+}
+
+TEST_F(ColumnMajorMatrixTest, contractionMatrixError)
+{
+  ColumnMajorMatrix rhs(4, 1);
+  ColumnMajorMatrix lhs(4, 2);
+
+  rhs(0, 0) = 4;
+  rhs(1, 0) = 3;
+  rhs(2, 0) = 2;
+  rhs(3, 0) = 1;
+
+  lhs(0, 0) = 1;
+  lhs(1, 0) = 2;
+  lhs(2, 0) = 3;
+  lhs(3, 0) = 4;
+
+  lhs(0, 1) = 1;
+  lhs(1, 1) = 2;
+  lhs(2, 1) = 3;
+  lhs(3, 1) = 4;
+
+  try
+  {
+    // Attempt doubleContraction
+    lhs.doubleContraction(rhs);
+    FAIL() << "missing expected exception";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("ColumnMajorMatrix error: Unable to perform the operation on matrices of "
+                         "different shapes.") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 TEST_F(ColumnMajorMatrixTest, normMatrix)
 {
-  ColumnMajorMatrix mat(2, 2);
+  ColumnMajorMatrix mat(4, 1);
   mat(0, 0) = 1;
   mat(1, 0) = 2;
-  mat(0, 1) = 2;
-  mat(1, 1) = 4;
+  mat(2, 0) = 2;
+  mat(3, 0) = 4;
 
   EXPECT_EQ(mat.norm(), 5);
 }
@@ -326,6 +395,62 @@ TEST_F(ColumnMajorMatrixTest, fillMatrix)
   EXPECT_EQ(tensor(2, 2), a_ref(2, 2));
 }
 
+TEST_F(ColumnMajorMatrixTest, fillTensorError)
+{
+  try
+  {
+    TensorValue<Real> tensor(0, 0, 0, 0, 0, 0, 0, 0, 0);
+    ColumnMajorMatrix & t_ref = t;
+    t_ref.fill(tensor);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot fill tensor! The ColumnMajorMatrix doesn't have the same number of entries!") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, fillMatrixError)
+{
+  try
+  {
+    DenseMatrix<Real> mat(2, 2);
+    ColumnMajorMatrix & a_ref = a;
+    a_ref.fill(mat);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Cannot fill dense matrix! The ColumnMajorMatrix doesn't have the same "
+                         "number of entries!") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, fillVectorError)
+{
+  try
+  {
+    DenseVector<Real> vec(2);
+    ColumnMajorMatrix & a_ref = a;
+    a_ref.fill(vec);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("ColumnMajorMatrix and DenseVector must be the same shape for a fill!") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
 TEST_F(ColumnMajorMatrixTest, tensorAssignOperator)
 {
   ColumnMajorMatrix test(3, 3);
@@ -395,21 +520,42 @@ TEST_F(ColumnMajorMatrixTest, notEqualMatrix)
   EXPECT_EQ(mat, mat1);
 }
 
+TEST_F(ColumnMajorMatrixTest, kroneckererror)
+{
+  ColumnMajorMatrix mat1(2, 1);
+  mat1(0, 0) = 1;
+  mat1(1, 0) = 2;
+  try
+  {
+    mat1.kronecker(t);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "ColumnMajorMatrix error: Unable to perform the operation on a non-square matrix.") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
 TEST_F(ColumnMajorMatrixTest, kronecker)
 {
-  ColumnMajorMatrix rhs(2, 2);
-  rhs(0, 0) = 1;
-  rhs(0, 1) = 2;
-  rhs(1, 0) = 3;
-  rhs(1, 1) = 4;
-
   ColumnMajorMatrix lhs(2, 2);
-  lhs(0, 0) = 0;
-  lhs(0, 1) = 5;
-  lhs(1, 0) = 6;
-  lhs(1, 1) = 7;
+  lhs(0, 0) = 1;
+  lhs(0, 1) = 2;
+  lhs(1, 0) = 3;
+  lhs(1, 1) = 4;
 
-  ColumnMajorMatrix ans = rhs.kronecker(lhs);
+  ColumnMajorMatrix rhs(2, 2);
+  rhs(0, 0) = 0;
+  rhs(0, 1) = 5;
+  rhs(1, 0) = 6;
+  rhs(1, 1) = 7;
+
+  ColumnMajorMatrix ans = lhs.kronecker(rhs);
 
   EXPECT_EQ(ans(0, 0), 0);
   EXPECT_EQ(ans(0, 3), 10);
@@ -571,4 +717,151 @@ TEST_F(ColumnMajorMatrixTest, exp)
   EXPECT_LT(std::abs(matrix_exp2(2, 0) - 0.0), err);
   EXPECT_LT(std::abs(matrix_exp2(2, 1) - 0.0), err);
   EXPECT_LT(std::abs(matrix_exp2(2, 2) - (1 / e)), err);
+}
+
+TEST_F(ColumnMajorMatrixTest, denseMatrixAssignment)
+{
+  DenseMatrix<Real> rhs(2, 1);
+  ColumnMajorMatrix lhs(2, 2);
+  rhs(0, 0) = 1;
+  rhs(1, 0) = 2;
+  try
+  {
+    lhs = rhs;
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("ColumnMajorMatrix and DenseMatrix should be of the same shape.") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, denseVectorAssignment)
+{
+  DenseVector<Real> rhs(2);
+  ColumnMajorMatrix lhs(2, 2);
+  rhs(0) = 1;
+  rhs(1) = 2;
+  try
+  {
+    lhs = rhs;
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("ColumnMajorMatrix and DenseVector should be of the same shape.") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, multTypeVecError)
+{
+  TypeVector<Real> rhs;
+  try
+  {
+    ColumnMajorMatrix result = t * rhs;
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Cannot perform matvec operation! The column dimension of "
+                         "the ColumnMajorMatrix does not match the TypeVector!") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, matrixMultError)
+{
+  try
+  {
+    ColumnMajorMatrix result = a * two_mat;
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot perform matrix multiply! The shapes of the two operands are not compatible!") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, matrixAddAssignError)
+{
+  TensorValue<Real> tensor(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  try
+  {
+    t += tensor;
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot perform matrix addition and assignment! The shapes of the two operands are "
+            "not compatible!") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, boundsTest)
+{
+  try
+  {
+    a(3, 4) += 2;
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Reference outside of ColumnMajorMatrix bounds!") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, checkSquareness)
+{
+  ColumnMajorMatrix mat1(2, 1);
+  mat1(0, 0) = 1;
+  mat1(1, 0) = 2;
+  try
+  {
+    mat1.checkSquareness();
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "ColumnMajorMatrix error: Unable to perform the operation on a non-square matrix.") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+TEST_F(ColumnMajorMatrixTest, checkShapeEqualityTest)
+{
+  try
+  {
+    a.checkShapeEquality(t);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("ColumnMajorMatrix error: Unable to perform the operation on matrices of "
+                         "different shapes.") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
