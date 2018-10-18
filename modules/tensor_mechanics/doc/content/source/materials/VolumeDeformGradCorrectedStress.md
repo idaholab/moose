@@ -1,14 +1,10 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # VolumeDeformGradCorrectedStress
 
-!alert construction title=Undocumented Class
-The VolumeDeformGradCorrectedStress has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /Materials/VolumeDeformGradCorrectedStress
+
+## Description
+
+This class takes the stress from the previous configuration and the deformation gradient as input, and computes the stress in the current configuration. The jacobian in the current configuration is same as that in the previous configuration.
 
 !syntax parameters /Materials/VolumeDeformGradCorrectedStress
 

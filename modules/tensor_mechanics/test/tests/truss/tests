@@ -1,15 +1,21 @@
 [Tests]
+  design = "source/kernels/LinearElasticTruss.md source/materials/StressDivergenceTensorsTruss.md LineElementAction.md"
+  issues = "#6789 #2460 #10313"
   [./truss_3d]
     type = 'Exodiff'
     input = 'truss_3d.i'
     exodiff = 'truss_3d_out.e'
     abs_zero = 1e-7
+    requirement = "The mechanics system shall accurately model the axial response"
+                  " of 3D truss elements."
   [../]
   [./truss_hex]
     type = 'Exodiff'
     input = 'truss_hex.i'
     exodiff = 'truss_hex_out.e'
     abs_zero = 1e-7
+    requirement = "The truss element shall work correctly when hex elements are also"
+                  " included in the same input or mesh file."
   [../]
   [./truss_2d]
     type = 'Exodiff'
@@ -17,6 +23,8 @@
     exodiff = 'truss_2d_out.e'
     abs_zero = 1e-7
     max_parallel = 1
+    requirement = "The mechanics system shall accurately model the static response of"
+                  " a 2D frame modeled using truss elements."
   [../]
   [./truss_3d_action]
     type = 'Exodiff'
@@ -24,6 +32,8 @@
     exodiff = 'truss_3d_out.e'
     abs_zero = 1e-7
     prereq = 'truss_3d'
+    requirement = "The LineElementAction shall correctly create the objects required for"
+                  " modeling the response of a mechanics system using 3D truss elements."
   [../]
   [./truss_hex_action]
     type = 'Exodiff'
@@ -31,6 +41,8 @@
     exodiff = 'truss_hex_out.e'
     abs_zero = 1e-7
     prereq = 'truss_hex'
+    requirement = "The LineElementAction shall correctly create the objects required for"
+                  " modeling the response of a mechanics system using truss and hex elements."
   [../]
   [./truss_2d_action]
     type = 'Exodiff'
@@ -40,17 +52,23 @@
     max_parallel = 1
     cli_args='Modules/TensorMechanics/LineElementMaster/block/area=area'
     prereq = 'truss_2d'
+    requirement = "The LineElementAction shall correctly create the objects required for"
+                  " modeling the response of a mechanics system using 2D truss elements." 
   [../]
   [./action_error_1]
     type = 'RunException'
     input = 'truss_2d_action.i'
     cli_args='Outputs/exodus=false Outputs/csv=false'
     expect_err='LineElementAction: `area` should be provided as input for'
+    requirement = "The LineElementAction shall produce an error if `area` is not provided"
+                  " as input for truss elements."
   [../]
   [./action_error_2]
     type = 'RunException'
     input = 'truss_2d_action.i'
     cli_args='Outputs/exodus=false Outputs/csv=false Modules/TensorMechanics/LineElementMaster/block/area=area Modules/TensorMechanics/LineElementMaster/block/rotations="rot_x"'
     expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
+    requirement = "The LineElementAction shall produce an error if rotational variables are"
+                  " provided as input for truss elements."
   [../]
 []
