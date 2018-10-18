@@ -1,21 +1,26 @@
 [Tests]
+design = 'syntax/DomainIntegral/index.md'
+issues = '#3705'
  [./ii_2d]
    type = 'CSVDiff'
    input = 'interaction_integral_2d.i'
    csvdiff = 'interaction_integral_2d_out.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D.'
  [../]
  [./ii_2d_rot]
    type = 'CSVDiff'
    input = 'interaction_integral_2d_rot.i'
    csvdiff = 'interaction_integral_2d_rot_out.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems for all planes in 2D.'
  [../]
  [./ii_3d_as_2d]
    type = 'CSVDiff'
    input = 'interaction_integral_3d_as_2d.i'
    csvdiff = 'interaction_integral_3d_as_2d_out.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3d evaluated as 2D.'
  [../]
  [./ii_3d]
    type = 'CSVDiff'
@@ -23,6 +28,7 @@
    csvdiff = 'interaction_integral_3d_out.csv interaction_integral_3d_out_II_KI_1_0001.csv interaction_integral_3d_out_II_KI_2_0001.csv interaction_integral_3d_out_II_KII_1_0001.csv interaction_integral_3d_out_II_KII_2_0001.csv interaction_integral_3d_out_II_KIII_1_0001.csv interaction_integral_3d_out_II_KIII_2_0001.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    abs_zero = 1e-8
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D.'
  [../]
  [./ii_3d_noq]
    type = 'CSVDiff'
@@ -32,6 +38,7 @@
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    abs_zero = 1e-8
    prereq = ii_3d
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D while supressing the output of q function values.'
  [../]
  [./ii_3d_points]
    type = 'CSVDiff'
@@ -39,6 +46,7 @@
    csvdiff = 'interaction_integral_3d_points_out.csv interaction_integral_3d_points_out_II_KI_1_0001.csv interaction_integral_3d_points_out_II_KI_2_0001.csv interaction_integral_3d_points_out_II_KII_1_0001.csv interaction_integral_3d_points_out_II_KII_2_0001.csv interaction_integral_3d_points_out_II_KIII_1_0001.csv interaction_integral_3d_points_out_II_KIII_2_0001.csv'
    abs_zero = 1e-8
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D at specified points.'
  [../]
  [./ii_3d_rot]
    type = 'CSVDiff'
@@ -46,6 +54,7 @@
    csvdiff = 'interaction_integral_3d_rot_out.csv interaction_integral_3d_rot_out_II_KI_1_0001.csv interaction_integral_3d_rot_out_II_KI_2_0001.csv interaction_integral_3d_rot_out_II_KII_1_0001.csv interaction_integral_3d_rot_out_II_KII_2_0001.csv interaction_integral_3d_rot_out_II_KIII_1_0001.csv interaction_integral_3d_rot_out_II_KIII_2_0001.csv'
    abs_zero = 2e-8
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in any plane in 3D.'
  [../]
  [./ii_2d_chk_q]
    type = 'Exodiff'
@@ -54,6 +63,7 @@
    exodiff = 'interaction_integral_2d_out.e'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_2d'
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D while outputting q vlaues.'
  [../]
  [./ii_2d_rot_chk_q]
    type = 'Exodiff'
@@ -62,6 +72,7 @@
    exodiff = 'interaction_integral_2d_rot_out.e'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_2d_rot'
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in any plane 2D while outputting q values.'
  [../]
  [./ii_3d_as_2d_chk_q]
    type = 'Exodiff'
@@ -70,6 +81,7 @@
    exodiff = 'interaction_integral_3d_as_2d_out.e'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_3d_as_2d'
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D evaluated as 2D.'
  [../]
  [./ii_3d_chk_q]
    type = 'Exodiff'
@@ -79,6 +91,7 @@
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_3d_noq'
    abs_zero = 1e-8
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D while outputting q values.'
  [../]
  [./ii_3d_points_chk_q]
    type = 'Exodiff'
@@ -88,6 +101,7 @@
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_3d_points'
    abs_zero = 1e-8
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D for specified points, while outputting q values.'
  [../]
  [./ii_3d_rot_chk_q]
    type = 'Exodiff'
@@ -97,5 +111,6 @@
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_3d_rot'
    abs_zero = 2e-8
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in any plane in 3D while outputting q values.'
  [../]
 []
