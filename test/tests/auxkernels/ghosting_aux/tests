@@ -5,6 +5,7 @@
     exodiff = 'ghosting_aux_out.e'
     min_parallel = 4
     max_parallel = 4
+    mesh_mode = replicated
 
     requirement = "MOOSE shall allow viewing the elements that would be ghosted to specific processors"
     design = 'GhostingAux.md'
@@ -17,6 +18,7 @@
     exodiff = 'no_ghosting_out.e'
     min_parallel = 4
     max_parallel = 4
+    mesh_mode = replicated
 
     requirement = "MOOSE shall utilize the minimum of ghosting necessary for the problem"
     design = 'GhostingAux.md relationship_managers.md'

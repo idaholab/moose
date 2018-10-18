@@ -1,5 +1,3 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # GhostingAux
 
 !syntax description /AuxKernels/GhostingAux
