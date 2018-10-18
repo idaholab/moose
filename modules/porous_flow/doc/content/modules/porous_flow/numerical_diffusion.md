@@ -62,7 +62,7 @@ The MOOSE input file is:
 
 The MOOSE input file is:
 
-!listing modules/porous_flow/test/tests/numerical_diffusion/rdgP0.i
+!listing modules/rdg/test/tests/advection_1d/rdgP0.i
 
 [rdgP0_eles] and [rdgP0_dt] show the dependence on discretisation when RDG(P0) is used.  This is identical to mass-lumping + full-upwinding (up to the fact that constant-monomial variables are used instead of linear-Lagrange).  As expected, there are no oscillations or over-shoots or under-shoots, but the results suffer from numerical diffusion.
 

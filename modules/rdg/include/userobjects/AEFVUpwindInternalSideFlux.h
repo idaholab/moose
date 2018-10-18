@@ -47,6 +47,8 @@ public:
                             DenseMatrix<Real> & jac2) const override;
 
 protected:
+  /// advective velocity
+  const Real _velocity;
 };
 
 #endif

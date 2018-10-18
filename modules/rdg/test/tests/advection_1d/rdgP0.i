@@ -33,11 +33,13 @@
   [./internal_side_flux]
     type = AEFVUpwindInternalSideFlux
     execute_on = 'linear'
+    velocity = 0.1
   [../]
 
   [./free_outflow_bc]
     type = AEFVFreeOutflowBoundaryFlux
     execute_on = 'linear'
+    velocity = 0.1
   [../]
 []
 
@@ -53,7 +55,6 @@
     variable = tracer
     component = 'concentration'
     flux = internal_side_flux
-    velocity = 0.1
     u = tracer
   [../]
 []

@@ -55,9 +55,6 @@ protected:
   /// choose an equation
   MooseEnum _component;
 
-  /// advective velocity
-  const Real _velocity;
-
   // "1" denotes variable value from the host element
 
   /// piecewise constant variable values in host element
