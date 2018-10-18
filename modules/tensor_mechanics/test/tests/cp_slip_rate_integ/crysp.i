@@ -184,7 +184,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options_iname = 'pc_type'
+  petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
   dt = 0.2

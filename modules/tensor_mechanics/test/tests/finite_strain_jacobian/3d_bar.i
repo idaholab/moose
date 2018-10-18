@@ -87,7 +87,7 @@
   type = Transient
 
   solve_type = NEWTON
-  petsc_options_iname = '_pc_type'
+  petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
   nl_rel_tol = 1e-10
