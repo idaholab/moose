@@ -1,4 +1,13 @@
 [Tests]
+  [./framework]
+    type = 'CSVDiff'
+    input = 'framework.i'
+    csvdiff = 'framework_out_tracer_0011.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    requirement = "MOOSE shall be able to solve the advection equation"
+    issues = "#12346"
+  [../]
   [./fully_saturated_action]
     type = 'CSVDiff'
     input = 'fully_saturated_action.i'
@@ -12,5 +21,14 @@
     csvdiff = 'no_action_out_tracer_0011.csv'
     abs_zero = 1.0E-5
     threading = '!pthreads'
+  [../]
+  [./rdgP0]
+    type = 'CSVDiff'
+    input = 'rdgP0.i'
+    csvdiff = 'rdgP0_out_tracer_0011.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    requirement = "1D RDG shall allow arbitrary 1D velocities to be specified.  This test demonstrates the advection of a tracer in 1D using the RDG module.  There is no slope limiting.  Changing the SlopeLimiting scheme to minmod, mc, or superbee means that a linear reconstruction is performed, and the slope limited according to the scheme chosen.  Doing this produces RDG(P0P1) and substantially reduces numerical diffusion"
+    issues = "#12346"
   [../]
 []
