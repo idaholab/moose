@@ -76,9 +76,13 @@ RelationshipManager::attachRelationshipManagers(Moose::RelationshipManagerType w
     _has_set_remote_elem_removal_flag = true;
   }
 
+  std::cout << "ARM1" << std::endl;
+
   // Next make sure that we haven't already triggered this type of callback
   if ((_cached_callbacks & when_type) == when_type)
     return;
+
+  std::cout << "ARM2" << std::endl;
 
   /**
    * We have a few different cases to handle when attaching RelationshipManagers to the
@@ -95,23 +99,38 @@ RelationshipManager::attachRelationshipManagers(Moose::RelationshipManagerType w
    * type.
    */
 
-  // Attach the Geometric RelationshipManager first (AlgebraicRMs are also GeometricRMs)
-  if ((_attach_geometric_early && when_type == early) ||
-      (!_attach_geometric_early && when_type == late))
+  std::cout << "attach_geometric_early: " << _attach_geometric_early << std::endl;
+  std::cout << "when_type == early" << (when_type == early) << std::endl;
+
+  // Pure early geometric
+  if (_attach_geometric_early && when_type == early)
   {
-    // We only need to attach GeometricRelationshipManagers when we are splitting the mesh for
-    // a DistributedMesh simulation, or we are running with DistributedMesh.
-    if (_app.isSplitMesh() || _mesh.isDistributedMesh())
+    if (true) //_app.isSplitMesh() || _mesh.isDistributedMesh())
     {
+
       attachRelationshipManagersInternal(Moose::RelationshipManagerType::GEOMETRIC);
       _cached_callbacks |= Moose::RelationshipManagerType::GEOMETRIC;
     }
   }
 
-  // Attach the Algebraic RelationshipManager were appropriate (only late)
-  if (getType() == Moose::RelationshipManagerType::ALGEBRAIC && when_type == late)
-  {
-    attachRelationshipManagersInternal(Moose::RelationshipManagerType::ALGEBRAIC);
-    _cached_callbacks |= Moose::RelationshipManagerType::ALGEBRAIC;
-  }
+      ||
+      (!_attach_geometric_early && when_type == late))
+      {
+        std::cout << "ARM3" << std::endl;
+
+        // We only need to attach GeometricRelationshipManagers when we are splitting the mesh for
+        // a DistributedMesh simulation, or we are running with DistributedMesh.
+        if (true) //_app.isSplitMesh() || _mesh.isDistributedMesh())
+        {
+          attachRelationshipManagersInternal(Moose::RelationshipManagerType::GEOMETRIC);
+          _cached_callbacks |= Moose::RelationshipManagerType::GEOMETRIC;
+        }
+      }
+
+      // Attach the Algebraic RelationshipManager were appropriate (only late)
+      if (getType() == Moose::RelationshipManagerType::ALGEBRAIC && when_type == late)
+      {
+        attachRelationshipManagersInternal(Moose::RelationshipManagerType::ALGEBRAIC);
+        _cached_callbacks |= Moose::RelationshipManagerType::ALGEBRAIC;
+      }
 }

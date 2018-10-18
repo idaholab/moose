@@ -40,15 +40,28 @@ void
 ElementSideNeighborLayers::attachRelationshipManagersInternal(
     Moose::RelationshipManagerType rm_type)
 {
-  if ((_app.isSplitMesh() || _mesh.isDistributedMesh()) && _element_side_neighbor_layers > 1)
-  {
-    _default_coupling = libmesh_make_unique<DefaultCoupling>();
-    _default_coupling->set_n_levels(_element_side_neighbor_layers);
+  _default_coupling = libmesh_make_unique<DefaultCoupling>();
+  _default_coupling->set_n_levels(_element_side_neighbor_layers);
 
-    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
-      attachGeometricFunctorHelper(*_default_coupling);
-    else
-      attachAlgebraicFunctorHelper(*_default_coupling);
+  // If we're trying to add geometric - and this one has been specified to be geometric
+  if ((rm_type &
+       Moose::RelationshipManagerType::GEOMETRIC == Moose::RelationshipManagerType::GEOMETRIC) &&
+      (_rm_type &
+       Moose::RelationshipManagerType::GEOMETRIC == Moose::RelationshipManagerType::GEOMETRIC))
+  {
+    std::cout << "ESNL: Adding Geometric" << std::endl;
+    attachGeometricFunctorHelper(*_default_coupling);
+  }
+
+  // If we're trying to add algebraic - and this one has been specified to be algebraic
+  if ((rm_type &
+       Moose::RelationshipManagerType::ALGEBRAIC == Moose::RelationshipManagerType::ALGEBRAIC) &&
+      (_rm_type &
+       Moose::RelationshipManagerType::ALGEBRAIC == Moose::RelationshipManagerType::ALGEBRAIC))
+  {
+    std::cout << "ESNL: Adding Algebraic" << std::endl;
+
+    attachAlgebraicFunctorHelper(*_default_coupling);
   }
 }
 

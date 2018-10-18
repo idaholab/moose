@@ -26,7 +26,7 @@ validParams<SubProblem>()
 
   params.addParam<bool>(
       "default_ghosting",
-      true,
+      false,
       "Whether or not to use libMesh's default amount of algebraic and geometric ghosting");
 
   params.addParamNamesToGroup("default_ghosting", "Advanced");

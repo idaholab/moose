@@ -24,6 +24,7 @@
 #include "libmesh/enum_norm_type.h"
 
 registerMooseAction("MooseApp", AdaptivityAction, "setup_adaptivity");
+registerMooseAction("MooseApp", AdaptivityAction, "add_geometric_rm");
 
 template <>
 InputParameters
@@ -83,62 +84,85 @@ AdaptivityAction::AdaptivityAction(InputParameters params) : Action(params) {}
 void
 AdaptivityAction::act()
 {
-  NonlinearSystemBase & system = _problem->getNonlinearSystemBase();
 
-  Adaptivity & adapt = _problem->adaptivity();
-
-  // we don't need to run mesh modifiers *again* after they ran already during the mesh
-  // splitting process. Adaptivity::init must be called for any adaptivity to work, however, so we
-  // can't just skip it for the useSplit case.
-  if (_app.isUseSplit())
-    adapt.init(0, 0);
-  else
-    adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));
-
-  adapt.setErrorEstimator(getParam<MooseEnum>("error_estimator"));
-
-  adapt.setParam("cycles_per_step", getParam<unsigned int>("cycles_per_step"));
-  adapt.setParam("refine fraction", getParam<Real>("refine_fraction"));
-  adapt.setParam("coarsen fraction", getParam<Real>("coarsen_fraction"));
-  adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
-  adapt.setParam("recompute_markers_during_cycles",
-                 getParam<bool>("recompute_markers_during_cycles"));
-
-  adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
-
-  const std::vector<std::string> & weight_names =
-      getParam<std::vector<std::string>>("weight_names");
-  const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
-
-  int num_weight_names = weight_names.size();
-  int num_weight_values = weight_values.size();
-
-  if (num_weight_names)
+  if (_current_task == "add_geometric_rm")
   {
-    if (num_weight_names != num_weight_values)
-      mooseError("Number of weight_names must be equal to number of weight_values in "
-                 "Execution/Adaptivity");
+    auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
 
-    // If weights have been specified then set the default weight to zero
-    std::vector<Real> weights(system.nVariables(), 0);
+    rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
 
-    for (int i = 0; i < num_weight_names; i++)
+    if (rm_params.areAllRequiredParamsValid())
     {
-      std::string name = weight_names[i];
-      double value = weight_values[i];
+      auto rm_obj = _factory.create<RelationshipManager>(
+          "ElementSideNeighborLayers", "adaptivity_ghosting", rm_params);
 
-      weights[system.getVariable(0, name).number()] = value;
+      if (!_app.addRelationshipManager(rm_obj))
+        _factory.releaseSharedObjects(*rm_obj);
+    }
+    else
+      mooseError("Invalid initialization of ElementSideNeighborLayers");
+  }
+  else if (_current_task == "setup_adaptivity")
+  {
+    NonlinearSystemBase & system = _problem->getNonlinearSystemBase();
+
+    Adaptivity & adapt = _problem->adaptivity();
+
+    // we don't need to run mesh modifiers *again* after they ran already during the mesh
+    // splitting process. Adaptivity::init must be called for any adaptivity to work, however, so we
+    // can't just skip it for the useSplit case.
+    if (_app.isUseSplit())
+      adapt.init(0, 0);
+    else
+      adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));
+
+    adapt.setErrorEstimator(getParam<MooseEnum>("error_estimator"));
+
+    adapt.setParam("cycles_per_step", getParam<unsigned int>("cycles_per_step"));
+    adapt.setParam("refine fraction", getParam<Real>("refine_fraction"));
+    adapt.setParam("coarsen fraction", getParam<Real>("coarsen_fraction"));
+    adapt.setParam("max h-level", getParam<unsigned int>("max_h_level"));
+    adapt.setParam("recompute_markers_during_cycles",
+                   getParam<bool>("recompute_markers_during_cycles"));
+
+    adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
+
+    const std::vector<std::string> & weight_names =
+        getParam<std::vector<std::string>>("weight_names");
+    const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
+
+    int num_weight_names = weight_names.size();
+    int num_weight_values = weight_values.size();
+
+    if (num_weight_names)
+    {
+      if (num_weight_names != num_weight_values)
+        mooseError("Number of weight_names must be equal to number of weight_values in "
+                   "Execution/Adaptivity");
+
+      // If weights have been specified then set the default weight to zero
+      std::vector<Real> weights(system.nVariables(), 0);
+
+      for (int i = 0; i < num_weight_names; i++)
+      {
+        std::string name = weight_names[i];
+        double value = weight_values[i];
+
+        weights[system.getVariable(0, name).number()] = value;
+      }
+
+      std::vector<FEMNormType> norms(system.nVariables(), H1_SEMINORM);
+
+      SystemNorm sys_norm(norms, weights);
+
+      adapt.setErrorNorm(sys_norm);
     }
 
-    std::vector<FEMNormType> norms(system.nVariables(), H1_SEMINORM);
-
-    SystemNorm sys_norm(norms, weights);
-
-    adapt.setErrorNorm(sys_norm);
+    adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+    adapt.setInterval(getParam<unsigned int>("interval"));
   }
-
-  adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
-  adapt.setInterval(getParam<unsigned int>("interval"));
 }
 
 #endif // LIBMESH_ENABLE_AMR
