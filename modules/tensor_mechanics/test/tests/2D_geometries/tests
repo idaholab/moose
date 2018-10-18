@@ -18,7 +18,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'plane_strain'
     design = 'source/materials/ComputePlaneSmallStrain.md VolumetricLocking.md'
-    requirement = 'The ComputePlaneSmallStrain class shall compute the same result for elastic strain and stress when using the B-bar volumentric locking correction as computed  without the volumetric locking correction for a planar geometry using a total small plane strain formulation.'
+    requirement = 'The ComputePlaneSmallStrain class shall compute the same result for elastic strain and stress when using the B-bar volumentric locking correction as computed without the volumetric locking correction for a planar geometry using a total small plane strain formulation.'
   [../]
   [./finite_planestrain]
     type = Exodiff
