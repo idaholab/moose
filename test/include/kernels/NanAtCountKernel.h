@@ -27,7 +27,11 @@ public:
   NanAtCountKernel(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
+  /// Compute this Kernel's contribution to the diagonal Jacobian entries
+  virtual void computeJacobian() override;
+  /// Compute this Kernel's contribution to the residual
+  virtual void computeResidual() override;
 
 private:
   /// The residual count to nan at

@@ -28,7 +28,7 @@
   [./nan]
     type = NanAtCountKernel
     variable = v
-    count = 2918
+    count = 32
   [../]
 []
 
