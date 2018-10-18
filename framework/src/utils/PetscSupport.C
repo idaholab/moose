@@ -896,7 +896,7 @@ setSinglePetscOption(const std::string & name, const std::string & value)
   // Not convenient to use the usual error checking macro, because we
   // don't have a specific communicator in this helper function.
   if (ierr)
-    mooseError("Error setting PETSc option.");
+    mooseError("Error setting PETSc option: ", name);
 }
 
 void

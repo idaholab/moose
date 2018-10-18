@@ -153,7 +153,7 @@
 
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = 'ksp_gmres_restart'
+  petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
 
 

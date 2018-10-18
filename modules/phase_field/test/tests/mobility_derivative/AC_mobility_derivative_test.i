@@ -66,7 +66,7 @@
   scheme = 'bdf2'
 
   solve_type = 'NEWTON'
-  petsc_options_iname = 'pc_type'
+  petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
   l_max_its = 15

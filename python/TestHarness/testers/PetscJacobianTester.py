@@ -46,9 +46,11 @@ class PetscJacobianTester(RunApp):
         else:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
 
-        if util.getPetscVersion(self.libmesh_dir) < '3.9':
+        if map(int, util.getPetscVersion(self.libmesh_dir).split(".")) < [3, 9]:
+            self.old_petsc = True
             self.specs['cli_args'].append('-snes_type test')
         else:
+            self.old_petsc = False
             self.specs['cli_args'].extend(['-snes_test_jacobian', '-snes_force_iteration'])
             if not self.specs['run_sim']:
                 self.specs['cli_args'].extend(['-snes_type', 'ksponly',
@@ -83,10 +85,7 @@ class PetscJacobianTester(RunApp):
             return False
 
     def processResults(self, moose_dir, options, output):
-        checks = options._checks
-        (old_petsc, _, _) = util.checkLogicVersionSingle(checks, '<3.9', 'petsc_version')
-
-        if old_petsc:
+        if self.old_petsc:
             if self.specs['state'].lower() == 'user':
                 m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)",
                               output, re.MULTILINE | re.DOTALL);
