@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 60
-  ny = 60
+  nx = 20
+  ny = 20
 []
 
 [GlobalParams]
@@ -12,42 +12,6 @@
 
 [Variables]
   [./u]
-  [../]
-[]
-
-[AuxVariables]
-  [./processor_id]
-  [../]
-  [./hardware_id]
-  [../]
-  [./physical_mem]
-  [../]
-  [./node_utilization]
-  [../]
-[]
-
-[AuxKernels]
-  [./processor_id]
-    type = ProcessorIDAux
-    variable = processor_id
-  [../]
-  [./hardware_id]
-    type = VectorPostprocessorVisualizationAux
-    variable = hardware_id
-    vpp = mem
-    vector_name = hardware_id
-  [../]
-  [./physical_mem]
-    type = VectorPostprocessorVisualizationAux
-    variable = physical_mem
-    vpp = mem
-    vector_name = physical_mem
-  [../]
-  [./node_utilization]
-    type = VectorPostprocessorVisualizationAux
-    variable = node_utilization
-    vpp = mem
-    vector_name = node_utilization
   [../]
 []
 
@@ -79,10 +43,9 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
+  num_steps = 2
 []
 
 [Outputs]
   csv = true
-  nemesis = true
 []
