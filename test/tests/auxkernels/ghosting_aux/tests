@@ -3,5 +3,23 @@
     type = 'Exodiff'
     input = 'ghosting_aux.i'
     exodiff = 'ghosting_aux_out.e'
+    min_parallel = 4
+    max_parallel = 4
+
+    requirement = "MOOSE shall allow viewing the elements that would be ghosted to specific processors"
+    design = 'GhostingAux.md'
+    issues = '#12298'
+  [../]
+
+  [./no_ghosting]
+    type = 'Exodiff'
+    input = 'no_ghosting.i'
+    exodiff = 'no_ghosting_out.e'
+    min_parallel = 4
+    max_parallel = 4
+
+    requirement = "MOOSE shall utilize the minimum of ghosting necessary for the problem"
+    design = 'GhostingAux.md relationship_managers.md'
+    issues = '#12327'
   [../]
 []
