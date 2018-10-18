@@ -592,6 +592,15 @@ enum class RelationshipManagerType : unsigned char
   COUPLING = 1 << 2
 };
 
+/**
+ * Two times to build and attach
+ */
+enum class RelationshipManagerTime : unsigned char
+{
+  EARLY = 0,
+  LATE = 1 << 0
+};
+
 std::string stringify(const Moose::RelationshipManagerType & t);
 } // namespace Moose
 

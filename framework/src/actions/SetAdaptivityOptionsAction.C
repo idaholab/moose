@@ -52,21 +52,24 @@ SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(InputParameters params) :
 void
 SetAdaptivityOptionsAction::act()
 {
-  Adaptivity & adapt = _problem->adaptivity();
+  if (_current_task == "setup_adaptivity")
+  {
+    Adaptivity & adapt = _problem->adaptivity();
 
-  if (isParamValid("marker"))
-    adapt.setMarkerVariableName(getParam<MarkerName>("marker"));
-  if (isParamValid("initial_marker"))
-    adapt.setInitialMarkerVariableName(getParam<MarkerName>("initial_marker"));
+    if (isParamValid("marker"))
+      adapt.setMarkerVariableName(getParam<MarkerName>("marker"));
+    if (isParamValid("initial_marker"))
+      adapt.setInitialMarkerVariableName(getParam<MarkerName>("initial_marker"));
 
-  adapt.setCyclesPerStep(getParam<unsigned int>("cycles_per_step"));
+    adapt.setCyclesPerStep(getParam<unsigned int>("cycles_per_step"));
 
-  adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));
+    adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));
 
-  adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
-  adapt.setUseNewSystem();
+    adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
+    adapt.setUseNewSystem();
 
-  adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+    adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
 
-  adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
+    adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
+  }
 }

@@ -1697,6 +1697,8 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
       break;
     }
 
+  std::cout << " Am I adding it: " << add << std::endl;
+
   if (add)
     _relationship_managers.emplace_back(relationship_manager);
 
@@ -1714,11 +1716,15 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 std::vector<std::pair<std::string, std::string>>
 MooseApp::getRelationshipManagerInfo() const
 {
+  std::cout << "  Printing RM info" << std::endl;
+
   std::vector<std::pair<std::string, std::string>> info_strings;
   info_strings.reserve(_relationship_managers.size());
 
   for (const auto & rm : _relationship_managers)
   {
+    std::cout << "   Print about " << Moose::stringify(rm->getType()) << std::endl;
+
     auto info = rm->getInfo();
     if (info.size())
       info_strings.emplace_back(std::make_pair(Moose::stringify(rm->getType()), info));
