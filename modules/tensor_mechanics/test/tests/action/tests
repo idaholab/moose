@@ -14,7 +14,7 @@
     exodiff = 'two_block_out.e'
     cli_args = 'Modules/TensorMechanics/Master/block1/block=1'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The TensorMechanics MasterAction shall create a different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks requesting different strain formulations.'
+    requirement = 'The TensorMechanics MasterAction shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks requesting different strain formulations.'
   [../]
 
   [./error_unrestricted]
@@ -41,7 +41,7 @@
     input = 'two_coord.i'
     exodiff = 'two_coord_out.e'
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The TensorMechanics MasterAction shall create a different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks using different coordinate systems.'
+    requirement = 'The TensorMechanics MasterAction shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks using different coordinate systems.'
   [../]
 
   [./error_coord]

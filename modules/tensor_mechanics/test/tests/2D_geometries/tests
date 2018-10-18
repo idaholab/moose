@@ -6,8 +6,8 @@
     exodiff = 'planestrain_out.e'
     abs_zero = 1e-7
     compiler = 'CLANG GCC'
-    design = 'source/materials/ComputePlaneSmallStrain.md syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The ComputePlaneSmallStrain class shall, as created by the TensorMechanics MasterAction, compute the elastic stress and strain for a planar square geometry under tension using a total small plane strain formulation.'
+    design = 'source/materials/ComputePlaneSmallStrain.md'
+    requirement = 'The ComputePlaneSmallStrain class shall compute the elastic stress and strain for a planar square geometry under tension using a total small plane strain formulation.'
   [../]
   [./plane_strain_Bbar]
     type = Exodiff
@@ -26,8 +26,8 @@
     exodiff = 'finite_planestrain_out.e'
     abs_zero = 1e-9
     compiler = 'CLANG GCC'
-    design = 'source/materials/ComputePlaneFiniteStrain.md syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The ComputePlaneFiniteStrain class shall, as created by the TensorMechanics MasterAction, compute the elastic stress and strain for a planar square geometry under tension using a finite incremental plane strain formulation.'
+    design = 'source/materials/ComputePlaneFiniteStrain.md'
+    requirement = 'The ComputePlaneFiniteStrain class shall compute the elastic stress and strain for a planar square geometry under tension using a finite incremental plane strain formulation.'
   [../]
   [./finite_planestrain_Bbar]
     type = Exodiff
@@ -46,8 +46,8 @@
     exodiff = '2D-RZ_test_out.e'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
                 Materials/stress/type=ComputeLinearElasticStress'
-    design = 'source/materials/ComputeAxisymmetricRZSmallStrain.md syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The ComputeAxisymmetricRZSmallStrain class shall, as created by the TensorMechanics MasterAction, compute the stress response for a pressurized hollow cylinder with a small total axisymmetric strain formulation.'
+    design = 'source/materials/ComputeAxisymmetricRZSmallStrain.md'
+    requirement = 'The ComputeAxisymmetricRZSmallStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small total axisymmetric strain formulation.'
   [../]
   [./axisym_smallstrain_Bbar]
     type = Exodiff
@@ -60,7 +60,7 @@
     rel_err = 5E-4
     prereq = 'axisym_smallstrain'
     design = 'source/materials/ComputeAxisymmetricRZSmallStrain.md VolumetricLocking.md'
-    requirement = 'The ComputeAxisymmetricRZSmallStrain class shall compute a similar result for elastic stress when using the B-bar volumentric locking correction as computed without the volumetric locking correction for a pressurized hollow cylinder with a small total axisymmetric strain formulation.'
+    requirement = 'The ComputeAxisymmetricRZSmallStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small total axisymmetric strain formulation using the B-bar volumetric locking correction.'
   [../]
   [./axisym_incremental_strain]
     type = Exodiff
@@ -70,8 +70,8 @@
                 Materials/stress/type=ComputeFiniteStrainElasticStress
                 Outputs/file_base=2D-RZ_incremental_strain_test_out'
     prereq = 'axisym_smallstrain_Bbar'
-    design = 'source/materials/ComputeAxisymmetricRZIncrementalStrain.md syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The ComputeAxisymmetricRZIncrementalStrain class shall, as created by the TensorMechanics MasterAction, compute the stress response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    design = 'source/materials/ComputeAxisymmetricRZIncrementalStrain.md'
+    requirement = 'The ComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
   [../]
   [./axisym_incremental_strain_Bbar]
     type = Exodiff
@@ -84,15 +84,15 @@
     prereq = 'axisym_incremental_strain'
     rel_err = 5E-4
     design = 'source/materials/ComputeAxisymmetricRZIncrementalStrain.md VolumetricLocking.md'
-    requirement = 'The ComputeAxisymmetricRZIncrementalStrain class shall compute a similar result for elastic stress when using the B-bar volumentric locking correction as computed without the volumetric locking correction for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    requirement = 'The ComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation using the B-bar volumetric locking correction.'
   [../]
   [./axisym_finitestrain]
     type = Exodiff
     input = '2D-RZ_finiteStrain_test.i'
     exodiff = '2D-RZ_finiteStrain_test_out.e'
     rel_err = 5E-4
-    design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall, as created by the TensorMechanics MasterAction, compute the stress response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md'
+    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
   [../]
   [./axisym_finitestrain_Bbar]
     type = Exodiff
@@ -101,7 +101,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'axisym_finitestrain'
     design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute a similar result for elastic stress when using the B-bar volumentric locking correction as computed without the volumetric locking correction for a pressurized hollow cylinder with a finite incremental axisymmetric strain formulation.'
+    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation using the B-bar volumetric locking correction.'
   [../]
   [./3D_RZ_finitestrain]
     type = Exodiff
@@ -112,7 +112,7 @@
     abs_zero = 1e-5
     rel_err = 3E-3
     design = 'syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation.'
+    requirement = 'The TensorMechanics MasterAction shall calculate the elastic stress and strain response for a 3D pressurized hollow cylinder with a large strain incremental strain formulation.'
   [../]
   [./3D_RZ_finitestrain_Bbar]
     type = Exodiff
@@ -123,7 +123,7 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = '3D_RZ_finitestrain'
     design = 'syntax/Modules/TensorMechanics/Master/index.md VolumetricLocking.md'
-    requirement = 'The TensorMechanics MasterAction shall compute a similar result for elastic stress when using the B-bar volumentric locking correction as computed without the volumetric locking correction for a 3D pressurized hollow cylinder with a finite incremental strain formulation.'
+    requirement = 'The TensorMechanics MasterAction shall compute the same result for elastic stress and strain when using the B-bar volumentric locking correction as computed without the volumetric locking correction for a 3D pressurized hollow cylinder with a finite incremental strain formulation.'
   [../]
   [./axisym_resid]
     type = Exodiff
@@ -132,8 +132,8 @@
     use_old_floor = true
     abs_zero = 1e-8
     compiler = 'GCC CLANG'
-    design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md syntax/Modules/TensorMechanics/Master/index.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall, as created by the TensorMechanics MasterAction, compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
+    design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md'
+    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
   [../]
   [./axisym_resid_Bbar]
     type = Exodiff
@@ -145,6 +145,6 @@
     cli_args = 'GlobalParams/volumetric_locking_correction=true Outputs/file_base=2D-RZ_finiteStrain_resid_bbar_out'
     prereq = 'axisym_resid'
     design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
-    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute a similar result for the reaction forces when using the B-Bar volumetric locking correction as computed without the volumetric locking correction for an axially loaded cylinder.'
+    requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction.'
   [../]
 []

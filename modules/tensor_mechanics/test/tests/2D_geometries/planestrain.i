@@ -1,3 +1,6 @@
+# This test uses the strain calculator ComputePlaneSmallStrain,
+# which is generated through the use of the TensorMechanics MasterAction.
+
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []

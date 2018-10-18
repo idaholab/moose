@@ -1,6 +1,7 @@
-# This tests the save_in_disp residual aux-variables for the Tensor Mechanics
-# AxisymmetricRZ action. GeneratedMesh is 1x1, rotated via axisym to create a
-# cylinder of height 1, radius 1.
+# This tests the save_in_disp residual aux-variables for
+# ComputeAxisymmetricRZFiniteStrain, which is generated through the use of the
+# TensorMechanics MasterAction. The GeneratedMesh is 1x1, rotated via axisym to
+# create a cylinder of height 1, radius 1.
 #
 # PostProcessor force_z plots the force on the top surface of the cylinder.
 #

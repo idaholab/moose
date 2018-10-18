@@ -1,3 +1,6 @@
+# This test uses the strain calculator ComputePlaneFiniteStrain,
+# which is generated through the use of the TensorMechanics MasterAction.
+
 [Mesh]
   type = GeneratedMesh
   nx = 2
