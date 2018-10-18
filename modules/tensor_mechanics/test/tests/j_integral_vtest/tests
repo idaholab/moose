@@ -1,26 +1,33 @@
 [Tests]
+design = 'syntax/DomainIntegral/index.md'
+issues = '#2717'
  [./j_ellip]
+ design = 'syntax/DomainIntegral/index.md'
    type = 'CSVDiff'
    input = 'j_int_surfbreak_ellip_crack_sym_mm.i'
    csvdiff = 'j_int_surfbreak_ellip_crack_sym_mm_out_J_1_0001.csv j_int_surfbreak_ellip_crack_sym_mm_out_J_2_0001.csv j_int_surfbreak_ellip_crack_sym_mm_out_J_3_0001.csv'
    max_parallel = 1
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the J integral for surface breaking elliptical cracks.'
  [../]
  [./J_ellip_cm]
    type = 'CSVDiff'
    input = 'j_int_surfbreak_ellip_crack_sym_mm_cm.i'
    csvdiff = 'j_int_surfbreak_ellip_crack_sym_mm_cm_out_J_1_0001.csv j_int_surfbreak_ellip_crack_sym_mm_cm_out_J_2_0001.csv j_int_surfbreak_ellip_crack_sym_mm_cm_out_J_3_0001.csv'
    max_parallel = 1
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the J integral for surface breaking elliptical cracks using the crack mouth specification.'
  [../]
  [./j_ellip_cfp]
    type = 'CSVDiff'
    input = 'j_int_surfbreak_ellip_crack_sym_mm_cfp.i'
    csvdiff = 'j_int_surfbreak_ellip_crack_sym_mm_cfp_out_J_1_0001.csv j_int_surfbreak_ellip_crack_sym_mm_cfp_out_J_2_0001.csv j_int_surfbreak_ellip_crack_sym_mm_cfp_out_J_3_0001.csv'
    max_parallel = 1
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the J integral for surface breaking elliptical cracks with crack face pressure.'
  [../]
  [./J_ellip_cm_cfp]
    type = 'CSVDiff'
    input = 'j_int_surfbreak_ellip_crack_sym_mm_cfp_cm.i'
    csvdiff = 'j_int_surfbreak_ellip_crack_sym_mm_cfp_cm_out_J_1_0001.csv j_int_surfbreak_ellip_crack_sym_mm_cfp_cm_out_J_2_0001.csv j_int_surfbreak_ellip_crack_sym_mm_cfp_cm_out_J_3_0001.csv'
    max_parallel = 1
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the J integral for surface breaking elliptical cracks with crack face pressure and crack mouth boundary specified.'
  [../]
 []

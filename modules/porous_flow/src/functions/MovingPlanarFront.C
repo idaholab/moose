@@ -23,12 +23,10 @@ validParams<MovingPlanarFront>()
       "The front is an infinite plane with normal pointing from start_posn to "
       "end_posn.  The front's distance from start_posn is defined by distance.  You "
       "should ensure that distance is positive");
-  params.addRequiredParam<Real>(
+  params.addParam<Real>(
       "active_length",
-      "This function will return true_value at a point if: (a) t >= "
-      "activation_time; (b) t < deactivation_time; (c) the point lies in the "
-      "domain between start_posn and the front position; (d) the distance between "
-      "the point and the front position <= active_length.");
+      std::numeric_limits<Real>::max(),
+      "Points greater than active_length behind the front will return false_value");
   params.addParam<Real>("true_value", 1.0, "Return this value if a point is in the active zone.");
   params.addParam<Real>(
       "false_value", 0.0, "Return this value if a point is not in the active zone.");
@@ -38,9 +36,21 @@ validParams<MovingPlanarFront>()
   params.addParam<Real>("deactivation_time",
                         std::numeric_limits<Real>::max(),
                         "This function will return false_value when t >= deactivation_time");
-  params.addClassDescription("This function defines the position of a moving front.  The front is "
-                             "an infinite plane with normal pointing from start_posn to end_posn.  "
-                             "The front's distance from start_posn is defined by distance");
+  params.addClassDescription(
+      "This function defines the position of a moving front.  The front is "
+      "an infinite plane with normal pointing from start_posn to end_posn.   The front's distance "
+      "from start_posn is defined by 'distance', so if the 'distance' function is time dependent, "
+      "the front's position will change with time.  Roughly speaking, the function returns "
+      "true_value for points lying in between start_posn and start_posn + distance.  Precisely "
+      "speaking, two planes are constructed, both with normal pointing from start_posn to "
+      "end_posn.  The first plane passes through start_posn; the second plane passes through "
+      "end_posn.  Given a point p and time t, this function returns false_value if ANY of the "
+      "following are true: (a) t<activation_time; (b) t>=deactivation_time; (c) p is 'behind' "
+      "start_posn (ie, p lies on one side of the start_posn plane and end_posn lies on the other "
+      "side); (d) p is 'ahead' of the front (ie, p lies one one side of the front and start_posn "
+      "lies on the other side); (e) the distance between p and the front is greater than "
+      "active_length.  Otherwise, the point is 'in the active zone' and the function returns "
+      "true_value.");
   return params;
 }
 

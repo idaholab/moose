@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#716'
+  design = 'syntax/Contact/index.md source/MechanicalContactConstraint.md'
   [./glued_kin]
     type = 'CSVDiff'
     input = 'hertz_cyl_qsym_1deg_template1.i'
@@ -10,6 +12,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce glued, kinematic contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -22,6 +26,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce glued, penalty contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -34,6 +40,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, kinematic contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -46,6 +54,8 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, penalty contact
+    for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -59,5 +69,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    requirement = "The Contact system shall enforce frictionless, Augmented
+    Lagrange contact for 2D Hertz quarter-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
 []
