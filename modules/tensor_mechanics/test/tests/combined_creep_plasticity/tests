@@ -1,10 +1,14 @@
 [Tests]
+  issues = '#6873 #8651'
+  design = 'source/materials/ComputeMultipleInelasticStress.md'
   [./combined]
     type = 'Exodiff'
     input = 'combined_creep_plasticity.i'
     exodiff = 'combined_creep_plasticity_out.e'
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+    requirement = "MOOSE tensor mechanics module shall solve a combined creep
+                   and plasticity 1-d bar problem."
   [../]
   [./combined_start_time]
     type = 'Exodiff'
@@ -13,6 +17,8 @@
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
     custom_cmp = start_time.cmp
+    requirement = "MOOSE tensor mechanics module shall solve a combined creep
+                   and plasticity 1-d bar problem with a non-zero start time."
   [../]
   [./stress_prescribed]
     type = 'Exodiff'
@@ -21,11 +27,17 @@
     rel_err = 1e-5
     abs_zero = 1e-09
     superlu = true
+    requirement = "MOOSE tensor mechanics module shall solve a combined creep
+                   and plasticity 3D cube problem with a time-varying pressure
+                   BC."
   [../]
   [./stress_relaxation]
     type = 'Exodiff'
     input = 'combined_stress_relaxation.i'
     exodiff = 'combined_stress_relaxation_out.e'
     abs_zero = 1e-09
+    requirement = "MOOSE tensor mechanics module shall solve a combined creep
+                   and plasticity 3D cube problem with a constant displacement
+                   BC and stress relaxation."
   [../]
 []
