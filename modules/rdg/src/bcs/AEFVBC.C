@@ -22,12 +22,14 @@ validParams<AEFVBC>()
   params.addParam<MooseEnum>("component", component, "Choose one of the equations");
   params.addRequiredCoupledVar("u", "Name of the variable to use");
   params.addRequiredParam<UserObjectName>("flux", "Name of the boundary flux object to use");
+  params.addParam<Real>("velocity", 1.0, "Advective velocity");
   return params;
 }
 
 AEFVBC::AEFVBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
     _component(getParam<MooseEnum>("component")),
+    _velocity(getParam<Real>("velocity")),
     _uc1(coupledValue("u")),
     _u1(getMaterialProperty<Real>("u")),
     _flux(getUserObject<BoundaryFluxBase>("flux"))
@@ -43,7 +45,8 @@ AEFVBC::computeQpResidual()
   std::vector<Real> uvec1 = {_u1[_qp]};
 
   // calculate the flux
-  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), uvec1, _normals[_qp]);
+  const auto & flux =
+      _flux.getFlux(_current_side, _current_elem->id(), uvec1, _velocity * _normals[_qp]);
 
   // distribute the contribution to the current element
   return flux[_component] * _test[_i][_qp];
@@ -57,7 +60,8 @@ AEFVBC::computeQpJacobian()
   std::vector<Real> uvec1 = {_uc1[_qp]};
 
   // calculate the flux
-  auto & fjac1 = _flux.getJacobian(_current_side, _current_elem->id(), uvec1, _normals[_qp]);
+  auto & fjac1 =
+      _flux.getJacobian(_current_side, _current_elem->id(), uvec1, _velocity * _normals[_qp]);
 
   // distribute the contribution to the current element
   return fjac1(_component, _component) * _phi[_j][_qp] * _test[_i][_qp];

@@ -52,7 +52,9 @@ AEFVFreeOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
                                           dof_id_type /*ielem*/,
                                           const std::vector<Real> & libmesh_dbg_var(uvec1),
                                           const RealVectorValue & /*dwave*/,
-                                          DenseMatrix<Real> & /*jac1*/) const
+                                          DenseMatrix<Real> & jac1) const
 {
   mooseAssert(uvec1.size() == 1, "Invalid size for uvec1. Must be single variable coupling.");
+  jac1.resize(1, 1);
+  jac1.zero(); // currently, no Jacobian entries are computed
 }

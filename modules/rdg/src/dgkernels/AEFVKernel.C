@@ -21,6 +21,7 @@ validParams<AEFVKernel>()
   MooseEnum component("concentration");
   params.addParam<MooseEnum>("component", component, "Choose one of the equations");
   params.addRequiredCoupledVar("u", "Name of the variable to use");
+  params.addParam<Real>("velocity", 1.0, "Advective velocity");
   params.addRequiredParam<UserObjectName>("flux", "Name of the internal side flux object to use");
   return params;
 }
@@ -28,6 +29,7 @@ validParams<AEFVKernel>()
 AEFVKernel::AEFVKernel(const InputParameters & parameters)
   : DGKernel(parameters),
     _component(getParam<MooseEnum>("component")),
+    _velocity(getParam<Real>("velocity")),
     _uc1(coupledValue("u")),
     _uc2(coupledNeighborValue("u")),
     _u1(getMaterialProperty<Real>("u")),
@@ -48,8 +50,12 @@ AEFVKernel::computeQpResidual(Moose::DGResidualType type)
   std::vector<Real> uvec2 = {_u2[_qp]};
 
   // calculate the flux
-  const auto & flux = _flux.getFlux(
-      _current_side, _current_elem->id(), _neighbor_elem->id(), uvec1, uvec2, _normals[_qp]);
+  const auto & flux = _flux.getFlux(_current_side,
+                                    _current_elem->id(),
+                                    _neighbor_elem->id(),
+                                    uvec1,
+                                    uvec2,
+                                    _velocity * _normals[_qp]);
 
   // distribute the contribution to the current and neighbor elements
   switch (type)
@@ -79,7 +85,7 @@ AEFVKernel::computeQpJacobian(Moose::DGJacobianType type)
                                          _neighbor_elem->id(),
                                          uvec1,
                                          uvec2,
-                                         _normals[_qp]);
+                                         _velocity * _normals[_qp]);
 
   const auto & fjac2 = _flux.getJacobian(Moose::Neighbor,
                                          _current_side,
@@ -87,7 +93,7 @@ AEFVKernel::computeQpJacobian(Moose::DGJacobianType type)
                                          _neighbor_elem->id(),
                                          uvec1,
                                          uvec2,
-                                         _normals[_qp]);
+                                         _velocity * _normals[_qp]);
 
   // distribute the contribution to the current and neighbor elements
   switch (type)
