@@ -24,6 +24,7 @@ Documentation:
     C++ Fundamentals : utilities/c++/index.md
 Help:
     Frequently Asked Questions: help/faq.md
+    Troubleshooting: help/troubleshooting.md
     Developer Tools: help/development/index.md
     INL HPC Connectivity: help/inlhpcconnectivity.md
     Contact Us: help/contact_us.md
