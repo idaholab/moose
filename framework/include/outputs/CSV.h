@@ -70,6 +70,12 @@ protected:
    */
   virtual void outputVectorPostprocessors() override;
 
+  /**
+   * Generates a filename pattern for Vectorpostprocessors
+   * filebase + VPP name + time step + ".csv"
+   */
+  std::string getVectorPostprocessorFileName(const std::string & vpp_name, bool include_time_step);
+
 private:
   /// Flag for aligning data in .csv file
   bool _align;
