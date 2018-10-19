@@ -1,4 +1,9 @@
-# Using RDG with no linear reconstruction
+# This test demonstrates the advection of a tracer in 1D using the RDG module.
+# There is no slope limiting.  Changing the SlopeLimiting scheme to minmod, mc,
+# or superbee means that a linear reconstruction is performed, and the slope
+# limited according to the scheme chosen.  Doing this produces RDG(P0P1) and
+# substantially reduces numerical diffusion
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
