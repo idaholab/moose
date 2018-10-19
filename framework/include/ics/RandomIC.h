@@ -10,13 +10,13 @@
 #ifndef RANDOMIC_H
 #define RANDOMIC_H
 
-#include "InitialCondition.h"
-#include "RandomData.h"
-#include "MooseRandom.h"
+#include "RandomICBase.h"
+#include "DistributionInterface.h"
 
 // Forward Declarations
 class InputParameters;
 class RandomIC;
+class Distribution;
 namespace libMesh
 {
 class Point;
@@ -31,18 +31,16 @@ InputParameters validParams<RandomIC>();
 /**
  * RandomIC just returns a Random value.
  */
-class RandomIC : public InitialCondition
+class RandomIC : public RandomICBase, public DistributionInterface
 {
 public:
   /**
    * Constructor
-   *
    * @param parameters The parameters object holding data for the class to use.
    */
   RandomIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;
-  void initialSetup() override;
 
 protected:
   /// The lower bound of the random number range
@@ -51,33 +49,8 @@ protected:
   /// The upper bound of the random number range
   const Real _max;
 
-  /// The range of random numbers (calculated from min and max)
-  const Real _range;
-
-  /// Determines whether a variable basis is elemental or nodal
-  const bool _is_nodal;
-
-  /// Boolean to indicate whether we want to use the old (deprecated) generation pattern
-  const bool _use_legacy;
-
-private:
-  /// RandomData element object, we cannot inherit from RandomInterface in an InitialCondition
-  std::unique_ptr<RandomData> _elem_random_data;
-
-  /// RandomData node object, we cannot inherit from RandomInterface in an InitialCondition
-  std::unique_ptr<RandomData> _node_random_data;
-
-  /// Elemental random number generator
-  MooseRandom * _elem_random_generator;
-
-  /// Nodal random number generator
-  MooseRandom * _node_random_generator;
-
-  /// Random numbers per element (currently limited to a single value at a time)
-  std::map<dof_id_type, Real> _elem_numbers;
-
-  /// Random numbers per node (currently limited to a single value at a time)
-  std::map<dof_id_type, Real> _node_numbers;
+  /// Distribution object optionally used to define distribution of random numbers
+  Distribution * _distribution;
 };
 
 #endif // RANDOMIC_H

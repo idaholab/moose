@@ -8,125 +8,53 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RandomIC.h"
-#include "MooseRandom.h"
 
 #include "libmesh/point.h"
+#include "Distribution.h"
 
 registerMooseObject("MooseApp", RandomIC);
-
-namespace
-{
-/**
- * Method for retrieving or generating and caching a value in a map.
- */
-inline Real
-valueHelper(dof_id_type id, MooseRandom & generator, std::map<dof_id_type, Real> & map)
-{
-  auto it_pair = map.lower_bound(id);
-
-  // Do we need to generate a new number?
-  if (it_pair == map.end() || it_pair->first != id)
-    it_pair = map.emplace_hint(it_pair, id, generator.rand(id));
-
-  return it_pair->second;
-}
-}
 
 template <>
 InputParameters
 validParams<RandomIC>()
 {
-  InputParameters params = validParams<InitialCondition>();
-  params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
-  params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
-  params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
-  params.addParam<bool>(
-      "legacy_generator",
-      true,
-      "Determines whether or not the legacy generator (deprecated) should be used.");
+  InputParameters params = validParams<RandomICBase>();
+  params += validParams<DistributionInterface>();
+  params.addParam<Real>(
+      "min", 0.0, "Lower bound of uniformly distributed randomly generated values");
+  params.addParam<Real>(
+      "max", 1.0, "Upper bound of uniformly distributed randomly generated values");
+  params.addParam<DistributionName>(
+      "distribution", "Name of distribution defining distribution of randomly generated values");
 
-  params.addClassDescription(
-      "This class produces a random field for a variable. It is not parallel agnostic.");
+  params.addClassDescription("Initialize a variable with randomly generated numbers following "
+                             "either a uniform distribution or a user-defined distribution");
   return params;
 }
 
 RandomIC::RandomIC(const InputParameters & parameters)
-  : InitialCondition(parameters),
+  : RandomICBase(parameters),
+    DistributionInterface(this),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
-    _range(_max - _min),
-    _is_nodal(_var.isNodal()),
-    _use_legacy(getParam<bool>("legacy_generator")),
-    _elem_random_generator(nullptr),
-    _node_random_generator(nullptr)
+    _distribution(nullptr)
 {
   if (_min >= _max)
     paramError("min", "Min >= Max for RandomIC!");
 
-  unsigned int processor_seed = getParam<unsigned int>("seed");
-  MooseRandom::seed(processor_seed);
-
-  if (_use_legacy)
+  if (parameters.isParamSetByUser("distribution"))
   {
-    auto proc_id = processor_id();
-    if (proc_id > 0)
-    {
-      for (processor_id_type i = 0; i < proc_id; ++i)
-        processor_seed = MooseRandom::randl();
-      MooseRandom::seed(processor_seed);
-    }
-  }
-  else
-  {
-    _elem_random_data =
-        libmesh_make_unique<RandomData>(_fe_problem, false, EXEC_INITIAL, MooseRandom::randl());
-    _node_random_data =
-        libmesh_make_unique<RandomData>(_fe_problem, true, EXEC_INITIAL, MooseRandom::randl());
-
-    _elem_random_generator = &_elem_random_data->getGenerator();
-    _node_random_generator = &_node_random_data->getGenerator();
-  }
-}
-
-void
-RandomIC::initialSetup()
-{
-  if (!_use_legacy)
-  {
-    _elem_random_data->updateSeeds(EXEC_INITIAL);
-    _node_random_data->updateSeeds(EXEC_INITIAL);
+    _distribution = &getDistributionByName(getParam<DistributionName>("distribution"));
+    if (parameters.isParamSetByUser("min") || parameters.isParamSetByUser("max"))
+      paramError("distribution", "Cannot use together with 'min' or 'max' parameter");
   }
 }
 
 Real
 RandomIC::value(const Point & /*p*/)
 {
-  Real rand_num;
-
-  if (_use_legacy)
-  {
-    mooseDeprecated("legacy_generator is deprecated. Please set \"legacy_generator = false\". This "
-                    "capability will be removed after 11/01/2018");
-
-    // Random number between 0 and 1
-    rand_num = MooseRandom::rand();
-  }
+  if (_distribution)
+    return _distribution->quantile(generateRandom());
   else
-  {
-    if (_current_node)
-      rand_num = valueHelper(_current_node->id(), *_node_random_generator, _node_numbers);
-    else if (_current_elem)
-      rand_num = valueHelper(_current_elem->id(), *_elem_random_generator, _elem_numbers);
-    else
-      mooseError("We can't generate parallel consistent random numbers for this kind of variable "
-                 "yet. Please contact the MOOSE team for assistance");
-  }
-
-  // Between 0 and range
-  rand_num *= _range;
-
-  // Between min and max
-  rand_num += _min;
-
-  return rand_num;
+    return generateRandom() * (_max - _min) + _min;
 }
