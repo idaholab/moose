@@ -345,10 +345,6 @@ template <typename postprocessor_type>
 void
 AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & execute_data_name)
 {
-
-  // Get the UserObjectWarhouse
-  const ExecuteMooseObjectWarehouse<UserObject> & warehouse = _problem_ptr->getUserObjects();
-
   // Convenience reference to the OutputData being operated on (should used "postprocessors" or
   // "vector_postprocessors")
   OutputData & execute_data = _execute_data[execute_data_name];
@@ -362,12 +358,16 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   // True if the postprocessors has been limited using 'outputs' parameter
   bool has_limited_pps = false;
 
-  // Loop through each of the execution flags
-  const auto & objects = warehouse.getActiveObjects();
-  for (const auto & object : objects)
+  std::vector<UserObject *> objs;
+  _problem_ptr->theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .queryInto(objs);
+
+  for (const auto & obj : objs)
   {
-    // Store the name in the available postprocessors, if it does not already exist in the list
-    std::shared_ptr<postprocessor_type> pps = std::dynamic_pointer_cast<postprocessor_type>(object);
+    auto pps = dynamic_cast<postprocessor_type *>(obj);
     if (!pps)
       continue;
 

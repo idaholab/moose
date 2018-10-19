@@ -34,7 +34,7 @@ template <>
 InputParameters validParams<LayeredBase>();
 
 /**
- * This UserObject computes volume integrals of a variable storing
+ * This UserObject (????? this isn't a userobject) computes volume integrals of a variable storing
  * partial sums for the specified number of intervals in a direction
  * (x,y,z).
  */

@@ -67,7 +67,7 @@ MooseVariableInterface<T>::~MooseVariableInterface()
 
 template <typename T>
 MooseVariableFE<T> *
-MooseVariableInterface<T>::mooseVariable()
+MooseVariableInterface<T>::mooseVariable() const
 {
   return _variable;
 }

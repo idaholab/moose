@@ -40,9 +40,8 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
 void
 SamplerPostprocessorTransfer::initialSetup()
 {
-  const ExecuteMooseObjectWarehouse<UserObject> & user_objects = _fe_problem.getUserObjects();
-  UserObject * uo = user_objects.getActiveObject(_master_vpp_name).get();
-  _results = dynamic_cast<StochasticResults *>(uo);
+  auto & uo = _fe_problem.getUserObject<UserObject>(_master_vpp_name);
+  _results = dynamic_cast<StochasticResults *>(&uo);
 
   if (!_results)
     mooseError("The 'results' object must be a 'StochasticResults' object.");

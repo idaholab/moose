@@ -36,6 +36,7 @@
 #include "Registry.h"
 #include "SerializerGuard.h"
 #include "PerfGraphInterface.h" // For TIME_SECTIOn
+#include "Attributes.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -305,6 +306,19 @@ MooseApp::MooseApp(InputParameters parameters)
 {
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
+
+  _the_warehouse.registerAttribute<AttribMatrixTags>("matrix_tags", 0);
+  _the_warehouse.registerAttribute<AttribVectorTags>("vector_tags", 0);
+  _the_warehouse.registerAttribute<AttribExecOns>("exec_ons", 0);
+  _the_warehouse.registerAttribute<AttribSubdomains>("subdomains", 0);
+  _the_warehouse.registerAttribute<AttribBoundaries>("boundaries", 0);
+  _the_warehouse.registerAttribute<AttribThread>("thread", 0);
+  _the_warehouse.registerAttribute<AttribPreIC>("pre_ic", 0);
+  _the_warehouse.registerAttribute<AttribPreAux>("pre_aux", 0);
+  _the_warehouse.registerAttribute<AttribName>("name", "dummy");
+  _the_warehouse.registerAttribute<AttribSystem>("system", "dummy");
+  _the_warehouse.registerAttribute<AttribVar>("variable", 0);
+  _the_warehouse.registerAttribute<AttribInterfaces>("interfaces", 0);
 
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
