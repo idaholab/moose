@@ -1,33 +1,46 @@
 [Tests]
+  issues = '#8045'
   [./axisymmetric_plane_strain_incremental]
     type = 'Exodiff'
     input = 'axisymm_plane_strain_incremental.i'
     exodiff = 'axisymm_plane_strain_incremental_out.e'
+    design = 'source/materials/ComputeAxisymmetric1DIncrementalStrain.md'
+    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall compute the elastic stress for a 1D axisymmetric small incremental strain formulation under a combination of applied tensile displacement and thermal expansion loading.'
   [../]
   [./axisymmetric_plane_strain_small]
     type = 'Exodiff'
     input = 'axisymm_plane_strain_small.i'
     exodiff = 'axisymm_plane_strain_small_out.e'
+    design = 'source/materials/ComputeAxisymmetric1DSmallStrain.md'
+    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall compute the elastic stress for a 1D axisymmetric small total strain formulation under a combination of applied tensile displacement and thermal expansion loading.'
   [../]
   [./axisymmetric_plane_strain_finite]
     type = 'Exodiff'
     input = 'axisymm_plane_strain_finite.i'
     exodiff = 'axisymm_plane_strain_finite_out.e'
+    design = 'source/materials/ComputeAxisymmetric1DFiniteStrain.md'
+    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall compute the elastic stress for a 1D axisymmetric incremental finite strain formulation under a combination of applied tensile displacement and thermal expansion loading.'
   [../]
 
   [./axisymmetric_gps_incremental]
     type = 'Exodiff'
     input = 'axisymm_gps_incremental.i'
     exodiff = 'axisymm_gps_incremental_out.e'
+    design = 'source/materials/ComputeAxisymmetric1DIncrementalStrain.md'
+    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall, under generalized plane strain conditions, compute the elastic stress for a 1D axisymmetric small incremental strain formulation under a combination of applied tensile displacement and thermal expansion loading.'
   [../]
   [./axisymmetric_gps_small]
     type = 'Exodiff'
     input = 'axisymm_gps_small.i'
     exodiff = 'axisymm_gps_small_out.e'
+    design = 'source/materials/ComputeAxisymmetric1DSmallStrain.md'
+    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall, under generalized plane strain conditions, compute the elastic stress for a 1D axisymmetric small total strain formulation under a combination of applied tensile displacement and thermal expansion loading.'
   [../]
   [./axisymmetric_gps_finite]
     type = 'Exodiff'
     input = 'axisymm_gps_finite.i'
     exodiff = 'axisymm_gps_finite_out.e'
+    design = 'source/materials/ComputeAxisymmetric1DFiniteStrain.md'
+    requirement = 'The ComputeAxisymmetric1DIncrementalStrain class shall, under generalized plane strain conditions, compute the elastic stress for a 1D axisymmetric incremental finite strain formulation under a combination of applied tensile displacement and thermal expansion loading.'
   [../]
 []

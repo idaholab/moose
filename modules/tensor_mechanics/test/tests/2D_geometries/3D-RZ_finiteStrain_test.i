@@ -1,5 +1,5 @@
 # Considers the mechanics solution for a thick spherical shell that is uniformly
-# pressurized on the inner and outer surfaces, using 2D axisymmetric geometry.
+# pressurized on the inner and outer surfaces, using 3D geometry.
 #
 # From Roark (Formulas for Stress and Strain, McGraw-Hill, 1975), the radially-dependent
 # circumferential stress in a uniformly pressurized thick spherical shell is given by:

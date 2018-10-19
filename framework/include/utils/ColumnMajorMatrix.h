@@ -12,7 +12,7 @@
 
 // MOOSE includes
 #include "Moose.h"      // using namespace libMesh
-#include "MooseError.h" // mooseAssert
+#include "MooseError.h"
 
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"
@@ -302,6 +302,16 @@ public:
   ColumnMajorMatrix & operator+=(Real scalar);
 
   /**
+   * Check if matrix is square
+   */
+  void checkSquareness() const;
+
+  /**
+   * Check if matrices are of same shape
+   */
+  void checkShapeEquality(const ColumnMajorMatrix & rhs) const;
+
+  /**
    * Equality operators
    */
   bool operator==(const ColumnMajorMatrix & rhs) const;
@@ -338,7 +348,8 @@ ColumnMajorMatrix::reshape(unsigned int rows, unsigned int cols)
 inline Real &
 ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j)
 {
-  mooseAssert((i * j) < _n_entries, "Reference outside of ColumnMajorMatrix bounds!");
+  if ((i * j) >= _n_entries)
+    mooseError("Reference outside of ColumnMajorMatrix bounds!");
 
   // Row major indexing!
   return _values[(j * _n_rows) + i];
@@ -347,7 +358,8 @@ ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j)
 inline Real
 ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j) const
 {
-  mooseAssert((i * j) < _n_entries, "Reference outside of ColumnMajorMatrix bounds!");
+  if ((i * j) >= _n_entries)
+    mooseError("Reference outside of ColumnMajorMatrix bounds!");
 
   // Row major indexing!
   return _values[(j * _n_rows) + i];
@@ -384,9 +396,9 @@ ColumnMajorMatrix::print_scientific(std::ostream & os)
 inline void
 ColumnMajorMatrix::fill(TypeTensor<Real> & tensor)
 {
-  mooseAssert(
-      LIBMESH_DIM * LIBMESH_DIM == _n_entries,
-      "Cannot fill tensor!  The ColumnMajorMatrix doesn't have the same number of entries!");
+  if (LIBMESH_DIM * LIBMESH_DIM != _n_entries)
+    mooseError(
+        "Cannot fill tensor! The ColumnMajorMatrix doesn't have the same number of entries!");
 
   for (unsigned int j = 0, index = 0; j < LIBMESH_DIM; ++j)
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i, ++index)
@@ -396,9 +408,9 @@ ColumnMajorMatrix::fill(TypeTensor<Real> & tensor)
 inline void
 ColumnMajorMatrix::fill(DenseMatrix<Real> & rhs)
 {
-  mooseAssert(
-      rhs.n() * rhs.m() == _n_entries,
-      "Cannot fill dense matrix!  The ColumnMajorMatrix doesn't have the same number of entries!");
+  if (rhs.n() * rhs.m() != _n_entries)
+    mooseError(
+        "Cannot fill dense matrix! The ColumnMajorMatrix doesn't have the same number of entries!");
 
   for (unsigned int j = 0, index = 0; j < rhs.m(); ++j)
     for (unsigned int i = 0; i < rhs.n(); ++i, ++index)
@@ -408,7 +420,8 @@ ColumnMajorMatrix::fill(DenseMatrix<Real> & rhs)
 inline void
 ColumnMajorMatrix::fill(DenseVector<Real> & rhs)
 {
-  mooseAssert(_n_rows == rhs.size(), "Vectors must be the same shape for a fill!");
+  if (_n_rows != rhs.size() || _n_cols != 1)
+    mooseError("ColumnMajorMatrix and DenseVector must be the same shape for a fill!");
 
   for (unsigned int i = 0; i < _n_rows; ++i)
     rhs(i) = (*this)(i);
@@ -461,7 +474,7 @@ ColumnMajorMatrix::abs()
 inline void
 ColumnMajorMatrix::setDiag(Real value)
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot set the diagonal of a non-square matrix!");
+  this->checkSquareness();
 
   for (unsigned int i = 0; i < _n_rows; i++)
     (*this)(i, i) = value;
@@ -470,7 +483,7 @@ ColumnMajorMatrix::setDiag(Real value)
 inline void
 ColumnMajorMatrix::addDiag(Real value)
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot add to the diagonal of a non-square matrix!");
+  this->checkSquareness();
 
   for (unsigned int i = 0; i < _n_rows; i++)
     (*this)(i, i) += value;
@@ -479,7 +492,7 @@ ColumnMajorMatrix::addDiag(Real value)
 inline Real
 ColumnMajorMatrix::tr() const
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot find the trace of a non-square matrix!");
+  this->checkSquareness();
 
   Real trace = 0;
 
@@ -499,7 +512,7 @@ ColumnMajorMatrix::zero()
 inline void
 ColumnMajorMatrix::identity()
 {
-  mooseAssert(_n_rows == _n_cols, "Cannot set the diagonal of a non-square matrix!");
+  this->checkSquareness();
 
   zero();
 
@@ -510,8 +523,7 @@ ColumnMajorMatrix::identity()
 inline Real
 ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs) const
 {
-  mooseAssert(_n_rows == rhs._n_cols && _n_cols == rhs._n_rows,
-              "Matrices must be the same shape for a double contraction!");
+  this->checkShapeEquality(rhs);
 
   Real value = 0;
 
@@ -602,9 +614,9 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(Real scalar) const
 
 inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const TypeVector<Real> & rhs) const
 {
-  mooseAssert(_n_cols == LIBMESH_DIM,
-              "Cannot perform matvec operation! The column dimension of "
-              "the ColumnMajorMatrix does not match the TypeVector!");
+  if (_n_cols != LIBMESH_DIM)
+    mooseError("Cannot perform matvec operation! The column dimension of "
+               "the ColumnMajorMatrix does not match the TypeVector!");
 
   ColumnMajorMatrix ret_matrix(_n_rows, 1);
 
@@ -633,9 +645,9 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const TypeVector<Real> & r
 
 inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const ColumnMajorMatrix & rhs) const
 {
-  mooseAssert(
-      _n_cols == rhs._n_rows,
-      "Cannot perform matrix multiply!  The shapes of the two operands are not compatible!");
+  if (_n_cols != rhs._n_rows)
+    mooseError(
+        "Cannot perform matrix multiply! The shapes of the two operands are not compatible!");
 
   ColumnMajorMatrix ret_matrix(_n_rows, rhs._n_cols);
 
@@ -650,9 +662,7 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const ColumnMajorMatrix & 
 inline ColumnMajorMatrix
 ColumnMajorMatrix::operator+(const ColumnMajorMatrix & rhs) const
 {
-  mooseAssert(
-      (_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols),
-      "Cannot perform matrix addition!  The shapes of the two operands are not compatible!");
+  this->checkShapeEquality(rhs);
 
   ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
 
@@ -665,9 +675,7 @@ ColumnMajorMatrix::operator+(const ColumnMajorMatrix & rhs) const
 inline ColumnMajorMatrix
 ColumnMajorMatrix::operator-(const ColumnMajorMatrix & rhs) const
 {
-  mooseAssert(
-      (_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols),
-      "Cannot perform matrix addition!  The shapes of the two operands are not compatible!");
+  this->checkShapeEquality(rhs);
 
   ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
 
@@ -680,9 +688,7 @@ ColumnMajorMatrix::operator-(const ColumnMajorMatrix & rhs) const
 inline ColumnMajorMatrix &
 ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
 {
-  mooseAssert((_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols),
-              "Cannot perform matrix addition and assignment!  The shapes of the two operands are "
-              "not compatible!");
+  this->checkShapeEquality(rhs);
 
   for (unsigned int i = 0; i < _n_entries; i++)
     _values[i] += rhs._values[i];
@@ -693,9 +699,9 @@ ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
 inline ColumnMajorMatrix &
 ColumnMajorMatrix::operator+=(const TypeTensor<Real> & rhs)
 {
-  mooseAssert((_n_rows == LIBMESH_DIM) && (_n_cols == LIBMESH_DIM),
-              "Cannot perform matrix addition and assignment!  The shapes of the two operands are "
-              "not compatible!");
+  if ((_n_rows != LIBMESH_DIM) || (_n_cols != LIBMESH_DIM))
+    mooseError("Cannot perform matrix addition and assignment! The shapes of the two operands are "
+               "not compatible!");
 
   for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
@@ -707,9 +713,7 @@ ColumnMajorMatrix::operator+=(const TypeTensor<Real> & rhs)
 inline ColumnMajorMatrix &
 ColumnMajorMatrix::operator-=(const ColumnMajorMatrix & rhs)
 {
-  mooseAssert((_n_rows == rhs._n_rows) && (_n_cols == rhs._n_cols),
-              "Cannot perform matrix subtraction and assignment!  The shapes of the two operands "
-              "are not compatible!");
+  this->checkShapeEquality(rhs);
 
   for (unsigned int i = 0; i < _n_entries; i++)
     _values[i] -= rhs._values[i];
