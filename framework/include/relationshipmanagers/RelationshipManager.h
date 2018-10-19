@@ -35,11 +35,18 @@ public:
   RelationshipManager(const InputParameters & parameters);
 
   /**
-   * System entry point to trigger the addition of RelationshipManagers to the system. It is not
-   * virtual and not intended to be overridden by a derived class.
-   * See attachRelationshipManagersInternal()
+   * Called before this RM is attached.  Will only be called once.
    */
-  void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
+  void init()
+  {
+    _inited = true;
+    internalInit();
+  }
+
+  /**
+   * Whether or not this RM has been inited
+   */
+  bool inited() { return _inited; }
 
   /**
    * Method for returning relationship manager information (suitable for console output).
@@ -51,28 +58,26 @@ public:
    */
   Moose::RelationshipManagerType getType() const { return _rm_type; }
 
-  //  bool compare(const RelationshipManager & rhs) { return *this == rhs; }
-
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
     mooseError("Comparison operator required for this RelationshipManager required");
   }
 
+  /**
+   * Whether or not this RM can be attached to the Mesh early if it's geometric.
+   *
+   * Note: this is unused if this RM is purely Algebraic
+   */
+  bool attachGeometricEarly() { return _attach_geometric_early; }
+
 protected:
   /**
-   * This method should make the decision of whether or not RMs are needed for the current
-   * simulation and attach them to the corresponding libMesh objects. Helper methods exist to
-   * attach geometric and algebraic RMs to the right places.
-   *
-   * This method is called at most once for each "when_type":
-   * For GeometricRelationshipManagers it'll be called exactly once. However, "when" it is called
-   * depends on the value of the developer-controlled "attach_geometric_early" value.
-   * For AlgebraicRelationshipManagers, this method may be called twice, but only once per "when"
-   * type. If the RM is able to create its geometric RM early, it should do so and attach it
-   * during the normal geometric add time. However, if that's not possible, both the geometric and
-   * algebraic RMs can be added during the "late" when time.
+   * Called before this RM is attached.  Only called once
    */
-  virtual void attachRelationshipManagersInternal(Moose::RelationshipManagerType when_type) = 0;
+  virtual void internalInit() = 0;
+
+  /// Whether or not this has been initialized
+  bool _inited = false;
 
   /// Reference to the Mesh object
   MooseMesh & _mesh;
@@ -85,15 +90,6 @@ protected:
   /// The type of RM this object is. Note that the underlying enum is capable of holding
   /// multiple values simultaneously, so you must use bitwise operators to test values.
   Moose::RelationshipManagerType _rm_type;
-
-private:
-  /// Value to keep track of whether the attachRelationshipManagerInternal callback has been
-  /// called for this "when_type"
-  Moose::RelationshipManagerType _cached_callbacks;
-
-  /// Internal variable indicating whether the mesh is allowed to have elements deleted during
-  /// the initial setup phase.
-  bool _has_set_remote_elem_removal_flag;
 };
 
 #endif /* RELATIONSHIPMANAGER_H */

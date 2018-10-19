@@ -7,16 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementSideNeighborLayers.h"
+#include "ElementPointNeighborLayers.h"
 #include "MooseMesh.h"
 #include "Conversion.h"
 #include "MooseApp.h"
 
-registerMooseObject("MooseApp", ElementSideNeighborLayers);
+#include "libmesh/point_neighbor_coupling.h"
+
+registerMooseObject("MooseApp", ElementPointNeighborLayers);
 
 template <>
 InputParameters
-validParams<ElementSideNeighborLayers>()
+validParams<ElementPointNeighborLayers>()
 {
   InputParameters params = validParams<FunctorRelationshipManager>();
 
@@ -30,25 +32,25 @@ validParams<ElementSideNeighborLayers>()
   return params;
 }
 
-ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & parameters)
+ElementPointNeighborLayers::ElementPointNeighborLayers(const InputParameters & parameters)
   : FunctorRelationshipManager(parameters), _layers(getParam<unsigned short>("layers"))
 {
 }
 
 std::string
-ElementSideNeighborLayers::getInfo() const
+ElementPointNeighborLayers::getInfo() const
 {
   std::ostringstream oss;
   std::string layers = _element_side_neighbor_layers == 1 ? "layer" : "layers";
 
-  oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << layers << ')';
+  oss << "ElementPointNeighborLayers (" << _element_side_neighbor_layers << layers << ')';
   return oss.str();
 }
 
 bool
-ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
+ElementPointNeighborLayers::operator==(const RelationshipManager & rhs) const
 {
-  const auto * rm = dynamic_cast<const ElementSideNeighborLayers *>(&rhs);
+  const auto * rm = dynamic_cast<const ElementPointNeighborLayers *>(&rhs);
   if (!rm)
     return false;
   else
@@ -56,8 +58,8 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
 }
 
 void
-ElementSideNeighborLayers::internalInit()
+ElementPointNeighborLayers::internalInit()
 {
-  _functor = libmesh_make_unique<DefaultCoupling>();
+  _functor = libmesh_make_unique<PointNeighborCoupling>();
   _functor->set_n_levels(_element_side_neighbor_layers);
 }
