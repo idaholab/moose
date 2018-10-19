@@ -1688,13 +1688,6 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
   return add;
 }
 
-void
-MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
-{
-  for (auto & rm : _relationship_managers)
-    rm->attachRelationshipManagers(rm_type);
-}
-
 std::vector<std::pair<std::string, std::string>>
 MooseApp::getRelationshipManagerInfo() const
 {
