@@ -634,7 +634,10 @@ public:
    */
   bool addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
-  void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
+  /**
+   * Retrieve the relationship managers
+   */
+  const std::vector<std::shared_ptr<RelationshipManager>> & getReleationshipManagers();
 
   /**
    * Returns the Relationship managers info suitable for printing.

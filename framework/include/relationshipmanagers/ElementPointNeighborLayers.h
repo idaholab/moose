@@ -7,31 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTSIDENEIGHBORLAYERS_H
-#define ELEMENTSIDENEIGHBORLAYERS_H
+#ifndef ELEMENTPOINTNEIGHBORLAYERS_H
+#define ELEMENTPOINTNEIGHBORLAYERS_H
 
 #include "AlgebraicRelationshipManager.h"
 
 #include "libmesh/default_coupling.h"
 
 // Forward declarations
-class ElementSideNeighborLayers;
+class ElementPointNeighborLayers;
 namespace libMesh
 {
 class GhostingFunctor;
 }
 
 template <>
-InputParameters validParams<ElementSideNeighborLayers>();
+InputParameters validParams<ElementPointNeighborLayers>();
 
 /**
- * ElementSideNeighborLayers is used to increase the halo or stencil depth of each processor's
+ * ElementPointNeighborLayers is used to increase the halo or stencil depth of each processor's
  * partition. It is useful when non-local element resources are needed when using DistributedMesh.
  */
-class ElementSideNeighborLayers : public FunctorRelationshipManager
+class ElementPointNeighborLayers : public FunctorRelationshipManager
 {
 public:
-  ElementSideNeighborLayers(const InputParameters & parameters);
+  ElementPointNeighborLayers(const InputParameters & parameters);
 
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
@@ -44,4 +44,4 @@ protected:
   unsigned short _layers;
 };
 
-#endif /* ELEMENTSIDENEIGHBORLAYERS_H */
+#endif /* ELEMENTPOINTNEIGHBORLAYERS_H */
