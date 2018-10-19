@@ -34,7 +34,7 @@ dynamic_pointer_cast(std::unique_ptr<T_SRC, T_DELETER> & src)
   return dest_temp;
 }
 
-template <typename T_SRC, typename T_DEST>
+template <typename T_DEST, typename T_SRC>
 std::unique_ptr<T_DEST>
 dynamic_pointer_cast(std::unique_ptr<T_SRC> & src)
 {
