@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<SpiralAnnularMeshGenerator>();
 
 /**
- * Generates an annular mesh given all the parameters
+ * Generates a spiral annular mesh given all the parameters
  */
 class SpiralAnnularMeshGenerator : public MeshGenerator
 {

@@ -23,7 +23,7 @@ validParams<SmoothMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  params.addRequiredParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to smooth.");
   params.addClassDescription("Utilizes a simple Laplacian based smoother to attempt to improve "
                              "mesh quality.  Will not move boundary nodes or nodes along "
                              "block/subdomain boundaries");

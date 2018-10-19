@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<GeneratedMeshGenerator>();
 
 /**
- * Generates individual elements given a list of nodal positions
+ * Generates a line, square, or cube mesh with uniformly spaced or biased elements.
  */
 class GeneratedMeshGenerator : public MeshGenerator
 {

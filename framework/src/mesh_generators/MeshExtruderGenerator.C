@@ -116,7 +116,6 @@ MeshExtruderGenerator::generate()
 void
 MeshExtruderGenerator::changeID(MeshBase & mesh, const std::vector<BoundaryName> & names, BoundaryID old_id)
 {
-  //std::unique_ptr<MeshBase> mesh = std::move(_input);
   std::vector<boundary_id_type> boundary_ids =
     MooseMeshUtils::getBoundaryIDs(mesh, names, true);
 

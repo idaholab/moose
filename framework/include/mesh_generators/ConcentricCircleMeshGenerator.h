@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<ConcentricCircleMeshGenerator>();
 
 /**
- * Generates an annular mesh given all the parameters
+ * Generates a mesh based on concentric circles, given all the parameters
  */
 class ConcentricCircleMeshGenerator : public MeshGenerator
 {

@@ -21,7 +21,7 @@ template <>
 InputParameters validParams<MeshExtruderGenerator>();
 
 /**
- * Generates individual elements given a list of nodal positions
+ * Extrude a 1D or 2D mesh to a 2D or 3D mesh respectively
  */
 class MeshExtruderGenerator : public MeshGenerator
 {
@@ -31,7 +31,7 @@ public:
   std::unique_ptr<MeshBase> generate();
 
 protected:
-  /// Mesh that possibly comes from another generator
+  /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;
 
   const RealVectorValue _extrusion_vector;
