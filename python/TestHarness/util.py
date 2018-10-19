@@ -459,13 +459,13 @@ def checkLogicVersionSingle(checks, iversion, package):
             return (False, '!=', version)
 
     # Logical match
-    if logic == '>' and checks[package][0:5] > version[0:5]:
+    if logic == '>' and map(int, checks[package].split(".")) > map(int, version.split(".")):
         return (True, None, version)
-    elif logic == '>=' and checks[package][0:5] >= version[0:5]:
+    elif logic == '>=' and map(int, checks[package].split(".")) >= map(int, version.split(".")):
         return (True, None, version)
-    elif logic == '<' and checks[package][0:5] < version[0:5]:
+    elif logic == '<' and map(int, checks[package].split(".")) < map(int, version.split(".")):
         return (True, None, version)
-    elif logic == '<=' and checks[package][0:5] <= version[0:5]:
+    elif logic == '<=' and map(int, checks[package].split(".")) <= map(int, version.split(".")):
         return (True, None, version)
 
     return (False, logic, version)
