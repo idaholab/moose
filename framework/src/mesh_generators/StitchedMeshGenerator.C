@@ -44,7 +44,7 @@ std::unique_ptr<MeshBase>
 StitchedMeshGenerator::generate()
 {
   // We put the first mesh in a local pointer
-  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<MeshBase, ReplicatedMesh>(*_mesh_ptrs[0]);
+  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[0]);
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
   _meshes.reserve(_input_names.size() - 1);
@@ -52,7 +52,7 @@ StitchedMeshGenerator::generate()
   // Read in all of the other meshes
   for (auto i = beginIndex(_input_names, 1); i < _input_names.size(); ++i)
   {
-    _meshes.push_back(dynamic_pointer_cast<MeshBase, ReplicatedMesh>(*_mesh_ptrs[i]));
+    _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
   }
 
   // Stich all the meshes to the first one

@@ -76,7 +76,7 @@ std::unique_ptr<MeshBase>
 TiledMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> initial_mesh = std::move(_input);
-  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<MeshBase, ReplicatedMesh>(initial_mesh);
+  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(initial_mesh);
 
   boundary_id_type left = mesh->get_id_by_name(getParam<BoundaryName>("left_boundary"));
   boundary_id_type right = mesh->get_id_by_name(getParam<BoundaryName>("right_boundary"));
