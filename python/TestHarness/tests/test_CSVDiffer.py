@@ -76,5 +76,11 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual(d.getNumErrors(), 1)
         self.assertIn("In all CSV files: Variable 'col3' in custom_columns is missing", msg)
 
+        # tests for override parameters with only_custom_compare
+        d = CSVDiffer(None, [], 1e-11, 5.5e-6, 'gold', ['col1','col2','col3'], ['5e-6','5e-6','5e-6'], ['1e-10','1e-10','1e-10'], True)
+        d.addCSVPair('out1.csv', 'x,y,col1,col2,col3\n5,6,1,2,3\n7,8,2,3,4', 'col1,col2,col3,foo,bar\n1,2,3,42,52\n2,3,4,43,53')
+        msg = d.diff()
+        self.assertEqual(d.getNumErrors(), 0)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
