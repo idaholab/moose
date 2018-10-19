@@ -38,10 +38,10 @@ protected:
   /// A transformed version of _stitch_boundaries into a more logical "pairwise" structure
   std::vector<std::vector<std::string>> _stitch_boundaries_pairs;
 
-  /// Pointer to the original "real" mesh to be stitched into
-  ///ReplicatedMesh * _original_mesh;
+  // Holds pointers to the pointers to the meshes.
+  std::vector<std::unique_ptr<MeshBase> * > _mesh_ptrs;
 
-  /// The meshes to be stitched together.  The first entry will be the "real" mesh
+  /// The meshes to be stitched together.
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 };
 
