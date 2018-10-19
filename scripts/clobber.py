@@ -76,7 +76,6 @@ class Clobber(object):
                 ".pyc",
                 ".plugin",
                 ".mod",
-                ".plist",
                 ".gcda",
                 ".gcno",
                 ".gcov",
