@@ -14,6 +14,7 @@
 
 #include "MooseArray.h"
 #include "DataIO.h"
+#include "MooseADWrapper.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"
@@ -100,18 +101,12 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> & get() const
-  {
-    return _value;
-  }
+  const MooseArray<MooseADWrapper<T>> & get() const { return _value; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> & set()
-  {
-    return _value;
-  }
+  MooseArray<MooseADWrapper<T>> & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.
@@ -189,7 +184,7 @@ private:
 
 protected:
   /// Stored parameter value.
-  MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> _value;
+  MooseArray<MooseADWrapper<T>> _value;
 };
 
 // ------------------------------------------------------------
@@ -258,18 +253,16 @@ public:
   /**
    * Get element i out of the array as a writeable reference.
    */
-  typename MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> &
-  operator[](const unsigned int i)
+  typename MooseADWrapper<T>::DNType & operator[](const unsigned int i)
   {
-    return this->_value[i];
+    return this->_value[i].dn();
   }
   /**
    * Get element i out of the array as a read-only reference.
    */
-  const typename MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> &
-  operator[](const unsigned int i) const
+  const typename MooseADWrapper<T>::DNType & operator[](const unsigned int i) const
   {
-    return this->_value[i];
+    return this->_value[i].dn();
   }
 };
 
@@ -341,7 +334,7 @@ PropertyValue *
 _init_helper(int size, PropertyValue * /*prop*/, const P *)
 {
   MaterialProperty<P> * copy = new MaterialProperty<P>;
-  copy->_value.resize(size, MetaPhysicL::NDDualNumber<P, NumberArray<AD_MAX_DOFS_PER_ELEM, P>>{});
+  copy->_value.resize(size, MooseADWrapper<P>{});
   return copy;
 }
 

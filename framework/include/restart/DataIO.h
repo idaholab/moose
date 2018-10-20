@@ -12,6 +12,7 @@
 
 // MOOSE includes
 #include "MooseTypes.h"
+#include "MooseADWrapper.h"
 #include "HashMap.h"
 #include "MooseError.h"
 #include "Backup.h"
@@ -22,7 +23,7 @@
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
 #endif
-#include "metaphysicl/nddualnumber.h"
+#include "metaphysicl/dualnumber.h"
 #include "metaphysicl/numberarray.h"
 
 // C++ includes
@@ -314,35 +315,13 @@ dataStore(std::ostream & stream, HashMap<T, U> & m, void * context)
   }
 }
 
-template <typename T>
-inline void
-dataStore(std::ostream & stream,
-          MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> & dn,
-          void * context)
-{
-  dataStore(stream, dn.value(), context);
-
-  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
-    dataStore(stream, dn.derivatives()[i], context);
-}
-
 // Specializations (defined in .C)
 template <>
 void dataStore(std::ostream & stream, Real & v, void * /*context*/);
 template <>
 void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
 template <>
-void dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/);
-template <>
-void dataStore(std::ostream & stream, DenseVector<Real> & v, void * /*context*/);
-template <>
-void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/);
-template <>
 void dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/);
-template <>
-void dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/);
-template <>
-void dataStore(std::ostream & stream, RealVectorValue & v, void * /*context*/);
 template <>
 void dataStore(std::ostream & stream, const Elem *& e, void * context);
 template <>
@@ -359,6 +338,78 @@ template <>
 void dataStore(std::ostream & stream, RankTwoTensor &, void *);
 template <>
 void dataStore(std::ostream & stream, RankFourTensor &, void *);
+
+inline void
+dataStore(std::ostream & stream, ADReal & dn, void * context)
+{
+  dataStore(stream, dn.value(), context);
+  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
+    dataStore(stream, dn.derivatives()[i], context);
+}
+
+template <typename T>
+void
+dataStore(std::ostream & stream, NumericVector<T> & v, void * context)
+{
+  v.close();
+
+  numeric_index_type size = v.local_size();
+
+  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
+  {
+    T r = v(i);
+    dataStore(stream, r, context);
+  }
+}
+
+template <typename T>
+void
+dataStore(std::ostream & stream, DenseVector<T> & v, void * context)
+{
+  unsigned int m = v.size();
+  stream.write((char *)&m, sizeof(m));
+  for (unsigned int i = 0; i < v.size(); i++)
+  {
+    T r = v(i);
+    dataStore(stream, r, context);
+  }
+}
+
+template <>
+void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * context);
+
+template <typename T>
+void
+dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
+    {
+      T r = v(i, j);
+      dataStore(stream, r, context);
+    }
+}
+
+template <typename T>
+void
+dataStore(std::ostream & stream, VectorValue<T> & v, void * context)
+{
+  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
+  // won't work.
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  {
+    T r = v(i);
+    dataStore(stream, r, context);
+  }
+}
+
+template <typename T>
+inline void
+dataStore(std::ostream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
+{
+  dataStore(stream, dn_wrapper.value(), context);
+  dataStore(stream, dn_wrapper.dn(), context);
+}
 
 // global load functions
 
@@ -508,35 +559,13 @@ dataLoad(std::istream & stream, HashMap<T, U> & m, void * context)
   }
 }
 
-template <typename T>
-inline void
-dataLoad(std::istream & stream,
-         MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> & dn,
-         void * context)
-{
-  dataLoad(stream, dn.value(), context);
-
-  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
-    dataLoad(stream, dn.derivatives()[i], context);
-}
-
 // Specializations (defined in .C)
 template <>
 void dataLoad(std::istream & stream, Real & v, void * /*context*/);
 template <>
 void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
 template <>
-void dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/);
-template <>
-void dataLoad(std::istream & stream, DenseVector<Real> & v, void * /*context*/);
-template <>
-void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/);
-template <>
 void dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/);
-template <>
-void dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/);
-template <>
-void dataLoad(std::istream & stream, RealVectorValue & v, void * /*context*/);
 template <>
 void dataLoad(std::istream & stream, const Elem *& e, void * context);
 template <>
@@ -553,6 +582,84 @@ template <>
 void dataLoad(std::istream & stream, RankTwoTensor &, void *);
 template <>
 void dataLoad(std::istream & stream, RankFourTensor &, void *);
+
+inline void
+dataLoad(std::istream & stream, ADReal & dn, void * context)
+{
+  dataLoad(stream, dn.value(), context);
+
+  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
+    dataLoad(stream, dn.derivatives()[i], context);
+}
+
+template <typename T>
+void
+dataLoad(std::istream & stream, NumericVector<T> & v, void * context)
+{
+  numeric_index_type size = v.local_size();
+  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
+  {
+    T r = 0;
+    dataLoad(stream, r, context);
+    v.set(i, r);
+  }
+  v.close();
+}
+
+template <typename T>
+void
+dataLoad(std::istream & stream, DenseVector<T> & v, void * context)
+{
+  unsigned int n = 0;
+  stream.read((char *)&n, sizeof(n));
+  v.resize(n);
+  for (unsigned int i = 0; i < n; i++)
+  {
+    T r = 0;
+    dataLoad(stream, r, context);
+    v(i) = r;
+  }
+}
+
+template <>
+void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * context);
+
+template <typename T>
+void
+dataLoad(std::istream & stream, TensorValue<T> & v, void * context)
+{
+  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
+  // won't work.
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
+    {
+      T r = 0;
+      dataLoad(stream, r, context);
+      v(i, j) = r;
+    }
+}
+
+template <typename T>
+void
+dataLoad(std::istream & stream, VectorValue<T> & v, void * context)
+{
+  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
+  // won't work.
+  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  {
+    T r = 0;
+    dataLoad(stream, r, context);
+    v(i) = r;
+  }
+}
+
+template <typename T>
+inline void
+dataLoad(std::istream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
+{
+  dataLoad(stream, dn_wrapper.value(), context);
+  dataLoad(stream, dn_wrapper.dn(), context);
+}
 
 // Scalar Helper Function
 template <typename P>

@@ -23,13 +23,8 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/type_n_tensor.h"
 
-#include "metaphysicl/nddualnumber.h"
+#include "metaphysicl/dualnumber.h"
 #include "metaphysicl/numberarray.h"
-
-#include "DualNumberTypeVector.h"
-#include "DualNumberVectorValue.h"
-#include "DualNumberTypeTensor.h"
-#include "DualNumberTensorValue.h"
 
 // BOOST include
 #include "bitmask_operators.h"
@@ -168,31 +163,53 @@ typedef MooseArray<std::vector<VectorValue<Real>>> VectorVariableTestCurl;
  * DualNumber naming
  */
 #define AD_MAX_DOFS_PER_ELEM 100
-using MetaPhysicL::NDDualNumber;
+using MetaPhysicL::DualNumber;
 using MetaPhysicL::NumberArray;
 
-template <typename T>
-using ScalarDN = NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>;
-template <typename T, template <class> class W>
-using TemplateDN = NDDualNumber<W<T>, NumberArray<AD_MAX_DOFS_PER_ELEM, W<T>>>;
-template <typename T>
-using VectorDN = NDDualNumber<VectorValue<T>, NumberArray<AD_MAX_DOFS_PER_ELEM, VectorValue<T>>>;
-template <typename T>
-using TensorDN = NDDualNumber<TensorValue<T>, NumberArray<AD_MAX_DOFS_PER_ELEM, TensorValue<T>>>;
+typedef DualNumber<Real, NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> ADReal;
+template <template <class> class W>
+using TemplateDN = W<ADReal>;
 
-/*
- * Some helpful typedefs for AD
- */
-typedef ScalarDN<Real> ADReal;
-typedef VectorDN<Real> ADRealVectorValue;
-typedef TensorDN<Real> ADRealTensorValue;
+typedef TemplateDN<VectorValue> ADRealVectorValue;
+typedef TemplateDN<TensorValue> ADRealTensorValue;
 
 typedef ADRealVectorValue ADRealGradient;
 typedef ADRealTensorValue ADRealTensor;
-typedef NDDualNumber<RankTwoTensor, NumberArray<AD_MAX_DOFS_PER_ELEM, RankTwoTensor>>
-    ADRankTwoTensor;
-typedef NDDualNumber<RankFourTensor, NumberArray<AD_MAX_DOFS_PER_ELEM, RankFourTensor>>
-    ADRankFourTensor;
+
+namespace libMesh
+{
+template <typename T, typename T2, typename D>
+struct CompareTypes<T, DualNumber<T2, D>>
+{
+  typedef DualNumber<typename CompareTypes<T, T2>::supertype,
+                     typename D::template rebind<typename CompareTypes<T, T2>::supertype>::other>
+      supertype;
+};
+template <typename T, typename D, typename T2>
+struct CompareTypes<DualNumber<T, D>, T2>
+{
+  typedef DualNumber<typename CompareTypes<T, T2>::supertype,
+                     typename D::template rebind<typename CompareTypes<T, T2>::supertype>::other>
+      supertype;
+};
+template <typename T, typename D, typename T2, typename D2>
+struct CompareTypes<DualNumber<T, D>, DualNumber<T2, D2>>
+{
+  typedef DualNumber<typename CompareTypes<T, T2>::supertype,
+                     typename D::template rebind<typename CompareTypes<T, T2>::supertype>::other>
+      supertype;
+};
+template <typename T, typename D>
+struct CompareTypes<DualNumber<T, D>, DualNumber<T, D>>
+{
+  typedef DualNumber<T, D> supertype;
+};
+template <typename T, typename D>
+struct ScalarTraits<DualNumber<T, D>>
+{
+  static const bool value = ScalarTraits<T>::value;
+};
+}
 
 enum ComputeStage
 {

@@ -1137,11 +1137,7 @@ MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const un
       _neighbor_ad_grad_u[qp] = 0;
 
     if (_need_neighbor_ad_second_u)
-    {
-      TensorValue<Real> value{};
-      NumberArray<AD_MAX_DOFS_PER_ELEM, TensorValue<Real>> derivatives{};
-      _neighbor_ad_second_u[qp] = TensorDN<Real>(value, derivatives);
-    }
+      _neighbor_ad_second_u[qp] = 0;
   }
 
   for (unsigned int i = 0; i < num_dofs; i++)

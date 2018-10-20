@@ -38,50 +38,6 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
 template <>
 void
-dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/)
-{
-  v.close();
-
-  numeric_index_type size = v.local_size();
-
-  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
-  {
-    Real r = v(i);
-    stream.write((char *)&r, sizeof(r));
-  }
-}
-
-template <>
-void
-dataStore(std::ostream & stream, DenseVector<Real> & v, void * /*context*/)
-{
-  unsigned int m = v.size();
-  stream.write((char *)&m, sizeof(m));
-  for (unsigned int i = 0; i < v.size(); i++)
-  {
-    Real r = v(i);
-    stream.write((char *)&r, sizeof(r));
-  }
-}
-
-template <>
-void
-dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/)
-{
-  unsigned int m = v.m();
-  unsigned int n = v.n();
-  stream.write((char *)&m, sizeof(m));
-  stream.write((char *)&n, sizeof(n));
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = v(i, j);
-      stream.write((char *)&r, sizeof(r));
-    }
-}
-
-template <>
-void
 dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/)
 {
   for (unsigned int i = 0; i < v.m(); i++)
@@ -90,15 +46,6 @@ dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/)
       Real r = v(i, j);
       stream.write((char *)&r, sizeof(r));
     }
-}
-
-template <>
-void
-dataStore(std::ostream & stream, RealTensorValue & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
-      stream.write((char *)&v(i, j), sizeof(v(i, j)));
 }
 
 template <>
@@ -113,16 +60,6 @@ void
 dataStore(std::ostream & stream, RankFourTensor & rft, void * context)
 {
   dataStore(stream, rft._vals, context);
-}
-
-template <>
-void
-dataStore(std::ostream & stream, RealVectorValue & v, void * /*context*/)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
-  // won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    stream.write((char *)&v(i), sizeof(v(i)));
 }
 
 template <>
@@ -212,6 +149,22 @@ dataStore(std::ostream & stream, std::stringstream *& s, void * context)
   dataStore(stream, *s, context);
 }
 
+template <>
+void
+dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * context)
+{
+  unsigned int m = v.m();
+  unsigned int n = v.n();
+  stream.write((char *)&m, sizeof(m));
+  stream.write((char *)&n, sizeof(n));
+  for (unsigned int i = 0; i < v.m(); i++)
+    for (unsigned int j = 0; j < v.n(); j++)
+    {
+      Real r = v(i, j);
+      dataStore(stream, r, context);
+    }
+}
+
 // global load functions
 
 template <>
@@ -238,73 +191,10 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 
 template <>
 void
-dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/)
-{
-  numeric_index_type size = v.local_size();
-
-  for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
-  {
-    Real r = 0;
-    stream.read((char *)&r, sizeof(r));
-    v.set(i, r);
-  }
-
-  v.close();
-}
-
-template <>
-void
-dataLoad(std::istream & stream, DenseVector<Real> & v, void * /*context*/)
-{
-  unsigned int n = 0;
-  stream.read((char *)&n, sizeof(n));
-  v.resize(n);
-  for (unsigned int i = 0; i < n; i++)
-  {
-    Real r = 0;
-    stream.read((char *)&r, sizeof(r));
-    v(i) = r;
-  }
-}
-
-template <>
-void
-dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/)
-{
-  unsigned int nr = 0, nc = 0;
-  stream.read((char *)&nr, sizeof(nr));
-  stream.read((char *)&nc, sizeof(nc));
-  v.resize(nr, nc);
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = 0;
-      stream.read((char *)&r, sizeof(r));
-      v(i, j) = r;
-    }
-}
-
-template <>
-void
 dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/)
 {
   for (unsigned int i = 0; i < v.m(); i++)
     for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = 0;
-      stream.read((char *)&r, sizeof(r));
-      v(i, j) = r;
-    }
-}
-
-template <>
-void
-dataLoad(std::istream & stream, RealTensorValue & v, void * /*context*/)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
-  // won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
     {
       Real r = 0;
       stream.read((char *)&r, sizeof(r));
@@ -324,20 +214,6 @@ void
 dataLoad(std::istream & stream, RankFourTensor & rft, void * context)
 {
   dataLoad(stream, rft._vals, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, RealVectorValue & v, void * /*context*/)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
-  // won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-  {
-    Real r = 0;
-    stream.read((char *)&r, sizeof(r));
-    v(i) = r;
-  }
 }
 
 template <>
@@ -441,4 +317,21 @@ void
 dataLoad(std::istream & stream, std::stringstream *& s, void * context)
 {
   dataLoad(stream, *s, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/)
+{
+  unsigned int nr = 0, nc = 0;
+  stream.read((char *)&nr, sizeof(nr));
+  stream.read((char *)&nc, sizeof(nc));
+  v.resize(nr, nc);
+  for (unsigned int i = 0; i < v.m(); i++)
+    for (unsigned int j = 0; j < v.n(); j++)
+    {
+      Real r = 0;
+      stream.read((char *)&r, sizeof(r));
+      v(i, j) = r;
+    }
 }
