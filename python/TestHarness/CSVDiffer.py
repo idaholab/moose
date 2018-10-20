@@ -11,12 +11,13 @@ import os, re, math
 
 class CSVDiffer:
     def __init__(self, test_dir, out_files, abs_zero=1e-11, relative_error=5.5e-6, gold_dir='gold',
-            custom_columns=[], custom_rel_err=[], custom_abs_zero=[]):
+                 custom_columns=[], custom_rel_err=[], custom_abs_zero=[], only_compare_custom=False):
         self.abs_zero = float(abs_zero)
         self.rel_tol = float(relative_error)
         self.custom_columns = custom_columns
         self.custom_rel_err = custom_rel_err
         self.custom_abs_zero = custom_abs_zero
+        self.only_compare_custom = only_compare_custom
         self.files = []
         self.msg = ''
         self.num_errors = 0
@@ -82,21 +83,29 @@ class CSVDiffer:
             keys1 = table1.keys()
             keys2 = table2.keys()
             (large,small) = (keys1,keys2)
-            if len(keys1) < len(keys2):
-                (large,small) = (keys2,keys1)
-            for key in large:
-                if key not in small:
-                    self.addError(fname, "Header '" + key + "' is missing" )
-                    foundError = True
-            if foundError:
-                continue
 
             # check if custom tolerances used, column name exists in one of
             # the CSV files
-            if self.custom_columns:
-               for mykey in self.custom_columns:
-                   if mykey in small:
-                      found_column[mykey] = True
+            if self.custom_columns and self.only_compare_custom:
+                # For the rest of the comparison, we only care about custom columns
+                keys1 = self.custom_columns
+                for key in self.custom_columns:
+                    if key not in small or key not in large:
+                        self.addError(fname, "Header '" + key + "' is missing")
+                        foundError = True
+            elif len(keys1) < len(keys2):
+                (large,small) = (keys2,keys1)
+                for key in large:
+                    if key not in small:
+                        self.addError(fname, "Header '" + key + "' is missing")
+                        foundError = True
+            else:
+                for key in keys1:
+                    found_column[key] = True
+
+
+            if foundError:
+                continue
 
             # now check that each column is the same length
             for key in keys1:
@@ -155,10 +164,11 @@ class CSVDiffer:
 
         # Loop over variable names to check if any are missing from all the
         # CSV files being compared
-        if self.custom_columns:
+        if self.custom_columns and not self.only_compare_custom:
            for mykey2 in self.custom_columns:
                if not found_column[mykey2]:
                   self.addError("all CSV files", "Variable '" + mykey2 + "' in custom_columns is missing" )
+
 
         return self.msg
 
