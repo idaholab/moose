@@ -146,6 +146,7 @@
   solve_type = Newton
   petsc_options = '-snes_converged_reason'
   end_time = 2
+  line_search = 'bt'
 
   [./TimeStepper]
     type = FunctionDT

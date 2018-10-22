@@ -317,6 +317,7 @@
   start_time = 0.0
   num_steps = 1
   dt = 0.1
+  line_search = 'bt'
 []
 
 [Outputs]

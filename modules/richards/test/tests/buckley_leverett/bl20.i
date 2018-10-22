@@ -237,6 +237,7 @@
   type = Transient
   solve_type = NEWTON
   end_time = 50
+  line_search = 'bt'
 
   [./TimeStepper]
     type = FunctionDT

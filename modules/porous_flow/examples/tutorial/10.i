@@ -184,6 +184,7 @@
   end_time = 1E6
   dt = 1E5
   nl_abs_tol = 1E-7
+  line_search = 'bt'
 []
 
 [Outputs]

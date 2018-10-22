@@ -217,6 +217,7 @@
   type = Transient
   solve_type = NEWTON
   end_time = 50
+  line_search = 'bt'
 
   nl_rel_tol = 1.e-9
   nl_max_its = 10

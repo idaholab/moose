@@ -206,6 +206,7 @@
   type = Transient
   solve_type = Newton
   end_time = 1e5
+  line_search = 'bt'
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 5e3

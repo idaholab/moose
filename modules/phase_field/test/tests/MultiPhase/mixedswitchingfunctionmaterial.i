@@ -106,6 +106,7 @@
   nl_abs_tol = 1.0e-10
   start_time = 0.0
   num_steps = 2
+  line_search = 'bt'
 
   [./TimeStepper]
     type = IterationAdaptiveDT

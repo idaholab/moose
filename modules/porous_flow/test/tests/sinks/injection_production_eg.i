@@ -243,6 +243,7 @@
   nl_abs_tol = 1E-13
   nl_rel_tol = 1E-10
   end_time = 1e8
+  line_search = 'bt'
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1E4

@@ -230,6 +230,7 @@
   end_time = 6E6
   dt = 3E6
   solve_type = NEWTON
+  line_search = 'bt'
 []
 
 [Outputs]

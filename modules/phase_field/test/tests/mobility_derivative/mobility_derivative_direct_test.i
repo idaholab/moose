@@ -80,6 +80,7 @@
   l_tol = 1.0e-4
   nl_max_its = 10
   nl_rel_tol = 1.0e-8
+  line_search = 'bt'
 
   start_time = 0.0
   num_steps = 2

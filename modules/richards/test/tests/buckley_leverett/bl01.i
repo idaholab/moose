@@ -137,6 +137,7 @@
   type = Transient
   end_time = 50
   dt = 2
+  line_search = 'bt'
 []
 
 [Outputs]
