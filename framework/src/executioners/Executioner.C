@@ -46,7 +46,7 @@ validParams<Executioner>()
   line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
 #endif // LIBMESH_HAVE_PETSC
   std::string line_search_string = Moose::stringify(line_searches, " ");
-  MooseEnum line_search(line_search_string, "default");
+  MooseEnum line_search(line_search_string, "none");
   std::string addtl_doc_str(" (Note: none = basic)");
   params.addParam<MooseEnum>(
       "line_search", line_search, "Specifies the line search type" + addtl_doc_str);
