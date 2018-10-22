@@ -332,21 +332,23 @@ LayeredBase::getBounds()
   {
     _direction_min = std::numeric_limits<Real>::infinity();
     _direction_max = -std::numeric_limits<Real>::infinity();
+
     MooseMesh & mesh = _layered_base_subproblem.mesh();
 
-    for (auto it = mesh.bndNodesBegin(); it != mesh.bndNodesEnd(); ++it)
+    for (auto & elem_ptr : *mesh.getActiveLocalElementRange())
     {
-      const Node & node = *(*it)->_node;
-      const std::set<SubdomainID> & node_blocks = mesh.getNodeBlockIds(node);
-      for (auto b = _blocks.begin(); b != _blocks.end(); ++b)
-        if (node_blocks.find(*b) != node_blocks.end())
-        {
-          if (_direction_min > node(_direction))
-            _direction_min = node(_direction);
-          if (_direction_max < node(_direction))
-            _direction_max = node(_direction);
-        }
+      auto subdomain_id = elem_ptr->subdomain_id();
+
+      if (std::find(_blocks.begin(), _blocks.end(), subdomain_id) == _blocks.end())
+        continue;
+
+      for (auto & node : elem_ptr->node_ref_range())
+      {
+        _direction_min = std::min(_direction_min, node(_direction));
+        _direction_max = std::max(_direction_max, node(_direction));
+      }
     }
+
     mesh.comm().min(_direction_min);
     mesh.comm().max(_direction_max);
   }
