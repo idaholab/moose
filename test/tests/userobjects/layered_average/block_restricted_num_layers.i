@@ -34,7 +34,7 @@
     direction = x
     variable = 'u'
     block = '1'
-    # Note: 'bounds' or 'num_layers' are provided as CLI args
+    num_layers = 2
   []
 []
 

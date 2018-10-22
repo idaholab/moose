@@ -5,7 +5,7 @@
     exodiff = 'layered_average_out.e'
 
     requirement = "MOOSE shall allow taking averages of variables along a coordinate axis in layers"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#1737'
   [../]
 
@@ -14,7 +14,7 @@
     input = 'layered_average_bounds.i'
     exodiff = 'layered_average_bounds_out.e'
     requirement = "MOOSE shall allow specifying boundaries and numbers of layers for layered averages"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#2941 #2567'
   [../]
 
@@ -25,7 +25,7 @@
     cli_args = 'UserObjects/average/num_layers=2'
 
     requirement = "MOOSE shall allow specifying boundaries and numbers of layers for layered averages"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#2941 #2567'
   [../]
 
@@ -36,7 +36,7 @@
     cli_args = 'UserObjects/average/sample_type=interpolate'
 
     requirement = "MOOSE shall allow specifying boundaries and numbers of layers for layered averages"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#2941 #2567'
   [../]
 
@@ -46,7 +46,7 @@
     expect_err = "One of 'bounds' or 'num_layers' must be specified for"
 
     requirement = "MOOSE shall allow specifying boundaries and numbers of layers for layered averages"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#2941 #2567'
   [../]
 
@@ -56,7 +56,7 @@
     exodiff = 'layered_average_interpolate_out.e'
 
     requirement = "MOOSE shall allow interpolating between layers for layered averages"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#1845'
   [../]
 
@@ -65,7 +65,7 @@
     input = 'layered_average_1d_displaced.i'
     exodiff = 'layered_average_1d_displaced_out.e'
     requirement = "MOOSE shall respect mesh displacements in layered average"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#10960'
   [../]
 
@@ -75,7 +75,7 @@
     exodiff = 'layered_average_block_out.e'
 
     requirement = "MOOSE shall respect block restriction for layered averages"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
     issues = '#8835 #12152'
   [../]
 
@@ -83,9 +83,21 @@
     type = 'Exodiff'
     input = 'block_restricted.i'
     exodiff = 'block_restricted_out.e'
+    cli_args = 'UserObjects/master_uo/bounds="0.4 0.5 0.6"'
 
     requirement = "MOOSE shall respect block restriction for layered averages"
-    design = 'LayeredAverage.md'
+    design = '/LayeredAverage.md'
+    issues = '#8835 #12152'
+  [../]
+
+  [./block_restricted_num_layers]
+    type = 'Exodiff'
+    input = 'block_restricted.i'
+    exodiff = 'block_restricted_num_layers_out.e'
+    cli_args = 'UserObjects/master_uo/num_layers=2 Outputs/file_base=block_restricted_num_layers_out'
+
+    requirement = "MOOSE shall respect block restriction for layered averages even when using num_layers"
+    design = '/LayeredAverage.md'
     issues = '#8835 #12152'
   [../]
 []
