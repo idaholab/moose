@@ -31,19 +31,19 @@ validParams<TiledMeshGenerator>()
   params.addParam<Real>("z_width", 0, "The tile width in the z direction");
 
   // x boundary names
-  params.addParam<BoundaryName>("left_boundary", "left_boundary", "name of the left (x) boundary");
+  params.addParam<BoundaryName>("left_boundary", "left", "name of the left (x) boundary");
   params.addParam<BoundaryName>(
-      "right_boundary", "right_boundary", "name of the right (x) boundary");
+      "right_boundary", "right", "name of the right (x) boundary");
 
   // y boundary names
-  params.addParam<BoundaryName>("top_boundary", "top_boundary", "name of the top (y) boundary");
+  params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
   params.addParam<BoundaryName>(
-      "bottom_boundary", "bottom_boundary", "name of the bottom (y) boundary");
+      "bottom_boundary", "bottom", "name of the bottom (y) boundary");
 
   // z boundary names
   params.addParam<BoundaryName>(
-      "front_boundary", "front_boundary", "name of the front (z) boundary");
-  params.addParam<BoundaryName>("back_boundary", "back_boundary", "name of the back (z) boundary");
+      "front_boundary", "front", "name of the front (z) boundary");
+  params.addParam<BoundaryName>("back_boundary", "back", "name of the back (z) boundary");
 
   // The number of tiles is 1 in each direction unless otherwise specified.
   // An x_tiles value of 1 means do not stitch any extra meshes together in
@@ -78,12 +78,12 @@ TiledMeshGenerator::generate()
   std::unique_ptr<MeshBase> initial_mesh = std::move(_input);
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(initial_mesh);
 
-  boundary_id_type left = mesh->get_id_by_name(getParam<BoundaryName>("left_boundary"));
-  boundary_id_type right = mesh->get_id_by_name(getParam<BoundaryName>("right_boundary"));
-  boundary_id_type top = mesh->get_id_by_name(getParam<BoundaryName>("top_boundary"));
-  boundary_id_type bottom = mesh->get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
-  boundary_id_type front = mesh->get_id_by_name(getParam<BoundaryName>("front_boundary"));
-  boundary_id_type back = mesh->get_id_by_name(getParam<BoundaryName>("back_boundary"));
+  boundary_id_type left = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
+  boundary_id_type right = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("right_boundary"));
+  boundary_id_type top = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
+  boundary_id_type bottom = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
+  boundary_id_type front = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
+  boundary_id_type back = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
 
   {
     std::unique_ptr<MeshBase> clone = mesh->clone();
