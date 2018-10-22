@@ -1,11 +1,7 @@
-# This tests the ability of the ComputeVolumetricEigenstrain material
-# to compute an eigenstrain tensor that results in a solution that exactly
-# recovers the specified volumetric expansion.
-# This model applies volumetric strain that ramps from 0 to 2 to a unit cube
-# and computes the final volume, which should be exactly 3.  Note that the default
-# TaylorExpansion option for decomposition_method gives a small (~4%) error
-# with this very large incremental strain, but decomposition_method=EigenSolution
-# gives the exact solution.
+# This test ensures that the reported volumetric strain for a cube with
+# mechanically imposed displacements (through Dirichlet BCs) exactly
+# matches that from a version of this test that experiences the same
+# defomation, but due to imposed eigenstrains.
 
 [Mesh]
   type = GeneratedMesh
@@ -39,7 +35,6 @@
   [./master]
     use_displaced_mesh = true
     strain = FINITE
-    eigenstrain_names = eigenstrain
     decomposition_method = EigenSolution #Necessary for exact solution
   [../]
 []
@@ -51,6 +46,19 @@
     rank_two_tensor = total_strain
     variable = volumetric_strain
   [../]
+[]
+
+[Functions]
+  [pres_disp]
+    type = PiecewiseLinear
+    # These values are taken from the displacements in the eigenstrain
+    # version of this test. The volume of the cube (which starts out as
+    # a 1x1x1 cube) is (1 + disp)^3. At time 2, this is
+    # (1.44224957030741)^3, which is 3.0.
+    xy_data = '0 0
+               1 0.25992104989487
+               2 0.44224957030741'
+  []
 []
 
 [BCs]
@@ -72,6 +80,24 @@
     boundary = back
     value = 0.0
   [../]
+  [./right]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = right
+    function = pres_disp
+  [../]
+  [./top]
+    type = FunctionPresetBC
+    variable = disp_y
+    boundary = top
+    function = pres_disp
+  [../]
+  [./front]
+    type = FunctionPresetBC
+    variable = disp_z
+    boundary = front
+    function = pres_disp
+  [../]
 []
 
 [Materials]
@@ -82,12 +108,6 @@
   [../]
   [./finite_strain_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./volumetric_eigenstrain]
-    type = ComputeVolumetricEigenstrain
-    volumetric_materials = volumetric_change
-    eigenstrain_name = eigenstrain
-    args = ''
   [../]
   [./volumetric_change]
     type = GenericFunctionMaterial

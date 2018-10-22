@@ -280,13 +280,36 @@ where $S_{ij}$ is the deviatoric tensor of the Rank-2 tensor $T_{ij}$.
 
 ## Volumetric Strain
 
-The scalar type `VolumetricStrain` computes the change in volume divided by the original volume and
-is most appliable for strain.  For a Rank-2 tensor, $T_{ij}$, the volumetric strain quantity is
-calculated with [eq:volumetric_strain_scalar_type].
+The scalar type `VolumetricStrain` computes the volumetric strain, defined as
 \begin{equation}
-\label{eq:volumetric_strain_scalar_type}
-s = T_{11} \cdot \left( T_{22} + T_{33} \right) + T_{22} \cdot T_{33} + T_{11} \cdot T_{22} \cdot T_{33}
+\label{eq:volumetric_strain}
+\varepsilon_{vol} = \frac{\Delta V}{V}
 \end{equation}
+where $\Delta V$ is the change in volume and $V$ is the original volume.
+
+This calculation assumes that the strains supplied as input ($T$) are logarithmic strains,
+which are by definition $log(L/L_0)$, where $L$ is the current length and $L_0$
+is the original length of a line segment in a given direction. 
+The ratio of the volume of a strained cube to the original volume is thus:
+\begin{equation}
+\label{eq:volumetric_strain_from_tensor}
+s = \exp(T_{11}) * \exp(T_{22}) * \exp(T_{33}) - 1
+\end{equation}
+This is the value computed as the volumetric strain.
+
+
+!alert! note title=Finite strain effects
+This calculation assumes that the supplied Rank-2 tensor $T_{ij}$ is a logarithmic strain, which is
+the strain quantity computed for finite strain calculations. The small-strain equivalent of this
+calculation would be
+\begin{equation}
+\label{eq:volumetric_strain_small_strain}
+s = T_{11} + T_{22} + T_{33}
+\end{equation}
+which assumes that engineering strains are supplied and ignores higher-order terms. There is currently
+no option to compute this small-strain form of the volumetric strain because at small strains, the
+differences between the finite strain form used and the small strain approximation is small.
+!alert-end!
 
 ### Example Input File Syntax
 

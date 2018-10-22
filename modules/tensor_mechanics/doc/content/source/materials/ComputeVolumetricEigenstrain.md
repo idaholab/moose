@@ -15,18 +15,20 @@ this eigenstrain will exactly equal the specified volumetric strain.
 ## Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/volumetric_eigenstrain/volumetric_eigenstrain.i
-         block=Materials/thermal_expansion_strain1
+         block=Materials/volumetric_eigenstrain
 
 where the volumetric material is defined as a separate material model
 
 !listing modules/tensor_mechanics/test/tests/volumetric_eigenstrain/volumetric_eigenstrain.i
          block=Materials/volumetric_change
 
-The `eigenstrain_name` parameter value must also be set for the strain calculator, and an example
-parameter setting is shown below:
+The `eigenstrain_name` parameter value must also be set for the strain calculator. When the 
+[TensorMechanics/Master](/Master/index.md) Action is used, it automatically creates the strain
+calculator. In that case, the `eigenstrain_name` is specified in the Master action block, and
+passed in to the strain calculator as shown:
 
 !listing modules/tensor_mechanics/test/tests/volumetric_eigenstrain/volumetric_eigenstrain.i
-         block=Materials/strain
+         block=Modules/TensorMechanics/Master
 
 !syntax parameters /Materials/ComputeVolumetricEigenstrain
 

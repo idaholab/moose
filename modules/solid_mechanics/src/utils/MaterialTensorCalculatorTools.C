@@ -69,11 +69,22 @@ hydrostatic(const SymmTensor & symm_tensor)
 Real
 volumetricStrain(const SymmTensor & symm_strain)
 {
-  Real value = symm_strain.trace();
-  value += symm_strain.xx() * symm_strain.yy() + symm_strain.yy() * symm_strain.zz() +
-           symm_strain.zz() * symm_strain.xx() +
-           symm_strain.xx() * symm_strain.yy() * symm_strain.zz();
-  return value;
+  // Since the strains are logarithmic strains, which are by definition log(L/L0),
+  // exp(log_strain) = L/L0
+  // The ratio of the volume of a strained cube to the original volume is thus:
+  // exp(log_strain_11) * exp(log_strain_22) * exp(log_strain_33) - 1
+  //
+  // Since eng_strain = exp(log_strain) - 1, the equivalent calculation using
+  // engineering strains would be:
+  // (1 + eng_strain_11) * (1 + eng_strain_22) + (1 + eng_strain_33) - 1
+  // If strains are small, the resulting terms that involve squared and cubed
+  // strains are negligible, resulting in the following approximate form:
+  // strain_11 + strain_22 + strain_33
+  // There is not currently an option to compute this small-strain form of the
+  // volumetric strain, but at small strains, it is approximately equal to the
+  // finite strain form that is computed.
+
+  return std::exp(symm_strain.xx()) * std::exp(symm_strain.yy()) * std::exp(symm_strain.zz()) - 1.0;
 }
 
 Real
