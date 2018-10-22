@@ -37,14 +37,14 @@ def builder(rows, headings=None):
         thead = TableHead(node)
         row = TableRow(thead)
         for h in headings:
-            th = TableHeaderItem(row)
+            th = TableHeaderItem(row, align='left')
             tokens.String(th, content=unicode(h))
 
     tbody = TableBody(node)
     for data in rows:
         row = TableRow(tbody)
         for d in data:
-            tr = TableItem(row)
+            tr = TableItem(row, align='left')
             tokens.String(tr, content=unicode(d))
 
     return node
@@ -69,8 +69,8 @@ class TableExtension(command.CommandExtension):
         renderer.add(TableHead, RenderTag('thead'))
         renderer.add(TableBody, RenderTag('tbody'))
         renderer.add(TableRow, RenderTag('tr'))
-        renderer.add(TableHeaderItem, RenderTag('th'))
-        renderer.add(TableItem, RenderTag('td'))
+        renderer.add(TableHeaderItem, RenderItem('th'))
+        renderer.add(TableItem, RenderItem('td'))
 
 class TableCommandComponent(command.CommandComponent):
     COMMAND = 'table'
@@ -137,14 +137,14 @@ class TableComponent(components.TokenComponent):
         if head:
             row = TableRow(TableHead(table))
             for i, h in enumerate(head):
-                hitem = TableHeaderItem(row, format=form[i])
+                hitem = TableHeaderItem(row, align=form[i])
                 self.reader.parse(hitem, h, MooseDocs.INLINE)
 
         for line in body.splitlines():
             if line:
                 row = TableRow(TableBody(table))
                 for i, content in enumerate([item.strip() for item in line.split('|') if item]):
-                    item = TableItem(row, format=form[i]) #pylint: disable=redefined-variable-type
+                    item = TableItem(row, align=form[i]) #pylint: disable=redefined-variable-type
                     self.reader.parse(item, content, MooseDocs.INLINE)
 
         return table
@@ -173,3 +173,9 @@ class RenderTag(components.RenderComponent):
 
     def createLatex(self, token, parent):
         pass
+
+class RenderItem(RenderTag):
+    def createHTML(self, token, parent):
+        tag = RenderTag.createHTML(self, token, parent)
+        tag.addStyle('text-align:{}'.format(token.align))
+        return tag

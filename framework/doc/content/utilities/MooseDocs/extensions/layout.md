@@ -1,5 +1,10 @@
 # Layout Extension
 
+The layout extension allows for dynamic rows and columns to be created, this relies on the
+materialize html output.
+
+
+!devel! example caption=Example that creates two columns.
 !row!
 !col class=s12 m6 l8
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
@@ -19,3 +24,4 @@ quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid 
 consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil
 molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
 !row-end!
+!devel-end!
