@@ -115,14 +115,15 @@ class RenderExampleToken(components.RenderComponent):
     def createHTML(self, token, parent):
         div = html.Tag(parent, 'div', class_='moose-example')
         left = html.Tag(div, 'div', class_='moose-example-code')
-        ast = tokens.Code(left, code=token.data)
+        ast = tokens.Code(None, code=token.data)
         self.translator.renderer.process(left, ast)
         html.Tag(div, 'div', class_='moose-example-rendered')
 
     def createMaterialize(self, token, parent):
+
         div = html.Tag(parent, 'div', class_='row card-content')
         left = html.Tag(div, 'div', class_='moose-example-code col s12 m12 l12')
-        ast = tokens.Code(left, code=token.data)
+        ast = tokens.Code(None, code=token.data)
         self.translator.renderer.process(left, ast)
         right = html.Tag(div, 'div', class_='moose-example-rendered col s12 m12 l12')
         return right
