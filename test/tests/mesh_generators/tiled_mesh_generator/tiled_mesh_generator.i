@@ -1,18 +1,15 @@
 [MeshGenerators]
-  [./gmg]
-    type = GeneratedMeshGenerator
-    dim = 3
-    nx = 3
-    ny = 3
-    nz = 3
+  [./fmg]
+    type = FileMeshGenerator
+    file = cube.e
   []
 
   [./tmg]
     type = TiledMeshGenerator
-    input = gmg
-    x_width = 1
-    y_width = 1
-    z_width = 1
+    input = fmg
+    x_width = 10
+    y_width = 10
+    z_width = 10
 
     left_boundary = left
     right_boundary = right
@@ -22,8 +19,12 @@
     back_boundary = back
 
     x_tiles = 2
-    y_tiles = 1
-    z_tiles = 5
+    y_tiles = 2
+    z_tiles = 2
+
+    # You can only run this test with ReplicatedMesh because the underlying
+    # algorithm, stitch_meshes(), only works with ReplicatedMesh.
+    parallel_type = replicated
   []
 []
 
