@@ -177,6 +177,8 @@ NonlinearSystem::solve()
   PetscNonlinearSolver<Real> & solver =
       static_cast<PetscNonlinearSolver<Real> &>(*_transient_sys.nonlinear_solver);
   solver.mffd_residual_object = &_fd_residual_functor;
+
+  solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
 #endif
 
   if (_time_integrator)

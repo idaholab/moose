@@ -237,6 +237,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _input_file_saved(false),
     _has_dampers(false),
     _has_constraints(false),
+    _snesmf_reuse_base(true),
+    _snesmf_reuse_base_set_by_user(false),
     _has_initialized_stateful(false),
     _const_jacobian(false),
     _has_jacobian(false),
