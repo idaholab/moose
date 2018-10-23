@@ -4,4 +4,9 @@
     input = exodiff.i
     exodiff = bogus_exodiff_out.e
   [../]
+  [./csvdiff]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = does_not_exist.csv
+  [../]
 []

@@ -1,0 +1,224 @@
+#!/usr/bin/env python2.7
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
+import os, re, math, sys, argparse
+
+class CSVDiffer:
+    def __init__(self, args):
+        self.files = args.csv_file
+        self.abs_zero = float(args.abs_zero)
+        self.rel_tol = float(args.relative_tolerance)
+        self.custom_columns = args.custom_columns
+        self.custom_rel_err = args.custom_rel_err
+        self.custom_abs_zero = args.custom_abs_zero
+        self.only_compare_custom = args.only_compare_custom
+        self.msg = ''
+        self.num_errors = 0
+
+    # diff the files added to the system and return a message of differences
+    # This method should only be called once. If it called again you must
+    # manually clear messages by calling clearDiff
+    def diff(self):
+
+        # Setup data structures for holding customized relative tolerance and absolute
+        # zero values and flag for checking variable names
+        rel_err_map = {}
+        abs_zero_map = {}
+        found_column = {}
+        if self.custom_columns:
+            for i in range(0, len(self.custom_columns)):
+                rel_err_map[self.custom_columns[i]] = float(self.custom_rel_err[i])
+                abs_zero_map[self.custom_columns[i]] = float(self.custom_abs_zero[i])
+                found_column[self.custom_columns[i]] = False
+
+
+        # use this value to skip the rest of the tests when we've found an error
+        # the order of the tests is most general to most specific, so if a general
+        # one fails then the more specific ones will probably not only fail, but
+        # crash the program because it's looking in a column that doesn't exist
+        foundError = False
+
+        (table1, table2) = self.convertToTable(self.files)
+
+        # Make sure header names are the same (also makes sure # cols is the same)
+        # This way it reports what column is missing, not just # cols is different
+        keys1 = table1.keys()
+        keys2 = table2.keys()
+        (large,small) = (keys1,keys2)
+
+        # check if custom tolerances used, column name exists in one of
+        # the CSV files
+        if self.custom_columns and self.only_compare_custom:
+            # For the rest of the comparison, we only care about custom columns
+            keys1 = self.custom_columns
+            for key in self.custom_columns:
+                if key not in small or key not in large:
+                    self.addError(self.files[0], "Header '" + key + "' is missing")
+                    foundError = True
+        elif len(keys1) < len(keys2):
+            (large,small) = (keys2,keys1)
+            for key in large:
+                if key not in small:
+                    self.addError(self.files[0], "Header '" + key + "' is missing")
+                    foundError = True
+        else:
+            for key in keys1:
+                found_column[key] = True
+
+        if foundError:
+            return self.msg
+
+        # now check that each column is the same length
+        for key in keys1:
+            if len(table1[key]) != len(table2[key]):
+                self.addError(self.files[0], "Columns with header '" + key + "' aren't the same length")
+                foundError = True
+                # assume all columns are the same length, so don't report the other errors
+                break
+
+        if foundError:
+            return self.msg
+
+        # now check all the values in the table
+        abs_zero = self.abs_zero
+        rel_tol = self.rel_tol
+        for key in keys1:
+            for val1, val2 in zip( table1[key], table2[key] ):
+                # if customized tolerances specified use them otherwise
+                # use the default
+                if self.custom_columns:
+                    try:
+                        abs_zero = abs_zero_map[key]
+                    except:
+                        abs_zero = self.abs_zero
+                if abs(val1) < abs_zero:
+                    val1 = 0
+                if abs(val2) < abs_zero:
+                    val2 = 0
+
+                # disallow nan in the gold file
+                if math.isnan(val1):
+                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain NaN")
+
+                # disallow inf in the gold file
+                if math.isinf(val1):
+                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" contain Inf")
+
+                # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
+                if val1 == 0 and val2 == 0:
+                    continue
+
+                rel_diff = 0
+                if max( abs(val1), abs(val2) ) > 0:
+                    rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
+
+                # if customized tolerances specified use them otherwise
+                # use the default
+                if self.custom_columns:
+                    try:
+                        rel_tol = rel_err_map[key]
+                    except:
+                        rel_tol = self.rel_tol
+                if rel_diff > rel_tol:
+                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" don't match\n\trel diff:  " + str(val1) + " ~ " + str(val2) + " = " + str(rel_diff))
+                    # assume all other vals in this column are wrong too, so don't report them
+                    break
+
+        # Loop over variable names to check if any are missing from all the
+        # CSV files being compared
+        if self.custom_columns and not self.only_compare_custom:
+           for mykey2 in self.custom_columns:
+               if not found_column[mykey2]:
+                  self.addError("all CSV files", "Variable '" + mykey2 + "' in custom_columns is missing" )
+
+        return self.msg
+
+    # convert text to a map of column names to column values
+    def convertToTable(self, files):
+        table_pair = []
+        for f in files:
+            f.seek(0)
+            text = f.read()
+            text = re.sub( r'\n\s*\n', '\n', text).strip()
+
+            # Exceptions occur if you try to parse a .e file
+            try:
+                lines = text.split('\n')
+                headers = lines.pop(0).split(',')
+                table = {}
+                for header in headers:
+                    table[header] = []
+
+                for row in lines:
+                    vals = row.split(',')
+                    if len(headers) != len(vals):
+                        self.addError(f, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
+                    for header, val in zip(headers,vals):
+                        try:
+                            table[header].append(float(val))
+                        except:
+                            # ignore strings
+                            table[header].append(0)
+
+            except Exception as e:
+                self.addError(f, "Exception parsing file: "+str(e.args))
+                return {}
+
+            table_pair.append(table)
+
+        return table_pair
+
+    # add an error to the message
+    # every error is added through here, so it could also output in xml, etc.
+    def addError(self, f, message):
+        self.msg += 'In ' + f.name + ': ' + message + '\n'
+        self.num_errors += 1
+
+    def getNumErrors(self):
+        """Return number of errors in diff"""
+        return self.num_errors
+
+def verifyArgs(args):
+    # Check if all custom args are populated correctly
+    unify_custom_args = [x for x in [args.custom_columns, args.custom_abs_zero, args.custom_rel_err] if x != None]
+    if unify_custom_args and len(unify_custom_args) != 3:
+        print 'When using any --custom-* option, you must use all three'
+        sys.exit(1)
+    elif unify_custom_args:
+        if len(set([len(x) for x in unify_custom_args])) > 1:
+            print 'All --custom-* options need to contain the same number of space separated items'
+            sys.exit(1)
+    return args
+
+def parseArgs(args=None):
+    parser = argparse.ArgumentParser(description='Tool for testing differences between two CSV files')
+    parser.add_argument('csv_file', nargs=2, type=argparse.FileType('r'))
+    parser.add_argument('--use-config', '-c', nargs=1, type=argparse.FileType('r'), metavar='config_file', help='Use comparison configuration file')
+    parser.add_argument('--ignore-fields', '-i', nargs='+', metavar='id', help='Ignore specified space-separated field IDs')
+    parser.add_argument('--diff-fields', '-f', nargs='+', metavar='id', help='Perform diff tests only on space-separated field IDs')
+    parser.add_argument('--abs-zero', nargs=1, metavar='absolute zero', default='1e-11', help='Exponential expression representing zero (default: 1e-11)')
+    parser.add_argument('--relative-tolerance', nargs=1, metavar='tolerance', default='5.5e-6', help='Exponential expression representing the acceptable tolerance between comparisons (default: 5.5e-6)')
+    parser.add_argument('--only-compare-custom', action='store_const', const=True, default=False, help='If using --custom-* options, ignore every field except those specified in --custom-columns')
+    parser.add_argument('--custom-columns', nargs='+', metavar='field', help='Space separated list of custom field IDs to compare')
+    parser.add_argument('--custom-abs-zero', nargs='+', metavar='exponential', help='Space separated list of corresponding exponential absolute zero values for --custom-colums')
+    parser.add_argument('--custom-rel-err', nargs='+', metavar='exponential', help='Space separated list of corresponding acceptable exponential tolerance values for --custom-colums')
+    return verifyArgs(parser.parse_args(args))
+
+if __name__ == '__main__':
+    args = parseArgs()
+    csv_tester = CSVDiffer(args)
+    messages = csv_tester.diff()
+    args.csv_file[0].close()
+    args.csv_file[1].close()
+    if len(messages):
+        print messages
+        sys.exit(1)
+    else:
+        print "Files are the same"
