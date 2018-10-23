@@ -38,7 +38,7 @@ public:
 
   inline bool operator==(const Attribute & other) const
   {
-    return _id == other._id && isMatch(other);
+    return _id == other._id && isEqual(other);
   }
   inline bool operator!=(const Attribute & other) const { return !(*this == other); }
 
@@ -57,10 +57,14 @@ public:
 
   /// initFrom reads and stores the desired meta-data from obj for later matching comparisons.
   virtual void initFrom(const MooseObject * obj) = 0;
-  /// isMatch returns true if the meta-data stored in this attribute has the same value as that
-  /// stored in other. isMatch does not need to check/compare the values from the instances' id()
-  /// functions.
+  /// isMatch returns true if the meta-data stored in this attribute is equivalent to that
+  /// stored in other. This is is for query matching - not exact equivalence. isMatch does not need
+  /// to check/compare the values from the instances' id() functions.
   virtual bool isMatch(const Attribute & other) const = 0;
+  /// isEqual returns true if the meta-data stored in this attribute is identical to that
+  /// stored in other. isEqual does not need to check/compare the values from the instances' id()
+  /// functions.
+  virtual bool isEqual(const Attribute & other) const = 0;
   /// clone creates and returns and identical (deep) copy of this attribute - i.e. the result of
   /// clone should return true if passed into isMatch.
   virtual std::unique_ptr<Attribute> clone() const = 0;

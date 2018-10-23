@@ -68,6 +68,7 @@ public:
     auto o = static_cast<const TestAttrib *>(&other);
     return val == o->val;
   }
+  virtual bool isEqual(const Attribute & other) const override { return isMatch(other); }
 
   virtual size_t hash() const override
   {
