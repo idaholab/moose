@@ -17,6 +17,7 @@
 #include "Executioner.h"
 #include "MooseEnum.h"
 #include "MooseVariableFE.h"
+#include "RelationshipManager.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -87,7 +88,6 @@ AdaptivityAction::act()
 
   if (_current_task == "add_geometric_rm")
   {
-    /*
     auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
 
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
@@ -104,10 +104,11 @@ AdaptivityAction::act()
     }
     else
       mooseError("Invalid initialization of ElementSideNeighborLayers");
-    */
   }
   else if (_current_task == "setup_adaptivity")
   {
+    std::cout << "setup_adaptivity" << std::endl;
+
     NonlinearSystemBase & system = _problem->getNonlinearSystemBase();
 
     Adaptivity & adapt = _problem->adaptivity();

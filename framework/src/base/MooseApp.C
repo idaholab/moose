@@ -1704,13 +1704,15 @@ MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_t
 
       if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
       {
-        auto & problem = _executioner->feProblem();
-        auto & mesh = problem.mesh();
+        // The problem is not built yet - so the ActionWarehouse currently owns the mesh
+        auto & mesh = _action_warehouse.mesh();
 
-        mesh.getMesh().add_ghosting_functor(*rm);
+        rm->init();
 
-        if (problem.getDisplacedProblem())
-          problem.getDisplacedProblem()->mesh().getMesh().add_ghosting_functor(*rm);
+        mesh->getMesh().add_ghosting_functor(*rm);
+
+        if (_action_warehouse.displacedMesh())
+          _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
       }
 
       if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
@@ -1718,8 +1720,11 @@ MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_t
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
         {
+          // Now that the Problem is buil we'll get the mesh from there
           auto & problem = _executioner->feProblem();
           auto & mesh = problem.mesh();
+
+          rm->init();
 
           mesh.getMesh().add_ghosting_functor(*rm);
 
@@ -1728,6 +1733,10 @@ MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_t
         }
 
         auto & problem = _executioner->feProblem();
+
+        // If it is not at all GEOMETRIC then it hasn't been inited
+        if (!rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
+          rm->init();
 
         problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
         problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(*rm);
@@ -1746,15 +1755,11 @@ MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_t
 std::vector<std::pair<std::string, std::string>>
 MooseApp::getRelationshipManagerInfo() const
 {
-  std::cout << "  Printing RM info" << std::endl;
-
   std::vector<std::pair<std::string, std::string>> info_strings;
   info_strings.reserve(_relationship_managers.size());
 
   for (const auto & rm : _relationship_managers)
   {
-    std::cout << "   Print about " << Moose::stringify(rm->getType()) << std::endl;
-
     auto info = rm->getInfo();
     if (info.size())
       info_strings.emplace_back(std::make_pair(Moose::stringify(rm->getType()), info));
