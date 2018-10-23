@@ -57,6 +57,7 @@ public:
   }
 
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_vals);
 
 protected:
@@ -89,6 +90,7 @@ public:
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_vals);
   clonefunc(AttribExecOns);
 
@@ -105,6 +107,7 @@ public:
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_vals);
   clonefunc(AttribSubdomains);
 
@@ -122,6 +125,7 @@ public:
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_vals, _must_be_restricted);
   clonefunc(AttribBoundaries);
 
@@ -136,6 +140,7 @@ public:
   AttribThread(TheWarehouse & w, THREAD_ID t) : Attribute(w, "thread"), _val(t) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribThread);
 
@@ -150,6 +155,7 @@ public:
   AttribPreIC(TheWarehouse & w, bool pre_ic) : Attribute(w, "pre_ic"), _val(pre_ic) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribPreIC);
 
@@ -164,6 +170,7 @@ public:
   AttribPreAux(TheWarehouse & w, bool pre_aux) : Attribute(w, "pre_aux"), _val(pre_aux) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribPreAux);
 
@@ -177,6 +184,7 @@ public:
   AttribName(TheWarehouse & w, const std::string & name) : Attribute(w, "name"), _val(name) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribName);
 
@@ -192,6 +200,7 @@ public:
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribSystem);
 
@@ -205,6 +214,7 @@ public:
   AttribVar(TheWarehouse & w, int var) : Attribute(w, "variable"), _val(var) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribVar);
 
@@ -222,6 +232,7 @@ public:
   AttribInterfaces(TheWarehouse & w, unsigned int mask) : Attribute(w, "interfaces"), _val(mask) {}
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribInterfaces);
 

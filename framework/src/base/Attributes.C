@@ -39,6 +39,19 @@ AttribTagBase::isMatch(const Attribute & other) const
   return false;
 }
 
+bool
+AttribTagBase::isEqual(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribTagBase *>(&other);
+  if (!a || a->_vals.size() != _vals.size())
+    return false;
+
+  for (size_t i = 0; i < a->_vals.size(); i++)
+    if (a->_vals[i] != _vals[i])
+      return false;
+  return true;
+}
+
 void
 AttribMatrixTags::initFrom(const MooseObject * obj)
 {
@@ -93,6 +106,19 @@ AttribExecOns::isMatch(const Attribute & other) const
   return false;
 }
 
+bool
+AttribExecOns::isEqual(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribExecOns *>(&other);
+  if (!a || a->_vals.size() != _vals.size())
+    return false;
+
+  for (size_t i = 0; i < a->_vals.size(); i++)
+    if (a->_vals[i] != _vals[i])
+      return false;
+  return true;
+}
+
 void
 AttribSubdomains::initFrom(const MooseObject * obj)
 {
@@ -123,6 +149,19 @@ AttribSubdomains::isMatch(const Attribute & other) const
       return true;
   }
   return false;
+}
+
+bool
+AttribSubdomains::isEqual(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribSubdomains *>(&other);
+  if (!a || a->_vals.size() != _vals.size())
+    return false;
+
+  for (size_t i = 0; i < a->_vals.size(); i++)
+    if (a->_vals[i] != _vals[i])
+      return false;
+  return true;
 }
 
 void
@@ -157,6 +196,19 @@ AttribBoundaries::isMatch(const Attribute & other) const
   return false;
 }
 
+bool
+AttribBoundaries::isEqual(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribBoundaries *>(&other);
+  if (!a || a->_vals.size() != _vals.size())
+    return false;
+
+  for (size_t i = 0; i < a->_vals.size(); i++)
+    if (a->_vals[i] != _vals[i])
+      return false;
+  return true;
+}
+
 void
 AttribThread::initFrom(const MooseObject * obj)
 {
@@ -167,6 +219,11 @@ AttribThread::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribThread *>(&other);
   return a && (a->_val == _val);
+}
+bool
+AttribThread::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
 }
 
 void
@@ -180,6 +237,12 @@ AttribPreIC::isMatch(const Attribute & other) const
   return a && (a->_val == _val);
 }
 
+bool
+AttribPreIC::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
 void
 AttribPreAux::initFrom(const MooseObject * /*obj*/)
 {
@@ -189,6 +252,12 @@ AttribPreAux::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribPreAux *>(&other);
   return a && (a->_val == _val);
+}
+
+bool
+AttribPreAux::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
 }
 
 void
@@ -203,6 +272,12 @@ AttribName::isMatch(const Attribute & other) const
   return a && (a->_val == _val);
 }
 
+bool
+AttribName::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
 void
 AttribSystem::initFrom(const MooseObject * /*obj*/)
 {
@@ -212,6 +287,12 @@ AttribSystem::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribSystem *>(&other);
   return a && (a->_val == _val);
+}
+
+bool
+AttribSystem::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
 }
 
 void
@@ -226,6 +307,12 @@ AttribVar::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribVar *>(&other);
   return a && (a->_val == _val);
+}
+
+bool
+AttribVar::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
 }
 
 void
@@ -252,4 +339,11 @@ AttribInterfaces::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribInterfaces *>(&other);
   return a && (a->_val & _val);
+}
+
+bool
+AttribInterfaces::isEqual(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribInterfaces *>(&other);
+  return a && (a->_val == _val);
 }

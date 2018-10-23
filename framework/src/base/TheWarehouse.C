@@ -56,7 +56,7 @@ public:
       bool ismatch = true;
       for (auto & cond : conds)
       {
-        if (*data[cond->id()] != *cond.get())
+        if (!data[cond->id()]->isMatch(*cond))
         {
           ismatch = false;
           break;

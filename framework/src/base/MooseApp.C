@@ -1544,7 +1544,11 @@ MooseApp::addExecFlag(const ExecFlagType & flag)
     // the ID to be set after construction. This was the lesser of two evils: const_cast or
     // friend class with mutable members.
     ExecFlagType & non_const_flag = const_cast<ExecFlagType &>(flag);
-    non_const_flag.setID(_execute_flags.getNextValidID());
+    auto it = _execute_flags.find(flag.name());
+    if (it != _execute_flags.items().end())
+      non_const_flag.setID(it->id());
+    else
+      non_const_flag.setID(_execute_flags.getNextValidID());
   }
   _execute_flags.addAvailableFlags(flag);
 }
