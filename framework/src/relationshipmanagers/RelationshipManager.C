@@ -54,8 +54,6 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
     _mesh(*getCheckedPointerParam<MooseMesh *>(
         "mesh", "Mesh is null in GeometricRelationshipManager ctor")),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
-    _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
-    _cached_callbacks(Moose::RelationshipManagerType::DEFAULT),
-    _has_set_remote_elem_removal_flag(false)
+    _rm_type(getParam<Moose::RelationshipManagerType>("rm_type"))
 {
 }

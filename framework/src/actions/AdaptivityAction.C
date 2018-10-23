@@ -87,6 +87,7 @@ AdaptivityAction::act()
 
   if (_current_task == "add_geometric_rm")
   {
+    /*
     auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
 
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
@@ -103,6 +104,7 @@ AdaptivityAction::act()
     }
     else
       mooseError("Invalid initialization of ElementSideNeighborLayers");
+    */
   }
   else if (_current_task == "setup_adaptivity")
   {

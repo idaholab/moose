@@ -39,9 +39,9 @@ std::string
 ElementSideNeighborLayers::getInfo() const
 {
   std::ostringstream oss;
-  std::string layers = _element_side_neighbor_layers == 1 ? "layer" : "layers";
+  std::string layers = _layers == 1 ? "layer" : "layers";
 
-  oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << layers << ')';
+  oss << "ElementSideNeighborLayers (" << _layers << layers << ')';
   return oss.str();
 }
 
@@ -52,12 +52,14 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _element_side_neighbor_layers == rm->_element_side_neighbor_layers;
+    return _layers == rm->_layers;
 }
 
 void
 ElementSideNeighborLayers::internalInit()
 {
-  _functor = libmesh_make_unique<DefaultCoupling>();
-  _functor->set_n_levels(_element_side_neighbor_layers);
+  auto functor = libmesh_make_unique<DefaultCoupling>();
+  functor->set_n_levels(_layers);
+
+  _functor = std::move(functor);
 }

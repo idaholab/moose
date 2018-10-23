@@ -10,8 +10,6 @@
 #ifndef ELEMENTSIDENEIGHBORLAYERS_H
 #define ELEMENTSIDENEIGHBORLAYERS_H
 
-#include "AlgebraicRelationshipManager.h"
-
 #include "libmesh/default_coupling.h"
 
 // Forward declarations
