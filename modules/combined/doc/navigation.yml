@@ -10,8 +10,6 @@ Getting Started:
     Manual Install (GCC): getting_started/installation/manual_installation_gcc.md
     Manual Install (LLVM): getting_started/installation/manual_installation_llvm.md
 Documentation:
-    Syntax: syntax/index.md
-    Source: source/index.md
     Examples: examples/index.md
     Application Usage: application_usage/index.md
     Application Development: application_development/index.md
