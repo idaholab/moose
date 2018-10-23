@@ -45,7 +45,8 @@ MooseObjectAction::MooseObjectAction(InputParameters params)
   _moose_object_pars.blockFullpath() = params.blockFullpath();
 }
 
-void MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType /*when_type*/)
+void
+MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType rm_type)
 {
   const auto & buildable_types = _moose_object_pars.getBuildableRelationshipManagerTypes();
 
@@ -62,6 +63,20 @@ void MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType /
 
     auto rm_params = _factory.getValidParams(buildable_type.first);
     rm_params.applyParameters(_moose_object_pars);
+
+    // If we're doing geometric but we can't build it early - then let's not build it yet
+    // (It will get built when we do algebraic)
+    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC &&
+        !rm_params.get<bool>("attach_geometric_early"))
+    {
+      // We also need to tell the mesh not to delete remote elements yet
+      // Note this will get reset in AddRelationshipManager::act() when attaching Algebraic
+      _mesh->getMesh().allow_remote_element_removal(false);
+
+      // Keep looking for more RMs
+      continue;
+    }
+
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
     rm_params.set<Moose::RelationshipManagerType>("rm_type") = buildable_type.second;
 

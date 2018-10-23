@@ -10,7 +10,7 @@
 #ifndef ELEMENTPOINTNEIGHBORLAYERS_H
 #define ELEMENTPOINTNEIGHBORLAYERS_H
 
-#include "AlgebraicRelationshipManager.h"
+#include "FunctorRelationshipManager.h"
 
 #include "libmesh/default_coupling.h"
 
