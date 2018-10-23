@@ -408,7 +408,7 @@ inline void
 dataStore(std::ostream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
 {
   dataStore(stream, dn_wrapper.value(), context);
-  dataStore(stream, dn_wrapper.dn(), context);
+  dataStore(stream, dn_wrapper.dn(false), context);
 }
 
 // global load functions
@@ -658,7 +658,7 @@ inline void
 dataLoad(std::istream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
 {
   dataLoad(stream, dn_wrapper.value(), context);
-  dataLoad(stream, dn_wrapper.dn(), context);
+  dataLoad(stream, dn_wrapper.dn(false), context);
 }
 
 // Scalar Helper Function
