@@ -41,7 +41,7 @@ ElementSideNeighborLayers::getInfo() const
   std::ostringstream oss;
   std::string layers = _layers == 1 ? "layer" : "layers";
 
-  oss << "ElementSideNeighborLayers (" << _layers << layers << ')';
+  oss << "ElementSideNeighborLayers (" << _layers << " " << layers << ')';
   return oss.str();
 }
 

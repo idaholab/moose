@@ -10,12 +10,7 @@
 #include "AddRelationshipManager.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddRelationshipManager, "add_algebraic_rm");
-
-registerMooseAction("MooseApp", AddRelationshipManager, "add_geometric_rm");
-
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_geometric_rm");
-
 registerMooseAction("MooseApp", AddRelationshipManager, "attach_algebraic_rm");
 
 template <>
@@ -30,25 +25,22 @@ AddRelationshipManager::AddRelationshipManager(InputParameters params) : Action(
 void
 AddRelationshipManager::act()
 {
-  if (_current_task == "add_geometric_rm")
+  if (_current_task == "attach_geometric_rm")
   {
+    // Add any more relationship managers that are needed
     const auto & all_action_ptrs = _awh.allActionBlocks();
     for (const auto & action_ptr : all_action_ptrs)
       action_ptr->addRelationshipManagers(Moose::RelationshipManagerType::GEOMETRIC);
+
+    _app.attachRelationshipManagers(Moose::RelationshipManagerType::GEOMETRIC);
   }
 
-  if (_current_task == "add_algebraic_rm")
+  if (_current_task == "attach_algebraic_rm")
   {
     const auto & all_action_ptrs = _awh.allActionBlocks();
     for (const auto & action_ptr : all_action_ptrs)
       action_ptr->addRelationshipManagers(Moose::RelationshipManagerType::ALGEBRAIC);
-  }
 
-  if (_current_task == "attach_geometric_rm")
-    _app.attachRelationshipManagers(Moose::RelationshipManagerType::GEOMETRIC);
-
-  if (_current_task == "attach_algebraic_rm")
-  {
     _app.attachRelationshipManagers(Moose::RelationshipManagerType::ALGEBRAIC);
 
     // If we're doing Algebraic then we're done adding ghosting functors
