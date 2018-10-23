@@ -345,10 +345,16 @@ stringToEnum<RelationshipManagerType>(const std::string & s)
   return rm_type_to_enum[upper];
 }
 
+// Ignore warnings about switching on the |'d type
+#include "libmesh/ignore_warnings.h"
+
 // Definition in MooseTypes.h
 std::string
 stringify(const RelationshipManagerType & t)
 {
+  constexpr RelationshipManagerType geoalgo = static_cast<RelationshipManagerType>(
+      (char)RelationshipManagerType::GEOMETRIC | (char)RelationshipManagerType::ALGEBRAIC);
+
   switch (t)
   {
     case RelationshipManagerType::DEFAULT:
@@ -357,12 +363,17 @@ stringify(const RelationshipManagerType & t)
       return "GEOMETRIC";
     case RelationshipManagerType::ALGEBRAIC:
       return "ALGEBRAIC";
+    case geoalgo:
+      return "GEOMETRIC and ALGEBRAIC";
     case RelationshipManagerType::COUPLING:
       return "COUPLING";
     default:
       return "ERROR";
   }
 }
+
+// Turn the warnings back on
+#include "libmesh/restore_warnings.h"
 
 std::string
 stringify(const SolveType & t)
