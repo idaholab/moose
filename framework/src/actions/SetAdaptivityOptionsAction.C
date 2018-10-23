@@ -13,6 +13,7 @@
 #include "libmesh/fe.h"
 
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_options");
+registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "add_geometric_rm");
 
 template <>
 InputParameters
@@ -52,6 +53,27 @@ SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(InputParameters params) :
 void
 SetAdaptivityOptionsAction::act()
 {
+  if (_current_task == "add_geometric_rm")
+  {
+    auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
+
+    rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
+
+    if (rm_params.areAllRequiredParamsValid())
+    {
+      auto rm_obj = _factory.create<RelationshipManager>(
+          "ElementSideNeighborLayers", "adaptivity_ghosting", rm_params);
+
+      // Delete the resources created on behalf of the RM if it ends up not being added to the
+      // App.
+      if (!_app.addRelationshipManager(rm_obj))
+        _factory.releaseSharedObjects(*rm_obj);
+    }
+    else
+      mooseError("Invalid initialization of ElementSideNeighborLayers");
+  }
   if (_current_task == "set_adaptivity_options")
   {
     Adaptivity & adapt = _problem->adaptivity();
