@@ -31,8 +31,12 @@ nearestPointBaseValidParams()
 {
   InputParameters params = validParams<ElementIntegralVariableUserObject>();
 
-  params.addRequiredParam<std::vector<Point>>(
-      "points", "Computations will be lumped into values at these points.");
+  params.addParam<std::vector<Point>>("points",
+                                      "Computations will be lumped into values at these points.");
+  params.addParam<FileName>("points_file",
+                            "A filename that should be looked in for points. Each "
+                            "set of 3 values in that file will represent a Point.  "
+                            "This and 'points' cannot be both supplied.");
 
   // Add in the valid parameters
   params += validParams<UserObjectType>();
@@ -70,6 +74,12 @@ public:
 
 protected:
   /**
+   * Fills in the `_points` variable from either 'points' or 'points_file' parameter.
+   * Also performs error checking.
+   */
+  void fillPoints();
+
+  /**
    * Get the UserObject that is closest to the point.
    *
    * @param p The point.
@@ -86,8 +96,10 @@ protected:
 
 template <typename UserObjectType>
 NearestPointBase<UserObjectType>::NearestPointBase(const InputParameters & parameters)
-  : ElementIntegralVariableUserObject(parameters), _points(getParam<std::vector<Point>>("points"))
+  : ElementIntegralVariableUserObject(parameters)
 {
+  fillPoints();
+
   _user_objects.reserve(_points.size());
 
   // Build each of the UserObject objects:
@@ -105,6 +117,57 @@ NearestPointBase<UserObjectType>::NearestPointBase(const InputParameters & param
 template <typename UserObjectType>
 NearestPointBase<UserObjectType>::~NearestPointBase()
 {
+}
+
+template <typename UserObjectType>
+void
+NearestPointBase<UserObjectType>::fillPoints()
+{
+  if (isParamValid("points") && isParamValid("points_file"))
+    mooseError(name(), ": Both 'points' and 'points_file' cannot be specified simultaneously.");
+
+  if (isParamValid("points"))
+  {
+    _points = getParam<std::vector<Point>>("points");
+  }
+  else if (isParamValid("points_file"))
+  {
+    const FileName & points_file = getParam<FileName>("points_file");
+    std::vector<Real> points_vec;
+
+    if (processor_id() == 0)
+    {
+      MooseUtils::checkFileReadable(points_file);
+
+      std::ifstream is(points_file.c_str());
+      std::istream_iterator<Real> begin(is), end;
+      points_vec.insert(points_vec.begin(), begin, end);
+
+      if (points_vec.size() % LIBMESH_DIM != 0)
+        mooseError(name(),
+                   ": Number of entries in 'points_file' ",
+                   points_file,
+                   " must be divisible by ",
+                   LIBMESH_DIM);
+    }
+
+    // Broadcast the vector to all processors
+    std::size_t num_points = points_vec.size();
+    _communicator.broadcast(num_points);
+    points_vec.resize(num_points);
+    _communicator.broadcast(points_vec);
+
+    for (std::size_t i = 0; i < points_vec.size(); i += LIBMESH_DIM)
+    {
+      Point point;
+      for (std::size_t j = 0; j < LIBMESH_DIM; j++)
+        point(j) = points_vec[i + j];
+
+      _points.push_back(point);
+    }
+  }
+  else
+    mooseError(name(), ": You need to supply either 'points' or 'points_file' parameter.");
 }
 
 template <typename UserObjectType>
