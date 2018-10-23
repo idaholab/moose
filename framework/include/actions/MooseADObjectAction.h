@@ -10,7 +10,7 @@
 #ifndef MOOSEADOBJECTACTION_H
 #define MOOSEADOBJECTACTION_H
 
-#include "Action.h"
+#include "MooseObjectActionBase.h"
 
 #include <string>
 
@@ -19,34 +19,10 @@ class MooseADObjectAction;
 template <>
 InputParameters validParams<MooseADObjectAction>();
 
-class MooseADObjectAction : public Action
+class MooseADObjectAction : public MooseObjectActionBase
 {
 public:
   MooseADObjectAction(InputParameters params);
-
-  virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
-
-  /**
-   * Retreive the parameters of the object to be created by this action
-   */
-  InputParameters & getObjectParams() { return _moose_object_pars; }
-
-  /**
-   * Constant version of retreiving the parameters of the object to be created by this action
-   */
-  const InputParameters & getObjectParams() const { return _moose_object_pars; }
-
-  /**
-   * Return the object type to be created
-   */
-  const std::string & getMooseObjectType() const { return _type; }
-
-protected:
-  /// The Object type that is being created
-  std::string _type;
-
-  /// The parameters for the object to be created
-  InputParameters _moose_object_pars;
 };
 
 #endif // MOOSEADOBJECTACTION_H
