@@ -57,7 +57,9 @@ if __name__ == '__main__':
 
     # Check requirements on changed tests specs
     count = 0
-    cmd = ['git', 'diff', '{}/{}'.format(opt.remote, opt.branch), '--name-only']
+    cmd = ['git', 'merge-base', '{}/{}'.format(opt.remote, opt.branch), 'HEAD']
+    sha = subprocess.check_output(cmd).strip()
+    cmd = ['git', 'diff', sha, '--name-only']
     for filename in subprocess.check_output(cmd).split('\n'):
         if os.path.isfile(filename) and (os.path.basename(filename) in opt.specs):
             count += check_requirement(os.path.join(root, filename))
