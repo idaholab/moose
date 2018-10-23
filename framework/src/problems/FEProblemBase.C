@@ -4472,15 +4472,19 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
+  _aux->residualSetup();
+
   if (_displaced_problem != NULL)
+  {
+    _aux->compute(EXEC_PRE_DISPLACE);
     _displaced_problem->updateMesh();
+  }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _all_materials.residualSetup(tid);
     _functions.residualSetup(tid);
   }
-  _aux->residualSetup();
 
   _nl->computeTimeDerivatives();
 
@@ -4593,16 +4597,19 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);
 
+    _aux->jacobianSetup();
+
     if (_displaced_problem != NULL)
+    {
+      _aux->compute(EXEC_PRE_DISPLACE);
       _displaced_problem->updateMesh();
+    }
 
     for (unsigned int tid = 0; tid < n_threads; tid++)
     {
       _all_materials.jacobianSetup(tid);
       _functions.jacobianSetup(tid);
     }
-
-    _aux->jacobianSetup();
 
     _aux->compute(EXEC_NONLINEAR);
 
@@ -4643,7 +4650,10 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   TIME_SECTION(_compute_jacobian_blocks_timer);
 
   if (_displaced_problem != NULL)
+  {
+    _aux->compute(EXEC_PRE_DISPLACE);
     _displaced_problem->updateMesh();
+  }
 
   _aux->compute(EXEC_NONLINEAR);
 

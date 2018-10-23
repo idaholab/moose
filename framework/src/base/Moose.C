@@ -39,6 +39,7 @@ const ExecFlagType EXEC_FORCED("FORCED", 0x40);                 // 64
 const ExecFlagType EXEC_FAILED("FAILED", 0x80);                 // 128
 const ExecFlagType EXEC_CUSTOM("CUSTOM", 0x100);                // 256
 const ExecFlagType EXEC_SUBDOMAIN("SUBDOMAIN", 0x200);          // 512
+const ExecFlagType EXEC_PRE_DISPLACE("PRE_DISPLACE");
 const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP");
 
 namespace Moose
@@ -351,6 +352,7 @@ registerExecFlags(Factory & factory)
   registerExecFlag(EXEC_FAILED);
   registerExecFlag(EXEC_CUSTOM);
   registerExecFlag(EXEC_SUBDOMAIN);
+  registerExecFlag(EXEC_PRE_DISPLACE);
   registerExecFlag(EXEC_SAME_AS_MULTIAPP);
 }
 
