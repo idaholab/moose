@@ -52,7 +52,7 @@ SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(InputParameters params) :
 void
 SetAdaptivityOptionsAction::act()
 {
-  if (_current_task == "setup_adaptivity")
+  if (_current_task == "set_adaptivity_options")
   {
     Adaptivity & adapt = _problem->adaptivity();
 
