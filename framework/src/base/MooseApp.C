@@ -11,6 +11,9 @@
 #include "MooseApp.h"
 #include "MooseRevision.h"
 #include "AppFactory.h"
+#include "DisplacedProblem.h"
+#include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
 #include "MooseSyntax.h"
 #include "MooseInit.h"
 #include "Executioner.h"
@@ -1704,6 +1707,58 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
 
   // Inform the caller whether the object was added or not
   return add;
+}
+
+void
+MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_type)
+{
+  for (auto & rm : _relationship_managers)
+  {
+    if (rm->isType(rm_type))
+    {
+      // Will attach them later (during algebraic)
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC && !rm->attachGeometricEarly())
+        continue;
+
+      if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+      {
+        auto & problem = _executioner->feProblem();
+        auto & mesh = problem.mesh();
+
+        mesh.getMesh().add_ghosting_functor(*rm);
+
+        if (problem.getDisplacedProblem())
+          problem.getDisplacedProblem()->mesh().getMesh().add_ghosting_functor(*rm);
+      }
+
+      if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
+      {
+        // If it's also Geometric but didn't get attached early - then let's attach it now
+        if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
+        {
+          auto & problem = _executioner->feProblem();
+          auto & mesh = problem.mesh();
+
+          mesh.getMesh().add_ghosting_functor(*rm);
+
+          if (problem.getDisplacedProblem())
+            problem.getDisplacedProblem()->mesh().getMesh().add_ghosting_functor(*rm);
+        }
+
+        auto & problem = _executioner->feProblem();
+
+        problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
+        problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(*rm);
+
+        // We need to do the same thing for displaced problem
+        if (problem.getDisplacedProblem())
+        {
+          problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(*rm);
+          problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(*rm);
+        }
+      }
+    }
+  }
 }
 
 std::vector<std::pair<std::string, std::string>>

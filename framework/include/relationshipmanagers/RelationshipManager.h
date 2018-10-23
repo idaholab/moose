@@ -58,6 +58,13 @@ public:
    */
   Moose::RelationshipManagerType getType() const { return _rm_type; }
 
+  /**
+   * Check to see if an RM is of a given type
+   *
+   * This is here so that the boolean logic doesn't have to get spread everywhere in the world
+   */
+  bool isType(const Moose::RelationshipManagerType & type) { return (_rm_type & type) == type; }
+
   virtual bool operator==(const RelationshipManager & /*rhs*/) const
   {
     mooseError("Comparison operator required for this RelationshipManager required");
