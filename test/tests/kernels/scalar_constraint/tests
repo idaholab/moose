@@ -7,10 +7,7 @@
     max_parallel = 4
     design = 'syntax/ScalarKernels/index.md'
     requirement = 'MOOSE shall solve the constrained Neumann problem using the Lagrange multiplier approach.'
-    # This test was originally merged in cbf6d2235379f6ad75908b0f9d4be792dbce6c3d,
-    # once Andrew adds the ability to parse git commits in the issues
-    # field, we can replace the #000.
-    issues = '#000'
+    issues = 'cbf6d2235379f6ad75908b0f9d4be792dbce6c3d'
   [../]
 
   [./kernel_disp]
