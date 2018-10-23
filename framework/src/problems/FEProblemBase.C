@@ -2208,8 +2208,15 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
       MooseVariableFEBase & var = getVariable(
           tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       parameters.set<SystemBase *>("_sys") = &var.sys();
-      std::shared_ptr<InitialCondition> ic =
-          _factory.create<InitialCondition>(ic_name, name, parameters, tid);
+      std::shared_ptr<InitialConditionBase> ic;
+      if (dynamic_cast<MooseVariable *>(&var))
+        ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
+      else if (dynamic_cast<VectorMooseVariable *>(&var))
+        ic = _factory.create<VectorInitialCondition>(ic_name, name, parameters, tid);
+      else
+        mooseError("Your FE variable in initial condition ",
+                   name,
+                   " must be either of scalar or vector type");
       _ics.addObject(ic, tid);
     }
   }

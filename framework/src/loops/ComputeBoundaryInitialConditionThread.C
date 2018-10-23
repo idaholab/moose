@@ -41,27 +41,10 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
 
   if (warehouse.hasActiveBoundaryObjects(boundary_id, _tid))
   {
-    const std::vector<std::shared_ptr<InitialCondition>> & ics =
-        warehouse.getActiveBoundaryObjects(boundary_id, _tid);
+    const auto & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
     for (const auto & ic : ics)
-    {
       if (node->processor_id() == _fe_problem.processor_id())
-      {
-        MooseVariable & var = ic->variable();
-        var.reinitNode();
-        var.computeNodalValues(); // has to call this to resize the internal array
-        Real value = ic->value(*node);
-
-        var.setNodalValue(value); // update variable data, which is referenced by others, so the
-                                  // value is up-to-date
-
-        // We are done, so update the solution vector
-        {
-          Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          var.insert(var.sys().solution());
-        }
-      }
-    }
+        ic->computeNodal(*node);
   }
 }
 
