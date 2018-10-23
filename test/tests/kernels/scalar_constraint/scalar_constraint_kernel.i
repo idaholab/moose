@@ -42,8 +42,6 @@
   [../]
 []
 
-# NL
-
 [Variables]
   [./u]
     family = LAGRANGE
@@ -88,25 +86,25 @@
   [./bottom]
     type = FunctionNeumannBC
     variable = u
-    boundary = '0'
+    boundary = 'bottom'
     function = bottom_bc_fn
   [../]
   [./right]
     type = FunctionNeumannBC
     variable = u
-    boundary = '1'
+    boundary = 'right'
     function = right_bc_fn
   [../]
   [./top]
     type = FunctionNeumannBC
     variable = u
-    boundary = '2'
+    boundary = 'top'
     function = top_bc_fn
   [../]
   [./left]
     type = FunctionNeumannBC
     variable = u
-    boundary = '3'
+    boundary = 'left'
     function = left_bc_fn
   [../]
 []
@@ -126,18 +124,27 @@
 []
 
 [Preconditioning]
-  active = 'pc'
-
   [./pc]
     type = SMP
     full = true
-    solve_type = 'PJFNK'
+    solve_type = 'NEWTON'
   [../]
-[] # End preconditioning block
+[]
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 1e-15
+  nl_rel_tol = 1e-9
+  l_tol = 1.e-10
+  nl_max_its = 10
+  # This example builds an indefinite matrix, so "-pc_type hypre -pc_hypre_type boomeramg" cannot
+  # be used reliably on this problem. ILU(0) seems to do OK in both serial and parallel in my testing,
+  # I have not seen any zero pivot issues.
+  petsc_options_iname = '-pc_type -sub_pc_type'
+  petsc_options_value = 'bjacobi  ilu'
+  # This is a linear problem, so we don't need to recompute the
+  # Jacobian. This isn't a big deal for a Steady problems, however, as
+  # there is only one solve.
+  solve_type = 'LINEAR'
 []
 
 [Outputs]
