@@ -20,9 +20,12 @@ InputParameters
 validParams<PostprocessorCED>()
 {
   InputParameters params = validParams<ScalarKernel>();
-  params.addClassDescription("This class is used to solve a constrained Neumann problem with a Lagrange multiplier approach.");
-  params.addRequiredParam<PostprocessorName>("pp_name", "Name of the Postprocessor value we are trying to equate with 'value'.");
-  params.addRequiredParam<Real>("value", "Given (constant) which we want the integral of the solution variable to match.");
+  params.addClassDescription("This class is used to solve a constrained Neumann problem with a "
+                             "Lagrange multiplier approach.");
+  params.addRequiredParam<PostprocessorName>(
+      "pp_name", "Name of the Postprocessor value we are trying to equate with 'value'.");
+  params.addRequiredParam<Real>(
+      "value", "Given (constant) which we want the integral of the solution variable to match.");
 
   return params;
 }

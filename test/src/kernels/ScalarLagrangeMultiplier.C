@@ -24,7 +24,8 @@ InputParameters
 validParams<ScalarLagrangeMultiplier>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("This class is used to solve a constrained Neumann problem with a Lagrange multiplier approach.");
+  params.addClassDescription("This class is used to solve a constrained Neumann problem with a "
+                             "Lagrange multiplier approach.");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier variable");
 
   return params;
