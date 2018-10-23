@@ -65,7 +65,8 @@ def _add_requirements(out, location, filename):
             if local_issues is None:
                 msg = "The 'issues' parameter is missing from '%s' in %s. It must be defined at " \
                       "the top level and/or within the individual test specification. It " \
-                      "should contain a space separated list of issue numbers (include the #)."
+                      "should contain a space separated list of issue numbers (include the #) or " \
+                      "a git commit SHA."
                 LOG.error(msg, child.name, filename)
                 local_issues = ''
 

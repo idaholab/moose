@@ -153,7 +153,10 @@ class SQARequirementsCommand(command.CommandComponent):
                 p = tokens.Paragraph(item, 'p')
                 tokens.String(p, content=u'Issues: ')
                 for issue in req.issues:
-                    url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
+                    if issue.startswith('#'):
+                        url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
+                    else:
+                        url = u"https://github.com/idaholab/moose/commit/{}".format(issue[1:])
                     tokens.Link(p, url=url, string=unicode(issue))
                     tokens.Space(p)
 
