@@ -1,0 +1,8 @@
+[Tests]
+  [./block_deletion_test]
+    type = 'Exodiff'
+    input = 'block_deletion_test1.i'
+    cli_args = '--mesh-only'
+    exodiff = 'block_deletion_test1_in.e'
+  [../]
+[]
