@@ -1,15 +1,17 @@
 # Numerical diffusion
 
-Numerical diffusion has been mentioned in various other pages.  For example, it is evident in the sinks and newton cooling tests.  There are two main sources of numerical diffusion:
+Numerical diffusion is the artifical smoothing of quantities, such as temperature and concentrations, as they are transported through a numerical model.  In the case of PorousFlow, it is usually the fluid that transports these quantities (the fluid "advects" temperature and chemical species).  Numerical diffusion can be the major source of inaccurate results in simulations, as MOOSE predicts that tracer breakthrough times (etc) are much shorter than they are in reality.
+
+An animation of the tracer advection is shown in [tracer_advection_anim].  Notice that the initially-sharp profile suffers from diffusion.
+
+!media porous_flow/tracer_advection.gif style=width:50%;margin-left:10px caption=Tracer advection down the porepressure gradient.  id=tracer_advection_anim
+
+Numerical diffusion has been mentioned in various pieces of PorousFlow documentation (eg, in the [tutorial_06.md] and [source/kernels/PorousFlowFullySaturatedDarcyFlow.md], and the latex documentation concerning the sinks and Newton-cooling tests (search the PorousFlow doc directory for latex documetation)).  There are two main sources of numerical diffusion:
 
 - employing large time steps with MOOSE's implicit time stepping scheme
 - the full upwinding used by PorousFlow
 
 To quantify the numerical by example, a single-phase tracer advection problem is studied in 1D.  A porepressure gradient is established so that the Darcy velocity, $k \nabla P/\mu = 10^{-2}\,$m/s, and porosity is chosen to be $0.1$ so that the tracer advects down the porepressure gradient with a constant velocity of $\phi k\nabla P/\mu = 0.1\,$m/s.
-
-An animation of the tracer advection is shown in [tracer_advection_anim].  Notice that the initially-sharp profile suffers from diffusion.
-
-!media porous_flow/tracer_advection.gif style=width:50%;margin-left:10px caption=Tracer advection down the porepressure gradient.  id=tracer_advection_anim
 
 The degree of diffusion is a function of the spatial and temporal discretisation, as well as the upwinding, RDG reconstruction and limiting.  To quantify this, five input files are created:
 
@@ -60,7 +62,7 @@ The MOOSE input file is:
 
 ## RDG(P0)
 
-The MOOSE input file is:
+In RDG, the variables (just the tracer in this case) are constant-monomial, that is, they are constant throughout the element.  This means MOOSE behaves like a Finite Volume Method, and it means that the output looks less smooth than the usual linear-Lagrange variables (the figures below display "stepped" results).  The MOOSE input file is:
 
 !listing modules/rdg/test/tests/advection_1d/rdgP0.i
 
@@ -89,6 +91,7 @@ By way of comparison, [nds_100_100] and [nds_100_1000] show the results when the
 
 !media media/porous_flow/numerical_diffusion_summary_100_1000.png style=width:60%;margin-left:10px caption=Diffusion for different numerical schemes.  1000 timesteps are used.  id=nds_100_1000
 
+Interestingly, as the timestep size is decreased, the numerical diffusion is decreased when using lumping and upwinding, but only up to a point: increasing the number of timesteps from 100 to 10000 makes basically no difference when the number of elements is 100.  This suggests that lumping and full-upwinding will always produce numerical diffusion, and this may be proved by simple analysis (not presented here) since the tracer always gets moved from upwind node to downwind node irrespective of the concentration of the tracer.
 
 
 
