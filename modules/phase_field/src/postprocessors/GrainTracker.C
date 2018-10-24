@@ -53,7 +53,7 @@ validParams<GrainTracker>()
   params += validParams<GrainTrackerInterface>();
 
   params.registerRelationshipManagers("GrainTrackerHaloRM ElementPointNeighbors",
-                                      "GEOMETRIC ALGEBRAIC");
+                                      "GEOMETRIC|ALGEBRAIC ALGEBRAIC");
   params.addPrivateParam<unsigned short>("element_point_neighbor_layers", 1);
 
   // The GrainTracker requires non-volatile storage for tracking grains across invocations.
