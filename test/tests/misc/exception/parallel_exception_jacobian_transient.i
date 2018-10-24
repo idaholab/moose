@@ -46,6 +46,7 @@
   dt = 0.01
   dtmin = 0.005
   solve_type = 'PJFNK'
+  line_search = 'bt'
 []
 
 [Outputs]
