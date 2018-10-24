@@ -82,6 +82,7 @@ template <typename>
 class MaterialProperty;
 template <typename>
 class ADMaterialPropertyObject;
+class InputParameters;
 
 namespace libMesh
 {
@@ -591,6 +592,12 @@ enum class RelationshipManagerType : unsigned char
   ALGEBRAIC = 1 << 1,
   COUPLING = 1 << 2
 };
+
+/**
+ * The type for the callback to set RelationshipManager parameters
+ */
+typedef std::function<void(const InputParameters &, InputParameters &)>
+    RelationshipManagerInputParameterCallback;
 
 std::string stringify(const Moose::RelationshipManagerType & t);
 } // namespace Moose

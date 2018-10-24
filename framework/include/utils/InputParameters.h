@@ -30,6 +30,8 @@ class FunctionParserBase
 };
 #endif
 
+#include <tuple>
+
 // Forward declarations
 class Action;
 class InputParameters;
@@ -450,17 +452,28 @@ public:
   void registerBuildableTypes(const std::string & names);
 
   /**
-   * Declares the types of RelationshipManagers that the owning object will either construct (in the
-   * case of Actions) or requires (in the case of every other MooseObject). With normal
-   * MooseObject-derived types built by MooseObjectAction, MOOSE will attempt to use the
-   * InputParameters available to it to construct the required RelationshipManager automatically.
-   * Actions may run custom logic to create RelationshipManagers. The names and rm_type lists must
-   * have the same number of entries.
+   * Tells MOOSE about a RelationshipManager that this object needs.  RelationshipManagers
+   * handle element "ghosting", "non-local DOF access" and "sparsity pattern" relationships.
    *
-   * @param names A space delimited list of RelationshipMangers that may be built by this object.
+   * Basically: if this object needs non-local (ie non-current-element) data access then you
+   * probably need a relationship manager
+   *
+   * @param name The name of the RelationshipManager type
+   * @param rm_type The type (GEOMETRIC/ALGEBRAIC) of the RelationshipManger.  Note: You can use
+   * boolean logic to to "or" RelationshipManagerTypes together to make a RelationshipManager that
+   * is multi-typed.
+   * @param input_parameter_callback This is a function pointer that will get called to fill in the
+   * RelationShipManager's InputParameters.  See MooseTypes.h for the signature of this function.
    */
-  void registerRelationshipManagers(const std::string & names,
-                                    const std::string & use_as_rm_types = "");
+  void addRelationshipManager(
+      const std::string & name,
+      Moose::RelationshipManagerType rm_type,
+      Moose::RelationshipManagerInputParameterCallback input_parameter_callback = nullptr);
+
+  /**
+   * Clears all currently registered RelationshipManagers
+   */
+  void clearRelationshipManagers() { _buildable_rm_types.clear(); }
 
   /**
    * Returns the list of buildable types as a std::vector<std::string>
@@ -470,7 +483,9 @@ public:
   /**
    * Returns the list of buildable (or required) RelationshipManager object types for this object.
    */
-  const std::vector<std::pair<std::string, Moose::RelationshipManagerType>> &
+  const std::vector<std::tuple<std::string,
+                               Moose::RelationshipManagerType,
+                               Moose::RelationshipManagerInputParameterCallback>> &
   getBuildableRelationshipManagerTypes() const;
 
   ///@{
@@ -864,7 +879,10 @@ private:
   /// The optional second argument may be supplied to "downgrade" the functionality of the corresponding
   /// relationship manager (e.g. An AlgebraicRelationshipManager could be only used as a
   /// GeometricRelationshipManager for a given simulation).
-  std::vector<std::pair<std::string, Moose::RelationshipManagerType>> _buildable_rm_types;
+  std::vector<std::tuple<std::string,
+                         Moose::RelationshipManagerType,
+                         Moose::RelationshipManagerInputParameterCallback>>
+      _buildable_rm_types;
 
   /// This parameter collapses one level of nesting in the syntax blocks.  It is used
   /// in conjunction with MooseObjectAction derived Actions.

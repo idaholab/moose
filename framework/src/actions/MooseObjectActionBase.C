@@ -44,27 +44,56 @@ MooseObjectActionBase::MooseObjectActionBase(InputParameters params, const std::
 }
 
 void
-MooseObjectActionBase::addRelationshipManagers(Moose::RelationshipManagerType rm_type)
+MooseObjectActionBase::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   const auto & buildable_types = _moose_object_pars.getBuildableRelationshipManagerTypes();
 
   for (const auto & buildable_type : buildable_types)
   {
+    auto & rm_name = std::get<0>(buildable_type);
+    auto & rm_type = std::get<1>(buildable_type);
+    auto rm_input_parameter_func = std::get<2>(buildable_type);
+
+    std::cout << "Here1" << std::endl;
+
     /**
-     * This method is always called twice. Once to attempt adding early RMs and once to add late
-     * RMs. For generic MooseObjects, we'd like to add RMs as early as possible, but we'll have to
-     * be careful not to add them twice!
+     * This method is always called twice. Once to attempt adding early RMs and once to add
+     * late RMs. For generic MooseObjects, we'd like to add RMs as early as possible, but
+     * we'll have to be careful not to add them twice!
      */
-    auto new_name = name() + '_' + buildable_type.first + "_rm";
+    auto new_name = name() + '_' + rm_name + "_rm";
     if (_app.hasRelationshipManager(new_name))
       continue;
 
-    auto rm_params = _factory.getValidParams(buildable_type.first);
-    rm_params.applyParameters(_moose_object_pars);
+    std::cout << "Here2 " << Moose::stringify(rm_type) << std::endl;
+
+    auto rm_params = _factory.getValidParams(rm_name);
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;
+
+    // Figure out if we should be adding this one yet
+    if (!(((rm_type & input_rm_type) == input_rm_type) // Does this RM have the type passed in?
+
+          || // Or is it a Geometric that wasn't able to be added during tthe geometric section
+
+          (((rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
+            Moose::RelationshipManagerType::GEOMETRIC) &&
+           !rm_params.template get<bool>("attach_geometric_early"))))
+      continue;
+
+    std::cout << "Here3" << std::endl;
+
+    // If there is a callback for setting the RM parameters let's use it
+    if (rm_input_parameter_func)
+      rm_input_parameter_func(_moose_object_pars, rm_params);
+
+    std::cout << "Type to be built: "
+              << Moose::stringify(rm_params.get<Moose::RelationshipManagerType>("rm_type"))
+              << std::endl;
 
     // If we're doing geometric but we can't build it early - then let's not build it yet
     // (It will get built when we do algebraic)
-    if (rm_type == Moose::RelationshipManagerType::GEOMETRIC &&
+    if ((input_rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
+            Moose::RelationshipManagerType::GEOMETRIC &&
         !rm_params.get<bool>("attach_geometric_early"))
     {
       // We also need to tell the mesh not to delete remote elements yet
@@ -76,15 +105,17 @@ MooseObjectActionBase::addRelationshipManagers(Moose::RelationshipManagerType rm
     }
 
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
-    rm_params.set<Moose::RelationshipManagerType>("rm_type") = buildable_type.second;
 
     if (rm_params.areAllRequiredParamsValid())
     {
-      auto rm_obj = _factory.create<RelationshipManager>(buildable_type.first, new_name, rm_params);
+      auto rm_obj = _factory.create<RelationshipManager>(rm_name, new_name, rm_params);
 
       // Delete the resources created on behalf of the RM if it ends up not being added to the App.
       if (!_app.addRelationshipManager(rm_obj))
         _factory.releaseSharedObjects(*rm_obj);
     }
+    else
+      mooseError("Missing required parameters for RelationshipManager " + rm_name + " for object " +
+                 name());
   }
 }
