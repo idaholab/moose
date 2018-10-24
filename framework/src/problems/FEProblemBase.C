@@ -1436,7 +1436,8 @@ FEProblemBase::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 FEProblemBase::reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
-                              THREAD_ID tid)
+                              THREAD_ID tid,
+                              bool suppress_displaced_init)
 {
   _assembly[tid]->reinitAtPhysical(elem, phys_points_in_elem);
 
@@ -1448,7 +1449,7 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
   if (_has_nonlocal_coupling)
     _assembly[tid]->prepareNonlocal();
 
-  if (_displaced_problem != NULL && (_reinit_displaced_elem))
+  if (_displaced_problem != NULL && _reinit_displaced_elem && !suppress_displaced_init)
   {
     _displaced_problem->reinitElemPhys(
         _displaced_mesh->elemPtr(elem->id()), phys_points_in_elem, tid);

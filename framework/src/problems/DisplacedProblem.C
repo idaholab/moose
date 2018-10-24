@@ -511,7 +511,8 @@ DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 void
 DisplacedProblem::reinitElemPhys(const Elem * elem,
                                  const std::vector<Point> & phys_points_in_elem,
-                                 THREAD_ID tid)
+                                 THREAD_ID tid,
+                                 bool)
 {
   _assembly[tid]->reinitAtPhysical(elem, phys_points_in_elem);
 
