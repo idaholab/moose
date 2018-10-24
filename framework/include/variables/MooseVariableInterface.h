@@ -42,7 +42,7 @@ public:
    * Get the variable that this object is using.
    * @return The variable this object is using.
    */
-  MooseVariableFE<T> * mooseVariable();
+  MooseVariableFE<T> * mooseVariable() const;
 
   virtual ~MooseVariableInterface();
 

@@ -16,18 +16,16 @@
 
 #include "libmesh/threads.h"
 
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(
-    FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
-    _user_objects(user_objects)
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblemBase & fe_problem,
+                                                             const TheWarehouse::Query & query)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem), _query(query)
 {
 }
 
 // Splitting Constructor
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x,
                                                              Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
-    _user_objects(x._user_objects)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split), _query(x._query)
 {
 }
 
@@ -39,17 +37,20 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   const Node * node = *node_it;
   _fe_problem.reinitNode(node, _tid);
 
+  std::vector<NodalUserObject *> objs;
+
   // Boundary Restricted
   std::vector<BoundaryID> nodeset_ids;
   _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node, nodeset_ids);
   for (const auto & bnd : nodeset_ids)
   {
-    if (_user_objects.hasActiveBoundaryObjects(bnd, _tid))
-    {
-      const auto & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
-      for (const auto & uo : objects)
-        uo->execute();
-    }
+    _query.clone()
+        .condition<AttribThread>(_tid)
+        .condition<AttribInterfaces>(Interfaces::NodalUserObject)
+        .condition<AttribBoundaries>(bnd, true)
+        .queryInto(objs);
+    for (const auto & uo : objs)
+      uo->execute();
   }
 
   // Block Restricted
@@ -60,20 +61,23 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   // To inforce the unique execution this vector is populated and checked if the unique flag is
   // enabled.
-  std::vector<std::shared_ptr<NodalUserObject>> computed;
-
+  std::set<NodalUserObject *> computed;
   const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
-    if (_user_objects.hasActiveBlockObjects(block, _tid))
-    {
-      const auto & objects = _user_objects.getActiveBlockObjects(block, _tid);
-      for (const auto & uo : objects)
-        if (!uo->isUniqueNodeExecute() || std::count(computed.begin(), computed.end(), uo) == 0)
-        {
-          uo->execute();
-          computed.push_back(uo);
-        }
-    }
+  {
+    _query.clone()
+        .condition<AttribThread>(_tid)
+        .condition<AttribInterfaces>(Interfaces::NodalUserObject)
+        .condition<AttribSubdomains>(block)
+        .queryInto(objs);
+
+    for (const auto & uo : objs)
+      if (!uo->isUniqueNodeExecute() || computed.count(uo) == 0)
+      {
+        uo->execute();
+        computed.insert(uo);
+      }
+  }
 }
 
 void

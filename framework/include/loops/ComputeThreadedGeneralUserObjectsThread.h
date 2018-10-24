@@ -15,8 +15,7 @@
 #include "MooseException.h"
 #include "GeneralUserObject.h"
 
-typedef StoredRange<std::vector<std::shared_ptr<GeneralUserObject>>::iterator,
-                    std::shared_ptr<GeneralUserObject>>
+typedef StoredRange<std::vector<GeneralUserObject *>::iterator, GeneralUserObject *>
     GeneralUserObjectRange;
 
 /**

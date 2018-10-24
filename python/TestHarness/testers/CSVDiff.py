@@ -19,6 +19,7 @@ class CSVDiff(FileTester):
         params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
         params.addParam('override_rel_err',   [], "A list of customized relative error tolerances .")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
+        params.addParam('only_compare_custom', False, "Only compare (and require) the listed custom columns.")
         return params
 
     def __init__(self, name, params):
@@ -52,7 +53,7 @@ class CSVDiff(FileTester):
 
         if len(specs['csvdiff']) > 0:
             differ = CSVDiffer(specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'], specs['gold_dir'],
-                    specs['override_columns'], specs['override_rel_err'], specs['override_abs_zero'])
+                               specs['override_columns'], specs['override_rel_err'], specs['override_abs_zero'], specs['only_compare_custom'])
             msg = differ.diff()
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':

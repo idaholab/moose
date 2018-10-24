@@ -36,6 +36,7 @@
 #include "Registry.h"
 #include "SerializerGuard.h"
 #include "PerfGraphInterface.h" // For TIME_SECTIOn
+#include "Attributes.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -306,6 +307,20 @@ MooseApp::MooseApp(InputParameters parameters)
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
 
+  _the_warehouse = libmesh_make_unique<TheWarehouse>();
+  _the_warehouse->registerAttribute<AttribMatrixTags>("matrix_tags", 0);
+  _the_warehouse->registerAttribute<AttribVectorTags>("vector_tags", 0);
+  _the_warehouse->registerAttribute<AttribExecOns>("exec_ons", 0);
+  _the_warehouse->registerAttribute<AttribSubdomains>("subdomains", 0);
+  _the_warehouse->registerAttribute<AttribBoundaries>("boundaries", 0);
+  _the_warehouse->registerAttribute<AttribThread>("thread", 0);
+  _the_warehouse->registerAttribute<AttribPreIC>("pre_ic", 0);
+  _the_warehouse->registerAttribute<AttribPreAux>("pre_aux", 0);
+  _the_warehouse->registerAttribute<AttribName>("name", "dummy");
+  _the_warehouse->registerAttribute<AttribSystem>("system", "dummy");
+  _the_warehouse->registerAttribute<AttribVar>("variable", 0);
+  _the_warehouse->registerAttribute<AttribInterfaces>("interfaces", 0);
+
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");
@@ -390,6 +405,7 @@ MooseApp::~MooseApp()
 {
   _action_warehouse.clear();
   _executioner.reset();
+  _the_warehouse.reset();
 
   delete _input_parameter_warehouse;
 
@@ -1530,7 +1546,11 @@ MooseApp::addExecFlag(const ExecFlagType & flag)
     // the ID to be set after construction. This was the lesser of two evils: const_cast or
     // friend class with mutable members.
     ExecFlagType & non_const_flag = const_cast<ExecFlagType &>(flag);
-    non_const_flag.setID(_execute_flags.getNextValidID());
+    auto it = _execute_flags.find(flag.name());
+    if (it != _execute_flags.items().end())
+      non_const_flag.setID(it->id());
+    else
+      non_const_flag.setID(_execute_flags.getNextValidID());
   }
   _execute_flags.addAvailableFlags(flag);
 }

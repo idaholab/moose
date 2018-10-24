@@ -652,10 +652,22 @@ MooseVariableFE<OutputType>::setNodalValue(const DenseVector<Number> & values)
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::setNodalValue(Number value, unsigned int idx /* = 0*/)
+MooseVariableFE<OutputType>::setNodalValue(OutputType value, unsigned int idx /* = 0*/)
 {
   _dof_values[idx] = value; // update variable nodal value
   _has_nodal_value = true;
+
+  // Update the qp values as well
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+    _u[qp] = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned int idx /* = 0*/)
+{
+  for (decltype(idx) i = 0; i < LIBMESH_DIM; ++i, ++idx)
+    _dof_values[idx] = value(i);
 
   // Update the qp values as well
   for (unsigned int qp = 0; qp < _u.size(); qp++)

@@ -24,6 +24,8 @@ InputParameters
 validParams<ScalarLagrangeMultiplier>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("This class is used to solve a constrained Neumann problem with a "
+                             "Lagrange multiplier approach.");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier variable");
 
   return params;
@@ -45,6 +47,15 @@ ScalarLagrangeMultiplier::computeQpResidual()
 void
 ScalarLagrangeMultiplier::computeOffDiagJacobianScalar(unsigned int jvar)
 {
+  // Note: Here we are assembling the contributions for _both_ Eq. (9) and (10)
+  // in the detailed writeup on this problem [0]. This is important to highlight
+  // because it is slightly different from the way things usually work in MOOSE
+  // because we are computing Jacobian contributions _for a different equation_
+  // than the equation which this Kernel is assigned in the input file. We do
+  // this for both simplicity (results in slightly less code) and efficiency:
+  // the contribution is symmetric, so it can be computed once and used twice.
+  //
+  // [0]: https://github.com/idaholab/large_media/blob/master/scalar_constraint_kernel.pdf
   DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
   DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);

@@ -185,7 +185,7 @@ public:
     return _solution_dofs_older_neighbor;
   }
 
-  void prepareIC();
+  virtual void prepareIC() override;
 
   const FieldVariablePhiValue & phi() { return _phi; }
   const FieldVariablePhiGradient & gradPhi() { return _grad_phi; }
@@ -476,7 +476,7 @@ public:
   virtual void computeElemValuesFace() override;
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
-  void setNodalValue(Number value, unsigned int idx = 0) override;
+  void setNodalValue(OutputType value, unsigned int idx = 0);
   void setNodalValue(const DenseVector<Number> & value) override;
   Number getNodalValue(const Node & node) override;
   Number getNodalValueOld(const Node & node) override;

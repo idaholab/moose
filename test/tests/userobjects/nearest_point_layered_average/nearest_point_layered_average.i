@@ -53,7 +53,6 @@
   [./npla]
     type = NearestPointLayeredAverage
     direction = y
-    points = '0.25 0 0.25 0.75 0 0.25 0.25 0 0.75 0.75 0 0.75'
     num_layers = 10
     variable = u
   [../]

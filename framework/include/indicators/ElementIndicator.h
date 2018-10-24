@@ -39,7 +39,7 @@ public:
   ElementIndicator(const InputParameters & parameters);
 
 protected:
-  MooseVariableFEBase & _field_var;
+  MooseVariable & _field_var;
 
   const Elem *& _current_elem;
   /// Volume of the current element

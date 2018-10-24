@@ -15,6 +15,10 @@
 
 #include "libmesh/elem_range.h"
 
+class InternalSideUserObject;
+class ElementUserObject;
+class ShapeElementUserObject;
+
 // libMesh forward declarations
 namespace libMesh
 {
@@ -28,12 +32,9 @@ class NumericVector;
 class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeUserObjectsThread(
-      FEProblemBase & problem,
-      SystemBase & sys,
-      const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
-      const MooseObjectWarehouse<SideUserObject> & side_user_objects,
-      const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects);
+  ComputeUserObjectsThread(FEProblemBase & problem,
+                           SystemBase & sys,
+                           const TheWarehouse::Query & query);
   // Splitting Constructor
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
 
@@ -50,12 +51,65 @@ public:
 protected:
   const NumericVector<Number> & _soln;
 
-  ///@{
-  /// Storage for UserObjects (see FEProblemBase::computeUserObjects)
-  const MooseObjectWarehouse<ElementUserObject> & _elemental_user_objects;
-  const MooseObjectWarehouse<SideUserObject> & _side_user_objects;
-  const MooseObjectWarehouse<InternalSideUserObject> & _internal_side_user_objects;
-  ///@}
+private:
+  template <typename T>
+  void querySubdomain(Interfaces iface, std::vector<T> & results)
+  {
+    _query.clone()
+        .condition<AttribThread>(_tid)
+        .condition<AttribSubdomains>(_subdomain)
+        .condition<AttribInterfaces>(iface)
+        .queryInto(results);
+  }
+  template <typename T>
+  void queryBoundary(Interfaces iface, BoundaryID bnd, std::vector<T> & results)
+  {
+    _query.clone()
+        .condition<AttribThread>(_tid)
+        .condition<AttribBoundaries>(bnd)
+        .condition<AttribInterfaces>(iface)
+        .queryInto(results);
+  }
+
+  const TheWarehouse::Query _query;
+  std::vector<InternalSideUserObject *> _internal_side_objs;
+  std::vector<ElementUserObject *> _element_objs;
+  std::vector<ShapeElementUserObject *> _shape_element_objs;
 };
+
+// determine when we need to run user objects based on whether any initial conditions or aux
+// kernels depend on the user objects.  If so we need to run them either before ics, before aux
+// kernels, or after aux kernels (if nothing depends on them).  Mark/store this information as
+// attributes in the warehouse for later reference.
+template <typename T>
+void
+groupUserObjects(TheWarehouse & w,
+                 const std::vector<T *> & objs,
+                 const std::set<std::string> & ic_deps,
+                 const std::set<std::string> & aux_deps)
+{
+  // Notes about how this information is used later during the simulation:
+  // We only need to run pre-ic objects for their "initial" exec flag time (not the others).
+  //
+  // For pre/post aux objects:
+  //
+  //     If an object was not run as a pre-ic object or it is a pre-ic object and
+  //     shouldDuplicateInitialExecution returns true:
+  //         * run the object at all its exec flag times.
+  //     Else
+  //         * run the object at all its exec flag times *except* "initial"
+  //
+  for (const auto obj : objs)
+  {
+    if (ic_deps.count(obj->name()) > 0)
+      w.update(obj, AttribPreIC(w, true));
+
+    if ((obj->isParamValid("force_preaux") && obj->template getParam<bool>("force_preaux")) ||
+        aux_deps.count(obj->name()) > 0 || ic_deps.count(obj->name()) > 0)
+      w.update(obj, AttribPreAux(w, true));
+    else
+      w.update(obj, AttribPreAux(w, false));
+  }
+}
 
 #endif // COMPUTEUSEROBJECTSTHREAD_H

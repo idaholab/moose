@@ -21,27 +21,16 @@
 
 #include "libmesh/numeric_vector.h"
 
-ComputeUserObjectsThread::ComputeUserObjectsThread(
-    FEProblemBase & problem,
-    SystemBase & sys,
-    const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
-    const MooseObjectWarehouse<SideUserObject> & side_user_objects,
-    const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects)
-  : ThreadedElementLoop<ConstElemRange>(problem),
-    _soln(*sys.currentSolution()),
-    _elemental_user_objects(elemental_user_objects),
-    _side_user_objects(side_user_objects),
-    _internal_side_user_objects(internal_side_user_objects)
+ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblemBase & problem,
+                                                   SystemBase & sys,
+                                                   const TheWarehouse::Query & query)
+  : ThreadedElementLoop<ConstElemRange>(problem), _soln(*sys.currentSolution()), _query(query)
 {
 }
 
 // Splitting Constructor
 ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split)
-  : ThreadedElementLoop<ConstElemRange>(x._fe_problem),
-    _soln(x._soln),
-    _elemental_user_objects(x._elemental_user_objects),
-    _side_user_objects(x._side_user_objects),
-    _internal_side_user_objects(x._internal_side_user_objects)
+  : ThreadedElementLoop<ConstElemRange>(x._fe_problem), _soln(x._soln), _query(x._query)
 {
 }
 
@@ -50,25 +39,47 @@ ComputeUserObjectsThread::~ComputeUserObjectsThread() {}
 void
 ComputeUserObjectsThread::subdomainChanged()
 {
+  // for the current thread get block objects for the current subdomain and *all* side objects
+  std::vector<UserObject *> objs;
+  querySubdomain(Interfaces::ElementUserObject | Interfaces::InternalSideUserObject, objs);
+
+  std::vector<UserObject *> side_objs;
+  _query.clone()
+      .condition<AttribThread>(_tid)
+      .condition<AttribInterfaces>(Interfaces::SideUserObject)
+      .queryInto(side_objs);
+
+  objs.insert(objs.begin(), side_objs.begin(), side_objs.end());
+
+  // collect dependenciesand run subdomain setup
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  _elemental_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
-  _side_user_objects.updateBoundaryVariableDependency(needed_moose_vars, _tid);
-  _internal_side_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
-
   std::set<unsigned int> needed_mat_props;
-  _elemental_user_objects.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
-  _side_user_objects.updateBoundaryMatPropDependency(needed_mat_props, _tid);
-  _internal_side_user_objects.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
+  for (const auto obj : objs)
+  {
+    auto v_obj = dynamic_cast<MooseVariableDependencyInterface *>(obj);
+    if (!v_obj)
+      mooseError("robert wrote broken code");
+    const auto & v_deps = v_obj->getMooseVariableDependencies();
+    needed_moose_vars.insert(v_deps.begin(), v_deps.end());
 
-  _elemental_user_objects.subdomainSetup(_subdomain, _tid);
-  _side_user_objects.subdomainSetup(_tid);
-  _internal_side_user_objects.subdomainSetup(_subdomain, _tid);
+    auto m_obj = dynamic_cast<MaterialPropertyInterface *>(obj);
+    if (!m_obj)
+      mooseError("robert wrote broken code again");
+    auto & m_deps = m_obj->getMatPropDependencies();
+    needed_mat_props.insert(m_deps.begin(), m_deps.end());
+
+    obj->subdomainSetup();
+  }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
+
+  querySubdomain(Interfaces::InternalSideUserObject, _internal_side_objs);
+  querySubdomain(Interfaces::ElementUserObject, _element_objs);
+  querySubdomain(Interfaces::ShapeElementUserObject, _shape_element_objs);
 }
 
 void
@@ -82,16 +93,11 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
-  {
-    const auto & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & uo : objects)
-      uo->execute();
-  }
+  for (const auto & uo : _element_objs)
+    uo->execute();
 
   // UserObject Jacobians
-  if (_fe_problem.currentlyComputingJacobian() &&
-      _elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+  if (_fe_problem.currentlyComputingJacobian() && _shape_element_objs.size() > 0)
   {
     // Prepare shape functions for ShapeElementUserObjects
     std::vector<MooseVariableFEBase *> jacobian_moose_vars =
@@ -102,14 +108,8 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
       std::vector<dof_id_type> & dof_indices = jvar->dofIndices();
 
       _fe_problem.prepareShapes(jvar_id, _tid);
-
-      const auto & e_objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
-      for (const auto & uo : e_objects)
-      {
-        auto shape_element_uo = std::dynamic_pointer_cast<ShapeElementUserObject>(uo);
-        if (shape_element_uo)
-          shape_element_uo->executeJacobianWrapper(jvar_id, dof_indices);
-      }
+      for (const auto uo : _shape_element_objs)
+        uo->executeJacobianWrapper(jvar_id, dof_indices);
     }
   }
 }
@@ -117,7 +117,9 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 void
 ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (!_side_user_objects.hasActiveBoundaryObjects(bnd_id, _tid))
+  std::vector<UserObject *> userobjs;
+  queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
+  if (userobjs.size() == 0)
     return;
 
   _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
@@ -128,12 +130,13 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, Bound
   _fe_problem.reinitMaterialsFace(_subdomain, _tid);
   _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
-  const auto & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
-  for (const auto & uo : objects)
+  for (const auto & uo : userobjs)
     uo->execute();
 
   // UserObject Jacobians
-  if (_fe_problem.currentlyComputingJacobian())
+  std::vector<ShapeSideUserObject *> shapers;
+  queryBoundary(Interfaces::ShapeSideUserObject, bnd_id, shapers);
+  if (_fe_problem.currentlyComputingJacobian() && shapers.size() > 0)
   {
     // Prepare shape functions for ShapeSideUserObjects
     std::vector<MooseVariableFEBase *> jacobian_moose_vars =
@@ -145,12 +148,8 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, Bound
 
       _fe_problem.prepareFaceShapes(jvar_id, _tid);
 
-      for (const auto & uo : objects)
-      {
-        auto shape_side_uo = std::dynamic_pointer_cast<ShapeSideUserObject>(uo);
-        if (shape_side_uo)
-          shape_side_uo->executeJacobianWrapper(jvar_id, dof_indices);
-      }
+      for (const auto & uo : shapers)
+        uo->executeJacobianWrapper(jvar_id, dof_indices);
     }
   }
 }
@@ -164,7 +163,7 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   // Get the global id of the element and the neighbor
   const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-  if (!_internal_side_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+  if (_internal_side_objs.size() == 0)
     return;
   if (!((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
         (neighbor->level() < elem->level())))
@@ -181,14 +180,9 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
   _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-  const auto & objects = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
-  for (const auto & uo : objects)
-  {
-    if (!uo->blockRestricted())
+  for (const auto & uo : _internal_side_objs)
+    if (!uo->blockRestricted() || uo->hasBlocks(neighbor->subdomain_id()))
       uo->execute();
-    else if (uo->hasBlocks(neighbor->subdomain_id()))
-      uo->execute();
-  }
 }
 
 void

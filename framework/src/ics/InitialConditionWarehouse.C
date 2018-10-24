@@ -10,11 +10,11 @@
 #include "InitialConditionWarehouse.h"
 
 // MOOSE includes
-#include "InitialCondition.h"
+#include "InitialConditionBase.h"
 #include "MooseVariableFE.h"
 
 InitialConditionWarehouse::InitialConditionWarehouse()
-  : MooseObjectWarehouseBase<InitialCondition>(),
+  : MooseObjectWarehouseBase<InitialConditionBase>(),
     _boundary_ics(libMesh::n_threads()),
     _block_ics(libMesh::n_threads())
 {
@@ -23,13 +23,13 @@ InitialConditionWarehouse::InitialConditionWarehouse()
 void
 InitialConditionWarehouse::initialSetup(THREAD_ID tid)
 {
-  MooseObjectWarehouseBase<InitialCondition>::sort(tid);
+  MooseObjectWarehouseBase<InitialConditionBase>::sort(tid);
   for (const auto & ic : _active_objects[tid])
     ic->initialSetup();
 }
 
 void
-InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object,
+InitialConditionWarehouse::addObject(std::shared_ptr<InitialConditionBase> object,
                                      THREAD_ID tid,
                                      bool recurse)
 {
@@ -83,7 +83,7 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object,
   }
 
   // Add the IC to the storage
-  MooseObjectWarehouseBase<InitialCondition>::addObject(object, tid, recurse);
+  MooseObjectWarehouseBase<InitialConditionBase>::addObject(object, tid, recurse);
 }
 
 std::set<std::string>
