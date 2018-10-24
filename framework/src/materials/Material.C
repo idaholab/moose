@@ -239,7 +239,7 @@ Material::computeProperties()
     _qp = 0;
     computeQpProperties();
 
-    if (_fe_problem.currentlyComputingJacobian())
+    if (_fe_problem.currentlyComputingJacobian() && _fe_problem.usingAD())
     {
       for (const auto & prop_id : _supplied_regular_prop_ids)
         props[prop_id]->copyValueToDualNumber(0);
@@ -274,7 +274,7 @@ Material::computeProperties()
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     {
       computeQpProperties();
-      if (_fe_problem.currentlyComputingJacobian())
+      if (_fe_problem.currentlyComputingJacobian() && _fe_problem.usingAD())
       {
         for (const auto & prop_id : _supplied_regular_prop_ids)
           props[prop_id]->copyValueToDualNumber(_qp);
