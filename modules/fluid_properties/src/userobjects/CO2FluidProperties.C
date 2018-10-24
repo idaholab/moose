@@ -19,14 +19,14 @@ template <>
 InputParameters
 validParams<CO2FluidProperties>()
 {
-  InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
+  InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addClassDescription(
       "Fluid properties for carbon dioxide (CO2) using the Span & Wagner EOS");
   return params;
 }
 
 CO2FluidProperties::CO2FluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidPropertiesPT(parameters)
+  : SinglePhaseFluidProperties(parameters)
 {
 }
 

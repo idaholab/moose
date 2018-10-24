@@ -9,7 +9,7 @@
 
 #include "PorousFlowBrineCO2.h"
 #include "BrineFluidProperties.h"
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 #include "MathUtils.h"
 #include "Conversion.h"
 
@@ -31,7 +31,7 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
   : PorousFlowFluidStateBase(parameters),
     _salt_component(getParam<unsigned int>("salt_component")),
     _brine_fp(getUserObject<BrineFluidProperties>("brine_fp")),
-    _co2_fp(getUserObject<SinglePhaseFluidPropertiesPT>("co2_fp")),
+    _co2_fp(getUserObject<SinglePhaseFluidProperties>("co2_fp")),
     _water_fp(_brine_fp.getComponent(BrineFluidProperties::WATER)),
     _Mh2o(_brine_fp.molarMassH2O()),
     _invMh2o(1.0 / _Mh2o),

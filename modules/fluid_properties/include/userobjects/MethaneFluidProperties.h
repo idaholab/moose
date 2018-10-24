@@ -10,7 +10,7 @@
 #ifndef METHANEFLUIDPROPERTIES_H
 #define METHANEFLUIDPROPERTIES_H
 
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 #include <array>
 
 class MethaneFluidProperties;
@@ -27,7 +27,7 @@ InputParameters validParams<MethaneFluidProperties>();
  * Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas
  * Tables with Computer Equations.
  */
-class MethaneFluidProperties : public SinglePhaseFluidPropertiesPT
+class MethaneFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   MethaneFluidProperties(const InputParameters & parameters);

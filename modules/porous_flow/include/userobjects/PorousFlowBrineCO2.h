@@ -13,7 +13,7 @@
 #include "PorousFlowFluidStateBase.h"
 
 class BrineFluidProperties;
-class SinglePhaseFluidPropertiesPT;
+class SinglePhaseFluidProperties;
 class PorousFlowBrineCO2;
 
 template <>
@@ -548,9 +548,9 @@ protected:
   /// Fluid properties UserObject for water
   const BrineFluidProperties & _brine_fp;
   /// Fluid properties UserObject for the CO2
-  const SinglePhaseFluidPropertiesPT & _co2_fp;
+  const SinglePhaseFluidProperties & _co2_fp;
   /// Fluid properties UserObject for H20
-  const SinglePhaseFluidPropertiesPT & _water_fp;
+  const SinglePhaseFluidProperties & _water_fp;
   /// Molar mass of water (kg/mol)
   const Real _Mh2o;
   /// Inverse of molar mass of H2O (mol/kg)

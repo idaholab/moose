@@ -15,13 +15,13 @@ template <>
 InputParameters
 validParams<NaClFluidProperties>()
 {
-  InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
+  InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addClassDescription("Fluid properties for NaCl");
   return params;
 }
 
 NaClFluidProperties::NaClFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidPropertiesPT(parameters),
+  : SinglePhaseFluidProperties(parameters),
     _Mnacl(58.443e-3),
     _p_critical(1.82e7),
     _T_critical(3841.15),

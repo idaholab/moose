@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<SimpleFluidProperties>()
 {
-  InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
+  InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addParam<Real>("molar_mass", 1.8E-2, "Constant molar mass of the fluid (kg/mol)");
   params.addParam<Real>(
       "thermal_expansion", 2.14E-4, "Constant coefficient of thermal expansion (1/K)");
@@ -40,7 +40,7 @@ validParams<SimpleFluidProperties>()
 }
 
 SimpleFluidProperties::SimpleFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidPropertiesPT(parameters),
+  : SinglePhaseFluidProperties(parameters),
     _molar_mass(getParam<Real>("molar_mass")),
     _thermal_expansion(getParam<Real>("thermal_expansion")),
     _cv(getParam<Real>("cv")),

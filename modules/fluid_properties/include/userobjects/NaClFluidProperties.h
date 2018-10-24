@@ -10,7 +10,7 @@
 #ifndef NACLFLUIDPROPERTIES_H
 #define NACLFLUIDPROPERTIES_H
 
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 
 class NaClFluidProperties;
 
@@ -38,7 +38,7 @@ InputParameters validParams<NaClFluidProperties>();
  * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
  * Phase Equil., 79 (1992)
  */
-class NaClFluidProperties : public SinglePhaseFluidPropertiesPT
+class NaClFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   NaClFluidProperties(const InputParameters & parameters);

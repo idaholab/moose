@@ -10,7 +10,7 @@
 #ifndef WATER97FLUIDPROPERTIES_H
 #define WATER97FLUIDPROPERTIES_H
 
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 #include <array>
 
 class Water97FluidProperties;
@@ -37,7 +37,7 @@ InputParameters validParams<Water97FluidProperties>();
  * Revised Release on the IAPS Formulation 1985 for the Thermal Conductivity of
  * Ordinary Water Substance
  */
-class Water97FluidProperties : public SinglePhaseFluidPropertiesPT
+class Water97FluidProperties : public SinglePhaseFluidProperties
 {
 public:
   Water97FluidProperties(const InputParameters & parameters);

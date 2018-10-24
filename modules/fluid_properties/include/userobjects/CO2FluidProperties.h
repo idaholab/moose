@@ -10,7 +10,7 @@
 #ifndef CO2FLUIDPROPERTIES_H
 #define CO2FLUIDPROPERTIES_H
 
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 #include <array>
 
 class CO2FluidProperties;
@@ -40,7 +40,7 @@ InputParameters validParams<CO2FluidProperties>();
  * Equation for Carbon Dioxide with an Optimized Functional Form, J. Phys.
  * Chem. Ref. Data 35 (2006)
  */
-class CO2FluidProperties : public SinglePhaseFluidPropertiesPT
+class CO2FluidProperties : public SinglePhaseFluidProperties
 {
 public:
   CO2FluidProperties(const InputParameters & parameters);
