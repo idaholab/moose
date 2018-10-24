@@ -1519,6 +1519,17 @@ public:
    */
   bool isSNESMFReuseBaseSetbyUser() { return _snesmf_reuse_base_set_by_user; }
 
+  /**
+   * Set the global automatic differentiaion (AD) flag which indicates whether any consumer has
+   * requested an AD material property or whether any suppier has declared an AD material property
+   */
+  void setUsingADFlag(bool using_ad) { _using_ad = using_ad; }
+
+  /**
+   * Whether any object has requested/supplied an AD material property
+   */
+  bool usingAD() const { return _using_ad; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1764,6 +1775,10 @@ protected:
   std::shared_ptr<LineSearch> _line_search;
 
   std::unique_ptr<ConstElemRange> _evaluable_local_elem_range;
+
+  /// Automatic differentiaion (AD) flag which indicates whether any consumer has
+  /// requested an AD material property or whether any suppier has declared an AD material property
+  bool _using_ad;
 
 private:
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);

@@ -14,6 +14,7 @@
 
 #include "MooseArray.h"
 #include "DataIO.h"
+#include "MooseADWrapper.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"
@@ -68,6 +69,18 @@ public:
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
+
+  /**
+   * copy the Real version to the DualNumber<Real> version of the material property for the
+   * specified quadrature point
+   */
+  virtual void copyValueToDualNumber(const unsigned int i) = 0;
+
+  /**
+   * copy the value portion (not the derivatives) of the DualNumber<Real> version of the material
+   * property to the Real version for the specified quadrature point
+   */
+  virtual void copyDualNumberToValue(const unsigned int i) = 0;
 };
 
 template <>
@@ -93,42 +106,38 @@ class MaterialProperty : public PropertyValue
 {
 public:
   /// Explicitly declare a public constructor because we made the copy constructor private
-  MaterialProperty() : PropertyValue() { /* */}
+  MaterialProperty() : PropertyValue()
+  { /* */
+  }
 
   virtual ~MaterialProperty() { _value.release(); }
 
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> & get() const
-  {
-    return _value;
-  }
+  const MooseArray<MooseADWrapper<T>> & get() const { return _value; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> & set()
-  {
-    return _value;
-  }
+  MooseArray<MooseADWrapper<T>> & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type();
+  virtual std::string type() override;
 
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual PropertyValue * init(int size);
+  virtual PropertyValue * init(int size) override;
 
   /**
    * Resizes the property to the size n
    */
-  virtual void resize(int n);
+  virtual void resize(int n) override;
 
-  virtual unsigned int size() const { return _value.size(); }
+  virtual unsigned int size() const override { return _value.size(); }
 
   /**
    * Get element i out of the array as a writeable reference.
@@ -143,7 +152,7 @@ public:
   /**
    *
    */
-  virtual void swap(PropertyValue * rhs);
+  virtual void swap(PropertyValue * rhs) override;
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
@@ -152,17 +161,18 @@ public:
    * @param rhs The Property you want to copy _from_.
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
-  virtual void qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp);
+  virtual void
+  qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp) override;
 
   /**
    * Store the property into a binary stream
    */
-  virtual void store(std::ostream & stream);
+  virtual void store(std::ostream & stream) override;
 
   /**
    * Load the property from a binary stream
    */
-  virtual void load(std::istream & stream);
+  virtual void load(std::istream & stream) override;
 
   /**
    * Friend helper function to handle scalar material property initializations
@@ -173,6 +183,18 @@ public:
    */
   template <typename P>
   friend PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type);
+
+  /**
+   * copy the Real version to the DualNumber<Real> version of the material property for the
+   * specified quadrature point
+   */
+  void copyValueToDualNumber(const unsigned int i) override { _value[i].copyValueToDualNumber(); }
+
+  /**
+   * copy the value portion (not the derivatives) of the DualNumber<Real> version of the material
+   * property to the Real version for the specified quadrature point
+   */
+  void copyDualNumberToValue(const unsigned int i) override { _value[i].copyDualNumberToValue(); }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -189,7 +211,7 @@ private:
 
 protected:
   /// Stored parameter value.
-  MooseArray<MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>>> _value;
+  MooseArray<MooseADWrapper<T>> _value;
 };
 
 // ------------------------------------------------------------
@@ -258,18 +280,16 @@ public:
   /**
    * Get element i out of the array as a writeable reference.
    */
-  typename MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> &
-  operator[](const unsigned int i)
+  typename MooseADWrapper<T>::DNType & operator[](const unsigned int i)
   {
-    return this->_value[i];
+    return this->_value[i].dn();
   }
   /**
    * Get element i out of the array as a read-only reference.
    */
-  const typename MetaPhysicL::NDDualNumber<T, NumberArray<AD_MAX_DOFS_PER_ELEM, T>> &
-  operator[](const unsigned int i) const
+  const typename MooseADWrapper<T>::DNType & operator[](const unsigned int i) const
   {
-    return this->_value[i];
+    return this->_value[i].dn();
   }
 };
 
@@ -341,7 +361,7 @@ PropertyValue *
 _init_helper(int size, PropertyValue * /*prop*/, const P *)
 {
   MaterialProperty<P> * copy = new MaterialProperty<P>;
-  copy->_value.resize(size, MetaPhysicL::NDDualNumber<P, NumberArray<AD_MAX_DOFS_PER_ELEM, P>>{});
+  copy->_value.resize(size, MooseADWrapper<P>{});
   return copy;
 }
 
