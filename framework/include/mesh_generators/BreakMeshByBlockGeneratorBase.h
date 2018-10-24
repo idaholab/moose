@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef BREAKMESHBYBLOCKBASEGENERATOR_H
-#define BREAKMESHBYBLOCKBASEGENERATOR_H
+#ifndef BREAKMESHBYBLOCKGENERATORBASE_H
+#define BREAKMESHBYBLOCKGENERATORBASE_H
 
 #include "MeshGenerator.h"
 
 // Forward declarations
-class BreakMeshByBlockBaseGenerator;
+class BreakMeshByBlockGeneratorBase;
 
 template <>
-InputParameters validParams<BreakMeshByBlockBaseGenerator>();
+InputParameters validParams<BreakMeshByBlockGeneratorBase>();
 
 /**
  * 
  */
-class BreakMeshByBlockBaseGenerator : public MeshGenerator
+class BreakMeshByBlockGeneratorBase : public MeshGenerator
 {
 public:
-  BreakMeshByBlockBaseGenerator(const InputParameters & parameters);
+  BreakMeshByBlockGeneratorBase(const InputParameters & parameters);
 
 protected:
   /// the file_name from whence this mesh came
@@ -66,4 +66,4 @@ private:
 
 };
 
-#endif // BREAKMESHBYBLOCKBASEGENERATOR_H
+#endif // BREAKMESHBYBLOCKGENERATORBASE_H

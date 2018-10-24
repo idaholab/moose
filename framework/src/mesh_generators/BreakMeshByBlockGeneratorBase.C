@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BreakMeshByBlockBaseGenerator.h"
+#include "BreakMeshByBlockGeneratorBase.h"
 #include "InputParameters.h"
 
 template <>
 InputParameters
-validParams<BreakMeshByBlockBaseGenerator>()
+validParams<BreakMeshByBlockGeneratorBase>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
@@ -30,7 +30,7 @@ validParams<BreakMeshByBlockBaseGenerator>()
   return params;
 }
 
-BreakMeshByBlockBaseGenerator::BreakMeshByBlockBaseGenerator(const InputParameters & parameters)
+BreakMeshByBlockGeneratorBase::BreakMeshByBlockGeneratorBase(const InputParameters & parameters)
 : MeshGenerator(parameters),
   _interface_name(getParam<std::string>("interface_name")),
   _split_interface(getParam<bool>("split_interface"))
@@ -44,7 +44,7 @@ BreakMeshByBlockBaseGenerator::BreakMeshByBlockBaseGenerator(const InputParamete
 }
 
 boundary_id_type
-BreakMeshByBlockBaseGenerator::findFreeBoundaryId(MeshBase & mesh)
+BreakMeshByBlockGeneratorBase::findFreeBoundaryId(MeshBase & mesh)
 {
   const std::set<boundary_id_type> & currentBoundaryIds = mesh.get_boundary_info().get_boundary_ids();
   bool freeBoundaryNotFound = true;
@@ -66,7 +66,7 @@ BreakMeshByBlockBaseGenerator::findFreeBoundaryId(MeshBase & mesh)
 }
 
 std::string
-BreakMeshByBlockBaseGenerator::generateBoundaryName(MeshBase & mesh,
+BreakMeshByBlockGeneratorBase::generateBoundaryName(MeshBase & mesh,
                                                     const subdomain_id_type & masterBlockID,
                                                     const subdomain_id_type & slaveBlockID)
 {
@@ -81,14 +81,14 @@ BreakMeshByBlockBaseGenerator::generateBoundaryName(MeshBase & mesh,
 }
 
 void
-BreakMeshByBlockBaseGenerator::mapBoundaryIdAndBoundaryName(boundary_id_type & boundaryID,
+BreakMeshByBlockGeneratorBase::mapBoundaryIdAndBoundaryName(boundary_id_type & boundaryID,
                                                    const std::string & boundaryName)
 {
   _bName_bID_set.insert(std::pair<std::string, int>(boundaryName, boundaryID));
 }
 
 void
-BreakMeshByBlockBaseGenerator::findBoundaryNameAndInd(MeshBase & mesh,
+BreakMeshByBlockGeneratorBase::findBoundaryNameAndInd(MeshBase & mesh,
                                                       const subdomain_id_type & masterBlockID,
                                                       const subdomain_id_type & slaveBlockID,
                                                       std::string & boundaryName,

@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementDeletionBaseGenerator.h"
+#include "ElementDeletionGeneratorBase.h"
 #include "libmesh/remote_elem.h"
 
 #include "MooseMeshUtils.h"
 
 template <>
 InputParameters
-validParams<ElementDeletionBaseGenerator>()
+validParams<ElementDeletionGeneratorBase>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
@@ -25,7 +25,7 @@ validParams<ElementDeletionBaseGenerator>()
   return params;
 }
 
-ElementDeletionBaseGenerator::ElementDeletionBaseGenerator(const InputParameters & parameters)
+ElementDeletionGeneratorBase::ElementDeletionGeneratorBase(const InputParameters & parameters)
 : MeshGenerator(parameters),
   _input(getMesh("input")),
   _assign_boundary(isParamValid("new_boundary")),
@@ -34,7 +34,7 @@ ElementDeletionBaseGenerator::ElementDeletionBaseGenerator(const InputParameters
 }
 
 std::unique_ptr<MeshBase>
-ElementDeletionBaseGenerator::generate()
+ElementDeletionGeneratorBase::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 

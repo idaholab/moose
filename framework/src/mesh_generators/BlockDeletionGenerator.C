@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<BlockDeletionGenerator>()
 {
-  InputParameters params = validParams<ElementDeletionBaseGenerator>();
+  InputParameters params = validParams<ElementDeletionGeneratorBase>();
 
   params.addClassDescription(
       "Mesh modifier which removes elements with the specified subdomain ID");
@@ -25,7 +25,7 @@ validParams<BlockDeletionGenerator>()
 }
 
 BlockDeletionGenerator::BlockDeletionGenerator(const InputParameters & parameters)
-: ElementDeletionBaseGenerator(parameters),
+: ElementDeletionGeneratorBase(parameters),
   _block_id(getParam<SubdomainID>("block_id"))
 {
 }

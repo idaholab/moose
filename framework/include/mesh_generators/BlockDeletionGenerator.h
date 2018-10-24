@@ -10,7 +10,7 @@
 #ifndef BLOCKDELETIONGENERATOR_H
 #define BLOCKDELETIONGENERATOR_H
 
-#include "ElementDeletionBaseGenerator.h"
+#include "ElementDeletionGeneratorBase.h"
 
 // Forward declarations
 class BlockDeletionGenerator;
@@ -21,7 +21,7 @@ InputParameters validParams<BlockDeletionGenerator>();
 /**
  * MeshGenerator for 
  */
-class BlockDeletionGenerator : public ElementDeletionBaseGenerator
+class BlockDeletionGenerator : public ElementDeletionGeneratorBase
 {
 public:
   BlockDeletionGenerator(const InputParameters & parameters);

@@ -10,14 +10,14 @@
 #ifndef BREAKMESHBYBLOCKGENERATOR_H
 #define BREAKMESHBYBLOCKGENERATOR_H
 
-#include "BreakMeshByBlockBaseGenerator.h"
+#include "BreakMeshByBlockGeneratorBase.h"
 
 class BreakMeshByBlockGenerator;
 
 template <>
 InputParameters validParams<BreakMeshByBlockGenerator>();
 
-class BreakMeshByBlockGenerator : public BreakMeshByBlockBaseGenerator
+class BreakMeshByBlockGenerator : public BreakMeshByBlockGeneratorBase
 {
 public:
   BreakMeshByBlockGenerator(const InputParameters & parameters);

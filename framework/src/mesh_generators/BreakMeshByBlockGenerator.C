@@ -20,7 +20,7 @@ template <>
 InputParameters
 validParams<BreakMeshByBlockGenerator>()
 {
-  InputParameters params = validParams<BreakMeshByBlockBaseGenerator>();
+  InputParameters params = validParams<BreakMeshByBlockGeneratorBase>();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Break boundaries based on the subdomains to which their sides are "
                              "attached. Naming convention for the new boundaries will be the old "
@@ -30,7 +30,7 @@ validParams<BreakMeshByBlockGenerator>()
 }
 
 BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & parameters)
-: BreakMeshByBlockBaseGenerator(parameters),
+: BreakMeshByBlockGeneratorBase(parameters),
   _input(getMesh("input"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())

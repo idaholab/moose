@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ELEMENTDELETIONBASEGENERATOR_H
-#define ELEMENTDELETIONBASEGENERATOR_H
+#ifndef ELEMENTDELETIONGENERATORBASE_H
+#define ELEMENTDELETIONGENERATORBASE_H
 
 #include "MeshGenerator.h"
 
 // Forward declarations
-class ElementDeletionBaseGenerator;
+class ElementDeletionGeneratorBase;
 
 template <>
-InputParameters validParams<ElementDeletionBaseGenerator>();
+InputParameters validParams<ElementDeletionGeneratorBase>();
 
 /**
  * This class deletes elements from the mesh data structure
@@ -25,10 +25,10 @@ InputParameters validParams<ElementDeletionBaseGenerator>();
  * their own derived classes by providing an implementation
  * for "shouldDelete".
  */
-class ElementDeletionBaseGenerator : public MeshGenerator
+class ElementDeletionGeneratorBase : public MeshGenerator
 {
 public:
-  ElementDeletionBaseGenerator(const InputParameters & parameters);
+  ElementDeletionGeneratorBase(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate();
 
@@ -48,4 +48,4 @@ protected:
   const BoundaryName _boundary_name;
 };
 
-#endif // ELEMENTDELETIONBASEGENERATOR_H
+#endif // ELEMENTDELETIONGENERATORBASE_H
