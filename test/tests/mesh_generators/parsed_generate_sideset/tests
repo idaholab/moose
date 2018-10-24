@@ -1,0 +1,8 @@
+[Tests]
+  [./parsed_generate_sideset_test]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_in.e'
+  [../]
+[]
