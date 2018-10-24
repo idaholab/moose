@@ -34,6 +34,10 @@ validParams<GlobalDisplacementAux>()
   params.addRequiredParam<UserObjectName>("global_strain_uo",
                                           "The name of the GlobalStrainUserObject");
 
+  // Default this object to get executed before the displaced mesh update.
+  // This way the AuxVars set by this object can be used as mesh displacements.
+  params.set<ExecFlagEnum>("execute_on") = EXEC_PRE_DISPLACE;
+
   return params;
 }
 

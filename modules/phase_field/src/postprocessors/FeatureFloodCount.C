@@ -1327,7 +1327,7 @@ FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
   {
     const Elem * elem = static_cast<const Elem *>(dof_object);
     std::vector<Point> centroid(1, elem->centroid());
-    _subproblem.reinitElemPhys(elem, centroid, 0);
+    _subproblem.reinitElemPhys(elem, centroid, 0, /* suppress_displaced_init = */ true);
     entity_value = _vars[current_index]->sln()[0];
   }
   else
