@@ -341,25 +341,12 @@ InputParameters::registerBuildableTypes(const std::string & names)
 }
 
 void
-InputParameters::registerRelationshipManagers(const std::string & names,
-                                              const std::string & use_as_rm_types)
+InputParameters::addRelationshipManager(
+    const std::string & name,
+    Moose::RelationshipManagerType rm_type,
+    Moose::RelationshipManagerInputParameterCallback input_parameter_callback)
 {
-  _buildable_rm_types.clear();
-
-  std::vector<std::string> buildable_rm_types;
-  MooseUtils::tokenize(names, buildable_rm_types, 1, " \t\n\v\f\r"); // tokenize on whitespace
-
-  std::vector<std::string> use_as_rm_type_strings;
-  MooseUtils::tokenize(use_as_rm_types, use_as_rm_type_strings, 1, " \t\n\v\f\r");
-
-  for (std::size_t i = 0; i < buildable_rm_types.size(); ++i)
-  {
-    Moose::RelationshipManagerType use_as_type = Moose::RelationshipManagerType::DEFAULT;
-    if (i < use_as_rm_type_strings.size())
-      use_as_type = Moose::stringToEnum<Moose::RelationshipManagerType>(use_as_rm_type_strings[i]);
-
-    _buildable_rm_types.emplace_back(std::make_pair(buildable_rm_types[i], use_as_type));
-  }
+  _buildable_rm_types.emplace_back(name, rm_type, input_parameter_callback);
 }
 
 const std::vector<std::string> &
@@ -368,7 +355,9 @@ InputParameters::getBuildableTypes() const
   return _buildable_types;
 }
 
-const std::vector<std::pair<std::string, Moose::RelationshipManagerType>> &
+const std::vector<std::tuple<std::string,
+                             Moose::RelationshipManagerType,
+                             Moose::RelationshipManagerInputParameterCallback>> &
 InputParameters::getBuildableRelationshipManagerTypes() const
 {
   return _buildable_rm_types;
