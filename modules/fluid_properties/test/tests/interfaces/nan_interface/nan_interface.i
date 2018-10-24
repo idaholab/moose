@@ -21,7 +21,6 @@
   [./FluidProperties]
     [./fp]
       type = NaNInterfaceTestFluidProperties
-      emit_on_nan=none
     [../]
   []
 []
