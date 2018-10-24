@@ -35,6 +35,9 @@ const Real LStableDirk4::_a[LStableDirk4::_n_stages][LStableDirk4::_n_stages] = 
 LStableDirk4::LStableDirk4(const InputParameters & parameters)
   : TimeIntegrator(parameters), _stage(1)
 {
+  mooseInfo("LStableDirk4 and other multistage TimeIntegrators are known not to work with "
+            "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
+
   // Name the stage residuals "residual_stage1", "residual_stage2", etc.
   for (unsigned int stage = 0; stage < _n_stages; ++stage)
   {

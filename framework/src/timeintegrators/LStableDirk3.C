@@ -28,6 +28,9 @@ LStableDirk3::LStableDirk3(const InputParameters & parameters)
     _gamma(-std::sqrt(2.) * std::cos(std::atan(std::sqrt(2.) / 4.) / 3.) / 2. +
            std::sqrt(6.) * std::sin(std::atan(std::sqrt(2.) / 4.) / 3.) / 2. + 1.)
 {
+  mooseInfo("LStableDirk3 and other multistage TimeIntegrators are known not to work with "
+            "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
+
   // Name the stage residuals "residual_stage1", "residual_stage2", etc.
   for (unsigned int stage = 0; stage < 3; ++stage)
   {

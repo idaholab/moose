@@ -29,6 +29,8 @@ LStableDirk2::LStableDirk2(const InputParameters & parameters)
     _residual_stage2(_nl.addVector("residual_stage2", false, GHOSTED)),
     _alpha(1. - 0.5 * std::sqrt(2))
 {
+  mooseInfo("LStableDirk2 and other multistage TimeIntegrators are known not to work with "
+            "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
 }
 
 void
