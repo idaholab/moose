@@ -5,6 +5,8 @@
     exodiff = 'scalar_constraint_kernel_out.e'
     # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
     max_parallel = 4
+    # The true solution and l2_err for this test are nearly zero, so don't use relative differences to compare them.
+    abs_zero = 1e-9
     design = 'syntax/ScalarKernels/index.md'
     requirement = 'MOOSE shall solve the constrained Neumann problem using the Lagrange multiplier approach.'
     # This test was originally merged in cbf6d2235379f6ad75908b0f9d4be792dbce6c3d,

@@ -116,6 +116,13 @@ ContactAction::act()
     mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
                "Mesh block.");
 
+  // It is risky to apply this optimization to contact problems
+  // since the problem configuration may be changed during Jacobian
+  // evaluation. We therefore turn it off for all contact problems so that
+  // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3.
+  if (!_problem->isSNESMFReuseBaseSetbyUser())
+    _problem->setSNESMFReuseBase(false, false);
+
   std::string action_name = MooseUtils::shortName(name());
 
   std::vector<NonlinearVariableName> displacements;

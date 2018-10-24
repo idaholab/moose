@@ -1500,6 +1500,24 @@ public:
 
   inline TheWarehouse & theWarehouse() const { return _app.theWarehouse(); }
 
+  /**
+   * If or not to reuse the base vector for matrix-free calculation
+   */
+  void setSNESMFReuseBase(bool reuse, bool set_by_user)
+  {
+    _snesmf_reuse_base = reuse, _snesmf_reuse_base_set_by_user = set_by_user;
+  }
+
+  /**
+   * Return a flag that indicates if we are reusing the vector base
+   */
+  bool useSNESMFReuseBase() { return _snesmf_reuse_base; }
+
+  /**
+   * Return a flag to indicate if _snesmf_reuse_base is set by users
+   */
+  bool isSNESMFReuseBaseSetbyUser() { return _snesmf_reuse_base_set_by_user; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1674,6 +1692,12 @@ protected:
 
   /// Whether or not this system has any Constraints.
   bool _has_constraints;
+
+  /// If or not to resuse the base vector for matrix-free calculation
+  bool _snesmf_reuse_base;
+
+  /// If or not _snesmf_reuse_base is set by user
+  bool _snesmf_reuse_base_set_by_user;
 
   /// Whether nor not stateful materials have been initialized
   bool _has_initialized_stateful;

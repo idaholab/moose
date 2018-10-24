@@ -30,4 +30,11 @@ AddSlaveFluxVectorAction::act()
 {
   _problem->getNonlinearSystemBase().addVector("slave_flux", false, GHOSTED);
   _problem->getNonlinearSystemBase().zeroVectorForResidual("slave_flux");
+
+  // It is risky to apply this optimization to contact problems
+  // since the problem configuration may be changed during Jacobian
+  // evaluation. We therefore turn it off for all contact problems so that
+  // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3 or older.
+  if (!_problem->isSNESMFReuseBaseSetbyUser())
+    _problem->setSNESMFReuseBase(false, false);
 }
