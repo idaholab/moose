@@ -3,27 +3,30 @@
     type = 'Exodiff'
     input = 'constant_poroperm.i'
     exodiff = 'constant_poroperm_out.e'
-# Run in serial so RandomIC gets fixed PRNG results
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
+
+    requirement = "The system shall allow the assignment of porosity and permeability from an AuxVariable field."
+    issues = "#8062"
+    design = "PorousFlowPorosity.md"
   [../]
   [./constant_poroperm2]
     type = 'Exodiff'
     input = 'constant_poroperm2.i'
     exodiff = 'constant_poroperm2_out.e'
-# Run in serial so RandomIC gets fixed PRNG results
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
+
+    requirement = "The system shall allow the assignment of porosity and permeability from an AuxVariable field with binlinear relationships."
+    issues = "#8062"
+    design = "PorousFlowPorosity.md"
   [../]
   [./vol_expansion_poroperm]
     type = Exodiff
     input = vol_expansion_poroperm.i
     exodiff = vol_expansion_poroperm_out.e
-# Run in serial so RandomIC gets fixed PRNG results
-    max_parallel = 1
-    max_threads  = 1
     threading = '!pthreads'
+
+    requirement = "The system shall calculate permeability from a changing porosity."
+    issues = "#8062"
+    design = "PorousFlowPorosity.md"
   [../]
 []
