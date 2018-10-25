@@ -133,8 +133,6 @@ public:
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
   template <typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
-  template <typename T>
-  ADMaterialPropertyObject<T> & declareADProperty(const std::string & prop_name);
   ///@}
 
   /**
@@ -252,6 +250,12 @@ protected:
   /// the name strings each time.
   std::set<unsigned int> _supplied_prop_ids;
 
+  /// The set of supplied regular property ids
+  std::set<unsigned int> _supplied_regular_prop_ids;
+
+  /// The set of supplied automatic differentiation property ids
+  std::set<unsigned int> _supplied_ad_prop_ids;
+
   /// If False MOOSE does not compute this property
   const bool _compute;
 
@@ -279,10 +283,13 @@ protected:
   };
   std::map<std::string, int> _props_to_flags;
 
-private:
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
-  void registerPropName(std::string prop_name, bool is_get, Prop_State state);
+  void registerPropName(std::string prop_name,
+                        bool is_get,
+                        Prop_State state,
+                        bool is_declared_ad = false);
 
+private:
   /// Check and throw an error if the execution has progerssed past the construction stage
   void checkExecutionStage();
 
@@ -419,14 +426,6 @@ Material::declarePropertyOlder(const std::string & prop_name)
                       "getMaterialPropertyOlder (only) if a reference is required in this class."));
   registerPropName(prop_name, false, Material::OLDER);
   return _material_data->declarePropertyOlder<T>(prop_name);
-}
-
-template <typename T>
-ADMaterialPropertyObject<T> &
-Material::declareADProperty(const std::string & prop_name)
-{
-  registerPropName(prop_name, false, Material::CURRENT);
-  return _material_data->declareADProperty<T>(prop_name);
 }
 
 template <typename T>

@@ -156,12 +156,20 @@ Material::checkStatefulSanity() const
 }
 
 void
-Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_State state)
+Material::registerPropName(std::string prop_name,
+                           bool is_get,
+                           Material::Prop_State state,
+                           bool is_declared_ad)
 {
   if (!is_get)
   {
     _supplied_props.insert(prop_name);
-    _supplied_prop_ids.insert(_material_data->getPropertyId(prop_name));
+    const auto & property_id = _material_data->getPropertyId(prop_name);
+    _supplied_prop_ids.insert(property_id);
+    if (is_declared_ad)
+      _supplied_ad_prop_ids.insert(property_id);
+    else
+      _supplied_regular_prop_ids.insert(property_id);
 
     _props_to_flags[prop_name] |= static_cast<int>(state);
     if (static_cast<int>(state) % 2 == 0)
@@ -218,6 +226,10 @@ Material::computeProperties()
   if (_constant_option == ConstantTypeEnum::SUBDOMAIN)
     return;
 
+  // Reference to *all* the MaterialProperties in the MaterialData object, not
+  // just the ones for this Material.
+  MaterialProperties & props = _material_data->props();
+
   // If this Material has the _constant_on_elem flag set, we take the
   // value computed for _qp==0 and use it at all the quadrature points
   // in the Elem.
@@ -227,22 +239,49 @@ Material::computeProperties()
     _qp = 0;
     computeQpProperties();
 
-    // Reference to *all* the MaterialProperties in the MaterialData object, not
-    // just the ones for this Material.
-    MaterialProperties & props = _material_data->props();
+    if (_fe_problem.currentlyComputingJacobian() && _fe_problem.usingAD())
+    {
+      for (const auto & prop_id : _supplied_regular_prop_ids)
+        props[prop_id]->copyValueToDualNumber(0);
+      for (const auto & prop_id : _supplied_ad_prop_ids)
+        props[prop_id]->copyDualNumberToValue(0);
+    }
 
     // Now copy the values computed at qp 0 to all the other qps.
-    for (const auto & prop_id : _supplied_prop_ids)
+    for (const auto & prop_id : _supplied_regular_prop_ids)
     {
       auto nqp = _qrule->n_points();
       for (decltype(nqp) qp = 1; qp < nqp; ++qp)
+      {
         props[prop_id]->qpCopy(qp, props[prop_id], 0);
+        if (_fe_problem.currentlyComputingJacobian())
+          props[prop_id]->copyValueToDualNumber(qp);
+      }
+    }
+    for (const auto & prop_id : _supplied_ad_prop_ids)
+    {
+      auto nqp = _qrule->n_points();
+      for (decltype(nqp) qp = 1; qp < nqp; ++qp)
+      {
+        props[prop_id]->qpCopy(qp, props[prop_id], 0);
+        if (_fe_problem.currentlyComputingJacobian())
+          props[prop_id]->copyDualNumberToValue(qp);
+      }
     }
   }
   else
   {
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    {
       computeQpProperties();
+      if (_fe_problem.currentlyComputingJacobian() && _fe_problem.usingAD())
+      {
+        for (const auto & prop_id : _supplied_regular_prop_ids)
+          props[prop_id]->copyValueToDualNumber(_qp);
+        for (const auto & prop_id : _supplied_ad_prop_ids)
+          props[prop_id]->copyDualNumberToValue(_qp);
+      }
+    }
   }
 }
 

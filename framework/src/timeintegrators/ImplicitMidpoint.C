@@ -28,6 +28,8 @@ ImplicitMidpoint::ImplicitMidpoint(const InputParameters & parameters)
     _stage(1),
     _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED))
 {
+  mooseInfo("ImplicitMidpoint and other multistage TimeIntegrators are known not to work with "
+            "Materials/AuxKernels that accumulate 'state' and should be used with caution.");
 }
 
 void

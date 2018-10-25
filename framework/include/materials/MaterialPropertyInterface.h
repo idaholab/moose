@@ -407,6 +407,8 @@ template <typename T>
 const ADMaterialPropertyObject<T> &
 MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
 {
+  _mi_feproblem.setUsingADFlag(true);
+
   checkExecutionStage();
   checkMaterialProperty(name);
 
