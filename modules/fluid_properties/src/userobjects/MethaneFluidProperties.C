@@ -18,13 +18,13 @@ template <>
 InputParameters
 validParams<MethaneFluidProperties>()
 {
-  InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
+  InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addClassDescription("Fluid properties for methane (CH4)");
   return params;
 }
 
 MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidPropertiesPT(parameters),
+  : SinglePhaseFluidProperties(parameters),
     _Mch4(16.0425e-3),
     _p_critical(4.5992e6),
     _T_critical(190.564),

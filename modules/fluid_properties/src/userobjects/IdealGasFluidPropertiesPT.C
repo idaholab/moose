@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<IdealGasFluidPropertiesPT>()
 {
-  InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
+  InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addParam<Real>("molar_mass", 29.0e-3, "Constant molar mass of the fluid (kg/mol)");
   params.addParam<Real>(
       "cv", 0.718e3, "Constant specific heat capacity at constant volume (J/kg/K)");
@@ -30,7 +30,7 @@ validParams<IdealGasFluidPropertiesPT>()
 }
 
 IdealGasFluidPropertiesPT::IdealGasFluidPropertiesPT(const InputParameters & parameters)
-  : SinglePhaseFluidPropertiesPT(parameters),
+  : SinglePhaseFluidProperties(parameters),
     _molar_mass(getParam<Real>("molar_mass")),
     _cv(getParam<Real>("cv")),
     _cp(getParam<Real>("cp")),

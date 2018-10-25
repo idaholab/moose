@@ -22,7 +22,7 @@ template <>
 InputParameters
 validParams<TabulatedFluidProperties>()
 {
-  InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
+  InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addParam<FileName>(
       "fluid_property_file",
       "fluid_properties.csv",
@@ -56,7 +56,7 @@ validParams<TabulatedFluidProperties>()
 }
 
 TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidPropertiesPT(parameters),
+  : SinglePhaseFluidProperties(parameters),
     _file_name(getParam<FileName>("fluid_property_file")),
     _temperature_min(getParam<Real>("temperature_min")),
     _temperature_max(getParam<Real>("temperature_max")),
@@ -64,7 +64,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
-    _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp")),
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
     _interpolated_properties(),
     _interpolate_density(false),

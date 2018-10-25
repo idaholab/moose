@@ -10,7 +10,7 @@
 #ifndef IDEALGASFLUIDPROPERTIESPT_H
 #define IDEALGASFLUIDPROPERTIESPT_H
 
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 
 class IdealGasFluidPropertiesPT;
 
@@ -21,7 +21,7 @@ InputParameters validParams<IdealGasFluidPropertiesPT>();
  * Ideal gas fluid properties for (pressure, temperature) variables.
  * Default parameters are for air at atmospheric pressure and temperature.
  */
-class IdealGasFluidPropertiesPT : public SinglePhaseFluidPropertiesPT
+class IdealGasFluidPropertiesPT : public SinglePhaseFluidProperties
 {
 public:
   IdealGasFluidPropertiesPT(const InputParameters & parameters);

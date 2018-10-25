@@ -11,7 +11,7 @@
 #define FLUIDPROPERTIESMATERIALPT_H
 
 #include "Material.h"
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 
 class FluidPropertiesMaterialPT;
 
@@ -54,7 +54,7 @@ protected:
   MaterialProperty<Real> & _c;
 
   /// Fluid properties UserObject
-  const SinglePhaseFluidPropertiesPT & _fp;
+  const SinglePhaseFluidProperties & _fp;
 };
 
 #endif /* FLUIDPROPERTIESMATERIALPT_H */

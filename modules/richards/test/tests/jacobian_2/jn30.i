@@ -95,6 +95,7 @@
     family = LAGRANGE
     [./InitialCondition]
       type = RandomIC
+      seed = 1
       block = 0
       min = -1
       max = 0
@@ -105,6 +106,7 @@
     family = LAGRANGE
     [./InitialCondition]
       type = RandomIC
+      seed = 2
       block = 0
       min = 0
       max = 1

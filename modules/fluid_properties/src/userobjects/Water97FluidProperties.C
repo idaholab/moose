@@ -18,13 +18,13 @@ template <>
 InputParameters
 validParams<Water97FluidProperties>()
 {
-  InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
+  InputParameters params = validParams<SinglePhaseFluidProperties>();
   params.addClassDescription("Fluid properties for water and steam (H2O) using IAPWS-IF97");
   return params;
 }
 
 Water97FluidProperties::Water97FluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidPropertiesPT(parameters),
+  : SinglePhaseFluidProperties(parameters),
     _Mh2o(18.015e-3),
     _Rw(461.526),
     _p_critical(22.064e6),

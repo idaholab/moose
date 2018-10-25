@@ -121,7 +121,7 @@ PorousFlowSingleComponentFluid::PorousFlowSingleComponentFluid(const InputParame
                                                _temperature_variable_name))
                       : nullptr),
 
-    _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp"))
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 

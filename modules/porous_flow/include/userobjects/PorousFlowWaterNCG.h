@@ -12,7 +12,7 @@
 
 #include "PorousFlowFluidStateBase.h"
 
-class SinglePhaseFluidPropertiesPT;
+class SinglePhaseFluidProperties;
 class PorousFlowWaterNCG;
 
 template <>
@@ -162,9 +162,9 @@ protected:
   void checkVariables(Real temperature) const;
 
   /// Fluid properties UserObject for water
-  const SinglePhaseFluidPropertiesPT & _water_fp;
+  const SinglePhaseFluidProperties & _water_fp;
   /// Fluid properties UserObject for the NCG
-  const SinglePhaseFluidPropertiesPT & _ncg_fp;
+  const SinglePhaseFluidProperties & _ncg_fp;
   /// Molar mass of water (kg/mol)
   const Real _Mh2o;
   /// Molar mass of non-condensable gas (kg/mol)
