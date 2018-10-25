@@ -9,6 +9,7 @@
 
 #include "SetAdaptivityOptionsAction.h"
 #include "FEProblem.h"
+#include "RelationshipManager.h"
 
 #include "libmesh/fe.h"
 
