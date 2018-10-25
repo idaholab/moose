@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr
