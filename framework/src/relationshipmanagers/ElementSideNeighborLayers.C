@@ -12,6 +12,8 @@
 #include "Conversion.h"
 #include "MooseApp.h"
 
+#include "libmesh/default_coupling.h"
+
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
 template <>
