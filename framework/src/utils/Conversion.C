@@ -352,24 +352,20 @@ stringToEnum<RelationshipManagerType>(const std::string & s)
 std::string
 stringify(const RelationshipManagerType & t)
 {
-  constexpr RelationshipManagerType geoalgo = static_cast<RelationshipManagerType>(
-      (char)RelationshipManagerType::GEOMETRIC | (char)RelationshipManagerType::ALGEBRAIC);
+  // Connot make a switch statement because the boolean logic doesn't work well with the class type
+  // enumeration and because Cody says so.
+  if (t == RelationshipManagerType::DEFAULT)
+    return "DEFAULT";
+  if (t == RelationshipManagerType::GEOMETRIC)
+    return "GEOMETRIC";
+  if (t == RelationshipManagerType::ALGEBRAIC)
+    return "ALGEBRAIC";
+  if (t == (RelationshipManagerType::GEOMETRIC | RelationshipManagerType::ALGEBRAIC))
+    return "GEOMETRIC and ALGEBRAIC";
+  if (t == RelationshipManagerType::COUPLING)
+    return "COUPLING";
 
-  switch (t)
-  {
-    case RelationshipManagerType::DEFAULT:
-      return "DEFAULT";
-    case RelationshipManagerType::GEOMETRIC:
-      return "GEOMETRIC";
-    case RelationshipManagerType::ALGEBRAIC:
-      return "ALGEBRAIC";
-    case geoalgo:
-      return "GEOMETRIC and ALGEBRAIC";
-    case RelationshipManagerType::COUPLING:
-      return "COUPLING";
-    default:
-      return "ERROR";
-  }
+  mooseError("Unknown RelationshipManagerType");
 }
 
 // Turn the warnings back on
