@@ -50,14 +50,20 @@ MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType input_
 {
   const auto & buildable_types = _moose_object_pars.getBuildableRelationshipManagerTypes();
 
+  // These need unique names
+  static unsigned int unique_object_id = 0;
+
   for (const auto & buildable_type : buildable_types)
   {
+    unique_object_id++;
+
     auto & rm_name = std::get<0>(buildable_type);
     auto & rm_type = std::get<1>(buildable_type);
     auto rm_input_parameter_func = std::get<2>(buildable_type);
 
     auto new_name = _moose_object_pars.get<std::string>("_moose_base") + '_' + name() + '_' +
-                    rm_name + "_" + Moose::stringify(rm_type);
+                    rm_name + "_" + Moose::stringify(rm_type) + " " +
+                    std::to_string(unique_object_id);
 
     auto rm_params = _factory.getValidParams(rm_name);
     rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;
