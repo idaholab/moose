@@ -1,0 +1,8 @@
+[Tests]
+  [./sidesets_from_normals_generator_test]
+    type = 'Exodiff'
+    input = 'sidesets_cylinder_normals.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sidesets_cylinder_normals_in.e'
+  [../]
+[]
