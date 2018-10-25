@@ -35,9 +35,18 @@ validParams<PolycrystalUserObjectBase>()
                              PolycrystalUserObjectBase::coloringAlgorithms(),
                              PolycrystalUserObjectBase::coloringAlgorithmDescriptions());
 
-  params.registerRelationshipManagers("GrainTrackerHaloRM ElementPointNeighbors",
-                                      "GEOMETRIC ALGEBRAIC");
-  params.addPrivateParam<unsigned short>("element_point_neighbor_layers", 1);
+  params.addRelationshipManager(
+      "ElementPointNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC,
+
+      [](const InputParameters & /*obj_params*/, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") = 2;
+      }
+
+  );
+
+  params.addRelationshipManager("ElementPointNeighborLayers",
+                                Moose::RelationshipManagerType::ALGEBRAIC);
 
   // Hide the output of the IC objects by default, it doesn't change over time
   params.set<std::vector<OutputName>>("outputs") = {"none"};
