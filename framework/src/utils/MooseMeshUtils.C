@@ -112,5 +112,36 @@ getBoundaryIDs(const libMesh::MeshBase & mesh,
   return ids;
 }
 
+std::vector<subdomain_id_type>
+getSubdomainIDs(const libMesh::MeshBase & mesh,
+                const std::vector<SubdomainName> & subdomain_name)
+{
+  std::vector<subdomain_id_type> ids(subdomain_name.size());
+  std::set<subdomain_id_type> mesh_subdomains;
+  mesh.subdomain_ids(mesh_subdomains);
+
+  for (unsigned int i = 0; i < subdomain_name.size(); i++)
+  {
+    if (subdomain_name[i] == "ANY_BLOCK_ID")
+    {
+      ids.assign(mesh_subdomains.begin(), mesh_subdomains.end());
+      if (i)
+        mooseWarning("You passed \"ANY_BLOCK_ID\" in addition to other block names.  This may be a "
+                     "logic error.");
+      break;
+    }
+
+    subdomain_id_type id = Moose::INVALID_BLOCK_ID;
+    std::istringstream ss(subdomain_name[i]);
+
+    if (!(ss >> id) || !ss.eof())
+      id = mesh.get_id_by_name(subdomain_name[i]);
+
+    ids[i] = id;
+  }
+
+  return ids;
+}
+
 
 }

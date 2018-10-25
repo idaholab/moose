@@ -29,6 +29,10 @@ namespace MooseMeshUtils
                             const std::vector<BoundaryName> & boundary_name,
                             bool generate_unknown);
 
+  std::vector<subdomain_id_type>
+  getSubdomainIDs(const libMesh::MeshBase & mesh,
+                  const std::vector<SubdomainName> & subdomain_name) ;
+
 }
 
 #endif // MOOSEMESHUTILS_H
