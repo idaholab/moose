@@ -26,6 +26,15 @@ MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
                                          Moose::VarKindType var_kind)
   : MooseVariableBase(var_num, fe_type, sys, var_kind), _assembly(assembly)
 {
+  auto num_vector_tags = _sys.subproblem().numVectorTags();
+
+  _vector_tag_u.resize(num_vector_tags);
+  _need_vector_tag_u.resize(num_vector_tags);
+
+  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
+
+  _matrix_tag_u.resize(num_matrix_tags);
+  _need_matrix_tag_u.resize(num_matrix_tags);
 }
 
 MooseVariableScalar::~MooseVariableScalar()
@@ -36,6 +45,16 @@ MooseVariableScalar::~MooseVariableScalar()
 
   _u_dot.release();
   _du_dot_du.release();
+
+  for (auto & _tag_u : _vector_tag_u)
+    _tag_u.release();
+
+  _vector_tag_u.clear();
+
+  for (auto & _tag_u : _matrix_tag_u)
+    _tag_u.release();
+
+  _matrix_tag_u.clear();
 }
 
 void
@@ -46,6 +65,8 @@ MooseVariableScalar::reinit()
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
   const NumericVector<Real> & u_dot = _sys.solutionUDot();
   const Real & du_dot_du = _sys.duDotDu();
+  auto num_vector_tags = _sys.subproblem().numVectorTags();
+  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
@@ -54,6 +75,12 @@ MooseVariableScalar::reinit()
   _u_old.resize(n);
   _u_older.resize(n);
   _u_dot.resize(n);
+
+  for (auto & _tag_u : _vector_tag_u)
+    _tag_u.resize(n);
+
+  for (auto & _tag_u : _matrix_tag_u)
+    _tag_u.resize(n);
 
   _du_dot_du.clear();
   _du_dot_du.resize(n, du_dot_du);
@@ -68,6 +95,15 @@ MooseVariableScalar::reinit()
     solution_old.get(_dof_indices, &_u_old[0]);
     solution_older.get(_dof_indices, &_u_older[0]);
     u_dot.get(_dof_indices, &_u_dot[0]);
+
+    for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+      if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
+        _sys.getVector(tag).get(_dof_indices, &_vector_tag_u[tag][0]);
+
+    for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+      if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
+        for (std::size_t i = 0; i != n; ++i)
+          _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(_dof_indices[i], _dof_indices[i]);
   }
   else
   {
@@ -83,6 +119,14 @@ MooseVariableScalar::reinit()
         solution_old.get(one_dof_index, &_u_old[i]);
         solution_older.get(one_dof_index, &_u_older[i]);
         u_dot.get(one_dof_index, &_u_dot[i]);
+
+        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+          if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
+            _sys.getVector(tag).get(one_dof_index, &_vector_tag_u[tag][i]);
+
+        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+          if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
+            _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(dof_index, dof_index);
       }
       else
       {
@@ -94,6 +138,14 @@ MooseVariableScalar::reinit()
         _u_old.resize(i);
         _u_older.resize(i);
         _u_dot.resize(i);
+
+        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+          if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
+            _vector_tag_u[tag].resize(i);
+
+        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+          if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
+            _matrix_tag_u[tag].resize(i);
 #else
         // If we can't catch errors at run-time, we can at least
         // propagate NaN values rather than invalid values, so that
@@ -102,6 +154,14 @@ MooseVariableScalar::reinit()
         _u_old[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_older[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_dot[i] = std::numeric_limits<Real>::quiet_NaN();
+
+        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+          if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
+            _vector_tag_u[tag][i] = std::numeric_limits<Real>::quiet_NaN();
+
+        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+          if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
+            _matrix_tag_u[tag][i] = std::numeric_limits<Real>::quiet_NaN();
 #endif
       }
     }

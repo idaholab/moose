@@ -22,4 +22,18 @@
     input = '2d_diffusion_matrix_tag_test.i'
     exodiff = 'matrix_tag_test_out.e'
   [../]
+
+  [./test_tag_scalar_kernels]
+    type = 'CSVDiff'
+    input = 'scalar_tag_vector.i'
+    csvdiff = 'scalar_tag_vector_out.csv'
+    # System of equations has one dof only 
+    # so that we do not need to run the test
+    # in parallel
+    max_parallel = 1   
+
+    requirement = 'tagging system shall support scalar kernels'
+    issues = '#9669'
+    design = '/tagging.md'
+  [../]
 []
