@@ -27,7 +27,17 @@ validParams<ElemSideNeighborLayersTester>()
 
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
 
-  params.registerRelationshipManagers("ElementSideNeighborLayers");
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") =
+            obj_params.get<unsigned short>("element_side_neighbor_layers");
+      }
+
+  );
+
   params.addRequiredParam<unsigned short>("element_side_neighbor_layers",
                                           "Number of layers to ghost");
 

@@ -7,48 +7,50 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElemSideNeighborLayersGeomTester.h"
+#include "TwoRMTester.h"
 #include "MooseMesh.h"
 
 // invalid_processor_id
 #include "libmesh/dof_object.h"
 
-registerMooseObject("MooseTestApp", ElemSideNeighborLayersGeomTester);
+registerMooseObject("MooseTestApp", TwoRMTester);
 
 template <>
 InputParameters
-validParams<ElemSideNeighborLayersGeomTester>()
+validParams<TwoRMTester>()
 {
   InputParameters params = validParams<ElemSideNeighborLayersTester>();
 
   // Our base class had called out some relationship managers that we don't want for this object
   params.clearRelationshipManagers();
 
-  /**
-   * Reuse an existing RelationshipManager, but restrict it to only acting geometrically.
-   * There is no new code or options in this class, just a registration change.
-   */
   params.addRelationshipManager(
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC,
 
       [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<unsigned short>("layers") =
-            obj_params.get<unsigned short>("element_side_neighbor_layers");
+        rm_params.set<unsigned short>("layers") = 2;
       }
 
   );
 
-  params.addRequiredParam<unsigned short>("element_side_neighbor_layers",
-                                          "Number of layers to ghost");
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::ALGEBRAIC,
 
-  params.addClassDescription("User object to calculate ghosted elements on a single processor or "
-                             "the union across all processors.");
+      [](const InputParameters & obj_params, InputParameters & rm_params) {
+        rm_params.set<unsigned short>("layers") = 1;
+      }
+
+  );
+
+  params.addClassDescription(
+      "Tests that the same RM can be used with different numbers of layers for the same object.");
+
   return params;
 }
 
-ElemSideNeighborLayersGeomTester::ElemSideNeighborLayersGeomTester(
-    const InputParameters & parameters)
+TwoRMTester::TwoRMTester(const InputParameters & parameters)
   : ElemSideNeighborLayersTester(parameters)
 {
 }

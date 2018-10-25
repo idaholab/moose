@@ -1,0 +1,17 @@
+[Tests]
+  [./evaluable_neighbors_replicated]
+    type = 'Exodiff'
+    input = 'two_rm.i'
+    exodiff = 'two_rm_out.e'
+    petsc_version = '>3.8'
+    mesh_mode = 'REPLICATED'
+    dof_id_bytes = 4 # Metis gives different partitions with 64-bit dof indices
+
+    min_parallel = 3
+    max_parallel = 3
+
+    design = "relationship_managers.md"
+    requirement = "MOOSE shall allow multiple active RelationshipManagers to manage ghosting for the same object"
+    issues = "#10455 #11981"
+  [../]
+[]

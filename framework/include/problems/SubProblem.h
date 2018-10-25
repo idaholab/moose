@@ -70,6 +70,11 @@ public:
   virtual bool isTransient() const = 0;
 
   /**
+   * Whether or not the user has requested default ghosting ot be on.
+   */
+  bool defaultGhosting() { return _default_ghosting; }
+
+  /**
    * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
    * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
    *

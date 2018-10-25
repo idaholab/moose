@@ -76,3 +76,7 @@
     variable = algebraic1
   []
 []
+
+[Problem]
+  default_ghosting = true
+[]

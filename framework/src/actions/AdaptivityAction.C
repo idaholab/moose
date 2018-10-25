@@ -107,8 +107,6 @@ AdaptivityAction::act()
   }
   else if (_current_task == "setup_adaptivity")
   {
-    std::cout << "setup_adaptivity" << std::endl;
-
     NonlinearSystemBase & system = _problem->getNonlinearSystemBase();
 
     Adaptivity & adapt = _problem->adaptivity();
