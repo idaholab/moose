@@ -54,7 +54,7 @@ ElementPointNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers;
+    return _layers == rm->_layers && _rm_type == rm->_rm_type;
 }
 
 void

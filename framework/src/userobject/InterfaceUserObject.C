@@ -21,6 +21,11 @@ validParams<InterfaceUserObject>()
   params += validParams<TwoMaterialPropertyInterface>();
   params += validParams<TransientInterface>();
   params.addClassDescription("Basic UO class to perform computation across an interface");
+
+  // Need one layer of ghosting
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 

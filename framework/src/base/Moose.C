@@ -203,6 +203,8 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_function_complete", false);
   registerTask("setup_variable_complete", false);
   registerTask("ready_to_init", true);
+  appendMooseObjectTask("ready_to_init", InterfaceKernel);
+  appendMooseObjectTask("ready_to_init", DGKernel);
 
   // Output related actions
   registerTask("add_output_aux_variables", true);
