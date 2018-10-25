@@ -9,8 +9,10 @@
 
 #include "AddDGKernelAction.h"
 #include "FEProblem.h"
+#include "NonlinearSystem.h"
 
 registerMooseAction("MooseApp", AddDGKernelAction, "add_dg_kernel");
+registerMooseAction("MooseApp", AddDGKernelAction, "ready_to_init");
 
 template <>
 InputParameters
@@ -24,5 +26,9 @@ AddDGKernelAction::AddDGKernelAction(InputParameters params) : MooseObjectAction
 void
 AddDGKernelAction::act()
 {
-  _problem->addDGKernel(_type, _name, _moose_object_pars);
+  if (_current_task == "ready_to_init")
+    _problem->getNonlinearSystem().dofMap().set_implicit_neighbor_dofs(true);
+
+  if (_current_task == "add_dg_kernel")
+    _problem->addDGKernel(_type, _name, _moose_object_pars);
 }

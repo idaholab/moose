@@ -1694,13 +1694,13 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
 {
   bool add = true;
   for (const auto & rm : _relationship_managers)
+  {
     if (*rm == *relationship_manager)
     {
       add = false;
       break;
     }
-
-  std::cout << " Am I adding it: " << add << std::endl;
+  }
 
   if (add)
     _relationship_managers.emplace_back(relationship_manager);

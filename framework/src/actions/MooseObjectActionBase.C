@@ -54,41 +54,35 @@ MooseObjectActionBase::addRelationshipManagers(Moose::RelationshipManagerType in
     auto & rm_type = std::get<1>(buildable_type);
     auto rm_input_parameter_func = std::get<2>(buildable_type);
 
-    std::cout << "Here1" << std::endl;
-
-    /**
-     * This method is always called twice. Once to attempt adding early RMs and once to add
-     * late RMs. For generic MooseObjects, we'd like to add RMs as early as possible, but
-     * we'll have to be careful not to add them twice!
-     */
-    auto new_name = name() + '_' + rm_name + "_rm";
-    if (_app.hasRelationshipManager(new_name))
-      continue;
-
-    std::cout << "Here2 " << Moose::stringify(rm_type) << std::endl;
+    auto new_name = _moose_object_pars.get<std::string>("_moose_base") + '_' + name() + '_' +
+                    rm_name + "_" + Moose::stringify(rm_type);
 
     auto rm_params = _factory.getValidParams(rm_name);
     rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;
 
-    // Figure out if we should be adding this one yet
-    if (!(((rm_type & input_rm_type) == input_rm_type) // Does this RM have the type passed in?
+    // Figure out if we shouldn't be adding this one yet
+    if (((rm_type & input_rm_type) != input_rm_type) // Does this RM not have the type passed in?
 
-          || // Or is it a Geometric that wasn't able to be added during tthe geometric section
+        || // Or are we adding Geometric but this one needs to be delayed
 
-          (((rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
-            Moose::RelationshipManagerType::GEOMETRIC) &&
-           !rm_params.template get<bool>("attach_geometric_early"))))
+        (((input_rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
+          Moose::RelationshipManagerType::GEOMETRIC) &&
+         ((rm_type & Moose::RelationshipManagerType::GEOMETRIC) ==
+          Moose::RelationshipManagerType::GEOMETRIC) &&
+         !rm_params.template get<bool>("attach_geometric_early"))
+
+        || // Or is this an Algebraic and Geometric one that we already added earlier?
+
+        (((input_rm_type & Moose::RelationshipManagerType::ALGEBRAIC) ==
+          Moose::RelationshipManagerType::ALGEBRAIC) &&
+         (rm_type == (Moose::RelationshipManagerType::GEOMETRIC |
+                      Moose::RelationshipManagerType::ALGEBRAIC)) &&
+         rm_params.template get<bool>("attach_geometric_early")))
       continue;
-
-    std::cout << "Here3" << std::endl;
 
     // If there is a callback for setting the RM parameters let's use it
     if (rm_input_parameter_func)
       rm_input_parameter_func(_moose_object_pars, rm_params);
-
-    std::cout << "Type to be built: "
-              << Moose::stringify(rm_params.get<Moose::RelationshipManagerType>("rm_type"))
-              << std::endl;
 
     // If we're doing geometric but we can't build it early - then let's not build it yet
     // (It will get built when we do algebraic)

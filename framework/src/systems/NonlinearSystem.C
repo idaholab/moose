@@ -20,6 +20,7 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/default_coupling.h"
 
 namespace Moose
 {
@@ -91,6 +92,10 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _fd_residual_functor(_fe_problem),
     _use_coloring_finite_difference(false)
 {
+  _sys.get_dof_map().add_coupling_functor(
+      _sys.get_dof_map().default_coupling(),
+      false); // The false keeps it from getting added to the mesh
+
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
   nonlinearSolver()->bounds = Moose::compute_bounds;
