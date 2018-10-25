@@ -1,0 +1,8 @@
+[Tests]
+  [./mesh_side_set_generator_test]
+    type = 'Exodiff'
+    input = 'mesh_side_set_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'mesh_side_set_generator_in.e'
+  [../]
+[]
