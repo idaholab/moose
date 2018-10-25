@@ -87,7 +87,13 @@ AdaptivityAction::act()
 
   Adaptivity & adapt = _problem->adaptivity();
 
-  adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));
+  // we don't need to run mesh modifiers *again* after they ran already during the mesh
+  // splitting process. Adaptivity::init must be called for any adaptivity to work, however, so we
+  // can't just skip it for the useSplit case.
+  if (_app.isUseSplit())
+    adapt.init(0, 0);
+  else
+    adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_adaptivity"));
 
   adapt.setErrorEstimator(getParam<MooseEnum>("error_estimator"));
 
