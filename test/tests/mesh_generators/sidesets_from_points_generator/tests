@@ -1,0 +1,8 @@
+[Tests]
+  [./sidesets_from_points_generator_test]
+    type = 'Exodiff'
+    input = 'sidesets_from_points.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sidesets_from_points_in.e'
+  [../]
+[]
