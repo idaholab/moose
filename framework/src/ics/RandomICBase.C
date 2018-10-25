@@ -38,7 +38,7 @@ validParams<RandomICBase>()
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
   params.addParam<bool>(
       "legacy_generator",
-      true,
+      false,
       "Determines whether or not the legacy generator (deprecated) should be used.");
 
   params.addClassDescription("Base class for generating a random field for a variable.");

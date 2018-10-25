@@ -10,7 +10,7 @@
 #ifndef SIMPLEFLUIDPROPERTIES_H
 #define SIMPLEFLUIDPROPERTIES_H
 
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 
 class SimpleFluidProperties;
 
@@ -31,7 +31,7 @@ InputParameters validParams<SimpleFluidProperties>();
  * specific entropy
  * viscosity
  */
-class SimpleFluidProperties : public SinglePhaseFluidPropertiesPT
+class SimpleFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   SimpleFluidProperties(const InputParameters & parameters);

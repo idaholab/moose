@@ -11,7 +11,7 @@
 #define SINGLEPHASEFLUIDPROPERTIESPTTESTUTILS_H
 
 #include "FluidPropertiesTestUtils.h"
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 
 // Macro for performing a derivative test
 #define DERIV_TEST(f, fd, a, b, tol)                                                               \

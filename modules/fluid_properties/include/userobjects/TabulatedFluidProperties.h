@@ -10,7 +10,7 @@
 #ifndef TABULATEDFLUIDPROPERTIES_H
 #define TABULATEDFLUIDPROPERTIES_H
 
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 #include "DelimitedFileReader.h"
 
 class SinglePhaseFluidPropertiesPT;
@@ -87,7 +87,7 @@ InputParameters validParams<TabulatedFluidProperties>();
  * wrt pressure and temperature) will be calculated using bicubic interpolation, while all
  * remaining fluid properties are calculated using the supplied FluidProperties UserObject.
  */
-class TabulatedFluidProperties : public SinglePhaseFluidPropertiesPT
+class TabulatedFluidProperties : public SinglePhaseFluidProperties
 {
 public:
   TabulatedFluidProperties(const InputParameters & parameters);
@@ -216,7 +216,7 @@ protected:
   unsigned int _num_p;
 
   /// SinglePhaseFluidPropertiesPT UserObject
-  const SinglePhaseFluidPropertiesPT & _fp;
+  const SinglePhaseFluidProperties & _fp;
 
   /// List of required column names to be read
   const std::vector<std::string> _required_columns{"pressure", "temperature"};

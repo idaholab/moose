@@ -586,6 +586,10 @@ class TestHarness:
             self.writeResults()
 
     def writeResults(self):
+        """ Don't update the results file when using the --failed-tests argument """
+        if self.options.failed_tests:
+            return
+
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
 

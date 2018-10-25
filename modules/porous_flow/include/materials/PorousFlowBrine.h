@@ -80,7 +80,7 @@ protected:
   const BrineFluidProperties * _brine_fp;
 
   /// Water Fluid properties UserObject
-  const SinglePhaseFluidPropertiesPT * _water_fp;
+  const SinglePhaseFluidProperties * _water_fp;
 
   /// NaCl mass fraction at the qps or nodes
   const VariableValue & _xnacl;

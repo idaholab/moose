@@ -38,7 +38,7 @@ FluidPropertiesMaterialPT::FluidPropertiesMaterialPT(const InputParameters & par
     _s(declareProperty<Real>("s")),
     _c(declareProperty<Real>("c")),
 
-    _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp"))
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 

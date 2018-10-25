@@ -155,7 +155,7 @@ public:
   static const unsigned int WATER = 0;
   static const unsigned int NACL = 1;
 
-  virtual const SinglePhaseFluidPropertiesPT & getComponent(unsigned int component) const override;
+  virtual const SinglePhaseFluidProperties & getComponent(unsigned int component) const override;
 
 protected:
   /**
@@ -173,9 +173,9 @@ protected:
   Real massFractionToMoleFraction(Real xnacl) const;
 
   /// Water97FluidProperties UserObject
-  const SinglePhaseFluidPropertiesPT * _water_fp;
+  const SinglePhaseFluidProperties * _water_fp;
   /// NaClFluidProperties UserObject
-  const SinglePhaseFluidPropertiesPT * _nacl_fp;
+  const SinglePhaseFluidProperties * _nacl_fp;
 
   /// Molar mass of NaCl (kg/mol)
   Real _Mnacl;

@@ -32,12 +32,14 @@
     min = 1e6
     max = 4e6
     variable = pgas
+    seed = 1
   [../]
   [./z]
     type = RandomIC
     min = 0.2
     max = 0.8
     variable = zi
+    seed = 2
   [../]
 []
 

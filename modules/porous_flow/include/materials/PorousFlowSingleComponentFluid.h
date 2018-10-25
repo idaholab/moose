@@ -11,7 +11,7 @@
 #define POROUSFLOWSINGLECOMPONENTFLUID_H
 
 #include "PorousFlowFluidPropertiesBase.h"
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 
 class PorousFlowSingleComponentFluid;
 
@@ -78,7 +78,7 @@ protected:
   MaterialProperty<Real> * const _denthalpy_dT;
 
   /// Fluid properties UserObject
-  const SinglePhaseFluidPropertiesPT & _fp;
+  const SinglePhaseFluidProperties & _fp;
 };
 
 #endif // POROUSFLOWSINGLECOMPONENTFLUID_H

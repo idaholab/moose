@@ -15,7 +15,7 @@
 #include "BrineFluidProperties.h"
 
 class BrineFluidProperties;
-class SinglePhaseFluidPropertiesPT;
+class SinglePhaseFluidProperties;
 
 class BrineFluidPropertiesTest : public MooseObjectUnitTest
 {
@@ -32,7 +32,7 @@ protected:
   }
 
   const BrineFluidProperties * _fp;
-  const SinglePhaseFluidPropertiesPT * _water_fp;
+  const SinglePhaseFluidProperties * _water_fp;
 };
 
 #endif // BRINEFLUIDPROPERTIESTEST_H

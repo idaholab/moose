@@ -11,7 +11,7 @@
 #define MULTICOMPONENTFLUIDPROPERTIESPT_H
 
 #include "FluidProperties.h"
-#include "SinglePhaseFluidPropertiesPT.h"
+#include "SinglePhaseFluidProperties.h"
 
 class MultiComponentFluidPropertiesPT;
 
@@ -200,7 +200,7 @@ public:
    * @param component fluid component
    * @return reference to SinglePhaseFluidPropertiesPT UserObject for component
    */
-  virtual const SinglePhaseFluidPropertiesPT & getComponent(unsigned int component) const = 0;
+  virtual const SinglePhaseFluidProperties & getComponent(unsigned int component) const = 0;
 
 protected:
   /// Conversion of temperature from Celcius to Kelvin
