@@ -51,10 +51,10 @@ public:
   virtual ~Adaptivity();
 
   /**
-   * Initialize the initial adaptivity ;-)
-   *
-   * @param steps TODO: describe me
-   * @param initial_steps number of steps to do in the initial adaptivity
+   * Initialize and turn on adaptivity for the simulation. initial_steps specifies the number of
+   * adaptivity cycles to perform before the simulation starts and steps indicates the
+   * number of adaptivity cycles to run during a steady (not transient) solve.  steps is not used
+   * for transient or eigen solves.
    */
   void init(unsigned int steps, unsigned int initial_steps);
 

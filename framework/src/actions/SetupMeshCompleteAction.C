@@ -57,10 +57,19 @@ SetupMeshCompleteAction::act()
 
   if (_current_task == "execute_mesh_modifiers")
   {
+    // we don't need to run mesh modifiers *again* after they ran already during the mesh
+    // splitting process
+    if (_app.isUseSplit())
+      return;
     _app.executeMeshModifiers();
   }
   else if (_current_task == "uniform_refine_mesh")
   {
+    // we don't need to run mesh modifiers *again* after they ran already during the mesh
+    // splitting process
+    if (_app.isUseSplit())
+      return;
+
     /**
      * If possible we'd like to refine the mesh here before the equation systems
      * are setup to avoid doing expensive projections. If however we are doing a
