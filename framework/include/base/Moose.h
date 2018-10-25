@@ -94,6 +94,7 @@ extern const ExecFlagType EXEC_FORCED;
 extern const ExecFlagType EXEC_FAILED;
 extern const ExecFlagType EXEC_CUSTOM;
 extern const ExecFlagType EXEC_SUBDOMAIN;
+extern const ExecFlagType EXEC_PRE_DISPLACE;
 extern const ExecFlagType EXEC_SAME_AS_MULTIAPP;
 
 namespace Moose

@@ -33,7 +33,10 @@ validParams<AuxKernel>()
 
   // Add the SetupInterface parameter 'execute_on' with 'linear' and 'timestep_end'
   params += validParams<SetupInterface>();
-  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_LINEAR, EXEC_TIMESTEP_END};
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum.addAvailableFlags(EXEC_PRE_DISPLACE);
+  exec_enum = {EXEC_LINEAR, EXEC_TIMESTEP_END};
+  params.setDocString("execute_on", exec_enum.getDocString());
 
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this object applies to");
