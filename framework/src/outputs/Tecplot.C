@@ -34,6 +34,10 @@ validParams<Tecplot>()
       false,
       "If true, append to an existing ASCII file rather than creating a new file each time");
 
+  // Need a layer of geometric ghosting for mesh serialization
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC);
+
   // Add description for the Tecplot class
   params.addClassDescription("Object for outputting data in the Tecplot format");
 
