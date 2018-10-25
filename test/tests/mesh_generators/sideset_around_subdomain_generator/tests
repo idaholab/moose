@@ -1,0 +1,15 @@
+[Tests]
+  [./sideset_around_subdomain_generator_test]
+    type = 'Exodiff'
+    input = 'sideset_around_subdomain.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sideset_around_subdomain_in.e'
+  [../]
+
+  [./sideset_around_subdomain_normal_generator_test]
+    type = 'Exodiff'
+    input = 'around_normals_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'around_normals_generator_in.e'
+  [../]
+[]
