@@ -10,7 +10,7 @@
 #ifndef ELEMENTSIDENEIGHBORLAYERS_H
 #define ELEMENTSIDENEIGHBORLAYERS_H
 
-#include "libmesh/default_coupling.h"
+#include "FunctorRelationshipManager.h"
 
 // Forward declarations
 class ElementSideNeighborLayers;
