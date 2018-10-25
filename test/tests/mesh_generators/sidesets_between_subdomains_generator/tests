@@ -1,0 +1,15 @@
+[Tests]
+  [./sideset_between_subdomains_generator_test]
+    type = 'Exodiff'
+    input = 'sideset_between_subdomains.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sideset_between_subdomains_in.e'
+  [../]
+
+  [./sideset_between_subdomains_vector_generator_test]
+    type = 'Exodiff'
+    input = 'sideset_between_vector_subdomains_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sideset_between_vector_subdomains_generator_in.e'
+  [../]
+[]
