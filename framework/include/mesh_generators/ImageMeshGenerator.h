@@ -12,6 +12,7 @@
 
 #include "GeneratedMeshGenerator.h"
 #include "FileRangeBuilder.h"
+#include "libmesh/replicated_mesh.h"
 
 // Forward declarations
 class ImageMeshGenerator;
