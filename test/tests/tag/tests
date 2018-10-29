@@ -27,12 +27,22 @@
     type = 'CSVDiff'
     input = 'scalar_tag_vector.i'
     csvdiff = 'scalar_tag_vector_out.csv'
-    # System of equations has one dof only 
+    # System of equations has one dof only
     # so that we do not need to run the test
     # in parallel
-    max_parallel = 1   
+    max_parallel = 1
 
     requirement = 'tagging system shall support scalar kernels'
+    issues = '#9669'
+    design = '/tagging.md'
+  [../]
+
+  [./test_tag_DG_kernels]
+    type = 'Exodiff'
+    input = '2d_diffusion_dg_tag.i'
+    exodiff = '2d_diffusion_dg_tag_out.e'
+
+    requirement = 'tagging system shall support DG kernels'
     issues = '#9669'
     design = '/tagging.md'
   [../]

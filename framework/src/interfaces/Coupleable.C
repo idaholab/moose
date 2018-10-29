@@ -341,7 +341,10 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
   if (var == NULL)
     mooseError("Call coupledVectorValue for coupled vector variables");
 
-  return var->nodalVectorTagValue(tag);
+  if (_c_nodal)
+    return var->nodalVectorTagValue(tag);
+  else
+    return var->vectorTagValue(tag);
 }
 
 const VariableValue &
@@ -356,7 +359,10 @@ Coupleable::coupledMatrixTagValue(const std::string & var_name, TagID tag, unsig
   if (var == NULL)
     mooseError("Call coupledVectorValue for coupled vector variables");
 
-  return var->nodalMatrixTagValue(tag);
+  if (_c_nodal)
+    return var->nodalMatrixTagValue(tag);
+  else
+    return var->matrixTagValue(tag);
 }
 
 const VectorVariableValue &
