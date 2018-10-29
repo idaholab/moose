@@ -3,6 +3,11 @@
   dim = 2
   nx = 10
   ny = 10
+  [Partitioner]
+    type = GridPartitioner
+    nx = 2
+    ny = 2
+  []
 []
 
 [Variables]
