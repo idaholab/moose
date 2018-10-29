@@ -40,7 +40,7 @@ as a function of the strain, i.e. $\tilde{\boldsymbol{\sigma}}( \boldsymbol{\eps
 free strain. For example, in linear elasticity (only valid for small strains), the material response
 is linear, i.e.  $\boldsymbol{\sigma} = \boldsymbol{\mathcal{C}}(\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_0)$.
 
-## Consistency Between Stress and Strain
+## Consistency Between Stress and Strain id=consistency_stress_strain_use_displaced_mesh
 
 Within the tensor mechanics module, we have three separate ways to consistently
 calculate the strain and stress as shown in [strain_formulations]. Attention to

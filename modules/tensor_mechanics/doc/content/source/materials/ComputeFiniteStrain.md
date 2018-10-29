@@ -14,21 +14,23 @@ In this form, the generic time increment under consideration is such that
   \label{eqn:time_notation}
   t \in [t_n, t_{n+1}]
 \end{equation}
-The configurations of the material element under consideration at $t = t_n$ and $t = t_{n+1}$ are denoted
-by $\kappa_n$, and $\kappa_{n + 1}$, respectively for the previous and the current
-incremental configurations.
+The configurations of the material element under consideration at $t = t_n$ and
+$t = t_{n+1}$ are denoted by $\kappa_n$, and $\kappa_{n + 1}$, respectively for
+the previous and the current incremental configurations.
 
-### Deformation Gradient
+### Deformation Gradient Definition
 
-The incremental motion over the time increment is assumed to be the inverse of
-the deformation gradient $\hat{\boldsymbol{F}}$, that is, the deformation in
-$\kappa_{n + 1}$ with respect to $\kappa_n$. This inverse deformation gradient
-may be written as
+The deformation gradient represent the change in a material element from the
+reference configuration to the current configuration [citep:malvern1969introduction].
+In the incremental formulation used in the `ComputeFiniteStrain` class, the incremental
+deformation gradient represents the change in the material element from the previous
+configuration, $\kappa_n$, to the current configuration, $\kappa_{n+1}$.
+Mathematically this relationship is given as
 \begin{equation}
-  \hat{\boldsymbol{F}}^{-1} = \left( \frac{\partial{\boldsymbol{x}_{n+1}}}{\partial{\boldsymbol{x}_n}} \right)^{-1} = 1 - \frac{\partial \hat{\boldsymbol{u}}}{\partial \boldsymbol{x}},
+  \hat{\boldsymbol{F}} = \frac{\partial{\boldsymbol{x}_{n+1}}}{\partial{\boldsymbol{x}_n}},
 \end{equation}
-where $\hat{\boldsymbol{u}}(\boldsymbol{x})$ is the incremental displacement field for the time step, and
-$\boldsymbol{x}_{n+1}$ is the position vector of materials points in $\kappa_{n+1}$.
+where $\boldsymbol{x}_{n+1}$ is the position vector of materials points in $\kappa_{n+1}$,
+and $\boldsymbol{x}_{n}$ is the position vector of materials points in $\kappa_{n}$.
 
 !alert! note title=Incremental vs Total Deformation Gradient
 Note that $\hat{\boldsymbol{F}}$ is NOT the deformation gradient, but rather the incremental deformation gradient
@@ -36,15 +38,20 @@ of $\kappa_{n+1}$ with respect to $\kappa_n$. Thus $\hat{\boldsymbol{F}} = \bold
 \boldsymbol{F}_n^{-1}$, where $\boldsymbol{F}_n$ is the total deformation gradient at time $t_n$.
 !alert-end!
 
-Following the explanation of this procedure given by [cite:zhang2018modified], the incremental deformation gradient can
-be multiplicatively decomposed into an incremental rotation tensor, $\boldsymbol{\hat{R}}$,
-and the incremental right stretch tensor, $\boldsymbol{\hat{U}}$
+Following the explanation of this procedure given by [cite:zhang2018modified],
+the incremental deformation gradient can be multiplicatively decomposed into an
+incremental rotation tensor, $\boldsymbol{\hat{R}}$, and the incremental right
+stretch tensor, $\boldsymbol{\hat{U}}$
 \begin{equation}
+  \label{eqn:polar_decomposition_deform_grad}
   \boldsymbol{\hat{F}} = \boldsymbol{\hat{R}} \cdot \boldsymbol{\hat{U}}
 \end{equation}
+where $\boldsymbol{\hat{R}}$ is a proper orthogonal rotation tensor and the stretch
+tensor, $\boldsymbol{\hat{U}}$, is symmetric and positive definite.
 The incremental right Cauchy-Green deformation tensor, $\boldsymbol{\hat{C}}$,
-can be given in terms of $\boldsymbol{\hat{U}}$ by subsituting the polar decomposition
-of the deformation gradient into the classical definition for $\boldsymbol{\hat{C}}$.
+can be given in terms of $\boldsymbol{\hat{U}}$ by subsituting
+[eqn:polar_decomposition_deform_grad] into the definition for $\boldsymbol{\hat{C}}$
+from [cite:malvern1969introduction]:
 \begin{equation}
   \label{eqn:right_green_cauchy_deformation_tensor}
   \boldsymbol{\hat{C}} = \boldsymbol{\hat{F}}^T \cdot \boldsymbol{\hat{F}} = \boldsymbol{\hat{U}}^T \cdot \boldsymbol{\hat{R}}^T \cdot \boldsymbol{\hat{R}} \cdot \boldsymbol{\hat{U}} = \boldsymbol{\hat{U}}^2
@@ -68,23 +75,13 @@ of 'incremental' right Cauchy-Green deformation tensor
 
 This incremental streteching rate tensor can then be used as the work conjugate
 for a stress measure, or used to compute another strain
-measure. The most computationally expensive part of this procedure is the spectral decomposition of $\boldsymbol{\hat{C}}$ to find $\boldsymbol{\hat{U}}$. This can be computed exactly using an [eigensolution](#eigensolution), but an approximation of this can be computed with much lower computational expense using a [Taylor expansion](#taylorexpansion) procedure. This class provides options to perform this calculation either way, but the Taylor expansion is the default.
-for the stretching rate tensor: the [Taylor Expansion](#taylorexpansion) and the
-[Eigenstrain Decomposition](#eigensolution). The Taylor Expansion is the default.
-
-### Assumptions for the Incremental Deformation Gradient Formulation
-
-For this form, we assume
-\begin{equation}
-\begin{aligned}
-\dot{\boldsymbol{F}} \boldsymbol{F}^{-1} =& \boldsymbol{D}\ \mathrm{(constant\ and\ symmetric),\ } t_n<t<t_{n+1}\\
-\boldsymbol{F}(t^{-}_{n+1}) =& \hat{\boldsymbol{U}}\ \mathrm{(symmetric\ positive\ definite)}\\
-\boldsymbol{F}(t_{n+1}) =& \hat{\boldsymbol{R}} \hat{\boldsymbol{U}} = \hat{\boldsymbol{F}}\ (\hat{\boldsymbol{R}}\ \mathrm{proper\ orthogonal})
-\end{aligned}
-\end{equation}
-
-These assumptions are used the Taylor Expansion to solve for the stretching rate
-and rotation tensors.
+measure. The most computationally expensive part of this procedure is the spectral
+decomposition of $\boldsymbol{\hat{C}}$ to find $\boldsymbol{\hat{U}}$. This
+decomposition can be computed exactly using an [Eigensolution](#eigensolution),
+yet an approximation of this can be computed with much lower computational expense
+using a [Taylor expansion](#taylorexpansion) procedure.
+This class provides options to perform this calculation either way, and the
+[Taylor expansion](#taylorexpansion) is the default.
 
 ## Taylor Expansion id=taylorexpansion
 
@@ -164,6 +161,16 @@ in the input file.
 
 !listing modules/tensor_mechanics/test/tests/volumetric_deform_grad/elastic_stress.i
          block=Materials/strain
+
+When directly using `ComputeFiniteStrain` in an input file as shown above, the
+[StressDivergenceTensors](/StressDivergenceTensors.md) kernel must be modified
+from the default by setting the parameter `use_displaced_mesh = true`. This setting
+is required to maintain consistency in the test function gradients and the
+strain formulation. For a complete discussion of the stress diveregence kernel
+settings and the corresponding strain classes, see the section on
+[Consistency Between Stress and Strain](/tensor_mechanics/StressDivergence.md#consistency_stress_strain_use_displaced_mesh)
+in the TensorMechanics module overview.
+
 
 !syntax parameters /Materials/ComputeFiniteStrain
 
