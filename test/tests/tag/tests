@@ -56,4 +56,14 @@
     issues = '#9669'
     design = '/tagging.md'
   [../]
+
+  [./test_tag_interface_kernels]
+    type = 'Exodiff'
+    input = 'tag_interface_kernels.i'
+    exodiff = 'tag_interface_kernels_out.e'
+
+    requirement = 'tagging system shall support interface kernels'
+    issues = '#9669'
+    design = '/tagging.md'
+  [../]
 []
