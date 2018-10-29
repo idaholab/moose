@@ -3,6 +3,7 @@
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/dense_vector.h"
 
 using namespace libMesh;
 
@@ -29,6 +30,32 @@ sgn(T val)
 {
   return (T(0) < val) - (val < T(0));
 }
+
+/**
+ * Computes a derivative of a fraction using quotient rule for a derivative
+ * w.r.t. a scalar quantity
+ *
+ * @param[in] num       numerator value
+ * @param[in] den       denominator value
+ * @param[in] dnum_dy   derivative of numerator value
+ * @param[in] dden_dy   derivative of denominator value
+ */
+Real
+applyQuotientRule(const Real & num, const Real & den, const Real & dnum_dy, const Real & dden_dy);
+
+/**
+ * Computes a derivative of a fraction using quotient rule for a derivative
+ * w.r.t. a vector quantity
+ *
+ * @param[in] num       numerator value
+ * @param[in] den       denominator value
+ * @param[in] dnum_dy   derivative of numerator value
+ * @param[in] dden_dy   derivative of denominator value
+ */
+DenseVector<Real> applyQuotientRule(const Real & num,
+                                    const Real & den,
+                                    const DenseVector<Real> & dnum_dy,
+                                    const DenseVector<Real> & dden_dy);
 
 /**
  * Compute Reynolds number

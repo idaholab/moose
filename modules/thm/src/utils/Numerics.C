@@ -4,6 +4,25 @@ namespace RELAP7
 {
 
 Real
+applyQuotientRule(const Real & num, const Real & den, const Real & dnum_dy, const Real & dden_dy)
+{
+  return (dnum_dy * den - num * dden_dy) / (den * den);
+}
+
+DenseVector<Real>
+applyQuotientRule(const Real & num,
+                  const Real & den,
+                  const DenseVector<Real> & dnum_dy,
+                  const DenseVector<Real> & dden_dy)
+{
+  DenseVector<Real> d_dy = dnum_dy;
+  d_dy *= 1.0 / den;
+  d_dy.add(-num / std::pow(den, 2), dden_dy);
+
+  return d_dy;
+}
+
+Real
 Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc)
 {
   return volume_fraction * rho * std::fabs(v) * Dh / visc;
