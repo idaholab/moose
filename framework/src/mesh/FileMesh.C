@@ -94,26 +94,13 @@ FileMesh::buildMesh()
     }
     else
     {
-      auto slash_pos = _file_name.find_last_of("/");
-      auto path = _file_name.substr(0, slash_pos);
-      auto file = _file_name.substr(slash_pos + 1);
-
-      bool restarting;
       // If we are reading a mesh while restarting, then we might have
       // a solution file that relies on that mesh partitioning and/or
       // numbering.  In that case, we need to turn off repartitioning
       // and renumbering, at least at first.
-      if (file == "LATEST")
-      {
-        std::list<std::string> files = MooseUtils::listDir(path);
-
-        // Fill in the name of the LATEST file so we can open it and read it.
-        _file_name = MooseUtils::getLatestMeshCheckpointFile(files);
-        restarting = true;
-      }
-      else
-        restarting = _file_name.rfind(".cpa") < _file_name.size() ||
-                     _file_name.rfind(".cpr") < _file_name.size();
+      _file_name = MooseUtils::convertLatestCheckpoint(_file_name, false);
+      bool restarting = _file_name.rfind(".cpa") < _file_name.size() ||
+                        _file_name.rfind(".cpr") < _file_name.size();
 
       const bool skip_partitioning_later = restarting && getMesh().skip_partitioning();
       const bool allow_renumbering_later = restarting && getMesh().allow_renumbering();

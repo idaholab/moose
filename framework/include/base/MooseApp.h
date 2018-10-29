@@ -356,7 +356,13 @@ public:
   /**
    * mutator for recover_base (set by RecoverBaseAction)
    */
-  void setRecoverFileBase(std::string recover_base) { _recover_base = recover_base; }
+  void setRecoverFileBase(std::string recover_base)
+  {
+    if (recover_base.empty())
+      _recover_base = MooseUtils::getLatestAppCheckpointFileBase(getCheckpointFiles());
+    else
+      _recover_base = recover_base;
+  }
 
   /**
    * The suffix for the recovery file.

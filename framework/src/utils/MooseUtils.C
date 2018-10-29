@@ -40,6 +40,23 @@ std::string getLatestCheckpointFileHelper(const std::list<std::string> & checkpo
 namespace MooseUtils
 {
 
+std::string
+convertLatestCheckpoint(std::string orig, bool base_only)
+{
+  auto slash_pos = orig.find_last_of("/");
+  auto path = orig.substr(0, slash_pos);
+  auto file = orig.substr(slash_pos + 1);
+  if (file != "LATEST")
+    return orig;
+
+  auto converted = MooseUtils::getLatestAppCheckpointFileBase(MooseUtils::listDir(path));
+  if (!base_only)
+    converted = MooseUtils::getLatestMeshCheckpointFile(MooseUtils::listDir(path));
+  else if (converted.empty())
+    mooseError("Unable to find suitable recovery file!");
+  return converted;
+}
+
 // this implementation is copied from
 // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C.2B.2B
 int
