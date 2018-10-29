@@ -126,6 +126,8 @@ MeshBaseImageSampler::setupImageSampler(MeshBase & mesh)
   // this is a special case.
   if (_status != 0)
   {
+    // TO DO : enable this. It was taken from ImageSampler.C, but cn't be implemented
+    // the same way.
     // We don't have parameters, so see if we can get them from ImageMesh
     /*ImageMeshgenerator * image_mesh_gen = dynamic_cast<ImageMesh *>(&mesh);
     if (!image_mesh)
