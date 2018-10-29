@@ -31,8 +31,11 @@ public:
   FluxLimiter(const InputParameters & parameters);
 
   virtual void initialize() override{};
-  virtual void execute() override{};
+  virtual void execute() override;
   virtual void finalize() override{};
+
+  virtual void timestepSetup() override;
+  virtual void meshChanged() override;
 
   Real val_at_node(const Node & node) const;
 
@@ -40,51 +43,26 @@ public:
    * Returns the value of R_{i}^{+}, Eqn (49) of KT
    * @param node_i global node number
    */
-  Real rPlus(unsigned node_i) const;
+  Real rPlus(const Node & node_i) const;
 
   /**
    * Returns the value of R_{i}^{-}, Eqn (49) of KT
    * @param node_i global node number
    */
-  Real rMinus(unsigned node_i) const;
+  Real rMinus(const Node & node_i) const;
 
   /**
-   * Returns the value of P_{i}^{+}, Eqn (47) of KT
-   * @param node_i global node number
-   */
-  Real pPlus(unsigned node_i) const;
-
-  /**
-   * Returns the value of P_{i}^{-}, Eqn (47) of KT
-   * @param node_i global node number
-   */
-  Real pMinus(unsigned node_i) const;
-
-  /**
-   * Returns the value of Q_{i}^{+}, Eqn (48) of KT
-   * @param node_i global node number
-   */
-  Real qPlus(unsigned node_i) const;
-
-  /**
-   * Returns the value of Q_{i}^{-}, Eqn (48) of KT
-   * @param node_i global node number
-   */
-  Real qMinus(unsigned node_i) const;
-
-  /**
-   * Returns the value of k_ij / velocity as computed
-   * by KT Eqns (18)-(20).
-   * @param node_i global node number
-   * @param node_j global node number
+   * Returns the value of k_ij as computed by KT Eqns (18)-(20).
+   * @param node_i i^th node
+   * @param node_j j^th node
    * @return k_ij of KT
    */
-  Real kij(unsigned node_i, unsigned node_j) const;
+  Real getKij(const Node & node_i, const Node & node_j) const;
 
   /**
    * flux limiter, L, on Page 135 of Kuzmin and Turek
    */
-  Real fluxLimiter(Real a, Real b) const;
+  Real limitFlux(Real a, Real b) const;
 
 protected:
   /// the nodal values of u
@@ -95,6 +73,48 @@ protected:
 
   /// Determines Flux Limiter type
   const enum class FluxLimiterTypeEnum { MinMod, VanLeer, MC, superbee, None } _flux_limiter_type;
+
+  /// Reference to the mesh
+  const MooseMesh & _mesh;
+
+  /// The data structure used to find neighboring elements given a node ID
+  std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
+
+  std::map<Node, std::map<Node, Real>> _kij;
+
+  /**
+   * Create _kij and set all its entries to zero
+   */
+  virtual void initializeKij();
+
+  /**
+   * Compute _kij
+   */
+  virtual void computeKij();
+
+  /**
+   * Returns the value of P_{i}^{+}, Eqn (47) of KT
+   * @param node_i global node number
+   */
+  Real pPlus(const Node & node_i) const;
+
+  /**
+   * Returns the value of P_{i}^{-}, Eqn (47) of KT
+   * @param node_i global node number
+   */
+  Real pMinus(const Node & node_i) const;
+
+  /**
+   * Returns the value of Q_{i}^{+}, Eqn (48) of KT
+   * @param node_i global node number
+   */
+  Real qPlus(const Node & node_i) const;
+
+  /**
+   * Returns the value of Q_{i}^{-}, Eqn (48) of KT
+   * @param node_i global node number
+   */
+  Real qMinus(const Node & node_i) const;
 };
 
 #endif // FLUXLIMITER_H

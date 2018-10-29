@@ -44,6 +44,7 @@ FluxLimitedTVDAdvection::computeResidual()
   prepareVectorTag(_assembly, _var.number());
   precalculateResidual();
 
+  //_fluo.val_at_node(*_current_elem->node_ptr(0));
   tvd();
 
   _local_re = _flux_out;
@@ -90,9 +91,8 @@ FluxLimitedTVDAdvection::tvd()
   // ---------------------------------------------------------------------------
   for (unsigned i = 0; i < num_nodes; ++i)
     for (unsigned j = 0; j < num_nodes; ++j)
-      kk[i][j] = _fluo.kij(_current_elem->node_ptr(i)->unique_id(),
-                           _current_elem->node_ptr(j)->unique_id()) *
-                 _velocity(0);
+      kk[i][j] =
+          _fluo.getKij(*_current_elem->node_ptr(i), *_current_elem->node_ptr(j)) * _velocity(0);
 
   // Calculate KuzminTurek D matrix
   // See Eqn (32)
@@ -125,8 +125,8 @@ FluxLimitedTVDAdvection::tvd()
   std::vector<Real> rMinus(num_nodes);
   for (unsigned i = 0; i < num_nodes; ++i)
   {
-    rPlus[i] = _fluo.rPlus(_current_elem->node_ptr(i)->unique_id());
-    rMinus[i] = _fluo.rMinus(_current_elem->node_ptr(i)->unique_id());
+    rPlus[i] = _fluo.rPlus(*_current_elem->node_ptr(i));
+    rMinus[i] = _fluo.rMinus(*_current_elem->node_ptr(i));
   }
 
   // Calculate KuzminTurek f^{a} matrix
