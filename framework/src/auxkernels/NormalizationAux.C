@@ -17,7 +17,8 @@ validParams<NormalizationAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("source_variable", "The variable to be normalized");
-  params.addRequiredParam<PostprocessorName>("normalization", "The postprocessor on the source");
+  params.addParam<PostprocessorName>("normalization", "The postprocessor on the source");
+  params.addParam<PostprocessorName>("shift", "The postprocessor to shift the source");
   params.addParam<Real>("normal_factor", 1.0, "The normalization factor");
   return params;
 }
@@ -25,7 +26,8 @@ validParams<NormalizationAux>()
 NormalizationAux::NormalizationAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _src(coupledValue("source_variable")),
-    _pp_on_source(getPostprocessorValue("normalization")),
+    _pp_on_source(isParamValid("normalization") ? &getPostprocessorValue("normalization") : NULL),
+    _shift(isParamValid("shift") ? &getPostprocessorValue("shift") : NULL),
     _normal_factor(getParam<Real>("normal_factor"))
 {
 }
@@ -33,5 +35,7 @@ NormalizationAux::NormalizationAux(const InputParameters & parameters)
 Real
 NormalizationAux::computeValue()
 {
-  return _src[_qp] * _normal_factor / _pp_on_source;
+  Real denominator = _pp_on_source ? *_pp_on_source : 1.0;
+  Real shift = _shift ? *_shift : 0.0;
+  return _src[_qp] * _normal_factor / denominator - shift;
 }
