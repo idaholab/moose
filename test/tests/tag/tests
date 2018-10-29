@@ -46,4 +46,14 @@
     issues = '#9669'
     design = '/tagging.md'
   [../]
+
+  [./test_tag_integratedBCs]
+    type = 'Exodiff'
+    input = 'tag_neumann.i'
+    exodiff = 'tag_neumann_out.e'
+
+    requirement = 'tagging system shall support integratedBCs'
+    issues = '#9669'
+    design = '/tagging.md'
+  [../]
 []
