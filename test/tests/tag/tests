@@ -66,4 +66,14 @@
     issues = '#9669'
     design = '/tagging.md'
   [../]
+
+  [./test_tag_dirac_kernels]
+    type = 'Exodiff'
+    input = 'tag_dirac_kernels.i'
+    exodiff = 'tag_dirac_kernels_out.e'
+
+    requirement = 'tagging system shall support Dirac kernels'
+    issues = '#9669'
+    design = '/tagging.md'
+  [../]
 []
