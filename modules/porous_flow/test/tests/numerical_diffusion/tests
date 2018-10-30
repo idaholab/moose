@@ -1,10 +1,23 @@
 [Tests]
+  [./framework]
+    type = 'CSVDiff'
+    input = 'framework.i'
+    csvdiff = 'framework_out_tracer_0011.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    requirement = "MOOSE shall be able to solve the advection equation"
+    issues = '#12346'
+    design = 'porous_flow/numerical_diffusion.md'
+  [../]
   [./fully_saturated_action]
     type = 'CSVDiff'
     input = 'fully_saturated_action.i'
     csvdiff = 'fully_saturated_action_out_tracer_0011.csv'
     abs_zero = 1.0E-5
     threading = '!pthreads'
+    requirement = "PorousFlow shall be able to solve the advection of fluid species, using mass lumping and no upwinding"
+    issues = '#11013'
+    design = 'porous_flow/numerical_diffusion.md'
   [../]
   [./no_action]
     type = 'CSVDiff'
@@ -12,5 +25,8 @@
     csvdiff = 'no_action_out_tracer_0011.csv'
     abs_zero = 1.0E-5
     threading = '!pthreads'
+    requirement = "PorousFlow shall be able to solve the advection of fluid species, using mass lumping and full upwinding"
+    issues = '#11013'
+    design = 'porous_flow/numerical_diffusion.md'
   [../]
 []

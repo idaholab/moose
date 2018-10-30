@@ -18,11 +18,12 @@ validParams<AEFVUpwindInternalSideFlux>()
   InputParameters params = validParams<InternalSideFluxBase>();
   params.addClassDescription("Upwind numerical flux scheme for the advection equation using a "
                              "cell-centered finite volume method.");
+  params.addParam<Real>("velocity", 1.0, "Advective velocity");
   return params;
 }
 
 AEFVUpwindInternalSideFlux::AEFVUpwindInternalSideFlux(const InputParameters & parameters)
-  : InternalSideFluxBase(parameters)
+  : InternalSideFluxBase(parameters), _velocity(getParam<Real>("velocity"))
 {
 }
 
@@ -44,10 +45,10 @@ AEFVUpwindInternalSideFlux::calcFlux(unsigned int /*iside*/,
   flux.resize(1);
 
   // assume a constant velocity on the left
-  RealVectorValue uadv1(1.0, 1.0, 1.0);
+  RealVectorValue uadv1(_velocity, 0.0, 0.0);
 
   // assume a constant velocity on the right
-  RealVectorValue uadv2(1.0, 1.0, 1.0);
+  RealVectorValue uadv2(_velocity, 0.0, 0.0);
 
   // normal velocity on the left and right
   Real vdon1 = uadv1 * dwave;
@@ -79,10 +80,10 @@ AEFVUpwindInternalSideFlux::calcJacobian(unsigned int /*iside*/,
   jac2.resize(1, 1);
 
   // assume a constant velocity on the left
-  RealVectorValue uadv1(1.0, 1.0, 1.0);
+  RealVectorValue uadv1(_velocity, 0.0, 0.0);
 
   // assume a constant velocity on the right
-  RealVectorValue uadv2(1.0, 1.0, 1.0);
+  RealVectorValue uadv2(_velocity, 0.0, 0.0);
 
   // normal velocity on the left and right
   Real vdon1 = uadv1 * dwave;
