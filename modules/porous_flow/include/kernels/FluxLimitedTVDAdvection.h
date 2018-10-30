@@ -10,16 +10,21 @@
 #define FLUXLIMITEDTVDADVECTION_H
 
 #include "Kernel.h"
-#include "FluxLimiter.h"
+#include "AdvectiveFluxCalculator.h"
 
 // Forward Declaration
 class FluxLimitedTVDAdvection;
 
 /**
- * Advection of the variable by the velocity provided by the user.
+ * Advection of the variable with velocity set in the AdvectiveFluxCalculator
+ *
  * This implements the flux-limited TVD scheme detailed in
- * D Kuzmin and S Turek "High-resolution FEM-TVD shcemes based on a fully multidimensional flux
+ * D Kuzmin and S Turek "High-resolution FEM-TVD schemes based on a fully multidimensional flux
  * limiter" Journal of Computational Physics 198 (2004) 131-158
+ *
+ * Kuzmin and Turek's K_ij matrix, and their R+ and R- quantities are
+ * computed by the AdvectiveFluxCalculator, and this Kernel adds the diffusion
+ * and antidiffusion as specified by Kuzmin and Turek.
  */
 template <>
 InputParameters validParams<FluxLimitedTVDAdvection>();
@@ -32,9 +37,6 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual void computeResidual() override;
-
-  /// advection velocity
-  RealVectorValue _velocity;
 
   /// Nodal value of u
   const VariableValue & _u_nodal;
@@ -49,7 +51,8 @@ protected:
   /// Do Kuzmin-Turek algorithm
   void tvd();
 
-  const FluxLimiter & _fluo;
+  /// The user object that computes Kuzmin and Turek's K_ij, and R+ and R- flux-limiting quantities
+  const AdvectiveFluxCalculator & _fluo;
 };
 
 #endif // FLUXLIMITEDTVDADVECTION_H

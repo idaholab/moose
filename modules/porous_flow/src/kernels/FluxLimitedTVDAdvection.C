@@ -18,16 +18,15 @@ validParams<FluxLimitedTVDAdvection>()
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ (advection), using "
                              "the Flux Limited TVD scheme invented by Kuzmin and Turek");
-  params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
-  params.addRequiredParam<UserObjectName>("flux_limiter_uo", "FluxLimiter UO");
+  params.addRequiredParam<UserObjectName>("advective_flux_calculator",
+                                          "AdvectiveFluxCalculator UserObject");
   return params;
 }
 
 FluxLimitedTVDAdvection::FluxLimitedTVDAdvection(const InputParameters & parameters)
   : Kernel(parameters),
-    _velocity(getParam<RealVectorValue>("velocity")),
     _u_nodal(_var.dofValues()),
-    _fluo(getUserObject<FluxLimiter>("flux_limiter_uo"))
+    _fluo(getUserObject<AdvectiveFluxCalculator>("advective_flux_calculator"))
 {
 }
 
@@ -44,7 +43,6 @@ FluxLimitedTVDAdvection::computeResidual()
   prepareVectorTag(_assembly, _var.number());
   precalculateResidual();
 
-  //_fluo.val_at_node(*_current_elem->node_ptr(0));
   tvd();
 
   _local_re = _flux_out;
@@ -67,32 +65,15 @@ FluxLimitedTVDAdvection::tvd()
   _flux_out.resize(num_nodes);
   _flux_out.zero();
 
-  // Calculate KuzminTurek K matrix
+  // Retrieve KuzminTurek K matrix from the AdvectiveFluxCalculator
   // See Eqns (18)-(20)
   std::vector<std::vector<Real>> kk(num_nodes);
   for (unsigned i = 0; i < num_nodes; ++i)
   {
     kk[i].assign(num_nodes, 0.0);
     for (unsigned j = 0; j < num_nodes; ++j)
-      for (unsigned qp = 0; qp < _qrule->n_points(); ++qp)
-        // there is no negative here because i've used integration by parts to put the grad onto
-        // _test
-        kk[i][j] += _JxW[qp] * _coord[qp] * (_grad_test[i][qp] * _velocity) * _test[j][qp];
+      kk[i][j] = _fluo.getKij(*_current_elem->node_ptr(i), *_current_elem->node_ptr(j));
   }
-
-  // ---------------------------------------------------------------------------
-  // |                               NOTE !!                                   |
-  // | If we use the K calculated above, we'll be computed P and Q based on    |
-  // | the fluxes WITHIN THIS ELEMENT ONLY                                     |
-  // | That is incorrect: instead the P and Q should be computed by looking at |
-  // | the fluxes from a node to ALL its joining nodes, not just the ones      |
-  // | in this element.                                                        |
-  // | Hence, i just use the K hard-coded into FluxLimiter:                    |
-  // ---------------------------------------------------------------------------
-  for (unsigned i = 0; i < num_nodes; ++i)
-    for (unsigned j = 0; j < num_nodes; ++j)
-      kk[i][j] =
-          _fluo.getKij(*_current_elem->node_ptr(i), *_current_elem->node_ptr(j)) * _velocity(0);
 
   // Calculate KuzminTurek D matrix
   // See Eqn (32)
@@ -119,7 +100,7 @@ FluxLimitedTVDAdvection::tvd()
     for (unsigned j = 0; j < num_nodes; ++j)
       ll[i][j] = kk[i][j] + dd[i][j];
 
-  // Calculate KuzminTurek R matrices
+  // Retrieve KuzminTurek R matrices
   // See Eqns (49) and (12)
   std::vector<Real> rPlus(num_nodes);
   std::vector<Real> rMinus(num_nodes);

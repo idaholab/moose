@@ -27,20 +27,20 @@
   [../]
   [./flux]
     type = FluxLimitedTVDAdvection
-    velocity = '0.1 0 0'
     variable = tracer
-    flux_limiter_uo = fluo
+    advective_flux_calculator = fluo
   [../]
 []
 
 [UserObjects]
   [./fluo]
-    type = FluxLimiter
+    type = AdvectiveFluxCalculator
     flux_limiter_type = superbee
     u = tracer
+    velocity = '0.1 0 0'
   [../]
 []
-  
+
 [BCs]
   [./no_tracer_on_left]
     type = PresetBC
