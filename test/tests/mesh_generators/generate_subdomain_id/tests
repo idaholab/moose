@@ -4,5 +4,8 @@
     input = 'generate_subdomain_id.i'
     cli_args = '--mesh-only'
     exodiff = 'generate_subdomain_id_in.e'
+    requirement = 'MOOSE shall be able to create different subdomains.'
+    design = 'mesh_generators/GenerateSubdomainID.md'
+    issues = '#11640'
   [../]
 []

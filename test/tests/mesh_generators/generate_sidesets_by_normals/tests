@@ -4,5 +4,8 @@
     input = 'less_simple.i'
     cli_args = '--mesh-only'
     exodiff = 'less_simple_in.e'
+    requirement = 'MOOSE shall be able to use libmesh/fe_base.h.'
+    design = 'mesh_generators/GenerateAllSideSetsByNormals.md'
+    issues = '#11640'
   [../]
 []

@@ -4,5 +4,8 @@
     input = 'sidesets_from_points.i'
     cli_args = '--mesh-only'
     exodiff = 'sidesets_from_points_in.e'
+    requirement = 'MOOSE shall be able to create sidesets.'
+    design = 'mesh_generators/SideSetsFromPointsGenerator.md'
+    issues = '#11640'
   [../]
 []

@@ -4,5 +4,8 @@
     input = 'rename_block1.i'
     cli_args = '--mesh-only'
     exodiff = 'rename_block1_in.e'
+    requirement = 'MOOSE shall be able to crate different subdomains.'
+    design = 'mesh_generators/RenameBlockGenerator.md'
+    issues = '#11640'
   [../]
 []

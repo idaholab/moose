@@ -1,0 +1,11 @@
+[Tests]
+  [./concentric_circle_mesh_generator_test]
+    type = 'Exodiff'
+    input = 'concentric_circle_mesh_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'concentric_circle_mesh_generator_in.e'
+    requirement = 'MOOSE shall be able to create a mesh based on elements.'
+    design = 'mesh_generators/ConcentricCircleMeshGenerator.md'
+    issues = '#11640'
+  [../]
+[]

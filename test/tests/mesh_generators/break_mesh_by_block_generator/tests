@@ -4,5 +4,8 @@
     input = 'break_mesh_3D_auto.i'
     cli_args = '--mesh-only'
     exodiff = 'break_mesh_3D_auto_in.e'
+    requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
+    design = 'mesh_generators/BreakMeshByBlockGenerator.md'
+    issues = '#11640'
   [../]
 []

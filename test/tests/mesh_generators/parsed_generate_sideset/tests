@@ -4,5 +4,8 @@
     input = 'parsed_generate_sideset.i'
     cli_args = '--mesh-only'
     exodiff = 'parsed_generate_sideset_in.e'
+    requirement = 'MOOSE shall be able to create sidesets.'
+    design = 'mesh_generators/ParsedGenerateSideset.md'
+    issues = '#11640'
   [../]
 []

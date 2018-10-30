@@ -4,6 +4,9 @@
     input = 'subdomain_bounding_box_generator_inside.i'
     cli_args = '--mesh-only'
     exodiff = 'subdomain_bounding_box_generator_inside_in.e'
+    requirement = 'MOOSE shall be able to use the BoundingBox class.'
+    design = 'mesh_generators/SubdomainBoundingBoxGenerator.md'
+    issues = '#11640'
   [../]
 
   [./oriented_subdomain_bounding_box_generator_test]
@@ -11,5 +14,8 @@
     input = 'oriented_subdomain_bounding_box_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'oriented_subdomain_bounding_box_generator_in.e'
+    requirement = 'MOOSE shall be able to use the BoundingBox class.'
+    design = 'mesh_generators/SubdomainBoundingBoxGenerator.md'
+    issues = '#11640'
   [../]
 []

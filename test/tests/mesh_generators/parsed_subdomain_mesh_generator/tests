@@ -4,5 +4,8 @@
     input = 'parsed_subdomain_mg.i'
     cli_args = '--mesh-only'
     exodiff = 'parsed_subdomain_mg_in.e'
+    requirement = 'MOOSE shall be able to create different subdomains.'
+    design = 'mesh_generators/ParsedSubdomainMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

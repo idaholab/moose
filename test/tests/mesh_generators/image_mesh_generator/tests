@@ -4,5 +4,8 @@
     input = 'image_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'image_mesh_generator_in.e'
+    requirement = 'MOOSE shall be able to read in an image.'
+    design = 'mesh_generators/ImageMeshGenerator.md'
+    issues = '#11640'
   [../]
 []

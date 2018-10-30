@@ -4,5 +4,7 @@
     input = 'break_boundary_on_subdomain.i'
     cli_args = '--mesh-only'
     exodiff = 'break_boundary_on_subdomain_in.e'
+    design = 'mesh_generators/BreakBoundaryOnSubdomainGenerator.md'
+    issues = '#11640'
   [../]
 []

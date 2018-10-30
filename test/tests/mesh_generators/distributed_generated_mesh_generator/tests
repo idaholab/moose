@@ -4,5 +4,8 @@
     input = 'distributed_generated_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'distributed_generated_mesh_generator_in.e'
+    requirement = 'MOOSE shall be able to use libmesh mesh generation tools.'
+    design = 'mesh_generators/DistributedGeneratedMeshGenerator.md'
+    issues = '#11640'
   [../]
 []
