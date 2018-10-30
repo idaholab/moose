@@ -11,6 +11,7 @@
 #define STITCHEDMESHGENERATOR_H
 
 #include "MeshGenerator.h"
+#include "libmesh/replicated_mesh.h"
 
 // Forward declarations
 class StitchedMeshGenerator;
