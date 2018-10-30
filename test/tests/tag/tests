@@ -76,4 +76,14 @@
     issues = '#9669'
     design = '/tagging.md'
   [../]
+
+  [./test_tag_nodal_kernels]
+    type = 'Exodiff'
+    input = 'tag_nodal_kernels.i'
+    exodiff = 'tag_nodal_kernels_out.e'
+
+    requirement = 'tagging system shall support nodal kernels'
+    issues = '#9669'
+    design = '/tagging.md'
+  [../]
 []

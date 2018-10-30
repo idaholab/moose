@@ -1591,7 +1591,7 @@ MooseVariableFE<OutputType>::computeNodalValues()
       TagID tag = 0;
       for (auto & dof_u : _matrix_tags_dof_u)
       {
-        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
         {
           dof_u.resize(n);
           auto & mat = _sys.getMatrix(tag);
