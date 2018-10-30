@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AnnularMeshGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -208,5 +209,5 @@ AnnularMeshGenerator::generate()
 
   mesh->prepare_for_use(false);
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
