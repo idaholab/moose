@@ -31,6 +31,7 @@ XFEM               := yes
 POROUS_FLOW        := yes
 FLUID_PROPERTIES   := yes
 CHEMICAL_REACTIONS := yes
+RDG                := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 

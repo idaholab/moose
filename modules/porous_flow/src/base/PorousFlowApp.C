@@ -13,6 +13,7 @@
 #include "MooseSyntax.h"
 #include "FluidPropertiesApp.h"
 #include "ChemicalReactionsApp.h"
+#include "RdgApp.h"
 
 template <>
 InputParameters
@@ -24,9 +25,7 @@ validParams<PorousFlowApp>()
 
 registerKnownLabel("PorousFlowApp");
 
-PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters)
-{
-}
+PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters) {}
 
 PorousFlowApp::~PorousFlowApp() {}
 
@@ -73,6 +72,7 @@ PorousFlowApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   TensorMechanicsApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
   ChemicalReactionsApp::registerAll(f, af, s);
+  RdgApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"PorousFlowApp"});
   Registry::registerActionsTo(af, {"PorousFlowApp"});
   associateSyntaxInner(s, af);
@@ -85,6 +85,7 @@ PorousFlowApp::registerObjectDepends(Factory & factory)
   TensorMechanicsApp::registerObjects(factory);
   FluidPropertiesApp::registerObjects(factory);
   ChemicalReactionsApp::registerObjects(factory);
+  RdgApp::registerObjects(factory);
 }
 
 void
@@ -101,6 +102,7 @@ PorousFlowApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_fa
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   FluidPropertiesApp::associateSyntax(syntax, action_factory);
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
+  RdgApp::associateSyntax(syntax, action_factory);
 }
 
 void
