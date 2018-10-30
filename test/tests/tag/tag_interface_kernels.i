@@ -65,7 +65,7 @@
     variable = u
     value = 1
     extra_matrix_tags = 'mat_tag1 mat_tag2'
-    extra_vector_tags = 'vec_tag1'
+    extra_vector_tags = 'vec_tag1 vec_tag2'
   [../]
 []
 
@@ -116,7 +116,7 @@
     variable = tag_variable1
     v = u
     block = 0
-    vector_tag = vec_tag2
+    vector_tag = vec_tag1
     execute_on = timestep_end
   [../]
 
