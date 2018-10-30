@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ElementGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
 
@@ -203,5 +204,5 @@ ElementGenerator::generate()
     elem->subdomain_id() = 0;
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

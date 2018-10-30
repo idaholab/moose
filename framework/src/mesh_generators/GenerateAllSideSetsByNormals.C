@@ -10,6 +10,7 @@
 #include "GenerateAllSideSetsByNormals.h"
 #include "Parser.h"
 #include "InputParameters.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh.h"
@@ -90,7 +91,7 @@ GenerateAllSideSetsByNormals::generate()
 
   finalize();
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 boundary_id_type

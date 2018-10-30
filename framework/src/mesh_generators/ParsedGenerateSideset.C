@@ -10,6 +10,7 @@
 #include "ParsedGenerateSideset.h"
 #include "Conversion.h"
 #include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/fparser_ad.hh"
 
@@ -135,5 +136,5 @@ ParsedGenerateSideset::generate()
   boundary_info.sideset_name(boundary_ids[0]) = _sideset_name;
   boundary_info.nodeset_name(boundary_ids[0]) = _sideset_name;
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

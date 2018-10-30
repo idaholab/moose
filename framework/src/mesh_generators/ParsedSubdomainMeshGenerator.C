@@ -10,6 +10,7 @@
 #include "ParsedSubdomainMeshGenerator.h"
 #include "Conversion.h"
 #include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/fparser_ad.hh"
 
@@ -99,5 +100,5 @@ ParsedSubdomainMeshGenerator::generate()
   if (isParamValid("block_name"))
     mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

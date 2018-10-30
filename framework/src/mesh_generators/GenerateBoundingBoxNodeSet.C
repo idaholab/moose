@@ -9,6 +9,7 @@
 
 #include "GenerateBoundingBoxNodeSet.h"
 #include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", GenerateBoundingBoxNodeSet);
 
@@ -78,5 +79,5 @@ GenerateBoundingBoxNodeSet::generate()
 
   boundary_info.nodeset_name(boundary_ids[0]) = boundary_names[0];
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

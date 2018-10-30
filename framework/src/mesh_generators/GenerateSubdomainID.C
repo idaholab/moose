@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GenerateSubdomainID.h"
+#include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", GenerateSubdomainID);
 
@@ -38,5 +39,5 @@ GenerateSubdomainID::generate()
   for (auto & elem : mesh->element_ptr_range())
     elem->subdomain_id() = _subdomain_id;
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

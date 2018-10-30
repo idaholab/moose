@@ -11,6 +11,7 @@
 #include "InputParameters.h"
 #include "MooseTypes.h"
 #include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/mesh.h"
 #include "libmesh/remote_elem.h"
@@ -222,5 +223,5 @@ SideSetsAroundSubdomainGenerator::generate()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -9,6 +9,7 @@
 
 #include "MeshSideSetGenerator.h"
 #include "BndElement.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/mesh_modification.h"
 
@@ -97,5 +98,5 @@ MeshSideSetGenerator::generate()
   if (isParamValid("block_name"))
     mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

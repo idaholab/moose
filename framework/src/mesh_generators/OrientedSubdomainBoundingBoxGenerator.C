@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OrientedSubdomainBoundingBoxGenerator.h"
+#include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", OrientedSubdomainBoundingBoxGenerator);
 
@@ -54,5 +55,5 @@ OrientedSubdomainBoundingBoxGenerator::generate()
       elem->subdomain_id() = _block_id;
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

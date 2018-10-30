@@ -69,5 +69,5 @@ StitchedMeshGenerator::generate()
     mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

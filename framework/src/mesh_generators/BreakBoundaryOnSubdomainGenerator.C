@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BreakBoundaryOnSubdomainGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
@@ -122,5 +123,5 @@ BreakBoundaryOnSubdomainGenerator::generate()
     }
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

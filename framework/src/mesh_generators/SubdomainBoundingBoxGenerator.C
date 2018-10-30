@@ -9,6 +9,7 @@
 
 #include "SubdomainBoundingBoxGenerator.h"
 #include "Conversion.h"
+#include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", SubdomainBoundingBoxGenerator);
 
@@ -66,5 +67,5 @@ SubdomainBoundingBoxGenerator::generate()
   if (isParamValid("block_name"))
     mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

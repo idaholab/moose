@@ -134,5 +134,5 @@ TiledMeshGenerator::generate()
     }
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RinglebMeshGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_modification.h"
@@ -216,5 +217,5 @@ RinglebMeshGenerator::generate()
   mesh->boundary_info->sideset_name(_inner_wall_bid) = "inner_wall";
   mesh->boundary_info->sideset_name(_outer_wall_bid) = "outer_wall";
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

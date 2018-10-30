@@ -9,6 +9,7 @@
 
 #include "MeshExtruderGenerator.h"
 #include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
@@ -104,7 +105,7 @@ MeshExtruderGenerator::generate()
   // Update the dimension
   mesh->set_mesh_dimension(mesh->mesh_dimension() + 1);
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 void

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RenameBlockGenerator.h"
+#include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", RenameBlockGenerator);
 
@@ -130,7 +131,7 @@ RenameBlockGenerator::generate()
   for (unsigned i = 0; i < _old_block_id.size(); ++i)
     mesh->subdomain_name(_old_block_id[i]) = _new_block_name[i];
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 SubdomainName

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ConcentricCircleMeshGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
@@ -670,5 +671,5 @@ ConcentricCircleMeshGenerator::generate()
       _portion != "bottom_half" && _portion != "full")
     mesh->prepare_for_use(false);
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

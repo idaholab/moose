@@ -10,6 +10,7 @@
 #include "LowerDBlockFromSidesetGenerator.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/distributed_mesh.h"
 
@@ -129,5 +130,5 @@ LowerDBlockFromSidesetGenerator::generate()
   if (isParamValid("new_block_name"))
     mesh->subdomain_name(_new_block_id) = getParam<SubdomainName>("new_block_name");
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

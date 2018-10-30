@@ -11,6 +11,7 @@
 #include "Conversion.h"
 #include "MooseTypes.h"
 #include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/distributed_mesh.h"
 
@@ -156,5 +157,5 @@ GenerateSideSetsFromBoundingBox::generate()
       mooseError("No nodes found within the bounding box");
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

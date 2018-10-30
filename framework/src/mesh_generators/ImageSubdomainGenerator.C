@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ImageSubdomainGenerator.h"
+#include "CastUniquePointer"
 
 // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 #include <cmath>
@@ -49,5 +50,5 @@ ImageSubdomainGenerator::generate()
     elem->subdomain_id() = id;
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

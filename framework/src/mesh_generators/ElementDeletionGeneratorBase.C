@@ -11,6 +11,7 @@
 #include "libmesh/remote_elem.h"
 
 #include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
 
 template <>
 InputParameters
@@ -225,5 +226,5 @@ ElementDeletionGeneratorBase::generate()
   mesh->contract();
   mesh->prepare_for_use();
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

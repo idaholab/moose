@@ -9,6 +9,7 @@
 
 #include "TransformGenerator.h"
 #include "libmesh/mesh_modification.h"
+#include "CastUniquePointer.h"
 
 registerMooseObject("MooseApp", TransformGenerator);
 
@@ -61,5 +62,5 @@ TransformGenerator::generate()
       break;
   }
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

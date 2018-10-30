@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BreakMeshByBlockGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
@@ -157,7 +158,7 @@ BreakMeshByBlockGenerator::generate()
   }     // end nodeptr check
 
   addInterfaceBoundary(*mesh);
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 void

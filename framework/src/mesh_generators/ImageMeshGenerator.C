@@ -10,6 +10,7 @@
 #include "ImageMeshGenerator.h"
 #include "pcrecpp.h"
 #include "MooseApp.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/replicated_mesh.h"
@@ -60,7 +61,7 @@ ImageMeshGenerator::generate()
   else
     buildMesh3D(_filenames, mesh);
 
-  return mesh;
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 void
