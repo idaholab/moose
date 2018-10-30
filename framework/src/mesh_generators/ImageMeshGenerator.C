@@ -14,6 +14,7 @@
 
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/mesh_generation.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
 

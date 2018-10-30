@@ -12,6 +12,7 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/distributed_mesh.h"
 #include "libmesh/boundary_info.h"
 
 registerMooseObject("MooseApp", PatternedMeshGenerator);
