@@ -11,6 +11,8 @@
 #define DISTRIBUTEDGENERATEDMESHGENERATOR_H
 
 #include "MeshGenerator.h"
+#include "MooseEnum.h"
+#include "libmesh/replicated_mesh.h"
 
 // Forward declarations
 class DistributedGeneratedMeshGenerator;
