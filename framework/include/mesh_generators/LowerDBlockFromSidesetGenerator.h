@@ -35,7 +35,6 @@ protected:
   const subdomain_id_type _new_block_id;
   /// The sidesets on which to create the lower dimensional elements
   std::vector<boundary_id_type> _sidesets;
-
 };
 
 #endif // LOWERDBLOCKFROMSIDESETGENERATOR_H

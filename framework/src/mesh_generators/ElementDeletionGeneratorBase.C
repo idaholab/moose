@@ -26,10 +26,10 @@ validParams<ElementDeletionGeneratorBase>()
 }
 
 ElementDeletionGeneratorBase::ElementDeletionGeneratorBase(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input")),
-  _assign_boundary(isParamValid("new_boundary")),
-  _boundary_name(_assign_boundary ? getParam<BoundaryName>("new_boundary") : "")
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _assign_boundary(isParamValid("new_boundary")),
+    _boundary_name(_assign_boundary ? getParam<BoundaryName>("new_boundary") : "")
 {
 }
 
@@ -49,9 +49,9 @@ ElementDeletionGeneratorBase::generate()
   }
 
   /**
- * If we are in parallel we'd better have a consistent idea of what
- * should be deleted.  This can't be checked cheaply.
- */
+   * If we are in parallel we'd better have a consistent idea of what
+   * should be deleted.  This can't be checked cheaply.
+   */
 #ifdef DEBUG
   dof_id_type pmax_elem_id = mesh->max_elem_id();
   mesh->comm().max(pmax_elem_id);

@@ -136,7 +136,7 @@ SpiralAnnularMeshGenerator::generate()
     for (std::size_t n = 0; n < _nodes_per_ring; ++n)
     {
       ring_nodes[r][n] = mesh->add_point(Point(radius * std::cos(theta), radius * std::sin(theta)),
-                                        current_node_id++);
+                                         current_node_id++);
       // Update angle
       theta += 2 * libMesh::pi / _nodes_per_ring;
     }

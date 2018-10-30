@@ -78,10 +78,10 @@ RinglebMeshGenerator::arhopj(const Real & gamma, const std::vector<Real> & q, co
 
 std::vector<Real>
 RinglebMeshGenerator::computexy(const std::vector<Real> values,
-                       const int & i,
-                       const int & index,
-                       const std::vector<Real> & ks,
-                       const std::vector<Real> & q)
+                                const int & i,
+                                const int & index,
+                                const std::vector<Real> & ks,
+                                const std::vector<Real> & q)
 {
   std::vector<Real> xy(2);
 

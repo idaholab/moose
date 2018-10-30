@@ -41,8 +41,7 @@ validParams<GenerateExtraNodeset>()
 }
 
 GenerateExtraNodeset::GenerateExtraNodeset(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input"))
+  : MeshGenerator(parameters), _input(getMesh("input"))
 {
 }
 
@@ -70,7 +69,7 @@ GenerateExtraNodeset::generate()
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
   std::vector<boundary_id_type> boundary_ids =
-    MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
+      MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
 
   // Get a reference to our BoundaryInfo object
   BoundaryInfo & boundary_info = mesh->get_boundary_info();

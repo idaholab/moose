@@ -9,7 +9,6 @@
 
 #include "GenerateElementSubdomainID.h"
 
-
 registerMooseObject("MooseApp", GenerateElementSubdomainID);
 
 template <>
@@ -27,8 +26,7 @@ validParams<GenerateElementSubdomainID>()
 }
 
 GenerateElementSubdomainID::GenerateElementSubdomainID(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input"))
+  : MeshGenerator(parameters), _input(getMesh("input"))
 {
 }
 

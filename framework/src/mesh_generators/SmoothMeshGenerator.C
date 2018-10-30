@@ -30,7 +30,6 @@ validParams<SmoothMeshGenerator>()
 
   params.addParam<unsigned int>("iterations", 1, "The number of smoothing iterations to do.");
 
-
   return params;
 }
 

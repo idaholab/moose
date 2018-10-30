@@ -34,8 +34,7 @@ validParams<GenerateAllSideSetsByNormals>()
 }
 
 GenerateAllSideSetsByNormals::GenerateAllSideSetsByNormals(const InputParameters & parameters)
-: GenerateSideSetsBase(parameters),
-  _input(getMesh("input"))
+  : GenerateSideSetsBase(parameters), _input(getMesh("input"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");

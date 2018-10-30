@@ -65,8 +65,8 @@ MeshBaseImageSampler::MeshBaseImageSampler(const InputParameters & parameters)
 
 {
 #ifndef LIBMESH_HAVE_VTK
-  // This should be impossible to reach, the registration of MeshBaseImageSampler is also guarded with
-  // LIBMESH_HAVE_VTK
+  // This should be impossible to reach, the registration of MeshBaseImageSampler is also guarded
+  // with LIBMESH_HAVE_VTK
   mooseError("libMesh must be configured with VTK enabled to utilize MeshBaseImageSampler");
 #endif
 }

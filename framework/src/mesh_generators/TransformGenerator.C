@@ -35,10 +35,10 @@ validParams<TransformGenerator>()
 }
 
 TransformGenerator::TransformGenerator(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input")),
-  _transform(getParam<MooseEnum>("transform")),
-  _vector_value(getParam<RealVectorValue>("vector_value"))
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _transform(getParam<MooseEnum>("transform")),
+    _vector_value(getParam<RealVectorValue>("vector_value"))
 {
 }
 
@@ -54,12 +54,10 @@ TransformGenerator::generate()
           *mesh, _vector_value(0), _vector_value(1), _vector_value(2));
       break;
     case 2:
-      MeshTools::Modification::rotate(
-          *mesh, _vector_value(0), _vector_value(1), _vector_value(2));
+      MeshTools::Modification::rotate(*mesh, _vector_value(0), _vector_value(1), _vector_value(2));
       break;
     case 3:
-      MeshTools::Modification::scale(
-          *mesh, _vector_value(0), _vector_value(1), _vector_value(2));
+      MeshTools::Modification::scale(*mesh, _vector_value(0), _vector_value(1), _vector_value(2));
       break;
   }
 

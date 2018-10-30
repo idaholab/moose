@@ -22,8 +22,10 @@ validParams<StitchedMeshGenerator>()
   InputParameters params = validParams<MeshGenerator>();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
-  params.addParam<bool>("clear_stitched_boundary_ids", true, "Whether or not to clear the stitchd boundary IDs");
-  params.addRequiredParam< std::vector<std::vector<std::string>> >("stitch_boundaries_pairs", "Pairs of boundaries to be stitched together");
+  params.addParam<bool>(
+      "clear_stitched_boundary_ids", true, "Whether or not to clear the stitchd boundary IDs");
+  params.addRequiredParam<std::vector<std::vector<std::string>>>(
+      "stitch_boundaries_pairs", "Pairs of boundaries to be stitched together");
 
   return params;
 }
@@ -32,7 +34,8 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
-    _stitch_boundaries_pairs(getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs"))
+    _stitch_boundaries_pairs(
+        getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs"))
 {
   // Grab the input meshes
   _mesh_ptrs.reserve(_input_names.size());
@@ -65,7 +68,6 @@ StitchedMeshGenerator::generate()
 
     mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
   }
-
 
   return mesh;
 }

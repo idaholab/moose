@@ -45,13 +45,14 @@ validParams<SideSetsAroundSubdomainGenerator>()
   return params;
 }
 
-SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(const InputParameters & parameters)
-: GenerateSideSetsBase(parameters),
-  _input(getMesh("input")),
-  _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
-  _using_normal(isParamValid("normal")),
-  _normal_tol(getParam<Real>("normal_tol")),
-  _normal(_using_normal ? getParam<Point>("normal") : Point())
+SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(
+    const InputParameters & parameters)
+  : GenerateSideSetsBase(parameters),
+    _input(getMesh("input")),
+    _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
+    _using_normal(isParamValid("normal")),
+    _normal_tol(getParam<Real>("normal_tol")),
+    _normal(_using_normal ? getParam<Point>("normal") : Point())
 {
   if (_using_normal)
   {
@@ -72,14 +73,14 @@ SideSetsAroundSubdomainGenerator::generate()
   blocks.resize(block_names.size());
   for (unsigned int i = 0; i < block_names.size(); i++)
   blocks[i] = mesh->get_id_by_name(block_names[i]);*/
-  auto blocks = MooseMeshUtils::getSubdomainIDs(*mesh,
-                                                getParam<std::vector<SubdomainName>>("block"));
+  auto blocks =
+      MooseMeshUtils::getSubdomainIDs(*mesh, getParam<std::vector<SubdomainName>>("block"));
   std::set<subdomain_id_type> block_ids(blocks.begin(), blocks.end());
 
   // Create the boundary IDs from the list of names provided (the true flag creates ids from unknown
   // names)
   std::vector<boundary_id_type> boundary_ids =
-    MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true);
+      MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_names, true);
 
   // construct the FE object so we can compute normals of faces
   setup(*mesh);

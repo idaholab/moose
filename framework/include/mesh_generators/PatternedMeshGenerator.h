@@ -42,7 +42,7 @@ protected:
   // The pattern, starting with the upper left corner
   const std::vector<std::vector<unsigned int>> & _pattern;
 
-  std::vector<std::unique_ptr<MeshBase> * > _mesh_ptrs;
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
 
   // Holds the pointers to the meshes
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
@@ -56,4 +56,3 @@ protected:
 };
 
 #endif // PATTERNEDMESHGENERATOR_H
-

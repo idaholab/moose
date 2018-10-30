@@ -32,13 +32,11 @@ validParams<PatternedMeshGenerator>()
 
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left", "name of the left (x) boundary");
-  params.addParam<BoundaryName>(
-      "right_boundary", "right", "name of the right (x) boundary");
+  params.addParam<BoundaryName>("right_boundary", "right", "name of the right (x) boundary");
 
   // y boundary names
   params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
-  params.addParam<BoundaryName>(
-      "bottom_boundary", "bottom", "name of the bottom (y) boundary");
+  params.addParam<BoundaryName>("bottom_boundary", "bottom", "name of the bottom (y) boundary");
 
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
       "pattern", "A double-indexed array starting with the upper-left corner");
@@ -59,7 +57,7 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
 {
   // The PatternedMesh class only works with ReplicatedMesh
   // Must find the equivalent : this is for MooseMesh derived objects
-  //errorIfDistributedMesh("PatternedMesh");
+  // errorIfDistributedMesh("PatternedMesh");
 
   _mesh_ptrs.reserve(_input_names.size());
   for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
@@ -81,12 +79,16 @@ PatternedMeshGenerator::generate()
   // Data structure that holds each row
   _row_meshes.resize(_pattern.size());
 
-  //const BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  // const BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  boundary_id_type left = _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
-  boundary_id_type right = _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("right_boundary"));
-  boundary_id_type top = _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
-  boundary_id_type bottom = _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
+  boundary_id_type left =
+      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
+  boundary_id_type right =
+      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("right_boundary"));
+  boundary_id_type top =
+      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
+  boundary_id_type bottom =
+      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
 
   // Build each row mesh
   for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)
@@ -112,10 +114,10 @@ PatternedMeshGenerator::generate()
       MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
 
       _row_meshes[i]->stitch_meshes(cell_mesh,
-                                   right,
-                                   left,
-                                   TOLERANCE,
-                                   /*clear_stitched_boundary_ids=*/true);
+                                    right,
+                                    left,
+                                    TOLERANCE,
+                                    /*clear_stitched_boundary_ids=*/true);
 
       // Undo the translation
       MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);

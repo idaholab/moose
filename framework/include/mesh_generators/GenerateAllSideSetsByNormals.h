@@ -40,7 +40,6 @@ protected:
   std::set<boundary_id_type> _mesh_boundary_ids;
 
   std::unique_ptr<MeshBase> & _input;
-
 };
 
 #endif // GENERATEALLSIDESETSBYNORMALS_H

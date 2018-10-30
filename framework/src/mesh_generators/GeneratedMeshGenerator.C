@@ -34,8 +34,7 @@ validParams<GeneratedMeshGenerator>()
       "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14"); // no default
 
   MooseEnum dims("1=1 2 3");
-  params.addRequiredParam<MooseEnum>(
-      "dim", dims, "The dimension of the mesh to be generated");
+  params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
 
   params.addParam<unsigned int>("nx", 1, "Number of elements in the X direction");
   params.addParam<unsigned int>("ny", 1, "Number of elements in the Y direction");

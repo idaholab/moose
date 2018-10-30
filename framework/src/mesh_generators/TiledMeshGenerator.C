@@ -32,17 +32,14 @@ validParams<TiledMeshGenerator>()
 
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left", "name of the left (x) boundary");
-  params.addParam<BoundaryName>(
-      "right_boundary", "right", "name of the right (x) boundary");
+  params.addParam<BoundaryName>("right_boundary", "right", "name of the right (x) boundary");
 
   // y boundary names
   params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
-  params.addParam<BoundaryName>(
-      "bottom_boundary", "bottom", "name of the bottom (y) boundary");
+  params.addParam<BoundaryName>("bottom_boundary", "bottom", "name of the bottom (y) boundary");
 
   // z boundary names
-  params.addParam<BoundaryName>(
-      "front_boundary", "front", "name of the front (z) boundary");
+  params.addParam<BoundaryName>("front_boundary", "front", "name of the front (z) boundary");
   params.addParam<BoundaryName>("back_boundary", "back", "name of the back (z) boundary");
 
   // The number of tiles is 1 in each direction unless otherwise specified.
@@ -78,12 +75,18 @@ TiledMeshGenerator::generate()
   std::unique_ptr<MeshBase> initial_mesh = std::move(_input);
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(initial_mesh);
 
-  boundary_id_type left = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
-  boundary_id_type right = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("right_boundary"));
-  boundary_id_type top = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
-  boundary_id_type bottom = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
-  boundary_id_type front = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
-  boundary_id_type back = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
+  boundary_id_type left =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
+  boundary_id_type right =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("right_boundary"));
+  boundary_id_type top =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
+  boundary_id_type bottom =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
+  boundary_id_type front =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
+  boundary_id_type back =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
 
   {
     std::unique_ptr<MeshBase> clone = mesh->clone();
@@ -91,12 +94,12 @@ TiledMeshGenerator::generate()
     // Build X Tiles
     for (unsigned int i = 1; i < getParam<unsigned int>("x_tiles"); ++i)
     {
-        MeshTools::Modification::translate(*clone, _x_width, 0, 0);
-        mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone),
-                            right,
-                            left,
-                            TOLERANCE,
-                            /*clear_stitched_boundary_ids=*/true);
+      MeshTools::Modification::translate(*clone, _x_width, 0, 0);
+      mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone),
+                          right,
+                          left,
+                          TOLERANCE,
+                          /*clear_stitched_boundary_ids=*/true);
     }
   }
 
@@ -107,11 +110,11 @@ TiledMeshGenerator::generate()
     for (unsigned int i = 1; i < getParam<unsigned int>("y_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, 0, _y_width, 0);
-        mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone),
-                            top,
-                            bottom,
-                            TOLERANCE,
-                            /*clear_stitched_boundary_ids=*/true);
+      mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone),
+                          top,
+                          bottom,
+                          TOLERANCE,
+                          /*clear_stitched_boundary_ids=*/true);
     }
   }
 
@@ -122,11 +125,11 @@ TiledMeshGenerator::generate()
     for (unsigned int i = 1; i < getParam<unsigned int>("z_tiles"); ++i)
     {
       MeshTools::Modification::translate(*clone, 0, 0, _z_width);
-        mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone),
-                            front,
-                            back,
-                            TOLERANCE,
-                            /*clear_stitched_boundary_ids=*/true);
+      mesh->stitch_meshes(dynamic_cast<ReplicatedMesh &>(*clone),
+                          front,
+                          back,
+                          TOLERANCE,
+                          /*clear_stitched_boundary_ids=*/true);
     }
   }
 

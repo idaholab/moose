@@ -17,10 +17,10 @@
 namespace MooseMeshUtils
 {
 void
-  changeBoundaryId(const libMesh::MeshBase & mesh,
-                   const libMesh::boundary_id_type old_id,
-                   const libMesh::boundary_id_type new_id,
-                   bool delete_prev)
+changeBoundaryId(const libMesh::MeshBase & mesh,
+                 const libMesh::boundary_id_type old_id,
+                 const libMesh::boundary_id_type new_id,
+                 bool delete_prev)
 {
   // Get a reference to our BoundaryInfo object, we will use it several times below...
   libMesh::BoundaryInfo boundary_info = mesh.get_boundary_info();
@@ -57,15 +57,16 @@ void
     boundary_info.remove_id(old_id);
 }
 
-
 std::vector<libMesh::boundary_id_type>
 getBoundaryIDs(const libMesh::MeshBase & mesh,
                const std::vector<BoundaryName> & boundary_name,
                bool generate_unknown)
 {
   const libMesh::BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  const std::map<libMesh::boundary_id_type, std::string> & sideset_map = boundary_info.get_sideset_name_map();
-  const std::map<libMesh::boundary_id_type, std::string> & nodeset_map = boundary_info.get_nodeset_name_map();
+  const std::map<libMesh::boundary_id_type, std::string> & sideset_map =
+      boundary_info.get_sideset_name_map();
+  const std::map<libMesh::boundary_id_type, std::string> & nodeset_map =
+      boundary_info.get_nodeset_name_map();
 
   std::set<libMesh::boundary_id_type> boundary_ids = boundary_info.get_boundary_ids();
 
@@ -113,8 +114,7 @@ getBoundaryIDs(const libMesh::MeshBase & mesh,
 }
 
 std::vector<subdomain_id_type>
-getSubdomainIDs(const libMesh::MeshBase & mesh,
-                const std::vector<SubdomainName> & subdomain_name)
+getSubdomainIDs(const libMesh::MeshBase & mesh, const std::vector<SubdomainName> & subdomain_name)
 {
   std::vector<subdomain_id_type> ids(subdomain_name.size());
   std::set<subdomain_id_type> mesh_subdomains;
@@ -142,6 +142,4 @@ getSubdomainIDs(const libMesh::MeshBase & mesh,
 
   return ids;
 }
-
-
 }

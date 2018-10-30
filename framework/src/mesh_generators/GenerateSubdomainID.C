@@ -24,9 +24,9 @@ validParams<GenerateSubdomainID>()
 }
 
 GenerateSubdomainID::GenerateSubdomainID(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input")),
-  _subdomain_id(getParam<SubdomainID>("subdomain_id"))
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _subdomain_id(getParam<SubdomainID>("subdomain_id"))
 {
 }
 

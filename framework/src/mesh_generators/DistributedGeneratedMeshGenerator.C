@@ -36,7 +36,8 @@
 #endif
 namespace Metis
 {
-extern "C" {
+extern "C"
+{
 #include "libmesh/ignore_warnings.h"
 #include "metis.h"
 #include "libmesh/restore_warnings.h"
@@ -100,12 +101,13 @@ validParams<DistributedGeneratedMeshGenerator>()
       "Create a line, square, or cube mesh with uniformly spaced or biased elements.");
 
   // This mesh is always distributed
-  //params.set<MooseEnum>("parallel_type") = "DISTRIBUTED";
+  // params.set<MooseEnum>("parallel_type") = "DISTRIBUTED";
 
   return params;
 }
 
-DistributedGeneratedMeshGenerator::DistributedGeneratedMeshGenerator(const InputParameters & parameters)
+DistributedGeneratedMeshGenerator::DistributedGeneratedMeshGenerator(
+    const InputParameters & parameters)
   : MeshGenerator(parameters),
     _verbose(getParam<bool>("verbose")),
     _dim(getParam<MooseEnum>("dim")),

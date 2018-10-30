@@ -80,17 +80,11 @@ MeshExtruderGenerator::generate()
     elem_subdomain_id = libmesh_make_unique<QueryElemSubdomainID>(
         _existing_subdomains, _layers, _new_ids, _num_layers);
 
-
   MeshTools::Generation::build_extrusion(
-      *mesh,
-      *source_mesh,
-      _num_layers,
-      _extrusion_vector,
-      elem_subdomain_id.get());
+      *mesh, *source_mesh, _num_layers, _extrusion_vector, elem_subdomain_id.get());
 
   // See if the user has requested specific sides for the top and bottom
-  std::set<boundary_id_type> side_ids =
-      mesh->get_boundary_info().get_side_boundary_ids();
+  std::set<boundary_id_type> side_ids = mesh->get_boundary_info().get_side_boundary_ids();
 
   // Handle distributed meshes: processors may not know all side ids
   _communicator.set_union(side_ids);
@@ -114,10 +108,11 @@ MeshExtruderGenerator::generate()
 }
 
 void
-MeshExtruderGenerator::changeID(MeshBase & mesh, const std::vector<BoundaryName> & names, BoundaryID old_id)
+MeshExtruderGenerator::changeID(MeshBase & mesh,
+                                const std::vector<BoundaryName> & names,
+                                BoundaryID old_id)
 {
-  std::vector<boundary_id_type> boundary_ids =
-    MooseMeshUtils::getBoundaryIDs(mesh, names, true);
+  std::vector<boundary_id_type> boundary_ids = MooseMeshUtils::getBoundaryIDs(mesh, names, true);
 
   if (std::find(boundary_ids.begin(), boundary_ids.end(), old_id) == boundary_ids.end())
     MooseMeshUtils::changeBoundaryId(mesh, old_id, boundary_ids[0], true);
@@ -154,7 +149,7 @@ MeshExtruderGenerator::QueryElemSubdomainID::QueryElemSubdomainID(
 
 subdomain_id_type
 MeshExtruderGenerator::QueryElemSubdomainID::get_subdomain_for_layer(const Elem * old_elem,
-                                                            unsigned int layer)
+                                                                     unsigned int layer)
 {
   mooseAssert(layer < _num_layers, "Access out of bounds: " << layer);
 

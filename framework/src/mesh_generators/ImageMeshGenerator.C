@@ -64,7 +64,8 @@ ImageMeshGenerator::generate()
 }
 
 void
-ImageMeshGenerator::buildMesh3D(const std::vector<std::string> & filenames, std::unique_ptr<ReplicatedMesh> & mesh)
+ImageMeshGenerator::buildMesh3D(const std::vector<std::string> & filenames,
+                                std::unique_ptr<ReplicatedMesh> & mesh)
 {
   // If the user gave us a "stack" with 0 or 1 files in it, we can't
   // really create a 3D Mesh from that
@@ -134,7 +135,8 @@ ImageMeshGenerator::buildMesh3D(const std::vector<std::string> & filenames, std:
 }
 
 void
-ImageMeshGenerator::buildMesh2D(const std::string & filename, std::unique_ptr<ReplicatedMesh> & mesh)
+ImageMeshGenerator::buildMesh2D(const std::string & filename,
+                                std::unique_ptr<ReplicatedMesh> & mesh)
 {
   int xpixels = 0, ypixels = 0;
 

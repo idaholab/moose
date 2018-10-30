@@ -29,9 +29,7 @@ public:
   std::unique_ptr<MeshBase> generate();
 
 protected:
-
   std::unique_ptr<MeshBase> & _input;
-
 };
 
 #endif // GENERATEEXTRANODESET_H

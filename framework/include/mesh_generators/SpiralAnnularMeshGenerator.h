@@ -33,7 +33,6 @@ public:
   std::unique_ptr<MeshBase> generate();
 
 protected:
-
   /// Radius of the inner circle
   const Real _inner_radius;
 

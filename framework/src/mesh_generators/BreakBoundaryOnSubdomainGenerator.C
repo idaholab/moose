@@ -30,9 +30,9 @@ validParams<BreakBoundaryOnSubdomainGenerator>()
   return params;
 }
 
-BreakBoundaryOnSubdomainGenerator::BreakBoundaryOnSubdomainGenerator(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input"))
+BreakBoundaryOnSubdomainGenerator::BreakBoundaryOnSubdomainGenerator(
+    const InputParameters & parameters)
+  : MeshGenerator(parameters), _input(getMesh("input"))
 {
 }
 

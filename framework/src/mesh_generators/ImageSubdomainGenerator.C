@@ -29,9 +29,7 @@ validParams<ImageSubdomainGenerator>()
 }
 
 ImageSubdomainGenerator::ImageSubdomainGenerator(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  MeshBaseImageSampler(parameters),
-  _input(getMesh("input"))
+  : MeshGenerator(parameters), MeshBaseImageSampler(parameters), _input(getMesh("input"))
 {
 }
 

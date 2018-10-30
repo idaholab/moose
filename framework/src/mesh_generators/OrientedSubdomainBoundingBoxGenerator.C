@@ -21,20 +21,21 @@ validParams<OrientedSubdomainBoundingBoxGenerator>()
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<subdomain_id_type>("block_id",
-                                       "Subdomain id to set for inside/outside the bounding box");
+  params.addRequiredParam<subdomain_id_type>(
+      "block_id", "Subdomain id to set for inside/outside the bounding box");
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
 
   return params;
 }
 
-OrientedSubdomainBoundingBoxGenerator::OrientedSubdomainBoundingBoxGenerator(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  OrientedBoxInterface(parameters),
-  _input(getMesh("input")),
-  _location(parameters.get<MooseEnum>("location")),
-  _block_id(parameters.get<subdomain_id_type>("block_id"))
+OrientedSubdomainBoundingBoxGenerator::OrientedSubdomainBoundingBoxGenerator(
+    const InputParameters & parameters)
+  : MeshGenerator(parameters),
+    OrientedBoxInterface(parameters),
+    _input(getMesh("input")),
+    _location(parameters.get<MooseEnum>("location")),
+    _block_id(parameters.get<subdomain_id_type>("block_id"))
 {
 }
 

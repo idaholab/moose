@@ -31,10 +31,7 @@ public:
 
 struct ADeleter
 {
-  void operator()(A * a)
-  {
-    delete a;
-  }
+  void operator()(A * a) { delete a; }
 };
 
 TEST(CastUniquePointer, test)

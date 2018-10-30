@@ -38,8 +38,8 @@ validParams<GenerateSideSetsFromBoundingBox>()
       "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
   params.addRequiredParam<RealVectorValue>(
       "top_right", "The bottom left point (in x,y,z with spaces in-between).");
-  params.addRequiredParam<subdomain_id_type>("block_id",
-                                       "Subdomain id to set for inside/outside the bounding box");
+  params.addRequiredParam<subdomain_id_type>(
+      "block_id", "Subdomain id to set for inside/outside the bounding box");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary_id_old", "Boundary id on specified block within the bounding box to select");
   params.addRequiredParam<boundary_id_type>(
@@ -54,15 +54,15 @@ validParams<GenerateSideSetsFromBoundingBox>()
 }
 
 GenerateSideSetsFromBoundingBox::GenerateSideSetsFromBoundingBox(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input")),
-  _location(parameters.get<MooseEnum>("location")),
-  _block_id(parameters.get<SubdomainID>("block_id")),
-  _boundary_id_old(parameters.get<std::vector<BoundaryName>>("boundary_id_old")),
-  _boundary_id_new(parameters.get<boundary_id_type>("boundary_id_new")),
-  _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _location(parameters.get<MooseEnum>("location")),
+    _block_id(parameters.get<SubdomainID>("block_id")),
+    _boundary_id_old(parameters.get<std::vector<BoundaryName>>("boundary_id_old")),
+    _boundary_id_new(parameters.get<boundary_id_type>("boundary_id_new")),
+    _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
                   parameters.get<RealVectorValue>("top_right")),
-  _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
+    _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
@@ -133,7 +133,7 @@ GenerateSideSetsFromBoundingBox::generate()
         std::vector<boundary_id_type> boundary_id_list;
         boundary_info.boundary_ids(*node, boundary_id_list);
         std::vector<boundary_id_type> boundary_id_old_list =
-          MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_id_old, true);
+            MooseMeshUtils::getBoundaryIDs(*mesh, _boundary_id_old, true);
 
         // sort boundary ids on node and sort boundary ids provided in input file
         std::sort(boundary_id_list.begin(), boundary_id_list.end());

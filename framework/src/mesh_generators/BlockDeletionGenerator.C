@@ -25,8 +25,7 @@ validParams<BlockDeletionGenerator>()
 }
 
 BlockDeletionGenerator::BlockDeletionGenerator(const InputParameters & parameters)
-: ElementDeletionGeneratorBase(parameters),
-  _block_id(getParam<SubdomainID>("block_id"))
+  : ElementDeletionGeneratorBase(parameters), _block_id(getParam<SubdomainID>("block_id"))
 {
 }
 

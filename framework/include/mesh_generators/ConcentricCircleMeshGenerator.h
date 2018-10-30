@@ -30,7 +30,6 @@ public:
   std::unique_ptr<MeshBase> generate();
 
 protected:
-
   /// Number of sectors in one quadrant
   unsigned int _num_sectors;
 
@@ -52,7 +51,6 @@ protected:
 
   /// Control of which portion of mesh will be developed
   MooseEnum _portion;
-
 };
 
 #endif // ANNULARMESHGENERATOR_H

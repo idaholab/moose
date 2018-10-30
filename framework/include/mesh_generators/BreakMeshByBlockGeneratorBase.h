@@ -63,7 +63,6 @@ private:
   /// this method save the boundary name/id pair
   void mapBoundaryIdAndBoundaryName(boundary_id_type & /*boundaryID*/,
                                     const std::string & /*boundaryName*/);
-
 };
 
 #endif // BREAKMESHBYBLOCKGENERATORBASE_H

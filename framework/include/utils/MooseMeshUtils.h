@@ -18,21 +18,19 @@
 
 namespace MooseMeshUtils
 {
-  // Changes the old ID to new ID in the mesh given in parameters
-  void changeBoundaryId(const libMesh::MeshBase & mesh,
-                        const libMesh::boundary_id_type old_id,
-                        const libMesh::boundary_id_type new_id,
-                        bool delete_prev);
+// Changes the old ID to new ID in the mesh given in parameters
+void changeBoundaryId(const libMesh::MeshBase & mesh,
+                      const libMesh::boundary_id_type old_id,
+                      const libMesh::boundary_id_type new_id,
+                      bool delete_prev);
 
-  std::vector<libMesh::boundary_id_type>
-  getBoundaryIDs(const libMesh::MeshBase & mesh,
-                            const std::vector<BoundaryName> & boundary_name,
-                            bool generate_unknown);
+std::vector<libMesh::boundary_id_type>
+getBoundaryIDs(const libMesh::MeshBase & mesh,
+               const std::vector<BoundaryName> & boundary_name,
+               bool generate_unknown);
 
-  std::vector<subdomain_id_type>
-  getSubdomainIDs(const libMesh::MeshBase & mesh,
-                  const std::vector<SubdomainName> & subdomain_name) ;
-
+std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
+                                               const std::vector<SubdomainName> & subdomain_name);
 }
 
 #endif // MOOSEMESHUTILS_H

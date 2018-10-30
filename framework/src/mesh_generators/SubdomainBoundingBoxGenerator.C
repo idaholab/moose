@@ -27,8 +27,8 @@ validParams<SubdomainBoundingBoxGenerator>()
       "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
   params.addRequiredParam<RealVectorValue>(
       "top_right", "The bottom left point (in x,y,z with spaces in-between).");
-  params.addRequiredParam<subdomain_id_type>("block_id",
-                                       "Subdomain id to set for inside/outside the bounding box");
+  params.addRequiredParam<subdomain_id_type>(
+      "block_id", "Subdomain id to set for inside/outside the bounding box");
   params.addParam<SubdomainName>(
       "block_name", "Subdomain name to set for inside/outside the bounding box (optional)");
   params.addParam<MooseEnum>(
@@ -38,12 +38,12 @@ validParams<SubdomainBoundingBoxGenerator>()
 }
 
 SubdomainBoundingBoxGenerator::SubdomainBoundingBoxGenerator(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input")),
-  _location(parameters.get<MooseEnum>("location")),
-  _block_id(parameters.get<subdomain_id_type>("block_id")),
-  _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
-                parameters.get<RealVectorValue>("top_right"))
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _location(parameters.get<MooseEnum>("location")),
+    _block_id(parameters.get<subdomain_id_type>("block_id")),
+    _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
+                  parameters.get<RealVectorValue>("top_right"))
 {
 }
 

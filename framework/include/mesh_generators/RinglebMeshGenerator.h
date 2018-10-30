@@ -44,7 +44,6 @@ public:
                               const std::vector<Real> & q);
 
 protected:
-
   /// Gamma
   const Real & _gamma;
 

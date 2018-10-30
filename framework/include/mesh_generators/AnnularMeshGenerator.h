@@ -29,7 +29,6 @@ public:
   std::unique_ptr<MeshBase> generate();
 
 protected:
-
   /// Number of elements in radial direction
   const unsigned _nr;
 

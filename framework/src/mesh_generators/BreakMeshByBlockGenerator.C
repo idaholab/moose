@@ -30,8 +30,7 @@ validParams<BreakMeshByBlockGenerator>()
 }
 
 BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & parameters)
-: BreakMeshByBlockGeneratorBase(parameters),
-  _input(getMesh("input"))
+  : BreakMeshByBlockGeneratorBase(parameters), _input(getMesh("input"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
@@ -187,7 +186,6 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
 
     // loop over all the side belonging to each pair and add it to the proper interface
     for (auto & element_side : boundary_side_map.second)
-    boundary_info.add_side(element_side.first, element_side.second, boundaryID);
+      boundary_info.add_side(element_side.first, element_side.second, boundaryID);
   }
 }
-

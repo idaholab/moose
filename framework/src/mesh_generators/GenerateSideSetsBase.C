@@ -65,7 +65,10 @@ GenerateSideSetsBase::finalize()
 }
 
 void
-GenerateSideSetsBase::flood(const Elem * elem, Point normal, boundary_id_type side_id, MeshBase & mesh)
+GenerateSideSetsBase::flood(const Elem * elem,
+                            Point normal,
+                            boundary_id_type side_id,
+                            MeshBase & mesh)
 {
   if (elem == nullptr || (_visited[side_id].find(elem) != _visited[side_id].end()))
     return;

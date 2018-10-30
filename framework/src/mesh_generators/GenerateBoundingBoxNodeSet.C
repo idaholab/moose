@@ -36,10 +36,10 @@ validParams<GenerateBoundingBoxNodeSet>()
 }
 
 GenerateBoundingBoxNodeSet::GenerateBoundingBoxNodeSet(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input")),
-  _location(getParam<MooseEnum>("location")),
-  _bounding_box(getParam<RealVectorValue>("bottom_left"), getParam<RealVectorValue>("top_right"))
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _location(getParam<MooseEnum>("location")),
+    _bounding_box(getParam<RealVectorValue>("bottom_left"), getParam<RealVectorValue>("top_right"))
 {
 }
 
@@ -50,7 +50,8 @@ GenerateBoundingBoxNodeSet::generate()
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName>>("new_boundary");
-  std::vector<BoundaryID> boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
+  std::vector<BoundaryID> boundary_ids =
+      MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
   if (boundary_ids.size() != 1)
     mooseError("Only one boundary ID can be assigned to a nodeset using a bounding box!");
 

@@ -33,7 +33,6 @@
 #include "libmesh/cell_pyramid13.h"
 #include "libmesh/cell_pyramid14.h"
 
-
 registerMooseObject("MooseApp", ElementGenerator);
 
 template <>
@@ -42,9 +41,8 @@ validParams<ElementGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  MooseEnum elem_types(
-      "EDGE2 EDGE3 EDGE4 QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX8 HEX20 HEX27 TET4 TET10 "
-      "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14");
+  MooseEnum elem_types("EDGE2 EDGE3 EDGE4 QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX8 HEX20 HEX27 TET4 TET10 "
+                       "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14");
 
   params.addParam<MeshGeneratorName>("input", "Optional input mesh to add the elements to");
 

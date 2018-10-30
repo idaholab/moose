@@ -36,9 +36,9 @@ validParams<MeshSideSetGenerator>()
 }
 
 MeshSideSetGenerator::MeshSideSetGenerator(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _input(getMesh("input")),
-  _block_id(parameters.get<subdomain_id_type>("block_id"))
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _block_id(parameters.get<subdomain_id_type>("block_id"))
 {
   if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
     mooseError("MeshSideSetGenerator only works with ReplicatedMesh");

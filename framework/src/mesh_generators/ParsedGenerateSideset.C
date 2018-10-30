@@ -50,17 +50,17 @@ validParams<ParsedGenerateSideset>()
 }
 
 ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
-: GenerateSideSetsBase(parameters),
-  FunctionParserUtils(parameters),
-  _input(getMesh("input")),
-  _function(parameters.get<std::string>("combinatorial_geometry")),
-  _sideset_name(getParam<BoundaryName>("new_sideset_name")),
-  _check_subdomains(isParamValid("included_subdomain_ids")),
-  _check_normal(parameters.isParamSetByUser("normal")),
-  _included_ids(_check_subdomains
+  : GenerateSideSetsBase(parameters),
+    FunctionParserUtils(parameters),
+    _input(getMesh("input")),
+    _function(parameters.get<std::string>("combinatorial_geometry")),
+    _sideset_name(getParam<BoundaryName>("new_sideset_name")),
+    _check_subdomains(isParamValid("included_subdomain_ids")),
+    _check_normal(parameters.isParamSetByUser("normal")),
+    _included_ids(_check_subdomains
                       ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids")
                       : std::vector<SubdomainID>()),
-  _normal(getParam<Point>("normal"))
+    _normal(getParam<Point>("normal"))
 {
   if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
@@ -100,7 +100,7 @@ ParsedGenerateSideset::generate()
 
   // Get the BoundaryIDs from the mesh
   std::vector<boundary_id_type> boundary_ids =
-    MooseMeshUtils::getBoundaryIDs(*mesh, {_sideset_name}, true);
+      MooseMeshUtils::getBoundaryIDs(*mesh, {_sideset_name}, true);
   mooseAssert(boundary_ids.size() == 1, "Length of boundary_ids should be one");
 
   for (const auto & elem : mesh->active_element_ptr_range())
@@ -137,4 +137,3 @@ ParsedGenerateSideset::generate()
 
   return mesh;
 }
-

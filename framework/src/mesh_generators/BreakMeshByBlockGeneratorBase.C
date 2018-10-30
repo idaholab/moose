@@ -31,9 +31,9 @@ validParams<BreakMeshByBlockGeneratorBase>()
 }
 
 BreakMeshByBlockGeneratorBase::BreakMeshByBlockGeneratorBase(const InputParameters & parameters)
-: MeshGenerator(parameters),
-  _interface_name(getParam<std::string>("interface_name")),
-  _split_interface(getParam<bool>("split_interface"))
+  : MeshGenerator(parameters),
+    _interface_name(getParam<std::string>("interface_name")),
+    _split_interface(getParam<bool>("split_interface"))
 {
   // check input consistency
   if (getParam<bool>("split_interface") && _pars.isParamSetByUser("interface_name"))
@@ -46,7 +46,8 @@ BreakMeshByBlockGeneratorBase::BreakMeshByBlockGeneratorBase(const InputParamete
 boundary_id_type
 BreakMeshByBlockGeneratorBase::findFreeBoundaryId(MeshBase & mesh)
 {
-  const std::set<boundary_id_type> & currentBoundaryIds = mesh.get_boundary_info().get_boundary_ids();
+  const std::set<boundary_id_type> & currentBoundaryIds =
+      mesh.get_boundary_info().get_boundary_ids();
   bool freeBoundaryNotFound = true;
   boundary_id_type freeId;
   for (freeId = 0; freeId < std::numeric_limits<boundary_id_type>::max(); freeId++)
@@ -82,7 +83,7 @@ BreakMeshByBlockGeneratorBase::generateBoundaryName(MeshBase & mesh,
 
 void
 BreakMeshByBlockGeneratorBase::mapBoundaryIdAndBoundaryName(boundary_id_type & boundaryID,
-                                                   const std::string & boundaryName)
+                                                            const std::string & boundaryName)
 {
   _bName_bID_set.insert(std::pair<std::string, int>(boundaryName, boundaryID));
 }

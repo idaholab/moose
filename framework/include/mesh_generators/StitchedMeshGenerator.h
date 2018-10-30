@@ -39,11 +39,10 @@ protected:
   std::vector<std::vector<std::string>> _stitch_boundaries_pairs;
 
   // Holds pointers to the pointers to the meshes.
-  std::vector<std::unique_ptr<MeshBase> * > _mesh_ptrs;
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
 
   /// The meshes to be stitched together.
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 };
 
 #endif // STITCHEDMESHGENERATOR_H
-
