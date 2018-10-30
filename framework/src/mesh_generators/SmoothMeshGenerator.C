@@ -12,6 +12,7 @@
 // libMesh includes
 #include "libmesh/mesh_smoother_laplace.h"
 #include "libmesh/unstructured_mesh.h"
+#include "libmesh/replicated_mesh.h"
 
 #include "CastUniquePointer.h"
 
