@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<SideSetsFromPointsGenerator>();
 
 /**
- * 
+ *
  */
 class SideSetsFromPointsGenerator : public GenerateSideSetsBase
 {

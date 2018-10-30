@@ -59,7 +59,7 @@ ImageMeshGenerator::generate()
 
   else
     buildMesh3D(_filenames, mesh);
-  
+
   return mesh;
 }
 

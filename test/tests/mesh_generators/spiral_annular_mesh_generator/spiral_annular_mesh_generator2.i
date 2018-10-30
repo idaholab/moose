@@ -1,4 +1,4 @@
-[MeshGenerators]  
+[MeshGenerators]
   [./samg]
     type = SpiralAnnularMeshGenerator
     input = eg

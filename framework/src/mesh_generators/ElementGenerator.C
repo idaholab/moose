@@ -169,7 +169,7 @@ ElementGenerator::getElemType(const std::string & type)
     Elem * elem = new Pyramid14;
     return elem;
   }
-  
+
   mooseError("This element type is not available.");
 }
 
@@ -184,7 +184,7 @@ ElementGenerator::generate()
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
   auto elem = getElemType(elem_type_enum);
-  
+
   std::vector<Node *> nodes;
 
   nodes.reserve(_nodal_positions.size());

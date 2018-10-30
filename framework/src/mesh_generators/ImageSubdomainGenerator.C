@@ -24,7 +24,7 @@ validParams<ImageSubdomainGenerator>()
   params += validParams<MeshBaseImageSampler>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  
+
   return params;
 }
 
@@ -50,6 +50,6 @@ ImageSubdomainGenerator::generate()
     subdomain_id_type id = static_cast<subdomain_id_type>(round(sample(elem->centroid())));
     elem->subdomain_id() = id;
   }
-  
+
   return mesh;
 }

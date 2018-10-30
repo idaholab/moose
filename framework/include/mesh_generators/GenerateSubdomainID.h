@@ -30,7 +30,7 @@ public:
 
 protected:
   std::unique_ptr<MeshBase> & _input;
-  
+
   /// The subdomain ID to assign to every elemennt
   SubdomainID _subdomain_id;
 };

@@ -29,7 +29,7 @@ validParams<GenerateAllSideSetsByNormals>()
   InputParameters params = validParams<GenerateSideSetsBase>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  
+
   return params;
 }
 

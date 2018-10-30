@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<BreakBoundaryOnSubdomainGenerator>();
 
 /**
- * MeshGenerator for 
+ * MeshGenerator for
  */
 class BreakBoundaryOnSubdomainGenerator : public MeshGenerator
 {
@@ -30,7 +30,7 @@ public:
 
 protected:
   std::unique_ptr<MeshBase> & _input;
-  
+
 };
 
 #endif // BREAKBOUNDARYONSUBDOMAINGENERATOR_H

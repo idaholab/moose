@@ -16,7 +16,7 @@
     bottom_left = '0 0 0'
     top_right = '0.5 1 1'
   []
-  
+
   [./right_block]
     type = SubdomainBoundingBoxGenerator
     input = left_block

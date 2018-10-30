@@ -36,7 +36,7 @@ validParams<GenerateExtraNodeset>()
                                      "supplied).");
   params.addParam<Real>(
       "tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
-  
+
   return params;
 }
 
@@ -142,6 +142,6 @@ GenerateExtraNodeset::generate()
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.nodeset_name(boundary_ids[i]) = boundary_names[i];
-  
+
   return mesh;
 }

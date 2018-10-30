@@ -25,7 +25,7 @@ public:
   std::unique_ptr<MeshBase> generate();
 
 protected:
-  std::unique_ptr<MeshBase> & _input;  
+  std::unique_ptr<MeshBase> & _input;
 
 private:
   /// generate the new boundary interface

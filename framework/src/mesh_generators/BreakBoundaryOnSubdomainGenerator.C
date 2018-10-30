@@ -26,7 +26,7 @@ validParams<BreakBoundaryOnSubdomainGenerator>()
                              "boundary name plus \"_to_\" plus the subdomain name");
   params.addParam<std::vector<BoundaryName>>(
       "boundaries", "Boundaries to be broken. Default means to break all boundaries");
-  
+
   return params;
 }
 

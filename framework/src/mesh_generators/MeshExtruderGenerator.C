@@ -45,7 +45,7 @@ validParams<MeshExtruderGenerator>()
       std::vector<unsigned int>(),
       "The list of new ids, This list should be either length \"existing_subdomains\" or "
       "\"existing_subdomains\" * layers");
-  
+
   return params;
 }
 
@@ -80,7 +80,7 @@ MeshExtruderGenerator::generate()
     elem_subdomain_id = libmesh_make_unique<QueryElemSubdomainID>(
         _existing_subdomains, _layers, _new_ids, _num_layers);
 
-  
+
   MeshTools::Generation::build_extrusion(
       *mesh,
       *source_mesh,
@@ -109,7 +109,7 @@ MeshExtruderGenerator::generate()
 
   // Update the dimension
   mesh->set_mesh_dimension(mesh->mesh_dimension() + 1);
-  
+
   return mesh;
 }
 

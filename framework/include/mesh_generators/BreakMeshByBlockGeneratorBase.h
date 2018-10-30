@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<BreakMeshByBlockGeneratorBase>();
 
 /**
- * 
+ *
  */
 class BreakMeshByBlockGeneratorBase : public MeshGenerator
 {

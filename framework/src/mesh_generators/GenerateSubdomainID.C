@@ -19,7 +19,7 @@ validParams<GenerateSubdomainID>()
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<SubdomainID>("subdomain_id", "New subdomain IDs of all elements");
-  
+
   return params;
 }
 

@@ -22,7 +22,7 @@ validParams<GenerateElementSubdomainID>()
   params.addRequiredParam<std::vector<SubdomainID>>("subdomain_ids",
                                                     "New subdomain IDs of all elements");
   params.addParam<std::vector<dof_id_type>>("element_ids", "New element IDs of all elements");
-  
+
   return params;
 }
 
@@ -145,6 +145,6 @@ GenerateElementSubdomainID::generate()
 
     elem->subdomain_id() = newid;
   }
-  
+
   return mesh;
 }

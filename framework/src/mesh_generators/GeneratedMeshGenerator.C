@@ -250,6 +250,6 @@ GeneratedMeshGenerator::generate()
       }
     }
   }
-  
+
   return mesh;
 }

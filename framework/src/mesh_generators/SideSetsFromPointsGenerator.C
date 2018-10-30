@@ -36,7 +36,7 @@ validParams<SideSetsFromPointsGenerator>()
                                                      "The name of the boundary to create");
   params.addRequiredParam<std::vector<Point>>(
       "points", "A list of points from which to start painting sidesets");
- 
+
   return params;
 }
 
@@ -96,6 +96,6 @@ SideSetsFromPointsGenerator::generate()
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     mesh->get_boundary_info().sideset_name(boundary_ids[i]) = _boundary_names[i];
-  
+
   return mesh;
 }

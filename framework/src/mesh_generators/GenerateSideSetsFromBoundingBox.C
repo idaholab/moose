@@ -49,7 +49,7 @@ validParams<GenerateSideSetsFromBoundingBox>()
                         "Set to true if boundaries need to overlap on sideset to be detected.");
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
-  
+
   return params;
 }
 
@@ -155,6 +155,6 @@ GenerateSideSetsFromBoundingBox::generate()
     if (!found_node)
       mooseError("No nodes found within the bounding box");
   }
-  
+
   return mesh;
 }

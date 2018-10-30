@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<SideSetsBetweenSubdomainsGenerator>();
 
 /**
- * MeshGenerator for 
+ * MeshGenerator for
  */
 class SideSetsBetweenSubdomainsGenerator : public MeshGenerator
 {

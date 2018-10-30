@@ -33,26 +33,26 @@ protected:
 
   /// Number of sectors in one quadrant
   unsigned int _num_sectors;
-  
+
   /// Radii of concentric circles
   std::vector<Real> _radii;
-  
+
   /// Number of rings in each circle or in the moderator
   std::vector<unsigned int> _rings;
-  
+
   /// Size of inner square in relation to radius of the innermost concentric circle
   Real _inner_mesh_fraction;
-  
+
   /// Adding the moderator is optional
   bool _has_outer_square;
   Real _pitch;
-  
+
   /// Volume preserving function is optional
   bool _preserve_volumes;
-  
+
   /// Control of which portion of mesh will be developed
   MooseEnum _portion;
-  
+
 };
 
 #endif // ANNULARMESHGENERATOR_H

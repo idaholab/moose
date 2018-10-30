@@ -90,7 +90,7 @@ AnnularMeshGenerator::generate()
   std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
 
   const Real dt = (_tmax - _tmin) / _nt;
-  
+
   mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(2);
   BoundaryInfo & boundary_info = mesh->get_boundary_info();

@@ -35,7 +35,7 @@ validParams<SideSetsFromNormalsGenerator>()
                                                      "The name of the boundary to create");
   params.addRequiredParam<std::vector<Point>>(
       "normals", "A list of normals for which to start painting sidesets");
-  
+
   return params;
 }
 

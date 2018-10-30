@@ -127,6 +127,6 @@ LowerDBlockFromSidesetGenerator::generate()
   // Assign block name, if provided
   if (isParamValid("new_block_name"))
     mesh->subdomain_name(_new_block_id) = getParam<SubdomainName>("new_block_name");
-  
+
   return mesh;
 }

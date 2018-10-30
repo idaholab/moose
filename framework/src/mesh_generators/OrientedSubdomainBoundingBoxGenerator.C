@@ -25,7 +25,7 @@ validParams<OrientedSubdomainBoundingBoxGenerator>()
                                        "Subdomain id to set for inside/outside the bounding box");
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
-  
+
   return params;
 }
 

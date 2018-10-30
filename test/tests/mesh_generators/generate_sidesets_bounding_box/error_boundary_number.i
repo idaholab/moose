@@ -16,7 +16,7 @@
     top_right = '1.9 1.9 0'
     block_id = 0
   []
-  
+
   [./createNewSidesetTwo]
     type = GenerateSideSetsFromBoundingBox
     input = createNewSidesetOne

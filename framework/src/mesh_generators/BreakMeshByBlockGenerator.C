@@ -41,7 +41,7 @@ std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  
+
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
   for (const auto & elem : mesh->active_element_ptr_range())
@@ -62,7 +62,7 @@ BreakMeshByBlockGenerator::generate()
         const Elem * current_elem = mesh->elem_ptr(*elem_id);
         connected_blocks.insert(current_elem->subdomain_id());
       }
-      
+
       unsigned int node_multiplicity = connected_blocks.size();
 
       // check if current_node need to be duplicated
@@ -168,7 +168,7 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
 
   boundary_id_type boundaryID = findFreeBoundaryId(mesh);
   std::string boundaryName = _interface_name;
-  
+
   // loop over boundary sides
   for (auto & boundary_side_map : _new_boundary_sides_map)
   {

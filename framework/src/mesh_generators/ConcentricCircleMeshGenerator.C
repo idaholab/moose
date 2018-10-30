@@ -669,6 +669,6 @@ ConcentricCircleMeshGenerator::generate()
   if (_portion != "top_half" && _portion != "right_half" && _portion != "left_half" &&
       _portion != "bottom_half" && _portion != "full")
     mesh->prepare_for_use(false);
-  
+
   return mesh;
 }

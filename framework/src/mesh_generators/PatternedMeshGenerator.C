@@ -120,7 +120,7 @@ PatternedMeshGenerator::generate()
       // Undo the translation
       MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
     }
-  
+
   // Now stitch together the rows
   // We're going to stitch them all to row 0 (which is the real mesh)
   for (auto i = beginIndex(_pattern) + 1; i < _pattern.size(); i++)

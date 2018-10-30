@@ -26,7 +26,7 @@ validParams<BreakMeshByBlockGeneratorBase>()
                         "different interface for each block pair.");
   params.addClassDescription("This is the base class used to split a monolithic"
                              "mesh by blocks pairs");
-  
+
   return params;
 }
 

@@ -8,7 +8,7 @@
     type = FileMeshGenerator
     file = tri_mesh.e
   []
-  
+
   [./pmg]
     type = PatternedMeshGenerator
     inputs = 'fmg fmg2'

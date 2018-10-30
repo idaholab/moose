@@ -17,7 +17,7 @@ InputParameters
 validParams<SubdomainBoundingBoxGenerator>()
 {
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
-  
+
   InputParameters params = validParams<MeshGenerator>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");

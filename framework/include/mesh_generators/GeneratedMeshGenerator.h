@@ -51,7 +51,7 @@ protected:
   /// _bias_x==1 implies no bias (original mesh unchanged).
   /// _bias_x > 1 implies cells are growing in the x-direction.
   Real _bias_x, _bias_y, _bias_z;
-  
+
 };
 
 #endif // GENERATEDMESHGENERATOR_H

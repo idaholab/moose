@@ -21,7 +21,7 @@ InputParameters
 validParams<RinglebMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
-  
+
   params.addRequiredParam<Real>("gamma", "Gamma parameter");
   params.addRequiredParam<Real>("kmax", "Value of k on the inner wall.");
   params.addRequiredParam<Real>("kmin", "Value of k on the outer wall.");

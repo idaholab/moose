@@ -101,7 +101,7 @@ validParams<DistributedGeneratedMeshGenerator>()
 
   // This mesh is always distributed
   //params.set<MooseEnum>("parallel_type") = "DISTRIBUTED";
- 
+
   return params;
 }
 
@@ -1456,6 +1456,6 @@ DistributedGeneratedMeshGenerator::generate()
       }
     }
   }
-  
+
   return mesh;
 }

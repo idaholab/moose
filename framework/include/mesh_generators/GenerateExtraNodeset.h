@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<GenerateExtraNodeset>();
 
 /**
- * 
+ *
  */
 class GenerateExtraNodeset : public MeshGenerator
 {
@@ -31,7 +31,7 @@ public:
 protected:
 
   std::unique_ptr<MeshBase> & _input;
-  
+
 };
 
 #endif // GENERATEEXTRANODESET_H

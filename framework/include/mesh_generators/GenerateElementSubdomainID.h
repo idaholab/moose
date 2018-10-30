@@ -30,7 +30,7 @@ public:
 
 protected:
   std::unique_ptr<MeshBase> & _input;
-  
+
 };
 
 #endif // GENERATEELEMENTSUBDOMAINID_H

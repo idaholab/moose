@@ -41,7 +41,7 @@ validParams<SideSetsAroundSubdomainGenerator>()
 
   params.addClassDescription(
       "Adds element faces that are on the exterior of the given block to the sidesets specified");
-  
+
   return params;
 }
 
@@ -220,6 +220,6 @@ SideSetsAroundSubdomainGenerator::generate()
   // Assign the supplied names to the newly created side sets
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
-  
+
   return mesh;
 }

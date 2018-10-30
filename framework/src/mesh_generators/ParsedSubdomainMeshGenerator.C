@@ -41,7 +41,7 @@ validParams<ParsedSubdomainMeshGenerator>()
                              "to determine if an element (aka its centroid) is inside the "
                              "combinatorial geometry and "
                              "assigns a new block id.");
-  
+
   return params;
 }
 

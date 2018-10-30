@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<BlockDeletionGenerator>();
 
 /**
- * MeshGenerator for 
+ * MeshGenerator for
  */
 class BlockDeletionGenerator : public ElementDeletionGeneratorBase
 {
@@ -31,7 +31,7 @@ protected:
 
 private:
   ///Defines the block to be removed
-  const SubdomainID _block_id;  
+  const SubdomainID _block_id;
 };
 
 #endif // BLOCKDELETIONGENERATOR_H

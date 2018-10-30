@@ -33,7 +33,7 @@ struct ADeleter
 {
   void operator()(A * a)
   {
-    std::cout << " Deleting " << std::endl;
+    //std::cout << " Deleting " << std::endl;
     delete a;
   }
 };
@@ -48,7 +48,7 @@ TEST(CastUniquePointer, test)
 
   {
     auto worked = dynamic_pointer_cast<C>(c);
-    std::cout << "Worked: " << (bool)worked << std::endl;
+    //std::cout << "Worked: " << (bool)worked << std::endl;
   }
 
   {

@@ -31,7 +31,7 @@ validParams<GenerateBoundingBoxNodeSet>()
       "top_right",
       "The bottom left point (in x,y,z with spaces in-between) of the box to select the nodes.");
   params.addParam<MooseEnum>("location", location, "Control of where the nodeset is to be set");
-  
+
   return params;
 }
 
