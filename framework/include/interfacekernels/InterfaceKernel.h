@@ -198,6 +198,10 @@ protected:
   /// Gradient of side neighbor shape function
   const VariableTestGradient & _grad_test_neighbor;
 
+  /// Holds residual entries as they are accumulated by this InterfaceKernel
+  /// This variable is temporarily reserved for RattleSnake
+  DenseMatrix<Number> _local_kxx;
+
   /** MultiMooseEnum specifying whether residual save-in
    * aux variables correspond to master or slave side
    */
