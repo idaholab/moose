@@ -76,8 +76,6 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_dof_values_previous_nl_neighbor(false),
     _need_dof_values_dot_neighbor(false),
     _need_dof_du_dot_du_neighbor(false),
-    _need_vector_tag_dof_u(false),
-    _need_matrix_tag_dof_u(false),
     _normals(_assembly.normals()),
     _is_nodal(true),
     _has_dofs(false),
@@ -107,6 +105,7 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
   auto num_vector_tags = _sys.subproblem().numVectorTags();
 
   _vector_tags_dof_u.resize(num_vector_tags);
+  _need_vector_tag_dof_u.resize(num_vector_tags);
 
   _need_vector_tag_u.resize(num_vector_tags);
   _vector_tag_u.resize(num_vector_tags);
@@ -114,6 +113,8 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
 
   _matrix_tags_dof_u.resize(num_matrix_tags);
+  _need_matrix_tag_dof_u.resize(num_matrix_tags);
+
   _need_matrix_tag_u.resize(num_matrix_tags);
   _matrix_tag_u.resize(num_matrix_tags);
 }
@@ -1032,7 +1033,7 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
       _u[qp] += *phi_local * soln_local;
 
       for (unsigned int tag = 0; tag < num_vector_tags; tag++)
-        if (_need_vector_tag_u[tag] && _sys.hasVector(tag))
+        if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
           tag_local_value = _sys.getVector(tag)(idx);
           _vector_tag_u[tag][qp] += *phi_local * tag_local_value;
@@ -1461,7 +1462,7 @@ MooseVariableFE<OutputType>::nodalVectorTagValue(TagID tag)
 {
   if (isNodal())
   {
-    _need_vector_tag_dof_u = true;
+    _need_vector_tag_dof_u[tag] = true;
 
     if (_sys.hasVector(tag) && tag < _vector_tags_dof_u.size())
       return _vector_tags_dof_u[tag];
@@ -1483,7 +1484,7 @@ MooseVariableFE<OutputType>::nodalMatrixTagValue(TagID tag)
 {
   if (isNodal())
   {
-    _need_matrix_tag_dof_u = true;
+    _need_matrix_tag_dof_u[tag] = true;
 
     if (_sys.hasMatrix(tag) && tag < _matrix_tags_dof_u.size())
       return _matrix_tags_dof_u[tag];
@@ -1571,35 +1572,30 @@ MooseVariableFE<OutputType>::computeNodalValues()
     _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
     _nodal_value = _dof_values[0];
 
-    if (_need_vector_tag_dof_u)
+    TagID tag = 0;
+    for (auto & dof_u : _vector_tags_dof_u)
     {
-      TagID tag = 0;
-      for (auto & dof_u : _vector_tags_dof_u)
+      if (_need_vector_tag_dof_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
       {
-        if (_sys.hasVector(tag))
-        {
-          dof_u.resize(n);
-          auto & vec = _sys.getVector(tag);
-          vec.get(_dof_indices, &dof_u[0]);
+        dof_u.resize(n);
+        auto & vec = _sys.getVector(tag);
+        vec.get(_dof_indices, &dof_u[0]);
         }
         tag++;
-      }
     }
 
-    if (_need_matrix_tag_dof_u)
+    tag = 0;
+    for (auto & dof_u : _matrix_tags_dof_u)
     {
-      TagID tag = 0;
-      for (auto & dof_u : _matrix_tags_dof_u)
+      if (_need_matrix_tag_dof_u[tag] && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag) &&
+          _sys.getMatrix(tag).closed())
       {
-        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
-        {
-          dof_u.resize(n);
-          auto & mat = _sys.getMatrix(tag);
-          for (unsigned i = 0; i < _dof_indices.size(); i++)
-            dof_u[i] = mat(_dof_indices[i], _dof_indices[i]);
-        }
-        tag++;
+        dof_u.resize(n);
+        auto & mat = _sys.getMatrix(tag);
+        for (unsigned i = 0; i < _dof_indices.size(); i++)
+          dof_u[i] = mat(_dof_indices[i], _dof_indices[i]);
       }
+      tag++;
     }
 
     if (_need_dof_values_previous_nl)

@@ -671,8 +671,8 @@ protected:
   bool _need_dof_values_dot_neighbor;
   bool _need_dof_du_dot_du_neighbor;
 
-  bool _need_vector_tag_dof_u;
-  bool _need_matrix_tag_dof_u;
+  std::vector<bool> _need_vector_tag_dof_u;
+  std::vector<bool> _need_matrix_tag_dof_u;
 
   /// Normals at QPs on faces
   const MooseArray<Point> & _normals;
