@@ -11,6 +11,7 @@
 #define GENERATEDMESHGENERATOR_H
 
 #include "MeshGenerator.h"
+#include "MooseEnum.h"
 
 // Forward declarations
 class GeneratedMeshGenerator;
