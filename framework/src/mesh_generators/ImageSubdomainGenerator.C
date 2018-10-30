@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ImageSubdomainGenerator.h"
-#include "CastUniquePointer"
+#include "CastUniquePointer.h"
 
 // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 #include <cmath>
