@@ -30,13 +30,13 @@ class AdvectiveFluxCalculator : public ElementLoopUserObject
 public:
   AdvectiveFluxCalculator(const InputParameters & parameters);
 
-  /// Create the _nodes_to_elem_map, if needed
+  /// Size _kij, if needed
   virtual void timestepSetup() override;
 
-  /// Call ElementLoopUserObject::meshChanged() and then recreate the _nodes_to_elem_map
+  /// Call ElementLoopUserObject::meshChanged() and clear _kij
   virtual void meshChanged() override;
 
-  /// Create a zeroed _kij
+  /// Zeroes _kij and record u at the nodes into _u_at_nodal_ids
   virtual void pre() override;
 
   /// Compute contributions to _kij from the current element
@@ -44,23 +44,23 @@ public:
 
   /**
    * Returns the value of R_{i}^{+}, Eqn (49) of KT
-   * @param node_i global node number
+   * @param node_i nodal id
    */
-  Real rPlus(const Node & node_i) const;
+  Real rPlus(dof_id_type node_i) const;
 
   /**
    * Returns the value of R_{i}^{-}, Eqn (49) of KT
-   * @param node_i global node number
+   * @param node_i nodal id
    */
-  Real rMinus(const Node & node_i) const;
+  Real rMinus(dof_id_type node_i) const;
 
   /**
    * Returns the value of k_ij as computed by KT Eqns (18)-(20).
-   * @param node_i i^th node
-   * @param node_j j^th node
+   * @param node_i id of i^th node
+   * @param node_j id of j^th node
    * @return k_ij of KT
    */
-  Real getKij(const Node & node_i, const Node & node_j) const;
+  Real getKij(dof_id_type node_i, dof_id_type node_j) const;
 
   /**
    * flux limiter, L, on Page 135 of Kuzmin and Turek
@@ -89,11 +89,11 @@ protected:
    */
   const enum class FluxLimiterTypeEnum { MinMod, VanLeer, MC, superbee, None } _flux_limiter_type;
 
-  /// The data structure used to find neighboring elements given a node ID
-  std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
-
   /// Kuzmin-Turek K_ij matrix.
-  std::map<Node, std::map<Node, Real>> _kij;
+  std::map<dof_id_type, std::map<dof_id_type, Real>> _kij;
+
+  /// For an pre-allocated K_ij, zero all its entries
+  void zeroKij();
 
   enum class PQPlusMinusEnum
   {
@@ -106,11 +106,12 @@ protected:
   /**
    * Returns the value of P_{i}^{+}, P_{i}^{-}, Q_{i}^{+} or Q_{i}^{-} (depending on pq_plus_minus)
    * which are defined in Eqns (47) and (48) of KT
-   * @param node_i global node number
+   * @param node_i nodal id
    * @param pq_plus_minus indicates whether P_{i}^{+}, P_{i}^{-}, Q_{i}^{+} or Q_{i}^{-} should be
    * returned
    */
-  Real PQPlusMinus(const Node & node_i, const PQPlusMinusEnum pq_plus_minus) const;
+  Real PQPlusMinus(dof_id_type node_i, const PQPlusMinusEnum pq_plus_minus) const;
+
 };
 
 #endif // ADVECTIVEFLUXCALCULATOR_H

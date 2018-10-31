@@ -72,7 +72,7 @@ FluxLimitedTVDAdvection::tvd()
   {
     kk[i].assign(num_nodes, 0.0);
     for (unsigned j = 0; j < num_nodes; ++j)
-      kk[i][j] = _fluo.getKij(*_current_elem->node_ptr(i), *_current_elem->node_ptr(j));
+      kk[i][j] = _fluo.getKij(_current_elem->node_id(i), _current_elem->node_id(j));
   }
 
   // Calculate KuzminTurek D matrix
@@ -106,8 +106,8 @@ FluxLimitedTVDAdvection::tvd()
   std::vector<Real> rMinus(num_nodes);
   for (unsigned i = 0; i < num_nodes; ++i)
   {
-    rPlus[i] = _fluo.rPlus(*_current_elem->node_ptr(i));
-    rMinus[i] = _fluo.rMinus(*_current_elem->node_ptr(i));
+    rPlus[i] = _fluo.rPlus(_current_elem->node_id(i));
+    rMinus[i] = _fluo.rMinus(_current_elem->node_id(i));
   }
 
   // Calculate KuzminTurek f^{a} matrix
@@ -144,5 +144,4 @@ FluxLimitedTVDAdvection::tvd()
     for (unsigned j = 0; j < num_nodes; ++j)
       // negative sign because residual = -Lu (KT equation (19))
       _flux_out(i) -= ll[i][j] * _u_nodal[j] + fa[i][j];
-  return;
 }

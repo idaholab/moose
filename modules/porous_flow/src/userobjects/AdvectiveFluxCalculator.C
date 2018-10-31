@@ -40,7 +40,7 @@ AdvectiveFluxCalculator::AdvectiveFluxCalculator(const InputParameters & paramet
     _phi(_assembly.fePhi<Real>(_u_nodal->feType())),
     _grad_phi(_assembly.feGradPhi<Real>(_u_nodal->feType())),
     _flux_limiter_type(getParam<MooseEnum>("flux_limiter_type").getEnum<FluxLimiterTypeEnum>()),
-    _nodes_to_elem_map(0)
+    _kij({})
 {
   // TODO: test this
   if (!_execute_enum.contains(EXEC_TIMESTEP_BEGIN) || !_execute_enum.contains(EXEC_NONLINEAR))
@@ -51,27 +51,49 @@ AdvectiveFluxCalculator::AdvectiveFluxCalculator(const InputParameters & paramet
 void
 AdvectiveFluxCalculator::timestepSetup()
 {
-  if (_nodes_to_elem_map.size() == 0)
+  if (_kij.size() == 0)
   {
-    // QUERY: We don't want to recompute the neighboring nodes every nonlinear iteration.  We
+    // Allocate _kij appropriately
+    //
+    // NOTE: We don't want to recompute the neighboring nodes every nonlinear iteration.  We
     // only need to do that at the beginning and when the mesh has changed because of adaptivity
-    // (and anything else i haven't thought about?)
+    // QUERY: (and anything else i haven't thought about?)
     // QUERY: does this properly account for multiple processors?
     // QUERY: or do we want to use _mesh.nodeToElemMap() ?   (if so, then
     // MeshTools::find_nodal_neighbors can't be used?) QUERY: threading?
-    _nodes_to_elem_map.clear();
+ 
+    std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
     MeshTools::build_nodes_to_elem_map(_mesh, _nodes_to_elem_map);
+
+    for (const auto & node_i : _mesh.getMesh().node_ptr_range())
+    {
+      std::map<dof_id_type, Real> nodal_flux = {};
+      std::vector<const Node *> neighbors;
+      MeshTools::find_nodal_neighbors(_mesh, *node_i, _nodes_to_elem_map, neighbors);
+      for (const auto & n : neighbors)
+        nodal_flux.emplace(n->id(), 0.0);
+      nodal_flux.emplace(node_i->id(), 0.0); // include node_i - node_i connection
+      _kij.emplace(node_i->id(), nodal_flux);
+    }
   }
 }
+
+void
+AdvectiveFluxCalculator::zeroKij()
+{
+  for (auto & nodes : _kij)
+    for (auto & neighbors: nodes.second)
+      neighbors.second = 0.0;
+}
+
 
 void
 AdvectiveFluxCalculator::meshChanged()
 {
   ElementLoopUserObject::meshChanged();
 
-  // Rebuild the _nodes_to_elem_map when adaptivity has caused a changed
-  _nodes_to_elem_map.clear();
-  MeshTools::build_nodes_to_elem_map(_mesh, _nodes_to_elem_map);
+  // Signal that _kij needs to be rebuilt
+  _kij.clear();  // does this destroy the inner std::maps too, or is a mem leak?
 }
 
 /*
@@ -95,7 +117,7 @@ AdvectiveFluxCalculator::val_at_node(const Node & node) const
 */
 
 Real
-AdvectiveFluxCalculator::rPlus(const Node & node_i) const
+AdvectiveFluxCalculator::rPlus(dof_id_type node_i) const
 {
   if (_flux_limiter_type == FluxLimiterTypeEnum::None)
     return 0.0;
@@ -109,7 +131,7 @@ AdvectiveFluxCalculator::rPlus(const Node & node_i) const
 }
 
 Real
-AdvectiveFluxCalculator::rMinus(const Node & node_i) const
+AdvectiveFluxCalculator::rMinus(dof_id_type node_i) const
 {
   if (_flux_limiter_type == FluxLimiterTypeEnum::None)
     return 0.0;
@@ -152,21 +174,7 @@ AdvectiveFluxCalculator::limitFlux(Real a, Real b) const
 void
 AdvectiveFluxCalculator::pre()
 {
-  // Following algorithm sets _kij to zero for all nodes we can see
-
-  _kij = {};
-  // QUERY:: does the following loop run through nodes on this processor only (+ ghosted ones?) or
-  // all nodes?  We only want nodes on this processor
-  for (const auto & node_i : _mesh.getMesh().node_ptr_range())
-  {
-    std::map<Node, Real> nodal_flux = {};
-    std::vector<const Node *> neighbors;
-    MeshTools::find_nodal_neighbors(_mesh, *node_i, _nodes_to_elem_map, neighbors);
-    for (const auto & n : neighbors)
-      nodal_flux.emplace(*n, 0.0);
-    nodal_flux.emplace(*node_i, 0.0); // include node_i - node_i connection
-    _kij.emplace(*node_i, nodal_flux);
-  }
+  zeroKij();
 }
 
 void
@@ -179,10 +187,10 @@ AdvectiveFluxCalculator::computeElement()
   /// compute _kij contributions from this element
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
-    const Node & node_i = _current_elem->node_ref(i);
+    const dof_id_type node_i = _current_elem->node_id(i);
     for (unsigned j = 0; j < _current_elem->n_nodes(); ++j)
     {
-      const Node & node_j = _current_elem->node_ref(j);
+      const dof_id_type node_j = _current_elem->node_id(j);
       for (unsigned qp = 0; qp < _qrule->n_points(); ++qp)
         // KT Eqn (20)
         _kij[node_i][node_j] +=
@@ -192,48 +200,56 @@ AdvectiveFluxCalculator::computeElement()
 }
 
 Real
-AdvectiveFluxCalculator::getKij(const Node & node_i, const Node & node_j) const
+AdvectiveFluxCalculator::getKij(dof_id_type node_i, dof_id_type node_j) const
 {
   const auto & row_find = _kij.find(node_i);
   mooseAssert(row_find != _kij.end(),
               "AdvectiveFluxCalculator UserObject " << name() << " Kij does not contain node "
-                                                    << node_i.unique_id());
-  const std::map<Node, Real> & kij_row = row_find->second;
+                                                    << node_i);
+  const std::map<dof_id_type, Real> & kij_row = row_find->second;
   const auto & entry_find = kij_row.find(node_j);
   mooseAssert(entry_find != kij_row.end(),
               "AdvectiveFluxCalculator UserObject "
-                  << name() << " Kij on row " << node_i.unique_id() << " does not contain node "
-                  << node_j.unique_id());
+                  << name() << " Kij on row " << node_i << " does not contain node "
+                  << node_j);
 
   return entry_find->second;
 }
 
 Real
-AdvectiveFluxCalculator::PQPlusMinus(const Node & node_i, const PQPlusMinusEnum pq_plus_minus) const
+AdvectiveFluxCalculator::PQPlusMinus(dof_id_type node_i, const PQPlusMinusEnum pq_plus_minus) const
 {
-  const Real u_i = _u_nodal->getNodalValue(node_i);
+  // Find the value of u at node_i
+  const Real u_i = _u_nodal->getNodalValue(_mesh.getMesh().node_ref(node_i));
 
   Real result = 0.0;
 
   // Sum over all nodes connected with node_i.
-  std::vector<const Node *> neighbor_nodes;
-  MeshTools::find_nodal_neighbors(_mesh, node_i, _nodes_to_elem_map, neighbor_nodes);
-  for (const auto & node_j : neighbor_nodes)
+  // These nodes are found in _kij[node_i]
+  const auto & row_find = _kij.find(node_i);
+  mooseAssert(row_find != _kij.end(),
+              "AdvectiveFluxCalculator UserObject " << name() << " Kij does not contain node "
+                                                    << node_i);
+  for (const auto & node_j_and_real : row_find->second)
   {
-    const Real u_j = _u_nodal->getNodalValue(*node_j);
+    // Find the value of u at node_j
+    const dof_id_type node_j = node_j_and_real.first;
+    const Real u_j = _u_nodal->getNodalValue(_mesh.getMesh().node_ref(node_j));
+
+    // Evaluate the i-j contribution to the result
     switch (pq_plus_minus)
     {
       case PQPlusMinusEnum::PPlus:
-        result += std::min(0.0, getKij(node_i, *node_j)) * std::min(0.0, u_j - u_i);
+        result += std::min(0.0, getKij(node_i, node_j)) * std::min(0.0, u_j - u_i);
         break;
       case PQPlusMinusEnum::PMinus:
-        result += std::min(0.0, getKij(node_i, *node_j)) * std::max(0.0, u_j - u_i);
+        result += std::min(0.0, getKij(node_i, node_j)) * std::max(0.0, u_j - u_i);
         break;
       case PQPlusMinusEnum::QPlus:
-        result += std::max(0.0, getKij(node_i, *node_j)) * std::max(0.0, u_j - u_i);
+        result += std::max(0.0, getKij(node_i, node_j)) * std::max(0.0, u_j - u_i);
         break;
       case PQPlusMinusEnum::QMinus:
-        result += std::max(0.0, getKij(node_i, *node_j)) * std::min(0.0, u_j - u_i);
+        result += std::max(0.0, getKij(node_i, node_j)) * std::min(0.0, u_j - u_i);
         break;
     }
   }
