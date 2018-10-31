@@ -20,7 +20,7 @@ InputParameters validParams<AuxScalarKernel>();
 
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to
- * the current AuxVariable. TagVectorAux returns the coupled nodal value.
+ * the current AuxVariable. ScalarTagVectorAux returns the coupled value.
  */
 class ScalarTagVectorAux : public AuxScalarKernel
 {

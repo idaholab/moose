@@ -21,7 +21,7 @@ validParams<ScalarTagVectorAux>()
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
 
-  params.addClassDescription("Couple a tag vector, and return its nodal value");
+  params.addClassDescription("Couple a tag vector, and return its value");
   return params;
 }
 

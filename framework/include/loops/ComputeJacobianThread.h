@@ -61,7 +61,7 @@ protected:
   // Reference to interface kernel storage structure
   MooseObjectTagWarehouse<InterfaceKernel> & _interface_kernels;
 
-  MooseObjectWarehouse<InterfaceKernel> * _if_warehouse;
+  MooseObjectWarehouse<InterfaceKernel> * _ik_warehouse;
 
   // Reference to Kernel storage structure
   MooseObjectTagWarehouse<KernelBase> & _kernels;

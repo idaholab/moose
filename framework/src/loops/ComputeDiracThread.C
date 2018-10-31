@@ -70,8 +70,7 @@ ComputeDiracThread::subdomainChanged()
   // we take all kernels
   if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
     _dirac_warehouse = &_dirac_kernels;
-  // If we have one tag only,
-  // We call tag based storage
+  // If we have one tag only,  We call tag based storage
   else if (_tags.size() == 1)
     _dirac_warehouse = _is_jacobian
                            ? &(_dirac_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid))

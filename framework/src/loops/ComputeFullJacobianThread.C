@@ -239,13 +239,13 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 void
 ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
 {
-  if (_if_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
+  if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
     const auto & ce = _fe_problem.couplingEntries(_tid);
     for (const auto & it : ce)
     {
       const std::vector<std::shared_ptr<InterfaceKernel>> & int_ks =
-          _if_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
+          _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
       {
         if (!interface_kernel->isImplicit())
