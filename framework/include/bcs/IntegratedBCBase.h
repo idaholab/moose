@@ -92,12 +92,6 @@ protected:
   /// i-th, j-th index for enumerating test and shape functions
   unsigned int _i, _j;
 
-  /// Holds residual entries as their accumulated by this Kernel
-  DenseVector<Number> _local_re;
-
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseMatrix<Number> _local_ke;
-
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
   std::vector<MooseVariableFEBase *> _save_in;

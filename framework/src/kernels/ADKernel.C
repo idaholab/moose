@@ -87,15 +87,13 @@ template <ComputeStage compute_stage>
 void
 ADKernel<compute_stage>::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -115,9 +113,7 @@ template <ComputeStage compute_stage>
 void
 ADKernel<compute_stage>::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
 
@@ -132,11 +128,11 @@ ADKernel<compute_stage>::computeJacobian()
     }
   }
 
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = ke.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
@@ -165,7 +161,10 @@ ADKernel<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
   {
     size_t ad_offset = jvar_num * _sys.getMaxVarNDofsPerElem();
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+    prepareMatrixTag(_assembly, _var.number(), jvar_num);
+
+    if (_local_ke.m() != _test.size() || _local_ke.n() != jvar.phiSize())
+      return;
 
     for (_i = 0; _i < _test.size(); _i++)
     {
@@ -175,9 +174,11 @@ ADKernel<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
             computeQpResidual(); // This will also compute the derivative with respect to all dofs
 
         for (_j = 0; _j < jvar.phiSize(); _j++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
       }
     }
+
+    accumulateTaggedLocalMatrix();
   }
 }
 

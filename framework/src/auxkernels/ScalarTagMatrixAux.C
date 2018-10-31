@@ -7,32 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TagMatrixAux.h"
+#include "ScalarTagMatrixAux.h"
 
-registerMooseObject("MooseApp", TagMatrixAux);
+registerMooseObject("MooseApp", ScalarTagMatrixAux);
 
 template <>
 InputParameters
-validParams<TagMatrixAux>()
+validParams<ScalarTagMatrixAux>()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = validParams<AuxScalarKernel>();
+
   params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
 
-  params.addClassDescription("Couple the diag of a tag matrix, and return its nodal value");
+  params.addClassDescription("Couple a tag matrix, and return its nodal value");
   return params;
 }
 
-TagMatrixAux::TagMatrixAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
+ScalarTagMatrixAux::ScalarTagMatrixAux(const InputParameters & parameters)
+  : AuxScalarKernel(parameters),
     _tag_id(_subproblem.getMatrixTagID(getParam<std::string>("matrix_tag"))),
-    _v(coupledMatrixTagValue("v", _tag_id))
+    _v(coupledMatrixTagScalarValue("v", _tag_id))
 {
 }
 
 Real
-TagMatrixAux::computeValue()
+ScalarTagMatrixAux::computeValue()
 {
-  return _v[_qp];
+  return _v[0];
 }
