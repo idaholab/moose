@@ -76,7 +76,8 @@ MeshSideSetGenerator::generate()
     auto side_id = std::get<1>(t);
     auto bc_id = std::get<2>(t);
 
-    std::unique_ptr<BndElement> bndElem = libmesh_make_unique<BndElement>(mesh->elem_ptr(elem_id), side_id, bc_id);
+    std::unique_ptr<BndElement> bndElem =
+        libmesh_make_unique<BndElement>(mesh->elem_ptr(elem_id), side_id, bc_id);
     bnd_elems.push_back(std::move(bndElem));
     bnd_elem_ids[bc_id].insert(elem_id);
   }
