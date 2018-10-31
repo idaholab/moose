@@ -67,7 +67,7 @@ MeshSideSetGenerator::generate()
   // Equivalent to MooseMesh::buildBndElemList()
   auto bc_tuples = boundary_info.build_active_side_list();
   int n = bc_tuples.size();
-  std::vector<BndElement *> bnd_elems;
+  std::vector<std::unique_ptr<BndElement>> bnd_elems;
   std::map<boundary_id_type, std::set<dof_id_type>> bnd_elem_ids;
   bnd_elems.reserve(n);
   for (const auto & t : bc_tuples)
@@ -76,7 +76,8 @@ MeshSideSetGenerator::generate()
     auto side_id = std::get<1>(t);
     auto bc_id = std::get<2>(t);
 
-    bnd_elems.push_back(new BndElement(mesh->elem_ptr(elem_id), side_id, bc_id));
+    std::unique_ptr<BndElement> bndElem = libmesh_make_unique<BndElement>(mesh->elem_ptr(elem_id), side_id, bc_id);
+    bnd_elems.push_back(std::move(bndElem));
     bnd_elem_ids[bc_id].insert(elem_id);
   }
 
