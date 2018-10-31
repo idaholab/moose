@@ -1,26 +1,36 @@
 [Tests]
+  issues = '#9669'
+  design = '/tagging.md'
   [./testtagvector]
     type = 'Exodiff'
     input = '2d_diffusion_tag_vector.i'
     exodiff = 'tag_vector_out.e'
+
+    requirement = 'tagging system shall be able to have vector tags'
   [../]
 
   [./testtagmatrix]
     type = 'Exodiff'
     input = '2d_diffusion_tag_matrix.i'
     exodiff = 'tag_matrix_out.e'
+
+    requirement = 'tagging system shall be able to have matrix tags'
   [../]
 
   [./test_tag_two_vectors]
     type = 'Exodiff'
     input = '2d_diffusion_vector_tag_test.i'
     exodiff = 'vector_tag_test_out.e'
+
+    requirement = 'tagging system shall be able to have more than one vector tags'
   [../]
 
   [./test_tag_two_matrices]
     type = 'Exodiff'
     input = '2d_diffusion_matrix_tag_test.i'
     exodiff = 'matrix_tag_test_out.e'
+
+    requirement = 'tagging system shall be able to have more than one matrix tags'
   [../]
 
   [./test_tag_scalar_kernels]
@@ -33,8 +43,6 @@
     max_parallel = 1
 
     requirement = 'tagging system shall support scalar kernels'
-    issues = '#9669'
-    design = '/tagging.md'
   [../]
 
   [./test_tag_DG_kernels]
@@ -43,8 +51,6 @@
     exodiff = '2d_diffusion_dg_tag_out.e'
 
     requirement = 'tagging system shall support DG kernels'
-    issues = '#9669'
-    design = '/tagging.md'
   [../]
 
   [./test_tag_integratedBCs]
@@ -53,8 +59,6 @@
     exodiff = 'tag_neumann_out.e'
 
     requirement = 'tagging system shall support integratedBCs'
-    issues = '#9669'
-    design = '/tagging.md'
   [../]
 
   [./test_tag_interface_kernels]
@@ -63,8 +67,6 @@
     exodiff = 'tag_interface_kernels_out.e'
 
     requirement = 'tagging system shall support interface kernels'
-    issues = '#9669'
-    design = '/tagging.md'
   [../]
 
   [./test_tag_dirac_kernels]
@@ -73,8 +75,6 @@
     exodiff = 'tag_dirac_kernels_out.e'
 
     requirement = 'tagging system shall support Dirac kernels'
-    issues = '#9669'
-    design = '/tagging.md'
   [../]
 
   [./test_tag_nodal_kernels]
@@ -83,7 +83,5 @@
     exodiff = 'tag_nodal_kernels_out.e'
 
     requirement = 'tagging system shall support nodal kernels'
-    issues = '#9669'
-    design = '/tagging.md'
   [../]
 []
