@@ -16,3 +16,7 @@ Simply put, your HPC Administrator will provide you with instructions on how to 
 !include getting_started/installation/create_an_app.md
 
 !include getting_started/installation/update_moose.md
+
+!include getting_started/installation/post_moose_install.md
+
+!include getting_started/installation/installation_troubleshooting.md
