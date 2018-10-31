@@ -162,7 +162,7 @@ typedef MooseArray<std::vector<VectorValue<Real>>> VectorVariableTestCurl;
 /*
  * DualNumber naming
  */
-#define AD_MAX_DOFS_PER_ELEM 100
+#define AD_MAX_DOFS_PER_ELEM 50
 using MetaPhysicL::DualNumber;
 using MetaPhysicL::NumberArray;
 
