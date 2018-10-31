@@ -39,8 +39,10 @@ AdvectiveFluxCalculator::AdvectiveFluxCalculator(const InputParameters & paramet
     _u_var_num(coupled("u", 0)),
     _phi(_assembly.fePhi<Real>(_u_nodal->feType())),
     _grad_phi(_assembly.feGradPhi<Real>(_u_nodal->feType())),
+    _init_k_and_compute_valence(true),
     _flux_limiter_type(getParam<MooseEnum>("flux_limiter_type").getEnum<FluxLimiterTypeEnum>()),
-    _kij({})
+    _kij({}),
+    _valence({})
 {
   // TODO: test this
   if (!_execute_enum.contains(EXEC_TIMESTEP_BEGIN) || !_execute_enum.contains(EXEC_NONLINEAR))
@@ -51,8 +53,15 @@ AdvectiveFluxCalculator::AdvectiveFluxCalculator(const InputParameters & paramet
 void
 AdvectiveFluxCalculator::timestepSetup()
 {
-  if (_kij.size() == 0)
+  if (_init_k_and_compute_valence)
   {
+    // -----------------------------------
+    //
+    // TODO: put the stuff below in the element loop that computes _valence
+    //
+    // -----------------------------------
+
+    _kij.clear();  // does this destroy the inner std::maps too, or is a mem leak?
     // Allocate _kij appropriately
     //
     // NOTE: We don't want to recompute the neighboring nodes every nonlinear iteration.  We
@@ -76,6 +85,37 @@ AdvectiveFluxCalculator::timestepSetup()
       _kij.emplace(node_i->id(), nodal_flux);
     }
   }
+
+  if (_init_k_and_compute_valence)
+  {
+    _valence.clear();
+    // Build _valence
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    for (ConstElemRange::const_iterator el = elem_range.begin(); el != elem_range.end(); ++el)
+    {
+      const Elem * elem = *el;
+      if (this->hasBlocks(elem->subdomain_id()))
+      {
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
+        {
+          const dof_id_type node_i = elem->node_id(i);
+          if (_valence.find(node_i) == _valence.end())
+          {
+            // haven't yet encountered node_i: initialise it with zeroes
+            std::map<dof_id_type, unsigned> zero_row = {};
+            for (unsigned j = 0; j < elem->n_nodes(); ++j)
+              zero_row.emplace(elem->node_id(j), 0);
+            _valence.emplace(node_i, zero_row);
+          }
+          // increment the valence
+          for (unsigned j = 0; j < elem->n_nodes(); ++j)
+           _valence[node_i][elem->node_id(j)] += 1;
+        }
+      }
+    }
+    _init_k_and_compute_valence = false;
+  }
+
 }
 
 void
@@ -92,8 +132,8 @@ AdvectiveFluxCalculator::meshChanged()
 {
   ElementLoopUserObject::meshChanged();
 
-  // Signal that _kij needs to be rebuilt
-  _kij.clear();  // does this destroy the inner std::maps too, or is a mem leak?
+  // Signal that _kij and _valence need to be rebuilt
+  _init_k_and_compute_valence = true;
 }
 
 /*
@@ -211,6 +251,23 @@ AdvectiveFluxCalculator::getKij(dof_id_type node_i, dof_id_type node_j) const
   mooseAssert(entry_find != kij_row.end(),
               "AdvectiveFluxCalculator UserObject "
                   << name() << " Kij on row " << node_i << " does not contain node "
+                  << node_j);
+
+  return entry_find->second;
+}
+
+unsigned
+AdvectiveFluxCalculator::getValence(dof_id_type node_i, dof_id_type node_j) const
+{
+  const auto & row_find = _valence.find(node_i);
+  mooseAssert(row_find != _valence.end(),
+              "AdvectiveFluxCalculator UserObject " << name() << " Valence does not contain node "
+                                                    << node_i);
+  const std::map<dof_id_type, unsigned> & valence_row = row_find->second;
+  const auto & entry_find = valence_row.find(node_j);
+  mooseAssert(entry_find != valence_row.end(),
+              "AdvectiveFluxCalculator UserObject "
+                  << name() << " Valence on row " << node_i << " does not contain node "
                   << node_j);
 
   return entry_find->second;

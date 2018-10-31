@@ -37,6 +37,7 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual void computeResidual() override;
+  virtual void computeJacobian() override;
 
   /// Nodal value of u
   const VariableValue & _u_nodal;
@@ -47,6 +48,12 @@ protected:
    * (I could have used _local_re, but the name _flux_out is more descriptive for now)
    */
   DenseVector<Real> _flux_out;
+
+  /**
+   * _dflux_out_dvar(i, j) = d(_flux_out[i])/d(_u_nodal[j]).  Used for Jacobian computations
+   * The present implementation assumes that Kij, R+ and R- are independent of u
+   */
+  DenseMatrix<Real> _dflux_out_dvar;
 
   /// Do Kuzmin-Turek algorithm
   void tvd();

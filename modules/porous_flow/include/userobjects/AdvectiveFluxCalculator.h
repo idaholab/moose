@@ -63,6 +63,15 @@ public:
   Real getKij(dof_id_type node_i, dof_id_type node_j) const;
 
   /**
+   * Returns the valence of the i-j edge.
+   * Valence is the number of times the edge is encountered in a loop over elements seen by this processor.
+   * @param node_i id of i^th node
+   * @param node_j id of j^th node
+   * @return valence of the i-j edge
+   */
+  unsigned getValence(dof_id_type node_i, dof_id_type node_j) const;
+
+  /**
    * flux limiter, L, on Page 135 of Kuzmin and Turek
    */
   Real limitFlux(Real a, Real b) const;
@@ -83,6 +92,9 @@ protected:
   /// grad(Kuzmin-Turek shape function)
   const VariablePhiGradient & _grad_phi;
 
+  /// whether _kij needs to be sized appropriately and valence computed
+  bool _init_k_and_compute_valence;
+
   /**
    * Determines Flux Limiter type (Page 135 of Kuzmin and Turek)
    * "None" means that limitFlux=0 always, which implies zero antidiffusion will be added
@@ -94,6 +106,10 @@ protected:
 
   /// For an pre-allocated K_ij, zero all its entries
   void zeroKij();
+
+  /// Number of times, in a loop over elements, that the i-j edge is encountered
+  std::map<dof_id_type, std::map<dof_id_type, unsigned>> _valence;
+
 
   enum class PQPlusMinusEnum
   {
