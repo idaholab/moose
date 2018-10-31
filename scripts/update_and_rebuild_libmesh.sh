@@ -126,7 +126,7 @@ if [ -z "$go_fast" ]; then
                --with-thread-model=openmp \
                --disable-maintainer-mode \
                --enable-petsc-hypre-required \
-               --enable-metaphysicl \
+               --enable-metaphysicl-required \
                $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
 else
   # The build directory must already exist: you can't do --fast for
