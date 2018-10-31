@@ -7,5 +7,6 @@
     requirement = 'MOOSE shall be able to use libmesh mesh generation tools.'
     design = 'mesh_generators/GeneratedMeshGenerator.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []

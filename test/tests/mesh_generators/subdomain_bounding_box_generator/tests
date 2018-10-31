@@ -7,6 +7,7 @@
     requirement = 'MOOSE shall be able to use the BoundingBox class.'
     design = 'mesh_generators/SubdomainBoundingBoxGenerator.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 
   [./oriented_subdomain_bounding_box_generator_test]
@@ -17,5 +18,6 @@
     requirement = 'MOOSE shall be able to use the BoundingBox class.'
     design = 'mesh_generators/SubdomainBoundingBoxGenerator.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []

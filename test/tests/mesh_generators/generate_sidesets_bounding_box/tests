@@ -7,5 +7,6 @@
     requirement = 'MOOSE shall be able to use the BoundingBox class.'
     design = 'mesh_generators/GenerateSideSetsFromBoundingBox.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []

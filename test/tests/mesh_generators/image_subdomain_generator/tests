@@ -8,6 +8,7 @@
     requirement = 'MOOSE shall be able to read in an image.'
     design = 'mesh_generators/ImageSubdomainGenerator.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
   [./image_subdomain_generator_3d_test]
     type = 'Exodiff'
@@ -18,5 +19,6 @@
     requirement = 'MOOSE shall be able to read in an image.'
     design = 'mesh_generators/ImageSubdomainGenerator.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []

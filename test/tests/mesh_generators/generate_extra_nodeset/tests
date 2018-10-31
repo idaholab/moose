@@ -7,5 +7,6 @@
     requirement = 'MOOSE shall be able to create nodesets.'
     design = 'mesh_generators/GenerateExtraNodeset.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []

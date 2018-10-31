@@ -7,5 +7,6 @@
     requirement = 'MOOSE shall be able to read in an image.'
     design = 'mesh_generators/ImageMeshGenerator.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []

@@ -7,5 +7,6 @@
     requirement = 'MOOSE shall be able to create different subdomains.'
     design = 'mesh_generators/GenerateSubdomainID.md'
     issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []
