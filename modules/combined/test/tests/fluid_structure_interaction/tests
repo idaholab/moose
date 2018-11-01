@@ -1,0 +1,10 @@
+[Tests]
+  [./fsi]
+    type = 'Exodiff'
+    input = 'fsi_flat_channel.i'
+    exodiff = 'fsi_flat_channel_out.e'
+    design = 'syntax/NavierStokes/index.md syntax/TensorMechanics/index.md'
+    requirement = 'We shall be able to combine navier-stokes and solid-mechanics simulation capabilities to do some basic fluid-structure interaction simulations'
+    issues = '#12462'
+  [../]
+[]
