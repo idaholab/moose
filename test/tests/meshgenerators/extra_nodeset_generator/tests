@@ -1,0 +1,13 @@
+[Tests]
+  [./generate_extra_nodeset_test]
+    type = 'Exodiff'
+    input = 'generate_extra_nodeset.i'
+    cli_args = '--mesh-only'
+    exodiff = 'generate_extra_nodeset_in.e'
+    requirement = 'MOOSE shall be able to create nodesets.'
+    design = 'meshgenerators/ExtraNodesetGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]

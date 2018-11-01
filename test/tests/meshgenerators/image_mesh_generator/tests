@@ -1,0 +1,13 @@
+[Tests]
+  [./image_mesh_generator_test]
+    type = 'Exodiff'
+    input = 'image_mesh_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'image_mesh_generator_in.e'
+    requirement = 'MOOSE shall be able to read in an image.'
+    design = 'meshgenerators/ImageMeshGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]

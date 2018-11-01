@@ -1,0 +1,14 @@
+[Tests]
+  [./distributed_generated_mesh_generator_test]
+    type = 'Exodiff'
+    input = 'distributed_generated_mesh_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'distributed_generated_mesh_generator_in.e'
+    requirement = 'MOOSE shall be able to use libmesh mesh generation tools.'
+    design = 'meshgenerators/DistributedGeneratedMeshGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    deleted = 'distributed_generated_mesh_generator_test'
+  [../]
+[]
