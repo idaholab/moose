@@ -43,16 +43,6 @@ public:
   VariableValue & sln() { return _u; }
   VariableValue & slnOld() { return _u_old; }
   VariableValue & slnOlder() { return _u_older; }
-  VariableValue & vectorTagSln(TagID tag)
-  {
-    _need_vector_tag_u[tag] = true;
-    return _vector_tag_u[tag];
-  }
-  VariableValue & matrixTagSln(TagID tag)
-  {
-    _need_matrix_tag_u[tag] = true;
-    return _matrix_tag_u[tag];
-  }
 
   VariableValue & uDot() { return _u_dot; }
   VariableValue & duDotDu() { return _du_dot_du; }
@@ -79,14 +69,6 @@ protected:
   VariableValue _u_old;
   /// The older value of scalar variable
   VariableValue _u_older;
-  /// Tagged vectors
-  std::vector<VariableValue> _vector_tag_u;
-  /// Only cache data when need it
-  std::vector<bool> _need_vector_tag_u;
-  /// Tagged matrices
-  std::vector<VariableValue> _matrix_tag_u;
-  /// Only cache data when need it
-  std::vector<bool> _need_matrix_tag_u;
 
   VariableValue _u_dot;
   VariableValue _du_dot_du;

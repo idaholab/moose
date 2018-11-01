@@ -51,19 +51,13 @@ protected:
   unsigned int _num_cached;
 
   /// Reference to BC storage structures
-  MooseObjectTagWarehouse<IntegratedBCBase> & _integrated_bcs;
-
-  MooseObjectWarehouse<IntegratedBCBase> * _ibc_warehouse;
+  const MooseObjectWarehouse<IntegratedBCBase> & _integrated_bcs;
 
   /// Reference to DGKernel storage structure
-  MooseObjectTagWarehouse<DGKernel> & _dg_kernels;
-
-  MooseObjectWarehouse<DGKernel> * _dg_warehouse;
+  const MooseObjectWarehouse<DGKernel> & _dg_kernels;
 
   /// Reference to interface kernel storage structure
-  MooseObjectTagWarehouse<InterfaceKernel> & _interface_kernels;
-
-  MooseObjectWarehouse<InterfaceKernel> * _ik_warehouse;
+  const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
 
   ///@{
   /// Reference to Kernel storage structures

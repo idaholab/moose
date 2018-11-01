@@ -84,13 +84,15 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
 void
 IntegratedBC::computeResidual()
 {
-  prepareVectorTag(_assembly, _var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  _local_re.resize(re.size());
+  _local_re.zero();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  accumulateTaggedLocalResidual();
+  re += _local_re;
 
   if (_has_save_in)
   {
@@ -103,18 +105,20 @@ IntegratedBC::computeResidual()
 void
 IntegratedBC::computeJacobian()
 {
-  prepareMatrixTag(_assembly, _var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  _local_ke.resize(ke.m(), ke.n());
+  _local_ke.zero();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-  accumulateTaggedLocalMatrix();
+  ke += _local_ke;
 
   if (_has_diag_save_in)
   {
-    unsigned int rows = _local_ke.m();
+    unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
@@ -129,19 +133,17 @@ void
 IntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
-  prepareMatrixTag(_assembly, _var.number(), jvar_num);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiFaceSize(); _j++)
       {
         if (_var.number() == jvar_num)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
         else
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
       }
-
-  accumulateTaggedLocalMatrix();
 }
 
 void
@@ -149,31 +151,27 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
 {
   mooseDeprecated("The computeJacobianBlock method signature has changed. Developers, please "
                   "pass in a MooseVariableFEBase reference instead of the variable number");
-  prepareMatrixTag(_assembly, _var.number(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
       {
         if (_var.number() == jvar)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
         else
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
       }
-
-  accumulateTaggedLocalMatrix();
 }
 
 void
 IntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
 {
-  prepareMatrixTag(_assembly, _var.number(), jvar);
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jv.order(); _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-
-  accumulateTaggedLocalMatrix();
+        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
 }

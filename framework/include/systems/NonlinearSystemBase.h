@@ -523,13 +523,19 @@ public:
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
-  MooseObjectTagWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
-  MooseObjectTagWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
+  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
+  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
     return _interface_kernels;
   }
-  MooseObjectTagWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
-  MooseObjectTagWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() { return _integrated_bcs; }
+  const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() const
+  {
+    return _dirac_kernels;
+  }
+  const MooseObjectWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() const
+  {
+    return _integrated_bcs;
+  }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
     return _element_dampers;
@@ -612,9 +618,9 @@ protected:
    */
   void computeJacobianInternal(const std::set<TagID> & tags);
 
-  void computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian);
+  void computeDiracContributions(bool is_jacobian);
 
-  void computeScalarKernelsJacobians(const std::set<TagID> & tags);
+  void computeScalarKernelsJacobians();
 
   /**
    * Enforce nodal constraints
@@ -673,21 +679,23 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
-  MooseObjectTagWarehouse<DGKernel> _dg_kernels;
-  MooseObjectTagWarehouse<InterfaceKernel> _interface_kernels;
+  MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
+  MooseObjectWarehouse<ScalarKernel> _time_scalar_kernels;
+  MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
+  MooseObjectWarehouse<DGKernel> _dg_kernels;
+  MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
 
   ///@}
 
   ///@{
   /// BoundaryCondition Warhouses
-  MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
+  MooseObjectWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
-  MooseObjectTagWarehouse<DiracKernel> _dirac_kernels;
+  MooseObjectWarehouse<DiracKernel> _dirac_kernels;
 
   /// Element Dampers for each thread
   MooseObjectWarehouse<ElementDamper> _element_dampers;
@@ -699,7 +707,7 @@ protected:
   MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
   /// NodalKernels for each thread
-  MooseObjectTagWarehouse<NodalKernel> _nodal_kernels;
+  MooseObjectWarehouse<NodalKernel> _nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods

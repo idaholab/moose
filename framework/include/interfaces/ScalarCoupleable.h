@@ -95,26 +95,6 @@ protected:
   virtual VariableValue & coupledScalarValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
-   * Returns value of a scalar coupled variable
-   * @param var_name Name of coupled variable
-   * @param tag Tag ID of coupled vector ;
-   * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue for the coupled variable
-   */
-  virtual VariableValue &
-  coupledVectorTagScalarValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
-
-  /**
-   * Returns value of a scalar coupled variable
-   * @param var_name Name of coupled variable
-   * @param tag Tag ID of coupled matrix;
-   * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue for the coupled variable
-   */
-  virtual VariableValue &
-  coupledMatrixTagScalarValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
-
-  /**
    * Returns the old (previous time step) value of a scalar coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
