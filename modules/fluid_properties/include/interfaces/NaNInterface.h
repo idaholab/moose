@@ -11,21 +11,19 @@
 #define NANINTERFACE_H
 
 #include "InputParameters.h"
+#include "MooseObject.h"
 
 class NaNInterface;
-class MooseObject;
 
 template <>
 InputParameters validParams<NaNInterface>();
 
 /**
- * Interface class for getting quiet or signaling NaNs
+ * Interface class for producing errors, warnings, or just quiet NaNs
  *
- * For some objects, it is sometimes desirable to have the choice of whether
- * to use a signaling NaN or a quiet NaN. For example, for some simulations,
- * one may want to run in debug mode but not crash on a NaN from a certain
- * object. This class adds a parameter to control this behavior and an interface
- * for getting the corresponding NaN.
+ * For some objects it is desirable to continue running despite generation of
+ * NaN(s). This class provides an interface for choosing whether to throw an
+ * error, a warning, or nothing at all, just using a quiet NaN.
  */
 class NaNInterface
 {
@@ -33,13 +31,40 @@ public:
   NaNInterface(const MooseObject * moose_object);
 
 protected:
-  /// Use quiet NaNs instead of signaling NaNs?
-  const bool _use_quiet_nans;
+  enum NaNMessage
+  {
+    NAN_MESSAGE_NONE = 0,
+    NAN_MESSAGE_WARNING = 1,
+    NAN_MESSAGE_ERROR = 2
+  };
+
+  const MooseObject * _moose_object;
+
+  /// Raise mooseWarning or mooseError?
+  const enum NaNMessage _emit_on_nan;
 
   /**
-   * Returns a quiet or signaling NaN, as specified by the user
+   * Produces errors, warnings, or just quiet NaNs
    */
-  Real getNaN() const;
+  Real getNaN() const { return getNaN("A NaN was produced."); }
+
+  template <typename... Args>
+  Real getNaN(Args &&... args) const
+  {
+    switch (_emit_on_nan)
+    {
+      case (NAN_MESSAGE_WARNING):
+        mooseWarning(_moose_object->name(), ": ", std::forward<Args>(args)...);
+        break;
+      case (NAN_MESSAGE_ERROR):
+        mooseError(_moose_object->name(), ": ", std::forward<Args>(args)...);
+        break;
+      default:
+        break;
+    }
+    // return a quiet NaN
+    return std::nan("");
+  }
 };
 
 #endif /* NANINTERFACE_H */

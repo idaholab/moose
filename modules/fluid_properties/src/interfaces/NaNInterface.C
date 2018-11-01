@@ -8,40 +8,31 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NaNInterface.h"
-#include "MooseObject.h"
+#include "Conversion.h"
+#include "MooseEnum.h"
 
 template <>
 InputParameters
 validParams<NaNInterface>()
 {
+#ifdef NDEBUG
+  // in opt mode, getNaN() emits neither a warning nor an error by default
+  MooseEnum emit_on_nan("none warning error", "none");
+#else
+  // in dbg mode, getNaN() raises an error by default
+  MooseEnum emit_on_nan("none warning error", "error");
+#endif
+
   InputParameters params = emptyInputParameters();
 
-  params.addParam<bool>("use_quiet_nans", false, "Use quiet NaNs instead of signaling NaNs?");
+  params.addParam<MooseEnum>("emit_on_nan", emit_on_nan, "Raise mooseWarning or mooseError?");
 
   return params;
 }
 
 NaNInterface::NaNInterface(const MooseObject * moose_object)
-  : _use_quiet_nans(moose_object->getParam<bool>("use_quiet_nans"))
+  : _emit_on_nan(
+        moose_object->getParam<MooseEnum>("emit_on_nan").getEnum<NaNInterface::NaNMessage>())
 {
-}
-
-Real
-NaNInterface::getNaN() const
-{
-  if (_use_quiet_nans)
-    return std::nan("");
-  else
-    /*
-    It was found that a number of potentially signalling NaNs did not actually
-    signal, at least with a certain OS/hardware/compiler configuration. For
-    example, the following did not signal:
-      std::numeric_limits<Real>::signaling_NaN()
-      1 * std::numeric_limits<Real>::infinity()
-      0.0 / 0.0
-      1.0 / 0.0
-      0 * (0.0 / 0.0)
-      0 * (1.0 / 0.0)
-    */
-    return 0 * std::numeric_limits<Real>::infinity();
+  _moose_object = moose_object;
 }
