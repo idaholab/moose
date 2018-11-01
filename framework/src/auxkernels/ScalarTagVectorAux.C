@@ -7,33 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TagVectorAux.h"
+#include "ScalarTagVectorAux.h"
 
-registerMooseObject("MooseApp", TagVectorAux);
+registerMooseObject("MooseApp", ScalarTagVectorAux);
 
 template <>
 InputParameters
-validParams<TagVectorAux>()
+validParams<ScalarTagVectorAux>()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = validParams<AuxScalarKernel>();
 
   params.addParam<std::string>("vector_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
 
-  params.addClassDescription("Couple a tag vector, and return its nodal value");
+  params.addClassDescription("Couple a tag vector, and return its value");
   return params;
 }
 
-TagVectorAux::TagVectorAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
+ScalarTagVectorAux::ScalarTagVectorAux(const InputParameters & parameters)
+  : AuxScalarKernel(parameters),
     _tag_id(_subproblem.getVectorTagID(getParam<std::string>("vector_tag"))),
-    _v(coupledVectorTagValue("v", _tag_id))
+    _v(coupledVectorTagScalarValue("v", _tag_id))
 {
 }
 
 Real
-TagVectorAux::computeValue()
+ScalarTagVectorAux::computeValue()
 {
-  return _v[_qp];
+  return _v[0];
 }

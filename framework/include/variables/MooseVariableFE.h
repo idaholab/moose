@@ -242,6 +242,16 @@ public:
   // damping
   FieldVariableValue & increment() { return _increment; }
 
+  const FieldVariableValue & vectorTagValue(TagID tag)
+  {
+    _need_vector_tag_u[tag] = true;
+    return _vector_tag_u[tag];
+  }
+  const FieldVariableValue & matrixTagValue(TagID tag)
+  {
+    _need_matrix_tag_u[tag] = true;
+    return _matrix_tag_u[tag];
+  }
   const FieldVariableValue & sln() { return _u; }
   const FieldVariableValue & slnOld()
   {
@@ -661,8 +671,8 @@ protected:
   bool _need_dof_values_dot_neighbor;
   bool _need_dof_du_dot_du_neighbor;
 
-  bool _need_vector_tag_dof_u;
-  bool _need_matrix_tag_dof_u;
+  std::vector<bool> _need_vector_tag_dof_u;
+  std::vector<bool> _need_matrix_tag_dof_u;
 
   /// Normals at QPs on faces
   const MooseArray<Point> & _normals;
@@ -739,6 +749,11 @@ protected:
   const FieldVariablePhiGradient & _grad_phi_face_neighbor;
   const FieldVariablePhiSecond * _second_phi_face_neighbor;
   const FieldVariablePhiCurl * _curl_phi_face_neighbor;
+
+  std::vector<FieldVariableValue> _vector_tag_u;
+  std::vector<bool> _need_vector_tag_u;
+  std::vector<FieldVariableValue> _matrix_tag_u;
+  std::vector<bool> _need_matrix_tag_u;
 
   FieldVariableValue _u, _u_bak;
   FieldVariableValue _u_old, _u_old_bak;

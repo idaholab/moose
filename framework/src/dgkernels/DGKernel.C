@@ -33,6 +33,7 @@ validParams<DGKernel>()
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
   params += validParams<MeshChangedInterface>();
+  params += validParams<TaggingInterface>();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh",
@@ -78,6 +79,7 @@ DGKernel::DGKernel(const InputParameters & parameters)
     TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     Restartable(this, "DGKernels"),
     MeshChangedInterface(parameters),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -189,16 +191,17 @@ DGKernel::computeElemNeighResidual(Moose::DGResidualType type)
     is_elem = false;
 
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
-  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number())
-                                     : _assembly.residualBlockNeighbor(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+
+  if (is_elem)
+    prepareVectorTag(_assembly, _var.number());
+  else
+    prepareVectorTagNeighbor(_assembly, _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -229,33 +232,25 @@ DGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
   const VariableTestValue & loc_phi =
       (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx =
-      type == Moose::ElementElement
-          ? _assembly.jacobianBlock(_var.number(), _var.number())
-          : type == Moose::ElementNeighbor
-                ? _assembly.jacobianBlockNeighbor(
-                      Moose::ElementNeighbor, _var.number(), _var.number())
-                : type == Moose::NeighborElement
-                      ? _assembly.jacobianBlockNeighbor(
-                            Moose::NeighborElement, _var.number(), _var.number())
-                      : _assembly.jacobianBlockNeighbor(
-                            Moose::NeighborNeighbor, _var.number(), _var.number());
-  _local_kxx.resize(Kxx.m(), Kxx.n());
-  _local_kxx.zero();
+
+  if (type == Moose::ElementElement)
+    prepareMatrixTag(_assembly, _var.number(), _var.number());
+  else
+    prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), type);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
-        _local_kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
 
-  Kxx += _local_kxx;
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor))
   {
-    unsigned int rows = _local_kxx.m();
+    unsigned int rows = _local_ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_kxx(i, i);
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _diag_save_in)
@@ -290,20 +285,18 @@ DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned i
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
   const VariableTestValue & loc_phi =
       (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx =
-      type == Moose::ElementElement
-          ? _assembly.jacobianBlock(_var.number(), jvar)
-          : type == Moose::ElementNeighbor
-                ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar)
-                : type == Moose::NeighborElement
-                      ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), jvar)
-                      : _assembly.jacobianBlockNeighbor(
-                            Moose::NeighborNeighbor, _var.number(), jvar);
+
+  if (type == Moose::ElementElement)
+    prepareMatrixTag(_assembly, _var.number(), jvar);
+  else
+    prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, type);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       for (_j = 0; _j < loc_phi.size(); _j++)
-        Kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jvar);
+
+  accumulateTaggedLocalMatrix();
 }
 
 void
