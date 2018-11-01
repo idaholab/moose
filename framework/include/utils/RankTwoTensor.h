@@ -431,6 +431,7 @@ private:
 
   template <class T>
   friend void dataLoad(std::istream &, T &, void *);
+
   friend class RankFourTensor;
   friend class RankThreeTensor;
 };
