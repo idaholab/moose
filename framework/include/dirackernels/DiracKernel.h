@@ -25,7 +25,6 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "MooseVariableInterface.h"
-#include "TaggingInterface.h"
 
 // Forward Declarations
 class Assembly;
@@ -54,8 +53,7 @@ class DiracKernel : public MooseObject,
                     public PostprocessorInterface,
                     protected GeometricSearchInterface,
                     public Restartable,
-                    public MeshChangedInterface,
-                    public TaggingInterface
+                    public MeshChangedInterface
 {
 public:
   DiracKernel(const InputParameters & parameters);

@@ -22,7 +22,6 @@ validParams<DiracKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<MaterialPropertyInterface>();
-  params += validParams<TaggingInterface>();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this kernel operates on");
 
@@ -64,7 +63,6 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "DiracKernels"),
     MeshChangedInterface(parameters),
-    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
@@ -97,7 +95,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
 void
 DiracKernel::computeResidual()
 {
-  prepareVectorTag(_assembly, _var.number());
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
   const std::vector<unsigned int> * multiplicities =
       _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
@@ -113,17 +111,15 @@ DiracKernel::computeResidual()
         multiplicity = (*multiplicities)[local_qp++];
 
       for (_i = 0; _i < _test.size(); _i++)
-        _local_re(_i) += multiplicity * computeQpResidual();
+        re(_i) += multiplicity * computeQpResidual();
     }
   }
-
-  accumulateTaggedLocalResidual();
 }
 
 void
 DiracKernel::computeJacobian()
 {
-  prepareMatrixTag(_assembly, _var.number(), _var.number());
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
 
   const std::vector<unsigned int> * multiplicities =
       _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
@@ -140,11 +136,9 @@ DiracKernel::computeJacobian()
 
       for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
-          _local_ke(_i, _j) += multiplicity * computeQpJacobian();
+          ke(_i, _j) += multiplicity * computeQpJacobian();
     }
   }
-
-  accumulateTaggedLocalMatrix();
 }
 
 void
@@ -156,7 +150,7 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
   }
   else
   {
-    prepareMatrixTag(_assembly, _var.number(), jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
     const std::vector<unsigned int> * multiplicities =
         _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
@@ -173,11 +167,9 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
 
         for (_i = 0; _i < _test.size(); _i++)
           for (_j = 0; _j < _phi.size(); _j++)
-            _local_ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar);
+            ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar);
       }
     }
-
-    accumulateTaggedLocalMatrix();
   }
 }
 

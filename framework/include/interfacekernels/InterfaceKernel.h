@@ -22,7 +22,6 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "TaggingInterface.h"
 
 // Forward Declarations
 class InterfaceKernel;
@@ -44,8 +43,7 @@ class InterfaceKernel : public MooseObject,
                         public NeighborMooseVariableInterface<Real>,
                         public Restartable,
                         public MeshChangedInterface,
-                        public TwoMaterialPropertyInterface,
-                        public TaggingInterface
+                        public TwoMaterialPropertyInterface
 {
 public:
   InterfaceKernel(const InputParameters & parameters);
@@ -199,7 +197,9 @@ protected:
   const VariableTestGradient & _grad_test_neighbor;
 
   /// Holds residual entries as they are accumulated by this InterfaceKernel
-  /// This variable is temporarily reserved for RattleSnake
+  DenseVector<Number> _local_re;
+
+  /// Holds residual entries as they are accumulated by this InterfaceKernel
   DenseMatrix<Number> _local_kxx;
 
   /** MultiMooseEnum specifying whether residual save-in

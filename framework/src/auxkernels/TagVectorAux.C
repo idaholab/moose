@@ -35,5 +35,8 @@ TagVectorAux::TagVectorAux(const InputParameters & parameters)
 Real
 TagVectorAux::computeValue()
 {
-  return _v[_qp];
+  if (_var.isNodal())
+    return _v[_qp];
+  else
+    mooseError(name(), " require a nodal variable");
 }

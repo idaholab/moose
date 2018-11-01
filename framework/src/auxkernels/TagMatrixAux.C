@@ -34,5 +34,8 @@ TagMatrixAux::TagMatrixAux(const InputParameters & parameters)
 Real
 TagMatrixAux::computeValue()
 {
-  return _v[_qp];
+  if (_var.isNodal())
+    return _v[_qp];
+  else
+    mooseError(name(), "require a nodal variable");
 }
