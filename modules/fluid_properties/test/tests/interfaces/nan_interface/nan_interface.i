@@ -21,7 +21,6 @@
   [./FluidProperties]
     [./fp]
       type = NaNInterfaceTestFluidProperties
-      use_quiet_nans = true
     [../]
   []
 []
