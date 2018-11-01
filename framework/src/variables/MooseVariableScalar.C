@@ -67,6 +67,8 @@ MooseVariableScalar::reinit()
   const Real & du_dot_du = _sys.duDotDu();
   auto num_vector_tags = _sys.subproblem().numVectorTags();
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
+  auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
+  auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
@@ -96,14 +98,20 @@ MooseVariableScalar::reinit()
     solution_older.get(_dof_indices, &_u_older[0]);
     u_dot.get(_dof_indices, &_u_dot[0]);
 
-    for (unsigned int tag = 0; tag < num_vector_tags; tag++)
-      if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
-        _sys.getVector(tag).get(_dof_indices, &_vector_tag_u[tag][0]);
+    if (safe_access_tagged_vectors)
+    {
+      for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+        if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
+          _sys.getVector(tag).get(_dof_indices, &_vector_tag_u[tag][0]);
+    }
 
-    for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
-      if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
-        for (std::size_t i = 0; i != n; ++i)
-          _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(_dof_indices[i], _dof_indices[i]);
+    if (safe_access_tagged_matrices)
+    {
+      for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+        if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
+          for (std::size_t i = 0; i != n; ++i)
+            _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(_dof_indices[i], _dof_indices[i]);
+    }
   }
   else
   {
@@ -120,13 +128,19 @@ MooseVariableScalar::reinit()
         solution_older.get(one_dof_index, &_u_older[i]);
         u_dot.get(one_dof_index, &_u_dot[i]);
 
-        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
-          if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
-            _sys.getVector(tag).get(one_dof_index, &_vector_tag_u[tag][i]);
+        if (safe_access_tagged_vectors)
+        {
+          for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+            if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
+              _sys.getVector(tag).get(one_dof_index, &_vector_tag_u[tag][i]);
+        }
 
-        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
-          if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
-            _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(dof_index, dof_index);
+        if (safe_access_tagged_matrices)
+        {
+          for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+            if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
+              _matrix_tag_u[tag][i] = _sys.getMatrix(tag)(dof_index, dof_index);
+        }
       }
       else
       {

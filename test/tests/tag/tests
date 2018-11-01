@@ -1,6 +1,7 @@
 [Tests]
   issues = '#9669'
   design = '/tagging.md'
+  # Matrix(i, j) does not support threading 
   [./testtagvector]
     type = 'Exodiff'
     input = '2d_diffusion_tag_vector.i'
@@ -13,6 +14,7 @@
     type = 'Exodiff'
     input = '2d_diffusion_tag_matrix.i'
     exodiff = 'tag_matrix_out.e'
+    max_threads = 1
 
     requirement = 'tagging system shall be able to have matrix tags'
   [../]
@@ -29,6 +31,7 @@
     type = 'Exodiff'
     input = '2d_diffusion_matrix_tag_test.i'
     exodiff = 'matrix_tag_test_out.e'
+    max_threads = 1
 
     requirement = 'tagging system shall be able to have more than one matrix tags'
   [../]
@@ -41,6 +44,7 @@
     # so that we do not need to run the test
     # in parallel
     max_parallel = 1
+    max_threads = 1
 
     requirement = 'tagging system shall support scalar kernels'
   [../]
@@ -49,6 +53,7 @@
     type = 'Exodiff'
     input = '2d_diffusion_dg_tag.i'
     exodiff = '2d_diffusion_dg_tag_out.e'
+    max_threads = 1
 
     requirement = 'tagging system shall support DG kernels'
   [../]
@@ -57,6 +62,7 @@
     type = 'Exodiff'
     input = 'tag_neumann.i'
     exodiff = 'tag_neumann_out.e'
+    max_threads = 1
 
     requirement = 'tagging system shall support integratedBCs'
   [../]
@@ -65,6 +71,10 @@
     type = 'Exodiff'
     input = 'tag_interface_kernels.i'
     exodiff = 'tag_interface_kernels_out.e'
+    # It is a tiny problem, we do not need to run more than two
+    # processor cores
+    max_parallel = 2
+    max_threads = 1
 
     requirement = 'tagging system shall support interface kernels'
   [../]
@@ -73,6 +83,7 @@
     type = 'Exodiff'
     input = 'tag_dirac_kernels.i'
     exodiff = 'tag_dirac_kernels_out.e'
+    max_threads = 1
 
     requirement = 'tagging system shall support Dirac kernels'
   [../]
@@ -81,6 +92,7 @@
     type = 'Exodiff'
     input = 'tag_nodal_kernels.i'
     exodiff = 'tag_nodal_kernels_out.e'
+    max_threads = 1
 
     requirement = 'tagging system shall support nodal kernels'
   [../]

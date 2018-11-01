@@ -503,6 +503,12 @@ public:
   /// Check whether residual being evaulated is non-linear
   bool & computingNonlinearResid() { return _computing_nonlinear_residual; }
 
+  /// Is it safe to access the tagged  matrices
+  bool & safeAccessTaggedMatrices() { return _safe_access_tagged_matrices; }
+
+  /// Is it safe to access the tagged vectors
+  bool & safeAccessTaggedVectors() { return _safe_access_tagged_vectors; }
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -584,6 +590,12 @@ protected:
 
   /// Whether residual being evaulated is non-linear
   bool _computing_nonlinear_residual;
+
+  /// Is it safe to retrieve data from tagged matrices
+  bool _safe_access_tagged_matrices;
+
+  /// Is it safe to retrieve data from tagged vectors
+  bool _safe_access_tagged_vectors;
 
 private:
   ///@{ Helper functions for checking MaterialProperties
