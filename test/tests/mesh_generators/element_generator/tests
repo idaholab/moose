@@ -8,6 +8,7 @@
     design = 'mesh_generators/ElementGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    recover = false
   [../]
   [./test2]
     type = 'Exodiff'
@@ -18,5 +19,6 @@
     design = 'mesh_generators/ElementGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    recover = false
   [../]
 []

@@ -8,5 +8,6 @@
     design = 'mesh_generators/GenerateAllSideSetsByNormals.md'
     issues = '#11640'
     mesh_mode = 'REPPLICATED'
+    recover = false
   [../]
 []
