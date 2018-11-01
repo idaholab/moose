@@ -102,11 +102,13 @@
   [./tag_variable1]
     order = FIRST
     family = LAGRANGE
+    block = 0
   [../]
 
   [./tag_variable2]
     order = FIRST
     family = LAGRANGE
+    block = 1
   [../]
 []
 
@@ -116,7 +118,7 @@
     variable = tag_variable1
     v = u
     block = 0
-    vector_tag = vec_tag1
+    vector_tag = vec_tag2
     execute_on = timestep_end
   [../]
 

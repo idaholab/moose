@@ -4514,7 +4514,11 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   _app.getOutputWarehouse().residualSetup();
 
+  _safe_access_tagged_vectors = false;
+
   _nl->computeResidualTags(tags);
+
+  _safe_access_tagged_vectors = true;
 }
 
 void
@@ -4620,11 +4624,14 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _app.getOutputWarehouse().jacobianSetup();
 
+    _safe_access_tagged_matrices = false;
+
     _nl->computeJacobianTags(tags);
 
     _current_execute_on_flag = EXEC_NONE;
     _currently_computing_jacobian = false;
     _has_jacobian = true;
+    _safe_access_tagged_matrices = true;
   }
 }
 

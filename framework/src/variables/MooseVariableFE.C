@@ -759,6 +759,8 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
   unsigned int nqp = qrule->n_points();
   auto num_vector_tags = _sys.subproblem().numVectorTags();
   auto num_matrix_tags = _sys.subproblem().numMatrixTags();
+  auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
+  auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
 
   _u.resize(nqp);
   _grad_u.resize(nqp);
@@ -1032,19 +1034,26 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
       _u[qp] += *phi_local * soln_local;
 
-      for (unsigned int tag = 0; tag < num_vector_tags; tag++)
-        if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
-        {
-          tag_local_value = _sys.getVector(tag)(idx);
-          _vector_tag_u[tag][qp] += *phi_local * tag_local_value;
-        }
+      if (safe_access_tagged_vectors)
+      {
+        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+          if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+          {
+            tag_local_value = _sys.getVector(tag)(idx);
+            _vector_tag_u[tag][qp] += *phi_local * tag_local_value;
+          }
+      }
 
-      for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
-        if (_need_matrix_tag_u[tag] && _sys.hasMatrix(tag) && _sys.getMatrix(tag).closed())
-        {
-          tag_local_value = _sys.getMatrix(tag)(idx, idx);
-          _matrix_tag_u[tag][qp] += *phi_local * tag_local_value;
-        }
+      if (safe_access_tagged_matrices)
+      {
+        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+          if (_need_matrix_tag_u[tag] && _sys.hasMatrix(tag) && _sys.getMatrix(tag).closed())
+          {
+            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+            tag_local_value = _sys.getMatrix(tag)(idx, idx);
+            _matrix_tag_u[tag][qp] += *phi_local * tag_local_value;
+          }
+      }
 
       grad_u_qp->add_scaled(*dphi_qp, soln_local);
 
@@ -1560,6 +1569,9 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeNodalValues()
 {
+  auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
+  auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
+
   if (_has_dofs)
   {
     const size_t n = _dof_indices.size();
@@ -1568,30 +1580,39 @@ MooseVariableFE<OutputType>::computeNodalValues()
     _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
     _nodal_value = _dof_values[0];
 
-    TagID tag = 0;
-    for (auto & dof_u : _vector_tags_dof_u)
+    if (safe_access_tagged_vectors)
     {
-      if (_need_vector_tag_dof_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+      TagID tag = 0;
+      for (auto & dof_u : _vector_tags_dof_u)
       {
-        dof_u.resize(n);
-        auto & vec = _sys.getVector(tag);
-        vec.get(_dof_indices, &dof_u[0]);
+        if (_need_vector_tag_dof_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+        {
+          dof_u.resize(n);
+          auto & vec = _sys.getVector(tag);
+          vec.get(_dof_indices, &dof_u[0]);
         }
         tag++;
+      }
     }
 
-    tag = 0;
-    for (auto & dof_u : _matrix_tags_dof_u)
+    if (safe_access_tagged_matrices)
     {
-      if (_need_matrix_tag_dof_u[tag] && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag) &&
-          _sys.getMatrix(tag).closed())
+      TagID tag = 0;
+      for (auto & dof_u : _matrix_tags_dof_u)
       {
-        dof_u.resize(n);
-        auto & mat = _sys.getMatrix(tag);
-        for (unsigned i = 0; i < _dof_indices.size(); i++)
-          dof_u[i] = mat(_dof_indices[i], _dof_indices[i]);
+        if (_need_matrix_tag_dof_u[tag] && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag) &&
+            _sys.getMatrix(tag).closed())
+        {
+          dof_u.resize(n);
+          auto & mat = _sys.getMatrix(tag);
+          for (unsigned i = 0; i < _dof_indices.size(); i++)
+          {
+            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+            dof_u[i] = mat(_dof_indices[i], _dof_indices[i]);
+          }
+        }
+        tag++;
       }
-      tag++;
     }
 
     if (_need_dof_values_previous_nl)

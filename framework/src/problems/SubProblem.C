@@ -34,7 +34,9 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _requires_nonlocal_coupling(false),
     _rz_coord_axis(1), // default to RZ rotation around y-axis
     _currently_computing_jacobian(false),
-    _computing_nonlinear_residual(false)
+    _computing_nonlinear_residual(false),
+    _safe_access_tagged_matrices(false),
+    _safe_access_tagged_vectors(false)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
