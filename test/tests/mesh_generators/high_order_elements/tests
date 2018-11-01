@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'high_order_elems.i'
+    exodiff = 'high_order_elems_out.e'
+  [../]
+
+#add all the other tests when 'uniform_refine' is added to MeshGenerators.
+[]
