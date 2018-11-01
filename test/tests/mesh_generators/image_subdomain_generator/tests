@@ -9,6 +9,7 @@
     design = 'mesh_generators/ImageSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    recover = false
   [../]
   [./image_subdomain_generator_3d_test]
     type = 'Exodiff'
@@ -20,5 +21,6 @@
     design = 'mesh_generators/ImageSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    recover = false
   [../]
 []

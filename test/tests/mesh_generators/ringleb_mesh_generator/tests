@@ -8,5 +8,6 @@
     design = 'mesh_generators/RinglebMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    recover = false
   [../]
 []

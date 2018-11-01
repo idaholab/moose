@@ -8,6 +8,7 @@
     design = 'mesh_generators/SideSetsAroundSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    recover = false
   [../]
 
   [./sideset_around_subdomain_normal_generator_test]
@@ -19,5 +20,6 @@
     design = 'mesh_generators/SideSetsAroundSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    recover = false
   [../]
 []
