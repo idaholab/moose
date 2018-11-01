@@ -1,11 +1,12 @@
 # Getting Started with MOOSE on HPC Machines
 
-This document assumes your HPC Administrator has completed the [HPC Cluster](cluster.md) instructions, and you have received instructions on how to enable your environment for MOOSE-based development. In a professional HPC environment, this is usually accomplished through the use of modules.
+This document assumes your HPC Administrator has completed the [HPC Cluster](cluster.md) instructions, and you have received instructions on how to enable your environment for MOOSE-based development.
 
 ## Environment
 
-Simply put, your HPC Administrator will provide you with instructions on how to initialize your environment for MOOSE-based development.
+Simply put, your HPC Administrator will provide you with instructions on how to initialize the environment they have constructed for you, for MOOSE-based development. However, you should have to do something. It is not magic, and not automatic. Please do not skip this step. If you are not sure what you should be doing to initialize your environment, please ask your HPC Administrators for help.
 
+Most if not all errors caused during build and/or runtime are usually related to a faulty or un-initialized environment.
 
 !include getting_started/installation/clone_moose.md
 

@@ -1,6 +1,6 @@
 # High Performance Computing
 
-If you are an HPC User, you should instead head on over to our [HPC Users](hpc_install_moose.md) Getting Started page.
+If you are an HPC User, you should instead head on over to our [HPC Users](hpc_install_moose.md) page.
 
 This document will aid an +HPC Administrator+ on building an environment which end-users will use when compiling and running MOOSE based applications. +If you do not have administrative rights, you will not be able to complete these instructions!+ Please forward these instructions to your HPC Administrator.
 
