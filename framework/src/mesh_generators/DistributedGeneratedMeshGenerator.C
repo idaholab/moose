@@ -47,7 +47,7 @@ extern "C"
 #include "libmesh/sfc_partitioner.h"
 #endif
 
-registerMooseObject("MooseApp", DistributedGeneratedMeshGenerator);
+//registerMooseObject("MooseApp", DistributedGeneratedMeshGenerator);
 
 template <>
 InputParameters

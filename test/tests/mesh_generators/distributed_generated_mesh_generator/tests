@@ -8,5 +8,6 @@
     design = 'mesh_generators/DistributedGeneratedMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
+    deleted = 'distributed_generated_mesh_generator_test'
   [../]
 []
