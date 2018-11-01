@@ -15,8 +15,8 @@ Be aware: `DistributedGeneratedMeshGenerator` turns on `parallel_type = distribu
 
 ## Example Syntax
 
-<!---!syntax parameters /MeshGenerators/DistributedGeneratedMeshGenerator
+<!---!syntax parameters /MeshGenerators/DistributedGeneratedMeshGenerator--->
 
-!syntax inputs /MeshGenerators/DistributedGeneratedMeshGenerator
+<!---!syntax inputs /MeshGenerators/DistributedGeneratedMeshGenerator--->
 
-!syntax children /MeshGenerators/DistributedGeneratedMeshGenerator--->
+<!---!syntax children /MeshGenerators/DistributedGeneratedMeshGenerator--->
