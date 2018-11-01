@@ -161,6 +161,7 @@
     issues = '#7855 #7661 #2881'
     design = 'JsonInputFileFormatter.md command_line_usage.md'
     requirement = 'We shall be able to convert input file syntax into JSON syntax'
+    methods = "!DBG"
   [../]
 
   [./definition_existsin_test]
