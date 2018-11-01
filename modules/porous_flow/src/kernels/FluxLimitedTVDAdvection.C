@@ -64,7 +64,14 @@ FluxLimitedTVDAdvection::computeJacobian()
 
   tvd();
 
-  _local_ke = _dflux_out_dvar;
+  // TODO: _dflux_out_dvar contains all the derivatives wrt to nodes not in this element.  Include
+  // those too!
+  for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
+    for (unsigned j = 0; j < _current_elem->n_nodes(); ++j)
+    {
+      const dof_id_type node_id_j = _current_elem->node_id(j);
+      _local_ke(i, j) = _dflux_out_dvar[i][node_id_j];
+    }
   accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
@@ -89,9 +96,6 @@ FluxLimitedTVDAdvection::tvd()
   _flux_out.resize(num_nodes);
   _flux_out.zero();
 
-  _dflux_out_dvar.resize(num_nodes, num_nodes);
-  _dflux_out_dvar.zero();
-
   // Retrieve KuzminTurek K matrix from the AdvectiveFluxCalculator
   // See Eqns (18)-(20)
   std::vector<std::vector<Real>> kk(num_nodes);
@@ -99,7 +103,8 @@ FluxLimitedTVDAdvection::tvd()
   {
     kk[i].assign(num_nodes, 0.0);
     for (unsigned j = 0; j < num_nodes; ++j)
-      kk[i][j] = _fluo.getKij(_current_elem->node_id(i), _current_elem->node_id(j)) / _fluo.getValence(_current_elem->node_id(i), _current_elem->node_id(j));
+      kk[i][j] = _fluo.getKij(_current_elem->node_id(i), _current_elem->node_id(j)) /
+                 _fluo.getValence(_current_elem->node_id(i), _current_elem->node_id(j));
   }
 
   // Calculate KuzminTurek D matrix
@@ -131,39 +136,76 @@ FluxLimitedTVDAdvection::tvd()
   // See Eqns (49) and (12)
   std::vector<Real> rPlus(num_nodes);
   std::vector<Real> rMinus(num_nodes);
+  std::vector<std::map<dof_id_type, Real>> drPlus(num_nodes); // drPlus[i][j] = d(rPlus[i])/du[j]
+  std::vector<std::map<dof_id_type, Real>> drMinus(num_nodes);
   for (unsigned i = 0; i < num_nodes; ++i)
   {
-    rPlus[i] = _fluo.rPlus(_current_elem->node_id(i));
-    rMinus[i] = _fluo.rMinus(_current_elem->node_id(i));
+    rPlus[i] = _fluo.rPlus(_current_elem->node_id(i), drPlus[i]);
+    rMinus[i] = _fluo.rMinus(_current_elem->node_id(i), drMinus[i]);
   }
 
   // Calculate KuzminTurek f^{a} matrix
   // This is the antidiffusive flux
   // See Eqn (50)
   std::vector<std::vector<Real>> fa(num_nodes);
-  std::vector<std::vector<std::vector<Real>>> dfa(num_nodes); // dfa[i][j][k] = d(fa[i][j])/du[k]
+  std::vector<std::vector<std::map<dof_id_type, Real>>> dfa(
+      num_nodes); // dfa[i][j][global_id] = d(fa[i][j])/du[global_id]
   for (unsigned i = 0; i < num_nodes; ++i)
   {
     fa[i].resize(num_nodes, 0.0);
-    dfa[i].assign(num_nodes, std::vector<Real>(num_nodes, 0.0));
+    dfa[i].resize(num_nodes);
+    for (unsigned j = 0; j < num_nodes; ++j)
+    {
+      // use drPlus to determine all the nodes connected with node i
+      for (const auto & dof_deriv : drPlus[i])
+        dfa[i][j][dof_deriv.first] = 0.0;
+    }
   }
   for (unsigned i = 0; i < num_nodes; ++i)
+  {
+    const dof_id_type node_id_i = _current_elem->node_id(i);
     for (unsigned j = 0; j < num_nodes; ++j)
     {
       if (j == i)
         continue;
+      const dof_id_type node_id_j = _current_elem->node_id(j);
       if (ll[j][i] >= ll[i][j]) // i is upwind of j.
       {
-	Real prefactor = 0.0;
+        Real prefactor = 0.0;
+        std::map<dof_id_type, Real>
+            dprefactor_du; // dprefactor_dr[global_id] = d(prefactor)/du[global_id];
+        for (const auto & dof_deriv : drPlus[i])
+          dprefactor_du[dof_deriv.first] = 0.0;
         if (_u_nodal[i] >= _u_nodal[j])
-	  prefactor = std::min(rPlus[i] * dd[i][j], ll[j][i]);
-	else
-	  prefactor = std::min(rMinus[i] * dd[i][j], ll[j][i]);
-	fa[i][j] = prefactor * (_u_nodal[i] - _u_nodal[j]);
-	dfa[i][j][i] = prefactor;
-	dfa[i][j][j] = -prefactor;
+        {
+          if (ll[j][i] <= rPlus[i] * dd[i][j])
+            prefactor = ll[j][i];
+          else
+          {
+            prefactor = rPlus[i] * dd[i][j];
+            for (const auto & dof_deriv : drPlus[i])
+              dprefactor_du[dof_deriv.first] = dof_deriv.second * dd[i][j];
+          }
+        }
+        else
+        {
+          if (ll[j][i] <= rMinus[i] * dd[i][j])
+            prefactor = ll[j][i];
+          else
+          {
+            prefactor = rMinus[i] * dd[i][j];
+            for (const auto & dof_deriv : drMinus[i])
+              dprefactor_du[dof_deriv.first] = dof_deriv.second * dd[i][j];
+          }
+        }
+        fa[i][j] = prefactor * (_u_nodal[i] - _u_nodal[j]);
+        dfa[i][j][node_id_i] = prefactor;
+        dfa[i][j][node_id_j] = -prefactor;
+        for (const auto & dof_deriv : dprefactor_du)
+          dfa[i][j][dof_deriv.first] += dof_deriv.second * (_u_nodal[i] - _u_nodal[j]);
       }
     }
+  }
   for (unsigned i = 0; i < num_nodes; ++i)
     for (unsigned j = 0; j < num_nodes; ++j)
     {
@@ -172,20 +214,29 @@ FluxLimitedTVDAdvection::tvd()
       if (ll[j][i] < ll[i][j]) // i is downwind of j
       {
         fa[i][j] = -fa[j][i];
-	for (unsigned k = 0; k < num_nodes; ++k)
-	  dfa[i][j][k] = -dfa[j][i][k];
+        for (const auto & dof_deriv : dfa[j][i])
+          dfa[i][j][dof_deriv.first] = -dof_deriv.second;
       }
     }
+
+  // Size _dflux_out_dvar appropriately
+  _dflux_out_dvar.resize(num_nodes);
+  // use drPlus to determine all the nodes connected with node i
+  for (unsigned i = 0; i < num_nodes; ++i)
+    for (const auto & dof_deriv : drPlus[i])
+      _dflux_out_dvar[i][dof_deriv.first] = 0.0;
 
   // Add everything together
   // See step 3 in Fig 2, noting Eqn (36)
   for (unsigned i = 0; i < num_nodes; ++i)
     for (unsigned j = 0; j < num_nodes; ++j)
-      {
+    {
       // negative sign because residual = -Lu (KT equation (19))
       _flux_out(i) -= ll[i][j] * _u_nodal[j] + fa[i][j];
-      _dflux_out_dvar(i, j) -= ll[i][j];
-      for (unsigned k = 0; k < num_nodes; ++k)
-	_dflux_out_dvar(i, k) -= dfa[i][j][k];
-      }
+
+      const dof_id_type node_id_j = _current_elem->node_id(j);
+      _dflux_out_dvar[i][node_id_j] -= ll[i][j];
+      for (const auto & dof_deriv : dfa[i][j])
+        _dflux_out_dvar[i][dof_deriv.first] -= dof_deriv.second;
+    }
 }

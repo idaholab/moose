@@ -45,15 +45,17 @@ protected:
   /**
    * _flux_out[i] = mass of fluid moving out of node i into other nodes of this element
    * So _flux_out[i] is the contribution to the residual of node i from this element
+   * Note that "i" is local to this element.
    * (I could have used _local_re, but the name _flux_out is more descriptive for now)
    */
   DenseVector<Real> _flux_out;
 
   /**
-   * _dflux_out_dvar(i, j) = d(_flux_out[i])/d(_u_nodal[j]).  Used for Jacobian computations
-   * The present implementation assumes that Kij, R+ and R- are independent of u
+   * _dflux_out_dvar[i][j] = d(_flux_out[i])/d(_u_nodal[global id j]).  Used for Jacobian
+   * computations The present implementation assumes that Kij is independent of u Note that "i" is
+   * local to this element, while j is a global nodal id.
    */
-  DenseMatrix<Real> _dflux_out_dvar;
+  std::vector<std::map<dof_id_type, Real>> _dflux_out_dvar;
 
   /// Do Kuzmin-Turek algorithm
   void tvd();

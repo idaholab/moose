@@ -45,14 +45,16 @@ public:
   /**
    * Returns the value of R_{i}^{+}, Eqn (49) of KT
    * @param node_i nodal id
+   * @param dlimited_du[out] dlimited_du[node_id] = d(R_{i}^{+})/du[node_id]
    */
-  Real rPlus(dof_id_type node_i) const;
+  Real rPlus(dof_id_type node_i, std::map<dof_id_type, Real> & dlimited_du) const;
 
   /**
    * Returns the value of R_{i}^{-}, Eqn (49) of KT
    * @param node_i nodal id
+   * @param dlimited_du[out] dlimited_du[node_id] = d(R_{i}^{-})/du[node_id]
    */
-  Real rMinus(dof_id_type node_i) const;
+  Real rMinus(dof_id_type node_i, std::map<dof_id_type, Real> & dlimited_du) const;
 
   /**
    * Returns the value of k_ij as computed by KT Eqns (18)-(20).
@@ -64,7 +66,9 @@ public:
 
   /**
    * Returns the valence of the i-j edge.
-   * Valence is the number of times the edge is encountered in a loop over elements (that have appropriate subdomain_id, if the user has employed the "blocks=" parameter) seen by this processor
+   * Valence is the number of times the edge is encountered in a loop over elements (that have
+   * appropriate subdomain_id, if the user has employed the "blocks=" parameter) seen by this
+   * processor
    * @param node_i id of i^th node
    * @param node_j id of j^th node
    * @return valence of the i-j edge
@@ -73,8 +77,12 @@ public:
 
   /**
    * flux limiter, L, on Page 135 of Kuzmin and Turek
+   * @param a KT's "a" parameter
+   * @param b KT's "b" parameter
+   * @param limited[out] The value of the flux limiter, L
+   * @param dlimited_db[out] The derivative dL/db
    */
-  Real limitFlux(Real a, Real b) const;
+  void limitFlux(Real a, Real b, Real & limited, Real & dlimited_db) const;
 
 protected:
   /// advection velocity
@@ -116,7 +124,8 @@ protected:
 
   /**
    * _valence[(i, j)] = number of times, in a loop over elements owned by this processor,
-   * and are part of the block-restricted blocks of this UserObject, that the i-j edge is encountered
+   * and are part of the block-restricted blocks of this UserObject, that the i-j edge is
+   * encountered
    */
   std::map<std::pair<dof_id_type, dof_id_type>, unsigned> _valence;
 
@@ -135,9 +144,19 @@ protected:
    * @param node_i nodal id
    * @param pq_plus_minus indicates whether P_{i}^{+}, P_{i}^{-}, Q_{i}^{+} or Q_{i}^{-} should be
    * returned
+   * @param derivs[out] derivs[i] = d(result)/d(u[node_id])
    */
-  Real PQPlusMinus(dof_id_type node_i, const PQPlusMinusEnum pq_plus_minus) const;
+  Real PQPlusMinus(dof_id_type node_i,
+                   const PQPlusMinusEnum pq_plus_minus,
+                   std::map<dof_id_type, Real> & derivs) const;
 
+  /**
+   * Using _kij, returns result that has result[node_id] = 0.0 for all node_id connected with node_i
+   * @param node_i nodal id
+   * @return result whose keys are node ids connected to node_i (according to _kij) and whose values
+   * are zero
+   */
+  std::map<dof_id_type, Real> zeroedConnection(dof_id_type node_i) const;
 };
 
 #endif // ADVECTIVEFLUXCALCULATOR_H
