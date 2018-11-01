@@ -55,67 +55,38 @@ AdvectiveFluxCalculator::timestepSetup()
 {
   if (_init_k_and_compute_valence)
   {
-    // -----------------------------------
-    //
-    // TODO: put the stuff below in the element loop that computes _valence
-    //
-    // -----------------------------------
+    _kij.clear();
+    _valence.clear();
 
-    _kij.clear();  // does this destroy the inner std::maps too, or is a mem leak?
-    // Allocate _kij appropriately
-    //
     // NOTE: We don't want to recompute the neighboring nodes every nonlinear iteration.  We
     // only need to do that at the beginning and when the mesh has changed because of adaptivity
-    // QUERY: (and anything else i haven't thought about?)
-    // QUERY: does this properly account for multiple processors?
-    // QUERY: or do we want to use _mesh.nodeToElemMap() ?   (if so, then
-    // MeshTools::find_nodal_neighbors can't be used?) QUERY: threading?
- 
-    std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
-    MeshTools::build_nodes_to_elem_map(_mesh, _nodes_to_elem_map);
+    // QUERY: does this properly account for multiple processors, threading, and other things i haven't thought about?
 
-    for (const auto & node_i : _mesh.getMesh().node_ptr_range())
-    {
-      std::map<dof_id_type, Real> nodal_flux = {};
-      std::vector<const Node *> neighbors;
-      MeshTools::find_nodal_neighbors(_mesh, *node_i, _nodes_to_elem_map, neighbors);
-      for (const auto & n : neighbors)
-        nodal_flux.emplace(n->id(), 0.0);
-      nodal_flux.emplace(node_i->id(), 0.0); // include node_i - node_i connection
-      _kij.emplace(node_i->id(), nodal_flux);
-    }
-  }
-
-  if (_init_k_and_compute_valence)
-  {
-    _valence.clear();
-    // Build _valence
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     for (ConstElemRange::const_iterator el = elem_range.begin(); el != elem_range.end(); ++el)
     {
-      const Elem * elem = *el;
+      const Elem * const elem = *el;
       if (this->hasBlocks(elem->subdomain_id()))
       {
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
         {
           const dof_id_type node_i = elem->node_id(i);
-          if (_valence.find(node_i) == _valence.end())
-          {
-            // haven't yet encountered node_i: initialise it with zeroes
-            std::map<dof_id_type, unsigned> zero_row = {};
-            for (unsigned j = 0; j < elem->n_nodes(); ++j)
-              zero_row.emplace(elem->node_id(j), 0);
-            _valence.emplace(node_i, zero_row);
-          }
-          // increment the valence
+	  if (_kij.find(node_i) == _kij.end())
+	    _kij[node_i] = {};
           for (unsigned j = 0; j < elem->n_nodes(); ++j)
-           _valence[node_i][elem->node_id(j)] += 1;
+	    {
+	      const dof_id_type node_j = elem->node_id(j);
+	      _kij[node_i][node_j] = 0.0;
+	      const std::pair<dof_id_type, dof_id_type> i_j(node_i, node_j);
+	      if (_valence.find(i_j) == _valence.end())
+		_valence[i_j] = 0;
+	      _valence[i_j] += 1;
+	    }
         }
       }
     }
     _init_k_and_compute_valence = false;
   }
-
 }
 
 void
@@ -259,17 +230,10 @@ AdvectiveFluxCalculator::getKij(dof_id_type node_i, dof_id_type node_j) const
 unsigned
 AdvectiveFluxCalculator::getValence(dof_id_type node_i, dof_id_type node_j) const
 {
-  const auto & row_find = _valence.find(node_i);
-  mooseAssert(row_find != _valence.end(),
-              "AdvectiveFluxCalculator UserObject " << name() << " Valence does not contain node "
-                                                    << node_i);
-  const std::map<dof_id_type, unsigned> & valence_row = row_find->second;
-  const auto & entry_find = valence_row.find(node_j);
-  mooseAssert(entry_find != valence_row.end(),
-              "AdvectiveFluxCalculator UserObject "
-                  << name() << " Valence on row " << node_i << " does not contain node "
-                  << node_j);
-
+  const std::pair<dof_id_type, dof_id_type> i_j(node_i, node_j);
+  const auto & entry_find = _valence.find(i_j);
+  mooseAssert(entry_find != _valence.end(),
+              "AdvectiveFluxCalculator UserObject " << name() << " Valence does not contain node-pair " << node_i << " to " << node_j);
   return entry_find->second;
 }
 

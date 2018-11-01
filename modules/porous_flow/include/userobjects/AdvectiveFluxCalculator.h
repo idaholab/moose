@@ -33,10 +33,10 @@ public:
   /// Size _kij, if needed
   virtual void timestepSetup() override;
 
-  /// Call ElementLoopUserObject::meshChanged() and clear _kij
+  /// Call ElementLoopUserObject::meshChanged() and set _init_k_and_compute_valence to true
   virtual void meshChanged() override;
 
-  /// Zeroes _kij and record u at the nodes into _u_at_nodal_ids
+  /// Zeroes _kij
   virtual void pre() override;
 
   /// Compute contributions to _kij from the current element
@@ -64,7 +64,7 @@ public:
 
   /**
    * Returns the valence of the i-j edge.
-   * Valence is the number of times the edge is encountered in a loop over elements seen by this processor.
+   * Valence is the number of times the edge is encountered in a loop over elements (that have appropriate subdomain_id, if the user has employed the "blocks=" parameter) seen by this processor
    * @param node_i id of i^th node
    * @param node_j id of j^th node
    * @return valence of the i-j edge
@@ -101,16 +101,26 @@ protected:
    */
   const enum class FluxLimiterTypeEnum { MinMod, VanLeer, MC, superbee, None } _flux_limiter_type;
 
-  /// Kuzmin-Turek K_ij matrix.
+  /**
+   * Kuzmin-Turek K_ij matrix.  Along with R+ and R-, this is the key quantity computed
+   * by this UserObject.
+   * _kij[i][j] = k_ij corresponding to the i-j node pair.
+   * Because it explicitly holds info which nodes are paired with which other nodes, it is
+   * also used to perform: given a node_id, loop over all neighbouring nodes.
+   * This occurs in the computation of R+ and R-.
+   */
   std::map<dof_id_type, std::map<dof_id_type, Real>> _kij;
 
   /// For an pre-allocated K_ij, zero all its entries
   void zeroKij();
 
-  /// Number of times, in a loop over elements, that the i-j edge is encountered
-  std::map<dof_id_type, std::map<dof_id_type, unsigned>> _valence;
+  /**
+   * _valence[(i, j)] = number of times, in a loop over elements owned by this processor,
+   * and are part of the block-restricted blocks of this UserObject, that the i-j edge is encountered
+   */
+  std::map<std::pair<dof_id_type, dof_id_type>, unsigned> _valence;
 
-
+  /// Signals to the PQPlusMinus method what should be computed
   enum class PQPlusMinusEnum
   {
     PPlus,

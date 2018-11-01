@@ -29,4 +29,14 @@
     issues = '#11013'
     design = 'porous_flow/numerical_diffusion.md'
   [../]
+  [./fltvd_none]
+    type = 'CSVDiff'
+    input = 'fltvd_none.i'
+    csvdiff = 'fltvd_none_out_tracer_0011.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
 []
