@@ -75,6 +75,7 @@ Details about numerical issues.
 - [Convergence criteria](convergence.md)
 - [Nonlinear convergence problems](nonlinear_convergence_problems.md)
 - [Numerical diffusion](numerical_diffusion.md)
+- [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
 ## The Dictator
 
