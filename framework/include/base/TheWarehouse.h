@@ -194,7 +194,7 @@ public:
     size_t count() { return _w->count(_attribs); }
 
     /// attribs returns a copy of the constructed Attribute list for the query in its current state.
-    std::vector<std::unique_ptr<Attribute>> attributes() { return std::move(clone()._attribs); }
+    std::vector<std::unique_ptr<Attribute>> attributes() { return clone()._attribs; }
 
     /// queryInto executes the query and stores the results in the given vector.  All results must
     /// be castable to the templated type T.
