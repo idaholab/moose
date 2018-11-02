@@ -18,19 +18,19 @@ template <>
 InputParameters
 validParams<MethaneFluidProperties>()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = validParams<HelmholtzFluidProperties>();
   params.addClassDescription("Fluid properties for methane (CH4)");
   return params;
 }
 
 MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters),
+  : HelmholtzFluidProperties(parameters),
     _Mch4(16.0425e-3),
     _p_critical(4.5992e6),
     _T_critical(190.564),
     _rho_critical(162.66),
     _p_triple(1.169e4),
-    _T_triple(90.67)
+    _T_triple(90.6941)
 {
 }
 
@@ -79,93 +79,6 @@ MethaneFluidProperties::triplePointTemperature() const
 }
 
 Real
-MethaneFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
-{
-  return pressure * _Mch4 / (_R * temperature);
-}
-
-void
-MethaneFluidProperties::rho_from_p_T(
-    Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
-{
-  rho = this->rho_from_p_T(pressure, temperature);
-  drho_dp = _Mch4 / (_R * temperature);
-  drho_dT = -pressure * _Mch4 / (_R * temperature * temperature);
-}
-
-Real
-MethaneFluidProperties::e_from_p_T(Real pressure, Real temperature) const
-{
-  return h_from_p_T(pressure, temperature) - _R * temperature / _Mch4;
-}
-
-void
-MethaneFluidProperties::e_from_p_T(
-    Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
-{
-  e = this->e_from_p_T(pressure, temperature);
-  Real enthalpy, enthalpy_dp, enthalpy_dT;
-  h_from_p_T(pressure, temperature, enthalpy, enthalpy_dp, enthalpy_dT);
-  de_dp = enthalpy_dp;
-  de_dT = enthalpy_dT - _R / _Mch4;
-}
-
-void
-MethaneFluidProperties::rho_e_dpT(Real pressure,
-                                  Real temperature,
-                                  Real & rho,
-                                  Real & drho_dp,
-                                  Real & drho_dT,
-                                  Real & e,
-                                  Real & de_dp,
-                                  Real & de_dT) const
-{
-  Real density, ddensity_dp, ddensity_dT;
-  rho_from_p_T(pressure, temperature, density, ddensity_dp, ddensity_dT);
-  rho = density;
-  drho_dp = ddensity_dp;
-  drho_dT = ddensity_dT;
-
-  Real energy, denergy_dp, denergy_dT;
-  e_from_p_T(pressure, temperature, energy, denergy_dp, denergy_dT);
-  e = energy;
-  de_dp = denergy_dp;
-  de_dT = denergy_dT;
-}
-
-Real
-MethaneFluidProperties::c_from_p_T(Real pressure, Real temperature) const
-{
-  return std::sqrt(gamma_from_p_T(pressure, temperature) * _R * temperature / _Mch4);
-}
-
-Real
-MethaneFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
-{
-  // Check the temperature is in the range of validity (280 K <= T <= 1080 K)
-  if (temperature <= 280.0 || temperature >= 1080.0)
-    throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (280K, 1080K) in " + name() + ": cp_from_p_T()");
-
-  Real specific_heat = 0.0;
-  if (temperature < 755.0)
-    for (std::size_t i = 0; i < _a0.size(); ++i)
-      specific_heat += _a0[i] * MathUtils::pow(temperature, i);
-  else
-    for (std::size_t i = 0; i < _a1.size(); ++i)
-      specific_heat += _a1[i] * MathUtils::pow(temperature, i);
-
-  // convert to J/kg/K by multiplying by 1000
-  return specific_heat * 1000.0;
-}
-
-Real
-MethaneFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
-{
-  return cp_from_p_T(pressure, temperature) - _R / _Mch4;
-}
-
-Real
 MethaneFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
@@ -192,27 +105,6 @@ MethaneFluidProperties::mu_from_p_T(
   for (std::size_t i = 0; i < _a.size(); ++i)
     dmudt += i * _a[i] * MathUtils::pow(temperature, i) / temperature;
   dmu_dT = dmudt * 1.e-6;
-}
-
-void
-MethaneFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
-{
-  rho = this->rho_from_p_T(pressure, temperature);
-  mu = this->mu_from_p_T(pressure, temperature);
-}
-
-void
-MethaneFluidProperties::rho_mu_dpT(Real pressure,
-                                   Real temperature,
-                                   Real & rho,
-                                   Real & drho_dp,
-                                   Real & drho_dT,
-                                   Real & mu,
-                                   Real & dmu_dp,
-                                   Real & dmu_dT) const
-{
-  this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  this->mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real
@@ -253,85 +145,19 @@ MethaneFluidProperties::k_from_p_T(
 }
 
 Real
-MethaneFluidProperties::s_from_p_T(Real /*pressure*/, Real temperature) const
+MethaneFluidProperties::vaporPressure(Real temperature) const
 {
-  // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
-  if (temperature <= 280.0 || temperature >= 1080.0)
-    throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (280K, 1080K) in " + name() + ": s()");
+  if (temperature < _T_triple || temperature > _T_critical)
+    throw MooseException("Temperature is out of range in " + name() + ": vaporPressure()");
 
-  Real entropy;
-  if (temperature < 755.0)
-  {
-    entropy = _a0[0] * std::log(temperature);
-    for (std::size_t i = 1; i < _a0.size(); ++i)
-      entropy += _a0[i] * MathUtils::pow(temperature, i) / static_cast<Real>(i);
-  }
-  else
-  {
-    entropy = _a1[0] * std::log(temperature);
-    for (std::size_t i = 1; i < _a1.size(); ++i)
-      entropy += _a1[i] * MathUtils::pow(temperature, i) / static_cast<Real>(i);
+  const Real Tr = temperature / _T_critical;
+  const Real theta = 1.0 - Tr;
 
-    // As entropy is obtained from cp by integration in this formulation, a zero
-    // shift is required in this regime, see Irvine and Liley (1984)
-    entropy -= 39.768;
-  }
+  const Real logpressure = (-6.036219 * theta + 1.409353 * std::pow(theta, 1.5) -
+                            0.4945199 * Utility::pow<2>(theta) - 1.443048 * std::pow(theta, 4.5)) /
+                           Tr;
 
-  // convert to J/kg/K by multiplying by 1000
-  return entropy * 1000.0;
-}
-
-void
-MethaneFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
-{
-  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
-}
-
-Real
-MethaneFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
-{
-  // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
-  if (temperature <= 280.0 || temperature >= 1080.0)
-    throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (280K, 1080K) in " + name() + ": cp_from_p_T()");
-
-  Real enthalpy = 0.0;
-  if (temperature < 755.0)
-    for (std::size_t i = 0; i < _a0.size(); ++i)
-      enthalpy += _a0[i] * MathUtils::pow(temperature, i + 1) / (i + 1.0);
-  else
-  {
-    for (std::size_t i = 0; i < _a1.size(); ++i)
-      enthalpy += _a1[i] * MathUtils::pow(temperature, i + 1) / (i + 1.0);
-
-    // As enthalpy is obtained from cp by integration in this formulation, a zero
-    // shift is required in this regime, see Irvine and Liley (1984)
-    enthalpy -= 1.4837e3;
-  }
-
-  // convert to J/kg by multiplying by 1000
-  return enthalpy * 1000.0;
-}
-
-void
-MethaneFluidProperties::h_from_p_T(
-    Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
-{
-  h = this->h_from_p_T(pressure, temperature);
-  // Enthalpy doesn't depend on pressure
-  dh_dp = 0.0;
-
-  Real dhdt = 0.0;
-  if (temperature < 755.0)
-    for (std::size_t i = 0; i < _a0.size(); ++i)
-      dhdt += _a0[i] * MathUtils::pow(temperature, i);
-  else
-    for (std::size_t i = 0; i < _a1.size(); ++i)
-      dhdt += _a1[i] * MathUtils::pow(temperature, i);
-
-  // convert to J/kg/K by multiplying by 1000
-  dh_dT = dhdt * 1000.0;
+  return _p_critical * std::exp(logpressure);
 }
 
 Real
@@ -344,4 +170,213 @@ void
 MethaneFluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const
 {
   henryConstantIAPWS_dT(temperature, Kh, dKh_dT, -10.44708, 4.66491, 12.12986);
+}
+
+Real
+MethaneFluidProperties::saturatedLiquidDensity(Real temperature) const
+{
+  if (temperature < _T_triple || temperature > _T_critical)
+    throw MooseException("Temperature is out of range in " + name() + ": saturatedLiquidDensity()");
+
+  const Real Tr = temperature / _T_critical;
+  const Real theta = 1.0 - Tr;
+
+  const Real logdensity = 1.9906389 * std::pow(theta, 0.354) - 0.78756197 * std::sqrt(theta) +
+                          0.036976723 * std::pow(theta, 2.5);
+
+  return _rho_critical * std::exp(logdensity);
+}
+
+Real
+MethaneFluidProperties::saturatedVaporDensity(Real temperature) const
+{
+  if (temperature < _T_triple || temperature > _T_critical)
+    throw MooseException("Temperature is out of range in " + name() + ": saturatedVaporDensity()");
+
+  const Real Tr = temperature / _T_critical;
+  const Real theta = 1.0 - Tr;
+
+  const Real logdensity =
+      -1.880284 * std::pow(theta, 0.354) - 2.8526531 * std::pow(theta, 5.0 / 6.0) -
+      3.000648 * std::pow(theta, 1.5) - 5.251169 * std::pow(theta, 2.5) -
+      13.191859 * std::pow(theta, 25.0 / 6.0) - 37.553961 * std::pow(theta, 47.0 / 6.0);
+
+  return _rho_critical * std::exp(logdensity);
+}
+
+Real
+MethaneFluidProperties::alpha(Real delta, Real tau) const
+{
+  // Ideal gas component of the Helmholtz free energy
+  Real alpha0 = std::log(delta) + 9.91243972 - 6.33270087 * tau + 3.0016 * std::log(tau);
+
+  for (std::size_t i = 0; i < _a0.size(); ++i)
+    alpha0 += _a0[i] * std::log(1.0 - std::exp(-_b0[i] * tau));
+
+  // Residual component of the Helmholtz free energy
+  Real alphar = 0.0;
+
+  for (std::size_t i = 0; i < _t1.size(); ++i)
+    alphar += _N1[i] * MathUtils::pow(delta, _d1[i]) * std::pow(tau, _t1[i]);
+
+  for (std::size_t i = 0; i < _t2.size(); ++i)
+    alphar += _N2[i] * MathUtils::pow(delta, _d2[i]) * std::pow(tau, _t2[i]) *
+              std::exp(-MathUtils::pow(delta, _c2[i]));
+
+  for (std::size_t i = 0; i < _t3.size(); ++i)
+    alphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
+              std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
+                       _beta3[i] * Utility::pow<2>(tau - _gamma3[i]));
+
+  // The Helmholtz free energy is the sum of these two
+  return alpha0 + alphar;
+}
+
+Real
+MethaneFluidProperties::dalpha_ddelta(Real delta, Real tau) const
+{
+  // Ideal gas component of the Helmholtz free energy
+  Real dalpha0 = 1.0 / delta;
+
+  // Residual component of the Helmholtz free energy
+  Real dalphar = 0.0;
+
+  for (std::size_t i = 0; i < _t1.size(); ++i)
+    dalphar += _N1[i] * _d1[i] * MathUtils::pow(delta, _d1[i]) * std::pow(tau, _t1[i]);
+
+  for (std::size_t i = 0; i < _t2.size(); ++i)
+    dalphar += _N2[i] * MathUtils::pow(delta, _d2[i]) * std::pow(tau, _t2[i]) *
+               std::exp(-MathUtils::pow(delta, _c2[i])) *
+               (_d2[i] - _c2[i] * MathUtils::pow(delta, _c2[i]));
+
+  for (std::size_t i = 0; i < _t3.size(); ++i)
+    dalphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
+               std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
+                        _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
+               (_d3[i] - delta * (2.0 * _alpha3[i] * (delta - _D3[i])));
+
+  // The Helmholtz free energy is the sum of these two
+  return dalpha0 + dalphar / delta;
+}
+
+Real
+MethaneFluidProperties::dalpha_dtau(Real delta, Real tau) const
+{
+  // Ideal gas component of the Helmholtz free energy
+  Real dalpha0 = -6.33270087 + 3.0016 / tau;
+
+  for (std::size_t i = 0; i < _a0.size(); ++i)
+    dalpha0 += _a0[i] * _b0[i] * (1.0 / (1.0 - std::exp(-_b0[i] * tau)) - 1.0);
+
+  // Residual component of the Helmholtz free energy
+  Real dalphar = 0.0;
+
+  for (std::size_t i = 0; i < _t1.size(); ++i)
+    dalphar += _N1[i] * _t1[i] * MathUtils::pow(delta, _d1[i]) * std::pow(tau, _t1[i]);
+
+  for (std::size_t i = 0; i < _t2.size(); ++i)
+    dalphar += _N2[i] * _t2[i] * MathUtils::pow(delta, _d2[i]) * std::pow(tau, _t2[i]) *
+               std::exp(-MathUtils::pow(delta, _c2[i]));
+
+  for (std::size_t i = 0; i < _t3.size(); ++i)
+    dalphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
+               std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
+                        _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
+               (_t3[i] + tau * (2.0 * _beta3[i] * (tau - _gamma3[i])));
+
+  // The Helmholtz free energy is the sum of these two
+  return dalpha0 + dalphar / tau;
+}
+
+Real
+MethaneFluidProperties::d2alpha_ddelta2(Real delta, Real tau) const
+{
+  // Ideal gas component of the Helmholtz free energy
+  Real dalpha0 = -1.0 / delta / delta;
+
+  // Residual component of the Helmholtz free energy
+  Real dalphar = 0.0;
+
+  for (std::size_t i = 0; i < _t1.size(); ++i)
+    dalphar +=
+        _N1[i] * _d1[i] * (_d1[i] - 1.0) * MathUtils::pow(delta, _d1[i]) * std::pow(tau, _t1[i]);
+
+  for (std::size_t i = 0; i < _t2.size(); ++i)
+    dalphar += _N2[i] * MathUtils::pow(delta, _d2[i]) * std::pow(tau, _t2[i]) *
+               std::exp(-MathUtils::pow(delta, _c2[i])) *
+               ((_d2[i] - _c2[i] * MathUtils::pow(delta, _c2[i])) *
+                    (_d2[i] - 1.0 - _c2[i] * MathUtils::pow(delta, _c2[i])) -
+                _c2[i] * _c2[i] * MathUtils::pow(delta, _c2[i]));
+
+  for (std::size_t i = 0; i < _t3.size(); ++i)
+    dalphar += _N3[i] * std::pow(tau, _t3[i]) *
+               std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
+                        _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
+               (-2.0 * _alpha3[i] * MathUtils::pow(delta, _d3[i] + 2) +
+                4.0 * _alpha3[i] * _alpha3[i] * MathUtils::pow(delta, _d3[i] + 2) *
+                    MathUtils::pow(delta - _D3[i], 2) -
+                4.0 * _d3[i] * _alpha3[i] * MathUtils::pow(delta, _d3[i] + 1) * (delta - _D3[i]) +
+                _d3[i] * (_d3[i] - 1) * MathUtils::pow(delta, _d3[i]));
+
+  // The Helmholtz free energy is the sum of these two
+  return dalpha0 + dalphar / delta / delta;
+}
+
+Real
+MethaneFluidProperties::d2alpha_dtau2(Real delta, Real tau) const
+{
+  // Ideal gas component of the Helmholtz free energy
+  Real dalpha0 = -3.0016 / tau / tau;
+
+  for (std::size_t i = 0; i < _a0.size(); ++i)
+  {
+    Real exptau = std::exp(-_b0[i] * tau);
+    dalpha0 -= _a0[i] * (_b0[i] * _b0[i] * exptau / (1.0 - exptau) / (1.0 - exptau));
+  }
+
+  // Residual component of the Helmholtz free energy
+  Real dalphar = 0.0;
+
+  for (std::size_t i = 0; i < _t1.size(); ++i)
+    dalphar +=
+        _N1[i] * _t1[i] * (_t1[i] - 1.0) * MathUtils::pow(delta, _d1[i]) * std::pow(tau, _t1[i]);
+
+  for (std::size_t i = 0; i < _t2.size(); ++i)
+    dalphar += _N2[i] * _t2[i] * (_t2[i] - 1.0) * MathUtils::pow(delta, _d2[i]) *
+               std::pow(tau, _t2[i]) * std::exp(-MathUtils::pow(delta, _c2[i]));
+
+  for (std::size_t i = 0; i < _t3.size(); ++i)
+    dalphar += _N3[i] * MathUtils::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
+               std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
+                        _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
+               (tau * _t3[i] - _beta3[i] * tau * tau * MathUtils::pow(tau - _gamma3[i], 2) -
+                _t3[i] - 2.0 * tau * tau * _beta3[i]);
+
+  // The Helmholtz free energy is the sum of these two
+  return dalpha0 + dalphar / tau / tau;
+}
+
+Real
+MethaneFluidProperties::d2alpha_ddeltatau(Real delta, Real tau) const
+{
+  // Residual component of the Helmholtz free energy
+  Real dalphar = 0.0;
+
+  for (std::size_t i = 0; i < _t1.size(); ++i)
+    dalphar += _N1[i] * _d1[i] * _t1[i] * std::pow(delta, _d1[i]) * std::pow(tau, _t1[i]);
+
+  for (std::size_t i = 0; i < _t2.size(); ++i)
+    dalphar += _N2[i] * _t2[i] * std::pow(delta, _d2[i]) * std::pow(tau, _t2[i]) *
+               std::exp(-MathUtils::pow(delta, _c2[i])) *
+               (_d2[i] - _c2[i] * MathUtils::pow(delta, _c2[i]));
+
+  for (std::size_t i = 0; i < _t3.size(); ++i)
+    dalphar += _N3[i] * std::pow(delta, _d3[i]) * std::pow(tau, _t3[i]) *
+               std::exp(-_alpha3[i] * Utility::pow<2>(delta - _D3[i]) -
+                        _beta3[i] * Utility::pow<2>(tau - _gamma3[i])) *
+               (_d3[i] - 2.0 * _alpha3[i] * delta * (delta - _D3[i]) *
+                             (_t3[i] - 2.0 * _beta3[i] * tau * (tau - _gamma3[i])));
+
+  // The Helmholtz free energy is the sum of these two
+  return dalphar / delta / tau;
 }
