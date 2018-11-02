@@ -34,6 +34,7 @@ validParams<TestControl>()
 TestControl::TestControl(const InputParameters & parameters)
   : Control(parameters), _test_type(getParam<MooseEnum>("test_type")), _alias("this/is/alias")
 {
+  Moose::out << "Who wrote this terrible code\n";
   if (_test_type == "real")
     getControllableValue<Real>("parameter");
 
