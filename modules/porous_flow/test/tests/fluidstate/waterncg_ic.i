@@ -109,7 +109,7 @@
     temperature = 50
   [../]
   [./waterncg]
-    type = PorousFlowFluidStateWaterNCG
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     fluid_state = fs

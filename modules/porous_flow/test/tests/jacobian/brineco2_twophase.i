@@ -1,4 +1,4 @@
-# Tests correct calculation of properties derivatives in PorousFlowFluidStateBrineCO2
+# Tests correct calculation of properties derivatives in PorousFlowFluidState
 # for conditions that are appropriate for two phases
 
 [Mesh]
@@ -112,7 +112,7 @@
     at_nodes = true
   [../]
   [./brineco2]
-    type = PorousFlowFluidStateBrineCO2
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
     at_nodes = true
@@ -122,7 +122,7 @@
     fluid_state = fs
   [../]
   [./brineco2_qp]
-    type = PorousFlowFluidStateBrineCO2
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
     temperature_unit = Celsius

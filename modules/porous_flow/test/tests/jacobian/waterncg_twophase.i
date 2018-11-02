@@ -1,4 +1,4 @@
-# Tests correct calculation of properties derivatives in PorousFlowFluidStateWaterNCG
+# Tests correct calculation of properties derivatives in PorousFlowWaterNCG
 # for conditions for two phases
 
 [Mesh]
@@ -101,7 +101,7 @@
     at_nodes = true
   [../]
   [./waterncg]
-    type = PorousFlowFluidStateWaterNCG
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     at_nodes = true
@@ -110,7 +110,7 @@
     fluid_state = fs
   [../]
   [./waterncg_qp]
-    type = PorousFlowFluidStateWaterNCG
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     temperature_unit = Celsius

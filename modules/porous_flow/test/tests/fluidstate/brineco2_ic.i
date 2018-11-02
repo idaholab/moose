@@ -110,7 +110,7 @@
     temperature = 50
   [../]
   [./waterncg]
-    type = PorousFlowFluidStateBrineCO2
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     fluid_state = fs
