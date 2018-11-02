@@ -38,7 +38,7 @@ PorousFlowFluidStateWaterNCGIC::value(const Point & /*p*/)
   Real Tk = _temperature[_qp] + _T_c2k;
 
   // The total mass fraction corresponding to the input saturation
-  Real z = _fs_uo.totalMassFraction(_gas_porepressure[_qp], Tk, _saturation[_qp]);
+  Real z = _fs_uo.totalMassFraction(_gas_porepressure[_qp], Tk, 0.0, _saturation[_qp], _qp);
 
   return z;
 }

@@ -90,7 +90,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
                                              Real temperature,
                                              Real Xnacl,
                                              Real Z,
-                                             unsigned qp,
+                                             unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
@@ -1405,7 +1405,7 @@ PorousFlowBrineCO2::partialDensityCO2(Real temperature,
 
 Real
 PorousFlowBrineCO2::totalMassFraction(
-    Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned qp) const
+    Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const
 {
   // Check whether the input pressure and temperature are within the region of validity
   checkVariables(pressure, temperature);
