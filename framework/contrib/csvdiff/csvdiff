@@ -9,9 +9,103 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, re, math, sys, argparse
+from decimal import Decimal
 
-class CSVDiffer:
+class CSVTools:
+    def __init__(self):
+        self.__num_errors = 0
+        self.__msg = []
+
+    def addError(self, f, message):
+        """Add error message and increment the error count"""
+        self.__msg.append('In ' + f.name + ': ' + message)
+        self.__num_errors += 1
+        return self.__msg
+
+    def addMessage(self, message):
+        """Add a message to be printed before exit"""
+        self.__msg.append(message)
+
+    def getMessages(self):
+        """Return stored messages"""
+        return self.__msg
+
+    def getNumErrors(self):
+        """Return number of errors"""
+        return self.__num_errors
+
+    def convertToTable(self, files):
+        """Convert text to a map of column names to column values"""
+        table_pair = []
+        for f in files:
+            f.seek(0)
+            text = f.read()
+            text = re.sub( r'\n\s*\n', '\n', text).strip()
+
+            # Exceptions occur if you try to parse a .e file
+            try:
+                lines = text.split('\n')
+                headers = lines.pop(0).split(',')
+                table = {}
+                for header in headers:
+                    table[header] = []
+
+                for row in lines:
+                    vals = row.split(',')
+                    if len(headers) != len(vals):
+                        self.addError(f, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
+                    for header, val in zip(headers,vals):
+                        try:
+                            table[header].append(float(val))
+                        except:
+                            # ignore strings
+                            table[header].append(0)
+
+            except Exception as e:
+                self.addError(f, "Exception parsing file: "+str(e.args))
+                return {}
+
+            table_pair.append(table)
+
+        return table_pair
+
+class CSVSummary(CSVTools):
     def __init__(self, args):
+        CSVTools.__init__(self)
+        self.files = args.summary
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        for a_file in self.files:
+            a_file.close()
+
+    def _getMinMax(field_list):
+        """ return the minimum and maximum values in the list along with the row id they were discovered on """
+        return
+
+    def summary(self):
+        """ Parse the CSV file and generate a summary """
+        table1 = self.convertToTable(self.files)[0]
+
+        # Simulate the format of exodiff's summary
+        formatted_messages = ['NODAL VARIABLES relative 1.e-6 floor 0.0']
+
+        for field, value in table1.iteritems():
+            if field == 'time':
+                formatted_messages.insert(0, 'TIME STEPS relative 1.e-6 floor 0.0  # min: %d @ t%d  max: %d @ t%d\n' % \
+                                          ( min(value), value.index(min(value)) + 1, max(value), value.index(max(value)) + 1 ))
+            else:
+                formatted_messages.append('\t%s\t\t# min: %.e @ t%d\t\tmax: %.e @ t%d' % \
+                                          (field, Decimal(min(value)), value.index(min(value)) + 1, Decimal(max(value)), value.index(max(value)) + 1 ))
+
+        self.addMessage('\n'.join(formatted_messages))
+        return self.getMessages()
+
+class CSVDiffer(CSVTools):
+    def __init__(self, args):
+        CSVTools.__init__(self)
         self.files = args.csv_file
         self.abs_zero = float(args.abs_zero)
         self.rel_tol = float(args.relative_tolerance)
@@ -19,8 +113,13 @@ class CSVDiffer:
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
         self.only_compare_custom = args.only_compare_custom
-        self.msg = ''
-        self.num_errors = 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        for a_file in self.files:
+            a_file.close()
 
     # diff the files added to the system and return a message of differences
     # This method should only be called once. If it called again you must
@@ -43,8 +142,6 @@ class CSVDiffer:
         # the order of the tests is most general to most specific, so if a general
         # one fails then the more specific ones will probably not only fail, but
         # crash the program because it's looking in a column that doesn't exist
-        foundError = False
-
         (table1, table2) = self.convertToTable(self.files)
 
         # Make sure header names are the same (also makes sure # cols is the same)
@@ -61,29 +158,26 @@ class CSVDiffer:
             for key in self.custom_columns:
                 if key not in small or key not in large:
                     self.addError(self.files[0], "Header '" + key + "' is missing")
-                    foundError = True
         elif len(keys1) < len(keys2):
             (large,small) = (keys2,keys1)
             for key in large:
                 if key not in small:
                     self.addError(self.files[0], "Header '" + key + "' is missing")
-                    foundError = True
         else:
             for key in keys1:
                 found_column[key] = True
 
-        if foundError:
-            return self.msg
+        if self.getNumErrors():
+            return self.getMessages()
 
         # now check that each column is the same length
         for key in keys1:
             if len(table1[key]) != len(table2[key]):
                 self.addError(self.files[0], "Columns with header '" + key + "' aren't the same length")
-                foundError = True
                 # assume all columns are the same length, so don't report the other errors
                 break
 
-        if foundError:
+        if self.getNumErrors():
             return self.msg
 
         # now check all the values in the table
@@ -138,68 +232,38 @@ class CSVDiffer:
                if not found_column[mykey2]:
                   self.addError("all CSV files", "Variable '" + mykey2 + "' in custom_columns is missing" )
 
-        return self.msg
-
-    # convert text to a map of column names to column values
-    def convertToTable(self, files):
-        table_pair = []
-        for f in files:
-            f.seek(0)
-            text = f.read()
-            text = re.sub( r'\n\s*\n', '\n', text).strip()
-
-            # Exceptions occur if you try to parse a .e file
-            try:
-                lines = text.split('\n')
-                headers = lines.pop(0).split(',')
-                table = {}
-                for header in headers:
-                    table[header] = []
-
-                for row in lines:
-                    vals = row.split(',')
-                    if len(headers) != len(vals):
-                        self.addError(f, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
-                    for header, val in zip(headers,vals):
-                        try:
-                            table[header].append(float(val))
-                        except:
-                            # ignore strings
-                            table[header].append(0)
-
-            except Exception as e:
-                self.addError(f, "Exception parsing file: "+str(e.args))
-                return {}
-
-            table_pair.append(table)
-
-        return table_pair
-
-    # add an error to the message
-    # every error is added through here, so it could also output in xml, etc.
-    def addError(self, f, message):
-        self.msg += 'In ' + f.name + ': ' + message + '\n'
-        self.num_errors += 1
-
-    def getNumErrors(self):
-        """Return number of errors in diff"""
-        return self.num_errors
+        return self.getMessages()
 
 def verifyArgs(args):
+    problems = []
+    if not args.csv_file and not args.summary:
+        problems.append('No input files given')
+
+    elif len(args.csv_file) != 2 and not args.summary:
+        problems.append('Specify two files to compare')
+
+    elif args.csv_file and args.summary:
+        problems.append('Incorrect positional arguments, or you are trying to perform a diff and show a summary (can only do one or the other)')
+
     # Check if all custom args are populated correctly
     unify_custom_args = [x for x in [args.custom_columns, args.custom_abs_zero, args.custom_rel_err] if x != None]
     if unify_custom_args and len(unify_custom_args) != 3:
-        print 'When using any --custom-* option, you must use all three'
-        sys.exit(1)
+        problems.append('When using any --custom-* option, you must use all three')
     elif unify_custom_args:
         if len(set([len(x) for x in unify_custom_args])) > 1:
-            print 'All --custom-* options need to contain the same number of space separated items'
-            sys.exit(1)
+            problems.append('All --custom-* options need to contain the same number of space separated items')
+
+    for a_problem in problems:
+        print a_problem
+    if problems:
+        sys.exit(1)
+
     return args
 
 def parseArgs(args=None):
     parser = argparse.ArgumentParser(description='Tool for testing differences between two CSV files')
-    parser.add_argument('csv_file', nargs=2, type=argparse.FileType('r'))
+    parser.add_argument('csv_file', nargs='*', type=argparse.FileType('r'))
+    parser.add_argument('--summary', '-s', nargs=1, type=argparse.FileType('r'), metavar='csv_file', help='Produce a summary in csvdiff input format')
     parser.add_argument('--use-config', '-c', nargs=1, type=argparse.FileType('r'), metavar='config_file', help='Use comparison configuration file')
     parser.add_argument('--ignore-fields', '-i', nargs='+', metavar='id', help='Ignore specified space-separated field IDs')
     parser.add_argument('--diff-fields', '-f', nargs='+', metavar='id', help='Perform diff tests only on space-separated field IDs')
@@ -213,12 +277,21 @@ def parseArgs(args=None):
 
 if __name__ == '__main__':
     args = parseArgs()
-    csv_tester = CSVDiffer(args)
-    messages = csv_tester.diff()
-    args.csv_file[0].close()
-    args.csv_file[1].close()
-    if len(messages):
-        print messages
-        sys.exit(1)
+    if args.summary:
+        with CSVSummary(args) as csv_summary:
+            messages = csv_summary.summary()
+            errors = csv_summary.getNumErrors()
+
     else:
+        with CSVDiffer(args) as csv_differ:
+            messages = csv_differ.diff()
+            errors = csv_differ.getNumErrors()
+
+    for a_message in messages:
+        print a_message
+
+    if not errors and not args.summary:
         print "Files are the same"
+
+    if errors:
+        sys.exit(1)
