@@ -123,6 +123,12 @@ public:
   unsigned int gasComponentIndex() const { return _gas_fluid_component; };
 
   /**
+   * The index of the salt component
+   * @return salt component number
+   */
+  unsigned int saltComponentIndex() const { return _salt_component; };
+
+  /**
    * Name of FluidState
    */
   virtual std::string fluidStateName() const = 0;
@@ -178,6 +184,8 @@ protected:
   const unsigned int _aqueous_fluid_component;
   /// Fluid component number of the gas phase
   unsigned int _gas_fluid_component;
+  /// Salt component index
+  const unsigned int _salt_component;
   /// Universal gas constant (J/mol/K)
   const Real _R;
   /// Conversion from C to K
@@ -187,7 +195,7 @@ protected:
   /// Tolerance for Newton-Raphson iterations
   const Real _nr_tol;
   /// Capillary pressure UserObject
-  const PorousFlowCapillaryPressure & _pc_uo;
+  const PorousFlowCapillaryPressure & _pc;
 };
 
 #endif // POROUSFLOWFLUIDSTATEBASE_H

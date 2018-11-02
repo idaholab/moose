@@ -17,6 +17,7 @@ validParams<PorousFlowFluidStateBase>()
   params.addParam<unsigned int>("liquid_phase_number", 0, "The phase number of the liquid phase");
   params.addParam<unsigned int>(
       "liquid_fluid_component", 0, "The fluid component number of the primary liquid component");
+  params.addParam<unsigned int>("salt_component", 2, "The component number of salt");
   params.addRequiredParam<UserObjectName>("capillary_pressure",
                                           "Name of the UserObject defining the capillary pressure");
   params.addClassDescription("Base class for fluid state classes");
@@ -27,11 +28,12 @@ PorousFlowFluidStateBase::PorousFlowFluidStateBase(const InputParameters & param
   : PorousFlowFluidStateFlash(parameters),
     _aqueous_phase_number(getParam<unsigned int>("liquid_phase_number")),
     _aqueous_fluid_component(getParam<unsigned int>("liquid_fluid_component")),
+    _salt_component(getParam<unsigned int>("salt_component")),
     _R(8.3144598),
     _T_c2k(273.15),
     _nr_max_its(42),
     _nr_tol(1.0e-12),
-    _pc_uo(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
+    _pc(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
 {
 }
 

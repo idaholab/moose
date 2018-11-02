@@ -99,7 +99,7 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::LIQUID:
     {
       // Calculate the liquid properties
-      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0, qp);
+      Real liquid_pressure = pressure - _pc.capillaryPressure(1.0, qp);
       liquidProperties(liquid_pressure, temperature, fsp);
 
       break;
@@ -114,7 +114,7 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
       saturationTwoPhase(pressure, temperature, Z, fsp);
 
       // Calculate the liquid properties
-      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0 - gas.saturation, qp);
+      Real liquid_pressure = pressure - _pc.capillaryPressure(1.0 - gas.saturation, qp);
       liquidProperties(liquid_pressure, temperature, fsp);
 
       break;
@@ -129,7 +129,7 @@ PorousFlowWaterNCG::thermophysicalProperties(Real pressure,
 
   // Save pressures to FluidStateProperties object
   gas.pressure = pressure;
-  liquid.pressure = pressure - _pc_uo.capillaryPressure(liquid.saturation, qp);
+  liquid.pressure = pressure - _pc.capillaryPressure(liquid.saturation, qp);
 }
 
 void
@@ -570,7 +570,7 @@ PorousFlowWaterNCG::totalMassFraction(
 
   // Liquid properties
   const Real liquid_saturation = 1.0 - saturation;
-  const Real liquid_pressure = pressure - _pc_uo.capillaryPressure(liquid_saturation, qp);
+  const Real liquid_pressure = pressure - _pc.capillaryPressure(liquid_saturation, qp);
   liquidProperties(liquid_pressure, temperature, fsp);
 
   // The total mass fraction of ncg (Z) can now be calculated

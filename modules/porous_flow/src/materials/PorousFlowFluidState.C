@@ -7,17 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PorousFlowFluidStateFlashBase.h"
+#include "PorousFlowFluidState.h"
 #include "PorousFlowCapillaryPressure.h"
+
+registerMooseObject("PorousFlowApp", PorousFlowFluidState);
 
 template <>
 InputParameters
-validParams<PorousFlowFluidStateFlashBase>()
+validParams<PorousFlowFluidState>()
 {
   InputParameters params = validParams<PorousFlowVariableBase>();
   params.addRequiredCoupledVar("gas_porepressure",
                                "Variable that is the porepressure of the gas phase");
   params.addRequiredCoupledVar("z", "Total mass fraction of component i summed over all phases");
+  params.addCoupledVar("xnacl", 0, "The salt mass fraction in the brine (kg/kg)");
   MooseEnum unit_choice("Kelvin=0 Celsius=1", "Kelvin");
   params.addParam<MooseEnum>(
       "temperature_unit", unit_choice, "The unit of the temperature variable");
@@ -25,12 +28,12 @@ validParams<PorousFlowFluidStateFlashBase>()
                                           "Name of the UserObject defining the capillary pressure");
   params.addRequiredParam<UserObjectName>("fluid_state", "Name of the FluidState UserObject");
   params.addPrivateParam<std::string>("pf_material_type", "fluid_state");
-  params.addClassDescription("Base class for fluid state calculations using persistent primary "
+  params.addClassDescription("Class for fluid state calculations using persistent primary "
                              "variables and a vapor-liquid flash");
   return params;
 }
 
-PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParameters & parameters)
+PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
   : PorousFlowVariableBase(parameters),
 
     _gas_porepressure(_nodal_material ? coupledNodalValue("gas_porepressure")
@@ -42,12 +45,19 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
               : 0),
 
     _num_Z_vars(coupledComponents("z")),
+    _Xnacl(_nodal_material ? coupledNodalValue("xnacl") : coupledValue("xnacl")),
+    _grad_Xnacl_qp(coupledGradient("xnacl")),
+    _Xnacl_varnum(coupled("xnacl")),
+    _Xvar(_dictator.isPorousFlowVariable(_Xnacl_varnum)
+              ? _dictator.porousFlowVariableNum(_Xnacl_varnum)
+              : 0),
 
-    _fs_base(getUserObject<PorousFlowFluidStateBase>("fluid_state")),
-    _aqueous_phase_number(_fs_base.aqueousPhaseIndex()),
-    _gas_phase_number(_fs_base.gasPhaseIndex()),
-    _aqueous_fluid_component(_fs_base.aqueousComponentIndex()),
-    _gas_fluid_component(_fs_base.gasComponentIndex()),
+    _fs(getUserObject<PorousFlowFluidStateBase>("fluid_state")),
+    _aqueous_phase_number(_fs.aqueousPhaseIndex()),
+    _gas_phase_number(_fs.gasPhaseIndex()),
+    _aqueous_fluid_component(_fs.aqueousComponentIndex()),
+    _gas_fluid_component(_fs.gasComponentIndex()),
+    _salt_component(_fs.saltComponentIndex()),
 
     _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal")
                                  : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
@@ -97,13 +107,13 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
 
     _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
     _is_initqp(false),
-    _pc_uo(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
+    _pc(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
 {
   // Check that the number of phases in the fluidstate class is also provided in the Dictator
-  if (_fs_base.numPhases() != _num_phases)
+  if (_fs.numPhases() != _num_phases)
     mooseError(name(),
                ": only ",
-               _fs_base.numPhases(),
+               _fs.numPhases(),
                " phases are allowed. Please check the number of phases entered in the dictator is "
                "correct");
 
@@ -128,7 +138,16 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
 }
 
 void
-PorousFlowFluidStateFlashBase::initQpStatefulProperties()
+PorousFlowFluidState::thermophysicalProperties()
+{
+  // The FluidProperty objects use temperature in K
+  Real Tk = _temperature[_qp] + _T_c2k;
+
+  _fs.thermophysicalProperties(_gas_porepressure[_qp], Tk, _Xnacl[_qp], (*_Z[0])[_qp], _qp, _fsp);
+}
+
+void
+PorousFlowFluidState::initQpStatefulProperties()
 {
   _is_initqp = true;
   // Set the size of pressure and saturation vectors
@@ -158,7 +177,7 @@ PorousFlowFluidStateFlashBase::initQpStatefulProperties()
 }
 
 void
-PorousFlowFluidStateFlashBase::computeQpProperties()
+PorousFlowFluidState::computeQpProperties()
 {
   _is_initqp = false;
   // Prepare the derivative vectors
@@ -187,7 +206,7 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
     _dsaturation_dvar[_qp][ph][_pvar] = _fsp[ph].dsaturation_dp;
   }
   // Derivative of capillary pressure
-  Real dpc = _pc_uo.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation);
+  Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation);
 
   // Derivative of porepressure wrt variables
   if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
@@ -261,7 +280,7 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
   if (!_nodal_material)
   {
     // Second derivative of capillary pressure
-    Real d2pc = _pc_uo.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation);
+    Real d2pc = _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation);
 
     (*_grads_qp)[_qp][_aqueous_phase_number] =
         _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar] * _gas_gradp_qp[_qp] +
@@ -292,10 +311,97 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
     (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] =
         -(*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component];
   }
+
+  // If Xnacl is a PorousFlow variable, add contribution to material properties
+  // due to the Xnacl component that are not included in
+  // PorousFlowFluidStateFlashBase::computeQpProperties();
+  if (_dictator.isPorousFlowVariable(_Xnacl_varnum))
+  {
+    // Derivative of saturation wrt variables
+    for (unsigned int ph = 0; ph < _num_phases; ++ph)
+      _dsaturation_dvar[_qp][ph][_Xvar] = _fsp[ph].dsaturation_dX;
+
+    // Derivative of capillary pressure
+    Real dpc = _pc.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation, _qp);
+
+    // Derivative of porepressure wrt variables
+    if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
+    {
+      if (!_nodal_material)
+        (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Xvar] =
+            -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar];
+
+      // The aqueous phase porepressure is also a function of liquid saturation,
+      // which depends on Xnacl
+      _dporepressure_dvar[_qp][_aqueous_phase_number][_Xvar] =
+          -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar];
+    }
+
+    // Calculate derivatives of material properties wrt primary variables
+    // Derivative of Xnacl wrt variables
+    std::vector<Real> dX_dvar;
+    dX_dvar.assign(_num_pf_vars, 0.0);
+
+    if (_dictator.isPorousFlowVariable(_Xvar))
+      dX_dvar[_Xvar] = 1.0;
+
+    // Derivatives of properties wrt primary variables
+    for (unsigned int v = 0; v < _num_pf_vars; ++v)
+      for (unsigned int ph = 0; ph < _num_phases; ++ph)
+      {
+        // Derivative of density in each phase
+        _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].ddensity_dX * dX_dvar[v];
+
+        // Derivative of viscosity in each phase
+        _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dX * dX_dvar[v];
+      }
+
+    // The derivative of the mass fractions for each fluid component in each phase.
+    // Note: these are all calculated in terms of gas pressuse, so there is no
+    // capillary pressure effect, and hence no need to multiply by _dporepressure_dvar
+    for (unsigned int ph = 0; ph < _num_phases; ++ph)
+      for (unsigned int comp = 0; comp < _num_components; ++comp)
+        _dmass_frac_dvar[_qp][ph][comp][_Xvar] = _fsp[ph].dmass_fraction_dX[comp];
+
+    // If the material properties are being evaluated at the qps, add the contribution
+    // to the gradients as well. Note: only nodal properties are evaluated in
+    // initQpStatefulProperties(), so no need to check _is_initqp flag for qp
+    // properties
+    if (!_nodal_material)
+    {
+      // Second derivative of capillary pressure
+      Real d2pc = _pc.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation, _qp);
+
+      (*_grads_qp)[_qp][_aqueous_phase_number] +=
+          _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
+
+      (*_grads_qp)[_qp][_gas_phase_number] -=
+          _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
+
+      (*_gradp_qp)[_qp][_aqueous_phase_number] -=
+          dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
+
+      (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Xvar] =
+          -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
+          _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar];
+
+      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_salt_component] = _grad_Xnacl_qp[_qp];
+      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] +=
+          _fsp[_aqueous_phase_number].dmass_fraction_dX[_aqueous_fluid_component] *
+          _grad_Xnacl_qp[_qp];
+      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] -=
+          _fsp[_aqueous_phase_number].dmass_fraction_dX[_aqueous_fluid_component] *
+          _grad_Xnacl_qp[_qp];
+      (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] +=
+          _fsp[_gas_phase_number].dmass_fraction_dX[_aqueous_fluid_component] * _grad_Xnacl_qp[_qp];
+      (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] -=
+          _fsp[_gas_phase_number].dmass_fraction_dX[_aqueous_fluid_component] * _grad_Xnacl_qp[_qp];
+    }
+  }
 }
 
 void
-PorousFlowFluidStateFlashBase::setMaterialVectorSize() const
+PorousFlowFluidState::setMaterialVectorSize() const
 {
   _fluid_density[_qp].assign(_num_phases, 0.0);
   _fluid_viscosity[_qp].assign(_num_phases, 0.0);

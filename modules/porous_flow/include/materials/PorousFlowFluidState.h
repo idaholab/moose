@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEFLASHBASE_H
-#define POROUSFLOWFLUIDSTATEFLASHBASE_H
+#ifndef POROUSFLOWFLUIDSTATE_H
+#define POROUSFLOWFLUIDSTATE_H
 
 #include "PorousFlowVariableBase.h"
 #include "PorousFlowFluidStateBase.h"
 
-class PorousFlowFluidStateFlashBase;
+class PorousFlowFluidState;
 class PorousFlowCapillaryPressure;
 
 template <>
-InputParameters validParams<PorousFlowFluidStateFlashBase>();
+InputParameters validParams<PorousFlowFluidState>();
 
 /**
- * Base class for fluid states using a persistent set of primary variables for
+ * Fluid state class using a persistent set of primary variables for
  * the mutliphase, multicomponent case.
  *
  * Primary variables are: gas pressure, total mass fraction
@@ -48,10 +48,10 @@ InputParameters validParams<PorousFlowFluidStateFlashBase>();
  * to determine vapor fraction (gas saturation), and subsequently the composition
  * of each phase.
  */
-class PorousFlowFluidStateFlashBase : public PorousFlowVariableBase
+class PorousFlowFluidState : public PorousFlowVariableBase
 {
 public:
-  PorousFlowFluidStateFlashBase(const InputParameters & parameters);
+  PorousFlowFluidState(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -64,7 +64,7 @@ protected:
    * Calculates all required thermophysical properties and derivatives for each phase
    * and fluid component. Must override in all derived classes.
    */
-  virtual void thermophysicalProperties() = 0;
+  virtual void thermophysicalProperties();
 
   /// Porepressure
   const VariableValue & _gas_porepressure;
@@ -84,8 +84,16 @@ protected:
   std::vector<unsigned int> _Zvar;
   /// Number of coupled total mass fractions. Should be _num_phases - 1
   const unsigned int _num_Z_vars;
+  /// Salt mass fraction (kg/kg)
+  const VariableValue & _Xnacl;
+  /// Gradient of salt mass fraction (only defined at the qps)
+  const VariableGradient & _grad_Xnacl_qp;
+  /// Salt mass fraction variable number
+  const unsigned int _Xnacl_varnum;
+  /// Salt mass fraction PorousFlow variable number
+  const unsigned int _Xvar;
   /// FluidState UserObject
-  const PorousFlowFluidStateBase & _fs_base;
+  const PorousFlowFluidStateBase & _fs;
   /// Phase number of the aqueous phase
   const unsigned int _aqueous_phase_number;
   /// Phase number of the gas phase
@@ -94,6 +102,8 @@ protected:
   const unsigned int _aqueous_fluid_component;
   /// Fluid component number of the gas phase
   const unsigned int _gas_fluid_component;
+  /// Salt component index
+  const unsigned int _salt_component;
   /// Temperature
   const MaterialProperty<Real> & _temperature;
   /// Gradient of temperature (only defined at the qps)
@@ -129,7 +139,7 @@ protected:
   /// FluidStateProperties data structure
   std::vector<FluidStateProperties> _fsp;
   /// Capillary pressure UserObject
-  const PorousFlowCapillaryPressure & _pc_uo;
+  const PorousFlowCapillaryPressure & _pc;
 };
 
-#endif // POROUSFLOWFLUIDSTATEFLASHBASE_H
+#endif // POROUSFLOWFLUIDSTATE_H
