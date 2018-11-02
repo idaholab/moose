@@ -67,23 +67,6 @@ TEST_F(NitrogenFluidPropertiesTest, vapor)
 }
 
 /**
- * Verify calculation of partial density at infinite dilution using data from
- * Hnedkovsky et al., Volumes of aqueous solutions of CH4, Hydrogen, H2S, and NH3
- * at temperatures from 298.15 K to 705 K and pressures to 35 MPa,
- * J. Chem. Thermo. 28, 1996.
- * As we are comparing with experimental data, calculated values within 5% are
- * considered satisfactory.
- */
-// TEST_F(NitrogenFluidPropertiesTest, partialDensity)
-// {
-//   const Real tol = 50.0 * REL_TOL_EXTERNAL_VALUE;
-//
-//   REL_TEST(_fp->partialDensity(373.15), 1182.8, tol);
-//   REL_TEST(_fp->partialDensity(473.35), 880.0, tol);
-//   REL_TEST(_fp->partialDensity(573.15), 593.8, tol);
-// }
-
-/**
  * Verify calculation of Henry's constant using data from
  * Guidelines on the Henry's constant and vapour liquid distribution constant
  * for gases in H20 and D20 at high temperatures, IAPWS (2004).

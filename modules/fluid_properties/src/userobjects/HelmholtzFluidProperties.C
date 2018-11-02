@@ -25,8 +25,6 @@ HelmholtzFluidProperties::HelmholtzFluidProperties(const InputParameters & param
 {
 }
 
-HelmholtzFluidProperties::~HelmholtzFluidProperties() {}
-
 Real
 HelmholtzFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {

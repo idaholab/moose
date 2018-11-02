@@ -35,8 +35,6 @@ HydrogenFluidProperties::HydrogenFluidProperties(const InputParameters & paramet
 {
 }
 
-HydrogenFluidProperties::~HydrogenFluidProperties() {}
-
 std::string
 HydrogenFluidProperties::fluidName() const
 {

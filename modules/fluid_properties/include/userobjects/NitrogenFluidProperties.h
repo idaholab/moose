@@ -37,7 +37,6 @@ class NitrogenFluidProperties : public HelmholtzFluidProperties
 {
 public:
   NitrogenFluidProperties(const InputParameters & parameters);
-  virtual ~NitrogenFluidProperties();
 
   virtual std::string fluidName() const override;
 

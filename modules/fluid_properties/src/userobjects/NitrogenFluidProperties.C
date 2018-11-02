@@ -35,8 +35,6 @@ NitrogenFluidProperties::NitrogenFluidProperties(const InputParameters & paramet
 {
 }
 
-NitrogenFluidProperties::~NitrogenFluidProperties() {}
-
 std::string
 NitrogenFluidProperties::fluidName() const
 {

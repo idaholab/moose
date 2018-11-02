@@ -41,7 +41,6 @@ class HydrogenFluidProperties : public HelmholtzFluidProperties
 {
 public:
   HydrogenFluidProperties(const InputParameters & parameters);
-  virtual ~HydrogenFluidProperties();
 
   virtual std::string fluidName() const override;
 
