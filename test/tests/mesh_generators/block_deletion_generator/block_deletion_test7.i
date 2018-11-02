@@ -10,20 +10,25 @@
     ymax = 4
   []
 
-  [./SubdomainBoundingBox]
+  [./SubdomainBoundingBox1]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
     bottom_left = '0 0 0'
-    top_right = '3 3 3'
+    top_right = '1 1 1'
   [../]
-  
+  [./SubdomainBoundingBox2]
+    type = SubdomainBoundingBoxGenerator
+    input = SubdomainBoundingBox1
+    block_id = 1
+    bottom_left = '2 2 0'
+    top_right = '3 3 1'
+  [../]
   [./ed0]
     type = BlockDeletionGenerator
-    input = SubdomainBoundingBox
     block_id = 1
+    input = SubdomainBoundingBox2
   [../]
-
 []
 
 [Mesh]

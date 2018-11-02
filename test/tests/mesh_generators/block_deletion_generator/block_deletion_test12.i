@@ -2,28 +2,27 @@
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 4
-    ny = 4
+    nx = 8
+    ny = 8
     xmin = 0
     xmax = 4
     ymin = 0
     ymax = 4
   []
 
-  [./SubdomainBoundingBox]
+  [./mark]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
-    bottom_left = '0 0 0'
-    top_right = '3 3 3'
+    bottom_left = '0.9 0.9 0'
+    top_right = '3.1 3.1 0'
   [../]
-  
-  [./ed0]
+  [./delete]
     type = BlockDeletionGenerator
-    input = SubdomainBoundingBox
     block_id = 1
+    input = mark
+    new_boundary = cut_surface
   [../]
-
 []
 
 [Mesh]
@@ -47,24 +46,23 @@
 []
 
 [BCs]
-  [./top]
+  [./outer]
     type = DirichletBC
     variable = u
-    boundary = bottom
+    boundary = 'top bottom left right'
     value = 1
+  [../]
+  [./inner]
+    type = DirichletBC
+    variable = u
+    boundary = cut_surface
+    value = 0
   [../]
 []
 
 [Executioner]
   type = Transient
-  start_time = 0
-  end_time = 10
-  dt = 10
-
-  solve_type = NEWTON
-
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  num_steps = 1
 []
 
 [Outputs]

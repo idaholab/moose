@@ -14,16 +14,14 @@
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
-    bottom_left = '0 0 0'
-    top_right = '3 3 3'
+    bottom_left = '1 1 0'
+    top_right = '3 3 1'
   [../]
-  
   [./ed0]
     type = BlockDeletionGenerator
-    input = SubdomainBoundingBox
     block_id = 1
+    input = SubdomainBoundingBox
   [../]
-
 []
 
 [Mesh]

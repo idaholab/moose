@@ -7,15 +7,15 @@
     nz = 0
     zmin = 0
     zmax = 0
-    elem_type = TRI3
+    elem_type = QUAD4
   []
 
   [./subdomain_id]
     type = GenerateElementSubdomainID
     input = gmg
-    subdomain_ids = '0 1  1 1
-                     1 1  1 0'
-  []
+    subdomain_ids = '0 1
+                     1 1'
+  [../]
 []
 
 [Mesh]
@@ -66,5 +66,6 @@
 []
 
 [Outputs]
+  file_base = out_quad_subdomain_id
   exodus = true
 []

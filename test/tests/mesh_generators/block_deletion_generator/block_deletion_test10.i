@@ -2,28 +2,47 @@
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 4
-    ny = 4
+    nx = 5
+    ny = 5
     xmin = 0
-    xmax = 4
+    xmax = 5
     ymin = 0
-    ymax = 4
+    ymax = 5
   []
 
-  [./SubdomainBoundingBox]
+  [./left]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
-    bottom_left = '0 0 0'
-    top_right = '3 3 3'
+    bottom_left = '2 2 0'
+    top_right = '3 3 1'
   [../]
-  
+  [./right]
+    type = SubdomainBoundingBoxGenerator
+    input = left
+    block_id = 2
+    bottom_left = '3 2 0'
+    top_right = '4 3 1'
+  [../]
+  [./interior_sideset]
+    type = SideSetsBetweenSubdomainsGenerator
+    master_block = 1
+    paired_block = 2
+    input = right
+    new_boundary = interior_ss
+  [../]
+  [./new_block_number]
+    type = SubdomainBoundingBoxGenerator
+    block_id = 3
+    bottom_left = '0 0 0'
+    top_right = '4 4 1'
+    input = 'interior_sideset'
+  [../]
   [./ed0]
     type = BlockDeletionGenerator
-    input = SubdomainBoundingBox
-    block_id = 1
+    block_id = 3
+    input = 'new_block_number'
   [../]
-
 []
 
 [Mesh]
