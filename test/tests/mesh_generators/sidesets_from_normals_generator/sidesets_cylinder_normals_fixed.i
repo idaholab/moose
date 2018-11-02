@@ -1,14 +1,18 @@
 [MeshGenerators]
   [./fmg]
     type = FileMeshGenerator
-    file = square.e
+    file = cylinder.e
+    #parallel_type = replicated
   []
 
-  [./extra_nodeset]
-    type = GenerateExtraNodeset
+  [./sidesets]
+    type = SideSetsFromNormalsGenerator
     input = fmg
-    new_boundary = 'middle_node'
-    nodes = '2'
+    normals = '0  1  0
+               0 -1  0'
+    fixed_normal = true
+    new_boundary = 'front back'
+    variance = 0.5
   []
 []
 
@@ -17,17 +21,11 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -35,27 +33,17 @@
 []
 
 [BCs]
-  active = 'left right middle'
-
-  [./left]
+  [./front]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = front
     value = 0
   [../]
-
-  [./right]
+  [./back]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = back
     value = 1
-  [../]
-
-  [./middle]
-    type = DirichletBC
-    variable = u
-    boundary = 'middle_node'
-    value = -1
   [../]
 []
 
@@ -63,9 +51,11 @@
   type = Steady
 
   solve_type = 'PJFNK'
+
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   exodus = true
-  file_base = out
 []
