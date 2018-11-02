@@ -7,38 +7,45 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWFLUIDSTATEICBASE_H
-#define POROUSFLOWFLUIDSTATEICBASE_H
+#ifndef POROUSFLOWFLUIDSTATEIC_H
+#define POROUSFLOWFLUIDSTATEIC_H
 
 #include "InitialCondition.h"
 
 class PorousFlowDictator;
-class PorousFlowFluidStateICBase;
+class PorousFlowFluidStateIC;
+class PorousFlowFluidStateBase;
 
 template <>
-InputParameters validParams<PorousFlowFluidStateICBase>();
+InputParameters validParams<PorousFlowFluidStateIC>();
 
 /**
  * PorousFlowFluidStateIC calculates an initial value for
  * the total mass fraction of a component summed over all
  * phases, z.
  */
-class PorousFlowFluidStateICBase : public InitialCondition
+class PorousFlowFluidStateIC : public InitialCondition
 {
 public:
-  PorousFlowFluidStateICBase(const InputParameters & parameters);
+  PorousFlowFluidStateIC(const InputParameters & parameters);
+
+  virtual Real value(const Point & p) override;
 
 protected:
   /// Gas porepressure (Pa)
   const VariableValue & _gas_porepressure;
   /// Fluid temperature (C or K)
   const VariableValue & _temperature;
+  /// NaCl mass fraction (kg/kg)
+  const VariableValue & _Xnacl;
   /// Gas saturation (-)
   const VariableValue & _saturation;
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;
   /// The PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
+  /// FluidState UserObject
+  const PorousFlowFluidStateBase & _fs;
 };
 
-#endif // POROUSFLOWFLUIDSTATEICBASE_H
+#endif // POROUSFLOWFLUIDSTATEIC_H

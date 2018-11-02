@@ -7,12 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PorousFlowFluidStateICBase.h"
+#include "PorousFlowFluidStateIC.h"
 #include "PorousFlowDictator.h"
+#include "PorousFlowFluidStateBase.h"
+
+registerMooseObject("PorousFlowApp", PorousFlowFluidStateIC);
 
 template <>
 InputParameters
-validParams<PorousFlowFluidStateICBase>()
+validParams<PorousFlowFluidStateIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredCoupledVar("gas_porepressure",
@@ -22,18 +25,32 @@ validParams<PorousFlowFluidStateICBase>()
   params.addParam<MooseEnum>(
       "temperature_unit", unit_choice, "The unit of the temperature variable");
   params.addCoupledVar("saturation", 0.0, "Gas saturation");
+  params.addRequiredParam<UserObjectName>("fluid_state", "Name of the FluidState UserObject");
+  params.addCoupledVar("xnacl", 0, "The salt mass fraction in the brine (kg/kg)");
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("An initial condition to calculate z from saturation");
   return params;
 }
 
-PorousFlowFluidStateICBase::PorousFlowFluidStateICBase(const InputParameters & parameters)
+PorousFlowFluidStateIC::PorousFlowFluidStateIC(const InputParameters & parameters)
   : InitialCondition(parameters),
     _gas_porepressure(coupledValue("gas_porepressure")),
     _temperature(coupledValue("temperature")),
+    _Xnacl(coupledValue("xnacl")),
     _saturation(coupledValue("saturation")),
     _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator"))
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _fs(getUserObject<PorousFlowFluidStateBase>("fluid_state"))
 {
+}
+
+Real
+PorousFlowFluidStateIC::value(const Point & /*p*/)
+{
+  // The fluid state user object needs temperature in K
+  const Real Tk = _temperature[_qp] + _T_c2k;
+
+  // The total mass fraction corresponding to the input saturation
+  return _fs.totalMassFraction(_gas_porepressure[_qp], Tk, _Xnacl[_qp], _saturation[_qp], _qp);
 }
