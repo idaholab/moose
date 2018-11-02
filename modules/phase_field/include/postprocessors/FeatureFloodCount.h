@@ -53,7 +53,6 @@ public:
 
   virtual void initialSetup() override;
   virtual void meshChanged() override;
-
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
@@ -641,7 +640,16 @@ protected:
    * implementation defined and may not correspond to anything useful. The ID of each feature should
    * be queried from the FeatureData objects.
    */
-  std::vector<FeatureData> _feature_sets;
+  std::vector<FeatureData> & _feature_sets;
+
+  /**
+   * Derived objects (e.g. the GrainTracker) may require restartable data to track information
+   * across time steps. The FeatureFloodCounter however does not. This container is here so that
+   * we have the flexabilty to switch between volatile and non-volatile storage. The _feature_sets
+   * data structure can conditionally refer to this structure or a MOOSE-provided structure, which
+   * is backed up.
+   */
+  std::vector<FeatureData> _volatile_feature_sets;
 
   /**
    * The feature maps contain the raw flooded node information and eventually the unique grain

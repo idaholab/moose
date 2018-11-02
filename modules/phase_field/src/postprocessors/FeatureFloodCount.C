@@ -151,6 +151,11 @@ validParams<FeatureFloodCount>()
    */
   params.set<bool>("use_displaced_mesh") = false;
 
+  // The FeatureFloodCount object does not require that any state (restartable information) is
+  // maintained. This Boolean is set to false so that we don't ask MOOSE to save a potentially
+  // large data structure for no reason.
+  params.addPrivateParam<bool>("restartable_required", false);
+
   params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering", "Advanced");
 
   MooseEnum flood_type("NODAL ELEMENTAL", "ELEMENTAL");
@@ -191,6 +196,9 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _feature_counts_per_map(_maps_size),
     _feature_count(0),
     _partial_feature_sets(_maps_size),
+    _feature_sets(getParam<bool>("restartable_required")
+                      ? declareRestartableData<std::vector<FeatureData>>("feature_sets")
+                      : _volatile_feature_sets),
     _feature_maps(_maps_size),
     _pbs(nullptr),
     _element_average_value(parameters.isParamValid("elem_avg_value")

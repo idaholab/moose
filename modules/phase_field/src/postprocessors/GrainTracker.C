@@ -56,6 +56,9 @@ validParams<GrainTracker>()
                                       "GEOMETRIC ALGEBRAIC");
   params.addPrivateParam<unsigned short>("element_point_neighbor_layers", 1);
 
+  // The GrainTracker requires non-volatile storage for tracking grains across invocations.
+  params.set<bool>("restartable_required") = true;
+
   params.addClassDescription("Grain Tracker object for running reduced order parameter simulations "
                              "without grain coalescence.");
 
@@ -74,16 +77,15 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _remap(getParam<bool>("remap_grains")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
     _nl(_fe_problem.getNonlinearSystemBase()),
-    _feature_sets_old(declareRestartableData<std::vector<FeatureData>>("unique_grains")),
     _poly_ic_uo(parameters.isParamValid("polycrystal_ic_uo")
                     ? &getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo")
                     : nullptr),
     _verbosity_level(getParam<short>("verbosity_level")),
-    _first_time(true),
+    _first_time(declareRestartableData<bool>("first_time", true)),
     _error_on_grain_creation(getParam<bool>("error_on_grain_creation")),
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
-    _max_curr_grain_id(invalid_id),
+    _max_curr_grain_id(declareRestartableData<unsigned int>("max_curr_grain_id", invalid_id)),
     _is_transient(_subproblem.isTransient()),
     _finalize_timer(registerTimedSection("finalize", 1)),
     _remap_timer(registerTimedSection("remapGrains", 2)),
@@ -181,9 +183,9 @@ GrainTracker::initialize()
     return;
 
   /**
-   * If we are passed the first time, we need to save the existing
-   * grains before beginning the tracking on the current step. We'll do that
-   * with a swap since the _feature_sets contents will be cleared anyway.
+   * If we are passed the first time, we need to save the existing grains before beginning the
+   * tracking on the current step. We'll do that with a swap since the _feature_sets contents will
+   * be cleared anyway.
    */
   if (!_first_time)
     _feature_sets_old.swap(_feature_sets);
@@ -437,7 +439,7 @@ GrainTracker::assignGrains()
 
   // Now trigger the newGrainCreated() callback on all ranks
   if (_max_curr_grain_id != invalid_id)
-    for (auto new_id = decltype(_max_curr_grain_id)(0); new_id <= _max_curr_grain_id; ++new_id)
+    for (unsigned int new_id = 0; new_id <= _max_curr_grain_id; ++new_id)
       newGrainCreated(new_id);
 }
 
