@@ -97,8 +97,8 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
                                    dphiH2O_dp,
                                    dphiH2O_dT);
 
-  ABS_TEST(phiCO2, 0.401938, 1.0e-6);
-  ABS_TEST(phiH2O, 0.0898968, 1.0e-6);
+  ABS_TEST(phiCO2, 0.401939178735, 1.0e-8);
+  ABS_TEST(phiH2O, 0.0898968578757, 1.0e-8);
 
   // Test the high temperature formulation
   T = 423.15;
@@ -110,8 +110,8 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   phiH2O = _fp->fugacityCoefficientH2OHighTemp(p, T, co2_density, xco2, yh2o);
   phiCO2 = _fp->fugacityCoefficientCO2HighTemp(p, T, co2_density, xco2, yh2o);
 
-  ABS_TEST(phiH2O, 0.156304067968, 1.0e-10);
-  ABS_TEST(phiCO2, 0.641936764138, 1.0e-10);
+  ABS_TEST(phiH2O, 0.156303437579, 1.0e-8);
+  ABS_TEST(phiCO2, 0.641936639599, 1.0e-8);
 
   // Test that the same results are returned in fugacityCoefficientsHighTemp()
   Real phiCO2_2, phiH2O_2;
@@ -240,8 +240,8 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMassFraction)
   Real X2, dX2_dp, dX2_dT, dX2_dX, Y2, dY2_dp, dY2_dT, dY2_dX;
   _fp->equilibriumMassFractions(p, T, Xnacl, X, dX_dp, dX_dT, dX_dX, Y, dY_dp, dY_dT, dY_dX);
 
-  ABS_TEST(X, 0.00355727945939, 1.0e-10);
-  ABS_TEST(Y, 0.0171978439739, 1.0e-10);
+  ABS_TEST(X, 0.0035573020148, 1.0e-10);
+  ABS_TEST(Y, 0.0171977397214, 1.0e-10);
 
   // Derivative wrt pressure
   _fp->equilibriumMassFractions(
@@ -288,8 +288,8 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMassFraction)
 
   _fp->equilibriumMassFractions(p, T, Xnacl, X, dX_dp, dX_dT, dX_dX, Y, dY_dp, dY_dT, dY_dX);
 
-  ABS_TEST(X, 0.0162994976121, 1.0e-10);
-  ABS_TEST(Y, 0.24947151051, 1.0e-10);
+  ABS_TEST(X, 0.016299479086, 1.0e-10);
+  ABS_TEST(Y, 0.249471400766, 1.0e-10);
 }
 
 /*
@@ -1006,8 +1006,8 @@ TEST_F(PorousFlowBrineCO2Test, solveEquilibriumMoleFractionHighTemp)
   Real yh2o, xco2;
   Real co2_density = _co2_fp->rho_from_p_T(p, T);
   _fp->solveEquilibriumMoleFractionHighTemp(p, T, Xnacl, co2_density, xco2, yh2o);
-  ABS_TEST(yh2o, 0.161429471353, 1.0e-10);
-  ABS_TEST(xco2, 0.0236967010229, 1.0e-10);
+  ABS_TEST(yh2o, 0.161429743509, 1.0e-10);
+  ABS_TEST(xco2, 0.0236966821858, 1.0e-10);
 
   // Mass fraction equivalent to molality of 2
   p = 30.0e6;
@@ -1015,8 +1015,8 @@ TEST_F(PorousFlowBrineCO2Test, solveEquilibriumMoleFractionHighTemp)
   Xnacl = 0.105;
 
   _fp->solveEquilibriumMoleFractionHighTemp(p, T, Xnacl, co2_density, xco2, yh2o);
-  ABS_TEST(yh2o, 0.0468195468869, 1.0e-10);
-  ABS_TEST(xco2, 0.023664581533, 1.0e-10);
+  ABS_TEST(yh2o, 0.0468197608955, 1.0e-10);
+  ABS_TEST(xco2, 0.0236644599437, 1.0e-10);
 
   // Mass fraction equivalent to molality of 4
   T = 523.15;
@@ -1024,8 +1024,8 @@ TEST_F(PorousFlowBrineCO2Test, solveEquilibriumMoleFractionHighTemp)
 
   co2_density = _co2_fp->rho_from_p_T(p, T);
   _fp->solveEquilibriumMoleFractionHighTemp(p, T, Xnacl, co2_density, xco2, yh2o);
-  ABS_TEST(yh2o, 0.253292227782, 1.0e-10);
-  ABS_TEST(xco2, 0.016834474171, 1.0e-10);
+  ABS_TEST(yh2o, 0.253292728991, 1.0e-10);
+  ABS_TEST(xco2, 0.0168344513321, 1.0e-10);
 }
 
 /**
@@ -1041,31 +1041,31 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMoleFractions)
 
   Real x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX;
   _fp->equilibriumMoleFractions(p, T, Xnacl, x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX);
-  ABS_TEST(y, 0.00696382327418, 1.0e-8);
-  ABS_TEST(x, 0.0236534984353, 1.0e-8);
+  ABS_TEST(y, 0.0069638270001, 1.0e-8);
+  ABS_TEST(x, 0.0236535616524, 1.0e-8);
 
   // Intermediate temperature regime
   T = 373.15;
 
   _fp->equilibriumMoleFractions(p, T, Xnacl, x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX);
-  ABS_TEST(y, 0.0194363435584, 1.0e-8);
-  ABS_TEST(x, 0.0201949380648, 1.0e-8);
+  ABS_TEST(y, 0.0194363768549, 1.0e-8);
+  ABS_TEST(x, 0.0201950146387, 1.0e-8);
 
   // High temperature regime
   p = 30.0e6;
   T = 523.15;
 
   _fp->equilibriumMoleFractions(p, T, Xnacl, x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX);
-  ABS_TEST(y, 0.286116587269, 1.0e-8);
-  ABS_TEST(x, 0.0409622847096, 1.0e-8);
+  ABS_TEST(y, 0.286117195565, 1.0e-8);
+  ABS_TEST(x, 0.0409622051253, 1.0e-8);
 
   // High temperature regime with low pressure
   p = 1.0e6;
   T = 523.15;
 
   _fp->equilibriumMoleFractions(p, T, Xnacl, x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX);
-  ABS_TEST(y, 1.0, 1.0e-10);
-  ABS_TEST(x, 0.0, 1.0e-10);
+  ABS_TEST(y, 1.0, 1.0e-8);
+  ABS_TEST(x, 0.0, 1.0e-8);
 
   // Test brine (Xnacl = 0.1)
   // Low temperature regime
@@ -1074,21 +1074,21 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMoleFractions)
   Xnacl = 0.1;
 
   _fp->equilibriumMoleFractions(p, T, Xnacl, x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX);
-  ABS_TEST(y, 0.00657324509341, 1.0e-8);
-  ABS_TEST(x, 0.0152851189462, 1.0e-8);
+  ABS_TEST(y, 0.00657324876094, 1.0e-8);
+  ABS_TEST(x, 0.0152851601478, 1.0e-8);
 
   // Intermediate temperature regime
   T = 373.15;
 
   _fp->equilibriumMoleFractions(p, T, Xnacl, x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX);
-  ABS_TEST(y, 0.0183104919388, 1.0e-8);
-  ABS_TEST(x, 0.0132647919449, 1.0e-8);
+  ABS_TEST(y, 0.0183105237286, 1.0e-8);
+  ABS_TEST(x, 0.013264842448, 1.0e-8);
 
   // High temperature regime
   p = 30.0e6;
   T = 523.15;
 
   _fp->equilibriumMoleFractions(p, T, Xnacl, x, dx_dp, dx_dT, dx_dX, y, dy_dp, dy_dT, dy_dX);
-  ABS_TEST(y, 0.270258370983, 1.0e-8);
-  ABS_TEST(x, 0.0246589523314, 1.0e-8);
+  ABS_TEST(y, 0.270258924237, 1.0e-8);
+  ABS_TEST(x, 0.0246589135776, 1.0e-8);
 }
