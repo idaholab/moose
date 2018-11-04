@@ -13,12 +13,17 @@
 #include "ElementLoopUserObject.h"
 
 /**
- * Computes K_ij and R+ and R- detailed in
+ * Computes Advective fluxes.  Specifically,
+ * computes K_ij, D_ij, L_ij, R+, R-, f^a_ij detailed in
  * D Kuzmin and S Turek "High-resolution FEM-TVD schemes based on a fully multidimensional flux
  * limiter" Journal of Computational Physics 198 (2004) 131-158
+ * Then combines the results to produce the residual and Jacobian contributions that
+ * may be used by Kernels
  *
  * K_ij is a measure of flux from node i to node j
- * R^+_i and R^-_i quantify how much antidiffusion to allow around node i
+ * D_ij is a diffusion matrix that stabilizes K_ij (K+D has the LED property)
+ * L = K + D
+ * R^+_i and R^-_i and f^a_{ij} quantify how much antidiffusion to allow around node i
  **/
 class AdvectiveFluxCalculator;
 
@@ -30,17 +35,77 @@ class AdvectiveFluxCalculator : public ElementLoopUserObject
 public:
   AdvectiveFluxCalculator(const InputParameters & parameters);
 
-  /// Size _kij, if needed
+  /// If needed, size quantities appropriately and compute _valence
   virtual void timestepSetup() override;
 
-  /// Call ElementLoopUserObject::meshChanged() and set _init_k_and_compute_valence to true
+  /// Call ElementLoopUserObject::meshChanged() and set _resizing_needed to true
   virtual void meshChanged() override;
 
   /// Zeroes _kij
   virtual void pre() override;
 
+  /**
+   * Using _kij, computes Kuzmin-Turek's D, L, f^a, and relevant Jacobian information
+   * Then assemble the relevant quantities into _flux_out and _dflux_out_du
+   */
+  virtual void post() override;
+
   /// Compute contributions to _kij from the current element
   virtual void computeElement() override;
+
+  /**
+   * Returns the flux out of lobal node id
+   * @param node_i id of node
+   * @return advective flux out of node after applying the KT procedure
+   */
+  Real getFluxOut(dof_id_type node_i) const;
+
+  /**
+   * Returns d(flux out of node i)/du(node j) used in Jacobian computations
+   * @param node_i id of node
+   * @param node_j id of j^th node
+   * @return the derivative (after applying the KT procedure)
+   */
+  Real getdFluxOutdu(dof_id_type node_i, dof_id_type node_j) const;
+
+  /**
+   * Returns the valence of the i-j edge.
+   * Valence is the number of times the edge is encountered in a loop over elements (that have
+   * appropriate subdomain_id, if the user has employed the "blocks=" parameter) seen by this
+   * processor
+   * @param node_i id of i^th node
+   * @param node_j id of j^th node
+   * @return valence of the i-j edge
+   */
+  unsigned getValence(dof_id_type node_i, dof_id_type node_j) const;
+
+protected:
+  /// advection velocity
+  RealVectorValue _velocity;
+
+  /// the nodal values of u
+  MooseVariable * _u_nodal;
+
+  /// the moose variable number of u
+  unsigned _u_var_num;
+
+  /// Kuzmin-Turek shape function
+  const VariablePhiValue & _phi;
+
+  /// grad(Kuzmin-Turek shape function)
+  const VariablePhiGradient & _grad_phi;
+
+  /// whether _kij, etc, need to be sized appropriately (and valence recomputed) at the start of the timestep
+  bool _resizing_needed;
+
+  /**
+   * flux limiter, L, on Page 135 of Kuzmin and Turek
+   * @param a KT's "a" parameter
+   * @param b KT's "b" parameter
+   * @param limited[out] The value of the flux limiter, L
+   * @param dlimited_db[out] The derivative dL/db
+   */
+  void limitFlux(Real a, Real b, Real & limited, Real & dlimited_db) const;
 
   /**
    * Returns the value of R_{i}^{+}, Eqn (49) of KT
@@ -65,45 +130,6 @@ public:
   Real getKij(dof_id_type node_i, dof_id_type node_j) const;
 
   /**
-   * Returns the valence of the i-j edge.
-   * Valence is the number of times the edge is encountered in a loop over elements (that have
-   * appropriate subdomain_id, if the user has employed the "blocks=" parameter) seen by this
-   * processor
-   * @param node_i id of i^th node
-   * @param node_j id of j^th node
-   * @return valence of the i-j edge
-   */
-  unsigned getValence(dof_id_type node_i, dof_id_type node_j) const;
-
-  /**
-   * flux limiter, L, on Page 135 of Kuzmin and Turek
-   * @param a KT's "a" parameter
-   * @param b KT's "b" parameter
-   * @param limited[out] The value of the flux limiter, L
-   * @param dlimited_db[out] The derivative dL/db
-   */
-  void limitFlux(Real a, Real b, Real & limited, Real & dlimited_db) const;
-
-protected:
-  /// advection velocity
-  RealVectorValue _velocity;
-
-  /// the nodal values of u
-  MooseVariable * _u_nodal;
-
-  /// the moose variable number of u
-  unsigned _u_var_num;
-
-  /// Kuzmin-Turek shape function
-  const VariablePhiValue & _phi;
-
-  /// grad(Kuzmin-Turek shape function)
-  const VariablePhiGradient & _grad_phi;
-
-  /// whether _kij needs to be sized appropriately and valence computed
-  bool _init_k_and_compute_valence;
-
-  /**
    * Determines Flux Limiter type (Page 135 of Kuzmin and Turek)
    * "None" means that limitFlux=0 always, which implies zero antidiffusion will be added
    */
@@ -119,8 +145,15 @@ protected:
    */
   std::map<dof_id_type, std::map<dof_id_type, Real>> _kij;
 
-  /// For an pre-allocated K_ij, zero all its entries
-  void zeroKij();
+  /**
+   * _flux_out[i] = flux of "heat" from node i
+   */
+  std::map<dof_id_type, Real> _flux_out;
+
+  /**
+   * _dflux_out_du[i] = d(flux_out[i])/d(u[j])
+   */
+  std::map<dof_id_type, std::map<dof_id_type, Real>> _dflux_out_du;
 
   /**
    * _valence[(i, j)] = number of times, in a loop over elements owned by this processor,

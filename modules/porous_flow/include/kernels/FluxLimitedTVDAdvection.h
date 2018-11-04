@@ -22,9 +22,9 @@ class FluxLimitedTVDAdvection;
  * D Kuzmin and S Turek "High-resolution FEM-TVD schemes based on a fully multidimensional flux
  * limiter" Journal of Computational Physics 198 (2004) 131-158
  *
- * Kuzmin and Turek's K_ij matrix, and their R+ and R- quantities are
- * computed by the AdvectiveFluxCalculator, and this Kernel adds the diffusion
- * and antidiffusion as specified by Kuzmin and Turek.
+ * Use the quantities built and cached by AdvectiveFluxCalculator
+ * to build the residual and Jacobian contributions corresponding
+ * to Kuzmin and Turek's stabilized advection
  */
 template <>
 InputParameters validParams<FluxLimitedTVDAdvection>();
@@ -39,28 +39,7 @@ protected:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
 
-  /// Nodal value of u
-  const VariableValue & _u_nodal;
-
-  /**
-   * _flux_out[i] = mass of fluid moving out of node i into other nodes of this element
-   * So _flux_out[i] is the contribution to the residual of node i from this element
-   * Note that "i" is local to this element.
-   * (I could have used _local_re, but the name _flux_out is more descriptive for now)
-   */
-  DenseVector<Real> _flux_out;
-
-  /**
-   * _dflux_out_dvar[i][j] = d(_flux_out[i])/d(_u_nodal[global id j]).  Used for Jacobian
-   * computations The present implementation assumes that Kij is independent of u Note that "i" is
-   * local to this element, while j is a global nodal id.
-   */
-  std::vector<std::map<dof_id_type, Real>> _dflux_out_dvar;
-
-  /// Do Kuzmin-Turek algorithm
-  void tvd();
-
-  /// The user object that computes Kuzmin and Turek's K_ij, and R+ and R- flux-limiting quantities
+  /// The user object that computes Kuzmin and Turek's K_ij, R+ and R-, etc quantities
   const AdvectiveFluxCalculator & _fluo;
 };
 

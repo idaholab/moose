@@ -27,8 +27,7 @@ validParams<AdvectiveFluxCalculator>()
                              flux_limiter_type,
                              "Type of flux limiter to use.  'None' means that no antidiffusion "
                              "will be added in the Kuzmin-Turek scheme");
-  // QUERY: do we need timestep_begin (see notes in timestepSetup method) or just nonlinear?
-  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_BEGIN, EXEC_NONLINEAR};
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_LINEAR};
   return params;
 }
 
@@ -39,21 +38,25 @@ AdvectiveFluxCalculator::AdvectiveFluxCalculator(const InputParameters & paramet
     _u_var_num(coupled("u", 0)),
     _phi(_assembly.fePhi<Real>(_u_nodal->feType())),
     _grad_phi(_assembly.feGradPhi<Real>(_u_nodal->feType())),
-    _init_k_and_compute_valence(true),
+    _resizing_needed(true),
     _flux_limiter_type(getParam<MooseEnum>("flux_limiter_type").getEnum<FluxLimiterTypeEnum>()),
     _kij({}),
+    _flux_out({}),
+    _dflux_out_du({}),
     _valence({})
 {
   // TODO: test this
-  if (!_execute_enum.contains(EXEC_TIMESTEP_BEGIN) || !_execute_enum.contains(EXEC_NONLINEAR))
+  if (!_execute_enum.contains(EXEC_LINEAR))
     mooseError("The AdvectiveFluxCalculator UserObject " + name() +
-               " execute_on parameter must include, at least, 'timestep_begin nonlinear'");
+               " execute_on parameter must include, at least, 'linear'.  This is to ensure that "
+               "this UserObject computes all necessary quantities just before the Kernels evaluate "
+               "their Residuals");
 }
 
 void
 AdvectiveFluxCalculator::timestepSetup()
 {
-  if (_init_k_and_compute_valence)
+  if (_resizing_needed)
   {
     _kij.clear();
     _valence.clear();
@@ -86,16 +89,22 @@ AdvectiveFluxCalculator::timestepSetup()
         }
       }
     }
-    _init_k_and_compute_valence = false;
-  }
-}
 
-void
-AdvectiveFluxCalculator::zeroKij()
-{
-  for (auto & nodes : _kij)
-    for (auto & neighbors : nodes.second)
-      neighbors.second = 0.0;
+    _flux_out.clear();
+    _dflux_out_du.clear();
+    for (auto & nodes : _kij)
+    {
+      const dof_id_type node_i = nodes.first;
+      _flux_out[node_i] = 0.0;
+      _dflux_out_du[node_i] = {};
+      for (auto & neighbors : nodes.second)
+      {
+        const dof_id_type node_j = neighbors.second;
+        _dflux_out_du[node_i][node_j] = 0.0;
+      }
+    }
+    _resizing_needed = false;
+  }
 }
 
 void
@@ -104,7 +113,7 @@ AdvectiveFluxCalculator::meshChanged()
   ElementLoopUserObject::meshChanged();
 
   // Signal that _kij and _valence need to be rebuilt
-  _init_k_and_compute_valence = true;
+  _resizing_needed = true;
 }
 
 /*
@@ -282,7 +291,9 @@ AdvectiveFluxCalculator::limitFlux(Real a, Real b, Real & limited, Real & dlimit
 void
 AdvectiveFluxCalculator::pre()
 {
-  zeroKij();
+  for (auto & nodes : _kij)
+    for (auto & neighbors : nodes.second)
+      neighbors.second = 0.0;
 }
 
 void
@@ -310,6 +321,7 @@ AdvectiveFluxCalculator::computeElement()
 Real
 AdvectiveFluxCalculator::getKij(dof_id_type node_i, dof_id_type node_j) const
 {
+
   const auto & row_find = _kij.find(node_i);
   mooseAssert(row_find != _kij.end(),
               "AdvectiveFluxCalculator UserObject " << name() << " Kij does not contain node "
@@ -320,6 +332,32 @@ AdvectiveFluxCalculator::getKij(dof_id_type node_i, dof_id_type node_j) const
               "AdvectiveFluxCalculator UserObject " << name() << " Kij on row " << node_i
                                                     << " does not contain node " << node_j);
 
+  return entry_find->second;
+}
+
+Real
+AdvectiveFluxCalculator::getdFluxOutdu(dof_id_type node_i, dof_id_type node_j) const
+{
+  const auto & row_find = _dflux_out_du.find(node_i);
+  mooseAssert(row_find != _dflux_out_du.end(),
+              "AdvectiveFluxCalculator UserObject "
+                  << name() << " _dflux_out_du does not contain node " << node_i);
+  const std::map<dof_id_type, Real> & dflux_out_du_row = row_find->second;
+  const auto & entry_find = dflux_out_du_row.find(node_j);
+  mooseAssert(entry_find != dflux_out_du_row.end(),
+              "AdvectiveFluxCalculator UserObject " << name() << " _dflux_out_du on row " << node_i
+                                                    << " does not contain node " << node_j);
+
+  return entry_find->second;
+}
+
+Real
+AdvectiveFluxCalculator::getFluxOut(dof_id_type node_i) const
+{
+  const auto & entry_find = _flux_out.find(node_i);
+  mooseAssert(entry_find != _flux_out.end(),
+              "AdvectiveFluxCalculator UserObject " << name() << " _flux_out does not contain node "
+                                                    << node_i);
   return entry_find->second;
 }
 
@@ -430,4 +468,196 @@ AdvectiveFluxCalculator::PQPlusMinus(dof_id_type node_i,
   }
 
   return result;
+}
+
+void
+AdvectiveFluxCalculator::post()
+{
+  // Calculate KuzminTurek D matrix
+  // See Eqn (32)
+  // This adds artificial diffusion, which eliminates any spurious oscillations
+  // The idea is that D will remove all negative off-diagonal elements when it is added to K
+  // This is identical to full upwinding
+  std::map<dof_id_type, std::map<dof_id_type, Real>> dij = {};
+  for (auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    dij[i] = {};
+    dij[i][i] = 0.0;
+    for (auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      if (i == j)
+        continue;
+      dij[i][j] = std::max(0.0, std::max(-_kij[i][j], -_kij[j][i]));
+      dij[i][i] -= dij[i][j];
+    }
+  }
+
+  // Calculate KuzminTurek L matrix
+  // See Fig 2: L = K + D
+  std::map<dof_id_type, std::map<dof_id_type, Real>> lij = {};
+  for (auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    lij[i] = {};
+    for (auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      lij[i][j] = _kij[i][j] + dij[i][j];
+    }
+  }
+
+  // Compute KuzminTurek R matrices
+  // See Eqns (49) and (12)
+  std::map<dof_id_type, Real> rP = {};
+  std::map<dof_id_type, Real> rM = {};
+  std::map<dof_id_type, std::map<dof_id_type, Real>> drP = {};
+  std::map<dof_id_type, std::map<dof_id_type, Real>> drM = {};
+  for (const auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    drP[i] = {};
+    rP[i] = rPlus(i, drP[i]);
+    drM[i] = {};
+    rM[i] = rMinus(i, drM[i]);
+  }
+
+  // Calculate KuzminTurek f^{a} matrix
+  // This is the antidiffusive flux
+  // See Eqn (50)
+  std::map<dof_id_type, std::map<dof_id_type, Real>> fa = {};
+  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>> dfa =
+      {}; // dfa[i][j][k] = d(fa[i][j])/du[k]
+  for (const auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    fa[i] = {};
+    dfa[i] = {};
+    for (const auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      fa[i][j] = 0.0;
+      dfa[i][j] = {};
+      // The derivatives are a bit complicated.
+      // If i is upwind of j then fa[i][j] depends on all nodes connected to i.
+      // But if i is downwind of j then fa[i][j] depends on all nodes connected to j.
+      for (const auto & neighbor_to_i : _kij[i])
+        dfa[i][j][neighbor_to_i.first] = 0.0;
+      for (const auto & neighbor_to_j : _kij[j])
+        dfa[i][j][neighbor_to_j.first] = 0.0;
+    }
+  }
+  for (const auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    const Real u_i = _u_nodal->getNodalValue(_mesh.getMesh().node_ref(i));
+    for (const auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      const Real u_j = _u_nodal->getNodalValue(_mesh.getMesh().node_ref(j));
+      if (i == j)
+        continue;
+      if (lij[j][i] >= lij[i][j]) // node i is upwind of node j.
+      {
+        Real prefactor = 0.0;
+        std::map<dof_id_type, Real>
+            dprefactor_du; // dprefactor_dr[global_id] = d(prefactor)/du[global_id];
+        for (const auto & dof_deriv : drP[i])
+          dprefactor_du[dof_deriv.first] = 0.0;
+        if (u_i >= u_j)
+        {
+          if (lij[j][i] <= rP[i] * dij[i][j])
+            prefactor = lij[j][i];
+          else
+          {
+            prefactor = rP[i] * dij[i][j];
+            for (const auto & dof_deriv : drP[i])
+              dprefactor_du[dof_deriv.first] = dof_deriv.second * dij[i][j];
+          }
+        }
+        else
+        {
+          if (lij[j][i] <= rM[i] * dij[i][j])
+            prefactor = lij[j][i];
+          else
+          {
+            prefactor = rM[i] * dij[i][j];
+            for (const auto & dof_deriv : drM[i])
+              dprefactor_du[dof_deriv.first] = dof_deriv.second * dij[i][j];
+          }
+        }
+        fa[i][j] = prefactor * (u_i - u_j);
+        dfa[i][j][i] = prefactor;
+        dfa[i][j][j] = -prefactor;
+        for (const auto & dof_deriv : dprefactor_du)
+          dfa[i][j][dof_deriv.first] += dof_deriv.second * (u_i - u_j);
+      }
+    }
+  }
+  for (const auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    for (const auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      if (i == j)
+        continue;
+      if (lij[j][i] < lij[i][j]) // node_i is downwind of node_j.
+      {
+        fa[i][j] = -fa[j][i];
+        for (const auto & dof_deriv : dfa[j][i])
+          dfa[i][j][dof_deriv.first] = -dof_deriv.second;
+      }
+    }
+  }
+
+  // zero _flux_out and _dflux_out_du
+  for (const auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    _flux_out[i] = 0.0;
+    // The derivatives are a bit complicated.
+    // If i is upwind of a node "j" then _flux_out[i] depends on all nodes connected to i.
+    // But if i is downwind of a node "j" then _flux_out depends on all nodes connected with node j.
+    for (const auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      _dflux_out_du[i][j] = 0.0;
+      for (const auto & neighbors_j : _kij[j])
+        _dflux_out_du[i][neighbors_j.first] = 0.0;
+    }
+  }
+
+  // Add everything together
+  // See step 3 in Fig 2, noting Eqn (36)
+  for (auto & nodes : _kij)
+  {
+    const dof_id_type i = nodes.first;
+    for (const auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      const Real u_j = _u_nodal->getNodalValue(_mesh.getMesh().node_ref(j));
+
+      // negative sign because residual = -Lu (KT equation (19))
+      _flux_out[i] -= lij[i][j] * u_j + fa[i][j];
+
+      _dflux_out_du[i][j] -= lij[i][j];
+      for (const auto & dof_deriv : dfa[i][j])
+        _dflux_out_du[i][dof_deriv.first] -= dof_deriv.second;
+    }
+  }
+
+  /*
+  Moose::out << "Computed derivs\n";
+  for (auto & nodes : _dflux_out_du)
+  {
+    const dof_id_type i = nodes.first;
+    if (i != 1)
+      continue;
+    for (const auto & node_deriv : nodes.second)
+      Moose::out << "i = " << i << " j = " << node_deriv.first << " deriv = " << node_deriv.second
+                 << "\n";
+  }
+  */
 }
