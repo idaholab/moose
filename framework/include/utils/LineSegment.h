@@ -70,10 +70,15 @@ public:
    */
   Real length() const { return (_p0 - _p1).norm(); }
 
+  /**
+   * Direction of line segment
+   */
+  Point direction() const { return _dir; }
+
 private:
   bool closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const;
 
-  Point _p0, _p1;
+  Point _p0, _p1, _dir;
 };
 
 #endif // LINESEGMENT_H

@@ -12,7 +12,10 @@
 #include "libmesh/plane.h"
 #include "libmesh/vector_value.h"
 
-LineSegment::LineSegment(const Point & p0, const Point & p1) : _p0(p0), _p1(p1) {}
+LineSegment::LineSegment(const Point & p0, const Point & p1)
+  : _p0(p0), _p1(p1), _dir((_p1 - _p0).unit())
+{
+}
 
 bool
 LineSegment::closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const

@@ -107,25 +107,6 @@ sideIntersectedByLine(const Elem * elem,
 }
 
 /**
- * Returns the side number for elem that neighbor is on
- *
- * Returns -1 if the neighbor can't be found to be a neighbor
- */
-int
-sideNeighborIsOn(const Elem * elem, const Elem * neighbor)
-{
-  unsigned int n_sides = elem->n_sides();
-
-  for (unsigned int i = 0; i < n_sides; i++)
-  {
-    if (elem->neighbor_ptr(i) == neighbor)
-      return i;
-  }
-
-  return -1;
-}
-
-/**
  * Recursively find all elements intersected by a line segment
  *
  * Works by moving from one element to the next _through_ the side of the current element.
@@ -157,10 +138,36 @@ recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment,
   int intersected_side =
       sideIntersectedByLine(current_elem, not_side, line_segment, intersection_point);
 
+  // We may start from a vertex where multiple sides intersect so we make sure
+  // to not stop or go backward
+  Point d = intersection_point - incoming_point;
+  if (d * line_segment.direction() <= TOLERANCE)
+  {
+    not_side.push_back(intersected_side);
+    intersected_side =
+        sideIntersectedByLine(current_elem, not_side, line_segment, intersection_point);
+  }
+
   if (intersected_side != -1) // -1 means that we didn't find any side
   {
     // Get the neighbor on that side
-    const Elem * neighbor = current_elem->neighbor_ptr(intersected_side);
+    std::set<const Elem *> neighbors;
+    current_elem->find_point_neighbors(intersection_point, neighbors);
+
+    const Elem * neighbor = nullptr;
+    if (neighbors.size() > 1)
+    {
+      // Extrude from intersection point a little further for finding the
+      // neighboring element
+      // Note: we assume this does not extrude beyond the neighboring element.
+      Point innext = intersection_point + 10 * TOLERANCE * line_segment.direction();
+      for (auto & e : neighbors)
+        if (e->contains_point(innext))
+        {
+          neighbor = e;
+          break;
+        }
+    }
 
     if (neighbor)
     {
@@ -172,7 +179,7 @@ recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment,
 
       // Note: This is finding the side the current_elem is on for the neighbor.  That's the
       // "incoming_side" for the neighbor
-      int incoming_side = sideNeighborIsOn(neighbor, current_elem);
+      int incoming_side = neighbor->which_neighbor_am_i(current_elem);
 
       // Recurse
       recursivelyFindElementsIntersectedByLine(
