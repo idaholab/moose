@@ -88,7 +88,7 @@ class CSVDiffer:
             # the CSV files
             if self.custom_columns and self.only_compare_custom:
                 # For the rest of the comparison, we only care about custom columns
-                keys1 = self.custom_columns
+                keys2 = self.custom_columns
                 for key in self.custom_columns:
                     if key not in small or key not in large:
                         self.addError(fname, "Header '" + key + "' is missing")
@@ -108,7 +108,7 @@ class CSVDiffer:
                 continue
 
             # now check that each column is the same length
-            for key in keys1:
+            for key in keys2:
                 if len(table1[key]) != len(table2[key]):
                     self.addError(fname, "Columns with header '" + key + "' aren't the same length")
                     foundError = True
@@ -120,7 +120,7 @@ class CSVDiffer:
             # now check all the values in the table
             abs_zero = self.abs_zero
             rel_tol   = self.rel_tol
-            for key in keys1:
+            for key in keys2:
                 for val1, val2 in zip( table1[key], table2[key] ):
                     # if customized tolerances specified use them otherwise
                     # use the default
