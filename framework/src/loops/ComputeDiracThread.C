@@ -20,10 +20,13 @@
 
 #include "libmesh/threads.h"
 
-ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem, bool is_jacobian)
+ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem,
+                                       const std::set<TagID> & tags,
+                                       bool is_jacobian)
   : ThreadedElementLoop<DistElemRange>(feproblem),
     _is_jacobian(is_jacobian),
     _nl(feproblem.getNonlinearSystemBase()),
+    _tags(tags),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
 {
 }
@@ -33,6 +36,7 @@ ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split sp
   : ThreadedElementLoop<DistElemRange>(x, split),
     _is_jacobian(x._is_jacobian),
     _nl(x._nl),
+    _tags(x._tags),
     _dirac_kernels(x._dirac_kernels)
 {
 }
@@ -61,6 +65,20 @@ ComputeDiracThread::subdomainChanged()
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+
+  // If users pass a empty vector or a full size of vector,
+  // we take all kernels
+  if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
+    _dirac_warehouse = &_dirac_kernels;
+  // If we have one tag only,  We call tag based storage
+  else if (_tags.size() == 1)
+    _dirac_warehouse = _is_jacobian
+                           ? &(_dirac_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid))
+                           : &(_dirac_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+  // This one may be expensive, and hopefully we do not use it so often
+  else
+    _dirac_warehouse = _is_jacobian ? &(_dirac_kernels.getMatrixTagsObjectWarehouse(_tags, _tid))
+                                    : &(_dirac_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
 }
 
 void
@@ -71,8 +89,7 @@ ComputeDiracThread::onElement(const Elem * elem)
     return;
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
-  const std::vector<std::shared_ptr<DiracKernel>> & dkernels =
-      _dirac_kernels.getActiveObjects(_tid);
+  const auto & dkernels = _dirac_warehouse->getActiveObjects(_tid);
 
   // Only call reinitMaterials() if one or more DiracKernels has
   // actually called getMaterialProperty().  Loop over all the

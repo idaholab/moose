@@ -19,9 +19,13 @@
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
-    FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels)
+    FEProblemBase & fe_problem,
+    MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+    const std::set<TagID> & tags)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
+    _tags(tags),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
 {
@@ -31,7 +35,9 @@ ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
     ComputeNodalKernelBCJacobiansThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+    _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
+    _tags(x._tags),
     _nodal_kernels(x._nodal_kernels),
     _num_cached(0)
 {
@@ -41,6 +47,13 @@ void
 ComputeNodalKernelBCJacobiansThread::pre()
 {
   _num_cached = 0;
+
+  if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
+    _nkernel_warehouse = &_nodal_kernels;
+  else if (_tags.size() == 1)
+    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+  else
+    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
 }
 
 void
@@ -63,10 +76,10 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     // The NodalKernels that are active and are coupled to the jvar in question
     std::vector<std::shared_ptr<NodalKernel>> active_involved_kernels;
 
-    if (_nodal_kernels.hasActiveBoundaryObjects(boundary_id, _tid))
+    if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, _tid))
     {
       // Loop over each NodalKernel to see if it's involved with the jvar
-      const auto & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
+      const auto & objects = _nkernel_warehouse->getActiveBoundaryObjects(boundary_id, _tid);
       for (const auto & nodal_kernel : objects)
       {
         if (nodal_kernel->variable().number() == ivar)
@@ -104,7 +117,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         var->prepareAux();
       }
 
-      if (_nodal_kernels.hasActiveBoundaryObjects(boundary_id, _tid))
+      if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, _tid))
       {
         Node * node = bnode->_node;
         if (node->processor_id() == _fe_problem.processor_id())

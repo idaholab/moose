@@ -34,12 +34,19 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _requires_nonlocal_coupling(false),
     _rz_coord_axis(1), // default to RZ rotation around y-axis
     _currently_computing_jacobian(false),
-    _computing_nonlinear_residual(false)
+    _computing_nonlinear_residual(false),
+    _safe_access_tagged_matrices(false),
+    _safe_access_tagged_vectors(false)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
   _active_material_property_ids.resize(n_threads);
+
+  _active_fe_var_coupleable_matrix_tags.resize(n_threads);
+  _active_fe_var_coupleable_vector_tags.resize(n_threads);
+  _active_sc_var_coupleable_matrix_tags.resize(n_threads);
+  _active_sc_var_coupleable_vector_tags.resize(n_threads);
 }
 
 SubProblem::~SubProblem() {}
@@ -140,6 +147,78 @@ TagName
 SubProblem::matrixTagName(TagID tag)
 {
   return _matrix_tag_id_to_tag_name[tag];
+}
+
+void
+SubProblem::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+{
+  _active_fe_var_coupleable_matrix_tags[tid] = mtags;
+}
+
+void
+SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+{
+  _active_fe_var_coupleable_vector_tags[tid] = vtags;
+}
+
+void
+SubProblem::clearActiveFEVariableCoupleableVectorTags(THREAD_ID tid)
+{
+  _active_fe_var_coupleable_vector_tags[tid].clear();
+}
+
+void
+SubProblem::clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid)
+{
+  _active_fe_var_coupleable_matrix_tags[tid].clear();
+}
+
+std::set<TagID> &
+SubProblem::getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid)
+{
+  return _active_fe_var_coupleable_matrix_tags[tid];
+}
+
+std::set<TagID> &
+SubProblem::getActiveFEVariableCoupleableVectorTags(THREAD_ID tid)
+{
+  return _active_fe_var_coupleable_vector_tags[tid];
+}
+
+void
+SubProblem::setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+{
+  _active_sc_var_coupleable_matrix_tags[tid] = mtags;
+}
+
+void
+SubProblem::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+{
+  _active_sc_var_coupleable_vector_tags[tid] = vtags;
+}
+
+void
+SubProblem::clearActiveScalarVariableCoupleableVectorTags(THREAD_ID tid)
+{
+  _active_sc_var_coupleable_vector_tags[tid].clear();
+}
+
+void
+SubProblem::clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid)
+{
+  _active_sc_var_coupleable_matrix_tags[tid].clear();
+}
+
+std::set<TagID> &
+SubProblem::getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid)
+{
+  return _active_sc_var_coupleable_matrix_tags[tid];
+}
+
+std::set<TagID> &
+SubProblem::getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid)
+{
+  return _active_sc_var_coupleable_vector_tags[tid];
 }
 
 void

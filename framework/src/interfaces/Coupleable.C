@@ -336,12 +336,17 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
   if (!isCoupled(var_name))
     mooseError(var_name, ": invalid variable name for coupledVectorTagValue");
 
+  addFEVariableCoupleableVectorTag(tag);
+
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
   if (var == NULL)
     mooseError("Call coupledVectorValue for coupled vector variables");
 
-  return var->nodalVectorTagValue(tag);
+  if (_c_nodal)
+    return var->nodalVectorTagValue(tag);
+  else
+    return var->vectorTagValue(tag);
 }
 
 const VariableValue &
@@ -351,12 +356,17 @@ Coupleable::coupledMatrixTagValue(const std::string & var_name, TagID tag, unsig
   if (!isCoupled(var_name))
     mooseError(var_name, ": invalid variable name for coupledMatrixTagValue");
 
+  addFEVariableCoupleableMatrixTag(tag);
+
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
   if (var == NULL)
     mooseError("Call coupledVectorValue for coupled vector variables");
 
-  return var->nodalMatrixTagValue(tag);
+  if (_c_nodal)
+    return var->nodalMatrixTagValue(tag);
+  else
+    return var->matrixTagValue(tag);
 }
 
 const VectorVariableValue &

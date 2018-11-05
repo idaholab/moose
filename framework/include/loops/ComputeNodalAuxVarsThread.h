@@ -31,15 +31,21 @@ public:
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 
-  void onNode(ConstNodeRange::const_iterator & nd);
+  void onNode(ConstNodeRange::const_iterator & nd) override;
 
   void join(const ComputeNodalAuxVarsThread & /*y*/);
+
+  void subdomainChanged();
+
+  void post() override;
 
 protected:
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects
   const MooseObjectWarehouse<AuxKernel> & _storage;
+
+  std::set<SubdomainID> _block_ids;
 };
 
 #endif // COMPUTENODALAUXVARSTHREAD_H

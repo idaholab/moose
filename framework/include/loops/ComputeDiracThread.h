@@ -18,6 +18,8 @@
 // Forward declarations
 class DiracKernel;
 template <typename T>
+class MooseObjectTagWarehouse;
+template <typename T>
 class MooseObjectWarehouse;
 class NonlinearSystemBase;
 
@@ -26,7 +28,7 @@ typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistEl
 class ComputeDiracThread : public ThreadedElementLoop<DistElemRange>
 {
 public:
-  ComputeDiracThread(FEProblemBase & feproblem, bool _is_jacobian);
+  ComputeDiracThread(FEProblemBase & feproblem, const std::set<TagID> & tags, bool _is_jacobian);
 
   // Splitting Constructor
   ComputeDiracThread(ComputeDiracThread & x, Threads::split);
@@ -45,8 +47,12 @@ protected:
   bool _is_jacobian;
   NonlinearSystemBase & _nl;
 
+  const std::set<TagID> & _tags;
+
   /// Storage for DiracKernel objects
-  const MooseObjectWarehouse<DiracKernel> & _dirac_kernels;
+  MooseObjectTagWarehouse<DiracKernel> & _dirac_kernels;
+
+  MooseObjectWarehouse<DiracKernel> * _dirac_warehouse;
 };
 
 #endif // COMPUTEDIRACTHREAD_H

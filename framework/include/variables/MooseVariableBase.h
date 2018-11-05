@@ -34,7 +34,8 @@ public:
   MooseVariableBase(unsigned int var_num,
                     const FEType & fe_type,
                     SystemBase & sys,
-                    Moose::VarKindType var_kind);
+                    Moose::VarKindType var_kind,
+                    THREAD_ID tid);
   virtual ~MooseVariableBase();
 
   /**
@@ -137,6 +138,9 @@ protected:
   Real _scaling_factor;
 
   bool _computing_jacobian;
+
+  /// Thread ID
+  THREAD_ID _tid;
 };
 
 #endif /* MOOSEVARIABLEBASE_H */

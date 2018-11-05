@@ -23,7 +23,8 @@ public:
   MooseVariableFEBase(unsigned int var_num,
                       const FEType & fe_type,
                       SystemBase & sys,
-                      Moose::VarKindType var_kind);
+                      Moose::VarKindType var_kind,
+                      THREAD_ID tid);
 
   /**
    * Clear out the dof indices.  We do this in case this variable is not going to be prepared at

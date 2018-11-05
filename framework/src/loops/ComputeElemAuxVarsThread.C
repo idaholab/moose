@@ -53,6 +53,8 @@ ComputeElemAuxVarsThread::subdomainChanged()
 
   std::set<MooseVariableFEBase *> needed_moose_vars;
   std::set<unsigned int> needed_mat_props;
+  std::set<TagID> needed_fe_var_matrix_tags;
+  std::set<TagID> needed_fe_var_vector_tags;
 
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
@@ -65,12 +67,20 @@ ComputeElemAuxVarsThread::subdomainChanged()
       const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
       needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+
+      auto & fe_var_coup_vtags = aux->getFEVariableCoupleableVectorTags();
+      needed_fe_var_vector_tags.insert(fe_var_coup_vtags.begin(), fe_var_coup_vtags.end());
+
+      auto & fe_var_coup_mtags = aux->getFEVariableCoupleableMatrixTags();
+      needed_fe_var_matrix_tags.insert(fe_var_coup_mtags.begin(), fe_var_coup_mtags.end());
     }
   }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
+  _fe_problem.setActiveFEVariableCoupleableMatrixTags(needed_fe_var_matrix_tags, _tid);
+  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
 }
 
 void
@@ -110,6 +120,9 @@ ComputeElemAuxVarsThread::post()
 {
   _fe_problem.clearActiveElementalMooseVariables(_tid);
   _fe_problem.clearActiveMaterialProperties(_tid);
+
+  _fe_problem.clearActiveFEVariableCoupleableVectorTags(_tid);
+  _fe_problem.clearActiveFEVariableCoupleableMatrixTags(_tid);
 }
 
 void

@@ -609,12 +609,12 @@ public:
 
   DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id = 0)
   {
-    return _sub_Re[static_cast<unsigned int>(tag_id)][var_num];
+    return _sub_Re[tag_id][var_num];
   }
 
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, TagID tag_id = 0)
   {
-    return _sub_Rn[static_cast<unsigned int>(tag_id)][var_num];
+    return _sub_Rn[tag_id][var_num];
   }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0);
@@ -926,6 +926,11 @@ public:
    */
   void
   cacheJacobianContribution(numeric_index_type i, numeric_index_type j, Real value, TagID tag = 0);
+
+  void cacheJacobianContribution(numeric_index_type i,
+                                 numeric_index_type j,
+                                 Real value,
+                                 const std::set<TagID> & tags);
 
   /**
    * Sets previously-cached Jacobian values via SparseMatrix::set() calls.

@@ -53,9 +53,7 @@ VectorIntegratedBC::VectorIntegratedBC(const InputParameters & parameters)
 void
 VectorIntegratedBC::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
@@ -64,49 +62,51 @@ VectorIntegratedBC::computeResidual()
       _local_re(_i) += residual;
     }
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 }
 
 void
 VectorIntegratedBC::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  _local_ke.resize(ke.m(), ke.n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-  ke += _local_ke;
+  accumulateTaggedLocalMatrix();
 }
 
 void
 VectorIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+  prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jvar.phiFaceSize(); _j++)
       {
         if (_var.number() == jvar_num)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
         else
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
       }
+
+  accumulateTaggedLocalMatrix();
 }
 
 void
 VectorIntegratedBC::computeJacobianBlockScalar(unsigned int jvar)
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+  prepareMatrixTag(_assembly, _var.number(), jvar);
 
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < jv.order(); _j++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+
+  accumulateTaggedLocalMatrix();
 }
