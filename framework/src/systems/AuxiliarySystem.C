@@ -375,8 +375,38 @@ AuxiliarySystem::addVector(const std::string & vector_name,
 }
 
 void
+AuxiliarySystem::setScalarVariableCoupleableTags(ExecFlagType type)
+{
+  const MooseObjectWarehouse<AuxScalarKernel> & storage = _aux_scalar_storage[type];
+  const std::vector<std::shared_ptr<AuxScalarKernel>> & objects = storage.getActiveObjects(0);
+
+  std::set<TagID> needed_sc_var_matrix_tags;
+  std::set<TagID> needed_sc_var_vector_tags;
+  for (const auto & obj : objects)
+  {
+    auto & sc_var_coup_vtags = obj->getScalarVariableCoupleableVectorTags();
+    needed_sc_var_vector_tags.insert(sc_var_coup_vtags.begin(), sc_var_coup_vtags.end());
+
+    auto & sc_var_coup_mtags = obj->getScalarVariableCoupleableMatrixTags();
+    needed_sc_var_matrix_tags.insert(sc_var_coup_mtags.begin(), sc_var_coup_mtags.end());
+  }
+
+  _fe_problem.setActiveScalarVariableCoupleableMatrixTags(needed_sc_var_matrix_tags, 0);
+  _fe_problem.setActiveScalarVariableCoupleableVectorTags(needed_sc_var_vector_tags, 0);
+}
+
+void
+AuxiliarySystem::clearScalarVariableCoupleableTags()
+{
+  _fe_problem.clearActiveScalarVariableCoupleableMatrixTags(0);
+  _fe_problem.clearActiveScalarVariableCoupleableVectorTags(0);
+}
+
+void
 AuxiliarySystem::computeScalarVars(ExecFlagType type)
 {
+  setScalarVariableCoupleableTags(type);
+
   // Reference to the current storage container
   const MooseObjectWarehouse<AuxScalarKernel> & storage = _aux_scalar_storage[type];
 
@@ -408,6 +438,8 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
     solution().close();
     _sys.update();
   }
+
+  clearScalarVariableCoupleableTags();
 }
 
 void

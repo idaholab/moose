@@ -23,8 +23,9 @@ MooseVariableScalar::MooseVariableScalar(unsigned int var_num,
                                          const FEType & fe_type,
                                          SystemBase & sys,
                                          Assembly & assembly,
-                                         Moose::VarKindType var_kind)
-  : MooseVariableBase(var_num, fe_type, sys, var_kind), _assembly(assembly)
+                                         Moose::VarKindType var_kind,
+                                         THREAD_ID tid)
+  : MooseVariableBase(var_num, fe_type, sys, var_kind, tid), _assembly(assembly)
 {
   auto num_vector_tags = _sys.subproblem().numVectorTags();
 
@@ -65,10 +66,12 @@ MooseVariableScalar::reinit()
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
   const NumericVector<Real> & u_dot = _sys.solutionUDot();
   const Real & du_dot_du = _sys.duDotDu();
-  auto num_vector_tags = _sys.subproblem().numVectorTags();
-  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
   auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
   auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
+  auto & active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveScalarVariableCoupleableMatrixTags(_tid);
+  auto & active_coupleable_vector_tags =
+      _sys.subproblem().getActiveScalarVariableCoupleableVectorTags(_tid);
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
@@ -100,14 +103,14 @@ MooseVariableScalar::reinit()
 
     if (safe_access_tagged_vectors)
     {
-      for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+      for (auto tag : active_coupleable_vector_tags)
         if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
           _sys.getVector(tag).get(_dof_indices, &_vector_tag_u[tag][0]);
     }
 
     if (safe_access_tagged_matrices)
     {
-      for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+      for (auto tag : active_coupleable_matrix_tags)
         if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
           for (std::size_t i = 0; i != n; ++i)
           {
@@ -133,14 +136,14 @@ MooseVariableScalar::reinit()
 
         if (safe_access_tagged_vectors)
         {
-          for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+          for (auto tag : active_coupleable_vector_tags)
             if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
               _sys.getVector(tag).get(one_dof_index, &_vector_tag_u[tag][i]);
         }
 
         if (safe_access_tagged_matrices)
         {
-          for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+          for (auto tag : active_coupleable_matrix_tags)
             if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
             {
               Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -159,11 +162,11 @@ MooseVariableScalar::reinit()
         _u_older.resize(i);
         _u_dot.resize(i);
 
-        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+        for (auto tag : active_coupleable_vector_tags)
           if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
             _vector_tag_u[tag].resize(i);
 
-        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+        for (auto tag : active_coupleable_matrix_tags)
           if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
             _matrix_tag_u[tag].resize(i);
 #else
@@ -175,11 +178,11 @@ MooseVariableScalar::reinit()
         _u_older[i] = std::numeric_limits<Real>::quiet_NaN();
         _u_dot[i] = std::numeric_limits<Real>::quiet_NaN();
 
-        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+        for (auto tag : active_coupleable_vector_tags)
           if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
             _vector_tag_u[tag][i] = std::numeric_limits<Real>::quiet_NaN();
 
-        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+        for (auto tag : active_coupleable_matrix_tags)
           if (_sys.hasMatrix(tag) && _sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
             _matrix_tag_u[tag][i] = std::numeric_limits<Real>::quiet_NaN();
 #endif

@@ -62,7 +62,8 @@ public:
                   const FEType & fe_type,
                   SystemBase & sys,
                   Assembly & assembly,
-                  Moose::VarKindType var_kind);
+                  Moose::VarKindType var_kind,
+                  THREAD_ID tid);
   virtual ~MooseVariableFE();
 
   void clearDofIndices() override;
@@ -586,9 +587,6 @@ public:
 protected:
   /// Our assembly
   Assembly & _assembly;
-
-  /// Thread ID
-  THREAD_ID _tid;
 
   /// Quadrature rule for interior
   QBase *& _qrule;

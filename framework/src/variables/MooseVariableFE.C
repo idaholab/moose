@@ -15,8 +15,9 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
                                              const FEType & fe_type,
                                              SystemBase & sys,
                                              Assembly & assembly,
-                                             Moose::VarKindType var_kind)
-  : MooseVariableFEBase(var_num, fe_type, sys, var_kind),
+                                             Moose::VarKindType var_kind,
+                                             THREAD_ID tid)
+  : MooseVariableFEBase(var_num, fe_type, sys, var_kind, tid),
     _assembly(assembly),
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
@@ -757,19 +758,21 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 {
   bool is_transient = _subproblem.isTransient();
   unsigned int nqp = qrule->n_points();
-  auto num_vector_tags = _sys.subproblem().numVectorTags();
-  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
   auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
   auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
+  auto & active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+  auto & active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
 
   _u.resize(nqp);
   _grad_u.resize(nqp);
 
-  for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+  for (auto tag : active_coupleable_vector_tags)
     if (_need_vector_tag_u[tag])
       _vector_tag_u[tag].resize(nqp);
 
-  for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+  for (auto tag : active_coupleable_matrix_tags)
     if (_need_matrix_tag_u[tag])
       _matrix_tag_u[tag].resize(nqp);
 
@@ -823,11 +826,11 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
     _u[i] = 0;
     _grad_u[i] = 0;
 
-    for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+    for (auto tag : active_coupleable_vector_tags)
       if (_need_vector_tag_u[tag])
         _vector_tag_u[tag][i] = 0;
 
-    for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+    for (auto tag : active_coupleable_matrix_tags)
       if (_need_matrix_tag_u[tag])
         _matrix_tag_u[tag][i] = 0;
 
@@ -1036,7 +1039,7 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
       if (safe_access_tagged_vectors)
       {
-        for (unsigned int tag = 0; tag < num_vector_tags; tag++)
+        for (auto tag : active_coupleable_vector_tags)
           if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
           {
             tag_local_value = _sys.getVector(tag)(idx);
@@ -1046,7 +1049,7 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
       if (safe_access_tagged_matrices)
       {
-        for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+        for (auto tag : active_coupleable_matrix_tags)
           if (_need_matrix_tag_u[tag] && _sys.hasMatrix(tag) && _sys.getMatrix(tag).closed())
           {
             Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -1571,6 +1574,10 @@ MooseVariableFE<OutputType>::computeNodalValues()
 {
   auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
   auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
+  auto & active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+  auto & active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
 
   if (_has_dofs)
   {
@@ -1580,39 +1587,35 @@ MooseVariableFE<OutputType>::computeNodalValues()
     _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
     _nodal_value = _dof_values[0];
 
+    for (auto tag : active_coupleable_vector_tags)
+      _vector_tags_dof_u[tag].resize(n);
+
+    for (auto tag : active_coupleable_matrix_tags)
+      _matrix_tags_dof_u[tag].resize(n);
+
     if (safe_access_tagged_vectors)
     {
-      TagID tag = 0;
-      for (auto & dof_u : _vector_tags_dof_u)
-      {
+      for (auto tag : active_coupleable_vector_tags)
         if (_need_vector_tag_dof_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
-          dof_u.resize(n);
           auto & vec = _sys.getVector(tag);
-          vec.get(_dof_indices, &dof_u[0]);
+          vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
         }
-        tag++;
-      }
     }
 
     if (safe_access_tagged_matrices)
     {
-      TagID tag = 0;
-      for (auto & dof_u : _matrix_tags_dof_u)
-      {
+      for (auto tag : active_coupleable_matrix_tags)
         if (_need_matrix_tag_dof_u[tag] && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag) &&
             _sys.getMatrix(tag).closed())
         {
-          dof_u.resize(n);
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < _dof_indices.size(); i++)
           {
             Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-            dof_u[i] = mat(_dof_indices[i], _dof_indices[i]);
+            _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
           }
         }
-        tag++;
-      }
     }
 
     if (_need_dof_values_previous_nl)

@@ -509,6 +509,30 @@ public:
   /// Is it safe to access the tagged vectors
   bool safeAccessTaggedVectors() { return _safe_access_tagged_vectors; }
 
+  virtual void clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
+
+  virtual void clearActiveFEVariableCoupleableVectorTags(THREAD_ID tid);
+
+  virtual void setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
+
+  virtual void setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
+
+  virtual void clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid);
+
+  virtual void clearActiveScalarVariableCoupleableVectorTags(THREAD_ID tid);
+
+  virtual void setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid);
+
+  virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid);
+
+  std::set<TagID> & getActiveScalarVariableCoupleableVectorTags(THREAD_ID tid);
+
+  std::set<TagID> & getActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid);
+
+  std::set<TagID> & getActiveFEVariableCoupleableVectorTags(THREAD_ID tid);
+
+  std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -575,6 +599,14 @@ protected:
 
   /// Set of material property ids that determine whether materials get reinited
   std::vector<std::set<unsigned int>> _active_material_property_ids;
+
+  std::vector<std::set<TagID>> _active_fe_var_coupleable_matrix_tags;
+
+  std::vector<std::set<TagID>> _active_fe_var_coupleable_vector_tags;
+
+  std::vector<std::set<TagID>> _active_sc_var_coupleable_matrix_tags;
+
+  std::vector<std::set<TagID>> _active_sc_var_coupleable_vector_tags;
 
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;

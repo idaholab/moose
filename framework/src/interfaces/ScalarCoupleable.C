@@ -152,6 +152,8 @@ ScalarCoupleable::coupledVectorTagScalarValue(const std::string & var_name,
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
+  addScalarVariableCoupleableVectorTag(tag);
+
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return var->vectorTagSln(tag);
 }
@@ -164,6 +166,8 @@ ScalarCoupleable::coupledMatrixTagScalarValue(const std::string & var_name,
   checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
+
+  addScalarVariableCoupleableMatrixTag(tag);
 
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return var->matrixTagSln(tag);

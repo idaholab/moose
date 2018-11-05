@@ -35,9 +35,44 @@ ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread &
 }
 
 void
+ComputeNodalAuxVarsThread::subdomainChanged()
+{
+  std::set<TagID> needed_vector_tags;
+  std::set<TagID> needed_matrix_tags;
+
+  const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
+
+  for (const auto & block : _block_ids)
+  {
+    const auto iter = block_kernels.find(block);
+
+    if (iter != block_kernels.end())
+      for (const auto & aux : iter->second)
+      {
+        auto & matrix_tags = aux->getFEVariableCoupleableMatrixTags();
+        needed_matrix_tags.insert(matrix_tags.begin(), matrix_tags.end());
+        auto & vector_tags = aux->getFEVariableCoupleableVectorTags();
+        needed_vector_tags.insert(vector_tags.begin(), vector_tags.end());
+      }
+  }
+
+  _fe_problem.setActiveFEVariableCoupleableMatrixTags(needed_matrix_tags, _tid);
+  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_vector_tags, _tid);
+}
+
+void
 ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
 {
   const Node * node = *node_it;
+
+  const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
+
+  if (_block_ids != block_ids)
+  {
+    _block_ids.clear();
+    _block_ids.insert(block_ids.begin(), block_ids.end());
+    subdomainChanged();
+  }
 
   // prepare variables
   for (const auto & it : _aux_sys._nodal_vars[_tid])
@@ -53,7 +88,6 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   // Loop over all SubdomainIDs for the current node, if an AuxKernel is active on this block then
   // compute it.
-  const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
   {
     const auto iter = block_kernels.find(block);
@@ -72,6 +106,13 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
       var->insert(_aux_sys.solution());
     }
   }
+}
+
+void
+ComputeNodalAuxVarsThread::post()
+{
+  _fe_problem.clearActiveFEVariableCoupleableVectorTags(_tid);
+  _fe_problem.clearActiveFEVariableCoupleableMatrixTags(_tid);
 }
 
 void

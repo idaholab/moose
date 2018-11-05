@@ -161,6 +161,10 @@ public:
 
   virtual void setPreviousNewtonSolution();
 
+  void setScalarVariableCoupleableTags(ExecFlagType type);
+
+  void clearScalarVariableCoupleableTags();
+
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);

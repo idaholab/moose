@@ -50,6 +50,14 @@ public:
    */
   const std::vector<MooseVariableScalar *> & getCoupledMooseScalarVars();
 
+  std::set<TagID> & getScalarVariableCoupleableVectorTags() { return _sc_coupleable_vector_tags; }
+
+  std::set<TagID> & getScalarVariableCoupleableMatrixTags() { return _sc_coupleable_matrix_tags; }
+
+  void addScalarVariableCoupleableVectorTag(TagID tag) { _sc_coupleable_vector_tags.insert(tag); }
+
+  void addScalarVariableCoupleableMatrixTag(TagID tag) { _sc_coupleable_matrix_tags.insert(tag); }
+
 protected:
   // Reference to the interface's input parameters
   const InputParameters & _sc_parameters;
@@ -213,6 +221,10 @@ protected:
 private:
   /// Field variables coupled into this object (for error checking)
   std::map<std::string, std::vector<MooseVariableFEBase *>> _sc_coupled_vars;
+
+  std::set<TagID> _sc_coupleable_vector_tags;
+
+  std::set<TagID> _sc_coupleable_matrix_tags;
 };
 
 #endif // SCALARCOUPLEABLE_H
