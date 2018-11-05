@@ -147,4 +147,12 @@
     design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
     requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction.'
   [../]
+  [./axisymmetric_vlc_centerline_pp]
+    type = CSVDiff
+    input = '2D-RZ_centerline_VLC.i'
+    csvdiff = '2D-RZ_centerline_VLC_out.csv'
+    design = 'VolumetricLocking.md source/postprocessors/AxisymmetricCenterlineAverageValue.md'
+    issues = '#12437 #10866'
+    requirement  = 'The volumetric locking correction option in ComputeAxisymmetricRZFiniteStrain shall reinit material properties without inverting a zero tensor when called from a side postprocessor applied to the axis of rotation in an axisymmetric simulation.'
+  [../]
 []
