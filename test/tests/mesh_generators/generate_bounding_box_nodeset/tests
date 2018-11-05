@@ -2,8 +2,18 @@
   [./generate_boundingbox_nodeset_test]
     type = 'Exodiff'
     input = 'boundingbox_nodeset_inside.i'
-    cli_args = '--mesh-only'
-    exodiff = 'boundingbox_nodeset_inside_in.e'
+    exodiff = 'boundingbox_nodeset_inside_out.e'
+    requirement = 'MOOSE shall be able to use the BoundingBox class.'
+    design = 'mesh_generators/GenerateBoundingBoxNodeSet.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./generate_boundingbox_nodeset_outside_test]
+    type = 'Exodiff'
+    input = 'boundingbox_nodeset_outside.i'
+    exodiff = 'boundingbox_nodeset_outside_out.e'
     requirement = 'MOOSE shall be able to use the BoundingBox class.'
     design = 'mesh_generators/GenerateBoundingBoxNodeSet.md'
     issues = '#11640'
