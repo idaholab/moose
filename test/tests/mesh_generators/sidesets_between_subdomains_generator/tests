@@ -22,4 +22,16 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+
+  [./sideset_between_subdomains_generator_test2]
+    type = 'Exodiff'
+    input = 'between.i'
+    cli_args = '--mesh-only'
+    exodiff = 'between_in.e'
+    requirement = 'MOOSE shall be able to create sidesets.'
+    design = 'mesh_generators/SideSetsBetweenSubdomainsGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
 []
