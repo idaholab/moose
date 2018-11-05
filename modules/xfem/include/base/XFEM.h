@@ -244,6 +244,11 @@ public:
                         EFAElement3D * CEMElem,
                         std::vector<std::vector<Point>> & frag_faces) const;
 
+  const std::map<const Elem *, std::vector<Point>> & getCrackTipOriginMap() const
+  {
+    return _elem_crack_origin_direction_map;
+  }
+
 private:
   bool _has_secondary_cut;
 
