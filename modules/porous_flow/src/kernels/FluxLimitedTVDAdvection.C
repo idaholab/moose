@@ -64,29 +64,45 @@ FluxLimitedTVDAdvection::computeJacobian()
   prepareMatrixTag(_assembly, _var.number(), _var.number());
   precalculateJacobian();
 
-  // get the Jacobian contributions from _fluo
+  // Run through the nodes of this element using "i", getting the Jacobian contributions
+  // d(residual_i)/du(node_j) for all nodes j that can have a nonzero Jacobian contribution.  Some
+  // of these node_j will live in this element, but some will live in other elements connected with
+  // node "i", and some will live in the next layer of nodes (eg, in 1D residual_3 will have
+  // contributions from node1, node2, node3, node4 and node5 in principle).
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
+    // global id of node "i"
     const dof_id_type node_id_i = _current_elem->node_id(i);
-    for (unsigned j = 0; j < _current_elem->n_nodes(); ++j)
+    // dof number of _var on node "i"
+    const std::vector<dof_id_type> idof_indices(
+        1, _current_elem->node_ref(i).dof_number(_sys.number(), _var.number(), 0));
+    // number of times node "i" is encountered in a sweep over elements
+    const unsigned valence = _fluo.getValence(node_id_i, node_id_i);
+
+    // retrieve the derivative information from _fluo
+    const std::map<dof_id_type, Real> derivs = _fluo.getdFluxOutdu(node_id_i);
+
+    // now build up the dof numbers of all the "j" nodes and the derivative matrix
+    // d(residual_i)/d(u_j)
+    std::vector<dof_id_type> jdof_indices(derivs.size());
+    DenseMatrix<Number> deriv_matrix(1, derivs.size());
+    unsigned j = 0;
+    for (const auto & node_j_deriv : derivs)
     {
-      const dof_id_type node_id_j = _current_elem->node_id(j);
-      _local_ke(i, j) =
-          _fluo.getdFluxOutdu(node_id_i, node_id_j) / _fluo.getValence(node_id_i, node_id_j);
+      // global id of j:
+      const dof_id_type node_id_j = node_j_deriv.first;
+      // dof at node j:
+      jdof_indices[j] =
+          _mesh.getMesh().node_ref(node_id_j).dof_number(_sys.number(), _var.number(), 0);
+      // derivative must be divided by valence, otherwise the loop over elements will multiple-count
+      deriv_matrix(0, j) = node_j_deriv.second / valence;
+      j++;
     }
+    // Ad the result to the system's Jacobian matrix
+    // TODO: get tag properly in _sys.getMatrix(0) properly
+    _assembly.addJacobianBlock(
+        _sys.getMatrix(0), deriv_matrix, idof_indices, jdof_indices, _var.scalingFactor());
   }
 
-  accumulateTaggedLocalMatrix();
-
-  if (_has_diag_save_in)
-  {
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (const auto & var : _diag_save_in)
-      var->sys().solution().add_vector(diag, var->dofIndices());
-  }
+  // accumulateTaggedLocalMatrix();
 }

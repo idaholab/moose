@@ -335,6 +335,16 @@ AdvectiveFluxCalculator::getKij(dof_id_type node_i, dof_id_type node_j) const
   return entry_find->second;
 }
 
+std::map<dof_id_type, Real>
+AdvectiveFluxCalculator::getdFluxOutdu(dof_id_type node_i) const
+{
+  const auto & row_find = _dflux_out_du.find(node_i);
+  mooseAssert(row_find != _dflux_out_du.end(),
+              "AdvectiveFluxCalculator UserObject "
+                  << name() << " _dflux_out_du does not contain node " << node_i);
+  return row_find->second;
+}
+
 Real
 AdvectiveFluxCalculator::getdFluxOutdu(dof_id_type node_i, dof_id_type node_j) const
 {

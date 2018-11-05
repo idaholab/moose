@@ -68,6 +68,8 @@ public:
    */
   Real getdFluxOutdu(dof_id_type node_i, dof_id_type node_j) const;
 
+  std::map<dof_id_type, Real> getdFluxOutdu(dof_id_type node_i) const;
+
   /**
    * Returns the valence of the i-j edge.
    * Valence is the number of times the edge is encountered in a loop over elements (that have
