@@ -37,7 +37,7 @@ class Test:
         self.args = args
         self.dur_secs = 0
         self.perflog = []
-        self.getpot_options = ['Outputs/console=false', 'Outputs/exodus=false', 'Outputs/csv=false']
+        self.getpot_options = ['Outputs/console=false', 'Outputs/exodus=false', 'Outputs/csv=false', '--no-gdb-backtrace']
         self.have_perflog = perflog
         if self.have_perflog:
             self.getpot_options.append('UserObjects/perflog/type=PerflogDumper')
@@ -392,4 +392,3 @@ def git_revision(dir='.'):
     commit = stdout.strip().split(' ')[0]
     date = int(stdout.strip().split(' ')[1])
     return commit, date
-
