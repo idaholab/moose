@@ -363,23 +363,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   if (isParamValid("restart_file_base"))
   {
     std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
-
-    std::size_t slash_pos = restart_file_base.find_last_of("/");
-    std::string path = restart_file_base.substr(0, slash_pos);
-    std::string file = restart_file_base.substr(slash_pos + 1);
-
-    // If the user specified LATEST as the file in their directory path, find the file with the
-    // latest timestep and the largest serial number.
-    if (file == "LATEST")
-    {
-      std::list<std::string> dir_list(1, path);
-      std::list<std::string> files = MooseUtils::getFilesInDirs(dir_list);
-      restart_file_base = MooseUtils::getLatestAppCheckpointFileBase(files);
-
-      if (restart_file_base == "")
-        mooseError("Unable to find suitable restart file");
-    }
-
+    restart_file_base = MooseUtils::convertLatestCheckpoint(restart_file_base);
     _console << "\nUsing " << restart_file_base << " for restart.\n\n";
     setRestartFile(restart_file_base);
   }

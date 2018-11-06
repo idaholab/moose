@@ -34,20 +34,7 @@ SetupRecoverFileBaseAction::act()
   if (!_app.isRecovering() || !_app.isUltimateMaster())
     return;
 
-  // Get the most current file, if it hasn't been set directly
-  if (!_app.hasRecoverFileBase())
-  {
-    // Build the list of all possible checkpoint files for recover
-    std::list<std::string> checkpoint_files = _app.getCheckpointFiles();
-
-    // Grab the most recent one
-    std::string recovery_file_base = MooseUtils::getLatestAppCheckpointFileBase(checkpoint_files);
-
-    if (recovery_file_base.empty())
-      mooseError("Unable to find suitable recovery file!");
-
-    _app.setRecoverFileBase(recovery_file_base);
-  }
+  _app.setRecoverFileBase(MooseUtils::convertLatestCheckpoint(_app.getRecoverFileBase()));
 
   // Set the recover file base in the App
   _console << "\nUsing " << _app.getRecoverFileBase() << " for recovery.\n\n";
