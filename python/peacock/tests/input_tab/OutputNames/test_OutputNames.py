@@ -41,14 +41,14 @@ class Tests(Testing.PeacockTester):
         input_file = "../../common/oversample.i"
         input_tree = self.create_tree(input_file)
         output_names = OutputNames.getOutputFiles(input_tree, input_file)
-        self.assertEqual(output_names, ["out_transient.e", "oversample_2_oversample.e"])
+        self.assertEqual(output_names, ["out_transient.e", "oversample_2.e"])
 
         outputs = input_tree.getBlockInfo("/Outputs")
         outputs.parameters_list.remove("file_base")
         del outputs.parameters["file_base"]
 
         output_names = OutputNames.getOutputFiles(input_tree, input_file)
-        self.assertEqual(output_names, ["oversample_out.e", "oversample_2_oversample.e"])
+        self.assertEqual(output_names, ["oversample_out.e", "oversample_2.e"])
 
         outputs = input_tree.getBlockInfo("/Outputs/refine_2")
         t = outputs.getTypeBlock()
@@ -56,7 +56,7 @@ class Tests(Testing.PeacockTester):
         del t.parameters["file_base"]
 
         output_names = OutputNames.getOutputFiles(input_tree, input_file)
-        self.assertEqual(output_names, ["oversample_out.e", "oversample_refine_2_oversample.e"])
+        self.assertEqual(output_names, ["oversample_out.e", "oversample_refine_2.e"])
 
     def testDate(self):
         input_file = "../../common/transient_with_date.i"

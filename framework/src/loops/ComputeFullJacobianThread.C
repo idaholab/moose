@@ -22,22 +22,14 @@
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
                                                      const std::set<TagID> & tags)
-  : ComputeJacobianThread(fe_problem, tags),
-    _nl(fe_problem.getNonlinearSystemBase()),
-    _integrated_bcs(_nl.getIntegratedBCWarehouse()),
-    _dg_kernels(_nl.getDGKernelWarehouse()),
-    _interface_kernels(_nl.getInterfaceKernelWarehouse())
+  : ComputeJacobianThread(fe_problem, tags)
 {
 }
 
 // Splitting Constructor
 ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread & x,
                                                      Threads::split split)
-  : ComputeJacobianThread(x, split),
-    _nl(x._nl),
-    _integrated_bcs(x._integrated_bcs),
-    _dg_kernels(x._dg_kernels),
-    _interface_kernels(x._interface_kernels)
+  : ComputeJacobianThread(x, split)
 {
 }
 
@@ -141,12 +133,11 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     MooseVariableFEBase & ivar = *(it.first);
     MooseVariableFEBase & jvar = *(it.second);
     if (ivar.activeOnSubdomain(_subdomain) && jvar.activeOnSubdomain(_subdomain) &&
-        _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
+        _ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be
       // any)
-      const std::vector<std::shared_ptr<IntegratedBCBase>> & bcs =
-          _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
+      const auto & bcs = _ibc_warehouse->getBoundaryObjects(bnd_id, _tid);
       for (const auto & bc : bcs)
         if (bc->shouldApply() && bc->variable().number() == ivar.number() && bc->isImplicit())
         {
@@ -170,10 +161,10 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       unsigned int jvar = jvariable.number();
 
       if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
-          _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
+          _ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
       {
         const std::vector<std::shared_ptr<IntegratedBCBase>> & integrated_bcs =
-            _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
+            _ibc_warehouse->getBoundaryObjects(bnd_id, _tid);
         for (const auto & integrated_bc : integrated_bcs)
         {
           std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc =
@@ -196,11 +187,10 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     const std::vector<MooseVariableFEBase *> & vars = _nl.getVariables(_tid);
     for (const auto & ivar : vars)
       if (ivar->activeOnSubdomain(_subdomain) > 0 &&
-          _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
+          _ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
       {
         // for each variable get the list of active kernels
-        const std::vector<std::shared_ptr<IntegratedBCBase>> & bcs =
-            _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+        const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
         for (const auto & bc : bcs)
           if (bc->variable().number() == ivar->number() && bc->isImplicit())
           {
@@ -220,13 +210,12 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 {
-  if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
     const auto & ce = _fe_problem.couplingEntries(_tid);
     for (const auto & it : ce)
     {
-      const std::vector<std::shared_ptr<DGKernel>> & dgks =
-          _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+      const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg : dgks)
       {
         MooseVariableFEBase & ivariable = *(it.first);
@@ -250,13 +239,13 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 void
 ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
 {
-  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
+  if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
     const auto & ce = _fe_problem.couplingEntries(_tid);
     for (const auto & it : ce)
     {
       const std::vector<std::shared_ptr<InterfaceKernel>> & int_ks =
-          _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+          _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
       {
         if (!interface_kernel->isImplicit())

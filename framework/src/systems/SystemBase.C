@@ -568,11 +568,12 @@ SystemBase::addVariable(const std::string & var_name,
     MooseVariableBase * var;
     if (type == FEType(0, MONOMIAL))
       var = new MooseVariableConstMonomial(
-          var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+          var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
     else if (type == FEType(FIRST, NEDELEC_ONE) || type.family == LAGRANGE_VEC)
-      var = new VectorMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      var =
+          new VectorMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
     else
-      var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
 
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
@@ -597,7 +598,7 @@ SystemBase::addScalarVariable(const std::string & var_name,
     // FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in
     // MooseVariableBase.
     MooseVariableScalar * var =
-        new MooseVariableScalar(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+        new MooseVariableScalar(var_num, type, *this, _subproblem.assembly(tid), _var_kind, tid);
     var->scalingFactor(scale_factor);
     _vars[tid].add(var_name, var);
   }

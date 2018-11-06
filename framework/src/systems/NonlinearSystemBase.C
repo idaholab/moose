@@ -345,14 +345,6 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
   std::shared_ptr<ScalarKernel> kernel =
       _factory.create<ScalarKernel>(kernel_name, name, parameters);
   _scalar_kernels.addObject(kernel);
-
-  // Store time/non-time ScalarKernels separately
-  ODETimeKernel * t_kernel = dynamic_cast<ODETimeKernel *>(kernel.get());
-
-  if (t_kernel)
-    _time_scalar_kernels.addObject(kernel);
-  else
-    _non_time_scalar_kernels.addObject(kernel);
 }
 
 void
@@ -1306,27 +1298,22 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       TIME_SECTION(_scalar_kernels_timer);
 
-      const std::vector<std::shared_ptr<ScalarKernel>> * scalars;
-
+      MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
       // This code should be refactored once we can do tags for scalar
       // kernels
       // Should redo this based on Warehouse
       if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
-        scalars = &(_scalar_kernels.getActiveObjects());
-      else if (tags.size() == 2)
-      {
-        if (tags.find(timeVectorTag()) != tags.end())
-          scalars = &(_time_scalar_kernels.getActiveObjects());
-        else if (tags.find(nonTimeVectorTag()) != tags.end())
-          scalars = &(_non_time_scalar_kernels.getActiveObjects());
-        else
-          mooseError("Wrong tags for scalar kernels ");
-      }
+        scalar_kernel_warehouse = &_scalar_kernels;
+      else if (tags.size() == 1)
+        scalar_kernel_warehouse =
+            &(_scalar_kernels.getVectorTagObjectWarehouse(*(tags.begin()), 0));
       else
-        mooseError("Unrecognized tags for scalar kernels in computeResidualInternal().");
+        // scalar_kernels is not threading
+        scalar_kernel_warehouse = &(_scalar_kernels.getVectorTagsObjectWarehouse(tags, 0));
 
       bool have_scalar_contributions = false;
-      for (const auto & scalar_kernel : *scalars)
+      const auto & scalars = scalar_kernel_warehouse->getActiveObjects();
+      for (const auto & scalar_kernel : scalars)
       {
         scalar_kernel->reinit();
         const std::vector<dof_id_type> & dof_indices = scalar_kernel->variable().dofIndices();
@@ -1356,7 +1343,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       TIME_SECTION(_nodal_kernels_timer);
 
-      ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels);
+      ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels, tags);
 
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
@@ -1382,7 +1369,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       TIME_SECTION(_nodal_kernel_bcs_timer);
 
-      ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels);
+      ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels, tags);
 
       ConstBndNodeRange & bnd_node_range = *_mesh.getBoundaryNodeRange();
 
@@ -1409,7 +1396,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _residual_ghosted->close();
   }
 
-  PARALLEL_TRY { computeDiracContributions(false); }
+  PARALLEL_TRY { computeDiracContributions(tags, false); }
   PARALLEL_CATCH;
 
   if (_fe_problem._has_constraints)
@@ -2138,12 +2125,21 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 }
 
 void
-NonlinearSystemBase::computeScalarKernelsJacobians()
+NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 {
+  MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
+
+  if (!tags.size() || tags.size() == _fe_problem.numMatrixTags())
+    scalar_kernel_warehouse = &_scalar_kernels;
+  else if (tags.size() == 1)
+    scalar_kernel_warehouse = &(_scalar_kernels.getMatrixTagObjectWarehouse(*(tags.begin()), 0));
+  else
+    scalar_kernel_warehouse = &(_scalar_kernels.getMatrixTagsObjectWarehouse(tags, 0));
+
   // Compute the diagonal block for scalar variables
-  if (_scalar_kernels.hasActiveObjects())
+  if (scalar_kernel_warehouse->hasActiveObjects())
   {
-    const auto & scalars = _scalar_kernels.getActiveObjects();
+    const auto & scalars = scalar_kernel_warehouse->getActiveObjects();
 
     _fe_problem.reinitScalars(/*tid=*/0);
 
@@ -2248,7 +2244,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -2261,7 +2257,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -2286,7 +2282,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -2299,7 +2295,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -2313,9 +2309,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       break;
     }
 
-    computeDiracContributions(true);
+    computeDiracContributions(tags, true);
 
-    computeScalarKernelsJacobians();
+    computeScalarKernelsJacobians(tags);
 
     static bool first = true;
 
@@ -2709,7 +2705,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 }
 
 void
-NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
+NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian)
 {
   _fe_problem.clearDiracInfo();
 
@@ -2730,7 +2726,7 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
       }
     }
 
-    ComputeDiracThread cd(_fe_problem, is_jacobian);
+    ComputeDiracThread cd(_fe_problem, tags, is_jacobian);
 
     _fe_problem.getDiracElements(dirac_elements);
 
@@ -2740,9 +2736,6 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
 
     cd(range);
   }
-
-  if (!is_jacobian)
-    _Re_non_time->close();
 }
 
 NumericVector<Number> &

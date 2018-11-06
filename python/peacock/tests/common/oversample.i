@@ -121,8 +121,6 @@
   [./refine_2]
     type = Exodus
     file_base = oversample_2
-    oversample = true
-    append_oversample = true
     refinements = 2
   [../]
 []

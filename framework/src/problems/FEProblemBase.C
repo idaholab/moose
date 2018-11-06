@@ -3813,6 +3813,42 @@ FEProblemBase::getSystem(const std::string & var_name)
 }
 
 void
+FEProblemBase::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+{
+  SubProblem::setActiveFEVariableCoupleableMatrixTags(mtags, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->setActiveFEVariableCoupleableMatrixTags(mtags, tid);
+}
+
+void
+FEProblemBase::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+{
+  SubProblem::setActiveFEVariableCoupleableVectorTags(vtags, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->setActiveFEVariableCoupleableVectorTags(vtags, tid);
+}
+
+void
+FEProblemBase::setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags, THREAD_ID tid)
+{
+  SubProblem::setActiveScalarVariableCoupleableMatrixTags(mtags, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->setActiveScalarVariableCoupleableMatrixTags(mtags, tid);
+}
+
+void
+FEProblemBase::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
+{
+  SubProblem::setActiveScalarVariableCoupleableVectorTags(vtags, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->setActiveScalarVariableCoupleableVectorTags(vtags, tid);
+}
+
+void
 FEProblemBase::setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
                                                 THREAD_ID tid)
 {
@@ -3829,6 +3865,42 @@ FEProblemBase::clearActiveElementalMooseVariables(THREAD_ID tid)
 
   if (_displaced_problem)
     _displaced_problem->clearActiveElementalMooseVariables(tid);
+}
+
+void
+FEProblemBase::clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid)
+{
+  SubProblem::clearActiveFEVariableCoupleableMatrixTags(tid);
+
+  if (_displaced_problem)
+    _displaced_problem->clearActiveFEVariableCoupleableMatrixTags(tid);
+}
+
+void
+FEProblemBase::clearActiveFEVariableCoupleableVectorTags(THREAD_ID tid)
+{
+  SubProblem::clearActiveFEVariableCoupleableVectorTags(tid);
+
+  if (_displaced_problem)
+    _displaced_problem->clearActiveFEVariableCoupleableVectorTags(tid);
+}
+
+void
+FEProblemBase::clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid)
+{
+  SubProblem::clearActiveScalarVariableCoupleableMatrixTags(tid);
+
+  if (_displaced_problem)
+    _displaced_problem->clearActiveScalarVariableCoupleableMatrixTags(tid);
+}
+
+void
+FEProblemBase::clearActiveScalarVariableCoupleableVectorTags(THREAD_ID tid)
+{
+  SubProblem::clearActiveScalarVariableCoupleableVectorTags(tid);
+
+  if (_displaced_problem)
+    _displaced_problem->clearActiveScalarVariableCoupleableVectorTags(tid);
 }
 
 void
@@ -4514,7 +4586,11 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   _app.getOutputWarehouse().residualSetup();
 
+  _safe_access_tagged_vectors = false;
+
   _nl->computeResidualTags(tags);
+
+  _safe_access_tagged_vectors = true;
 }
 
 void
@@ -4620,11 +4696,14 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _app.getOutputWarehouse().jacobianSetup();
 
+    _safe_access_tagged_matrices = false;
+
     _nl->computeJacobianTags(tags);
 
     _current_execute_on_flag = EXEC_NONE;
     _currently_computing_jacobian = false;
     _has_jacobian = true;
+    _safe_access_tagged_matrices = true;
   }
 }
 

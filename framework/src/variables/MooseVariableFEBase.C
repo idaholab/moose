@@ -12,7 +12,8 @@
 MooseVariableFEBase::MooseVariableFEBase(unsigned int var_num,
                                          const FEType & fe_type,
                                          SystemBase & sys,
-                                         Moose::VarKindType var_kind)
-  : MooseVariableBase(var_num, fe_type, sys, var_kind)
+                                         Moose::VarKindType var_kind,
+                                         THREAD_ID tid)
+  : MooseVariableBase(var_num, fe_type, sys, var_kind, tid)
 {
 }

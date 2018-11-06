@@ -257,6 +257,26 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid) override;
 
+  virtual void clearActiveFEVariableCoupleableMatrixTags(THREAD_ID tid) override;
+
+  virtual void clearActiveFEVariableCoupleableVectorTags(THREAD_ID tid) override;
+
+  virtual void setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                       THREAD_ID tid) override;
+
+  virtual void setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                       THREAD_ID tid) override;
+
+  virtual void clearActiveScalarVariableCoupleableMatrixTags(THREAD_ID tid) override;
+
+  virtual void clearActiveScalarVariableCoupleableVectorTags(THREAD_ID tid) override;
+
+  virtual void setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags,
+                                                           THREAD_ID tid) override;
+
+  virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags,
+                                                           THREAD_ID tid) override;
+
   /**
    * Record and set the material properties required by the current computing thread.
    * @param mat_prop_ids The set of material properties required by the current computing thread.

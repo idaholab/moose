@@ -84,6 +84,14 @@ public:
     return _coupled_vector_moose_vars;
   }
 
+  void addFEVariableCoupleableVectorTag(TagID tag) { _fe_coupleable_vector_tags.insert(tag); }
+
+  void addFEVariableCoupleableMatrixTag(TagID tag) { _fe_coupleable_matrix_tags.insert(tag); }
+
+  std::set<TagID> & getFEVariableCoupleableVectorTags() { return _fe_coupleable_vector_tags; }
+
+  std::set<TagID> & getFEVariableCoupleableMatrixTags() { return _fe_coupleable_matrix_tags; }
+
 protected:
   /**
    * Returns true if a variables has been coupled as name.
@@ -658,6 +666,10 @@ private:
 
   /// Scalar variables coupled into this object (for error checking)
   std::map<std::string, std::vector<MooseVariableScalar *>> _c_coupled_scalar_vars;
+
+  std::set<TagID> _fe_coupleable_vector_tags;
+
+  std::set<TagID> _fe_coupleable_matrix_tags;
 };
 
 template <ComputeStage compute_stage>

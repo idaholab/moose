@@ -23,6 +23,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "TaggingInterface.h"
 
 // Forward Declarations
 class MooseMesh;
@@ -49,7 +50,8 @@ class DGKernel : public MooseObject,
                  public NeighborMooseVariableInterface<Real>,
                  public TwoMaterialPropertyInterface,
                  public Restartable,
-                 public MeshChangedInterface
+                 public MeshChangedInterface,
+                 public TaggingInterface
 {
 public:
   /**
@@ -173,12 +175,6 @@ protected:
   const VariableValue & _u_neighbor;
   /// Holds the current solution gradient at the current quadrature point
   const VariableGradient & _grad_u_neighbor;
-
-  /// Holds residual entries as they are accumulated by this DGKernel
-  DenseVector<Number> _local_re;
-
-  /// Holds residual entries as they are accumulated by this DGKernel
-  DenseMatrix<Number> _local_kxx;
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;

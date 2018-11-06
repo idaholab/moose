@@ -22,7 +22,8 @@ public:
                              const FEType & fe_type,
                              SystemBase & sys,
                              Assembly & assembly,
-                             Moose::VarKindType var_kind);
+                             Moose::VarKindType var_kind,
+                             THREAD_ID tid);
 
   virtual void computeElemValues() override;
   virtual void computeElemValuesFace() override;

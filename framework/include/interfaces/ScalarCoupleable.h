@@ -50,6 +50,14 @@ public:
    */
   const std::vector<MooseVariableScalar *> & getCoupledMooseScalarVars();
 
+  std::set<TagID> & getScalarVariableCoupleableVectorTags() { return _sc_coupleable_vector_tags; }
+
+  std::set<TagID> & getScalarVariableCoupleableMatrixTags() { return _sc_coupleable_matrix_tags; }
+
+  void addScalarVariableCoupleableVectorTag(TagID tag) { _sc_coupleable_vector_tags.insert(tag); }
+
+  void addScalarVariableCoupleableMatrixTag(TagID tag) { _sc_coupleable_matrix_tags.insert(tag); }
+
 protected:
   // Reference to the interface's input parameters
   const InputParameters & _sc_parameters;
@@ -93,6 +101,26 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    */
   virtual VariableValue & coupledScalarValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns value of a scalar coupled variable
+   * @param var_name Name of coupled variable
+   * @param tag Tag ID of coupled vector ;
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   */
+  virtual VariableValue &
+  coupledVectorTagScalarValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
+
+  /**
+   * Returns value of a scalar coupled variable
+   * @param var_name Name of coupled variable
+   * @param tag Tag ID of coupled matrix;
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   */
+  virtual VariableValue &
+  coupledMatrixTagScalarValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
 
   /**
    * Returns the old (previous time step) value of a scalar coupled variable
@@ -193,6 +221,10 @@ protected:
 private:
   /// Field variables coupled into this object (for error checking)
   std::map<std::string, std::vector<MooseVariableFEBase *>> _sc_coupled_vars;
+
+  std::set<TagID> _sc_coupleable_vector_tags;
+
+  std::set<TagID> _sc_coupleable_matrix_tags;
 };
 
 #endif // SCALARCOUPLEABLE_H
