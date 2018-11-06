@@ -4,8 +4,8 @@
 # This test exercises 2D gap heat transfer for a constant conductivity gap.
 #
 # The mesh consists of an inner solid cylinder of radius = 1 unit, and outer
-# hollow cylinder with an inner radius of 2. In other words, the gap between
-# them is 1 radial unit in length.
+# hollow cylinder with an inner radius of 2 in the x-y plane. In other words,
+# the gap between them is 1 radial unit in length.
 #
 # The conductivity of both cylinders is set very large to achieve a uniform
 # temperature in each cylinder. The temperature of the center node of the

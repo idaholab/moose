@@ -1200,7 +1200,14 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
   }
   else if (dim - 1 == 1)
   {
-    normal = RealGradient(dxyz_dxi[0](1), -dxyz_dxi[0](0));
+    const Node * const * elem_nodes = master_elem->get_nodes();
+    const Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
+    const Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
+
+    Point out_of_plane_normal = in_plane_vector1.cross(in_plane_vector2);
+    out_of_plane_normal /= out_of_plane_normal.norm();
+
+    normal = dxyz_dxi[0].cross(out_of_plane_normal);
   }
   else
   {
