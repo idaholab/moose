@@ -5,8 +5,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 40
-  ny = 40
+  nx = 20
+  ny = 20
   bias_x = 1.1
   bias_y = 1.1
   ymax = 100
@@ -119,7 +119,7 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  dt = 7E1
+  dt = 200
   end_time = 1E3
   nl_abs_tol = 1e-10
 []
@@ -129,10 +129,6 @@
   file_base = theis1
   csv = true
   execute_on = 'final'
-  [./con]
-    output_linear = true
-    type = Console
-  [../]
 []
 
 [ICs]

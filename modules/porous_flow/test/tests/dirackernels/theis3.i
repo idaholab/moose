@@ -173,11 +173,10 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  end_time = 2e4
-  dtmax = 1e4
+  end_time = 1e4
   [./TimeStepper]
     type = IterationAdaptiveDT
-    dt = 1
+    dt = 10
     growth_factor = 2
   [../]
 []
@@ -212,7 +211,6 @@
   file_base = theis3
   print_linear_residuals = false
   perf_graph = true
-  exodus = true
   [./csv]
     type = CSV
     execute_on = timestep_end
