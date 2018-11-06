@@ -111,6 +111,72 @@
     design = "GrainTracker.md"
   [../]
 
+  [./test_recovery_serial_part1]
+    type = 'RunApp'
+    input = 'grain_tracker_remapping_test.i'
+    cli_args = 'Outputs/file_base=gt_recover_serial_out Outputs/checkpoint=true --half-transient'
+
+    method = '!DBG'
+    valgrind = 'NONE'
+    petsc_version = '>=3.5.0'
+
+    requirement = "The GrainTracker object shall properly checkpoint unique grain information in serial."
+    issues = "#6713 #12427"
+    design = "GrainTracker.md"
+  [../]
+
+  [./test_recovery_serial_part2]
+    type = 'CSVDiff'
+    input = 'grain_tracker_remapping_test.i'
+    csvdiff = 'gt_recover_serial_out.csv'
+    cli_args = 'Outputs/file_base=gt_recover_serial_out --recover'
+    prereq = 'test_recovery_serial_part1'
+    delete_output_before_running = false
+
+    method = '!DBG'
+    valgrind = 'NONE'
+    petsc_version = '>=3.5.0'
+
+    requirement = "The GrainTracker object shall properly recover unique grain information in serial."
+    issues = "#6713 #12427"
+    design = "GrainTracker.md"
+  [../]
+
+  [./test_recovery_parallel_part1]
+    type = 'RunApp'
+    input = 'grain_tracker_remapping_test.i'
+    cli_args = 'Outputs/file_base=gt_recover_parallel_out Outputs/checkpoint=true --half-transient'
+
+    min_parallel = 8 # Test distributed merge work with grain tracker
+
+    method = '!DBG'
+    valgrind = 'NONE'
+    petsc_version = '>=3.5.0'
+
+    requirement = "The GrainTracker object shall properly checkpoint unique grain information in parallel."
+    issues = "#6713 #12427"
+    design = "GrainTracker.md"
+  [../]
+
+  [./test_recovery_parallel_part2]
+    type = 'CSVDiff'
+    input = 'grain_tracker_remapping_test.i'
+    csvdiff = 'gt_recover_parallel_out.csv'
+    cli_args = 'Outputs/file_base=gt_recover_parallel_out --recover'
+    prereq = 'test_recovery_parallel_part1'
+    delete_output_before_running = false
+
+    min_parallel = 8 # Test distributed merge work with grain tracker
+
+    method = '!DBG'
+    valgrind = 'NONE'
+    petsc_version = '>=3.5.0'
+
+    requirement = "The GrainTracker object shall properly recover unique grain information in parallel."
+    issues = "#6713 #12427"
+    design = "GrainTracker.md"
+  [../]
+
   [./test_poly_ic_handoff]
     type = 'CSVDiff'
     input = 'grain_tracker_remapping_test.i'

@@ -208,7 +208,7 @@ protected:
    * This data structure holds the map of unique grains from the previous time step.
    * The information is updated each timestep to track grains over time.
    */
-  std::vector<FeatureData> & _feature_sets_old;
+  std::vector<FeatureData> _feature_sets_old;
 
   /// An optional IC UserObject which can provide initial data structures to this object.
   const PolycrystalUserObjectBase * _poly_ic_uo;
@@ -222,7 +222,7 @@ protected:
    * Boolean to indicate the first time this object executes.
    * Note: _tracking_step isn't enough if people skip initial or execute more than once per step.
    */
-  bool _first_time;
+  bool & _first_time;
 
   /**
    * Boolean to terminate with an error if a new grain is created during the simulation.
@@ -239,7 +239,7 @@ private:
   unsigned int _old_max_grain_id;
 
   /// Holds the next "regular" grain ID (a grain found or remapped to the standard op vars)
-  unsigned int _max_curr_grain_id;
+  unsigned int & _max_curr_grain_id;
 
   /// Boolean to indicate whether this is a Steady or Transient solve
   const bool _is_transient;
