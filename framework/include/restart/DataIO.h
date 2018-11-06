@@ -149,8 +149,8 @@ inline void loadHelper(std::istream & stream, HashMap<P, Q> & data, void * conte
 template <typename T>
 inline void dataStore(std::ostream & stream, T & v, void * /*context*/);
 
-// global store functions
-
+// DO NOT MODIFY THE NEXT LINE - It is used by MOOSEDocs
+// *************** Global Store Declarations *****************
 template <typename T>
 inline void
 dataStore(std::ostream & stream, T & v, void * /*context*/)
@@ -411,8 +411,8 @@ dataStore(std::ostream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
   dataStore(stream, dn_wrapper.dn(false), context);
 }
 
-// global load functions
-
+// DO NOT MODIFY THE NEXT LINE - It is used by MOOSEDocs
+// *************** Global Load Declarations *****************
 template <typename T>
 inline void
 dataLoad(std::istream & stream, T & v, void * /*context*/)

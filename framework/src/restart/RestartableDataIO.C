@@ -301,7 +301,7 @@ RestartableDataIO::createBackup()
   backup->_restartable_data.resize(n_threads);
 
   for (unsigned int tid = 0; tid < n_threads; tid++)
-    serializeRestartableData(restartable_datas[tid], *backup->_restartable_data[tid]);
+    serializeRestartableData(restartable_datas[tid], backup->_restartable_data[tid]);
 
   return backup;
 }
@@ -314,7 +314,7 @@ RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restar
   // Make sure we read from the beginning
   backup->_system_data.seekg(0);
   for (unsigned int tid = 0; tid < n_threads; tid++)
-    backup->_restartable_data[tid]->seekg(0);
+    backup->_restartable_data[tid].seekg(0);
 
   deserializeSystems(backup->_system_data);
 
@@ -324,25 +324,25 @@ RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restar
   {
     // header
     char id[2];
-    backup->_restartable_data[tid]->read(id, 2);
+    backup->_restartable_data[tid].read(id, 2);
 
     unsigned int this_file_version;
-    backup->_restartable_data[tid]->read((char *)&this_file_version, sizeof(this_file_version));
+    backup->_restartable_data[tid].read((char *)&this_file_version, sizeof(this_file_version));
 
     processor_id_type this_n_procs = 0;
     unsigned int this_n_threads = 0;
 
-    backup->_restartable_data[tid]->read((char *)&this_n_procs, sizeof(this_n_procs));
-    backup->_restartable_data[tid]->read((char *)&this_n_threads, sizeof(this_n_threads));
+    backup->_restartable_data[tid].read((char *)&this_n_procs, sizeof(this_n_procs));
+    backup->_restartable_data[tid].read((char *)&this_n_threads, sizeof(this_n_threads));
 
     std::set<std::string> & recoverable_data = _fe_problem.getMooseApp().getRecoverableData();
 
     if (for_restart) // When doing restart - make sure we don't read data that is only for
                      // recovery...
       deserializeRestartableData(
-          restartable_datas[tid], *backup->_restartable_data[tid], recoverable_data);
+          restartable_datas[tid], backup->_restartable_data[tid], recoverable_data);
     else
       deserializeRestartableData(
-          restartable_datas[tid], *backup->_restartable_data[tid], std::set<std::string>());
+          restartable_datas[tid], backup->_restartable_data[tid], std::set<std::string>());
   }
 }
