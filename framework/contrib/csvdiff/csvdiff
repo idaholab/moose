@@ -18,7 +18,7 @@ class CSVTools:
 
     def addError(self, f, message):
         """Add error message and increment the error count"""
-        self.__msg.append('In ' + f.name + ': ' + message)
+        self.__msg.append('In ' + os.path.basename(f.name) + ': ' + message)
         self.__num_errors += 1
         return self.__msg
 
@@ -69,11 +69,46 @@ class CSVTools:
 
         return table_pair
 
+    def parseComparisonFile(self, config_file):
+        """ Walk through comparison file and populate/return a dictionary """
+        # A set of known paramater naming conventions
+        important_params = set(['floor', 'relative', 'abs_zero', 'absolute'])
+        custom_params = {}
+        config_text = config_file.read()
+
+        global_settings = re.findall(r"^(?![#|\n])(\S.*\n\s*$)", config_text, re.MULTILINE)
+        config_settings = re.findall(r"^(?![#|\n])(.*\W(\t.*(\n|$))+)", config_text, re.MULTILINE)
+
+        # Build params dictionary
+        for settings in [global_settings, config_settings]:
+            for config_line in settings:
+                if type(config_line) == type(()):
+                    config_line = config_line[0].lower()
+                else:
+                    config_line = config_line.lower()
+
+                # Find global params
+                if set(config_line.split()).intersection(important_params):
+                    custom_key = config_line[0:min(i for i in [config_line.find(x) for x in important_params] if i > 0) - 1]
+                    custom_params[custom_key] = { 'variables' : {}}
+
+
+                    for param in set(config_line.split()).intersection(important_params):
+                        custom_params[custom_key][param] = re.findall(param + "\s+([0-9e.-]+)", config_line)[0]
+
+                    # Find fields possibly contained within global params
+                    for field in config_line.split('\n')[1:]:
+                        if field:
+                            (id_field, rel_tol) = re.findall(r"(\S+)\s+(\S+|.*).*#", field)[0]
+                            custom_params[custom_key]['variables'][id_field] = rel_tol
+
+        return custom_params
+
 class CSVSummary(CSVTools):
     def __init__(self, args):
         CSVTools.__init__(self)
         self.files = args.summary
-        self.config = args.use_config
+        self.config = args.comparison_file
 
     def __enter__(self):
         return self
@@ -101,7 +136,7 @@ class CSVSummary(CSVTools):
                 formatted_messages.insert(0, 'TIME STEPS relative 1.e-6 floor 0.0  # min: %d @ t%d  max: %d @ t%d\n' % \
                                           ( min(value), value.index(min(value)) + 1, max(value), value.index(max(value)) + 1 ))
             else:
-                formatted_messages.append('\t%s\t\t# min: %.e @ t%d\t\tmax: %.e @ t%d' % \
+                formatted_messages.append('\t%s\t\t# min: %.3e @ t%d\t\tmax: %.3e @ t%d' % \
                                           (field, Decimal(min(value)), value.index(min(value)) + 1, Decimal(max(value)), value.index(max(value)) + 1 ))
 
         self.addMessage('\n'.join(formatted_messages))
@@ -111,9 +146,9 @@ class CSVDiffer(CSVTools):
     def __init__(self, args):
         CSVTools.__init__(self)
         self.files = args.csv_file
-        self.config = args.use_config
-        self.abs_zero = float(args.abs_zero)
-        self.rel_tol = float(args.relative_tolerance)
+        self.config = args.comparison_file
+        self.abs_zero = float(str(args.abs_zero[0]))
+        self.rel_tol = float(str(args.relative_tolerance[0]))
         self.custom_columns = args.custom_columns
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
@@ -134,36 +169,24 @@ class CSVDiffer(CSVTools):
     # manually clear messages by calling clearDiff
     def diff(self):
 
-        # Setup custom values based on supplied config file
-        custom_params = {}
+        # Setup custom values based on supplied config file. Override any information
+        # in self.custom_colums (indeed, verifyArgs will not allow both --custom and
+        # --config to be used together anyway)
         if self.config:
+            self.only_compare_custom = True
+            custom_params = self.parseComparisonFile(self.config[0])
             self.custom_columns = []
             self.custom_rel_err = []
             self.custom_abs_zero = []
-            self.only_compare_custom = True
-            config_settings = re.findall("^(?!#)^(?!\n).*", self.config[0].read(), re.MULTILINE)
 
-            # Find Key params
-            for config_line in config_settings:
-                # This is a key param in the config file
-                if config_line and 'relative' in config_line.lower() and 'floor' in config_line.lower():
-                    custom_params[re.findall("(.*) .*relative", config_line)[0]] = re.findall(".*relative (\S+).*floor (\S+)", config_line)[0]
-
-            # Find fields
-            for config_line in config_settings:
-                if config_line and 'relative' not in config_line.lower() and 'floor' not in config_line.lower():
-                    custom_params[re.findall("(\S+)", config_line)[0]] = custom_params['NODAL VARIABLES']
-
-            # populate custom fields
-            self.custom_columns.append('time')
-            self.custom_rel_err.append(custom_params['TIME STEPS'][0])
-            self.custom_abs_zero.append(custom_params['TIME STEPS'][1])
-
-            for param, values in custom_params.iteritems():
-                if param != 'TIME STEPS' and param != 'NODAL VARIABLES':
-                    self.custom_columns.append(param)
-                    self.custom_rel_err.append(values[0])
-                    self.custom_abs_zero.append(values[1])
+            # CSVDiff is only interested in Nodal Variables
+            for field_id, value in custom_params['nodal variables']['variables'].iteritems():
+                self.custom_columns.append(field_id)
+                self.custom_abs_zero.append(custom_params['nodal variables']['floor'])
+                if value:
+                    self.custom_rel_err.append(value)
+                else:
+                    self.custom_rel_err.append(custom_params['nodal variables']['relative'])
 
         # Setup data structures for holding customized relative tolerance and absolute
         # zero values and flag for checking variable names
@@ -202,6 +225,10 @@ class CSVDiffer(CSVTools):
             for key in large:
                 if key not in small:
                     self.addError(self.files[0], "Header '" + key + "' is missing")
+        elif len(keys1) > len(keys2):
+            for key in large:
+                if key not in small:
+                    self.addError(self.files[1], "Header '" + key + "' is missing")
         else:
             for key in keys1:
                 found_column[key] = True
@@ -269,7 +296,7 @@ class CSVDiffer(CSVTools):
         if self.custom_columns and not self.only_compare_custom:
            for mykey2 in self.custom_columns:
                if not found_column[mykey2]:
-                  self.addError("all CSV files", "Variable '" + mykey2 + "' in custom_columns is missing" )
+                  self.addError(self.files[0], "all CSV files Variable '" + mykey2 + "' in custom_columns is missing" )
 
         return self.getMessages()
 
@@ -284,7 +311,7 @@ def verifyArgs(args):
     elif args.csv_file and args.summary:
         problems.append('Incorrect positional arguments, or you are trying to perform a diff and show a summary (can only do one or the other)')
 
-    elif args.summary and args.use_config:
+    elif args.summary and args.comparison_file:
         print 'Ignoring request to use config file while being asked to display a summary\n'
 
     # Check if all custom args are populated correctly
@@ -295,8 +322,8 @@ def verifyArgs(args):
         if len(set([len(x) for x in unify_custom_args])) > 1:
             problems.append('All --custom-* options need to contain the same number of space separated items')
 
-    if unify_custom_args and args.use_config:
-        problems.append('When supplying a config file (--use-config|-c), you can not use any --custom-* args')
+    if unify_custom_args and args.comparison_file:
+        problems.append('When supplying a config file (--comparison-file|-c), you can not use any --custom-* args')
 
     for a_problem in problems:
         print a_problem
@@ -309,7 +336,7 @@ def parseArgs(args=None):
     parser = argparse.ArgumentParser(description='Tool for testing differences between two CSV files')
     parser.add_argument('csv_file', nargs='*', type=argparse.FileType('r'))
     parser.add_argument('--summary', '-s', nargs=1, type=argparse.FileType('r'), metavar='csv_file', help='Produce a summary in csvdiff input format')
-    parser.add_argument('--use-config', '-c', nargs=1, type=argparse.FileType('r'), metavar='config_file', help='Use comparison configuration file (can be generated using --summary|-s)')
+    parser.add_argument('--comparison-file', '-c', nargs=1, type=argparse.FileType('r'), metavar='comparison_file', help='Use comparison configuration file (can be generated using --summary|-s)')
     parser.add_argument('--ignore-fields', '-i', nargs='+', metavar='id', help='Ignore specified space-separated field IDs')
     parser.add_argument('--diff-fields', '-f', nargs='+', metavar='id', help='Perform diff tests only on space-separated field IDs')
     parser.add_argument('--abs-zero', nargs=1, metavar='absolute zero', default='1e-11', help='Exponential expression representing zero (default: 1e-11)')

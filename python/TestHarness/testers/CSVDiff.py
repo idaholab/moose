@@ -18,9 +18,12 @@ class CSVDiff(FileTester):
         params = FileTester.validParams()
         params.addRequiredParam('csvdiff',   [], "A list of files to run CSVDiff on.")
         params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
-        params.addParam('override_rel_err',   [], "A list of customized relative error tolerances .")
+        params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
         params.addParam('only_compare_custom', False, "Only compare (and require) the listed custom columns.")
+        params.addParam('comparison_file', "Use supplied custom comparison config file.")
+        params.addParam('rel_err', "A customized relative error tolerances.")
+        params.addParam('abs_zero', "A customized relative error tolerances.")
         return params
 
     def __init__(self, name, params):
@@ -50,7 +53,17 @@ class CSVDiff(FileTester):
             custom_cmp = ''
             old_floor = ''
 
+            if self.specs.isValid('rel_err'):
+                csvdiff.append('--relative-tolerance %s' % (self.specs['rel_err']))
+
+            if self.specs.isValid('abs_zero'):
+                csvdiff.append('--abs-zero %s' % (self.specs['abs_zero']))
+
+            if self.specs.isValid('comparison_file'):
+                csvdiff.append('--comparison-file %s' % (self.specs['comparison_file']))
+
             if self.specs.isValid('override_columns'):
+                self.addCaveats('deprecated override_params. Build and use a comparison_file')
                 csvdiff.append('--custom-columns %s' % (' '.join(self.specs['override_columns'])))
 
             if self.specs.isValid('override_rel_err'):
