@@ -14,4 +14,8 @@
 #include "libmesh/parallel.h"
 
 // Backup Definitions
-Backup::Backup() : _restartable_data(libMesh::n_threads()) {}
+Backup::Backup() : _restartable_data(libMesh::n_threads())
+{
+  for (auto & data_ptr : _restartable_data)
+    data_ptr = libmesh_make_unique<std::stringstream>();
+}
