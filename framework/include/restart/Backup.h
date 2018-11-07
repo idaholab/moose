@@ -30,7 +30,7 @@ public:
   /**
    * Vector of streams for holding individual thread data for the simulation.
    */
-  std::vector<std::stringstream> _restartable_data;
+  std::vector<std::unique_ptr<std::stringstream>> _restartable_data;
 };
 
 // Specializations for dataLoad and dataStore appear in DataIO.C
