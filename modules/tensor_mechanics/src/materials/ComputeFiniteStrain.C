@@ -141,7 +141,12 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
     case DecompMethod::TaylorExpansion:
     {
       // inverse of _Fhat
-      RankTwoTensor invFhat(_Fhat[_qp].inverse());
+      RankTwoTensor invFhat;
+      static const RankTwoTensor zero;
+      if (_Fhat[_qp] == zero)
+        invFhat.zero();
+      else
+        invFhat = _Fhat[_qp].inverse();
 
       // A = I - _Fhat^-1
       RankTwoTensor A(RankTwoTensor::initIdentity);
