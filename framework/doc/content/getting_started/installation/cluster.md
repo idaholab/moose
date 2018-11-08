@@ -1,12 +1,8 @@
-# High Performance Computing
+# Multi-User Cluster Instructions
 
-If you are an HPC User, you should instead head on over to our [HPC Users](hpc_install_moose.md) page.
+This document will aid an +HPC Administrator+ on building an environment which multiple end-users will use when compiling and running MOOSE based applications. +If you do not have administrative rights, you will not be able to complete these instructions!+ Please forward these instructions to your HPC Administrator.
 
-This document will aid an +HPC Administrator+ on building an environment which end-users will use when compiling and running MOOSE based applications. +If you do not have administrative rights, you will not be able to complete these instructions!+ Please forward these instructions to your HPC Administrator.
-
-Because this document assumes the reader is an administrator, most of the content herein are suggestions, and should not be blindly followed with 'copy/paste/enter' behavior (your HPC cluster is no doubt different than our cluster these instructions were based on).
-
-+If you are an end-user trying to follow these instructions, please seek help from one of your HPC Administrators.+ However, if you are the sole owner of the machine for which you currently operate on (a single workstation), you should follow one of our [Manual Install (GCC)](manual_installation_gcc.md) instructions instead.
+Because this document assumes the reader *is* an administrator, most of the content herein are suggestions, and not 'copy, paste, enter' instructions.
 
 ## Prerequisites
 

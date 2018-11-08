@@ -31,43 +31,43 @@ Loading these two modules will in-turn load other necessary modules. The correct
 
 - Linux:
 
-  ```bash
+  !package! code max-height=400
   module list
 
   Currently Loaded Modulefiles:
-  1) moose/.gcc-7.3.1                             5) moose/.cppunit-1.12.1_gcc-7.3.1
-  2) moose/.mpich-3.2_gcc-7.3.1                   6) moose-dev-gcc
-  3) moose/.petsc-3.8.3_mpich-3.2_gcc-7.3.1-opt   7) miniconda
-  4) moose/.tbb-2018_U3                           8) moose-tools
-  ```
+  1) moose/.gcc-__GCC__                             5) moose/.cppunit-__CPPUNIT___gcc-__GCC__
+  2) moose/.mpich-__MPICH___gcc-__GCC__                   6) moose-dev-gcc
+  3) moose/.petsc-__PETSC_DEFAULT___mpich-3.2_gcc-__GCC__-opt   7) miniconda
+  4) moose/.tbb-__TBB__                           8) moose-tools
+  !package-end!
 
 - Macintosh:
 
-  ```bash
+  !package! code max-height=400
   module list
 
   Currently Loaded Modulefiles:
-  1) moose/.gcc-7.3.1                               6) moose/.cppunit-1.12.1_clang-6.0.1
-  2) moose/.clang-6.0.1                             7) moose-dev-clang
-  3) moose/.mpich-3.2_clang-6.0.1                   8) miniconda
-  4) moose/.petsc-3.8.3_mpich-3.2_clang-6.0.1-opt   9) moose-tools
-  5) moose/.tbb-2018_U3
-  ```
+  1) moose/.gcc-__GCC__                               6) moose/.cppunit-__CPPUNIT___clang-__LLVM__
+  2) moose/.clang-__LLVM__                             7) moose-dev-clang
+  3) moose/.mpich-__MPICH___clang-__LLVM__                   8) miniconda
+  4) moose/.petsc-__PETSC_DEFAULT___mpich-__MPICH___clang-__LLVM__-opt   9) moose-tools
+  5) moose/.tbb-__TBB__
+  !package-end!
 
 If your terminal mirrors the above (version numbers may vary slightly), then you have a proper environment. Please return from whence you came, and continue troubleshooting.
 
-!alert! warning title=That didn't work!
-If you find yourself looping through our troubleshooting guide, unable to solve your issue, there is still another attempt you can perform. Start over (sorry!). But this time, perform the following before starting over:
+!alert! note title=Ughh! None of this is working!
+If you find yourself looping through our troubleshooting guide, unable to solve your issue, there is still another attempt you can perform. Start over. But this time, perform the following before starting over:
 
-```bash
+!package! code max-height=400
 env -i bash
 export PATH=/usr/bin:/usr/sbin:/sbin
-source /opt/moose/Modules/3.2.10/init/bash
-```
+source /opt/moose/Modules/__MODULES__/init/bash
+!package-end!
 
-These three commands, start a new command interpreter without any of your bash profiles.
+These three commands will start a new command interpreter without any of your default environment. This is important because for most errors we end up solving, it was due to *something* in the users environment.
 
-Do note, that if *this* ends up solving your issue, then there is *something* in one of possibly many bash profiles getting in the way. At this point, you will want to reach out to our [mailing list](https://groups.google.com/forum/#!forum/moose-users) and ask for help tracking this down. Keep in mind, depending on the situation you may be asked to contact the administrators of the machine in which you are operating on (HPC clusters for example are beyound our control).
+Do note, if *this* ends up solving your issue, then there is *something* in one of possibly many bash profiles getting in the way. At this point, you will want to reach out to our [mailing list](https://groups.google.com/forum/#!forum/moose-users) and ask for help tracking this down. Keep in mind, depending on the situation you may be asked to contact the administrators of the machine in which you are operating on (HPC clusters for example are beyound our control).
 !alert-end!
 
 !alert note

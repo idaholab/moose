@@ -6,30 +6,30 @@ Compiling libMesh requires a proper environment. Lets verify a few things before
 
   - Linux:
 
-    ```bash
+    !package! code max-height=400
     which $CC
-    /opt/moose/mpich-3.2/gcc-7.3.1/bin/mpicc
+    /opt/moose/mpich-__MPICH__/gcc-__GCC__/bin/mpicc
 
     mpicc -show
-    gcc -I/opt/moose/mpich-3.2/gcc-7.3.1/include -L/opt/moose/mpich-3.2/gcc-7.3.1/lib -Wl,-rpath -Wl,/opt/moose/mpich-3.2/gcc-7.3.1/lib -Wl,--enable-new-dtags -lmpi
+    gcc -I/opt/moose/mpich-__MPICH__/gcc-__GCC__/include -L/opt/moose/mpich-__MPICH__/gcc-__GCC__/lib -Wl,-rpath -Wl,/opt/moose/mpich-__MPICH__/gcc-__GCC__/lib -Wl,--enable-new-dtags -lmpi
 
     which gcc
-    /opt/moose/gcc-7.3.1/bin/gcc
-    ```
+    /opt/moose/gcc-__GCC__/bin/gcc
+    !package-end!
 
   - Macintosh:
-  
-    ```bash
+
+    !package! code max-height=400
     which $CC
-    /opt/moose/mpich-3.2/clang-6.0.1/bin/mpicc
+    /opt/moose/mpich-__MPICH__/clang-__LLVM__/bin/mpicc
 
     mpicc -show
-    clang -Wl,-commons,use_dylibs -I/opt/moose/mpich-3.2/clang-6.0.1/include -L/opt/moose/mpich-3.2/clang-6.0.1/lib -lmpi -lpmpi
+    clang -Wl,-commons,use_dylibs -I/opt/moose/mpich-__MPICH__/clang-__LLVM__/include -L/opt/moose/mpich-__MPICH__/clang-__LLVM__/lib -lmpi -lpmpi
 
     which clang
-    /opt/moose/llvm-6.0.1/bin/clang
-    ```
-  
+    /opt/moose/llvm-__LLVM__/bin/clang
+    !package-end!
+
   What you are looking for is that `which` and `mpicc -show` are returning proper paths. If these paths are not set, or `which` is not returning anything, see [Modules](help/troubleshooting.md#modules) for help on setting up a proper environment. Once set up, return here and verify the above commands return the proper messages.
 
 
@@ -37,23 +37,23 @@ Compiling libMesh requires a proper environment. Lets verify a few things before
 
   - Linux:
 
-    ```bash
+    !package! code max-height=400
     echo $PETSC_DIR
-    /opt/moose/petsc-3.8.3/mpich-3.2_gcc-7.3.1-opt
+    /opt/moose/petsc-__PETSC_DEFAULT__/mpich-__MPICH___gcc-__GCC__-opt
 
     file $PETSC_DIR
-    /opt/moose/petsc-3.8.3/mpich-3.2_gcc-7.3.1-opt: directory
-    ```
-    
+    /opt/moose/petsc-__PETSC_DEFAULT__/mpich-__MPICH___gcc-__GCC__-opt: directory
+    !package-end!
+
   - Macintosh:
 
-    ```bash
+    !package! code max-height=400
     echo $PETSC_DIR
-    /opt/moose/petsc-3.8.3/mpich-3.2_clang-6.0.1-opt
+    /opt/moose/petsc-__PETSC_DEFAULT__/mpich-__MPICH___clang-__LLVM__-opt
 
     file $PETSC_DIR
-    /opt/moose/petsc-3.8.3/mpich-3.2_clang-6.0.1-opt: directory
-    ```
+    /opt/moose/petsc-__PETSC_DEFAULT__/mpich-__MPICH___clang-__LLVM__-opt: directory
+    !package-end!
 
   - If `echo $PETSC_DIR` returns nothing, this would indicate your environment is not complete. See [Modules](help/troubleshooting.md#modules) for help on setting up a proper environment. Once set up, return here and verify the above commands return the proper messages.
 

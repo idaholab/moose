@@ -993,6 +993,11 @@ details[open] .moose-section-content {
   }
 }
 
+/* Dropdown Menu Text Color */
+.dropdown-content li > a, .dropdown-content li > span {
+    color: var(--inl-blue);
+}
+
 /* MooseDocs contents extension */
 .moose-source-directory{
     font-weight:400;

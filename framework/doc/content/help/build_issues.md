@@ -2,12 +2,12 @@
 
 Build issues are normally caused by an invalid environment, or perhaps an update to your repository occurred, and you now have a mismatch between MOOSE and your application, or a combination of one or the other with libMesh's submodule.
 
-- Verify you have a functional environment see [Modules](help/troubleshooting.md#modules) above.
+- Verify you have a functional environment see [Modules](help/troubleshooting.md#modules).
 
 - Verify the MOOSE repository is up to date, with the correct vetted version of libMesh:
 
   !alert warning
-  Before performing the following commands, be sure you have committed your work. We are about to delete stuff!
+  Before performing the following commands, be sure you have committed your work. Because... we are about to delete stuff!
 
   ```bash
   cd moose
@@ -21,4 +21,21 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   git submodule update --init
   ```
 
-- Once completed, you should attempt to [rebuild libMesh](help/troubleshooting.md#libmesh).
+- Verify you either have no moose directory set, or it is set correctly.
+
+  ```bash
+  [~] > echo $MOOSE_DIR
+
+  [~] >
+  ```
+
+  The above should return nothing, or, it should point to the correct moose repository.
+
+  !alert note
+  Mose users, do not use or set MOOSE_DIR. If the above command returns something, and you are not sure why, just unset it:
+
+  ```bash
+  unset MOOSE_DIR
+  ```
+
+- Once completed, you should attempt to [rebuild libMesh](help/troubleshooting.md#libmesh) again.

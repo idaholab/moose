@@ -1,23 +1,60 @@
-# Getting Started with MOOSE on HPC Machines
+# Getting Started with MOOSE on Cluster Machines
 
-This document assumes your HPC Administrator has completed the [HPC Cluster](cluster.md) instructions, and you have received instructions on how to enable your environment for MOOSE-based development.
+The following instructions aims at setting up a baseline single-user environment for building MOOSE based applications in a job scheduling capable environment.
 
-## Environment
+If instead, you are here interested in allowing MOOSE-based development to be made avaialable to multiple users, please see our [Multi-User](getting_started/installation/cluster.md) setup instructions (requires administrative rights). Normal users: please ingore the previous sentence, and continue on...
 
-Simply put, your HPC Administrator will provide you with instructions on how to initialize the environment they have constructed for you, for MOOSE-based development. However, you should have to do something. It is not magic, and not automatic. Please do not skip this step. If you are not sure what you should be doing to initialize your environment, please ask your HPC Administrators for help.
+## Pre-Reqs
 
-Most if not all errors caused during build and/or runtime are usually related to a faulty or un-initialized environment.
+What ever compiler you choose to use on your cluster (GCC/Clang, MPICH/OpenMPI), the minimum requirement, is that it must be C++11 compatible. If you are unsure, please consult with your system admins for your cluster on which compiler to use (and how to use it).
 
-!include getting_started/installation/clone_moose.md
+- +CMake+. A modern version of CMake (>2.8) is required to build some of the meta packages we need to include in PETSc.
 
-!include getting_started/installation/build_libmesh.md
+- +Python 2.7.x Development libraries+.
 
-!include getting_started/installation/test_moose.md
+Your cluster will most likely have these two requirements available via some form of environment management software. If you are unfamiliar with how to manage your environment, please consult with your cluster administrators.
 
-!include getting_started/installation/create_an_app.md
+## PREFIX Setup
 
-!include getting_started/installation/update_moose.md
+```bash
+export STACK_SRC=`mktemp -d /tmp/stack_temp.XXXXXX`
+export PACKAGES_DIR=$HOME/moose-compilers
+```
 
-!include getting_started/installation/post_moose_install.md
+!alert! note
+- The `$PACKAGES_DIR` directory must reside in a location where all the compute nodes can access.
+- We need the above two environment variables to exist throughout these instructions. Please use the one and only one, terminal you executed those two commands with.
+!alert-end!
 
-!include getting_started/installation/installation_troubleshooting.md
+!include manual_petsc.md
+
+## Create MOOSE Profile
+
+Use an editor to add the following contents to `$HOME/.moose_profile`
+
+```bash
+PACKAGES_DIR=$HOME/moose-compilers
+
+export CC=mpicc
+export CXX=mpicxx
+export F90=mpif90
+export F77=mpif77
+export FC=mpif90
+
+export PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3
+```
+
+## Source the MOOSE Profile
+
+```bash
+source $HOME/.moose_profile
+```
+
+By sourcing the above file, you are now ready to begin MOOSE-based development.
+
+!alert note title=+Remember to source the profile!+
+You will need to perform the above (`source $HOME/.moose_profile`) for every new terminal session for which you perform work with MOOSE. If you want this to be automatic, add the above to your `~/.bash_profile` (or `~/.bashrc` or, which ever profile you use on your system)
+
+!include manual_cleanup.md
+
+Once the above is complete, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).

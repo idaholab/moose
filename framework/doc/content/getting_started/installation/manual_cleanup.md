@@ -3,5 +3,5 @@
 Whith everything finished, it is now safe to remove the temporary directory containing our source:
 
 ```bash
-rm -rf $STACK_SRC
+if [ -d "$STACK_SRC" ]; then rm -rf "$STACK_SRC"; fi
 ```
