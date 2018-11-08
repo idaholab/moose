@@ -153,10 +153,14 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
     if (_need_dof_values_older)
       _dof_values_older[0] = soln_older;
 
-    u_dot = _sys.solutionUDot()(idx);
-    u_dotdot = _sys.solutionUDotDot()(idx);
-    u_dot_old = (*_sys.solutionUDotOld())(idx);
-    u_dotdot_old = (*_sys.solutionUDotDotOld())(idx);
+    if (_sys.solutionUDot())
+      u_dot = (*_sys.solutionUDot())(idx);
+    if (_sys.solutionUDotDot())
+      u_dotdot = (*_sys.solutionUDotDot())(idx);
+    if (_sys.solutionUDotOld())
+      u_dot_old = (*_sys.solutionUDotOld())(idx);
+    if (_sys.solutionUDotDotOld())
+      u_dotdot_old = (*_sys.solutionUDotDotOld())(idx);
 
     if (_need_dof_values_dot)
       _dof_values_dot[0] = u_dot;
@@ -327,10 +331,14 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
     if (_need_dof_values_older_neighbor)
       _dof_values_older_neighbor[0] = soln_older;
 
-    u_dot = _sys.solutionUDot()(idx);
-    u_dotdot = _sys.solutionUDotDot()(idx);
-    u_dot_old = (*_sys.solutionUDotOld())(idx);
-    u_dotdot_old = (*_sys.solutionUDotDotOld())(idx);
+    if (_sys.solutionUDot())
+      u_dot = (*_sys.solutionUDot())(idx);
+    if (_sys.solutionUDotDot())
+      u_dotdot = (*_sys.solutionUDotDot())(idx);
+    if (_sys.solutionUDotOld())
+      u_dot_old = (*_sys.solutionUDotOld())(idx);
+    if (_sys.solutionUDotDotOld())
+      u_dotdot_old = (*_sys.solutionUDotDotOld())(idx);
 
     if (_need_dof_values_dot_neighbor)
       _dof_values_dot_neighbor[0] = u_dot;

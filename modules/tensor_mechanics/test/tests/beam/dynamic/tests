@@ -34,7 +34,8 @@
     input = 'dyn_euler_small_rayleigh_hht_ti.i'
     exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
     rel_err = 1e-5
-  
+
+    allow_warnings = True  
     requirement = "The mechanics system shall correctly predict the natural frequencies"
                   " of an Euler-Bernoulli beam modeled using beam elements in the"
                   " presence of Rayleigh damping and numerical damping introduced"

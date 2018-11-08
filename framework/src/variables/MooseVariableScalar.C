@@ -75,12 +75,12 @@ MooseVariableScalar::reinit()
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
-  const NumericVector<Real> & u_dot = _sys.solutionUDot();
-  const NumericVector<Real> & u_dotdot = _sys.solutionUDotDot();
-  const NumericVector<Real> & u_dot_old = *_sys.solutionUDotOld();
-  const NumericVector<Real> & u_dotdot_old = *_sys.solutionUDotDotOld();
+  const NumericVector<Real> * u_dot = _sys.solutionUDot();
+  const NumericVector<Real> * u_dotdot = _sys.solutionUDotDot();
+  const NumericVector<Real> * u_dot_old = _sys.solutionUDotOld();
+  const NumericVector<Real> * u_dotdot_old = _sys.solutionUDotDotOld();
   const Real & du_dot_du = _sys.duDotDu();
-  const Real & du_dotdot_du = _sys.duDotdotDu();
+  const Real & du_dotdot_du = _sys.duDotDotDu();
   auto safe_access_tagged_vectors = _sys.subproblem().safeAccessTaggedVectors();
   auto safe_access_tagged_matrices = _sys.subproblem().safeAccessTaggedMatrices();
   auto & active_coupleable_matrix_tags =
@@ -157,16 +157,16 @@ MooseVariableScalar::reinit()
     }
 
     if (_need_u_dot)
-      u_dot.get(_dof_indices, &_u_dot[0]);
+      (*u_dot).get(_dof_indices, &_u_dot[0]);
 
     if (_need_u_dotdot)
-      u_dotdot.get(_dof_indices, &_u_dotdot[0]);
+      (*u_dotdot).get(_dof_indices, &_u_dotdot[0]);
 
     if (_need_u_dot_old)
-      u_dot_old.get(_dof_indices, &_u_dot_old[0]);
+      (*u_dot_old).get(_dof_indices, &_u_dot_old[0]);
 
     if (_need_u_dotdot_old)
-      u_dotdot_old.get(_dof_indices, &_u_dotdot_old[0]);
+      (*u_dotdot_old).get(_dof_indices, &_u_dotdot_old[0]);
   }
   else
   {
@@ -200,16 +200,16 @@ MooseVariableScalar::reinit()
         }
 
         if (_need_u_dot)
-          u_dot.get(one_dof_index, &_u_dot[i]);
+          (*u_dot).get(one_dof_index, &_u_dot[i]);
 
         if (_need_u_dotdot)
-          u_dotdot.get(one_dof_index, &_u_dotdot[i]);
+          (*u_dotdot).get(one_dof_index, &_u_dotdot[i]);
 
         if (_need_u_dot_old)
-          u_dot_old.get(one_dof_index, &_u_dot_old[i]);
+          (*u_dot_old).get(one_dof_index, &_u_dot_old[i]);
 
         if (_need_u_dotdot_old)
-          u_dotdot_old.get(one_dof_index, &_u_dotdot_old[i]);
+          (*u_dotdot_old).get(one_dof_index, &_u_dotdot_old[i]);
       }
       else
       {

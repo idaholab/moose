@@ -287,13 +287,26 @@ public:
   }
   const FieldVariableGradient & gradSlnDot()
   {
-    _need_grad_dot = true;
-    return _grad_u_dot;
+    if (_sys.solutionUDot())
+    {
+      _need_grad_dot = true;
+      return _grad_u_dot;
+    }
+    else
+      mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+                 "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
   const FieldVariableGradient & gradSlnDotDot()
   {
-    _need_grad_dotdot = true;
-    return _grad_u_dotdot;
+    if (_sys.solutionUDotDot())
+    {
+      _need_grad_dotdot = true;
+      return _grad_u_dotdot;
+    }
+    else
+      mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+                 "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`.");
   }
   const FieldVariableSecond & secondSln()
   {
@@ -386,26 +399,53 @@ public:
 
   const FieldVariableValue & uDot()
   {
-    _need_u_dot = true;
-    return _u_dot;
+    if (_sys.solutionUDot())
+    {
+      _need_u_dot = true;
+      return _u_dot;
+    }
+    else
+      mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+                 "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
 
   const FieldVariableValue & uDotDot()
   {
-    _need_u_dotdot = true;
-    return _u_dotdot;
+    if (_sys.solutionUDotDot())
+    {
+      _need_u_dotdot = true;
+      return _u_dotdot;
+    }
+    else
+      mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+                 "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`.");
   }
 
   const FieldVariableValue & uDotOld()
   {
-    _need_u_dot_old = true;
-    return _u_dot_old;
+    if (_sys.solutionUDotOld())
+    {
+      _need_u_dot_old = true;
+      return _u_dot_old;
+    }
+    else
+      mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+                 "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+                 "`u_dot_old`.");
   }
 
   const FieldVariableValue & uDotDotOld()
   {
-    _need_u_dotdot_old = true;
-    return _u_dotdot_old;
+    if (_sys.solutionUDotDotOld())
+    {
+      _need_u_dotdot_old = true;
+      return _u_dotdot_old;
+    }
+    else
+      mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+                 "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+                 "requesting `u_dotdot_old`");
   }
 
   const VariableValue & duDotDu()
@@ -454,13 +494,26 @@ public:
   }
   const FieldVariableGradient & gradSlnNeighborDot()
   {
-    _need_grad_neighbor_dot = true;
-    return _grad_u_neighbor_dot;
+    if (_sys.solutionUDot())
+    {
+      _need_grad_neighbor_dot = true;
+      return _grad_u_neighbor_dot;
+    }
+    else
+      mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+                 "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
   const FieldVariableGradient & gradSlnNeighborDotDot()
   {
-    _need_grad_neighbor_dotdot = true;
-    return _grad_u_neighbor_dotdot;
+    if (_sys.solutionUDotDot())
+    {
+      _need_grad_neighbor_dotdot = true;
+      return _grad_u_neighbor_dotdot;
+    }
+    else
+      mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+                 "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`.");
   }
   const FieldVariableSecond & secondSlnNeighbor()
   {
@@ -508,26 +561,53 @@ public:
 
   const FieldVariableValue & uDotNeighbor()
   {
-    _need_u_dot_neighbor = true;
-    return _u_dot_neighbor;
+    if (_sys.solutionUDot())
+    {
+      _need_u_dot_neighbor = true;
+      return _u_dot_neighbor;
+    }
+    else
+      mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+                 "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
 
   const FieldVariableValue & uDotDotNeighbor()
   {
-    _need_u_dotdot_neighbor = true;
-    return _u_dotdot_neighbor;
+    if (_sys.solutionUDotDot())
+    {
+      _need_u_dotdot_neighbor = true;
+      return _u_dotdot_neighbor;
+    }
+    else
+      mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+                 "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`");
   }
 
   const FieldVariableValue & uDotOldNeighbor()
   {
-    _need_u_dot_old_neighbor = true;
-    return _u_dot_old_neighbor;
+    if (_sys.solutionUDotOld())
+    {
+      _need_u_dot_old_neighbor = true;
+      return _u_dot_old_neighbor;
+    }
+    else
+      mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+                 "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+                 "`u_dot_old`");
   }
 
   const FieldVariableValue & uDotDotOldNeighbor()
   {
-    _need_u_dotdot_old_neighbor = true;
-    return _u_dotdot_old_neighbor;
+    if (_sys.solutionUDotDotOld())
+    {
+      _need_u_dotdot_old_neighbor = true;
+      return _u_dotdot_old_neighbor;
+    }
+    else
+      mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+                 "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+                 "requesting `u_dotdot_old`");
   }
 
   const VariableValue & duDotDuNeighbor()

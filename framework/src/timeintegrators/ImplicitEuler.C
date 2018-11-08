@@ -28,10 +28,15 @@ ImplicitEuler::~ImplicitEuler() {}
 void
 ImplicitEuler::computeTimeDerivatives()
 {
-  _u_dot = *_solution;
-  _u_dot -= _solution_old;
-  _u_dot *= 1 / _dt;
-  _u_dot.close();
+  if (!_sys.solutionUDot())
+    mooseError("ImplicitEuler: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
+
+  NumericVector<Number> & u_dot = *_sys.solutionUDot();
+  u_dot = *_solution;
+  u_dot -= _solution_old;
+  u_dot *= 1 / _dt;
+  u_dot.close();
 
   _du_dot_du = 1.0 / _dt;
 }

@@ -154,12 +154,6 @@ protected:
   /// Value of the unknown variable this is acting on
   const VariableValue & _u;
 
-  /// Time derivative of the variable this is acting on
-  const VariableValue & _u_dot;
-
-  /// Derivative of u_dot with respect to u
-  const VariableValue & _du_dot_du;
-
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
   std::vector<MooseVariableFEBase *> _save_in;

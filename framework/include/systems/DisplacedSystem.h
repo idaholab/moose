@@ -82,12 +82,12 @@ public:
 
   virtual NumericVector<Number> & solution() override { return _undisplaced_system.solution(); }
 
-  virtual NumericVector<Number> & solutionUDot() override
+  virtual NumericVector<Number> * solutionUDot() override
   {
     return _undisplaced_system.solutionUDot();
   }
 
-  virtual NumericVector<Number> & solutionUDotDot() override
+  virtual NumericVector<Number> * solutionUDotDot() override
   {
     return _undisplaced_system.solutionUDotDot();
   }

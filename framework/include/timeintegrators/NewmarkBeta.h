@@ -37,15 +37,6 @@ protected:
   /// Newmark time integration parameter-gamma
   Real _gamma;
 
-  /// solution vector for u^dot_old
-  const NumericVector<Number> & _u_dot_old;
-
-  /// solution vector for u^dotdot
-  NumericVector<Number> & _u_dotdot;
-
-  /// solution vector for u^dotdot_old
-  const NumericVector<Number> & _u_dotdot_old;
-
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
   Real & _du_dotdot_du;
 };

@@ -128,8 +128,6 @@ protected:
   /// Nonlinear implicit system, if applicable; otherwise, nullptr
   const NonlinearImplicitSystem * _nonlinear_implicit_system;
 
-  /// solution vector for u^dot
-  NumericVector<Number> & _u_dot;
   /// solution vector for \f$ {du^dot}\over{du} \f$
   Real & _du_dot_du;
   /// solution vectors

@@ -313,7 +313,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence", 5)),
     _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3)),
     _exec_multi_apps_timer(registerTimedSection("execMultiApps", 3)),
-    _backup_multi_apps_timer(registerTimedSection("backupMultiApps", 5))
+    _backup_multi_apps_timer(registerTimedSection("backupMultiApps", 5)),
+    _u_dot_requested(false),
+    _u_dotdot_requested(false),
+    _u_dot_old_requested(false),
+    _u_dotdot_old_requested(false)
 {
 
   _time = 0.0;
@@ -4345,6 +4349,11 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
   _nl->addTimeIntegrator(type, name, parameters);
   _has_time_integrator = true;
+
+  // add vectors to store u_dot, u_dotdot, udot_old and u_dotdot_old if requested by the time
+  // integrator
+  _aux->addDotVectors();
+  _nl->addDotVectors();
 }
 
 void
@@ -4500,8 +4509,12 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
 {
   TIME_SECTION(_compute_transient_implicit_residual_timer);
 
-  _nl->setSolutionUDot(udot);
-  _nl->setSolutionUDotDot(udotdot);
+  if (uDotRequested())
+    _nl->setSolutionUDot(udot);
+
+  if (uDotDotRequested())
+    _nl->setSolutionUDotDot(udotdot);
+
   _time = time;
   computeResidual(u, residual);
 }
@@ -4705,8 +4718,10 @@ FEProblemBase::computeTransientImplicitJacobian(Real time,
   if (0)
   { // The current interface guarantees that the residual is called before Jacobian, thus udot has
     // already been set
-    _nl->setSolutionUDotDot(udotdot);
-    _nl->setSolutionUDot(udot);
+    if (uDotDotRequested())
+      _nl->setSolutionUDotDot(udotdot);
+    if (uDotOldRequested())
+      _nl->setSolutionUDot(udot);
   }
   _nl->duDotDu() = duDotDu_shift;
   _nl->duDotDotDu() = duDotDotDu_shift;

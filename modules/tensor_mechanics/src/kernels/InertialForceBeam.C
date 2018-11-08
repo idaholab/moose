@@ -229,9 +229,23 @@ InertialForceBeam::computeResidual()
     }
     else
     {
-      const NumericVector<Number> & vel = nonlinear_sys.solutionUDot();
+      if (!nonlinear_sys.solutionUDot())
+        mooseError("InertialForceBeam: Time derivative of solution (`u_dot`) is not stored. Please "
+                   "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+
+      if (!nonlinear_sys.solutionUDotOld())
+        mooseError("InertialForceBeam: Old time derivative of solution (`u_dot_old`) is not "
+                   "stored. Please set uDotOldRequested() to true in FEProblemBase before "
+                   "requesting `u_dot_old`.");
+
+      if (!nonlinear_sys.solutionUDotDot())
+        mooseError("InertialForceBeam: Second time derivative of solution (`u_dotdot`) is not "
+                   "stored. Please set uDotDotRequested() to true in FEProblemBase before "
+                   "requesting `u_dotdot`.");
+
+      const NumericVector<Number> & vel = *nonlinear_sys.solutionUDot();
       const NumericVector<Number> & vel_old = *nonlinear_sys.solutionUDotOld();
-      const NumericVector<Number> & accel = nonlinear_sys.solutionUDotDot();
+      const NumericVector<Number> & accel = *nonlinear_sys.solutionUDotDot();
 
       for (unsigned int i = 0; i < _ndisp; ++i)
       {

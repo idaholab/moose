@@ -118,6 +118,12 @@ public:
   addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
 
   /**
+   * Add u_dot, u_dotdot, u_dot_old and u_dotdot_old
+   * vectors if requested by the time integrator
+   */
+  void addDotVectors();
+
+  /**
    * Adds a kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
@@ -354,8 +360,8 @@ public:
    */
   virtual void setSolutionUDotDot(const NumericVector<Number> & udotdot);
 
-  virtual NumericVector<Number> & solutionUDot() override;
-  virtual NumericVector<Number> & solutionUDotDot() override;
+  virtual NumericVector<Number> * solutionUDot() override { return _u_dot; }
+  virtual NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
 
   /**
    *  Return a numeric vector that is associated with the time tag.

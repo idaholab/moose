@@ -11,6 +11,7 @@
 #define MOOSEVARIABLESCALAR_H
 
 #include "MooseVariableBase.h"
+#include "SystemBase.h"
 
 // libMesh forward declarations
 namespace libMesh
@@ -57,26 +58,53 @@ public:
 
   VariableValue & uDot()
   {
-    _need_u_dot = true;
-    return _u_dot;
+    if (_sys.solutionUDot())
+    {
+      _need_u_dot = true;
+      return _u_dot;
+    }
+    else
+      mooseError("MooseVariableScalar: Time derivative of solution (`u_dot`) is not stored. Please "
+                 "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
   }
 
   VariableValue & uDotDot()
   {
-    _need_u_dotdot = true;
-    return _u_dotdot;
+    if (_sys.solutionUDotDot())
+    {
+      _need_u_dotdot = true;
+      return _u_dotdot;
+    }
+    else
+      mooseError("MooseVariableScalar: Second time derivative of solution (`u_dotdot`) is not "
+                 "stored. Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`.");
   }
 
   VariableValue & uDotOld()
   {
-    _need_u_dot_old = true;
-    return _u_dot_old;
+    if (_sys.solutionUDotOld())
+    {
+      _need_u_dot_old = true;
+      return _u_dot_old;
+    }
+    else
+      mooseError("MooseVariableScalar: Old time derivative of solution (`u_dot_old`) is not "
+                 "stored. Please set uDotOldRequested() to true in FEProblemBase before requesting "
+                 "`u_dot_old`.");
   }
 
   VariableValue & uDotDotOld()
   {
-    _need_u_dotdot_old = true;
-    return _u_dotdot_old;
+    if (_sys.solutionUDotDotOld())
+    {
+      _need_u_dotdot_old = true;
+      return _u_dotdot_old;
+    }
+    else
+      mooseError("MooseVariableScalar: Old second time derivative of solution (`u_dotdot_old`) is "
+                 "not stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+                 "requesting `u_dotdot_old`.");
   }
 
   VariableValue & duDotDu()

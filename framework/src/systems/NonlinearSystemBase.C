@@ -113,6 +113,10 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _solution_previous_nl(NULL),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
+    _u_dot(NULL),
+    _u_dotdot(NULL),
+    _u_dot_old(NULL),
+    _u_dotdot_old(NULL),
     _Re_time_tag(-1),
     _Re_time(NULL),
     _Re_non_time_tag(-1),
@@ -165,11 +169,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   _fe_problem.addMatrixTag("TIME");
 
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
-
-  _u_dot = &addVector("u_dot", true, GHOSTED);
-  _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
-  _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
-  _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
 }
 
 NonlinearSystemBase::~NonlinearSystemBase()
@@ -198,6 +197,19 @@ NonlinearSystemBase::init()
   _max_var_n_dofs_per_elem = mvndpe.max();
   _communicator.max(_max_var_n_dofs_per_elem);
   Moose::perf_log.pop("maxVarNDofsPerElem()", "Setup");
+}
+
+void
+NonlinearSystemBase::addDotVectors()
+{
+  if (_fe_problem.uDotRequested())
+    _u_dot = &addVector("u_dot", true, GHOSTED);
+  if (_fe_problem.uDotOldRequested())
+    _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
+  if (_fe_problem.uDotDotRequested())
+    _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
+  if (_fe_problem.uDotDotOldRequested())
+    _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
 }
 
 void
@@ -584,6 +596,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
     zeroTaggedVectors(tags);
     computeResidualInternal(tags);
     closeTaggedVectors(tags);
+
     if (required_residual)
     {
       auto & residual = getVector(residualVectorTag());
@@ -686,18 +699,6 @@ NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
   _nodal_kernels.subdomainSetup(subdomain, tid);
   _element_dampers.subdomainSetup(subdomain, tid);
   _nodal_dampers.subdomainSetup(subdomain, tid);
-}
-
-NumericVector<Number> &
-NonlinearSystemBase::solutionUDot()
-{
-  return *_u_dot;
-}
-
-NumericVector<Number> &
-NonlinearSystemBase::solutionUDotDot()
-{
-  return *_u_dotdot;
 }
 
 NumericVector<Number> &

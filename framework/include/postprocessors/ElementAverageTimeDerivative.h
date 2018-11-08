@@ -28,6 +28,9 @@ public:
 
 protected:
   virtual Real computeQpIntegral() override;
+
+  /// Holds the solution derivative at the current quadrature points
+  const VariableValue & _u_dot;
 };
 
 #endif

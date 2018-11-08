@@ -15,6 +15,7 @@
     input = 'newmark_beta_prescribed_parameters.i'
     csvdiff = 'newmark_beta_prescribed_parameters_out.csv'
 
+    allow_warnings = True
     requirement = "The NewmarkBeta time integrator shall correctly compute the first"
                   " and second time derivatives of a variable using user provided beta"
                   " and gamma parameters."

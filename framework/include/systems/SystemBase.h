@@ -155,9 +155,9 @@ public:
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
-  virtual NumericVector<Number> & solutionUDot() { return *_u_dot_dummy_vec; }
+  virtual NumericVector<Number> * solutionUDot() = 0;
   virtual NumericVector<Number> * solutionUDotOld() = 0;
-  virtual NumericVector<Number> & solutionUDotDot() { return *_u_dotdot_dummy_vec; }
+  virtual NumericVector<Number> * solutionUDotDot() = 0;
   virtual NumericVector<Number> * solutionUDotDotOld() = 0;
 
   virtual void saveOldSolutions();
@@ -686,9 +686,6 @@ protected:
   std::vector<SparseMatrix<Number> *> _tagged_matrices;
   /// Active flags for tagged matrices
   std::vector<bool> _matrix_tag_active_flags;
-
-  NumericVector<Number> * _u_dot_dummy_vec;    // to satisfy the interface
-  NumericVector<Number> * _u_dotdot_dummy_vec; // to satisfy the interface
 
   // Used for saving old solutions so that they wont be accidentally changed
   NumericVector<Real> * _saved_old;
