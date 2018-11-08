@@ -14,20 +14,8 @@
 #include "libmesh/parallel.h"
 
 // Backup Definitions
-Backup::Backup()
+Backup::Backup() : _restartable_data(libMesh::n_threads())
 {
-  unsigned int n_threads = libMesh::n_threads();
-
-  _restartable_data.resize(n_threads);
-
-  for (unsigned int i = 0; i < n_threads; ++i)
-    _restartable_data[i] = new std::stringstream;
-}
-
-Backup::~Backup()
-{
-  unsigned int n_threads = libMesh::n_threads();
-
-  for (unsigned int i = 0; i < n_threads; ++i)
-    delete _restartable_data[i];
+  for (auto & data_ptr : _restartable_data)
+    data_ptr = libmesh_make_unique<std::stringstream>();
 }

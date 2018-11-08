@@ -26,7 +26,7 @@ TEST_F(MethaneFluidPropertiesTest, criticalProperties)
 TEST_F(MethaneFluidPropertiesTest, triplePointProperties)
 {
   ABS_TEST(_fp->triplePointPressure(), 1.169e4, REL_TOL_SAVED_VALUE);
-  ABS_TEST(_fp->triplePointTemperature(), 90.67, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->triplePointTemperature(), 90.6941, REL_TOL_SAVED_VALUE);
 }
 
 /**
@@ -56,8 +56,37 @@ TEST_F(MethaneFluidPropertiesTest, henry)
 }
 
 /**
+ * Verify calculation of vapor pressure, vapor density and saturated liquid
+ * density
+ */
+TEST_F(MethaneFluidPropertiesTest, vapor)
+{
+  const Real tol = REL_TOL_EXTERNAL_VALUE;
+
+  // Vapor pressure
+  REL_TEST(_fp->vaporPressure(110.0), 0.08813e6, tol);
+  REL_TEST(_fp->vaporPressure(130.0), 0.36732e6, tol);
+  REL_TEST(_fp->vaporPressure(190.0), 4.5186e6, tol);
+
+  // Saturated vapor density
+  REL_TEST(_fp->saturatedVaporDensity(110.0), 1.5982, tol);
+  REL_TEST(_fp->saturatedVaporDensity(130.0), 5.9804, tol);
+  REL_TEST(_fp->saturatedVaporDensity(190.0), 125.18, tol);
+
+  // Saturated liquid density
+  REL_TEST(_fp->saturatedLiquidDensity(110.0), 424.78, tol);
+  REL_TEST(_fp->saturatedLiquidDensity(130.0), 394.04, tol);
+  REL_TEST(_fp->saturatedLiquidDensity(190.0), 200.78, tol);
+}
+
+/**
  * Verify calculation of thermophysical properties of methane using
  * verification data provided in
+ * Setzmann and Wagner, A new equation of state and tables of thermodynamic
+ * properties for methane covering the range from the melting line to 625 K at
+ * pressures up to 100 MPa, Journal of Physical and Chemical Reference Data,
+ * 20, 1061--1155 (1991)
+ * and
  * Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
  * Computer Equations
  */
@@ -68,23 +97,15 @@ TEST_F(MethaneFluidPropertiesTest, properties)
   Real T = 350.0;
   const Real tol = REL_TOL_EXTERNAL_VALUE;
 
-  REL_TEST(_fp->rho_from_p_T(p, T), 55.13, tol);
-  REL_TEST(_fp->h_from_p_T(p, T), 708.5e3, tol);
-  REL_TEST(_fp->e_from_p_T(p, T), 527.131e3, tol);
-  REL_TEST(_fp->s_from_p_T(p, T), 11.30e3, tol);
-  REL_TEST(_fp->cp_from_p_T(p, T), 2.375e3, tol);
-  REL_TEST(_fp->cv_from_p_T(p, T), 1.857e3, tol);
-  REL_TEST(_fp->c_from_p_T(p, T), 481.7, tol);
+  REL_TEST(_fp->rho_from_p_T(p, T), 59.261, tol);
+  REL_TEST(_fp->h_from_p_T(p, T), 47.785e3, tol);
+  REL_TEST(_fp->e_from_p_T(p, T), -120.96e3, tol);
+  REL_TEST(_fp->s_from_p_T(p, T), -2.1735e3, tol);
+  REL_TEST(_fp->cv_from_p_T(p, T), 1.9048e3, tol);
+  REL_TEST(_fp->cp_from_p_T(p, T), 2.8021e3, tol);
+  REL_TEST(_fp->c_from_p_T(p, T), 487.29, tol);
   REL_TEST(_fp->mu_from_p_T(p, T), 0.01276e-3, tol);
   REL_TEST(_fp->k_from_p_T(p, T), 0.04113, tol);
-
-  // Test s, h and cp for temperatures > 755K as well as these methods have a
-  // different formulation in this regime
-  T = 800.0;
-
-  REL_TEST(_fp->h_from_p_T(p, T), 2132.0e3, tol);
-  REL_TEST(_fp->s_from_p_T(p, T), 13.83e3, tol);
-  REL_TEST(_fp->cp_from_p_T(p, T), 3.934e3, tol);
 }
 
 /**
@@ -103,10 +124,6 @@ TEST_F(MethaneFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
   DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
-
-  // Test derivative of enthalpy for T > 755 as well as it has a different formulation
-  T = 800.0;
-  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
 
   // Henry's constant
   T = 350.0;
