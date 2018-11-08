@@ -321,16 +321,22 @@ public:
   const FieldVariableValue & curlSln()
   {
     _need_curl = true;
+    curlPhi();
+    curlPhiFace();
     return _curl_u;
   }
   const FieldVariableValue & curlSlnOld()
   {
     _need_curl_old = true;
+    curlPhi();
+    curlPhiFace();
     return _curl_u_old;
   }
   const FieldVariableValue & curlSlnOlder()
   {
     _need_curl_older = true;
+    curlPhi();
+    curlPhiFace();
     return _curl_u_older;
   }
 
