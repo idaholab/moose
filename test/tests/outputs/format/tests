@@ -154,14 +154,64 @@
     requirement = 'MOOSE shall support XDR output'
   [../]
 
-  [./json]
+  [./json_full]
     type = 'PythonUnitTest'
     input = 'test_json.py'
+    test_case = "TestFull"
     max_buffer_size = -1
-    issues = '#7855 #7661 #2881'
+    issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md command_line_usage.md'
-    requirement = 'We shall be able to convert input file syntax into JSON syntax'
-    method = "!DBG"
+    requirement = 'The system shall be able to dump input file syntax in JSON format'
+  [../]
+
+  [./json_no_test_objects]
+    type = 'PythonUnitTest'
+    input = 'test_json.py'
+    test_case = "TestNoTestObjects"
+    max_buffer_size = -1
+    issues = '#7855 #7661 #2881 #10839 #12455'
+    design = 'JsonInputFileFormatter.md command_line_usage.md'
+    requirement = 'The system shall be able to dump input file syntax in JSON format and exclude test object syntax.'
+  [../]
+
+  [./json_search]
+    type = 'PythonUnitTest'
+    input = 'test_json.py'
+    test_case = "TestSearch"
+    max_buffer_size = -1
+    issues = '#7855 #7661 #2881 #10839 #12455'
+    design = 'JsonInputFileFormatter.md command_line_usage.md'
+    requirement = 'The system shall be able to dump a subset of JSON formatted syntax.'
+  [../]
+
+  [./json_line_info]
+    type = 'PythonUnitTest'
+    input = 'test_json.py'
+    test_case = "TestLineInfo"
+    max_buffer_size = -1
+    issues = '#7855 #7661 #2881 #10839 #12455'
+    design = 'JsonInputFileFormatter.md command_line_usage.md'
+    requirement = 'The system shall dump line information along with JSON formatted syntax.'
+  [../]
+
+  [./hit]
+    type = 'PythonUnitTest'
+    input = 'test_hit_output.py'
+    test_case = 'TestInputFileFormat'
+    max_buffer_size = -1
+    issues = '#7855 #7661 #2881 #10839 #12455'
+    design = 'JsonInputFileFormatter.md command_line_usage.md'
+    requirement = 'The system shall be able to dump input file (HIT) syntax.'
+  [../]
+
+  [./hit_search]
+    type = 'PythonUnitTest'
+    input = 'test_hit_output.py'
+    test_case = 'TestInputFileFormatSearch'
+    max_buffer_size = -1
+    issues = '#7855 #7661 #2881 #10839 #12455'
+    design = 'JsonInputFileFormatter.md command_line_usage.md'
+    requirement = 'The system shall be able to dump a subset of input file (HIT) syntax.'
   [../]
 
   [./definition_existsin_test]
