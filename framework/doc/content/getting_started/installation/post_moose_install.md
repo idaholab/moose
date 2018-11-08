@@ -1,4 +1,4 @@
-# Now What?
+## Now What?
 
 Now that you have a working MOOSE Framework stack, there are several [examples](examples/index.md) you can peruse to familiarize yourself with the components of the input file. The input file is what you will use to build problems for your Application (and MOOSE) to solve.
 

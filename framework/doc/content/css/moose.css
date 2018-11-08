@@ -996,6 +996,7 @@ details[open] .moose-section-content {
 /* Dropdown Menu Text Color */
 .dropdown-content li > a, .dropdown-content li > span {
     color: var(--inl-blue);
+    font-weight:400;
 }
 
 /* MooseDocs contents extension */

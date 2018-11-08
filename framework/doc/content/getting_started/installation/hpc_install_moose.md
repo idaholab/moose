@@ -57,4 +57,8 @@ You will need to perform the above (`source $HOME/.moose_profile`) for every new
 
 !include manual_cleanup.md
 
-Once the above is complete, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
+## Compiler Stack Finished
+
+With the compiler stack ready, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
+
+!include getting_started/installation/post_moose_install.md
