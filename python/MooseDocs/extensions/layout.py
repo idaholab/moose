@@ -76,7 +76,8 @@ class RenderRowToken(components.RenderComponent):
         return row
 
     def createMaterialize(self, token, parent):
-        row = html.Tag(parent, 'div', class_='row', **token.attributes)
+        row = html.Tag(parent, 'div', **token.attributes)
+        row.addClass('row')
         return row
 
     def createLatex(self, token, parent):
