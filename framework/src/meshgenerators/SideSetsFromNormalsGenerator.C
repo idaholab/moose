@@ -28,7 +28,7 @@ template <>
 InputParameters
 validParams<SideSetsFromNormalsGenerator>()
 {
-  InputParameters params = validParams<SideSetsGeneratorBase>();
+  InputParameters params = validParams<GenerateSideSetsBase>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription(
@@ -42,7 +42,7 @@ validParams<SideSetsFromNormalsGenerator>()
 }
 
 SideSetsFromNormalsGenerator::SideSetsFromNormalsGenerator(const InputParameters & parameters)
-  : SideSetsGeneratorBase(parameters),
+  : GenerateSideSetsBase(parameters),
     _input(getMesh("input")),
     _normals(getParam<std::vector<Point>>("normals"))
 {

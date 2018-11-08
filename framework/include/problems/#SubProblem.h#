@@ -1,0 +1,330 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef SUBPROBLEM_H
+#define SUBPROBLEM_H
+
+#include "Problem.h"
+#include "DiracKernelInfo.h"
+#include "GeometricSearchData.h"
+#include "MooseTypes.h"
+
+#include "libmesh/coupling_matrix.h"
+
+class MooseMesh;
+class SubProblem;
+class Factory;
+class Assembly;
+class MooseVariableFEBase;
+class MooseVariableScalar;
+template <typename>
+class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
+typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
+class RestartableDataValue;
+class SystemBase;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class EquationSystems;
+class DofMap;
+class CouplingMatrix;
+template <typename T>
+class SparseMatrix;
+template <typename T>
+class NumericVector;
+class System;
+}
+
+template <>
+InputParameters validParams<SubProblem>();
+
+/**
+ * Generic class for solving transient nonlinear problems
+ *
+ */
+class SubProblem : public Problem
+{
+public:
+  SubProblem(const InputParameters & parameters);
+  virtual ~SubProblem();
+
+  virtual EquationSystems & es() = 0;
+  virtual MooseMesh & mesh() = 0;
+
+  virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
+
+  virtual void solve() = 0;
+  virtual bool converged() = 0;
+
+  virtual void onTimestepBegin() = 0;
+  virtual void onTimestepEnd() = 0;
+
+  virtual bool isTransient() const = 0;
+
+  /**
+   * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
+   * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
+   *
+   * Note: If the tag is already present then this will simply return the TagID of that Tag
+   *
+   * @param tag_name The name of the tag to create, the TagID will get automatically generated
+   */
+  virtual TagID addVectorTag(TagName tag_name);
+
+  /**
+   * Get a TagID from a TagName.
+   */
+  virtual TagID getVectorTagID(const TagName & tag_name);
+
+  /**
+   * Retrieve the name associated with a TagID
+   */
+  virtual TagName vectorTagName(TagID tag);
+
+  /**
+   * Return all vector tags, where a tag is represented by a map from name to ID
+   */
+  virtual std::map<TagName, TagID> & getVectorTags() { return _vector_tag_name_to_tag_id; }
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool vectorTagExists(TagID tag) { return tag < _vector_tag_name_to_tag_id.size(); }
+
+  /**
+   * Check to see if a particular Tag exists by using Tag name
+   */
+  bool vectorTagExists(const TagName & tag_name);
+
+  /**
+   * The total number of tags
+   */
+  virtual unsigned int numVectorTags() { return _vector_tag_name_to_tag_id.size(); }
+
+  /**
+   * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
+   * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
+   *
+   * Note: If the tag is already present then this will simply return the TagID of that Tag
+   *
+   * @param tag_name The name of the tag to create, the TagID will get automatically generated
+   */
+  virtual TagID addMatrixTag(TagName tag_name);
+
+  /**
+   * Get a TagID from a TagName.
+   */
+  virtual TagID getMatrixTagID(const TagName & tag_name);
+
+  /**
+   * Retrieve the name associated with a TagID
+   */
+  virtual TagName matrixTagName(TagID tag);
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool matrixTagExists(const TagName & tag_name);
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool matrixTagExists(TagID tag_id);
+
+  /**
+   * The total number of tags
+   */
+  virtual unsigned int numMatrixTags() { return _matrix_tag_name_to_tag_id.size(); }
+
+  /**
+   * Return all matrix tags in the sytem, where a tag is represented by a map from name to ID
+   */
+  virtual std::map<TagName, TagID> & getMatrixTags() { return _matrix_tag_name_to_tag_id; }
+
+  // Variables /////
+  virtual bool hasVariable(const std::string & var_name) const = 0;
+
+  /**
+   * Returns the variable reference for requested variable which must
+   * be of the expected_var_type (Nonlinear vs. Auxiliary) and
+   * expected_var_field_type (standard, scalar, vector). The default
+   * values of VAR_ANY and VAR_FIELD_ANY should be used when "any"
+   * type of variable is acceptable.  Throws an error if the variable
+   * in question is not in the expected System or of the expected
+   * type.
+   */
+  virtual MooseVariableFEBase &
+  getVariable(THREAD_ID tid,
+              const std::string & var_name,
+              Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+              Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) = 0;
+
+  /// Returns the variable reference for requested MooseVariable which may be in any system
+  virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns the variable reference for requested VectorMooseVariable which may be in any system
+  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns a Boolean indicating whether any system contains a variable with the name provided
+  virtual bool hasScalarVariable(const std::string & var_name) const = 0;
+
+  /// Returns the scalar variable reference from whichever system contains it
+  virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
+
+  /// Returns the equation system containing the variable provided
+  virtual System & getSystem(const std::string & var_name) = 0;
+
+  /**
+   * Set the MOOSE variables to be reinited on each element.
+   * @param moose_vars A set of variables that need to be reinited each time reinit() is called.
+   *
+   * @param tid The thread id
+   */
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
+                                                THREAD_ID tid);
+
+  /**
+   * Get the MOOSE variables to be reinited on each element.
+   *
+   * @param tid The thread id
+   */
+  virtual const std::set<MooseVariableFEBase *> &
+  getActiveElementalMooseVariables(THREAD_ID tid) const;
+
+  /**
+   * Whether or not a list of active elemental moose variables has been set.
+   *
+   * @return True if there has been a list of active elemental moose variables set, False otherwise
+   */
+  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) const;
+
+  /**
+   * Clear the active elemental MooseVariableFEBase.  If there are no active variables then they
+   * will all be reinited. Call this after finishing the computation that was using a restricted set
+   * of MooseVariableFEBases
+   *
+   * @param tid The thread id
+   */
+  virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
+
+  /**
+   * Record and set the material properties required by the current computing thread.
+   * @param mat_prop_ids The set of material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
+                                           THREAD_ID tid);
+
+  /**
+   * Get the material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid) const;
+
+  /**
+   * Method to check whether or not a list of active material roperties has been set. This method
+   * is called by reinitMaterials to determine whether Material computeProperties methods need to be
+   * called. If the return is False, this check prevents unnecessary material property computation
+   * @param tid The thread id
+   *
+   * @return True if there has been a list of active material properties set, False otherwise
+   */
+  virtual bool hasActiveMaterialProperties(THREAD_ID tid) const;
+
+  /**
+   * Clear the active material properties. Should be called at the end of every computing thread
+   *
+   * @param tid The thread id
+   */
+  virtual void clearActiveMaterialProperties(THREAD_ID tid);
+
+  virtual Assembly & assembly(THREAD_ID tid) = 0;
+  virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
+  virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
+  virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
+  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) = 0;
+
+  /**
+   * Returns the desired radial direction for RZ coordinate transformation
+   * @return The coordinate direction for the radial direction
+   */
+  unsigned int getAxisymmetricRadialCoord() const;
+
+  virtual DiracKernelInfo & diracKernelInfo();
+  virtual Real finalNonlinearResidual() const;
+  virtual unsigned int nNonlinearIterations() const;
+  virtual unsigned int nLinearIterations() const;
+
+  virtual void addResidual(THREAD_ID tid) = 0;
+  virtual void addResidualNeighbor(THREAD_ID tid) = 0;
+
+  virtual void cacheResidual(THREAD_ID tid) = 0;
+  virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;
+  virtual void addCachedResidual(THREAD_ID tid) = 0;
+
+  virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+  virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
+
+  virtual void addJacobian(THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(THREAD_ID tid) = 0;
+  virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
+                                unsigned int ivar,
+                                unsigned int jvar,
+                                const DofMap & dof_map,
+                                std::vector<dof_id_type> & dof_indices,
+                                THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
+                                   unsigned int ivar,
+                                   unsigned int jvar,
+                                   const DofMap & dof_map,
+                                   std::vector<dof_id_type> & dof_indices,
+                                   std::vector<dof_id_type> & neighbor_dof_indices,
+                                   THREAD_ID tid) = 0;
+
+  virtual void cacheJacobian(THREAD_ID tid) = 0;
+  virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
+  virtual void addCachedJacobian(THREAD_ID tid) = 0;
+
+  virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void prepare(const Elem * elem,
+                       unsigned int ivar,
+                       unsigned int jvar,
+                       const std::vector<dof_id_type> & dof_indices,
+                       THREAD_ID tid) = 0;
+  virtual void setCurrentSubdomainID(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void setNeighborSubdomainID(const Elem * elem, unsigned int side, THREAD_ID tid) = 0;
+  virtual void prepareAssembly(THREAD_ID tid) = 0;
+
+  virtual void reinitElem(const Elem * elem, THREAD_ID tid) = 0;
+  virtual void reinitElemPhys(const Elem * elem,
+                              const std::vector<Point> & phys_points_in_elem,
+                              THREAD_ID tid;
+
+private:
+  ///@{ Helper functions for checking MaterialProperties
+  std::string restrictionSubdomainCheckName(SubdomainID check_id);
+  std::string restrictionBoundaryCheckName(BoundaryID check_id);
+  ///@}
+
+  friend class Restartable;
+};
+
+namespace Moose
+{
+
+void initial_condition(EquationSystems & es, const std::string & system_name);
+
+} // namespace Moose
+
+#endif /* SUBPROBLEM_H */

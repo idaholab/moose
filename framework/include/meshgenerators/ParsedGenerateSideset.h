@@ -10,7 +10,7 @@
 #ifndef PARSEDGENERATESIDESET_H
 #define PARSEDGENERATESIDESET_H
 
-#include "SideSetsGeneratorBase.h"
+#include "GenerateSideSetsBase.h"
 #include "FunctionParserUtils.h"
 
 // Forward declarations
@@ -24,7 +24,7 @@ InputParameters validParams<ParsedGenerateSideset>();
  * optionally by looking at the subdomain a side's element belongs to
  * and the side's normal vector
  */
-class ParsedGenerateSideset : public SideSetsGeneratorBase, public FunctionParserUtils
+class ParsedGenerateSideset : public GenerateSideSetsBase, public FunctionParserUtils
 {
 public:
   ParsedGenerateSideset(const InputParameters & parameters);

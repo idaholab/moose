@@ -7,33 +7,32 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDESETSFROMPOINTSGENERATOR_H
-#define SIDESETSFROMPOINTSGENERATOR_H
+#ifndef GENERATESUBDOMAINID_H
+#define GENERATESUBDOMAINID_H
 
-#include "GenerateSideSetsBase.h"
+#include "MeshGenerator.h"
 
 // Forward declarations
-class SideSetsFromPointsGenerator;
+class GenerateSubdomainID;
 
 template <>
-InputParameters validParams<SideSetsFromPointsGenerator>();
+InputParameters validParams<GenerateSubdomainID>();
 
 /**
- *
+ * MeshGenerator for assigning a subdomain ID to all elements
  */
-class SideSetsFromPointsGenerator : public GenerateSideSetsBase
+class GenerateSubdomainID : public MeshGenerator
 {
 public:
-  SideSetsFromPointsGenerator(const InputParameters & parameters);
+  GenerateSubdomainID(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate();
 
 protected:
   std::unique_ptr<MeshBase> & _input;
 
-  std::vector<BoundaryName> _boundary_names;
-
-  std::vector<Point> _points;
+  /// The subdomain ID to assign to every elemennt
+  SubdomainID _subdomain_id;
 };
 
-#endif // SIDESETSFROMPOINTSGENERATOR_H
+#endif // GENERATESUBDOMAINID_H

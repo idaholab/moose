@@ -22,7 +22,7 @@ template <>
 InputParameters
 validParams<SideSetsAroundSubdomainGenerator>()
 {
-  InputParameters params = validParams<SideSetsGeneratorBase>();
+  InputParameters params = validParams<GenerateSideSetsBase>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<BoundaryName>>(
@@ -48,7 +48,7 @@ validParams<SideSetsAroundSubdomainGenerator>()
 
 SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(
     const InputParameters & parameters)
-  : SideSetsGeneratorBase(parameters),
+  : GenerateSideSetsBase(parameters),
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
     _using_normal(isParamValid("normal")),

@@ -7,33 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIDESETSFROMPOINTSGENERATOR_H
-#define SIDESETSFROMPOINTSGENERATOR_H
+#ifndef GENERATEEXTRANODESET_H
+#define GENERATEEXTRANODESET_H
 
-#include "GenerateSideSetsBase.h"
+#include "MeshGenerator.h"
 
 // Forward declarations
-class SideSetsFromPointsGenerator;
+class GenerateExtraNodeset;
 
 template <>
-InputParameters validParams<SideSetsFromPointsGenerator>();
+InputParameters validParams<GenerateExtraNodeset>();
 
 /**
  *
  */
-class SideSetsFromPointsGenerator : public GenerateSideSetsBase
+class GenerateExtraNodeset : public MeshGenerator
 {
 public:
-  SideSetsFromPointsGenerator(const InputParameters & parameters);
+  GenerateExtraNodeset(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate();
 
 protected:
   std::unique_ptr<MeshBase> & _input;
-
-  std::vector<BoundaryName> _boundary_names;
-
-  std::vector<Point> _points;
 };
 
-#endif // SIDESETSFROMPOINTSGENERATOR_H
+#endif // GENERATEEXTRANODESET_H
