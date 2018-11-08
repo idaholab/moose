@@ -5,7 +5,7 @@
     cli_args = '--mesh-only'
     exodiff = 'sidesets_from_points_in.e'
     requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'meshgenerators/SideSetsFromPointsGenerator.md'
+    design = 'mesh_generators/SideSetsFromPointsGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

@@ -5,7 +5,7 @@
     cli_args = '--mesh-only'
     exodiff = 'spiral_annular_mesh_generator_in.e'
     requirement = 'MOOSE shall be able to create meshes.'
-    design = 'meshgenerators/SpiralAnnularMeshGenerator.md'
+    design = 'mesh_generators/SpiralAnnularMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

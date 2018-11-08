@@ -5,7 +5,7 @@
     cli_args = '--mesh-only'
     exodiff = 'element_generator_in.e'
     requirement = 'MOOSE shall be able to create a mesh based on elements.'
-    design = 'meshgenerators/ElementGenerator.md'
+    design = 'mesh_generators/ElementGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -16,7 +16,7 @@
     cli_args = '--mesh-only'
     exodiff = 'eg2_in.e'
     requirement = 'MOOSE shall be able to create a mesh based on elements.'
-    design = 'meshgenerators/ElementGenerator.md'
+    design = 'mesh_generators/ElementGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

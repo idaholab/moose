@@ -2,10 +2,20 @@
   [./rename_block_generator_test]
     type = 'Exodiff'
     input = 'rename_block1.i'
-    cli_args = '--mesh-only'
-    exodiff = 'rename_block1_in.e'
+    exodiff = 'rename_block1_out.e'
     requirement = 'MOOSE shall be able to crate different subdomains.'
-    design = 'meshgenerators/RenameBlockGenerator.md'
+    design = 'mesh_generators/RenameBlockGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./rename_block_generator_test2]
+    type = 'Exodiff'
+    input = 'rename_block2.i'
+    exodiff = 'rename_block2_out.e'
+    requirement = 'MOOSE shall be able to crate different subdomains.'
+    design = 'mesh_generators/RenameBlockGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

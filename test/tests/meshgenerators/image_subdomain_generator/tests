@@ -2,27 +2,23 @@
   [./image_subdomain_generator_2d_test]
     type = 'Exodiff'
     input = 'image_subdomain_2d.i'
-    cli_args = '--mesh-only'
     vtk = true
-    exodiff = 'image_subdomain_2d_in.e'
+    exodiff = 'image_subdomain_2d_out.e'
     requirement = 'MOOSE shall be able to read in an image.'
-    design = 'meshgenerators/ImageSubdomainGenerator.md'
+    design = 'mesh_generators/ImageSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = "!DBG"
   [../]
   [./image_subdomain_generator_3d_test]
     type = 'Exodiff'
     input = 'image_subdomain_3d.i'
-    cli_args = '--mesh-only'
     vtk = true
-    exodiff = 'image_subdomain_3d_in.e'
+    exodiff = 'image_subdomain_3d_out.e'
     requirement = 'MOOSE shall be able to read in an image.'
-    design = 'meshgenerators/ImageSubdomainGenerator.md'
+    design = 'mesh_generators/ImageSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = "!DBG"
   [../]
 []

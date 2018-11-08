@@ -5,7 +5,7 @@
     cli_args = '--mesh-only'
     exodiff = 'generated_mesh_generator_in.e'
     requirement = 'MOOSE shall be able to use libmesh mesh generation tools.'
-    design = 'meshgenerators/GeneratedMeshGenerator.md'
+    design = 'mesh_generators/GeneratedMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

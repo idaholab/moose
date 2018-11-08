@@ -5,7 +5,7 @@
     cli_args = '--mesh-only'
     exodiff = 'annular_mesh_generator_in.e'
     requirement = 'MOOSE shall generate a mesh based on elements.'
-    design = 'meshgenerators/AnnularMeshGenerator.md'
+    design = 'mesh_generators/AnnularMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

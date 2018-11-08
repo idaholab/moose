@@ -1,0 +1,50 @@
+[Tests]
+  [./generate_sidesets_bounding_box_test]
+    type = 'Exodiff'
+    input = 'generate_sidesets_bounding_box.i'
+    exodiff = 'generate_sidesets_bounding_box_out.e'
+    requirement = 'MOOSE shall be able to use the BoundingBox class.'
+    design = 'mesh_generators/GenerateSideSetsFromBoundingBox.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./test_multiple_boundary_ids]
+    type = 'Exodiff'
+    input = 'multiple_boundary_ids.i'
+    exodiff = 'multiple_boundary_ids_out.e'
+    mesh_mode = REPLICATED
+  [../]
+  
+  [./test_multiple_boundary_ids_3d]
+    type = 'Exodiff'
+    input = 'multiple_boundary_ids_3d.i'
+    exodiff = 'multiple_boundary_ids_3d_out.e'
+    mesh_mode = REPLICATED
+  [../]
+  [./error_no_elements_in_bounding_box]
+    type = 'RunException'
+    input = 'error_no_elements_in_bounding_box.i'
+    expect_err = 'No elements found within the bounding box'
+    mesh_mode = REPLICATED
+  [../]
+  [./error_no_side_sets_found]
+    type = 'RunException'
+    input = 'error_no_side_sets_found.i'
+    expect_err = 'No side sets found on active elements within the bounding box'
+    mesh_mode = REPLICATED
+  [../]
+  [./error_boundary_number]
+    type = 'RunException'
+    input = 'error_boundary_number.i'
+    expect_err = 'Must be 2 boundary inputs or more.'
+    mesh_mode = REPLICATED
+  [../]
+  [./error_no_nodes_found]
+    type = 'RunException'
+    input = 'error_no_nodes_found.i'
+    expect_err = 'No nodes found within the bounding box'
+    mesh_mode = REPLICATED
+  [../]
+[]

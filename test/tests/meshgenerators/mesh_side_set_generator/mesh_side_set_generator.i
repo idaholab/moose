@@ -47,6 +47,50 @@
   type = MeshGeneratorMesh
 []
 
+[Variables]
+  [./c_volume]
+    [./InitialCondition]
+      type = FunctionIC
+      function = '1-(x-0.5)^2+(y-0.5)^2+(z-0.5)^2'
+    [../]
+  [../]
+  [./c_plane]
+    block = 'center_mesh'
+  [../]
+[]
+
+[Kernels]
+  [./volume_diff]
+    type = Diffusion
+    variable = c_volume
+    block = 'left_block right_block'
+  [../]
+  [./volume_dt]
+    type = TimeDerivative
+    variable = c_volume
+    block = 'left_block right_block'
+  [../]
+
+  # couple the lower dimensional variable to the volume variable
+  [./plane_reaction]
+    type = Reaction
+    variable = c_plane
+    block = 'center_mesh'
+  [../]
+  [./plane_coupled]
+    type = CoupledForce
+    variable = c_plane
+    v = c_volume
+    block = 'center_mesh'
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  dt = 0.01
+  num_steps = 2
+[]
+  
 [Outputs]
   exodus = true
 []

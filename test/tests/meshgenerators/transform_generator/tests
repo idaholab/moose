@@ -2,10 +2,9 @@
   [./transform_generator_test]
     type = 'Exodiff'
     input = 'rotate_and_scale.i'
-    cli_args = '--mesh-only'
-    exodiff = 'rotate_and_scale_in.e'
+    exodiff = 'rotate_and_scale_out.e'
     requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
-    design = 'meshgenerators/TransformGenerator.md'
+    design = 'mesh_generators/TransformGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

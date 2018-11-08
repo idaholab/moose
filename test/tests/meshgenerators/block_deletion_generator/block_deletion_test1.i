@@ -10,22 +10,61 @@
     ymax = 4
   []
 
-  [./generate_id]
-    type = ElementSubdomainIDGenerator
+  [./SubdomainBoundingBox]
+    type = SubdomainBoundingBoxGenerator
     input = gmg
-    element_ids = '5 6 9 10'
-    subdomain_ids = '1 1 1 1'
-  []
-
-  [./deletion]
-    type = BlockDeletionGenerator
-    input = generate_id
     block_id = 1
-  []
+    bottom_left = '0 0 0'
+    top_right = '3 3 3'
+  [../]
+  
+  [./ed0]
+    type = BlockDeletionGenerator
+    input = SubdomainBoundingBox
+    block_id = 1
+  [../]
+
 []
 
 [Mesh]
   type = MeshGeneratorMesh
+[]
+
+[Variables]
+  [./u]
+  [../]
+[]
+
+[Kernels]
+  [./dt]
+    type = TimeDerivative
+    variable = u
+  [../]
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+[]
+
+[BCs]
+  [./top]
+    type = DirichletBC
+    variable = u
+    boundary = bottom
+    value = 1
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  start_time = 0
+  end_time = 10
+  dt = 10
+
+  solve_type = NEWTON
+
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
