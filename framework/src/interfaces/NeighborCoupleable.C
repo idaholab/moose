@@ -35,6 +35,26 @@ NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned 
 }
 
 const VariableValue &
+NeighborCoupleable::coupledNeighborValueDot(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+  if (_neighbor_nodal)
+    return var->dofValuesDotNeighbor();
+  else
+    return var->uDotNeighbor();
+}
+
+const VariableValue &
+NeighborCoupleable::coupledNeighborValueDotDu(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+  if (_neighbor_nodal)
+    return var->dofValuesDuDotDuNeighbor();
+  else
+    return var->duDotDuNeighbor();
+}
+
+const VariableValue &
 NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsigned int comp)
 {
   validateExecutionerType(var_name, "coupledNeighborValueOld");
