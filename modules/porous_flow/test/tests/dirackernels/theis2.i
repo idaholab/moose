@@ -1,13 +1,12 @@
 # Theis problem: Flow to single sink
-# Constant rate injection between 700 and 1700 s.
-# Final state matches theis1.i final state.
+# Constant rate injection between 200 and 1000 s.
 # Cartesian mesh with logarithmic distribution in x and y.
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 40
-  ny = 40
+  nx = 20
+  ny = 20
   bias_x = 1.1
   bias_y = 1.1
   ymax = 100
@@ -107,8 +106,8 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  dt = 100
-  end_time = 1700
+  dt = 200
+  end_time = 1000
   nl_abs_tol = 1e-10
 []
 
@@ -117,10 +116,6 @@
   file_base = theis2
   csv = true
   execute_on = 'final'
-  [./con]
-    output_linear = true
-    type = Console
-  [../]
 []
 
 [ICs]
@@ -134,8 +129,8 @@
 [DiracKernels]
   [./sink]
     type = PorousFlowSquarePulsePointSource
-    start_time = 700
-    end_time = 1700
+    start_time = 200
+    end_time = 1000
     point = '0 0 0'
     mass_flux = -0.04
     variable = pp
