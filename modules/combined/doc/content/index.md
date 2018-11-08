@@ -31,7 +31,7 @@ domains.
 ### Getting Started class=center style=font-weight:200;
 
 MOOSE works on Mac OS, Linux, and Windows and is easy to get started with. To begin exploring
-MOOSE, read our [getting_started/getting_started.md] page.
+MOOSE, read our [getting_started/index.md] page.
 
 !col-end!
 !row-end!

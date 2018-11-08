@@ -8,4 +8,4 @@
 
 !include getting_started/installation/update_moose.md
 
-Head back over to the [getting_started/getting_started.md] page to continue your tour of MOOSE.
+Head back over to the [getting_started/index.md] page to continue your tour of MOOSE.
