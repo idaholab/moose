@@ -56,6 +56,12 @@ html {
   background-color:#F5F6CE;
 }
 
+a {
+    color: var(--inl-blue);
+    font-weight: 400;
+    font-size: 104%;
+}
+
 .tabs .tab a
 {
   background-color: transparent;
@@ -415,7 +421,7 @@ li{
 
 .collapsible-header .moose-parameter-header-default{
     color:#757575;
-    font-weight:100;
+    font-weight:400;
 }
 
 .collapsible-header .moose-parameter-header-description{
@@ -423,17 +429,19 @@ li{
     overflow:hidden;
     text-overflow:ellipsis;
     color:#757575;
+    font-weight:400;
 }
 
 .moose-parameter-header-default{
     white-space:nowrap;
     padding-left:10px;
+    font-weight:400;
 }
 
 .moose-parameter-header-description{
     padding-left:10px;
     font-size:85%;
-    font-weight:100;
+    font-weight:400;
 }
 
 .moose-parameter-header-default::before{
@@ -669,7 +677,7 @@ footer.page-footer {
 .moose-syntax-objects-description,
 .moose-syntax-actions-description{
     padding-left:10px;
-    font-weight:100;
+    font-weight:400;
     color:#757575;
 }
 
