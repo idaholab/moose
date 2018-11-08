@@ -9,7 +9,15 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
+import mooseutils
 from Options import Options
+
+VTK_NOTATION_ENUM = [
+    vtk.vtkAxis.STANDARD_NOTATION,
+    vtk.vtkAxis.SCIENTIFIC_NOTATION,
+    vtk.vtkAxis.FIXED_NOTATION,
+    vtk.vtkAxis.PRINTF_NOTATION
+]
 
 def get_options():
     """
@@ -25,8 +33,8 @@ def get_options():
     opt.add('tick_font_size', "The axis tick label font size, in points.", vtype=int)
     opt.add('grid', True, "Show/hide the grid lines for this axis.")
     opt.add('grid_color', [0.25, 0.25, 0.25], "The color for the grid lines.")
-    opt.add('precision', 3, "The axis numeric precision.", vtype=int)
-    opt.add('notation', "The type of notation, leave empty to let VTK decide", vtype=str,
+    opt.add('precision', "The axis numeric precision.", vtype=int)
+    opt.add('notation', 'fixed', "The type of notation, leave empty to let VTK decide", vtype=str,
             allow=['standard', 'scientific', 'fixed', 'printf'])
     opt.add('ticks_visible', True, "Control visibility of tickmarks on colorbar axis.")
     opt.add('axis_visible', True, "Control visibility of axis line on colorbar axis.")
@@ -103,11 +111,17 @@ def set_options(vtkaxis, opt):
         vtkaxis.GetLabelProperties().SetFontSize(opt['tick_font_size'])
 
     # Precision/notation
-    vtkaxis.SetPrecision(opt['precision'])
     if opt.isOptionValid('notation'):
         notation = opt['notation'].upper()
         vtk_notation = getattr(vtk.vtkAxis, notation + '_NOTATION')
         vtkaxis.SetNotation(vtk_notation)
+
+    if opt.isOptionValid('precision'):
+        if vtkaxis.GetNotation() in VTK_NOTATION_ENUM[1:2]:
+            vtkaxis.SetPrecision(opt['precision'])
+        else:
+            mooseutils.mooseWarning("When using 'precision' option, 'notation' option has to be "
+                                    "set to either 'scientific' or 'fixed'.")
 
     # Grid lines
     vtkaxis.SetGridVisible(opt['grid'])

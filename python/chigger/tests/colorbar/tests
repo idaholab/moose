@@ -70,4 +70,10 @@
     command = zero_range.py
     imagediff = 'zero_range.png'
   [../]
+
+  [./precision_with_wrong_notation]
+    type = RunApp
+    command = precision_with_wrong_notation.py
+    expect_out = "When using 'precision' option, 'notation' option has to be set to either 'scientific' or 'fixed'."
+  [../]
 []
