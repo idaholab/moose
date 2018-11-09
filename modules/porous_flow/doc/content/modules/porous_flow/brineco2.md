@@ -138,10 +138,7 @@ thermophysical description of the model given pressure, temperature and salt mas
 
 ### Materials
 
-The [`PorousFlowFluidStateBrineCO2`](/PorousFlowFluidStateBrineCO2.md)
-Material provides all phase pressures, saturation, densities, viscosities etc, as well
-as all mass fractions of all fluid components in all fluid phases in a single material
-using the formulation provided in the [`PorousFlowBrineCO2`](/PorousFlowBrineCO2.md) UserObject.
+The [`PorousFlowFluidState`](/PorousFlowFluidState.md) material provides all phase pressures, saturation, densities, viscosities etc, as well as all mass fractions of all fluid components in all fluid phases in a single material using the formulation provided in the [`PorousFlowBrineCO2`](/PorousFlowBrineCO2.md) UserObject.
 
 !listing modules/porous_flow/test/tests/fluidstate/brineco2.i block=Materials/brineco2
 
@@ -150,7 +147,7 @@ using the formulation provided in the [`PorousFlowBrineCO2`](/PorousFlowBrineCO2
 The nonlinear variable representing CO$_2$ is the total mass fraction of CO$_2$ summed over
 all phases. In some cases, it may be preferred to provide an initial CO$_2$ saturation, rather
 than total mass fraction. To allow an initial saturation to be specified, the
-[`PorousFlowFluidStateBrineCO2IC`](/PorousFlowFluidStateBrineCO2IC.md) initial
+[`PorousFlowFluidStateIC`](/PorousFlowFluidStateIC.md) initial
 condition is provided. This initial condition calculates the total mass fraction of CO$_2$
 summed over all phases for a given saturation.
 

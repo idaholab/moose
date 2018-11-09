@@ -2,10 +2,8 @@
 
 !syntax description /Materials/PorousFlowFluidStateBrineCO2
 
-Material that provides all thermophysical properties of the system given a set
-of nonlinear variables using the formulation provided by the [`PorousFlowBrineCO2`](/PorousFlowBrineCO2.md) UserObject.
-
-For more details, see the documentation of the [brine and CO$_2$](brineco2.md) equation of state.
+!alert note
+PorousFlowFluidStateBrineCO2 is deprecated. Just use [PorousFlowFluidState](/PorousFlowFluidState.md)
 
 !syntax parameters /Materials/PorousFlowFluidStateBrineCO2
 
