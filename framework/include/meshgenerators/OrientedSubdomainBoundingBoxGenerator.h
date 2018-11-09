@@ -1,0 +1,44 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef ORIENTEDSUBDOMAINBOUNDINGBOXGENERATOR_H
+#define ORIENTEDSUBDOMAINBOUNDINGBOXGENERATOR_H
+
+#include "MeshGenerator.h"
+#include "MooseEnum.h"
+#include "OrientedBoxInterface.h"
+
+// Forward declarations
+class OrientedSubdomainBoundingBoxGenerator;
+
+template <>
+InputParameters validParams<OrientedSubdomainBoundingBoxGenerator>();
+
+/**
+ * MeshGenerator for defining a Subdomain inside or outside of a bounding box with arbitrary
+ * orientation
+ */
+class OrientedSubdomainBoundingBoxGenerator : public MeshGenerator, public OrientedBoxInterface
+{
+public:
+  OrientedSubdomainBoundingBoxGenerator(const InputParameters & parameters);
+
+  std::unique_ptr<MeshBase> generate();
+
+protected:
+  std::unique_ptr<MeshBase> & _input;
+
+  /// ID location (inside of outside of box)
+  const MooseEnum _location;
+
+  /// Block ID to assign to the region
+  const subdomain_id_type _block_id;
+};
+
+#endif // ORIENTEDSUBDOMAINBOUNDINGBOXGENERATOR_H

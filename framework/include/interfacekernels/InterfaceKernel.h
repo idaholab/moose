@@ -185,6 +185,7 @@ protected:
 
   /// Coupled neighbor variable value
   const VariableValue & _neighbor_value;
+
   /// Coupled neighbor variable gradient
   const VariableGradient & _grad_neighbor_value;
 

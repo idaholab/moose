@@ -8,8 +8,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 100
-  xmax = 2000
+  nx = 40
+  xmax = 200
   bias_x = 1.05
 []
 
@@ -197,12 +197,11 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  end_time = 1e5
-  dtmax = 1e5
+  end_time = 2e2
   [./TimeStepper]
     type = IterationAdaptiveDT
-    dt = 1
-    growth_factor = 1.5
+    dt = 10
+    growth_factor = 2
   [../]
 []
 
@@ -218,17 +217,17 @@
 [Postprocessors]
   [./pgas]
     type = PointValue
-    point =  '4 0 0'
+    point =  '1 0 0'
     variable = pgas
   [../]
   [./sgas]
     type = PointValue
-    point =  '4 0 0'
+    point =  '1 0 0'
     variable = saturation_gas
   [../]
   [./zi]
     type = PointValue
-    point = '4 0 0'
+    point = '1 0 0'
     variable = zi
   [../]
   [./massgas]
@@ -237,12 +236,12 @@
   [../]
   [./x1]
     type = PointValue
-    point =  '4 0 0'
+    point =  '1 0 0'
     variable = x1
   [../]
   [./y0]
     type = PointValue
-    point =  '4 0 0'
+    point =  '1 0 0'
     variable = y0
   [../]
 []

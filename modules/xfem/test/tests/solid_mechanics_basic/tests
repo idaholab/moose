@@ -134,4 +134,13 @@
     unique_id = true
     requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a 3-noded triangle element by two prescribed evolving cutting planes'
   [../]
+  [./test_crack_counter]
+    type = CSVDiff
+    input = test_crack_counter.i
+    csvdiff = 'test_crack_counter_out.csv'
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM system shall provide an accessor function to the crack_tip_origin_direction_map'
+    allow_test_objects = true
+  [../]
 []

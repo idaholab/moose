@@ -59,7 +59,7 @@ def run_app(args=[]):
         sys.exit(proc.returncode)
     return stdout_data
 
-class TestJSON(unittest.TestCase):
+class TestJSONBase(unittest.TestCase):
     """
     Make sure the Json dump produces valid Json
     and has the expected structure
@@ -70,9 +70,15 @@ class TestJSON(unittest.TestCase):
         self.assertIn("**START JSON DATA**\n", output)
         self.assertIn("**END JSON DATA**\n", output)
 
-        output = output.split('**START JSON DATA**\n')[1]
-        output = output.split('**END JSON DATA**')[0]
+        start_json_string = '**START JSON DATA**\n'
 
+        start_pos = output.find('**START JSON DATA**\n')
+        self.assertGreater(start_pos, -1)
+
+        end_pos = output.find('**END JSON DATA**')
+        self.assertGreater(end_pos, -1)
+
+        output = output[start_pos + len(start_json_string):end_pos]
         data = json.loads(output)
         return data
 
@@ -115,20 +121,51 @@ class TestJSON(unittest.TestCase):
         self.assertIn("all", i["parameters"]["outputs"]["reserved_values"])
         self.assertIn("none", i["parameters"]["outputs"]["reserved_values"])
 
+    def getBlockSections(self, node):
+        return {c.path(): c for c in node.children(node_type=hit.NodeType.Section)}
 
-    def testJson(self):
-        """
-        Some basic checks to see if some data
-        is there and is in the right location.
-        """
-        all_data = self.getJsonData()
-        self.assertIn("active", all_data["global"]["parameters"])
-        data = all_data["blocks"]
-        self.check_basic_json(data)
-        # Make sure the default dump has test objects
-        self.assertIn("ApplyInputParametersTest", data)
-        self.assertEqual(data["Functions"]["star"]["subblock_types"]["PostprocessorFunction"]["label"], "MooseTestApp")
+    def getBlockParams(self, node):
+        return {c.path(): c for c in node.children(node_type=hit.NodeType.Field)}
 
+    def getInputFileFormat(self, extra=[]):
+        """
+        Does a dump and uses the GetPotParser to parse the output.
+        """
+        args = ["--disable-refcount-printing", "--dump"] + extra
+        output = run_app(args)
+        self.assertIn("### START DUMP DATA ###\n", output)
+        self.assertIn("### END DUMP DATA ###\n", output)
+
+        output = output.split('### START DUMP DATA ###\n')[1]
+        output = output.split('### END DUMP DATA ###')[0]
+
+        self.assertNotEqual(len(output), 0)
+        root = hit.parse("dump.i", output)
+        hit.explode(root)
+        w = DupWalker("dump.i")
+        root.walk(w, hit.NodeType.All)
+        if w.errors:
+            print("\n".join(w.errors))
+        self.assertEqual(len(w.errors), 0)
+        return root
+
+
+class TestFull(TestJSONBase):
+    def testFullJson(self):
+         """
+         Some basic checks to see if some data
+         is there and is in the right location.
+         """
+         all_data = self.getJsonData()
+         self.assertIn("active", all_data["global"]["parameters"])
+         data = all_data["blocks"]
+         self.check_basic_json(data)
+         # Make sure the default dump has test objects
+         self.assertIn("ApplyInputParametersTest", data)
+         self.assertEqual(data["Functions"]["star"]["subblock_types"]["PostprocessorFunction"]["label"], "MooseTestApp")
+
+
+class TestNoTestObjects(TestJSONBase):
     def testNoTestObjects(self):
         # Make sure test objects are removed from the output
         all_data = self.getJsonData(["--disallow-test-objects"])
@@ -137,6 +174,8 @@ class TestJSON(unittest.TestCase):
         self.check_basic_json(data)
         self.assertNotIn("ApplyInputParametersTest", data)
 
+
+class TestSearch(TestJSONBase):
     def testJsonSearch(self):
         """
         Make sure parameter search works
@@ -161,93 +200,8 @@ class TestJSON(unittest.TestCase):
         diff = data["Kernels"]["star"]["subblock_types"]["Diffusion"]
         self.assertIn("use_displaced_mesh", diff["parameters"])
 
-    def getInputFileFormat(self, extra=[]):
-        """
-        Does a dump and uses the GetPotParser to parse the output.
-        """
-        args = ["--disable-refcount-printing", "--dump"] + extra
-        output = run_app(args)
-        self.assertIn("### START DUMP DATA ###\n", output)
-        self.assertIn("### END DUMP DATA ###\n", output)
 
-        output = output.split('### START DUMP DATA ###\n')[1]
-        output = output.split('### END DUMP DATA ###')[0]
-
-        self.assertNotEqual(len(output), 0)
-        root = hit.parse("dump.i", output)
-        hit.explode(root)
-        w = DupWalker("dump.i")
-        root.walk(w, hit.NodeType.All)
-        if w.errors:
-            print("\n".join(w.errors))
-        self.assertEqual(len(w.errors), 0)
-        return root
-
-    def getBlockSections(self, node):
-        return {c.path(): c for c in node.children(node_type=hit.NodeType.Section)}
-
-    def getBlockParams(self, node):
-        return {c.path(): c for c in node.children(node_type=hit.NodeType.Field)}
-
-    def testInputFileFormat(self):
-        """
-        Some basic checks to see if some data
-        is there and is in the right location.
-        """
-        root = self.getInputFileFormat()
-        root_sections = self.getBlockSections(root)
-        self.assertIn("Executioner", root_sections)
-        self.assertIn("BCs", root_sections)
-        bcs_sections = self.getBlockSections(root_sections["BCs"])
-        self.assertIn("Periodic", bcs_sections)
-        self.assertIn("*", bcs_sections)
-        star = bcs_sections["*"]
-        bcs_star_params = self.getBlockParams(star)
-        bcs_star_sections = self.getBlockSections(star)
-        self.assertIn("active", bcs_star_params)
-        self.assertIn("<types>", bcs_star_sections)
-        bcs_star_types_sections = self.getBlockSections(bcs_star_sections["<types>"])
-        self.assertIn("<DirichletBC>", bcs_star_types_sections)
-        periodic_children = self.getBlockSections(bcs_sections["Periodic"])
-        self.assertEqual(len(periodic_children.keys()), 1)
-        self.assertIn("*", periodic_children)
-
-        self.assertNotIn("<types>", bcs_sections)
-
-        exe_sections = self.getBlockSections(root_sections["Executioner"])
-        self.assertIn("<types>", exe_sections)
-        exe_types_sections = self.getBlockSections(exe_sections["<types>"])
-        self.assertIn("<Transient>", exe_types_sections)
-
-        # Preconditioning has a Preconditioning/*/* syntax which is unusual
-        self.assertIn("Preconditioning", root_sections)
-        p = root_sections["Preconditioning"]
-        pc_sections = self.getBlockSections(p)
-        pc_star_sections = self.getBlockSections(pc_sections["*"])
-        pc_star_star_sections = self.getBlockSections(pc_star_sections["*"])
-        pc_star_star_types_sections = self.getBlockSections(pc_star_star_sections["<types>"])
-        split_params = self.getBlockParams(pc_star_star_types_sections["<Split>"])
-        self.assertIn("splitting_type", split_params)
-        self.assertIn("petsc_options", split_params)
-
-        # Make sure the default dump has test objects
-        self.assertIn("ApplyInputParametersTest", root_sections)
-
-    def testInputFileFormatSearch(self):
-        """
-        Make sure parameter search works
-        """
-        root = self.getInputFileFormat(["initial_steps"])
-        section_map = {c.path(): c for c in root.children(node_type=hit.NodeType.Section)}
-        self.assertNotIn("Executioner", section_map)
-        self.assertNotIn("BCs", section_map)
-        self.assertIn("Adaptivity", section_map)
-        self.assertEqual(len(section_map.keys()), 1)
-        adaptivity = section_map["Adaptivity"]
-        params = {c.path(): c for c in adaptivity.children(node_type=hit.NodeType.Field)}
-        self.assertIn("initial_steps", params)
-        self.assertEqual(len(params.keys()), 1)
-
+class TestLineInfo(TestJSONBase):
     def testLineInfo(self):
         """
         Make sure file/line information works
@@ -270,4 +224,4 @@ class TestJSON(unittest.TestCase):
         self.assertGreater(fi[fname], 0)
 
 if __name__ == '__main__':
-    unittest.main(module=__name__, verbosity=2)
+    unittest.main(__name__, verbosity=2)
