@@ -65,7 +65,7 @@ GenerateSideSetsFromBoundingBox::GenerateSideSetsFromBoundingBox(const InputPara
                   parameters.get<RealVectorValue>("top_right")),
     _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
 {
-  if (typeid(_input).name() == typeid(DistributedMesh).name())
+  if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
 }
 
@@ -76,6 +76,7 @@ GenerateSideSetsFromBoundingBox::generate()
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  boundary_info.build_node_list_from_side_list();
 
   bool found_element = false;
   bool found_side_sets = false;
