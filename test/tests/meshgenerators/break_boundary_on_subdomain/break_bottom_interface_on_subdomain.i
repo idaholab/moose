@@ -25,7 +25,7 @@
     top_right = '2 1 1'
     block_id = 2
   []
-  
+
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain2
@@ -33,7 +33,7 @@
     paired_block = '0'
     new_boundary = 'interface'
   []
-  
+
   [./break_boundary]
     input = interface
     type = BreakBoundaryOnSubdomainGenerator

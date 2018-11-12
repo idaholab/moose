@@ -90,7 +90,7 @@
   dt = 0.01
   num_steps = 2
 []
-  
+
 [Outputs]
   exodus = true
 []

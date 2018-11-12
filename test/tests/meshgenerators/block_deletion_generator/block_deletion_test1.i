@@ -17,7 +17,7 @@
     bottom_left = '0 0 0'
     top_right = '3 3 3'
   [../]
-  
+
   [./ed0]
     type = BlockDeletionGenerator
     input = SubdomainBoundingBox
