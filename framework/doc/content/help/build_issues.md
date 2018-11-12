@@ -2,7 +2,7 @@
 
 Build issues are normally caused by an invalid environment, or perhaps an update to your repository occurred, and you now have a mismatch between MOOSE and your application, or a combination of one or the other with libMesh's submodule.
 
-- Verify you have a functional environment see [Modules](help/troubleshooting.md#modules).
+- Verify you have a functional [Modules](help/troubleshooting.md#modules) environment.
 
 - Verify the MOOSE repository is up to date, with the correct vetted version of libMesh:
 
@@ -32,7 +32,7 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   The above should return nothing, or, it should point to the correct moose repository.
 
   !alert note
-  Mose users, do not use or set MOOSE_DIR. If the above command returns something, and you are not sure why, just unset it:
+  Most users, do not use or set MOOSE_DIR. If the above command returns something, and you are not sure why, just unset it:
 
   ```bash
   unset MOOSE_DIR
