@@ -9,6 +9,9 @@
     max_parallel = 2
     min_parallel = 2
     mesh_mode = 'REPLICATED'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
   [./test_2a]
     # To generate the splits for this test, run
@@ -20,6 +23,9 @@
     max_parallel = 2
     min_parallel = 2
     mesh_mode = 'REPLICATED'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
   [./test_4]
     # To generate the splits for this test, run
@@ -31,6 +37,9 @@
     max_parallel = 4
     min_parallel = 4
     mesh_mode = 'REPLICATED'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
   [./test_4a]
     # To generate the splits for this test, run
@@ -42,6 +51,9 @@
     max_parallel = 4
     min_parallel = 4
     mesh_mode = 'REPLICATED'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
   [./test_8]
     # To generate the splits for this test, run
@@ -53,6 +65,9 @@
     max_parallel = 8
     min_parallel = 8
     mesh_mode = 'REPLICATED'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
   [./test_8a]
     # To generate the splits for this test, run
@@ -64,5 +79,8 @@
     max_parallel = 8
     min_parallel = 8
     mesh_mode = 'REPLICATED'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
 []

@@ -5,5 +5,8 @@
     exodiff = 'gmsh_test_in.e'
     cli_args = '--mesh-only'
     recover = false
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
 []

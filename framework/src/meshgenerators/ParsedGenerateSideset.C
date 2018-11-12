@@ -23,7 +23,7 @@ template <>
 InputParameters
 validParams<ParsedGenerateSideset>()
 {
-  InputParameters params = validParams<GenerateSideSetsBase>();
+  InputParameters params = validParams<SideSetsGeneratorBase>();
   params += validParams<FunctionParserUtils>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
@@ -52,7 +52,7 @@ validParams<ParsedGenerateSideset>()
 }
 
 ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
-  : GenerateSideSetsBase(parameters),
+  : SideSetsGeneratorBase(parameters),
     FunctionParserUtils(parameters),
     _input(getMesh("input")),
     _function(parameters.get<std::string>("combinatorial_geometry")),

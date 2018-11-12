@@ -3,17 +3,26 @@
     type = 'Exodiff'
     input = '1d_2d.i'
     exodiff = 'out.e'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
 
   [./onedtwod_w_matl_test]
     type = 'Exodiff'
     input = '1d_2d_w_matl.i'
     exodiff = '1d_2d_w_matl_out.e'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
 
   [./onedthreed_test]
     type = 'Exodiff'
     input = '1d_3d.i'
     exodiff = '1d_3d_out.e'
+    design = ''
+    requirements = ''
+    issue = '#11640'
   [../]
 []

@@ -10,7 +10,7 @@
 #ifndef SIDESETSFROMPOINTSGENERATOR_H
 #define SIDESETSFROMPOINTSGENERATOR_H
 
-#include "GenerateSideSetsBase.h"
+#include "SideSetsGeneratorBase.h"
 
 // Forward declarations
 class SideSetsFromPointsGenerator;
@@ -21,7 +21,7 @@ InputParameters validParams<SideSetsFromPointsGenerator>();
 /**
  *
  */
-class SideSetsFromPointsGenerator : public GenerateSideSetsBase
+class SideSetsFromPointsGenerator : public SideSetsGeneratorBase
 {
 public:
   SideSetsFromPointsGenerator(const InputParameters & parameters);

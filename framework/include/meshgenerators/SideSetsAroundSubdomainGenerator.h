@@ -10,7 +10,7 @@
 #ifndef SIDESETSAROUNDSUBDOMAINGENERATOR_H
 #define SIDESETSAROUNDSUBDOMAINGENERATOR_H
 
-#include "GenerateSideSetsBase.h"
+#include "SideSetsGeneratorBase.h"
 
 // Forward declarations
 class SideSetsAroundSubdomainGenerator;
@@ -24,7 +24,7 @@ InputParameters validParams<SideSetsAroundSubdomainGenerator>();
  * Optionally, only adds faces that have a normal
  * equal to specified normal up to a tolerance
  */
-class SideSetsAroundSubdomainGenerator : public GenerateSideSetsBase
+class SideSetsAroundSubdomainGenerator : public SideSetsGeneratorBase
 {
 public:
   SideSetsAroundSubdomainGenerator(const InputParameters & parameters);

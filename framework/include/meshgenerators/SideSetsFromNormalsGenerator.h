@@ -10,7 +10,7 @@
 #ifndef SIDESETSFROMNORMALSGENERATOR_H
 #define SIDESETSFROMNORMALSGENERATOR_H
 
-#include "GenerateSideSetsBase.h"
+#include "SideSetsGeneratorBase.h"
 
 // Forward declarations
 class SideSetsFromNormalsGenerator;
@@ -21,7 +21,7 @@ InputParameters validParams<SideSetsFromNormalsGenerator>();
 /**
  *
  */
-class SideSetsFromNormalsGenerator : public GenerateSideSetsBase
+class SideSetsFromNormalsGenerator : public SideSetsGeneratorBase
 {
 public:
   SideSetsFromNormalsGenerator(const InputParameters & parameters);

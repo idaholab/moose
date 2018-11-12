@@ -29,7 +29,7 @@ template <>
 InputParameters
 validParams<SideSetsFromPointsGenerator>()
 {
-  InputParameters params = validParams<GenerateSideSetsBase>();
+  InputParameters params = validParams<SideSetsGeneratorBase>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addClassDescription("Adds a new sideset starting at the specified point containing all "
@@ -43,7 +43,7 @@ validParams<SideSetsFromPointsGenerator>()
 }
 
 SideSetsFromPointsGenerator::SideSetsFromPointsGenerator(const InputParameters & parameters)
-  : GenerateSideSetsBase(parameters),
+  : SideSetsGeneratorBase(parameters),
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
     _points(getParam<std::vector<Point>>("points"))
