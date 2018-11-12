@@ -33,8 +33,8 @@ def get_options():
     opt.add('tick_font_size', "The axis tick label font size, in points.", vtype=int)
     opt.add('grid', True, "Show/hide the grid lines for this axis.")
     opt.add('grid_color', [0.25, 0.25, 0.25], "The color for the grid lines.")
-    opt.add('precision', "The axis numeric precision.", vtype=int)
-    opt.add('notation', 'fixed', "The type of notation, leave empty to let VTK decide", vtype=str,
+    opt.add('precision', 3, "The axis numeric precision.", vtype=int)
+    opt.add('notation', "The type of notation, leave empty to let VTK decide", vtype=str,
             allow=['standard', 'scientific', 'fixed', 'printf'])
     opt.add('ticks_visible', True, "Control visibility of tickmarks on colorbar axis.")
     opt.add('axis_visible', True, "Control visibility of axis line on colorbar axis.")
