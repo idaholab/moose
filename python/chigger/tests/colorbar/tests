@@ -74,6 +74,7 @@
   [./precision_with_wrong_notation]
     type = RunApp
     command = precision_with_wrong_notation.py
-    expect_out = "When using 'precision' option, 'notation' option has to be set to either 'scientific' or 'fixed'."
+    expect_out = "When using 'precision' option, 'notation' option has to be set to either 'scientific' or 'fixed'"
+    match_literal = true
   [../]
 []
