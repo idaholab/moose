@@ -2,8 +2,7 @@
   [./patterned_mesh_generator_test]
     type = 'Exodiff'
     input = 'patterned_mesh_generator.i'
-    cli_args = '--mesh-only'
-    exodiff = 'patterned_mesh_generator_in.e'
+    exodiff = 'patterned_mesh_generator_out.e'
     requirement = 'MOOSE shall be able to create meshes.'
     design = 'mesh_generators/PatternedMeshGenerator.md'
     issues = '#11640'
