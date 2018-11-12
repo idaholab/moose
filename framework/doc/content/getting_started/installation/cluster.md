@@ -1,10 +1,8 @@
-# High Performance Computing
+# Multi-User Cluster Instructions
 
-This document will aid an +HPC Administrator+ on building an environment which end-users will use when compiling and running MOOSE based applications. +If you do not have administrative rights, you will not be able to complete these instructions!+ Please forward these instructions to your HPC Administrator.
+This document will aid an +HPC Administrator+ on building an environment which multiple end-users will use when compiling and running MOOSE based applications. +If you do not have administrative rights, you will not be able to complete these instructions!+ Please forward these instructions to your HPC Administrator.
 
-Because this document assumes the reader is an administrator, most of the content herein are suggestions, and should not be blindly followed with 'copy/paste/enter' behavior (your HPC cluster is no doubt different than our cluster these instructions were based on).
-
-+If you are an end-user trying to follow these instructions, please seek help from one of your HPC Administrators.+ However, if you are the sole owner of the machine for which you currently operate on (a single workstation), you should follow one of our [Manual Install (GCC)](manual_installation_gcc.md) instructions instead.
+Because this document assumes the reader *is* an administrator, most of the content herein are suggestions, and not 'copy, paste, enter' instructions.
 
 ## Prerequisites
 
@@ -90,7 +88,7 @@ setenv F90      mpif90
 setenv F77      mpif77
 setenv FC       mpif90
 
-setenv          PETSC_DIR        $base_path/petsc/petsc-__PETSC_DEFAULT__/gcc-opt
+setenv          PETSC_DIR        $base_path/petsc/petsc-__PETSC_DEFAULT__
 
 # Optional if miniconda is installed
 prepend-path    PATH             $base_path/miniconda/bin
@@ -120,7 +118,7 @@ Verify that this module loads properly by attempting to echo $PETSC_DIR:
 
 !package! code
 echo $PETSC_DIR
-/opt/moose/petsc/petsc-__PETSC_DEFAULT__/gcc-opt
+/opt/moose/petsc/petsc-__PETSC_DEFAULT__
 !package-end!
 
 While we are at it, verify that your MPI wrapper works by running a few commands (your results will vary, but they should return something):
