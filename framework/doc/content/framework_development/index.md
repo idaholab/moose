@@ -18,6 +18,14 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Git](git.md) - The revision control system we use
 
+## Documentation
+
+[Doxygen](http://www.mooseframework.com/docs/doxygen/moose/classes.html)
+
+[Source Code Documentation](source/index.md)
+
+[Syntax Documentation](syntax/index.md)
+
 ## Build Status and Automatic Metrics
 
 [Build Status (external)](https://civet.inl.gov)

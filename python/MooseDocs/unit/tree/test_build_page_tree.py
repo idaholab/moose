@@ -154,14 +154,14 @@ class TestDocTree(unittest.TestCase):
         self.assertEqual(root(0).source,
                          os.path.join(ROOT_DIR, 'framework/doc/content/getting_started'))
 
-        self.assertIsInstance(root(0)(0), page.DirectoryNode)
-        self.assertEqual(root(0)(0).name, 'installation')
-        self.assertEqual(root(0)(0).source,
+        self.assertIsInstance(root(0)(1), page.DirectoryNode)
+        self.assertEqual(root(0)(1).name, 'installation')
+        self.assertEqual(root(0)(1).source,
                          os.path.join(ROOT_DIR, 'framework/doc/content/getting_started/installation'))
 
-        self.assertIsInstance(root(0)(0)(0), page.MarkdownNode)
-        self.assertEqual(root(0)(0)(0).name, 'bash_profile.md')
-        self.assertEqual(root(0)(0)(0).source,
+        self.assertIsInstance(root(0)(1)(0), page.MarkdownNode)
+        self.assertEqual(root(0)(1)(0).name, 'bash_profile.md')
+        self.assertEqual(root(0)(1)(0).source,
                          os.path.join(ROOT_DIR,
                                       'framework/doc/content/getting_started/installation/bash_profile.md'))
 

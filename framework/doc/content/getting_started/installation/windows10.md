@@ -6,9 +6,13 @@ Using MOOSE on Windows 10 is experimental and not fully supported.
 Known issues:
 
 - Peacock does not work correctly.
-- Microsoft is now offering several different flavors of linux. Different versions means you need to choose wisely!
+- Microsoft is now offering several different flavors of linux. Keep in mind, the Microsoft Store may not contain the same version of said operating system that we provide a support package for. Do some investigating to make sure the operating system (and version) you choose, is among our list of supported linux platforms. In general, we have support packages for the following linux operating systems listed below at their latest available release. At the time of this writing, the safe bet, is to choose Ubuntu:
 
-  - (at the time of this writing, we have installation packages for: Ubuntu and OpenSUSE Leap)
+  - Ubuntu
+  - Mint
+  - CentOS
+  - OpenSUSE
+  - Fedora
 !alert-end!
 
 Begin by performing the following external sets of instructions. Do note, that when it comes time to decide what distribution of Linux you want, you should try and choose a flavor listed among our getting started pages for the smoothest installation process. This is not a requirement however, as MOOSE will run on just about any flavor of Linux if you are of the adventurous type!

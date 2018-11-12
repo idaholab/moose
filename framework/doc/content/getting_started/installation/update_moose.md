@@ -1,8 +1,8 @@
 ## Update MOOSE
 
 MOOSE does not use traditional versioning, is under heavy development, and is being updated
-continuously. Therefore, it is critical that you continue to update MOOSE as you develop your
-application, we recommend weekly updates.
+continuously. Therefore, it is important that you continue to update MOOSE as you use it to develop your
+application(s), we recommend weekly updates.
 
 To update MOOSE use the following commands.
 
