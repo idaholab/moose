@@ -15,10 +15,8 @@
     # Remap layers
     existing_subdomains = '1 2 5'
     layers = '1 3 5'
-    new_ids = '10 12 15
-               30 32 35
-               50 52 55'
-  [../]
+    new_ids = '10 12 15' # Repeat this remapping for each layer
+  []
 []
 
 [Mesh]

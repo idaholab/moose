@@ -19,7 +19,7 @@
 namespace MooseMeshUtils
 {
 // Changes the old ID to new ID in the mesh given in parameters
-void changeBoundaryId(const libMesh::MeshBase & mesh,
+void changeBoundaryId(MeshBase & mesh,
                       const libMesh::boundary_id_type old_id,
                       const libMesh::boundary_id_type new_id,
                       bool delete_prev);
