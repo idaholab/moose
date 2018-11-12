@@ -77,6 +77,7 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   // Get a reference to our BoundaryInfo object for later use
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  boundary_info.build_node_list_from_side_list();
 
   bool found_element = false;
   bool found_side_sets = false;
