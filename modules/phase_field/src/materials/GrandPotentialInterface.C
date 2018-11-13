@@ -22,9 +22,11 @@ validParams<GrandPotentialInterface>()
   params.addClassDescription("Calculate Grand Potential interface parameters for a specified "
                              "interfacial free energy and width");
   params.addRequiredParam<std::vector<Real>>("sigma", "Interfacial free energies");
-  params.addRequiredRangeCheckedParam<Real>("width", "width > 0", "Interfacial width");
+  params.addRequiredRangeCheckedParam<Real>(
+      "width", "width > 0", "Interfacial width (for the interface with gamma = 1.5)");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "gamma_names", "Interfacial gamma parameter names (leave empty for gamma0... gammaN)");
+      "gamma_names",
+      "Interfacial / grain boundary gamma parameter names (leave empty for gamma0... gammaN)");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa", "Gradient interface parameter name");
   params.addParam<MaterialPropertyName>("mu_name", "mu", "Grain growth bulk energy parameter name");
   params.addParam<unsigned int>(
