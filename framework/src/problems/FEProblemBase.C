@@ -5222,6 +5222,9 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   for (const auto & mci : _notify_when_mesh_changes)
     mci->meshChanged();
+
+  _nl->clearDofIndicesToZero();
+  _aux->clearDofIndicesToZero();
 }
 
 void

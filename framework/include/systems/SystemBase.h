@@ -655,6 +655,8 @@ public:
    */
   virtual void copySolutionsBackwards();
 
+  virtual void clearDofIndicesToZero() { _dof_indices_to_zero_on_residual.clear(); }
+
 protected:
   SubProblem & _subproblem;
 
@@ -671,6 +673,7 @@ protected:
   std::map<unsigned int, std::set<SubdomainID>> _var_map;
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
+  std::set<dof_id_type> _dof_indices_to_zero_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
   Real _du_dot_du;

@@ -198,7 +198,28 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 void
 SystemBase::zeroVariablesForResidual()
 {
-  zeroVariables(_vars_to_be_zeroed_on_residual);
+  if (_vars_to_be_zeroed_on_residual.size() == 0)
+    return;
+
+  if (_dof_indices_to_zero_on_residual.size() == 0)
+  {
+    AllLocalDofIndicesThread aldit(system(), _vars_to_be_zeroed_on_residual);
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    Threads::parallel_reduce(elem_range, aldit);
+
+    _dof_indices_to_zero_on_residual = aldit._all_dof_indices;
+  }
+  NumericVector<Number> & solution = this->solution();
+
+  solution.close();
+
+  for (const auto & dof : _dof_indices_to_zero_on_residual)
+    solution.set(dof, 0);
+
+  solution.close();
+
+  // Call update to update the current_local_solution for this system
+  system().update();
 }
 
 void
