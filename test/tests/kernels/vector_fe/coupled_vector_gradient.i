@@ -175,8 +175,10 @@
   num_steps = 3
   solve_type = 'NEWTON'
   petsc_options = '-ksp_converged_reason -snes_converged_reason'
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '100'
   nl_max_its = 3
-  l_max_its = 20
+  l_max_its = 100
   dtmin = 1
 []
 
