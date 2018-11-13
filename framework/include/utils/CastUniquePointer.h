@@ -16,6 +16,8 @@
 #ifndef CASTUNIQUEPOINTER_H
 #define CASTUNIQUEPOINTER_H
 
+#include <memory>
+
 template <typename T_DEST, typename T_SRC, typename T_DELETER>
 std::unique_ptr<T_DEST, T_DELETER>
 dynamic_pointer_cast(std::unique_ptr<T_SRC, T_DELETER> & src)
