@@ -9,7 +9,7 @@
   []
 
   [./createNewSidesetOne]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = gmg
     boundary_id_old = 'left bottom front'
     boundary_id_new = 10
@@ -18,7 +18,7 @@
     block_id = 0
   []
   [./createNewSidesetTwo]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetOne
     boundary_id_old = 'right top back'
     boundary_id_new = 11
@@ -27,7 +27,7 @@
     block_id = 0
   []
   [./createNewSidesetThree]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetTwo
     boundary_id_old = 'left top back'
     boundary_id_new = 12
@@ -36,7 +36,7 @@
     block_id = 0
   []
   [./createNewSidesetFour]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetThree
     boundary_id_old = 'front'
     boundary_id_new = 13

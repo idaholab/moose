@@ -5,7 +5,7 @@
     exodiff = 'gmsh_bcs_out.e'
     mesh_mode = 'REPLICATED'
     design = ''
-    requirements = ''
-    issue = '#11640'
+    requirement = ''
+    issues = '#11640'
   [../]
 []

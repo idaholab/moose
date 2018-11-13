@@ -5,7 +5,7 @@
   []
 
   [./extra_nodeset]
-    type = GenerateExtraNodeset
+    type = ExtraNodesetGenerator
     input = fmg
     new_boundary = 'middle_node'
     nodes = '2'

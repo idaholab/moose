@@ -8,7 +8,7 @@
   []
 
   [./nodeset]
-    type = GenerateBoundingBoxNodeSet
+    type = BoundingBoxNodeSetGenerator
     input = gmg
     new_boundary = middle_node
     top_right = '1.1 1.1 0'

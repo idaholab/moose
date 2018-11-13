@@ -8,7 +8,7 @@
   []
 
   [./createNewSidesetOne]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = gmg
     boundary_id_old = 'bottom back left'
     boundary_id_new = 10
@@ -18,7 +18,7 @@
     boundary_id_overlap = true
   []
   [./createNewSidesetTwo]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetOne
     boundary_id_old = 'right bottom'
     boundary_id_new = 11
@@ -28,7 +28,7 @@
     boundary_id_overlap = true
   []
   [./createNewSidesetThree]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetTwo
     boundary_id_old = 'top front'
     boundary_id_new = 12

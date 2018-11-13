@@ -6,7 +6,8 @@
     cli_args = '--mesh-only'
     recover = false
     design = ''
-    requirements = ''
-    issue = '#11640'
+    requirement = ''
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
   [../]
 []

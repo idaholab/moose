@@ -66,8 +66,8 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
                   parameters.get<RealVectorValue>("top_right")),
     _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
 {
-  if (dynamic_pointer_cast<DistributedMesh>(_input) == nullptr)
-    mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
+  if (dynamic_pointer_cast<DistributedMesh>(_input) != nullptr)
+    mooseError("SideSetsFromBoundingBox only works with ReplicatedMesh.");
 }
 
 std::unique_ptr<MeshBase>

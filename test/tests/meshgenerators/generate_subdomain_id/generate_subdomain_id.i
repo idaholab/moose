@@ -7,7 +7,7 @@
   []
 
   [./generate_id]
-    type = GenerateSubdomainID
+    type = SubdomainIDGenerator
     input = gmg
     subdomain_id = 3
   []

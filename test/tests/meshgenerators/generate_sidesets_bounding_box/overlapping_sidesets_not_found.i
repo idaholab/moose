@@ -8,7 +8,7 @@
   []
 
   [./createNewSidesetOne]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = gmg
     boundary_id_old = 'bottom top'
     boundary_id_new = 11

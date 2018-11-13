@@ -14,7 +14,7 @@
   []
 
   [./subdomains]
-    type = GenerateElementSubdomainID
+    type = ElementSubdomainIDGenerator
     input = gmg
     subdomain_ids = '0 0 0 0
                      0 0 0 0
