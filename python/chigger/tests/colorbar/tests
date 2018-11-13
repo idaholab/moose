@@ -1,74 +1,88 @@
 [Tests]
+  issues = '#8661'
+  design = 'chigger/index.md'
   [./standalone]
     type = ImageDiff
     command = colorbar.py
     imagediff = 'colorbar.png'
+    requirement = "Chigger shall include a colorbar object that can be oriented vertically."
   [../]
 
   [./standalone_horiz]
     type = ImageDiff
     command = colorbar_horiz.py
     imagediff = 'colorbar_horiz.png'
+    requirement = "Chigger shall include a colorbar object that can be oriented horizontally."
   [../]
 
   [./exdous_default]
     type = ImageDiff
     command = exodus_colorbar.py
     imagediff = 'exodus_colorbar.png'
+    requirement = "Chigger shall include a colorbar object that captures range and colormap data from an Exodus result."
   [../]
 
   [./left]
     type = ImageDiff
     command = colorbar_left.py
     imagediff = 'colorbar_left.png'
+    requirement = "The chigger colorbar shall support placing the tick marks on the left-side of a vertical oriented colorbar."
   [../]
 
   [./top]
     type = ImageDiff
     command = colorbar_top.py
     imagediff = 'colorbar_top.png'
+    requirement = "The chigger colorbar shall support placing the tick marks on the top of a horizontal oriented colorbar."
   [../]
 
   [./bottom]
     type = ImageDiff
     command = colorbar_bottom.py
     imagediff = 'colorbar_bottom.png'
+    requirement = "The chigger colorbar shall support placing the tick marks on the bottom of a horizontal oriented colorbar."
   [../]
 
   [./common]
     type = ImageDiff
     command = common_colorbar.py
     imagediff = 'common_colorbar.png'
+    requirement = "Chigger shall include a colorbar object oriented vertically that captures range and colormap data from two Exodus results."
   [../]
 
   [./common_horiz]
     type = ImageDiff
     command = common_colorbar_horiz.py
     imagediff = 'common_colorbar_horiz.png'
+    requirement = "Chigger shall include a colorbar object oriented horizontally that captures range and colormap data from two Exodus results."
   [../]
 
   [./dual]
     type = ImageDiff
     command = dual_colorbar.py
     imagediff = 'dual_colorbar.png'
+    requirement = "Chigger shall support vertical colorbars associated with Exodus results within a viewport."
   [../]
 
   [./dual_horiz]
     type = ImageDiff
     command = dual_colorbar_horiz.py
     imagediff = 'dual_colorbar_horiz.png'
+    requirement = "Chigger shall support horizontal colorbars associated with Exodus results within a viewport."
   [../]
 
   [./font]
     type = ImageDiff
     command = colorbar_font.py
     imagediff = 'colorbar_font.png'
+    requirement = "The chigger colorbar shall support the ability to change the font size of the tick labels."
   [../]
 
   [./zero_range]
     type = ImageDiff
     command = zero_range.py
     imagediff = 'zero_range.png'
+    requirement = "The chigger colorbar shall handle range values that do not differ in value."
   [../]
 
   [./precision_with_wrong_notation]
@@ -77,5 +91,6 @@
     command = precision_with_wrong_notation.py
     expect_out = "When using 'precision' option, 'notation' option has to be set to either 'scientific' or 'fixed'"
     match_literal = true
+    requirement = "The chigger colorbar shall error when the 'notation' and 'precision' settings are incongruent."
   [../]
 []
