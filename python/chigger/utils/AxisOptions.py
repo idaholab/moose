@@ -9,7 +9,15 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
+import mooseutils
 from Options import Options
+
+VTK_NOTATION_ENUM = [
+    vtk.vtkAxis.STANDARD_NOTATION,
+    vtk.vtkAxis.SCIENTIFIC_NOTATION,
+    vtk.vtkAxis.FIXED_NOTATION,
+    vtk.vtkAxis.PRINTF_NOTATION
+]
 
 def get_options():
     """
@@ -103,11 +111,17 @@ def set_options(vtkaxis, opt):
         vtkaxis.GetLabelProperties().SetFontSize(opt['tick_font_size'])
 
     # Precision/notation
-    vtkaxis.SetPrecision(opt['precision'])
     if opt.isOptionValid('notation'):
         notation = opt['notation'].upper()
         vtk_notation = getattr(vtk.vtkAxis, notation + '_NOTATION')
         vtkaxis.SetNotation(vtk_notation)
+
+    if opt.isOptionValid('precision'):
+        if vtkaxis.GetNotation() in VTK_NOTATION_ENUM[1:2]:
+            vtkaxis.SetPrecision(opt['precision'])
+        else:
+            mooseutils.mooseWarning("When using 'precision' option, 'notation' option has to be "
+                                    "set to either 'scientific' or 'fixed'.")
 
     # Grid lines
     vtkaxis.SetGridVisible(opt['grid'])
