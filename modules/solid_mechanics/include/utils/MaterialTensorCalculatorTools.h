@@ -54,6 +54,8 @@ Real hydrostatic(const SymmTensor & symm_tensor);
  * The volumentric strain is the change in volume over the original volume. In
  * this method the squared and cubic terms are included so that the calculation
  * is valid for both small and finite strains.
+ * @param strain Total logarithmic strain
+ * @return volumetric strain (delta V / V)
  */
 Real volumetricStrain(const SymmTensor & symm_strain);
 

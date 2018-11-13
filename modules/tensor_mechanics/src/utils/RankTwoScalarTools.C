@@ -144,14 +144,22 @@ L2norm(const RankTwoTensor & r2tensor)
 Real
 volumetricStrain(const RankTwoTensor & strain)
 {
-  Real val = strain.trace();
-  for (unsigned int i = 0; i < 2; ++i)
-    for (unsigned int j = i + 1; j < 3; ++j)
-      val += strain(i, i) * strain(j, j);
-
-  val += strain(0, 0) * strain(1, 1) * strain(2, 2);
-
-  return val;
+  // Since the strains are logarithmic strains, which are by definition log(L/L0),
+  // exp(log_strain) = L/L0
+  // The ratio of the volume of a strained cube to the original volume is thus:
+  // exp(log_strain_11) * exp(log_strain_22) * exp(log_strain_33) - 1
+  //
+  // Since eng_strain = exp(log_strain) - 1, the equivalent calculation using
+  // engineering strains would be:
+  // (1 + eng_strain_11) * (1 + eng_strain_22) + (1 + eng_strain_33) - 1
+  // If strains are small, the resulting terms that involve squared and cubed
+  // strains are negligible, resulting in the following approximate form:
+  // strain_11 + strain_22 + strain_33
+  // There is not currently an option to compute this small-strain form of the
+  // volumetric strain, but at small strains, it is approximately equal to the
+  // finite strain form that is computed.
+  //
+  return std::exp(strain(0, 0)) * std::exp(strain(1, 1)) * std::exp(strain(2, 2)) - 1.0;
 }
 
 Real
