@@ -78,6 +78,27 @@ protected:
   virtual const typename OutputTools<T>::VariableValue & dot();
 
   /**
+   * The second time derivative of the variable this object is operating on.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual const typename OutputTools<T>::VariableValue & dotDot();
+
+  /**
+   * The old time derivative of the variable this object is operating on.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual const typename OutputTools<T>::VariableValue & dotOld();
+
+  /**
+   * The old second time derivative of the variable this object is operating on.
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual const typename OutputTools<T>::VariableValue & dotDotOld();
+
+  /**
    * The derivative of the time derivative of the variable this object is operating on
    * with respect to this variable's coefficients.
    *
@@ -86,6 +107,16 @@ protected:
    * @return The reference to be stored off and used later.
    */
   virtual const VariableValue & dotDu();
+
+  /**
+   * The derivative of the second time derivative of the variable this object is operating on
+   * with respect to this variable's coefficients.
+   *
+   * This is useful for creating Jacobian entries for residual statements that use _u_dotdot
+   *
+   * @return The reference to be stored off and used later.
+   */
+  virtual const VariableValue & dotDotDu();
 
   /**
    * The gradient of the variable this object is operating on.

@@ -28,10 +28,17 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_u_old(false),
     _need_u_older(false),
     _need_u_previous_nl(false),
+    _need_u_dot(false),
+    _need_u_dotdot(false),
+    _need_u_dot_old(false),
+    _need_u_dotdot_old(false),
+    _need_du_dot_du(false),
+    _need_du_dotdot_du(false),
     _need_grad_old(false),
     _need_grad_older(false),
     _need_grad_previous_nl(false),
     _need_grad_dot(false),
+    _need_grad_dotdot(false),
     _need_second(false),
     _need_second_old(false),
     _need_second_older(false),
@@ -48,10 +55,17 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_u_old_neighbor(false),
     _need_u_older_neighbor(false),
     _need_u_previous_nl_neighbor(false),
+    _need_u_dot_neighbor(false),
+    _need_u_dotdot_neighbor(false),
+    _need_u_dot_old_neighbor(false),
+    _need_u_dotdot_old_neighbor(false),
+    _need_du_dot_du_neighbor(false),
+    _need_du_dotdot_du_neighbor(false),
     _need_grad_old_neighbor(false),
     _need_grad_older_neighbor(false),
     _need_grad_previous_nl_neighbor(false),
     _need_grad_neighbor_dot(false),
+    _need_grad_neighbor_dotdot(false),
     _need_second_neighbor(false),
     _need_second_old_neighbor(false),
     _need_second_older_neighbor(false),
@@ -70,13 +84,21 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_dof_values_older(false),
     _need_dof_values_previous_nl(false),
     _need_dof_values_dot(false),
+    _need_dof_values_dotdot(false),
+    _need_dof_values_dot_old(false),
+    _need_dof_values_dotdot_old(false),
     _need_dof_du_dot_du(false),
+    _need_dof_du_dotdot_du(false),
     _need_dof_values_neighbor(false),
     _need_dof_values_old_neighbor(false),
     _need_dof_values_older_neighbor(false),
     _need_dof_values_previous_nl_neighbor(false),
     _need_dof_values_dot_neighbor(false),
+    _need_dof_values_dotdot_neighbor(false),
+    _need_dof_values_dot_old_neighbor(false),
+    _need_dof_values_dotdot_old_neighbor(false),
     _need_dof_du_dot_du_neighbor(false),
+    _need_dof_du_dotdot_du_neighbor(false),
     _normals(_assembly.normals()),
     _is_nodal(true),
     _has_dofs(false),
@@ -128,14 +150,22 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _dof_values_older.release();
   _dof_values_previous_nl.release();
   _dof_values_dot.release();
+  _dof_values_dotdot.release();
+  _dof_values_dot_old.release();
+  _dof_values_dotdot_old.release();
   _dof_du_dot_du.release();
+  _dof_du_dotdot_du.release();
 
   _dof_values_neighbor.release();
   _dof_values_old_neighbor.release();
   _dof_values_older_neighbor.release();
   _dof_values_previous_nl_neighbor.release();
   _dof_values_dot_neighbor.release();
+  _dof_values_dotdot_neighbor.release();
+  _dof_values_dot_old_neighbor.release();
+  _dof_values_dotdot_old_neighbor.release();
   _dof_du_dot_du_neighbor.release();
+  _dof_du_dotdot_du_neighbor.release();
 
   for (auto & dof_u : _vector_tags_dof_u)
     dof_u.release();
@@ -173,6 +203,7 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _grad_u_older.release();
   _grad_u_previous_nl.release();
   _grad_u_dot.release();
+  _grad_u_dotdot.release();
 
   _second_u.release();
   _second_u_bak.release();
@@ -197,10 +228,30 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _u_dot_neighbor.release();
   _u_dot_bak_neighbor.release();
 
+  _u_dotdot.release();
+  _u_dotdot_bak.release();
+  _u_dotdot_neighbor.release();
+  _u_dotdot_bak_neighbor.release();
+
+  _u_dot_old.release();
+  _u_dot_old_bak.release();
+  _u_dot_old_neighbor.release();
+  _u_dot_old_bak_neighbor.release();
+
+  _u_dotdot_old.release();
+  _u_dotdot_old_bak.release();
+  _u_dotdot_old_neighbor.release();
+  _u_dotdot_old_bak_neighbor.release();
+
   _du_dot_du.release();
   _du_dot_du_bak.release();
   _du_dot_du_neighbor.release();
   _du_dot_du_bak_neighbor.release();
+
+  _du_dotdot_du.release();
+  _du_dotdot_du_bak.release();
+  _du_dotdot_du_neighbor.release();
+  _du_dotdot_du_bak_neighbor.release();
 
   _increment.release();
 
@@ -214,6 +265,7 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _grad_u_older_neighbor.release();
   _grad_u_previous_nl_neighbor.release();
   _grad_u_neighbor_dot.release();
+  _grad_u_neighbor_dotdot.release();
 
   _second_u_neighbor.release();
   _second_u_old_neighbor.release();
@@ -581,16 +633,118 @@ template <typename OutputType>
 const MooseArray<Number> &
 MooseVariableFE<OutputType>::dofValuesDot()
 {
-  _need_dof_values_dot = true;
-  return _dof_values_dot;
+  if (_sys.solutionUDot())
+  {
+    _need_dof_values_dot = true;
+    return _dof_values_dot;
+  }
+  else
+    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDotDot()
+{
+  if (_sys.solutionUDotDot())
+  {
+    _need_dof_values_dotdot = true;
+    return _dof_values_dotdot;
+  }
+  else
+    mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+               "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+               "`u_dotdot`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDotOld()
+{
+  if (_sys.solutionUDotOld())
+  {
+    _need_dof_values_dot_old = true;
+    return _dof_values_dot_old;
+  }
+  else
+    mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+               "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+               "`u_dot_old`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDotDotOld()
+{
+  if (_sys.solutionUDotDotOld())
+  {
+    _need_dof_values_dotdot_old = true;
+    return _dof_values_dotdot_old;
+  }
+  else
+    mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+               "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+               "requesting `u_dotdot_old`.");
 }
 
 template <typename OutputType>
 const MooseArray<Number> &
 MooseVariableFE<OutputType>::dofValuesDotNeighbor()
 {
-  _need_dof_values_dot_neighbor = true;
-  return _dof_values_dot_neighbor;
+  if (_sys.solutionUDot())
+  {
+    _need_dof_values_dot_neighbor = true;
+    return _dof_values_dot_neighbor;
+  }
+  else
+    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDotDotNeighbor()
+{
+  if (_sys.solutionUDotDot())
+  {
+    _need_dof_values_dotdot_neighbor = true;
+    return _dof_values_dotdot_neighbor;
+  }
+  else
+    mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+               "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+               "`u_dotdot`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDotOldNeighbor()
+{
+  if (_sys.solutionUDotOld())
+  {
+    _need_dof_values_dot_old_neighbor = true;
+    return _dof_values_dot_old_neighbor;
+  }
+  else
+    mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+               "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+               "`u_dot_old`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDotDotOldNeighbor()
+{
+  if (_sys.solutionUDotDotOld())
+  {
+    _need_dof_values_dotdot_old_neighbor = true;
+    return _dof_values_dotdot_old_neighbor;
+  }
+  else
+    mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+               "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+               "requesting `u_dotdot_old`.");
 }
 
 template <typename OutputType>
@@ -603,10 +757,26 @@ MooseVariableFE<OutputType>::dofValuesDuDotDu()
 
 template <typename OutputType>
 const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDuDotDotDu()
+{
+  _need_dof_du_dotdot_du = true;
+  return _dof_du_dotdot_du;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
 MooseVariableFE<OutputType>::dofValuesDuDotDuNeighbor()
 {
   _need_dof_du_dot_du_neighbor = true;
   return _dof_du_dot_du_neighbor;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableFE<OutputType>::dofValuesDuDotDotDuNeighbor()
+{
+  _need_dof_du_dotdot_du_neighbor = true;
+  return _dof_du_dotdot_du_neighbor;
 }
 
 template <typename OutputType>
@@ -793,11 +963,29 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
   if (is_transient)
   {
-    _u_dot.resize(nqp);
-    _du_dot_du.resize(nqp);
+    if (_need_u_dot)
+      _u_dot.resize(nqp);
+
+    if (_need_u_dotdot)
+      _u_dotdot.resize(nqp);
+
+    if (_need_u_dot_old)
+      _u_dot_old.resize(nqp);
+
+    if (_need_u_dotdot_old)
+      _u_dotdot_old.resize(nqp);
+
+    if (_need_du_dot_du)
+      _du_dot_du.resize(nqp);
+
+    if (_need_du_dotdot_du)
+      _du_dotdot_du.resize(nqp);
 
     if (_need_grad_dot)
       _grad_u_dot.resize(nqp);
+
+    if (_need_grad_dotdot)
+      _grad_u_dotdot.resize(nqp);
 
     if (_need_u_old)
       _u_old.resize(nqp);
@@ -851,11 +1039,29 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
     if (is_transient)
     {
-      _u_dot[i] = 0;
-      _du_dot_du[i] = 0;
+      if (_need_u_dot)
+        _u_dot[i] = 0;
+
+      if (_need_u_dotdot)
+        _u_dotdot[i] = 0;
+
+      if (_need_u_dot_old)
+        _u_dot_old[i] = 0;
+
+      if (_need_u_dotdot_old)
+        _u_dotdot_old[i] = 0;
+
+      if (_need_du_dot_du)
+        _du_dot_du[i] = 0;
+
+      if (_need_du_dotdot_du)
+        _du_dotdot_du[i] = 0;
 
       if (_need_grad_dot)
         _grad_u_dot[i] = 0;
+
+      if (_need_grad_dotdot)
+        _grad_u_dotdot[i] = 0;
 
       if (_need_u_old)
         _u_old[i] = 0;
@@ -896,6 +1102,12 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
       _dof_values_older.resize(num_dofs);
     if (_need_dof_values_dot)
       _dof_values_dot.resize(num_dofs);
+    if (_need_dof_values_dotdot)
+      _dof_values_dotdot.resize(num_dofs);
+    if (_need_dof_values_dot_old)
+      _dof_values_dot_old.resize(num_dofs);
+    if (_need_dof_values_dotdot_old)
+      _dof_values_dotdot_old.resize(num_dofs);
   }
 
   if (_need_solution_dofs)
@@ -911,8 +1123,12 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
   const NumericVector<Real> * solution_prev_nl = _sys.solutionPreviousNewton();
-  const NumericVector<Real> & u_dot = _sys.solutionUDot();
+  const NumericVector<Real> * u_dot = _sys.solutionUDot();
+  const NumericVector<Real> * u_dotdot = _sys.solutionUDotDot();
+  const NumericVector<Real> * u_dot_old = _sys.solutionUDotOld();
+  const NumericVector<Real> * u_dotdot_old = _sys.solutionUDotDotOld();
   const Real & du_dot_du = _sys.duDotDu();
+  const Real & du_dotdot_du = _sys.duDotDotDu();
 
   dof_id_type idx = 0;
   Real soln_local = 0;
@@ -921,6 +1137,9 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
   Real soln_older_local = 0;
   Real soln_previous_nl_local = 0;
   Real u_dot_local = 0;
+  Real u_dotdot_local = 0;
+  Real u_dot_old_local = 0;
+  Real u_dotdot_old_local = 0;
 
   const OutputType * phi_local = NULL;
   const typename OutputTools<OutputType>::OutputGradient * dphi_qp = NULL;
@@ -968,9 +1187,33 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
       if (_need_dof_values_older)
         _dof_values_older[i] = soln_older_local;
 
-      u_dot_local = u_dot(idx);
-      if (_need_dof_values_dot)
-        _dof_values_dot[i] = u_dot_local;
+      if (u_dot)
+      {
+        u_dot_local = (*u_dot)(idx);
+        if (_need_dof_values_dot)
+          _dof_values_dot[i] = u_dot_local;
+      }
+
+      if (u_dotdot)
+      {
+        u_dotdot_local = (*u_dotdot)(idx);
+        if (_need_dof_values_dotdot)
+          _dof_values_dotdot[i] = u_dotdot_local;
+      }
+
+      if (u_dot_old)
+      {
+        u_dot_old_local = (*u_dot_old)(idx);
+        if (_need_dof_values_dot_old)
+          _dof_values_dot_old[i] = u_dot_old_local;
+      }
+
+      if (u_dotdot_old)
+      {
+        u_dotdot_old_local = (*u_dotdot_old)(idx);
+        if (_need_dof_values_dotdot_old)
+          _dof_values_dotdot_old[i] = u_dotdot_old_local;
+      }
 
       if (_need_solution_dofs_old)
         _solution_dofs_old(i) = solution_old(idx);
@@ -1067,11 +1310,29 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
       if (is_transient)
       {
-        _u_dot[qp] += *phi_local * u_dot_local;
-        _du_dot_du[qp] = du_dot_du;
+        if (_need_u_dot)
+          _u_dot[qp] += *phi_local * u_dot_local;
+
+        if (_need_u_dotdot)
+          _u_dotdot[qp] += *phi_local * u_dotdot_local;
+
+        if (_need_u_dot_old)
+          _u_dot_old[qp] += *phi_local * u_dot_old_local;
+
+        if (_need_u_dotdot_old)
+          _u_dotdot_old[qp] += *phi_local * u_dotdot_old_local;
+
+        if (_need_du_dot_du)
+          _du_dot_du[qp] = du_dot_du;
+
+        if (_need_du_dotdot_du)
+          _du_dotdot_du[qp] = du_dotdot_du;
 
         if (_need_grad_dot)
           _grad_u_dot[qp].add_scaled(*dphi_qp, u_dot_local);
+
+        if (_need_grad_dotdot)
+          _grad_u_dotdot[qp].add_scaled(*dphi_qp, u_dotdot_local);
 
         if (_need_u_old)
           _u_old[qp] += *phi_local * soln_old_local;
@@ -1243,10 +1504,29 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
 
   if (is_transient)
   {
-    _u_dot_neighbor.resize(nqp);
-    _du_dot_du_neighbor.resize(nqp);
+    if (_need_u_dot_neighbor)
+      _u_dot_neighbor.resize(nqp);
+
+    if (_need_u_dotdot_neighbor)
+      _u_dotdot_neighbor.resize(nqp);
+
+    if (_need_u_dot_old_neighbor)
+      _u_dot_old_neighbor.resize(nqp);
+
+    if (_need_u_dotdot_old_neighbor)
+      _u_dotdot_old_neighbor.resize(nqp);
+
+    if (_need_du_dot_du_neighbor)
+      _du_dot_du_neighbor.resize(nqp);
+
+    if (_need_du_dotdot_du_neighbor)
+      _du_dotdot_du_neighbor.resize(nqp);
+
     if (_need_grad_neighbor_dot)
       _grad_u_neighbor_dot.resize(nqp);
+
+    if (_need_grad_neighbor_dotdot)
+      _grad_u_neighbor_dotdot.resize(nqp);
 
     if (_need_u_old_neighbor)
       _u_old_neighbor.resize(nqp);
@@ -1277,11 +1557,28 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
 
     if (_need_grad_dot)
       _grad_u_neighbor_dot[i] = 0;
+    if (_need_grad_dotdot)
+      _grad_u_neighbor_dotdot[i] = 0;
 
     if (is_transient)
     {
-      _u_dot_neighbor[i] = 0;
-      _du_dot_du_neighbor[i] = 0;
+      if (_need_u_dot_neighbor)
+        _u_dot_neighbor[i] = 0;
+
+      if (_need_u_dotdot_neighbor)
+        _u_dotdot_neighbor[i] = 0;
+
+      if (_need_u_dot_old_neighbor)
+        _u_dot_old_neighbor[i] = 0;
+
+      if (_need_u_dotdot_old_neighbor)
+        _u_dotdot_old_neighbor[i] = 0;
+
+      if (_need_du_dot_du_neighbor)
+        _du_dot_du_neighbor[i] = 0;
+
+      if (_need_du_dotdot_du_neighbor)
+        _du_dotdot_du_neighbor[i] = 0;
 
       if (_need_u_old_neighbor)
         _u_old_neighbor[i] = 0;
@@ -1315,6 +1612,12 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
       _dof_values_older_neighbor.resize(num_dofs);
     if (_need_dof_values_dot_neighbor)
       _dof_values_dot_neighbor.resize(num_dofs);
+    if (_need_dof_values_dotdot_neighbor)
+      _dof_values_dotdot_neighbor.resize(num_dofs);
+    if (_need_dof_values_dot_old_neighbor)
+      _dof_values_dot_old_neighbor.resize(num_dofs);
+    if (_need_dof_values_dotdot_old_neighbor)
+      _dof_values_dotdot_old_neighbor.resize(num_dofs);
   }
 
   if (_need_solution_dofs_neighbor)
@@ -1329,14 +1632,21 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
-  const NumericVector<Real> & u_dot = _sys.solutionUDot();
+  const NumericVector<Real> * u_dot = _sys.solutionUDot();
+  const NumericVector<Real> * u_dotdot = _sys.solutionUDotDot();
+  const NumericVector<Real> * u_dot_old = _sys.solutionUDotOld();
+  const NumericVector<Real> * u_dotdot_old = _sys.solutionUDotDotOld();
   const Real & du_dot_du = _sys.duDotDu();
+  const Real & du_dotdot_du = _sys.duDotDotDu();
 
   dof_id_type idx;
   Real soln_local;
   Real soln_old_local = 0;
   Real soln_older_local = 0;
   Real u_dot_local = 0;
+  Real u_dotdot_local = 0;
+  Real u_dot_old_local = 0;
+  Real u_dotdot_old_local = 0;
 
   OutputType phi_local;
   typename OutputTools<OutputType>::OutputGradient dphi_local;
@@ -1366,9 +1676,33 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
       if (_need_dof_values_older_neighbor)
         _dof_values_older_neighbor[i] = soln_older_local;
 
-      u_dot_local = u_dot(idx);
-      if (_need_dof_values_dot_neighbor)
-        _dof_values_dot_neighbor[i] = u_dot_local;
+      if (u_dot)
+      {
+        u_dot_local = (*u_dot)(idx);
+        if (_need_dof_values_dot_neighbor)
+          _dof_values_dot_neighbor[i] = u_dot_local;
+      }
+
+      if (u_dotdot)
+      {
+        u_dotdot_local = (*u_dotdot)(idx);
+        if (_need_dof_values_dotdot_neighbor)
+          _dof_values_dotdot_neighbor[i] = u_dotdot_local;
+      }
+
+      if (u_dot_old)
+      {
+        u_dot_old_local = (*u_dot_old)(idx);
+        if (_need_dof_values_dot_old_neighbor)
+          _dof_values_dot_old_neighbor[i] = u_dot_old_local;
+      }
+
+      if (u_dotdot_old)
+      {
+        u_dotdot_old_local = (*u_dotdot_old)(idx);
+        if (_need_dof_values_dotdot_old_neighbor)
+          _dof_values_dotdot_old_neighbor[i] = u_dotdot_old_local;
+      }
 
       if (_need_solution_dofs_old_neighbor)
         _solution_dofs_old_neighbor(i) = solution_old(idx);
@@ -1393,11 +1727,29 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
 
       if (is_transient)
       {
-        _u_dot_neighbor[qp] += phi_local * u_dot_local;
-        _du_dot_du_neighbor[qp] = du_dot_du;
+        if (_need_u_dot_neighbor)
+          _u_dot_neighbor[qp] += phi_local * u_dot_local;
+
+        if (_need_u_dotdot_neighbor)
+          _u_dotdot_neighbor[qp] += phi_local * u_dotdot_local;
+
+        if (_need_u_dot_old_neighbor)
+          _u_dot_old_neighbor[qp] += phi_local * u_dot_old_local;
+
+        if (_need_u_dotdot_old_neighbor)
+          _u_dotdot_old_neighbor[qp] += phi_local * u_dotdot_old_local;
+
+        if (_need_du_dot_du_neighbor)
+          _du_dot_du_neighbor[qp] = du_dot_du;
+
+        if (_need_du_dotdot_du_neighbor)
+          _du_dotdot_du_neighbor[qp] = du_dotdot_du;
 
         if (_need_grad_neighbor_dot)
           _grad_u_neighbor_dot[qp].add_scaled(dphi_local, u_dot_local);
+
+        if (_need_grad_neighbor_dotdot)
+          _grad_u_neighbor_dotdot[qp].add_scaled(dphi_local, u_dotdot_local);
 
         if (_need_u_old_neighbor)
           _u_old_neighbor[qp] += phi_local * soln_old_local;
@@ -1559,8 +1911,80 @@ MooseVariableFE<OutputType>::nodalValueDot()
 {
   if (isNodal())
   {
-    _need_dof_values_dot = true;
-    return _nodal_value_dot;
+    if (_sys.solutionUDot())
+    {
+      _need_dof_values_dot = true;
+      return _nodal_value_dot;
+    }
+    else
+      mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+                 "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const OutputType &
+MooseVariableFE<OutputType>::nodalValueDotDot()
+{
+  if (isNodal())
+  {
+    if (_sys.solutionUDotDot())
+    {
+      _need_dof_values_dotdot = true;
+      return _nodal_value_dotdot;
+    }
+    else
+      mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+                 "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`.");
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const OutputType &
+MooseVariableFE<OutputType>::nodalValueDotOld()
+{
+  if (isNodal())
+  {
+    if (_sys.solutionUDotOld())
+    {
+      _need_dof_values_dot_old = true;
+      return _nodal_value_dot_old;
+    }
+    else
+      mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+                 "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+                 "`u_dot_old`.");
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const OutputType &
+MooseVariableFE<OutputType>::nodalValueDotDotOld()
+{
+  if (isNodal())
+  {
+    if (_sys.solutionUDotDotOld())
+    {
+      _need_dof_values_dotdot_old = true;
+      return _nodal_value_dotdot_old;
+    }
+    else
+      mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+                 "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+                 "requesting `u_dotdot_old`.");
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -1624,7 +2048,6 @@ MooseVariableFE<OutputType>::computeNodalValues()
       _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
       _nodal_value_previous_nl = _dof_values_previous_nl[0];
     }
-
     if (_subproblem.isTransient())
     {
       _dof_values_old.resize(n);
@@ -1635,10 +2058,26 @@ MooseVariableFE<OutputType>::computeNodalValues()
       _nodal_value_older = _dof_values_older[0];
 
       _dof_values_dot.resize(n);
+      _dof_values_dotdot.resize(n);
+      _dof_values_dot_old.resize(n);
+      _dof_values_dotdot_old.resize(n);
       _dof_du_dot_du.resize(n);
-      _dof_values_dot[0] = _sys.solutionUDot()(_dof_indices[0]);
+      _dof_du_dotdot_du.resize(n);
+
+      if (_sys.solutionUDot())
+        _dof_values_dot[0] = (*_sys.solutionUDot())(_dof_indices[0]);
+      if (_sys.solutionUDotDot())
+        _dof_values_dotdot[0] = (*_sys.solutionUDotDot())(_dof_indices[0]);
+      if (_sys.solutionUDotOld())
+        _dof_values_dot_old[0] = (*_sys.solutionUDotOld())(_dof_indices[0]);
+      if (_sys.solutionUDotDotOld())
+        _dof_values_dotdot_old[0] = (*_sys.solutionUDotDotOld())(_dof_indices[0]);
       _dof_du_dot_du[0] = _sys.duDotDu();
+      _dof_du_dotdot_du[0] = _sys.duDotDotDu();
       _nodal_value_dot = _dof_values_dot[0];
+      _nodal_value_dotdot = _dof_values_dotdot[0];
+      _nodal_value_dot_old = _dof_values_dot_old[0];
+      _nodal_value_dotdot_old = _dof_values_dotdot_old[0];
     }
   }
   else
@@ -1651,7 +2090,11 @@ MooseVariableFE<OutputType>::computeNodalValues()
       _dof_values_old.resize(0);
       _dof_values_older.resize(0);
       _dof_values_dot.resize(0);
+      _dof_values_dotdot.resize(0);
+      _dof_values_dot_old.resize(0);
+      _dof_values_dotdot_old.resize(0);
       _dof_du_dot_du.resize(0);
+      _dof_du_dotdot_du.resize(0);
     }
   }
 }
@@ -1690,11 +2133,25 @@ MooseVariableFE<RealVectorValue>::computeNodalValues()
         _nodal_value_older(i) = _dof_values_older[i];
       }
       _dof_values_dot.resize(n);
+      _dof_values_dotdot.resize(n);
+      _dof_values_dot_old.resize(n);
+      _dof_values_dotdot_old.resize(n);
       _dof_du_dot_du.resize(n);
+      _dof_du_dotdot_du.resize(n);
       for (size_t i = 0; i < n; ++i)
       {
-        _dof_values_dot[i] = _sys.solutionUDot()(_dof_indices[i]);
+        if (_sys.solutionUDot())
+          _dof_values_dot[i] = (*_sys.solutionUDot())(_dof_indices[i]);
+        if (_sys.solutionUDotDot())
+          _dof_values_dotdot[i] = (*_sys.solutionUDotDot())(_dof_indices[i]);
+        if (_sys.solutionUDotOld())
+          _dof_values_dot_old[i] = (*_sys.solutionUDotOld())(_dof_indices[i]);
+        if (_sys.solutionUDotDotOld())
+          _dof_values_dotdot_old[i] = (*_sys.solutionUDotDotOld())(_dof_indices[i]);
         _nodal_value_dot(i) = _dof_values_dot[i];
+        _nodal_value_dotdot(i) = _dof_values_dotdot[i];
+        _nodal_value_dot_old(i) = _dof_values_dot_old[i];
+        _nodal_value_dotdot_old(i) = _dof_values_dotdot_old[i];
       }
     }
   }
@@ -1708,7 +2165,11 @@ MooseVariableFE<RealVectorValue>::computeNodalValues()
       _dof_values_old.resize(0);
       _dof_values_older.resize(0);
       _dof_values_dot.resize(0);
+      _dof_values_dotdot.resize(0);
+      _dof_values_dot_old.resize(0);
+      _dof_values_dotdot_old.resize(0);
       _dof_du_dot_du.resize(0);
+      _dof_du_dotdot_du.resize(0);
     }
   }
 }
@@ -1732,11 +2193,24 @@ MooseVariableFE<OutputType>::computeNodalNeighborValues()
       _sys.solutionOlder().get(_dof_indices_neighbor, &_dof_values_older_neighbor[0]);
 
       _dof_values_dot_neighbor.resize(n);
+      _dof_values_dotdot_neighbor.resize(n);
+      _dof_values_dot_old_neighbor.resize(n);
+      _dof_values_dotdot_old_neighbor.resize(n);
       _dof_du_dot_du_neighbor.resize(n);
+      _dof_du_dotdot_du_neighbor.resize(n);
       for (unsigned int i = 0; i < n; i++)
       {
-        _dof_values_dot_neighbor[i] = _sys.solutionUDot()(_dof_indices_neighbor[i]);
+        if (_sys.solutionUDot())
+          _dof_values_dot_neighbor[i] = (*_sys.solutionUDot())(_dof_indices_neighbor[i]);
+        if (_sys.solutionUDotDot())
+          _dof_values_dotdot_neighbor[i] = (*_sys.solutionUDotDot())(_dof_indices_neighbor[i]);
+        if (_sys.solutionUDotOld())
+          _dof_values_dot_old_neighbor[i] = (*_sys.solutionUDotOld())(_dof_indices_neighbor[i]);
+        if (_sys.solutionUDotDotOld())
+          _dof_values_dotdot_old_neighbor[i] =
+              (*_sys.solutionUDotDotOld())(_dof_indices_neighbor[i]);
         _dof_du_dot_du_neighbor[i] = _sys.duDotDu();
+        _dof_du_dotdot_du_neighbor[i] = _sys.duDotDotDu();
       }
     }
   }
@@ -1748,7 +2222,11 @@ MooseVariableFE<OutputType>::computeNodalNeighborValues()
       _dof_values_old_neighbor.resize(0);
       _dof_values_older_neighbor.resize(0);
       _dof_values_dot_neighbor.resize(0);
+      _dof_values_dotdot_neighbor.resize(0);
+      _dof_values_dot_old_neighbor.resize(0);
+      _dof_values_dotdot_old_neighbor.resize(0);
       _dof_du_dot_du_neighbor.resize(0);
+      _dof_du_dotdot_du_neighbor.resize(0);
     }
   }
 }

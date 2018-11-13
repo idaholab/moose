@@ -20,7 +20,7 @@ validParams<ElementAverageTimeDerivative>()
 }
 
 ElementAverageTimeDerivative::ElementAverageTimeDerivative(const InputParameters & parameters)
-  : ElementAverageValue(parameters)
+  : ElementAverageValue(parameters), _u_dot(_is_transient ? coupledDot("variable") : _zero)
 {
 }
 

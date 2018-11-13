@@ -15,7 +15,7 @@
 #ifndef NODALROTATIONALINERTIA_H
 #define NODALROTATIONALINERTIA_H
 
-#include "NodalKernel.h"
+#include "TimeNodalKernel.h"
 #include "RankTwoTensor.h"
 
 // Forward Declarations
@@ -28,7 +28,7 @@ InputParameters validParams<NodalRotationalInertia>();
  * Calculates the inertial torque and inertia proportional damping
  * for nodal rotational inertia
  */
-class NodalRotationalInertia : public NodalKernel
+class NodalRotationalInertia : public TimeNodalKernel
 {
 public:
   NodalRotationalInertia(const InputParameters & parameters);
@@ -41,7 +41,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// Auxiliary system object
-  AuxiliarySystem & _aux_sys;
+  AuxiliarySystem * _aux_sys;
 
   /// Number of coupled rotational variables
   unsigned int _nrot;
@@ -71,10 +71,10 @@ protected:
   std::vector<Real> _rot_vel_old;
 
   /// Newmark time integration parameter
-  const Real & _beta;
+  const Real _beta;
 
   /// Newmark time integration parameter
-  const Real & _gamma;
+  const Real _gamma;
 
   /// Mass proportional Rayliegh damping
   const Real & _eta;
@@ -87,6 +87,21 @@ protected:
 
   /// Moment of inertia tensor in global coordinate system
   RankTwoTensor _inertia;
+
+  /// Velocity value
+  std::vector<const VariableValue *> _rot_vel_value;
+
+  /// Old velocity value
+  std::vector<const VariableValue *> _rot_vel_old_value;
+
+  /// Acceleration value
+  std::vector<const VariableValue *> _rot_accel_value;
+
+  /// du_dot_du value
+  const VariableValue * _du_dot_du;
+
+  /// du_dotdot_du value
+  const VariableValue * _du_dotdot_du;
 };
 
 #endif /* NODALROTATIOANLINERTIA_H */

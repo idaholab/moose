@@ -59,9 +59,7 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _u_old(_var.slnOld()),
-    _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu())
+    _u_old(_var.slnOld())
 {
 }
 

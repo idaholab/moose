@@ -31,7 +31,6 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _nonlinear_implicit_system(dynamic_cast<const NonlinearImplicitSystem *>(&_sys.system())),
-    _u_dot(_sys.solutionUDot()),
     _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionOld()),
@@ -44,6 +43,7 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _n_nonlinear_iterations(0),
     _n_linear_iterations(0)
 {
+  _fe_problem.setUDotRequested(true);
 }
 
 void

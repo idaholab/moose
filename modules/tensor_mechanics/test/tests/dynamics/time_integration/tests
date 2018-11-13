@@ -23,4 +23,19 @@
     design = "Dynamics.md"
     issues = "#5559"
   [../]
+  [./hht_ti]
+    type = 'Exodiff'
+    input = 'hht_test_ti.i'
+    exodiff = 'hht_test_out.e'
+    abs_zero = 1e-09
+    compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system using Hilber-Hughes-Taylor (HHT) time integration"
+                  " when velocity and acceleration of the system are calculated using the Newmark-Beta"
+                  " time integrator."
+    design = "Dynamics.md"
+    issues = "#12185"
+    prereq = "hht"
+  [../]
 []

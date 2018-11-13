@@ -28,7 +28,10 @@ validParams<TimeKernel>()
   return params;
 }
 
-TimeKernel::TimeKernel(const InputParameters & parameters) : Kernel(parameters) {}
+TimeKernel::TimeKernel(const InputParameters & parameters)
+  : Kernel(parameters), _u_dot(_var.uDot()), _du_dot_du(_var.duDotDu())
+{
+}
 
 void
 TimeKernel::computeResidual()

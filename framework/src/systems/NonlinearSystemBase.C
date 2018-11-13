@@ -113,6 +113,10 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _solution_previous_nl(NULL),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
+    _u_dot(NULL),
+    _u_dotdot(NULL),
+    _u_dot_old(NULL),
+    _u_dotdot_old(NULL),
     _Re_time_tag(-1),
     _Re_time(NULL),
     _Re_non_time_tag(-1),
@@ -165,8 +169,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   _fe_problem.addMatrixTag("TIME");
 
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
-
-  _u_dot = &addVector("u_dot", true, GHOSTED);
 }
 
 NonlinearSystemBase::~NonlinearSystemBase()
@@ -195,6 +197,19 @@ NonlinearSystemBase::init()
   _max_var_n_dofs_per_elem = mvndpe.max();
   _communicator.max(_max_var_n_dofs_per_elem);
   Moose::perf_log.pop("maxVarNDofsPerElem()", "Setup");
+}
+
+void
+NonlinearSystemBase::addDotVectors()
+{
+  if (_fe_problem.uDotRequested())
+    _u_dot = &addVector("u_dot", true, GHOSTED);
+  if (_fe_problem.uDotOldRequested())
+    _u_dot_old = &addVector("u_dot_old", true, GHOSTED);
+  if (_fe_problem.uDotDotRequested())
+    _u_dotdot = &addVector("u_dotdot", true, GHOSTED);
+  if (_fe_problem.uDotDotOldRequested())
+    _u_dotdot_old = &addVector("u_dotdot_old", true, GHOSTED);
 }
 
 void
@@ -591,7 +606,6 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
         residual += *_Re_non_time;
       residual.close();
     }
-
     computeNodalBCs(tags);
     closeTaggedVectors(tags);
 
@@ -603,7 +617,6 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
       *_residual_ghosted = residual;
       _residual_ghosted->close();
     }
-
     // Need to close and update the aux system in case residuals were saved to it.
     if (_has_nodalbc_save_in)
       _fe_problem.getAuxiliarySystem().solution().close();
@@ -686,12 +699,6 @@ NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
   _nodal_kernels.subdomainSetup(subdomain, tid);
   _element_dampers.subdomainSetup(subdomain, tid);
   _nodal_dampers.subdomainSetup(subdomain, tid);
-}
-
-NumericVector<Number> &
-NonlinearSystemBase::solutionUDot()
-{
-  return *_u_dot;
 }
 
 NumericVector<Number> &
@@ -1436,9 +1443,7 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
     _nl_vector_tags.insert(tag.second);
 
   associateVectorToTag(residual, residualVectorTag());
-
   computeNodalBCs(residual, _nl_vector_tags);
-
   disassociateVectorFromTag(residual, residualVectorTag());
 }
 
@@ -2840,9 +2845,27 @@ NonlinearSystemBase::setSolution(const NumericVector<Number> & soln)
 }
 
 void
-NonlinearSystemBase::setSolutionUDot(const NumericVector<Number> & udot)
+NonlinearSystemBase::setSolutionUDot(const NumericVector<Number> & u_dot)
 {
-  *_u_dot = udot;
+  *_u_dot = u_dot;
+}
+
+void
+NonlinearSystemBase::setSolutionUDotDot(const NumericVector<Number> & u_dotdot)
+{
+  *_u_dotdot = u_dotdot;
+}
+
+void
+NonlinearSystemBase::setSolutionUDotOld(const NumericVector<Number> & u_dot_old)
+{
+  *_u_dot_old = u_dot_old;
+}
+
+void
+NonlinearSystemBase::setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old)
+{
+  *_u_dotdot_old = u_dotdot_old;
 }
 
 NumericVector<Number> &

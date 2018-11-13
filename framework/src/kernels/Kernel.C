@@ -41,9 +41,7 @@ Kernel::Kernel(const InputParameters & parameters)
     _phi(_assembly.phi(_var)),
     _grad_phi(_assembly.gradPhi(_var)),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu())
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld())
 {
   addMooseVariableDependency(mooseVariable());
   _save_in.resize(_save_in_strings.size());

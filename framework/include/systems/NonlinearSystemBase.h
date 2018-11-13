@@ -48,7 +48,7 @@ template <typename T>
 class NumericVector;
 template <typename T>
 class SparseMatrix;
-}
+} // namespace libMesh
 
 /**
  * Nonlinear system to be solved
@@ -116,6 +116,12 @@ public:
    */
   void
   addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
+
+  /**
+   * Add u_dot, u_dotdot, u_dot_old and u_dotdot_old
+   * vectors if requested by the time integrator
+   */
+  void addDotVectors();
 
   /**
    * Adds a kernel
@@ -346,7 +352,16 @@ public:
    */
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
-  virtual NumericVector<Number> & solutionUDot() override;
+  /**
+   * Set transient term used by residual and Jacobian evaluation.
+   * @param udotdot transient term
+   * @note If the calling sequence for residual evaluation was changed, this could become an
+   * explicit argument.
+   */
+  virtual void setSolutionUDotDot(const NumericVector<Number> & udotdot);
+
+  virtual NumericVector<Number> * solutionUDot() override { return _u_dot; }
+  virtual NumericVector<Number> * solutionUDotDot() override { return _u_dotdot; }
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -556,10 +571,18 @@ public:
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
+  virtual NumericVector<Number> * solutionUDotOld() override { return _u_dot_old; }
+
+  virtual NumericVector<Number> * solutionUDotDotOld() override { return _u_dotdot_old; }
+
   virtual NumericVector<Number> * solutionPreviousNewton() override
   {
     return _solution_previous_nl;
   }
+
+  virtual void setSolutionUDotOld(const NumericVector<Number> & u_dot_old);
+
+  virtual void setSolutionUDotDotOld(const NumericVector<Number> & u_dotdot_old);
 
   virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
 
@@ -641,8 +664,18 @@ protected:
 
   /// solution vector for u^dot
   NumericVector<Number> * _u_dot;
+  /// solution vector for u^dotdot
+  NumericVector<Number> * _u_dotdot;
+
+  /// old solution vector for u^dot
+  NumericVector<Number> * _u_dot_old;
+  /// old solution vector for u^dotdot
+  NumericVector<Number> * _u_dotdot_old;
+
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
+  /// \f$ {du^dotdot}\over{du} \f$
+  Number _du_dotdot_du;
 
   /// Tag for time contribution residual
   TagID _Re_time_tag;

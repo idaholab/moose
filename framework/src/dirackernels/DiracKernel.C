@@ -84,8 +84,6 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _grad_test(_var.gradPhi()),
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
-    _u_dot(_var.uDot()),
-    _du_dot_du(_var.duDotDu()),
     _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points"))
 {
   addMooseVariableDependency(mooseVariable());

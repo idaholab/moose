@@ -214,11 +214,6 @@ protected:
   /// Holds the solution gradient at the current quadrature points
   const VariableGradient & _grad_u;
 
-  /// Time derivative of the solution
-  const VariableValue & _u_dot;
-  /// Derivative of u_dot wrt u
-  const VariableValue & _du_dot_du;
-
   /// drop duplicate points or consider them in residual and Jacobian
   const bool _drop_duplicate_points;
 
