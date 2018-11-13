@@ -5,7 +5,7 @@
     cli_args = '--mesh-only'
     exodiff = 'sideset_between_subdomains_in.e'
     requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'mesh_generators/SideSetsBetweenSubdomainsGenerator.md'
+    design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -17,7 +17,7 @@
     cli_args = '--mesh-only'
     exodiff = 'sideset_between_vector_subdomains_generator_in.e'
     requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'mesh_generators/SideSetsBetweenSubdomainsGenerator.md'
+    design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -29,7 +29,7 @@
     cli_args = '--mesh-only'
     exodiff = 'between_in.e'
     requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'mesh_generators/SideSetsBetweenSubdomainsGenerator.md'
+    design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

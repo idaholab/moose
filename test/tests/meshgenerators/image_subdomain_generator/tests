@@ -5,7 +5,7 @@
     vtk = true
     exodiff = 'image_subdomain_2d_out.e'
     requirement = 'MOOSE shall be able to read in an image.'
-    design = 'mesh_generators/ImageSubdomainGenerator.md'
+    design = 'meshgenerators/ImageSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -16,7 +16,7 @@
     vtk = true
     exodiff = 'image_subdomain_3d_out.e'
     requirement = 'MOOSE shall be able to read in an image.'
-    design = 'mesh_generators/ImageSubdomainGenerator.md'
+    design = 'meshgenerators/ImageSubdomainGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

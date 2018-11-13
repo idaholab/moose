@@ -4,7 +4,7 @@
     input = 'quad_with_elementid_subdomainid.i'
     exodiff = 'quad_with_elementid_subdomainid_out.e'
     requirement = 'MOOSE shall be able to create different subdomains.'
-    design = 'mesh_generators/GenerateElementSubdomainID.md'
+    design = 'meshgenerators/ElementSubdomainIDGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -15,7 +15,7 @@
     input = 'quad_with_subdomainid.i'
     exodiff = 'out_quad_subdomain_id.e'
     requirement = 'MOOSE shall be able to create different subdomains.'
-    design = 'mesh_generators/GenerateElementSubdomainID.md'
+    design = 'meshgenerators/ElementSubdomainIDGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -26,7 +26,7 @@
     input = 'tri_with_subdomainid.i'
     exodiff = 'tri_with_subdomainid_out.e'
     requirement = 'MOOSE shall be able to create different subdomains.'
-    design = 'mesh_generators/GenerateElementSubdomainID.md'
+    design = 'meshgenerators/ElementSubdomainIDGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

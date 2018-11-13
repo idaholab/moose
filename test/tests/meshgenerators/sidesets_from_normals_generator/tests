@@ -4,7 +4,7 @@
     input = 'sidesets_cylinder_normals.i'
     exodiff = 'sidesets_cylinder_normals_out.e'
     requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'mesh_generators/SideSetsFromNormalsGenerator.md'
+    design = 'meshgenerators/SideSetsFromNormalsGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -15,7 +15,7 @@
     input = 'sidesets_cylinder_normals_fixed.i'
     exodiff = 'sidesets_cylinder_normals_fixed_out.e'
     requirement = 'MOOSE shall be able to create sidesets.'
-    design = 'mesh_generators/SideSetsFromNormalsGenerator.md'
+    design = 'meshgenerators/SideSetsFromNormalsGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

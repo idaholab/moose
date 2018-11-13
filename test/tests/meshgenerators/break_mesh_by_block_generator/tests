@@ -5,7 +5,7 @@
     cli_args = '--mesh-only'
     exodiff = 'break_mesh_3D_auto_in.e'
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'mesh_generators/BreakMeshByBlockGenerator.md'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -17,7 +17,7 @@
     cli_args = '--mesh-only'
     exodiff = 'break_mesh_3D_splittrue_in.e'
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'mesh_generators/BreakMeshByBlockGenerator.md'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -29,7 +29,7 @@
     cli_args = '--mesh-only'
     exodiff = 'break_mesh_3D_polycrystal_in.e'
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'mesh_generators/BreakMeshByBlockGenerator.md'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -41,7 +41,7 @@
     cli_args = '--mesh-only'
     exodiff = 'break_mesh_2DJunction_auto_in.e'
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'mesh_generators/BreakMeshByBlockGenerator.md'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -53,7 +53,7 @@
     cli_args = '--mesh-only'
     exodiff = 'break_mesh_2DJunction_splittrue_in.e'
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'mesh_generators/BreakMeshByBlockGenerator.md'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
@@ -65,7 +65,7 @@
     cli_args = '--mesh-only'
     exodiff = 'break_mesh_2DJunction_polycrystal_in.e'
     requirement = 'MOOSE shall be able to create separate blocks in a mesh.'
-    design = 'mesh_generators/BreakMeshByBlockGenerator.md'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false

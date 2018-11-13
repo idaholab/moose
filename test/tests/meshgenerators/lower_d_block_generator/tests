@@ -4,7 +4,7 @@
     input = 'lower_d_block_generator.i'
     exodiff = 'lower_d_block_generator_out.e'
     requirement = 'MOOSE shall be able to create different subdomains.'
-    design = 'mesh_generators/LowerDBlockFromSidesetGenerator.md'
+    design = 'meshgenerators/LowerDBlockFromSidesetGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
