@@ -61,16 +61,6 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
-  [./error_boundary_number]
-    type = 'RunException'
-    input = 'error_boundary_number.i'
-    expect_err = 'Must be 2 boundary inputs or more.'
-    requirement = 'MOOSE shall be able to use the BoundingBox class.'
-    design = 'meshgenerators/SideSetsFromBoundingBoxGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
-  [../]
   [./error_no_nodes_found]
     type = 'RunException'
     input = 'error_no_nodes_found.i'

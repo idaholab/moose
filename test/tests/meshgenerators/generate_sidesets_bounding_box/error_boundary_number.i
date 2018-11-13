@@ -18,7 +18,7 @@
   []
 
   [./createNewSidesetTwo]
-    type = GenerateSideSetsFromBoundingBox
+    type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetOne
     boundary_id_old = 'left'
     boundary_id_new = 10
