@@ -24,6 +24,8 @@
     family = LAGRANGE_VEC
     order = FIRST
   [../]
+  [./q]
+  [../]
 []
 
 [Kernels]
@@ -59,6 +61,10 @@
     variable = s
     v = u
     state = older
+  [../]
+  [./q_diff]
+    type = Diffusion
+    variable = q
   [../]
 []
 
@@ -114,6 +120,18 @@
     boundary = 'right'
     x_exact_soln = 'x_exact_older'
     y_exact_soln = 'y_exact_older'
+  [../]
+  [./left_q]
+    type = DirichletBC
+    variable = q
+    boundary = 'left'
+    value = 1
+  [../]
+  [./right_q]
+    type = NeumannBC
+    variable = q
+    boundary = 'right'
+    value = 1
   [../]
 []
 
