@@ -2,7 +2,7 @@
   [./d1]
     requirement = 'MOOSE shall be able to build a 1D mesh in parallel'
     design = '/DistributedGeneratedMesh.md'
-    issues = '11485'
+    issues = '#11485'
     type = 'Exodiff'
     cli_args = 'Mesh/dim=1 --mesh-only=d1.e'
     input = 'distributed_generated_mesh.i'
@@ -13,9 +13,9 @@
   [./d2]
     requirement = 'MOOSE shall be able to build a 2D mesh in parallel'
     design = '/DistributedGeneratedMesh.md'
-    issues = '1148Z'
+    issues = '#11485'
     type = 'Exodiff'
-    cli_args = 'Mesh/dim=1 --mesh-only=d2.e'
+    cli_args = 'Mesh/dim=2 --mesh-only=d2.e'
     input = 'distributed_generated_mesh.i'
     exodiff = 'd2.e'
     min_parallel = 2
@@ -24,9 +24,9 @@
   [./d3]
     requirement = 'MOOSE shall be able to build a 3D mesh in parallel'
     design = '/DistributedGeneratedMesh.md'
-    issues = '11485'
+    issues = '#11485'
     type = 'Exodiff'
-    cli_args = 'Mesh/dim=1 --mesh-only=d3.e'
+    cli_args = 'Mesh/dim=3 --mesh-only=d3.e'
     input = 'distributed_generated_mesh.i'
     exodiff = 'd3.e'
     min_parallel = 2
