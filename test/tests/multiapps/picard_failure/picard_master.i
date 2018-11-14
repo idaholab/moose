@@ -71,11 +71,18 @@
 []
 
 [MultiApps]
+  active = 'sub' # will be modified by CLI overrides
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
     positions = '0 0 0'
     input_files = picard_sub.i
+  [../]
+  [./sub_no_fail]
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    positions = '0 0 0'
+    input_files = picard_sub_no_fail.i
   [../]
 []
 
