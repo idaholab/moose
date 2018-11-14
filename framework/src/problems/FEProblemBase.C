@@ -3539,12 +3539,17 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
     bool success = true;
 
     for (const auto & multi_app : multi_apps)
+    {
       success = multi_app->solveStep(_dt, _time, auto_advance);
+      // no need to finish executing the subapps if one fails
+      if (!success)
+        break;
+    }
 
     _console << "Waiting For Other Processors To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    _communicator.max(success);
+    _communicator.min(success);
 
     if (!success)
       return false;
