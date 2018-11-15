@@ -10,4 +10,16 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+
+  [./break_bottom_interface_generator_test]
+    type = 'Exodiff'
+    input = 'break_bottom_interface_on_subdomain.i'
+    cli_args = '--mesh-only'
+    exodiff = 'break_bottom_interface_on_subdomain_in.e'
+    requirement = 'MOOSE shall be able to crate different subdomains'
+    design = 'meshgenerators/BreakBoundaryOnSubdomainGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
 []

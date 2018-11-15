@@ -13,17 +13,18 @@
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/mesh_base.h"
 
 namespace MooseMeshUtils
 {
 void
-changeBoundaryId(const libMesh::MeshBase & mesh,
+changeBoundaryId(MeshBase & mesh,
                  const libMesh::boundary_id_type old_id,
                  const libMesh::boundary_id_type new_id,
                  bool delete_prev)
 {
   // Get a reference to our BoundaryInfo object, we will use it several times below...
-  libMesh::BoundaryInfo boundary_info = mesh.get_boundary_info();
+  libMesh::BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   // Container to catch ids passed back from BoundaryInfo
   std::vector<libMesh::boundary_id_type> old_ids;
