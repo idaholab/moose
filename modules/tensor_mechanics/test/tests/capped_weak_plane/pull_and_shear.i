@@ -545,7 +545,7 @@
   l_max_its = 100
   nl_max_its = 100
 
-  end_time = 2.0
+  num_steps = 8
   dt = 0.1
   type = Transient
 []
