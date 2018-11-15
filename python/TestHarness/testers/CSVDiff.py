@@ -50,9 +50,6 @@ class CSVDiff(FileTester):
             # Due to required positional nargs with the ability to support custom positional args (--argument), we need to specify the required ones first
             csvdiff.append(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
 
-            custom_cmp = ''
-            old_floor = ''
-
             if self.specs.isValid('rel_err'):
                 csvdiff.append('--relative-tolerance %s' % (self.specs['rel_err']))
 
