@@ -20,7 +20,7 @@ the previous and the current incremental configurations.
 
 ### Deformation Gradient Definition
 
-The deformation gradient represent the change in a material element from the
+The deformation gradient represents the change in a material element from the
 reference configuration to the current configuration [citep:malvern1969introduction].
 In the incremental formulation used in the `ComputeFiniteStrain` class, the incremental
 deformation gradient represents the change in the material element from the previous
@@ -67,7 +67,7 @@ Once $\boldsymbol{\hat{U}}$ has been computed, the multiplicative decomposition
 of the deformation graidient is used to find the incremental rotation tensor
 $\boldsymbol{\hat{R}}$ and the stretching rate $\boldsymbol{D}$.
 Following [cite:rashid1993incremental], the stretching rate tensor can be expressed in terms
-of 'incremental' right Cauchy-Green deformation tensor
+of the 'incremental' right Cauchy-Green deformation tensor
 \begin{equation}
   \label{eqn:stretching_tensor_definition}
   \boldsymbol{D} = \frac{1}{\Delta t}\log({\hat{\boldsymbol{C}}^{1/2}})
