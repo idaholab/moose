@@ -24,13 +24,32 @@
   [../]
 []
 
+[AuxVariables]
+  [./volumetric_strain]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Modules/TensorMechanics/Master]
+  [./master]
     use_displaced_mesh = true
+    strain = FINITE
+    eigenstrain_names = eigenstrain
+    decomposition_method = EigenSolution #Necessary for exact solution
+  [../]
+[]
+
+[AuxKernels]
+  [./volumetric_strain]
+    type = RankTwoScalarAux
+    scalar_type = VolumetricStrain
+    rank_two_tensor = total_strain
+    variable = volumetric_strain
   [../]
 []
 
@@ -41,14 +60,12 @@
     boundary = left
     value = 0.0
   [../]
-
   [./bottom]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
   [../]
-
   [./back]
     type = DirichletBC
     variable = disp_z
@@ -63,15 +80,10 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    eigenstrain_names = eigenstrain
-    decomposition_method = EigenSolution #Necessary for exact solution
-  [../]
   [./finite_strain_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./thermal_expansion_strain1]
+  [./volumetric_eigenstrain]
     type = ComputeVolumetricEigenstrain
     volumetric_materials = volumetric_change
     eigenstrain_name = eigenstrain
@@ -88,6 +100,12 @@
   [./vol]
     type = VolumePostprocessor
     use_displaced_mesh = true
+    execute_on = 'initial timestep_end'
+  [../]
+  [./volumetric_strain]
+    type = ElementalVariableValue
+    variable = volumetric_strain
+    elementid = 0
   [../]
   [./disp_right]
     type = NodalMaxValue

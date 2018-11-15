@@ -65,12 +65,17 @@ ComputeEigenstrainBase::computeQpProperties()
 Real
 ComputeEigenstrainBase::computeVolumetricStrainComponent(const Real volumetric_strain) const
 {
+  // The engineering strain in a given direction is:
+  // epsilon_eng = cbrt(volumetric_strain + 1.0) - 1.0
+  //
+  // We need to provide this as a logarithmic strain to be consistent with the strain measure
+  // used for finite strain:
+  // epsilon_log = log(1.0 + epsilon_eng)
+  //
+  // This can be simplified down to a more direct form:
+  // epsilon_log = log(cbrt(volumetric_strain + 1.0))
+  // or:
+  // epsilon_log = (1/3) log(volumetric_strain + 1.0)
 
-  Real volumetric_strain_comp = std::cbrt(volumetric_strain + 1.0) - 1.0;
-
-  // Convert to logarithmic strain to compute strains to exactly recover
-  // volumetric strain in finite strain models
-  volumetric_strain_comp = std::log(1.0 + volumetric_strain_comp);
-
-  return volumetric_strain_comp;
+  return std::log(volumetric_strain + 1.0) / 3.0;
 }

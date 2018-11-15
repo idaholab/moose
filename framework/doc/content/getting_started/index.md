@@ -54,20 +54,20 @@ TODO: talk about and link to examples and tutorial, etc.
 
 Join one of our mailing lists:
 
-- moose-users@googlegroups.com - Technical Q&A (moderate traffic)
-- moose-announce@googlegroups.com - Announcements (very light traffic)
+- [moose-users@googlegroups.com](https://groups.google.com/forum/#!forum/moose-users) - Technical Q&A (moderate traffic)
+- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
 
 GMail users can just click the "Join group" button.
 Everyone else can join by sending an email to:
 
-- moose-users+subscribe@googlegroups.com or
+- moose-users+subscribe@googlegroups.com
 - moose-announce+subscribe@googlegroups.com
 
 You may also want to follow MOOSE developers on Twitter:
 
-- Derek Gaston: @friedmud
-- Cody Permann: @permcody
-- John Peterson: @peterson512
-- Jason Miller: @mjmiller96
-- Andrew Slaughter @aeslaughter98
+- Derek Gaston: [@friedmud](https://twitter.com/@friedmud)
+- Cody Permann: [@permcody](https://twitter.com/@permcody)
+- John Peterson: [@peterson512](https://twitter.com/@peterson512)
+- Jason Miller: [@mjmiller96](https://twitter.com/@mjmiller96)
+- Andrew Slaughter: [@aeslaughter98](https://twitter.com/@aeslaughter98)
 

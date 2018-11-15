@@ -7,7 +7,7 @@
 #ifndef INERTIALFORCEBEAM_H
 #define INERTIALFORCEBEAM_H
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 #include "Material.h"
 #include "RankTwoTensor.h"
 
@@ -17,7 +17,7 @@ class InertialForceBeam;
 template <>
 InputParameters validParams<InertialForceBeam>();
 
-class InertialForceBeam : public Kernel
+class InertialForceBeam : public TimeKernel
 {
 public:
   InertialForceBeam(const InputParameters & parameters);
@@ -164,6 +164,16 @@ private:
    * coordinate system
    **/
   RealVectorValue _global_force_0, _global_force_1, _global_moment_0, _global_moment_1;
+
+  /**
+   * Coupled variable for du_dot_du calculated by time integrator
+   **/
+  const VariableValue * _du_dot_du;
+
+  /**
+   * Coupled variable for du_dotdot_du calculated by time integrator
+   **/
+  const VariableValue * _du_dotdot_du;
 };
 
 #endif // INERTIALFORCEBEAM_H

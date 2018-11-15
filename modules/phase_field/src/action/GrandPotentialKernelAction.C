@@ -31,7 +31,7 @@ validParams<GrandPotentialKernelAction>()
       "List of free energies for each phase. Place in same order as switching_function_names.");
   parameters.addRequiredParam<std::vector<MaterialPropertyName>>(
       "free_energies_w",
-      "List of functions for each phase. Length should be lenght of chemical_potentials * length "
+      "List of functions for each phase. Length should be length of chemical_potentials * length "
       "of switching_function_names.");
   parameters.addRequiredParam<std::vector<MaterialPropertyName>>(
       "switching_function_names",
@@ -45,7 +45,7 @@ validParams<GrandPotentialKernelAction>()
       "additional_ops", "List of any additional order parameters which are not grains");
   parameters.addParam<std::vector<MaterialPropertyName>>("free_energies_op",
                                                          "List of free energies used by additional "
-                                                         "order paramaters. Places in same order "
+                                                         "order parameters. Places in same order "
                                                          "as switching_function_names.");
   parameters.addParam<MaterialPropertyName>("kappa_gr", "kappa", "The kappa used with the grains");
   parameters.addParam<MaterialPropertyName>(

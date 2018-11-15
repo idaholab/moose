@@ -71,12 +71,6 @@ protected:
 
   /// Holds the solution gradient at the current quadrature points
   const VariableGradient & _grad_u;
-
-  /// Time derivative of u
-  const VariableValue & _u_dot;
-
-  /// Derivative of u_dot with respect to u
-  const VariableValue & _du_dot_du;
 };
 
 #endif /* KERNEL_H */

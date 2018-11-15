@@ -11,6 +11,7 @@
 #define MOOSEVARIABLESCALAR_H
 
 #include "MooseVariableBase.h"
+#include "SystemBase.h"
 
 // libMesh forward declarations
 namespace libMesh
@@ -55,8 +56,68 @@ public:
     return _matrix_tag_u[tag];
   }
 
-  VariableValue & uDot() { return _u_dot; }
-  VariableValue & duDotDu() { return _du_dot_du; }
+  VariableValue & uDot()
+  {
+    if (_sys.solutionUDot())
+    {
+      _need_u_dot = true;
+      return _u_dot;
+    }
+    else
+      mooseError("MooseVariableScalar: Time derivative of solution (`u_dot`) is not stored. Please "
+                 "set uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+  }
+
+  VariableValue & uDotDot()
+  {
+    if (_sys.solutionUDotDot())
+    {
+      _need_u_dotdot = true;
+      return _u_dotdot;
+    }
+    else
+      mooseError("MooseVariableScalar: Second time derivative of solution (`u_dotdot`) is not "
+                 "stored. Please set uDotDotRequested() to true in FEProblemBase before requesting "
+                 "`u_dotdot`.");
+  }
+
+  VariableValue & uDotOld()
+  {
+    if (_sys.solutionUDotOld())
+    {
+      _need_u_dot_old = true;
+      return _u_dot_old;
+    }
+    else
+      mooseError("MooseVariableScalar: Old time derivative of solution (`u_dot_old`) is not "
+                 "stored. Please set uDotOldRequested() to true in FEProblemBase before requesting "
+                 "`u_dot_old`.");
+  }
+
+  VariableValue & uDotDotOld()
+  {
+    if (_sys.solutionUDotDotOld())
+    {
+      _need_u_dotdot_old = true;
+      return _u_dotdot_old;
+    }
+    else
+      mooseError("MooseVariableScalar: Old second time derivative of solution (`u_dotdot_old`) is "
+                 "not stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+                 "requesting `u_dotdot_old`.");
+  }
+
+  VariableValue & duDotDu()
+  {
+    _need_du_dot_du = true;
+    return _du_dot_du;
+  }
+
+  VariableValue & duDotDotDu()
+  {
+    _need_du_dotdot_du = true;
+    return _du_dotdot_du;
+  }
 
   /**
    * Set the nodal value for this variable (to keep everything up to date
@@ -90,7 +151,18 @@ protected:
   std::vector<bool> _need_matrix_tag_u;
 
   VariableValue _u_dot;
+  VariableValue _u_dotdot;
+  VariableValue _u_dot_old;
+  VariableValue _u_dotdot_old;
   VariableValue _du_dot_du;
+  VariableValue _du_dotdot_du;
+
+  bool _need_u_dot;
+  bool _need_u_dotdot;
+  bool _need_u_dot_old;
+  bool _need_u_dotdot_old;
+  bool _need_du_dot_du;
+  bool _need_du_dotdot_du;
 };
 
 #endif /* MOOSEVARIABLESCALAR_H */

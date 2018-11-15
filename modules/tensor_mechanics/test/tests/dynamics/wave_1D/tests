@@ -34,6 +34,22 @@
                    " in a linear elastic material with both Rayleigh damping and"
                    " numerical damping resulting from Hilber-Hughes-Taylor (HHT) time integration."
   [../]
+  [./rayleigh_hht_ti]
+    type = 'Exodiff'
+    input = 'wave_rayleigh_hht_ti.i'
+    exodiff = 'wave_rayleigh_hht_out.e'
+    abs_zero = 1e-09
+    compiler = 'GCC CLANG'
+
+    allow_warnings = True
+    requirement = "The mechanics system shall correctly predict 1D wave propagation"
+                   " in a linear elastic material with both Rayleigh damping and"
+                   " numerical damping resulting from Hilber-Hughes-Taylor (HHT) time integration"
+                   " when using the velocity and acceleration computed using the Newmark-Beta time"
+                   " integrator."
+    issues = "#12185"
+    prereq = "rayleigh_hht"
+  [../]
   [./rayleigh_newmark]
     type = 'Exodiff'
     input = 'wave_rayleigh_newmark.i'

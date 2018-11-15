@@ -88,8 +88,6 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _current_node(_var.node()),
     _u(_var.dofValues()),
-    _u_dot(_var.dofValuesDot()),
-    _du_dot_du(_var.dofValuesDuDotDu()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 

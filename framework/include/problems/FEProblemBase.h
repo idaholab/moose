@@ -973,17 +973,20 @@ public:
    */
   void execTransfers(ExecFlagType type);
 
-  /// Evaluates transient residual G in canonical semidiscrete form G(t,U,Udot) = F(t,U)
+  /// Evaluates transient residual G in canonical semidiscrete form G(t,U,Udot,Udotdot) = F(t,U)
   void computeTransientImplicitResidual(Real time,
                                         const NumericVector<Number> & u,
                                         const NumericVector<Number> & udot,
+                                        const NumericVector<Number> & udotdot,
                                         NumericVector<Number> & residual);
 
   /// Evaluates transient Jacobian J_a = dG/dU + a*dG/dUdot from canonical semidiscrete form G(t,U,Udot) = F(t,U)
   void computeTransientImplicitJacobian(Real time,
                                         const NumericVector<Number> & u,
                                         const NumericVector<Number> & udot,
-                                        Real shift,
+                                        const NumericVector<Number> & udotdot,
+                                        Real duDotDu_shift,
+                                        Real duDotDotDu_shift,
                                         SparseMatrix<Number> & jacobian);
 
   ////
@@ -1550,6 +1553,54 @@ public:
    */
   bool usingAD() const { return _using_ad; }
 
+  /// Set boolean flag to true to store solution time derivative
+  virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; };
+
+  /// Set boolean flag to true to store solution second time derivative
+  virtual void setUDotDotRequested(const bool u_dotdot_requested)
+  {
+    _u_dotdot_requested = u_dotdot_requested;
+  };
+
+  /// Set boolean flag to true to store old solution time derivative
+  virtual void setUDotOldRequested(const bool u_dot_old_requested)
+  {
+    _u_dot_old_requested = u_dot_old_requested;
+  };
+
+  /// Set boolean flag to true to store old solution second time derivative
+  virtual void setUDotDotOldRequested(const bool u_dotdot_old_requested)
+  {
+    _u_dotdot_old_requested = u_dotdot_old_requested;
+  };
+
+  /// Get boolean flag to check whether solution time derivative needs to be stored
+  virtual bool uDotRequested() { return _u_dot_requested; };
+
+  /// Get boolean flag to check whether solution second time derivative needs to be stored
+  virtual bool uDotDotRequested() { return _u_dotdot_requested; };
+
+  /// Get boolean flag to check whether old solution time derivative needs to be stored
+  virtual bool uDotOldRequested()
+  {
+    if (_u_dot_old_requested && !_u_dot_requested)
+      mooseError("FEProblemBase: When requesting old time derivative of solution, current time "
+                 "derivative of solution should also be stored. Please set `u_dot_requested` to "
+                 "true using setUDotRequested.");
+
+    return _u_dot_old_requested;
+  };
+
+  /// Get boolean flag to check whether old solution second time derivative needs to be stored
+  virtual bool uDotDotOldRequested()
+  {
+    if (_u_dotdot_old_requested && !_u_dotdot_requested)
+      mooseError("FEProblemBase: When requesting old second time derivative of solution, current "
+                 "second time derivation of solution should also be stored. Please set "
+                 "`u_dotdot_requested` to true using setUDotDotRequested.");
+    return _u_dotdot_old_requested;
+  };
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -1862,6 +1913,18 @@ private:
   const PerfID _update_geometric_search_timer;
   const PerfID _exec_multi_apps_timer;
   const PerfID _backup_multi_apps_timer;
+
+  /// Whether solution time derivative needs to be stored
+  bool _u_dot_requested;
+
+  /// Whether solution second time derivative needs to be stored
+  bool _u_dotdot_requested;
+
+  /// Whether old solution time derivative needs to be stored
+  bool _u_dot_old_requested;
+
+  /// Whether old solution second time derivative needs to be stored
+  bool _u_dotdot_old_requested;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

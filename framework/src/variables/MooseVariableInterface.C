@@ -142,6 +142,36 @@ MooseVariableInterface<T>::dot()
     return _variable->uDot();
 }
 
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::dotDot()
+{
+  if (_nodal)
+    return _variable->dofValuesDotDot();
+  else
+    return _variable->uDotDot();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::dotOld()
+{
+  if (_nodal)
+    return _variable->dofValuesDotOld();
+  else
+    return _variable->uDotOld();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::dotDotOld()
+{
+  if (_nodal)
+    return _variable->dofValuesDotDotOld();
+  else
+    return _variable->uDotDotOld();
+}
+
 template <>
 const VectorVariableValue &
 MooseVariableInterface<RealVectorValue>::dot()
@@ -152,6 +182,36 @@ MooseVariableInterface<RealVectorValue>::dot()
     return _variable->uDot();
 }
 
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::dotDot()
+{
+  if (_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->uDotDot();
+}
+
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::dotOld()
+{
+  if (_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->uDotOld();
+}
+
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::dotDotOld()
+{
+  if (_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->uDotDotOld();
+}
+
 template <typename T>
 const VariableValue &
 MooseVariableInterface<T>::dotDu()
@@ -160,6 +220,16 @@ MooseVariableInterface<T>::dotDu()
     return _variable->dofValuesDuDotDu();
   else
     return _variable->duDotDu();
+}
+
+template <typename T>
+const VariableValue &
+MooseVariableInterface<T>::dotDotDu()
+{
+  if (_nodal)
+    return _variable->dofValuesDuDotDotDu();
+  else
+    return _variable->duDotDotDu();
 }
 
 template <typename T>

@@ -12,6 +12,22 @@
     design = "Dynamics.md"
     issues = "#5559"
   [../]
+  [./hht_ti]
+    type = 'Exodiff'
+    input = 'rayleigh_hht_ti.i'
+    exodiff = 'rayleigh_hht_out.e'
+    abs_zero = 1e-09
+    compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system with both Rayleigh damping and numerical"
+                  " damping resulting from Hilber-Hughes-Taylor (HHT) time integration"
+                  " when using the velocity and acceleration computed using the Newmark-Beta"
+                  " time integrator."
+    design = "Dynamics.md"
+    issues = "#12185"
+    prereq = "hht"
+  [../]
   [./newmark]
     type = 'Exodiff'
     input = 'rayleigh_newmark.i'

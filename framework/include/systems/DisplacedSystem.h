@@ -82,11 +82,18 @@ public:
 
   virtual NumericVector<Number> & solution() override { return _undisplaced_system.solution(); }
 
-  virtual NumericVector<Number> & solutionUDot() override
+  virtual NumericVector<Number> * solutionUDot() override
   {
     return _undisplaced_system.solutionUDot();
   }
+
+  virtual NumericVector<Number> * solutionUDotDot() override
+  {
+    return _undisplaced_system.solutionUDotDot();
+  }
+
   virtual Number & duDotDu() override { return _undisplaced_system.duDotDu(); }
+  virtual Number & duDotDotDu() override { return _undisplaced_system.duDotDotDu(); }
 
   /**
    * Return the residual copy from the NonlinearSystem
@@ -154,6 +161,16 @@ public:
   virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
 
   virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+
+  virtual NumericVector<Number> * solutionUDotOld() override
+  {
+    return _undisplaced_system.solutionUDotOld();
+  }
+
+  virtual NumericVector<Number> * solutionUDotDotOld() override
+  {
+    return _undisplaced_system.solutionUDotDotOld();
+  }
 
   virtual NumericVector<Number> * solutionPreviousNewton() override { return NULL; }
 

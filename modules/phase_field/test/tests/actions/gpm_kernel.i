@@ -58,6 +58,13 @@
   [../]
 []
 
+[AuxKernels]
+  [./bnds_aux]
+    type = BndsCalcAux
+    variable = bnds
+  [../]
+[]
+
 [Modules]
   [./PhaseField]
     [./GrandPotential]
@@ -80,13 +87,6 @@
       kappa_op = kappa
       free_energies_op = 'omegab omegam'
     [../]
-  [../]
-[]
-
-[AuxKernels]
-  [./bnds_aux]
-    type = BndsCalcAux
-    variable = bnds
   [../]
 []
 

@@ -24,6 +24,8 @@
     family = LAGRANGE_VEC
     order = FIRST
   [../]
+  [./q]
+  [../]
 []
 
 [Kernels]
@@ -59,6 +61,10 @@
     variable = s
     v = u
     state = older
+  [../]
+  [./q_diff]
+    type = Diffusion
+    variable = q
   [../]
 []
 
@@ -115,6 +121,18 @@
     x_exact_soln = 'x_exact_older'
     y_exact_soln = 'y_exact_older'
   [../]
+  [./left_q]
+    type = DirichletBC
+    variable = q
+    boundary = 'left'
+    value = 1
+  [../]
+  [./right_q]
+    type = NeumannBC
+    variable = q
+    boundary = 'right'
+    value = 1
+  [../]
 []
 
 [Functions]
@@ -157,8 +175,10 @@
   num_steps = 3
   solve_type = 'NEWTON'
   petsc_options = '-ksp_converged_reason -snes_converged_reason'
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '100'
   nl_max_its = 3
-  l_max_its = 20
+  l_max_its = 100
   dtmin = 1
 []
 

@@ -26,7 +26,10 @@ validParams<TimeNodalKernel>()
   return params;
 }
 
-TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters) : NodalKernel(parameters) {}
+TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters)
+  : NodalKernel(parameters), _u_dot(_var.dofValuesDot()), _du_dot_du(_var.dofValuesDuDotDu())
+{
+}
 
 void
 TimeNodalKernel::computeResidual()

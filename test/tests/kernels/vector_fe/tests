@@ -4,6 +4,9 @@
     input = 'vector_kernel.i'
     exodiff = 'vector_kernel_out.e'
     abs_zero = 1e-8
+    design = "moose_variables.md"
+    issues = "#10049"
+    requirement = "MOOSE shall be able to solve a curl-curl problem using NEDELEC_ONE elements"
   [../]
   [./coupled_scalar_vector]
     type = Exodiff
@@ -11,12 +14,18 @@
     exodiff = 'coupled_scalar_vector_out.e'
     abs_zero = 6e-8
     rel_err = 3e-5
+    design = "moose_variables.md"
+    issues = "#10049"
+    requirement = "MOOSE shall be able to couple a vector variable into a standard kernel"
   [../]
   [./lagrange_vec]
     type = Exodiff
     input = 'lagrange_vec.i'
     exodiff = 'lagrange_vec_out.e'
     abs_zero = 1e-8
+    design = "moose_variables.md"
+    issues = "#10049"
+    requirement = "MOOSE shall be able to solve multi-dimensional problems with LAGRANGE_VEC variables"
   [../]
   [./jacobian]
     type = PetscJacobianTester
@@ -25,6 +34,9 @@
     state = 'const_positive'
     ratio_tol = 1e-7
     difference_tol = 5e-6
+    design = "moose_variables.md"
+    issues = "#10049"
+    requirement = "MOOSE shall be able to couple a vector variable into a standard kernel and produced the correct Jacobian"
   [../]
   [./coupled_gradient_dot_em_gauge]
     type = Exodiff
@@ -32,6 +44,9 @@
     exodiff = 'electromagnetic_coulomb_gauge_out.e'
     abs_zero = 6e-8
     rel_err = 3e-5
+    design = "moose_variables.md VectorBodyForce.md"
+    issues = "#10861"
+    requirement = "MOOSE shall be able to couple a standard variable into a vector kernel. Additionally, MOOSE shall be able to calculate time derivatives of variable gradients."
   [../]
   [./coupled_gradient_dot_jacobian]
     type = PetscJacobianTester
@@ -41,10 +56,16 @@
     ratio_tol = 1e-7
     difference_tol = 5e-6
     cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false Executioner/num_steps=1'
+    design = "moose_variables.md VectorBodyForce.md"
+    issues = "#10861"
+    requirement = "MOOSE shall be able to compute the correct Jacobian when coupling a standard variable into a vector kernel and taking time derivatives of variable gradients."
   [../]
   [./coupled_vector_gradient]
     type = Exodiff
     input = 'coupled_vector_gradient.i'
     exodiff = 'coupled_vector_gradient_out.e'
+    design = "moose_variables.md VectorDiffusion.md LagrangeVecDirichletBC.md LagrangeVecFunctionDirichletBC.md"
+    issues = "#11150"
+    requirement = "1) MOOSE shall be able to asign dirichlet boundary conditions for LAGRANGE_VEC variables 2) MOOSE shall be able to obtain coupled vector variable gradients 3) MOOSE shall correctly initialize both volume and face curl shape functions when the curl of a variable is requested"
   [../]
 []

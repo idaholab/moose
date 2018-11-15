@@ -45,8 +45,11 @@ protected:
 
   /**
    * Helper function for models that compute the eigenstrain based on a volumetric
-   * strain.  This function computes the diagonal components of the eigenstrain tensor.
-   * param volumetric_strain The current volumetric strain to be applied
+   * strain.  This function computes the diagonal components of the eigenstrain tensor
+   * as logarithmic strains.
+   * @param volumetric_strain The current volumetric strain to be applied
+   * @return Current strain in one direction due to volumetric strain, expressed as a logarithmic
+   * strain
    */
   Real computeVolumetricStrainComponent(const Real volumetric_strain) const;
 

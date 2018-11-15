@@ -29,7 +29,6 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
         {"max_principal", {"MaxPrincipal", {"stress"}}},
         {"mid_principal", {"MidPrincipal", {"stress"}}},
         {"min_principal", {"MinPrincipal", {"stress"}}},
-        {"effective", {"EffectiveStrain", {"plastic_strain", "creep_strain"}}},
         {"firstinv", {"FirstInvariant", {"stress", "strain"}}},
         {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
         {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}}};

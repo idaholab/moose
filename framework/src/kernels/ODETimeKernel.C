@@ -26,7 +26,10 @@ validParams<ODETimeKernel>()
   return params;
 }
 
-ODETimeKernel::ODETimeKernel(const InputParameters & parameters) : ODEKernel(parameters) {}
+ODETimeKernel::ODETimeKernel(const InputParameters & parameters)
+  : ODEKernel(parameters), _u_dot(_var.uDot()), _du_dot_du(_var.duDotDu())
+{
+}
 
 void
 ODETimeKernel::computeResidual()

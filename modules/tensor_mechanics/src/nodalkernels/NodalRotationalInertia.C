@@ -23,15 +23,15 @@ template <>
 InputParameters
 validParams<NodalRotationalInertia>()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = validParams<TimeNodalKernel>();
   params.addClassDescription("Calculates the inertial torques and inertia proportional damping "
                              "corresponding to the nodal rotational inertia.");
-  params.addRequiredCoupledVar("rotations", "rotational displacement variables");
-  params.addRequiredCoupledVar("rotational_velocities", "rotational velocity variables");
-  params.addRequiredCoupledVar("rotational_accelerations", "rotational acceleration variables");
-  params.addRequiredRangeCheckedParam<Real>(
+  params.addCoupledVar("rotations", "rotational displacement variables");
+  params.addCoupledVar("rotational_velocities", "rotational velocity variables");
+  params.addCoupledVar("rotational_accelerations", "rotational acceleration variables");
+  params.addRangeCheckedParam<Real>(
       "beta", "beta>0.0", "beta parameter for Newmark Time integration");
-  params.addRequiredRangeCheckedParam<Real>(
+  params.addRangeCheckedParam<Real>(
       "gamma", "gamma>0.0", "gamma parameter for Newmark Time integration");
   params.addRangeCheckedParam<Real>("eta",
                                     0.0,
@@ -66,8 +66,7 @@ validParams<NodalRotationalInertia>()
 }
 
 NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameters)
-  : NodalKernel(parameters),
-    _aux_sys(_fe_problem.getAuxiliarySystem()),
+  : TimeNodalKernel(parameters),
     _nrot(coupledComponents("rotations")),
     _rot(_nrot),
     _rot_old(_nrot),
@@ -77,32 +76,62 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _rot_accel(_nrot),
     _rot_vel(_nrot),
     _rot_vel_old(_nrot),
-    _beta(getParam<Real>("beta")),
-    _gamma(getParam<Real>("gamma")),
+    _beta(isParamValid("beta") ? getParam<Real>("beta") : 0.1),
+    _gamma(isParamValid("gamma") ? getParam<Real>("gamma") : 0.1),
     _eta(getParam<Real>("eta")),
     _alpha(getParam<Real>("alpha")),
-    _component(getParam<unsigned int>("component"))
+    _component(getParam<unsigned int>("component")),
+    _rot_vel_value(_nrot),
+    _rot_vel_old_value(_nrot),
+    _rot_accel_value(_nrot)
 {
-  if (coupledComponents("rotational_velocities") != _nrot ||
-      coupledComponents("rotational_accelerations") != _nrot)
-    mooseError("NodalRotationalInertia: rotational_velocities and rotational_accelerations should "
-               "be same size "
-               "as rotations.");
-
-  for (unsigned int i = 0; i < _nrot; ++i)
+  if (isParamValid("beta") && isParamValid("gamma") && isParamValid("rotational_velocities") &&
+      isParamValid("rotational_accelerations"))
   {
-    MooseVariable * rot_var = getVar("rotations", i);
-    MooseVariable * rot_vel_var = getVar("rotational_velocities", i);
-    MooseVariable * rot_accel_var = getVar("rotational_accelerations", i);
+    _aux_sys = &(_fe_problem.getAuxiliarySystem());
+    if (coupledComponents("rotational_velocities") != _nrot ||
+        coupledComponents("rotational_accelerations") != _nrot)
+      mooseError(
+          "NodalRotationalInertia: rotational_velocities and rotational_accelerations should "
+          "be same size "
+          "as rotations.");
 
-    _rot[i] = &rot_var->dofValues();
-    _rot_old[i] = &rot_var->dofValuesOld();
+    for (unsigned int i = 0; i < _nrot; ++i)
+    {
+      MooseVariable * rot_var = getVar("rotations", i);
+      MooseVariable * rot_vel_var = getVar("rotational_velocities", i);
+      MooseVariable * rot_accel_var = getVar("rotational_accelerations", i);
 
-    _rot_vel_num[i] = rot_vel_var->number();
-    _rot_accel_num[i] = rot_accel_var->number();
+      _rot[i] = &rot_var->dofValues();
+      _rot_old[i] = &rot_var->dofValuesOld();
 
-    _rot_variables[i] = coupled("rotations", i);
+      _rot_vel_num[i] = rot_vel_var->number();
+      _rot_accel_num[i] = rot_accel_var->number();
+
+      _rot_variables[i] = coupled("rotations", i);
+    }
   }
+  else if (!isParamValid("beta") && !isParamValid("gamma") &&
+           !isParamValid("rotational_velocities") && !isParamValid("rotational_accelerations"))
+  {
+    for (unsigned int i = 0; i < _nrot; ++i)
+    {
+      MooseVariable * rot_var = getVar("rotations", i);
+      _rot_vel_value[i] = &rot_var->dofValuesDot();
+      _rot_vel_old_value[i] = &rot_var->dofValuesDotOld();
+      _rot_accel_value[i] = &rot_var->dofValuesDotDot();
+
+      if (i == 0)
+      {
+        _du_dot_du = &rot_var->dofValuesDuDotDu();
+        _du_dotdot_du = &rot_var->dofValuesDuDotDotDu();
+      }
+    }
+  }
+  else
+    mooseError("NodalRotationalInertia: Either all or none of `beta`, `gamma`, "
+               "`rotational_velocities` and `rotational_accelerations` should be provided as "
+               "input.");
 
   // Store inertia values in inertia tensor
   _inertia.zero();
@@ -173,30 +202,43 @@ NodalRotationalInertia::computeQpResidual()
     return 0;
   else
   {
-    const NumericVector<Number> & aux_sol_old = _aux_sys.solutionOld();
-
-    mooseAssert(_beta > 0.0, "NodalRotationalInertia: Beta parameter should be positive.");
-
-    for (unsigned int i = 0; i < _nrot; ++i)
+    if (isParamValid("beta"))
     {
-      _rot_vel_old[i] =
-          aux_sol_old(_current_node->dof_number(_aux_sys.number(), _rot_vel_num[i], 0));
-      const Real rot_accel_old =
-          aux_sol_old(_current_node->dof_number(_aux_sys.number(), _rot_accel_num[i], 0));
+      mooseAssert(_beta > 0.0, "NodalRotationalInertia: Beta parameter should be positive.");
 
-      _rot_accel[i] = 1.0 / _beta *
-                      ((((*_rot[i])[_qp] - (*_rot_old[i])[_qp]) / (_dt * _dt)) -
-                       _rot_vel_old[i] / _dt - rot_accel_old * (0.5 - _beta));
-      _rot_vel[i] =
-          _rot_vel_old[i] + (_dt * (1.0 - _gamma)) * rot_accel_old + _gamma * _dt * _rot_accel[i];
+      const NumericVector<Number> & aux_sol_old = _aux_sys->solutionOld();
+
+      for (unsigned int i = 0; i < _nrot; ++i)
+      {
+        _rot_vel_old[i] =
+            aux_sol_old(_current_node->dof_number(_aux_sys->number(), _rot_vel_num[i], 0));
+        const Real rot_accel_old =
+            aux_sol_old(_current_node->dof_number(_aux_sys->number(), _rot_accel_num[i], 0));
+
+        _rot_accel[i] = 1.0 / _beta *
+                        ((((*_rot[i])[_qp] - (*_rot_old[i])[_qp]) / (_dt * _dt)) -
+                         _rot_vel_old[i] / _dt - rot_accel_old * (0.5 - _beta));
+        _rot_vel[i] =
+            _rot_vel_old[i] + (_dt * (1.0 - _gamma)) * rot_accel_old + _gamma * _dt * _rot_accel[i];
+      }
+
+      Real res = 0.0;
+      for (unsigned int i = 0; i < _nrot; ++i)
+        res += _inertia(_component, i) * (_rot_accel[i] + _rot_vel[i] * _eta * (1.0 + _alpha) -
+                                          _alpha * _eta * _rot_vel_old[i]);
+
+      return res;
     }
+    else
+    {
+      Real res = 0.0;
+      for (unsigned int i = 0; i < _nrot; ++i)
+        res += _inertia(_component, i) *
+               ((*_rot_accel_value[i])[_qp] + (*_rot_vel_value[i])[_qp] * _eta * (1.0 + _alpha) -
+                _alpha * _eta * (*_rot_vel_old_value[i])[_qp]);
 
-    Real res = 0.0;
-    for (unsigned int i = 0; i < _nrot; ++i)
-      res += _inertia(_component, i) * (_rot_accel[i] + _rot_vel[i] * _eta * (1.0 + _alpha) -
-                                        _alpha * _eta * _rot_vel_old[i]);
-
-    return res;
+      return res;
+    }
   }
 }
 
@@ -208,8 +250,14 @@ NodalRotationalInertia::computeQpJacobian()
   if (_dt == 0)
     return 0.0;
   else
-    return _inertia(_component, _component) / (_beta * _dt * _dt) +
-           _eta * (1.0 + _alpha) * _inertia(_component, _component) * _gamma / _beta / _dt;
+  {
+    if (isParamValid("beta"))
+      return _inertia(_component, _component) / (_beta * _dt * _dt) +
+             _eta * (1.0 + _alpha) * _inertia(_component, _component) * _gamma / _beta / _dt;
+    else
+      return _inertia(_component, _component) * (*_du_dotdot_du)[_qp] +
+             _eta * (1.0 + _alpha) * _inertia(_component, _component) * (*_du_dot_du)[_qp];
+  }
 }
 
 Real
@@ -233,8 +281,14 @@ NodalRotationalInertia::computeQpOffDiagJacobian(unsigned int jvar)
   if (_dt == 0)
     return 0.0;
   else if (rot_coupled)
-    return _inertia(_component, coupled_component) / (_beta * _dt * _dt) +
-           _eta * (1.0 + _alpha) * _inertia(_component, coupled_component) * _gamma / _beta / _dt;
+  {
+    if (isParamValid("beta"))
+      return _inertia(_component, coupled_component) / (_beta * _dt * _dt) +
+             _eta * (1.0 + _alpha) * _inertia(_component, coupled_component) * _gamma / _beta / _dt;
+    else
+      return _inertia(_component, coupled_component) * (*_du_dotdot_du)[_qp] +
+             _eta * (1.0 + _alpha) * _inertia(_component, coupled_component) * (*_du_dot_du)[_qp];
+  }
   else
     return 0.0;
 }
