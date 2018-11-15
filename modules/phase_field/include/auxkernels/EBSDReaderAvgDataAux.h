@@ -34,7 +34,13 @@ protected:
   virtual Real computeValue();
   virtual void precalculateValue();
 
+  /// Optional phase number needed for global grain index retrieval
+  const unsigned int _phase;
+
+  /// EBSD reader user object
   const EBSDReader & _ebsd_reader;
+
+  /// Grain tracker user object
   const GrainTrackerInterface & _grain_tracker;
 
   /// MooseEnum that stores the type of data this AuxKernel extracts.

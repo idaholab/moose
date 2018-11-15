@@ -11,6 +11,7 @@
 #define EULERANGLEPROVIDER2RGBAUX_H
 
 #include "AuxKernel.h"
+#include "EBSDReader.h"
 #include "EulerAngleProvider.h"
 #include "GrainTracker.h"
 
@@ -29,10 +30,14 @@ class EulerAngleProvider2RGBAux : public AuxKernel
 {
 public:
   EulerAngleProvider2RGBAux(const InputParameters & parameters);
+  virtual unsigned int getNumGrains() const;
 
 protected:
   virtual Real computeValue();
   virtual void precalculateValue();
+
+  /// Optional phase number needed for global grain index retrieval
+  const unsigned int _phase;
 
   /// Reference direction of the sample
   const unsigned int _sd;
@@ -45,6 +50,9 @@ protected:
 
   /// Object providing the Euler angles
   const EulerAngleProvider & _euler;
+
+  /// EBSDReader Object
+  const EBSDReader * _ebsd_reader;
 
   /// Grain tracker object
   const GrainTracker & _grain_tracker;
