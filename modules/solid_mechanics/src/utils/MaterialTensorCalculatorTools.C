@@ -71,7 +71,8 @@ volumetricStrain(const SymmTensor & symm_strain)
 {
   // Since the strains are logarithmic strains, which are by definition log(L/L0),
   // exp(log_strain) = L/L0
-  // The ratio of the volume of a strained cube to the original volume is thus:
+  // The ratio of the volume change of a strained cube to the original volume
+  // (delta V / V) is thus:
   // exp(log_strain_11) * exp(log_strain_22) * exp(log_strain_33) - 1
   //
   // Since eng_strain = exp(log_strain) - 1, the equivalent calculation using
