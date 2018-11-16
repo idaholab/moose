@@ -115,5 +115,6 @@
     max_parallel = 1
     max_threads  = 1
     threading = '!pthreads'
+    skip = '#12505"
   [../]
 []
