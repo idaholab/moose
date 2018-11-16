@@ -39,6 +39,7 @@
     input = 'inclusion.i'
     exodiff = 'inclusion_out.e'
     fparser_jit = True
+    abs_zero = 1e-8
     issues = '#7452'
     design = 'ComputeVariableEigenstrain.md InclusionProperties.md'
     requirement = "The InclusionProperties material, in conjunction with the ComputeVariableEigenstrain material, shall correctly compute the in-plane dilitational eigenstrains resulting from an ellipsoidal inclusion."
