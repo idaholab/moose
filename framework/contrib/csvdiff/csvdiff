@@ -70,37 +70,38 @@ class CSVTools:
         return table_pair
 
     def parseComparisonFile(self, config_file):
-        """ Walk through comparison file and populate/return a dictionary """
-        # A set of known paramater naming conventions
-        important_params = set(['floor', 'relative', 'abs_zero', 'absolute'])
-        custom_params = {}
+        """ Walk through comparison file and populate/return a dictionary as best we can """
+        # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
+        zero_params = set(['floor', 'abs_zero', 'absolute'])
+        tollerance_params = set(['relative', 'rel_tol'])
+
+        custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : [] }
         config_text = config_file.read()
+        line_settings = ''.join(re.findall(r"[^#]*", config_text)).split('\n')
 
-        global_settings = re.findall(r"^(?![#|\n])(\S.*\n\s*$)", config_text, re.MULTILINE)
-        config_settings = re.findall(r"^(?![#|\n])(.*\W(\t.*(\n|$))+)", config_text, re.MULTILINE)
+        for a_line in line_settings:
+            # Ignore TIME STEPS header (future csvdiff capability)
+            if a_line and a_line.lower().find('time steps') == 0:
+                continue
 
-        # Build params dictionary
-        for settings in [global_settings, config_settings]:
-            for config_line in settings:
-                if type(config_line) == type(()):
-                    config_line = config_line[0].lower()
-                else:
-                    config_line = config_line.lower()
+            # This is the important line we were looking for, containing some default paramaters
+            if a_line and (set(a_line.split()).intersection(tollerance_params) or
+                           set(a_line.split()).intersection(zero_params)):
+                # populate important paramaters (floor, rel_tol, etc)
+                for param in set(a_line.split()).intersection(tollerance_params):
+                    custom_params['RELATIVE'] = re.findall(param + "\s+([0-9e.-]+)", a_line)[0]
+                for param in set(a_line.split()).intersection(zero_params):
+                    custom_params['ZERO'] = re.findall(param + "\s+([0-9e.-]+)", a_line)[0]
 
-                # Find global params
-                if set(config_line.split()).intersection(important_params):
-                    custom_key = config_line[0:min(i for i in [config_line.find(x) for x in important_params] if i > 0) - 1]
-                    custom_params[custom_key] = { 'variables' : {}}
+            # A line starting with a white-space character, with a possible tollerance value
+            elif a_line and (re.findall(r'\s', a_line[0]) and len(a_line.split()) >= 2):
+                field = a_line.split()[0]
+                try:
+                    val = float(a_line.split()[1])
+                except ValueError:
+                    val = custom_params['RELATIVE']
 
-
-                    for param in set(config_line.split()).intersection(important_params):
-                        custom_params[custom_key][param] = re.findall(param + "\s+([0-9e.-]+)", config_line)[0]
-
-                    # Find fields possibly contained within global params
-                    for field in config_line.split('\n')[1:]:
-                        if field:
-                            (id_field, rel_tol) = re.findall(r"(\S+)\s+(\S+|.*).*#", field)[0]
-                            custom_params[custom_key]['variables'][id_field] = rel_tol
+                custom_params['FIELDS'].append((field, val))
 
         return custom_params
 
@@ -127,17 +128,29 @@ class CSVSummary(CSVTools):
     def summary(self):
         """ Parse the CSV file and generate a summary """
         table1 = self.convertToTable(self.files)[0]
+        formatted_messages = ['Value Tollerances relative 1.e-6 floor 0.0']
 
-        # Simulate the format of exodiff's summary
-        formatted_messages = ['NODAL VARIABLES relative 1.e-6 floor 0.0']
+        field_len = []
+        value_len = []
+        for field, value in table1.iteritems():
+            field_len.append(len(field))
+            value_len.append(len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)) + 1)))
+
+        field_justify = max(field_len) + 10
+        value_justify = max(value_len) + 5
 
         for field, value in table1.iteritems():
             if field == 'time':
                 formatted_messages.insert(0, 'TIME STEPS relative 1.e-6 floor 0.0  # min: %d @ t%d  max: %d @ t%d\n' % \
                                           ( min(value), value.index(min(value)) + 1, max(value), value.index(max(value)) + 1 ))
-            else:
-                formatted_messages.append('\t%s\t\t# min: %.3e @ t%d\t\tmax: %.3e @ t%d' % \
-                                          (field, Decimal(min(value)), value.index(min(value)) + 1, Decimal(max(value)), value.index(max(value)) + 1 ))
+
+            formatted_messages.append('%s%s%s# min: %.3e @ t%d%smax: %.3e @ t%d' % \
+                                      (" "*4,
+                                       field,
+                                       " "*((field_justify - len(field)) + 10),
+                                       Decimal(min(value)), value.index(min(value)) + 1,
+                                       " "*((value_justify - len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)) + 1))) + 5),
+                                       Decimal(max(value)), value.index(max(value)) + 1 ))
 
         self.addMessage('\n'.join(formatted_messages))
         return self.getMessages()
@@ -147,8 +160,8 @@ class CSVDiffer(CSVTools):
         CSVTools.__init__(self)
         self.files = args.csv_file
         self.config = args.comparison_file
-        self.abs_zero = float(str(args.abs_zero[0]))
-        self.rel_tol = float(str(args.relative_tolerance[0]))
+        self.abs_zero = float(str(args.abs_zero))
+        self.rel_tol = float(str(args.relative_tolerance))
         self.custom_columns = args.custom_columns
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
@@ -162,7 +175,7 @@ class CSVDiffer(CSVTools):
             a_file.close()
 
         if self.config:
-            self.config[0].close()
+            self.config.close()
 
     # diff the files added to the system and return a message of differences
     # This method should only be called once. If it called again you must
@@ -174,19 +187,15 @@ class CSVDiffer(CSVTools):
         # --config to be used together anyway)
         if self.config:
             self.only_compare_custom = True
-            custom_params = self.parseComparisonFile(self.config[0])
+            custom_params = self.parseComparisonFile(self.config)
             self.custom_columns = []
             self.custom_rel_err = []
             self.custom_abs_zero = []
 
-            # CSVDiff is only interested in Nodal Variables
-            for field_id, value in custom_params['nodal variables']['variables'].iteritems():
+            for field_id, value in custom_params['FIELDS']:
                 self.custom_columns.append(field_id)
-                self.custom_abs_zero.append(custom_params['nodal variables']['floor'])
-                if value:
-                    self.custom_rel_err.append(value)
-                else:
-                    self.custom_rel_err.append(custom_params['nodal variables']['relative'])
+                self.custom_abs_zero.append(custom_params['ZERO'])
+                self.custom_rel_err.append(value)
 
         # Setup data structures for holding customized relative tolerance and absolute
         # zero values and flag for checking variable names
@@ -198,7 +207,6 @@ class CSVDiffer(CSVTools):
                 rel_err_map[self.custom_columns[i]] = float(self.custom_rel_err[i])
                 abs_zero_map[self.custom_columns[i]] = float(self.custom_abs_zero[i])
                 found_column[self.custom_columns[i]] = False
-
 
         # use this value to skip the rest of the tests when we've found an error
         # the order of the tests is most general to most specific, so if a general
@@ -244,7 +252,7 @@ class CSVDiffer(CSVTools):
                 break
 
         if self.getNumErrors():
-            return self.msg
+            return self.getMessages()
 
         # now check all the values in the table
         abs_zero = self.abs_zero
@@ -287,7 +295,7 @@ class CSVDiffer(CSVTools):
                     except:
                         rel_tol = self.rel_tol
                 if rel_diff > rel_tol:
-                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" don't match\n\trel diff:  " + str(val1) + " ~ " + str(val2) + " = " + str(rel_diff))
+                    self.addError(self.files[0], "The values in column \"" + key.strip() + "\" don't match\n\trel diff:  " + str(val1) + " ~ " + str(val2) + " = " + str(rel_diff) + "  # %.3e" % (Decimal(rel_diff)))
                     # assume all other vals in this column are wrong too, so don't report them
                     break
 
@@ -336,11 +344,11 @@ def parseArgs(args=None):
     parser = argparse.ArgumentParser(description='Tool for testing differences between two CSV files')
     parser.add_argument('csv_file', nargs='*', type=argparse.FileType('r'))
     parser.add_argument('--summary', '-s', nargs=1, type=argparse.FileType('r'), metavar='csv_file', help='Produce a summary in csvdiff input format')
-    parser.add_argument('--comparison-file', '-c', nargs=1, type=argparse.FileType('r'), metavar='comparison_file', help='Use comparison configuration file (can be generated using --summary|-s)')
+    parser.add_argument('--comparison-file', '-c', type=argparse.FileType('r'), metavar='comparison_file', help='Use comparison configuration file (can be generated using --summary|-s)')
     parser.add_argument('--ignore-fields', '-i', nargs='+', metavar='id', help='Ignore specified space-separated field IDs')
     parser.add_argument('--diff-fields', '-f', nargs='+', metavar='id', help='Perform diff tests only on space-separated field IDs')
-    parser.add_argument('--abs-zero', nargs=1, metavar='absolute zero', default='1e-11', help='Exponential expression representing zero (default: 1e-11)')
-    parser.add_argument('--relative-tolerance', nargs=1, metavar='tolerance', default='5.5e-6', help='Exponential expression representing the acceptable tolerance between comparisons (default: 5.5e-6)')
+    parser.add_argument('--abs-zero', metavar='absolute zero', default='1e-11', help='Exponential expression representing zero (default: 1e-11)')
+    parser.add_argument('--relative-tolerance', metavar='tolerance', default='5.5e-6', help='Exponential expression representing the acceptable tolerance between comparisons (default: 5.5e-6)')
     parser.add_argument('--only-compare-custom', action='store_const', const=True, default=False, help='If using --custom-* options, ignore every field except those specified in --custom-columns')
     parser.add_argument('--custom-columns', nargs='+', metavar='field', help='Space separated list of custom field IDs to compare')
     parser.add_argument('--custom-abs-zero', nargs='+', metavar='exponential', help='Space separated list of corresponding exponential absolute zero values for --custom-colums')
