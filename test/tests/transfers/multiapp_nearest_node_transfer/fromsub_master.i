@@ -13,19 +13,29 @@
   [../]
 []
 
-[AuxVariables]
-  [./from_sub]
-  [../]
-  [./elemental_from_sub]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = Diffusion
     variable = u
+  [../]
+[]
+
+[AuxVariables]
+  [./nodal_source_from_sub_nodal]
+    family = LAGRANGE
+    order = FIRST
+  [../]
+  [./nodal_source_from_sub_elemental]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./elemental_source_from_sub_nodal]
+    family = LAGRANGE
+    order = FIRST
+  [../]
+  [./elemental_source_from_sub_elemental]
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 
@@ -63,24 +73,38 @@
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    positions = '0.48 0 0 -1.01 0 0'
-    input_files = tosub_sub.i
+    positions = '0.48 0.01 0 -1.01 0.01 0'
+    input_files = fromsub_sub.i
   [../]
 []
 
 [Transfers]
-  [./from_sub]
+  [./from_sub_nodal_from_nodal]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
     multi_app = sub
     source_variable = u
-    variable = from_sub
+    variable = nodal_source_from_sub_nodal
   [../]
-  [./elemental_from_sub]
+  [./from_sub_nodal_from_elemental]
     type = MultiAppNearestNodeTransfer
     direction = from_multiapp
     multi_app = sub
     source_variable = u
-    variable = elemental_from_sub
+    variable = nodal_source_from_sub_elemental
+  [../]
+  [./from_sub_elemental_from_nodal]
+    type = MultiAppNearestNodeTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = u_elemental
+    variable = elemental_source_from_sub_nodal
+  [../]
+  [./from_sub_elemental_from_elemental]
+    type = MultiAppNearestNodeTransfer
+    direction = from_multiapp
+    multi_app = sub
+    source_variable = u_elemental
+    variable = elemental_source_from_sub_elemental
   [../]
 []

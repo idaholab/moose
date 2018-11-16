@@ -20,6 +20,21 @@
   [../]
 []
 
+[AuxVariables]
+  [./u_elemental]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./fun_aux]
+    type = FunctionAux
+    function = 'x + y'
+    variable = u_elemental
+  [../]
+[]
+
 [BCs]
   [./left]
     type = DirichletBC
@@ -55,24 +70,38 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     execute_on = timestep_end
-    positions = '0.48 0 0'
+    positions = '0.48 0.01 0'
     input_files = tosub_sub.i
   [../]
 []
 
 [Transfers]
-  [./to_sub]
+  [./to_sub_nodal_to_nodal]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
-    variable = from_master
+    variable = nodal_source_from_master_nodal
   [../]
-  [./elemental_to_sub]
+  [./to_sub_nodal_to_elemental]
     type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = u
-    variable = elemental_from_master
+    variable = nodal_source_from_master_elemental
+  [../]
+  [./to_sub_elemental_to_nodal]
+    type = MultiAppNearestNodeTransfer
+    direction = to_multiapp
+    multi_app = sub
+    source_variable = u_elemental
+    variable = elemental_source_from_master_nodal
+  [../]
+  [./to_sub_elemental_to_elemental]
+    type = MultiAppNearestNodeTransfer
+    direction = to_multiapp
+    multi_app = sub
+    source_variable = u_elemental
+    variable = elemental_source_from_master_elemental
   [../]
 []

@@ -4,7 +4,7 @@
     input = 'tosub_master.i'
     exodiff = 'tosub_master_out_sub0.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
-    issues = '#1866'
+    issues = '#1866 #12245'
     requirement = "The NearestNodeTransfer shall transfer both nodal and elemental fields to a SubApp from the Master App."
   [../]
 
@@ -13,7 +13,7 @@
     input = 'fromsub_master.i'
     exodiff = 'fromsub_master_out.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
-    issues = '#1866'
+    issues = '#1866 #12245'
     requirement = "The NearestNodeTransfer shall transfer both nodal and elemental fields from SubApps to the Master App."
   [../]
 

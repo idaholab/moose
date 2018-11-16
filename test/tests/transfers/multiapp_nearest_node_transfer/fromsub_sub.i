@@ -20,6 +20,21 @@
   [../]
 []
 
+[AuxVariables]
+  [./u_elemental]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./fun_aux]
+    type = FunctionAux
+    function = 'x + y'
+    variable = u_elemental
+  [../]
+[]
+
 [BCs]
   [./left]
     type = DirichletBC
