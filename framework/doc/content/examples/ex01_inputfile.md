@@ -158,8 +158,12 @@ make -j8
 ## Next Steps
 
 - Diffusion kernel is the only "physics" in the MOOSE framework
+
     * A large set of physics is included in the MOOSE [modules](http://mooseframework.org/wiki/PhysicsModules/)
+
 - In order to implement your own physics, you must understand three things:
-    * [Finite Element Methods](http://mooseframework.org/wiki/MooseTraining/FEM/) and the generation of a "weak" form
-    * [C++](http://mooseframework.org/wiki/MooseTraining/CPP/) and object-oriented design
-    * [The Anatomy of a MOOSE Object](http://mooseframework.org/wiki/MooseTraining/MooseObject/)
+
+  - [Finite Element Methods](http://mooseframework.org/wiki/MooseTraining/FEM/) and the generation of a "weak" form
+  - [C++](http://mooseframework.org/wiki/MooseTraining/CPP/) and object-oriented design
+  - [The Anatomy of a MOOSE Object](http://mooseframework.org/wiki/MooseTraining/MooseObject/)
+
