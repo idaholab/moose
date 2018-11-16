@@ -9,6 +9,7 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+    method = "!dbg"
   [../]
   [./image_subdomain_generator_3d_test]
     type = 'Exodiff'
@@ -20,5 +21,6 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
+    method = "!dbg"
   [../]
 []
