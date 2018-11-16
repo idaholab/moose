@@ -50,7 +50,7 @@ protected:
    * @return The maximum distance between the point p and the eight corners of
    * the bounding box bbox.
    */
-  Real bboxMaxDistance(Point p, BoundingBox bbox);
+  Real bboxMaxDistance(const Point & p, const BoundingBox & bbox);
 
   /**
    * Return the distance between the given point and the nearest corner of the
@@ -60,9 +60,11 @@ protected:
    * @return The minimum distance between the point p and the eight corners of
    * the bounding box bbox.
    */
-  Real bboxMinDistance(Point p, BoundingBox bbox);
+  Real bboxMinDistance(const Point & p, const BoundingBox & bbox);
 
-  void getLocalNodes(MooseMesh * mesh, std::vector<Node *> & local_nodes);
+  void getLocalEntities(MooseMesh * mesh,
+                        std::vector<std::pair<Point, DofObject *>> & local_entities,
+                        bool nodal);
 
   AuxVariableName _to_var_name;
   VariableName _from_var_name;
