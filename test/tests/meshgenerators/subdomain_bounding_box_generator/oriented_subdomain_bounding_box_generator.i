@@ -30,6 +30,22 @@
   type = MeshGeneratorMesh
 []
 
+[Problem]
+  type = FEProblem
+  solve = false
+  kernel_coverage_check = false
+[]
+
+[Variables]
+  [./u]
+  [../]
+[]
+
+[Executioner]
+  type = Steady
+  solve_type = PJFNK
+[]
+
 [Outputs]
   exodus = true
 []

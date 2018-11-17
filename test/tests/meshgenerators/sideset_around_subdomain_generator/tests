@@ -22,4 +22,28 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+
+  [./sideset_around_subdomain_multi_generator_test]
+    type = 'Exodiff'
+    input = 'around_multi_created_subdomain.i'
+    cli_args = '--mesh-only'
+    exodiff = 'around_multi_created_subdomain_in.e'
+    requirement = 'MOOSE shall be able to create sidesets.'
+    design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./sideset_around_subdomain_generator_test2]
+    type = 'Exodiff'
+    input = 'around.i'
+    cli_args = '--mesh-only'
+    exodiff = 'around_in.e'
+    requirement = 'MOOSE shall be able to create sidesets.'
+    design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
 []

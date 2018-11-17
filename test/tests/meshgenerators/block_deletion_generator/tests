@@ -2,8 +2,7 @@
   [./block_deletion_test]
     type = 'Exodiff'
     input = 'block_deletion_test1.i'
-    cli_args = '--mesh-only'
-    exodiff = 'block_deletion_test1_in.e'
+    exodiff = 'block_deletion_test1_out.e'
     requirement = 'MOOSE shall be able to create different subdomains.'
     design = 'meshgenerators/BlockDeletionGenerator.md'
     issues = '#11640'

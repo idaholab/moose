@@ -290,10 +290,10 @@ where $\Delta V$ is the change in volume and $V$ is the original volume.
 This calculation assumes that the strains supplied as input ($T$) are logarithmic strains,
 which are by definition $log(L/L_0)$, where $L$ is the current length and $L_0$
 is the original length of a line segment in a given direction. 
-The ratio of the volume of a strained cube to the original volume is thus:
+The ratio of the volume change of a strained cube to the original volume is thus:
 \begin{equation}
 \label{eq:volumetric_strain_from_tensor}
-s = \exp(T_{11}) * \exp(T_{22}) * \exp(T_{33}) - 1
+s = \frac{\Delta V}{V} = \exp(T_{11}) * \exp(T_{22}) * \exp(T_{33}) - 1
 \end{equation}
 This is the value computed as the volumetric strain.
 

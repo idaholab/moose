@@ -32,6 +32,9 @@ validParams<PatternedMeshGenerator>()
   params.addRangeCheckedParam<Real>(
       "z_width", 0, "z_width>=0", "The tile width in the z direction");
 
+  // Boundaries : user has to provide id or name for each boundary
+  // If an id is provided, any provided name for this particular boundary will be ignored.
+
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left", "name of the left (x) boundary");
   params.addParam<BoundaryName>("right_boundary", "right", "name of the right (x) boundary");
@@ -39,6 +42,14 @@ validParams<PatternedMeshGenerator>()
   // y boundary names
   params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
   params.addParam<BoundaryName>("bottom_boundary", "bottom", "name of the bottom (y) boundary");
+
+  // x boundary ids
+  params.addParam<boundary_id_type>("left_boundary_id", "id of the left (x) boundary");
+  params.addParam<boundary_id_type>("right_boundary_id", "id of the right (x) boundary");
+
+  // y boundary ids
+  params.addParam<boundary_id_type>("top_boundary_id", "name of the top (y) boundary");
+  params.addParam<boundary_id_type>("bottom_boundary_id", "name of the bottom (y) boundary");
 
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
       "pattern", "A double-indexed array starting with the upper-left corner");
@@ -57,10 +68,6 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
 {
-  // The PatternedMesh class only works with ReplicatedMesh
-  // Must find the equivalent : this is for MooseMesh derived objects
-  // errorIfDistributedMesh("PatternedMesh");
-
   _mesh_ptrs.reserve(_input_names.size());
   for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
     _mesh_ptrs.push_back(&getMeshByName(_input_names[i]));
@@ -69,10 +76,10 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
 std::unique_ptr<MeshBase>
 PatternedMeshGenerator::generate()
 {
-  // Reserve spaces for the other meshes (no need to store the first one another time)
+  // Reserve spaces for all the meshes
   _meshes.reserve(_input_names.size());
 
-  // Read in all of the other meshes
+  // Read in all of the meshes
   for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
   {
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
@@ -81,8 +88,7 @@ PatternedMeshGenerator::generate()
   // Data structure that holds each row
   _row_meshes.resize(_pattern.size());
 
-  // const BoundaryInfo & boundary_info = mesh.get_boundary_info();
-
+  // Trying to get the boundaries by name
   boundary_id_type left =
       _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
   boundary_id_type right =
@@ -91,6 +97,26 @@ PatternedMeshGenerator::generate()
       _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
   boundary_id_type bottom =
       _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
+
+  // For each boundary, check if the user provided an id
+  if (isParamValid("left_boundary_id"))
+    left = getParam<boundary_id_type>("left_boundary_id");
+  if (isParamValid("right_boundary_id"))
+    right = getParam<boundary_id_type>("right_boundary_id");
+  if (isParamValid("top_boundary_id"))
+    top = getParam<boundary_id_type>("top_boundary_id");
+  if (isParamValid("bottom_boundary_id"))
+    bottom = getParam<boundary_id_type>("bottom_boundary_id");
+
+  // Check if all the boundaries have been initialized
+  if (left == -123)
+    mooseError("The left boundary has not been initialized properly.");
+  if (right == -123)
+    mooseError("The right boundary has not been initialized properly.");
+  if (top == -123)
+    mooseError("The top boundary has not been initialized properly.");
+  if (bottom == -123)
+    mooseError("The bottom boundary has not been initialized properly.");
 
   // Build each row mesh
   for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)

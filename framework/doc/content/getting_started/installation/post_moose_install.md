@@ -1,5 +1,24 @@
-## Now What?
+## Learn More
 
 Now that you have a working MOOSE Framework stack, there are several [examples](examples/index.md) you can peruse to familiarize yourself with the components of the input file. The input file is what you will use to build problems for your Application (and MOOSE) to solve.
 
-You can also introduce yourself on our [moose-users@googlegroups.com](https://groups.google.com/forum/#!forum/moose-users) mailing list! We would love to hear how you plan to use MOOSE. The mailing list is also a good place to go for questions concerning MOOSE in general.
+## Join the Community
+
+Join one of our mailing lists:
+
+- [moose-users@googlegroups.com](https://groups.google.com/forum/#!forum/moose-users) - Technical Q&A (moderate traffic)
+- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
+
+GMail users can just click the "Join group" button.
+Everyone else can join by sending an email to:
+
+- moose-users+subscribe@googlegroups.com
+- moose-announce+subscribe@googlegroups.com
+
+You may also want to follow MOOSE developers on Twitter:
+
+- Derek Gaston: [@friedmud](https://twitter.com/@friedmud)
+- Cody Permann: [@permcody](https://twitter.com/@permcody)
+- John Peterson: [@peterson512](https://twitter.com/@peterson512)
+- Jason Miller: [@mjmiller96](https://twitter.com/@mjmiller96)
+- Andrew Slaughter: [@aeslaughter98](https://twitter.com/@aeslaughter98)

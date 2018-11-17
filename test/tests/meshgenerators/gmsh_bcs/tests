@@ -1,0 +1,11 @@
+[Tests]
+  [./gmsh_bc_test]
+    type = 'Exodiff'
+    input = 'gmsh_bcs.i'
+    exodiff = 'gmsh_bcs_out.e'
+    mesh_mode = 'REPLICATED'
+    design = ''
+    requirement = ''
+    issues = '#11640'
+  [../]
+[]

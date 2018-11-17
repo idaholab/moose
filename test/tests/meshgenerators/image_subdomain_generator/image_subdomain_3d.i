@@ -20,6 +20,21 @@
   type = MeshGeneratorMesh
 []
 
+[Variables]
+  [./u]
+  [../]
+[]
+
+[Problem]
+  type = FEProblem
+  solve = false
+[../]
+
+[Executioner]
+  type = Steady
+[]
+
 [Outputs]
   exodus = true
+  execute_on = 'timestep_end'
 []

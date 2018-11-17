@@ -10,4 +10,15 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+
+  [./stitched_mesh_generator2_test]
+    type = 'Exodiff'
+    input = 'stitched_mesh_generator2.i'
+    exodiff = 'stitched_mesh_generator2_out.e'
+    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
+    design = 'meshgenerators/StitchedMeshGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
 []

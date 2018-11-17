@@ -1,9 +1,52 @@
 [Tests]
   [./mesh_extruder_generator_test]
     type = 'Exodiff'
-    input = 'extruder_generator.i'
-    cli_args = '--mesh-only'
-    exodiff = 'extruder_generator_in.e'
+    input = 'extrude_remap_layer1.i'
+    exodiff = 'extrude_remap_layer1_out.e'
+    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
+    design = 'meshgenerators/MeshExtruderGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./mesh_extruder_generator_test2]
+    type = 'Exodiff'
+    input = 'extrude_remap_layer2.i'
+    exodiff = 'extrude_remap_layer2_out.e'
+    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
+    design = 'meshgenerators/MeshExtruderGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./mesh_extruder_generator_quad_test]
+    type = 'Exodiff'
+    input = 'extrude_quad.i'
+    exodiff = 'out_quad.e'
+    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
+    design = 'meshgenerators/MeshExtruderGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./mesh_extruder_generator_quad_angle_test]
+    type = 'Exodiff'
+    input = 'extrude_angle.i'
+    exodiff = 'out_quad_angle.e'
+    requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
+    design = 'meshgenerators/MeshExtruderGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./mesh_extruder_generator_generated_test]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    exodiff = 'out_gen.e'
     requirement = 'MOOSE shall be able to use libmesh mesh modification tools.'
     design = 'meshgenerators/MeshExtruderGenerator.md'
     issues = '#11640'

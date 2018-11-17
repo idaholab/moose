@@ -25,6 +25,42 @@
   type = MeshGeneratorMesh
 []
 
+[Variables]
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[Kernels]
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+[]
+
+[BCs]
+  [./bottom]
+    type = DirichletBC
+    variable = u
+    boundary = 'new_bottom'
+    value = 0
+  [../]
+
+  [./top]
+    type = DirichletBC
+    variable = u
+    boundary = 'new_top'
+    value = 1
+  [../]
+[]
+
+[Executioner]
+  type = Steady
+
+  solve_type = 'PJFNK'
+[]
+
 [Outputs]
   exodus = true
 []

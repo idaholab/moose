@@ -46,28 +46,6 @@ make -j4
 
 If your application is working correctly, you should see one passing test. This indicates that  your application is ready to be further developed.
 
-## Learn More
+!include getting_started/installation/post_moose_install.md
 
-TODO: talk about and link to examples and tutorial, etc.
-
-## Join the Community
-
-Join one of our mailing lists:
-
-- [moose-users@googlegroups.com](https://groups.google.com/forum/#!forum/moose-users) - Technical Q&A (moderate traffic)
-- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
-
-GMail users can just click the "Join group" button.
-Everyone else can join by sending an email to:
-
-- moose-users+subscribe@googlegroups.com
-- moose-announce+subscribe@googlegroups.com
-
-You may also want to follow MOOSE developers on Twitter:
-
-- Derek Gaston: [@friedmud](https://twitter.com/@friedmud)
-- Cody Permann: [@permcody](https://twitter.com/@permcody)
-- John Peterson: [@peterson512](https://twitter.com/@peterson512)
-- Jason Miller: [@mjmiller96](https://twitter.com/@mjmiller96)
-- Andrew Slaughter: [@aeslaughter98](https://twitter.com/@aeslaughter98)
-
+!include getting_started/installation/installation_troubleshooting.md

@@ -1,0 +1,13 @@
+[Tests]
+  [./gmsh_test]
+    type = 'Exodiff'
+    input = 'gmsh_test.i'
+    exodiff = 'gmsh_test_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    design = ''
+    requirement = ''
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+  [../]
+[]

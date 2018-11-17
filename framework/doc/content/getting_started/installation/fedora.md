@@ -9,7 +9,3 @@
 !include getting_started/installation/post_package_install.md
 
 !include getting_started/installation/install_moose.md
-
-!include getting_started/installation/post_moose_install.md
-
-!include getting_started/installation/installation_troubleshooting.md

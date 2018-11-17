@@ -61,7 +61,7 @@ class VersionInfo:
                 self.SHA1 = shellCommand('git show ' + self.hideSignature() + ' -s --format=%h', cwd).strip()
                 self.is_git_repo = True
             except: # subprocess.CalledProcessError:
-                self.SHA1 = ""
+                self.SHA1 = None
 
         return self.SHA1
 

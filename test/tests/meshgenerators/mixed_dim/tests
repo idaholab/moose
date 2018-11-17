@@ -1,0 +1,34 @@
+[Tests]
+  [./onedtwod_test]
+    type = 'Exodiff'
+    input = '1d_2d.i'
+    exodiff = 'out.e'
+    design = ''
+    requirement = ''
+    issues = '#11640'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  [../]
+
+  [./onedtwod_w_matl_test]
+    type = 'Exodiff'
+    input = '1d_2d_w_matl.i'
+    exodiff = '1d_2d_w_matl_out.e'
+    design = ''
+    requirement = ''
+    issues = '#11640'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  [../]
+
+  [./onedthreed_test]
+    type = 'Exodiff'
+    input = '1d_3d.i'
+    exodiff = '1d_3d_out.e'
+    design = ''
+    requirement = ''
+    issues = '#11640'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  [../]
+[]

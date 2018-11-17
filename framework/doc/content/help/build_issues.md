@@ -38,4 +38,58 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   unset MOOSE_DIR
   ```
 
-- Once completed, you should attempt to [rebuild libMesh](help/troubleshooting.md#libmesh) again.
+- Try building a simple hello world example (copy and paste the entire box):
+
+  ```bash
+  cd /tmp
+  cat << EOF > hello.C
+  #include <mpi.h>
+  #include <stdio.h>
+
+  int main(int argc, char** argv) {
+    // Initialize the MPI environment
+    MPI_Init(NULL, NULL);
+
+    // Get the number of processes
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    // Get the rank of the process
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    // Get the name of the processor
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    int name_len;
+    MPI_Get_processor_name(processor_name, &name_len);
+
+    // Print off a hello world message
+    printf("Hello world from processor %s, rank %d out of %d processors\n",
+           processor_name, world_rank, world_size);
+
+    // Finalize the MPI environment.
+    MPI_Finalize();
+  }
+  EOF
+
+  mpicxx -fopenmp hello.C
+  ```
+
+  If the build failed, and you have the correct [Modules](help/troubleshooting.md#modules) environment loaded, then you should attempt to perform the 'Uggh! None of this is working' step in the [Modules](help/troubleshooting.md#modules) section. As it would seem, there is something else in your environment that is inhibiting your ability to compile simple programs.
+
+  If the build was successfull, attempt to execute the hello word example:
+
+  ```bash
+  mpiexec -n 4 /tmp/a.out
+  ```
+
+  You should receive a response similar to the following:
+
+  ```bash
+  Hello world from processor my_hostname, rank 0 out of 4 processors
+  Hello world from processor my_hostname, rank 1 out of 4 processors
+  Hello world from processor my_hostname, rank 3 out of 4 processors
+  Hello world from processor my_hostname, rank 2 out of 4 processors
+  ```
+
+- If all of the above has succeeded, you should attempt to [rebuild libMesh](help/troubleshooting.md#libmesh) again.
