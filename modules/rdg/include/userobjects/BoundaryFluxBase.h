@@ -91,8 +91,15 @@ public:
                             DenseMatrix<Real> & jac1) const = 0;
 
 protected:
-  mutable unsigned int _cached_side_id;
-  mutable dof_id_type _cached_elem_id;
+  /// element ID of the cached flux values
+  mutable unsigned int _cached_flux_elem_id;
+  /// side ID of the cached flux values
+  mutable unsigned int _cached_flux_side_id;
+
+  /// element ID of the cached Jacobian values
+  mutable unsigned int _cached_jacobian_elem_id;
+  /// side ID of the cached Jacobian values
+  mutable unsigned int _cached_jacobian_side_id;
 
   /// Cached flux
   mutable std::vector<Real> _flux;
