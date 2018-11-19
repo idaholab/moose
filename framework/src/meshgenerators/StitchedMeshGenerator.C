@@ -10,6 +10,7 @@
 #include "StitchedMeshGenerator.h"
 
 #include "CastUniquePointer.h"
+#include "MooseUtils.h"
 
 #include "libmesh/replicated_mesh.h"
 
@@ -54,18 +55,67 @@ StitchedMeshGenerator::generate()
 
   // Read in all of the other meshes
   for (auto i = beginIndex(_input_names, 1); i < _input_names.size(); ++i)
-  {
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
-  }
 
   // Stich all the meshes to the first one
   for (auto i = beginIndex(_meshes); i < _meshes.size(); i++)
   {
     auto boundary_pair = _stitch_boundaries_pairs[i];
 
-    boundary_id_type first = _meshes[i]->get_boundary_info().get_id_by_name(boundary_pair[0]);
-    boundary_id_type second = _meshes[i]->get_boundary_info().get_id_by_name(boundary_pair[1]);
+    boundary_id_type first, second;
 
+    try
+    {
+      first = MooseUtils::convert<boundary_id_type>(boundary_pair[0], true);
+    }
+    catch(...)
+    {
+      first = mesh->get_boundary_info().get_id_by_name(boundary_pair[0]);
+
+      if (first == BoundaryInfo::invalid_id)
+      {
+        std::stringstream error;
+
+        error << "Boundary " << boundary_pair[0] << " doesn't exist on the first mesh in " << name() << "\n";
+        error << "Boundary names that do exist: \n";
+        error << " ID : Name\n";
+
+        auto & sideset_id_name_map = mesh->get_boundary_info().get_sideset_name_map();
+        
+        for (auto & ss_name_map_pair : sideset_id_name_map)
+          error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
+        
+        mooseError(error.str());
+      }
+    }
+    
+    try
+    {
+      second = MooseUtils::convert<boundary_id_type>(boundary_pair[1], true);
+    }
+    catch(...)
+    {
+      second = _meshes[i]->get_boundary_info().get_id_by_name(boundary_pair[1]);
+
+      if (second == BoundaryInfo::invalid_id)
+      {
+        _meshes[i]->print_info();
+        
+        std::stringstream error;
+
+        error << "Boundary " << boundary_pair[1] << " doesn't exist on mesh " << i + 1 << " in " << name() << "\n";
+        error << "Boundary names that do exist: \n";
+        error << " ID : Name\n";
+
+        auto & sideset_id_name_map = _meshes[i]->get_boundary_info().get_sideset_name_map();
+        
+        for (auto & ss_name_map_pair : sideset_id_name_map)
+          error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
+        
+        mooseError(error.str());
+      }
+    }
+        
     mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
   }
 
