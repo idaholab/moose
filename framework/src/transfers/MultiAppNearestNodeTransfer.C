@@ -82,7 +82,12 @@ MultiAppNearestNodeTransfer::execute()
   getAppInfo();
 
   // Get the bounding boxes for the "from" domains.
-  std::vector<BoundingBox> bboxes = getFromBoundingBoxes();
+  std::vector<BoundingBox> bboxes;
+  if (isParamValid("source_boundary"))
+    bboxes = getFromBoundingBoxes(
+        _from_meshes[0]->getBoundaryID(getParam<BoundaryName>("source_boundary")));
+  else
+    bboxes = getFromBoundingBoxes();
 
   // Figure out how many "from" domains each processor owns.
   std::vector<unsigned int> froms_per_proc = getFromsPerProc();
@@ -349,8 +354,8 @@ MultiAppNearestNodeTransfer::execute()
             // also potentially be chosen instead... there's no way to decide among
             // the set of all equidistant points.
             //
-            // outgoing_evals[2 * qp] is the current closest distance between a local point and the
-            // incoming_qp.
+            // outgoing_evals[2 * qp] is the current closest distance between a local point and
+            // the incoming_qp.
             if (current_distance < outgoing_evals[2 * qp])
             {
               // Assuming LAGRANGE!

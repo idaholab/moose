@@ -88,11 +88,16 @@ protected:
   /// True if displaced mesh is used for the target mesh, otherwise false
   bool _displaced_target_mesh;
 
+  ///@{
   /**
-   * Return the bounding boxes of all the "from" domains, including all the
-   * domains not local to this processor.
+   * Return the bounding boxes of all the "from" domains, including all the domains not local to
+   * this processor. The is a boundary restricted version which will return a degenerate minimum
+   * boundary box (min, min, min, min, min, min) in the case where the source domain doesn't
+   * have any active nodes on the boundary.
    */
   std::vector<BoundingBox> getFromBoundingBoxes();
+  std::vector<BoundingBox> getFromBoundingBoxes(BoundaryID boundary_id);
+  ///@}
 
   /**
    * Return the number of "from" domains that each processor owns.
