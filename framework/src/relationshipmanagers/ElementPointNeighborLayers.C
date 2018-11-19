@@ -44,6 +44,7 @@ ElementPointNeighborLayers::getInfo() const
   std::string layers = _layers == 1 ? "layer" : "layers";
 
   oss << "ElementPointNeighborLayers (" << layers << layers << ')';
+
   return oss.str();
 }
 

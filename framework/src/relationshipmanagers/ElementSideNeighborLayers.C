@@ -11,8 +11,12 @@
 #include "MooseMesh.h"
 #include "Conversion.h"
 #include "MooseApp.h"
+#include "Executioner.h"
+#include "FEProblemBase.h"
+#include "NonlinearSystem.h"
 
 #include "libmesh/default_coupling.h"
+#include "libmesh/dof_map.h"
 
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
@@ -44,6 +48,10 @@ ElementSideNeighborLayers::getInfo() const
   std::string layers = _layers == 1 ? "layer" : "layers";
 
   oss << "ElementSideNeighborLayers (" << _layers << " " << layers << ')';
+
+  if (_has_periodic_boundaries)
+    oss << " with periodic BCs";
+
   return oss.str();
 }
 
@@ -54,14 +62,34 @@ ElementSideNeighborLayers::operator==(const RelationshipManager & rhs) const
   if (!rm)
     return false;
   else
-    return _layers == rm->_layers && _rm_type == rm->_rm_type;
+    return _layers == rm->_layers && _rm_type == rm->_rm_type &&
+           _has_periodic_boundaries == rm->_has_periodic_boundaries;
 }
 
 void
 ElementSideNeighborLayers::internalInit()
 {
   auto functor = libmesh_make_unique<DefaultCoupling>();
+  functor->set_name(MooseObject::name() + ": " + getInfo());
   functor->set_n_levels(_layers);
+
+  // Need to see if there are periodic BCs - if so we need to dig them out
+  auto executioner_ptr = _app.getExecutioner();
+
+  if (executioner_ptr)
+  {
+    auto & fe_problem = executioner_ptr->feProblem();
+    auto & nl_sys = fe_problem.getNonlinearSystem();
+    auto & dof_map = nl_sys.dofMap();
+    auto periodic_boundaries_ptr = dof_map.get_periodic_boundaries();
+
+    if (periodic_boundaries_ptr)
+    {
+      _has_periodic_boundaries = true;
+      functor->set_mesh(&_mesh.getMesh());
+      functor->set_periodic_boundaries(periodic_boundaries_ptr);
+    }
+  }
 
   _functor = std::move(functor);
 }

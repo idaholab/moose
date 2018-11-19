@@ -26,6 +26,17 @@ public:
   CreateDisplacedProblemAction(InputParameters parameters);
 
   virtual void act() override;
+
+protected:
+  /**
+   * Sets up a ProxyRelationshipManager that copies algebraic ghosting from->to
+   */
+  void addProxyAlgebraicRelationshipManagers(SystemBase & to, SystemBase & from);
+
+  /**
+   * Sets up a ProxyRelationshipManager that copies geometric ghosting from->to
+   */
+  void addProxyGeometricRelationshipManagers(SystemBase & to, SystemBase & from);
 };
 
 #endif /* CREATEDISPLACEDPROBLEMACTION_H */

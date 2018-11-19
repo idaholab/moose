@@ -42,6 +42,18 @@ validParams<RelationshipManager>()
    */
   params.addPrivateParam<Moose::RelationshipManagerType>("rm_type");
 
+  /**
+   * The name of the object (or Action) requesting this RM
+   */
+  params.addRequiredParam<std::string>("for_whom", "What object is requesting this RM?");
+
+  params.addParam<bool>(
+      "use_displaced_mesh",
+      false,
+      "Whether this RM should be placed on the undisplaced or displaced problem. Note: yes, it "
+      "still says 'mesh' to match with common parameter name in MOOSE - but if it's purely "
+      "algebraic then it's going to the DofMap no matter what!");
+
   // Set by MOOSE
   params.addPrivateParam<MooseMesh *>("mesh");
   params.registerBase("RelationshipManager");
@@ -54,6 +66,8 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
     _mesh(*getCheckedPointerParam<MooseMesh *>(
         "mesh", "Mesh is null in GeometricRelationshipManager ctor")),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
-    _rm_type(getParam<Moose::RelationshipManagerType>("rm_type"))
+    _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
+  _for_whom.push_back(getParam<std::string>("for_whom"));
 }

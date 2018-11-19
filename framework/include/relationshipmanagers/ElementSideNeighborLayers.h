@@ -40,6 +40,9 @@ protected:
   /// Size of the halo or stencil of elements available in each local processors partition. Only
   /// applicable and necessary when using DistributedMesh.
   unsigned short _layers;
+
+  /// Weither or not this RM is keeping track of periodic boundaries
+  bool _has_periodic_boundaries = false;
 };
 
 #endif /* ELEMENTSIDENEIGHBORLAYERS_H */
