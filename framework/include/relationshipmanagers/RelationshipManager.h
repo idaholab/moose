@@ -49,6 +49,16 @@ public:
   bool inited() { return _inited; }
 
   /**
+   * The object (or Action) this RelationshipManager was built for
+   */
+  virtual const std::vector<std::string> & forWhom() const { return _for_whom; }
+
+  /**
+   * Add another name to for_whom
+   */
+  void addForWhom(const std::string & for_whom) { _for_whom.push_back(for_whom); }
+
+  /**
    * Method for returning relationship manager information (suitable for console output).
    */
   virtual std::string getInfo() const = 0;
@@ -77,6 +87,14 @@ public:
    */
   bool attachGeometricEarly() { return _attach_geometric_early; }
 
+  /**
+   * Whether this should be placed on the undisplaced or displaced systems
+   *
+   * Note: this says 'mesh' but that's just to match the colloquial term
+   * in MOOSE.  If this thing is algebraic then it's going to the DofMap
+   */
+  bool useDisplacedMesh() const { return _use_displaced_mesh; }
+
 protected:
   /**
    * Called before this RM is attached.  Only called once
@@ -97,6 +115,12 @@ protected:
   /// The type of RM this object is. Note that the underlying enum is capable of holding
   /// multiple values simultaneously, so you must use bitwise operators to test values.
   Moose::RelationshipManagerType _rm_type;
+
+  /// The name of the object that requires this RelationshipManager
+  std::vector<std::string> _for_whom;
+
+  /// Which system this should go to (undisplaced or displaced)
+  bool _use_displaced_mesh;
 };
 
 #endif /* RELATIONSHIPMANAGER_H */
