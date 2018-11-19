@@ -49,6 +49,7 @@
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/checkpoint_io.h"
+#include "libmesh/mesh_base.h"
 
 // System include for dynamic library methods
 #include <dlfcn.h>
@@ -311,6 +312,9 @@ MooseApp::MooseApp(InputParameters parameters)
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3))
 {
+  // Turn off default geometric ghosting
+  MeshBase::use_default_ghosting = false;
+
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
 
@@ -1680,6 +1684,18 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> relationsh
     if (*rm == *relationship_manager)
     {
       add = false;
+
+      auto & existing_for_whom = rm->forWhom();
+
+      // Since the existing object is going to cover this one
+      // Pass along who is needing it
+      for (auto & fw : relationship_manager->forWhom())
+      {
+        if (std::find(existing_for_whom.begin(), existing_for_whom.end(), fw) ==
+            existing_for_whom.end())
+          rm->addForWhom(fw);
+      }
+
       break;
     }
   }
@@ -1709,10 +1725,10 @@ MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_t
 
         rm->init();
 
-        mesh->getMesh().add_ghosting_functor(*rm);
-
-        if (_action_warehouse.displacedMesh())
+        if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
           _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
+        else
+          mesh->getMesh().add_ghosting_functor(*rm);
       }
 
       if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
@@ -1720,16 +1736,16 @@ MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_t
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
         {
-          // Now that the Problem is buil we'll get the mesh from there
+          // Now that the Problem is built we'll get the mesh from there
           auto & problem = _executioner->feProblem();
           auto & mesh = problem.mesh();
 
           rm->init();
 
-          mesh.getMesh().add_ghosting_functor(*rm);
-
-          if (problem.getDisplacedProblem())
-            problem.getDisplacedProblem()->mesh().getMesh().add_ghosting_functor(*rm);
+          if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
+          else
+            mesh.getMesh().add_ghosting_functor(*rm);
         }
 
         auto & problem = _executioner->feProblem();
@@ -1738,14 +1754,15 @@ MooseApp::attachRelationshipManagers(const Moose::RelationshipManagerType & rm_t
         if (!rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
           rm->init();
 
-        problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
-        problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(*rm);
-
-        // We need to do the same thing for displaced problem
-        if (problem.getDisplacedProblem())
+        if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
         {
           problem.getDisplacedProblem()->nlSys().dofMap().add_algebraic_ghosting_functor(*rm);
           problem.getDisplacedProblem()->auxSys().dofMap().add_algebraic_ghosting_functor(*rm);
+        }
+        else
+        {
+          problem.getNonlinearSystemBase().dofMap().add_algebraic_ghosting_functor(*rm);
+          problem.getAuxiliarySystem().dofMap().add_algebraic_ghosting_functor(*rm);
         }
       }
     }
@@ -1761,6 +1778,17 @@ MooseApp::getRelationshipManagerInfo() const
   for (const auto & rm : _relationship_managers)
   {
     auto info = rm->getInfo();
+
+    auto & for_whom = rm->forWhom();
+
+    if (!for_whom.empty())
+    {
+      info = info + " for";
+
+      for (auto & fw : for_whom)
+        info = info + " " + fw;
+    }
+
     if (info.size())
       info_strings.emplace_back(std::make_pair(Moose::stringify(rm->getType()), info));
   }

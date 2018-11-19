@@ -15,6 +15,8 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 #include "MooseApp.h"
+#include "FEProblemBase.h"
+#include "DisplacedProblem.h"
 
 template <>
 InputParameters
@@ -67,6 +69,7 @@ MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType input_
 
     auto rm_params = _factory.getValidParams(rm_name);
     rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;
+    rm_params.set<std::string>("for_whom") = name();
 
     // Figure out if we shouldn't be adding this one yet
     if (((rm_type & input_rm_type) != input_rm_type) // Does this RM not have the type passed in?
@@ -101,6 +104,9 @@ MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType input_
       // We also need to tell the mesh not to delete remote elements yet
       // Note this will get reset in AddRelationshipManager::act() when attaching Algebraic
       _mesh->getMesh().allow_remote_element_removal(false);
+
+      if (_problem->getDisplacedProblem())
+        _problem->getDisplacedProblem()->mesh().getMesh().allow_remote_element_removal(false);
 
       // Keep looking for more RMs
       continue;

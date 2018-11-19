@@ -90,6 +90,7 @@ AdaptivityAction::act()
   {
     auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
 
+    rm_params.set<std::string>("for_whom") = "Adaptivity";
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
     rm_params.set<Moose::RelationshipManagerType>("rm_type") =
         Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
