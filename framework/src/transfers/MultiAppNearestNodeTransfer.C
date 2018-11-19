@@ -194,8 +194,12 @@ MultiAppNearestNodeTransfer::execute()
         // variable in the current System.
         for (const auto & node : target_local_nodes)
           if (node->n_dofs(sys_num, var_num) && !local_nodes_found.count(node))
-            mooseError(
-                "No candidate BoundingBoxes found for node ", node->id(), " at position ", *node);
+            mooseError("In ",
+                       name(),
+                       ": No candidate BoundingBoxes found for node ",
+                       node->id(),
+                       " at position ",
+                       *node);
       }
       else // Elemental
       {
@@ -247,7 +251,9 @@ MultiAppNearestNodeTransfer::execute()
         // variable in the current System.
         for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
           if (elem->n_dofs(sys_num, var_num) && !local_elems_found.count(elem))
-            mooseError("No candidate BoundingBoxes found for Elem ",
+            mooseError("In ",
+                       name(),
+                       ": No candidate BoundingBoxes found for Elem ",
                        elem->id(),
                        ", centroid = ",
                        elem->centroid());

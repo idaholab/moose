@@ -5,7 +5,7 @@
     exodiff = 'tosub_master_out_sub0.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1866 #12245'
-    requirement = "The NearestNodeTransfer shall transfer both nodal and elemental fields to a SubApp from the Master App."
+    requirement = "The system shall transfer both nodal and elemental fields to a SubApp from the Master App."
   [../]
 
   [./fromsub]
@@ -14,7 +14,7 @@
     exodiff = 'fromsub_master_out.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1866 #12245'
-    requirement = "The NearestNodeTransfer shall transfer both nodal and elemental fields from SubApps to the Master App."
+    requirement = "The system shall transfer both nodal and elemental fields from SubApps to the Master App."
   [../]
 
   [./fromsub_displaced]
@@ -23,7 +23,7 @@
     exodiff = 'fromsub_displaced_master_out.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1868'
-    requirement = "The NearestNodeTransfer shall transfer values from SubApps which set the displaced_source_mesh flag to true."
+    requirement = "The system shall transfer values from SubApps which set the displaced_source_mesh flag to true."
   [../]
 
   [./tosub_displaced]
@@ -33,7 +33,7 @@
     deleted = 'Not yet implemented properly!'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1868'
-    requirement = "The NearestNodeTransfer shall transfer values from SubApps which set the displaced_target_mesh flag to true."
+    requirement = "The system shall transfer values from SubApps which set the displaced_target_mesh flag to true."
   [../]
 
   [./fromsub_fixed_meshes]
@@ -42,7 +42,7 @@
     exodiff = 'fromsub_fixed_meshes_master_out.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#2126'
-    requirement = "The NearestNodeTransfer shall support the 'fixed_meshes' flag which allows caching of nearest neighbors."
+    requirement = "The system shall support the 'fixed_meshes' flag which allows caching of nearest neighbors."
   [../]
 
   [./boundary_tosub]
@@ -51,7 +51,7 @@
     exodiff = 'boundary_tosub_master_out_sub0.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#6156'
-    requirement = "The NearestNodeTransfer shall transfer values to multiple SubApps from the Master App's boundary."
+    requirement = "The system shall transfer values to multiple SubApps from the Master App's boundary."
   [../]
 
   [./boundary_tomaster]
@@ -60,7 +60,7 @@
     exodiff = 'boundary_tomaster_master_out.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#6156'
-    requirement = "The NearestNodeTransfer shall transfer values from a SubApp boundary to the Master App."
+    requirement = "The system shall transfer values from a SubApp boundary to the Master App."
   [../]
 
   [./two_way_many_apps]
@@ -69,7 +69,7 @@
     exodiff = 'two_way_many_apps_master_out.e two_way_many_apps_master_out_sub0.e two_way_many_apps_master_out_sub4.e'
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#5360'
-    requirement = "The NearestNodeTransfer shall work when there are multiple SubApps present."
+    requirement = "The system shall work when there are multiple SubApps present."
   [../]
 
   [./parallel]
@@ -80,6 +80,6 @@
     max_parallel = 2
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#8004'
-    requirement = "The NearestNodeTransfer shall work in parallel between meshes with different spatial dimensions."
+    requirement = "The system shall work in parallel between meshes with different spatial dimensions."
   [../]
 []
