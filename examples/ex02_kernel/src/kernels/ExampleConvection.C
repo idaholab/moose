@@ -10,11 +10,17 @@
 #include "ExampleConvection.h"
 
 /**
- * This function defines the valid parameters for
- * this Kernel and their default values
+ * All MOOSE based object classes you create must be registered using this macro.  The first
+ * argument is the name of the App you entered in when running the stork.sh script with an "App"
+ * suffix. If you ran "stork.sh Example", then the argument here becomes "ExampleApp". The second
+ * argument is the name of the C++ class you created.
  */
 registerMooseObject("ExampleApp", ExampleConvection);
 
+/**
+ * This function defines the valid parameters for
+ * this Kernel and their default values
+ */
 template <>
 InputParameters
 validParams<ExampleConvection>()

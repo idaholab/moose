@@ -17,7 +17,7 @@ your operating system/platform and follow the instructions:
 
 When installation is complete, return to this page to continue.
 
-## Create an Application
+## Create an Application id=create-an-app
 
 MOOSE is designed for building custom applications, therefore if you plan on working with MOOSE
 then you should create an application.
