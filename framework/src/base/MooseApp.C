@@ -1505,11 +1505,11 @@ MooseApp::executeMeshGenerators()
         if (outputs.size())
         {
           auto & first_output = *outputs.begin();
-          
+
           first_output = std::move(_final_generated_mesh);
 
           auto output_it = outputs.begin()++;
-          
+
           // For all of the rest we need to make a copy
           for (; output_it != outputs.end(); ++output_it)
             (*output_it) = first_output->clone();

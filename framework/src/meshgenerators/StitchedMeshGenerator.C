@@ -68,7 +68,7 @@ StitchedMeshGenerator::generate()
     {
       first = MooseUtils::convert<boundary_id_type>(boundary_pair[0], true);
     }
-    catch(...)
+    catch (...)
     {
       first = mesh->get_boundary_info().get_id_by_name(boundary_pair[0]);
 
@@ -76,46 +76,48 @@ StitchedMeshGenerator::generate()
       {
         std::stringstream error;
 
-        error << "Boundary " << boundary_pair[0] << " doesn't exist on the first mesh in " << name() << "\n";
+        error << "Boundary " << boundary_pair[0] << " doesn't exist on the first mesh in " << name()
+              << "\n";
         error << "Boundary names that do exist: \n";
         error << " ID : Name\n";
 
         auto & sideset_id_name_map = mesh->get_boundary_info().get_sideset_name_map();
-        
+
         for (auto & ss_name_map_pair : sideset_id_name_map)
           error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
-        
+
         mooseError(error.str());
       }
     }
-    
+
     try
     {
       second = MooseUtils::convert<boundary_id_type>(boundary_pair[1], true);
     }
-    catch(...)
+    catch (...)
     {
       second = _meshes[i]->get_boundary_info().get_id_by_name(boundary_pair[1]);
 
       if (second == BoundaryInfo::invalid_id)
       {
         _meshes[i]->print_info();
-        
+
         std::stringstream error;
 
-        error << "Boundary " << boundary_pair[1] << " doesn't exist on mesh " << i + 1 << " in " << name() << "\n";
+        error << "Boundary " << boundary_pair[1] << " doesn't exist on mesh " << i + 1 << " in "
+              << name() << "\n";
         error << "Boundary names that do exist: \n";
         error << " ID : Name\n";
 
         auto & sideset_id_name_map = _meshes[i]->get_boundary_info().get_sideset_name_map();
-        
+
         for (auto & ss_name_map_pair : sideset_id_name_map)
           error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
-        
+
         mooseError(error.str());
       }
     }
-        
+
     mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
   }
 

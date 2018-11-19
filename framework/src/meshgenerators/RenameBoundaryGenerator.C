@@ -56,22 +56,22 @@ RenameBoundaryGenerator::RenameBoundaryGenerator(const InputParameters & paramet
 {
   // error checking.  Must have exactly one of old_boundary_id or old_boundary_name
   if (isParamValid("old_boundary_id") && isParamValid("old_boundary_name"))
-    mooseError(
-        "RenameBoundaryGenerator: You must supply exactly one of old_boundary_id or old_boundary_name\n");
+    mooseError("RenameBoundaryGenerator: You must supply exactly one of old_boundary_id or "
+               "old_boundary_name\n");
   else if (!isParamValid("old_boundary_id") && !isParamValid("old_boundary_name"))
-    mooseError(
-        "RenameBoundaryGenerator: You must supply exactly one of old_boundary_id or old_boundary_name\n");
+    mooseError("RenameBoundaryGenerator: You must supply exactly one of old_boundary_id or "
+               "old_boundary_name\n");
 
   // error checking.  Must have exactly one of new_boundary_id or new_boundary_name
   // In principal we could have both (the old boundary would then be given a new ID and a new name)
   // but i feel that could lead to confusion for the user.  If the user wants to do that they
   // should use two of these RenameBoundary MeshModifiers.
   if (isParamValid("new_boundary_id") && isParamValid("new_boundary_name"))
-    mooseError(
-        "RenameBoundaryGenerator: You must supply exactly one of new_boundary_id or new_boundary_name\n");
+    mooseError("RenameBoundaryGenerator: You must supply exactly one of new_boundary_id or "
+               "new_boundary_name\n");
   else if (!isParamValid("new_boundary_id") && !isParamValid("new_boundary_name"))
-    mooseError(
-        "RenameBoundaryGenerator: You must supply exactly one of new_boundary_id or new_boundary_name\n");
+    mooseError("RenameBoundaryGenerator: You must supply exactly one of new_boundary_id or "
+               "new_boundary_name\n");
 }
 
 std::unique_ptr<MeshBase>
@@ -106,8 +106,9 @@ RenameBoundaryGenerator::generate()
   {
     _new_boundary_id = getParam<std::vector<boundary_id_type>>("new_boundary_id");
     if (_new_boundary_id.size() != _old_boundary_id.size())
-      mooseError("RenameBoundaryGenerator: The vector of old_boundary information must have the same"
-                 " length as the vector of new_boundary information\n");
+      mooseError(
+          "RenameBoundaryGenerator: The vector of old_boundary information must have the same"
+          " length as the vector of new_boundary information\n");
 
     // construct the _new_boundary_name
     _new_boundary_name.reserve(_new_boundary_id.size());
@@ -118,19 +119,20 @@ RenameBoundaryGenerator::generate()
   {
     _new_boundary_name = getParam<std::vector<BoundaryName>>("new_boundary_name");
     if (_new_boundary_name.size() != _old_boundary_id.size())
-      mooseError("RenameBoundaryGenerator: The vector of old_boundary information must have the same"
-                 " length as the vector of new_boundary information\n");
+      mooseError(
+          "RenameBoundaryGenerator: The vector of old_boundary information must have the same"
+          " length as the vector of new_boundary information\n");
 
     _new_boundary_id.reserve(_new_boundary_name.size());
     for (const auto & boundary_name : _new_boundary_name)
       _new_boundary_id.emplace_back(newBoundaryID(boundary_name));
   }
 
-  for (const auto & elem : mesh->active_element_ptr_range())//Pour chaque elt
+  for (const auto & elem : mesh->active_element_ptr_range())
   {
-    for (unsigned int side = 0; side < elem->n_sides(); side++)//pour chaque bord
-    {  
-      for (unsigned i = 0; i < _old_boundary_id.size(); ++i)//pour chaque id fournie
+    for (unsigned int side = 0; side < elem->n_sides(); side++)
+    {
+      for (unsigned i = 0; i < _old_boundary_id.size(); ++i)
         if (boundary_info.has_boundary_id(elem, side, _old_boundary_id[i]))
         {
           boundary_info.remove_side(elem, side);
