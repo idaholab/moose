@@ -1,4 +1,5 @@
 [MeshGenerators]
+#active = 'gmg'
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 3

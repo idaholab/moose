@@ -141,7 +141,7 @@ SideSetsFromBoundingBoxGenerator::generate()
         // sort boundary ids on node and sort boundary ids provided in input file
         std::sort(boundary_id_list.begin(), boundary_id_list.end());
         std::sort(boundary_id_old_list.begin(), boundary_id_old_list.end());
-
+        
         // check if input boundary ids are all contained in the node
         // if true, write new boundary id on respective node
         if (std::includes(boundary_id_list.begin(),
