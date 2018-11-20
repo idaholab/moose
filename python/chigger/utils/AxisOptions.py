@@ -33,7 +33,7 @@ def get_options():
     opt.add('tick_font_size', "The axis tick label font size, in points.", vtype=int)
     opt.add('grid', True, "Show/hide the grid lines for this axis.")
     opt.add('grid_color', [0.25, 0.25, 0.25], "The color for the grid lines.")
-    opt.add('precision', 3, "The axis numeric precision.", vtype=int)
+    opt.add('precision', "The axis numeric precision.", vtype=int)
     opt.add('notation', "The type of notation, leave empty to let VTK decide", vtype=str,
             allow=['standard', 'scientific', 'fixed', 'printf'])
     opt.add('ticks_visible', True, "Control visibility of tickmarks on colorbar axis.")
@@ -44,6 +44,7 @@ def get_options():
     opt.add('axis_point1', [0, 0], 'Starting location of axis, in absolute viewport coordinates.')
     opt.add('axis_point2', [0, 0], 'Ending location of axis, in absolute viewport coordinates.')
     opt.add('axis_scale', 1, "The axis scaling factor.", vtype=float)
+    opt.add('axis_factor', 0, "Offset the axis by adding a factor.", vtype=float)
     opt.add('zero_tol', 1e-10, "Tolerance for considering limits to be the same.")
     return opt
 
@@ -83,7 +84,8 @@ def set_options(vtkaxis, opt):
             vtkaxis.SetCustomTickPositions(None, None)
             vtkaxis.SetBehavior(vtk.vtkAxis.FIXED)
             scale = opt['axis_scale']
-            vtkaxis.SetRange(lim[0] * scale, lim[1] * scale)
+            factor = opt['axis_factor']
+            vtkaxis.SetRange(lim[0] * scale + factor, lim[1] * scale + factor)
             vtkaxis.RecalculateTickSpacing()
     else:
         vtkaxis.SetBehavior(vtk.vtkAxis.AUTO)
