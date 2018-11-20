@@ -1519,7 +1519,7 @@ MooseApp::executeMeshGenerators()
 
             (*output_it)->get_boundary_info() = copy_from.get_boundary_info();
 
-            (*output_it)->set_subdomain_name_map () = copy_from.get_subdomain_name_map ();
+            (*output_it)->set_subdomain_name_map() = copy_from.get_subdomain_name_map();
 
             // Get references to BoundaryInfo objects to make the code below cleaner...
             const BoundaryInfo & first_boundary_info = copy_from.get_boundary_info();
@@ -1531,14 +1531,16 @@ MooseApp::executeMeshGenerators()
 
             // Assign those boundary ids in our BoundaryInfo object
             for (const auto & side_bnd_id : side_boundaries)
-              boundary_info.sideset_name(side_bnd_id) = first_boundary_info.get_sideset_name(side_bnd_id);
+              boundary_info.sideset_name(side_bnd_id) =
+                  first_boundary_info.get_sideset_name(side_bnd_id);
 
             // Do the same thing for node boundary ids
             std::vector<boundary_id_type> node_boundaries;
             first_boundary_info.build_node_boundary_ids(node_boundaries);
 
             for (const auto & node_bnd_id : node_boundaries)
-              boundary_info.nodeset_name(node_bnd_id) = first_boundary_info.get_nodeset_name(node_bnd_id);
+              boundary_info.nodeset_name(node_bnd_id) =
+                  first_boundary_info.get_nodeset_name(node_bnd_id);
           }
         }
       }
