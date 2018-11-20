@@ -179,6 +179,62 @@ MultiAppTransfer::getFromBoundingBoxes()
   return bboxes;
 }
 
+std::vector<BoundingBox>
+MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
+{
+  std::vector<std::pair<Point, Point>> bb_points(_from_meshes.size());
+  const Real min_r = std::numeric_limits<Real>::lowest();
+  const Real max_r = std::numeric_limits<Real>::max();
+
+  for (unsigned int i = 0; i < _from_meshes.size(); i++)
+  {
+
+    Point min(max_r, max_r, max_r);
+    Point max(min_r, min_r, min_r);
+    bool at_least_one = false;
+
+    // TODO: Factor this into mesh_tools after adding new boundary bounding box routine.
+    const ConstBndNodeRange & bnd_nodes = *_from_meshes[i]->getBoundaryNodeRange();
+    for (const auto & bnode : bnd_nodes)
+    {
+      if (bnode->_bnd_id == boundary_id && bnode->_node->processor_id() == processor_id())
+      {
+        const auto & node = *bnode->_node;
+        for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        {
+          min = std::min(min(i), node(i));
+          max = std::max(max(i), node(i));
+          at_least_one = true;
+        }
+      }
+    }
+
+    BoundingBox bbox(min, max);
+    if (!at_least_one)
+      bbox.min() = max; // If we didn't hit any nodes, this will be _the_ minimum bbox
+    else
+    {
+      // Translate the bounding box to the from domain's position.
+      bbox.first += _from_positions[i];
+      bbox.second += _from_positions[i];
+    }
+
+    // Cast the bounding box into a pair of points (so it can be put through
+    // MPI communication).
+    bb_points[i] = static_cast<std::pair<Point, Point>>(bbox);
+  }
+
+  // Serialize the bounding box points.
+  _communicator.allgather(bb_points);
+
+  // Recast the points back into bounding boxes and return.
+  std::vector<BoundingBox> bboxes(bb_points.size());
+  for (unsigned int i = 0; i < bb_points.size(); i++)
+    bboxes[i] = static_cast<BoundingBox>(bb_points[i]);
+
+  return bboxes;
+}
+
 std::vector<unsigned int>
 MultiAppTransfer::getFromsPerProc()
 {
