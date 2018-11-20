@@ -19,15 +19,22 @@ validParams<RDGFluxBase>()
   return params;
 }
 
-RDGFluxBase::RDGFluxBase(const InputParameters & parameters) : ThreadedGeneralUserObject(parameters)
+RDGFluxBase::RDGFluxBase(const InputParameters & parameters)
+  : ThreadedGeneralUserObject(parameters),
+    _cached_flux_elem_id(libMesh::invalid_uint),
+    _cached_flux_side_id(libMesh::invalid_uint),
+    _cached_jacobian_elem_id(libMesh::invalid_uint),
+    _cached_jacobian_side_id(libMesh::invalid_uint)
 {
 }
 
 void
 RDGFluxBase::initialize()
 {
-  _cached_elem_id = libMesh::invalid_uint;
-  _cached_side_id = libMesh::invalid_uint;
+  _cached_flux_elem_id = libMesh::invalid_uint;
+  _cached_flux_side_id = libMesh::invalid_uint;
+  _cached_jacobian_elem_id = libMesh::invalid_uint;
+  _cached_jacobian_side_id = libMesh::invalid_uint;
 }
 
 void
@@ -52,10 +59,10 @@ RDGFluxBase::getFlux(const unsigned int iside,
                      const std::vector<Real> & uvec2,
                      const RealVectorValue & normal) const
 {
-  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  if (_cached_flux_elem_id != ielem || _cached_flux_side_id != iside)
   {
-    _cached_elem_id = ielem;
-    _cached_side_id = iside;
+    _cached_flux_elem_id = ielem;
+    _cached_flux_side_id = iside;
 
     calcFlux(uvec1, uvec2, normal, _flux);
   }
@@ -70,10 +77,10 @@ RDGFluxBase::getJacobian(const bool get_first_jacobian,
                          const std::vector<Real> & uvec2,
                          const RealVectorValue & normal) const
 {
-  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  if (_cached_jacobian_elem_id != ielem || _cached_jacobian_side_id != iside)
   {
-    _cached_elem_id = ielem;
-    _cached_side_id = iside;
+    _cached_jacobian_elem_id = ielem;
+    _cached_jacobian_side_id = iside;
 
     calcJacobian(uvec1, uvec2, normal, _jac1, _jac2);
   }
