@@ -1,0 +1,13 @@
+[Tests]
+  [./rename_block_generator_test]
+    type = 'Exodiff'
+    input = 'rename_boundary.i'
+    cli_args = '--mesh-only'
+    exodiff = 'rename_boundary_in.e'
+    requirement = 'MOOSE shall be able to rename boundary ids and names.'
+    design = 'meshgenerators/RenameBoundaryGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+[]
