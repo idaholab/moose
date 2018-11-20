@@ -644,7 +644,7 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p,
 Real
 MultiAppNearestNodeTransfer::bboxMaxDistance(const Point & p, const BoundingBox & bbox)
 {
-  std::array<Point, 2> source_points = {bbox.first, bbox.second};
+  std::array<Point, 2> source_points = {{bbox.first, bbox.second}};
 
   std::array<Point, 8> all_points;
   for (unsigned int x = 0; x < 2; x++)
@@ -668,7 +668,7 @@ MultiAppNearestNodeTransfer::bboxMaxDistance(const Point & p, const BoundingBox 
 Real
 MultiAppNearestNodeTransfer::bboxMinDistance(const Point & p, const BoundingBox & bbox)
 {
-  std::array<Point, 2> source_points = {bbox.first, bbox.second};
+  std::array<Point, 2> source_points = {{bbox.first, bbox.second}};
 
   std::array<Point, 8> all_points;
   for (unsigned int x = 0; x < 2; x++)
