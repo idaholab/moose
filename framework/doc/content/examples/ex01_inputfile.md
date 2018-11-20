@@ -163,9 +163,6 @@ Peacock or an external application that supports the Exodus II format (e.g., Par
 - [Diffusion.h](https://github.com/idaholab/moose/blob/devel/framework/include/kernels/Diffusion.h)
 - [Diffusion.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/Diffusion.C)
 
-
-[](---)
-
 ## Next Steps
 
 Although the Diffusion kernel is the only "physics" in the MOOSE framework, a large set of physics

@@ -15,6 +15,8 @@ in the heat flux on the two surfaces.
 It is also important to use the appropriate `gap_geometry_type` parameter (PLATE, CYLINDER, or
 SPHERE) for the model geometry.
 
+Two-dimensional Cartesian geometries are not restricted to be in or parallel to the X-Y coordinate plane.
+
 
 ## Example Input syntax
 
