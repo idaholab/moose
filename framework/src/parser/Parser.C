@@ -1099,6 +1099,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalarvaltype(unsigned int, unsigned int, long);
       setscalarvaltype(unsigned long, unsigned int, long);
       setscalarvaltype(long int, int64_t, long);
+      setscalarvaltype(unsigned long long, unsigned int, long);
 
       setscalar(bool, bool);
       setscalar(SubdomainID, int);
@@ -1191,6 +1192,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvectorvector(int);
       setvectorvector(long);
       setvectorvector(unsigned int);
+      setvectorvector(unsigned long long);
 
 // See vector type explanation
 #if LIBMESH_DOF_ID_BYTES == 8
