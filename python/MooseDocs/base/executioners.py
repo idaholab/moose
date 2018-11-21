@@ -100,7 +100,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorMixin):
         return self._ast_available
 
     def getSyntaxTree(self, page):
-        """Return the syntax tree for the supplied page."""
+        """Return a copy of the syntax tree for the supplied page."""
 
         if not self.isSyntaxTreeAvailable():
             msg = "The AST data for {} page is not available until tokenization is complete, " \
@@ -113,7 +113,10 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorMixin):
                   "was provided."
             raise exceptions.MooseDocsException(msg, page.__class__.__name__)
 
-        return self._tree_data.get(page.uid, None)
+        data = self._tree_data.get(page.uid, None)
+        if data is not None:
+            data = data.copy()
+        return data
 
     def getMetaData(self, page, key):
         """Return the desired meta data for the supplied page."""
@@ -420,7 +423,7 @@ class ParallelDemand(Executioner):
 
         for node in nodes:
             ast, meta = self.tokenize(node)
-            self._tree_data[node.uid] = ast
+            self._tree_data[node.uid] = ast.copy()
             self._meta_data[node.uid] = meta
             self.render(node, ast, meta)
 
