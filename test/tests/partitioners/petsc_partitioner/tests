@@ -10,6 +10,8 @@
     ptscotch = true
     min_parallel = 4
     max_parallel = 4
+    # PTScotch is not valgrind clean
+    valgrind = none
   [../]
 
   [./ptscotch_weight_elment]
@@ -25,6 +27,8 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+   # PTScotch is not valgrind clean
+    valgrind = none
   [../]
 
   [./ptscotch_weight_side]
@@ -39,6 +43,8 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+   # PTScotch is not valgrind clean
+    valgrind = none
   [../]
 
   [./ptscotch_weight_both]
@@ -53,6 +59,8 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+  # PTScotch is not valgrind clean
+    valgrind = none 
   [../]
 
   [./parmetis]
