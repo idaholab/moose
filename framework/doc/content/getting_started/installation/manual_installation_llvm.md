@@ -77,4 +77,3 @@ command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
 
 With the compiler stack ready, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
 
-!include getting_started/installation/post_moose_install.md
