@@ -1,4 +1,4 @@
-E# MOOSE-Wrapped Apps
+# MOOSE-Wrapped Apps
 
 ## Overview
 

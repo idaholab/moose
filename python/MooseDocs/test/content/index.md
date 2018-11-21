@@ -1,4 +1,4 @@
-!config NavigationExtension breadcrumbs=False
+!config navigation breadcrumbs=False
 
 # MooseDocs Test Pages
 

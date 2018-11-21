@@ -98,7 +98,7 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
             common.check_type("component", component, MooseDocs.base.components.TokenComponent)
             common.check_type("location", location, (str, int))
 
-        component.init(self)
+        component.setReader(self)
         self.addComponent(component)
 
         # Update the lexer

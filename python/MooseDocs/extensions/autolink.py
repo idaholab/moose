@@ -14,7 +14,7 @@ import re
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.base import components
-from MooseDocs.extensions import core, floats
+from MooseDocs.extensions import core, floats, heading
 from MooseDocs.tree import tokens
 
 def make_extension(**kwargs):
@@ -40,7 +40,7 @@ class AutoLinkExtension(components.Extension):
     def extend(self, reader, renderer):
         """Replace default core link components on reader and provide auto link rendering."""
 
-        self.requires(core, floats)
+        self.requires(core, floats, heading)
 
         reader.addInline(PageLinkComponent(), location='=LinkInline')
         reader.addInline(PageShortcutLinkComponent(), location='=ShortcutLinkInline')
@@ -103,6 +103,7 @@ class PageLinkComponent(core.LinkInline):
 class RenderLinkBase(components.RenderComponent):
 
     def createHTMLHelper(self, parent, token, page, desired):
+
         bookmark = token['bookmark']
 
         url = unicode(desired.relativeDestination(page))
@@ -110,15 +111,16 @@ class RenderLinkBase(components.RenderComponent):
             url += '#{}'.format(bookmark)
 
         link = core.Link(None, url=url)
-        if not token.children:
-            ast = self.getSyntaxTree(desired)
-            heading = common.find_heading(desired, ast, bookmark)
-            if heading is not None:
-                for child in heading:
+        if len(token.children) == 0:
+            head = heading.find_heading(self.translator, desired)
+
+            if head is not None:
+                for child in head:
                     child.parent = link
             else:
                 tokens.String(link, content=url)
         else:
+
             for child in token:
                 child.parent = link
 
@@ -140,7 +142,7 @@ class RenderAutoLink(RenderLinkBase):
     Create link to another page and extract the heading for the text, if no children provided.
     """
     def createHTML(self, parent, token, page):
-        desired = self.findPage(token['page'])
+        desired = self.translator.findPage(token['page'])
         return self.createHTMLHelper(parent, token, page, desired)
 
     def createLatex(self, parent, token, page):

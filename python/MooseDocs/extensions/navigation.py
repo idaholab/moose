@@ -14,6 +14,7 @@ import logging
 import json
 import anytree
 from MooseDocs import common
+from MooseDocs.extensions import core, heading
 from MooseDocs.base import components, renderers
 from MooseDocs.common import exceptions
 from MooseDocs.tree import html, pages
@@ -50,6 +51,7 @@ class NavigationExtension(components.Extension):
         return config
 
     def extend(self, reader, renderer):
+        self.requires(core, heading)
 
         menu = self.get('menu')
         if menu is None:
@@ -66,7 +68,7 @@ class NavigationExtension(components.Extension):
                 renderer.addJavaScript('fuse', "contrib/fuse/fuse.min.js")
                 renderer.addJavaScript('fuse_index', "js/search_index.js")
 
-    def postRead(self, content, page, meta):
+    def initMetaData(self, page, meta):
         """Initialize the meta data to hold search index data."""
         meta.initData('search', list)
 
@@ -78,29 +80,29 @@ class NavigationExtension(components.Extension):
 
         index = []
         title = None
-        for heading in anytree.search.findall_by_attr(ast, 'Heading'):
-            if (heading['level'] == 1) and (title is None):
-                title = heading.text()
+        for head in anytree.search.findall_by_attr(ast, 'Heading'):
+            if (head['level'] == 1) and (title is None):
+                title = head.text()
 
-            id_ = heading.get('id')
+            id_ = head.get('id')
             if id_ == u'':
-                id_ = heading.text('-').lower()
-            index.append(dict(title=title, text=heading.text(), bookmark=id_))
+                id_ = head.text('-').lower()
+            index.append(dict(title=title, text=head.text(), bookmark=id_))
         meta.getData('search').extend(index)
 
     def postExecute(self, content):
         """Build the JSON file containing the index data."""
-        dest = self._FindPageMixin__translator.get('destination') #pylint: disable=no-member
+        dest = self.translator.get('destination') #pylint: disable=no-member
         home = self.get('home')
         iname = os.path.join(dest, 'js', 'search_index.js')
         items = []
 
         for page in content:
-            meta = self.getMetaData(page)
+            meta = self.translator.getMetaData(page, 'search')
             if meta is None:
                 continue
             location = page.destination.replace(dest, home)
-            for data in meta.getData('search'):
+            for data in meta:
                 url = '{}#{}'.format(location, data['bookmark'])
                 items.append(dict(title=data['title'], text=data['text'], location=url))
 
@@ -177,14 +179,14 @@ class NavigationExtension(components.Extension):
         a = html.Tag(None, 'a', href=repo, class_='right')
 
         if 'github' in repo:
-            img0 = self.findPage('github-logo.png')
-            img1 = self.findPage('github-mark.png')
+            img0 = self.translator.findPage('github-logo.png')
+            img1 = self.translator.findPage('github-mark.png')
 
             html.Tag(a, 'img', src=img0.relativeDestination(page), class_='github-mark')
             html.Tag(a, 'img', src=img1.relativeDestination(page), class_='github-logo')
 
         elif 'gitlab' in repo:
-            img = self.findPage('gitlab-logo.png')
+            img = self.translator.findPage('gitlab-logo.png')
             html.Tag(a, 'img', src=img.relativeDestination(page), class_='gitlab-logo')
 
         nav.insert(0, a)
@@ -200,15 +202,13 @@ class NavigationExtension(components.Extension):
         """
 
         # Locate h1 heading, if it is found extract the rendered text
-        name = page.name if page else None # default
-        for node in anytree.PreOrderIter(root):
-            if node.name == 'h1':
-                name = node.text()
-                break
-
-        # Add <title> tag
+        h = heading.find_heading(self.translator, page)
+        page_name = h.text() if h else page.name
+        name = self.get('name', None)
         if name is not None:
-            html.Tag(head, 'title', string=u'{}|{}'.format(name, self.get('name')))
+            html.Tag(head, 'title', string=u'{}|{}'.format(page_name, self.get('name')))
+        else:
+            html.Tag(head, 'title', string=unicode(page_name))
 
     def _addSearch(self, parent, page):
 
@@ -272,10 +272,10 @@ class NavigationExtension(components.Extension):
 
         parts = page.local.split(os.sep)
         for i in range(1, len(parts)):
-            current = self.findPage(lambda p: p.local == os.path.join(*parts[:i])) #pylint: disable=cell-var-from-loop
+            current = self.translator.findPage(lambda p: p.local == os.path.join(*parts[:i])) #pylint: disable=cell-var-from-loop
 
             if isinstance(current, pages.Directory):
-                idx = self.findPages(os.path.join(current.local, 'index.md'))
+                idx = self.translator.findPages(os.path.join(current.local, 'index.md'))
                 if idx:
                     url = os.path.relpath(current.local,
                                           os.path.dirname(page.local)).replace('.md', '.html')
@@ -413,11 +413,10 @@ class NavigationExtension(components.Extension):
         div.addClass('moose-mega-menu-content')
         parent['data-target'] = id_
 
-        node = self.findPage(filename)
-        #TODO: There needs to be a better interface for doing this. Perhaps the extension
-        #      needs full access to the translator.
-        ast = self.getSyntaxTree(node) #pylint: disable=no-member
-        self._FindPageMixin__translator.renderer.render(div, ast, page) #pylint: disable=no-member
+        wrap = html.Tag(div, 'div', class_='moose-mega-menu-wrapper')
+        node = self.translator.findPage(filename)
+        ast = self.translator.getSyntaxTree(node) #pylint: disable=no-member
+        self.translator.renderer.render(wrap, ast, page) #pylint: disable=no-member
 
     def _buildDropdown(self, parent, page, tag_id, items):
         """Creates sublist for dropdown navigation."""
@@ -429,7 +428,7 @@ class NavigationExtension(components.Extension):
 
     def _findPath(self, page, path):
         """Locates page based on supplied path."""
-        node = self.findPage(path)
+        node = self.translator.findPage(path)
         if node is None:
             msg = 'Failed to locate navigation item: {}.'.format(path)
             LOG.error(msg)

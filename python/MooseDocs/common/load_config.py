@@ -41,24 +41,28 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.acronym',
                       'MooseDocs.extensions.content',
                       'MooseDocs.extensions.plotly',
+                      'MooseDocs.extensions.heading',
                       'MooseDocs.extensions.navigation']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_TRANSLATOR = 'MooseDocs.base.Translator'
+DEFAULT_EXECUTIONER = 'MooseDocs.base.ParallelBarrier'
 
-def load_config(filename):
+def load_config(filename, **kwargs):
     """
     Read the config.yml file and create the Translator object.
     """
     config = yaml_load(filename, root=MooseDocs.ROOT_DIR)
+    config.update(kwargs)
 
     extensions = _yaml_load_extensions(config)
     reader = _yaml_load_object('Reader', config, DEFAULT_READER)
     renderer = _yaml_load_object('Renderer', config, DEFAULT_RENDERER)
     content = _yaml_load_content(config, reader.EXTENSIONS)
+    executioner = _yaml_load_object('Executioner', config, DEFAULT_EXECUTIONER)
     translator = _yaml_load_object('Translator', config, DEFAULT_TRANSLATOR,
-                                   content, reader, renderer, extensions)
+                                   content, reader, renderer, extensions, executioner)
     return translator, config
 
 def load_extensions(ext_list, ext_configs=None):
@@ -84,7 +88,6 @@ def load_extensions(ext_list, ext_configs=None):
         else:
             obj = mod.make_extension(**ext_configs.get(name, dict()))
             # hack to allow build to disable via command line
-            obj._name = name.split('.')[-1] #pylint: disable=protected-access
             extensions.append(obj)
 
     return extensions
@@ -107,6 +110,9 @@ def _get_module(ext):
         raise exceptions.MooseDocsException(msg, ext, type(ext))
 
     return name, ext
+
+def _yaml_load_executioner(config):
+    """Load the Executioner objecte for the translator."""
 
 def _yaml_load_extensions(config):
     """Load extensions from the Extensions block of the YAML configuration file."""
@@ -156,21 +162,13 @@ def _yaml_load_object(name, config, default, *args):
     #    msg = "ERROR: The %s block must contain a valid object name."
     #    LOG.error(msg, name)
 
+
 def _yaml_load_content(config, in_ext):
     """Load the 'Content' section."""
-
     options = config.get('Content', None)
     if options is None:
         msg = "The 'Content' section is required."
         raise exceptions.MooseDocsException(msg)
 
-    items = []
-    if isinstance(options, list):
-        for value in options:
-            items.append(dict(root_dir=value, content=None))
-    elif isinstance(options, dict):
-        for _, value in options.iteritems():
-            content = value.get('content', None)
-            items.append(dict(root_dir=value['root_dir'], content=content))
-
+    items = MooseDocs.common.get_items(options)
     return MooseDocs.common.get_content(items, in_ext)

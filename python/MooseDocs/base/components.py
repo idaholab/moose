@@ -6,7 +6,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 """
 An Extension is comprised of Component objects, the objects are used for tokenizeing markdown
 and converting tokens to rendered HTML.
@@ -14,41 +13,7 @@ and converting tokens to rendered HTML.
 from MooseDocs.common import exceptions, parse_settings, mixins
 from MooseDocs.tree import tokens
 
-class FindPageMixin(object):
-    """
-    Mixin for findPage/findPages methods needed in the Components and Extension
-    """
-    def __init__(self):
-        self.__translator = None
-
-    def setTranslator(self, translator):
-        """
-        Method called by Translator to allow find methods to operate.
-        """
-        self.__translator = translator
-
-    def findPages(self, name):
-        """Locate pages matching the supplied name (see Translator::findPages)."""
-        return self.__translator.findPages(name)
-
-    def findPage(self, name):
-        """Locate  a page matching the supplied name (see Translator::findPage)."""
-        return self.__translator.findPage(name)
-
-    def getMetaData(self, page):
-        """Return a copy of the meta data for the supplied page."""
-        return self.__translator.getMetaData(page)
-
-    def getSyntaxTree(self, page, **kwargs):
-        """
-        Return the Syntax tree for the supplied page.
-
-        This is restricted to the RenderComponent to allow to support the various types of
-        parallel builds, see Translator execute.
-        """
-        return self._FindPageMixin__translator.getSyntaxTree(page, **kwargs) #pylint: disable=no-member
-
-class Extension(mixins.ConfigObject, FindPageMixin):
+class Extension(mixins.ConfigObject, mixins.TranslatorMixin):
     """
     Base class for creating extensions. An extension is simply a mechanism to allow for
     the creation of reader/renderer components to be added to the translation process.
@@ -69,7 +34,7 @@ class Extension(mixins.ConfigObject, FindPageMixin):
 
     def __init__(self, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
-        FindPageMixin.__init__(self)
+        mixins.TranslatorMixin.__init__(self)
         self.__requires = set()
 
         # The 'active' setting must be able to be set outside of the configure options to allow
@@ -77,6 +42,14 @@ class Extension(mixins.ConfigObject, FindPageMixin):
         # if only the config is used it is reset after building the page to the default to
         # support the config extension.
         self.__active = self.get('active')
+
+        # Extension name
+        self.__name = self.__class__.__name__.split('.')[-1].replace('Extension', '').lower()
+
+    @property
+    def name(self):
+        """Return the name of the extension."""
+        return self.__name
 
     @property
     def active(self):
@@ -100,6 +73,12 @@ class Extension(mixins.ConfigObject, FindPageMixin):
         """
         self.__requires.update(args)
 
+    def initMetaData(self, page, meta):
+        """
+        Called prior to reading.
+        """
+        pass
+
     def postRead(self, content, page, meta):
         """
         Called after to reading the file.
@@ -111,15 +90,28 @@ class Extension(mixins.ConfigObject, FindPageMixin):
         """
         pass
 
+    def postWrite(self):
+        """
+        Called after renderer has written content.
+
+        """
+        pass
+
     def preExecute(self, content):
         """
-        Called by Translator prior to beginning conversion, after reading.
+        Called by Translator prior to beginning conversion.
+
+        Input:
+            content[list]: List of all Page objects.
         """
         pass
 
     def postExecute(self, content):
         """
-        Called by Translator after all conversion is complete, prior to writing.
+        Called by Translator after all conversion is complete.
+
+        Input:
+            content[list]: List of all Page objects.
         """
         pass
 
@@ -159,14 +151,14 @@ class Extension(mixins.ConfigObject, FindPageMixin):
         """
         pass
 
-class Component(FindPageMixin):
+class Component(mixins.TranslatorMixin):
     """
     Each extension is made up of components, both for tokenizing and rendering. The components
     provide a means for defining settings as well as other customizable features required for
     translation.
     """
     def __init__(self):
-        FindPageMixin.__init__(self)
+        mixins.TranslatorMixin.__init__(self)
         self.__extension = None
 
     @property

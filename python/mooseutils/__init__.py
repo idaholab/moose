@@ -15,6 +15,7 @@ from message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from MooseException import MooseException
 from eval_path import eval_path
 from AutoPropertyMixin import AutoPropertyMixin, Property, addProperty
+import parallel
 
 try:
     from hit_load import hit_load, HitNode, hit_parse

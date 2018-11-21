@@ -35,6 +35,7 @@ Extensions:
     MooseDocs.extensions.config: default
     MooseDocs.extensions.content: default
     MooseDocs.extensions.plotly: default
+    MooseDocs.extensions.heading: default
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose

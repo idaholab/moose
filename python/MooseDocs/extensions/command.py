@@ -33,7 +33,7 @@ class CommandExtension(components.Extension):
         common.check_type('SUBCOMMAND', command.SUBCOMMAND, (type(None), str, tuple))
 
         # Initialize the component
-        command.init(reader)
+        command.setReader(reader)
         command.setExtension(self)
 
         # Subcommands can be tuples

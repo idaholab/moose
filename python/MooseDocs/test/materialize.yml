@@ -18,6 +18,7 @@ Renderer:
 
 Extensions:
     disable_defaults: True
+    MooseDocs.extensions.config: default
     MooseDocs.extensions.core: default
     MooseDocs.extensions.floats: default
     MooseDocs.extensions.command: default
@@ -33,9 +34,9 @@ Extensions:
     MooseDocs.extensions.bibtex: default
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.layout: default
-    MooseDocs.extensions.config: default
     MooseDocs.extensions.content: default
     MooseDocs.extensions.plotly: default
+    MooseDocs.extensions.heading: default
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose

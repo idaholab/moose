@@ -1,6 +1,6 @@
 !config renderer name=Config Extension
 
-!config MediaExtension prefix=Flag
+!config media prefix=Flag
 
 # Config Extension
 

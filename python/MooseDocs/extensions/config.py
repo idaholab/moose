@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import collections
 from MooseDocs import common
 from MooseDocs.extensions import command
 
@@ -25,6 +25,7 @@ class ConfigExtension(command.CommandExtension):
 
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
+        self.__configurations = collections.defaultdict(dict)
 
     def postRead(self, content, page, meta):
         """Updates configuration items."""
@@ -32,16 +33,29 @@ class ConfigExtension(command.CommandExtension):
             for match in command.BlockInlineCommand.RE.finditer(content):
                 if match.group('command') == 'config':
                     subcommand = match.group('subcommand')
-                    meta.initData(subcommand, dict)
                     _, settings = common.match_settings(dict(), match.group('settings'))
-                    meta.getData(subcommand).update(**settings)
+                    self.__configurations[page.uid][subcommand] = settings
+
+    def preTokenize(self, ast, page, meta, reader):
+        for key, value in self.__configurations[page.uid].iteritems():
+            self.translator.updateConfiguration(key, **value)
+
+    def postTokenize(self, ast, page, meta, reader):
+        self.translator.resetConfigurations()
+
+    def preRender(self, result, page, meta, renderer):
+        for key, value in self.__configurations[page.uid].iteritems():
+            self.translator.updateConfiguration(key, **value)
+
+    def postWrite(self, *args):
+        self.translator.resetConfigurations()
 
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(reader, ConfigRendererCommand())
 
 class ConfigRendererCommand(command.CommandComponent):
-    """This does nothing but that serves to hide the command syntax from outputting."""
+    """This does nothing but serves to hide the command syntax from outputting."""
     COMMAND = 'config'
     SUBCOMMAND = '*'
     PARSE_SETTINGS = False

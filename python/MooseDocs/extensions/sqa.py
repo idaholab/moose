@@ -180,7 +180,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
         for requirements in self.extension.requirements.itervalues():
             for req in requirements:
                 for d in req.design:
-                    node = self.findPage(d)
+                    node = self.translator.findPage(d)
                     design[node].append(req)
 
         for node, requirements in design.iteritems():

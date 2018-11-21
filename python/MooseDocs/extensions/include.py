@@ -25,7 +25,7 @@ class IncludeExtension(command.CommandExtension):
         self.requires(command)
         self.addCommand(reader, IncludeCommand())
 
-    def postRead(self, content, page, meta):
+    def initMetaData(self, page, meta):
         meta.initData('dependencies', set)
 
     def postTokenize(self, ast, page, meta, reader):
@@ -50,7 +50,7 @@ class IncludeCommand(command.CommandComponent):
         """
         Tokenize the included content and create dependency between pages.
         """
-        include_page = self.findPage(info['subcommand'])
+        include_page = self.translator.findPage(info['subcommand'])
         content, line = common.extractContent(self.reader.read(include_page), self.settings)
         self.reader.tokenize(parent, content, include_page, line=line)
         self.extension.addDependency(include_page)

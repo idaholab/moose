@@ -413,7 +413,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
             if group in obj.groups:
                 count += 1
                 item = SyntaxListItem(parent)
-                nodes = self.findPages(obj.markdown())
+                nodes = self.translator.findPages(obj.markdown())
                 if len(nodes) == 0:
                     tokens.String(item, content=unicode(obj.name))
                 else:

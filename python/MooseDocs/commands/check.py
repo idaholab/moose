@@ -69,12 +69,13 @@ def check(translator,
     app_syntax = None
     extension = None
     for ext in translator.extensions:
-        extension = ext
-        if isinstance(ext, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
+        if ext.name == 'appsyntax':
+            extension = ext
+            extension.preExecute(translator.content)
             app_syntax = ext.syntax
             break
 
-    if extension['disable']:
+    if not extension.active:
         LOG.info("Syntax is disabled, skipping the check.")
         return
 

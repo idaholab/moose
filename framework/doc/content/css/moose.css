@@ -98,16 +98,27 @@ li.moose-mega-menu-trigger i{
     margin-left:0;
 }
 
-.moose-mega-menu ul{
+.moose-mega-menu-wrapper{
+    margin:20px;
+}
+
+.moose-mega-menu-wrapper h1,
+.moose-mega-menu-wrapper h2,
+.moose-mega-menu-wrapper h3,
+.moose-mega-menu-wrapper h4,
+.moose-mega-menu-wrapper h5,
+.moose-mega-menu-wrapper h6{
+    margin:0;
     padding:0;
+    padding-bottom:6px;
+    font-size:125%;
+    font-weight:100;
 }
 
-.moose-mega-menu h1:first-of-type{
-    margin-top:0px;
-}
-
-.moose-mega-menu .modal-content{
-    margin:0px;
+.moose-mega-menu-wrapper ol,
+.moose-mega-menu-wrapper ul{
+    margin:0;
+    margin-bottom:15px;
 }
 
 /*

@@ -139,6 +139,19 @@ def get_files(items, in_ext, git_ls_files=True):
 
     return filenames
 
+def get_items(options):
+    """Helper for building content, see load_config.py"""
+    items = []
+    if isinstance(options, list):
+        for value in options:
+            items.append(dict(root_dir=value, content=None))
+    elif isinstance(options, dict):
+        for _, value in options.iteritems():
+            content = value.get('content', None)
+            items.append(dict(root_dir=value['root_dir'], content=content))
+
+    return items
+
 def get_content(items, in_ext):
     """
     Create a tree of files for processing.

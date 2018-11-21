@@ -35,6 +35,11 @@ def command_line_options(subparser, parent):
                         help="A list of extensions to disable.")
     parser.add_argument('--fast', action='store_true',
                         help="Build the pages with the slowest extension (appsyntax) disabled.")
+    parser.add_argument('--executioner',
+                        help="Select the mode of execution " \
+                             "(default: MooseDocs.base.ParallelBarrier).")
+    parser.add_argument('--profile', action='store_true',
+                        help="Build the pages with python profiling.")
     parser.add_argument('--destination',
                         default=None,
                         help="Destination for writing build content.")
@@ -84,20 +89,17 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         self._config = yaml_load(options.config, root=MooseDocs.ROOT_DIR)
 
         # Determine the directories to watch
-        # TODO: This list is not exact, but I am hoping it is close enough, at least for now
-        # I might just need to watch the repo
-        base_dirs = set()
-        for node in self._translator.findPages(lambda p: isinstance(p, pages.Directory)):
-            loc = node.local.split(os.sep, 1)[0]
-            idx = node.source.find(loc)
-            base_dirs.add(node.source[:idx+len(loc)])
+        roots = set()
+        self._items = common.get_items(self._config.get('Content'))
+        for root, _ in common.get_files(self._items, self._translator.reader.EXTENSIONS):
+            roots.add(root)
 
-        # Add watcher to each directory
-        for loc in base_dirs:
-            self.watch(loc, self.build, delay=1)
+        for root in roots:
+            self.watch(root, self.build, delay=1)
 
     def build(self):
         """Build the necessary pages based on the current filepath."""
+        print 'HERE:', self.filepath
 
         # Locate the page to be translated
         page = self._getPage(self.filepath)
@@ -108,12 +110,11 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         # Build a list of pages to be translated including the dependencies
         nodes = [page]
         for node in self._translator.content:
-            meta = self._translator.getMetaData(node)
-            if meta:
-                uids = meta.getData('dependencies')
-                if page.uid in uids:
-                    nodes.append(node)
+            uids = self._translator.getMetaData(node, 'dependencies') or []
+            if page.uid in uids:
+                nodes.append(node)
 
+        print 'PAGE:', nodes
         self._translator.execute(self._options.num_threads, nodes)
 
     def _getPage(self, source):
@@ -124,11 +125,9 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
             if source == page.source:
                 return page
 
+
         # Build a list of all filenames
-        items = self._config.get('Content')
-        filenames = common.get_files(items,
-                                     self._translator.reader.EXTENSIONS,
-                                     self._translator.renderer.EXTENSION)
+        filenames = common.get_files(self._items, self._translator.reader.EXTENSIONS, False)
 
         # Build a page object if the filename shows up in the list of available files
         for root, filename in filenames:
@@ -139,6 +138,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                 if isinstance(page, pages.Source):
                     page.output_extension = self._translator.renderer.EXTENSION
                 return page
+
 
 def _init_large_media():
     """Check submodule for large_media."""
@@ -163,21 +163,28 @@ def main(options):
     # Make sure "large_media" exists in MOOSE
     _init_large_media()
 
+    # Setup executioner
+    kwargs = dict()
+    if options.executioner:
+        kwargs['Executioner'] = {'type':options.executioner}
+
     # Create translator
-    translator, _ = common.load_config(options.config)
+    translator, _ = common.load_config(options.config, **kwargs)
     if options.destination:
         translator.update(destination=mooseutils.eval_path(options.destination))
+    if options.profile:
+        translator.executioner.update(profile=True)
     translator.init()
 
     # Disable slow extensions for --fast
     if options.fast:
         options.disable.append('appsyntax')
-        options.disable.append('navigation')
+       # options.disable.append('navigation')
 
     # Disable extensions based on command line arguments
     if options.disable:
         for ext in translator.extensions:
-            if ext._name in options.disable: #pylint: disable=protected-access
+            if ext.name in options.disable: #pylint: disable=protected-access
                 ext.setActive(False)
 
     # Replace "home" with local server

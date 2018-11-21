@@ -1,10 +1,28 @@
 [Tests]
   issues = '#6699'
   design = 'MooseDocs/index.md'
-  [materialize]
+  [materialize_barrier]
     type = RunCommand
-    command = 'python moosedocs.py verify --form materialize'
-    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support."
+    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
+    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelBarrier executioner."
+  []
+  [materialize_pipe]
+    skip = 'AutoLink problem'
+    type = RunCommand
+    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
+    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelPipe executioner."
+  []
+  [materialize_demand]
+    skip = 'AutoLink problem'
+    type = RunCommand
+    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelDemand'
+    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelDemand executioner."
+  []
+  [materialize_serial]
+    skip = 'AutoLink problem'
+    type = RunCommand
+    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
+    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the Serial executioner."
   []
   [html]
     type = RunCommand

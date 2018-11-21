@@ -31,6 +31,9 @@ def command_line_options(subparser, parent):
                         help="The desired output format to verify.")
     parser.add_argument('--update-gold', action='store_true',
                         help="Copy the rendered results to the gold directory.")
+    parser.add_argument('--executioner',
+                        default='MooseDocs.base.ParallelBarrier',
+                        help="Select the mode of execution.")
 
 def insert_moose_dir(content):
     """Helper for adding '${MOOSE_DIR}' to content."""
@@ -92,7 +95,9 @@ def main(options):
 
     # Create the content
     config = options.form + '.yml'
-    subprocess.check_output(['python', 'moosedocs.py', 'build', '--config', config],
+    subprocess.check_output(['python', 'moosedocs.py', 'build',
+                             '--config', config,
+                             '--executioner', options.executioner],
                             cwd=os.path.join(MooseDocs.MOOSE_DIR, 'python', 'MooseDocs', 'test'))
 
     # Define output and gold directories

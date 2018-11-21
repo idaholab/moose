@@ -1,4 +1,4 @@
-!config renderer breadcrumbs=False scrollspy=False
+!config navigation breadcrumbs=False scrollspy=False
 
 # HOME style=visibility:hidden;
 
@@ -41,4 +41,3 @@ read our [getting_started/index.md] page.
 <br>
 
 !media media/inl_blue.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
-

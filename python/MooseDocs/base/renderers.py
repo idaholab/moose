@@ -54,7 +54,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
             common.check_type("name", name, unicode)
             common.check_type("component", component, MooseDocs.base.components.RenderComponent)
-        component.init(self)
+        component.setRenderer(self)
         self.addComponent(component)
         self.__functions[name] = self._method(component)
 

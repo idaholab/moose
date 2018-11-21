@@ -11,10 +11,9 @@
 import os
 import uuid
 import mooseutils
-from MooseDocs import common
 from MooseDocs.base import components
 from MooseDocs.tree import pages, tokens, html
-from MooseDocs.extensions import core, command
+from MooseDocs.extensions import core, command, heading
 
 def make_extension(**kwargs):
     return ContentExtension(**kwargs)
@@ -33,7 +32,7 @@ class ContentExtension(command.CommandExtension):
         return config
 
     def extend(self, reader, renderer):
-        self.requires(core, command)
+        self.requires(core, heading, command)
         self.addCommand(reader, ContentCommand())
         self.addCommand(reader, AtoZCommand())
         renderer.add('Collapsible', RenderCollapsible())
@@ -55,7 +54,7 @@ class ContentCommand(command.CommandComponent):
         tree = dict()
         tree[(u'',)] = core.UnorderedList(parent, browser_default=False)
         func = lambda p: p.local.startswith(location) and isinstance(p, pages.Directory)
-        for node in self.findPages(func):
+        for node in self.translator.findPages(func):
             key = tuple(node.local.strip(os.sep).replace(location, '').split(os.sep))
             if key not in tree:
                 col = Collapsible(tree[key[:-1]], summary=key[-1])
@@ -63,7 +62,7 @@ class ContentCommand(command.CommandComponent):
                 tree[key] = core.UnorderedList(li, browser_default=False)
 
         func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
-        for node in self.findPages(func):
+        for node in self.translator.findPages(func):
             dname = os.path.dirname(node.local).strip(os.sep)
             key = tuple(dname.replace(location, '').split(os.sep))
             loc = node.relativeDestination(page)
@@ -111,9 +110,8 @@ class RenderAtoZ(components.RenderComponent):
 
         # Extract headings, default to filename if a heading is not found
         func = lambda n: n.local.startswith(token['location']) and isinstance(n, pages.Source)
-        for node in self.findPages(func):
-            ast = self.getSyntaxTree(node)
-            h_node = common.find_heading(node, ast)
+        for node in self.translator.findPages(func):
+            h_node = heading.find_heading(self.translator, node)
             if h_node is not None:
                 r = html.Tag(None, 'span')
                 self.renderer.render(r, h_node, page)

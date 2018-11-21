@@ -58,7 +58,7 @@ class MediaCommandBase(command.CommandComponent):
         if src.startswith('http'):
             location = src
         else:
-            node = self.findPage(src)
+            node = self.translator.findPage(src)
             location = unicode(node.relativeSource(page))
 
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)

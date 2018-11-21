@@ -107,29 +107,22 @@ class ReaderObject(object):
     def __init__(self):
         self.__reader = None
 
-    def init(self, reader):
+    def setReader(self, reader):
         """Initialize the class with the Reader object."""
-        if self.initialized():
-            msg = "The {} object has already been initialized, this method should not " \
-                  "be called twice."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
-
         check_type('reader', reader, MooseDocs.base.readers.Reader)
         self.__reader = reader
-
-    def initialized(self):
-        """Returns True if the init method was called."""
-        return self.__reader is not None
 
     @property
     def reader(self):
         """Return the Reader object."""
-        if self.__reader is None:
-            msg = "The init() method of the {} object must be called prior to accessing the " \
-                  "reader property."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
-
+        self.assertInitialized()
         return self.__reader
+
+    def assertInitialized(self):
+        """Error if the reader is not set."""
+        if self.__reader is None:
+            msg = "The setTranslator() method must be called prior to accessing this property."
+            raise MooseDocs.common.exceptions.MooseDocsException(msg)
 
 class RendererObject(object):
     """
@@ -138,29 +131,21 @@ class RendererObject(object):
     def __init__(self):
         self.__renderer = None
 
-    def init(self, renderer):
+    def setRenderer(self, renderer):
         """Initialize the class with the Renderer object."""
-        if self.initialized():
-            msg = "The {} object has already been initialized, this method should not " \
-                  "be called twice."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
-
         check_type('renderer', renderer, MooseDocs.base.renderers.Renderer)
         self.__renderer = renderer
-
-    def initialized(self):
-        """Returns True if the init method was called."""
-        return self.__renderer is not None
 
     @property
     def renderer(self):
         """Return the Renderer object."""
-        if self.__renderer is None:
-            msg = "The init() method of the {} object must be called prior to accessing this " \
-                  "property."
-            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
-
         return self.__renderer
+
+    def assertInitialized(self):
+        """Error if the renderer has not been set."""
+        if self.__renderer is None:
+            msg = "The setRenderer() method must be called prior to accessing this property."
+            raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
 
 class ComponentObject(object):
     """
@@ -182,3 +167,29 @@ class ComponentObject(object):
         """
         check_type("component", comp, MooseDocs.base.components.Component)
         self.__components.append(comp)
+
+class TranslatorMixin(object):
+    """
+    Mixin for accessing translator (e.g., Extensions and Components).
+    """
+    def __init__(self):
+        self.__translator = None
+
+    def setTranslator(self, translator):
+        """
+        Method called by Translator to allow find methods to operate.
+        """
+        check_type('translator', translator, MooseDocs.base.translators.Translator)
+        self.__translator = translator
+
+    @property
+    def translator(self):
+        """Return the translator instance."""
+        self.assertInitialized()
+        return self.__translator
+
+    def assertInitialized(self):
+        """Error if the translator is not set."""
+        if self.__translator is None:
+            msg = "The setTranslator() method must be called prior to accessing this property."
+            raise MooseDocs.common.exceptions.MooseDocsException(msg)

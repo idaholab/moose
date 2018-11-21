@@ -30,11 +30,13 @@ Translators:
 
 Extensions:
     MooseDocs.extensions.navigation:
+        name: 'MOOSE'
+        repo: https://github.com/idaholab/moose
+        home: https://www.mooseframework.org
         menu:
-            Getting Started: getting_started.menu.md
+            Getting Started: getting_started/index.md
             Documentation: documentation.menu.md
             Help: help.menu.md
-            Wiki (deprecated): https://www.mooseframework.org/old/wiki
             News: newsletter/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/combined
