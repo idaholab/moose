@@ -73,6 +73,14 @@ a {
 	background-color: var(--inl-blue);
 }
 
+/*
+  Set a margin between <p> tags, if two or more paragraphs exist within an alert
+ */
+.card .card-content p + p
+{
+  margin-top:10px;
+}
+
 .moose-exception {
   color: red;
 }
