@@ -52,7 +52,7 @@
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-5
+    abs_zero = 1e-4
     max_time = 800
   [../]
 
