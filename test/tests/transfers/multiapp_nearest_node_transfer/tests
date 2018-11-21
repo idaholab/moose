@@ -6,6 +6,7 @@
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#1866 #12245'
     requirement = "The system shall transfer both nodal and elemental fields to a SubApp from the Master App."
+    max_parallel = 4 # Ticket #12523
   [../]
 
   [./fromsub]
@@ -70,6 +71,7 @@
     design = 'transfers/MultiAppNearestNodeTransfer.md'
     issues = '#5360'
     requirement = "The system shall work when there are multiple SubApps present."
+    max_parallel = 4 # Ticket #12523
   [../]
 
   [./parallel]
