@@ -69,14 +69,14 @@ ${MOOSE_DIR}/framework/doc/content/utilities/MooseDocs/setup.md -> ${HOME}/.loca
 The Extensions section is used to enable non-default or custom extensions as well as change the
 configuration for existing extensions. The list of default extensions is shown in
 [default-extensions]. For example, the following snippet changes the settings for the
-[panoptic.md] extension. Note, the first level key name ("globals") is arbitrary and the
+[common.md] extension. Note, the first level key name ("globals") is arbitrary and the
 "type" key name under that is required. The value matches with the python package loaded, as in
 [default-extensions].
 
 ```yaml
 Extensions:
     globals:
-        type: MooseDocs.extensions.panoptic
+        type: MooseDocs.extensions.common
         shortcuts: !include framework/doc/globals.yml
 ```
 

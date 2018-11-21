@@ -9,8 +9,7 @@ Renderer:
     home: /modules/stochastic_tools
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/stochastic_tools
         hide:
             framework: !include framework/doc/hidden.yml
@@ -20,9 +19,7 @@ Extensions:
         includes:
             - framework/include
             - modules/stochastic_tools/include
-    globals:
-        type: MooseDocs.extensions.panoptic
+    MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
-    acronyms:
-        type: MooseDocs.extensions.acronym
+    MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml

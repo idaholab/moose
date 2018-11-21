@@ -9,46 +9,9 @@ Renderer:
     home: /
 
 Extensions:
-    disable_defaults: True
-    MooseDocs.extensions.core: default
-    MooseDocs.extensions.floats:
-        active: False
-    MooseDocs.extensions.command:
-        active: False
-    MooseDocs.extensions.include:
-        active: False
-    MooseDocs.extensions.media:
-        active: False
-    MooseDocs.extensions.listing:
-        active: False
-    MooseDocs.extensions.table:
-        active: False
-    MooseDocs.extensions.autolink:
-        active: False
-    MooseDocs.extensions.devel:
-        active: False
-    MooseDocs.extensions.package:
-        active: False
-    MooseDocs.extensions.alert:
-        active: False
-    MooseDocs.extensions.katex:
-        active: False
-    MooseDocs.extensions.bibtex:
-        active: False
-    MooseDocs.extensions.panoptic:
-        active: False
-    MooseDocs.extensions.layout:
-        active: False
-    MooseDocs.extensions.config:
-        active: False
-    MooseDocs.extensions.materialicon:
-        active: False
-    MooseDocs.extensions.content:
-        active: False
-    MooseDocs.extensions.plotly:
+    MooseDocs.extensions.navigation:
         active: False
     MooseDocs.extensions.appsyntax:
-        active: False
         executable: ${MOOSE_DIR}/test
         hide:
             framework: !include framework/doc/hidden.yml
@@ -58,8 +21,6 @@ Extensions:
         includes:
             - framework/include
     MooseDocs.extensions.common:
-        active: False
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
-        active: False
         acronyms: !include framework/doc/acronyms.yml

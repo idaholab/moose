@@ -32,7 +32,7 @@ class NavigationExtension(components.Extension):
     @staticmethod
     def defaultConfig():
         config = components.Extension.defaultConfig()
-        config['menu'] = (None, "Navigation items, this can either be a *.menu.md file or dict. " \
+        config['menu'] = (dict(), "Navigation items, this can either be a *.menu.md file or dict. "\
                           "The former creates a 'mega menu' and the later uses dropdowns.")
         config['search'] = (True, "Enable/disable the search bar.")
         config['home'] = ('', "The homepage for the website.")
@@ -54,12 +54,12 @@ class NavigationExtension(components.Extension):
         self.requires(core, heading)
 
         menu = self.get('menu')
-        if menu is None:
+        if (menu is None) and (renderer.get('navigation', None) is not None):
             msg = "The navigation setting in the MaterializeRenderer is deprecated, " \
                   "please update your code to use the 'menu' setting within the " \
                   "MooseDocs.extensions.navigation extension."
             LOG.warning(msg)
-            self.update(menu=renderer.get('navigation', None))
+            self.update(menu=renderer.get('navigation'))
 
         if isinstance(renderer, renderers.MaterializeRenderer):
             renderer.addJavaScript('nav', 'js/navigation.js')
@@ -378,7 +378,7 @@ class NavigationExtension(components.Extension):
     def _createNavigation(self, ul, page, mega=True):
         """Helper for creating navigation lists."""
 
-        for key, value in self.get('menu').iteritems(): #pylint: disable=no-member
+        for key, value in self.get('menu', dict()).iteritems(): #pylint: disable=no-member
 
             li = html.Tag(ul, 'li')
             if isinstance(value, str) and value.endswith('menu.md') and mega:

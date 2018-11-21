@@ -13,8 +13,7 @@ Renderer:
     home: /modules/porous_flow
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/porous_flow
         hide:
             framework: !include framework/doc/hidden.yml
@@ -30,9 +29,7 @@ Extensions:
             - modules/fluid_properties/include
             - modules/chemical_reactions/include
             - modules/rdg/include
-    globals:
-        type: MooseDocs.extensions.panoptic
+    MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
-    acronyms:
-        type: MooseDocs.extensions.acronym
+    MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
