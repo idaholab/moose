@@ -19,15 +19,21 @@ validParams<InternalSideFluxBase>()
 }
 
 InternalSideFluxBase::InternalSideFluxBase(const InputParameters & parameters)
-  : ThreadedGeneralUserObject(parameters)
+  : ThreadedGeneralUserObject(parameters),
+    _cached_flux_elem_id(libMesh::invalid_uint),
+    _cached_flux_neig_id(libMesh::invalid_uint),
+    _cached_jacobian_elem_id(libMesh::invalid_uint),
+    _cached_jacobian_neig_id(libMesh::invalid_uint)
 {
 }
 
 void
 InternalSideFluxBase::initialize()
 {
-  _cached_elem_id = 0;
-  _cached_neig_id = 0;
+  _cached_flux_elem_id = libMesh::invalid_uint;
+  _cached_flux_neig_id = libMesh::invalid_uint;
+  _cached_jacobian_elem_id = libMesh::invalid_uint;
+  _cached_jacobian_neig_id = libMesh::invalid_uint;
 }
 
 void
@@ -53,10 +59,10 @@ InternalSideFluxBase::getFlux(unsigned int iside,
                               const std::vector<Real> & uvec2,
                               const RealVectorValue & dwave) const
 {
-  if (_cached_elem_id != ielem || _cached_neig_id != ineig)
+  if (_cached_flux_elem_id != ielem || _cached_flux_neig_id != ineig)
   {
-    _cached_elem_id = ielem;
-    _cached_neig_id = ineig;
+    _cached_flux_elem_id = ielem;
+    _cached_flux_neig_id = ineig;
 
     calcFlux(iside, ielem, ineig, uvec1, uvec2, dwave, _flux);
   }
@@ -72,10 +78,10 @@ InternalSideFluxBase::getJacobian(Moose::DGResidualType type,
                                   const std::vector<Real> & uvec2,
                                   const RealVectorValue & dwave) const
 {
-  if (_cached_elem_id != ielem || _cached_neig_id != ineig)
+  if (_cached_jacobian_elem_id != ielem || _cached_jacobian_neig_id != ineig)
   {
-    _cached_elem_id = ielem;
-    _cached_neig_id = ineig;
+    _cached_jacobian_elem_id = ielem;
+    _cached_jacobian_neig_id = ineig;
 
     calcJacobian(iside, ielem, ineig, uvec1, uvec2, dwave, _jac1, _jac2);
   }

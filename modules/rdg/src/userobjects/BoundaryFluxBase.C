@@ -18,15 +18,21 @@ validParams<BoundaryFluxBase>()
 }
 
 BoundaryFluxBase::BoundaryFluxBase(const InputParameters & parameters)
-  : ThreadedGeneralUserObject(parameters)
+  : ThreadedGeneralUserObject(parameters),
+    _cached_flux_elem_id(libMesh::invalid_uint),
+    _cached_flux_side_id(libMesh::invalid_uint),
+    _cached_jacobian_elem_id(libMesh::invalid_uint),
+    _cached_jacobian_side_id(libMesh::invalid_uint)
 {
 }
 
 void
 BoundaryFluxBase::initialize()
 {
-  _cached_elem_id = 0;
-  _cached_side_id = libMesh::invalid_uint;
+  _cached_flux_elem_id = libMesh::invalid_uint;
+  _cached_flux_side_id = libMesh::invalid_uint;
+  _cached_jacobian_elem_id = libMesh::invalid_uint;
+  _cached_jacobian_side_id = libMesh::invalid_uint;
 }
 
 void
@@ -50,10 +56,10 @@ BoundaryFluxBase::getFlux(unsigned int iside,
                           const std::vector<Real> & uvec1,
                           const RealVectorValue & dwave) const
 {
-  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  if (_cached_flux_elem_id != ielem || _cached_flux_side_id != iside)
   {
-    _cached_elem_id = ielem;
-    _cached_side_id = iside;
+    _cached_flux_elem_id = ielem;
+    _cached_flux_side_id = iside;
 
     calcFlux(iside, ielem, uvec1, dwave, _flux);
   }
@@ -66,10 +72,10 @@ BoundaryFluxBase::getJacobian(unsigned int iside,
                               const std::vector<Real> & uvec1,
                               const RealVectorValue & dwave) const
 {
-  if (_cached_elem_id != ielem || _cached_side_id != iside)
+  if (_cached_jacobian_elem_id != ielem || _cached_jacobian_side_id != iside)
   {
-    _cached_elem_id = ielem;
-    _cached_side_id = iside;
+    _cached_jacobian_elem_id = ielem;
+    _cached_jacobian_side_id = iside;
 
     calcJacobian(iside, ielem, uvec1, dwave, _jac1);
   }

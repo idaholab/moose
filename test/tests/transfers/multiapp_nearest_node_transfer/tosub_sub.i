@@ -14,11 +14,21 @@
 []
 
 [AuxVariables]
-  [./from_master]
+  [./nodal_source_from_master_nodal]
+    family = LAGRANGE
+    order = FIRST
   [../]
-  [./elemental_from_master]
-    order = CONSTANT
+  [./nodal_source_from_master_elemental]
     family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./elemental_source_from_master_nodal]
+    family = LAGRANGE
+    order = FIRST
+  [../]
+  [./elemental_source_from_master_elemental]
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 

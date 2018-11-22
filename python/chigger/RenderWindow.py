@@ -12,6 +12,7 @@ import os
 import vtk
 
 import base
+import annotations
 import observers
 import misc
 import mooseutils
@@ -63,8 +64,15 @@ class RenderWindow(base.ChiggerObject):
         self._results = [misc.ChiggerBackground()]
         self.__active = None
 
+        self.__watermark = annotations.ImageAnnotation(filename='chigger_white.png',
+                                                       width=0.025,
+                                                       horizontal_alignment='left',
+                                                       vertical_alignment='bottom',
+                                                       position=[0, 0])
         # Store the supplied result objects
         self.append(*args)
+        if kwargs.pop('chigger', False):
+            self.append(self.__watermark)
 
     def __contains__(self, item):
         """
