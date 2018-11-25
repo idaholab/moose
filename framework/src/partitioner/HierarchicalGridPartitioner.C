@@ -38,6 +38,10 @@ validParams<HierarchicalGridPartitioner>()
   params.addParam<unsigned int>(
       "nz_procs", 0, "Number of processors in the Z direction within each node");
 
+  params.addClassDescription("Partitions a mesh into sub-partitions for each computational node"
+                             " then into partitions within that node.  All partitions are made"
+                             " using a regular grid.");
+
   return params;
 }
 
