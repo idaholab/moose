@@ -1,10 +1,26 @@
 # Using Flux-Limited TVD Advection ala Kuzmin and Turek, with antidiffusion from superbee flux limiting
+# 1D version with mesh adaptivity
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 100
+  nx = 10
   xmin = 0
   xmax = 1
+[]
+
+[Adaptivity]
+  initial_steps = 1
+  initial_marker = tracer_marker
+  marker = tracer_marker
+  max_h_level = 1
+  [./Markers]
+    [./tracer_marker]
+      type = ValueRangeMarker
+      variable = tracer
+      lower_bound = 0.02
+      upper_bound = 0.98
+    [../]
+  [../]
 []
 
 [Variables]
@@ -80,7 +96,7 @@
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '1 0 0'
-    num_points = 101
+    num_points = 11
     sort_by = x
     variable = tracer
   [../]

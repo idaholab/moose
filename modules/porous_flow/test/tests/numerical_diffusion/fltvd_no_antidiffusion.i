@@ -1,4 +1,4 @@
-# Using Flux-Limited TVD Advection ala Kuzmin and Turek
+# Using Flux-Limited TVD Advection ala Kuzmin and Turek, but without any antidiffusion
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -90,14 +90,14 @@
   type = Transient
   solve_type = Newton
   end_time = 6
-  dt = 6E-3
+  dt = 6E-1
   nl_abs_tol = 1E-8
   nl_max_its = 500
   timestep_tolerance = 1E-3
 []
 
 [Outputs]
-  exodus = true
+  #exodus = true
   csv = true
   print_linear_residuals = false
   execute_on = final

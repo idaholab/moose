@@ -1,10 +1,17 @@
 # Using Flux-Limited TVD Advection ala Kuzmin and Turek, with antidiffusion from superbee flux limiting
+# 3D version
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 100
+  dim = 3
+  nx = 10
   xmin = 0
   xmax = 1
+  ny = 4
+  ymin = 0
+  ymax = 0.5
+  nz = 3
+  zmin = 0
+  zmax = 2
 []
 
 [Variables]
@@ -79,8 +86,8 @@
   [./tracer]
     type = LineValueSampler
     start_point = '0 0 0'
-    end_point = '1 0 0'
-    num_points = 101
+    end_point = '1 0.5 2'
+    num_points = 11
     sort_by = x
     variable = tracer
   [../]

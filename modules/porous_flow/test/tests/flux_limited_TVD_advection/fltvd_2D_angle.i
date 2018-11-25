@@ -1,10 +1,14 @@
 # Using Flux-Limited TVD Advection ala Kuzmin and Turek, with antidiffusion from superbee flux limiting
+# 2D version with velocity = (0.1, 0.2, 0)
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 100
+  dim = 2
+  nx = 10
   xmin = 0
   xmax = 1
+  ny = 10
+  ymin = 0
+  ymax = 1
 []
 
 [Variables]
@@ -16,7 +20,7 @@
   [./tracer]
     type = FunctionIC
     variable = tracer
-    function = 'if(x<0.1,0,if(x>0.3,0,1))'
+    function = 'if(x<0.1 | x > 0.3 | y < 0.1 | y > 0.3, 0, 1)'
   [../]
 []
 
@@ -37,7 +41,7 @@
     type = AdvectiveFluxCalculator
     flux_limiter_type = superbee
     u = tracer
-    velocity = '0.1 0 0'
+    velocity = '0.1 0.2 0'
   [../]
 []
 
@@ -75,30 +79,16 @@
   [../]
 []
 
-[VectorPostprocessors]
-  [./tracer]
-    type = LineValueSampler
-    start_point = '0 0 0'
-    end_point = '1 0 0'
-    num_points = 101
-    sort_by = x
-    variable = tracer
-  [../]
-[]
-
 [Executioner]
   type = Transient
   solve_type = Newton
-  end_time = 6
-  dt = 6E-2
-  nl_abs_tol = 1E-8
-  nl_max_its = 500
-  timestep_tolerance = 1E-3
+  end_time = 2
+  dt = 0.1
 []
 
 [Outputs]
-  #exodus = true
+  exodus = true
   csv = true
   print_linear_residuals = false
-  execute_on = final
+  execute_on = 'initial final'
 []

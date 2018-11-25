@@ -9,4 +9,85 @@
     design = 'porous_flow/numerical_diffusion.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
   [../]
+  [./jacobian_02]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_02.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
+  [./fltvd_1D]
+    type = 'CSVDiff'
+    input = 'fltvd_1D.i'
+    csvdiff = 'fltvd_1D_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
+  [./fltvd_2D]
+    type = 'CSVDiff'
+    input = 'fltvd_2D.i'
+    csvdiff = 'fltvd_2D_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
+  [./fltvd_3D]
+    type = 'CSVDiff'
+    input = 'fltvd_3D.i'
+    csvdiff = 'fltvd_3D_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    heavy = true
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
+  [./fltvd_2D_angle]
+    type = Exodiff
+    input = 'fltvd_2D_angle.i'
+    exodiff = 'fltvd_2D_angle_out.e'
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
+  [./fltvd_2D_trimesh]
+    type = 'CSVDiff'
+    input = 'fltvd_2D_trimesh.i'
+    csvdiff = 'fltvd_2D_trimesh_out_tracer_0101.csv'
+    heavy = true
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
+  [./fltvd_2D_blocks]
+    type = 'CSVDiff'
+    input = 'fltvd_2D_blocks.i'
+    csvdiff = 'fltvd_2D_blocks_out_tracer_bot_0101.csv fltvd_2D_blocks_out_tracer_top_0101.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
+  [./fltvd_1D_adaptivity]
+    type = 'CSVDiff'
+    input = 'fltvd_1D_adaptivity.i'
+    csvdiff = 'fltvd_1D_adaptivity_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+  [../]
 []
