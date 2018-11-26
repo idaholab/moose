@@ -1,3 +1,12 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 """
 Module for defining the default Lexer objects that plugin to base.Reader objects.
 """
@@ -9,8 +18,7 @@ import re
 
 import MooseDocs
 from MooseDocs import common
-from MooseDocs.tree import tokens
-from MooseDocs.common import exceptions
+from MooseDocs.tree import tokens, pages
 
 LOG = logging.getLogger(__name__)
 
@@ -41,10 +49,6 @@ class Grammar(object):
     applied to the Lexer object and the associated regular expression that define the
     text associated with the Token object.
     """
-
-    #: Container for information required for creating a Token object.
-   # Pattern = collections.namedtuple('Pattern', 'name regex function')
-
     def __init__(self):
         self.__patterns = common.Storage(Pattern)
 
@@ -199,7 +203,7 @@ class Lexer(object):
     def __init__(self):
         pass
 
-    def tokenize(self, parent, grammar, text, line=1):
+    def tokenize(self, parent, text, page, grammar, line=1):
         """
         Perform tokenization of the supplied text.
 
@@ -210,13 +214,14 @@ class Lexer(object):
             line[int]: The line number to startwith, this allows for nested calls to begin with
                        the correct line.
 
-        NOTE: If the functions attached to the Grammar object raise a TokenizeException it will
+        NOTE: If the functions attached to the Grammar object raise an Exception it will
               be caught by this object and converted into an Exception token. This allows for
-              the entire text to be tokenized and have the errors report upon completion. The
-              TokenizeException also contains information about the error, via a LexerInformation
-              object to improve error reports.
+              the entire text to be tokenized and have the errors report upon completion.
         """
-        common.check_type('text', text, unicode, exc=exceptions.TokenizeException)
+        if MooseDocs.LOG_LEVEL == logging.DEBUG:
+            common.check_type('text', text, unicode)
+            common.check_type('page', page, pages.Page)
+            common.check_type('line', line, int)
 
         n = len(text)
         pos = 0
@@ -227,14 +232,14 @@ class Lexer(object):
                 if match:
                     info = LexerInformation(match, pattern, line)
                     try:
-                        obj = self.buildObject(parent, pattern, info)
+                        obj = self.buildToken(parent, pattern, info, page)
                     except Exception as e: #pylint: disable=broad-except
-                        obj = tokens.ExceptionToken(parent,
-                                                    info=info,
-                                                    message=unicode(e.message),
-                                                    traceback=traceback.format_exc())
+                        obj = tokens.ErrorToken(parent,
+                                                message=unicode(e.message),
+                                                traceback=traceback.format_exc())
+
                     if obj is not None:
-                        obj.info = info #TODO: set ptype on base Token, change to info
+                        obj.info = info
                         line += match.group(0).count('\n')
                         pos = match.end()
                         break
@@ -247,21 +252,17 @@ class Lexer(object):
         # Produce Exception token if text remains that was not matched
         if pos < n:
             msg = u'Unprocessed text exists.'
-            tokens.ErrorToken(parent, info=info, message=msg)
+            tokens.ErrorToken(parent, message=msg)
 
-    def buildObject(self, parent, pattern, info): #pylint: disable=no-self-use
+    def buildToken(self, parent, pattern, info, page): #pylint: disable=no-self-use
         """
         Return a token object for the given lexer information.
         """
-        obj = pattern.function(info, parent)
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('obj', obj, (tokens.Token, type(None)),
-                              exc=exceptions.TokenizeException)
-        return obj
+        return pattern.function(parent, info, page)
 
 class RecursiveLexer(Lexer):
     """
-    A lexer that accepts mulitple grammars and automatically processes the content recusively
+    A lexer that accepts multiple grammars and automatically processes the content recursively
     base on regex group names.
 
     Inputs:
@@ -303,20 +304,20 @@ class RecursiveLexer(Lexer):
         """
         self.grammar(group).add(*args)
 
-    def buildObject(self, parent, pattern, info):
+    def buildToken(self, parent, pattern, info, page):
         """
-        Override the Lexer.buildObject method to recursively tokenize base on group names.
+        Override the Lexer.buildToken method to recursively tokenize base on group names.
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('parent', parent, tokens.Token, exc=exceptions.TokenizeException)
-            common.check_type('info', info, LexerInformation, exc=exceptions.TokenizeException)
+            common.check_type('parent', parent, tokens.Token)
+            common.check_type('info', info, LexerInformation)
 
-        obj = super(RecursiveLexer, self).buildObject(parent, pattern, info)
+        obj = super(RecursiveLexer, self).buildToken(parent, pattern, info, page)
 
-        if (obj is not None) and (obj is not parent) and obj.recursive:
+        if (obj is not None) and (obj is not parent) and obj.get('recursive'):
             for key, grammar in self._grammars.iteritems():
                 if key in info.keys():
                     text = info[key]
                     if text is not None:
-                        self.tokenize(obj, grammar, text, info.line)
+                        self.tokenize(obj, text, page, grammar, info.line)
         return obj

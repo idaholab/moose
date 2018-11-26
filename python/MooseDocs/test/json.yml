@@ -13,8 +13,45 @@ Renderer:
 
 Extensions:
     disable_defaults: True
-    core:
-        type: MooseDocs.extensions.core
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.include: default
+    MooseDocs.extensions.media: default
+    MooseDocs.extensions.listing: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.table: default
+    MooseDocs.extensions.devel: default
+    MooseDocs.extensions.package: default
+    MooseDocs.extensions.alert: default
+    MooseDocs.extensions.katex: default
+    MooseDocs.extensions.bibtex: default
+    MooseDocs.extensions.materialicon: default
+    MooseDocs.extensions.layout: default
+    MooseDocs.extensions.config: default
+    MooseDocs.extensions.content: default
+    MooseDocs.extensions.plotly: default
+    MooseDocs.extensions.heading: default
+    MooseDocs.extensions.navigation:
+        name: MOOSEDocs
+        repo: https://github.com/idaholab/moose
+        home: https://www.mooseframework.org
+        menu:
+            Direct: core.md
+            Mega: mega.menu.md
+            Dict:
+                Core: core.md
+                AutoLink: autolink.md
+    MooseDocs.extensions.acronym:
+        acronyms:
+            INL: Idaho National Laboratory
+            MTU: Michigan Technological University
+    MooseDocs.extensions.common:
+        shortcuts:
+            MOOSE: https:://mooseframework.org
+            libMesh: https://libmesh.github.io/
+    MooseDocs.extensions.appsyntax:
+        active: False
 
 Translator:
     type: MooseDocs.base.Translator

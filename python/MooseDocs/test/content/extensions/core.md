@@ -57,7 +57,7 @@ for i in range(10):
 
 ## Unordered Lists
 
-### Single level lists
+### Single level lists id=single-level-lists
 
 - Item 1
 - Item 2
@@ -122,7 +122,7 @@ for i in range(10):
 12345. Twelve thousand *three* hundred and forty-five
 12345. Twelve thousand three hundred and forty-six
 
-       1. A nested item with a +huge+ number.
+       1. A nested item within a +huge+ number.
 
 ### Nested lists
 
@@ -173,3 +173,7 @@ Yo, dawg I heard you like formatting, so I created =underline
 formatted text that contains text with ~stikethrough that
 contains +bold formatting with *emphasis that has some^superscript
 text with a@subscript@^*+~=, I hope you like it.
+
+## Links id=links
+
+This is a link to [#links].

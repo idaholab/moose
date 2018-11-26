@@ -1,0 +1,201 @@
+{
+    "attributes": {
+        "recursive": true
+    }, 
+    "children": [
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 1, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "Acronym Extension"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Acronym", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Extension", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "complete": false, 
+                "heading": true, 
+                "recursive": true
+            }, 
+            "children": [], 
+            "name": "AcronymListToken"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "acronym": "INL", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "AcronymToken"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "acronym": "MTU", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "AcronymToken"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Some", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "text", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "acronym": "INL", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "AcronymToken"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "acronym": "MTU", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "AcronymToken"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "key": "MOOSE", 
+                "link": "https:://mooseframework.org", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "MOOSE", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "libMesh", 
+                "link": "https://libmesh.github.io/", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "libMesh", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }
+    ], 
+    "name": null
+}

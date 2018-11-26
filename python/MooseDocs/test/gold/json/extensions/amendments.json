@@ -1,0 +1,1292 @@
+{
+    "attributes": {
+        "recursive": true
+    }, 
+    "children": [
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Congress", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "shall", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "make", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "no", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "law", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "respecting", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "an", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "establishment", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "religion", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "or", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "prohibiting", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "free", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "exercise", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }, 
+                {
+                    "attributes": {
+                        "content": "thereof", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ";", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "or", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "abridging", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "freedom", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "speech", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "or", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "press", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ";", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "or", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "right", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "people", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "peaceably", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "to", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }, 
+                {
+                    "attributes": {
+                        "content": "assemble", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "and", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "to", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "petition", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Government", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "for", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "a", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "redress", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "grievances", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ".", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "A", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "well", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "regulated", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Militia", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "being", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "necessary", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "to", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "security", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "a", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "free", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "State", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "right", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "the", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "people", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "to", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }, 
+                {
+                    "attributes": {
+                        "content": "keep", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "and", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "bear", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Arms", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ",", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "shall", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "not", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "be", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "infringed", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ".", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "key": "MOOSE", 
+                "link": "https:://mooseframework.org", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "MOOSE", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "libMesh", 
+                "link": "https://libmesh.github.io/", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "libMesh", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }
+    ], 
+    "name": null
+}

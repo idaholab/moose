@@ -122,7 +122,7 @@ class VectorPostprocessorReader(object):
         """
         Returns the list of available time indices contained in the data.
         """
-        return list(self.data.keys().values)
+        return self.data.keys().values.tolist()
 
     def clear(self):
         """

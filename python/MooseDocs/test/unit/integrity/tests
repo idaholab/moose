@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#6699'
+  design = 'MooseDocs/index.md'
+  [./spec]
+    type = PythonUnitTest
+    input = test_spec_files.py
+    requirement = "MooseDocs shall include a test that ensures that all python files within the tests directories have an associated test specification."
+  [../]
+[]

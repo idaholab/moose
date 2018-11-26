@@ -1,0 +1,434 @@
+{
+    "attributes": {
+        "recursive": true
+    }, 
+    "children": [
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 1, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "KaTeX Extension"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
+                        "content": "KaTeX", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Extension", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 2, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "Inline"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Inline", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Inline", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "recursive": true, 
+                        "tex": "y=ax+b"
+                    }, 
+                    "children": [], 
+                    "name": "LatexInlineEquation"
+                }, 
+                {
+                    "attributes": {
+                        "content": ".", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 2, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "Block"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Block", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": 1, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "a^2 + b^2 = c^2"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": null, 
+                        "numbered": false, 
+                        "recursive": true, 
+                        "tex": "G_{\\\\mu\\\\nu} = 8\\\\pi G(T_{\\\\mu\\\\nu} + \\\\rho_{\\\\Lambda} g_{\\\\mu\\\\nu})"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": 2, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "t\\' = t \\\\frac{1}{\\\\sqrt{1 - \\\\frac{\\\\nu^2}{c^2}}}"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": 3, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "F = ma"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "calculus", 
+                        "number": 4, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "\\ \\\\int_a^b f\\'(x)dx = f(b) - f(a)"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "The", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "fundamental", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "theorem", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "of", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "calculus", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ":", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "class": "", 
+                        "id": "", 
+                        "key": "calculus", 
+                        "recursive": true, 
+                        "style": ""
+                    }, 
+                    "children": [], 
+                    "name": "ShortcutLink"
+                }, 
+                {
+                    "attributes": {
+                        "content": ".", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "key": "calculus", 
+                "link": "#moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Eq. (4)", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "MOOSE", 
+                "link": "https:://mooseframework.org", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "MOOSE", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "libMesh", 
+                "link": "https://libmesh.github.io/", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "libMesh", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }
+    ], 
+    "name": null
+}

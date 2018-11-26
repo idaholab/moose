@@ -2,7 +2,7 @@
 
 ## Overview
 
-MOOSE has been designed so that copuling to existing codes is a relatively straight-forward process. If your existing code is relatively modular
+MOOSE has been designed so that coupling to existing codes is a relatively straight-forward process. If your existing code is relatively modular
 you may not be required to make any intrusive changes in order to get it talking to MOOSE. This provides an attractive solution for developers
 where creating a new code from scratch may not be feasible, or where existing codes contain capabilities that are well outside the scope of
 MOOSE's normal capabilities. This page describes the extension points and directions for creating a new "thin wrapper" application that will
@@ -49,7 +49,7 @@ so that Picard or fixed-point iterations may be taken to tightly converge a simu
 ### ExternalProblem-derived object
 
 The [ExternalProblem](/ExternalProblem.md) object contains the extra interface function necessary for creating and maintaining current solution
-information on an [ExternalMesh] object. Specifically, the ExternalProblem creates a final override for the `solve()` method that triggers three
+information on an [#ExternalMesh] object. Specifically, the ExternalProblem creates a final override for the `solve()` method that triggers three
 different callbacks:
 
 ```

@@ -1,10 +1,19 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
 """
 An Extension is comprised of Component objects, the objects are used for tokenizeing markdown
 and converting tokens to rendered HTML.
 """
 from MooseDocs.common import exceptions, parse_settings, mixins
+from MooseDocs.tree import tokens
 
-class Extension(mixins.ConfigObject, mixins.TranslatorObject):
+class Extension(mixins.ConfigObject, mixins.TranslatorMixin):
     """
     Base class for creating extensions. An extension is simply a mechanism to allow for
     the creation of reader/renderer components to be added to the translation process.
@@ -14,19 +23,42 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
 
     Inputs:
         kwargs: All key-value pairs are treated as configure options, see ConfigObject.
-
-    The Translator object allows for pre/post calls to the Extension object for tokenization
-    and rendering. Within your extension one of the following methods exist it will be called
-    automatically.
-
-        preTokenize(ast, config)
-        postTokenize(ast, config)
-        preRender(root, config)
-        postRender(root, config)
     """
+    @staticmethod
+    def defaultConfig():
+        """Basic Extension configuration options."""
+        config = mixins.ConfigObject.defaultConfig()
+        config['active'] = (True, "Toggle for disabling the extension. This only changes "
+                                  "the initial active state, use setActive to control at runtime.")
+        return config
+
     def __init__(self, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
-        mixins.TranslatorObject.__init__(self)
+        mixins.TranslatorMixin.__init__(self)
+        self.__requires = set()
+
+        # The 'active' setting must be able to be set outside of the configure options to allow
+        # for object constructors (i.e., appsyntax) to disable an extension internally. Because,
+        # if only the config is used it is reset after building the page to the default to
+        # support the config extension.
+        self.__active = self.get('active')
+
+        # Extension name
+        self.__name = self.__class__.__name__.split('.')[-1].replace('Extension', '').lower()
+
+    @property
+    def name(self):
+        """Return the name of the extension."""
+        return self.__name
+
+    @property
+    def active(self):
+        """Return the 'active' status of the Extension."""
+        return self.__active
+
+    def setActive(self, value):
+        """Set the active state for the extension."""
+        self.__active = value
 
     def extend(self, reader, renderer):
         """
@@ -39,32 +71,108 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
         Require that the supplied extension module exists within the Translator object. This
         method cannot be called before init().
         """
-        if self.translator is None:
-            raise exceptions.MooseDocsException("The 'requires' method should be called from " \
-                                                "within the 'extend' method.")
+        self.__requires.update(args)
 
-        available = [e.__module__ for e in self.translator.extensions]
-        messages = []
-        for ext in args:
-            if ext.__name__ not in available:
-                msg = "The {} extension is required but not included.".format(ext.__name__)
-                messages.append(msg)
+    def initMetaData(self, page, meta):
+        """
+        Called prior to reading.
+        """
+        pass
 
-        if messages:
-            raise exceptions.MooseDocsException('\n'.join(messages))
+    def postRead(self, content, page, meta):
+        """
+        Called after to reading the file.
 
+        Input:
+             content[unicode]: A copy of the content read from the page.
+             page[pages.Source]: The source object representing the content.
+             meta[Meta]: Meta data object for storing data on the node (see translators.py)
+        """
+        pass
 
-class Component(mixins.TranslatorObject):
+    def postWrite(self):
+        """
+        Called after renderer has written content.
+
+        """
+        pass
+
+    def preExecute(self, content):
+        """
+        Called by Translator prior to beginning conversion.
+
+        Input:
+            content[list]: List of all Page objects.
+        """
+        pass
+
+    def postExecute(self, content):
+        """
+        Called by Translator after all conversion is complete.
+
+        Input:
+            content[list]: List of all Page objects.
+        """
+        pass
+
+    def preTokenize(self, ast, page, meta, reader):
+        """
+        Called by Translator prior to tokenization.
+
+        Inputs:
+            ast[tokens.Token]: The root node of the token tree.
+        """
+        pass
+
+    def postTokenize(self, ast, page, meta, reader):
+        """
+        Called by Translator after tokenization.
+
+        Inputs:
+            ast[tokens.Token]: The root node of the token tree.
+        """
+        pass
+
+    def preRender(self, result, page, meta, renderer):
+        """
+        Called by Translator prior to rendering.
+
+        Inputs:
+            result[tree.base.NodeBase]: The root node of the result tree.
+        """
+        pass
+
+    def postRender(self, result, page, meta, renderer):
+        """
+        Called by Translator after rendering.
+
+        Inputs:
+            result[tree.base.NodeBase]: The root node of the result tree.
+        """
+        pass
+
+class Component(mixins.TranslatorMixin):
     """
     Each extension is made up of components, both for tokenizing and rendering. The components
     provide a means for defining settings as well as other customizable features required for
     translation.
     """
     def __init__(self):
-        mixins.TranslatorObject.__init__(self)
-        self.extension = None
+        mixins.TranslatorMixin.__init__(self)
+        self.__extension = None
 
-class TokenComponent(Component):
+    @property
+    def extension(self):
+        """Access to the parent Extension object for this component."""
+        return self.__extension
+
+    def setExtension(self, extension):
+        """
+        Attach the extension the component, this is done by the Translator.
+        """
+        self.__extension = extension
+
+class TokenComponent(Component, mixins.ReaderObject):
     """
     Base class for creating components designed to create a token during tokenization.
 
@@ -116,6 +224,7 @@ class TokenComponent(Component):
         Constructs the object and sets the default settings of the object.
         """
         Component.__init__(self)
+        mixins.ReaderObject.__init__(self)
 
         # Local settings, this is updated by __call__ just prior to calling the createToken()
         self.__settings = None
@@ -126,7 +235,7 @@ class TokenComponent(Component):
             msg = "The component '{}' must return a dict from the defaultSettings static method."
             raise exceptions.MooseDocsException(msg, self)
 
-    def __call__(self, info, parent):
+    def __call__(self, parent, info, page):
         """
         MooseDocs internal method, this should not be called, please use the createToken method.
 
@@ -137,6 +246,11 @@ class TokenComponent(Component):
             info[LexerInformation]: Object containing the lexer information object.
             parent[tokens.Token]: The parent node in the AST for the token being created.
         """
+        # Disable inactive extensions, the "is not None" allows this method to work when
+        # components are added outside of an extension, which is needed for testing
+        if (self.extension is not None) and (not self.extension.active):
+            tokens.DisabledToken(parent, string=info[0])
+            return parent
 
         # Define the settings
         defaults = self.defaultSettings()
@@ -146,7 +260,7 @@ class TokenComponent(Component):
             self.__settings = {k:v[0] for k, v in defaults.iteritems()}
 
         # Call user method and reset settings
-        token = self.createToken(info, parent)
+        token = self.createToken(parent, info, page)
         self.__settings = None
         return token
 
@@ -171,13 +285,6 @@ class TokenComponent(Component):
         """
         return self.__settings
 
-    @property
-    def reader(self):
-        """
-        Return the Reader object.
-        """
-        return self.translator.reader
-
     def setSettings(self, settings):
         """
         Method for defining the settings for this object directly.
@@ -186,34 +293,34 @@ class TokenComponent(Component):
         """
         self.__settings = settings
 
-    def createToken(self, info, parent):
+    def createToken(self, parent, info, page):
         """
         Method designed to be implemented by child classes, this method should create the
         token for the AST based on the regex match.
 
         Inputs:
-            info[LexerInformation]: Object containing the lexer information object.
             parent[tokens.Token]: The parent node in the AST for the token being created.
+            info[LexerInformation]: Object containing the lexer information object.
+            page[page.Page]: Page object of the current content being read.
         """
         raise NotImplementedError("The createToken method is required.")
 
-class RenderComponent(Component):
+class RenderComponent(Component, mixins.RendererObject):
     """
     RenderComponent objects are used to convert tokens to an output format such as HTML or LaTeX.
 
     The function to be called is assigned by the Renderer object; however, it has the following
     signature:
-        functionName(self, token, parent):
+        functionName(self, parent, token, page):
             ...
 
     This allows the RenderComponent object to have multiple methods for converting to different
     formats. For example, the components in core.py have createHTML and createLatex methods to
     work with the HTMLRenderer and the LatexRenderer.
     """
-
-    @property
-    def renderer(self):
+    def __init__(self):
         """
-        Return the Renderer object.
+        Constructs the object and sets the default settings of the object.
         """
-        return self.translator.renderer
+        Component.__init__(self)
+        mixins.RendererObject.__init__(self)

@@ -1,18 +1,25 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 """Defines the MooseDocs build command."""
 import os
+import sys
 import multiprocessing
 import logging
 import subprocess
 import shutil
-
-import anytree
 import livereload
-
 import mooseutils
-
+from mooseutils.yaml_load import yaml_load
 import MooseDocs
 from MooseDocs import common
-from MooseDocs.tree import page
+from MooseDocs.tree import pages
 from check import check
 
 def command_line_options(subparser, parent):
@@ -24,6 +31,15 @@ def command_line_options(subparser, parent):
 
     parser.add_argument('--config', default='config.yml',
                         help="The configuration file.")
+    parser.add_argument('--disable', nargs='*', default=[],
+                        help="A list of extensions to disable.")
+    parser.add_argument('--fast', action='store_true',
+                        help="Build the pages with the slowest extension (appsyntax) disabled.")
+    parser.add_argument('--executioner',
+                        help="Select the mode of execution " \
+                             "(default: MooseDocs.base.ParallelBarrier).")
+    parser.add_argument('--profile', action='store_true',
+                        help="Build the pages with python profiling.")
     parser.add_argument('--destination',
                         default=None,
                         help="Destination for writing build content.")
@@ -65,52 +81,64 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
     """
 
     def __init__(self, translator, options, *args, **kwargs):
+
         super(MooseDocsWatcher, self).__init__(*args, **kwargs)
         self._options = options
         self._translator = translator
 
-        for node in anytree.PreOrderIter(self._translator.root):
-            if isinstance(node, page.FileNode):
-                self.watch(node.source, node.build, delay=2)
+        self._config = yaml_load(options.config, root=MooseDocs.ROOT_DIR)
 
-    def execute(self):
-        """
-        Perform complete build.
-        """
-        self._translator.execute(self._options.num_threads)
+        # Determine the directories to watch
+        roots = set()
+        self._items = common.get_items(self._config.get('Content'))
+        for root, _ in common.get_files(self._items, self._translator.reader.EXTENSIONS):
+            roots.add(root)
 
-    def examine(self):
-        """
-        Investigate directories for new files and add them to the tree if found.
+        for root in roots:
+            self.watch(root, self.build, delay=1)
 
-        TODO: Remove nodes if page is deleted.
-        TODO: Handle !include (see extensions.include.py for more information).
-        """
-        for node in anytree.PreOrderIter(self._translator.root):
+    def build(self):
+        """Build the necessary pages based on the current filepath."""
+        print 'HERE:', self.filepath
 
-            # Only perform check on valid directories
-            if not isinstance(node, page.DirectoryNode) or not os.path.exists(node.source):
-                continue
+        # Locate the page to be translated
+        page = self._getPage(self.filepath)
+        if page is None:
+            return
+        MooseDocs.PROJECT_FILES.add(self.filepath)
 
-            # Build map of child pages for the directory
-            children = {child.name:child for child in node.children \
-                        if isinstance(child, page.FileNode)}
+        # Build a list of pages to be translated including the dependencies
+        nodes = [page]
+        for node in self._translator.content:
+            uids = self._translator.getMetaData(node, 'dependencies') or []
+            if page.uid in uids:
+                nodes.append(node)
 
-            # Compare the list of files in the directory with those tracked by MooseDocs
-            for filename in os.listdir(node.source):  #pylint: disable=no-member
-                if filename.endswith(MooseDocs.FILE_EXT) and not filename.startswith('.'):
-                    if filename not in children:
-                        source = os.path.join(node.source, filename)
-                        if filename.endswith('.md'):
-                            new = page.MarkdownNode(node, source=source)
-                        else:
-                            new = page.FileNode(node, source=source) #pylint: disable=redefined-variable-type
-                        new.base = self._options.destination
-                        self.watch(new.source, new.build, delay=2) #pylint: disable=no-member
-                        new.init(self._translator)
-                        new.build()
+        print 'PAGE:', nodes
+        self._translator.execute(self._options.num_threads, nodes)
 
-        return super(MooseDocsWatcher, self).examine()
+    def _getPage(self, source):
+        """Search the existing content for pages, if it doesn't exist create it."""
+
+        # Search for the page based on the source name, if it is found return the page
+        for page in self._translator.content:
+            if source == page.source:
+                return page
+
+
+        # Build a list of all filenames
+        filenames = common.get_files(self._items, self._translator.reader.EXTENSIONS, False)
+
+        # Build a page object if the filename shows up in the list of available files
+        for root, filename in filenames:
+            if filename == source:
+                key = filename.replace(root, '').strip('/')
+                page = common.create_file_page(key, filename, self._translator.reader.EXTENSIONS)
+                page.base = self._translator.get('destination')
+                if isinstance(page, pages.Source):
+                    page.output_extension = self._translator.renderer.EXTENSION
+                return page
+
 
 def _init_large_media():
     """Check submodule for large_media."""
@@ -135,22 +163,40 @@ def main(options):
     # Make sure "large_media" exists in MOOSE
     _init_large_media()
 
+    # Setup executioner
+    kwargs = dict()
+    if options.executioner:
+        kwargs['Executioner'] = {'type':options.executioner}
+
     # Create translator
-    translator, _ = common.load_config(options.config)
+    translator, _ = common.load_config(options.config, **kwargs)
     if options.destination:
         translator.update(destination=mooseutils.eval_path(options.destination))
+    if options.profile:
+        translator.executioner.update(profile=True)
     translator.init()
+
+    # Disable slow extensions for --fast
+    if options.fast:
+        options.disable.append('appsyntax')
+       # options.disable.append('navigation')
+
+    # Disable extensions based on command line arguments
+    if options.disable:
+        for ext in translator.extensions:
+            if ext.name in options.disable: #pylint: disable=protected-access
+                ext.setActive(False)
 
     # Replace "home" with local server
     if options.serve:
-        home = 'http://127.0.0.1:{}'.format(options.port)
-        translator.renderer.update(home=home)
-    elif options.home:
-        translator.renderer.update(home=options.home)
+        for ext in translator.extensions:
+            if 'home' in ext:
+                ext.update(home='http://127.0.0.1:{}'.format(options.port), set_initial=True)
 
     # Dump page tree
     if options.dump:
         print translator.root
+        sys.exit()
 
     # Clean when --files is NOT used or when --clean is used with --files.
     if ((options.files == []) or (options.files != [] and options.clean)) \
@@ -165,9 +211,10 @@ def main(options):
 
     # Perform build
     if options.files:
+        nodes = []
         for filename in options.files:
-            node = translator.root.findall(filename)[0]
-            node.build()
+            nodes += translator.findPages(filename)
+        translator.execute(options.num_threads, nodes)
     else:
         translator.execute(options.num_threads)
 

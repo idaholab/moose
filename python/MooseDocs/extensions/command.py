@@ -1,42 +1,40 @@
-"""
-Extension for adding commands to Markdown syntax.
-"""
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
+"""Extension for adding commands to Markdown syntax."""
+#pylint: disable=missing-docstring
 import re
 
 from MooseDocs import common
-from MooseDocs.base import components
+from MooseDocs.base import components, Reader
+from MooseDocs.tree import tokens
+from MooseDocs.extensions import core
 
-# Documenting all these classes is far to repetitive and useless.
-#pylint: disable=missing-docstring
-
-def make_extension():
-    return CommandExtension()
+def make_extension(**kwargs):
+    """Create the CommandExtension object."""
+    return CommandExtension(**kwargs)
 
 class CommandExtension(components.Extension):
+    """Extension for creating tools necessary generic commands."""
+    EXTENSION_COMMANDS = dict()
 
-    def init(self, translator):
-        components.Extension.init(self, translator)
-
-        # Create a location to store the commands. I have tried this a few different ways, but
-        # settle on the following, despite its hackishness. First, the commands were stored on the
-        # Reader, which I didn't like because I want this extension to be stand-alone. Second, I
-        # stored the commands with a static member on this class, but that fails when multiple
-        # instances of the translator are created and this method is called again with other
-        # instances active. So, my solution is to just sneak the storage into the current translator
-        # object.
-        if not hasattr(self.translator, '__EXTENSION_COMMANDS__'):
-            setattr(self.translator, '__EXTENSION_COMMANDS__', dict())
-
-    def addCommand(self, command):
+    def addCommand(self, reader, command):
 
         # Type checking
+        common.check_type('reader', reader, Reader)
         common.check_type('command', command, CommandComponent)
         common.check_type('COMMAND', command.COMMAND, str)
         common.check_type('SUBCOMMAND', command.SUBCOMMAND, (type(None), str, tuple))
 
         # Initialize the component
-        command.init(self.translator)
-        command.extension = self
+        command.setReader(reader)
+        command.setExtension(self)
 
         # Subcommands can be tuples
         if not isinstance(command.SUBCOMMAND, tuple):
@@ -47,16 +45,16 @@ class CommandExtension(components.Extension):
         # Add the command and error if it exists
         for sub in subcommands:
             pair = (command.COMMAND, sub)
-            if pair in self.translator.__EXTENSION_COMMANDS__:
+            if pair in CommandExtension.EXTENSION_COMMANDS:
                 msg = "A CommandComponent object exists with the command '{}' and subcommand '{}'."
                 raise common.exceptions.MooseDocsException(msg, pair[0], pair[1])
 
-            self.translator.__EXTENSION_COMMANDS__[pair] = command
+            CommandExtension.EXTENSION_COMMANDS[pair] = command
 
     def extend(self, reader, renderer):
+        self.requires(core)
         reader.addBlock(BlockBlockCommand(), location='_begin')
         reader.addBlock(BlockInlineCommand(), location='<BlockBlockCommand')
-
         reader.addInline(InlineCommand(), location='_begin')
 
 class CommandComponent(components.TokenComponent): #pylint: disable=abstract-method
@@ -81,7 +79,7 @@ class CommandBase(components.TokenComponent):
     def __init__(self, *args, **kwargs):
         components.TokenComponent.__init__(self, *args, **kwargs)
 
-    def createToken(self, info, parent):
+    def createToken(self, parent, info, page):
 
         cmd = (info['command'], info['subcommand'])
         settings = info['settings']
@@ -93,40 +91,49 @@ class CommandBase(components.TokenComponent):
         elif info['subcommand'] and info['subcommand'].startswith('http'):
             cmd = (info['command'], None)
         elif info['subcommand'] and '=' in info['subcommand']:
-            #settings += ' ' + info['subcommand']
             settings = info['subcommand'] + ' ' + settings
             cmd = (info['command'], None)
 
         # Locate the command object to call
         try:
-            obj = self.translator.__EXTENSION_COMMANDS__[cmd]
+            obj = CommandExtension.EXTENSION_COMMANDS[cmd]
         except KeyError:
             try:
-                obj = self.translator.__EXTENSION_COMMANDS__[(cmd[0], '*')]
+                obj = CommandExtension.EXTENSION_COMMANDS[(cmd[0], '*')]
             except KeyError:
                 msg = "The following command combination is unknown: '{} {}'."
-                raise common.exceptions.TokenizeException(msg.format(*cmd))
+                raise common.exceptions.MooseDocsException(msg.format(*cmd))
+
+        if not obj.extension.active:
+            if isinstance(self, InlineCommand):
+                tokens.DisabledToken(parent, tag='span', string=info[0])
+            tokens.DisabledToken(parent, tag='p', string=info[0])
+            return parent
 
         # Build the token
         if obj.PARSE_SETTINGS:
             settings, _ = common.parse_settings(obj.defaultSettings(), settings)
             obj.setSettings(settings)
-        token = obj.createToken(info, parent)
+        token = obj.createToken(parent, info, page)
         return token
+
+    def setTranslator(self, translator):
+        for comp in CommandExtension.EXTENSION_COMMANDS.values():
+            comp.setTranslator(translator)
 
 class BlockInlineCommand(CommandBase):
     RE = re.compile(r'(?:\A|\n{2,})^'           # block begin with empty line
                     r'!(?P<command>\w+)(?: |$)' # command followed by space or end of line
                     r'(?P<subcommand>\S+)?'     # optional subcommand
                     r' *(?P<settings>.*?)'      # optional settings, which can span lines
-                    r'(?P<inline>^\S.*?)?'      # content begins when line starts with a character
+                    r'(?P<block>^\S.*?)?'       # content begins when line starts with a character
                     r'(?=\n*\Z|\n{2,})',        # ends with empty line or end of string
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
 class BlockBlockCommand(CommandBase):
     RE = re.compile(r'(?:\A|\n{2,})^'            # block begin with empty line
                     r'!(?P<command>\w+)!(?: |$)' # command followed by space or end of line
-                    r'(?P<subcommand>\S+)?'       # optional subcommand
+                    r'(?P<subcommand>\S+)?'      # optional subcommand
                     r' *(?P<settings>.*?)'       # optional settings, which can span lines
                     r'(?P<block>^\S.*?)'         # content begins when line starts with a character
                     r'(^!\1-end!)'               # content ends with the "end" command

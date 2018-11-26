@@ -1,3 +1,12 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 """
 Sorted container for storing objects.
 """
@@ -38,7 +47,7 @@ class Storage(object):
         """
 
         # Check the type
-        if not isinstance(obj, self._type):
+        if (self._type is not None) and (not isinstance(obj, self._type)):
             msg = 'Incorrect object provided, expected {} but received {}'
             msg = msg.format(self._type.__name__, type(obj).__name__)
             raise TypeError(msg)

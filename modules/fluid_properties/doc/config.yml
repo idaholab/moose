@@ -9,8 +9,7 @@ Renderer:
     home: /modules/fluid_properties
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/fluid_properties
         hide:
             framework: !include framework/doc/hidden.yml
@@ -19,9 +18,7 @@ Extensions:
         includes:
             - framework/include
             - modules/fluid_properties/include
-    globals:
-        type: MooseDocs.extensions.panoptic
+    MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
-    acronyms:
-        type: MooseDocs.extensions.acronym
+    MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml

@@ -10,8 +10,7 @@ Renderer:
     home: /modules/xfem
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/xfem
         hide:
             framework: !include framework/doc/hidden.yml
@@ -24,9 +23,7 @@ Extensions:
             - framework/include
             - modules/xfem/include
             - modules/tensor_mechanics/include
-    globals:
-        type: MooseDocs.extensions.panoptic
+    MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
-    acronyms:
-        type: MooseDocs.extensions.acronym
+    MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
