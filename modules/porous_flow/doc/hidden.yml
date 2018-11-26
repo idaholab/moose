@@ -1,3 +1,4 @@
+- /AuxVariables/InitialCondition/PorousFlowFluidStateIC
 - /AuxVariables/InitialCondition/PorousFlowFluidStateBrineCO2IC
 - /AuxVariables/InitialCondition/PorousFlowFluidStateWaterNCGIC
 - /Functions/MovingPlanarFront
@@ -12,5 +13,6 @@
 - /PorousFlowFullySaturated/PorousFlowFullySaturated
 - /PorousFlowUnsaturated
 - /PorousFlowUnsaturated/PorousFlowUnsaturated
+- /Variables/InitialCondition/PorousFlowFluidStateIC
 - /Variables/InitialCondition/PorousFlowFluidStateBrineCO2IC
 - /Variables/InitialCondition/PorousFlowFluidStateWaterNCGIC

@@ -1,4 +1,4 @@
-# Tests correct calculation of properties in PorousFlowFluidStateWaterNCG.
+# Tests correct calculation of properties in PorousFlowWaterNCG.
 # This test is run three times, with the initial condition of z (the total mass
 # fraction of NCG in all phases) varied to give either a single phase liquid, a
 # single phase gas, or two phases.
@@ -212,7 +212,7 @@
     temperature = 50
   [../]
   [./waterncg]
-    type = PorousFlowFluidStateWaterNCG
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     temperature_unit = Celsius

@@ -123,6 +123,49 @@ public:
   unsigned int gasComponentIndex() const { return _gas_fluid_component; };
 
   /**
+   * The index of the salt component
+   * @return salt component number
+   */
+  unsigned int saltComponentIndex() const { return _salt_component; };
+
+  /**
+   * Name of FluidState
+   */
+  virtual std::string fluidStateName() const = 0;
+
+  /**
+   * Determines the complete thermophysical state of the system for a given set of
+   * primary variables
+   *
+   * @param pressure gas phase pressure (Pa)
+   * @param temperature fluid temperature (K)
+   * @param Xnacl mass fraction of NaCl
+   * @param Z total mass fraction of fluid component
+   * @param qp quadpoint index
+   * @param[out] fsp the FluidStateProperties struct containing all properties
+   */
+  virtual void thermophysicalProperties(Real pressure,
+                                        Real temperature,
+                                        Real Xnacl,
+                                        Real Z,
+                                        unsigned int qp,
+                                        std::vector<FluidStateProperties> & fsp) const = 0;
+
+  /**
+   * Total mass fraction of fluid component summed over all phases in the two-phase state
+   * for a specified gas saturation
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param Xnacl NaCl mass fraction (kg/kg)
+   * @param saturation gas saturation (-)
+   * @param qp quadpoint index
+   * @return total mass fraction Z (-)
+   */
+  virtual Real totalMassFraction(
+      Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const = 0;
+
+  /**
    * Clears the contents of the FluidStateProperties data structure
    * @param[out] fsp FluidStateProperties data structure with all data initialized to 0
    */
@@ -141,6 +184,8 @@ protected:
   const unsigned int _aqueous_fluid_component;
   /// Fluid component number of the gas phase
   unsigned int _gas_fluid_component;
+  /// Salt component index
+  const unsigned int _salt_component;
   /// Universal gas constant (J/mol/K)
   const Real _R;
   /// Conversion from C to K
@@ -150,7 +195,7 @@ protected:
   /// Tolerance for Newton-Raphson iterations
   const Real _nr_tol;
   /// Capillary pressure UserObject
-  const PorousFlowCapillaryPressure & _pc_uo;
+  const PorousFlowCapillaryPressure & _pc;
 };
 
 #endif // POROUSFLOWFLUIDSTATEBASE_H

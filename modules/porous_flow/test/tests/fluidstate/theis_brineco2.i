@@ -1,4 +1,4 @@
-# Two phase Theis problem: Flow from single source using PorousFlowFluidStateBrineCO2.
+# Two phase Theis problem: Flow from single source.
 # Constant rate injection 2 kg/s
 # 1D cylindrical mesh
 # Initially, system has only a liquid phase, until enough gas is injected
@@ -150,7 +150,7 @@
     type = PorousFlowTemperature
   [../]
   [./brineco2]
-    type = PorousFlowFluidStateBrineCO2
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
     temperature_unit = Celsius

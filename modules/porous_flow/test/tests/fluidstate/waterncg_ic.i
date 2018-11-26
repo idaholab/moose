@@ -1,5 +1,5 @@
 # Tests correct calculation of z (total mass fraction of NCG summed over all
-# phases) using the PorousFlowFluidStateWaterNCGIC initial condition. Once z is
+# phases) using the PorousFlowFluidStateIC initial condition. Once z is
 # calculated by the initial condition, the thermophysical properties are calculated
 # and the resulting gas saturation should be equal to that given in the intial condition
 
@@ -23,7 +23,7 @@
 
 [ICs]
   [./z]
-    type = PorousFlowFluidStateWaterNCGIC
+    type = PorousFlowFluidStateIC
     saturation = 0.5
     gas_porepressure = pgas
     temperature = 50
@@ -109,7 +109,7 @@
     temperature = 50
   [../]
   [./waterncg]
-    type = PorousFlowFluidStateWaterNCG
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     fluid_state = fs

@@ -156,7 +156,7 @@
     temperature = '45'
   []
   [brineco2]
-    type = PorousFlowFluidStateBrineCO2
+    type = PorousFlowFluidState
     gas_porepressure = 'pgas'
     z = 'zi'
     temperature_unit = Celsius
