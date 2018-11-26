@@ -12,6 +12,8 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "MooseMesh.h"
+#include "SerializerGuard.h"
+
 #include "libmesh/checkpoint_io.h"
 
 registerMooseAction("MooseApp", SplitMeshAction, "split_mesh");
@@ -77,18 +79,53 @@ SplitMeshAction::act()
     Moose::out << "Splitting " << n << " ways..." << std::endl;
 
     auto cp = libMesh::split_mesh(*mesh, n);
-    Moose::out << "    - writing " << cp->current_processor_ids().size() << " files per process..."
-               << std::endl;
-    cp->binary() = checkpoint_binary_flag;
+
+    auto fname = mesh->getFileName();
 
     // To name the split files, we start with the given mesh filename
     // (if set) or the argument to --split-file, strip any existing
     // extension, and then append either .cpr or .cpa depending on the
     // checkpoint_binary_flag.
-    auto fname = mesh->getFileName();
-    if (fname == "")
+    if (fname == "" || split_file_arg != "")
       fname = split_file_arg;
     fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa");
+
+    Moose::out << "    - writing " << cp->current_processor_ids().size() << " files per process\n"
+               << " to " << fname << std::endl;
+
+    // Check the file directory of file_base and create if needed
+    std::string base = fname;
+    base = base.substr(0, base.find_last_of('/'));
+
+    {
+      // Serialize this in case all procs are writing to the same place (they might not be - which
+      // is why we need to do this!
+      SerializerGuard guard(mesh->comm(), false);
+
+      if (access(base.c_str(), W_OK) == -1)
+      {
+        // Directory does not exist. Loop through incremental directories and create as needed.
+        std::vector<std::string> path_names;
+        MooseUtils::tokenize(base, path_names);
+        std::string inc_path;
+
+        // If it's an absolute path keep it that way!
+        if (base[0] == '/')
+          inc_path = '/';
+
+        inc_path = inc_path + path_names[0];
+
+        for (unsigned int i = 1; i < path_names.size(); ++i)
+        {
+          inc_path += '/' + path_names[i];
+          if (access(inc_path.c_str(), W_OK) == -1)
+            if (mkdir(inc_path.c_str(), S_IRWXU | S_IRGRP) == -1)
+              mooseError("Could not create directory: " + inc_path + " for: " + fname);
+        }
+      }
+    }
+
+    cp->binary() = checkpoint_binary_flag;
     cp->write(fname);
   }
 }
