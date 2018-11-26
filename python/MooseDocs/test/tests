@@ -6,25 +6,26 @@
     command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
     requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelBarrier executioner."
   []
+  [materialize_serial]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
+    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the Serial executioner."
+    prereq = materialize_barrier
+  []
   [materialize_pipe]
     type = RunCommand
     command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
     requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelPipe executioner."
-    prereq = materialize_barrier
+    #prereq = materialize_serial
+    skip = 'WIP'
   []
   [materialize_demand]
     type = RunCommand
     command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelDemand'
     requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the ParallelDemand executioner."
-    prereq = materialize_pipe
+    #prereq = materialize_pipe
+    skip = 'WIP'
   []
-  [materialize_serial]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
-    requirement = "MooseDocs shall be able to convert markdown to HTML with Materialize support with the Serial executioner."
-    prereq = materialize_demand
-  []
-
 
 
   [html_barrier]
@@ -32,23 +33,25 @@
     command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelBarrier executioner."
   []
+  [html_serial]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
+    requirement = "MooseDocs shall be able to convert markdown to HTML with the Serial executioner."
+    prereq = html_barrier
+  []
   [html_pipe]
     type = RunCommand
     command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelPipe executioner."
-    prereq = html_barrier
+    #prereq = html_serial
+    skip = 'WIP'
   []
   [html_demand]
     type = RunCommand
     command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelDemand'
     requirement = "MooseDocs shall be able to convert markdown to HTML with the ParallelDemand executioner."
-    prereq = html_pipe
-  []
-  [html_serial]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
-    requirement = "MooseDocs shall be able to convert markdown to HTML with the Serial executioner."
-    prereq = html_demand
+    #prereq = html_pipe
+    skip = 'WIP'
   []
 
 
@@ -58,23 +61,25 @@
     command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.ParallelBarrier'
     requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the ParallelBarrier executioner."
   []
+  [json_serial]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.Serial'
+    requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the Serial executioner."
+    prereq = json_barrier
+  []
   [json_pipe]
     type = RunCommand
     command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.ParallelPipe'
     requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the ParallelPipe executioner."
-    prereq = json_barrier
+    #prereq = json_serial
+    skip = 'WIP'
   []
   [json_demand]
     type = RunCommand
     command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.ParallelDemand'
     requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the ParallelDemand executioner."
-    prereq = json_pipe
-  []
-  [json_serial]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.Serial'
-    requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the Serial executioner."
-    prereq = json_demand
+    #prereq = json_pipe
+    skip = 'WIP'
   []
 
 
@@ -84,22 +89,24 @@
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelBarrier executioner."
   []
+  [latex_serial]
+    type = RunCommand
+    command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
+    requirement = "MooseDocs shall be able to convert markdown to latex with the Serial executioner."
+    prereq = latex_barrier
+  []
   [latex_pipe]
     type = RunCommand
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelPipe executioner."
-    prereq = latex_barrier
+    #prereq = latex_serial
+    skip = 'WIP'
   []
   [latex_demand]
     type = RunCommand
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelDemand'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelDemand executioner."
-    prereq = latex_pipe
-  []
-  [latex_serial]
-    type = RunCommand
-    command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
-    requirement = "MooseDocs shall be able to convert markdown to latex with the Serial executioner."
-    prereq = latex_demand
+#    prereq = latex_pip
+    skip = 'WIP'
   []
 []

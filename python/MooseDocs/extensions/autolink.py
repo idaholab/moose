@@ -49,6 +49,13 @@ class AutoLinkExtension(components.Extension):
         renderer.add('AutoLink', RenderAutoLink())
 
 
+    #def postTokenize(self, ast, page, meta, reader):
+    #    if page.local == 'mega.menu.md':
+    #        print 'AUTOLINK'
+    #        print ast
+
+
+
 def createTokenHelper(key, parent, info, page, use_key_in_modal=False):
     match = PAGE_LINK_RE.search(info[key])
     bookmark = match.group('bookmark')[1:] if match.group('bookmark') else u''
@@ -110,22 +117,22 @@ class RenderLinkBase(components.RenderComponent):
         if bookmark:
             url += '#{}'.format(bookmark)
 
-        link = core.Link(None, url=url)
+        link = core.Link(None, url=url, info=token.info)
         if len(token.children) == 0:
-            head = heading.find_heading(self.translator, desired)
+            head = heading.find_heading(self.translator, desired, bookmark)
 
             if head is not None:
                 for child in head:
                     child.parent = link
             else:
                 tokens.String(link, content=url)
-        else:
 
-            for child in token:
+        else:
+            for child in token.copy():
                 child.parent = link
 
         self.renderer.render(parent, link, page)
-        return parent
+        return None
 
 class RenderLocalLink(RenderLinkBase):
     """

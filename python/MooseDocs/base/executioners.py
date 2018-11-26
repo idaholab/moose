@@ -116,6 +116,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorMixin):
         data = self._tree_data.get(page.uid, None)
         if data is not None:
             data = data.copy()
+
         return data
 
     def getMetaData(self, page, key):
@@ -334,6 +335,9 @@ class ParallelPipe(Executioner):
     Parallel execution that performs tokenization and uses a multiprocessing.Pipe to
     send the data to the main process. I then starts a new parallel process for
     rendering, using the data populated from the first step.
+
+    TODO: This isn't working correct, but the ParallelBarrier seams to be the
+          fastest, so I will need to come back to this at some time.
     """
     PROCESS_FINISHED = -1
 
@@ -398,6 +402,13 @@ class ParallelDemand(Executioner):
     """
     Parallel execution that does not perform any communication and re-builds syntax trees
     within the getSyntaxTree method.
+
+
+    NOTE: This doesn't work yet. The configuration changes get screwed up when the
+          getSyntaxTree method is called from another page. I need to re-think the configuration
+          handling to make this work.
+
+          Fixing this is not a high priority, because the ParallelBarrier seems to be the fastest.
     """
     def __init__(self, *args, **kwargs):
         super(ParallelDemand, self).__init__(*args, **kwargs)
@@ -423,7 +434,7 @@ class ParallelDemand(Executioner):
 
         for node in nodes:
             ast, meta = self.tokenize(node)
-            self._tree_data[node.uid] = ast.copy()
+            self._tree_data[node.uid] = ast
             self._meta_data[node.uid] = meta
             self.render(node, ast, meta)
 

@@ -6643,8 +6643,7 @@
             "children": [
                 {
                     "attributes": {
-                        "code": "mono", 
-                        "content": "", 
+                        "content": "mono", 
                         "recursive": false
                     }, 
                     "children": [], 
