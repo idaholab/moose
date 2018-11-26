@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#12527'
+  design = '/ContactAction.md'
 
   [./frictional_mu02_penalty]
     type = 'Exodiff'
@@ -10,6 +12,8 @@
     abs_zero = 1e-7
     max_time = 800
     allow_warnings = true
+
+    requirement = 'MOOSE shall support mechanics frictional contact problems'
   [../]
 
   [./frictional_mu04_penalty]
@@ -21,6 +25,8 @@
     abs_zero = 1e-7
     max_time = 800
     deleted = '#6139'
+
+    requirement = 'MOOSE shall support mechanics frictional contact problems'
   [../]
 
   [./frictionless_kinematic]
@@ -32,6 +38,8 @@
     abs_zero = 1e-7
     max_time = 800
     deleted = '#6139'
+
+    requirement = 'MOOSE shall support mechanics frictionless contact problems'
   [../]
 
   [./frictionless_penalty]
@@ -43,6 +51,8 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+
+    requirement = 'MOOSE shall support mechanics frictionless contact problems'
   [../]
 
   [./frictionless_aug]
@@ -52,8 +62,10 @@
     heavy = true
     superlu = true
     min_parallel = 4
-    abs_zero = 1e-5
+    abs_zero = 1e-4
     max_time = 800
+
+    requirement = 'MOOSE shall support mechanics frictionless contact problems'
   [../]
 
   [./frictional_mu02_aug]
@@ -65,6 +77,8 @@
     min_parallel = 4
     abs_zero = 1e-5
     max_time = 800
+
+    requirement = 'MOOSE shall support mechanics frictional contact problems'
   [../]
 
 []
