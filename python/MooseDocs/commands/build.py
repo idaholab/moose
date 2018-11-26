@@ -222,3 +222,5 @@ def main(options):
         watcher = MooseDocsWatcher(translator, options)
         server = livereload.Server(watcher=watcher)
         server.serve(root=translator['destination'], host=options.host, port=options.port)
+
+    return 0

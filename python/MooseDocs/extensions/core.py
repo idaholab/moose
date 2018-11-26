@@ -358,7 +358,7 @@ class FormatInline(components.TokenComponent):
         elif tok == u'~':
             return Strikethrough(parent)
         elif tok == u'`':
-            return Monospace(parent, code=info['inline'], recursive=False)
+            return Monospace(parent, content=info['inline'], recursive=False)
 
 ####################################################################################################
 # Rendering.
