@@ -120,4 +120,4 @@ def main(options):
             if ext in extensions:
                 errno = compare(os.path.join(root, fname), out_dir, gold_dir, options.update_gold)
 
-    sys.exit(errno)
+    return errno
