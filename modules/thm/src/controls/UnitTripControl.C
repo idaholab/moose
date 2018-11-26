@@ -17,7 +17,7 @@ UnitTripControl::UnitTripControl(const InputParameters & parameters)
   : RELAP7Control(parameters),
     _value(getControlData<Real>("input")),
     _threshold(getParam<Real>("threshold")),
-    _output(declareComponentControlData<bool>("output"))
+    _state(declareComponentControlData<bool>("state"))
 {
 }
 
@@ -25,7 +25,7 @@ void
 UnitTripControl::execute()
 {
   if (_value <= _threshold)
-    _output = false;
+    _state = false;
   else
-    _output = true;
+    _state = true;
 }

@@ -24,8 +24,8 @@ protected:
   const Real & _value;
   /// threshold that trips the output from false to true
   const Real & _threshold;
-  /// the output of this block (false for _value < _threshold, true otherwise)
-  bool & _output;
+  /// the state of this block (false for _value < _threshold, true otherwise)
+  bool & _state;
 };
 
 #endif // UNITTRIP_H
