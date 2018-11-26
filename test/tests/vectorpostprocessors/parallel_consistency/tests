@@ -1,8 +1,9 @@
 [Tests]
+    design = '/VectorPostprocessors/index.md'
+    issues = '#11408'
+
   [./test]
     requirement = 'MOOSE shall provide VectorPostprocessor results to all processors as scattered data'
-    design = '/VectorPostprocessors/index.md'
-    issues = '11408'
 
     type = 'Exodiff'
     input = 'parallel_consistency.i'
@@ -12,8 +13,6 @@
   [../]
   [./broadcast]
     requirement = 'MOOSE shall provide VectorPostprocessor results to all processors as replicated data'
-    design = '/VectorPostprocessors/index.md'
-    issues = '11408'
 
     type = 'Exodiff'
     input = 'parallel_consistency.i'

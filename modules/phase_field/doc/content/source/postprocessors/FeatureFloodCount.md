@@ -3,21 +3,21 @@
 The FeatureFloodCount object is a utility that inspects solution fields looking for [Connected Components](https://en.wikipedia.org/wiki/Connected_component_(graph_theory)) or "topologically connected regions of a solution field sharing a similar characteristic". Typically, this means a region where the solution value is higher than some threshold. This object is designed to work efficiently on a partitioned unstructured mesh with hundreds to thousands of processors.
 
 !row!
-!col! class=s12 m6 l6
+!col! small=12 medium=6 large=6
 !media media/phase_field/unstructured_1.png id=unstructured1 caption=The identification of a new feature.
 !col-end!
 
-!col! class=s12 m6 l6
+!col! small=12 medium=6 large=6
 !media media/phase_field/unstructured_2.png id=unstructured2 caption=Intermediate stage of identification.
 !col-end!
 !row-end!
 
 !row!
-!col! class=s12 m6 l6
+!col! small=12 medium=6 large=6
 !media media/phase_field/unstructured_3.png id=unstructured3 caption=Identification of the region complete.
 !col-end!
 
-!col! class=s12 m6 l6
+!col! small=12 medium=6 large=6
 !media media/phase_field/unstructured_4.png id=unstructured4 caption=Halo extension complete.
 !col-end!
 !row-end!
@@ -28,11 +28,11 @@ The algorithm for identifying portions of connected components begins by running
 
 
 !row!
-!col! class=s12 m6 l6
+!col! small=12 medium=6 large=6
 !media media/phase_field/grain_stitching_small_split.svg id=grain_stitch_split caption=Regular grid with 6 features partitioned 3 ways.
 !col-end!
 
-!col! class=s12 m6 l6
+!col! small=12 medium=6 large=6
 !media media/phase_field/grain_stitching_small.svg id=grain_stitch caption=Global identification of all features.
 !col-end!
 !row-end!

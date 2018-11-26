@@ -1,7 +1,7 @@
 # ACBarrierFunction
 
 The ACBarrierFunction kernel implements the term $\frac{\partial m}{\partial \eta}f(\eta)$
-term for the free energy given in [cite:moelans_quantitative_2008].
+term for the free energy given in [cite!moelans_quantitative_2008].
 $m$ is the barrier energy coefficient.
 In many phase field models, $m$ is constant, but in the case where it is a function
 of one or more of the variables, this kernel should be included.

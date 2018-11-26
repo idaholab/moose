@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/PorousFlowCapillaryPressureBC
 
-The Brooks-Corey capillary-pressure relationship is [citep:brookscorey1966]
+The Brooks-Corey capillary-pressure relationship is [citep!brookscorey1966]
 
 \begin{equation}
 S_{\mathrm{eff}} = \left( \frac{P_c}{P_e} \right)^{-\lambda},

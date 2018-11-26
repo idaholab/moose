@@ -3,12 +3,12 @@
     --inl-blue-light: rgba(0, 104, 179, 1.0);
     --dark-blue: rgba(0, 44, 78, 1.0);
     --gray: rgba(117, 117, 117);
-    --alert-error: #ef5350;
-    --alert-error-content: #ffebee;
-    --alert-note: var(--inl-blue);
+    --alert-error: rgba(153, 0, 0, 1);
+    --alert-error-content: rgba(153, 0, 0, 0.1);
+    --alert-note: rgba(0, 88, 151);
     --alert-note-content: rgba(0, 88, 151, 0.1);
-    --alert-warning: #fbc02d;
-    --alert-warning-content: #fffde7;
+    --alert-warning: rgba(255, 255, 51, 1.0);
+    --alert-warning-content: rgba(255, 255, 51, 0.1);
     --alert-construction: rgba(255, 114, 33, 1.0);
     --alert-construction-content: rgba(255, 114, 33, 0.1);
 }
@@ -45,9 +45,18 @@ main {
   -webkit-font-smoothing: antialiased;
 }
 
-.moose-help .material-icons{
+.material-icons .moose-help{
     color:white;
     margin-left:5px;
+}
+
+.moose-col-icon{
+    font-size: 32pt;
+    display:inline-block;
+    width:100%;
+    padding-top: 16pt;
+    color: var(--inl-blue);
+    text-align:center;
 }
 
 .moose-inline-icon{
@@ -441,6 +450,10 @@ span.moose-sqa-error{
     color:red;
 }
 
+.moose-sqa-items a:not(:last-child):after{
+    content:"; "
+}
+
 /* Children/Input file lists */
 ul.moose-list-children,
 ul.moose-list-inputs{
@@ -831,7 +844,7 @@ li p {
 }
 
 .moose-alert-warning .moose-alert-title{
-  color: white;
+  color: black;
   background-color: var(--alert-warning);
 }
 

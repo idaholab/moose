@@ -2,8 +2,8 @@
 
 !syntax description /Modules/PhaseField/GrandPotential/GrandPotentialKernelAction
 
-For more information on the grand potential model, see [cite:plapp_unified_2011] and
-[cite:moelans_quantitative_2008].
+For more information on the grand potential model, see [cite!plapp_unified_2011] and
+[cite!moelans_quantitative_2008].
 The following kernels are generated for each chemical potential variable:
 
 - [`SusceptibilityTimeDerivative`](/SusceptibilityTimeDerivative.md)
@@ -48,7 +48,7 @@ action. These typically represent grains in a polycrystal system.
 - `var_name_base`: Name of order parameters auto-generated in Variable block.
 - `free_energies_gr`: Vector of chemical potential density functions used for this set of order parameters. Each entry corresponds to the phase in the same entry of "switching_function_names".
 - `mobility_name_gr`: Name of scalar mobility used with this set of order parameters.
-- `energy_barrier_gr`: Name of energy barrier coefficient (m in [cite:moelans_quantitative_2008].) used with this set of order parameters.
+- `energy_barrier_gr`: Name of energy barrier coefficient (m in [cite!moelans_quantitative_2008].) used with this set of order parameters.
 - `gamma_gr`: Name of gamma coefficient used with this set of order parameters which controls interface energy between these order parameters.
 - `kappa_gr`: Name of kappa coefficient to be used with this set of order parameters.
 

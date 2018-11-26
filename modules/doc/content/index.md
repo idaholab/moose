@@ -9,7 +9,7 @@
 # An open source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
 !row!
-!col! class=s12 m4 l4 icon=flash_on
+!col! small=12 medium=4 large=4 icon=flash_on
 ### Rapid Development class=center style=font-weight:200;
 
 MOOSE is a finite-element framework that aids in application development by harnessing
@@ -17,7 +17,7 @@ state-of-the-art fully-coupled, fully-implicit multiphysics solvers while provid
 parallelization, mesh adaptivity, and a growing set of physics modules.
 !col-end!
 
-!col! class=s12 m4 l4 icon=group
+!col! small=12 medium=4 large=4 icon=group
 ### User Focused class=center style=font-weight:200;
 
 MOOSE includes ever-expanding set of physics modules including solid mechanics, phase-field,
@@ -26,7 +26,7 @@ MOOSE-based applications, enabling collaboration across applications, time-scale
 domains.
 !col-end!
 
-!col! class=s12 m4 l4 icon=settings
+!col! small=12 medium=4 large=4 icon=settings
 ### Getting Started class=center style=font-weight:200;
 
 MOOSE works on Mac OS, Linux, and Windows and is easy to get started with. Begin by exploring
@@ -34,10 +34,5 @@ MOOSE works on Mac OS, Linux, and Windows and is easy to get started with. Begin
 
 !col-end!
 !row-end!
-
-!media media/inl_blue.png style=width:0%; <!- TODO: why is this necessary to fix the layout? ->
-
-<br>
-<br>
 
 !media media/inl_blue.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;

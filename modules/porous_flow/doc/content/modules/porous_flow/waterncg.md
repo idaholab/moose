@@ -78,7 +78,7 @@ h_l = (1 - x_{ncg}) h_{h2o} + x_{ncg} (h_{ncg,g} + h_{dis,g}),
 
 where $h_{ncg,g}$ is the enthalpy of the gaseous NCG, and $h_{dis,g}$ is the enthalpy of
 dissolution of NCG into the liquid. An expression for the enthalpy of dissolution is
-implemented following [citep:himmelblau1959]
+implemented following [citep!himmelblau1959]
 
 \begin{equation}
 \frac{\partial \ln(K_h)}{\partial T} = - \frac{h_{dis,g} M_{ncg}}{R T^2},

@@ -1,10 +1,129 @@
 \documentclass{report}
+\usepackage[urlcolor=blue,filecolor=blue,linkcolor=blue,colorlinks=true,citecolor=blue]{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
 \usepackage{amsmath}
-\usepackage{hyperref}
+\usepackage{listings}
 \usepackage{soul}
-\title{\label{moosedocs-test-pages}MooseDocs Test Pages}
+\usepackage[margin=1in]{geometry}
+\usepackage[labelsep=period]{caption}
+\usepackage{xifthen}
+\usepackage{tabulary}
+\usepackage{fontawesome}
+\usepackage[content={Draft mode enabled in the graph extension.}]{draftfigure}
+\usepackage{xparse}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage[round]{natbib}
+\usepackage{parskip}\setlength{\parindent}{0pt}
+\lstset{basicstyle=\ttfamily,columns=fullflexible,frame=single,breaklines=true,showstringspaces=false,showspaces=false,postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},}
+\tcbuselibrary{skins}
+
+\newtcolorbox
+[auto counter,number within=chapter]{example}[2][]{%
+skin=bicolor,colback=black!10,colbacklower=white,colframe=black!90,fonttitle=\bfseries,
+title=Example~\thetcbcounter: #2,#1}
+
+\definecolor{alert-error}{RGB}{153,0,0}
+\definecolor{alert-note}{RGB}{0,88,151}
+\definecolor{alert-warning}{RGB}{220,200,100}
+\definecolor{alert-construction}{RGB}{255,114,33}
+\setlength\intextsep{0pt}
+\NewDocumentEnvironment{alert}{O{#2}moO{white}}{%
+  \ifthenelse{\isempty{#1}}{%
+      \IfValueT{#3}{\tcbset{title=#3}}
+    }{%
+      \tcbset{title=\MakeUppercase{#1}\IfValueT{#3}{: #3}}
+    }
+  \begin{tcolorbox}[arc=0mm,fonttitle=\bfseries,colback=alert-#2!5,colframe=alert-#2,coltitle=#4]
+}{%
+  \end{tcolorbox}
+}
+
+
+\DeclareDocumentEnvironment{InputParameter}{mooo}{%
+  \begin{minipage}{\textwidth}
+  \textbf{#1} \newline
+  \smallskip
+  \hfill
+  \begin{minipage}{0.95\textwidth}
+  \smallskip
+}{%
+  \newline
+  \IfValueT{#2}{\textit{Group}:~#2\\}
+  \IfValueT{#3}{\textit{C++ Type}:~\texttt{#3}\\}
+  \IfValueT{#4}{\textit{Default}:~#4\\}
+  \end{minipage}
+  \end{minipage}
+}
+
+
+\DeclareDocumentEnvironment{ObjectDescription}{moo}{%
+  \begin{minipage}{\textwidth}
+  \textbf{#1} \newline
+  \smallskip
+  \hfill
+  \begin{minipage}{0.95\textwidth}
+    \smallskip
+}{%
+  \newline
+  \IfValueT{#2}{\textit{Registered to}~#2\\}
+  \IfValueT{#3}{\textit{Base Type:}~\texttt{#3}\\}
+  \end{minipage}
+  \end{minipage}
+}
+
+
+\DeclareDocumentCommand{\ContentItem}{mmm}{#3 (\texttt{\small #1})\dotfill \pageref{#2}\\}
+
+\definecolor{card-frame}{RGB}{0,88,151}
+\NewDocumentEnvironment{card}{mm}{ %
+  \tcbset{width=#1,title=#2}
+  \begin{tcolorbox}[fonttitle=\bfseries, colback=white, colframe=card-frame]
+}{ %
+  \end{tcolorbox}
+}
+
+
+\DeclareDocumentEnvironment{Requirement}{m}{%
+  \begin{minipage}[t]{0.08\textwidth}%
+    #1
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.9\textwidth}%
+}{%
+  \end{minipage}
+}
+
 \begin{document}
-\maketitle
+
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/index.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/acronym.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/alert.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/appsyntax.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/autolink.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/bibtex.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/common.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/config.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/content.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/core.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/devel.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/example.template.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/gallery.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/graph.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/include.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/katex.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/layout.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/listing.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/materialicon.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/media.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/navigation.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/package.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/sqa.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/table.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/template.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/folder/index.tex}
+\bibliographystyle{unsrtnat}
+\bibliography{${MOOSE_DIR}/modules/level_set/doc/content/bib/level_set.bib,${MOOSE_DIR}/framework/doc/content/bib/moose.bib}
 \end{document}

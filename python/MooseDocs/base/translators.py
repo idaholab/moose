@@ -78,7 +78,6 @@ class Translator(mixins.ConfigObject):
         self.__extensions = extensions
         self.__reader = reader
         self.__renderer = renderer
-        self.__destination = None # assigned during init()
 
         # Define an Executioner if not provided
         self.__executioner = executioner
@@ -113,6 +112,11 @@ class Translator(mixins.ConfigObject):
         """Return the Executioner instance."""
         return self.__executioner
 
+    @property
+    def destination(self):
+        """Return the destination directory."""
+        return self.get('destination')
+
     def addContent(self, page):
         """Add an additional page to the list of available pages."""
         self.__content.append(page)
@@ -143,12 +147,20 @@ class Translator(mixins.ConfigObject):
             ext.resetConfig()
 
     def getMetaData(self, page, key):
-        """Return the Meta data object for the supplied page."""
+        """Return the Meta data for the supplied page and key."""
         return self.__executioner.getMetaData(page, key)
+
+    def getMetaDataObject(self, page):
+        """Return the Meta data object for the supplied page."""
+        return self.__executioner.getMetaDataObject(page)
 
     def getSyntaxTree(self, page):
         """Return the AST for the supplied page."""
         return self.__executioner.getSyntaxTree(page)
+
+    def getResultTree(self, page):
+        """Return the rendered tree for the supplied page."""
+        return self.__executioner.getResultTree(page)
 
     def findPages(self, arg):
         """

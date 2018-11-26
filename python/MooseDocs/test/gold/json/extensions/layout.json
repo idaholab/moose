@@ -14,14 +14,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Layout Extension"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Layout", 
                         "recursive": true
                     }, 
@@ -57,9 +49,12 @@
             "children": [
                 {
                     "attributes": {
-                        "class": "s12 m6 l8", 
+                        "class": "", 
                         "id": "", 
+                        "large": 9, 
+                        "medium": 8, 
                         "recursive": true, 
+                        "small": 12, 
                         "style": "", 
                         "width": null
                     }, 
@@ -397,9 +392,12 @@
                 }, 
                 {
                     "attributes": {
-                        "class": "s12 m6 l4", 
+                        "class": "", 
                         "id": "", 
+                        "large": 3, 
+                        "medium": 4, 
                         "recursive": true, 
+                        "small": 12, 
                         "style": "", 
                         "width": null
                     }, 
@@ -934,6 +932,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -952,6 +951,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

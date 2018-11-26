@@ -262,7 +262,7 @@ algorithm.
 ### Consistent Tangent Operator
 
 The consistent tangent operator is used to improve the convergence of mechanics
-problems (see a reference such as [cite:simo1985cto] for an introduction to
+problems (see a reference such as [cite!simo1985cto] for an introduction to
 consistent tangent operators).
 The Jacobian matrix, [eqn:combined_jacobian_mult] and [eqn:single_model_jacobian_mult],
 is used to capture how the change in the residual calculation changes with respect

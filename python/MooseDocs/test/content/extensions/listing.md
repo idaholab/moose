@@ -10,6 +10,8 @@ One
 !listing id=three
 Three
 
+You can reference listings: [three].
+
 ## Test Captions
 
 !listing
@@ -37,7 +39,7 @@ void function();
 
 ## File Listing
 
-!listing framework/src/kernels/Diffusion.C link=False
+!listing framework/src/kernels/Diffusion.C link=False id=diffusion-c
 
 !listing framework/src/kernels/Diffusion.C link=True start=template end=Diffusion::
 
