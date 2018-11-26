@@ -26,6 +26,10 @@ protected:
   const Real & _threshold;
   /// the state of this block (false for _value < _threshold, true otherwise)
   bool & _state;
+  /// Determines if the state of the trip should stay true for the rest of the simulation after the trip happened
+  const bool & _latch;
+  /// true if the trip happened, otherwise false
+  bool _tripped;
 };
 
 #endif // UNITTRIP_H
