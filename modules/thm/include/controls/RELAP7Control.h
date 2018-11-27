@@ -15,6 +15,8 @@ class RELAP7Control : public Control
 public:
   RELAP7Control(const InputParameters & parameters);
 
+  virtual void init() {}
+
   /**
    * Return the Controls that must run before this Control
    */
@@ -45,6 +47,14 @@ protected:
   template <typename T>
   const T & getControlData(const std::string & param_name);
 
+  /**
+   * Get a reference to control data that are specified by 'data_name' name
+   *
+   * @param data_name The name of the control data
+   */
+  template <typename T>
+  const T & getControlDataByName(const std::string & data_name);
+
   Simulation & _sim;
 
   /// A list of control data that are required to run before this control may run
@@ -73,6 +83,13 @@ const T &
 RELAP7Control::getControlData(const std::string & param_name)
 {
   std::string data_name = getParam<std::string>(param_name);
+  return getControlDataByName<T>(data_name);
+}
+
+template <typename T>
+const T &
+RELAP7Control::getControlDataByName(const std::string & data_name)
+{
   ControlData<T> * data_ptr = _sim.getControlData<T>(data_name);
   if (data_ptr == nullptr)
     mooseError("Trying to get control data '",
