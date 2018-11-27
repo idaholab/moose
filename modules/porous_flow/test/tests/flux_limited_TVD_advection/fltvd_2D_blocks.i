@@ -94,14 +94,14 @@
 
 [UserObjects]
   [./fluo_top]
-    type = AdvectiveFluxCalculator
+    type = AdvectiveFluxCalculatorConstantVelocity
     flux_limiter_type = superbee
     u = tracer
     velocity = '0.1 0 0'
     block = '1'
   [../]
   [./fluo_bot]
-    type = AdvectiveFluxCalculator
+    type = AdvectiveFluxCalculatorConstantVelocity
     flux_limiter_type = superbee
     u = tracer
     velocity = '-0.1 0 0'

@@ -20,7 +20,7 @@
 
 [UserObjects]
   [./fluo]
-    type = AdvectiveFluxCalculator
+    type = AdvectiveFluxCalculatorConstantVelocity
     execute_on = 'nonlinear timestep_begin timestep_end final initial'
     u = u
     velocity = '0 0 0'

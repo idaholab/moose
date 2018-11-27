@@ -50,7 +50,7 @@
 
 [UserObjects]
   [./fluo]
-    type = AdvectiveFluxCalculator
+    type = AdvectiveFluxCalculatorConstantVelocity
     flux_limiter_type = superbee
     u = u
     velocity = '1 -2 1.5'

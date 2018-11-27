@@ -105,7 +105,7 @@ The MOOSE input file is:
 
 !listing modules/porous_flow/test/tests/numerical_diffusion/fltvd.i
 
-[KTlimited_eles] and [KTlimited_dt] show the dependence on discretisation when Kuzmin-Turek with a flux limiter is used (the "superbee" limiter has been chosen in this case, see https://mooseframework.inl.gov/moose/modules/rdg/index.html). As expected, the behaviour is similar to the RDG(POP1) case, except it is smooth because the variables are linear-lagrange.
+[KTlimited_eles] and [KTlimited_dt] show the dependence on discretisation when Kuzmin-Turek with a flux limiter is used (the "superbee" limiter has been chosen in this case, see the [worked example of Kuzmin-Turek stabilization](kt_worked.md)). As expected, the behaviour is similar to the RDG(POP1) case, except it is smooth because the variables are linear-lagrange.
 
 !media media/porous_flow/KTlimited_eles.png style=width:60%;margin-left:10px caption=Diffusion as a function of number of elements.  The number of time steps is fixed to 100 and Kuzmin-Turek with no flux limiter is used.  id=KTlimited_eles
 

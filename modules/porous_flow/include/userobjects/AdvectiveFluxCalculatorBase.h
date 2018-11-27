@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADVECTIVEFLUXCALCULATOR_H
-#define ADVECTIVEFLUXCALCULATOR_H
+#ifndef ADVECTIVEFLUXCALCULATORBASE_H
+#define ADVECTIVEFLUXCALCULATORBASE_H
 
 #include "ElementUserObject.h"
 
 /**
- * Computes Advective fluxes.  Specifically,
+ * Base class to ompute Advective fluxes.  Specifically,
  * computes K_ij, D_ij, L_ij, R+, R-, f^a_ij detailed in
  * D Kuzmin and S Turek "High-resolution FEM-TVD schemes based on a fully multidimensional flux
  * limiter" Journal of Computational Physics 198 (2004) 131-158
@@ -25,15 +25,15 @@
  * L = K + D
  * R^+_i and R^-_i and f^a_{ij} quantify how much antidiffusion to allow around node i
  **/
-class AdvectiveFluxCalculator;
+class AdvectiveFluxCalculatorBase;
 
 template <>
-InputParameters validParams<AdvectiveFluxCalculator>();
+InputParameters validParams<AdvectiveFluxCalculatorBase>();
 
-class AdvectiveFluxCalculator : public ElementUserObject
+class AdvectiveFluxCalculatorBase : public ElementUserObject
 {
 public:
-  AdvectiveFluxCalculator(const InputParameters & parameters);
+  AdvectiveFluxCalculatorBase(const InputParameters & parameters);
 
   /// If needed, size quantities appropriately and compute _valence
   virtual void timestepSetup() override;
@@ -85,20 +85,21 @@ public:
   unsigned getValence(dof_id_type node_i, dof_id_type node_j) const;
 
 protected:
-  /// advection velocity
-  RealVectorValue _velocity;
+  /**
+   * Returns the transfer velocity between current node i and current node j
+   * at the current qp in the current element.
+   * For instance, (_grad_phi[i][qp] * _velocity) * _phi[j][qp];
+   * @param i node number in the current element
+   * @param j node number in the current element
+   * @param qp quadpoint number in the current element
+   */
+  virtual Real getInternodalVelocity(unsigned i, unsigned j, unsigned qp) const = 0;
 
-  /// the nodal values of u
-  MooseVariable * _u_nodal;
-
-  /// the moose variable number of u
-  unsigned _u_var_num;
-
-  /// Kuzmin-Turek shape function
-  const VariablePhiValue & _phi;
-
-  /// grad(Kuzmin-Turek shape function)
-  const VariablePhiGradient & _grad_phi;
+  /**
+   * Returns the value of u at the global node id
+   * @param id global node id (not the local one within an element)
+   */
+  virtual Real getU(dof_id_type id) const = 0;
 
   /// whether _kij, etc, need to be sized appropriately (and valence recomputed) at the start of the timestep
   bool _resizing_needed;
@@ -197,4 +198,4 @@ protected:
   std::map<dof_id_type, Real> zeroedConnection(dof_id_type node_i) const;
 };
 
-#endif // ADVECTIVEFLUXCALCULATOR_H
+#endif // ADVECTIVEFLUXCALCULATORBASE_H

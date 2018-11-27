@@ -197,3 +197,18 @@ When $\Phi=0$, KT's procedure yields the *full upwind* equation [eq:fullupwind].
 
 !media media/porous_flow/fltvd_all.png style=width:60%;margin-left:10px caption=Temperature profile after 1000 timesteps, when operator $L$ is used to transport the heat, and when $L$ plus antidiffusion is used.  id=fltvd_all
 
+
+## Flux limiters
+
+KT present four different flux-limiters.  These are plotted in [flux_liiters].
+
+Notice that the VanLeer limiter is smoother than the others, so it is likely to provide superior nonlinear concergence, and it is chosen as the default limiter in the [AdvectiveFluxCalculator](AdvectiveFluxCalculator.md).
+
+!media media/porous_flow/flux_limiters.png style=width:60%;margin-left:10px caption=Flux limiters, $\Phi(r)$, enumerated by KT (pp 135).  id=flux_liiters
+
+## Effect of different flux limiters
+
+The effect of choosing different flux limiters for this worked example is shown in [flux_limiter_choice].  In this case, the superbee flux limiter performs best.  Note that the timestep is rather large in this example, to emphasize the differences between the flux limiters, however, if this were a real simulation that was trying to reduce numerical diffusion, the timestep should be chosen smaller, and then the results would look more like [fltvd_all].
+
+!media porous_flow/flux_limiter_choice.gif style=width:70%;margin-left:10px caption=The effect of flux limiter on the advective profile.  Note that the timestep is rather large here, to emphasise the difference between the flux limiters.  If a smaller timestep is chosen the results all look similar and like [fltvd_all].  id=flux_limiter_choice
+

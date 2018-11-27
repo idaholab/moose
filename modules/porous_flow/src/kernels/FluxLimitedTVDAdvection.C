@@ -24,7 +24,7 @@ validParams<FluxLimitedTVDAdvection>()
 }
 
 FluxLimitedTVDAdvection::FluxLimitedTVDAdvection(const InputParameters & parameters)
-  : Kernel(parameters), _fluo(getUserObject<AdvectiveFluxCalculator>("advective_flux_calculator"))
+  : Kernel(parameters), _fluo(getUserObject<AdvectiveFluxCalculatorBase>("advective_flux_calculator"))
 {
 }
 

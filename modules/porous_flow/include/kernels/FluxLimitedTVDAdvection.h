@@ -10,7 +10,7 @@
 #define FLUXLIMITEDTVDADVECTION_H
 
 #include "Kernel.h"
-#include "AdvectiveFluxCalculator.h"
+#include "AdvectiveFluxCalculatorBase.h"
 
 // Forward Declaration
 class FluxLimitedTVDAdvection;
@@ -40,7 +40,7 @@ protected:
   virtual void computeJacobian() override;
 
   /// The user object that computes Kuzmin and Turek's K_ij, R+ and R-, etc quantities
-  const AdvectiveFluxCalculator & _fluo;
+  const AdvectiveFluxCalculatorBase & _fluo;
 };
 
 #endif // FLUXLIMITEDTVDADVECTION_H

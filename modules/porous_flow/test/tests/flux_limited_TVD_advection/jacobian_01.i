@@ -37,7 +37,7 @@
 
 [UserObjects]
   [./fluo]
-    type = AdvectiveFluxCalculator
+    type = AdvectiveFluxCalculatorConstantVelocity
     flux_limiter_type = none
     u = u
     velocity = '1 -2 1.5'
