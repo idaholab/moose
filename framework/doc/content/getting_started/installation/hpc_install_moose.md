@@ -1,4 +1,4 @@
-# Getting Started with MOOSE on Cluster Machines
+# HPC Cluster
 
 The following instructions aims at setting up a baseline single-user environment for building MOOSE based applications in a job scheduling capable environment.
 
@@ -32,7 +32,7 @@ export PACKAGES_DIR=$HOME/moose-compilers
 
 Use an editor to add the following contents to `$HOME/.moose_profile`
 
-```bash
+!package! code max-height=400
 PACKAGES_DIR=$HOME/moose-compilers
 
 export CC=mpicc
@@ -41,8 +41,8 @@ export F90=mpif90
 export F77=mpif77
 export FC=mpif90
 
-export PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3
-```
+export PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__
+!package-end!
 
 ## Source the MOOSE Profile
 
@@ -57,8 +57,4 @@ You will need to perform the above (`source $HOME/.moose_profile`) for every new
 
 !include manual_cleanup.md
 
-## Compiler Stack Finished
-
-With the compiler stack ready, you can proceed to [Obtaining and Building MOOSE](getting_started/installation/install_moose.md).
-
-!include getting_started/installation/post_moose_install.md
+Head back over to the [getting_started/index.md] page to continue your tour of MOOSE.

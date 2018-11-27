@@ -1,5 +1,13 @@
 ## MPICH
 
+Check and see if you already have an MPI wrapper available on your machine. One simple way of doing so, is to perform a `which` on the three necessary MPI wrapper binaries:
+
+```bash
+which mpicc mpicxx mpif90 | wc -l
+```
+
+If the above command returns '3', then you may skip the MPICH section. +However+, if you ended up building your own GCC compiler above, you will want to *NOT* skip this step. With the reason being, it is generally best to build an MPI wrapper based on the compiler you plan to use.
+
 Download MPICH !!package mpich!!
 
 !package! code

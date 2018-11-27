@@ -11,7 +11,7 @@ your operating system/platform and follow the instructions:
 - [getting_started/installation/fedora.md]
 - [getting_started/installation/centos.md]
 - [getting_started/installation/windows10.md]
-- [getting_started/installation/cluster.md]
+- [getting_started/installation/hpc_install_moose.md]
 - [getting_started/installation/manual_installation_gcc.md]
 - [getting_started/installation/manual_installation_llvm.md]
 
