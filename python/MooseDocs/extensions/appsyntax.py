@@ -394,7 +394,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
         if self.settings['heading'] == u'AUTO':
             h = ['Objects', 'Actions', 'Subsystems']
             idx = [self.settings['objects'], self.settings['actions'], self.settings['subsystems']]
-            names = [h[i] for i in idx if i]
+            names = [h[i] for i, v in enumerate(idx) if v]
             if len(names) == 1:
                 self.settings['heading'] = u'Available {}'.format(*names)
             elif len(names) == 2:
@@ -434,6 +434,7 @@ class SyntaxCompleteCommand(SyntaxListCommand):
         settings = SyntaxListCommand.defaultSettings()
         settings['group'] = (None, "The group (app) to limit the complete syntax list.")
         settings['level'] = (2, "Beginning heading level.")
+        settings['heading'] = (None, settings['heading'][1])
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj):

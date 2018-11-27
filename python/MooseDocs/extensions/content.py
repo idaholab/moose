@@ -50,24 +50,28 @@ class ContentCommand(command.CommandComponent):
 
     def createToken(self, parent, info, page):
 
-        location = self.settings['location']
         tree = dict()
         tree[(u'',)] = core.UnorderedList(parent, browser_default=False)
-        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Directory)
-        for node in self.translator.findPages(func):
-            key = tuple(node.local.strip(os.sep).replace(location, '').split(os.sep))
-            if key not in tree:
-                col = Collapsible(tree[key[:-1]], summary=key[-1])
-                li = core.ListItem(col, class_='moose-source-item', tooltip=False)
-                tree[key] = core.UnorderedList(li, browser_default=False)
+
+        location = self.settings['location']
 
         func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
-        for node in self.translator.findPages(func):
-            dname = os.path.dirname(node.local).strip(os.sep)
-            key = tuple(dname.replace(location, '').split(os.sep))
+        nodes = self.translator.findPages(func)
+        for node in nodes:
+            key = tuple(node.local.strip(os.sep).replace(location, '').split(os.sep))[:-1]
+            for i in xrange(1, len(key) + 1):
+                k = key[:i]
+                if k not in tree:
+                    col = Collapsible(tree[k[:-1]], summary=k[-1])
+                    li = core.ListItem(col, class_='moose-source-item', tooltip=False)
+                    tree[k] = core.UnorderedList(li, browser_default=False)
+
+        for node in nodes:
+            key = tuple(node.local.strip(os.sep).replace(location, '').split(os.sep))[:-1]
             loc = node.relativeDestination(page)
             li = core.ListItem(tree[key])
             core.Link(li, url=loc, string=node.name, class_='moose-source-item', tooltip=False)
+
         return parent
 
 class AtoZCommand(command.CommandComponent):

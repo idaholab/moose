@@ -54,7 +54,7 @@ class NavigationExtension(components.Extension):
         self.requires(core, heading)
 
         menu = self.get('menu')
-        if (menu is None) and (renderer.get('navigation', None) is not None):
+        if (not menu) and (renderer.get('navigation', None) is not None):
             msg = "The navigation setting in the MaterializeRenderer is deprecated, " \
                   "please update your code to use the 'menu' setting within the " \
                   "MooseDocs.extensions.navigation extension."

@@ -60,9 +60,7 @@ def run():
     warnings = log.MooseDocsFormatter.COUNTS['WARNING'].value
 
     print 'CRITICAL:{} ERROR:{} WARNING:{}'.format(critical, errors, warnings)
-    if critical or errors:
-        return 1
-    elif errno != 0:
+    if critical or errors or (errno != 0):
         return 1
     return 0
 
