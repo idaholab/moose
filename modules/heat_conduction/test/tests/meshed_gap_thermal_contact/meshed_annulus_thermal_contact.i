@@ -7,6 +7,7 @@
 [Variables]
   [./temp]
     block = '1 3'
+    initial_condition = 1.0
   [../]
 []
 
@@ -20,6 +21,7 @@
     type = HeatSource
     variable = temp
     block = 3
+    value = 10.0
   [../]
 []
 
@@ -28,7 +30,7 @@
     type = DirichletBC
     variable = temp
     boundary = 1
-    value = 0
+    value = 1.0
   [../]
 []
 
