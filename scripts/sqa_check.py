@@ -18,6 +18,10 @@ sys.path.insert(0, os.path.join(moose_dir, 'python'))
 
 import mooseutils
 
+# Directories to skip (i.e., deprecated modules)
+skip = [os.path.join('modules', 'richards'),
+        os.path.join('modules', 'solid_mechanics')]
+
 def get_options():
     """Command-line options."""
     parser = argparse.ArgumentParser(description='SQA Requirement checking tool.')
@@ -70,7 +74,8 @@ if __name__ == '__main__':
     sha = subprocess.check_output(cmd).strip()
     cmd = ['git', 'diff', sha, '--name-only']
     for filename in subprocess.check_output(cmd).split('\n'):
-        if os.path.isfile(filename) and (os.path.basename(filename) in opt.specs):
+        if os.path.isfile(filename) and (os.path.basename(filename) in opt.specs) and \
+           not any(s in filename for s in skip):
             count += check_requirement(os.path.join(root, filename))
 
     sys.exit(count)
