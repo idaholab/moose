@@ -108,6 +108,7 @@
     type = Exodiff
     input = 'planar_xy.i'
     exodiff = 'planar_xy_out.e'
+    custom_cmp = 'planar.cmp'
     superlu = true
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -117,6 +118,7 @@
     type = Exodiff
     input = 'planar_xz.i'
     exodiff = 'planar_xz_out.e'
+    custom_cmp = 'planar.cmp'
     superlu = true
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
@@ -126,6 +128,7 @@
     type = Exodiff
     input = 'planar_yz.i'
     exodiff = 'planar_yz_out.e'
+    custom_cmp = 'planar.cmp'
     superlu = true
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'

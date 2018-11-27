@@ -5,8 +5,7 @@
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_glued_kin.csv'
-    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-3
-    Executioner/nl_rel_tol=1e-10 Executioner/nl_abs_tol=1e-12 Contact/leftright/model=glued Contact/leftright/formulation=kinematic'
+    cli_args = 'Executioner/end_time=0.002 Contact/leftright/model=glued Contact/leftright/formulation=kinematic'
     rel_err = 5e-4
     abs_zero = 3e-5
     max_parallel = 1
