@@ -110,7 +110,6 @@ class CSVSummary(CSVTools):
     def __init__(self, args):
         CSVTools.__init__(self)
         self.files = args.summary
-        self.config = args.comparison_file
         self.abs_zero = float(str(args.abs_zero))
         self.rel_tol = float(str(args.relative_tolerance))
 
@@ -120,9 +119,6 @@ class CSVSummary(CSVTools):
     def __exit__(self, exc_type, exc_value, traceback):
         for a_file in self.files:
             a_file.close()
-
-        if self.config:
-            self.config[0].close()
 
     def _getMinMax(field_list):
         """ return the minimum and maximum values in the list along with the row id they were discovered on """
