@@ -1,10 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 25
-  xmax = 50
-  ymax = 50
+  nx = 12
+  ny = 12
+  xmax = 30
+  ymax = 30
   elem_type = QUAD4
 []
 
@@ -17,12 +17,14 @@
 
 [ICs]
   [./c_IC]
-    type = CrossIC
-    x1 = 0.0
-    x2 = 50.0
-    y1 = 0.0
-    y2 = 50.0
+    type = SmoothCircleIC
+    x1 = 15
+    y1 = 15
+    radius = 10
     variable = c
+    int_width = 3
+    invalue = 1
+    outvalue = -1
   [../]
 []
 

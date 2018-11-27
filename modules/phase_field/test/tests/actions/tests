@@ -1,98 +1,132 @@
 [Tests]
   [./Nonconserved_1var]
-    # Test nonconserved action
     type = Exodiff
     input = 'Nonconserved_1var.i'
     exodiff = 'Nonconserved_1var_out.e'
+    issues = '#9336'
+    design = 'action/NonconservedAction.md'
+    requirement = 'The phase field module shall provide an action to set up an Allen-Cahn problem'
   [../]
   [./Nonconserved_highorder]
-    # Test nonconserved action with higher order elements
     type = Exodiff
     input = 'Nonconserved_highorder.i'
     exodiff = 'Nonconserved_highorder_out.e'
+    issues = '#9336'
+    design = 'action/NonconservedAction.md'
+    requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with higher order elements'
   [../]
   [./Nonconserved_variableL]
-    # Test nonconserved action with a variable mobility
     type = Exodiff
     input = 'Nonconserved_variableL.i'
     exodiff = 'Nonconserved_variableL_out.e'
+    issues = '#9336'
+    design = 'action/NonconservedAction.md'
+    requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with variable dependent mobilities'
   [../]
   [./Nonconserved_2vars]
-    # Test nonconserved action with 2 nonconserved variables
     type = Exodiff
     input = 'Nonconserved_2vars.i'
     exodiff = 'Nonconserved_2vars_out.e'
+    issues = '#9336'
+    design = 'action/NonconservedAction.md'
+    requirement = 'The NonconservedAction shall correctly set up Allen-Cahn problems with multiple order parameters'
   [../]
   [./conserved_direct_1var]
-    # Test conserved action with direct solve and 1 variable
     type = Exodiff
     input = 'conserved_direct_1var.i'
     exodiff = 'conserved_direct_1var_out.e'
+    issues = '#9336'
+    design = 'action/ConservedAction.md'
+    requirement = 'The phase field module shall provide an action to set up a non-split Cahn-Hilliard problem'
   [../]
   [./conserved_split_1var]
-    # Test conserved action with split solve and 1 variable
     type = Exodiff
     input = 'conserved_split_1var.i'
     exodiff = 'conserved_split_1var_out.e'
+    issues = '#9336'
+    design = 'action/ConservedAction.md'
+    requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem'
   [../]
   [./conserved_split_1var_high_order]
-    # Test conserved action with split solve and 1 variable with high order element
     type = Exodiff
     input = 'conserved_split_1var_high_order.i'
     exodiff = 'conserved_split_1var_high_order_out.e'
+    issues = '#9336'
+    design = 'action/ConservedAction.md'
+    requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem with higher order elements'
   [../]
   [./conserved_direct_1var_variable_mob]
-    # Test conserved action with direct solve, 1 variable, and a variable mobility
     type = Exodiff
     input = 'conserved_direct_1var_variable_mob.i'
     exodiff = 'conserved_direct_1var_variable_mob_out.e'
+    issues = '#9336'
+    design = 'action/ConservedAction.md'
+    requirement = 'The phase field module shall provide an action to set up a non-split Cahn-Hilliard problem with variable dependent mobilities'
   [../]
   [./conserved_split_1var_variable_mob]
-    # Test conserved action with split solve, 1 variable, and a variable mobility
     type = Exodiff
     input = 'conserved_split_1var_variable_mob.i'
     exodiff = 'conserved_split_1var_variable_mob_out.e'
+    abs_zero = 1e-9
+    issues = '#9336'
+    design = 'action/ConservedAction.md'
+    requirement = 'The phase field module shall provide an action to set up a reverse split Cahn-Hilliard problem with variable dependent mobilities'
   [../]
   [./both_split_2vars]
-    # Test conserved and nonconserved actions with split solve
     type = Exodiff
     input = 'both_split_2vars.i'
     exodiff = 'both_split_2vars_out.e'
+    issues = '#9336'
+    design = 'action/ConservedAction.md action/NonconservedAction.md'
+    requirement = 'The phase field module NonconservedAction and ConservedAction can be combined to construct a coupled Allen-Chan and split Cahn-Hilliard problem'
   [../]
   [./both_direct_2vars]
-    # Test conserved and nonconserved actions with direct solve
     type = Exodiff
     input = 'both_direct_2vars.i'
     exodiff = 'both_direct_2vars_out.e'
+    issues = '#9336'
+    design = 'action/ConservedAction.md action/NonconservedAction.md'
+    requirement = 'The phase field module NonconservedAction and ConservedAction can be combined to construct a coupled Allen-Chan and non-split Cahn-Hilliard problem'
   [../]
   [./conserved_forward_split_1var]
-    # Test conserved action with forward split solve
     type = Exodiff
     input = 'conserved_forward_split_1var.i'
     exodiff = 'conserved_forward_split_1var_out.e'
+    issues = '#9378'
+    design = 'action/ConservedAction.md'
+    requirement = 'The phase field module shall provide an action to set up a forward split Cahn-Hilliard problem'
   [../]
   [./grain_growth]
-    # Test grain growth action
     type = Exodiff
     input = 'grain_growth.i'
     exodiff = 'grain_growth_out.e'
+    issues = '#9485'
+    design = 'action/GrainGrowthAction.md'
+    requirement = 'The phase field module shall provide an action to set up grain growth problems'
   [../]
   [./grain_growth_with_c]
-    # Test grain growth action with a pinning particle
     type = Exodiff
     input = 'grain_growth_with_c.i'
     exodiff = 'grain_growth_with_c_out.e'
+    issues = '#9485'
+    design = 'action/GrainGrowthAction.md'
+    requirement = 'The grain growth action shall have the ability to set up problems with a pinning particle'
   [../]
   [./grain_growth_with_T_grad]
-    # Test grain growth action with a T gradient
     type = Exodiff
     input = 'grain_growth_with_T_grad.i'
     exodiff = 'grain_growth_with_T_grad_out.e'
+    issues = '#9485'
+    design = 'action/GrainGrowthAction.md'
+    requirement = 'The grain growth action shall have the ability to set up problems with a temperature gradient'
   [../]
   [./grand_potential_kernels]
-    # Test the GPMKernelAction's ability to generate kernels
+    # Test
     type = Exodiff
     input = 'gpm_kernel.i'
     exodiff = 'gpm_kernel_out.e'
+    issues = '#11386'
+    design = 'action/GrandPotentialKernelAction.md'
+    requirement = 'The GrandPotentialAction shall have the ability to generate kernels'
   [../]
 []
