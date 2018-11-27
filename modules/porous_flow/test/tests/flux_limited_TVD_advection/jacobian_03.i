@@ -1,4 +1,10 @@
-# Checking the Jacobian of Flux-Limited TVD Advection, using flux_limiter_type = superbee
+# Checking the Jacobian of Flux-Limited TVD Advection, using flux_limiter_type = vanleer
+#
+# The initial conditions are u=x.  This means that the argument of the flux limiter is 1, so that
+# the flux_limiter=1 everywhere, irrespective of flux_limiter_type (except for 'none').  However
+# superbee and minmod are nondifferentiable at this point, so using those flux_limiter_type will
+# result in a poor Jacobian
+#
 # Here we use snes_check_jacobian instead of snes_type=test.  The former just checks the Jacobian for the
 # random initial conditions, while the latter checks for u=1 and u=-1
 #
@@ -13,18 +19,8 @@
 # the residual comes from the full-upwind scenario).
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 2
-  xmin = 0
-  xmax = 1
-  ny = 2
-  ymin = -1
-  ymax = 2
-  bias_y = 1.5
-  nz = 2
-  zmin = 1
-  zmax = 2
-  bias_z = 0.8
+  dim = 1
+  nx = 6
 []
 
 [Variables]
@@ -36,7 +32,7 @@
   [./u]
     type = FunctionIC
     variable = u
-    function = 'x + 0.5 * y - 0.4 * z - 0.1 * sin(x) - 0.1 * cos(y) + 0.2 * exp(-z)'
+    function = 'x'
   [../]
 []
 
@@ -51,7 +47,7 @@
 [UserObjects]
   [./fluo]
     type = AdvectiveFluxCalculator
-    flux_limiter_type = superbee
+    flux_limiter_type = vanleer
     u = u
     velocity = '1 -2 1.5'
   [../]

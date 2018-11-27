@@ -16,23 +16,25 @@ template <>
 InputParameters
 validParams<AdvectiveFluxCalculator>()
 {
-  InputParameters params = validParams<ElementLoopUserObject>();
+  InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription("Computes K_ij (a measure of advective flux from node i to node j) "
                              "and R+ and R- (which quantify amount of antidiffusion to add) in the "
                              "Kuzmin-Turek FEM-TVD multidimensional scheme");
   params.addRequiredCoupledVar("u", "The variable that is being advected");
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
-  MooseEnum flux_limiter_type("MinMod VanLeer MC superbee None", "MinMod");
+  MooseEnum flux_limiter_type("MinMod VanLeer MC superbee None", "VanLeer");
   params.addParam<MooseEnum>("flux_limiter_type",
                              flux_limiter_type,
                              "Type of flux limiter to use.  'None' means that no antidiffusion "
                              "will be added in the Kuzmin-Turek scheme");
+  params.registerRelationshipManagers("ElementSideNeighborLayers");
+  params.addPrivateParam<unsigned short>("element_side_neighbor_layers", 2);
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_LINEAR};
   return params;
 }
 
 AdvectiveFluxCalculator::AdvectiveFluxCalculator(const InputParameters & parameters)
-  : ElementLoopUserObject(parameters),
+  : ElementUserObject(parameters),
     _velocity(getParam<RealVectorValue>("velocity")),
     _u_nodal(getVar("u", 0)),
     _u_var_num(coupled("u", 0)),
@@ -45,12 +47,13 @@ AdvectiveFluxCalculator::AdvectiveFluxCalculator(const InputParameters & paramet
     _dflux_out_du({}),
     _valence({})
 {
-  // TODO: test this
   if (!_execute_enum.contains(EXEC_LINEAR))
-    mooseError("The AdvectiveFluxCalculator UserObject " + name() +
-               " execute_on parameter must include, at least, 'linear'.  This is to ensure that "
-               "this UserObject computes all necessary quantities just before the Kernels evaluate "
-               "their Residuals");
+    paramError(
+        "execute_on",
+        "The AdvectiveFluxCalculator UserObject " + name() +
+            " execute_on parameter must include, at least, 'linear'.  This is to ensure that "
+            "this UserObject computes all necessary quantities just before the Kernels evaluate "
+            "their Residuals");
 }
 
 void
@@ -110,7 +113,7 @@ AdvectiveFluxCalculator::timestepSetup()
 void
 AdvectiveFluxCalculator::meshChanged()
 {
-  ElementLoopUserObject::meshChanged();
+  ElementUserObject::meshChanged();
 
   // Signal that _kij and _valence need to be rebuilt
   _resizing_needed = true;
@@ -289,7 +292,7 @@ AdvectiveFluxCalculator::limitFlux(Real a, Real b, Real & limited, Real & dlimit
 }
 
 void
-AdvectiveFluxCalculator::pre()
+AdvectiveFluxCalculator::initialize()
 {
   for (auto & nodes : _kij)
     for (auto & neighbors : nodes.second)
@@ -297,11 +300,11 @@ AdvectiveFluxCalculator::pre()
 }
 
 void
-AdvectiveFluxCalculator::computeElement()
+AdvectiveFluxCalculator::execute()
 {
   /// prepare variable values and test functions
-  _fe_problem.prepare(_current_elem, _tid);
-  _fe_problem.reinitElem(_current_elem, _tid);
+  //_fe_problem.prepare(_current_elem, _tid);
+  //_fe_problem.reinitElem(_current_elem, _tid);
 
   /// compute _kij contributions from this element
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
@@ -481,7 +484,24 @@ AdvectiveFluxCalculator::PQPlusMinus(dof_id_type node_i,
 }
 
 void
-AdvectiveFluxCalculator::post()
+AdvectiveFluxCalculator::threadJoin(const UserObject & uo)
+{
+  const AdvectiveFluxCalculator & afc = static_cast<const AdvectiveFluxCalculator &>(uo);
+  // because afc is const, loop through afc._kij rather than through _kij
+  for (const auto & nodes : afc._kij)
+  {
+    const dof_id_type i = nodes.first;
+    for (const auto & neighbors : nodes.second)
+    {
+      const dof_id_type j = neighbors.first;
+      const Real afc_val = neighbors.second;
+      _kij[i][j] += afc_val;
+    }
+  }
+}
+
+void
+AdvectiveFluxCalculator::finalize()
 {
   // Calculate KuzminTurek D matrix
   // See Eqn (32)
@@ -657,17 +677,4 @@ AdvectiveFluxCalculator::post()
         _dflux_out_du[i][dof_deriv.first] -= dof_deriv.second;
     }
   }
-
-  /*
-  Moose::out << "Computed derivs\n";
-  for (auto & nodes : _dflux_out_du)
-  {
-    const dof_id_type i = nodes.first;
-    if (i != 1)
-      continue;
-    for (const auto & node_deriv : nodes.second)
-      Moose::out << "i = " << i << " j = " << node_deriv.first << " deriv = " << node_deriv.second
-                 << "\n";
-  }
-  */
 }

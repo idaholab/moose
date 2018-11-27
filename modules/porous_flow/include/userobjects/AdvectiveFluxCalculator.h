@@ -10,7 +10,7 @@
 #ifndef ADVECTIVEFLUXCALCULATOR_H
 #define ADVECTIVEFLUXCALCULATOR_H
 
-#include "ElementLoopUserObject.h"
+#include "ElementUserObject.h"
 
 /**
  * Computes Advective fluxes.  Specifically,
@@ -30,7 +30,7 @@ class AdvectiveFluxCalculator;
 template <>
 InputParameters validParams<AdvectiveFluxCalculator>();
 
-class AdvectiveFluxCalculator : public ElementLoopUserObject
+class AdvectiveFluxCalculator : public ElementUserObject
 {
 public:
   AdvectiveFluxCalculator(const InputParameters & parameters);
@@ -38,20 +38,23 @@ public:
   /// If needed, size quantities appropriately and compute _valence
   virtual void timestepSetup() override;
 
-  /// Call ElementLoopUserObject::meshChanged() and set _resizing_needed to true
+  /// Call ElementUserObject::meshChanged() and set _resizing_needed to true
   virtual void meshChanged() override;
 
   /// Zeroes _kij
-  virtual void pre() override;
+  virtual void initialize() override;
+
+  /// add _kij contributions
+  virtual void threadJoin(const UserObject & uo) override;
 
   /**
    * Using _kij, computes Kuzmin-Turek's D, L, f^a, and relevant Jacobian information
    * Then assemble the relevant quantities into _flux_out and _dflux_out_du
    */
-  virtual void post() override;
+  virtual void finalize() override;
 
   /// Compute contributions to _kij from the current element
-  virtual void computeElement() override;
+  virtual void execute() override;
 
   /**
    * Returns the flux out of lobal node id

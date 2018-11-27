@@ -74,7 +74,7 @@ FluxLimitedTVDAdvection::computeJacobian()
     // global id of node "i"
     const dof_id_type node_id_i = _current_elem->node_id(i);
     // dof number of _var on node "i"
-    const std::vector<dof_id_type> idof_indices(
+    std::vector<dof_id_type> idof_indices(
         1, _current_elem->node_ref(i).dof_number(_sys.number(), _var.number(), 0));
     // number of times node "i" is encountered in a sweep over elements
     const unsigned valence = _fluo.getValence(node_id_i, node_id_i);
@@ -98,10 +98,8 @@ FluxLimitedTVDAdvection::computeJacobian()
       deriv_matrix(0, j) = node_j_deriv.second / valence;
       j++;
     }
-    // Ad the result to the system's Jacobian matrix
-    // TODO: get tag properly in _sys.getMatrix(0) properly
-    _assembly.addJacobianBlock(
-        _sys.getMatrix(0), deriv_matrix, idof_indices, jdof_indices, _var.scalingFactor());
+    // Add the result to the system's Jacobian matrix
+    _assembly.cacheJacobianBlock(deriv_matrix, idof_indices, jdof_indices, _var.scalingFactor());
   }
 
   // accumulateTaggedLocalMatrix();
