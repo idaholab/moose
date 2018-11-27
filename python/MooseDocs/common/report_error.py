@@ -21,7 +21,13 @@ def report_error(message, page, info, traceback=None, prefix=u'ERROR'):
         traceback: The traceback (should be a string from traceback.format_exc())
     """
     title = '{}: {}'.format(prefix, message)
-    filename = mooseutils.colorText('{}:{}\n'.format(page.source, info.line), 'RESET')
-    src = mooseutils.colorText(box(info[0], line=info.line, width=100), 'LIGHT_CYAN')
+    if info is not None:
+        src = mooseutils.colorText(box(info[0], line=info.line, width=100), 'LIGHT_CYAN')
+        line = info.line
+    else:
+        src = ''
+        line = u'?'
+    filename = mooseutils.colorText('{}:{}\n'.format(page.source, line), 'RESET')
+
     trace = u'\n' + mooseutils.colorText(traceback, 'GREY') if traceback else ''
     return u'\n{}\n{}{}{}\n'.format(title, filename, src, trace)

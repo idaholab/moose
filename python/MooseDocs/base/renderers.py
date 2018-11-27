@@ -251,8 +251,8 @@ class MaterializeRenderer(HTMLRenderer):
 
     def __init__(self, *args, **kwargs):
         HTMLRenderer.__init__(self, *args, **kwargs)
-        self.__navigation = None # Cache for navigation pages
-        self.__index = False # page index created
+        self.__navigation = None # cache for navigation pages
+        self.__index = False     # page index created
 
         self.addCSS('materialize', "contrib/materialize/materialize.min.css",
                     media="screen,projection")

@@ -49,18 +49,18 @@ def run():
     log.init_logging(getattr(logging, options.level))
 
     if options.command == 'build':
-        build.main(options)
+        errno = build.main(options)
     elif options.command == 'check':
-        check.main(options)
+        errno = check.main(options)
     elif options.command == 'verify':
-        verify.main(options)
+        errno = verify.main(options)
 
     critical = log.MooseDocsFormatter.COUNTS['CRITICAL'].value
     errors = log.MooseDocsFormatter.COUNTS['ERROR'].value
     warnings = log.MooseDocsFormatter.COUNTS['WARNING'].value
 
     print 'CRITICAL:{} ERROR:{} WARNING:{}'.format(critical, errors, warnings)
-    if critical or errors:
+    if critical or errors or (errno != 0):
         return 1
     return 0
 

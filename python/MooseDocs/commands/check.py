@@ -50,12 +50,13 @@ def main(options):
     """./moosedocs check"""
 
     translator, _ = common.load_config(options.config)
-    check(translator,
-          dump=options.dump,
-          update=options.update,
-          generate=options.generate,
-          object_prefix=options.object_prefix,
-          syntax_prefix=options.syntax_prefix)
+    err = check(translator,
+                dump=options.dump,
+                update=options.update,
+                generate=options.generate,
+                object_prefix=options.object_prefix,
+                syntax_prefix=options.syntax_prefix)
+    return err
 
 def check(translator,
           dump=False,
@@ -77,7 +78,7 @@ def check(translator,
 
     if not extension.active:
         LOG.info("Syntax is disabled, skipping the check.")
-        return
+        return 0
 
     if app_syntax is None:
         msg = "Failed to locate AppSyntaxExtension for the given configuration."
@@ -110,6 +111,8 @@ def check(translator,
                          type(node).__name__,
                          syntax.ObjectNode.__name__,
                          syntax.SyntaxNode.__name__)
+
+    return 0
 
 def _check_object_node(node, app_name, generate, update, prefix):
     """

@@ -99,7 +99,6 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
 
     def build(self):
         """Build the necessary pages based on the current filepath."""
-        print 'HERE:', self.filepath
 
         # Locate the page to be translated
         page = self._getPage(self.filepath)
@@ -114,7 +113,6 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
             if page.uid in uids:
                 nodes.append(node)
 
-        print 'PAGE:', nodes
         self._translator.execute(self._options.num_threads, nodes)
 
     def _getPage(self, source):
@@ -222,3 +220,5 @@ def main(options):
         watcher = MooseDocsWatcher(translator, options)
         server = livereload.Server(watcher=watcher)
         server.serve(root=translator['destination'], host=options.host, port=options.port)
+
+    return 0
