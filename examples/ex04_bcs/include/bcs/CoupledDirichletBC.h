@@ -12,37 +12,24 @@
 
 #include "NodalBC.h"
 
-// Forward Declarations
 class CoupledDirichletBC;
 
 template <>
 InputParameters validParams<CoupledDirichletBC>();
 
-/**
- * Implements a coupled Dirichlet BC where u = alpha * some_var on the boundary.
- */
+/// Implements a coupled Dirichlet BC where u = alpha * some_var on the boundary.
 class CoupledDirichletBC : public NodalBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   CoupledDirichletBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
 
 private:
-  /**
-   * Multiplier on the boundary.
-   */
+  /// Multiplier on the boundary.
   Real _alpha;
-
-  /**
-   * Holds the values at the quadrature points
-   * of a coupled variable.
-   */
+  /// reference to a user-specifiable coupled (independent) variable
   const VariableValue & _some_var_val;
 };
 

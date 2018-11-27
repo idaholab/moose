@@ -12,7 +12,6 @@
 
 #include "IntegratedBC.h"
 
-// Forward Declarations
 class CoupledNeumannBC;
 
 template <>
@@ -25,25 +24,15 @@ InputParameters validParams<CoupledNeumannBC>();
 class CoupledNeumannBC : public IntegratedBC
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   CoupledNeumannBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
 
 private:
-  /**
-   * Multiplier on the boundary.
-   */
+  /// Multiplier on the boundary.
   Real _alpha;
-
-  /**
-   * Holds the values at the quadrature points
-   * of a coupled variable.
-   */
+  /// reference to a user-specifiable coupled (independent) variable
   const VariableValue & _some_var_val;
 };
 

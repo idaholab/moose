@@ -17,21 +17,24 @@ validParams<CoupledNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
-  // Here we are adding a parameter that will be extracted from the input file by the Parser
+  // Specify input parameters that we want users to be able to set:
   params.addParam<Real>("alpha", 1.0, "Value multiplied by the coupled value on the boundary");
-  params.addRequiredCoupledVar("some_var", "Flux Value at the Boundary");
+  params.addRequiredCoupledVar("some_var", "Flux value at the boundary");
   return params;
 }
 
 CoupledNeumannBC::CoupledNeumannBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    _alpha(getParam<Real>("alpha")),
-    _some_var_val(coupledValue("some_var"))
+    // store the user-specified parameters from the input file...
+    _alpha(getParam<Real>("alpha")),        // for the multiplier
+    _some_var_val(coupledValue("some_var")) // for the coupled variable
 {
 }
 
 Real
 CoupledNeumannBC::computeQpResidual()
 {
+  // For this Neumann BC grad(u)=alpha * v on the boundary.
+  // We use the term produced from integrating the diffusion operator by parts.
   return -_test[_i][_qp] * _alpha * _some_var_val[_qp];
 }
