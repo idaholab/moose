@@ -42,6 +42,7 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.content',
                       'MooseDocs.extensions.plotly',
                       'MooseDocs.extensions.heading',
+                      'MooseDocs.extensions.gallery',
                       'MooseDocs.extensions.navigation']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'

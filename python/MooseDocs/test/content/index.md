@@ -9,6 +9,7 @@ links to test pages for the various extensions within MooseDocs.
 1. [extensions/autolink.md]
 1. [extensions/include.md]
 1. [extensions/media.md]
+1. [extensions/gallery.md]
 1. [extensions/listing.md]
 1. [extensions/table.md]
 1. [extensions/devel.md]

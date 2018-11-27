@@ -89,6 +89,13 @@ class Tag(NodeBase):
                 strings.append(node['content'])
         return u' '.join(strings)
 
+    def copy(self, _parent=None):
+        """Copy the tree from this node."""
+        root = Tag(_parent, self.name, **self.attributes)
+        for child in self.children:
+            child.copy(_parent=root)
+        return root
+
 class String(NodeBase):
     """
     A node for containing string content.
@@ -103,3 +110,7 @@ class String(NodeBase):
             return cgi.escape(self.get('content'), quote=True)
         else:
             return self.get('content')
+
+    def copy(self, _parent=None):
+        """Copy the String. These shouldn't have children, so don't worry about them."""
+        return String(_parent, **self.attributes)
