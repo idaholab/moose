@@ -19,16 +19,47 @@ validParams<MaskedBodyForce>()
   InputParameters params = validParams<BodyForce>();
   params.addClassDescription("Kernel that defines a body force modified by a material mask");
   params.addParam<MaterialPropertyName>("mask", "Material property defining the mask");
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
   return params;
 }
 
 MaskedBodyForce::MaskedBodyForce(const InputParameters & parameters)
-  : BodyForce(parameters), _mask(getMaterialProperty<Real>("mask"))
+  : DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>(parameters),
+    _mask(getMaterialProperty<Real>("mask")),
+    _nvar(_coupled_moose_vars.size()),
+    _v_name(_var.name()),
+    _dmaskdv(getMaterialPropertyDerivative<Real>("mask", _v_name)),
+    _dmaskdarg(_nvar)
 {
+  // Get derivatives of mask wrt coupled variables
+  for (unsigned int i = 0; i < _nvar; ++i)
+  {
+    MooseVariableFEBase * cvar = _coupled_moose_vars[i];
+    _dmaskdarg[i] = &getMaterialPropertyDerivative<Real>("mask", cvar->name());
+  }
+}
+
+void
+MaskedBodyForce::initialSetup()
+{
+  validateNonlinearCoupling<Real>("mask");
 }
 
 Real
 MaskedBodyForce::computeQpResidual()
 {
   return BodyForce::computeQpResidual() * _mask[_qp];
+}
+
+Real
+MaskedBodyForce::computeQpJacobian()
+{
+  return _dmaskdv[_qp] * BodyForce::computeQpResidual() * _phi[_j][_qp];
+}
+
+Real
+MaskedBodyForce::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  const unsigned int cvar = mapJvarToCvar(jvar);
+  return (*_dmaskdarg[cvar])[_qp] * BodyForce::computeQpResidual() * _phi[_j][_qp];
 }
