@@ -141,7 +141,7 @@ class CSVSummary(CSVTools):
         value_len = []
         for field, value in table1.iteritems():
             field_len.append(len(field))
-            value_len.append(len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)) + 1)))
+            value_len.append(len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)))))
 
         field_justify = max(field_len) + 10
         value_justify = max(value_len) + 5
@@ -150,15 +150,15 @@ class CSVSummary(CSVTools):
             if field == 'time':
                 # Tolerance for time steps will be the same for value tolerances for now (future csvdiff capability will separate this tolerance)
                 formatted_messages.insert(0, 'default time step tolerances: relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
-                                          ( self.rel_tol, self.abs_zero, min(value), value.index(min(value)) + 1, max(value), value.index(max(value)) + 1 ))
+                                          ( self.rel_tol, self.abs_zero, min(value), value.index(min(value)), max(value), value.index(max(value))))
 
             formatted_messages.append('%s%s%s# min: %.3e @ t%d%smax: %.3e @ t%d' % \
                                       (" "*4,
                                        field,
                                        " "*((field_justify - len(field)) + 10),
-                                       Decimal(min(value)), value.index(min(value)) + 1,
-                                       " "*((value_justify - len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value)) + 1))) + 5),
-                                       Decimal(max(value)), value.index(max(value)) + 1 ))
+                                       Decimal(min(value)), value.index(min(value)),
+                                       " "*((value_justify - len("# min: %.3e @ t%d" % (Decimal(min(value)), value.index(min(value))))) + 5),
+                                       Decimal(max(value)), value.index(max(value))))
 
         self.addMessage('\n'.join(formatted_messages))
         return self.getMessages()
@@ -304,11 +304,11 @@ class CSVDiffer(CSVTools):
                         rel_tol = self.rel_tol
                 if rel_diff > rel_tol:
                     self.addError(self.files[1], "The values in column \"%s\" don't match @ t%d\n\trelative diff:   %f ~ %f = %f (%.3e)" % (key.strip(),
-                                                                                                                                               table2[key].index(val2),
-                                                                                                                                               val1,
-                                                                                                                                               val2,
-                                                                                                                                               rel_diff,
-                                                                                                                                               Decimal(rel_diff)))
+                                                                                                                                            table2[key].index(val2),
+                                                                                                                                            val1,
+                                                                                                                                            val2,
+                                                                                                                                            rel_diff,
+                                                                                                                                            Decimal(rel_diff)))
                     # assume all other vals in this column are wrong too, so don't report them
                     break
 
