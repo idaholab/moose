@@ -7,7 +7,7 @@ several key capabilities in the MOOSE framework including:
 
 - Checkpointing -> the ability to terminate an application and restart it where you left off (useful for batch cluster systems).
 - Picard Iteration -> The ability to converge a "tighty" coupled multiApp simulation.
-- Restart -> the ability to save stateful data for a [restart](restart_recover.md) type simulation when using checkpoint format
+- Restart -> the ability to save stateful data for a [restart](restart_recover.md optional=True) type simulation when using checkpoint format
 
 ## What is stateful data?
 

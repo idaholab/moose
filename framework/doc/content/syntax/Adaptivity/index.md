@@ -2,7 +2,7 @@
 
 ## h-Adaptivity
 
-!media media/element_adaptivity.png style=width:250px;float:right;padding-left:20px; caption=Self-similar refinement pattern utilized by MOOSE for adaptivity.
+!media media/adaptivity/element_adaptivity.png style=width:250px;float:right;padding-left:20px; caption=Self-similar refinement pattern utilized by MOOSE for adaptivity.
 
 MOOSE employs $h$-adaptivity to automatically refine or coarsen the mesh in regions of high or low
 estimated solution error, respectively. The idea is to concentrate degrees of freedom (DOFs) where
