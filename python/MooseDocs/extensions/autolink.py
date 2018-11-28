@@ -23,7 +23,7 @@ def make_extension(**kwargs):
 PAGE_LINK_RE = re.compile(r'(?P<filename>.*?\.md)?(?P<bookmark>#.*)?', flags=re.UNICODE)
 
 LocalLink = tokens.newToken('LocalLink', bookmark=u'')
-AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'')
+AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'', optional=False)
 
 class AutoLinkExtension(components.Extension):
     """
@@ -48,15 +48,7 @@ class AutoLinkExtension(components.Extension):
         renderer.add('LocalLink', RenderLocalLink())
         renderer.add('AutoLink', RenderAutoLink())
 
-
-    #def postTokenize(self, ast, page, meta, reader):
-    #    if page.local == 'mega.menu.md':
-    #        print 'AUTOLINK'
-    #        print ast
-
-
-
-def createTokenHelper(key, parent, info, page, use_key_in_modal=False):
+def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=False):
     match = PAGE_LINK_RE.search(info[key])
     bookmark = match.group('bookmark')[1:] if match.group('bookmark') else u''
     filename = match.group('filename')
@@ -67,7 +59,7 @@ def createTokenHelper(key, parent, info, page, use_key_in_modal=False):
         return LocalLink(parent, bookmark=bookmark)
 
     elif filename is not None:
-        return AutoLink(parent, page=filename, bookmark=bookmark)
+        return AutoLink(parent, page=filename, bookmark=bookmark, optional=optional)
 
     else:
         source = common.project_find(info[key])
@@ -89,8 +81,16 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
     given, otherwise a core.ShortcutLink token.
     """
 
+    @staticmethod
+    def defaultSettings():
+        settings = core.ShortcutLinkInline.defaultSettings()
+        settings['optional'] = (False, "Toggle the link as optional when file doesn't exist.")
+        return settings
+
     def createToken(self, parent, info, page):
-        token = createTokenHelper('key', parent, info, page, use_key_in_modal=True)
+        token = createTokenHelper('key', parent, info, page,
+                                  use_key_in_modal=True,
+                                  optional=self.settings['optional'])
         if token is None:
             return core.ShortcutLinkInline.createToken(self, parent, info, page)
         return token
@@ -101,8 +101,14 @@ class PageLinkComponent(core.LinkInline):
     otherwise a core.Link token.
     """
 
+    @staticmethod
+    def defaultSettings():
+        settings = core.LinkInline.defaultSettings()
+        settings['optional'] = (False, "Toggle the link as optional when file doesn't exist.")
+        return settings
+
     def createToken(self, parent, info, page):
-        token = createTokenHelper('url', parent, info, page)
+        token = createTokenHelper('url', parent, info, page, optional=self.settings['optional'])
         if token is None:
             return core.LinkInline.createToken(self, parent, info, page)
         return token
@@ -110,8 +116,15 @@ class PageLinkComponent(core.LinkInline):
 class RenderLinkBase(components.RenderComponent):
 
     def createHTMLHelper(self, parent, token, page, desired):
-
         bookmark = token['bookmark']
+
+        # Handle 'optional' linking
+        if desired is None:
+            tok = tokens.Token(None)
+            for child in token.copy():
+                child.parent = tok
+            self.renderer.render(parent, tok, page)
+            return None
 
         url = unicode(desired.relativeDestination(page))
         if bookmark:
@@ -149,7 +162,7 @@ class RenderAutoLink(RenderLinkBase):
     Create link to another page and extract the heading for the text, if no children provided.
     """
     def createHTML(self, parent, token, page):
-        desired = self.translator.findPage(token['page'])
+        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'])
         return self.createHTMLHelper(parent, token, page, desired)
 
     def createLatex(self, parent, token, page):
