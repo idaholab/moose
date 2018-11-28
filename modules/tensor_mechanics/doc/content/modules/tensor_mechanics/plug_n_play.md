@@ -10,7 +10,7 @@ $\boldsymbol{\epsilon}$ or strain increment, elasticity tensor $\boldsymbol{\mat
 $\boldsymbol{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain)
 $\boldsymbol{\epsilon}_0$ and additional stress $\boldsymbol{\sigma}_0$.
 
-!media media/tensor_mechanics-IntroPlugNPlay.png
+!media media/tensor_mechanics/IntroPlugNPlay.png
        style=width:800;float:right;
        caption=Figure 1: Tensors required to fully describe a mechanics material.
 

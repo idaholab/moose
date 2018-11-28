@@ -96,7 +96,7 @@ introductory theory pages on the various models:
 
 The tensor mechanics module is being developed by users at national laboratories
 and universities around the world. Contact the developers through the
-[moose-users email list](help/contact_us.md).
+[moose-users email list](help/contact_us.md optional=True).
 
 ## Developing New Tensor Mechanics Code
 
@@ -104,4 +104,4 @@ Consider becoming a developer yourself.
 The tensor mechanics module uses code syntax based on tensor forms. This approach
 allows the constitutive tensor equations to be implemented, clearly and concisely,
 in the same format as written in mathematical notation.
-Follow the MOOSE standards for [contributing code and documentation](MooseDocs/generate.md).
+Follow the MOOSE standards for [contributing code and documentation](MooseDocs/generate.md optional=True).

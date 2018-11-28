@@ -28,7 +28,7 @@ as is required to achieve convergence.
 
 ## Radial Return Algorithm Overview
 
-!media media/tensor_mechanics-RadialReturnStressSpace.png
+!media media/tensor_mechanics/RadialReturnStressSpace.png
        style=width:30%;margin-left:2%;float:right
        caption=A trial stress is shown outside of the deviatoric yield surface and the radial return
                  stress which is normal to the yield surface.
