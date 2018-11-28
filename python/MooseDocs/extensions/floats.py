@@ -57,7 +57,7 @@ def create_modal(parent, title=None, content=None, **kwargs):
     """
     Create the necessary Modal tokens for creating modal windows with materialize.
     """
-    modal = ModalLink(parent, **kwargs)
+    modal = ModalLink(parent.root, **kwargs)
     if isinstance(title, unicode):
         ModalLinkTitle(modal, string=title)
     elif isinstance(title, tokens.Token):
