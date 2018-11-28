@@ -7,6 +7,7 @@
 [Variables]
   [./temp]
     block = '1 3'
+    initial_condition = 1.0
   [../]
 []
 
@@ -23,13 +24,13 @@
     type = DirichletBC
     variable = temp
     boundary = 1
-    value = 0
+    value = 1
   [../]
   [./right]
     type = DirichletBC
     variable = temp
     boundary = 4
-    value = 1
+    value = 2
   [../]
 []
 
