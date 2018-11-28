@@ -43,7 +43,7 @@ through, but some of the important ones are:
   attempts to "recover" it and run until the end.  This is very rigorous testing that tests whether
   everything in your application can work with restart/recover.
 - `--opt` (The default) Builds an optimized executable suitable for running calculations.
-- `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems 
+- `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems
 - `--oprof` Not normally used. Can be used for "code profiling": running your code with a utility like oprof, gprof, vtune, etc.
 - `--pro` An alias to `--oprof`
 - `--devel` Something in-between opt and dbg. Attempts to be faster but also does some more run-time checks (asserts and mooseAsserts)
@@ -70,7 +70,7 @@ The MOOSE team is not responsible for fixing deprecations.
 
 #### PYTHONPATH
 
-PYTHONPATH instructs python to include the designated paths while attempting to import python modules. +While normally not needing to be set+, sometimes it is necessary. For example, when testing the TestHarness (unittests). Another use-case, is when a developer wants to utilize the moosedocs system for creating [moose documentation](utilities/MooseDocs/index.md) (the website you are using right now).
+PYTHONPATH instructs python to include the designated paths while attempting to import python modules. +While normally not needing to be set+, sometimes it is necessary. For example, when testing the TestHarness (unittests). Another use-case, is when a developer wants to utilize the moosedocs system for creating [moose documentation](MooseDocs/index.md) (the website you are using right now).
 
 In either case, when you need to modify PYTHONPATH for MOOSE related development, you will almost always want to point it at `moose/python`.
 
