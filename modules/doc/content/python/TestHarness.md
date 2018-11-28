@@ -64,7 +64,7 @@ The one thing we do +not+ recommend is enforcing that the use of deprecated code
 like an error.  That is entirely too rigid of a requirement and impedes the normal flow of
 development.  Instead, developers should periodically run their tests with `--error-deprecated` to
 see if any of their tests are using deprecated code / parameters and then fix them up at that point.
-The MOOSE team is not responsible for fixing deprecations.
+The MOOSE team is not responsible for fixing deprecated code.
 
 ## Influential Environment Variables id=environment
 
@@ -89,11 +89,11 @@ Set the `METHOD` environment variable to one of the following to control which t
 | METHOD | devel | Something in-between opt and dbg |
 
 !alert note
-The methods described here can also be controled via command line arguments. See "More Options" above.
+The methods described here can also be controlled via command line arguments. See "More Options" above.
 
 #### MOOSE_TERM_FORMAT
 
-Set `MOOSE_TERM_FORMAT` to any or all of the following, as well as in a perticular order and case (restricted) to control where, what, and how the TestHarness prints that specific item:
+Set `MOOSE_TERM_FORMAT` to any or all of the following, as well as in a particular order and case (restricted) to control where, what, and how the TestHarness prints that specific item:
 
 | Variable Name | Argument | Usage |
 | - | - | - |
