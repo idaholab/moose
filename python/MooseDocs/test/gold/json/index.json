@@ -566,6 +566,39 @@
                                 {
                                     "attributes": {
                                         "bookmark": "", 
+                                        "page": "extensions/gallery.md", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "AutoLink"
+                                }, 
+                                {
+                                    "attributes": {
+                                        "count": 1, 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Break"
+                                }
+                            ], 
+                            "name": "Paragraph"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "recursive": true
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "bookmark": "", 
                                         "page": "extensions/listing.md", 
                                         "recursive": true
                                     }, 

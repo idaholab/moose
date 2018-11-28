@@ -5,6 +5,7 @@ Content:
             - media/under-construction.gif
             - media/github-logo.png
             - media/github-mark.png
+            - large_media/level_set/vortex_out.gif
             - bib/*
             - contrib/**
             - css/*
@@ -36,6 +37,7 @@ Extensions:
     MooseDocs.extensions.content: default
     MooseDocs.extensions.plotly: default
     MooseDocs.extensions.heading: default
+    MooseDocs.extensions.gallery: default
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose

@@ -218,21 +218,98 @@
         }, 
         {
             "attributes": {
-                "key": "montana-flag", 
-                "link": "#montana-flag", 
+                "img": false, 
                 "recursive": true
             }, 
             "children": [
                 {
                     "attributes": {
-                        "content": "Figure 1", 
-                        "recursive": true
+                        "class": "", 
+                        "id": "newyork-flag", 
+                        "recursive": true, 
+                        "src": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_New_York.svg", 
+                        "style": "width:100%;"
                     }, 
                     "children": [], 
-                    "name": "String"
+                    "name": "Image"
+                }, 
+                {
+                    "attributes": {
+                        "key": "newyork-flag", 
+                        "number": 2, 
+                        "prefix": "Figure", 
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "New", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "York", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "state", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "flag", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": ".", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Punctuation"
+                        }
+                    ], 
+                    "name": "Caption"
                 }
             ], 
-            "name": "Shortcut"
+            "name": "Float"
         }, 
         {
             "attributes": {
@@ -315,30 +392,12 @@
         }, 
         {
             "attributes": {
-                "key": "idaho-flag", 
-                "link": "#idaho-flag", 
                 "recursive": true
             }, 
             "children": [
                 {
                     "attributes": {
-                        "content": "Flag 1", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "String"
-                }
-            ], 
-            "name": "Shortcut"
-        }, 
-        {
-            "attributes": {
-                "recursive": true
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "content": "Link", 
+                        "content": "Montana", 
                         "recursive": true
                     }, 
                     "children": [], 
@@ -370,6 +429,108 @@
                     }, 
                     "children": [], 
                     "name": "ShortcutLink"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "New", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "York", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ":", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "class": "", 
+                        "id": "", 
+                        "key": "newyork-flag", 
+                        "recursive": true, 
+                        "style": ""
+                    }, 
+                    "children": [], 
+                    "name": "ShortcutLink"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Idaho", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ":", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "class": "", 
+                        "id": "", 
+                        "key": "idaho-flag", 
+                        "recursive": true, 
+                        "style": ""
+                    }, 
+                    "children": [], 
+                    "name": "ShortcutLink"
                 }, 
                 {
                     "attributes": {
@@ -381,6 +542,60 @@
                 }
             ], 
             "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "key": "montana-flag", 
+                "link": "#montana-flag", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Figure 1", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "newyork-flag", 
+                "link": "#newyork-flag", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Figure 2", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "idaho-flag", 
+                "link": "#idaho-flag", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Flag 1", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
         }, 
         {
             "attributes": {
