@@ -4,7 +4,6 @@ MOOSE includes a set of community developed physics modules that you can build o
 application.
 
 - [Chemical reactions](modules/chemical_reactions/index.md)
-- [Combined](modules/combined/index.md)
 - [Contact](modules/contact/index.md)
 - [Fluid Properties](modules/fluid_properties/index.md)
 - [Functional Expansion Tools](modules/functional_expansion_tools/index.md)
