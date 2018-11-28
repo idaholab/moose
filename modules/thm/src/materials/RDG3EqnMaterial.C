@@ -21,6 +21,9 @@ validParams<RDG3EqnMaterial>()
   params.addRequiredCoupledVar("rhouA", "Conserved variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Conserved variable: rho*E*A");
 
+  params.addRequiredParam<MaterialPropertyName>("direction",
+                                                "Flow channel direction material property name");
+
   params.addRequiredParam<UserObjectName>("slopes_uo", "Name of slopes user object");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
@@ -37,10 +40,15 @@ RDG3EqnMaterial::RDG3EqnMaterial(const InputParameters & parameters)
     _rhoA_avg(coupledValue("rhoA")),
     _rhouA_avg(coupledValue("rhouA")),
     _rhoEA_avg(coupledValue("rhoEA")),
+
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
+
     _rhoA(declareProperty<Real>("rhoA")),
     _rhouA(declareProperty<Real>("rhouA")),
     _rhoEA(declareProperty<Real>("rhoEA")),
+
     _slopes_uo(getUserObject<RDGSlopes3Eqn>("slopes_uo")),
+
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
@@ -48,11 +56,14 @@ RDG3EqnMaterial::RDG3EqnMaterial(const InputParameters & parameters)
 void
 RDG3EqnMaterial::computeQpProperties()
 {
-  // get the limited slopes of the primitive variables: {p, u, T}
+  // Get the limited slopes of the primitive variables: {p, u, T}.
+  // See the documentation for getElementSlope(); the first entry of the
+  // returned gradient values is the slope along the 1-D direction; the other
+  // entries are not used.
   const auto slopes = _slopes_uo.getElementSlope(_current_elem->id());
-  const auto p_slope = slopes[RELAP73Eqn::SLOPE_PRESSURE];
-  const auto vel_slope = slopes[RELAP73Eqn::SLOPE_VELOCITY];
-  const auto T_slope = slopes[RELAP73Eqn::SLOPE_TEMPERATURE];
+  const Real p_slope = slopes[RELAP73Eqn::SLOPE_PRESSURE](0);
+  const Real vel_slope = slopes[RELAP73Eqn::SLOPE_VELOCITY](0);
+  const Real T_slope = slopes[RELAP73Eqn::SLOPE_TEMPERATURE](0);
 
   // compute primitive variables from the cell-average solution
   const Real rho_avg = _rhoA_avg[_qp] / _A_avg[_qp];
@@ -63,7 +74,7 @@ RDG3EqnMaterial::computeQpProperties()
   const Real T_avg = _fp.T_from_v_e(v_avg, e_avg);
 
   // apply slopes to primitive variables
-  const RealGradient delta_x = _q_point[_qp] - _current_elem->centroid();
+  const Real delta_x = (_q_point[_qp] - _current_elem->centroid()) * _dir[_qp];
   const Real p = p_avg + p_slope * delta_x;
   const Real vel = vel_avg + vel_slope * delta_x;
   const Real T = T_avg + T_slope * delta_x;

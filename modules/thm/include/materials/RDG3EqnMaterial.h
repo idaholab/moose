@@ -35,6 +35,9 @@ protected:
   const VariableValue & _rhouA_avg;
   const VariableValue & _rhoEA_avg;
 
+  /// Flow channel direction
+  const MaterialProperty<RealVectorValue> & _dir;
+
   // reconstructed variable values
   MaterialProperty<Real> & _rhoA;
   MaterialProperty<Real> & _rhouA;
