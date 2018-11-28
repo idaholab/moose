@@ -114,10 +114,7 @@ Swapping NCG's is as simple as changing the `gas_fp` parameter in this UserObjec
 
 ### Materials
 
-The [`PorousFlowFluidStateWaterNCG`](/PorousFlowFluidStateWaterNCG.md)
-Material provides all phase pressures, saturation, densities, viscosities etc, as well
-as all mass fractions of all fluid components in all fluid phases in a single material
-using the formulation provided in the [`PorousFlowWaterNCG`](/PorousFlowWaterNCG.md) UserObject.
+The [`PorousFlowFluidState`](/PorousFlowFluidState.md) material provides all phase pressures, saturation, densities, viscosities etc, as well as all mass fractions of all fluid components in all fluid phases in a single material using the formulation provided in the [`PorousFlowWaterNCG`](/PorousFlowWaterNCG.md) UserObject.
 
 !listing modules/porous_flow/test/tests/fluidstate/theis.i block=Materials/waterncg
 
@@ -126,7 +123,7 @@ using the formulation provided in the [`PorousFlowWaterNCG`](/PorousFlowWaterNCG
 The nonlinear variable representing NCG is the total mass fraction of NCG summed over
 all phases. In some cases, it may be preferred to provide an initial NCG saturation, rather
 than total mass fraction. To allow an initial saturation to be specified, the
-[`PorousFlowFluidStateWaterNCGIC`](/PorousFlowFluidStateWaterNCGIC.md) initial
+[`PorousFlowFluidStateIC`](/PorousFlowFluidStateIC.md) initial
 condition is provided. This initial condition calculates the total mass fraction of NCG
 summed over all phases for a given saturation.
 

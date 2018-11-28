@@ -16,6 +16,5 @@ Renderer:
     home: /modules/richards
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
-        disable: True
+    MooseDocs.extensions.appsyntax:
+        active: False

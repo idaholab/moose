@@ -2,6 +2,12 @@
 
 These documentation pages are meant to be used by developers who are developing MOOSE-based applications.
 
+[Syntax](syntax/index.md) - MOOSE syntax documentation
+
+[Source Code](source/index.md) - MOOSE source documentation
+
+[Doxygen](http://www.mooseframework.com/docs/doxygen/moose/classes.html) - MOOSE Doxygen
+
 [Build System](/build_system.md) - How the hierarchical `make` system functions in MOOSE
 
 [Test System](/test_system.md) - How to create/maintain tests for your application
@@ -24,8 +30,4 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Moose-Wrapped Apps](/moose_wrapped_apps.md) - Coupling external codes to MOOSE
 
-[Doxygen](http://www.mooseframework.com/docs/doxygen/moose/classes.html) - MOOSE Doxygen
 
-[Syntax](syntax/index.md) - MOOSE syntax documentation
-
-[Source Code](source/index.md) - MOOSE source documentation

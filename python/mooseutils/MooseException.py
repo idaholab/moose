@@ -9,9 +9,7 @@
 
 class MooseException(Exception):
     """
-    An Exception for MOOSE python applications.
+    An Exception for MOOSE python applications that automatically applies the .format command.
     """
-
-    def __init__(self, *args):
-        message = ' '.join([str(x) for x in args])
-        Exception.__init__(self, message)
+    def __init__(self, message, *args):
+        Exception.__init__(self, message.format(*args))

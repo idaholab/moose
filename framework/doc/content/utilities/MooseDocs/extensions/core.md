@@ -18,17 +18,18 @@ define the MooseDocs syntax. The following sections detail the syntax that compr
 ## Settings id=settings
 
 In general, most block level syntax and some inline syntax accepts key-value pair settings. Where
-the settings appear within the syntax varies and is detailed in the following sections. [settings-example] show how the settings are specified in [links].
+the settings appear within the syntax varies and is detailed in the following sections.
+[settings-example] show how the settings are specified in [#links].
 However, the settings are applied in a uniform manner. Foremost, the key and value are separated by
 an equal (`=`) sign +without spaces+ surrounding. The value may contain spaces, with the space after
 the equal sign being the exception.
 
 If syntax has settings the key-value pairs, the default value (if any), and a short description
 will be provided in a table. For example, [code-settings] lists the available settings
-for the fenced code blocks discussed in the [fenced-code] section.
+for the fenced code blocks discussed in the [#fenced-code] section.
 
 !devel example id=settings-example
-               caption=Example use of settings within [links], settings are key-value pairs that
+               caption=Example use of settings within [#links], settings are key-value pairs that
                        are specified with a separating equal sign (no spaces exist on either side).
 [google](https://www.google.com style=color:teal;)
 
@@ -37,7 +38,7 @@ for the fenced code blocks discussed in the [fenced-code] section.
 Block level content, as the name suggest, are blocks of text. In all cases, blocks must
 begin and end with empty lines (with the exception of the start and end of the file). This
 restriction allows for special characters such as the hash (`#`) to be used at the start
-of a line without conflicting with heading creation (see [headings]). Additionally, this
+of a line without conflicting with heading creation (see [#headings]). Additionally, this
 allows content and settings to be spanned across multiple lines.
 
 ### Code id=fenced-code
@@ -57,7 +58,7 @@ Settings for code blocks are defined by key-value pairings that follow the back-
 export METHOD=opt
 ```
 
-!devel settings module=MooseDocs.extensions.core object=Code id=code-settings caption=Available settings for fenced code blocks.
+!devel settings module=MooseDocs.extensions.core object=CodeBlock id=code-settings caption=Available settings for fenced code blocks.
 
 ### Quotations
 
@@ -86,7 +87,7 @@ as shown in [quote-nested-example].
 ### Headings id=headings
 
 Headings can range from level one to six and are specified using the hash (`#`) character, where the
-number of hashes indicate the heading level (see [heading-basic-example]). The following is required
+number of hashes indicate the heading level (see [#heading-basic-example]). The following is required
 to define a heading:
 
 1. the hash(es) must be followed by a single space,
@@ -121,7 +122,7 @@ Multiple Lines (this is useful if they are really long)
    style=font-size:15pt
    id=level-two
 
-!devel settings module=MooseDocs.extensions.core object=HeadingHash caption=Available settings for headings. id=heading-settings
+!devel settings module=MooseDocs.extensions.core object=HeadingBlock caption=Available settings for headings. id=heading-settings
 
 ### Unordered List id=unordered
 
@@ -196,7 +197,7 @@ this is a list it also follows the aforementioned rules for list continuation.
 
 ### Ordered List
 
-A numbered list work nearly identical to unordered lists (see [unordered]), but start with a
+A numbered list work nearly identical to unordered lists (see [#unordered]), but start with a
 numbered followed by a period and a single space. The number used for the first item in the list
 will be the number used for the start of the list, see [ordered-example].
 
@@ -218,7 +219,7 @@ will be the number used for the start of the list, see [ordered-example].
 ### Shortcuts id=shortcuts
 
 It is possible to define shortcuts for use within your document via a [shortcut link](#shortcut-link). The shortcuts
-are defined using traditional markdown syntax as in [shortcut-link]. However, these are block
+are defined using traditional markdown syntax as in [#shortcut-link]. However, these are block
 items, so to maintain consistent behavior they must be surrounded by blank lines.
 
 !devel! example id=shortcut-example caption=Markdown shortcut definition.
@@ -284,20 +285,20 @@ MooseDocs uses traditional [markdown] syntax for links; however, it also support
 the link (see [settings-example]). The settings are the expected key-value pairings common to much of the MooseDocs
 syntax. The available settings for links is include in [link-settings].
 
-!devel settings module=MooseDocs.extensions.core id=link-settings object=Link caption=Available settings for links.
+!devel settings module=MooseDocs.extensions.core id=link-settings object=LinkInline caption=Available settings for links.
 
 ### Shortcut links id=shortcut-link
 
 Links to shortcuts use the typical [markdown] syntax of a key enclosed in square brackets (`[key]`),
-where the key references a shortcut, which are defined as detailed in the [shortcuts] section, refer
-to [shortcut-example] for a demonstration of shortcut and shortcut link use.
+where the key references a shortcut, which are defined as detailed in the [#shortcuts] section, refer
+to [#shortcut-example] for a demonstration of shortcut and shortcut link use.
 
-In addition to linking to [shortcuts] created directly, the same syntax is used to reference
+In addition to linking to [#shortcuts] created directly, the same syntax is used to reference
 headings that have an "id" setting applied, see [heading-link-example]. When used in this fashion
 the heading text directly replaces the shortcut link and a link to the heading is created.
 
 !devel! example id=heading-link-example caption=Example showing use of shortcut links to reference a heading.
-Using shortcut link syntax, it is possible to link to [heading].
+Using shortcut link syntax, it is possible to link to [#heading].
 
 # A Heading with Link id=heading
 

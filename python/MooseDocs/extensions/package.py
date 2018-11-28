@@ -1,12 +1,21 @@
 #pylint: disable=missing-docstring
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import re
 
 from mooseutils.yaml_load import yaml_load
 
 import MooseDocs
 from MooseDocs.common import exceptions
-from MooseDocs.extensions import command
+from MooseDocs.extensions import core, command
 from MooseDocs.tree import tokens
 
 def make_extension(**kwargs):
@@ -35,13 +44,14 @@ class PackageExtension(command.CommandExtension):
 
         config['link'] = (r'http://www.mooseframework.org/moose_packages',
                           "Location of packages.")
+
         return config
 
     def extend(self, reader, renderer):
-        self.requires(command)
-        self.addCommand(PackageCommand())
-        self.addCommand(PackageCodeReplace())
-        self.addCommand(PackageTextReplace())
+        self.requires(core, command)
+        self.addCommand(reader, PackageCommand())
+        self.addCommand(reader, PackageCodeReplace())
+        self.addCommand(reader, PackageTextReplace())
 
 class PackageCommand(command.CommandComponent):
     """
@@ -64,16 +74,16 @@ class PackageCommand(command.CommandComponent):
         settings['arch'] = (None, "The name of the OS package name to retrieve.")
         return settings
 
-    def createToken(self, info, parent):
+    def createToken(self, parent, info, page):
         arch = self.settings['arch']
         packages = self.extension.get('moose_packages', dict())
 
         if arch not in packages:
             msg = "The supplied value for the 'arch' settings, {}, was not found."
-            raise exceptions.TokenizeException(msg, arch)
+            raise exceptions.MooseDocsException(msg, arch)
 
         href = os.path.join(self.extension.get('link'), packages[arch])
-        tokens.Link(parent, url=unicode(href), string=unicode(packages[arch]))
+        core.Link(parent, url=unicode(href), string=unicode(packages[arch]))
         return parent
 
 class PackageCodeReplace(command.CommandComponent):
@@ -100,19 +110,23 @@ class PackageCodeReplace(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['max-height'] = (u'350px', "The default height for listing content.")
         settings['language'] = (u'bash', "The language to use for highlighting, if not supplied " \
-                                "it will be inferred from the extension (if possible).")
+                                         "it will be inferred from the extension (if possible).")
         return settings
 
-    def createToken(self, info, parent):
+    def createToken(self, parent, info, page):
         content = info['inline'] if 'inline' in info else info['block']
-
-        for package, version in self.extension.getConfig().iteritems():
-            if package != 'moose_packages':
-                content = content.replace('__' + package.upper() + '__', unicode(version))
-
-        tokens.Code(parent, style="max-height:{};".format(self.settings['max-height']),
-                    language=self.settings['language'], code=content)
+        content = re.sub(r'__(?P<package>[A-Z]+)__', self.subFunction, content, flags=re.UNICODE)
+        core.Code(parent, style="max-height:{};".format(self.settings['max-height']),
+                  language=self.settings['language'], content=content)
         return parent
+
+    def subFunction(self, match):
+        key = match.group('package')
+        for package in self.extension.keys():
+            if package.upper() == key:
+                version = self.extension.get(package)
+                return unicode(version)
+        return match.group(0)
 
 class PackageTextReplace(command.CommandComponent):
     """
@@ -136,7 +150,7 @@ class PackageTextReplace(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         return settings
 
-    def createToken(self, info, parent):
+    def createToken(self, parent, info, page):
         content = self.extension.get(info['subcommand'], dict())
         tokens.String(parent, content=unicode(content))
         return parent

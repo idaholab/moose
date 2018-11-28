@@ -10,8 +10,7 @@ Renderer:
     home: /modules/navier_stokes
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/navier_stokes
         hide:
             framework: !include framework/doc/hidden.yml
@@ -23,9 +22,7 @@ Extensions:
             - framework/include
             - modules/navier_stokes/include
             - modules/fluid_properties/include
-    globals:
-        type: MooseDocs.extensions.panoptic
+    MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
-    acronyms:
-        type: MooseDocs.extensions.acronym
+    MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml

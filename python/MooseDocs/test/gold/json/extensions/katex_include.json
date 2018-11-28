@@ -1,0 +1,92 @@
+{
+    "attributes": {
+        "recursive": true
+    }, 
+    "children": [
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": 1, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "t\\' = t \\\\frac{1}{\\\\sqrt{1 - \\\\frac{\\\\nu^2}{c^2}}}"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": 2, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "F = ma"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Break"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "key": "MOOSE", 
+                "link": "https:://mooseframework.org", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "MOOSE", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "libMesh", 
+                "link": "https://libmesh.github.io/", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "libMesh", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }
+    ], 
+    "name": null
+}

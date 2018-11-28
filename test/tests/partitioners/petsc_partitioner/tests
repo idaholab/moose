@@ -10,6 +10,8 @@
     ptscotch = true
     min_parallel = 4
     max_parallel = 4
+    # PTScotch is not valgrind clean
+    valgrind = none
   [../]
 
   [./ptscotch_weight_elment]
@@ -25,6 +27,8 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+   # PTScotch is not valgrind clean
+    valgrind = none
   [../]
 
   [./ptscotch_weight_side]
@@ -39,6 +43,8 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+   # PTScotch is not valgrind clean
+    valgrind = none
   [../]
 
   [./ptscotch_weight_both]
@@ -53,6 +59,8 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+  # PTScotch is not valgrind clean
+    valgrind = none 
   [../]
 
   [./parmetis]
@@ -80,6 +88,26 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+
+    # The partition with 8 bytes looks right, but it is different
+    dof_id_bytes = 4
+  [../]
+
+  [./parmetis_weight_element_64]
+    requirement = 'Parmetis shall support element-weighted graphs for balancing workload'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_element_out_64.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_element_out_64 Mesh/Partitioner/apply_element_weight=true'
+    parmetis = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+
+    # The partition with 8 bytes looks right, but it is different
+    dof_id_bytes = 8
   [../]
 
   [./parmetis_weight_side]
@@ -94,6 +122,26 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+
+    # The partition with 8 bytes looks right, but it is different
+    dof_id_bytes = 4
+  [../]
+
+  [./parmetis_weight_side_64]
+    requirement = 'Parmetis shall support side-weighted graphs for minimizing communication'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_side_out_64.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_side_out_64 Mesh/Partitioner/apply_side_weight=true'
+    parmetis = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+
+    # The partition with 8 bytes looks right, but it is different
+    dof_id_bytes = 8
   [../]
 
   [./parmetis_weight_both]
@@ -108,6 +156,26 @@
     petsc_version = '>=3.9.3'
     min_parallel = 4
     max_parallel = 4
+
+    # The partition with 8 bytes looks right, but it is different
+    dof_id_bytes = 4
+  [../]
+
+  [./parmetis_weight_both_64]
+    requirement = 'Parmetis shall take side weights and element weights into consideration'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_weight_both_out_64.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Outputs/file_base=petsc_partitioner_parmetis_weight_both_out_64 Mesh/Partitioner/apply_side_weight=true Mesh/Partitioner/apply_element_weight=true'
+    parmetis = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 4
+    max_parallel = 4
+
+    # The partition with 8 bytes looks right, but it is different
+    dof_id_bytes = 8
   [../]
 
   [./chaco]

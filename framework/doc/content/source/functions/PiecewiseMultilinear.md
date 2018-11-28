@@ -8,7 +8,7 @@ of the interpolation.
 
 Formatting instructions for the `data_file` (reproduced from `data_file` docstring):
 any empty line and any line
-beginning with # are ignored, all other lines are assumed to contain relevant information.  
+beginning with # are ignored, all other lines are assumed to contain relevant information.
 The file must begin with specification of the grid.  This is done through lines containing
 the keywords: AXIS X; AXIS Y; AXIS Z; or AXIS T.  Immediately following the keyword line
 must be a space-separated line of real numbers which define the grid along the specified

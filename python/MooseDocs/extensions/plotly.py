@@ -1,21 +1,26 @@
 #pylint: disable=missing-docstring
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 import os
 import re
 import uuid
 import mooseutils
-
 from MooseDocs import common
 from MooseDocs.extensions import command, floats
-from MooseDocs.base import components
+from MooseDocs.base import components, renderers
 from MooseDocs.tree import tokens, html
 
 def make_extension(**kwargs):
     return PlotlyExtension(**kwargs)
 
-class ScatterToken(tokens.Token):
-    """Token for scatter plots."""
-    PROPERTIES = [tokens.Property('data', ptype=list, required=True),
-                  tokens.Property('layout', ptype=dict, default=dict())]
+ScatterToken = tokens.newToken('ScatterToken', data=[], layout=dict())
 
 class PlotlyExtension(command.CommandExtension):
     """
@@ -30,15 +35,11 @@ class PlotlyExtension(command.CommandExtension):
 
     def extend(self, reader, renderer):
         self.requires(command, floats)
-        self.addCommand(PlotlyScatter())
-        renderer.add(ScatterToken, RenderScatter())
+        self.addCommand(reader, PlotlyScatter())
+        renderer.add('ScatterToken', RenderScatter())
 
-    def postRender(self, root, config): #pylint: disable=unused-argument
-        """Adds the plotly javascript library to the <head> tag."""
-        path = "contrib/plotly/plotly.min.js"
-        src = os.path.relpath(path, os.path.dirname(self.translator.current.local))
-        head = root.find('head')
-        html.Tag(head, 'script', type="text/javascript", src=src)
+        if isinstance(renderer, renderers.HTMLRenderer):
+            renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js")
 
 class PlotlyScatter(command.CommandComponent):
     """
@@ -60,16 +61,16 @@ class PlotlyScatter(command.CommandComponent):
         settings['filename'] = (None, "The name of a CSV file for extracting data, when used the "
                                 "'x' and 'y' fields of the 'data' setting should be replaced by "
                                 "column names or numbers.")
-        settings['prefix'] = (None, "Prefix to use when a caption and id are provided.")
-        settings['caption'] = (None, "The caption to use for the chart.")
+        settings.update(floats.caption_settings())
+        settings['prefix'] = ('Figure', settings['prefix'][1])
         return settings
 
-    def createToken(self, info, parent):
+    def createToken(self, parent, info, page):
 
         # Build the JSON data for plotting
         data = self.settings['data']
         if data is None:
-            raise common.exceptions.TokenizeException("The 'data' setting is required.")
+            raise common.exceptions.MooseDocsException("The 'data' setting is required.")
         data = eval(data)
 
         # Use Postprocessor file for data
@@ -82,8 +83,14 @@ class PlotlyScatter(command.CommandComponent):
                 data[i]['x'] = reader(line['x']).tolist()
                 data[i]['y'] = reader(line['y']).tolist()
 
-        flt = floats.create_float(parent, self.extension, self.settings)
-        return ScatterToken(flt, data=data, layout=eval(self.settings['layout']))
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)
+        ScatterToken(flt, data=data, layout=eval(self.settings['layout']))
+        if flt.children[0].name == 'Caption':
+            cap = flt.children[0]
+            cap.parent = None
+            cap.parent = flt
+
+        return parent
 
 class PlotlyTemplate(object):
     """
@@ -117,8 +124,11 @@ class RenderScatter(components.RenderComponent):
     """Render a plotly scatter plot."""
 
     TEMPLATE = PlotlyTemplate('scatter.js')
-    def createHTML(self, token, parent):
+    def createHTML(self, parent, token, page):
         plot_id = unicode(uuid.uuid4())
-        content = self.TEMPLATE(id_=plot_id, data=repr(token.data), layout=repr(token.layout))
+        content = self.TEMPLATE(id_=plot_id, data=repr(token['data']), layout=repr(token['layout']))
         html.Tag(parent, 'div', id_=plot_id)
         html.Tag(parent, 'script', string=content)
+
+    def createLatex(self, parent, token, page):
+        pass

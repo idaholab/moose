@@ -243,7 +243,7 @@
     type = PorousFlowTemperature
   [../]
   [./brineco2]
-    type = PorousFlowFluidStateBrineCO2
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = z
     temperature_unit = Celsius

@@ -1,3 +1,12 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 """
 Module that defines Translator objects for converted AST from Reader to Rendered output from
 Renderer objects. The Translator objects exist as a place to import extensions and bridge
@@ -6,20 +15,18 @@ between the reading and rendering content.
 import os
 import logging
 import multiprocessing
-import time
-import json
-
-import anytree
+import types
 
 import mooseutils
 
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import mixins, exceptions
-from MooseDocs.tree import page
+from MooseDocs.tree import pages
 from components import Extension
 from readers import Reader
-from renderers import Renderer, MaterializeRenderer
+from renderers import Renderer
+from executioners import ParallelBarrier
 
 LOG = logging.getLogger('MooseDocs.Translator')
 
@@ -28,48 +35,58 @@ class Translator(mixins.ConfigObject):
     Object responsible for converting reader content into an AST and rendering with the
     supplied renderer.
 
-    TODO: It would be a better design to separate the translator from the components, rather than
-          the components having access to the Translator object perhaps the TokenizeComponent should
-          have access to only the Reader and RenderComponent only have the Renderer. This would
-          avoid the temptation from tokenizing in the renderer and rendering in the tokenizer. To do
-          this the parallel implementation needs to be improved, which is not all the easy in
-          python. For a discussion of why, see the "execute" method below.
-
     Inputs:
-        reader: [Reader] A Reader instance.
-        renderer: [Renderer] A Renderer instance.
-        extensions: [list] A list of extensions objects to use.
+        content[page.Page]: A tree of input "pages".
+        reader[Reader]: A Reader instance.
+        renderer[Renderer]: A Renderer instance.
+        extensions[list]: A list of extensions objects to use.
+        kwargs[dict]: Key, value pairs applied to the configuration options.
+
+    This class is the workhorse of MOOSEDocs, it is the hub for all data in and out.  It is not
+    designed to be customized and extensions have no access to this the class.
     """
+    #: A multiprocessing lock. This is used in various locations, mainly prior to caching items
+    #  as well as during directory creation.
+    LOCK = multiprocessing.Lock()
+
+    #: A code for indicating that parallel work is done
+    PROCESS_FINISHED = -1
+
     @staticmethod
     def defaultConfig():
         config = mixins.ConfigObject.defaultConfig()
+        config['profile'] = (False, "Perform profiling of tokenization and rendering, " \
+                                    "this runs in serial.")
         config['destination'] = (os.path.join(os.getenv('HOME'), '.local', 'share', 'moose',
                                               'site'),
                                  "The output directory.")
         return config
 
-    def __init__(self, content, reader, renderer, extensions, **kwargs):
+    def __init__(self, content, reader, renderer, extensions, executioner=None, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
 
-        common.check_type('content', content, page.PageNodeBase)
-        common.check_type('reader', reader, Reader)
-        common.check_type('renderer', renderer, Renderer)
-        common.check_type('extensions', extensions, list)
-        for ext in extensions:
-            common.check_type('extensions', ext, Extension)
+        if MooseDocs.LOG_LEVEL == logging.DEBUG:
+            common.check_type('content', content, pages.Page)
+            common.check_type('reader', reader, Reader)
+            common.check_type('renderer', renderer, Renderer)
+            common.check_type('extensions', extensions, list)
+            for ext in extensions:
+                common.check_type('extensions', ext, Extension)
 
         self.__initialized = False
-        self.__current = None
-        self.__lock = multiprocessing.Lock()
-        self.__root = content
+        self.__content = content
         self.__extensions = extensions
         self.__reader = reader
         self.__renderer = renderer
         self.__destination = None # assigned during init()
-        self.__extension_functions = dict(preRender=list(),
-                                          postRender=list(),
-                                          preTokenize=list(),
-                                          postTokenize=list())
+
+        # Define an Executioner if not provided
+        self.__executioner = executioner
+        if executioner is None:
+            self.__executioner = ParallelBarrier()
+
+        # Caching for page searches (see findPages)
+        self.__page_cache = dict()
 
     @property
     def extensions(self):
@@ -87,26 +104,14 @@ class Translator(mixins.ConfigObject):
         return self.__renderer
 
     @property
-    def root(self):
-        """Return the root page of the documents being translated."""
-        return self.__root
+    def content(self):
+        """Return the content."""
+        return self.__content
 
     @property
-    def current(self):
-        """Return the current page being converted, see build method."""
-        return self.__current
-
-    @current.setter
-    def current(self, value):
-        """Set the current page being translated, see page.MarkdownNode.build()."""
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('value', value, (type(None), page.PageNodeBase))
-        self.__current = value
-
-    @property
-    def lock(self):
-        """Return a multiprocessing lock for serial operations (e.g., directory creation)."""
-        return self.__lock
+    def executioner(self):
+        """Return the Executioner instance."""
+        return self.__executioner
 
     def update(self, **kwargs):
         """Update configuration and handle destination."""
@@ -115,12 +120,88 @@ class Translator(mixins.ConfigObject):
             kwargs['destination'] = mooseutils.eval_path(dest)
         mixins.ConfigObject.update(self, **kwargs)
 
+    def updateConfiguration(self, obj_name, **kwargs):
+        """Update configuration from meta data."""
+        if obj_name == 'reader':
+            self.__reader.update(error_on_unknown=False, **kwargs)
+        elif obj_name == 'renderer':
+            self.__renderer.update(error_on_unknown=False, **kwargs)
+        else:
+            for ext in self.__extensions:
+                if ext.name == obj_name:
+                    ext.update(error_on_unknown=False, **kwargs)
+
+    def resetConfigurations(self):
+        """Reset configuration to original state."""
+        self.__reader.resetConfig()
+        self.__renderer.resetConfig()
+        for ext in self.extensions:
+            ext.resetConfig()
+
+    def getMetaData(self, page, key):
+        """Return the Meta data object for the supplied page."""
+        return self.__executioner.getMetaData(page, key)
+
+    def getSyntaxTree(self, page):
+        """Return the AST for the supplied page."""
+        return self.__executioner.getSyntaxTree(page)
+
+    def findPages(self, arg):
+        """
+        Locate all Page objects that operates on a string or uses a filter.
+
+        Usage:
+           nodes = self.findPages('name')
+           nodes = self.findPages(lambda p: p.name == 'foo')
+
+        The string version is equivalent to:
+           nodes = self.findPages(lambda p: p.local.endswith(arg))
+
+        Inputs:
+            name[str|unicode|lambda]: The partial name to search against or the function to use
+                                      to test for matches.
+        """
+        if MooseDocs.LOG_LEVEL == logging.DEBUG:
+            common.check_type('name', arg, (str, unicode, types.FunctionType))
+
+        if isinstance(arg, (str, unicode)):
+            items = self.__page_cache.get(arg, None)
+            if items is None:
+                func = lambda p: p.local.endswith(arg)
+                items = [page for page in self.__content if func(page)]
+                #self.__page_cache[arg] = items
+
+        else:
+            items = [page for page in self.__content if arg(page)]
+
+        return items
+
+    def findPage(self, arg):
+        """
+        Locate a single Page object that has a local name ending with the supplied name.
+
+        Inputs:
+            see findPages
+        """
+        nodes = self.findPages(arg)
+        if len(nodes) == 0:
+            msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
+            raise exceptions.MooseDocsException(msg)
+
+        elif len(nodes) > 1:
+            msg = "Multiple pages with a name that ends with '{}' were found:".format(arg)
+            for node in nodes:
+                msg += '\n  {} (source: {})'.format(node.local, node.source)
+            raise exceptions.MooseDocsException(msg)
+        return nodes[0]
+
     def init(self):
         """
         Initialize the translator with the output destination for the converted content.
 
         This method also initializes all the various items within the translator for performing
-        the conversion.
+        the conversion. It is required to allow the build command to modify configuration items
+        (i.e., the 'destination' option) prior to setting up the extensions.
 
         Inputs:
             destination[str]: The path to the output directory.
@@ -130,150 +211,60 @@ class Translator(mixins.ConfigObject):
                   "be called twice."
             raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
 
-        destination = self.get("destination")
-        self.__reader.init(self)
-        self.__renderer.init(self)
+        # Attach translator to Executioner
+        self.__executioner.setTranslator(self)
 
+        # Initialize the extension and call the extend method, then set the extension object
+        # on each of the extensions.
+        destination = self.get("destination")
         for ext in self.__extensions:
             common.check_type('extensions', ext, MooseDocs.base.components.Extension)
-            ext.init(self)
+            ext.setTranslator(self)
             ext.extend(self.__reader, self.__renderer)
             for comp in self.__reader.components:
                 if comp.extension is None:
-                    comp.extension = ext
+                    comp.setExtension(ext)
+
             for comp in self.__renderer.components:
                 if comp.extension is None:
-                    comp.extension = ext
+                    comp.setExtension(ext)
 
-            for func_name in self.__extension_functions:
-                if hasattr(ext, func_name):
-                    self.__extension_functions[func_name].append(getattr(ext, func_name))
+        # Set the translator
+        for comp in self.__reader.components:
+            comp.setTranslator(self)
+        for comp in self.__renderer.components:
+            comp.setTranslator(self)
 
-        for node in anytree.PreOrderIter(self.__root):
+        # Check that the extension requirements are met
+        for ext in self.__extensions:
+            self.__checkRequires(ext)
+
+        for node in self.__content:
             node.base = destination
-            node.init(self)
+            if isinstance(node, pages.Source):
+                node.output_extension = self.__renderer.EXTENSION
 
         self.__initialized = True
 
-    def executeExtensionFunction(self, name, *args):
-        """
-        Execute pre/post functions for extensions.
-        """
-        if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            common.check_type('name', name, str)
-            if name not in self.__extension_functions:
-                msg = "The supplied extension function name '{}' does not exist, the possible " \
-                      "names include: {}."
-                raise exceptions.MooseDocsException(msg, name, self.__extension_functions.keys())
-
-        for func in self.__extension_functions[name]:
-            func(*args)
-
-    def reinit(self):
-        """
-        Reinitialize the Reader, Renderer, and all Extension objects.
-        """
+    def execute(self, num_threads=1, nodes=None):
+        """Perform build for all pages, see executioners."""
         self.__assertInitialize()
-        self.reader.reinit()
-        self.renderer.reinit()
-
-        for ext in self.__extensions:
-            ext.reinit()
-
-    def execute(self, num_threads=1):
-        """
-        Perform parallel build for all pages.
-
-        Inputs:
-            num_threads[int]: The number of threads to use (default: 1).
-
-        NOTICE:
-        A proper parallelization for MooseDocs would be three parallel steps, with minimal
-        communication.
-          1. Read all the markdown files (in parallel).
-          2. Perform the AST tokenization (in parallel), then communicate the completed
-             AST back to the main process.
-          3. Convert the AST to HTML (in parallel).
-          4. Write/copy (in parallel) the completed HTML and other files (images, js, etc.).
-
-        However, step two is problematic because python requires that the AST be pickled,
-        which is possible, for communication. In doing this I realized that the pickling was a
-        limiting factor and made the AST step very slow. I need to investigate this further to
-        make sure I was using a non-locking pool of workers, but this was taking too much
-        development time.
-
-        The current implementation performs all four steps together, which generally works just
-        fine, with one exception. The autolink extension actually interrogates the AST from other
-        pages. Hence, if the other page was generated off process the information is not available.
-        The current implementation will just compute the AST locally (i.e., I am performing repeated
-        calculations in favor of communication). This works well enough for now, but as more
-        autolinking is preformed and other similar extensions are created this could cause a slow
-        down.
-
-        Long term this should be looked into again, for now the current approach is working well.
-        This new system is already an order of 4 times faster than the previous implementation and
-        likely could be optimized further.
-
-        The multiprocessing.Manager() needs to be explored, it is working to pull the JSON index
-        information together.
-        """
-        common.check_type('num_threads', num_threads, int)
-        self.__assertInitialize()
-
-        self.renderer.preExecute()
-
-
-        # Log start message and time
-        LOG.info("Building Pages...")
-        start = time.time()
-
-        manager = multiprocessing.Manager()
-        array = manager.list()
-        build_index = isinstance(self.renderer, MaterializeRenderer)
-        def target(nodes, lock):
-            """Helper for building multiple nodes (i.e., a chunk for a process)."""
-            for node in nodes:
-                node.build()
-                if isinstance(node, page.MarkdownNode):
-                    if build_index:
-                        node.buildIndex(self.renderer.get('home', None))
-                        with lock:
-                            for entry in node.index:
-                                array.append(entry)
-
-        # Complete list of nodes
-        nodes = [n for n in anytree.PreOrderIter(self.root)]
-
-        # Serial
-        if num_threads == 1:
-            target(nodes, self.lock)
-
-        # Multiprocessing
-        else:
-            jobs = []
-            for chunk in mooseutils.make_chunks(nodes, num_threads):
-                p = multiprocessing.Process(target=target, args=(chunk, self.lock))
-                p.start()
-                jobs.append(p)
-
-            for job in jobs:
-                job.join()
-
-        # Done
-        stop = time.time()
-        LOG.info("Build time %s sec.", stop - start)
-
-        if build_index:
-            iname = os.path.join(self.get('destination'), 'js', 'search_index.js')
-            if not os.path.isdir(os.path.dirname(iname)):
-                os.makedirs(os.path.dirname(iname))
-            items = [v for v in array if v]
-            common.write(iname, 'var index_data = {};'.format(json.dumps(items)))
-
-        self.renderer.postExecute()
+        self.__executioner(nodes, num_threads)
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""
         if not self.__initialized:
             msg = "The Translator.init() method must be called prior to executing this method."
             raise exceptions.MooseDocsException(msg)
+
+    def __checkRequires(self, extension):
+        """Helper to check the loaded extensions."""
+        available = [e.__module__ for e in self.__extensions]
+        messages = []
+        for ext in extension._Extension__requires: #pylint: disable=protected-access
+            if ext.__name__ not in available:
+                msg = "The {} extension is required but not included.".format(ext.__name__)
+                messages.append(msg)
+
+        if messages:
+            raise exceptions.MooseDocsException('\n'.join(messages))

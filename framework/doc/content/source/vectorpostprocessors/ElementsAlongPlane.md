@@ -1,4 +1,5 @@
 # ElementsAlongPlane
+
 !syntax description /VectorPostprocessors/ElementsAlongPlane
 
 ## Description

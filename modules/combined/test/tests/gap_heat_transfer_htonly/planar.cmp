@@ -1,0 +1,17 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t11
+
+GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
+	flux_bottom  relative 1.e-4 floor 1e-5 # min:   1.7674751e-06 @ t1	max:       100.00001 @ t11
+	flux_top     relative 1.e-4 floor 1e-5 # min:   1.6431301e-06 @ t1	max:             100 @ t11
+	temp_bottom  # min:             100 @ t1	max:             200 @ t11
+	temp_top     # min:             100 @ t1	max:             100 @ t11
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	paired_temp  # min:               0 @ t1,n2	max:             100 @ t11,n1
+	penetration  # min:               0 @ t1,n2	max:               1 @ t1,n1
+	temp         # min:             100 @ t1,n1	max:             200 @ t11,n11
+
+ELEMENT VARIABLES relative 1.e-6 floor 1.e-10
+	gap_cond  # min:               0 @ t1,b1,e1	max:               1 @ t2,b1,e6

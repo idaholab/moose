@@ -1,6 +1,14 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 """Utilities for reading files."""
 import codecs
-import re
 import os
 
 def read(filename):
@@ -18,10 +26,6 @@ def read(filename):
     """
     with codecs.open(filename, encoding='utf-8') as fid:
         content = fid.read()
-
-    if filename.endswith(('.h', '.C')):
-        content = re.sub(r'^//\*', '//', content, flags=re.MULTILINE|re.UNICODE)
-
     return content
 
 def write(filename, content):

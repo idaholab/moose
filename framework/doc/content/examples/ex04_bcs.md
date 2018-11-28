@@ -1,54 +1,86 @@
 # Example 4 : Custom Boundary Conditions
 
-[](---)
+MOOSE provides several basic boundary conditions that can be either used directly in your input
+files or extended to provide custom behavior.  This example builds on the system of equations used
+in [Example 3](examples/ex03_coupling.md). In this example, we extend MOOSE's built-in Dirichlet and
+Neumann boundary condition objects by allowing them to be coupled to independent variables in your
+equation system.  We also provide an example of using MOOSE's built-in periodic boundary
+conditions. For more detailed information about boundary conditions in MOOSE, see the
+[BCs System Documentation](syntax/BCs/index.md) 
 
-## Problem statement
+## Coupled Dirichlet
 
-[](---)
+Dirichlet BCs in MOOSE all inherit from a `NodalBC` base-class - our `CoupledDirichletBC` in this
+example is no exception:
 
-## Complete source files
+```cpp
+class CoupledDirichletBC : public NodalBC
+```
 
-[dirichlet_bc.i](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/dirichlet_bc.i)
+!listing examples/ex04_bcs/include/bcs/CoupledDirichletBC.h start=#ifndef
 
-[CoupledDirichletBC.h](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/include/bcs/CoupledDirichletBC.h)
+The source file creates input parameters and uses them to compute the residual just like the prior
+examples:
 
-[CoupledDirichletBC.C](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/src/bcs/CoupledDirichletBC.C)
+!listing examples/ex04_bcs/src/bcs/CoupledDirichletBC.C start=#include end=$ max-height=10000px
 
-[neumann_bc.i](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/neumann_bc.i)
-
-[CoupledNeumannBC.h](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/include/bcs/CoupledNeumannBC.h)
-
-[CoupledNeumannBC.C](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/src/bcs/CoupledNeumannBC.C)
-
-[ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/src/base/ExampleApp.C)
-
-[periodic_bc.i](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/periodic_bc.i)
-
-[trapezoid.i](https://github.com/idaholab/moose/blob/devel/examples/ex04_bcs/trapezoid.i)
-
-[](---)
-
-## Outputs
+Running the `dirichlet_bc.i` file should give you results like this for the 'u' and 'v' variables
+in our coupled system:
 
 !media large_media/examples/ex04_bc_01.png
+       caption=v
        style=width:50%;
+       caption=solution for u
 
 !media large_media/examples/ex04_bc_02.png
        style=width:50%;
+       caption=solution for v (TODO: fix legend)
 
 !media large_media/examples/ex04_bc_03.png
        style=width:30%;
+       caption=TODO: regenerate higher quality with fixed legend
 
+## Coupled Neumann
 
+This example is largely the same as the coupled Dirichlet example above, except we inherit from
+the `IntegratedBC` class instead:
 
+```cpp
+class CoupledNeumannBC : public IntegratedBC
+```
 
-[](---)
+And the residual calculation is obviously a bit different:
 
-## Periodic example
+!listing examples/ex04_bcs/src/bcs/CoupledNeumannBC.C re=Real\sCoupledNeumannBC::compute.*$ max-height=10000px
+
+This boundary condition class is used in the file `neumann_bc.i`.  Running this file should
+generate results along the lines of those shown above.
+
+## Periodic
+
+MOOSE provides built-in support for specifying periodic boundary conditions.  The `periodic_bc.i`
+input file demonstrates this functionality while also taking advantage of MOOSE's ability for
+parsing user-specified analytical functions from input files. Parsed functions can be used to do
+many things in input files and are discussed in more detail in [Example 13](examples/ex13_functions.md).
+TODO: briefly explain how to use PeriodicBC.
+
+Here are some results using periodic BCs from running `periodic_bc.i` and `trapezoid.i`:
 
 !media large_media/examples/ex04_out_pbc.png
        style=width:50%;
 
 !media large_media/examples/ex04_out_trap.png
        style=width:50%;
+
+## Complete source files
+
+- [examples/ex04_bcs/dirichlet_bc.i]
+- [examples/ex04_bcs/include/bcs/CoupledDirichletBC.h]
+- [examples/ex04_bcs/src/bcs/CoupledDirichletBC.C]
+- [examples/ex04_bcs/neumann_bc.i]
+- [examples/ex04_bcs/include/bcs/CoupledNeumannBC.h]
+- [examples/ex04_bcs/src/bcs/CoupledNeumannBC.C]
+- [examples/ex04_bcs/src/base/ExampleApp.C]
+- [examples/ex04_bcs/periodic_bc.i]
+- [examples/ex04_bcs/trapezoid.i]
 

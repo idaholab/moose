@@ -47,7 +47,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [/table.md] | Provides means for implementing tables using traditional markdown format. |
 | [/katex.md] | Enables use of KaTeX rendered equations. |
 | [/bibtex.md] | Enables use of BibTeX citations and bibliographies. |
-| [/panoptic.md] | Defines a means for defining global shortcut syntax. |
+| [/common.md] | Defines a means for defining global shortcut syntax. |
 | [/listing.md] | Provides commands for including source code directly from the repository. |
 | [/include.md] | Allows for markdown files to be included in other markdown files. |
 | [/alert.md] | Creates alert boxes to draw attention to content. |

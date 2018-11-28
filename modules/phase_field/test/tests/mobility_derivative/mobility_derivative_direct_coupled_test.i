@@ -3,8 +3,8 @@
   dim = 2
   nx = 10
   ny = 10
-  xmax = 30.0
-  ymax = 30.0
+  xmax = 30
+  ymax = 30
   elem_type = QUAD4
 []
 
@@ -19,20 +19,21 @@
 
 [ICs]
   [./c_IC]
-    type = CrossIC
-    x1 = 2
-    x2 = 28
-    y1 = 2
-    y2 = 28
+    type = SmoothCircleIC
+    x1 = 15
+    y1 = 15
+    radius = 12
     variable = c
-    interface = 0.15
+    int_width = 3
+    invalue = 1
+    outvalue = 0
   [../]
   [./d_IC]
     type = BoundingBoxIC
-    x1 = 0.0
-    x2 = 15.0
-    y1 = 0.0
-    y2 = 30.0
+    x1 = 0
+    x2 = 15
+    y1 = 0
+    y2 = 30
     inside = 1.0
     outside = 0.0
     variable = d
@@ -114,8 +115,8 @@
   nl_max_its = 50
   nl_rel_tol = 1.0e-10
 
-  dt = 0.5
-  num_steps = 4
+  dt = 0.25
+  num_steps = 2
 []
 
 [Outputs]

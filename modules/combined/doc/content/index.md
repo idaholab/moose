@@ -1,4 +1,4 @@
-!config renderer breadcrumbs=False scrollspy=False
+!config navigation breadcrumbs=False scrollspy=False
 
 # HOME style=visibility:hidden;
 
@@ -7,7 +7,6 @@
 # Multiphysics Object Oriented Simulation Environment class=center light style=font-size:300%
 
 # An open source, parallel finite element framework class=center style=font-weight:200;font-size:200%
-
 
 !row!
 !col! class=s12 m4 l4 icon=flash_on
@@ -42,4 +41,3 @@ read our [getting_started/index.md] page.
 <br>
 
 !media media/inl_blue.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
-

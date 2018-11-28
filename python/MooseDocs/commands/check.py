@@ -1,3 +1,12 @@
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 """Developer tools for MooseDocs."""
 import os
 import collections
@@ -41,12 +50,13 @@ def main(options):
     """./moosedocs check"""
 
     translator, _ = common.load_config(options.config)
-    check(translator,
-          dump=options.dump,
-          update=options.update,
-          generate=options.generate,
-          object_prefix=options.object_prefix,
-          syntax_prefix=options.syntax_prefix)
+    err = check(translator,
+                dump=options.dump,
+                update=options.update,
+                generate=options.generate,
+                object_prefix=options.object_prefix,
+                syntax_prefix=options.syntax_prefix)
+    return err
 
 def check(translator,
           dump=False,
@@ -60,14 +70,15 @@ def check(translator,
     app_syntax = None
     extension = None
     for ext in translator.extensions:
-        extension = ext
-        if isinstance(ext, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
+        if ext.name == 'appsyntax':
+            extension = ext
+            extension.preExecute(translator.content)
             app_syntax = ext.syntax
             break
 
-    if extension['disable']:
+    if not extension.active:
         LOG.info("Syntax is disabled, skipping the check.")
-        return
+        return 0
 
     if app_syntax is None:
         msg = "Failed to locate AppSyntaxExtension for the given configuration."
@@ -100,6 +111,8 @@ def check(translator,
                          type(node).__name__,
                          syntax.ObjectNode.__name__,
                          syntax.SyntaxNode.__name__)
+
+    return 0
 
 def _check_object_node(node, app_name, generate, update, prefix):
     """

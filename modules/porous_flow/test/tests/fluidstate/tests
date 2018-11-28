@@ -4,6 +4,9 @@
     input = 'waterncg.i'
     exodiff = 'waterncg_liquid.e'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the properties of the liquid phase in a water and NCG system'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#8818'
   [../]
   [./waterncg_twophase]
     type = 'Exodiff'
@@ -11,6 +14,9 @@
     exodiff = 'waterncg_twophase.e'
     cli_args = 'Variables/z/initial_condition=0.25 Outputs/file_base=waterncg_twophase'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the solubilities and properties of both the gas and liquid phase in a water and NCG system'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#8818'
   [../]
   [./waterncg_gas]
     type = 'Exodiff'
@@ -18,12 +24,18 @@
     exodiff = 'waterncg_gas.e'
     cli_args = 'Variables/z/initial_condition=0.999 Outputs/file_base=waterncg_gas'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the properties of the gas phase in a water and NCG system'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#8818'
   [../]
   [./theis]
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = "theis_csvout.csv"
     threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a gas phase as a gas component is added in a water and NCG system'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#8818'
   [../]
   [./theis_tabulated]
     type = 'CSVDiff'
@@ -31,24 +43,36 @@
     csvdiff = "theis_csvout.csv"
     prereq = 'theis'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a gas phase as a gas component is added in a water and NCG system'
+    design = 'PorousFlowWaterNCG.md'
+    issues = '#8818'
   [../]
   [./brineco2]
     type = 'CSVDiff'
     input = 'brineco2.i'
     csvdiff = 'brineco2.csv'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the solubilities and properties of both the gas and liquid phase in a brine and CO2 system'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818'
   [../]
   [./brineco2_2]
     type = 'CSVDiff'
     input = 'brineco2_2.i'
     csvdiff = 'brineco2_2.csv'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a gas phase as CO2 is added to a liquid brine phase'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818'
   [../]
   [./brineco2_hightemp]
     type = 'CSVDiff'
     input = 'brineco2_hightemp.i'
     csvdiff = 'brineco2_hightemp_out.csv'
     threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a gas phase as CO2 is added to a liquid brine phase in the high temperature regime'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818 #11359'
   [../]
   [./theis_brineco2]
     type = 'CSVDiff'
@@ -56,17 +80,26 @@
     csvdiff = "theis_brineco2_csvout.csv"
     heavy = true
     threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a gas phase as CO2 is added to a liquid brine phase'
+    design = 'PorousFlowBrineCO2.md'
+    issues = '#8818'
   [../]
   [./waterncg_ic]
     type = 'CSVDiff'
     input = 'waterncg_ic.i'
     csvdiff = "waterncg_ic_out.csv"
     threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the initial value of total mass fraction corresponding to the specified gas saturation in a water and NCG system'
+    design = 'PorousFlowWaterNCGIC.md'
+    issues = '#9377'
   [../]
   [./brineco2_ic]
     type = 'CSVDiff'
     input = 'brineco2_ic.i'
     csvdiff = "brineco2_ic_out.csv"
     threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the initial value of total mass fraction corresponding to the specified gas saturation in a brine and CO2 system'
+    design = 'PorousFlowBrineCO2IC.md'
+    issues = '#9377'
   [../]
 []

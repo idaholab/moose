@@ -10,25 +10,23 @@
 import os
 import logging
 import copy
-
-import anytree
-
-from .base import NodeBase, Property
+import mooseutils
+from .base import NodeBase
 
 LOG = logging.getLogger(__name__)
 
-class SyntaxNodeBase(NodeBase):
+@mooseutils.addProperty('hidden', default=False, ptype=bool)
+@mooseutils.addProperty('removed', default=False, ptype=bool)
+@mooseutils.addProperty('parameters', ptype=dict)
+@mooseutils.addProperty('description', ptype=unicode)
+@mooseutils.addProperty('alias', ptype=unicode)
+class SyntaxNodeBase(NodeBase, mooseutils.AutoPropertyMixin):
     """
     Node for MOOSE syntax that serves as the parent for actions/objects.
     """
-    PROPERTIES = [Property('hidden', ptype=bool, default=False),
-                  Property('removed', ptype=bool, default=False),
-                  Property('parameters', ptype=dict),
-                  Property('description', ptype=unicode),
-                  Property('alias', ptype=unicode)]
-
     def __init__(self, *args, **kwargs):
-        NodeBase.__init__(self, *args, **kwargs)
+        NodeBase.__init__(self, *args)
+        mooseutils.AutoPropertyMixin.__init__(self, **kwargs)
         self._groups = set()
 
     @property
@@ -56,14 +54,6 @@ class SyntaxNodeBase(NodeBase):
     def markdown(self):
         """Return the 'required' markdown filename."""
         raise NotImplementedError()
-
-    def findfull(self, name, maxlevel=None):
-        """
-        Search for a node, by full name.
-        """
-        for node in anytree.PreOrderIter(self, maxlevel=maxlevel):
-            if (node.fullpath == name) or (node.alias == name):
-                return node
 
     def syntax(self, *args, **kwargs):
         """
@@ -131,8 +121,8 @@ class SyntaxNode(SyntaxNodeBase):
     """
     COLOR = 'LIGHT_GREEN'
 
-    def __init__(self, parent, name, **kwargs):
-        SyntaxNodeBase.__init__(self, parent, name, **kwargs)
+    def __init__(self, *args, **kwargs):
+        SyntaxNodeBase.__init__(self, *args, **kwargs)
 
     def markdown(self):
         """
@@ -162,8 +152,8 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
     Base class for nodes associated with C++ objects (Action, MooseObjectAction, or MooseObject).
     """
 
-    def __init__(self, parent, name, item, **kwargs):
-        SyntaxNodeBase.__init__(self, parent, name, **kwargs)
+    def __init__(self, name, parent, item, **kwargs):
+        SyntaxNodeBase.__init__(self, name, parent, **kwargs)
 
         if item['description']:
             self.description = item['description']
@@ -219,9 +209,9 @@ class MooseObjectNode(ObjectNode):
     """
     COLOR = 'LIGHT_YELLOW'
 
-    def __init__(self, parent, key, item, **kwargs):
-        ObjectNode.__init__(self, parent, key, item, **kwargs)
-        self.__class_name = item['class'] if 'class' in item else key
+    def __init__(self, name, parent, item, **kwargs):
+        ObjectNode.__init__(self, name, parent, item, **kwargs)
+        self.__class_name = item['class'] if 'class' in item else name
 
     @property
     def class_name(self):
@@ -236,9 +226,8 @@ class ActionNode(ObjectNode):
     """
     COLOR = 'LIGHT_MAGENTA'
 
-    def __init__(self, parent, key, item, **kwargs):
-        ObjectNode.__init__(self, parent, key, item, **kwargs)
-
+    def __init__(self, name, parent, item, **kwargs):
+        ObjectNode.__init__(self, name, parent, item, **kwargs)
         self._tasks = set(item['tasks']) if 'tasks' in item else set()
 
     @property

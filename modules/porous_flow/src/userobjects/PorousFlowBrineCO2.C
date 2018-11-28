@@ -90,7 +90,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
                                              Real temperature,
                                              Real Xnacl,
                                              Real Z,
-                                             unsigned qp,
+                                             unsigned int qp,
                                              std::vector<FluidStateProperties> & fsp) const
 {
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
@@ -121,7 +121,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
     case FluidStatePhaseEnum::LIQUID:
     {
       // Calculate the liquid properties
-      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0, qp);
+      Real liquid_pressure = pressure - _pc.capillaryPressure(1.0, qp);
       liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
       break;
@@ -136,7 +136,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
       saturationTwoPhase(pressure, temperature, Xnacl, Z, fsp);
 
       // Calculate the liquid properties
-      Real liquid_pressure = pressure - _pc_uo.capillaryPressure(1.0 - gas.saturation, qp);
+      Real liquid_pressure = pressure - _pc.capillaryPressure(1.0 - gas.saturation, qp);
       liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
       break;
@@ -152,7 +152,7 @@ PorousFlowBrineCO2::thermophysicalProperties(Real pressure,
 
   // Save pressures to FluidStateProperties object
   gas.pressure = pressure;
-  liquid.pressure = pressure - _pc_uo.capillaryPressure(liquid.saturation, qp);
+  liquid.pressure = pressure - _pc.capillaryPressure(liquid.saturation, qp);
 }
 
 void
@@ -1405,7 +1405,7 @@ PorousFlowBrineCO2::partialDensityCO2(Real temperature,
 
 Real
 PorousFlowBrineCO2::totalMassFraction(
-    Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned qp) const
+    Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const
 {
   // Check whether the input pressure and temperature are within the region of validity
   checkVariables(pressure, temperature);
@@ -1441,7 +1441,7 @@ PorousFlowBrineCO2::totalMassFraction(
 
   // Liquid properties
   const Real liquid_saturation = 1.0 - saturation;
-  const Real liquid_pressure = pressure - _pc_uo.capillaryPressure(liquid_saturation, qp);
+  const Real liquid_pressure = pressure - _pc.capillaryPressure(liquid_saturation, qp);
   liquidProperties(liquid_pressure, temperature, Xnacl, fsp);
 
   // The total mass fraction of ncg (z) can now be calculated

@@ -1,8 +1,17 @@
 #pylint: disable=missing-docstring
-import re
-from exceptions import TokenizeException
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
 
-def regex(pattern, content, flags=None, exc=TokenizeException):
+import re
+from exceptions import MooseDocsException
+
+def regex(pattern, content, flags=None):
     """
     Tool for searching for "content" within a regex and raising the desired exception if not found.
     """
@@ -14,6 +23,6 @@ def regex(pattern, content, flags=None, exc=TokenizeException):
             content = match.group()
     else:
         msg = "Failed to match regular expression: {}"
-        raise exc(msg, pattern)
+        raise MooseDocsException(msg, pattern)
 
     return content

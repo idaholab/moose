@@ -10,9 +10,8 @@
 #ifndef POROUSFLOWFLUIDSTATEBRINECO2_H
 #define POROUSFLOWFLUIDSTATEBRINECO2_H
 
-#include "PorousFlowFluidStateFlashBase.h"
+#include "PorousFlowFluidState.h"
 
-class PorousFlowBrineCO2;
 class PorousFlowFluidStateBrineCO2;
 
 template <>
@@ -28,27 +27,12 @@ InputParameters validParams<PorousFlowFluidStateBrineCO2>();
  * Partitioning in chloride brine at 12-100C and up to 600 bar, Geochimica et
  * Cosmochimica Acta, 69, 3309-3320 (2005)
  */
-class PorousFlowFluidStateBrineCO2 : public PorousFlowFluidStateFlashBase
+class PorousFlowFluidStateBrineCO2 : public PorousFlowFluidState
 {
 public:
   PorousFlowFluidStateBrineCO2(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties() override;
-  virtual void thermophysicalProperties() override;
-
-  /// Salt mass fraction (kg/kg)
-  const VariableValue & _Xnacl;
-  /// Gradient of salt mass fraction (only defined at the qps)
-  const VariableGradient & _grad_Xnacl_qp;
-  /// Salt mass fraction variable number
-  const unsigned int _Xnacl_varnum;
-  /// Salt mass fraction PorousFlow variable number
-  const unsigned int _Xvar;
-  /// FluidState UserObject
-  const PorousFlowBrineCO2 & _fs_uo;
-  /// Salt component index
-  const unsigned int _salt_component;
 };
 
 #endif // POROUSFLOWFLUIDSTATEBRINECO2_H

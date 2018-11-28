@@ -137,7 +137,7 @@
     type = PorousFlowTemperature
   [../]
   [./waterncg]
-    type = PorousFlowFluidStateWaterNCG
+    type = PorousFlowFluidState
     gas_porepressure = pgas
     z = zi
     temperature_unit = Celsius

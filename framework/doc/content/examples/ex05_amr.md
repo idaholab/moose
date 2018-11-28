@@ -1,7 +1,5 @@
 # Example 05 : Automatic Mesh Adaptivity
 
-[](---)
-
 ## Results
 
 !media large_media/examples/ex5-mesh-0.png
@@ -36,12 +34,8 @@
        caption=Example 5 Output
        style=width:50%;
 
-[](---)
-
 ## Complete Source Files
 
-[ex05.i](https://github.com/idaholab/moose/blob/devel/examples/ex05_amr/ex05.i)
-
-[ExampleCoefDiffusion.h](https://github.com/idaholab/moose/blob/devel/examples/ex05_amr/include/kernels/ExampleCoefDiffusion.h)
-
-[ExampleCoefDiffusion.C](https://github.com/idaholab/moose/blob/devel/examples/ex05_amr/src/kernels/ExampleCoefDiffusion.C)
+- [examples/ex05_amr/ex05.i]
+- [examples/ex05_amr/include/kernels/ExampleCoefDiffusion.h]
+- [examples/ex05_amr/src/kernels/ExampleCoefDiffusion.C]

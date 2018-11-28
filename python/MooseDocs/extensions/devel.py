@@ -1,17 +1,19 @@
 #pylint: disable=missing-docstring
-import importlib
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import importlib
 from MooseDocs.common import exceptions
-from MooseDocs.base import components
-from MooseDocs.extensions import floats, command, table
-from MooseDocs.tree import html, tokens
-from MooseDocs.tree.base import Property
+from MooseDocs.extensions import core, floats, command, table
 
 def make_extension(**kwargs):
     return DevelExtension(**kwargs)
-
-class ExampleToken(tokens.Token):
-    PROPERTIES = [Property("data", ptype=unicode, required=True)]
 
 class DevelExtension(command.CommandExtension):
     """
@@ -24,12 +26,9 @@ class DevelExtension(command.CommandExtension):
         return config
 
     def extend(self, reader, renderer):
-        self.requires(floats)
-
-        self.addCommand(Example())
-        self.addCommand(ComponentSettings())
-
-        renderer.add(ExampleToken, RenderExampleToken())
+        self.requires(core, floats)
+        self.addCommand(reader, Example())
+        self.addCommand(reader, ComponentSettings())
 
 class Example(command.CommandComponent):
     COMMAND = 'devel'
@@ -38,21 +37,16 @@ class Example(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['caption'] = (None, "The caption to use for the code specification example.")
-        settings['prefix'] = (u'Example', "The caption prefix (e.g., Example).")
+        settings.update(floats.caption_settings())
+        settings['prefix'] = (u'Example', settings['prefix'][1])
         return settings
 
-    def createToken(self, match, parent):
-
-        master = floats.Float(parent, **self.attributes)
-        caption = floats.Caption(master, prefix=self.settings['prefix'], key=self.attributes['id'])
-
-        grammar = self.reader.lexer.grammar('inline')
-        self.reader.lexer.tokenize(caption, grammar, unicode(self.settings['caption']), match.line)
-
-        data = match['block'] if 'block' in match else match['inline']
-        example = ExampleToken(master, data=data)
-        return example
+    def createToken(self, parent, info, page):
+        master = floats.create_float(parent, self.extension, self.reader, page,
+                                     self.settings, **self.attributes)
+        data = info['block'] if 'block' in info else info['inline']
+        core.Code(master, content=data)
+        return master
 
 class ComponentSettings(command.CommandComponent):
     COMMAND = 'devel'
@@ -63,38 +57,32 @@ class ComponentSettings(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['module'] = (None, "The name of the module containing the object.")
         settings['object'] = (None, "The name of the object to import from the 'module'.")
-        settings['caption'] = (None, "The caption to use for the settings table created.")
-        settings['prefix'] = (u'Table', "The caption prefix (e.g., Table).")
+        settings.update(floats.caption_settings())
+        settings['prefix'] = (u'Table', settings['prefix'][1])
 
         return settings
 
-    def createToken(self, match, parent):
+    def createToken(self, parent, info, page):
         if self.settings['module'] is None:
-            raise exceptions.TokenizeException("The 'module' setting is required.")
+            raise exceptions.MooseDocsException("The 'module' setting is required.")
 
         if self.settings['object'] is None:
-            raise exceptions.TokenizeException("The 'object' setting is required.")
+            raise exceptions.MooseDocsException("The 'object' setting is required.")
 
-        master = floats.Float(parent, **self.attributes)
-
-        if self.settings['caption']:
-            caption = floats.Caption(master, prefix=self.settings['prefix'],
-                                     key=self.attributes['id'])
-            grammar = self.reader.lexer.grammar('inline')
-            self.reader.lexer.tokenize(caption, grammar, self.settings['caption'], match.line)
-
+        master = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+                                     **self.attributes)
         try:
             mod = importlib.import_module(self.settings['module'])
         except ImportError:
             msg = "Unable to load the '{}' module."
-            raise exceptions.TokenizeException(msg, self.settings['module'])
+            raise exceptions.MooseDocsException(msg, self.settings['module'])
 
         try:
             obj = getattr(mod, self.settings['object'])
         except AttributeError:
             msg = "Unable to load the '{}' attribute from the '{}' module."
-            raise exceptions.TokenizeException(msg, self.settings['object'],
-                                               self.settings['module'])
+            raise exceptions.MooseDocsException(msg, self.settings['object'],
+                                                self.settings['module'])
 
         if hasattr(obj, 'defaultSettings'):
             settings = obj.defaultSettings()
@@ -103,27 +91,9 @@ class ComponentSettings(command.CommandComponent):
         else:
             msg = "The '{}' object in the '{}' module does not have a 'defaultSettings' or "\
                   "'defaultConfig' method."
-            raise exceptions.TokenizeException(msg, mod, obj)
+            raise exceptions.MooseDocsException(msg, mod, obj)
 
         rows = [[key, value[0], value[1]] for key, value in settings.iteritems()]
         tbl = table.builder(rows, headings=[u'Key', u'Default', u'Description'])
         tbl.parent = master
         return master
-
-class RenderExampleToken(components.RenderComponent):
-
-    def createHTML(self, token, parent):
-        div = html.Tag(parent, 'div', class_='moose-example')
-        left = html.Tag(div, 'div', class_='moose-example-code')
-        ast = tokens.Code(None, code=token.data)
-        self.translator.renderer.process(left, ast)
-        html.Tag(div, 'div', class_='moose-example-rendered')
-
-    def createMaterialize(self, token, parent):
-
-        div = html.Tag(parent, 'div', class_='row card-content')
-        left = html.Tag(div, 'div', class_='moose-example-code col s12 m12 l12')
-        ast = tokens.Code(None, code=token.data)
-        self.translator.renderer.process(left, ast)
-        right = html.Tag(div, 'div', class_='moose-example-rendered col s12 m12 l12')
-        return right

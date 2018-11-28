@@ -15,7 +15,7 @@ MOOSE run_tests.
 import argparse
 import logging
 
-from commands import build, devel, check, update, profiler, verify
+from commands import build, check, verify
 from common import log
 
 def command_line_options():
@@ -36,10 +36,7 @@ def command_line_options():
                         help="Set the python logging level (default: %(default)s).")
 
     build.command_line_options(subparser, parent)
-    devel.command_line_options(subparser, parent)
     check.command_line_options(subparser, parent)
-    update.command_line_options(subparser, parent)
-    profiler.command_line_options(subparser, parent)
     verify.command_line_options(subparser, parent)
     return parser.parse_args()
 
@@ -52,24 +49,18 @@ def run():
     log.init_logging(getattr(logging, options.level))
 
     if options.command == 'build':
-        build.main(options)
-    elif options.command == 'devel':
-        devel.main(options)
+        errno = build.main(options)
     elif options.command == 'check':
-        check.main(options)
-    elif options.command == 'update':
-        update.main(options)
-    elif options.command == 'profile':
-        profiler.main(options)
+        errno = check.main(options)
     elif options.command == 'verify':
-        verify.main(options)
+        errno = verify.main(options)
 
     critical = log.MooseDocsFormatter.COUNTS['CRITICAL'].value
     errors = log.MooseDocsFormatter.COUNTS['ERROR'].value
     warnings = log.MooseDocsFormatter.COUNTS['WARNING'].value
 
     print 'CRITICAL:{} ERROR:{} WARNING:{}'.format(critical, errors, warnings)
-    if critical or errors:
+    if critical or errors or (errno != 0):
         return 1
     return 0
 
