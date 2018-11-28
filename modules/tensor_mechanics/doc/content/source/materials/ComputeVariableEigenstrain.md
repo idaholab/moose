@@ -25,7 +25,7 @@ the user-specified variable.
 
 The contributions of the eigenstrain to the first and second elastic strain
 derivatives are calculated with use of the MOOSE
-[DerivativeMaterialInterface](framework_development/interfaces/DerivativeMaterialInterface.md)
+[DerivativeMaterialInterface](materials/DerivativeMaterialInterface.md)
 applied to the prefactor variables.
 \begin{equation}
   \label{eqn:derivatives}

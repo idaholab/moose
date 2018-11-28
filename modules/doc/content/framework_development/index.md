@@ -44,7 +44,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [/PerfGraph.md] - How to time sections of code in MOOSE
 
-[MooseUtils Namespace](moose_utils.md) - Basic utilities used throughout the framework
+[MooseUtils Namespace](MooseUtils.md) - Basic utilities used throughout the framework
 
 [Utils](utils/index.md) - Basic utilities used throughout the framework
 
