@@ -25,10 +25,6 @@ def create_float(parent, extension, reader, page, settings, **kwargs):
     if cap:
         flt = Float(parent, **kwargs)
         cap.parent = flt
-        key = cap.get('key')
-        if key:
-            core.Shortcut(parent.root, key=key, link=u'#{}'.format(key),
-                          string=u'{} {}'.format(cap['prefix'].title(), cap['number']))
         return flt
     return parent
 
@@ -87,7 +83,7 @@ def create_modal_link(parent, title=None, content=None, string=None, **kwargs):
     return link
 
 Float = tokens.newToken('Float', img=False)
-Caption = tokens.newToken('Caption', key=u'', prefix=u'', number=1)
+Caption = tokens.newToken('Caption', key=u'', prefix=u'', number='?')
 ModalLink = tokens.newToken('ModalLink', bookmark=True, bottom=False, close=True)
 ModalLinkTitle = tokens.newToken('ModalLinkTitle')
 ModalLinkContent = tokens.newToken('ModalLinkContent')
@@ -98,7 +94,6 @@ class FloatExtension(components.Extension):
     base extension. It does not provide tables for example, just the tools to make floats
     in a uniform manner.
     """
-    COUNTS = collections.defaultdict(int)
     def extend(self, reader, renderer):
         renderer.add('Float', RenderFloat())
         renderer.add('Caption', RenderCaption())
@@ -106,17 +101,21 @@ class FloatExtension(components.Extension):
         renderer.add('ModalLinkTitle', RenderModalLinkTitle())
         renderer.add('ModalLinkContent', RenderModalLinkContent())
 
-    def preTokenize(self, ast, page, meta, reader):
-        """Reset float counters."""
-        FloatExtension.COUNTS.clear()
+    def initMetaData(self, page, meta):
+        meta.initData('counts', collections.defaultdict(int))
 
     def postTokenize(self, ast, page, meta, reader):
         """Set float number for each counter."""
         for node in anytree.PreOrderIter(ast, filter_=lambda n: n.name == 'Caption'):
             prefix = node.get('prefix', None)
-            if prefix:
-                FloatExtension.COUNTS[prefix] += 1
-                node.set('number', FloatExtension.COUNTS[prefix])
+            if prefix is not None:
+                meta.getData('counts')[prefix] += 1
+                node['number'] = meta.getData('counts')[prefix]
+            key = node.get('key')
+            if key:
+                core.Shortcut(ast.root, key=key, link=u'#{}'.format(key),
+                              string=u'{} {}'.format(prefix.title(), node['number']))
+
 
 class RenderFloat(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use

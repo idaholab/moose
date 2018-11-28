@@ -26,7 +26,7 @@ class IncludeExtension(command.CommandExtension):
         self.addCommand(reader, IncludeCommand())
 
     def initMetaData(self, page, meta):
-        meta.initData('dependencies', set)
+        meta.initData('dependencies', set())
 
     def postTokenize(self, ast, page, meta, reader):
         meta.getData('dependencies').update(self.__dependencies)
