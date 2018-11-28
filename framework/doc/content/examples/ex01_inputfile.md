@@ -145,12 +145,13 @@ make -j8
 ./ex01-opt -i ex01.i
 ```
 
-This will generate the results file, out.e, as shown in Figure 2. This file may be viewed using
+This will generate the results file, out.e, as shown in [example-1-results]. This file may be viewed using
 Peacock or an external application that supports the Exodus II format (e.g., Paraview).
 
 <br>
 
 !media large_media/examples/ex01_results.png
+       id=example-1-results
        caption= Example 1 Results
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
@@ -171,6 +172,5 @@ implement your own physics, you will need to understand the following:
 
 - [Finite Element Methods](http://mooseframework.org/wiki/MooseTraining/FEM/) and the generating
   the "weak" form of for PDEs
-- [C++](utilities/c++/index.md) and object-oriented design
+- [C++](help/c++/index.md) and object-oriented design
 - [The Anatomy of a MOOSE Object](http://mooseframework.org/wiki/MooseTraining/MooseObject/)
-

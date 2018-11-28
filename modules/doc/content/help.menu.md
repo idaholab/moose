@@ -14,7 +14,7 @@
 - [Git](git.md)
 - [Developer Tools](help/development/index.md)
 - [Finite Element Concepts](finite_element_concepts/index.md)
-- [C++ Fundamentals](utilities/c++/index.md)
+- [C++ Fundamentals](help/c++/index.md)
 - [INL HPC Connectivity](help/inlhpcconnectivity.md)
 
 !col-end!

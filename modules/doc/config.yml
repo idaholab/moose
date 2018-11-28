@@ -1,6 +1,6 @@
 Content:
-    - framework/doc/content
     - modules/doc/content
+    - framework/doc/content
     - modules/chemical_reactions/doc/content
     - modules/contact/doc/content
     - modules/fluid_properties/doc/content
