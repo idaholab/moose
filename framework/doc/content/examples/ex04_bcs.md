@@ -27,18 +27,14 @@ examples:
 Running the `dirichlet_bc.i` file should give you results like this for the 'u' and 'v' variables
 in our coupled system:
 
-!media large_media/examples/ex04_bc_01.png
-       caption=v
-       style=width:50%;
-       caption=solution for u
+!media large_media/examples/ex04_bcs/dirichlet_convected.png
+       style=width:50%;display:inline-flex;margin-left:0%;
 
-!media large_media/examples/ex04_bc_02.png
-       style=width:50%;
-       caption=solution for v (TODO: fix legend)
+!media large_media/examples/ex04_bcs/dirichlet_diffused.png
+       style=width:50%;display:inline-flex;margin-left:0%;
 
-!media large_media/examples/ex04_bc_03.png
-       style=width:30%;
-       caption=TODO: regenerate higher quality with fixed legend
+!media large_media/examples/ex04_bcs/dirichlet_xsec.svg
+       style=width:60%;margin-left:auto;margin-right:auto;
 
 ## Coupled Neumann
 
@@ -53,8 +49,18 @@ And the residual calculation is obviously a bit different:
 
 !listing examples/ex04_bcs/src/bcs/CoupledNeumannBC.C re=Real\sCoupledNeumannBC::compute.*$ max-height=10000px
 
-This boundary condition class is used in the file `neumann_bc.i`.  Running this file should
-generate results along the lines of those shown above.
+This boundary condition class is used in the file `neumann_bc.i`.  Running this file will generate
+results that look like this:
+
+!media large_media/examples/ex04_bcs/neumann_convected.png
+       style=width:50%;display:inline-flex;margin-left:0%;
+
+!media large_media/examples/ex04_bcs/neumann_diffused.png
+       style=width:50%;display:inline-flex;margin-left:0%;
+
+!media large_media/examples/ex04_bcs/neumann_xsec.svg
+       style=width:60%;margin-left:auto;margin-right:auto;
+
 
 ## Periodic
 
