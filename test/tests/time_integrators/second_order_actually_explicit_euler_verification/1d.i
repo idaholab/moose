@@ -15,12 +15,12 @@
 
   [./forcing_fn]
     type = ParsedFunction
-    value = x
+    value = -4*pi^2*sin(2*pi*t)*x+2*pi*cos(2*pi*t)*x
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*x
+    value = sin(2*pi*t)*x
   [../]
 []
 
@@ -32,15 +32,20 @@
     [./InitialCondition]
       type = FunctionIC
       function = ic
+      function_dot = 2*pi*x
     [../]
   [../]
 []
 
 [Kernels]
-  [./ie]
+  [./u_dotdot]
+    type = SecondTimeDerivative
+    variable = u
+  [../]
+
+  [./u_dot]
     type = TimeDerivative
     variable = u
-    lumping = true
   [../]
 
   [./diff]
@@ -61,6 +66,8 @@
     variable = u
     boundary = '0 1'
     function = exact_fn
+    extra_matrix_tags = 'secondtime'
+    implicit = false
   [../]
 []
 
@@ -74,14 +81,10 @@
 
 [Executioner]
   type = Transient
-
-  start_time = 0.0
-  num_steps = 20
-  dt = 0.00005
-
+  num_steps = 10
+  dt = 5e-5
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
-    solve_type = lumped
   [../]
 []
 

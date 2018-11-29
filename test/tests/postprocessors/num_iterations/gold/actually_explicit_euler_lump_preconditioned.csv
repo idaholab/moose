@@ -1,4 +1,4 @@
 time,num_linear_iterations,num_nonlinear_iterations
 0,0,0
-0.0001,10,0
-0.0002,10,0
+0.0001,9,0
+0.0002,9,0

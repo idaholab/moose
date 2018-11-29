@@ -167,6 +167,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   // The time matrix tag is not normally used - but must be added to the system
   // in case it is so that objects can have 'time' in their matrix tags by default
   _fe_problem.addMatrixTag("TIME");
+  _fe_problem.addMatrixTag("SECONDTIME");
 
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
 }

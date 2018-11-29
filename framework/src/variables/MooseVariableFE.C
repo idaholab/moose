@@ -785,6 +785,8 @@ MooseVariableFE<OutputType>::prepareIC()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
   _dof_values.resize(_dof_indices.size());
+  if (_subproblem.isTransient())
+    _dof_values_dot.resize(_dof_indices.size());
 
   unsigned int nqp = _qrule->n_points();
   _u.resize(nqp);
@@ -859,6 +861,44 @@ MooseVariableFE<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned 
   // Update the qp values as well
   for (unsigned int qp = 0; qp < _u.size(); qp++)
     _u[qp] = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::setNodalValueDot(const DenseVector<Number> & values)
+{
+  for (unsigned int i = 0; i < values.size(); i++)
+    _dof_values_dot[i] = values(i);
+
+  for (unsigned int qp = 0; qp < _u_dot.size(); qp++)
+  {
+    _u_dot[qp] = 0;
+    for (unsigned int i = 0; i < _dof_values_dot.size(); i++)
+      _u_dot[qp] += _phi[i][qp] * _dof_values_dot[i];
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::setNodalValueDot(OutputType value, unsigned int idx /* = 0*/)
+{
+  _dof_values_dot[idx] = value; // update variable nodal value
+
+  // Update the qp values as well
+  for (unsigned int qp = 0; qp < _u_dot.size(); qp++)
+    _u_dot[qp] = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::setNodalValueDot(RealVectorValue value, unsigned int idx /* = 0*/)
+{
+  for (decltype(idx) i = 0; i < LIBMESH_DIM; ++i, ++idx)
+    _dof_values_dot[idx] = value(i);
+
+  // Update the qp values as well
+  for (unsigned int qp = 0; qp < _u_dot.size(); qp++)
+    _u_dot[qp] = value;
 }
 
 template <typename OutputType>

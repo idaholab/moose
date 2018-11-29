@@ -72,6 +72,14 @@ public:
   virtual GradientType gradient(const Point & /*p*/) { return GradientType(); };
 
   /**
+   * The first time derivative of value of the variable at a point.
+   *
+   * This is optional. Note that you want to define this if you have a second order time derivative
+   * in your PDE
+   */
+  virtual ValueType valueDot(const Point & /*p*/) { return 0.0; };
+
+  /**
    * set the temporary solution vector for node projections of C0 variables
    */
   void setCZeroVertices();
@@ -127,6 +135,8 @@ protected:
   DenseVector<Number> _Fe;
   /// Linear solution vector
   DenseVector<Number> _Ue;
+  /// Linear solution time derivative vector
+  DenseVector<Number> _UDote;
 
   /// The finite element type for the IC variable
   const FEType & _fe_type;

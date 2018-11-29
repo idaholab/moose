@@ -50,7 +50,13 @@ protected:
    */
   virtual RealGradient gradient(const Point & p) override;
 
+  /**
+   * The value of the first time derivative of the variable at a point.
+   */
+  virtual Real valueDot(const Point & p) override;
+
   Function & _func;
+  Function * _func_dot;
 };
 
 #endif // FUNCTIONIC_H

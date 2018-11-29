@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 3
+  ny = 3
 []
 
 [Variables]
@@ -45,6 +45,7 @@
 
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
+    # solve_type = lumped
   [../]
 []
 

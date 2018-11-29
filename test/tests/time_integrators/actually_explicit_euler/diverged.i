@@ -51,7 +51,7 @@
 
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
-    solve_type = lump_preconditioned
+    solve_type = consistent
   [../]
 []
 

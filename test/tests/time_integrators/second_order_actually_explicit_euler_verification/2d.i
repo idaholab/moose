@@ -1,26 +1,29 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 1
+  dim = 2
   xmin = -1
   xmax = 1
-  nx = 200
-  elem_type = EDGE2
+  ymin = -1
+  ymax = 1
+  nx = 3
+  ny = 3
+  elem_type = QUAD4
 []
 
 [Functions]
   [./ic]
     type = ParsedFunction
-    value = 0
+    value = x+y
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = x
+    value = -4*pi^2*cos(2*pi*t)*(x+y)-2*pi*sin(2*pi*t)*(x+y)
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*x
+    value = cos(2*pi*t)*(x+y)
   [../]
 []
 
@@ -37,10 +40,14 @@
 []
 
 [Kernels]
-  [./ie]
+  [./u_dotdot]
+    type = SecondTimeDerivative
+    variable = u
+  [../]
+
+  [./u_dot]
     type = TimeDerivative
     variable = u
-    lumping = true
   [../]
 
   [./diff]
@@ -59,8 +66,10 @@
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '0 1'
+    boundary = '0 1 2 3'
     function = exact_fn
+    extra_matrix_tags = 'secondtime'
+    implicit = false
   [../]
 []
 
@@ -76,12 +85,12 @@
   type = Transient
 
   start_time = 0.0
-  num_steps = 20
-  dt = 0.00005
+  end_time = 5e-4
+  dt = 5e-5
+  l_tol = 1e-12
 
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
-    solve_type = lumped
   [../]
 []
 

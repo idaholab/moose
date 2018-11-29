@@ -2242,6 +2242,10 @@ FEProblemBase::projectSolution()
   // Need to close the solution vector here so that boundary ICs take precendence
   _nl->solution().close();
   _aux->solution().close();
+  if (_nl->solutionUDot())
+    _nl->solutionUDot()->close();
+  if (_aux->solutionUDot())
+    _aux->solutionUDot()->close();
 
   // now run boundary-restricted initial conditions
   ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -2250,6 +2254,10 @@ FEProblemBase::projectSolution()
 
   _nl->solution().close();
   _aux->solution().close();
+  if (_nl->solutionUDot())
+    _nl->solutionUDot()->close();
+  if (_aux->solutionUDot())
+    _aux->solutionUDot()->close();
 
   // Also, load values into the SCALAR dofs
   // Note: We assume that all SCALAR dofs are on the
@@ -2280,6 +2288,23 @@ FEProblemBase::projectSolution()
 
   _aux->solution().close();
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+
+  if (_nl->solutionUDot())
+  {
+    _nl->solutionUDot()->close();
+    _nl->solutionUDot()->localize(*_nl->system().current_local_solution,
+                                  _nl->dofMap().get_send_list());
+  }
+
+  if (_aux->solutionUDot())
+  {
+    _aux->solutionUDot()->close();
+    _aux->solutionUDot()->localize(*_aux->system().current_local_solution,
+                                   _aux->dofMap().get_send_list());
+  }
+
+  // propagate the projected initial condition to libmesh system
+  _nl->update();
 }
 
 std::shared_ptr<Material>
@@ -2961,11 +2986,15 @@ FEProblemBase::computeIndicators()
     ComputeIndicatorThread cit(*this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
     _aux->solution().close();
+    if (_aux->solutionUDot())
+      _aux->solutionUDot()->close();
     _aux->update();
 
     ComputeIndicatorThread finalize_cit(*this, true);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
     _aux->solution().close();
+    if (_aux->solutionUDot())
+      _aux->solutionUDot()->close();
     _aux->update();
   }
 }
@@ -2999,6 +3028,8 @@ FEProblemBase::computeMarkers()
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cmt);
 
     _aux->solution().close();
+    if (_aux->solutionUDot())
+      _aux->solutionUDot()->close();
     _aux->update();
   }
 }
@@ -4191,6 +4222,8 @@ FEProblemBase::checkExceptionAndStopSolve()
 
     // and close Aux system (we MUST do this here; see #11525)
     _aux->solution().close();
+    if (_aux->solutionUDot())
+      _aux->solutionUDot()->close();
 
     // We've handled this exception, so we no longer have one.
     _has_exception = false;

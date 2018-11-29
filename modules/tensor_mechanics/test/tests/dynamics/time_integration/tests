@@ -38,4 +38,16 @@
     issues = "#12185"
     prereq = "hht"
   [../]
+  [./explicit_ti]
+    type = 'Exodiff'
+    input = 'explicit_test.i'
+    exodiff = 'explicit_test_out.e'
+    abs_zero = 1e-09
+    compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall accurately predict the dynamic response"
+                  " of a linear elastic system using explicit time integration"
+    design = "Dynamics.md"
+    issues = "#9726"
+  [../]
 []

@@ -18,6 +18,7 @@ validParams<FunctionIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<FunctionName>("function", "The initial condition function.");
+  params.addParam<FunctionName>("function_dot", "The initial time derivative function.");
 
   params.addClassDescription("An initial condition that uses a normal function of x, y, z to "
                              "produce values (and optionally gradients) for a field variable.");
@@ -25,7 +26,9 @@ validParams<FunctionIC>()
 }
 
 FunctionIC::FunctionIC(const InputParameters & parameters)
-  : InitialCondition(parameters), _func(getFunction("function"))
+  : InitialCondition(parameters),
+    _func(getFunction("function")),
+    _func_dot(isParamValid("function_dot") ? &getFunction("function_dot") : NULL)
 {
 }
 
@@ -39,4 +42,13 @@ RealGradient
 FunctionIC::gradient(const Point & p)
 {
   return _func.gradient(_t, p);
+}
+
+Real
+FunctionIC::valueDot(const Point & p)
+{
+  if (!_func_dot)
+    return 0.0;
+
+  return _func_dot->value(_t, p);
 }

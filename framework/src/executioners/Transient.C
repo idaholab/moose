@@ -885,6 +885,9 @@ Transient::setupTimeIntegrator()
       case TI_NEWMARK_BETA:
         ti_str = "NewmarkBeta";
         break;
+      case TI_ACTUALLY_EXPLICIT_EULER:
+        ti_str = "ActuallyExplicitEuler";
+        break;
       default:
         mooseError("Unknown scheme: ", _time_scheme);
         break;

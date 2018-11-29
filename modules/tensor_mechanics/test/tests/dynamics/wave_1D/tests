@@ -23,6 +23,17 @@
                    " in a linear elastic material with no numerical or structural"
                    " damping."
   [../]
+  [./explicit]
+    type = 'Exodiff'
+    input = 'wave_explicit.i'
+    exodiff = 'wave_explicit_out.e'
+    abs_zero = 1e-09
+    compiler = 'GCC CLANG'
+
+    requirement = "The mechanics system shall correctly predict 1D wave propagation"
+                   " using an explicit time integration"
+    issues = "#9726"
+  [../]
   [./rayleigh_hht]
     type = 'Exodiff'
     input = 'wave_rayleigh_hht.i'

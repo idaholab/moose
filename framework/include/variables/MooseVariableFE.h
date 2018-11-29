@@ -651,6 +651,8 @@ public:
   virtual void computeNeighborValues() override;
   void setNodalValue(OutputType value, unsigned int idx = 0);
   void setNodalValue(const DenseVector<Number> & value) override;
+  void setNodalValueDot(OutputType value, unsigned int idx = 0);
+  void setNodalValueDot(const DenseVector<Number> & value);
   Number getNodalValue(const Node & node) override;
   Number getNodalValueOld(const Node & node) override;
   Number getNodalValueOlder(const Node & node) override;

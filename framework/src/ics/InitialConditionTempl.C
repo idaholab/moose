@@ -118,6 +118,10 @@ InitialConditionTempl<T>::compute()
   _Ue.resize(n_dofs);
   _Ue.zero();
 
+  // Zero the interpolated time derivatives
+  _UDote.resize(n_dofs);
+  _UDote.zero();
+
   // In general, we need a series of
   // projections to ensure a unique and continuous
   // solution.  We start by interpolating nodes, then
@@ -254,6 +258,20 @@ InitialConditionTempl<T>::compute()
     }
     _var.setNodalValue(_Ue);
   }
+
+  // Set solution time derivative if requested
+  if (_var.sys().solutionUDot())
+  {
+    NumericVector<Number> & solutionDot = *_var.sys().solutionUDot();
+    // Lock the new_vector since it is shared among threads.
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+
+      for (unsigned int i = 0; i < n_dofs; i++)
+        solutionDot.set(_dof_indices[i], _UDote(i));
+      _var.setNodalValueDot(_UDote);
+    }
+  }
 }
 
 template <typename T>
@@ -267,6 +285,8 @@ InitialConditionTempl<T>::setCZeroVertices()
   _current_node = _current_elem->node_ptr(_n);
   _Ue(_current_dof) = value(*_current_node);
   _dof_is_fixed[_current_dof] = true;
+  if (_var.sys().solutionUDot())
+    _UDote(_current_dof) = valueDot(*_current_node);
   _current_dof++;
 }
 
@@ -277,10 +297,13 @@ InitialConditionTempl<RealVectorValue>::setCZeroVertices()
   _qp = _n;
   _current_node = _current_elem->node_ptr(_n);
   auto point_value = value(*_current_node);
+  auto point_value_dot = valueDot(*_current_node);
   for (decltype(_nc) i = 0; i < _nc; ++i)
   {
     _Ue(_current_dof) = point_value(i);
     _dof_is_fixed[_current_dof] = true;
+    if (_var.sys().solutionUDot())
+      _UDote(_current_dof) = point_value_dot(i);
     _current_dof++;
   }
 }
@@ -294,6 +317,8 @@ InitialConditionTempl<T>::setHermiteVertices()
   _current_node = _current_elem->node_ptr(_n);
   _Ue(_current_dof) = value(*_current_node);
   _dof_is_fixed[_current_dof] = true;
+  if (_var.sys().solutionUDot())
+    _UDote(_current_dof) = valueDot(*_current_node);
   _current_dof++;
   Gradient grad = gradient(*_current_node);
   // x derivative
@@ -379,6 +404,8 @@ InitialConditionTempl<T>::setOtherCOneVertices()
   _current_node = _current_elem->node_ptr(_n);
   _Ue(_current_dof) = value(*_current_node);
   _dof_is_fixed[_current_dof] = true;
+  if (_var.sys().solutionUDot())
+    _UDote(_current_dof) = valueDot(*_current_node);
   _current_dof++;
   Gradient grad = gradient(*_current_node);
   for (unsigned int i = 0; i != _dim; ++i)
