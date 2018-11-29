@@ -28,12 +28,9 @@ class Meta(object):
     def __init__(self):
         self.__data = dict()
 
-    def initData(self, key, dtype=None):
+    def initData(self, key, default=None):
         """Initialize dict key with the supplied type."""
-        if dtype is not None:
-            self.__data[key] = dtype()
-        else:
-            self.__data[key] = None
+        self.__data[key] = default
 
     def getData(self, key):
         """Retrieve data for the supplied key."""

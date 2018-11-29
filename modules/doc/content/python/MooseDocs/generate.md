@@ -62,10 +62,23 @@ make -j16 # 16 should be replaced by the number of cores on your system
 ```
 
 If you are writing a documentation page for a new class with MOOSE or the modules, you can use the
-MooseDocs executable to build a documentation stub for your new class:
+MooseDocs executable to build a documentation stub for your new class. However, the executable
+for the module must be used. For example, if you add a new class the the tensor mechanics
+module:
 
 ```bash
-cd ~/projects/moose/modules/doc
+cd ~/projects/moose/modules/tensor_mechanics
+make -j12
+cd doc
+./moosedocs.py check --generate
+```
+
+To generate pages for the framework, the moose test application can be used as follows.
+
+```bash
+cd ~/projects/moose/test
+make -j12
+cd doc
 ./moosedocs.py check --generate
 ```
 
@@ -90,6 +103,14 @@ Once the server is running, the markdown files within the repository may be modi
 changes are saved, the local server will automatically update the content.
 The content added or modified should follow the
 [Standards for Documentation Pages](MooseDocs/standards.md) guidelines.
+
+## Media
+
+In general, media files should be placed within the `content/media` directory within the
+framework or module directories. However, if a large file (>2MB), such as a movie, is needed then
+the "large media" repository should be used. Within MOOSE there is folder, `large_media`, which
+is a submodule. The large file should be added to this repository and the submodule should be
+updated in MOOSE to reflect this change.
 
 ## Requirement, Design, and Issues
 

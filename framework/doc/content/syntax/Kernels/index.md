@@ -32,7 +32,7 @@ residual and Jacobian values in the above mentioned functions:
 
 To create a custom kernel, you can follow the pattern of the [`Diffusion`](/Diffusion.md) kernel
 implemented and included in the MOOSE framework.  Additionally,
-[Example 2](examples/custom_kernel.md) provides a step-by-step overview of creating your own custom
+[Example 2](examples/custom_kernel.md optional=True) in MOOSE provides a step-by-step overview of creating your own custom
 kernel.
 
 The strong-form of the diffusion equations is defined on a 3-D domain $\Omega$ as: find $u$ such

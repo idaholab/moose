@@ -1,20 +1,20 @@
 Content:
-    stork:
-        root_dir: doc/content
+    Stork:
+        root_dir: ${ROOT_DIR}/doc/content
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
+            - js/*
+            - css/*
             - contrib/**
-            - css/**
-            - js/**
+            - media/**
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: Stork
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
         includes:
             - include

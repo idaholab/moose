@@ -160,3 +160,19 @@ class NodeBase(anytree.NodeMixin):
         for child in self.children:
             out += child.write()
         return out
+
+    @property
+    def previous(self):
+        """Return the previous sibling, if it exists."""
+        if self.parent is not None:
+            idx = self.parent.children.index(self)
+            if idx > 0:
+                return self.parent.children[idx-1]
+
+    @property
+    def next(self):
+        """Return the next sibling, if it exists."""
+        if self.parent is not None:
+            idx = self.parent.children.index(self)
+            if idx < len(self.parent.children) - 1:
+                return self.parent.children[idx+1]

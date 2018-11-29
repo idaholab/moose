@@ -315,12 +315,14 @@ def text_unidiff(out_content, gold_content, out_fname=None, gold_fname=None, col
         num_lines[int]: The number of lines to include with the diff (default: 3).
 
     """
-    diff = []
-    for line in difflib.unified_diff(gold_content.splitlines(True),
-                                     out_content.splitlines(True),
-                                     fromfile=gold_fname,
-                                     tofile=out_fname, n=num_lines):
 
+    lines = difflib.unified_diff(gold_content.splitlines(True),
+                                 out_content.splitlines(True),
+                                 fromfile=gold_fname,
+                                 tofile=out_fname, n=num_lines)
+
+    diff = []
+    for line in list(lines):
         if color:
             if line.startswith('-'):
                 line = colorText(line, 'RED')
@@ -328,11 +330,9 @@ def text_unidiff(out_content, gold_content, out_fname=None, gold_fname=None, col
                 line = colorText(line, 'GREEN')
             elif line.startswith('@'):
                 line = colorText(line, 'CYAN')
-
-
         diff.append(line)
-    return ''.join(diff)
 
+    return ''.join(diff)
 
 def git_ls_files(working_dir=os.getcwd()):
     """

@@ -55,6 +55,7 @@
                 {
                     "attributes": {
                         "bookmark": "", 
+                        "optional": false, 
                         "page": "core.md", 
                         "recursive": true
                     }, 
@@ -72,6 +73,7 @@
                 {
                     "attributes": {
                         "bookmark": "", 
+                        "optional": false, 
                         "page": "core.md", 
                         "recursive": true
                     }, 
@@ -339,6 +341,7 @@
                 {
                     "attributes": {
                         "bookmark": "single-level-lists", 
+                        "optional": false, 
                         "page": "core.md", 
                         "recursive": true
                     }, 
@@ -356,6 +359,7 @@
                 {
                     "attributes": {
                         "bookmark": "single-level-lists", 
+                        "optional": false, 
                         "page": "core.md", 
                         "recursive": true
                     }, 
@@ -410,7 +414,7 @@
             "attributes": {
                 "class": "", 
                 "id": "", 
-                "level": 1, 
+                "level": 2, 
                 "recursive": true, 
                 "style": ""
             }, 
@@ -473,54 +477,54 @@
                         }
                     ], 
                     "name": "Link"
-                }, 
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true
+            }, 
+            "children": [
                 {
                     "attributes": {
-                        "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "bottom": false, 
-                        "close": true, 
                         "recursive": true
                     }, 
                     "children": [
                         {
                             "attributes": {
+                                "content": "/framework/src/controls/RealFunctionControl.C", 
                                 "recursive": true
                             }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "content": "/framework/src/controls/RealFunctionControl.C", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "String"
-                                }
-                            ], 
-                            "name": "ModalLinkTitle"
-                        }, 
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "content": "// This file is part of the MOOSE framework\n// https://www.mooseframework.org\n//\n// All rights reserved, see COPYRIGHT for full restrictions\n// https://github.com/idaholab/moose/blob/master/COPYRIGHT\n//\n// Licensed under LGPL 2.1, please see LICENSE for details\n// https://www.gnu.org/licenses/lgpl-2.1.html\n\n// MOOSE includes\n#include \"RealFunctionControl.h\"\n#include \"Function.h\"\n\nregisterMooseObject(\"MooseApp\", RealFunctionControl);\n\ntemplate <>\nInputParameters\nvalidParams<RealFunctionControl>()\n{\n  InputParameters params = validParams<Control>();\n  params.addClassDescription(\n      \"Sets the value of a 'Real' input parameters to the value of a provided function.\");\n  params.addRequiredParam<FunctionName>(\n      \"function\", \"The function to use for controlling the specified parameter.\");\n  params.addRequiredParam<std::string>(\n      \"parameter\",\n      \"The input parameter(s) to control. Specify a single parameter name and all \"\n      \"parameters in all objects matching the name will be updated\");\n  return params;\n}\n\nRealFunctionControl::RealFunctionControl(const InputParameters & parameters)\n  : Control(parameters), _function(getFunction(\"function\"))\n{\n}\n\nvoid\nRealFunctionControl::execute()\n{\n  Real value = _function.value(_t, Point());\n  setControllableValue<Real>(\"parameter\", value);\n}\n", 
-                                        "escape": true, 
-                                        "language": "cpp", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Code"
-                                }
-                            ], 
-                            "name": "ModalLinkContent"
+                            "children": [], 
+                            "name": "String"
                         }
                     ], 
-                    "name": "ModalLink"
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "// This file is part of the MOOSE framework\n// https://www.mooseframework.org\n//\n// All rights reserved, see COPYRIGHT for full restrictions\n// https://github.com/idaholab/moose/blob/master/COPYRIGHT\n//\n// Licensed under LGPL 2.1, please see LICENSE for details\n// https://www.gnu.org/licenses/lgpl-2.1.html\n\n// MOOSE includes\n#include \"RealFunctionControl.h\"\n#include \"Function.h\"\n\nregisterMooseObject(\"MooseApp\", RealFunctionControl);\n\ntemplate <>\nInputParameters\nvalidParams<RealFunctionControl>()\n{\n  InputParameters params = validParams<Control>();\n  params.addClassDescription(\n      \"Sets the value of a 'Real' input parameters to the value of a provided function.\");\n  params.addRequiredParam<FunctionName>(\n      \"function\", \"The function to use for controlling the specified parameter.\");\n  params.addRequiredParam<std::string>(\n      \"parameter\",\n      \"The input parameter(s) to control. Specify a single parameter name and all \"\n      \"parameters in all objects matching the name will be updated\");\n  return params;\n}\n\nRealFunctionControl::RealFunctionControl(const InputParameters & parameters)\n  : Control(parameters), _function(getFunction(\"function\"))\n{\n}\n\nvoid\nRealFunctionControl::execute()\n{\n  Real value = _function.value(_t, Point());\n  setControllableValue<Real>(\"parameter\", value);\n}\n", 
+                                "escape": true, 
+                                "language": "cpp", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
                 }
             ], 
-            "name": "Paragraph"
+            "name": "ModalLink"
         }, 
         {
             "attributes": {
@@ -561,51 +565,154 @@
                         }
                     ], 
                     "name": "Link"
-                }, 
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                "bottom": false, 
+                "close": true, 
+                "recursive": true
+            }, 
+            "children": [
                 {
                     "attributes": {
-                        "bookmark": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                        "bottom": false, 
-                        "close": true, 
                         "recursive": true
                     }, 
                     "children": [
                         {
                             "attributes": {
+                                "content": "/framework/src/controls/RealFunctionControl.C", 
                                 "recursive": true
                             }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "content": "/framework/src/controls/RealFunctionControl.C", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "String"
-                                }
-                            ], 
-                            "name": "ModalLinkTitle"
+                            "children": [], 
+                            "name": "String"
+                        }
+                    ], 
+                    "name": "ModalLinkTitle"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "// This file is part of the MOOSE framework\n// https://www.mooseframework.org\n//\n// All rights reserved, see COPYRIGHT for full restrictions\n// https://github.com/idaholab/moose/blob/master/COPYRIGHT\n//\n// Licensed under LGPL 2.1, please see LICENSE for details\n// https://www.gnu.org/licenses/lgpl-2.1.html\n\n// MOOSE includes\n#include \"RealFunctionControl.h\"\n#include \"Function.h\"\n\nregisterMooseObject(\"MooseApp\", RealFunctionControl);\n\ntemplate <>\nInputParameters\nvalidParams<RealFunctionControl>()\n{\n  InputParameters params = validParams<Control>();\n  params.addClassDescription(\n      \"Sets the value of a 'Real' input parameters to the value of a provided function.\");\n  params.addRequiredParam<FunctionName>(\n      \"function\", \"The function to use for controlling the specified parameter.\");\n  params.addRequiredParam<std::string>(\n      \"parameter\",\n      \"The input parameter(s) to control. Specify a single parameter name and all \"\n      \"parameters in all objects matching the name will be updated\");\n  return params;\n}\n\nRealFunctionControl::RealFunctionControl(const InputParameters & parameters)\n  : Control(parameters), _function(getFunction(\"function\"))\n{\n}\n\nvoid\nRealFunctionControl::execute()\n{\n  Real value = _function.value(_t, Point());\n  setControllableValue<Real>(\"parameter\", value);\n}\n", 
+                                "escape": true, 
+                                "language": "cpp", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Code"
+                        }
+                    ], 
+                    "name": "ModalLinkContent"
+                }
+            ], 
+            "name": "ModalLink"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 2, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "Optional Links"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Optional", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Links", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "", 
+                        "optional": true, 
+                        "page": "not_a_real_file_name.md", 
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "this", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
                         }, 
                         {
                             "attributes": {
+                                "count": 1, 
                                 "recursive": true
                             }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "content": "// This file is part of the MOOSE framework\n// https://www.mooseframework.org\n//\n// All rights reserved, see COPYRIGHT for full restrictions\n// https://github.com/idaholab/moose/blob/master/COPYRIGHT\n//\n// Licensed under LGPL 2.1, please see LICENSE for details\n// https://www.gnu.org/licenses/lgpl-2.1.html\n\n// MOOSE includes\n#include \"RealFunctionControl.h\"\n#include \"Function.h\"\n\nregisterMooseObject(\"MooseApp\", RealFunctionControl);\n\ntemplate <>\nInputParameters\nvalidParams<RealFunctionControl>()\n{\n  InputParameters params = validParams<Control>();\n  params.addClassDescription(\n      \"Sets the value of a 'Real' input parameters to the value of a provided function.\");\n  params.addRequiredParam<FunctionName>(\n      \"function\", \"The function to use for controlling the specified parameter.\");\n  params.addRequiredParam<std::string>(\n      \"parameter\",\n      \"The input parameter(s) to control. Specify a single parameter name and all \"\n      \"parameters in all objects matching the name will be updated\");\n  return params;\n}\n\nRealFunctionControl::RealFunctionControl(const InputParameters & parameters)\n  : Control(parameters), _function(getFunction(\"function\"))\n{\n}\n\nvoid\nRealFunctionControl::execute()\n{\n  Real value = _function.value(_t, Point());\n  setControllableValue<Real>(\"parameter\", value);\n}\n", 
-                                        "escape": true, 
-                                        "language": "cpp", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Code"
-                                }
-                            ], 
-                            "name": "ModalLinkContent"
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "is", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "optional", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
                         }
                     ], 
-                    "name": "ModalLink"
+                    "name": "AutoLink"
                 }, 
                 {
                     "attributes": {

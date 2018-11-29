@@ -76,7 +76,7 @@ def check(translator,
             app_syntax = ext.syntax
             break
 
-    if not extension.active:
+    if (extension is None) or (not extension.active):
         LOG.info("Syntax is disabled, skipping the check.")
         return 0
 

@@ -32,7 +32,7 @@
 !col-end!
 
 !col! class=s12 m6 l4
-## [MOOSEDocs](utilities/MooseDocs/index.md)
+## [MOOSEDocs](MooseDocs/index.md)
 
 - [MooseDocs/specification.md]
 - [MooseDocs/generate.md]
@@ -40,7 +40,7 @@
 
 ## Infrastructure
 
-- [Python](utilities/python/index.md)
+- [Python](python/index.md)
 - [Build System](/build_system.md)
 - [Test System](/test_system.md)
 - [Benchmarking](/performance_benchmarking.md)

@@ -1,7 +1,6 @@
 Content:
     - framework/doc/content
     - test/doc/content
-
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MooseTestApp

@@ -1,6 +1,5 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-
 # Modules System
 
 !syntax list /Modules objects=True actions=False subsystems=False

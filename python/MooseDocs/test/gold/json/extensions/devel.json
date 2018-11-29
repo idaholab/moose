@@ -202,24 +202,6 @@
         }, 
         {
             "attributes": {
-                "key": "markdown-example", 
-                "link": "#markdown-example", 
-                "recursive": true
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "content": "Example 1", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "String"
-                }
-            ], 
-            "name": "Shortcut"
-        }, 
-        {
-            "attributes": {
                 "class": "", 
                 "id": "markdown-example", 
                 "img": false, 
@@ -401,6 +383,24 @@
                 {
                     "attributes": {
                         "content": "Example 1", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "markdown-example", 
+                "link": "#markdown-example", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Example 2", 
                         "recursive": true
                     }, 
                     "children": [], 

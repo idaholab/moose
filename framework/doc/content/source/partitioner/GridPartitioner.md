@@ -8,7 +8,7 @@ Partitions the mesh by creating a grid in `x,y,z` and assigning each element of 
 
 This is an example of a `2x2` grid partitioning for use on `4` processors.
 
-!media media/grid_partitioner_example.png style=width:40% caption=2x2 `GridPartitioner` Example
+!media media/partitioner/grid_partitioner_example.png style=width:40% caption=2x2 `GridPartitioner` Example
 
 !alert warning
 The number of cells (`nx*ny*nz`) MUST be equal to the number of MPI processes you're attempting to use!

@@ -177,7 +177,7 @@ def main(options):
     # Disable slow extensions for --fast
     if options.fast:
         options.disable.append('appsyntax')
-       # options.disable.append('navigation')
+        options.disable.append('navigation')
 
     # Disable extensions based on command line arguments
     if options.disable:
@@ -193,7 +193,8 @@ def main(options):
 
     # Dump page tree
     if options.dump:
-        print translator.root
+        for page in translator.content:
+            print '{}: {}'.format(page.local, page.source)
         sys.exit()
 
     # Clean when --files is NOT used or when --clean is used with --files.

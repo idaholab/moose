@@ -144,7 +144,10 @@ def get_items(options):
     items = []
     if isinstance(options, list):
         for value in options:
-            items.append(dict(root_dir=value, content=None))
+            if isinstance(value, dict):
+                items.append(dict(value[value.keys()[0]]))
+            else:
+                items.append(dict(root_dir=value, content=None))
     elif isinstance(options, dict):
         for _, value in options.iteritems():
             content = value.get('content', None)

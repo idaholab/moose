@@ -14,7 +14,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Performance Benchmarking](/performance_benchmarking.md) - How to perform benchmarking
 
-[MooseUtils](/moose_utils.md) - General utilities used throughout the Framework and applications
+[MooseUtils](/MooseUtils.md) - General utilities used throughout the Framework and applications
 
 [Utils](utils/index.md) - General utilities used throughout the Framework and applications
 
@@ -29,5 +29,3 @@ These documentation pages are meant to be used by developers who are developing 
 [RelationshipManagers](/relationship_managers.md) - Telling MOOSE about extra geomatric or algebraic information needed in parallel
 
 [Moose-Wrapped Apps](/moose_wrapped_apps.md) - Coupling external codes to MOOSE
-
-

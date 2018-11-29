@@ -18,7 +18,7 @@ vector as `a` and the second as `b`, these options are as follows:
 | `less_than_equals`    | `a <= b`? |
 
 All tests use a "fuzzy" comparison; see the corresponding functions in
-[moose_utils.md].
+[MooseUtils.md].
 
 !syntax parameters /Postprocessors/VectorPostprocessorComparison
 

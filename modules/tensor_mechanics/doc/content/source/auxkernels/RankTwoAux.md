@@ -40,7 +40,7 @@ Results will have different quality based on the AuxVariable:
   purposes. Using higher order monomial variables in this way can produce smoother visualizations of results for a properly
   converged simulation.
 - +Nodal Lagrange+ Using an AuxVariable with `family = LAGRANGE` will result in a smooth nodal field of the material property,
-  constructed using [nodal patch recovery](nodal_patch_recovery.md).
+  constructed using [nodal patch recovery](nodal_patch_recovery.md optional=True).
   `patch_polynomial_order` is set to equal the order of the AuxVariable by default.
   Use this option for the best (smoothest, most accurate) results, but there is
   some additional computational cost. Furthermore, this method is suitable +only

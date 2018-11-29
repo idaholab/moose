@@ -70,7 +70,7 @@ class NavigationExtension(components.Extension):
 
     def initMetaData(self, page, meta):
         """Initialize the meta data to hold search index data."""
-        meta.initData('search', list)
+        meta.initData('search', list())
 
     def postTokenize(self, ast, page, meta, reader):
         """Capture the search results."""

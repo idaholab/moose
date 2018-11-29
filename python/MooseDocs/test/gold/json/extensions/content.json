@@ -830,6 +830,33 @@
                                 "class": "moose-source-item", 
                                 "recursive": true, 
                                 "tooltip": false, 
+                                "url": "gallery.json"
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "content": "gallery.md", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "String"
+                                }
+                            ], 
+                            "name": "Link"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "class": "moose-source-item", 
+                                "recursive": true, 
+                                "tooltip": false, 
                                 "url": "acronym.json"
                             }, 
                             "children": [

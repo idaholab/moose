@@ -43,7 +43,7 @@ through, but some of the important ones are:
   attempts to "recover" it and run until the end.  This is very rigorous testing that tests whether
   everything in your application can work with restart/recover.
 - `--opt` (The default) Builds an optimized executable suitable for running calculations.
-- `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems 
+- `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems
 - `--oprof` Not normally used. Can be used for "code profiling": running your code with a utility like oprof, gprof, vtune, etc.
 - `--pro` An alias to `--oprof`
 - `--devel` Something in-between opt and dbg. Attempts to be faster but also does some more run-time checks (asserts and mooseAsserts)
@@ -64,13 +64,13 @@ The one thing we do +not+ recommend is enforcing that the use of deprecated code
 like an error.  That is entirely too rigid of a requirement and impedes the normal flow of
 development.  Instead, developers should periodically run their tests with `--error-deprecated` to
 see if any of their tests are using deprecated code / parameters and then fix them up at that point.
-The MOOSE team is not responsible for fixing deprecations.
+The MOOSE team is not responsible for fixing deprecated code.
 
 ## Influential Environment Variables id=environment
 
 #### PYTHONPATH
 
-PYTHONPATH instructs python to include the designated paths while attempting to import python modules. +While normally not needing to be set+, sometimes it is necessary. For example, when testing the TestHarness (unittests). Another use-case, is when a developer wants to utilize the moosedocs system for creating [moose documentation](utilities/MooseDocs/index.md) (the website you are using right now).
+PYTHONPATH instructs python to include the designated paths while attempting to import python modules. +While normally not needing to be set+, sometimes it is necessary. For example, when testing the TestHarness (unittests). Another use-case, is when a developer wants to utilize the moosedocs system for creating [moose documentation](MooseDocs/index.md) (the website you are using right now).
 
 In either case, when you need to modify PYTHONPATH for MOOSE related development, you will almost always want to point it at `moose/python`.
 
@@ -89,11 +89,11 @@ Set the `METHOD` environment variable to one of the following to control which t
 | METHOD | devel | Something in-between opt and dbg |
 
 !alert note
-The methods described here can also be controled via command line arguments. See "More Options" above.
+The methods described here can also be controlled via command line arguments. See "More Options" above.
 
 #### MOOSE_TERM_FORMAT
 
-Set `MOOSE_TERM_FORMAT` to any or all of the following, as well as in a perticular order and case (restricted) to control where, what, and how the TestHarness prints that specific item:
+Set `MOOSE_TERM_FORMAT` to any or all of the following, as well as in a particular order and case (restricted) to control where, what, and how the TestHarness prints that specific item:
 
 | Variable Name | Argument | Usage |
 | - | - | - |
