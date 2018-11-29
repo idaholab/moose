@@ -7,11 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SIC_H
-#define SIC_H
+#ifndef THERMALSILICONCARBIDEMATERIAL_H
+#define THERMALSILICONCARBIDEMATERIAL_H
 
-#include "ThermalSolidProperties.h"
-#include "MooseEnum.h"
+#include "ThermalSolidPropertiesMaterial.h"
 
 class ThermalSiliconCarbideProperties;
 
@@ -21,7 +20,7 @@ InputParameters validParams<ThermalSiliconCarbideProperties>();
 /**
  * Monolithic silicon carbide properties as a function of temperature \cite snead.
  */
-class ThermalSiliconCarbideProperties : public ThermalSolidProperties
+class ThermalSiliconCarbideProperties : public ThermalSolidPropertiesMaterial
 {
 public:
   ThermalSiliconCarbideProperties(const InputParameters & parameters);
@@ -39,7 +38,7 @@ public:
   virtual Real molarMass() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature.
+   * Isobaric specific heat capacity as a function of temperature (K).
    * Correlation from \cite snead based on data in the range
    * 200 K $\le$ T $\le$ 2400 K. The uncertainty is $\pm$ 7%
    * in the range 200 K $\le$ T $\le$ 1000 K and $\pm$ 4% in the range
@@ -48,22 +47,12 @@ public:
    * agrees reasonably well with the constant value of 1300 J/kg$\dot$K used
    * by Wang, but is about double the value of 620 J/kg$\cdot$K used by
    * Hales et. al \cite hales.
-   * @param T temperature (K)
    * @return isobaric specific heat (J/kg$\cdot$K)
    */
-  virtual Real cp_from_T(Real T) const override;
+  virtual Real cp() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return cp isobaric specific heat (J/kg$\cdot$K)
-   * @return dcp_dT isobaric specific heat derivative with respect to temperature (J/kg$\cdot$K$^2$)
-   */
-  virtual void cp_from_T(Real T, Real & cp, Real & dcp_dT) const override;
-
-  /**
-   * Thermal conductivity as a function of temperature.
+   * Thermal conductivity as a function of temperature (K).
    * The thermal conductivity of silicon carbide depends strongly on
    * the grain size, the nature of the grain boundaries,
    * and the presence of additives such as those included in sintering. For
@@ -91,41 +80,28 @@ public:
    * at room temperature, while the PARFUME correlation is much lower. However, others
    * have measured 16.74, 50, and 62 W/m$\cdot$K \cite lopez_honorato, values
    * that are much closer to the PARFUME correlation predictions.
-   * @param T temperature (K)
    * @return thermal conductivity (W/m$\cdot$K)
    */
-  virtual Real k_from_T(Real T) const override;
+  virtual Real k() const override;
 
   /**
-   * Thermal conductivity as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return k thermal conductivity (W/m$\cdot$K)
-   * @return dk_dT thermal conductivity derivative with respect to temperature (W/m$\cdot$K$^2$)
-   */
-  virtual void k_from_T(Real T, Real & k, Real & dk_dT) const override;
-
-  /**
-   * Density as a function of temperature.
+   * Density as a function of temperature (K).
    * The density is assumed constant due to the very small thermal expansion
    * coefficient of silicon carbide. A default density value is obtained by
    * averaging the density for four different silicon carbide crystal structures
    * at room temperature. This constant density agrees well with the constant
    * densities of 3.2 g/cm$^2$ \cite xin_wang_thesis and 3.18 g/cm$^3$
    * \cite tecdoc1694 \cite sun used by others.
-   * @param T temperature (K)
    * @return rho density (kg/m$^3$)
    */
-  virtual Real rho_from_T(Real T) const override;
+  virtual Real rho() const override;
 
   /**
-   * Density as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return rho density (kg/m$^3$)
-   * @return drho_dT density derivative with respect to temperature (kg/m$^3$$\cdot$K)
+   * Thermal expansion coefficient computed as
+   * $-\frac{1}{\rho}\frac{\partial\rho}{\partial T}$
+   * @return thermal expansion coefficient (1/K)
    */
-  virtual void rho_from_T(Real T, Real & rho, Real & drho_dT) const override;
+  virtual Real beta() const override;
 
 protected:
   /// enumeration for selecting the thermal conductivity model
@@ -146,4 +122,4 @@ private:
   static const std::string _name;
 };
 
-#endif /* SIC_H */
+#endif /* THERMALSILICONCARBIDEMATERIAL_H */

@@ -7,12 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAPHITE_PROPERTIES_H
-#define GRAPHITE_PROPERTIES_H
+#ifndef THERMALGRAPHITEMATERIAL_H
+#define THERMALGRAPHITEMATERIAL_H
 
-#include "ThermalSolidProperties.h"
+#include "ThermalSolidPropertiesMaterial.h"
 #include "SolidPropertiesEnums.h"
-#include "MooseEnum.h"
 
 class ThermalGraphiteProperties;
 
@@ -35,7 +34,7 @@ InputParameters validParams<ThermalGraphiteProperties>();
  * is many orders of magnitude lower than atmospheric, and hence these properties
  * correspond only to solid graphite.
  */
-class ThermalGraphiteProperties : public ThermalSolidProperties
+class ThermalGraphiteProperties : public ThermalSolidPropertiesMaterial
 {
 public:
   ThermalGraphiteProperties(const InputParameters & parameters);
@@ -57,29 +56,18 @@ public:
   virtual Real molarMass() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature.
+   * Isobaric specific heat capacity as a function of temperature (K).
    * Correlation is from \cite butland and is valid over
    * 200 K $\le$ T $\le$ 3500. All coke-based graphites show approximately the same
    * specific heat, so it may be reasonable to use a single correlation to describe
    * with reasonable accuracy a wide range of grades of nuclear graphite
    * \cite baker.
-   * @param T temperature (K)
-   * @return isobaric specific heat (J/kg$\cdot$K)
+   * @return isobaric specific heat capacity (J/kg$\cdot$K)
    */
-  virtual Real cp_from_T(Real T) const override;
+  virtual Real cp() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return cp isobaric specific heat (J/kg$\cdot$K)
-   * @return dcp_dT isobaric specific heat derivative with respect to temperature (J/kg$\cdot$K$^2$)
-   *
-   */
-  virtual void cp_from_T(Real T, Real & cp, Real & dcp_dT) const override;
-
-  /**
-   * Thermal conductivity as a function of temperature.
+   * Thermal conductivity as a function of temperature (K).
    * More so than density and specific heat, thermal conductivity is extremely
    * dependent on material and manufacturing details, and no correlation is
    * provided in the review article by Baker \cite baker.
@@ -100,37 +88,17 @@ public:
    * R$^2$ value of this fit is 0.97620. The systematic uncertainty is $\pm$2.7% while
    * the random uncertainty is $\pm$1.5%. At low temperatures, this correlation
    * slightly underpredicts the GrafTech data \cite albers.
-   * @param T temperature (K)
    * @return thermal conductivity (W/m$\cdot$K)
    */
-  virtual Real k_from_T(Real T) const override;
+  virtual Real k() const override;
 
   /**
-   * Thermal conductivity as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return k thermal conductivity (W/m$\cdot$K)
-   * @return dk_dT thermal conductivity derivative with respect to temperature (W/m$\cdot$K$^2$)
-   */
-  virtual void k_from_T(Real T, Real & k, Real & dk_dT) const override;
-
-  /**
-   * Density as a function of temperature.
+   * Density as a function of temperature (K).
    * Given a room-temperature density, the thermal expansion coefficient is used
    * to compute the temperature dependence \cite baker.
-   * @param T temperature (K)
-   * @return rho density (kg/m$^3$)
+   * @return density (kg/m$^3$)
    */
-  virtual Real rho_from_T(Real T) const override;
-
-  /**
-   * Density as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return rho density (kg/m$^3$)
-   * @return drho_dT density derivative with respect to temperature (kg/m$^3$$\cdot$K)
-   */
-  virtual void rho_from_T(Real T, Real & rho, Real & drho_dT) const override;
+  virtual Real rho() const override;
 
   /**
    * Thermal expansion coefficient as a function of temperature.
@@ -143,20 +111,18 @@ public:
    * range, which may give inaccurate densities at higher temperatures. However,
    * the very small variation of density with temperature indicates that despite this
    * error, the variation of density is not very significant anyways.
-   * @param T temperature (K)
-   * @return average thermal expansion coefficient from 20 $\degree$ C to temperature T (1/K)
+   * @return thermal expansion coefficient (1/K)
    */
-  virtual Real beta_from_T(Real T) const override;
+  virtual Real beta() const override;
 
   /**
-   * Total integrated emissivity as a function of temperature.
+   * Surface emissivity (total, integrated) as a function of temperature (K).
    * The correlations available from \cite baker represent integrated
    * emissivities over 0.2 to 10 $\mu$ for AUC type graphite. Alternatively,
    * a user-specified constant value may ne specified.
-   * @param T temperature (K)
-   * @return emissivity (unitless)
+   * @return surface emissivity (unitless)
    */
-  virtual Real emissivity_from_T(Real T) const override;
+  virtual Real surface_emissivity() const override;
 
 protected:
   /**
@@ -187,4 +153,4 @@ private:
   static const std::string _name;
 };
 
-#endif /* GRAPHITE_PROPERTIES_H */
+#endif /* THERMALGRAPHITEMATERIAL_H */

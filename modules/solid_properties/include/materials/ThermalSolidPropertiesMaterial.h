@@ -11,7 +11,6 @@
 #define THERMALSOLIDPROPERTIESMATERIAL_H
 
 #include "SolidPropertiesMaterial.h"
-#include "ThermalSolidProperties.h"
 
 class ThermalSolidPropertiesMaterial;
 
@@ -28,7 +27,8 @@ public:
   ThermalSolidPropertiesMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  /// Compute properties at quadrature point
+  virtual void computeQpProperties() override;
 
   /// Temperature
   const VariableValue & _temperature;
@@ -41,9 +41,6 @@ protected:
 
   /// Density
   MaterialProperty<Real> & _rho;
-
-  /// Solid properties UserObject
-  const ThermalSolidProperties & _sp;
 };
 
 #endif /* THERMALSOLIDPROPERTIESMATERIAL_H */

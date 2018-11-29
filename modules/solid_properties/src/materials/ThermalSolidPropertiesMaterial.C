@@ -9,16 +9,13 @@
 
 #include "ThermalSolidPropertiesMaterial.h"
 
-registerMooseObject("SolidPropertiesApp", ThermalSolidPropertiesMaterial);
-
 template <>
 InputParameters
 validParams<ThermalSolidPropertiesMaterial>()
 {
   InputParameters params = validParams<SolidPropertiesMaterial>();
-  params.addRequiredCoupledVar("temperature", "Temperature");
-  params.addRequiredParam<UserObjectName>("sp", "The name of the user object for solid properties");
   params.addClassDescription("Material providing solid thermal properties");
+  params.addRequiredCoupledVar("temperature", "Temperature");
   return params;
 }
 
@@ -27,16 +24,14 @@ ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParame
     _temperature(coupledValue("temperature")),
     _cp(declareProperty<Real>("cp_solid")),
     _k(declareProperty<Real>("k_solid")),
-    _rho(declareProperty<Real>("rho_solid")),
-
-    _sp(getUserObject<ThermalSolidProperties>("sp"))
+    _rho(declareProperty<Real>("rho_solid"))
 {
 }
 
 void
 ThermalSolidPropertiesMaterial::computeQpProperties()
 {
-  _cp[_qp] = _sp.cp_from_T(_temperature[_qp]);
-  _k[_qp] = _sp.k_from_T(_temperature[_qp]);
-  _rho[_qp] = _sp.rho_from_T(_temperature[_qp]);
+  _cp[_qp] = cp();
+  _k[_qp] = k();
+  _rho[_qp] = rho();
 }

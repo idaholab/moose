@@ -18,8 +18,8 @@ template <>
 InputParameters
 validParams<ThermalStainlessSteel316Properties>()
 {
-  InputParameters params = validParams<ThermalSolidProperties>();
-  params.addClassDescription("Userobject defining stainless steel 316 thermal "
+  InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
+  params.addClassDescription("ThermalSolidPropertiesMaterial defining stainless steel 316 thermal "
                              "properties.");
 
   params.addParam<MooseEnum>(
@@ -31,9 +31,8 @@ validParams<ThermalStainlessSteel316Properties>()
   return params;
 }
 
-ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(
-    const InputParameters & parameters)
-  : ThermalSolidProperties(parameters),
+ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(const InputParameters & parameters)
+  : ThermalSolidPropertiesMaterial(parameters),
     _surface(getParam<MooseEnum>("surface").getEnum<surface::SurfaceEnum>()),
     _constant_emissivity(parameters.isParamSetByUser("emissivity") ? true : false),
     _emissivity(getParam<Real>("emissivity"))
@@ -53,45 +52,35 @@ ThermalStainlessSteel316Properties::molarMass() const
 }
 
 Real
-ThermalStainlessSteel316Properties::cp_from_T(Real T) const
+ThermalStainlessSteel316Properties::cp() const
 {
-  return 0.1816 * T + 428.46;
-}
-
-void
-ThermalStainlessSteel316Properties::cp_from_T(Real T, Real & cp, Real & dcp_dT) const
-{
-  cp = cp_from_T(T);
-  dcp_dT = 0.1816;
+  return 0.1816 * _temperature[_qp] + 428.46;
+  //   dcp_dT = 0.1816;
 }
 
 Real
-ThermalStainlessSteel316Properties::k_from_T(Real T) const
+ThermalStainlessSteel316Properties::k() const
 {
-  return -7.301e-6 * T * T + 0.02716 * T + 6.308;
-}
-
-void
-ThermalStainlessSteel316Properties::k_from_T(Real T, Real & k, Real & dk_dT) const
-{
-  k = k_from_T(T);
-  dk_dT = -7.301e-6 * 2.0 * T + 0.02716;
+  return -7.301e-6 * _temperature[_qp] * _temperature[_qp] + 0.02716 * _temperature[_qp] + 6.308;
+  //   dk_dT = -7.301e-6 * 2.0 * T + 0.02716;
 }
 
 Real
-ThermalStainlessSteel316Properties::rho_from_T(Real T) const
+ThermalStainlessSteel316Properties::rho() const
 {
-  return -4.454e-5 * T * T - 0.4297 * T + 8089.4;
+  return -4.454e-5 * _temperature[_qp] * _temperature[_qp] - 0.4297 * _temperature[_qp] + 8089.4;
+  //   drho_dT = -4.454e-5 * 2.0 * T - 0.4297;
 }
 
-void
-ThermalStainlessSteel316Properties::rho_from_T(Real T, Real & rho, Real & drho_dT) const
+Real
+ThermalStainlessSteel316Properties::beta() const
 {
-  rho = rho_from_T(T);
-  drho_dT = -4.454e-5 * 2.0 * T - 0.4297;
+  Real drho_dT = -4.454e-5 * 2.0 * _temperature[_qp] - 0.4297;
+  return -drho_dT / rho();
 }
 
-Real ThermalStainlessSteel316Properties::emissivity_from_T(Real /* T */) const
+Real
+ThermalStainlessSteel316Properties::surface_emissivity() const
 {
   if (_constant_emissivity)
     return _emissivity;

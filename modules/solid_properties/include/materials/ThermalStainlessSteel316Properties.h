@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef STAINLESS_STEEL_316_PROPERTIES_H
-#define STAINLESS_STEEL_316_PROPERTIES_H
+#ifndef THERMALSTAINLESSSTEEL316MATERIAL_H
+#define THERMALSTAINLESSSTEEL316MATERIAL_H
 
-#include "ThermalSolidProperties.h"
+#include "ThermalSolidPropertiesMaterial.h"
 #include "SolidPropertiesEnums.h"
 
 class ThermalStainlessSteel316Properties;
@@ -26,7 +26,7 @@ InputParameters validParams<ThermalStainlessSteel316Properties>();
  * is obtained form solid phase measurements and these properties should not
  * be used to compute transition or liquid regime properties.
  */
-class ThermalStainlessSteel316Properties : public ThermalSolidProperties
+class ThermalStainlessSteel316Properties : public ThermalSolidPropertiesMaterial
 {
 public:
   ThermalStainlessSteel316Properties(const InputParameters & parameters);
@@ -46,68 +46,44 @@ public:
   virtual Real molarMass() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature.
+   * Isobaric specific heat capacity as a function of temperature (K).
    * A curve fit is performed from data in \cite mills over
    * 25 $\degree$C $\le$ T $\le$ 1300 $\degree$C. The fit is obtained with an
    * R$^2$ value of 0.9926. Uncertainty on the tabulated data is $\pm$ 5%.
-   * @param T temperature (K)
-   * @return isobaric specific heat (J/kg$\cdot$K)
+   * @return isobaric specific heat capacity (J/kg$\cdot$K)
    */
-  virtual Real cp_from_T(Real T) const override;
+  virtual Real cp() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return cp isobaric specific heat (J/kg$\cdot$K)
-   * @return dcp_dT isobaric specific heat derivative with respect to temperature (J/kg$\cdot$K$^2$)
-   */
-  virtual void cp_from_T(Real T, Real & cp, Real & dcp_dT) const override;
-
-  /**
-   * Thermal conductivity as a function of temperature.
+   * Thermal conductivity as a function of temperature (K).
    * A curve fit is performed from data in \cite mills over
    * 25 $\degree$ C $\le$ T $\le$ 1300 $\degree$ C. The fit is obtained with an
    * R$^2$ value of 0.9960. Uncertainty on the tabulated data is $\pm$ 10%.
-   * @param T temperature (K)
    * @return thermal conductivity (W/m$\cdot$K)
    */
-  virtual Real k_from_T(Real T) const override;
+  virtual Real k() const override;
 
   /**
-   * Thermal conductivity as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return k thermal conductivity (W/m$\cdot$K)
-   * @return dk_dT thermal conductivity derivative with respect to temperature (W/m$\cdot$K$^2$)
-   */
-  virtual void k_from_T(Real T, Real & k, Real & dk_dT) const override;
-
-  /**
-   * Density as a function of temperature.
+   * Density as a function of temperature (K).
    * A curve fit is performed from data in \cite mills over
    * 25 $\degree$ C $\le$ T $\le$ 1300 $\degree$ C. The fit is obtained with
    * an R$^2$ value of 0.9995. Uncertainty on the tabulated data is $\pm$ 3%.
-   * @param T temperature (K)
    * @return density (kg/m$^3$)
    */
-  virtual Real rho_from_T(Real T) const override;
+  virtual Real rho() const override;
 
   /**
-   * Density as a function of temperature and its
-   * derivative with respect to temperature.
-   * @param T temperature (K)
-   * @return rho density (kg/m$^3$)
-   * @return drho_dT density derivative with respect to temperature (kg/m$^3$$\cdot$K)
+   * Thermal expansion coefficient computed as
+   * $-\frac{1}{\rho}\frac{\partial\rho}{\partial T}$
+   * @return thermal expansion coefficient (1/K)
    */
-  virtual void rho_from_T(Real T, Real & rho, Real & drho_dT) const override;
+  virtual Real beta() const override;
 
   /**
-   * Total integrated emissivity as a function of temperature
-   * @param T temperature (K)
-   * @return emissivity (unitless)
+   * Surface emissivity (total, integrated) as a function of temperature (K)
+   * @return surface emissivity (unitless)
    */
-  virtual Real emissivity_from_T(Real T) const override;
+  virtual Real surface_emissivity() const override;
 
 protected:
   /// The state of the surface, 'oxidized' or 'polished', used in estimating emissivity
@@ -124,4 +100,4 @@ private:
   static const std::string _name;
 };
 
-#endif /* STAINLESS_STEEL_316_PROPERTIES_H */
+#endif /* THERMALSTAINLESSSTEEL316MATERIAL_H */
