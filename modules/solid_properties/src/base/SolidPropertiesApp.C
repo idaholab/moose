@@ -35,21 +35,11 @@ SolidPropertiesApp::registerApps()
   registerApp(SolidPropertiesApp);
 }
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
-{
-  registerSyntaxTask(
-      "AddSolidPropertiesAction", "Modules/SolidProperties/*", "add_solid_properties");
-  registerMooseObjectTask("add_solid_properties", SolidProperties, false);
-  syntax.addDependency("add_solid_properties", "add_function");
-}
-
 void
-SolidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+SolidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & /* s */)
 {
   Registry::registerObjectsTo(f, {"SolidPropertiesApp"});
   Registry::registerActionsTo(af, {"SolidPropertiesApp"});
-  associateSyntaxInner(s, af);
 }
 
 void
@@ -60,11 +50,10 @@ SolidPropertiesApp::registerObjects(Factory & factory)
 }
 
 void
-SolidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+SolidPropertiesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"SolidPropertiesApp"});
-  associateSyntaxInner(syntax, action_factory);
 }
 
 void

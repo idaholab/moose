@@ -35,40 +35,33 @@ public:
    */
   virtual const std::string & solidName() const override;
 
-  /**
-   * Isobaric specific heat capacity as a function of temperature.
-   * @return isobaric specific heat capacity
-   */
-  virtual Real cp() const override;
+  /// Isobaric specific heat capacity
+  virtual void computeIsobaricSpecificHeat() override;
 
-  /**
-   * Thermal conductivity as a function of temperature.
-   * @return thermal conductivity
-   */
-  virtual Real k() const override;
+  /// Isobaric specific heat capacity derivatives
+  virtual void computeIsobaricSpecificHeatDerivatives() override;
 
-  /**
-   * Density as a function of temperature.
-   * @return density
-   */
-  virtual Real rho() const override;
+  /// Thermal conductivity
+  virtual void computeThermalConductivity() override;
 
-  /**
-   * Thermal expansion coefficient computed as
-   * $-\frac{1}{\rho}\frac{\partial\rho}{\partial T}$
-   * @return thermal expansion coefficient (1/K)
-   */
-  virtual Real beta() const override;
+  /// Thermal conductivity derivatives
+  virtual void computeThermalConductivityDerivatives() override;
+
+  /// Density
+  virtual void computeDensity() override;
+
+  /// Density derivatives
+  virtual void computeDensityDerivatives() override;
 
 protected:
   /// Function providing the thermal conductivity as a function of temperature
-  Function & _k;
+  Function & _k_function;
 
   /// Function providing the isobaric specific heat as a function of temperature
-  Function & _cp;
+  Function & _cp_function;
 
   /// Function providing the density as a function of temperature
-  Function & _rho;
+  Function & _rho_function;
 
 private:
   /// The solid name

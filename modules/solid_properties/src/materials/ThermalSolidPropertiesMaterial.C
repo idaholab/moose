@@ -22,16 +22,24 @@ validParams<ThermalSolidPropertiesMaterial>()
 ThermalSolidPropertiesMaterial::ThermalSolidPropertiesMaterial(const InputParameters & parameters)
   : SolidPropertiesMaterial(parameters),
     _temperature(coupledValue("temperature")),
+    _temperature_name(getVar("temperature", 0)->name()),
     _cp(declareProperty<Real>("cp_solid")),
+    _dcp_dT(declarePropertyDerivative<Real>("cp_solid", _temperature_name)),
     _k(declareProperty<Real>("k_solid")),
-    _rho(declareProperty<Real>("rho_solid"))
+    _dk_dT(declarePropertyDerivative<Real>("k_solid", _temperature_name)),
+    _rho(declareProperty<Real>("rho_solid")),
+    _drho_dT(declarePropertyDerivative<Real>("rho_solid", _temperature_name))
 {
 }
 
 void
 ThermalSolidPropertiesMaterial::computeQpProperties()
 {
-  _cp[_qp] = cp();
-  _k[_qp] = k();
-  _rho[_qp] = rho();
+  computeIsobaricSpecificHeat();
+  computeThermalConductivity();
+  computeDensity();
+
+  computeIsobaricSpecificHeatDerivatives();
+  computeThermalConductivityDerivatives();
+  computeDensityDerivatives();
 }

@@ -51,44 +51,52 @@ ThermalStainlessSteel316Properties::molarMass() const
   return 55.34175166872447e-3;
 }
 
-Real
-ThermalStainlessSteel316Properties::cp() const
+void
+ThermalStainlessSteel316Properties::computeIsobaricSpecificHeat()
 {
-  return 0.1816 * _temperature[_qp] + 428.46;
-  //   dcp_dT = 0.1816;
+  _cp[_qp] = 0.1816 * _temperature[_qp] + 428.46;
 }
 
-Real
-ThermalStainlessSteel316Properties::k() const
+void
+ThermalStainlessSteel316Properties::computeIsobaricSpecificHeatDerivatives()
 {
-  return -7.301e-6 * _temperature[_qp] * _temperature[_qp] + 0.02716 * _temperature[_qp] + 6.308;
-  //   dk_dT = -7.301e-6 * 2.0 * T + 0.02716;
+  _dcp_dT[_qp] = 0.1816;
 }
 
-Real
-ThermalStainlessSteel316Properties::rho() const
+void
+ThermalStainlessSteel316Properties::computeThermalConductivity()
 {
-  return -4.454e-5 * _temperature[_qp] * _temperature[_qp] - 0.4297 * _temperature[_qp] + 8089.4;
-  //   drho_dT = -4.454e-5 * 2.0 * T - 0.4297;
+  _k[_qp] = -7.301e-6 * _temperature[_qp] * _temperature[_qp] + 0.02716 * _temperature[_qp] + 6.308;
 }
 
-Real
-ThermalStainlessSteel316Properties::beta() const
+void
+ThermalStainlessSteel316Properties::computeThermalConductivityDerivatives()
 {
-  Real drho_dT = -4.454e-5 * 2.0 * _temperature[_qp] - 0.4297;
-  return -drho_dT / rho();
+  _dk_dT[_qp] = -7.301e-6 * 2.0 * _temperature[_qp] + 0.02716;
 }
 
-Real
-ThermalStainlessSteel316Properties::surface_emissivity() const
+void
+ThermalStainlessSteel316Properties::computeDensity()
 {
-  if (_constant_emissivity)
-    return _emissivity;
-
-  if (_surface == surface::oxidized)
-    return 0.7;
-  else if (_surface == surface::polished)
-    return 0.15;
-  else
-    mooseError(name(), ": Unhandled SurfaceEnum in 'emissivity_from_T'!");
+  _rho[_qp] = -4.454e-5 * _temperature[_qp] * _temperature[_qp] - 0.4297 * _temperature[_qp] + 8089.4;
 }
+
+void
+ThermalStainlessSteel316Properties::computeDensityDerivatives()
+{
+  _drho_dT[_qp] = -4.454e-5 * 2.0 * _temperature[_qp] - 0.4297;
+}
+
+//Real
+//ThermalStainlessSteel316Properties::surface_emissivity() const
+//{
+//  if (_constant_emissivity)
+//    return _emissivity;
+//
+//  if (_surface == surface::oxidized)
+//    return 0.7;
+//  else if (_surface == surface::polished)
+//    return 0.15;
+//  else
+//    mooseError(name(), ": Unhandled SurfaceEnum in 'emissivity_from_T'!");
+//}

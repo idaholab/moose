@@ -33,14 +33,26 @@ protected:
   /// Temperature
   const VariableValue & _temperature;
 
+  /// Name of the temperature variable
+  const VariableName _temperature_name;
+
   /// Isobaric specific heat capacity
   MaterialProperty<Real> & _cp;
+
+  /// Derivative of isobaric specific heat capacity with respect to temperature
+  MaterialProperty<Real> & _dcp_dT;
 
   /// Thermal conductivity
   MaterialProperty<Real> & _k;
 
+  /// Derivative of thermal conductivity with respect to temperature
+  MaterialProperty<Real> & _dk_dT;
+
   /// Density
   MaterialProperty<Real> & _rho;
+
+  /// Derivative of density with respect to temperature
+  MaterialProperty<Real> & _drho_dT;
 };
 
 #endif /* THERMALSOLIDPROPERTIESMATERIAL_H */

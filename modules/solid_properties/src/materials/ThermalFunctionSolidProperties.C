@@ -27,9 +27,9 @@ validParams<ThermalFunctionSolidProperties>()
 
 ThermalFunctionSolidProperties::ThermalFunctionSolidProperties(const InputParameters & parameters)
   : ThermalSolidPropertiesMaterial(parameters),
-    _k(getFunction("k")),
-    _cp(getFunction("cp")),
-    _rho(getFunction("rho"))
+    _k_function(getFunction("k")),
+    _cp_function(getFunction("cp")),
+    _rho_function(getFunction("rho"))
 {
 }
 
@@ -39,30 +39,38 @@ ThermalFunctionSolidProperties::solidName() const
   return _name;
 }
 
-Real
-ThermalFunctionSolidProperties::cp() const
+void
+ThermalFunctionSolidProperties::computeIsobaricSpecificHeat()
 {
-  return _cp.value(_temperature[_qp], Point());
-  //  dcp_dT = _cp.timeDerivative(T, Point());
+  _cp[_qp] = _cp_function.value(_temperature[_qp], Point());
 }
 
-Real
-ThermalFunctionSolidProperties::k() const
+void
+ThermalFunctionSolidProperties::computeIsobaricSpecificHeatDerivatives()
 {
-  return _k.value(_temperature[_qp], Point());
-  //   dk_dT = _k.timeDerivative(T, Point());
+  _dcp_dT[_qp] = _cp_function.timeDerivative(_temperature[_qp], Point());
 }
 
-Real
-ThermalFunctionSolidProperties::rho() const
+void
+ThermalFunctionSolidProperties::computeThermalConductivity()
 {
-  return _rho.value(_temperature[_qp], Point());
-  //   drho_dT = _rho.timeDerivative(T, Point());
+  _k[_qp] = _k_function.value(_temperature[_qp], Point());
 }
 
-Real
-ThermalFunctionSolidProperties::beta() const
+void
+ThermalFunctionSolidProperties::computeThermalConductivityDerivatives()
 {
-  Real drho_dT = _rho.timeDerivative(_temperature[_qp], Point());
-  return -drho_dT / rho();
+  _dk_dT[_qp] = _k_function.timeDerivative(_temperature[_qp], Point());
+}
+
+void
+ThermalFunctionSolidProperties::computeDensity()
+{
+  _rho[_qp] = _rho_function.value(_temperature[_qp], Point());
+}
+
+void
+ThermalFunctionSolidProperties::computeDensityDerivatives()
+{
+  _drho_dT[_qp] = _rho_function.timeDerivative(_temperature[_qp], Point());
 }

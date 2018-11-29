@@ -56,18 +56,19 @@ public:
   virtual Real molarMass() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature (K).
+   * Isobaric specific heat capacity (J/kg$\cdot$K) as a function of temperature (K).
    * Correlation is from \cite butland and is valid over
    * 200 K $\le$ T $\le$ 3500. All coke-based graphites show approximately the same
    * specific heat, so it may be reasonable to use a single correlation to describe
-   * with reasonable accuracy a wide range of grades of nuclear graphite
-   * \cite baker.
-   * @return isobaric specific heat capacity (J/kg$\cdot$K)
+   * with reasonable accuracy a wide range of grades of nuclear graphite \cite baker.
    */
-  virtual Real cp() const override;
+  virtual void computeIsobaricSpecificHeat() override;
+
+  /// Isobaric specific heat capacity derivatives
+  virtual void computeIsobaricSpecificHeatDerivatives() override;
 
   /**
-   * Thermal conductivity as a function of temperature (K).
+   * Thermal conductivity (W/m$\cdot$K) as a function of temperature (K).
    * More so than density and specific heat, thermal conductivity is extremely
    * dependent on material and manufacturing details, and no correlation is
    * provided in the review article by Baker \cite baker.
@@ -88,20 +89,24 @@ public:
    * R$^2$ value of this fit is 0.97620. The systematic uncertainty is $\pm$2.7% while
    * the random uncertainty is $\pm$1.5%. At low temperatures, this correlation
    * slightly underpredicts the GrafTech data \cite albers.
-   * @return thermal conductivity (W/m$\cdot$K)
    */
-  virtual Real k() const override;
+  virtual void computeThermalConductivity() override;
+
+  /// Thermal conductivity derivatives
+  virtual void computeThermalConductivityDerivatives() override;
 
   /**
-   * Density as a function of temperature (K).
+   * Density (kg/m$^3$) as a function of temperature (K).
    * Given a room-temperature density, the thermal expansion coefficient is used
    * to compute the temperature dependence \cite baker.
-   * @return density (kg/m$^3$)
    */
-  virtual Real rho() const override;
+  virtual void computeDensity() override;
+
+  /// Density derivatives
+  virtual void computeDensityDerivatives() override;
 
   /**
-   * Thermal expansion coefficient as a function of temperature.
+   * Thermal expansion coefficient (1/K) as a function of temperature (K).
    * The mean thermal expansion coefficient in the
    * range of 20 $\degree C$ to some end temperature can be approximated by adding
    * a constant to the average thermal expansion coefficient in the 20 to 100
@@ -111,9 +116,8 @@ public:
    * range, which may give inaccurate densities at higher temperatures. However,
    * the very small variation of density with temperature indicates that despite this
    * error, the variation of density is not very significant anyways.
-   * @return thermal expansion coefficient (1/K)
    */
-  virtual Real beta() const override;
+  Real beta() const;
 
   /**
    * Surface emissivity (total, integrated) as a function of temperature (K).
@@ -122,7 +126,7 @@ public:
    * a user-specified constant value may ne specified.
    * @return surface emissivity (unitless)
    */
-  virtual Real surface_emissivity() const override;
+  //Real surfaceEmissivity() const;
 
 protected:
   /**

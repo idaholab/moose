@@ -38,7 +38,7 @@ public:
   virtual Real molarMass() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature (K).
+   * Isobaric specific heat capacity (J/kg$\cdot$K) as a function of temperature (K).
    * Correlation from \cite snead based on data in the range
    * 200 K $\le$ T $\le$ 2400 K. The uncertainty is $\pm$ 7%
    * in the range 200 K $\le$ T $\le$ 1000 K and $\pm$ 4% in the range
@@ -47,12 +47,14 @@ public:
    * agrees reasonably well with the constant value of 1300 J/kg$\dot$K used
    * by Wang, but is about double the value of 620 J/kg$\cdot$K used by
    * Hales et. al \cite hales.
-   * @return isobaric specific heat (J/kg$\cdot$K)
    */
-  virtual Real cp() const override;
+  virtual void computeIsobaricSpecificHeat() override;
+
+  /// Isobaric specific heat capacity derivatives
+  virtual void computeIsobaricSpecificHeatDerivatives() override;
 
   /**
-   * Thermal conductivity as a function of temperature (K).
+   * Thermal conductivity (W/m$\cdot$K) as a function of temperature (K).
    * The thermal conductivity of silicon carbide depends strongly on
    * the grain size, the nature of the grain boundaries,
    * and the presence of additives such as those included in sintering. For
@@ -80,12 +82,14 @@ public:
    * at room temperature, while the PARFUME correlation is much lower. However, others
    * have measured 16.74, 50, and 62 W/m$\cdot$K \cite lopez_honorato, values
    * that are much closer to the PARFUME correlation predictions.
-   * @return thermal conductivity (W/m$\cdot$K)
    */
-  virtual Real k() const override;
+  virtual void computeThermalConductivity() override;
+
+  /// Thermal conductivity derivatives
+  virtual void computeThermalConductivityDerivatives() override;
 
   /**
-   * Density as a function of temperature (K).
+   * Density (kg/m$^3$) as a function of temperature (K).
    * The density is assumed constant due to the very small thermal expansion
    * coefficient of silicon carbide. A default density value is obtained by
    * averaging the density for four different silicon carbide crystal structures
@@ -94,14 +98,10 @@ public:
    * \cite tecdoc1694 \cite sun used by others.
    * @return rho density (kg/m$^3$)
    */
-  virtual Real rho() const override;
+  virtual void computeDensity() override;
 
-  /**
-   * Thermal expansion coefficient computed as
-   * $-\frac{1}{\rho}\frac{\partial\rho}{\partial T}$
-   * @return thermal expansion coefficient (1/K)
-   */
-  virtual Real beta() const override;
+  /// Density derivatives
+  virtual void computeDensityDerivatives() override;
 
 protected:
   /// enumeration for selecting the thermal conductivity model
@@ -115,7 +115,7 @@ protected:
   const ThermalSiliconCarbidePropertiesKModel _k_model;
 
   /// (constant) density
-  const Real & _rho;
+  const Real & _rho_const;
 
 private:
   /// The solid name

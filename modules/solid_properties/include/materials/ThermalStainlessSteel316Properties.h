@@ -46,44 +46,43 @@ public:
   virtual Real molarMass() const override;
 
   /**
-   * Isobaric specific heat capacity as a function of temperature (K).
+   * Isobaric specific heat capacity (J/kg$\cdot$K) as a function of temperature (K).
    * A curve fit is performed from data in \cite mills over
    * 25 $\degree$C $\le$ T $\le$ 1300 $\degree$C. The fit is obtained with an
    * R$^2$ value of 0.9926. Uncertainty on the tabulated data is $\pm$ 5%.
-   * @return isobaric specific heat capacity (J/kg$\cdot$K)
    */
-  virtual Real cp() const override;
+  virtual void computeIsobaricSpecificHeat() override;
+
+  /// Isobaric specific heat capacity derivatives
+  virtual void computeIsobaricSpecificHeatDerivatives() override;
 
   /**
-   * Thermal conductivity as a function of temperature (K).
+   * Thermal conductivity (W/m$\cdot$K) as a function of temperature (K).
    * A curve fit is performed from data in \cite mills over
    * 25 $\degree$ C $\le$ T $\le$ 1300 $\degree$ C. The fit is obtained with an
    * R$^2$ value of 0.9960. Uncertainty on the tabulated data is $\pm$ 10%.
-   * @return thermal conductivity (W/m$\cdot$K)
    */
-  virtual Real k() const override;
+  virtual void computeThermalConductivity() override;
+
+  /// Thermal conductivity derivatives
+  virtual void computeThermalConductivityDerivatives() override;
 
   /**
-   * Density as a function of temperature (K).
+   * Density (kg/m$^3$) as a function of temperature (K).
    * A curve fit is performed from data in \cite mills over
    * 25 $\degree$ C $\le$ T $\le$ 1300 $\degree$ C. The fit is obtained with
    * an R$^2$ value of 0.9995. Uncertainty on the tabulated data is $\pm$ 3%.
-   * @return density (kg/m$^3$)
    */
-  virtual Real rho() const override;
+  virtual void computeDensity() override;
 
-  /**
-   * Thermal expansion coefficient computed as
-   * $-\frac{1}{\rho}\frac{\partial\rho}{\partial T}$
-   * @return thermal expansion coefficient (1/K)
-   */
-  virtual Real beta() const override;
+  /// Density derivatives
+  virtual void computeDensityDerivatives() override;
 
   /**
    * Surface emissivity (total, integrated) as a function of temperature (K)
    * @return surface emissivity (unitless)
    */
-  virtual Real surface_emissivity() const override;
+  //virtual Real surface_emissivity() const override;
 
 protected:
   /// The state of the surface, 'oxidized' or 'polished', used in estimating emissivity

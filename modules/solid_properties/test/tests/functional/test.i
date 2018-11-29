@@ -44,22 +44,13 @@
   [../]
 []
 
-[Modules]
-  [./SolidProperties]
-    [./sp]
-      type = ThermalFunctionSolidProperties
-      rho = '1000.0'
-      cp = '200*t+150.0'
-      k = '2.0*exp(-100.0/(2.0+t))+1.0'
-    [../]
-  [../]
-[]
-
 [Materials]
   [./sp_mat]
-    type = ThermalSolidPropertiesMaterial
+    type = ThermalFunctionSolidProperties
     temperature = T
-    sp = sp
+    rho = '1000.0'
+    cp = '200*t+150.0'
+    k = '2.0*exp(-100.0/(2.0+t))+1.0'
   [../]
 []
 

@@ -16,13 +16,12 @@ InputParameters
 validParams<SolidPropertiesMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.registerBase("SolidPropertiesMaterial");
   params.addClassDescription("Base class for defining solid property materials");
   return params;
 }
 
 SolidPropertiesMaterial::SolidPropertiesMaterial(const InputParameters & parameters)
-  : Material(parameters)
+  : DerivativeMaterialInterface<Material>(parameters)
 {
 }
 
@@ -38,32 +37,50 @@ SolidPropertiesMaterial::molarMass() const
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-Real
-SolidPropertiesMaterial::cp() const
+void
+SolidPropertiesMaterial::computeIsobaricSpecificHeat()
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-Real
-SolidPropertiesMaterial::k() const
+void
+SolidPropertiesMaterial::computeIsobaricSpecificHeatDerivatives()
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-Real
-SolidPropertiesMaterial::rho() const
+void
+SolidPropertiesMaterial::computeThermalConductivity()
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-Real
-SolidPropertiesMaterial::beta() const
+void
+SolidPropertiesMaterial::computeThermalConductivityDerivatives()
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-Real
-SolidPropertiesMaterial::surface_emissivity() const
+void
+SolidPropertiesMaterial::computeDensity()
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
+
+void
+SolidPropertiesMaterial::computeDensityDerivatives()
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+//Real
+//SolidPropertiesMaterial::computeThermalExpansionCoefficient() const
+//{
+//  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+//}
+//
+//Real
+//SolidPropertiesMaterial::surface_emissivity() const
+//{
+//  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+//}

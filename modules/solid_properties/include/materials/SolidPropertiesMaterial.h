@@ -11,6 +11,7 @@
 #define SOLIDPROPERTIESMATERIAL_H
 
 #include "Material.h"
+#include "DerivativeMaterialInterface.h"
 
 class SolidPropertiesMaterial;
 
@@ -20,7 +21,7 @@ InputParameters validParams<SolidPropertiesMaterial>();
 /**
  * Base class for defining solid property materials.
  */
-class SolidPropertiesMaterial : public Material
+class SolidPropertiesMaterial : public DerivativeMaterialInterface<Material>
 {
 public:
   SolidPropertiesMaterial(const InputParameters & parameters);
@@ -39,33 +40,45 @@ public:
 
   /**
    * Isobaric specific heat capacity
-   * @return isobaric specific heat capacity
    */
-  virtual Real cp() const;
+  virtual void computeIsobaricSpecificHeat();
 
   /**
-   * Compute thermal conductivity
-   * @return thermal conductivity
+   * Isobaric specific heat capacity derivatives
    */
-  virtual Real k() const;
+  virtual void computeIsobaricSpecificHeatDerivatives();
 
   /**
-   * Compute density
-   * @return density
+   * Thermal conductivity
    */
-  virtual Real rho() const;
+  virtual void computeThermalConductivity();
 
   /**
-   * Thermal expansion coefficient
-   * @return thermal expansion coefficient
+   * Thermal conductivity derivatives
    */
-  virtual Real beta() const;
+  virtual void computeThermalConductivityDerivatives();
 
   /**
-   * Surface emissivity
-   * @return surface emissivity
+   * Density
    */
-  virtual Real surface_emissivity() const;
+  virtual void computeDensity();
+
+  /**
+   * Density derivatives
+   */
+  virtual void computeDensityDerivatives();
+
+  ///**
+  // * Thermal expansion coefficient
+  // * @return thermal expansion coefficient
+  // */
+  //virtual Real computeThermalExpansionCoefficient();
+
+  ///**
+  // * Surface emissivity
+  // * @return surface emissivity
+  // */
+  //virtual Real computeSurfaceEmissivity() const;
 
 private:
   /// The solid name

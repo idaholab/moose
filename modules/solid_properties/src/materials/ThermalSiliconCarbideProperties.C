@@ -32,7 +32,7 @@ ThermalSiliconCarbideProperties::ThermalSiliconCarbideProperties(const InputPara
   : ThermalSolidPropertiesMaterial(parameters),
     _k_model(getParam<MooseEnum>("thermal_conductivity_model")
                  .getEnum<ThermalSiliconCarbidePropertiesKModel>()),
-    _rho(getParam<Real>("density"))
+    _rho_const(getParam<Real>("density"))
 {
 }
 
@@ -48,40 +48,48 @@ ThermalSiliconCarbideProperties::molarMass() const
   return 40.0962e-3;
 }
 
-Real
-ThermalSiliconCarbideProperties::cp() const
+void
+ThermalSiliconCarbideProperties::computeIsobaricSpecificHeat()
 {
-  return 925.65 + 0.3772 * _temperature[_qp] - 7.9259e-5 * std::pow(_temperature[_qp], 2.0) - 3.1946e7 * std::pow(_temperature[_qp], -2.0);
-  //   dcp_dT = 0.3772 - 7.9259e-5 * 2.0 * T - 3.1946e7 * -2.0 * std::pow(T, -3.0);
+  _cp[_qp] = 925.65 + 0.3772 * _temperature[_qp] - 7.9259e-5 * std::pow(_temperature[_qp], 2.0) - 3.1946e7 * std::pow(_temperature[_qp], -2.0);
 }
 
-Real
-ThermalSiliconCarbideProperties::k() const
+void
+ThermalSiliconCarbideProperties::computeIsobaricSpecificHeatDerivatives()
+{
+  _dcp_dT[_qp] = 0.3772 - 7.9259e-5 * 2.0 * _temperature[_qp] - 3.1946e7 * -2.0 * std::pow(_temperature[_qp], -3.0);
+}
+
+void
+ThermalSiliconCarbideProperties::computeThermalConductivity()
 {
   if (_k_model == snead)
-    return 1.0 / (-0.0003 + 1.05e-5 * _temperature[_qp]);
+    _k[_qp] = 1.0 / (-0.0003 + 1.05e-5 * _temperature[_qp]);
   else if (_k_model == parfume)
-    return 17885.0 / _temperature[_qp] + 2.0;
+    _k[_qp] = 17885.0 / _temperature[_qp] + 2.0;
   else
     mooseError(name(), ": Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
-
-  //if (_k_model == snead)
-  //  dk_dT = -1.0 / std::pow(-0.0003 + 1.05e-5 * T, 2.0) * 1.05e-5;
-  //else if (_k_model == parfume)
-  //  dk_dT = -17885.0 / std::pow(T, 2.0);
-  //else
-  //  mooseError(name(), ": Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
 }
 
-Real
-ThermalSiliconCarbideProperties::rho() const
+void
+ThermalSiliconCarbideProperties::computeThermalConductivityDerivatives()
 {
-  return _rho;
-  //   drho_dT = 0.0;
+  if (_k_model == snead)
+    _dk_dT[_qp] = -1.0 / std::pow(-0.0003 + 1.05e-5 * _temperature[_qp], 2.0) * 1.05e-5;
+  else if (_k_model == parfume)
+    _dk_dT[_qp] = -17885.0 / std::pow(_temperature[_qp], 2.0);
+  else
+    mooseError(name(), ": Unhandled MooseEnum in ThermalSiliconCarbideProperties!");
 }
 
-Real
-ThermalSiliconCarbideProperties::beta() const
+void
+ThermalSiliconCarbideProperties::computeDensity()
 {
-  return 0.0;
+  _rho[_qp] = _rho_const;
+}
+
+void
+ThermalSiliconCarbideProperties::computeDensityDerivatives()
+{
+  _drho_dT[_qp] = 0.0;
 }
