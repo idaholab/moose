@@ -15,6 +15,7 @@
 #include "SubProblem.h"
 #include "MooseVariableFE.h"
 #include "MooseMesh.h"
+#include "MooseUtils.h"
 
 #include "libmesh/threads.h"
 
@@ -499,7 +500,6 @@ PenetrationThread::switchInfo(PenetrationInfo *& info, PenetrationInfo *& infoNe
   infoNew = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
 }
 
-// Determine whether first (pi1) or second (pi2) interaction is stronger
 PenetrationThread::CompeteInteractionResult
 PenetrationThread::competeInteractions(PenetrationInfo * pi1, PenetrationInfo * pi2)
 {
@@ -527,42 +527,8 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1, PenetrationInfo * 
     result = SECOND_WINS;
 
   else if (pi1->_tangential_distance == 0.0 && pi2->_tangential_distance == 0.0) // on both faces
-  {
-    if (pi1->_distance >= 0.0 &&
-        pi2->_distance < 0.0) // favor face with positive distance (penetrated)
-      result = FIRST_WINS;
+    result = competeInteractionsBothOnFace(pi1, pi2);
 
-    else if (pi2->_distance >= 0.0 && pi1->_distance < 0.0)
-      result = SECOND_WINS;
-
-    else if (std::abs(pi1->_distance) < std::abs(pi2->_distance)) // otherwise, favor the closer
-                                                                  // face
-    {
-      // TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      // Moose::out<<"Case1:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2:
-      // "<<pi2->_elem->id()<<std::endl;
-      result = FIRST_WINS;
-    }
-    else if (std::abs(pi2->_distance) < std::abs(pi1->_distance)) // otherwise, favor the closer
-                                                                  // face
-    {
-      // TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      // Moose::out<<"Case2:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2:
-      // "<<pi2->_elem->id()<<std::endl;
-      result = SECOND_WINS;
-    }
-    else // completely equal.  Favor the one with a smaller element id (for repeatibility)
-    {
-      // TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      // Moose::out<<"Case3:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2:
-      // "<<pi2->_elem->id()<<std::endl;
-      if (pi1->_elem->id() < pi2->_elem->id())
-        result = FIRST_WINS;
-
-      else
-        result = SECOND_WINS;
-    }
-  }
   else if (pi1->_tangential_distance <= _tangential_tolerance &&
            pi2->_tangential_distance <= _tangential_tolerance) // off but within tol of both faces
   {
@@ -588,33 +554,39 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1, PenetrationInfo * 
       else
         mooseError("Invalid off_edge_nodes counts");
     }
-    else // Use the same logic as in the on-face condition (above).  A little copy-paste can't
-         // hurt...
-    {
-      if (pi1->_distance >= 0.0 &&
-          pi2->_distance < 0.0) // favor face with positive distance (penetrated)
-        result = FIRST_WINS;
+    else // The node projects to both faces within tangential tolerance.
+      result = competeInteractionsBothOnFace(pi1, pi2);
+  }
 
-      else if (pi2->_distance >= 0.0 && pi1->_distance < 0.0)
-        result = SECOND_WINS;
+  return result;
+}
 
-      else if (std::abs(pi1->_distance) <
-               std::abs(pi2->_distance)) // otherwise, favor the closer face
-        result = FIRST_WINS;
+PenetrationThread::CompeteInteractionResult
+PenetrationThread::competeInteractionsBothOnFace(PenetrationInfo * pi1, PenetrationInfo * pi2)
+{
+  CompeteInteractionResult result = NEITHER_WINS;
 
-      else if (std::abs(pi2->_distance) <
-               std::abs(pi1->_distance)) // otherwise, favor the closer face
-        result = SECOND_WINS;
+  if (pi1->_distance >= 0.0 && pi2->_distance < 0.0)
+    result = FIRST_WINS; // favor face with positive distance (penetrated) -- first in this case
 
-      else // completely equal.  Favor the one with a smaller element id (for repeatibility)
-      {
-        if (pi1->_elem->id() < pi2->_elem->id())
-          result = FIRST_WINS;
+  else if (pi2->_distance >= 0.0 && pi1->_distance < 0.0)
+    result = SECOND_WINS; // favor face with positive distance (penetrated) -- second in this case
 
-        else
-          result = SECOND_WINS;
-      }
-    }
+  // TODO: This logic below could cause an abrupt jump from one face to the other with small mesh
+  //       movement.  If there is some way to smooth the transition, we should do it.
+  else if (MooseUtils::relativeFuzzyLessThan(std::abs(pi1->_distance), std::abs(pi2->_distance)))
+    result = FIRST_WINS; // otherwise, favor the closer face -- first in this case
+
+  else if (MooseUtils::relativeFuzzyLessThan(std::abs(pi2->_distance), std::abs(pi1->_distance)))
+    result = SECOND_WINS; // otherwise, favor the closer face -- second in this case
+
+  else // Equal within tolerance.  Favor the one with a smaller element id (for repeatibility)
+  {
+    if (pi1->_elem->id() < pi2->_elem->id())
+      result = FIRST_WINS;
+
+    else
+      result = SECOND_WINS;
   }
 
   return result;
