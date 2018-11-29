@@ -43,7 +43,7 @@
     type = 'RunException'
     input = 'except6.i'
     expect_err = 'CappedWeakInclinedPlaneStressUpdate: normal_vector must not have zero length'
-    requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the normal vector has zero length" 
+    requirement = "The CappedWeakPlaneStressUpdate model shall generate an error if the normal vector has zero length"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7784"
   [../]
@@ -173,6 +173,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent the tensile failure of a single layer of elements in 1 nonlinear step"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
+    custom_cmp = 'pull_and_shear_1step.cmp'
   [../]
   [./pull_and_shear]
     type = Exodiff
