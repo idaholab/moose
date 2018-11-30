@@ -20,9 +20,15 @@
 [AuxVariables]
   [evaluable0]
   []
+  [ghosted0]
+  []
   [evaluable1]
   []
+  [ghosted1]
+  []
   [evaluable2]
+  []
+  [ghosted2]
   []
   [proc]
   []
@@ -36,6 +42,13 @@
     field_name = "evaluable"
     execute_on = initial
   []
+  [ghosted0]
+    type = ElementUOAux
+    variable = ghosted0
+    element_user_object = evaluable_uo0
+    field_name = "ghosted"
+    execute_on = initial
+  []
   [evaluable1]
     type = ElementUOAux
     variable = evaluable1
@@ -43,11 +56,25 @@
     field_name = "evaluable"
     execute_on = initial
   []
+  [ghosted1]
+    type = ElementUOAux
+    variable = ghosted1
+    element_user_object = evaluable_uo1
+    field_name = "ghosted"
+    execute_on = initial
+  []
   [evaluable2]
     type = ElementUOAux
     variable = evaluable2
     element_user_object = evaluable_uo2
     field_name = "evaluable"
+    execute_on = initial
+  []
+  [ghosted2]
+    type = ElementUOAux
+    variable = ghosted2
+    element_user_object = evaluable_uo2
+    field_name = "ghosted"
     execute_on = initial
   []
   [proc]
