@@ -15,3 +15,12 @@ Montana: [montana-flag]
 New York: [newyork-flag]
 
 Idaho: [idaho-flag]
+
+
+## Width
+
+!media https://upload.wikimedia.org/wikipedia/commons/b/b5/Flag_of_Michigan.svg style=width:15%;
+
+!media https://upload.wikimedia.org/wikipedia/commons/b/b5/Flag_of_Michigan.svg
+       caption=Width is set to 15%
+       style=width:15%;

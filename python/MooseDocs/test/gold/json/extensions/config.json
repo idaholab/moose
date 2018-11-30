@@ -49,17 +49,17 @@
         }, 
         {
             "attributes": {
+                "class": "", 
+                "id": "michigan-flag", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": ""
             }, 
             "children": [
                 {
                     "attributes": {
-                        "class": "", 
-                        "id": "michigan-flag", 
                         "recursive": true, 
-                        "src": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Flag_of_Michigan.svg", 
-                        "style": ""
+                        "src": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Flag_of_Michigan.svg"
                     }, 
                     "children": [], 
                     "name": "Image"
