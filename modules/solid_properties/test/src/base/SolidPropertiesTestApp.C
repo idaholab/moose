@@ -24,31 +24,23 @@ registerKnownLabel("SolidPropertiesTestApp");
 
 SolidPropertiesTestApp::SolidPropertiesTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Moose::registerObjects(_factory);
-  SolidPropertiesApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  SolidPropertiesApp::associateSyntax(_syntax, _action_factory);
-
-  Moose::registerExecFlags(_factory);
-  SolidPropertiesApp::registerExecFlags(_factory);
-
-  bool use_test_objs = getParam<bool>("allow_test_objects");
-  if (use_test_objs)
-  {
-    SolidPropertiesTestApp::registerObjects(_factory);
-    SolidPropertiesTestApp::associateSyntax(_syntax, _action_factory);
-  }
+  SolidPropertiesTestApp::registerAll(
+      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 SolidPropertiesTestApp::~SolidPropertiesTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-SolidPropertiesTestApp__registerApps()
+void
+SolidPropertiesTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
 {
-  SolidPropertiesTestApp::registerApps();
+  SolidPropertiesApp::registerAll(f, af, s);
+  if (use_test_objs)
+  {
+    Registry::registerObjectsTo(f, {"SolidPropertiesTestApp"});
+    Registry::registerActionsTo(af, {"SolidPropertiesTestApp"});
+  }
 }
+
 void
 SolidPropertiesTestApp::registerApps()
 {
@@ -56,37 +48,30 @@ SolidPropertiesTestApp::registerApps()
   registerApp(SolidPropertiesTestApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-SolidPropertiesTestApp__registerObjects(Factory & factory)
-{
-  SolidPropertiesTestApp::registerObjects(factory);
-}
 void
 SolidPropertiesTestApp::registerObjects(Factory & factory)
 {
   Registry::registerObjectsTo(factory, {"SolidPropertiesTestApp"});
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-SolidPropertiesTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  SolidPropertiesTestApp::associateSyntax(syntax, action_factory);
-}
 void
 SolidPropertiesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
   Registry::registerActionsTo(action_factory, {"SolidPropertiesTestApp"});
 }
 
-// External entry point for dynamic execute flag registration
-extern "C" void
-SolidPropertiesTestApp__registerExecFlags(Factory & factory)
-{
-  SolidPropertiesTestApp::registerExecFlags(factory);
-}
 void
 SolidPropertiesTestApp::registerExecFlags(Factory & /*factory*/)
 {
+}
+
+extern "C" void
+SolidPropertiesTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  SolidPropertiesTestApp::registerAll(f, af, s);
+}
+extern "C" void
+SolidPropertiesTestApp__registerApps()
+{
+  SolidPropertiesTestApp::registerApps();
 }

@@ -1,18 +1,21 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
+  nx = 2
   ny = 2
   elem_type = QUAD4
 []
 
 [Variables]
-  [./T]
+  [./u]
     initial_condition = 1000.0
   [../]
 []
 
 [AuxVariables]
+  [./T]
+    initial_condition = 923.15
+  [../]
   [./cp]
     family = MONOMIAL
     order = CONSTANT
@@ -22,6 +25,18 @@
     order = CONSTANT
   [../]
   [./rho]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./dcp_dT]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./dk_dT]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./drho_dT]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -30,18 +45,33 @@
 [AuxKernels]
   [./cp]
     type = MaterialRealAux
-     variable = cp
-     property = cp_solid
+    variable = cp
+    property = cp_solid
   [../]
   [./k]
     type = MaterialRealAux
-     variable = k
-     property = k_solid
+    variable = k
+    property = k_solid
   [../]
   [./rho]
     type = MaterialRealAux
-     variable = rho
-     property = rho_solid
+    variable = rho
+    property = rho_solid
+  [../]
+  [./dcp_dT]
+    type = MaterialRealAux
+    variable = dcp_dT
+    property = dcp_solid/dT
+  [../]
+  [./dk_dT]
+    type = MaterialRealAux
+    variable = dk_dT
+    property = dk_solid/dT
+  [../]
+  [./drho_dT]
+    type = MaterialRealAux
+    variable = drho_dT
+    property = drho_solid/dT
   [../]
 []
 
@@ -49,26 +79,28 @@
   [./sp_mat]
     type = ThermalSiliconCarbideProperties
     temperature = T
+    thermal_conductivity_model = parfume
+    density = 3180.0
   [../]
 []
 
 [Kernels]
   [./diff]
     type = Diffusion
-    variable = T
+    variable = u
   [../]
 []
 
 [BCs]
   [./left]
     type = DirichletBC
-    variable = T
+    variable = u
     boundary = 'left'
     value = 1000.0
   [../]
   [./right]
     type = DirichletBC
-    variable = T
+    variable = u
     boundary = 'right'
     value = 500.0
   [../]

@@ -73,14 +73,14 @@ SolidPropertiesMaterial::computeDensityDerivatives()
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
 }
 
-//Real
-//SolidPropertiesMaterial::computeThermalExpansionCoefficient() const
-//{
-//  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
-//}
-//
-//Real
-//SolidPropertiesMaterial::surface_emissivity() const
-//{
-//  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
-//}
+void
+SolidPropertiesMaterial::computeThermalExpansionCoefficient()
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
+void
+SolidPropertiesMaterial::computeSurfaceEmissivity()
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}

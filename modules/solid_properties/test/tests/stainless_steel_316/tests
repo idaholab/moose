@@ -10,4 +10,14 @@
     design = 'ThermalStainlessSteel316Properties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
   [../]
+  [./test_with_derivatives]
+    type = Exodiff
+    input = 'test_with_derivatives.i'
+    exodiff = 'test_with_derivatives_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct calculation of thermal properties. "
+      "Derivatives were verified by cross-referencing against a finite difference approximation."
+    design = 'ThermalStainlessSteel316Properties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
 []

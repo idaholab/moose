@@ -44,20 +44,10 @@
   [../]
 []
 
-[Modules]
-  [./SolidProperties]
-    [./sp]
-      type = ThermalStainlessSteel316Properties
-      surface = polished
-    [../]
-  [../]
-[]
-
 [Materials]
   [./sp_mat]
-    type = ThermalSolidPropertiesMaterial
+    type = ThermalStainlessSteel316Properties
     temperature = T
-    sp = sp
   [../]
 []
 

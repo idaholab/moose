@@ -10,4 +10,27 @@
     design = 'ThermalSiliconCarbideProperties.md ThermalSolidPropertiesMaterial.md'
     issues = '#12284'
   [../]
+  [./test_with_derivatives]
+    type = Exodiff
+    input = 'test_with_derivatives.i'
+    exodiff = 'test_with_derivatives_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct calculation of thermal properties "
+      "when thermal conductivity is given by the Snead correlation. Derivatives were "
+      "verified by cross-referencing against a finite difference approximation."
+    design = 'ThermalSiliconCarbideProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
+  [./test_with_derivatives2]
+    type = Exodiff
+    input = 'test_with_derivatives2.i'
+    exodiff = 'test_with_derivatives2_out.e'
+    threading = '!pthreads'
+    requirement = "This test demonstrates correct calculation of thermal properties "
+      "when thermal conductivity is given by the Parfume correlation and a user-specified "
+      "density are given. Derivatives were "
+      "verified by cross-referencing against a finite difference approximation."
+    design = 'ThermalSiliconCarbideProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  [../]
 []

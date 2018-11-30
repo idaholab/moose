@@ -68,17 +68,15 @@ public:
    */
   virtual void computeDensityDerivatives();
 
-  ///**
-  // * Thermal expansion coefficient
-  // * @return thermal expansion coefficient
-  // */
-  //virtual Real computeThermalExpansionCoefficient();
+  /**
+   * Thermal expansion coefficient
+   */
+  virtual void computeThermalExpansionCoefficient();
 
-  ///**
-  // * Surface emissivity
-  // * @return surface emissivity
-  // */
-  //virtual Real computeSurfaceEmissivity() const;
+  /**
+   * Surface emissivity
+   */
+  virtual void computeSurfaceEmissivity();
 
 private:
   /// The solid name

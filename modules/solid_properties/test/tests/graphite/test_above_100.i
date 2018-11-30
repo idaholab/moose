@@ -7,13 +7,20 @@
 []
 
 [Variables]
-  [./T]
+  [./u]
     initial_condition = 1000.0
   [../]
 []
 
 [AuxVariables]
+  [./T]
+    initial_condition = 1073.15
+  [../]
   [./cp]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./dcp_dT]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -21,7 +28,15 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+  [./dk_dT]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
   [./rho]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./drho_dT]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -30,18 +45,33 @@
 [AuxKernels]
   [./cp]
     type = MaterialRealAux
-     variable = cp
-     property = cp_solid
+    variable = cp
+    property = cp_solid
+  [../]
+  [./dcp_dT]
+    type = MaterialRealAux
+    variable = dcp_dT
+    property = dcp_solid/dT
   [../]
   [./k]
     type = MaterialRealAux
-     variable = k
-     property = k_solid
+    variable = k
+    property = k_solid
+  [../]
+  [./dk_dT]
+    type = MaterialRealAux
+    variable = dk_dT
+    property = dk_solid/dT
   [../]
   [./rho]
     type = MaterialRealAux
-     variable = rho
-     property = rho_solid
+    variable = rho
+    property = rho_solid
+  [../]
+  [./drho_dT]
+    type = MaterialRealAux
+    variable = drho_dT
+    property = drho_solid/dT
   [../]
 []
 
@@ -55,20 +85,20 @@
 [Kernels]
   [./diff]
     type = Diffusion
-    variable = T
+    variable = u
   [../]
 []
 
 [BCs]
   [./left]
     type = DirichletBC
-    variable = T
+    variable = u
     boundary = 'left'
     value = 1000.0
   [../]
   [./right]
     type = DirichletBC
-    variable = T
+    variable = u
     boundary = 'right'
     value = 500.0
   [../]
