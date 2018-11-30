@@ -24,21 +24,21 @@ AuxKernel.
 
 <div style="clear:both"></div>
 
-!media media/vector_memory_usage/ss_grid.png style=width:25%;margin-left:30px;float:left;
+!media media/vectorpostprocessors/ss_grid.png style=width:25%;margin-left:30px;float:left;
     caption=Refined grid
 
-!media media/vector_memory_usage/ss_processor_id.png style=width:25%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_processor_id.png style=width:25%;margin-left:30px;float:left
     caption=Processor id (using [`ProcessorIDAux`](/ProcessorIDAux.md))
 
-!media media/vector_memory_usage/ss_hardware_id.png style=width:25%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_hardware_id.png style=width:25%;margin-left:30px;float:left
     caption=Hardware id (i.e. compute node)
 
 <div style="clear:both"></div>
 
-!media media/vector_memory_usage/ss_physical_mem.png style=width:25%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_physical_mem.png style=width:25%;margin-left:30px;float:left
     caption=Physical memory used by rank
 
-!media media/vector_memory_usage/ss_node_utilization.png style=width:25%;margin-left:30px;float:left
+!media media/vectorpostprocessors/ss_node_utilization.png style=width:25%;margin-left:30px;float:left
     caption=Fraction of RAM used by the current simulation on the compute node
 
 <div style="clear:both"></div>

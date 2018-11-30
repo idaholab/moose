@@ -6,7 +6,12 @@
 
 !media https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_Montana.svg id=montana-flag caption=Montana state flag.
 
+!media https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_New_York.svg id=newyork-flag caption=New York state flag. style=width:100%;
+
 !media https://upload.wikimedia.org/wikipedia/commons/a/a4/Flag_of_Idaho.svg prefix=Flag caption=Idaho state flag. id=idaho-flag
 
+Montana: [montana-flag]
 
-Link: [montana-flag]
+New York: [newyork-flag]
+
+Idaho: [idaho-flag]

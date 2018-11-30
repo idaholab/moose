@@ -2,6 +2,7 @@ Content:
     framework:
         root_dir: framework/doc/content
         content:
+            - large_media/level_set/vortex_out.gif
             - contrib/**
             - css/*
             - js/*
@@ -32,6 +33,7 @@ Extensions:
     MooseDocs.extensions.content: default
     MooseDocs.extensions.plotly: default
     MooseDocs.extensions.heading: default
+    MooseDocs.extensions.gallery: default
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose

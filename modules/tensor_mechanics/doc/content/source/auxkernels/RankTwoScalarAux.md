@@ -289,7 +289,7 @@ where $\Delta V$ is the change in volume and $V$ is the original volume.
 
 This calculation assumes that the strains supplied as input ($T$) are logarithmic strains,
 which are by definition $log(L/L_0)$, where $L$ is the current length and $L_0$
-is the original length of a line segment in a given direction. 
+is the original length of a line segment in a given direction.
 The ratio of the volume change of a strained cube to the original volume is thus:
 \begin{equation}
 \label{eq:volumetric_strain_from_tensor}
@@ -360,7 +360,7 @@ Results will have different quality based on the AuxVariable:
   purposes. Using higher order monomial variables in this way can produce smoother visualizations of results for a properly
   converged simulation.
 - +Nodal Lagrange+ Using an AuxVariable with `family = LAGRANGE` will result in a smooth nodal field of the material property,
-  constructed using [nodal patch recovery](nodal_patch_recovery.md).
+  constructed using [nodal patch recovery](nodal_patch_recovery.md optional=True).
   `patch_polynomial_order` is set to equal the order of the AuxVariable by default.
   Use this option for the best (smoothest, most accurate) results, but there is
   some additional computational cost. Furthermore, this method is suitable +only

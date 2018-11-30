@@ -6,7 +6,7 @@ The Tensor Mechanics module is a library of simulation tools that solve
 continuum mechanics problems. It provides a simple approach for implementing
 even advanced mechanics models:
 
-- Plug-n-play design enables users to encorporate the relevant physics for specific and varied simulations
+- Plug-n-play design enables users to incorporate the relevant physics for specific and varied simulations
 - Tensor implementation matches mathematical theory
 - Straight-forward procedure for adding new physics
 
@@ -96,7 +96,7 @@ introductory theory pages on the various models:
 
 The tensor mechanics module is being developed by users at national laboratories
 and universities around the world. Contact the developers through the
-[moose-users email list](help/contact_us.md).
+[moose-users email list](help/contact_us.md optional=True).
 
 ## Developing New Tensor Mechanics Code
 
@@ -104,4 +104,4 @@ Consider becoming a developer yourself.
 The tensor mechanics module uses code syntax based on tensor forms. This approach
 allows the constitutive tensor equations to be implemented, clearly and concisely,
 in the same format as written in mathematical notation.
-Follow the MOOSE standards for [contributing code and documentation](utilities/MooseDocs/generate.md).
+Follow the MOOSE standards for [contributing code and documentation](MooseDocs/generate.md optional=True).

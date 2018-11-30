@@ -134,7 +134,10 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         elif isinstance(page, pages.File):
             create_directory(page.destination)
             LOG.debug('COPY: %s-->%s', page.source, page.destination)
-            shutil.copyfile(page.source, page.destination)
+            if not os.path.exists(page.source):
+                LOG.error('Unknown file: %s', page.source)
+            else:
+                shutil.copyfile(page.source, page.destination)
 
         elif isinstance(page, pages.Directory):
             create_directory(page.destination)

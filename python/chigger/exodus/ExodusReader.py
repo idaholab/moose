@@ -95,7 +95,7 @@ class ExodusReader(base.ChiggerObject):
     NODAL = vtk.vtkExodusIIReader.NODAL
     ELEMENTAL = vtk.vtkExodusIIReader.ELEM_BLOCK
     GLOBAL = vtk.vtkExodusIIReader.GLOBAL
-    VARIABLE_TYPES = [NODAL, ELEMENTAL, GLOBAL]
+    VARIABLE_TYPES = [ELEMENTAL, NODAL, GLOBAL]
 
     # Information data structures
     BlockInformation = collections.namedtuple('BlockInformation', ['name', 'object_type',

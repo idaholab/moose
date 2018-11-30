@@ -176,7 +176,7 @@ class Translator(mixins.ConfigObject):
 
         return items
 
-    def findPage(self, arg):
+    def findPage(self, arg, throw_on_zero=True):
         """
         Locate a single Page object that has a local name ending with the supplied name.
 
@@ -185,8 +185,11 @@ class Translator(mixins.ConfigObject):
         """
         nodes = self.findPages(arg)
         if len(nodes) == 0:
-            msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
-            raise exceptions.MooseDocsException(msg)
+            if throw_on_zero:
+                msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
+                raise exceptions.MooseDocsException(msg)
+            else:
+                return None
 
         elif len(nodes) > 1:
             msg = "Multiple pages with a name that ends with '{}' were found:".format(arg)

@@ -2,7 +2,7 @@
 
 A beam element [fig_beam] is used to model the response of a structural element that is long in one dimension compared to its cross-section. There are two popular formulation of beam elements:
 
-!media media/tensor_mechanics_beam_representation.png
+!media media/tensor_mechanics/beam_representation.png
       style=width:50%;margin-left:2%;float:right
       id=fig_beam
       caption=Beam element with 2 nodes and 3 translational and 3 rotational degrees of freedom at each node.

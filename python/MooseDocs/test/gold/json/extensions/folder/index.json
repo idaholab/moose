@@ -111,6 +111,7 @@
                 {
                     "attributes": {
                         "bookmark": "", 
+                        "optional": false, 
                         "page": "folder/folder.md", 
                         "recursive": true
                     }, 
