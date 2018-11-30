@@ -1,0 +1,150 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADDGKernel.h"
+#include "Assembly.h"
+#include "MooseVariable.h"
+#include "Problem.h"
+#include "SubProblem.h"
+#include "NonlinearSystemBase.h"
+
+// libmesh includes
+#include "libmesh/threads.h"
+
+defineADBaseValidParams(ADDGKernel, DGKernel, params.registerBase("ADDGKernel"););
+
+template <ComputeStage compute_stage>
+ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)
+  : DGKernel(parameters),
+    _test(_var.phi()),
+    _grad_test(_var.gradPhi()),
+    _u(_var.adSln<compute_stage>()),
+    _grad_u(_var.adGradSln<compute_stage>())
+{
+}
+
+template <ComputeStage compute_stage>
+ADDGKernel<compute_stage>::~ADDGKernel()
+{
+}
+
+template <ComputeStage compute_stage>
+void
+ADDGKernel<compute_stage>::computeResidual()
+{
+  DGKernel::computeResidual();
+}
+
+template <>
+void
+ADDGKernel<JACOBIAN>::computeResidual()
+{
+}
+
+template <ComputeStage compute_stage>
+void
+ADDGKernel<compute_stage>::computeJacobian()
+{
+  DGKernel::computeJacobian();
+}
+
+template <>
+void
+ADDGKernel<RESIDUAL>::computeJacobian()
+{
+}
+
+template <ComputeStage compute_stage>
+void
+ADDGKernel<compute_stage>::computeElemNeighJacobian(Moose::DGJacobianType type)
+{
+  const VariableTestValue & test_space =
+      (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
+  const VariableTestValue & loc_phi =
+      (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+
+  if (type == Moose::ElementElement)
+    prepareMatrixTag(_assembly, _var.number(), _var.number());
+  else
+    prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), type);
+
+  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+    {
+      ADReal residual =
+        computeADQpResidual((type == Moose::ElementElement || type == Moose::NeighborElement)? Moose::Element: Moose::Neighbor);
+      for (_j = 0; _j < loc_phi.size(); _j++)
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
+    }
+
+  accumulateTaggedLocalMatrix();
+
+  if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor))
+  {
+    unsigned int rows = _local_ke.m();
+    DenseVector<Number> diag(rows);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
+
+    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
+    for (const auto & var : _diag_save_in)
+    {
+      if (type == Moose::ElementElement)
+        var->sys().solution().add_vector(diag, var->dofIndices());
+      else
+        var->sys().solution().add_vector(diag, var->dofIndicesNeighbor());
+    }
+  }
+}
+
+template <ComputeStage compute_stage>
+void
+ADDGKernel<compute_stage>::computeOffDiagJacobian(unsigned int jvar)
+{
+  DGKernel::computeOffDiagJacobian(jvar);
+}
+
+template <>
+void
+ADDGKernel<RESIDUAL>::computeOffDiagJacobian(unsigned int)
+{
+}
+
+template <ComputeStage compute_stage>
+void
+ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar)
+{
+  const VariableTestValue & test_space =
+      (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
+  const VariableTestValue & loc_phi =
+      (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+
+  if (type == Moose::ElementElement)
+    prepareMatrixTag(_assembly, _var.number(), jvar);
+  else
+    prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, type);
+
+  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+    {
+     ADReal residual =
+        computeADQpResidual((type == Moose::ElementElement || type == Moose::NeighborElement)? Moose::Element: Moose::Neighbor);
+      for (_j = 0; _j < loc_phi.size(); _j++)
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp]  * residual.derivatives()[ad_offset + _j];
+    }
+
+  accumulateTaggedLocalMatrix();
+}
+
+template class ADDGKernel<RESIDUAL>;
+template class ADDGKernel<JACOBIAN>;

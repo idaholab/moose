@@ -68,7 +68,7 @@ public:
   /**
    * The variable number that this kernel operates on.
    */
-  MooseVariable & variable();
+  virtual MooseVariable & variable();
 
   /**
    * Return a reference to the subproblem.
