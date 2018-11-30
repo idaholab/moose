@@ -88,6 +88,14 @@ a {
   margin-top:10px;
 }
 
+.card .card-content{
+    padding:10px;
+}
+
+.card-content img{
+    width:100%;
+}
+
 .moose-exception {
   color: red;
 }
