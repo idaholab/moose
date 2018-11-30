@@ -81,8 +81,7 @@ DerivativeMaterialInterfaceRelap<T>::declarePropertyDerivativeRelap(const std::s
                                                                     const std::string & var_name,
                                                                     const unsigned int i)
 {
-  return this->template declarePropertyDerivative<U>(base,
-                                                     this->template getVar(var_name, i)->name());
+  return this->template declarePropertyDerivative<U>(base, this->getVar(var_name, i)->name());
 }
 
 template <class T>
@@ -95,10 +94,10 @@ DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelap(
   const std::string prop_name = this->deducePropertyName(base);
 
   // get the name of the variable which derivative is respect to
-  const std::string der_var_name = this->template getVar(var_name, i)->name();
+  const std::string der_var_name = this->getVar(var_name, i)->name();
 
   return this->template getMaterialPropertyByName<U>(
-      this->template propertyNameFirst(prop_name, der_var_name));
+      this->propertyNameFirst(prop_name, der_var_name));
 }
 
 template <class T>
@@ -118,8 +117,8 @@ DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelapPhase(
   else
   {
     const std::string prop_name = this->deducePropertyName(base);
-    const std::string der_var_name = this->template getVar(var_name, i)->name();
-    const std::string der_prop_name = this->template propertyNameFirst(prop_name, der_var_name);
+    const std::string der_var_name = this->getVar(var_name, i)->name();
+    const std::string der_prop_name = this->propertyNameFirst(prop_name, der_var_name);
     return this->template getZeroMaterialProperty<U>(der_prop_name);
   }
 }
