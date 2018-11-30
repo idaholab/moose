@@ -735,10 +735,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     {
 #if !PETSC_VERSION_LESS_THAN(3, 9, 0)
       if (petsc_options_inames[i] == "-pc_factor_mat_solver_package")
-      {
         po.inames.push_back("-pc_factor_mat_solver_type");
-        mooseDeprecated("Please use -pc_factor_mat_solver_type for PETSc-3.9.x or higher");
-      }
       else
         po.inames.push_back(petsc_options_inames[i]);
 #else
