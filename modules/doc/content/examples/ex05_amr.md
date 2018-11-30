@@ -1,14 +1,28 @@
 # Example 05 : Automatic Mesh Adaptivity
 
+MOOSE has support for mesh adaptivity that can automatically refine and coarsen the mesh in areas
+of higher/lower error when solving problems.  This can improve the quality of your results in
+addition to reducing computation time. You don't need to write any C++ code to use mesh
+adaptivity. Instead, it can easily be enabled by filling out the `Adaptivity` section in an input
+file:
+
+!listing examples/ex05_amr/ex05.i block=Adaptivity
+
+More details about this functionality are provided on the [Adaptivity](syntax/Adaptivity/index.md)
+page.  MOOSE includes multiple [Indicators](Indicators/index.md) you can use to compute different
+error estimates in addition to a few [Markers](Markers/index.md).
+
 ## Results
 
+Mesh results from each refinement step in `ex05.i` are shown below:
+
 !media large_media/examples/ex5-mesh-0.png
+       style=width:50%;margin-left:0%;
        caption=Initial mesh
-       style=width:50%;
 
 !media large_media/examples/ex5-mesh-1.png
+       style=width:50%;margin-left:0%;
        caption=Adaptivity Step 1 
-       style=width:50%;
 
 !media large_media/examples/ex5-mesh-2.png
        caption=Adaptivity Step 2
@@ -30,9 +44,12 @@
        caption=Adaptivity Step 6
        style=width:50%;
 
+
+And here is the final solution after all refinement steps are complete:
+
 !media large_media/examples/ex5_out.png
        caption=Example 5 Output
-       style=width:50%;
+       style=width:80%;
 
 ## Complete Source Files
 
