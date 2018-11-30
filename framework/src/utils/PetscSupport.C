@@ -739,7 +739,10 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       else
         po.inames.push_back(petsc_options_inames[i]);
 #else
-      po.inames.push_back(petsc_options_inames[i]);
+      if (petsc_options_inames[i] == "-pc_factor_mat_solver_type")
+        po.inames.push_back("-pc_factor_mat_solver_package");
+      else
+        po.inames.push_back(petsc_options_inames[i]);
 #endif
       po.values.push_back(petsc_options_values[i]);
 
