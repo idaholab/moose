@@ -153,6 +153,12 @@ StressDivergenceTensors::computeQpResidual()
 void
 StressDivergenceTensors::computeJacobian()
 {
+  if (_volumetric_locking_correction)
+  {
+    computeAverageGradientTest();
+    computeAverageGradientPhi();
+  }
+
   if (_use_finite_deform_jacobian)
   {
     _finite_deform_Jacobian_mult.resize(_qrule->n_points());
@@ -163,19 +169,18 @@ StressDivergenceTensors::computeJacobian()
     ALEKernel::computeJacobian();
   }
   else
-  {
-    if (_volumetric_locking_correction)
-    {
-      computeAverageGradientTest();
-      computeAverageGradientPhi();
-    }
     Kernel::computeJacobian();
-  }
 }
 
 void
 StressDivergenceTensors::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
+  if (_volumetric_locking_correction)
+  {
+    computeAverageGradientPhi();
+    computeAverageGradientTest();
+  }
+
   if (_use_finite_deform_jacobian)
   {
     _finite_deform_Jacobian_mult.resize(_qrule->n_points());
@@ -186,14 +191,7 @@ StressDivergenceTensors::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     ALEKernel::computeOffDiagJacobian(jvar);
   }
   else
-  {
-    if (_volumetric_locking_correction)
-    {
-      computeAverageGradientPhi();
-      computeAverageGradientTest();
-    }
     Kernel::computeOffDiagJacobian(jvar);
-  }
 }
 
 Real
