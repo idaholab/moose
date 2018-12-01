@@ -61,7 +61,8 @@ class MediaCommandBase(command.CommandComponent):
             node = self.translator.findPage(src)
             location = unicode(node.relativeSource(page))
 
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+                                  **self.attributes)
         self.createMedia(flt, info, page, location, **self.attributes)
         if flt.children[0].name == 'Caption':
             cap = flt.children[0]
@@ -74,7 +75,10 @@ class ImageCommand(MediaCommandBase):
     SUBCOMMAND = ('jpg', 'jpeg', 'gif', 'png', 'svg', None)
 
     def createMedia(self, parent, info, page, src, **kwargs):
-        return Image(parent, src=src, **kwargs)
+        if parent.name == 'Float':
+            return Image(parent, src=src)
+        else:
+            return Image(parent, src=src, **kwargs)
 
 class VideoCommand(MediaCommandBase):
     COMMAND = 'media'
