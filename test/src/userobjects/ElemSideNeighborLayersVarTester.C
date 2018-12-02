@@ -9,6 +9,8 @@
 
 #include "libmesh/parallel.h"
 
+#include "unistd.h"
+
 registerMooseObject("MooseTestApp", ElemSideNeighborLayersVarTester);
 
 template <>
@@ -20,9 +22,8 @@ validParams<ElemSideNeighborLayersVarTester>()
       "Tests whether a coupled variable is correctly ghosted.  This code needs to be cleaned up");
   params.addRequiredParam<unsigned int>("rank", "The rank for which the ghosted data are recorded");
 
-  params.registerRelationshipManagers("ElementSideNeighborLayers");
-  params.addRequiredParam<unsigned short>("element_side_neighbor_layers",
-                                          "Number of layers to ghost");
+  params.registerRelationshipManagers("ElementSideNeighborLayers", "GEOMETRIC ALGEBRAIC");
+  params.addParam<unsigned short>("element_side_neighbor_layers", 1, "Number of layers to ghost");
   params.addRequiredCoupledVar("u",
                                "The variable that is ghosted.  At nodes where this is NOT ghosted, "
                                "this UserObject will set the variable to -1, so to visualise the "
@@ -46,10 +47,13 @@ ElemSideNeighborLayersVarTester::timestepSetup()
 
   if (my_processor_id == _rank)
   {
-    // here i'm looping over *all* elements for a replicated mesh and that seems a waste: only
-    // Evaluable+ghost would be better
-    for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
+    // This loops over *all* elements for a replicated mesh and local+ghosted for distributed:
+    // for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
+    //
+    // This loops over local + 1 layer for replicated and distributed
+    for (const auto & elem : _fe_problem.getEvaluableElementRange())
     {
+      Moose::err << "rank=" << my_processor_id << " elem=" << elem->id() << std::endl;
       for (unsigned i = 0; i < elem->n_nodes(); ++i)
       {
         const dof_id_type node_id = elem->node_id(i);
