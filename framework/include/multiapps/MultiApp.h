@@ -417,6 +417,9 @@ protected:
 
   /// Backups for each local App
   SubAppBackups & _backups;
+
+  /// Storage for command line arguments
+  const std::vector<std::string> & _cli_args;
 };
 
 template <>

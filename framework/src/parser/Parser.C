@@ -405,11 +405,11 @@ Parser::walk(const std::string & fullpath, const std::string & nodepath, hit::No
 }
 
 std::string
-Parser::hitCLIFilter(std::string appname, int argc, char * argv[])
+Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 {
   std::string hit_text;
   bool afterDoubleDash = false;
-  for (int i = 1; i < argc; i++)
+  for (std::size_t i = 1; i < argv.size(); i++)
   {
     std::string arg(argv[i]);
 
@@ -512,10 +512,7 @@ Parser::parse(const std::string & input_filename)
   try
   {
     _root.reset(hit::parse(_input_filename, input));
-
-    int argc = _app.commandLine()->argc();
-    char ** argv = _app.commandLine()->argv();
-    auto cli_input = hitCLIFilter(_app.name(), argc, argv);
+    auto cli_input = hitCLIFilter(_app.name(), _app.commandLine()->getArguments());
 
     _cli_root.reset(hit::parse("CLI_ARGS", cli_input));
     hit::explode(_cli_root.get());
@@ -614,10 +611,12 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   if (warn_unused)
   {
     for (auto arg : cli->unused(comm))
-      _warnmsg +=
-          hit::errormsg(
-              "CLI_ARG", nullptr, "unused command line parameter '", cli->argv()[arg], "'") +
-          "\n";
+      _warnmsg += hit::errormsg("CLI_ARG",
+                                nullptr,
+                                "unused command line parameter '",
+                                cli->getArguments()[arg],
+                                "'") +
+                  "\n";
     for (auto & msg : uwcli.errors)
       _warnmsg += msg + "\n";
     for (auto & msg : uw.errors)
@@ -626,8 +625,11 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   else if (err_unused)
   {
     for (auto arg : cli->unused(comm))
-      _errmsg += hit::errormsg(
-                     "CLI_ARG", nullptr, "unused command line parameter '", cli->argv()[arg], "'") +
+      _errmsg += hit::errormsg("CLI_ARG",
+                               nullptr,
+                               "unused command line parameter '",
+                               cli->getArguments()[arg],
+                               "'") +
                  "\n";
     for (auto & msg : uwcli.errors)
       _errmsg += msg + "\n";

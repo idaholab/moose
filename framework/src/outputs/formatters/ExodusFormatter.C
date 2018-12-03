@@ -33,10 +33,8 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
   _ss << "### Command Line Arguments ###\n";
   if (wh.mooseApp().commandLine())
   {
-    auto argc = wh.mooseApp().commandLine()->argc();
-    auto argv = wh.mooseApp().commandLine()->argv();
-    for (int i = 1; i < argc; i++)
-      _ss << " " << argv[i];
+    for (const auto & arg : wh.mooseApp().commandLine()->getArguments())
+      _ss << " " << arg;
   }
   if (wh.mooseApp().getSystemInfo() != NULL)
   {
