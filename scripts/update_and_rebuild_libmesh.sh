@@ -111,6 +111,16 @@ fi
 
 cd $SCRIPT_DIR/../libmesh
 
+# If there is no package in envirment
+# We use petsc submodule
+if [ -z "$PETSC_DIR" ]; then
+  echo "We can not find an installed PETSc, and PETSc submodule will be used"
+  echo "You may see some test fails until we officely support this new PETSc"
+  echo "If did not run update_and_rebuild_petsc.sh yet, please run it before building libMesh"
+  export PETSC_DIR=$SCRIPT_DIR/../petsc
+  export PETSC_ARCH=arch-moose
+fi
+
 # If we're not going fast, remove the build directory and reconfigure
 if [ -z "$go_fast" ]; then
   rm -rf build

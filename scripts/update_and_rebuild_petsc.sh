@@ -14,7 +14,7 @@ do
 
   if [ "$i" == "--skip-submodule-update" ]; then
     skip_sub_update=1;
-  else # Remove the skip submodule update argument before passing to libMesh configure
+  else # Remove the skip submodule update argument before passing to PETSc configure
     set -- "$@" "$i"
   fi
 done
@@ -40,10 +40,7 @@ if [[ -n "$help" ]]; then
   exit 0
 fi
 
-# If --fast was used, it means we are going to skip configure, so
-# don't allow the user to pass any other flags (with the exception
-# of --skip-submodule-update) to the script thinking they are going
-# to do something.
+
 if [[ -n "$go_fast" && $# != 1 ]]; then
   echo "Error: --fast can only be used by itself or with --skip-submodule-update."
   echo "Try again, removing either --fast or all other conflicting arguments!"
@@ -63,10 +60,6 @@ if [[ -z "$go_fast" && -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]
   git submodule update --init --recursive petsc
   if [[ $? != 0 ]]; then
     echo "git submodule command failed, are your proxy settings correct?"
-    # TODO: is this a git bug?
-    # failed attempts with `git submodule update` deletes the submodule directory.
-    # So re-create it to prevent a diff.
-    mkdir libmesh
     exit 1
   fi
 fi
@@ -78,16 +71,28 @@ cd $SCRIPT_DIR/../petsc
 if [ -z "$go_fast" ]; then
   rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
 
-  ./configure --with-debugging=no \
-               --with-mpi=1 \
-               --download-fblaslapack=1 \
-               --download-metis=1 \
-               --download-parmetis=1 \
-               --download-superlu_dist=1 \
-               --download-hypre=1 \
-               --download-mumps=1 \
-               --download-scalapack=1 \
-               --download-ptscotch=1 \
+  ./configure --download-hypre=1 \
+      --with-ssl=0 \
+      --with-debugging=no \
+      --with-pic=1 \
+      --with-shared-libraries=1 \
+      --with-cc=mpicc \
+      --with-cxx=mpicxx \
+      --with-fc=mpif90 \
+      --download-fblaslapack=1 \
+      --download-metis=1 \
+      --download-ptscotch=1 \
+      --download-parmetis=1 \
+      --download-superlu_dist=1 \
+      --download-mumps=1 \
+      --download-scalapack=1 \
+      -CC=mpicc -CXX=mpicxx -FC=mpif90 -F77=mpif77 -F90=mpif90 \
+      -CFLAGS='-fPIC -fopenmp' \
+      -CXXFLAGS='-fPIC -fopenmp' \
+      -FFLAGS='-fPIC -fopenmp' \
+      -FCFLAGS='-fPIC -fopenmp' \
+      -F90FLAGS='-fPIC -fopenmp' \
+      -F77FLAGS='-fPIC -fopenmp' \
 
    make all
 else
