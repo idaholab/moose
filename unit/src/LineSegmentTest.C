@@ -434,7 +434,9 @@ TEST_F(LineSegmentTest, lineIntersectTest)
   EXPECT_TRUE(t5.intersect(_pos3x, result));
   EXPECT_FALSE(t5.intersect(t4, result));
   EXPECT_TRUE(t5.intersect(_neg3y, result));
-  EXPECT_EQ(result, Point(0, 0, 0));
+  EXPECT_NEAR(result(0), 0., 1e-16);
+  EXPECT_NEAR(result(1), 0., 1e-16);
+  EXPECT_NEAR(result(2), 0., 1e-16);
 
   // Switch some of the a.intersect(b) tests to b.intersect(a) to make sure we get the same result
   EXPECT_FALSE(t2.intersect(t1, result));

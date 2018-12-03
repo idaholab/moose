@@ -543,7 +543,7 @@ TEST(HitTests, Formatter_sorting)
   };
   // clang-format on
 
-  for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
+  for (size_t i = 0; i < sizeof(cases) / sizeof(SortCase); i++)
   {
     auto test = cases[i];
     std::string got;

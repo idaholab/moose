@@ -72,6 +72,7 @@
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D plane strain single point contact model using the contact line
     search solver options."
+    compiler = 'GCC CLANG'
   [../]
   [./mu_0_0_kin]
     type = 'CSVDiff'

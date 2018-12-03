@@ -1,0 +1,47 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.90) Modified: 2018-02-15
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#             Run on    2018/11/29   07:59:12 MST
+#  *****************************************************************
+
+#  FILE 1: /Users/slauae/projects/moose/modules/tensor_mechanics/test/tests/capped_weak_plane/gold/pull_and_shear_1step.e
+#   Title: pull_and_shear_1step.e
+#          Dim = 3, Blocks = 1, Nodes = 18, Elements = 4, Nodesets = 7, Sidesets = 6
+#          Vars: Global = 0, Nodal = 3, Element = 25, Nodeset = 0, Sideset = 0, Times = 2
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 0.0
+	disp_y  # min:               0 @ t1,n1	max:               0 @ t1,n1
+	disp_z  # min:               0 @ t1,n1	max:               1 @ t2,n2
+
+ELEMENT VARIABLES relative 1.e-6 floor 0.0
+	stress_xz      # min:               0 @ t1,b0,e1	max:   2.3964126e+08 @ t2,b0,e1
+	stress_zz      # min:               0 @ t1,b0,e1	max:        64573991 @ t2,b0,e3
+	strainp_zz     # min:               0 @ t1,b0,e1	max:     0.012511211 @ t2,b0,e1
+	straint_xz     # min:               0 @ t1,b0,e1	max:     0.018721973 @ t2,b0,e1
+	straint_zz     # min:               0 @ t1,b0,e1	max:     0.012511211 @ t2,b0,e1
+	f_shear        # min:               0 @ t1,b0,e1	max:           1e+60 @ t2,b0,e1
+	f_tensile      # min:               0 @ t1,b0,e1	max:        64573991 @ t2,b0,e3
+	f_compressive  # min:               0 @ t1,b0,e1	max:           1e+80 @ t2,b0,e1
+	intnl_tensile  # min:               0 @ t1,b0,e1	max:     0.012511211 @ t2,b0,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
