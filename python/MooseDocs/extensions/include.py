@@ -35,7 +35,6 @@ class IncludeExtension(command.CommandExtension):
     def addDependency(self, page):
         self.__dependencies.add(page.uid)
 
-
 class IncludeCommand(command.CommandComponent):
     COMMAND = 'include'
     SUBCOMMAND = 'md' #TODO: get this from the reader inside the __init__ method.

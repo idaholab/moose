@@ -28,7 +28,7 @@ class Page(mooseutils.AutoPropertyMixin):
 
         self._fullname = fullname            # local path of the node
         self._name = fullname.split('/')[-1] # file/folder name
-        self.__unique_id = uuid.uuid4()      # a unique identifer
+        self.__unique_id = uuid.uuid4()      # a unique identifier
 
     @property
     def uid(self):
@@ -49,14 +49,6 @@ class Page(mooseutils.AutoPropertyMixin):
     def destination(self):
         """Returns the translator destination location."""
         return os.path.join(self.base, self.local)
-
-    def modified(self):
-        """
-        Returns True if the content has been modified from the last call.
-        """
-        if self.source and os.path.exists(self.source):
-            return os.path.getmtime(self.source) > self._modified
-        return True
 
     def relativeSource(self, other):
         """ Location of this page related to the other page."""

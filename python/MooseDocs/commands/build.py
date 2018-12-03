@@ -123,7 +123,6 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
             if source == page.source:
                 return page
 
-
         # Build a list of all filenames
         filenames = common.get_files(self._items, self._translator.reader.EXTENSIONS, False)
 
@@ -135,8 +134,8 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                 page.base = self._translator.get('destination')
                 if isinstance(page, pages.Source):
                     page.output_extension = self._translator.renderer.EXTENSION
+                self._translator.content.append(page)
                 return page
-
 
 def _init_large_media():
     """Check submodule for large_media."""
