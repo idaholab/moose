@@ -17,6 +17,7 @@
   int_width = 0.8
   x1 = 0
   y1 = 0
+  derivative_order = 2
   enable_jit = false
 []
 
@@ -31,8 +32,14 @@
 
 [AuxVariables]
   [./bnds]
-    order = FIRST
-    family = LAGRANGE
+  [../]
+[]
+
+[AuxKernels]
+  [./bnds]
+    type = BndsCalcAux
+    variable = bnds
+    v = 'etaa0 etab0'
   [../]
 []
 
@@ -76,7 +83,6 @@
     [../]
   [../]
 []
-
 
 [Kernels]
 # Order parameter eta_alpha0
@@ -148,13 +154,11 @@
     type = SusceptibilityTimeDerivative
     variable = w
     f_name = chi
-    args = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
     variable = w
     D_name = Dchi
-    args = ''
   [../]
   [./coupled_etaa0dot]
     type = CoupledSwitchingTimeDerivative
@@ -173,8 +177,6 @@
     args = 'etaa0 etab0'
   [../]
 []
-
-
 
 [Materials]
   [./ha]
@@ -195,7 +197,6 @@
     f_name = omegaa
     material_property_names = 'Vm ka caeq'
     function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
-    derivative_order = 2
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
@@ -203,7 +204,6 @@
     f_name = omegab
     material_property_names = 'Vm kb cbeq'
     function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
-    derivative_order = 2
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
@@ -211,7 +211,6 @@
     f_name = rhoa
     material_property_names = 'Vm ka caeq'
     function = 'w/Vm^2/ka + caeq/Vm'
-    derivative_order = 2
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
@@ -219,7 +218,6 @@
     f_name = rhob
     material_property_names = 'Vm kb cbeq'
     function = 'w/Vm^2/kb + cbeq/Vm'
-    derivative_order = 2
   [../]
   [./kappaa]
     type = InterfaceOrientationMultiphaseMaterial
@@ -228,6 +226,8 @@
     d2kappadgrad_etaa_name = d2kappadgrad_etaa
     etaa = etaa0
     etab = etab0
+    outputs = exodus
+    output_properties = 'kappaa dkappadgrad_etaa'
   [../]
   [./kappab]
     type = InterfaceOrientationMultiphaseMaterial
@@ -236,18 +236,19 @@
     d2kappadgrad_etaa_name = d2kappadgrad_etab
     etaa = etab0
     etab = etaa0
+    outputs = exodus
+    output_properties = 'kappab dkappadgrad_etab'
   [../]
   [./const]
     type = GenericConstantMaterial
-    prop_names =  'kappa_c   L   D    chi  Vm   ka    caeq kb    cbeq  gab mu'
-    prop_values = '0         1.0 1.0  0.1  1.0  10.0  0.1  10.0  0.9   4.5 10.0'
+    prop_names =  'L   D    chi  Vm   ka    caeq kb    cbeq  gab mu'
+    prop_values = '1.0 1.0  0.1  1.0  10.0  0.1  10.0  0.9   4.5 10.0'
   [../]
   [./Mobility]
-    type = DerivativeParsedMaterial
+    type = ParsedMaterial
     f_name = Dchi
     material_property_names = 'D chi'
     function = 'D*chi'
-    derivative_order = 2
   [../]
 []
 
@@ -267,11 +268,7 @@
   nl_rel_tol = 1.0e-8
   nl_abs_tol = 1e-8
   num_steps = 2
-  [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 0.001
-  [../]
-
+  dt = 0.001
 []
 
 [Outputs]

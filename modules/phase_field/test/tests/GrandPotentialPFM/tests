@@ -19,7 +19,8 @@
     type = 'Exodiff'
     input = 'GrandPotentialAnisotropy.i'
     exodiff = 'GrandPotentialAnisotropy_out.e'
-    issues = '#11802'
+    abs_zero = 1e-8
+    issues = '#11802 #12554'
     design = '/ACInterface2DMultiPhase1.md /ACInterface2DMultiPhase2.md /InterfaceOrientationMultiphaseMaterial.md'
     requirement = 'MOOSE shall provide a Grand Potential based dendritic solidification capability in 2D'
   [../]

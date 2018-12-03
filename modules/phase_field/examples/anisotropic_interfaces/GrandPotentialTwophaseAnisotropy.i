@@ -7,6 +7,7 @@
   xmax = 4
   ymin = -4
   ymax = 4
+  uniform_refine = 2
 []
 
 [GlobalParams]
@@ -14,6 +15,7 @@
   int_width = 0.3
   x1 = 0
   y1 = 0
+  derivative_order = 2
 []
 
 [Variables]
@@ -27,8 +29,14 @@
 
 [AuxVariables]
   [./bnds]
-    order = FIRST
-    family = LAGRANGE
+  [../]
+[]
+
+[AuxKernels]
+  [./bnds]
+    type = BndsCalcAux
+    variable = bnds
+    v = 'etaa0 etab0'
   [../]
 []
 
@@ -72,7 +80,6 @@
     [../]
   [../]
 []
-
 
 [Kernels]
 # Order parameter eta_alpha0
@@ -144,13 +151,11 @@
     type = SusceptibilityTimeDerivative
     variable = w
     f_name = chi
-    args = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
     variable = w
     D_name = Dchi
-    args = ''
   [../]
   [./coupled_etaa0dot]
     type = CoupledSwitchingTimeDerivative
@@ -169,7 +174,6 @@
     args = 'etaa0 etab0'
   [../]
 []
-
 
 [Materials]
   [./ha]
@@ -190,8 +194,6 @@
     f_name = omegaa
     material_property_names = 'Vm ka caeq'
     function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
-    derivative_order = 2
-    enable_jit = false
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
@@ -199,8 +201,6 @@
     f_name = omegab
     material_property_names = 'Vm kb cbeq'
     function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
-    derivative_order = 2
-    enable_jit = false
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
@@ -208,8 +208,6 @@
     f_name = rhoa
     material_property_names = 'Vm ka caeq'
     function = 'w/Vm^2/ka + caeq/Vm'
-    derivative_order = 2
-    enable_jit = false
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
@@ -217,8 +215,6 @@
     f_name = rhob
     material_property_names = 'Vm kb cbeq'
     function = 'w/Vm^2/kb + cbeq/Vm'
-    derivative_order = 2
-    enable_jit = false
   [../]
   [./kappaa]
     type = InterfaceOrientationMultiphaseMaterial
@@ -227,6 +223,8 @@
     d2kappadgrad_etaa_name = d2kappadgrad_etaa
     etaa = etaa0
     etab = etab0
+    outputs = exodus
+    output_properties = 'kappaa'
   [../]
   [./kappab]
     type = InterfaceOrientationMultiphaseMaterial
@@ -235,19 +233,19 @@
     d2kappadgrad_etaa_name = d2kappadgrad_etab
     etaa = etab0
     etab = etaa0
+    outputs = exodus
+    output_properties = 'kappab'
   [../]
   [./const]
     type = GenericConstantMaterial
-    prop_names =  'kappa_c   L   D    chi  Vm   ka    caeq kb    cbeq  gab mu'
-    prop_values = '0         1.0 1.0  0.1  1.0  10.0  0.1  10.0  0.9   4.5 10.0'
+    prop_names =  'L   D    chi  Vm   ka    caeq kb    cbeq  gab mu'
+    prop_values = '1.0 1.0  0.1  1.0  10.0  0.1  10.0  0.9   4.5 10.0'
   [../]
   [./Mobility]
-    type = DerivativeParsedMaterial
+    type = ParsedMaterial
     f_name = Dchi
     material_property_names = 'D chi'
     function = 'D*chi'
-    derivative_order = 2
-    enable_jit = false
   [../]
 []
 
@@ -264,7 +262,6 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      31'
-
   l_tol = 1.0e-3
   l_max_its = 30
   nl_max_its = 15
@@ -272,18 +269,42 @@
   nl_abs_tol = 1e-8
   end_time = 10.0
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = IterationAdaptiveDT
     dt = 0.0005
+    cutback_factor = 0.7
+    growth_factor = 1.2
   [../]
-  [./Adaptivity]
-    initial_adaptivity = 3 # Number of times mesh is adapted to initial condition
-    refine_fraction = 0.7 # Fraction of high error that will be refined
-    coarsen_fraction = 0.1 # Fraction of low error that will coarsened
-    max_h_level = 3 # Max number of refinements used, starting from initial mesh (before uniform refinement)
-    weight_names = 'etaa0 etab0 w'
-    weight_values = '1 1 1'
-  [../]
+[]
 
+[Adaptivity]
+ initial_steps = 5
+ max_h_level = 3
+ initial_marker = err_eta
+ marker = err_bnds
+[./Markers]
+   [./err_eta]
+     type = ErrorFractionMarker
+     coarsen = 0.3
+     refine = 0.95
+     indicator = ind_eta
+   [../]
+   [./err_bnds]
+     type = ErrorFractionMarker
+     coarsen = 0.3
+     refine = 0.95
+     indicator = ind_bnds
+   [../]
+ [../]
+ [./Indicators]
+   [./ind_eta]
+     type = GradientJumpIndicator
+     variable = etaa0
+    [../]
+    [./ind_bnds]
+      type = GradientJumpIndicator
+      variable = bnds
+   [../]
+ [../]
 []
 
 [Outputs]
