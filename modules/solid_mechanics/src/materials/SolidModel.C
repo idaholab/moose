@@ -102,11 +102,6 @@ validParams<SolidModel>()
   params.addParam<bool>("compute_JIntegral", false, "Whether to compute the J Integral.");
   params.addParam<bool>(
       "compute_InteractionIntegral", false, "Whether to compute the Interaction Integral.");
-  params.addParam<bool>("store_stress_older",
-                        false,
-                        "Parameter which indicates whether the older "
-                        "stress state, required for HHT time "
-                        "integration, needs to be stored");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
@@ -217,7 +212,6 @@ SolidModel::SolidModel(const InputParameters & parameters)
     _strain_increment(0),
     _compute_JIntegral(getParam<bool>("compute_JIntegral")),
     _compute_InteractionIntegral(getParam<bool>("compute_InteractionIntegral")),
-    _store_stress_older(getParam<bool>("store_stress_older")),
     _SED(NULL),
     _SED_old(NULL),
     _Eshelby_tensor(NULL),

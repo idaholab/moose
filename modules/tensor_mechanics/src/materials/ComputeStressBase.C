@@ -20,12 +20,6 @@ validParams<ComputeStressBase>()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
-  params.addParam<bool>("store_stress_old",
-                        false,
-                        "Parameter which indicates whether the old "
-                        "stress state, required for the HHT time "
-                        "integration scheme and Rayleigh damping, needs "
-                        "to be stored");
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
@@ -39,8 +33,7 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
     _elastic_strain(declareProperty<RankTwoTensor>(_base_name + "elastic_strain")),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
-    _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _store_stress_old(getParam<bool>("store_stress_old"))
+    _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult"))
 {
 
   if (getParam<bool>("use_displaced_mesh"))

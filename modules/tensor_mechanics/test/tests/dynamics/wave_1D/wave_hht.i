@@ -238,7 +238,6 @@
 
   [./stress]
     type = ComputeLinearElasticStress
-    store_stress_old = true
     block = 0
   [../]
 

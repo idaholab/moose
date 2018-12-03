@@ -12,8 +12,6 @@
 #
 # Here M is the mass matrix, K is the stiffness matrix
 #
-# store_stress_older should be set to true in material model
-#
 # The displacement at the second, third and fourth node at t = 0.1 are
 # -7.776268399030435152e-02, 1.949967184623528985e-02 and -4.615737877580032046e-03, respectively
 [GlobalParams]
@@ -253,7 +251,6 @@
      youngs_modulus = 1
      poissons_ratio = 0
      thermal_expansion = 0
-     store_stress_older = true
    [../]
     [./density]
     type = GenericConstantMaterial

@@ -25,10 +25,6 @@
 # The system will come to steady state slowly after the pressure
 # becomes constant.  Alpha equal to zero will result in Newmark
 # integration.
-#
-# The store_stress_older flag in the SolidModel material model needs
-# to be turned on to store stress older. In this example, this flag is
-# turned on using the child class Elastic.
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -299,7 +295,6 @@
     youngs_modulus = 210e+09
     poissons_ratio = 0
     thermal_expansion = 0
-    store_stress_older = true
   [../]
 
   [./density]
