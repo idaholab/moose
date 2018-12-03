@@ -16,7 +16,6 @@
   x1 = 0.0
   y1 = 0.0
   derivative_order = 2
-  enable_jit = true
 []
 
 [Variables]
@@ -246,11 +245,10 @@
     prop_values = '33.33 1.0  0.1  1.0  10.0  0.1  10.0  0.9   4.5 10.0 1.0 5.0'
   [../]
   [./Mobility]
-    type = DerivativeParsedMaterial
+    type = ParsedMaterial
     f_name = Dchi
     material_property_names = 'D chi'
     function = 'D*chi'
-    derivative_order = 0
   [../]
 []
 
