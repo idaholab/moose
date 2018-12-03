@@ -35,6 +35,7 @@ protected:
 
   const GlobalStrainUserObjectInterface & _pst;
   const VectorValue<bool> & _periodic_dir;
+  const Point _ref_point;
 
   const unsigned int _dim;
   const unsigned int _ndisp;
