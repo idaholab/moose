@@ -27,6 +27,8 @@ public:
 
   virtual Real value(Real t, const Point & p) override;
 
+  virtual Real timeDerivative(Real t, const Point & p) override;
+
 protected:
   const Real & _value;
 };

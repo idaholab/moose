@@ -31,3 +31,9 @@ ConstantFunction::value(Real, const Point &)
 {
   return _value;
 }
+
+Real
+ConstantFunction::timeDerivative(Real, const Point &)
+{
+  return 0.0;
+}
