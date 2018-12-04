@@ -19,10 +19,12 @@ The total strain $\epsilon_{ij}^{total}$ at any point is calculated considering 
 where $\epsilon_{ij}$ are the [strain components](/ComputeSmallStrain.md) calculated from the displacement gradients, $\epsilon_{ij}^g$ are the global strain components, and $\epsilon_{ij}^0$ are the eigen strain components. An additional [displacement field](/GlobalDisplacementAux.md) $\boldsymbol u^g$ is generated to visualize the effect of the global strain as
 
 \begin{equation} \label{eq:dispg_eq}
-\boldsymbol {u}^g = \boldsymbol {r} \boldsymbol{\epsilon}^g
+\boldsymbol {u}^g = (\boldsymbol {r} - \boldsymbol {r}_{0}) \boldsymbol{\epsilon}^g
 \end{equation}
 
-where $\boldsymbol{r}$ is the position vector and $\boldsymbol{\epsilon}^g$ is the global strain tensor. Then, the total displacement is represented as
+where $\boldsymbol {r}$ is the position vector, $\boldsymbol{r}_{0}$ is the location of the reference point, and $\boldsymbol{\epsilon}^g$ is the global strain tensor. The reference point could be any fixed ($\boldsymbol {u}^{total} = \boldsymbol {0}$) point in the domain. For maintaining periodicity, it is recommended to fix the center point of the simulation domain as the reference point.
+
+The total displacement is represented as
 
 \begin{equation} \label{eq:disp_eq}
 	\boldsymbol {u}^{total} = \boldsymbol {u} + \boldsymbol {u}^g
