@@ -51,13 +51,15 @@ ThermalSiliconCarbideProperties::molarMass() const
 void
 ThermalSiliconCarbideProperties::computeIsobaricSpecificHeat()
 {
-  _cp[_qp] = 925.65 + 0.3772 * _temperature[_qp] - 7.9259e-5 * std::pow(_temperature[_qp], 2.0) - 3.1946e7 * std::pow(_temperature[_qp], -2.0);
+  _cp[_qp] = 925.65 + 0.3772 * _temperature[_qp] - 7.9259e-5 * std::pow(_temperature[_qp], 2.0) -
+             3.1946e7 * std::pow(_temperature[_qp], -2.0);
 }
 
 void
 ThermalSiliconCarbideProperties::computeIsobaricSpecificHeatDerivatives()
 {
-  _dcp_dT[_qp] = 0.3772 - 7.9259e-5 * 2.0 * _temperature[_qp] - 3.1946e7 * -2.0 * std::pow(_temperature[_qp], -3.0);
+  _dcp_dT[_qp] = 0.3772 - 7.9259e-5 * 2.0 * _temperature[_qp] -
+                 3.1946e7 * -2.0 * std::pow(_temperature[_qp], -3.0);
 }
 
 void

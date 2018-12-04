@@ -31,7 +31,8 @@ validParams<ThermalStainlessSteel316Properties>()
   return params;
 }
 
-ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(const InputParameters & parameters)
+ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(
+    const InputParameters & parameters)
   : ThermalSolidPropertiesMaterial(parameters),
     _surface(getParam<MooseEnum>("surface").getEnum<surface::SurfaceEnum>()),
     _constant_emissivity(parameters.isParamSetByUser("emissivity") ? true : false),
@@ -78,7 +79,8 @@ ThermalStainlessSteel316Properties::computeThermalConductivityDerivatives()
 void
 ThermalStainlessSteel316Properties::computeDensity()
 {
-  _rho[_qp] = -4.454e-5 * _temperature[_qp] * _temperature[_qp] - 0.4297 * _temperature[_qp] + 8089.4;
+  _rho[_qp] =
+      -4.454e-5 * _temperature[_qp] * _temperature[_qp] - 0.4297 * _temperature[_qp] + 8089.4;
 }
 
 void
@@ -87,8 +89,8 @@ ThermalStainlessSteel316Properties::computeDensityDerivatives()
   _drho_dT[_qp] = -4.454e-5 * 2.0 * _temperature[_qp] - 0.4297;
 }
 
-//Real
-//ThermalStainlessSteel316Properties::surface_emissivity() const
+// Real
+// ThermalStainlessSteel316Properties::surface_emissivity() const
 //{
 //  if (_constant_emissivity)
 //    return _emissivity;

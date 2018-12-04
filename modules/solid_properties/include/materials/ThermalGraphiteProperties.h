@@ -126,7 +126,7 @@ public:
    * a user-specified constant value may ne specified.
    * @return surface emissivity (unitless)
    */
-  //Real surfaceEmissivity() const;
+  // Real surfaceEmissivity() const;
 
 protected:
   /**

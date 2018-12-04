@@ -82,7 +82,7 @@ public:
    * Surface emissivity (total, integrated) as a function of temperature (K)
    * @return surface emissivity (unitless)
    */
-  //virtual Real surface_emissivity() const override;
+  // virtual Real surface_emissivity() const override;
 
 protected:
   /// The state of the surface, 'oxidized' or 'polished', used in estimating emissivity
