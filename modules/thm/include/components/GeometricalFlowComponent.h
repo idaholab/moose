@@ -94,7 +94,7 @@ protected:
   const UserObjectName _rdg_int_var_uo_name;
 
   /// Slope reconstruction type for rDG
-  const FlowModel::ESlopeReconstructionType _rdg_slope_reconstruction;
+  const MooseEnum _rdg_slope_reconstruction;
 
   /// Use implicit time integration for rDG
   const bool _implicit_rdg;

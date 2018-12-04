@@ -67,10 +67,6 @@ FlowModelSinglePhase::addMooseObjects()
 {
   FlowModel::addCommonMooseObjects();
 
-  const InputParameters & pars = _pipe.parameters();
-
-  const std::string fp_name = pars.get<UserObjectName>("fp");
-
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
@@ -78,7 +74,7 @@ FlowModelSinglePhase::addMooseObjects()
   {
     const std::string class_name = "NumericalFlux3EqnHLLC";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<UserObjectName>("fluid_properties") = fp_name;
+    params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, _numerical_flux_name, params);
   }
@@ -317,7 +313,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("e") = cv_internal_energy;
     params.set<std::vector<VariableName>>("v") = cv_v;
-    params.set<UserObjectName>("fp") = fp_name;
+    params.set<UserObjectName>("fp") = _fp_name;
     _sim.addAuxKernel(class_name, Component::genName(_comp_name, "pressure_uv_auxkernel"), params);
   }
   {
@@ -327,7 +323,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("e") = cv_internal_energy;
     params.set<std::vector<VariableName>>("v") = cv_v;
-    params.set<UserObjectName>("fp") = fp_name;
+    params.set<UserObjectName>("fp") = _fp_name;
     _sim.addAuxKernel(class_name, Component::genName(_comp_name, "T_auxkernel"), params);
   }
 

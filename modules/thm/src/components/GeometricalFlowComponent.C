@@ -26,8 +26,7 @@ GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & param
                                                              : FlowModel::AREA),
     _numerical_flux_name(genName(name(), "numerical_flux")),
     _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),
-    _rdg_slope_reconstruction(
-        getEnumParam<FlowModel::ESlopeReconstructionType>("rdg_slope_reconstruction")),
+    _rdg_slope_reconstruction(getParam<MooseEnum>("rdg_slope_reconstruction")),
     _implicit_rdg(getParam<bool>("implicit_rdg"))
 {
   if (_spatial_discretization == FlowModel::rDG)
