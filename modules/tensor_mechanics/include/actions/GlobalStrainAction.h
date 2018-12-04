@@ -27,6 +27,7 @@ public:
 protected:
   std::vector<VariableName> _coupled_disp;
   std::vector<AuxVariableName> _aux_disp;
+  std::vector<AuxVariableName> _global_disp;
 
   std::vector<SubdomainName> _block_names;
   std::set<SubdomainID> _block_ids;
