@@ -19,7 +19,7 @@ validParams<InterfaceOrientationMultiphaseMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription(
-      "This Material accounts for the the orientation dependence"
+      "This Material accounts for the the orientation dependence "
       "of interfacial energy for multi-phase multi-order parameter phase-field model.");
   params.addRequiredParam<MaterialPropertyName>("kappa_name",
                                                 "Name of the kappa for the given phase");
@@ -66,9 +66,8 @@ InterfaceOrientationMultiphaseMaterial::computeQpProperties()
   const Real tol = 1e-9;
   const Real cutoff = 1.0 - tol;
 
-  // cosine of the gradient orientation angle
+  // Normal direction of the interface
   Real n = 0.0;
-  // normal direction of the interface
   const RealGradient nd = _grad_etaa[_qp] - _grad_etab[_qp];
   const Real nx = nd(0);
   const Real ny = nd(1);
@@ -85,52 +84,58 @@ InterfaceOrientationMultiphaseMaterial::computeQpProperties()
   if (n < -cutoff)
     n = -cutoff;
 
+  // Calculate the orientation angle
   const Real angle = std::acos(n) * MathUtils::sign(ny);
 
-  // Compute derivative of angle with respect to grad_op
-  RealGradient _dangledgrad_etaa;
+  // Compute derivatives of the angle wrt n
+  const Real dangledn = -MathUtils::sign(ny) / std::sqrt(1.0 - n * n);
+  const Real d2angledn2 = -MathUtils::sign(ny) * n / (1.0 - n * n) / std::sqrt(1.0 - n * n);
+
+  // Compute derivative of n wrt grad_eta
+  RealGradient dndgrad_etaa;
   if (nsq > tol)
   {
-    _dangledgrad_etaa(0) = -ny;
-    _dangledgrad_etaa(1) = nx;
-    _dangledgrad_etaa *= (MathUtils::sign(ny) / nsq);
+    dndgrad_etaa(0) = ny * ny;
+    dndgrad_etaa(1) = -nx * ny;
+    dndgrad_etaa /= nsq * std::sqrt(nsq);
   }
 
+  // Compute the square of dndgrad_etaa
+  RealTensorValue dndgrad_etaa_sq;
+  if (nsq > tol)
+  {
+    dndgrad_etaa_sq(0, 0) = n2y * n2y;
+    dndgrad_etaa_sq(0, 1) = -nx * ny * n2y;
+    dndgrad_etaa_sq(1, 0) = -nx * ny * n2y;
+    dndgrad_etaa_sq(1, 1) = n2x * n2y;
+    dndgrad_etaa_sq /= n2sq * nsq;
+  }
+
+  // Compute the second derivative of n wrt grad_eta
+  RealTensorValue d2ndgrad_etaa2;
+  if (nsq > tol)
+  {
+    d2ndgrad_etaa2(0, 0) = -3.0 * nx * n2y;
+    d2ndgrad_etaa2(0, 1) = -ny * n2y + 2.0 * ny * n2x;
+    d2ndgrad_etaa2(1, 0) = -ny * n2y + 2.0 * ny * n2x;
+    d2ndgrad_etaa2(1, 1) = -nx * n2x + 2.0 * nx * n2y;
+    d2ndgrad_etaa2 /= n2sq * std::sqrt(nsq);
+  }
+
+  // Calculate interfacial coefficient kappa and its derivatives wrt the angle
   Real anglediff = _j * (angle - _theta0 * libMesh::pi / 180.0);
-  // Calculate interfacial parameter kappa and its derivatives wrt angle
   _kappa[_qp] =
       _kappa_bar * (1.0 + _delta * std::cos(anglediff)) * (1.0 + _delta * std::cos(anglediff));
-
-  Real _dkappadangle =
+  Real dkappadangle =
       -2.0 * _kappa_bar * _delta * _j * (1.0 + _delta * std::cos(anglediff)) * std::sin(anglediff);
-
-  Real _d2kappadangle =
+  Real d2kappadangle =
       2.0 * _kappa_bar * _delta * _delta * _j * _j * std::sin(anglediff) * std::sin(anglediff) -
       2.0 * _kappa_bar * _delta * _j * _j * (1.0 + _delta * std::cos(anglediff)) *
           std::cos(anglediff);
 
-  RealTensorValue _dangledgrad_etaasq;
-  if (nsq > tol)
-  {
-    _dangledgrad_etaasq(0, 0) = n2y;
-    _dangledgrad_etaasq(0, 1) = -(nx * ny);
-    _dangledgrad_etaasq(1, 0) = -(nx * ny);
-    _dangledgrad_etaasq(1, 1) = n2x;
-    _dangledgrad_etaasq /= n2sq;
-  }
-
-  RealTensorValue _d2angledgrad_etaa;
-  if (nsq > tol)
-  {
-    _d2angledgrad_etaa(0, 0) = 2.0 * nx * ny;
-    _d2angledgrad_etaa(0, 1) = n2y - n2x;
-    _d2angledgrad_etaa(1, 0) = n2y - n2x;
-    _d2angledgrad_etaa(1, 1) = -2.0 * nx * ny;
-    _d2angledgrad_etaa *= (MathUtils::sign(ny) / n2sq);
-  }
-
-  // Compute derivatives of kappa and its derivatives wrt grad_eta
-  _dkappadgrad_etaa[_qp] = _dkappadangle * _dangledgrad_etaa;
-  _d2kappadgrad_etaa[_qp] =
-      _d2kappadangle * _dangledgrad_etaasq + _dkappadangle * _d2angledgrad_etaa;
+  // Compute derivatives of kappa wrt grad_eta
+  _dkappadgrad_etaa[_qp] = dkappadangle * dangledn * dndgrad_etaa;
+  _d2kappadgrad_etaa[_qp] = d2kappadangle * dangledn * dangledn * dndgrad_etaa_sq +
+                            dkappadangle * d2angledn2 * dndgrad_etaa_sq +
+                            dkappadangle * dangledn * d2ndgrad_etaa2;
 }

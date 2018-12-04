@@ -4,7 +4,7 @@
     type = Exodiff
     input = 'planestrain.i'
     exodiff = 'planestrain_out.e'
-    abs_zero = 1e-7
+    abs_zero = 1e-6
     compiler = 'CLANG GCC'
     design = 'source/materials/ComputePlaneSmallStrain.md'
     requirement = 'The ComputePlaneSmallStrain class shall compute the elastic stress and strain for a planar square geometry under tension using a total small plane strain formulation.'

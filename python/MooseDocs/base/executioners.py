@@ -155,18 +155,20 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorMixin):
         self._executeExtensionFunction('preExecute', None, args=(self.translator.content,))
         LOG.info('Finished preExecute methods [%s sec.]', time.time() - t)
 
-        t = time.time()
-        LOG.info('Translating using %s threads...', num_threads)
-        if self.get('profile', False):
-            mooseutils.run_profile(self.execute, source_nodes, num_threads)
-        else:
-            self.execute(source_nodes, num_threads)
-        LOG.info('Translating complete [%s sec.]', time.time() - t)
+        if source_nodes:
+            t = time.time()
+            LOG.info('Translating using %s threads...', num_threads)
+            if self.get('profile', False):
+                mooseutils.run_profile(self.execute, source_nodes, num_threads)
+            else:
+                self.execute(source_nodes, num_threads)
+            LOG.info('Translating complete [%s sec.]', time.time() - t)
 
         # Indexing/copying
-        LOG.info('Finalizing content...')
-        t = self.finalize(other_nodes, num_threads)
-        LOG.info('Finalizing Finished [%s sec.]', t)
+        if other_nodes:
+            LOG.info('Copying content...')
+            t = self.finalize(other_nodes, num_threads)
+            LOG.info('Copying Finished [%s sec.]', t)
 
         LOG.info('Executing postExecute methods...')
         t = time.time()

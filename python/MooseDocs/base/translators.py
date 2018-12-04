@@ -169,7 +169,7 @@ class Translator(mixins.ConfigObject):
             if items is None:
                 func = lambda p: p.local.endswith(arg)
                 items = [page for page in self.__content if func(page)]
-                #self.__page_cache[arg] = items
+                self.__page_cache[arg] = items
 
         else:
             items = [page for page in self.__content if arg(page)]

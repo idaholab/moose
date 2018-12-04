@@ -213,10 +213,7 @@
   l_max_its = 30
   nl_max_its = 12
 
-  l_tol = 1.0e-4
-
-  nl_rel_tol = 1.0e-6
-  nl_abs_tol = 1.0e-10
+  nl_rel_tol = 1.0e-10
 
   start_time = 0.0
   num_steps = 1

@@ -6,6 +6,7 @@
     rel_err = 1E-4
     use_old_floor = True
     exodiff_opts = '-steps last'
+    skip = '#12503'
   [../]
   [./ex02]
     type = 'Exodiff'

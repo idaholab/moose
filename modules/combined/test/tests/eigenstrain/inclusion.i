@@ -258,11 +258,9 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 31'
-  l_max_its = 20
+  l_max_its = 30
   nl_max_its = 10
-  l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-6
-  nl_abs_tol = 1.0e-8
+  nl_rel_tol = 1.0e-10
 []
 
 [Outputs]
