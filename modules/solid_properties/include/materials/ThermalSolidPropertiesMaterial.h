@@ -36,6 +36,15 @@ protected:
   /// Name of the temperature variable
   const VariableName _temperature_name;
 
+  /// Name of the isobaric specific heat
+  const std::string _cp_name;
+
+  /// Name of the thermal conductivity
+  const std::string _k_name;
+
+  /// Name of the density
+  const std::string _rho_name;
+
   /// Isobaric specific heat capacity
   MaterialProperty<Real> & _cp;
 

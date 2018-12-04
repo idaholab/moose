@@ -1,6 +1,6 @@
 # ThermalSiliconCarbideProperties
 
-!syntax description /Modules/SolidProperties/ThermalSiliconCarbideProperties
+!syntax description /Materials/ThermalSiliconCarbideProperties
 
 ## Description
 
@@ -21,7 +21,7 @@ Molar mass is calculated assuming a 1:1 mixture of pure elemental silicon and ca
 
 ## Range of Validity
 
-The ThermalSiliconCarbideProperties UserObject is valid for estimating isobaric
+The ThermalSiliconCarbideProperties Material is valid for estimating isobaric
 specific heat over 200 K $\le$ T $\le$ 2400 K; for estimating thermal
 conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
 [cite:snead] and over an unspecified range for the second correlation
@@ -29,12 +29,12 @@ conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/silicon_carbide/test.i block=Modules
+!listing modules/solid_properties/test/tests/silicon_carbide/test.i block=Materials
 
-!syntax parameters /Modules/SolidProperties/ThermalSiliconCarbideProperties
+!syntax parameters /Materials/ThermalSiliconCarbideProperties
 
-!syntax inputs /Modules/SolidProperties/ThermalSiliconCarbideProperties
+!syntax inputs /Materials/ThermalSiliconCarbideProperties
 
-!syntax children /Modules/SolidProperties/ThermalSiliconCarbideProperties
+!syntax children /Materials/ThermalSiliconCarbideProperties
 
 !bibtex bibliography

@@ -77,22 +77,6 @@ public:
   /// Density derivatives
   virtual void computeDensityDerivatives() override;
 
-  /**
-   * Surface emissivity (total, integrated) as a function of temperature (K)
-   * @return surface emissivity (unitless)
-   */
-  //virtual Real surface_emissivity() const override;
-
-protected:
-  /// The state of the surface, 'oxidized' or 'polished', used in estimating emissivity
-  const surface::SurfaceEnum _surface;
-
-  /// Whether the user has specified a constant emissivity
-  const bool _constant_emissivity;
-
-  /// Optional user-specified emissivity. If not set by the user, this is not used
-  const Real & _emissivity;
-
 private:
   /// The solid name
   static const std::string _name;

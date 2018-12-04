@@ -21,21 +21,12 @@ validParams<ThermalGraphiteProperties>()
   params.addClassDescription("Userobject defining graphite thermal properties.");
   params.addRangeCheckedParam<Real>(
       "density_room_temp", 1600.0, "density_room_temp > 0.0", "Density at room temperature");
-  params.addParam<MooseEnum>(
-      "surface", getSurfaceEnum("oxidized"), "The state of the solid surface");
-  params.addRangeCheckedParam<Real>("emissivity",
-                                    1.0,
-                                    "emissivity >= 0.0 & emissivity <= 1.0",
-                                    "Optional user-specified constant emissivity");
   return params;
 }
 
 ThermalGraphiteProperties::ThermalGraphiteProperties(const InputParameters & parameters)
   : ThermalSolidPropertiesMaterial(parameters),
     _rho_room_temp(getParam<Real>("density_room_temp")),
-    _surface(getParam<MooseEnum>("surface").getEnum<surface::SurfaceEnum>()),
-    _constant_emissivity(parameters.isParamSetByUser("emissivity") ? true : false),
-    _emissivity(getParam<Real>("emissivity")),
     _beta0(2.925e-6)
 {
 }
@@ -56,16 +47,18 @@ void
 ThermalGraphiteProperties::computeIsobaricSpecificHeat()
 {
   _cp[_qp] = 4184.0 * (0.54212 - 2.42667e-6 * _temperature[_qp] - 90.2725 / _temperature[_qp] -
-    43449.3 * std::pow(_temperature[_qp], -2.0) +
-    1.59309e7 * std::pow(_temperature[_qp], -3.0) - 1.43688e9 * std::pow(_temperature[_qp], -4.0));
+                       43449.3 * std::pow(_temperature[_qp], -2.0) +
+                       1.59309e7 * std::pow(_temperature[_qp], -3.0) -
+                       1.43688e9 * std::pow(_temperature[_qp], -4.0));
 }
 
 void
 ThermalGraphiteProperties::computeIsobaricSpecificHeatDerivatives()
 {
   _dcp_dT[_qp] = 4184.0 * (-2.42667e-6 + 90.2725 * std::pow(_temperature[_qp], -2.0) +
-    86898.6 * std::pow(_temperature[_qp], -3.0) - 4.77927e7 * std::pow(_temperature[_qp], -4.0) +
-    5.74752e9 * std::pow(_temperature[_qp], -5.0));
+                           86898.6 * std::pow(_temperature[_qp], -3.0) -
+                           4.77927e7 * std::pow(_temperature[_qp], -4.0) +
+                           5.74752e9 * std::pow(_temperature[_qp], -5.0));
 }
 
 void
@@ -91,10 +84,13 @@ ThermalGraphiteProperties::computeDensityDerivatives()
 {
   if (_temperature[_qp] > 373.15)
   {
-    Real d_betaT = _beta0 + (2.1e-9 * 4.0 * std::pow(_temperature[_qp], 3.0) - 1.23726e-5 * 3.0 * std::pow(_temperature[_qp], 2.0) +
+    Real d_betaT = _beta0 + (2.1e-9 * 4.0 * std::pow(_temperature[_qp], 3.0) -
+                             1.23726e-5 * 3.0 * std::pow(_temperature[_qp], 2.0) +
                              3.05359e-2 * 2.0 * _temperature[_qp] - 9.73349) *
                                 1e-7;
-    Real d_beta = (2.1e-9 * 3.0 * std::pow(_temperature[_qp], 2.0) - 1.23726e-5 * 2.0 * _temperature[_qp] + 3.05359e-2) * 1e-7;
+    Real d_beta = (2.1e-9 * 3.0 * std::pow(_temperature[_qp], 2.0) -
+                   1.23726e-5 * 2.0 * _temperature[_qp] + 3.05359e-2) *
+                  1e-7;
     _drho_dT[_qp] = -_rho_room_temp * (d_betaT - 293.15 * d_beta);
   }
   else
@@ -107,22 +103,10 @@ ThermalGraphiteProperties::beta() const
   Real term = 0.0;
 
   if (_temperature[_qp] > 373.15)
-    term = (2.1e-9 * std::pow(_temperature[_qp], 3.0) - 1.23726e-5 * std::pow(_temperature[_qp], 2.0) + 3.05359e-2 * _temperature[_qp] - 9.73349) *
-           1e-7;
+    term =
+        (2.1e-9 * std::pow(_temperature[_qp], 3.0) - 1.23726e-5 * std::pow(_temperature[_qp], 2.0) +
+         3.05359e-2 * _temperature[_qp] - 9.73349) *
+        1e-7;
 
   return _beta0 + term;
 }
-
-//Real
-//ThermalGraphiteProperties::surface_emissivity() const
-//{
-//  if (_constant_emissivity)
-//    return _emissivity;
-//
-//  if (_surface == surface::oxidized)
-//    return 0.732 + 5.21e-5 * _temperature[_qp];
-//  else if (_surface == surface::polished)
-//    return 0.448 + 13.8e-5 * _temperature[_qp];
-//  else
-//    mooseError(name(), ": Unhandled SurfaceEnum in 'surface_emissivity'!");
-//}

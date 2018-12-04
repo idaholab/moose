@@ -4,50 +4,57 @@ The Solid Properties module provides a consistent interface to solid properties.
 fluid properties that are often times only a function of pressure and temperature
 (or two other state variables), solid properties are frequently a function of many
 other parameters in addition to temperature, such as accumulated radiation damage,
-oxidation state, and microstructure. The Solid Properties module provides a consistent
-interface to commonly-required solid properties; such properties include thermal
+oxidation state, and microstructure. Some common properties include thermal
 properties such as specific heat, thermal conductivity, and emissivity; and
 mechanical properties such as elastic modulus and Poisson ratio. This module uses a
 flexible design to permit extension by other applications to include dependencies on
 application-specific parameters. In addition, a consistent interface exists to access
 derivatives with respect to the primary variables. This module allows different solids
 to be used in the input files by simply swapping the name of the Solid Properties
-UserObject in a plug-and-play manner.
+Material in a plug-and-play manner.
 
 !alert warning
 Always verify that the material properties provided in this module agree with
 the system you are modeling. The selection of particular correlations here does not
 constitute an endorsement of the accuracy of those correlations.
 
-!alert note
-Solid properties are implemented in GeneralUserObjects that have empty initialize(), execute() and
-finalize() methods, so do nothing during a simulation. Their purpose is to provide convenient access
-to solid properties through the UserObject interface.
-
-This module provides solid properties for different solids, organized according to
+This module provides solid properties for different solid materials, organized according to
 the overall type of property.
 
 ## Solid properties
 
-All solid properties inherit from the `SolidProperties` base class, which provides
-interfaces for providing:
+All solid properties inherit from the `SolidPropertiesMaterial` base material class, which provides
+interfaces for all types of solid properties that might be desired, in addition to:
 
-- Molar mass: `molarMass()`
 - Solid name: `solidName()`
 
 ## Thermal properties
 
-Thermal properties (density, specific heat, thermal conductivity, and emissivity) are
-available in terms of temperature. The `ThermalSolidProperties` class inherits
-from the `SolidProperties` class, and provides the following additional
-properties (with corresponding method names):
+Thermal properties (density, specific heat, and thermal conductivity) are computed by
+materials inheriting from the `ThermalSolidPropertiesMaterial` base class. This class
+defines these three material properties and their derivatives with respect to temperature.
+For flexibility, a custom name may be provided for each of these three properties.
 
-- Isobaric specific heat: `cp_from_T(temperature)`
-- Thermal conductivity: `k_from_T(temperature)`
-- Density: `rho_from_T(temperature)`
-- Emissivity: `emissivity_from_T(temperature)`
+In the `ThermalSolidProperties` material, the `computeQpProperties` method calculates a number of properties at
+the quadrature points using the values of `_temperature[_qp]`.
 
-UserObjects available in the SolidProperties module that provide thermal properties
+!listing modules/solid_properties/src/materials/ThermalSolidPropertiesMaterial.C start=computeQpProperties
+
+The calculation of material properties is divided into several different methods:
+
+- compute isobaric specific heat - `computeIsobaricSpecificHeat()`
+- compute derivatives of isobaric specific heat - `computeIsobaricSpecificHeatDerivatives()`
+- compute thermal conductivity - `computeThermalConductivity()`
+- compute derivatives of thermal conductivity - `computeThermalConductivityDerivatives()`
+- compute density - `computeDensity()`
+- compute derivatives of density - `computeDensityDerivatives()`
+
+The methods for computing derivatives are designed such that no value is returned (return
+type is `void` to accomodate applications needing multiple derivatives of a property, such
+as derivatives of thermal conductivity with respect to temperature, strain, and density).
+An example is provided below for creating a new solid material providing thermal properties.
+
+Materials available in the SolidProperties module that provide thermal properties
 are:
 
 - [functional](/ThermalFunctionSolidProperties.md)
@@ -61,80 +68,143 @@ implemented.
 
 ## Usage
 
-All Solid Properties UserObjects can be accessed in MOOSE objects through the usual UserObject
+All Solid Properties materials can be accessed in MOOSE objects through the usual Material
 interface. The following example provides a detailed explanation of the steps involved to use the
-Solid Properties UserObjects in other MOOSE objects, and the syntax required in the input file.
+Solid Properties Materials in other MOOSE objects, and the syntax required in the input file.
 
-This example is for a problem where thermal solid properties are needed. A material
-is provided to calculate solid properties at the quadrature points.
+This example is for a problem where thermal conductivity and its derivative are needed in a kernel.
+An example input file syntax using this kernel and the Solid Properties module is also provided.
+Similar steps would be followed for other material properties.
 
 ### Source
 
 To access the solid properties defined in the Solid Properties module in a MOOSE object, the source
 code of the object must include the following lines of code.
 
-In the header file of the material, a `const` reference to the base `ThermalSolidProperties`
-object is required:
+To provide the consistent interface to solid material property derivatives, the kernel must
+inherit from the templated `DerivativeMaterialInterface` class. If your MOOSE object already
+inherits from this class, then skip forward to the discussion on how to retrieve solid
+material properties. Assuming your MOOSE object does not already inherit from the
+`DerivativeMaterialInterface` class, continue here.
 
-!listing modules/solid_properties/include/materials/ThermalSolidPropertiesMaterial.h line=ThermalSolidProperties
+Suppose we would like to use the thermal conductivity and its derivative in a
+kernel named `HeatDiffusion` that inherits
+from the `Kernel` class. Simply modify the inheritance in the header file to the templated
+`DerivativeMaterialInterface` class:
+
+!listing modules/solid_properties/test/include/kernels/HeatDiffusion.h line=DerivativeMaterialInterface<Kernel>
 
 !alert note
-A forward declaration to the `ThermalSolidProperties` class is required at the beginning of the
+An include statement to the `DerivativeMaterialInterface` class is required at the beginning of the
 header file.
 
-!listing modules/solid_properties/include/materials/ThermalSolidPropertiesMaterial.h line=class ThermalSolidProperties
+!listing modules/solid_properties/test/include/kernels/HeatDiffusion.h line=include
 
-In the include file, the `ThermalSolidProperties` class must be included
+Finally, in the source file of the MOOSE object where a solid material property is needed,
+modify the constructor to obtain the parameters of the templated base class:
 
-!listing modules/solid_properties/include/materials/ThermalSolidPropertiesMaterial.h line= "ThermalSolidProperties.h"
+!listing modules/solid_properties/test/src/kernels/HeatDiffusion.C start=parameters end=getMaterialProperty
 
-The Solid Properties UserObject is passed to this material in the input file by adding a UserObject
-name parameters in the input parameters:
+Once your MOOSE object inherits from the `DerivativeMaterialInterface` class, you can now
+use material properties provided by the Solid Properties module. In the header file of the
+MOOSE object where a solid material property is needed (in this case, the
+thermal conductivity and its derivative), `const` references to the material properties are required:
 
-!listing modules/solid_properties/src/materials/ThermalSolidPropertiesMaterial.C line=addRequiredParam
+!listing modules/solid_properties/test/include/kernels/HeatDiffusion.h start=/// thermal end=};
 
-The reference to the UserObject is then initialized in the constructor using
+The names `_k` and `_dk_dT` are arbitrary, and may be selected as desired per application.
 
-!listing modules/solid_properties/src/materials/ThermalSolidPropertiesMaterial.C line=getUserObject
+The desired material properties are then obtained in the constructor in the source file
+according to the name of those properties defined in `ThermalSolidPropertiesMaterial` (which
+may be customized to be different from `k_solid`, `rho_solid`, and `cp_solid`). Here, the
+default name of `"k_solid"` is used.
 
-The properties defined in the Solid Properties UserObject can now be accessed through the
-reference. In this material, the `computeQpProperties` method calculates a number of properties at
-the quadrature points using the values of `_T[_qp]`.
+!listing modules/solid_properties/test/src/kernels/HeatDiffusion.C start=parameters end={
 
-!listing modules/solid_properties/src/materials/ThermalSolidPropertiesMaterial.C start=computeQpProperties
+Then, material properties are used just as other MOOSE materials are used. For example, the
+weak residual for the heat diffusion kernel grabs the value of thermal conductivity at the
+present quadrature point.
 
-Applications requiring property derivatives can inherit from the
-`ThermalSolidPropertiesMaterial` class and override the
-`computeQpProperties()` method to compute such derivatives.
+!listing modules/solid_properties/test/src/kernels/HeatDiffusion.C start=computeQpResidual end=Real
 
 ### Input file syntax
 
-The Solid Properties UserObjects are implemented in an input file in the `Modules` block.  For
-example, to use stainless steel 316 thermal properties,
-the input file syntax would be:
-
-!listing modules/solid_properties/test/tests/stainless_steel_316/test.i block=Modules
-
-In this example, the user has specified that the surface is polished, rather
-than the default `oxidized` state.
-
-The solid properties can then be accessed by other MOOSE objects through the name given in the input
-file.
+The Solid Properties Materials are implemented in an input file in the `Materials` block.  For
+example, to use stainless steel 316 thermal properties to provide the thermal conductivity in
+the `HeatDiffusion` kernel above, the input file syntax would be:
 
 !listing modules/solid_properties/test/tests/stainless_steel_316/test.i block=Materials
 
 Due to the consistent interface for solid properties, a different solid can be substituted in the
-input file be changing the type of the UserObject. For example, to set thermal properties
-with an arbitrary functional dependence, the solid property module section of
+input file be changing the type of the Material. For example, to set thermal properties
+with an arbitrary functional dependence instead, the solid property module section of
 the input file is:
 
-!listing modules/solid_properties/test/tests/functional/test.i block=Modules
+!listing modules/solid_properties/test/tests/functional/test.i block=Materials
 
 ## Creating additional solids
 
 New solids can be added to the Solid Properties module by inheriting from the base class appropriate
-to the formulation and overriding the methods that describe the solid properties. These can then be
-used in an identical manner as all other Solid Properties UserObjects.
+to the formulation and overriding the methods that describe the solid properties. New solids can also
+be added to separate applications for more custom usage. These can then be
+used in an identical manner as all other Solid Properties Materials.
+
+For example, suppose new thermal solid properties were desired for a material named `GorillaGlue` in
+the Navier-Stokes module. Begin from an empty material inheriting from `ThermalSolidPropertiesMaterial`.
+Override all methods in `SolidPropertiesMaterial` that you would like to imlement custom `GorillaGlue`
+properties for. The header file for your new material indicates all methods that will be defined.
+
+!listing language=cpp
+#ifndef THERMALGORILLAGLUEMATERIAL_H
+#define THERMALGORILLAGLUEMATERIAL_H
+//
+#include "ThermalSolidPropertiesMaterial.h"
+//
+class ThermalGorillaGlueProperties;
+template <> InputParameters validParams<ThermalGorillaGlueProperties>();
+//
+class ThermalGraphiteProperties : public ThermalSolidPropertiesMaterial
+{
+public:
+  ThermalGraphiteProperties(const InputParameters & parameters);
+  virtual const std::string & solidName() const override;
+  virtual Real molarMass() const override;
+  virtual void computeIsobaricSpecificHeat() override;
+  virtual void computeIsobaricSpecificHeatDerivatives() override;
+  virtual void computeThermalConductivity() override;
+  virtual void computeThermalConductivityDerivatives() override;
+  virtual void computeDensity() override;
+  virtual void computeDensityDerivatives() override;
+private:
+  static const std::string _name;
+};
+#endif /* THERMALGORILLAGLUEMATERIAL_H */
+
+Next, implement those methods in a `ThermalGorillaGlueProperties` material. You can provide
+a class description to make it clear what properties this new material provides.
+
+!listing language=cpp
+#include "ThermalGorillaGlueProperties.h"
+registerMooseObject("SolidPropertiesApp", ThermalGorillaGlueProperties);
+const std::string ThermalGorillaGlueProperties::_name = std::string("thermal_gorilla_glue");
+//
+template <>
+InputParameters
+validParams<ThermalGorillaGlueProperties>()
+{
+  InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
+  params.addClassDescription("ThermalSolidPropertiesMaterial defining Gorilla Glue properties.");
+  return params;
+}
+//
+ThermalGorillaGlueProperties::ThermalGorillaGlueProperties(
+    const InputParameters & parameters)
+  : ThermalSolidPropertiesMaterial(parameters)
+{
+}
+
+Then, the remainder of the source file includes the material-specific implementations
+of the methods defined in the header file for Gorilla Glue.
 
 ## Objects, Actions, and Syntax
 

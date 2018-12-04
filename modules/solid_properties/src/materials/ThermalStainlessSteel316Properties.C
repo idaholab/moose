@@ -21,21 +21,12 @@ validParams<ThermalStainlessSteel316Properties>()
   InputParameters params = validParams<ThermalSolidPropertiesMaterial>();
   params.addClassDescription("ThermalSolidPropertiesMaterial defining stainless steel 316 thermal "
                              "properties.");
-
-  params.addParam<MooseEnum>(
-      "surface", getSurfaceEnum("oxidized"), "The state of the solid surface");
-  params.addRangeCheckedParam<Real>("emissivity",
-                                    1.0,
-                                    "emissivity >= 0.0 & emissivity <= 1.0",
-                                    "Optional user-specified constant emissivity");
   return params;
 }
 
-ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(const InputParameters & parameters)
-  : ThermalSolidPropertiesMaterial(parameters),
-    _surface(getParam<MooseEnum>("surface").getEnum<surface::SurfaceEnum>()),
-    _constant_emissivity(parameters.isParamSetByUser("emissivity") ? true : false),
-    _emissivity(getParam<Real>("emissivity"))
+ThermalStainlessSteel316Properties::ThermalStainlessSteel316Properties(
+    const InputParameters & parameters)
+  : ThermalSolidPropertiesMaterial(parameters)
 {
 }
 
@@ -78,7 +69,8 @@ ThermalStainlessSteel316Properties::computeThermalConductivityDerivatives()
 void
 ThermalStainlessSteel316Properties::computeDensity()
 {
-  _rho[_qp] = -4.454e-5 * _temperature[_qp] * _temperature[_qp] - 0.4297 * _temperature[_qp] + 8089.4;
+  _rho[_qp] =
+      -4.454e-5 * _temperature[_qp] * _temperature[_qp] - 0.4297 * _temperature[_qp] + 8089.4;
 }
 
 void
@@ -86,17 +78,3 @@ ThermalStainlessSteel316Properties::computeDensityDerivatives()
 {
   _drho_dT[_qp] = -4.454e-5 * 2.0 * _temperature[_qp] - 0.4297;
 }
-
-//Real
-//ThermalStainlessSteel316Properties::surface_emissivity() const
-//{
-//  if (_constant_emissivity)
-//    return _emissivity;
-//
-//  if (_surface == surface::oxidized)
-//    return 0.7;
-//  else if (_surface == surface::polished)
-//    return 0.15;
-//  else
-//    mooseError(name(), ": Unhandled SurfaceEnum in 'emissivity_from_T'!");
-//}

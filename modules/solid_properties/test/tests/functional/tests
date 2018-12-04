@@ -6,7 +6,8 @@
     threading = '!pthreads'
     requirement = "This test demonstrates correct input file syntax for "
       "declaring thermal solid properties with parsed functions and their usage "
-      "in providing thermal materials."
+      "in providing thermal materials, in additiont to correct value and "
+      "derivative evaluation."
     design = 'ThermalFunctionSolidProperties.md ThermalSolidProperties.md'
     issues = '#12284'
   [../]

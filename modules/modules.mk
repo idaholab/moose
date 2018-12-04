@@ -48,7 +48,7 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem external_petsc_solver"
+MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics solid_properties stochastic_tools tensor_mechanics xfem external_petsc_solver"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################

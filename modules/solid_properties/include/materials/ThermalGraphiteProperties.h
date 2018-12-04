@@ -118,30 +118,12 @@ public:
    */
   Real beta() const;
 
-  /**
-   * Surface emissivity (total, integrated) as a function of temperature (K).
-   * The correlations available from \cite baker represent integrated
-   * emissivities over 0.2 to 10 $\mu$ for AUC type graphite. Alternatively,
-   * a user-specified constant value may ne specified.
-   * @return surface emissivity (unitless)
-   */
-  //Real surfaceEmissivity() const;
-
 protected:
   /**
    * Density at room temperature, with a default value of 1600.0 kg/m$^3$ taken as the
    * midpoint of the 1.5 to 1.7 g/cm$^3$ range given by Baker \cite baker.
    */
   const Real & _rho_room_temp;
-
-  /// The state of the surface, 'oxidized' or 'polished', used in estimating emissivity
-  const surface::SurfaceEnum _surface;
-
-  /// Whether the user has specified a constant emissivity
-  const bool _constant_emissivity;
-
-  /// Optional user-specified emissivity. If not set by the user, this is not used
-  const Real & _emissivity;
 
   /**
    * Average thermal expansion coefficient over

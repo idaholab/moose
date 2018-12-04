@@ -8,20 +8,19 @@ The `ThermalSolidPropertiesMaterial` material is an
 abstract base class from which all thermal solid materials properties should
 inherit. This base class declares density, specific heat, and thermal
 conductivity as material properties and computes them in
-`computeQpProperties()`. Applications requiring additional thermal properties,
-such as emissivity and derivatives of thermal properties with respect to
-temperature, should inherit from this class and declare additional solid
-properties and override `computeQpProperties` to perform the additional calculations.
+`computeQpProperties()`. This base class also declares the derivatives of
+density, specific heat, and thermal conductivity with respect to temperature
+and computes them in `computeQpProperties()`.
 
-## Example Input File Syntax
+The `computeQpProperties()` method is divided into six sub-methods for modular
+implementation of solid properties:
 
-The `ThermalSolidPropertiesMaterial` is used in an input file as:
-
-!listing modules/solid_properties/test/tests/stainless_steel_316/test.i block=Modules
-
-The solid property user object is then specified as:
-
-!listing modules/solid_properties/test/tests/stainless_steel_316/test.i block=Materials
+- compute isobaric specific heat - `computeIsobaricSpecificHeat()`
+- compute derivatives of isobaric specific heat - `computeIsobaricSpecificHeatDerivatives()`
+- compute thermal conductivity - `computeThermalConductivity()`
+- compute derivatives of thermal conductivity - `computeThermalConductivityDerivatives()`
+- compute density - `computeDensity()`
+- compute derivatives of density - `computeDensityDerivatives()`
 
 !syntax parameters /Materials/ThermalSolidPropertiesMaterial
 
