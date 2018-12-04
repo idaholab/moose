@@ -293,6 +293,7 @@ Transient::init()
     _time_stepper = _app.getFactory().create<TimeStepper>("ConstantDT", "TimeStepper", pars);
   }
 
+  _problem.executeControls(EXEC_PRE_INITIAL);
   _problem.initialSetup();
 
   _time_stepper->init();

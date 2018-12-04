@@ -48,6 +48,7 @@ Steady::init()
   }
 
   checkIntegrity();
+  _problem.executeControls(EXEC_PRE_INITIAL);
   _problem.initialSetup();
 
   _problem.outputStep(EXEC_INITIAL);
