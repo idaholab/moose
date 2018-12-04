@@ -16,7 +16,8 @@ validParams<ThermalSolidPropertiesMaterial>()
   InputParameters params = validParams<SolidPropertiesMaterial>();
   params.addClassDescription("Material providing solid thermal properties");
   params.addRequiredCoupledVar("temperature", "Temperature");
-  params.addParam<std::string>("cp_name", "cp_solid", "Name to be used for the isobaric specific heat");
+  params.addParam<std::string>(
+      "cp_name", "cp_solid", "Name to be used for the isobaric specific heat");
   params.addParam<std::string>("k_name", "k_solid", "Name to be used for the thermal conductivity");
   params.addParam<std::string>("rho_name", "rho_solid", "Name to be used for the density");
   return params;

@@ -26,6 +26,7 @@
 #include "RdgApp.h"
 #include "RichardsApp.h"
 #include "SolidMechanicsApp.h"
+#include "SolidPropertiesApp.h"
 #include "StochasticToolsApp.h"
 #include "TensorMechanicsApp.h"
 #include "XFEMApp.h"
@@ -72,6 +73,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   RdgApp::registerAll(f, af, s);
   RichardsApp::registerAll(f, af, s);
   SolidMechanicsApp::registerAll(f, af, s);
+  SolidPropertiesApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
   TensorMechanicsApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
@@ -94,6 +96,7 @@ CombinedApp::registerObjects(Factory & factory)
   RdgApp::registerObjects(factory);
   RichardsApp::registerObjects(factory);
   SolidMechanicsApp::registerObjects(factory);
+  SolidPropertiesApp::registerObjects(factory);
   StochasticToolsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
   XFEMApp::registerObjects(factory);
@@ -116,6 +119,7 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   RdgApp::associateSyntax(syntax, action_factory);
   RichardsApp::associateSyntax(syntax, action_factory);
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
+  SolidPropertiesApp::associateSyntax(syntax, action_factory);
   StochasticToolsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   XFEMApp::associateSyntax(syntax, action_factory);
@@ -134,6 +138,7 @@ CombinedApp::registerExecFlags(Factory & factory)
   PhaseFieldApp::registerExecFlags(factory);
   RichardsApp::registerExecFlags(factory);
   SolidMechanicsApp::registerExecFlags(factory);
+  SolidPropertiesApp::registerExecFlags(factory);
   StochasticToolsApp::registerExecFlags(factory);
   TensorMechanicsApp::registerExecFlags(factory);
   XFEMApp::registerExecFlags(factory);
