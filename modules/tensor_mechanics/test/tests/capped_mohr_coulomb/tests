@@ -141,8 +141,8 @@
   [./random1_heavy]
     type = CSVDiff
     input = 'random1.i'
-    csvdiff = 'random1.csv'
-    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    csvdiff = 'random1_heavy.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random1_heavy'
     heavy = true
   [../]
   [./random2]
@@ -154,8 +154,8 @@
   [./random2_heavy]
     type = CSVDiff
     input = 'random2.i'
-    csvdiff = 'random2.csv'
-    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    csvdiff = 'random2_heavy.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random2_heavy'
     heavy = true
   [../]
   [./random3]
@@ -167,8 +167,8 @@
   [./random3_heavy]
     type = CSVDiff
     input = 'random3.i'
-    csvdiff = 'random3.csv'
-    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    csvdiff = 'random3_heavy.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random3_heavy'
     heavy = true
   [../]
   [./random4]
@@ -180,8 +180,8 @@
   [./random4_heavy]
     type = CSVDiff
     input = 'random4.i'
-    csvdiff = 'random4.csv'
-    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    csvdiff = 'random4_heavy.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random4_heavy'
     heavy = true
   [../]
   [./random5]

@@ -82,10 +82,10 @@
   [./random_hyperbolic_heavy]
     type = 'CSVDiff'
     input = 'random_hyperbolic.i'
-    csvdiff = 'random_hyperbolic.csv'
+    csvdiff = 'random_hyperbolic_heavy.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no-trap-fpe Mesh/nx=100 Mesh/ny=55 Mesh/xmax=100 Mesh/ymax=55'
+    cli_args = '--no-trap-fpe Mesh/nx=100 Mesh/ny=55 Mesh/xmax=100 Mesh/ymax=55 Outputs/file_base=random_hyperbolic_heavy'
     heavy = true
   [../]
 []

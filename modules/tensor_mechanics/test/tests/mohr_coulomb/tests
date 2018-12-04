@@ -83,10 +83,10 @@
   [./random_heavy]
     type = 'CSVDiff'
     input = 'random.i'
-    csvdiff = 'random.csv'
+    csvdiff = 'random_heavy.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20 Outputs/file_base=random_heavy'
     heavy = true
   [../]
 
@@ -183,10 +183,10 @@
   [./random_planar_heavy]
     type = 'CSVDiff'
     input = 'random_planar.i'
-    csvdiff = 'random_planar.csv'
+    csvdiff = 'random_planar_heavy.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
-    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20 Outputs/file_base=random_planar_heavy'
     heavy = true
   [../]
 

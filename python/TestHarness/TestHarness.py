@@ -528,7 +528,7 @@ class TestHarness:
             for err in self.parse_errors:
                 print(util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code))
 
-        if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
+        if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)):
             print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS)))
             for (job, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
                 print(util.formatResult(job, self.options, caveats=True))
@@ -545,45 +545,41 @@ class TestHarness:
             fatal_error += ', <r>FATAL PARSER ERROR</r>'
             self.error_code = 1
 
-        # Alert the user to their session file
+        # create footer message based on arguments
+        messages = []
         if self.options.queueing:
-            print('Your session file is %s' % self.results_storage)
+            messages.append('Your session file is %s\n' % self.results_storage)
 
-        # Print a different footer when performing a dry run
         if self.options.dry_run:
-            print('Processed %d tests in %.1f seconds.' % (self.num_passed+self.num_skipped, time))
-            summary = '<b>%d would run</b>'
-            summary += ', <b>%d would be skipped</b>'
-            summary += fatal_error
-            print(util.colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code ))
-
+            messages.append('Processed %d tests in %.1f seconds.\n' % (self.num_passed+self.num_skipped, time))
         else:
-            print('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time))
+            messages.append('Ran %d tests in %.1f seconds.\n' % (self.num_passed+self.num_failed, time))
 
-            if self.num_passed:
-                summary = '<g>%d passed</g>'
-            else:
-                summary = '<b>%d passed</b>'
-            summary += ', <b>%d skipped</b>'
-            if self.num_pending:
-                summary += ', <c>%d pending</c>'
-            else:
-                summary += ', <b>%d pending</b>'
-            if self.num_failed:
-                summary += ', <r>%d FAILED</r>'
-            else:
-                summary += ', <b>%d failed</b>'
-            if self.scheduler.maxFailures():
-                summary += '\n<r>MAX FAILURES REACHED</r>'
+        green, cyan, red, failed  = ('b', 'b', 'b',  'failed')
 
-            summary += fatal_error
+        if self.num_passed:
+            green = 'g'
+        if self.num_pending:
+            cyan = 'c'
+        if self.num_failed:
+            red = 'r'
+            failed = 'FAILED'
 
-            print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
-                             colored=self.options.colored, code=self.options.code ))
+        messages.extend(['<%s>%d passed</%s>' % (green, self.num_passed, green),
+                         ', <b>%d skipped</b>' % (self.num_skipped),
+                         ', <%s>%d pending</%s>' % (cyan, self.num_pending, cyan),
+                         ', <%s>%d %s</%s>' % (red, self.num_failed, failed, red)])
 
-            # Perform any write-to-disc operations
-            self.writeResults()
+        if self.scheduler.maxFailures():
+            messages.append('\n<r>MAX FAILURES REACHED</r>')
+
+        messages.append(fatal_error)
+
+        # Print footer message
+        print(util.colorText( ''.join(messages),  "", html = True, colored=self.options.colored, code=self.options.code ))
+
+        # Perform any write-to-disc operations
+        self.writeResults()
 
     def writeResults(self):
         """ Don't update the results file when using the --failed-tests argument """
