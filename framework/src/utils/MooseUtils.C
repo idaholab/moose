@@ -14,6 +14,7 @@
 #include "MultiMooseEnum.h"
 #include "InputParameters.h"
 #include "ExecFlagEnum.h"
+#include "InfixIterator.h"
 
 #include "libmesh/elem.h"
 
@@ -776,6 +777,19 @@ linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type 
   }
 }
 
+std::vector<std::string>
+split(const std::string & str, const std::string & delimiter)
+{
+  std::vector<std::string> output;
+  size_t prev = 0, pos = 0;
+  do
+  {
+    pos = str.find(delimiter, prev);
+    output.push_back(str.substr(prev, pos - prev));
+    prev = pos + delimiter.length();
+  } while (pos != string::npos);
+  return output;
+}
 } // MooseUtils namespace
 
 std::string

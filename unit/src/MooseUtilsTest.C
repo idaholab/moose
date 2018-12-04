@@ -285,3 +285,21 @@ TEST(MooseUtilsTests, linearPartitionChunk)
   EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 15), 3);
   EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 16), 3);
 }
+
+TEST(MooseUtils, split)
+{
+  std::vector<std::string> out = MooseUtils::split("foo;bar;foobar", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", "foobar"}));
+
+  out = MooseUtils::split(";foo;bar", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"", "foo", "bar"}));
+
+  out = MooseUtils::split("foo;;bar", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "", "bar"}));
+
+  out = MooseUtils::split("foo;bar;", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", ""}));
+
+  out = MooseUtils::split("foo;bar;;", ";");
+  EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", "", ""}));
+}

@@ -63,6 +63,11 @@ void escape(std::string & str);
 std::string trim(const std::string & str, const std::string & white_space = " \t\n\v\f\r");
 
 /**
+ * Python like split function for strings.
+ */
+std::vector<std::string> split(const std::string & str, const std::string & delimiter);
+
+/**
  * This function tokenizes a path and checks to see if it contains the string to look for
  */
 bool pathContains(const std::string & expression,
