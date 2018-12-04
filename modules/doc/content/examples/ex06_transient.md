@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-We consider the transient diffusion equation on the 3D domain $$\Omega$$: find $u$ such that
+We consider the transient diffusion equation on the 3D domain $\Omega$: find $u$ such that
 $-\nabla \cdot \nabla u = 20\frac{\partial u}{\partial t} \in \Omega$, $u = 0$ on the bottom, $u =
 1$ on the top and with $\nabla u \cdot \hat{n} = 0$ on the remaining boundaries.  The initial
 condition is $u(t_0) = 0$ everywhere except on the top boundary where $u = 1$.

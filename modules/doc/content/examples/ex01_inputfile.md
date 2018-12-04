@@ -5,7 +5,7 @@
 This example briefly describes the creation of a basic input file and the six required sections
 for utilizing MOOSE for solving a problem.
 
-We consider the steady-state diffusion equation on the 3D domain $$\Omega$$: find $u$ such that
+We consider the steady-state diffusion equation on the 3D domain $\Omega$: find $u$ such that
 $-\nabla \cdot \nabla u = 0 \in \Omega$, $u = 1$ on the bottom, $u = 0$ on the top and with
 $\nabla u \cdot \hat{n} = 0$ on the remaining boundaries.
 
