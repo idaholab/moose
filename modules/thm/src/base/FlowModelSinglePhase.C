@@ -352,6 +352,39 @@ FlowModelSinglePhase::addMooseObjects()
 void
 FlowModelSinglePhase::addRDGMooseObjects()
 {
+  // slopes user object
+  const UserObjectName slopes_uo_name = Component::genName(_comp_name, "slopes");
+  {
+    const std::string class_name = "RDGSlopes3Eqn";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<VariableName>>("A") = {AREA};
+    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+    params.set<UserObjectName>("fluid_properties") = _fp_name;
+    params.set<MooseEnum>("scheme") = _rdg_slope_reconstruction;
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
+    params.set<bool>("implicit") = _implicit_rdg;
+    _sim.addUserObject(class_name, slopes_uo_name, params);
+  }
+
+  // slope reconstruction material
+  {
+    const std::string class_name = "RDG3EqnMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
+    params.set<std::vector<VariableName>>("A_elem") = {AREA};
+    params.set<std::vector<VariableName>>("A_linear") = {_A_linear_name};
+    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+    params.set<MaterialPropertyName>("direction") = DIRECTION;
+    params.set<UserObjectName>("fluid_properties") = _fp_name;
+    params.set<UserObjectName>("slopes_uo") = slopes_uo_name;
+    params.set<bool>("implicit") = _implicit_rdg;
+    _sim.addMaterial(class_name, Component::genName(_comp_name, class_name), params);
+  }
+
   // advection
   {
     // mass
