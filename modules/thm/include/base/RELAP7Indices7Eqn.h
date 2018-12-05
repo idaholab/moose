@@ -59,24 +59,6 @@ enum LocalEquationIndex
   LOCAL_EQ_ENERGY = 3
 };
 
-/// Total number of slopes
-static const unsigned int N_SLOPES = 8;
-/// Number of slopes that are limited
-static const unsigned int N_LIMITED_SLOPES = 7;
-
-/// Indices for slope array
-enum SlopeIndex
-{
-  SLOPE_ALPHA_LIQUID = 0,
-  SLOPE_PRESSURE_LIQUID = 1,
-  SLOPE_VELOCITY_LIQUID = 2,
-  SLOPE_TEMPERATURE_LIQUID = 3,
-  SLOPE_PRESSURE_VAPOR = 4,
-  SLOPE_VELOCITY_VAPOR = 5,
-  SLOPE_TEMPERATURE_VAPOR = 6,
-  SLOPE_ALPHA_LIQUID_UNLIMITED = 7
-};
-
 /// Number of phases
 static const unsigned int N_PHASE = 2;
 

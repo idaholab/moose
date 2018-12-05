@@ -23,16 +23,6 @@ enum EquationIndex
   EQ_MOMENTUM = 1,
   EQ_ENERGY = 2
 };
-
-/// Number of slopes
-static const unsigned int N_SLOPES = 3;
-/// Indices for slope array
-enum SlopeIndex
-{
-  SLOPE_PRESSURE = 0,
-  SLOPE_VELOCITY = 1,
-  SLOPE_TEMPERATURE = 2
-};
 }
 
 #endif // RELAP7INDICES3EQN_H
