@@ -24,10 +24,6 @@
 #
 # The system will come to steady state slowly after the pressure becomes constant.
 # Alpha equal to zero will result in Newmark integration.
-#
-# The store_stress_old flag in the ComputeStressBase material model needs to be
-# turned on to store stress old. In this example, this flag is turned on using
-# the child class ComputeLinearElasticStress.
 
 [Mesh]
   type = GeneratedMesh
@@ -240,7 +236,6 @@
 
   [./stress]
     type = ComputeLinearElasticStress
-    store_stress_old = True
     block = 0
   [../]
 

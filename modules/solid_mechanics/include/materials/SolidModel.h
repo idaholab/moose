@@ -153,7 +153,6 @@ protected:
 
   const bool _compute_JIntegral;
   const bool _compute_InteractionIntegral;
-  bool _store_stress_older;
 
   // These are used in calculation of the J integral
   MaterialProperty<Real> * _SED;
