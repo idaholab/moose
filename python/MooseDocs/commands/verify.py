@@ -35,6 +35,13 @@ def command_line_options(subparser, parent):
                         default='MooseDocs.base.ParallelBarrier',
                         help="Select the mode of execution.")
 
+def prepare_content(content):
+    """Performs necessary substitutions for consistent comparisions."""
+    content = insert_moose_dir(content)
+    content = replace_uuid4(content)
+    content = replace_package_file(content)
+    return content
+
 def insert_moose_dir(content):
     """Helper for adding '${MOOSE_DIR}' to content."""
     return content.replace(os.getenv('MOOSE_DIR'), '${MOOSE_DIR}')
@@ -43,6 +50,10 @@ def replace_uuid4(content):
     """Replace uuid.uuid4() numbers."""
     return re.sub(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
                   r'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', content)
+
+def replace_package_file(content):
+    """Replace the package filename with something consistent."""
+    return re.sub(r'(moose-environment\S*\.pkg)', r'moose-environment.pkg', content)
 
 def update_gold_helper(gold, out_content):
     """Update the gold files."""
@@ -61,7 +72,7 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
 
     # Read the content to be tested
     with open(out_fname, 'r') as fid:
-        out_content = insert_moose_dir(replace_uuid4(fid.read()))
+        out_content = prepare_content(fid.read())
 
     # Update gold content
     if update_gold:
