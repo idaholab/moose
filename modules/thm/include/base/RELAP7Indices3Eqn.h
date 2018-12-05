@@ -25,7 +25,7 @@ enum EquationIndex
 };
 
 /// Number of slopes
-static const unsigned int _n_slopes = 3;
+static const unsigned int N_SLOPES = 3;
 /// Indices for slope array
 enum SlopeIndex
 {
