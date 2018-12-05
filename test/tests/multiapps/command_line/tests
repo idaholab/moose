@@ -1,6 +1,6 @@
 [Tests]
   design = 'source/MultiApp.md'
-  issue = '#12576'
+  issues = '#12576'
   [master]
     type = Exodiff
     input = master.i
