@@ -1,16 +1,12 @@
 # Adaptivity System
 
-## h-Adaptivity
-
-!media media/adaptivity/element_adaptivity.png style=width:250px;float:right;padding-left:20px; caption=Self-similar refinement pattern utilized by MOOSE for adaptivity.
-
 MOOSE employs $h$-adaptivity to automatically refine or coarsen the mesh in regions of high or low
 estimated solution error, respectively. The idea is to concentrate degrees of freedom (DOFs) where
 the error is highest, while reducing DOFs where the solution is already well-captured. This is
 achieved through splitting and joining elements from the original mesh based on an error
 [`Indicator`](/Adaptivity/Indicators/index.md). Once an error has been computed, a
 [`Marker`](/Adaptivity/Markers/index.md) is used to decide which elements to refine or coarsen. Mesh
-adaptivity can be employed in both `Steady` and `Transient` Executioners.
+adaptivity can be employed with both `Steady` and `Transient` Executioners.
 
 ## Refinement Patterns
 
@@ -20,5 +16,11 @@ elements, four "child" elements are created when the element is refined. Coarsen
 reverse, children are deleted and the "parent" element is reactivated. The original mesh starts at
 refinement level 0. Each time an element is split, the children are assigned a refinement level one
 higher than their parents.
+
+!media media/adaptivity/element_adaptivity.png
+       style=width:30%;margin-left:auto;margin-right:auto;
+       caption=Self-similar refinement pattern utilized by MOOSE for adaptivity.
+
+!syntax parameters /Adaptivity
 
 !syntax list /Adaptivity objects=False actions=False subsystems=True

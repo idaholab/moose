@@ -33,6 +33,9 @@ validParams<GlobalDisplacementAux>()
       "output_global_displacement", false, "Option to output global displacement only");
   params.addRequiredParam<UserObjectName>("global_strain_uo",
                                           "The name of the GlobalStrainUserObject");
+  params.addParam<Point>("reference_point",
+                         Point(0, 0, 0),
+                         "The coordinate of the center/fixed point of the simulation");
 
   // Default this object to get executed before the displaced mesh update.
   // This way the AuxVars set by this object can be used as mesh displacements.
@@ -48,6 +51,7 @@ GlobalDisplacementAux::GlobalDisplacementAux(const InputParameters & parameters)
     _output_global_disp(getParam<bool>("output_global_displacement")),
     _pst(getUserObject<GlobalStrainUserObjectInterface>("global_strain_uo")),
     _periodic_dir(_pst.getPeriodicDirections()),
+    _ref_point(parameters.get<Point>("reference_point")),
     _dim(_mesh.dimension()),
     _ndisp(coupledComponents("displacements")),
     _disp(_ndisp)
@@ -78,7 +82,7 @@ GlobalDisplacementAux::computeValue()
       for (unsigned int var = 0; var < _ndisp; ++var)
         strain(dir, var) = 0.0;
 
-  const RealVectorValue & global_disp = strain * (*_current_node);
+  const RealVectorValue & global_disp = strain * ((*_current_node) - _ref_point);
 
   if (_output_global_disp)
     return global_disp(_component);
