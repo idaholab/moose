@@ -1,6 +1,5 @@
 #include "RDG3EqnMaterial.h"
 #include "SinglePhaseFluidProperties.h"
-#include "RELAP7Indices3Eqn.h"
 
 registerMooseObject("RELAP7App", RDG3EqnMaterial);
 
@@ -59,9 +58,9 @@ RDG3EqnMaterial::computeQpProperties()
 {
   // Get the limited slopes of the primitive variables: {p, u, T}.
   const auto slopes = getElementSlopes(_current_elem);
-  const Real p_slope = slopes[RELAP73Eqn::SLOPE_PRESSURE];
-  const Real vel_slope = slopes[RELAP73Eqn::SLOPE_VELOCITY];
-  const Real T_slope = slopes[RELAP73Eqn::SLOPE_TEMPERATURE];
+  const Real p_slope = slopes[PRESSURE];
+  const Real vel_slope = slopes[VELOCITY];
+  const Real T_slope = slopes[TEMPERATURE];
 
   // compute primitive variables from the cell-average solution
   const Real rho_avg = _rhoA_avg[_qp] / _A_avg[_qp];
@@ -114,10 +113,10 @@ RDG3EqnMaterial::computeElementPrimitiveVariables(const Elem * elem) const
   const Real v = 1.0 / rho;
   const Real e = rhoEA / rhoA - 0.5 * vel * vel;
 
-  std::vector<Real> W(RELAP73Eqn::N_SLOPES);
-  W[RELAP73Eqn::SLOPE_PRESSURE] = _fp.p_from_v_e(v, e);
-  W[RELAP73Eqn::SLOPE_VELOCITY] = vel;
-  W[RELAP73Eqn::SLOPE_TEMPERATURE] = _fp.T_from_v_e(v, e);
+  std::vector<Real> W(_n_slopes);
+  W[PRESSURE] = _fp.p_from_v_e(v, e);
+  W[VELOCITY] = vel;
+  W[TEMPERATURE] = _fp.T_from_v_e(v, e);
 
   return W;
 }

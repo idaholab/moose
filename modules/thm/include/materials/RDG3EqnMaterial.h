@@ -52,6 +52,16 @@ protected:
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;
+
+  /// Number of slopes
+  static const unsigned int _n_slopes = 3;
+  /// Indices for slope array
+  enum SlopeIndex
+  {
+    PRESSURE = 0,
+    VELOCITY = 1,
+    TEMPERATURE = 2
+  };
 };
 
 #endif
