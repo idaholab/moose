@@ -58,13 +58,10 @@ void
 RDG3EqnMaterial::computeQpProperties()
 {
   // Get the limited slopes of the primitive variables: {p, u, T}.
-  // See the documentation for getElementSlope(); the first entry of the
-  // returned gradient values is the slope along the 1-D direction; the other
-  // entries are not used.
   const auto slopes = getElementSlopes(_current_elem);
-  const Real p_slope = slopes[RELAP73Eqn::SLOPE_PRESSURE](0);
-  const Real vel_slope = slopes[RELAP73Eqn::SLOPE_VELOCITY](0);
-  const Real T_slope = slopes[RELAP73Eqn::SLOPE_TEMPERATURE](0);
+  const Real p_slope = slopes[RELAP73Eqn::SLOPE_PRESSURE];
+  const Real vel_slope = slopes[RELAP73Eqn::SLOPE_VELOCITY];
+  const Real T_slope = slopes[RELAP73Eqn::SLOPE_TEMPERATURE];
 
   // compute primitive variables from the cell-average solution
   const Real rho_avg = _rhoA_avg[_qp] / _A_avg[_qp];

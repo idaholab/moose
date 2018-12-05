@@ -22,7 +22,7 @@ SlopeReconstruction1DInterface::SlopeReconstruction1DInterface(const MooseObject
 {
 }
 
-std::vector<RealGradient>
+std::vector<Real>
 SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
 {
   // Determine flow channel direction
@@ -72,7 +72,7 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
   const bool is_interior_cell = (!side_is_boundary[0] && !side_is_boundary[1]);
 
   // vector for the (possibly limited) slopes
-  std::vector<RealGradient> slopes_limited(n_slopes, RealGradient(0.0, 0.0, 0.0));
+  std::vector<Real> slopes_limited(n_slopes, 0.0);
 
   // limit the slopes
   switch (_scheme)
@@ -97,17 +97,17 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
           const Real dx = (x_neighbor[0] - x_neighbor[1]) * dir;
 
           // use central slope
-          slopes_limited[m](0) = (W_neighbor[0][m] - W_neighbor[1][m]) / dx;
+          slopes_limited[m] = (W_neighbor[0][m] - W_neighbor[1][m]) / dx;
         }
         else if (side_is_boundary[0])
           // side 0 is boundary; use side 1 slope
-          slopes_limited[m](0) = slopes_one_sided[1][m];
+          slopes_limited[m] = slopes_one_sided[1][m];
         else if (side_is_boundary[1])
           // side 1 is boundary; use side 0 slope
-          slopes_limited[m](0) = slopes_one_sided[0][m];
+          slopes_limited[m] = slopes_one_sided[0][m];
         else
           // single cell in mesh; no slope
-          slopes_limited[m](0) = 0.0;
+          slopes_limited[m] = 0.0;
       }
     }
     break;
@@ -122,9 +122,9 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
           if ((slopes_one_sided[0][m] * slopes_one_sided[1][m]) > 0.0)
           {
             if (std::abs(slopes_one_sided[0][m]) < std::abs(slopes_one_sided[1][m]))
-              slopes_limited[m](0) = slopes_one_sided[0][m];
+              slopes_limited[m] = slopes_one_sided[0][m];
             else
-              slopes_limited[m](0) = slopes_one_sided[1][m];
+              slopes_limited[m] = slopes_one_sided[1][m];
           }
         }
       }
@@ -146,11 +146,11 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
         {
           if (slopes_central[m] > 0.0 && slopes_one_sided[0][m] > 0.0 &&
               slopes_one_sided[1][m] > 0.0)
-            slopes_limited[m](0) = std::min(
+            slopes_limited[m] = std::min(
                 slopes_central[m], 2.0 * std::min(slopes_one_sided[0][m], slopes_one_sided[1][m]));
           else if (slopes_central[m] < 0.0 && slopes_one_sided[0][m] < 0.0 &&
                    slopes_one_sided[1][m] < 0.0)
-            slopes_limited[m](0) = std::max(
+            slopes_limited[m] = std::max(
                 slopes_central[m], 2.0 * std::max(slopes_one_sided[0][m], slopes_one_sided[1][m]));
         }
       }
@@ -180,9 +180,9 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
 
           // calculate slope with maxmod
           if (slope1 > 0.0 && slope2 > 0.0)
-            slopes_limited[m](0) = std::max(slope1, slope2);
+            slopes_limited[m] = std::max(slope1, slope2);
           else if (slope1 < 0.0 && slope2 < 0.0)
-            slopes_limited[m](0) = std::min(slope1, slope2);
+            slopes_limited[m] = std::min(slope1, slope2);
         }
       }
       break;

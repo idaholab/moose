@@ -22,21 +22,13 @@ public:
 
 protected:
   /**
-   * Gets limited slopes for the primitive variables.
-   *
-   * The interface for this function returns a vector of \c RealGradient values,
-   * but for 1-D cases like this, it does not make sense to return a 3-D vector;
-   * only a single value is needed to represent the gradient along the 1-D
-   * direction. This function outputs these 1-D gradient values in the first
-   * entry of the \c RealGradient values; the other 2 entries are not used.
+   * Gets limited slopes for the primitive variables in the 1-D direction
    *
    * @param[in] elem   Element for which to get slopes
    *
-   * @returns Vector of a number of slopes for the element, where the first
-   *          entry of each is the slope in the 1-D direction, and the other
-   *          entries are zero.
+   * @returns Vector of slopes for the element in the 1-D direction
    */
-  std::vector<RealGradient> getElementSlopes(const Elem * elem) const;
+  std::vector<Real> getElementSlopes(const Elem * elem) const;
 
   /**
    * Computes the cell-average primitive variable values for an element
