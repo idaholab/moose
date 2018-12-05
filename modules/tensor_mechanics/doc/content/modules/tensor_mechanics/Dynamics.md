@@ -110,10 +110,6 @@ The input file syntax for calculating the residual due to both the Inertial forc
 
 Here, `./DynamicTensorMechanics` is the action that calls the [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) kernel.
 
-For calculating the time derivative of the stress, we require old and older states of stress, i.e., $\sigma(t)$ and $\sigma(t-\Delta t)$, respectively. These values need to be stored only when the [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) kernel is used. Therefore, we can request the stress calculator to store the old states of stress through the boolean flag `store_stress_old` when [DynamicStressDivergenceTensors](/DynamicStressDivergenceTensors.md) kernel is used. The input file syntax for setting `store_stress_old` to true is as follows:
-
-!listing modules/tensor_mechanics/test/tests/dynamics/rayleigh_damping/rayleigh_hht.i start=Materials end=Executioner
-
 Finally, when using HHT time integration method, external forces like gravity and pressure also require $\alpha$ as input.
 
 !alert note
