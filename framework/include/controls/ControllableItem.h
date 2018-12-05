@@ -32,7 +32,7 @@
 class ControllableItem
 {
 public:
-  ControllableItem(const MooseObjectParameterName & name, libMesh::Parameters::Value * value);
+  ControllableItem(const MooseObjectParameterName & name, libMesh::Parameters::Value * value, std::set<ExecFlagType> flags = {});
   virtual ~ControllableItem() = default;
 
   ControllableItem(const ControllableItem &) = default;
@@ -101,6 +101,14 @@ public:
   bool isChanged() { return _changed; }
   ///@}
 
+  /**
+   * Return the execute flag restrictions, an empty set is un-restricted
+   */
+  const std::set<ExecFlagType> & getExecuteOnFlags() const
+    {
+      return _execute_flags;
+    }
+
   /// Allows this to be used with std:: cout
   friend std::ostream & operator<<(std::ostream & stream, const ControllableItem & obj);
 
@@ -115,6 +123,9 @@ protected:
 
   /// Flag for ControlOutput, allows output objects to keep track of when a parameter is altered
   bool _changed = false;
+
+  /// Flags to which the control is restricted (if not set it is unrestricted)
+  std::set<ExecFlagType> _execute_flags;
 };
 
 template <typename T>

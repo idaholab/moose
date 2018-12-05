@@ -136,7 +136,7 @@ validParams<MultiApp>()
       "of the App positions, to be moved at move_time to move_positions");
 
   params.addParam<std::vector<Point>>("move_positions",
-                                      "The positions corresponding to each move_app.");
+                                      "The positiSons corresponding to each move_app.");
 
   params.addParam<std::vector<std::string>>(
       "cli_args",
@@ -147,6 +147,7 @@ validParams<MultiApp>()
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
+  params.declareControllable("cli_args", {EXEC_PRE_INITIAL});
   params.registerBase("MultiApp");
 
   return params;

@@ -294,7 +294,8 @@ InputParameters::isPrivate(const std::string & name) const
 }
 
 void
-InputParameters::declareControllable(const std::string & input_names)
+InputParameters::declareControllable(const std::string & input_names,
+                                     std::set<ExecFlagType> execute_flags)
 {
   std::vector<std::string> names;
   MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
@@ -302,7 +303,10 @@ InputParameters::declareControllable(const std::string & input_names)
   {
     auto map_iter = _params.find(name);
     if (map_iter != _params.end()) // error is handled by checkParams method
+    {
       map_iter->second._controllable = true;
+      map_iter->second._controllable_flags = execute_flags;
+    }
     else
       mooseError("The input parameter '",
                  name,
@@ -314,6 +318,12 @@ bool
 InputParameters::isControllable(const std::string & name)
 {
   return _params.count(name) > 0 && _params[name]._controllable;
+}
+
+const std::set<ExecFlagType> &
+InputParameters::getControllableExecuteOnTypes(const std::string & name)
+{
+  return _params[name]._controllable_flags;
 }
 
 void

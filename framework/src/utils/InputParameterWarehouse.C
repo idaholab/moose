@@ -74,7 +74,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
       {
         MooseObjectParameterName param_name(object_name, name);
         _controllable_items[tid].emplace_back(
-            std::make_shared<ControllableItem>(param_name, value));
+          std::make_shared<ControllableItem>(param_name, value, ptr->getControllableExecuteOnTypes(name)));
       }
   }
 

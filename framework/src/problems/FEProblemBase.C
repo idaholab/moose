@@ -569,7 +569,7 @@ FEProblemBase::initialSetup()
   // set state flag indicating that we are in or beyond initialSetup.
   // This can be used to throw errors in methods that _must_ be called at construction time.
   _started_initial_setup = true;
-
+  setCurrentExecuteOnFlag(EXEC_INITIAL);
   addExtraVectors();
 
   // Perform output related setups
@@ -824,6 +824,7 @@ FEProblemBase::initialSetup()
       reinitScalars(tid);
 
     execute(EXEC_INITIAL);
+    setCurrentExecuteOnFlag(EXEC_INITIAL);
   }
 
   // Here we will initialize the stateful properties once more since they may have been updated
@@ -875,6 +876,7 @@ FEProblemBase::initialSetup()
   }
 
   _app.checkRegistryLabels();
+  setCurrentExecuteOnFlag(EXEC_NONE);
 }
 
 void

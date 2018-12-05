@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ControllableParameter.h"
+#include "MooseUtils.h"
 
 void
 ControllableParameter::add(ControllableItem * item)
@@ -22,6 +23,23 @@ ControllableParameter::dump() const
   for (auto item_ptr : _items)
     oss << item_ptr->dump();
   return oss.str();
+}
+
+void
+ControllableParameter::checkExecuteOnType(const ExecFlagType & current) const
+{
+  for (const ControllableItem * const item : _items)
+  {
+    const std::set<ExecFlagType> & flags = item->getExecuteOnFlags();
+    if (!flags.empty() && flags.find(current) == flags.end())
+      mooseError("The controllable parameter (",
+                 item->name(),
+                 ") is not allowed to execute on '",
+                 current,
+                 "', it is only allowed to execute on '",
+                 MooseUtils::join(flags, " "),
+                 "'.");
+  }
 }
 
 std::ostream &

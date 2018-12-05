@@ -13,9 +13,9 @@
 // MOOSE includes
 #include "TransientMultiApp.h"
 #include "SamplerInterface.h"
-#include "Sampler.h"
 
 class SamplerMultiApp;
+class Sampler;
 
 template <>
 InputParameters validParams<SamplerMultiApp>();

@@ -93,5 +93,6 @@ Control::getControllableParameterByName(const MooseObjectParameterName & param_n
                "' was not located for the '",
                name(),
                "' object, it either does not exist or has not been declared as controllable.");
+  out.checkExecuteOnType(_fe_problem.getCurrentExecuteOnFlag());
   return out;
 }
