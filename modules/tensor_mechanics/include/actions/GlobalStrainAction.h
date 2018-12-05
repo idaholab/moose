@@ -25,7 +25,7 @@ public:
   void act() override;
 
 protected:
-  std::vector<VariableName> _coupled_disp;
+  std::vector<VariableName> _disp;
   std::vector<AuxVariableName> _aux_disp;
   std::vector<AuxVariableName> _global_disp;
 

@@ -52,16 +52,16 @@ validParams<GlobalStrainAction>()
 
 GlobalStrainAction::GlobalStrainAction(const InputParameters & params)
   : Action(params),
-    _coupled_disp(getParam<std::vector<VariableName>>("displacements")),
+    _disp(getParam<std::vector<VariableName>>("displacements")),
     _aux_disp(getParam<std::vector<AuxVariableName>>("auxiliary_displacements")),
     _global_disp(getParam<std::vector<AuxVariableName>>("global_displacements")),
     _block_names(getParam<std::vector<SubdomainName>>("block")),
     _block_ids()
 {
-  if (_aux_disp.size() != _coupled_disp.size())
+  if (_aux_disp.size() != _disp.size())
     mooseError("Number of auxiliary displacement variables should be equal to the number of "
                "nonlinear displacement variables, i.e., ",
-               _coupled_disp.size());
+               _disp.size());
 }
 
 void
@@ -125,25 +125,27 @@ GlobalStrainAction::act()
   //
   else if (_current_task == "add_aux_variable")
   {
+    const bool second = _problem->mesh().hasSecondOrderElements();
+
     for (unsigned int i = 0; i < _aux_disp.size(); ++i)
     {
       std::string aux_var_name = _aux_disp[i];
 
       _problem->addAuxVariable(aux_var_name,
-                               FEType(Utility::string_to_enum<Order>("FIRST"),
+                               FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
                                       Utility::string_to_enum<FEFamily>("LAGRANGE")),
                                _block_ids.empty() ? nullptr : &_block_ids);
     }
-    if (_global_disp.size() > 0)
-      for (unsigned int i = 0; i < _global_disp.size(); ++i)
-      {
-        std::string aux_var_name = _global_disp[i];
 
-        _problem->addAuxVariable(aux_var_name,
-                                 FEType(Utility::string_to_enum<Order>("FIRST"),
-                                        Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                                 _block_ids.empty() ? nullptr : &_block_ids);
-      }
+    for (unsigned int i = 0; i < _global_disp.size(); ++i)
+    {
+      std::string aux_var_name = _global_disp[i];
+
+      _problem->addAuxVariable(aux_var_name,
+                               FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
+                                      Utility::string_to_enum<FEFamily>("LAGRANGE")),
+                               _block_ids.empty() ? nullptr : &_block_ids);
+    }
   }
 
   //
@@ -170,24 +172,23 @@ GlobalStrainAction::act()
       _problem->addAuxKernel(aux_type, aux_var_name + '_' + name(), params);
     }
 
-    if (_global_disp.size() > 0.0)
-      for (unsigned int i = 0; i < _global_disp.size(); ++i)
-      {
-        std::string aux_var_name = _global_disp[i];
+    for (unsigned int i = 0; i < _global_disp.size(); ++i)
+    {
+      std::string aux_var_name = _global_disp[i];
 
-        std::string aux_type = "GlobalDisplacementAux";
-        InputParameters params = _factory.getValidParams(aux_type);
-        params.applyParameters(parameters(), {"scalar_global_strain"});
-        params.set<AuxVariableName>("variable") = aux_var_name;
-        params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-        params.set<bool>("use_displaced_mesh") = false;
-        params.set<bool>("output_global_displacement") = true;
-        params.set<std::vector<VariableName>>("scalar_global_strain") = {
-            getParam<NonlinearVariableName>("scalar_global_strain")};
-        params.set<UserObjectName>("global_strain_uo") = uo_name;
-        params.set<unsigned int>("component") = i;
+      std::string aux_type = "GlobalDisplacementAux";
+      InputParameters params = _factory.getValidParams(aux_type);
+      params.applyParameters(parameters(), {"scalar_global_strain"});
+      params.set<AuxVariableName>("variable") = aux_var_name;
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+      params.set<bool>("use_displaced_mesh") = false;
+      params.set<bool>("output_global_displacement") = true;
+      params.set<std::vector<VariableName>>("scalar_global_strain") = {
+          getParam<NonlinearVariableName>("scalar_global_strain")};
+      params.set<UserObjectName>("global_strain_uo") = uo_name;
+      params.set<unsigned int>("component") = i;
 
-        _problem->addAuxKernel(aux_type, aux_var_name + '_' + name(), params);
-      }
+      _problem->addAuxKernel(aux_type, aux_var_name + '_' + name(), params);
+    }
   }
 }
