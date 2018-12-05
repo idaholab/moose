@@ -303,3 +303,18 @@ TEST(MooseUtils, split)
   out = MooseUtils::split("foo;bar;;", ";");
   EXPECT_EQ(out, std::vector<std::string>({"foo", "bar", "", ""}));
 }
+
+TEST(MooseUtils, join)
+{
+  std::vector<std::string> str = {"foo", "bar", "foobar"};
+  EXPECT_EQ(MooseUtils::join(str, ";"), "foo;bar;foobar");
+
+  str = {"", "foo", "bar", "foobar"};
+  EXPECT_EQ(MooseUtils::join(str, ";"), ";foo;bar;foobar");
+
+  str = {"foo", "bar", "foobar", ""};
+  EXPECT_EQ(MooseUtils::join(str, ";"), "foo;bar;foobar;");
+
+  str = {"foo", "bar", "foobar", "", ""};
+  EXPECT_EQ(MooseUtils::join(str, ";"), "foo;bar;foobar;;");
+}

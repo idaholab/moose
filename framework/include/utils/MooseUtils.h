@@ -68,6 +68,12 @@ std::string trim(const std::string & str, const std::string & white_space = " \t
 std::vector<std::string> split(const std::string & str, const std::string & delimiter);
 
 /**
+ * Python like join function for strings.
+ */
+template <typename T>
+std::string join(const T & strings, const std::string & delimiter);
+
+/**
  * This function tokenizes a path and checks to see if it contains the string to look for
  */
 bool pathContains(const std::string & expression,
