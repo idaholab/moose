@@ -19,8 +19,8 @@ validParams<TestControl>()
 {
   InputParameters params = validParams<Control>();
 
-  MooseEnum test_type(
-      "real variable point tid_warehouse_error disable_executioner connection alias mult execflag_error");
+  MooseEnum test_type("real variable point tid_warehouse_error disable_executioner connection "
+                      "alias mult execflag_error");
   params.addRequiredParam<MooseEnum>(
       "test_type", test_type, "Indicates the type of test to perform");
   params.addParam<std::string>(
@@ -85,5 +85,6 @@ TestControl::execute()
   }
 
   else if (_test_type == "execflag_error")
-    setControllableValueByName<std::vector<std::string>>("MultiApps", "sub", "cli_args", {"Mesh/nx=2"});
+    setControllableValueByName<std::vector<std::string>>(
+        "MultiApps", "sub", "cli_args", {"Mesh/nx=2"});
 }

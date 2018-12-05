@@ -32,7 +32,9 @@
 class ControllableItem
 {
 public:
-  ControllableItem(const MooseObjectParameterName & name, libMesh::Parameters::Value * value, std::set<ExecFlagType> flags = {});
+  ControllableItem(const MooseObjectParameterName & name,
+                   libMesh::Parameters::Value * value,
+                   std::set<ExecFlagType> flags = {});
   virtual ~ControllableItem() = default;
 
   ControllableItem(const ControllableItem &) = default;
@@ -104,10 +106,7 @@ public:
   /**
    * Return the execute flag restrictions, an empty set is un-restricted
    */
-  const std::set<ExecFlagType> & getExecuteOnFlags() const
-    {
-      return _execute_flags;
-    }
+  const std::set<ExecFlagType> & getExecuteOnFlags() const { return _execute_flags; }
 
   /// Allows this to be used with std:: cout
   friend std::ostream & operator<<(std::ostream & stream, const ControllableItem & obj);
