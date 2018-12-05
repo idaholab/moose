@@ -1,6 +1,7 @@
 #include "GeometricalFlowComponent.h"
 #include "FluidProperties.h"
 #include "TwoPhaseNCGFluidProperties.h"
+#include "SlopeReconstruction1DInterface.h"
 
 template <>
 InputParameters
@@ -11,9 +12,10 @@ validParams<GeometricalFlowComponent>()
   params.addClassDescription("Base class for geometrical components that have fluid flow");
 
   params.addRequiredParam<UserObjectName>("fp", "Name of fluid properties user object");
-  params.addParam<MooseEnum>("rdg_slope_reconstruction",
-                             FlowModel::getSlopeReconstructionMooseEnum("None"),
-                             "Slope reconstruction type for rDG spatial discretization");
+  params.addParam<MooseEnum>(
+      "rdg_slope_reconstruction",
+      SlopeReconstruction1DInterface::getSlopeReconstructionMooseEnum("None"),
+      "Slope reconstruction type for rDG spatial discretization");
   params.addParam<bool>("implicit_rdg", true, "Use implicit time integration for rDG");
 
   return params;
