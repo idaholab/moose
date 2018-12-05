@@ -563,7 +563,7 @@ class TestHarness:
             cyan = 'c'
         if self.num_failed:
             red = 'r'
-            failed = 'FAILED'
+            failed = failed.upper()
 
         messages.extend(['<%s>%d passed</%s>' % (green, self.num_passed, green),
                          ', <b>%d skipped</b>' % (self.num_skipped),
