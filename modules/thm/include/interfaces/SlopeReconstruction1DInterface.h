@@ -1,9 +1,12 @@
 #ifndef SLOPERECONSTRUCTION1DINTERFACE_H
 #define SLOPERECONSTRUCTION1DINTERFACE_H
 
-#include "FlowModel.h"
+#include "MooseTypes.h"
+#include "InputParameters.h"
+#include "Enums.h"
 
 class SlopeReconstruction1DInterface;
+class MooseObject;
 
 template <>
 InputParameters validParams<SlopeReconstruction1DInterface>();
@@ -19,6 +22,26 @@ class SlopeReconstruction1DInterface
 {
 public:
   SlopeReconstruction1DInterface(const MooseObject * moose_object);
+
+  /// Slope reconstruction type
+  enum ESlopeReconstructionType
+  {
+    None,    ///< No reconstruction; Godunov scheme
+    Full,    ///< Full reconstruction; no limitation
+    Minmod,  ///< Minmod slope limiter
+    MC,      ///< Monotonized Central-Difference slope limiter
+    Superbee ///< Superbee slope limiter
+  };
+  /// Map of slope reconstruction type string to enum
+  static const std::map<std::string, ESlopeReconstructionType> _slope_reconstruction_type_to_enum;
+
+  /**
+   * Gets a MooseEnum for slope reconstruction type
+   *
+   * @param[in] name   default value
+   * @returns MooseEnum for slope reconstruction type
+   */
+  static MooseEnum getSlopeReconstructionMooseEnum(const std::string & name = "");
 
 protected:
   /**
@@ -40,12 +63,19 @@ protected:
   virtual std::vector<Real> computeElementPrimitiveVariables(const Elem * elem) const = 0;
 
   /// Slope reconstruction scheme
-  const FlowModel::ESlopeReconstructionType _scheme;
+  const ESlopeReconstructionType _scheme;
 
   /// Number of sides
   static const unsigned int _n_side;
   /// Number of elemental values in stencil for computing slopes
   static const unsigned int _n_sten;
 };
+
+namespace RELAP7
+{
+template <>
+SlopeReconstruction1DInterface::ESlopeReconstructionType
+stringToEnum<SlopeReconstruction1DInterface::ESlopeReconstructionType>(const std::string & s);
+}
 
 #endif

@@ -1,5 +1,25 @@
 #include "SlopeReconstruction1DInterface.h"
 #include "MooseObject.h"
+#include "MooseEnum.h"
+
+const std::map<std::string, SlopeReconstruction1DInterface::ESlopeReconstructionType>
+    SlopeReconstruction1DInterface::_slope_reconstruction_type_to_enum{
+        {"NONE", None}, {"FULL", Full}, {"MINMOD", Minmod}, {"MC", MC}, {"SUPERBEE", Superbee}};
+
+MooseEnum
+SlopeReconstruction1DInterface::getSlopeReconstructionMooseEnum(const std::string & name)
+{
+  return RELAP7::getMooseEnum<SlopeReconstruction1DInterface::ESlopeReconstructionType>(
+      name, _slope_reconstruction_type_to_enum);
+}
+
+template <>
+SlopeReconstruction1DInterface::ESlopeReconstructionType
+RELAP7::stringToEnum(const std::string & s)
+{
+  return stringToEnum<SlopeReconstruction1DInterface::ESlopeReconstructionType>(
+      s, SlopeReconstruction1DInterface::_slope_reconstruction_type_to_enum);
+}
 
 const unsigned int SlopeReconstruction1DInterface::_n_side = 2;
 const unsigned int SlopeReconstruction1DInterface::_n_sten = 3;
@@ -11,13 +31,15 @@ validParams<SlopeReconstruction1DInterface>()
   InputParameters params = emptyInputParameters();
 
   params.addRequiredParam<MooseEnum>(
-      "scheme", FlowModel::getSlopeReconstructionMooseEnum("None"), "Slope reconstruction scheme");
+      "scheme",
+      SlopeReconstruction1DInterface::getSlopeReconstructionMooseEnum("None"),
+      "Slope reconstruction scheme");
 
   return params;
 }
 
 SlopeReconstruction1DInterface::SlopeReconstruction1DInterface(const MooseObject * moose_object)
-  : _scheme(RELAP7::stringToEnum<FlowModel::ESlopeReconstructionType>(
+  : _scheme(RELAP7::stringToEnum<ESlopeReconstructionType>(
         moose_object->parameters().get<MooseEnum>("scheme")))
 {
 }
@@ -78,11 +100,11 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
   switch (_scheme)
   {
     // first-order, zero slope
-    case FlowModel::None:
+    case None:
       break;
 
     // full reconstruction; no limitation
-    case FlowModel::Full:
+    case Full:
     {
       for (unsigned int m = 0; m < n_slopes; m++)
       {
@@ -113,7 +135,7 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
     break;
 
     // minmod limiter
-    case FlowModel::Minmod:
+    case Minmod:
 
       if (is_interior_cell)
       {
@@ -131,7 +153,7 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
       break;
 
     // MC (monotonized central-difference) limiter
-    case FlowModel::MC:
+    case MC:
 
       if (is_interior_cell)
       {
@@ -157,7 +179,7 @@ SlopeReconstruction1DInterface::getElementSlopes(const Elem * elem) const
       break;
 
     // superbee limiter
-    case FlowModel::Superbee:
+    case Superbee:
 
       if (is_interior_cell)
       {
