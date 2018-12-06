@@ -2,10 +2,10 @@ minimum_gcc: 4.8.4
 minimum_clang: 3.4.0
 minimum_intel: 2017
 mpich: 3.2
-petsc_alt: 3.9.4
-slepc_alt: 3.9.2
-petsc_default: 3.8.3
-slepc_default: 3.8.2
+petsc_alt: 3.8.3
+slepc_alt: 3.8.2
+petsc_default: 3.9.4
+slepc_default: 3.9.2
 autoconf: 2.69
 automake: 1.16
 gcc: 7.3.1
