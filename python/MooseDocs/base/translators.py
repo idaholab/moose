@@ -113,6 +113,10 @@ class Translator(mixins.ConfigObject):
         """Return the Executioner instance."""
         return self.__executioner
 
+    def addContent(self, page):
+        """Add an additional page to the list of available pages."""
+        self.__content.append(page)
+
     def update(self, **kwargs):
         """Update configuration and handle destination."""
         dest = kwargs.get('destination', None)
