@@ -1,8 +1,11 @@
 [Tests]
+  issues = '#3832 #3535 #3731'
   [./small1]
     type = 'CSVDiff'
     input = 'small_deform1.i'
     csvdiff = 'small_deform1.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/userobjects/TensorMechanicsPlasticTensile.md'
+    requirement = 'The multi-plasticity model shall return a single element under a small amount of tensile loading to yield surface to recover the tensile stress as the tensile strength of the material.'
   [../]
   [./small2]
     type = 'CSVDiff'
@@ -11,41 +14,57 @@
     override_columns = 's_xx s_xy s_zz s_yy'
     override_rel_err = '2e-3 1e-3 1e-3 1e-3'
     override_abs_zero = '1e-6 6e-4 1e-6 1e-6'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/userobjects/TensorMechanicsPlasticTensile.md'
+    requirement = 'The multi-plasticity model shall return a single element under a small amount of tensile loading to yield surface to recover a tensile stress that is half of the tensile material strength with a smoother value of 0.5.'
   [../]
   [./small3]
     type = 'CSVDiff'
     input = 'small_deform3.i'
     csvdiff = 'small_deform3.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/userobjects/TensorMechanicsPlasticTensile.md'
+    requirement = 'The multi-plasticity model shall return a single element, loaded by a small amount of tensile displacement in the z and x directions, to a yield surface in a direction along hypersurface sigma_I = sigma_II with an edge smoother of 25 degrees.'
   [../]
   [./small5]
     type = 'CSVDiff'
     input = 'small_deform5.i'
     csvdiff = 'small_deform5.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/userobjects/TensorMechanicsPlasticTensile.md'
+    requirement = 'The multi-plasticity model shall return a single element, loaded by a small amount of tensile displacement in the z and x directions, to a yield surface in a direction along hypersurface sigma_III = 0.'
   [../]
   [./small6]
     type = 'CSVDiff'
     input = 'small_deform6.i'
     csvdiff = 'small_deform6.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a small amount of tensile displacement in the z direction only, to a yield surface in a direction along hypersurface sigma_II = sigma_III.'
   [../]
   [./small7]
     type = 'CSVDiff'
     input = 'small_deform7.i'
     csvdiff = 'small_deform7.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a small amount of tensile displacement in the z and x directions, to a yield surface in a direction along hypersurface sigma_I = sigma_II.'
   [../]
   [./small8]
     type = 'CSVDiff'
     input = 'small_deform8.i'
     csvdiff = 'small_deform8.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a small amount of tensile loading to yield surface to recover a tensile stress that is half of the tensile material strength with a smoother value of 0.5.'
   [../]
   [./small9]
     type = 'CSVDiff'
     input = 'small_deform9.i'
     csvdiff = 'small_deform9.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a complex combination of tensile displacement in all three directions, to a yield surface in a direction along hypersurface sigma_I = sigma_II = 0.5 with a smoother tolerance of 0.001.'
   [../]
   [./small11]
     type = 'CSVDiff'
     input = 'small_deform11.i'
     csvdiff = 'small_deform11.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element under a small amount of compressive loading to yield surface to recover the compressive stress as the compressive strength of the material.'
   [../]
   [./small12]
     type = 'CSVDiff'
@@ -54,47 +73,66 @@
     override_columns = 's_xx s_xy s_zz s_yy'
     override_rel_err = '1e-3 1e-3 1e-3 2e-3'
     override_abs_zero = '1e-6 5e-4 1e-6 1e-6'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a small amount of equal compressive displacement in all three directions, to a yield surface in a direction along hypersurface sigma_I = sigma_II = sigma_III = 1.0 with a smoother tolerance of 0.1.'
   [../]
   [./small13]
     type = 'CSVDiff'
     input = 'small_deform13.i'
     csvdiff = 'small_deform13.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a small amount of compressive displacement in the z and x directions, to a yield surface in a direction along hypersurface sigma_I = sigma_II.'
   [../]
   [./small15]
     type = 'CSVDiff'
     input = 'small_deform15.i'
     csvdiff = 'small_deform15.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a complex combination of small amount of compressive displacements in the z and x directions, to a yield surface in a direction along hypersurface sigma_I = 0.'
   [../]
   [./small16]
     type = 'CSVDiff'
     input = 'small_deform16.i'
     csvdiff = 'small_deform16.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a small amount of differing compressive displacement in all three directions, to a yield surface in a direction along hypersurface sigma_I = sigma_II with a smoother tolerance of 0.5.'
   [../]
   [./small17]
     type = 'CSVDiff'
     input = 'small_deform17.i'
     csvdiff = 'small_deform17.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a small amount of differing compressive displacement in all three directions, to a yield surface in a direction along hypersurface sigma_II = sigma_III with a smoother tolerance of 0.5.'
   [../]
   [./small18]
     type = 'CSVDiff'
     input = 'small_deform18.i'
     csvdiff = 'small_deform18.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element under a small amount of compressive loading in the z direction only to yield surface to recover the compressive stress as the compressive strength of the material.'
+
   [../]
   [./small19]
     type = 'CSVDiff'
     input = 'small_deform19.i'
     csvdiff = 'small_deform19.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element, loaded by a complex combination of differing compressive displacement in all three directions, to a yield surface with a stress equal to the compressive strength of the material when the shear correction to the tensile internal parameter is activated.'
   [../]
 
   [./small21]
     type = 'CSVDiff'
     input = 'small_deform21.i'
     csvdiff = 'small_deform21.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element geometry under repeated cyclic displacement in all three directions such that the mean stress is zero to map out the yield surface in the octahedral plane.'
   [../]
   [./small23]
     type = 'CSVDiff'
     input = 'small_deform23.i'
     csvdiff = 'small_deform23.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element geometry under repeated cyclic displacement in all three directions such that the sigma_max is approximately sigma_mid with a lode angle of 30 degrees to map out the yield surface in the meridional plane.'
   [../]
   [./small24]
     type = 'CSVDiff'
@@ -103,33 +141,45 @@
     override_columns = 's_xx s_xy s_yy'
     override_rel_err = '3e-3 1e-3 3e-3'
     override_abs_zero = '1e-6 6e-2 1e-6'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return a single element geometry under repeated cyclic displacement in all three directions such that the sigma_min is approximately sigma_mid with a lode angle of -30 degrees to map out the yield surface in the meridional plane.'
   [../]
   [./small25]
     type = 'CSVDiff'
     input = 'small_deform25.i'
     csvdiff = 'small_deform25.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return to the tip of the combined yield surface under equal displacement loading in all three directions with an approximate result of sigma_max = sigma_mid = sigma_min.'
   [../]
 
   [./small_hard3]
     type = 'CSVDiff'
     input = 'small_deform_hard3.i'
     csvdiff = 'small_deform_hard3.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall demonstrate cubic hardening under repeated uniaxial tensile loading.'
   [../]
   [./small_hard13]
     type = 'CSVDiff'
     input = 'small_deform_hard13.i'
     csvdiff = 'small_deform_hard13.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall demonstrate cubic hardening under repeated uniaxial compressive loading.'
   [../]
   [./small_hard21]
     type = 'CSVDiff'
     input = 'small_deform_hard21.i'
     csvdiff = 'small_deform_hard21.csv'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall demonstrate cohesive hardening under an unequal combination of tensile loading in the x and y directions.'
   [../]
   [./small_hard22]
     type = 'CSVDiff'
     input = 'small_deform_hard22.i'
     csvdiff = 'small_deform_hard22.csv'
     abs_zero = 1.0E-9
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall demonstrate hardening hardening of the friction and dilation angles under an unequal combination of tensile loading in the x and y directions.'
   [../]
 
   [./random1]
@@ -137,6 +187,8 @@
     input = 'random1.i'
     csvdiff = 'random1.csv'
     cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return the material to the tensile yield surface when the initial positions of the mesh are randomly perturbed on a small mesh.'
   [../]
   [./random1_heavy]
     type = CSVDiff
@@ -144,12 +196,16 @@
     csvdiff = 'random1_heavy.csv'
     cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random1_heavy'
     heavy = true
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return the material to the tensile yield surface when the initial positions of the mesh are randomly perturbed on a larger mesh.'
   [../]
   [./random2]
     type = CSVDiff
     input = 'random2.i'
     csvdiff = 'random2.csv'
     cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return the material to the compressive yield surface when the initial positions of the mesh are randomly perturbed on a small mesh.'
   [../]
   [./random2_heavy]
     type = CSVDiff
@@ -157,12 +213,16 @@
     csvdiff = 'random2_heavy.csv'
     cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random2_heavy'
     heavy = true
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model shall return the material to the compressive yield surface when the initial positions of the mesh are randomly perturbed on a larger mesh.'
   [../]
   [./random3]
     type = CSVDiff
     input = 'random3.i'
     csvdiff = 'random3.csv'
     cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model, with cohesion active and a nonzero dilation angle, shall return the material to the tensile yield surface when the initial positions of the mesh are randomly perturbed on a small mesh.'
   [../]
   [./random3_heavy]
     type = CSVDiff
@@ -170,12 +230,16 @@
     csvdiff = 'random3_heavy.csv'
     cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random3_heavy'
     heavy = true
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model, with cohesion active and a nonzero dilation angle, shall return the material to the tensile yield surface when the initial positions of the mesh are randomly perturbed on a larger mesh.'
   [../]
   [./random4]
     type = CSVDiff
     input = 'random4.i'
     csvdiff = 'random4.csv'
     cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model, with cohesion active and a nonzero dilation angle, shall return the material to the unequal tensile and compressive yield surfaces when the initial positions of the mesh are randomly perturbed on a small mesh.'
   [../]
   [./random4_heavy]
     type = CSVDiff
@@ -183,6 +247,8 @@
     csvdiff = 'random4_heavy.csv'
     cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42 Outputs/file_base=random4_heavy'
     heavy = true
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model, with cohesion active and a nonzero dilation angle, shall return the material to the unequal tensile and compressive yield surfaces when the initial positions of the mesh are randomly perturbed on a larger mesh.'
   [../]
   [./random5]
     type = Exodiff
@@ -190,16 +256,22 @@
     exodiff = 'random5.e'
     heavy = true
     abs_zero = 1.0E-6
+    design = 'source/materials/ComputeMultiPlasticityStress.md source/materials/CappedMohrCoulombStressUpdate.md'
+    requirement = 'The capped Mohr-Coulomb plasticity model, with cohesion active and a large dilation angle, shall return the material to the unequal tensile and compressive yield surfaces when the initial positions of the mesh are randomly perturbed.'
   [../]
 
   [./small1_cosserat]
     type = 'CSVDiff'
     input = 'small_deform1_cosserat.i'
     csvdiff = 'small_deform1_cosserat.csv'
+    design = 'source/materials/ComputeMultipleInelasticCosseratStress.md source/materials/CappedMohrCoulombCosseratStressUpdate.md'
+    requirement = 'The Cosserat version of the capped Mohr-Coulomb model shall return a single element under a small amount of tensile loading to yield surface to recover the tensile stress as the tensile strength of the material when applied to a thick layer case.'
   [../]
   [./small9_cosserat]
     type = 'CSVDiff'
     input = 'small_deform9_cosserat.i'
     csvdiff = 'small_deform9_cosserat.csv'
+    design = 'source/materials/ComputeMultipleInelasticCosseratStress.md source/materials/CappedMohrCoulombCosseratStressUpdate.md'
+    requirement = 'The Cosserat version of the capped Mohr-Coulomb model shall return a single element, loaded by a complex combination of tensile displacement in all three directions, to a yield surface in a direction along hypersurface sigma_I = sigma_II = 0.5 when applied to a thick layer case.'
   [../]
 []
