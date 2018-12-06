@@ -25,7 +25,7 @@ validParams<TiledMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  params.addParam<MeshGeneratorName>("input", "The mesh we want to repeat");
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to repeat");
 
   params.addParam<Real>("x_width", 0, "The tile width in the x direction");
   params.addParam<Real>("y_width", 0, "The tile width in the y direction");
