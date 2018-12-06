@@ -51,12 +51,12 @@
             "attributes": {
                 "recursive": true, 
                 "tooltip": true, 
-                "url": "http://www.mooseframework.org/moose_packages/moose-environment_osx-highsierra_20181012_x86_64.pkg"
+                "url": "http://www.mooseframework.org/moose_packages/moose-environment.pkg"
             }, 
             "children": [
                 {
                     "attributes": {
-                        "content": "moose-environment_osx-highsierra_20181012_x86_64.pkg", 
+                        "content": "moose-environment.pkg", 
                         "recursive": true
                     }, 
                     "children": [], 
