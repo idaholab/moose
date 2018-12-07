@@ -396,8 +396,9 @@ protected:
 };
 
 template <typename T1, typename T2>
-inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b)
-    -> RankFourTensorTempl<decltype(T1() * T2())>
+inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
+    typename std::enable_if<ScalarTraits<T1>::value,
+                            RankFourTensorTempl<decltype(T1() * T2())>>::type
 {
   return b * a;
 }
