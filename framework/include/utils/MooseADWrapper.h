@@ -11,10 +11,26 @@
 #include <typeinfo>
 
 template <typename T>
+class MooseADWrapper;
+
+template <typename T>
+void dataStore(std::ostream & stream, MooseADWrapper<T> & dn_wrapper, void * context);
+template <typename T>
+void dataLoad(std::istream & stream, MooseADWrapper<T> & dn_wrapper, void * context);
+
+template <typename T>
 class MooseADWrapper
 {
 public:
-  MooseADWrapper(bool = false) : _val() {}
+  MooseADWrapper(bool = false) : _val(), _dual_number(nullptr) {}
+  MooseADWrapper(MooseADWrapper<T> &&) = default;
+
+  MooseADWrapper<T> & operator=(const MooseADWrapper<T> & rhs)
+  {
+    _val = rhs._val;
+    return *this;
+  }
+  MooseADWrapper<T> & operator=(MooseADWrapper<T> &&) = default;
 
   typedef T DNType;
 
@@ -73,6 +89,9 @@ public:
 
 private:
   T _val;
+  mutable std::unique_ptr<T> _dual_number;
+  friend void dataStore<T>(std::ostream &, MooseADWrapper<T> &, void *);
+  friend void dataLoad<T>(std::istream &, MooseADWrapper<T> &, void *);
 };
 
 template <>
@@ -103,6 +122,8 @@ private:
   bool _use_ad;
   Real _val;
   mutable std::unique_ptr<ADReal> _dual_number;
+  friend void dataStore<Real>(std::ostream &, MooseADWrapper<Real> &, void *);
+  friend void dataLoad<Real>(std::istream &, MooseADWrapper<Real> &, void *);
 };
 
 template <>
@@ -133,6 +154,10 @@ private:
   bool _use_ad;
   VectorValue<Real> _val;
   mutable std::unique_ptr<VectorValue<ADReal>> _dual_number;
+  friend void
+  dataStore<VectorValue<Real>>(std::ostream &, MooseADWrapper<VectorValue<Real>> &, void *);
+  friend void
+  dataLoad<VectorValue<Real>>(std::istream &, MooseADWrapper<VectorValue<Real>> &, void *);
 };
 
 template <>
@@ -163,6 +188,10 @@ private:
   bool _use_ad;
   TensorValue<Real> _val;
   mutable std::unique_ptr<TensorValue<ADReal>> _dual_number;
+  friend void
+  dataStore<TensorValue<Real>>(std::ostream &, MooseADWrapper<TensorValue<Real>> &, void *);
+  friend void
+  dataLoad<TensorValue<Real>>(std::istream &, MooseADWrapper<TensorValue<Real>> &, void *);
 };
 
 template <>
@@ -195,6 +224,12 @@ private:
   bool _use_ad;
   RankTwoTensorTempl<Real> _val;
   mutable std::unique_ptr<RankTwoTensorTempl<ADReal>> _dual_number;
+  friend void dataStore<RankTwoTensorTempl<Real>>(std::ostream &,
+                                                  MooseADWrapper<RankTwoTensorTempl<Real>> &,
+                                                  void *);
+  friend void dataLoad<RankTwoTensorTempl<Real>>(std::istream &,
+                                                 MooseADWrapper<RankTwoTensorTempl<Real>> &,
+                                                 void *);
 };
 
 #endif // MOOSEADWRAPPER_H

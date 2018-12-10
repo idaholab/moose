@@ -345,11 +345,11 @@ dataStore(std::ostream & stream, ADReal & dn, void * context)
     dataStore(stream, dn.derivatives()[i], context);
 }
 
-template <size_t N>
+template <std::size_t N>
 inline void
 dataStore(std::ostream & stream, ADReal (&dn)[N], void * context)
 {
-  for (size_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
     dataStore(stream, dn[i], context);
 }
 
@@ -428,7 +428,17 @@ inline void
 dataStore(std::ostream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
 {
   dataStore(stream, dn_wrapper.value(), context);
-  dataStore(stream, dn_wrapper.dn(false), context);
+  if (dn_wrapper._dual_number)
+  {
+    unsigned int m = 1;
+    stream.write((char *)&m, sizeof(m));
+    dataStore(stream, *dn_wrapper._dual_number, context);
+  }
+  else
+  {
+    unsigned int m = 0;
+    stream.write((char *)&m, sizeof(m));
+  }
 }
 
 // DO NOT MODIFY THE NEXT LINE - It is used by MOOSEDocs
@@ -688,7 +698,13 @@ inline void
 dataLoad(std::istream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
 {
   dataLoad(stream, dn_wrapper.value(), context);
-  dataLoad(stream, dn_wrapper.dn(false), context);
+  unsigned int n = 0;
+  stream.read((char *)&n, sizeof(n));
+  if (n)
+  {
+    dn_wrapper._dual_number = libmesh_make_unique<typename MooseADWrapper<T>::DNType>();
+    dataLoad(stream, *dn_wrapper._dual_number, context);
+  }
 }
 
 // Scalar Helper Function
