@@ -11,6 +11,7 @@
 #define RANKTWOTENSOR_H
 
 #include "Moose.h"
+#include "ADReal.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
@@ -31,17 +32,6 @@ class MooseArray;
 typedef MooseArray<Real> VariableValue;
 template <typename>
 class ColumnMajorMatrixTempl;
-#ifndef AD_MAX_DOFS_PER_ELEM
-#define AD_MAX_DOFS_PER_ELEM 50
-#endif
-namespace MetaPhysicL
-{
-template <typename, typename>
-class DualNumber;
-template <size_t, typename>
-class NumberArray;
-}
-typedef MetaPhysicL::DualNumber<Real, MetaPhysicL::NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> ADReal;
 
 template <typename T>
 void mooseSetToZero(T & v);
@@ -132,6 +122,12 @@ public:
 
   /// Copy constructor from TypeTensor<T>
   RankTwoTensorTempl(const TypeTensor<T> & a) : TensorValue<T>(a) {}
+
+  /// Construct from other template
+  template <typename T2>
+  RankTwoTensorTempl(const RankTwoTensorTempl<T2> & a) : TensorValue<T>(a)
+  {
+  }
 
   // Named constructors
   static RankTwoTensorTempl Identity() { return RankTwoTensorTempl(initIdentity); }

@@ -7,6 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
 #include "RankTwoTensor.h"
 
 // MOOSE includes
@@ -22,9 +25,6 @@
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/utility.h"
-
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
 
 // PETSc includes
 #include <petscblaslapack.h>

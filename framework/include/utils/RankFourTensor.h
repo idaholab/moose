@@ -11,13 +11,12 @@
 #define RANKFOURTENSOR_H
 
 #include "Moose.h"
+#include "ADReal.h"
 
 #include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/tuple_of.h"
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
 
 #include <petscsys.h>
 
@@ -34,10 +33,6 @@ typedef RankTwoTensorTempl<Real> RankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-#ifndef AD_MAX_DOFS_PER_ELEM
-#define AD_MAX_DOFS_PER_ELEM 50
-#endif
-typedef MetaPhysicL::DualNumber<Real, MetaPhysicL::NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> ADReal;
 
 template <typename T>
 void mooseSetToZero(T & v);

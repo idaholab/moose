@@ -13,6 +13,7 @@
 // MOOSE includes
 #include "Moose.h" // using namespace libMesh
 #include "MooseError.h"
+#include "ADReal.h"
 
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"
@@ -22,11 +23,6 @@
 
 // C++ includes
 #include <iomanip>
-
-#ifndef AD_MAX_DOFS_PER_ELEM
-#define AD_MAX_DOFS_PER_ELEM 50
-#endif
-typedef MetaPhysicL::DualNumber<Real, MetaPhysicL::NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> ADReal;
 
 /**
  * This class defines a Tensor that can change its shape.  This means
