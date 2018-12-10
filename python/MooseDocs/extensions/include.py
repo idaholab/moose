@@ -51,6 +51,6 @@ class IncludeCommand(command.CommandComponent):
         """
         include_page = self.translator.findPage(info['subcommand'])
         content, line = common.extractContent(self.reader.read(include_page), self.settings)
-        self.reader.tokenize(parent, content, include_page, line=line)
+        self.reader.tokenize(parent, content, page, line=line)
         self.extension.addDependency(include_page)
         return parent
