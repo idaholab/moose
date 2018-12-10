@@ -136,7 +136,7 @@ validParams<MultiApp>()
       "of the App positions, to be moved at move_time to move_positions");
 
   params.addParam<std::vector<Point>>("move_positions",
-                                      "The positiSons corresponding to each move_app.");
+                                      "The positions corresponding to each move_app.");
 
   params.addParam<std::vector<std::string>>(
       "cli_args",
