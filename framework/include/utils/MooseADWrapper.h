@@ -182,7 +182,7 @@ public:
   void markAD(bool use_ad);
 
   MooseADWrapper<TensorValue<Real>> & operator=(const MooseADWrapper<TensorValue<Real>> &);
-  MooseADWrapper<TensorValue<Real>> & operator=(MooseADWrapper<TensorValue<Real>> &&);
+  MooseADWrapper<TensorValue<Real>> & operator=(MooseADWrapper<TensorValue<Real>> &&) = default;
 
 private:
   bool _use_ad;
