@@ -51,7 +51,7 @@ class Page(mooseutils.AutoPropertyMixin):
         return os.path.join(self.base, self.local)
 
     def relativeSource(self, other):
-        """ Location of this page related to the other page."""
+        """Location of this page related to the other page."""
         return os.path.relpath(self.local, os.path.dirname(other.local))
 
     def relativeDestination(self, other):
