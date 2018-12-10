@@ -104,7 +104,7 @@ def get_min_max(*pairs):
         xmax = max(xmax, x1)
     return xmin, xmax
 
-def print_camera(camera, prefix='camera', precision=4):
+def print_camera(camera, prefix='camera', precision=10):
     """
     Prints vtkCamera object to screen.
     """
