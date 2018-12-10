@@ -12,7 +12,7 @@
 
 ControllableItem::ControllableItem(const MooseObjectParameterName & name,
                                    libMesh::Parameters::Value * value,
-                                   std::set<ExecFlagType> flags)
+                                   const std::set<ExecFlagType> & flags)
   : _execute_flags(flags)
 {
   _pairs.emplace_back(name, value);

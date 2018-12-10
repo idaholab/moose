@@ -824,6 +824,10 @@ FEProblemBase::initialSetup()
       reinitScalars(tid);
 
     execute(EXEC_INITIAL);
+
+    // The FEProblemBase::execute method doesn't call all the systems on EXEC_INITIAL, but it does
+    // set/unset the current flag. Therefore, this resets the current flag to EXEC_INITIAL so that
+    // subsequent calls (e.g., executeControls) have the proper flag.
     setCurrentExecuteOnFlag(EXEC_INITIAL);
   }
 

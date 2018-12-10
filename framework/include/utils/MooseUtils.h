@@ -64,11 +64,15 @@ std::string trim(const std::string & str, const std::string & white_space = " \t
 
 /**
  * Python like split function for strings.
+ *
+ * NOTE: This is similar to the tokenize function, but it maintains empty items, which tokenize does
+ *       not. For example, "foo;bar;;" becomes {"foo", "bar", "", ""}.
  */
 std::vector<std::string> split(const std::string & str, const std::string & delimiter);
 
 /**
  * Python like join function for strings.
+
  */
 template <typename T>
 std::string join(const T & strings, const std::string & delimiter);

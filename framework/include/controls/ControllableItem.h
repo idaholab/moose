@@ -34,7 +34,7 @@ class ControllableItem
 public:
   ControllableItem(const MooseObjectParameterName & name,
                    libMesh::Parameters::Value * value,
-                   std::set<ExecFlagType> flags = {});
+                   const std::set<ExecFlagType> & flags = {});
   virtual ~ControllableItem() = default;
 
   ControllableItem(const ControllableItem &) = default;
