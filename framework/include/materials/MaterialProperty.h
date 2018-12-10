@@ -229,7 +229,7 @@ template <typename T>
 inline void
 MaterialProperty<T>::resize(int n)
 {
-  auto diff = n - _value.size();
+  auto diff = n - static_cast<int>(_value.size());
   if (diff < 0)
     _value.erase(_value.end() + diff, _value.end());
   else

@@ -187,6 +187,18 @@ public:
   /// sets _coords to a, and returns _coords
   RankTwoTensorTempl<T> & operator=(const RankTwoTensorTempl<T> & a);
 
+  /**
+   * Assignment-from-scalar operator.  Used only to zero out vectors.
+   */
+  template <typename Scalar>
+  typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, RankTwoTensorTempl &>::type
+  operator=(const Scalar & libmesh_dbg_var(p))
+  {
+    libmesh_assert_equal_to(p, Scalar(0));
+    this->zero();
+    return *this;
+  }
+
   /// adds a to _coords
   RankTwoTensorTempl<T> & operator+=(const RankTwoTensorTempl<T> & a);
 

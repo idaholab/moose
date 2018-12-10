@@ -45,7 +45,10 @@ MooseADWrapper<Real> &
 MooseADWrapper<Real>::operator=(const MooseADWrapper<Real> & rhs)
 {
   _val = rhs._val;
-  *_dual_number = *rhs._dual_number;
+  if (_dual_number && rhs._dual_number)
+    *_dual_number = *rhs._dual_number;
+  else if (_dual_number)
+    *_dual_number = 0;
   return *this;
 }
 
@@ -94,7 +97,10 @@ MooseADWrapper<VectorValue<Real>> &
 MooseADWrapper<VectorValue<Real>>::operator=(const MooseADWrapper<VectorValue<Real>> & rhs)
 {
   _val = rhs._val;
-  *_dual_number = *rhs._dual_number;
+  if (_dual_number && rhs._dual_number)
+    *_dual_number = *rhs._dual_number;
+  else if (_dual_number)
+    *_dual_number = 0;
   return *this;
 }
 
@@ -145,7 +151,10 @@ MooseADWrapper<TensorValue<Real>> &
 MooseADWrapper<TensorValue<Real>>::operator=(const MooseADWrapper<TensorValue<Real>> & rhs)
 {
   _val = rhs._val;
-  *_dual_number = *rhs._dual_number;
+  if (_dual_number && rhs._dual_number)
+    *_dual_number = *rhs._dual_number;
+  else if (_dual_number)
+    *_dual_number = 0;
   return *this;
 }
 
@@ -197,6 +206,9 @@ MooseADWrapper<RankTwoTensorTempl<Real>>::
 operator=(const MooseADWrapper<RankTwoTensorTempl<Real>> & rhs)
 {
   _val = rhs._val;
-  *_dual_number = *rhs._dual_number;
+  if (_dual_number && rhs._dual_number)
+    *_dual_number = *rhs._dual_number;
+  else if (_dual_number)
+    *_dual_number = 0;
   return *this;
 }
