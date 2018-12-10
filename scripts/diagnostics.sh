@@ -26,6 +26,15 @@ file_born_date() {
 }
 
 diagnose_compilers() {
+    # Variable
+    which $CC &> /dev/null
+    if [ "$?" -eq 0 ]; then
+        write_to_stdout "\nVariable \`which \$CC\` check:\n`which $CC`\n\n\$CC --version:\n`$CC --version`"
+    else
+        write_to_stdout "\n\$CC not set"
+    fi
+
+    # Static
     which mpicc &> /dev/null
     if [ "$?" -eq 0 ]; then
         write_to_stdout "\nMPICC:\nwhich mpicc:\n\t`which mpicc`\nmpicc -show:\n\t`mpicc -show`\n\nCOMPILER `echo $(mpicc -show | cut -d\  -f1)`:\n`$(mpicc -show | cut -d\  -f1) --version`"
@@ -105,6 +114,23 @@ diagnose_python() {
     fi
 }
 
+diagnose_petsc() {
+    if [ -f "$PETSC_DIR/include/petscconfiginfo.h" ]; then
+        formatted=`cat $PETSC_DIR/include/petscconfiginfo.h | sed -e 's|\\\||g'`
+        write_to_stdout "\nPETSc configure:\n$formatted"
+        write_to_stdout "\nPETSc linked libraries:"
+
+        if [ `uname` = "Linux" ]; then
+            ldd $PETSC_DIR/lib/libpetsc.so
+        else
+            otool -L $PETSC_DIR/lib/libpetsc.dylib
+        fi
+
+    elif [ -z "$PETSC_DIR" ]; then
+        write_to_stdout "\nPETSC_DIR not set"
+    fi
+}
+
 # Execute the diagnostics
 date
 diagnose_root
@@ -115,4 +141,5 @@ diagnose_memory
 diagnose_compilers
 diagnose_python
 diagnose_modules
+diagnose_petsc
 diagnose_environment
