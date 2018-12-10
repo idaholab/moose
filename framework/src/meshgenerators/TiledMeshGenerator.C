@@ -59,8 +59,7 @@ validParams<TiledMeshGenerator>()
 }
 
 TiledMeshGenerator::TiledMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input(getMesh("input"))
+  : MeshGenerator(parameters), _input(getMesh("input"))
 {
   if (dynamic_pointer_cast<DistributedMesh>(_input) != nullptr)
     mooseError("TiledMeshGenerator only works with ReplicatedMesh.");
@@ -75,19 +74,19 @@ TiledMeshGenerator::generate()
   // Getting the x,y,z widths
   std::set<subdomain_id_type> sub_ids;
   mesh->subdomain_ids(sub_ids);
-  BoundingBox bbox(Point(0,0,0), Point(0,0,0));
-  for(auto id : sub_ids)
+  BoundingBox bbox(Point(0, 0, 0), Point(0, 0, 0));
+  for (auto id : sub_ids)
   {
     BoundingBox sub_bbox = MeshTools::create_subdomain_bounding_box(*mesh, id);
-    if(bbox.min() == bbox.max())
+    if (bbox.min() == bbox.max())
       bbox = sub_bbox;
     else
       bbox.union_with(sub_bbox);
   }
 
-  _x_width = bbox.max()(0)-bbox.min()(0);
-  _y_width = bbox.max()(1)-bbox.min()(1);
-  _z_width = bbox.max()(2)-bbox.min()(2);
+  _x_width = bbox.max()(0) - bbox.min()(0);
+  _y_width = bbox.max()(1) - bbox.min()(1);
+  _z_width = bbox.max()(2) - bbox.min()(2);
 
   boundary_id_type left =
       mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
