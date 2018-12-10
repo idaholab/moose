@@ -25,14 +25,11 @@ ExampleIC::ExampleIC(const InputParameters & parameters)
 {
 }
 
+// This is the primary function custom ICs must implement.
 Real
 ExampleIC::value(const Point & p)
 {
-  /**
-   * _value * x
-   * The Point class is defined in libMesh.  The spatial
-   * coordinates x,y,z can be accessed individually using
-   * the parenthesis operator and a numeric index from 0..2
-   */
+  // The Point class is defined in libMesh.  The spatial coordinates x,y,z can be accessed
+  // individually using the parenthesis operator and a numeric index from 0..2
   return 2. * _coefficient * std::abs(p(0));
 }

@@ -48,14 +48,7 @@ file itself:
 In this simple problem, a single variable, 'diffused,' is defined, which represents $$u$$ from the
 continuous problem.  The 'diffused' variable is approximated with linear Lagrange shape functions.
 
-```text
-[Variables]
-  [./diffused]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-```
+!listing examples/ex01_inputfile/ex01.i block=Variables
 
 ### Kernels
 
@@ -65,14 +58,7 @@ the `Diffusion` Kernel is already defined in MOOSE.  To use a particular Kernel 
 file sub-section is defined, labeled "diff" (this is an arbitrary user-defined name), that
 utilizes the `Diffusion` `Kernel` and acts on the previously defined variable "diffused".
 
-```text
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = diffused
-  [../]
-[]
-```
+!listing examples/ex01_inputfile/ex01.i block=Kernels
 
 ### Boundary Conditions (BCs)
 
@@ -80,22 +66,7 @@ Boundary conditions are defined in a manner similar to `Kernels`.  For this prob
 boundary conditions are required.  In the input file the two boundary conditions are specified
 each using the `DirichletBC` object provided by MOOSE.
 
-```text
-[BCs]
-  [./bottom]
-    type = DirichletBC
-    variable = diffused
-    boundary = 'bottom'
-    value = 1
-  [../]
-  [./top]
-    type = DirichletBC
-    variable = diffused
-    boundary = 'top'
-    value = 0
-  [../]
-[]
-```
+!listing examples/ex01_inputfile/ex01.i block=BCs
 
 Within each of the two sub-section, named "top" and "bottom" by the user, the boundary conditions
 are linked to their associated variable(s) (i.e. "diffused" in this case) and boundaries.  In this
@@ -114,12 +85,7 @@ The type of problem to solve and the method for solving it is defined within the
 block.  This problem is steady-state and will use the `Steady` Executioner and will use the
 default solving method Preconditioned Jacobain Free Newton Krylov.
 
-```text
-[Executioner]
-  type = Steady
-  solve_type = 'PJFNK'
-[]
-```
+!listing examples/ex01_inputfile/ex01.i block=Executioner
 
 ### Outputs
 
@@ -127,13 +93,7 @@ Here two types of outputs are enabled: output to the screen (console) and output
 file (exodus).  Setting the "file_base" parameter is optional, in this example it forces the
 output file to be named "out.e" ("e" is the extension used for the Exodus II format).
 
-```text
-[Outputs]
-  file_base = out
-  screen = true
-  exodus = true
-[]
-```
+!listing examples/ex01_inputfile/ex01.i block=Outputs
 
 ## Running the Problem
 
@@ -155,15 +115,6 @@ Peacock or an external application that supports the Exodus II format (e.g., Par
        caption= Example 1 Results
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
 
-## Complete Source Files
-
-- [ex01.i](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/ex01.i)
-- [main.C](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/src/main.C)
-- [ExampleApp.h](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/include/base/ExampleApp.h)
-- [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/src/base/ExampleApp.C)
-- [Diffusion.h](https://github.com/idaholab/moose/blob/devel/framework/include/kernels/Diffusion.h)
-- [Diffusion.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/Diffusion.C)
-
 ## Next Steps
 
 Although the Diffusion kernel is the only "physics" in the MOOSE framework, a large set of physics
@@ -174,3 +125,14 @@ implement your own physics, you will need to understand the following:
   the "weak" form of for PDEs
 - [C++](help/c++/index.md) and object-oriented design
 - [The Anatomy of a MOOSE Object](http://mooseframework.org/wiki/MooseTraining/MooseObject/)
+- Check out more [examples](examples/index.md)
+
+## Complete Source Files
+
+- [ex01.i](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/ex01.i)
+- [main.C](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/src/main.C)
+- [ExampleApp.h](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/include/base/ExampleApp.h)
+- [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/src/base/ExampleApp.C)
+- [Diffusion.h](https://github.com/idaholab/moose/blob/devel/framework/include/kernels/Diffusion.h)
+- [Diffusion.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/Diffusion.C)
+
