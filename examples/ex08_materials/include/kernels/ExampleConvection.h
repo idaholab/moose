@@ -28,6 +28,7 @@ protected:
   virtual Real computeQpJacobian() override;
 
 private:
+  // we will store a material property instead of VariableGradient (like example 3):
   const MaterialProperty<RealGradient> & _velocity;
 };
 

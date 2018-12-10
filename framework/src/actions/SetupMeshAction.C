@@ -50,7 +50,14 @@ validParams<SetupMeshAction>()
       "displacements",
       "The variables corresponding to the x y z displacements of the mesh.  If "
       "this is provided then the displacements will be taken into account during "
-      "the computation.");
+      "the computation. Creation of the displaced mesh can be suppressed even if "
+      "this is set by setting 'use_displaced_mesh = false'.");
+  params.addParam<bool>(
+      "use_displaced_mesh",
+      true,
+      "Create the displaced mesh if the 'displacements' "
+      "parameter is set. If this is 'false', a displaced mesh will not be created, "
+      "regardless of whether 'displacements' is set.");
   params.addParam<std::vector<BoundaryName>>("ghosted_boundaries",
                                              "Boundaries to be ghosted if using Nemesis");
   params.addParam<std::vector<Real>>("ghosted_boundaries_inflation",
@@ -208,14 +215,14 @@ SetupMeshAction::act()
     }
 
     _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
-    if (isParamValid("displacements"))
+    if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
       _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);
   }
   else if (_current_task == "init_mesh")
   {
     _mesh->init();
 
-    if (isParamValid("displacements"))
+    if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
     {
       // Initialize the displaced mesh
       _displaced_mesh->init();

@@ -1,11 +1,14 @@
 [Tests]
+  design = 'functional_expansion_tools/index.md'
+  issues = #10577
   [./interface_coupling]
-    # This test couples a master and sub app in 2D for light but fully-functional interface test
     type = Exodiff
     input = interface_coupled.i
     exodiff = interface_coupled_out.e
     min_threads = 2
+    petsc_version = '>=3.7.6' #This test times out on Falcon on PETSc 3.6.3 with 2 threads
     group = functional_expansion_tools
+    requirement = 'The functional_expansion_tools module shall be capable of coupling interface data between a master and sub app in 2D.'
   [../]
 
 
@@ -15,40 +18,39 @@
     input = volume_coupled.i
     exodiff = volume_coupled_out.e
     group = functional_expansion_tools
+    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a master and sub app in 1D.'
   [../]
 
   [./volume_coupling_custom_norm]
-    # This test couples a master and sub app in 1D for a light but fully-functional volumetric test
     type = Exodiff
     input = volume_coupling_custom_norm.i
     exodiff = volume_coupled_out.e
     group = functional_expansion_tools
     prereq = 'volume_coupling'
+    requirement = 'The functional_expansion_tools module shall be capable of coupling volumetric data between a master and sub app in 1D using a custom norm.'
   [../]
 
 
   [./print_coefficients]
-    # If an extraneous field is provided, then so long as the 'physical_bounds' and 'orders' fields
-    # are of the correct length, no error should be provided.
     type = RunApp
     input = multiapp_print_coefficients.i
     group = functional_expansion
+    requirement = "The functional_expansion_tools module shall be capable of printing coefficients when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
   [../]
 
 
   [./neglect_invalid_enum]
-    # If an extraneous field is provided, then so long as the 'physical_bounds' and 'orders' fields
-    # are of the correct length, no error should be provided.
     type = RunApp
     input = neglect_invalid_enum.i
     group = functional_expansion
+    requirement = "The functional_expansion_tools module shall not generate an error when an extraneous field is provided, as long as the 'physical_bounds' and 'orders' fields are of the correct length."
   [../]
 
 
   [./incompatible_dimensions]
-    # Functional Expansions do not currently validate the physical dimensions between objects.
     type = RunApp
     input = multiapp_different_physical_boundaries.i
     group = functional_expansion_tools
+    requirement = 'The functional_expansion_tools module shall not validate the physical dimensions between objects.'
   [../]
 []

@@ -23,7 +23,14 @@ validParams<CreateDisplacedProblemAction>()
       "displacements",
       "The variables corresponding to the x y z displacements of the mesh.  If "
       "this is provided then the displacements will be taken into account during "
-      "the computation.");
+      "the computation. Creation of the displaced mesh can be suppressed even if "
+      "this is set by setting 'use_displaced_mesh = false'.");
+  params.addParam<bool>(
+      "use_displaced_mesh",
+      true,
+      "Create the displaced mesh if the 'displacements' "
+      "parameter is set. If this is 'false', a displaced mesh will not be created, "
+      "regardless of whether 'displacements' is set.");
 
   return params;
 }
@@ -36,7 +43,7 @@ CreateDisplacedProblemAction::CreateDisplacedProblemAction(InputParameters param
 void
 CreateDisplacedProblemAction::act()
 {
-  if (isParamValid("displacements"))
+  if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
   {
     if (!_displaced_mesh)
       mooseError("displacements were set but a displaced mesh wasn't created!");

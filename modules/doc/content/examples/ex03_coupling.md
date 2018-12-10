@@ -3,19 +3,34 @@
 ## Problem statement
 
 This problem considers a coupled systems of equations on a 3-D domain $\Omega$ : find $u$ and $v$
-such that $-\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0$ and
+such that
 
-$-\nabla \cdot \nabla v = 0$,
+\begin{equation}
+\begin{aligned}
+-\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0 \\
+-\nabla \cdot \nabla v = 0
+\end{aligned}
+\end{equation}
 
 where $u=v=0$ on the top boundary and $u=2$ and $v=1$ on the bottom boundary. The remaining
-boundaries are natural boundaries: $\nabla u \cdot \hat{n} = 0$ and $\nabla v \cdot \hat{n} = 0$.
-The domain, $\Omega$, is the same as utilized in Example 2.
+boundaries are natural boundaries:
 
-The weak form of this equation, in inner-product notation, is given by:
+\begin{equation}
+\begin{aligned}
+\nabla u \cdot \hat{n} = 0 \\
+\nabla v \cdot \hat{n} = 0
+\end{aligned}
+\end{equation}
 
-$(\nabla u_h, \nabla \phi_i) + (\nabla\vec{v} \cdot \nabla u, \phi_i)= 0 \quad \forall  \phi_i$ and
+The domain, $\Omega$, is the same as utilized in Example 2.  The weak form of this equation, in
+inner-product notation, is given by:
 
-$(\nabla\vec{v}, \nabla\phi_i)= 0 \quad \forall  \phi_i$,
+\begin{equation}
+\begin{aligned}
+(\nabla u_h, \nabla \phi_i) + (\nabla\vec{v} \cdot \nabla u, \phi_i)= 0 \quad \forall  \phi_i \\
+(\nabla\vec{v}, \nabla\phi_i)= 0 \quad \forall  \phi_i
+\end{aligned}
+\end{equation}
 
 where $\phi_i$ are the test functions and $u_h$ and $v_h$ are the finite element solutions.
 
@@ -94,10 +109,16 @@ using Peacock or an external application that supports the Exodus II format (e.g
 # 1D exact solution
 
  A simplified 1D analog of this problem is given as follows, where $u(0)=0$ and $u(1)=1$:
-$-\epsilon \frac{d^2 u}{d x^2} + \frac{d u}{d x} = 0$
 
-The exact solution to this problem is
-$u = \frac{\exp\left(\frac{x}{\epsilon}\right) - 1}{\exp\left(\frac{1}{\epsilon}\right) - 1}$
+\begin{equation}
+-\epsilon \frac{d^2 u}{d x^2} + \frac{d u}{d x} = 0
+\end{equation}
+
+The exact solution to this problem is:
+
+\begin{equation}
+u = \frac{\exp\left(\frac{x}{\epsilon}\right) - 1}{\exp\left(\frac{1}{\epsilon}\right) - 1}
+\end{equation}
 
 ## Complete Source Files
 

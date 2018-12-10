@@ -21,9 +21,7 @@ validParams<ExampleConvection>()
 
 ExampleConvection::ExampleConvection(const InputParameters & parameters)
   : Kernel(parameters),
-
-    // Retrieve a gradient material property to use for the convection
-    // velocity
+    // Retrieve and store gradient from a material property to use for the convection velocity
     _velocity(getMaterialProperty<RealGradient>("convection_velocity"))
 {
 }
@@ -31,6 +29,7 @@ ExampleConvection::ExampleConvection(const InputParameters & parameters)
 Real
 ExampleConvection::computeQpResidual()
 {
+  // Use the velocity gradient just like before in example 3
   return _test[_i][_qp] * (_velocity[_qp] * _grad_u[_qp]);
 }
 
