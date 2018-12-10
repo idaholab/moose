@@ -13,15 +13,11 @@
 #include "Material.h"
 #include "LinearInterpolation.h"
 
-// Forward Declarations
 class ExampleMaterial;
 
 template <>
 InputParameters validParams<ExampleMaterial>();
 
-/**
- * Example material class that defines a few properties.
- */
 class ExampleMaterial : public Material
 {
 public:
@@ -31,27 +27,17 @@ protected:
   virtual void computeQpProperties() override;
 
 private:
-  /**
-   * This is the member reference that will hold the computed values
-   * for the Real value property in this class.
-   */
+  /// member variable to hold the computed diffusivity coefficient
   MaterialProperty<Real> & _diffusivity;
-
-  /**
-   * Computed values for the Gradient value property in this class.
-   */
+  /// member variable to hold the computed convection velocity gradient term
   MaterialProperty<RealGradient> & _convection_velocity;
 
-  /**
-   * This is the member reference that will hold the gradient
-   * of the coupled variable
-   */
+  /// A place to store the coupled variable gradient for calculating the convection velocity
+  /// property.
   const VariableGradient & _diffusion_gradient;
 
-  /**
-   * This object returns a piecewise linear function based an a series
-   * of points and their corresponding values
-   */
+  /// A helper object for performaing linear interpolations on tabulated data for calculating the
+  /// diffusivity property.
   LinearInterpolation _piecewise_func;
 };
 

@@ -17,12 +17,16 @@ validParams<ExampleMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  // Vectors for Linear Interpolation
+  // Allow users to specify vectors defining the points of a piecewise function formed via linear
+  // interpolation.
   params.addRequiredParam<std::vector<Real>>(
-      "independent_vals", "The vector of indepedent values for building the piecewise function");
+      "independent_vals",
+      "The vector of z-coordinate values for a piecewise function's independent variable");
   params.addRequiredParam<std::vector<Real>>(
-      "dependent_vals", "The vector of depedent values for building the piecewise function");
+      "dependent_vals", "The vector of diffusivity values for a piecewise function's dependent");
 
+  // Allow the user to specify which independent variable's gradient to use for calculating the
+  // convection velocity property:
   params.addCoupledVar(
       "diffusion_gradient",
       "The gradient of this variable will be used to compute a velocity vector property.");
@@ -32,18 +36,19 @@ validParams<ExampleMaterial>()
 
 ExampleMaterial::ExampleMaterial(const InputParameters & parameters)
   : Material(parameters),
-    // Declare that this material is going to provide a Real
-    // valued property named "diffusivity" that Kernels can use.
+    // Declare that this material is going to provide a Real value typed
+    // material property named "diffusivity" that Kernels and other objects can use.
+    // This property is "bound" to the class's "_diffusivity" member.
     _diffusivity(declareProperty<Real>("diffusivity")),
 
-    // Declare that this material is going to provide a RealGradient
-    // valued property named "convection_velocity" that Kernels can use.
+    // Also declare a second "convection_velocity" RealGradient value typed property.
     _convection_velocity(declareProperty<RealGradient>("convection_velocity")),
 
-    // Get the reference to the variable coupled into this Material
+    // Get the reference to the variable coupled into this Material.
     _diffusion_gradient(isCoupled("diffusion_gradient") ? coupledGradient("diffusion_gradient")
                                                         : _grad_zero),
 
+    // Initialize our piecewise function helper with the user-specified interpolation points.
     _piecewise_func(getParam<std::vector<Real>>("independent_vals"),
                     getParam<std::vector<Real>>("dependent_vals"))
 {
@@ -52,9 +57,10 @@ ExampleMaterial::ExampleMaterial(const InputParameters & parameters)
 void
 ExampleMaterial::computeQpProperties()
 {
-  // We will compute the diffusivity based on the Linear Interpolation of the provided vectors in
-  // the z-direction
+  // Diffusivity will be the value of the (linearly-interpolated) piece-wise function described by
+  // the user.
   _diffusivity[_qp] = _piecewise_func.sample(_q_point[_qp](2));
 
+  // Convection velocity is set equal to the gradient of the variable set by the user.
   _convection_velocity[_qp] = _diffusion_gradient[_qp];
 }
