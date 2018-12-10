@@ -14,6 +14,9 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_modification.h"
+#include "libmesh/bounding_box.h"
+#include "libmesh/mesh_tools.h"
+#include "libmesh/point.h"
 
 #include <typeinfo>
 
@@ -26,10 +29,6 @@ validParams<TiledMeshGenerator>()
   InputParameters params = validParams<MeshGenerator>();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to repeat");
-
-  params.addParam<Real>("x_width", 0, "The tile width in the x direction");
-  params.addParam<Real>("y_width", 0, "The tile width in the y direction");
-  params.addParam<Real>("z_width", 0, "The tile width in the z direction");
 
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left", "name of the left (x) boundary");
@@ -61,13 +60,10 @@ validParams<TiledMeshGenerator>()
 
 TiledMeshGenerator::TiledMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-    _input(getMesh("input")),
-    _x_width(getParam<Real>("x_width")),
-    _y_width(getParam<Real>("y_width")),
-    _z_width(getParam<Real>("z_width"))
+    _input(getMesh("input"))
 {
-  if (typeid(_input).name() == typeid(DistributedMesh).name())
-    mooseError("TiledMesh only works with ReplicatedMesh.");
+  if (dynamic_pointer_cast<DistributedMesh>(_input) != nullptr)
+    mooseError("TiledMeshGenerator only works with ReplicatedMesh.");
 }
 
 std::unique_ptr<MeshBase>
@@ -75,6 +71,23 @@ TiledMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> initial_mesh = std::move(_input);
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(initial_mesh);
+
+  // Getting the x,y,z widths
+  std::set<subdomain_id_type> sub_ids;
+  mesh->subdomain_ids(sub_ids);
+  BoundingBox bbox(Point(0,0,0), Point(0,0,0));
+  for(auto id : sub_ids)
+  {
+    BoundingBox sub_bbox = MeshTools::create_subdomain_bounding_box(*mesh, id);
+    if(bbox.min() == bbox.max())
+      bbox = sub_bbox;
+    else
+      bbox.union_with(sub_bbox);
+  }
+
+  _x_width = bbox.max()(0)-bbox.min()(0);
+  _y_width = bbox.max()(1)-bbox.min()(1);
+  _z_width = bbox.max()(2)-bbox.min()(2);
 
   boundary_id_type left =
       mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));

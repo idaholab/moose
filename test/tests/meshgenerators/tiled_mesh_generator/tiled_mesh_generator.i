@@ -7,9 +7,6 @@
   [./tmg]
     type = TiledMeshGenerator
     input = fmg
-    x_width = 10
-    y_width = 10
-    z_width = 10
 
     left_boundary = left
     right_boundary = right
