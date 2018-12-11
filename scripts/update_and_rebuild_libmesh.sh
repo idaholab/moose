@@ -111,12 +111,13 @@ fi
 
 cd $SCRIPT_DIR/../libmesh
 
-# If there is no package in envirment
-# We use petsc submodule
+# If PETSC_DIR is not set in the environment (perhaps because the user is not using the MOOSE
+# package), we use the PETSc submodule
 if [ -z "$PETSC_DIR" ]; then
-  echo "We can not find an installed PETSc, and PETSc submodule will be used"
-  echo "You may see some test fails until we officely support this new PETSc"
-  echo "If did not run update_and_rebuild_petsc.sh yet, please run it before building libMesh"
+  echo "We could not find an installed PETSc (no PETSC_DIR environment variable set), so the"
+  echo "PETSc submodule will be used. You may see some test failures until we officially support the"
+  echo "PETSc maint branch."
+  echo "IMPORTANT: If you did not run the update_and_rebuild_petsc.sh script yet, please run it before building libMesh"
   export PETSC_DIR=$SCRIPT_DIR/../petsc
   export PETSC_ARCH=arch-moose
 fi
