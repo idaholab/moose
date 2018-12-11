@@ -12,4 +12,20 @@
     absent_out = '3 Nonlinear'
     prereq = 'linear-hand-coded'
   [../]
+  [./linear-hand-coded-jac]
+    type = 'PetscJacobianTester'
+    input = 'linear-hand-coded.i'
+    run_sim = 'True'
+    prereq = 'linear-ad'
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+  [../]
+  [./linear-ad-jac]
+    type = 'PetscJacobianTester'
+    input = 'linear-ad.i'
+    run_sim = 'True'
+    prereq = 'linear-ad'
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+  [../]
 []
