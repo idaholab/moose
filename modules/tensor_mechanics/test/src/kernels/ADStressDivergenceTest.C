@@ -9,7 +9,7 @@
 
 #include "ADStressDivergenceTest.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTest);
+registerADMooseObject("TensorMechanicsTestApp", ADStressDivergenceTest);
 
 defineADValidParams(ADStressDivergenceTest,
                     ADKernel,
