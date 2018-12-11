@@ -120,6 +120,12 @@ public:
   /// Fill from vector
   RankFourTensorTempl(const std::vector<T> &, FillMethod);
 
+  /**
+   * Copy constructor
+   */
+  template <typename T2>
+  RankFourTensorTempl(const RankFourTensorTempl<T2> & copy);
+
   // Named constructors
   static RankFourTensorTempl<T> Identity() { return RankFourTensorTempl<T>(initIdentity); }
   static RankFourTensorTempl<T> IdentityFour() { return RankFourTensorTempl<T>(initIdentityFour); };
@@ -147,6 +153,20 @@ public:
 
   /// copies values from a into this tensor
   RankFourTensorTempl<T> & operator=(const RankFourTensorTempl<T> & a);
+
+  /**
+   * Assignment-from-scalar operator.  Used only to zero out the tensor.
+   *
+   * \returns A reference to *this.
+   */
+  template <typename Scalar>
+  typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, RankFourTensorTempl &>::type
+  operator=(const Scalar & libmesh_dbg_var(p))
+  {
+    libmesh_assert_equal_to(p, Scalar(0));
+    this->zero();
+    return *this;
+  }
 
   /// C_ijkl*a_kl
   template <template <typename> class Tensor, typename T2>
@@ -396,6 +416,14 @@ inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
                             RankFourTensorTempl<decltype(T1() * T2())>>::type
 {
   return b * a;
+}
+
+template <typename T>
+template <typename T2>
+RankFourTensorTempl<T>::RankFourTensorTempl(const RankFourTensorTempl<T2> & copy)
+{
+  for (unsigned int i = 0; i < N4; ++i)
+    _vals[i] = copy._vals[i];
 }
 
 typedef RankFourTensorTempl<Real> RankFourTensor;
