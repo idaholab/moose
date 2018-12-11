@@ -25,9 +25,9 @@ public:
   enum EGravityAngleType
   {
     ZERO_GRAVITY,      ///< Gravitational acceleration magnitude is zero
-    HORIZONTAL,        ///< Flow channel is perpindicular to gravity vector
+    HORIZONTAL,        ///< Flow channel is perpendicular to gravity vector
     VERTICAL,          ///< Flow channel is parallel to gravity vector
-    MOSTLY_HORIZONTAL, ///< Flow channel is mostly perpindicular to gravity vector
+    MOSTLY_HORIZONTAL, ///< Flow channel is mostly perpendicular to gravity vector
     MOSTLY_VERTICAL    ///< Flow channel is mostly parallel to gravity vector
   };
 
