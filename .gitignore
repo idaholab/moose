@@ -166,6 +166,9 @@ framework/contrib/asio/
 *.cpa-*
 *.cpr-*
 
+# Ignore petsc arch
+petsc/arch-*/*
+
 # phase_field/tests/solution_rasterizer
 out.xyz
 
