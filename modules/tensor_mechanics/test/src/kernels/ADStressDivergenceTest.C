@@ -11,31 +11,20 @@
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTest);
 
-template <>
-InputParameters
-validParams<ADStressDivergenceTest<RESIDUAL>>()
-{
-  InputParameters params = validParams<ADKernel<RESIDUAL>>();
-  params.addRequiredParam<unsigned int>("component", "displacement component");
-  return params;
-}
-template <>
-InputParameters
-validParams<ADStressDivergenceTest<JACOBIAN>>()
-{
-  return validParams<ADStressDivergenceTest<RESIDUAL>>();
-}
+defineADValidParams(ADStressDivergenceTest,
+                    ADKernel,
+                    params.addRequiredParam<unsigned int>("component", "displacement component"););
 
 template <ComputeStage compute_stage>
 ADStressDivergenceTest<compute_stage>::ADStressDivergenceTest(const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
-    _stress(this->template getADMaterialProperty<RankTwoTensor>("stress")),
-    _component(this->template getParam<unsigned int>("component"))
+    _stress(adGetADMaterialProperty<RankTwoTensor>("stress")),
+    _component(adGetParam<unsigned int>("component"))
 {
 }
 
 template <ComputeStage compute_stage>
-typename ResidualReturnType<compute_stage>::type
+ADResidual
 ADStressDivergenceTest<compute_stage>::computeQpResidual()
 {
   return _stress[_qp].row(_component) * _grad_test[_i][_qp];

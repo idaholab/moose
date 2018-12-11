@@ -19,10 +19,7 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-template <>
-InputParameters validParams<TensorMechADMatTest<RESIDUAL>>();
-template <>
-InputParameters validParams<TensorMechADMatTest<JACOBIAN>>();
+declareADValidParams(TensorMechADMatTest);
 
 /**
  * TensorMechADMatTest is the base class for stress tensors
@@ -37,18 +34,16 @@ protected:
   virtual void computeQpProperties() override;
 
   MaterialProperty<RankFourTensor> & _elasticity_tensor;
-  typename MaterialPropertyType<compute_stage, RankTwoTensor>::type & _total_strain;
-  typename MaterialPropertyType<compute_stage, RankTwoTensor>::type & _mechanical_strain;
-  typename MaterialPropertyType<compute_stage, RankTwoTensor>::type & _stress;
+  ADMaterialProperty(RankTwoTensor) & _total_strain;
+  ADMaterialProperty(RankTwoTensor) & _mechanical_strain;
+  ADMaterialProperty(RankTwoTensor) & _stress;
 
   unsigned int _ndisp;
-  std::vector<const typename VariableGradientType<compute_stage>::type *> _grad_disp;
+  std::vector<const ADVariableGradient *> _grad_disp;
 
   RankFourTensor _Cijkl;
 
-  using ADMaterial<compute_stage>::_ad_grad_zero;
-  using ADMaterial<compute_stage>::_qp;
-  using ADMaterial<compute_stage>::coupledComponents;
+  usingMaterialMembers;
 };
 
 #endif // TENSORMECHADMATTEST_H

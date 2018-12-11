@@ -10,16 +10,12 @@
 #define ADSTRESSDIVERGENCETEST_H
 
 #include "ADKernel.h"
-#include "MaterialProperty.h"
 
 // Forward Declaration
 template <ComputeStage>
 class ADStressDivergenceTest;
 
-template <>
-InputParameters validParams<ADStressDivergenceTest<RESIDUAL>>();
-template <>
-InputParameters validParams<ADStressDivergenceTest<JACOBIAN>>();
+declareADValidParams(ADStressDivergenceTest);
 
 template <ComputeStage compute_stage>
 class ADStressDivergenceTest : public ADKernel<compute_stage>
@@ -28,14 +24,12 @@ public:
   ADStressDivergenceTest(const InputParameters & parameters);
 
 protected:
-  virtual typename ResidualReturnType<compute_stage>::type computeQpResidual();
+  virtual ADResidual computeQpResidual();
 
-  const typename MaterialPropertyType<compute_stage, RankTwoTensor>::type & _stress;
+  const ADMaterialProperty(RankTwoTensor) & _stress;
   const unsigned int _component;
 
-  using ADKernel<compute_stage>::_qp;
-  using ADKernel<compute_stage>::_grad_test;
-  using ADKernel<compute_stage>::_i;
+  usingKernelMembers;
 };
 
 #endif // ADSTRESSDIVERGENCETEST_H

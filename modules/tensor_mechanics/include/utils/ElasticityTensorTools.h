@@ -13,6 +13,13 @@
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
+namespace libMesh
+{
+template <typename>
+class VectorValue;
+typedef VectorValue<Real> RealGradient;
+}
+using libMesh::RealGradient;
 
 namespace ElasticityTensorTools
 {

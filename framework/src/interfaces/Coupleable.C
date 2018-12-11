@@ -1493,14 +1493,14 @@ Coupleable::getADDefaultGradient<RESIDUAL>()
 
 template <>
 const typename VariableValueType<JACOBIAN>::type &
-Coupleable::adZero<JACOBIAN>()
+Coupleable::adZeroTemplate<JACOBIAN>()
 {
   return _ad_zero;
 }
 
 template <>
 const typename VariableGradientType<JACOBIAN>::type &
-Coupleable::adGradZero<JACOBIAN>()
+Coupleable::adGradZeroTemplate<JACOBIAN>()
 {
   return _ad_grad_zero;
 }
