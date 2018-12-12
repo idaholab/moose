@@ -30,7 +30,7 @@
   [../]
   [./ZR]
     type = Exodiff
-    input = 'gap_heat_transfer_htonly_zr_test.i'
+    input = 'gap_heat_transfer_htonly_rz_test.i'
     exodiff = 'gap_heat_transfer_htonly_zr_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
@@ -38,7 +38,7 @@
     requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity gap in 2D axisymmetric coordinates where the axial axis is along the x-direction"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#12071'
-    skip = '#12459 calculated fluxes incorrect'
+    cli_args = 'Problem/rz_coord_axis=X MeshModifiers/active=rotate Outputs/file_base=gap_heat_transfer_htonly_zr_test_out'
   [../]
   [./RSpherical]
     type = Exodiff
