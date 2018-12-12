@@ -66,8 +66,6 @@ FlowConnection::init()
   {
     std::vector<UserObjectName> fp_names;
     std::vector<RELAP7::FlowModelID> flow_model_ids;
-    std::vector<bool> implicit_rdg_flags;
-    std::vector<FlowModel::ESpatialDiscretizationType> spatial_discretizations;
     for (const auto & connection : _connections)
     {
       const std::string comp_name = connection._geometrical_component_name;
@@ -85,8 +83,6 @@ FlowConnection::init()
         _A_linear_names.push_back(comp.getLinearAreaName());
         _numerical_flux_names.push_back(comp.getNumericalFluxUserObjectName());
         _rdg_int_var_uo_names.push_back(comp.getRDGInterfacialVariablesUserObjectName());
-        implicit_rdg_flags.push_back(comp.getImplicitRDGFlag());
-        spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
       }
     }
 
@@ -97,13 +93,6 @@ FlowConnection::init()
 
       checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
       _flow_model_id = flow_model_ids[0];
-
-      checkAllConnectionsHaveSame<bool>(implicit_rdg_flags, "implicit rDG flag");
-      _implicit_rdg = implicit_rdg_flags[0];
-
-      checkAllConnectionsHaveSame<FlowModel::ESpatialDiscretizationType>(spatial_discretizations,
-                                                                         "spatial discretization");
-      _spatial_discretization = spatial_discretizations[0];
 
       if (hasComponentByName<Pipe>(_connections[0]._geometrical_component_name))
       {

@@ -70,13 +70,10 @@ public:
     return _rdg_int_var_uo_name;
   }
 
-  /**
-   * Gets the flag indicating whether RDG objects are in an implicit form
-   */
-  const bool & getImplicitRDGFlag() const { return _implicit_rdg; }
-
 protected:
   virtual void init() override;
+
+  virtual bool usingSecondOrderMesh() const override;
 
   /// Map of end type to a list of connections
   std::map<FlowConnection::EEndType, std::vector<Connection>> _connections;
@@ -95,9 +92,6 @@ protected:
 
   /// Slope reconstruction type for rDG
   const MooseEnum _rdg_slope_reconstruction;
-
-  /// Use implicit time integration for rDG
-  const bool _implicit_rdg;
 
   /// Flow model type
   RELAP7::FlowModelID _model_id;

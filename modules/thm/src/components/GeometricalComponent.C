@@ -15,10 +15,6 @@ validParams<GeometricalComponent>()
       "length", "The lengths of the subsections of the geometric component along the main axis");
   params.addRequiredParam<std::vector<unsigned int>>(
       "n_elems", "The number of elements in each subsection along the main axis");
-  params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
-  params.addRequiredParam<MooseEnum>("spatial_discretization",
-                                     FlowModel::getSpatialDiscretizationMooseEnum("CG"),
-                                     "Spatial discretization");
 
   return params;
 }
@@ -37,14 +33,7 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _length(std::accumulate(_lengths.begin(), _lengths.end(), 0.0)),
     _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
     _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
-    _2nd_order_mesh(getParam<bool>("2nd_order_mesh")),
-    _spatial_discretization(
-        getEnumParam<FlowModel::ESpatialDiscretizationType>("spatial_discretization")),
-    _n_nodes(computeNumberOfNodes(_n_elem)),
     _n_sections(_lengths.size()),
-    _fe_type(_spatial_discretization == FlowModel::rDG
-                 ? FEType(CONSTANT, MONOMIAL)
-                 : (_2nd_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE))),
     _displace_node_user_object_name(genName(name(), "displace_node"))
 {
   checkSizeGreaterThan<Real>("length", 0);
@@ -54,7 +43,7 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
 unsigned int
 GeometricalComponent::computeNumberOfNodes(unsigned int n_elems)
 {
-  return _2nd_order_mesh ? (2 * n_elems) + 1 : n_elems + 1;
+  return usingSecondOrderMesh() ? (2 * n_elems) + 1 : n_elems + 1;
 }
 
 void
@@ -100,7 +89,7 @@ GeometricalComponent::check() const
   Component::check();
 
   // Do not use TRAP q-rule with 2nd order FEs
-  if (_2nd_order_mesh)
+  if (usingSecondOrderMesh())
   {
     auto actions = _app.actionWarehouse().getActionListByName("setup_quadrature");
     const MooseEnum & quadrature_type = (*actions.begin())->getParam<MooseEnum>("type");
@@ -138,9 +127,10 @@ GeometricalComponent::getCoordSysTypes() const
 void
 GeometricalComponent::generateNodeLocations()
 {
+  unsigned int n_nodes = computeNumberOfNodes(_n_elem);
   unsigned int start_node = 0;
   Real start_length = 0.0;
-  _node_locations = std::vector<Real>(_n_nodes);
+  _node_locations = std::vector<Real>(n_nodes);
   _node_locations[0] = start_length;
 
   for (unsigned int i = 0; i < _n_sections; ++i)

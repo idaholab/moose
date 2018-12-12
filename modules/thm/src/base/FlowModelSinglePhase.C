@@ -365,7 +365,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
-    params.set<bool>("implicit") = _implicit_rdg;
+    params.set<bool>("implicit") = FlowModel::getImplicitRDGFlag();
     _sim.addMaterial(class_name, Component::genName(_comp_name, class_name), params);
   }
 
@@ -382,7 +382,7 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-    params.set<bool>("implicit") = _implicit_rdg;
+    params.set<bool>("implicit") = FlowModel::getImplicitRDGFlag();
     _sim.addDGKernel(class_name, Component::genName(_comp_name, "mass_advection"), params);
 
     // momentum

@@ -159,10 +159,6 @@ protected:
   std::vector<UserObjectName> _numerical_flux_names;
   /// rDG interfacial variables user object names
   std::vector<UserObjectName> _rdg_int_var_uo_names;
-  /// Use implicit time integration for rDG
-  bool _implicit_rdg;
-  /// Spatial discretization
-  FlowModel::ESpatialDiscretizationType _spatial_discretization;
   /// flag signalling that there is phase interaction (relevant only in 2-phase)
   bool _phase_interaction;
   /// Vector of connections of this component

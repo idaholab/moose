@@ -36,10 +36,8 @@ PipeBase::init()
   pars.set<Simulation *>("_sim") = &_sim;
   pars.set<PipeBase *>("_pipe") = this;
   pars.set<UserObjectName>("fp") = _fp_name;
-  pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;
-  pars.set<bool>("implicit_rdg") = _implicit_rdg;
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
   if (_model_id == RELAP7::FM_SINGLE_PHASE)
     _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);

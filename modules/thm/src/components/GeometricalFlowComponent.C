@@ -16,7 +16,6 @@ validParams<GeometricalFlowComponent>()
       "rdg_slope_reconstruction",
       SlopeReconstruction1DInterface::getSlopeReconstructionMooseEnum("None"),
       "Slope reconstruction type for rDG spatial discretization");
-  params.addParam<bool>("implicit_rdg", true, "Use implicit time integration for rDG");
 
   return params;
 }
@@ -24,15 +23,13 @@ validParams<GeometricalFlowComponent>()
 GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & parameters)
   : GeometricalComponent(parameters),
     _fp_name(getParam<UserObjectName>("fp")),
-    _A_linear_name(_spatial_discretization == FlowModel::rDG ? FlowModel::AREA + "_linear"
-                                                             : FlowModel::AREA),
+    _A_linear_name(FlowModel::getSpatialDiscretizationType() == FlowModel::rDG
+                       ? FlowModel::AREA + "_linear"
+                       : FlowModel::AREA),
     _numerical_flux_name(genName(name(), "numerical_flux")),
     _rdg_int_var_uo_name(genName(name(), "rdg_int_var_uo")),
-    _rdg_slope_reconstruction(getParam<MooseEnum>("rdg_slope_reconstruction")),
-    _implicit_rdg(getParam<bool>("implicit_rdg"))
+    _rdg_slope_reconstruction(getParam<MooseEnum>("rdg_slope_reconstruction"))
 {
-  if (_spatial_discretization == FlowModel::rDG)
-    checkRDGRequiredParameter("implicit_rdg");
 }
 
 void
@@ -41,6 +38,15 @@ GeometricalFlowComponent::init()
   GeometricalComponent::init();
 
   _model_id = _app.getFlowModelID(_sim.getUserObject<FluidProperties>(_fp_name));
+}
+
+bool
+GeometricalFlowComponent::usingSecondOrderMesh() const
+{
+  if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
+    return false;
+  else
+    return FlowModel::feType().order == SECOND;
 }
 
 const std::vector<GeometricalFlowComponent::Connection> &

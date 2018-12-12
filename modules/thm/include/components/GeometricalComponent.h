@@ -59,27 +59,19 @@ public:
    */
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
 
-  /**
-   * Gets the FE type for this component
-   *
-   * @return The finite element type
-   */
-  const FEType & feType() const { return _fe_type; }
-
-  /**
-   * Gets the spatial discretization type for this component
-   */
-  const FlowModel::ESpatialDiscretizationType & getSpatialDiscretizationType() const
-  {
-    return _spatial_discretization;
-  }
-
 protected:
   virtual void check() const override;
   virtual void computeMeshTransformation();
   virtual void setupMesh() override;
 
   virtual void buildMesh() = 0;
+
+  /**
+   * Check if second order mesh is being used by this geometrical component
+   *
+   * @return true if second order mesh is being used, otherwise false
+   */
+  virtual bool usingSecondOrderMesh() const = 0;
 
   /**
    * Sets the next subdomain ID, name, and coordinate system
@@ -132,20 +124,8 @@ protected:
   /// Number of elements along the main axis
   const unsigned int _n_elem;
 
-  /// True if simulation is using a second order mesh
-  const bool _2nd_order_mesh;
-
-  /// Spatial discretization
-  const FlowModel::ESpatialDiscretizationType _spatial_discretization;
-
-  /// Number of nodes along the main axis
-  const unsigned int _n_nodes;
-
   /// Number of sections in the geometric component
   const unsigned int _n_sections;
-
-  /// The FE type used in this component
-  const FEType _fe_type;
 
   /// The name of the user object to displace nodes into the physical space
   UserObjectName _displace_node_user_object_name;
