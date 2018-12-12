@@ -80,7 +80,11 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
 
         except Exception as e: #pylint: disable=broad-except
             el = None
-            msg = common.report_error(e.message, page, token.info, traceback.format_exc(),
+            msg = common.report_error(e.message,
+                                      page.source,
+                                      token.info.line,
+                                      token.info[0],
+                                      traceback.format_exc(),
                                       u'RENDER ERROR')
             with MooseDocs.base.translators.Translator.LOCK:
                 LOG.error(msg)

@@ -57,7 +57,7 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
             LOG.debug('READ %s', page.source)
             return common.read(page.source).lstrip('\n')
 
-    def tokenize(self, root, content, page, group=None, line=1):
+    def tokenize(self, root, content, page, group=None, line=1, report=True):
         """
         Perform the parsing of the supplied content into an AST with the provided root node.
 
@@ -75,11 +75,15 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         self.__lexer.tokenize(root, content, page, self.__lexer.grammar(group), line)
 
         # Report errors
-        for token in anytree.PreOrderIter(root):
-            if token.name == 'ErrorToken':
-                msg = common.report_error(token['message'], page, token.info, token['traceback'],
-                                          u'TOKENIZE ERROR')
-                with MooseDocs.base.translators.Translator.LOCK:
+        if report:
+            for token in anytree.PreOrderIter(root):
+                if token.name == 'ErrorToken':
+                    msg = common.report_error(token['message'],
+                                              page.source,
+                                              token.info.line,
+                                              token.info[0],
+                                              token['traceback'],
+                                              u'TOKENIZE ERROR')
                     LOG.error(msg)
 
     def add(self, group, component, location='_end'):

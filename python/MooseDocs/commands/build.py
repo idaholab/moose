@@ -177,6 +177,7 @@ def main(options):
     if options.fast:
         options.disable.append('appsyntax')
         options.disable.append('navigation')
+        options.disable.append('sqa')
 
     # Disable extensions based on command line arguments
     if options.disable:
