@@ -14,7 +14,9 @@ error estimates in addition to a few [Markers](Markers/index.md).
 
 ## Results
 
-Mesh results from each refinement step in `ex05.i` are shown below:
+The results shown here are created using 6 refinement steps.  However, because it can take a while
+to run, the `ex05.i` input file only specifies running 2 mesh refinement steps.  Mesh results from
+each of the 6 refinement steps are shown below:
 
 !media large_media/examples/ex5-mesh-0.png
        style=width:50%;margin-left:0%;
