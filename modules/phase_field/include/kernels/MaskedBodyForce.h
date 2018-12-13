@@ -11,6 +11,8 @@
 #define MASKEDBODYFORCE_H
 
 #include "BodyForce.h"
+#include "JvarMapInterface.h"
+#include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
 class MaskedBodyForce;
@@ -25,15 +27,30 @@ InputParameters validParams<MaskedBodyForce>();
  * body force in certain regions of the mesh.
  */
 
-class MaskedBodyForce : public BodyForce
+class MaskedBodyForce : public DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>
 {
 public:
   MaskedBodyForce(const InputParameters & parameters);
+  virtual void initialSetup();
 
 protected:
   virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const MaterialProperty<Real> & _mask;
+
+  /// number of coupled variables
+  const unsigned int _nvar;
+
+  /// name of the nonlinear variable (needed to retrieve the derivative material properties)
+  VariableName _v_name;
+
+  /// derivative of the mask wrt the kernel's nonlinear variable
+  const MaterialProperty<Real> & _dmaskdv;
+
+  ///  Reaction rate derivatives w.r.t. other coupled variables
+  std::vector<const MaterialProperty<Real> *> _dmaskdarg;
 };
 
 #endif
