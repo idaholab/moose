@@ -24,7 +24,7 @@ protected:
   /// Wall heat flux
   const VariableValue & _q_wall;
   /// Heat transfer coefficient
-  const VariableValue & _Hw;
+  const MaterialProperty<Real> & _Hw;
   /// Fluid temperature
   const MaterialProperty<Real> & _T;
 };
