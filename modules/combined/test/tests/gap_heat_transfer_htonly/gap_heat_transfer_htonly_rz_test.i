@@ -40,12 +40,21 @@
 
 [Problem]
   coord_type = RZ
+  rz_coord_axis = Y # this is modified through CLI args to test Z-R as opposed to R-Z
 []
 
 [Mesh]
   file = gap_heat_transfer_htonly_rz_test.e
 []
 
+[MeshModifiers]
+  active = '' # this is modified through CLI args to test Z-R as opposed to R-Z
+  [rotate]
+    type = Transform
+    transform = ROTATE
+    vector_value = '90 0 0'
+  []
+[]
 [Functions]
 
   [./ramp]
