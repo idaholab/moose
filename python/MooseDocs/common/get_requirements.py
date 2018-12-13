@@ -18,13 +18,23 @@ LOG = logging.getLogger(__name__)
 
 class Requirement(object):
     """struct for storing Requirement information."""
-    def __init__(self, name=None, path=None, filename=None, text=None, design=None, issues=None,
+    def __init__(self,
+                 name=None,
+                 path=None,
+                 filename=None,
+                 text=None,
+                 text_line=None,
+                 design=None,
+                 design_line=None,
+                 issues=None,
                  satisfied=True):
         self.name = name
         self.path = path
         self.filename = filename
         self.text = text
+        self.text_line = text_line
         self.design = design
+        self.design_line = design_line
         self.issues = issues
         self.label = None # added by get_requirements function
         self.satisfied = satisfied
@@ -58,11 +68,13 @@ def _add_requirements(out, location, filename):
     """Opens tests specification and extracts requirement items."""
     root = mooseutils.hit_load(filename)
     design = root.children[0].get('design', None)
+    design_line = root.children[0].line('design', None)
     issues = root.children[0].get('issues', None)
     for child in root.children[0]:
         if 'requirement' in child:
 
             local_design = child.get('design', design)
+            local_design_line = child.line('design', design_line)
             if local_design is None:
                 msg = "The 'design' parameter is missing from '%s' in %s. It must be defined at " \
                       "the top level and/or within the individual test specification. It " \
@@ -90,7 +102,9 @@ def _add_requirements(out, location, filename):
                               path=os.path.relpath(os.path.dirname(filename), location),
                               filename=filename,
                               text=unicode(text),
+                              text_line=child.line('requirement', None),
                               design=local_design.split(),
+                              design_line=local_design_line,
                               issues=local_issues.split(),
                               satisfied=satisfied)
 

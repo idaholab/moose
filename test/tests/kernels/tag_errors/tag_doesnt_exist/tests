@@ -1,6 +1,6 @@
 [Tests]
   group = 'Tagging System'
-  design = "framework_development/interfaces/TaggingInterface.md framework_development/tagging.md"
+  design = "interfaces/TaggingInterface.md framework_development/tagging.md"
   issues = '#9669'
 
   [./bad_transient]

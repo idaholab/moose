@@ -96,7 +96,7 @@ class RenderAlertContent(components.RenderComponent):
         content = html.Tag(card_content, 'div', class_='moose-alert-content')
 
         if token['icon'] and (token['brand'] == 'construction'):
-            src = os.path.relpath('media/under-construction.gif',
+            src = os.path.relpath('media/framework/under-construction.gif',
                                   os.path.dirname(page.local))
             html.Tag(content, 'img', class_='moose-alert-construction-img', src=src)
 
