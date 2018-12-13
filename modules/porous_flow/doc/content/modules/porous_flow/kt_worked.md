@@ -8,7 +8,7 @@ In this page, the 1D example studied in the [numerical diffusion page](numerical
 
 The mesh sits in the domain $0\leq x \leq 1$ and is meshed with 100 elements.  The initial condition is $u(x)=1$ if $0.1\leq x \leq 3$, and $u(x)=0$ otherwise.  The velocity is uniform to the right: $v=0.1$.
 
-The key differences between this input file and any other that simulated advection is the use of the [FluxLimitedTVDAdvection](FluxLimitedTVDAdvection.md) Kernel and the [AdvectiveFluxCalculator](AdvectiveFluxCalculator.md) UserObject.  The latter computes $K$, $R^{+}$ and $R^{-}$ that are used by the Kernel as described in detail in this page.
+The key differences between this input file and any other that simulated advection is the use of the [FluxLimitedTVDAdvection](FluxLimitedTVDAdvection.md) Kernel and the [AdvectiveFluxCalculatorConstantVelocity](AdvectiveFluxCalculatorConstantVelocity.md) UserObject.  The latter computes $K$, $R^{+}$ and $R^{-}$ that are used by the Kernel as described in detail in this page.
 
 The above input file sets the `flux_limiter_type = superbee`, but different types, such as `none`, `vanleer`, `minmod` or `mc` may be chosen.  As explained in detail below, these add antidiffusion to counteract the artificial numerical diffusion added to stabilize the problem (except for the `none` choice that adds no antidiffusion).
 
@@ -36,7 +36,7 @@ R_{i} = -\sum_{j}k_{ij}u_{j} = -\sum_{j}k_{ij}(u_{j} - u_{i}) - u_{i}\sum_{j}k_{
 \end{equation}
 See KT Eqn (31).
 
-$k_{ij}$ is evaluated for all pairs of nodes that are linked by the mesh.  Therefore, it may be evaluated by looping over elements, and adding contributions to the appropriate $i$-$j$ entries.  This is done by the [`AdvectiveFluxCalculator`](AdvectiveFluxCalculator.md) `UserObject`.
+$k_{ij}$ is evaluated for all pairs of nodes that are linked by the mesh.  Therefore, it may be evaluated by looping over elements, and adding contributions to the appropriate $i$-$j$ entries.  This is done by the [`AdvectiveFluxCalculatorConstantVelocity`](AdvectiveFluxCalculatorConstantVelocity.md) `UserObject`.
 
 Let us evaluate $K$ for the initial configuration of our test example.  Each element yields
 \begin{equation}
@@ -202,7 +202,7 @@ When $\Phi=0$, KT's procedure yields the *full upwind* equation [eq:fullupwind].
 
 KT present four different flux-limiters.  These are plotted in [flux_liiters].
 
-Notice that the VanLeer limiter is smoother than the others, so it is likely to provide superior nonlinear concergence, and it is chosen as the default limiter in the [AdvectiveFluxCalculator](AdvectiveFluxCalculator.md).
+Notice that the VanLeer limiter is smoother than the others, so it is likely to provide superior nonlinear concergence, and it is chosen as the default limiter in the [AdvectiveFluxCalculatorConstantVelocity](AdvectiveFluxCalculatorConstantVelocity.md).
 
 !media media/porous_flow/flux_limiters.png style=width:60%;margin-left:10px caption=Flux limiters, $\Phi(r)$, enumerated by KT (pp 135).  id=flux_liiters
 

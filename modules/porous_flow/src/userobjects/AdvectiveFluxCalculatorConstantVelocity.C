@@ -14,15 +14,17 @@ InputParameters
 validParams<AdvectiveFluxCalculatorConstantVelocity>()
 {
   InputParameters params = validParams<AdvectiveFluxCalculatorBase>();
-  params.addClassDescription("Compute K_ij (a measure of advective flux from node i to node j) "
-                             "and R+ and R- (which quantify amount of antidiffusion to add) in the "
-                             "Kuzmin-Turek FEM-TVD multidimensional scheme.  Constant advective velocity is assumed");
+  params.addClassDescription(
+      "Compute K_ij (a measure of advective flux from node i to node j) "
+      "and R+ and R- (which quantify amount of antidiffusion to add) in the "
+      "Kuzmin-Turek FEM-TVD multidimensional scheme.  Constant advective velocity is assumed");
   params.addRequiredCoupledVar("u", "The variable that is being advected");
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
   return params;
 }
 
-AdvectiveFluxCalculatorConstantVelocity::AdvectiveFluxCalculatorConstantVelocity(const InputParameters & parameters)
+AdvectiveFluxCalculatorConstantVelocity::AdvectiveFluxCalculatorConstantVelocity(
+    const InputParameters & parameters)
   : AdvectiveFluxCalculatorBase(parameters),
     _velocity(getParam<RealVectorValue>("velocity")),
     _u_nodal(getVar("u", 0)),
@@ -33,9 +35,10 @@ AdvectiveFluxCalculatorConstantVelocity::AdvectiveFluxCalculatorConstantVelocity
 {
 }
 
-
 Real
-AdvectiveFluxCalculatorConstantVelocity::getInternodalVelocity(unsigned i, unsigned j, unsigned qp) const
+AdvectiveFluxCalculatorConstantVelocity::getInternodalVelocity(unsigned i,
+                                                               unsigned j,
+                                                               unsigned qp) const
 {
   return (_grad_phi[i][qp] * _velocity) * _phi[j][qp];
 }
@@ -49,13 +52,13 @@ AdvectiveFluxCalculatorConstantVelocity::getU(dof_id_type id) const
   const bool meth = true;
 
   if (meth)
-    {
-      dof_id_type dof = node.dof_number(_u_nodal->sys().number(), _u_var_num, 0);
-      const NumericVector<Real> & u = *_u_nodal->sys().currentSolution();
-      return u(dof);
-    }
+  {
+    dof_id_type dof = node.dof_number(_u_nodal->sys().number(), _u_var_num, 0);
+    const NumericVector<Real> & u = *_u_nodal->sys().currentSolution();
+    return u(dof);
+  }
 
-    return _u_nodal->getNodalValue(node);
+  return _u_nodal->getNodalValue(node);
 }
 
 /*

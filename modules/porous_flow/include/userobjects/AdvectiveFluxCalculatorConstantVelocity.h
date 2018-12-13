@@ -46,7 +46,6 @@ protected:
 
   /// grad(Kuzmin-Turek shape function)
   const VariablePhiGradient & _grad_phi;
-
 };
 
 #endif // ADVECTIVEFLUXCALCULATORCONSTANTVELOCITY_H

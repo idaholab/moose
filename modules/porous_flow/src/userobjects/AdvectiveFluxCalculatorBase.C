@@ -15,9 +15,10 @@ InputParameters
 validParams<AdvectiveFluxCalculatorBase>()
 {
   InputParameters params = validParams<ElementUserObject>();
-  params.addClassDescription("Base class to compute K_ij (a measure of advective flux from node i to node j) "
-                             "and R+ and R- (which quantify amount of antidiffusion to add) in the "
-                             "Kuzmin-Turek FEM-TVD multidimensional scheme");
+  params.addClassDescription(
+      "Base class to compute K_ij (a measure of advective flux from node i to node j) "
+      "and R+ and R- (which quantify amount of antidiffusion to add) in the "
+      "Kuzmin-Turek FEM-TVD multidimensional scheme");
   MooseEnum flux_limiter_type("MinMod VanLeer MC superbee None", "VanLeer");
   params.addParam<MooseEnum>("flux_limiter_type",
                              flux_limiter_type,
@@ -71,19 +72,19 @@ AdvectiveFluxCalculatorBase::timestepSetup()
     for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
     {
       if (this->hasBlocks(elem->subdomain_id()))
-	{
-      for (unsigned i = 0; i < elem->n_nodes(); ++i)
       {
-        const dof_id_type node_i = elem->node_id(i);
-        if (_kij.find(node_i) == _kij.end())
-          _kij[node_i] = {};
-        for (unsigned j = 0; j < elem->n_nodes(); ++j)
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
         {
-          const dof_id_type node_j = elem->node_id(j);
-          _kij[node_i][node_j] = 0.0;
+          const dof_id_type node_i = elem->node_id(i);
+          if (_kij.find(node_i) == _kij.end())
+            _kij[node_i] = {};
+          for (unsigned j = 0; j < elem->n_nodes(); ++j)
+          {
+            const dof_id_type node_j = elem->node_id(j);
+            _kij[node_i][node_j] = 0.0;
+          }
         }
       }
-	}
     }
 
     /**
@@ -382,7 +383,8 @@ AdvectiveFluxCalculatorBase::finalize()
 }
 
 Real
-AdvectiveFluxCalculatorBase::rPlus(dof_id_type node_i, std::map<dof_id_type, Real> & dlimited_du) const
+AdvectiveFluxCalculatorBase::rPlus(dof_id_type node_i,
+                                   std::map<dof_id_type, Real> & dlimited_du) const
 {
   dlimited_du.clear();
   dlimited_du = zeroedConnection(node_i);
@@ -408,7 +410,8 @@ AdvectiveFluxCalculatorBase::rPlus(dof_id_type node_i, std::map<dof_id_type, Rea
 }
 
 Real
-AdvectiveFluxCalculatorBase::rMinus(dof_id_type node_i, std::map<dof_id_type, Real> & dlimited_du) const
+AdvectiveFluxCalculatorBase::rMinus(dof_id_type node_i,
+                                    std::map<dof_id_type, Real> & dlimited_du) const
 {
   dlimited_du.clear();
   dlimited_du = zeroedConnection(node_i);
@@ -540,12 +543,12 @@ AdvectiveFluxCalculatorBase::getKij(dof_id_type node_i, dof_id_type node_j) cons
   const auto & row_find = _kij.find(node_i);
   mooseAssert(row_find != _kij.end(),
               "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij does not contain node "
-                                                    << node_i);
+                                                        << node_i);
   const std::map<dof_id_type, Real> & kij_row = row_find->second;
   const auto & entry_find = kij_row.find(node_j);
   mooseAssert(entry_find != kij_row.end(),
               "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij on row " << node_i
-                                                    << " does not contain node " << node_j);
+                                                        << " does not contain node " << node_j);
 
   return entry_find->second;
 }
@@ -570,8 +573,9 @@ AdvectiveFluxCalculatorBase::getdFluxOutdu(dof_id_type node_i, dof_id_type node_
   const std::map<dof_id_type, Real> & dflux_out_du_row = row_find->second;
   const auto & entry_find = dflux_out_du_row.find(node_j);
   mooseAssert(entry_find != dflux_out_du_row.end(),
-              "AdvectiveFluxCalculatorBase UserObject " << name() << " _dflux_out_du on row " << node_i
-                                                    << " does not contain node " << node_j);
+              "AdvectiveFluxCalculatorBase UserObject " << name() << " _dflux_out_du on row "
+                                                        << node_i << " does not contain node "
+                                                        << node_j);
 
   return entry_find->second;
 }
@@ -581,8 +585,8 @@ AdvectiveFluxCalculatorBase::getFluxOut(dof_id_type node_i) const
 {
   const auto & entry_find = _flux_out.find(node_i);
   mooseAssert(entry_find != _flux_out.end(),
-              "AdvectiveFluxCalculatorBase UserObject " << name() << " _flux_out does not contain node "
-                                                    << node_i);
+              "AdvectiveFluxCalculatorBase UserObject "
+                  << name() << " _flux_out does not contain node " << node_i);
   return entry_find->second;
 }
 
@@ -604,7 +608,7 @@ AdvectiveFluxCalculatorBase::zeroedConnection(dof_id_type node_i) const
   const auto & row_find = _kij.find(node_i);
   mooseAssert(row_find != _kij.end(),
               "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij does not contain node "
-                                                    << node_i);
+                                                        << node_i);
   std::map<dof_id_type, Real> result = {};
   for (const auto & nk : row_find->second)
     result[nk.first] = 0.0;
@@ -613,8 +617,8 @@ AdvectiveFluxCalculatorBase::zeroedConnection(dof_id_type node_i) const
 
 Real
 AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
-                                     const PQPlusMinusEnum pq_plus_minus,
-                                     std::map<dof_id_type, Real> & derivs) const
+                                         const PQPlusMinusEnum pq_plus_minus,
+                                         std::map<dof_id_type, Real> & derivs) const
 {
   // Find the value of u at node_i
   const Real u_i = getU(node_i);
@@ -624,7 +628,7 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
   const auto & row_find = _kij.find(node_i);
   mooseAssert(row_find != _kij.end(),
               "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij does not contain node "
-                                                    << node_i);
+                                                        << node_i);
   const std::map<dof_id_type, Real> nodej_and_kij = row_find->second;
 
   // Initialize the results
