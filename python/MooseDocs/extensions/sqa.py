@@ -13,7 +13,7 @@ import os
 import codecs
 import logging
 import collections
-
+import traceback
 import anytree
 
 import MooseDocs
@@ -74,10 +74,10 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQARequirementsMatrixCommand())
         self.addCommand(reader, SQAVerificationCommand())
 
-        renderer.add(SQATemplateItem, RenderSQATemplateItem())
-        renderer.add(SQARequirementMatrix, RenderSQARequirementMatrix())
-        renderer.add(SQARequirementMatrixItem, RenderSQARequirementMatrixItem())
-        renderer.add(SQARequirementMatrixHeading, RenderSQARequirementMatrixHeading())
+        renderer.add('SQATemplateItem', RenderSQATemplateItem())
+        renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
+        renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
+        renderer.add('SQARequirementMatrixHeading', RenderSQARequirementMatrixHeading())
 
 SQADocumentItem = tokens.newToken('SQADocumentItem', key=u'')
 SQATemplateItem = tokens.newToken('SQATemplateItem', key=u'')
@@ -127,7 +127,18 @@ class SQARequirementsCommand(command.CommandComponent):
                                         label=unicode(req.label),
                                         satisfied=req.satisfied,
                                         id_=req.path)
-        self.reader.tokenize(item, req.text, page)
+
+        self.reader.tokenize(item, req.text, page, MooseDocs.INLINE, info.line, report=False)
+        for token in anytree.PreOrderIter(item):
+            if token.name == 'ErrorToken':
+                msg = common.report_error("Failed to tokenize SQA requirement.",
+                                          req.filename,
+                                          req.text_line,
+                                          req.text,
+                                          token['traceback'],
+                                          u'SQA TOKENIZE ERROR')
+                LOG.critical(msg)
+
 
         if self.settings['link']:
             if self.settings['link-spec']:
@@ -138,11 +149,9 @@ class SQARequirementsCommand(command.CommandComponent):
                     content = fid.read()
 
                 floats.create_modal_link(p,
-                                         url=u"#",
-                                         title=tokens.String(None, content=unicode(req.filename)),
-                                         content=core.Code(None, language=u'text', code=content),
-                                         string=u"{}:{}".format(req.path, req.name),
-                                         tooltip=False)
+                                         title=req.filename,
+                                         content=core.Code(None, language=u'text', content=content),
+                                         string=u"{}:{}".format(req.path, req.name))
 
             if self.settings['link-design'] and req.design:
                 p = core.Paragraph(item)
@@ -152,7 +161,7 @@ class SQARequirementsCommand(command.CommandComponent):
 
             if self.settings['link-issues'] and req.issues:
                 p = core.Paragraph(item)
-                tokens.String(p, content=u'Issues: ')
+                tokens.String(p, content=u'Issue(s): ')
                 for issue in req.issues:
                     if issue.startswith('#'):
                         url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
@@ -180,13 +189,22 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
         for requirements in self.extension.requirements.itervalues():
             for req in requirements:
                 for d in req.design:
-                    node = self.translator.findPage(d)
-                    design[node].append(req)
+                    try:
+                        node = self.translator.findPage(d)
+                        design[node].append(req)
+                    except exceptions.MooseDocsException:
+                        msg = "Failed to locate the design page '{}'".format(d)
+                        LOG.critical(common.report_error(msg,
+                                                         req.filename,
+                                                         req.design_line,
+                                                         ' '.join(req.design),
+                                                         traceback.format_exc(),
+                                                         'SQA ERROR'))
 
         for node, requirements in design.iteritems():
-            matrix = SQARequirementMatrix(parent)#, heading=link)
+            matrix = SQARequirementMatrix(parent)
             heading = SQARequirementMatrixHeading(matrix)
-            autolink.AutoLink(heading, page=unicode(node.fullpath))
+            autolink.AutoLink(heading, page=unicode(node.local))
             for req in requirements:
                 self._addRequirement(matrix, info, page, req, requirements)
 
@@ -218,7 +236,8 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
         ul.parent = None
 
         # Check the list type
-        if not isinstance(ul, core.UnorderedListBlock):
+        if ul.name != 'UnorderedList':
+            print ul.name
             msg = "The content is required to be an unordered list (i.e., use '-')."
             raise exceptions.MooseDocsException(msg)
 
@@ -343,7 +362,18 @@ class SQAVerificationCommand(command.CommandComponent):
                                         label=unicode(req.label),
                                         satisfied=req.satisfied,
                                         id_=req.path)
-        self.reader.tokenize(item, req.text, page, line=info.line)
+
+
+        self.reader.tokenize(item, req.text, page, MooseDocs.INLINE, info.line, report=False)
+        for token in anytree.PreOrderIter(item):
+            if token.name == 'ErrorToken':
+                msg = common.report_error("Failed to tokenize SQA requirement.",
+                                          req.filename,
+                                          req.text_line,
+                                          req.text,
+                                          token['traceback'],
+                                          u'SQA TOKENIZE ERROR')
+                LOG.critical(msg)
 
         p = core.Paragraph(item)
         tokens.String(p, content=u'Specification: ')
@@ -351,11 +381,9 @@ class SQAVerificationCommand(command.CommandComponent):
         with codecs.open(req.filename, encoding='utf-8') as fid:
             content = fid.read()
             floats.create_modal_link(p,
-                                     tooltip=False,
-                                     url=u"#",
                                      string=u"{}:{}".format(req.path, req.name),
-                                     title=tokens.String(None, content=unicode(req.filename)),
-                                     content=core.Code(None, language=u'text', code=content))
+                                     content=core.Code(None, language=u'text', content=content),
+                                     title=unicode(req.filename))
 
         p = core.Paragraph(item)
         tokens.String(p, content=u'Details: ')
@@ -369,8 +397,8 @@ class RenderSQATemplateItem(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
 
-        key = token.key
-        func = lambda n: isinstance(n, SQADocumentItem) and (n.key == key)
+        key = token['key']
+        func = lambda n: (n.name == 'SQADocumentItem') and (n['key'] == key)
         replacement = anytree.search.find(token.root, filter_=func, maxlevel=2)
 
         if replacement:
@@ -419,14 +447,14 @@ class RenderSQARequirementMatrix(core.RenderUnorderedList):
 class RenderSQARequirementMatrixItem(core.RenderListItem):
     def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
         li = html.Tag(parent, 'li', class_="collection-item", **token.attributes)
-        num = html.Tag(li, 'span', string=token.label, class_='moose-requirement-number')
+        num = html.Tag(li, 'span', string=token['label'], class_='moose-requirement-number')
 
         id_ = token.get('id', None)
         if id_:
             num.addClass('tooltipped')
             num['data-tooltip'] = id_
 
-        if not token.satisfied:
+        if not token['satisfied']:
             num = html.Tag(li, 'i', string=u'block',
                            class_='material-icons moose-requirement-unsatisfied')
 

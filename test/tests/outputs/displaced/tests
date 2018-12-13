@@ -7,8 +7,8 @@
     exodiff = 'displaced_adapt_test_out.e-s003'
     recover = false
     max_parallel = 1
-    requirement = "The system shall be able to output the displaced mesh for a model with adaptive mesh refinement."
-    design = "Outputs/index.md Adaptivity/index.md"
+    requirement = "The system shall be able to output the ~displaced~ mesh for a model with adaptive mesh refinement."
+    design = "Outputs/index.md syntax/Adaptivity/index.md"
     issues = "#1927"
   [../]
 

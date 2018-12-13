@@ -706,6 +706,11 @@ footer.page-footer {
     font-weight:100;
 }
 
+.collection-header a
+{
+    color:white;
+}
+
 .moose-requirements.collection .collection-item{
     display:flex;
 }
@@ -853,6 +858,11 @@ li p {
     float:left;
     margin-right:10px;
     height:100px;
+}
+
+.card-content .moose-alert-content img
+{
+    width:unset;
 }
 
 .moose-alert-title-brand{

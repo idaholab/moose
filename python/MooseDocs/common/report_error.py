@@ -10,7 +10,7 @@
 
 import mooseutils
 from box import box
-def report_error(message, page, info, traceback=None, prefix=u'ERROR'):
+def report_error(message, filename, line, src, traceback=None, prefix=u'ERROR'):
     """
     Helper for reporting error to logging module.
 
@@ -21,13 +21,7 @@ def report_error(message, page, info, traceback=None, prefix=u'ERROR'):
         traceback: The traceback (should be a string from traceback.format_exc())
     """
     title = '{}: {}'.format(prefix, message)
-    if info is not None:
-        src = mooseutils.colorText(box(info[0], line=info.line, width=100), 'LIGHT_CYAN')
-        line = info.line
-    else:
-        src = ''
-        line = u'?'
-    filename = mooseutils.colorText('{}:{}\n'.format(page.source, line), 'RESET')
-
+    src = mooseutils.colorText(box(src, line=line, width=100), 'LIGHT_CYAN')
+    filename = mooseutils.colorText('{}:{}\n'.format(filename, line), 'RESET')
     trace = u'\n' + mooseutils.colorText(traceback, 'GREY') if traceback else ''
     return u'\n{}\n{}{}{}\n'.format(title, filename, src, trace)
