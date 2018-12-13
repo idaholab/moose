@@ -59,7 +59,6 @@ FlowModelSinglePhase::addVariables()
   _sim.addVariable(false, SPECIFIC_INTERNAL_ENERGY, _fe_type, subdomain_id);
   _sim.addVariable(false, TEMPERATURE, _fe_type, subdomain_id);
   _sim.addVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomain_id);
-  _sim.addVariable(false, HEAT_TRANSFER_COEFFICIENT_WALL, _fe_type, subdomain_id);
 }
 
 void
@@ -92,7 +91,6 @@ FlowModelSinglePhase::addMooseObjects()
   std::vector<VariableName> cv_temperature(1, TEMPERATURE);
   std::vector<VariableName> cv_v(1, SPECIFIC_VOLUME);
   std::vector<VariableName> cv_internal_energy(1, SPECIFIC_INTERNAL_ENERGY);
-  std::vector<VariableName> cv_HTC(1, HEAT_TRANSFER_COEFFICIENT_WALL);
   std::vector<VariableName> cv_P_hf(1, HEAT_FLUX_PERIMETER);
 
   std::vector<VariableName> cv_rhoA(1, RHOA);
