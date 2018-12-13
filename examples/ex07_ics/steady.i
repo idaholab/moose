@@ -35,7 +35,7 @@
     type = DirichletBC
     variable = diffused
     boundary = 'bottom'
-    value = 10
+    value = 8
   [../]
 []
 
