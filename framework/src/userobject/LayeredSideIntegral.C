@@ -23,6 +23,10 @@ validParams<LayeredSideIntegral>()
 LayeredSideIntegral::LayeredSideIntegral(const InputParameters & parameters)
   : SideIntegralVariableUserObject(parameters), LayeredBase(parameters)
 {
+  if (parameters.isParamValid("block") && parameters.isParamValid("boundary"))
+    mooseError("Both block and boundary cannot be specified in LayeredSideIntegral. If you want to "
+               "define the geometric bounds of the layers from a specified block set "
+               "layer_bounding_block instead.");
 }
 
 void
