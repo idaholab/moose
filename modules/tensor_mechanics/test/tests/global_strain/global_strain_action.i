@@ -52,6 +52,7 @@
         scalar_global_strain = global_strain
         displacements = 'u_x u_y u_z'
         auxiliary_displacements = 'disp_x disp_y disp_z'
+        global_displacements = 'ug_x ug_y ug_z'
       [../]
     [../]
   [../]
