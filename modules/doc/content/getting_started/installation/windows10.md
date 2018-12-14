@@ -3,22 +3,24 @@
 !alert! warning
 Using MOOSE on Windows 10 is experimental and not fully supported.
 
-Known issues:
+Caveats:
 
-- Peacock does not work correctly.
-- Microsoft is now offering several different flavors of linux. Keep in mind, the Microsoft Store may not contain the same version of said operating system that we provide a support package for. Do some investigating to make sure the operating system (and version) you choose, is among our list of supported linux platforms. In general, we have support packages for the following linux operating systems listed below at their latest available release. At the time of this writing, the safe bet, is to choose Ubuntu:
+- Peacock does not work correctly (artifacts during rendering: surface normals are flipped).
+- Different flavors of linux are available.
 
-  - Ubuntu
-  - Mint
-  - CentOS
-  - OpenSUSE
-  - Fedora
+    - Be sure to choose an OS in which we support. While MOOSE will ultimately work on just about every flavor of linux, this document assumes you have chosen Ubuntu.
 !alert-end!
 
-Begin by performing the following external sets of instructions. Do note, that when it comes time to decide what distribution of Linux you want, you should try and choose a flavor listed among our getting started pages for the smoothest installation process. This is not a requirement however, as MOOSE will run on just about any flavor of Linux if you are of the adventurous type!
+Begin by performing the following external sets of instructions. Remember to choose Ubuntu, unless you know what you are doing.
 
 - [Windows Subsystem for Linux (WSL)](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide)
 - [VcXsrv](https://sourceforge.net/projects/vcxsrv/reviews/) (Only needed for Peacock)
+
+## Launch VcXsrv
+
+Each time you reboot, or basically each time VcXsrv is *not* running, and you wish to use the graphical capabilities of MOOSE (Peacock), you should start VcXsrv before launching your WSL terminal.
+
+We have found better performance instructing VcXsrv to use software rendering over native OpenGL. When launching VcXsrv, search for the option: "Native opengl", and un-check it. All other options can remain the default.
 
 ## Edit Hostname within WSL
 
@@ -34,25 +36,28 @@ DESKTOP-L7BGA7L
 127.0.0.1   DESKTOP-L7BGA7L    <---- ADD THAT
 ```
 
-## Update Ubuntu/OpenSUSE within WSL
+## Update Ubuntu, install additional libraries
 
-Launch WSL, and perform an update:
+Launch WSL, perform an update, and install necessary OpenGL libraries:
 
 ```bash
-# Ubuntu:
 sudo apt-get update
 sudo apt-get upgrade
-
-# OpenSUSE:
-sudo zypper update
+sudo apt-get install x11-apps libglu1-mesa
 ```
 
-## Setup Xming
+## Configure WSL to use VcXsrv
 
-Launch WSL, and modify your bash profile to allow WSL to connect to Xming.
+Modify your bash profile to allow WSL to connect to VcXsrv.
 
 ```bash
 echo "export DISPLAY=localhost:0" >> ~/.bashrc
 ```
 
-Once the above items are complete, please follow the installation instructions pertaining to your choice of Linux OS among our getting started pages. If you chose a Linux distribution we do not have a package for, then you will want to follow one of our 'Manual Install' instructions.
+## Close the WSL terminal
+
+With the above complete, close the WSL terminal, and re-open it. Then proceed to our [Ubuntu](getting_started/installation/ubuntu.md) instructions.
+
+!alert! note
+Your Download's folder, while using WSL, is located at: `/mnt/c/Users/<Your User Name>/Downloads`
+!alert-end!
