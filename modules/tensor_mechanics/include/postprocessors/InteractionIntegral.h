@@ -15,7 +15,9 @@
 
 // Forward Declarations
 class InteractionIntegral;
-class RankTwoTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 template <>
 InputParameters validParams<InteractionIntegral>();

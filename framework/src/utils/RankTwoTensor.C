@@ -7,6 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
 #include "RankTwoTensor.h"
 
 // MOOSE includes
@@ -34,26 +37,36 @@
 
 template <>
 void
-mooseSetToZero<RankTwoTensor>(RankTwoTensor & v)
+mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
 {
   v.zero();
 }
 
+template <>
+void
+mooseSetToZero<RankTwoTensorTempl<ADReal>>(RankTwoTensorTempl<ADReal> & v)
+{
+  v.zero();
+}
+
+template <typename T>
 MooseEnum
-RankTwoTensor::fillMethodEnum()
+RankTwoTensorTempl<T>::fillMethodEnum()
 {
   return MooseEnum("autodetect=0 isotropic1=1 diagonal3=3 symmetric6=6 general=9", "autodetect");
 }
 
-RankTwoTensor::RankTwoTensor()
+template <typename T>
+RankTwoTensorTempl<T>::RankTwoTensorTempl()
 {
-  mooseAssert(N == 3, "RankTwoTensor is currently only tested for 3 dimensions.");
+  mooseAssert(N == 3, "RankTwoTensorTempl is currently only tested for 3 dimensions.");
 
   for (unsigned int i = 0; i < N2; i++)
-    _coords[i] = 0.0;
+    this->_coords[i] = 0.0;
 }
 
-RankTwoTensor::RankTwoTensor(const InitMethod init)
+template <typename T>
+RankTwoTensorTempl<T>::RankTwoTensorTempl(const InitMethod init)
 {
   switch (init)
   {
@@ -61,52 +74,56 @@ RankTwoTensor::RankTwoTensor(const InitMethod init)
       break;
 
     case initIdentity:
-      zero();
+      this->zero();
       for (unsigned int i = 0; i < N; ++i)
         (*this)(i, i) = 1.0;
       break;
 
     default:
-      mooseError("Unknown RankTwoTensor initialization pattern.");
+      mooseError("Unknown RankTwoTensorTempl initialization pattern.");
   }
 }
 
 /// TODO: deprecate this method in favor of initializeFromRows
-RankTwoTensor::RankTwoTensor(const TypeVector<Real> & row1,
-                             const TypeVector<Real> & row2,
-                             const TypeVector<Real> & row3)
+template <typename T>
+RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
+                                          const TypeVector<T> & row2,
+                                          const TypeVector<T> & row3)
 {
   // Initialize the Tensor matrix from the passed in vectors
   for (unsigned int i = 0; i < N; i++)
-    _coords[i] = row1(i);
+    this->_coords[i] = row1(i);
 
   for (unsigned int i = 0; i < N; i++)
-    _coords[N + i] = row2(i);
+    this->_coords[N + i] = row2(i);
 
   const unsigned int two_n = N * 2;
   for (unsigned int i = 0; i < N; i++)
-    _coords[two_n + i] = row3(i);
+    this->_coords[two_n + i] = row3(i);
 }
 
-RankTwoTensor
-RankTwoTensor::initializeFromRows(const TypeVector<Real> & row0,
-                                  const TypeVector<Real> & row1,
-                                  const TypeVector<Real> & row2)
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::initializeFromRows(const TypeVector<T> & row0,
+                                          const TypeVector<T> & row1,
+                                          const TypeVector<T> & row2)
 {
-  return RankTwoTensor(
+  return RankTwoTensorTempl<T>(
       row0(0), row1(0), row2(0), row0(1), row1(1), row2(1), row0(2), row1(2), row2(2));
 }
 
-RankTwoTensor
-RankTwoTensor::initializeFromColumns(const TypeVector<Real> & col0,
-                                     const TypeVector<Real> & col1,
-                                     const TypeVector<Real> & col2)
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::initializeFromColumns(const TypeVector<T> & col0,
+                                             const TypeVector<T> & col1,
+                                             const TypeVector<T> & col2)
 {
-  return RankTwoTensor(
+  return RankTwoTensorTempl<T>(
       col0(0), col0(1), col0(2), col1(0), col1(1), col1(2), col2(0), col2(1), col2(2));
 }
 
-RankTwoTensor::RankTwoTensor(Real S11, Real S22, Real S33, Real S23, Real S13, Real S12)
+template <typename T>
+RankTwoTensorTempl<T>::RankTwoTensorTempl(T S11, T S22, T S33, T S23, T S13, T S12)
 {
   (*this)(0, 0) = S11;
   (*this)(1, 1) = S22;
@@ -116,8 +133,9 @@ RankTwoTensor::RankTwoTensor(Real S11, Real S22, Real S33, Real S23, Real S13, R
   (*this)(0, 1) = (*this)(1, 0) = S12;
 }
 
-RankTwoTensor::RankTwoTensor(
-    Real S11, Real S21, Real S31, Real S12, Real S22, Real S32, Real S13, Real S23, Real S33)
+template <typename T>
+RankTwoTensorTempl<T>::RankTwoTensorTempl(
+    T S11, T S21, T S31, T S12, T S22, T S32, T S13, T S23, T S33)
 {
   (*this)(0, 0) = S11;
   (*this)(1, 0) = S21;
@@ -130,23 +148,24 @@ RankTwoTensor::RankTwoTensor(
   (*this)(2, 2) = S33;
 }
 
+template <typename T>
 void
-RankTwoTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method)
+RankTwoTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMethod fill_method)
 {
   if (fill_method != autodetect && fill_method != input.size())
-    mooseError("Expected an input vector size of ", fill_method, " to fill the RankTwoTensor");
+    mooseError("Expected an input vector size of ", fill_method, " to fill the RankTwoTensorTempl");
 
   switch (input.size())
   {
     case 1:
-      zero();
+      this->zero();
       (*this)(0, 0) = input[0]; // S11
       (*this)(1, 1) = input[0]; // S22
       (*this)(2, 2) = input[0]; // S33
       break;
 
     case 3:
-      zero();
+      this->zero();
       (*this)(0, 0) = input[0]; // S11
       (*this)(1, 1) = input[1]; // S22
       (*this)(2, 2) = input[2]; // S33
@@ -175,22 +194,23 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod f
 
     default:
       mooseError("Please check the number of entries in the input vector for building "
-                 "a RankTwoTensor. It must be 1, 3, 6, or 9");
+                 "a RankTwoTensorTempl. It must be 1, 3, 6, or 9");
   }
 }
 
+template <typename T>
 void
-RankTwoTensor::fillFromScalarVariable(const VariableValue & scalar_variable)
+RankTwoTensorTempl<T>::fillFromScalarVariable(const VariableValue & scalar_variable)
 {
   switch (scalar_variable.size())
   {
     case 1:
-      zero();
+      this->zero();
       (*this)(0, 0) = scalar_variable[0]; // S11
       break;
 
     case 3:
-      zero();
+      this->zero();
       (*this)(0, 0) = scalar_variable[0];                 // S11
       (*this)(1, 1) = scalar_variable[1];                 // S22
       (*this)(0, 1) = (*this)(1, 0) = scalar_variable[2]; // S12
@@ -207,14 +227,15 @@ RankTwoTensor::fillFromScalarVariable(const VariableValue & scalar_variable)
 
     default:
       mooseError("Only FIRST, THIRD, or SIXTH order scalar variable can be used to build "
-                 "a RankTwoTensor.");
+                 "a RankTwoTensorTempl.");
   }
 }
 
-TypeVector<Real>
-RankTwoTensor::column(const unsigned int c) const
+template <typename T>
+TypeVector<T>
+RankTwoTensorTempl<T>::column(const unsigned int c) const
 {
-  RealVectorValue result;
+  VectorValue<T> result;
 
   for (unsigned int i = 0; i < N; ++i)
     result(i) = (*this)(i, c);
@@ -222,18 +243,20 @@ RankTwoTensor::column(const unsigned int c) const
   return result;
 }
 
-RankTwoTensor
-RankTwoTensor::rotated(const RankTwoTensor & R) const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::rotated(const RankTwoTensorTempl<T> & R) const
 {
-  RankTwoTensor result(*this);
+  RankTwoTensorTempl<T> result(*this);
   result.rotate(R);
   return result;
 }
 
+template <typename T>
 void
-RankTwoTensor::rotate(const RankTwoTensor & R)
+RankTwoTensorTempl<T>::rotate(const RankTwoTensorTempl<T> & R)
 {
-  RankTwoTensor temp;
+  RankTwoTensorTempl<T> temp;
   unsigned int i1 = 0;
   for (unsigned int i = 0; i < N; i++)
   {
@@ -242,7 +265,7 @@ RankTwoTensor::rotate(const RankTwoTensor & R)
     {
       // tmp += R(i,k)*R(j,l)*(*this)(k,l);
       // clang-format off
-      Real tmp = R._coords[i1 + 0] * R._coords[j1 + 0] * (*this)(0, 0) +
+      T tmp = R._coords[i1 + 0] * R._coords[j1 + 0] * (*this)(0, 0) +
                  R._coords[i1 + 0] * R._coords[j1 + 1] * (*this)(0, 1) +
                  R._coords[i1 + 0] * R._coords[j1 + 2] * (*this)(0, 2) +
                  R._coords[i1 + 1] * R._coords[j1 + 0] * (*this)(1, 0) +
@@ -258,19 +281,20 @@ RankTwoTensor::rotate(const RankTwoTensor & R)
     i1 += N;
   }
   for (unsigned int i = 0; i < N2; i++)
-    _coords[i] = temp._coords[i];
+    this->_coords[i] = temp._coords[i];
 }
 
-RankTwoTensor
-RankTwoTensor::rotateXyPlane(Real a)
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::rotateXyPlane(T a)
 {
-  Real c = std::cos(a);
-  Real s = std::sin(a);
-  Real x = (*this)(0, 0) * c * c + (*this)(1, 1) * s * s + 2.0 * (*this)(0, 1) * c * s;
-  Real y = (*this)(0, 0) * s * s + (*this)(1, 1) * c * c - 2.0 * (*this)(0, 1) * c * s;
-  Real xy = ((*this)(1, 1) - (*this)(0, 0)) * c * s + (*this)(0, 1) * (c * c - s * s);
+  T c = std::cos(a);
+  T s = std::sin(a);
+  T x = (*this)(0, 0) * c * c + (*this)(1, 1) * s * s + 2.0 * (*this)(0, 1) * c * s;
+  T y = (*this)(0, 0) * s * s + (*this)(1, 1) * c * c - 2.0 * (*this)(0, 1) * c * s;
+  T xy = ((*this)(1, 1) - (*this)(0, 0)) * c * s + (*this)(0, 1) * (c * c - s * s);
 
-  RankTwoTensor b(*this);
+  RankTwoTensorTempl<T> b(*this);
 
   b(0, 0) = x;
   b(1, 1) = y;
@@ -279,92 +303,110 @@ RankTwoTensor::rotateXyPlane(Real a)
   return b;
 }
 
-RankTwoTensor
-RankTwoTensor::transpose() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::transpose() const
 {
-  return RealTensorValue::transpose();
+  return TensorValue<T>::transpose();
 }
 
-RankTwoTensor &
-RankTwoTensor::operator=(const RankTwoTensor & a)
+template <typename T>
+RankTwoTensorTempl<T> &
+RankTwoTensorTempl<T>::operator=(const RankTwoTensorTempl<T> & a)
 {
-  RealTensorValue::operator=(a);
+  TensorValue<T>::operator=(a);
   return *this;
 }
 
-RankTwoTensor &
-RankTwoTensor::operator+=(const RankTwoTensor & a)
+template <typename T>
+RankTwoTensorTempl<T> &
+RankTwoTensorTempl<T>::operator+=(const RankTwoTensorTempl<T> & a)
 {
-  RealTensorValue::operator+=(a);
+  TensorValue<T>::operator+=(a);
   return *this;
 }
 
-RankTwoTensor
-RankTwoTensor::operator+(const RankTwoTensor & b) const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::operator+(const RankTwoTensorTempl<T> & b) const
 {
-  return RealTensorValue::operator+(b);
+  return TensorValue<T>::operator+(b);
 }
 
-RankTwoTensor &
-RankTwoTensor::operator-=(const RankTwoTensor & a)
+template <typename T>
+RankTwoTensorTempl<T> &
+RankTwoTensorTempl<T>::operator-=(const RankTwoTensorTempl<T> & a)
 {
-  RealTensorValue::operator-=(a);
+  TensorValue<T>::operator-=(a);
   return *this;
 }
 
-RankTwoTensor
-RankTwoTensor::operator-(const RankTwoTensor & b) const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::operator-(const RankTwoTensorTempl<T> & b) const
 {
-  return RealTensorValue::operator-(b);
+  return TensorValue<T>::operator-(b);
 }
 
-RankTwoTensor
-RankTwoTensor::operator-() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::operator-() const
 {
-  return RealTensorValue::operator-();
+  return TensorValue<T>::operator-();
 }
 
-RankTwoTensor &
-RankTwoTensor::operator*=(const Real a)
+template <typename T>
+RankTwoTensorTempl<T> &
+RankTwoTensorTempl<T>::operator*=(const T & a)
 {
-  RealTensorValue::operator*=(a);
+  TensorValue<T>::operator*=(a);
   return *this;
 }
 
-RankTwoTensor RankTwoTensor::operator*(const Real b) const { return RealTensorValue::operator*(b); }
-
-RankTwoTensor &
-RankTwoTensor::operator/=(const Real a)
+template <typename T>
+RankTwoTensorTempl<T> RankTwoTensorTempl<T>::operator*(const T & b) const
 {
-  RealTensorValue::operator/=(a);
+  return TensorValue<T>::operator*(b);
+}
+
+template <typename T>
+RankTwoTensorTempl<T> &
+RankTwoTensorTempl<T>::operator/=(const T & a)
+{
+  TensorValue<T>::operator/=(a);
   return *this;
 }
 
-RankTwoTensor
-RankTwoTensor::operator/(const Real b) const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::operator/(const T & b) const
 {
-  return RealTensorValue::operator/(b);
+  return TensorValue<T>::operator/(b);
 }
 
-TypeVector<Real> RankTwoTensor::operator*(const TypeVector<Real> & b) const
+template <typename T>
+TypeVector<T> RankTwoTensorTempl<T>::operator*(const TypeVector<T> & b) const
 {
-  return RealTensorValue::operator*(b);
+  return TensorValue<T>::operator*(b);
 }
 
-RankTwoTensor RankTwoTensor::operator*(const TypeTensor<Real> & b) const
+template <typename T>
+RankTwoTensorTempl<T> RankTwoTensorTempl<T>::operator*(const TypeTensor<T> & b) const
 {
-  return RealTensorValue::operator*(b);
+  return TensorValue<T>::operator*(b);
 }
 
-RankTwoTensor &
-RankTwoTensor::operator*=(const TypeTensor<Real> & a)
+template <typename T>
+RankTwoTensorTempl<T> &
+RankTwoTensorTempl<T>::operator*=(const TypeTensor<T> & a)
 {
   *this = *this * a;
   return *this;
 }
 
+template <typename T>
 bool
-RankTwoTensor::operator==(const RankTwoTensor & a) const
+RankTwoTensorTempl<T>::operator==(const RankTwoTensorTempl<T> & a) const
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -374,36 +416,39 @@ RankTwoTensor::operator==(const RankTwoTensor & a) const
   return true;
 }
 
-RankTwoTensor &
-RankTwoTensor::operator=(const ColumnMajorMatrix & a)
+template <typename T>
+RankTwoTensorTempl<T> &
+RankTwoTensorTempl<T>::operator=(const ColumnMajorMatrixTempl<T> & a)
 {
   if (a.n() != N || a.m() != N)
-    mooseError("Dimensions of ColumnMajorMatrix are incompatible with RankTwoTensor");
+    mooseError("Dimensions of ColumnMajorMatrixTempl<T> are incompatible with RankTwoTensorTempl");
 
-  const Real * cmm_rawdata = a.rawData();
+  const T * cmm_rawdata = a.rawData();
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
-      _coords[i * N + j] = cmm_rawdata[i + j * N];
+      this->_coords[i * N + j] = cmm_rawdata[i + j * N];
 
   return *this;
 }
 
-Real
-RankTwoTensor::doubleContraction(const RankTwoTensor & b) const
+template <typename T>
+T
+RankTwoTensorTempl<T>::doubleContraction(const RankTwoTensorTempl<T> & b) const
 {
   // deprecate this!
-  return RealTensorValue::contract(b);
+  return TensorValue<T>::contract(b);
 }
 
-RankFourTensor
-RankTwoTensor::outerProduct(const RankTwoTensor & b) const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::outerProduct(const RankTwoTensorTempl<T> & b) const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
 
   unsigned int index = 0;
   for (unsigned int ij = 0; ij < N2; ++ij)
   {
-    const Real a = _coords[ij];
+    const T & a = this->_coords[ij];
     for (unsigned int kl = 0; kl < N2; ++kl)
       result._vals[index++] = a * b._coords[kl];
   }
@@ -411,17 +456,18 @@ RankTwoTensor::outerProduct(const RankTwoTensor & b) const
   return result;
 }
 
-RankFourTensor
-RankTwoTensor::mixedProductIkJl(const RankTwoTensor & b) const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::mixedProductIkJl(const RankTwoTensorTempl<T> & b) const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
       {
-        const Real a = (*this)(i, k);
+        const T & a = (*this)(i, k);
         for (unsigned int l = 0; l < N; ++l)
           result._vals[index++] = a * b(j, l);
       }
@@ -429,10 +475,11 @@ RankTwoTensor::mixedProductIkJl(const RankTwoTensor & b) const
   return result;
 }
 
-RankFourTensor
-RankTwoTensor::mixedProductIlJk(const RankTwoTensor & b) const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::mixedProductIlJk(const RankTwoTensorTempl<T> & b) const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -443,17 +490,18 @@ RankTwoTensor::mixedProductIlJk(const RankTwoTensor & b) const
   return result;
 }
 
-RankFourTensor
-RankTwoTensor::mixedProductJkIl(const RankTwoTensor & b) const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
       {
-        const Real a = (*this)(j, k);
+        const T & a = (*this)(j, k);
         for (unsigned int l = 0; l < N; ++l)
           result._vals[index++] = a * b(i, l);
       }
@@ -461,9 +509,10 @@ RankTwoTensor::mixedProductJkIl(const RankTwoTensor & b) const
   return result;
 }
 
-RankFourTensor
-RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
-                                                    RankTwoTensor & eigvec) const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eigval,
+                                                            RankTwoTensorTempl<T> & eigvec) const
 {
   // The calculate of projection tensor follows
   // C. Miehe and M. Lambrecht, Commun. Numer. Meth. Engng 2001; 17:337~353
@@ -472,8 +521,8 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
   this->symmetricEigenvaluesEigenvectors(eigval, eigvec);
 
   // Separate out positive and negative eigen values
-  std::array<Real, N> epos;
-  std::array<Real, N> d;
+  std::array<T, N> epos;
+  std::array<T, N> d;
   for (unsigned int i = 0; i < N; ++i)
   {
     epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
@@ -481,9 +530,9 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
   }
 
   // projection tensor
-  RankFourTensor proj_pos;
-  RankFourTensor Gab, Gba;
-  RankTwoTensor Ma, Mb;
+  RankFourTensorTempl<T> proj_pos;
+  RankFourTensorTempl<T> Gab, Gba;
+  RankTwoTensorTempl<T> Ma, Mb;
 
   for (unsigned int a = 0; a < N; ++a)
   {
@@ -500,7 +549,7 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
       Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
       Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
 
-      Real theta_ab;
+      T theta_ab;
       if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
         theta_ab = 0.5 * (epos[a] - epos[b]) / (eigval[a] - eigval[b]);
       else
@@ -511,19 +560,21 @@ RankTwoTensor::positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
   return proj_pos;
 }
 
-RankTwoTensor
-RankTwoTensor::deviatoric() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::deviatoric() const
 {
-  RankTwoTensor deviatoric(*this);
-  deviatoric.addIa(-1.0 / 3.0 * tr()); // actually construct deviatoric part
+  RankTwoTensorTempl<T> deviatoric(*this);
+  deviatoric.addIa(-1.0 / 3.0 * this->tr()); // actually construct deviatoric part
   return deviatoric;
 }
 
-Real
-RankTwoTensor::generalSecondInvariant() const
+template <typename T>
+T
+RankTwoTensorTempl<T>::generalSecondInvariant() const
 {
   // clang-format off
-  Real result = (*this)(0, 0) * (*this)(1, 1) +
+  T result = (*this)(0, 0) * (*this)(1, 1) +
                 (*this)(0, 0) * (*this)(2, 2) +
                 (*this)(1, 1) * (*this)(2, 2) -
                 (*this)(0, 1) * (*this)(1, 0) -
@@ -533,13 +584,14 @@ RankTwoTensor::generalSecondInvariant() const
   return result;
 }
 
-Real
-RankTwoTensor::secondInvariant() const
+template <typename T>
+T
+RankTwoTensorTempl<T>::secondInvariant() const
 {
-  Real result = 0.0;
+  T result = 0.0;
 
-  // RankTwoTensor deviatoric(*this);
-  // deviatoric.addIa(-1.0/3.0 * tr()); // actually construct deviatoric part
+  // RankTwoTensorTempl<T> deviatoric(*this);
+  // deviatoric.addIa(-1.0/3.0 * this->tr()); // actually construct deviatoric part
   // result = 0.5*(deviatoric + deviatoric.transpose()).doubleContraction(deviatoric +
   // deviatoric.transpose());
   result = Utility::pow<2>((*this)(0, 0) - (*this)(1, 1)) / 6.0;
@@ -551,16 +603,18 @@ RankTwoTensor::secondInvariant() const
   return result;
 }
 
-RankTwoTensor
-RankTwoTensor::dsecondInvariant() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::dsecondInvariant() const
 {
   return 0.5 * (deviatoric() + deviatoric().transpose());
 }
 
-RankFourTensor
-RankTwoTensor::d2secondInvariant() const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::d2secondInvariant() const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
@@ -573,32 +627,36 @@ RankTwoTensor::d2secondInvariant() const
   return result;
 }
 
-Real
-RankTwoTensor::trace() const
+template <typename T>
+T
+RankTwoTensorTempl<T>::trace() const
 {
   // deprecate this!
-  return tr();
+  return this->tr();
 }
 
-RankTwoTensor
-RankTwoTensor::inverse() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::inverse() const
 {
-  return RealTensorValue::inverse();
+  return TensorValue<T>::inverse();
 }
 
-RankTwoTensor
-RankTwoTensor::dtrace() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::dtrace() const
 {
-  return RankTwoTensor(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  return RankTwoTensorTempl<T>(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
-Real
-RankTwoTensor::thirdInvariant() const
+template <typename T>
+T
+RankTwoTensorTempl<T>::thirdInvariant() const
 {
-  RankTwoTensor s = 0.5 * deviatoric();
+  RankTwoTensorTempl<T> s = 0.5 * deviatoric();
   s += s.transpose();
 
-  Real result = 0.0;
+  T result = 0.0;
 
   result = s(0, 0) * (s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2));
   result -= s(1, 0) * (s(0, 1) * s(2, 2) - s(2, 1) * s(0, 2));
@@ -607,14 +665,15 @@ RankTwoTensor::thirdInvariant() const
   return result;
 }
 
-RankTwoTensor
-RankTwoTensor::dthirdInvariant() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::dthirdInvariant() const
 {
-  RankTwoTensor s = 0.5 * deviatoric();
+  RankTwoTensorTempl<T> s = 0.5 * deviatoric();
   s += s.transpose();
 
-  RankTwoTensor d;
-  Real sec_over_three = secondInvariant() / 3.0;
+  RankTwoTensorTempl<T> d;
+  T sec_over_three = secondInvariant() / 3.0;
 
   d(0, 0) = s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2) + sec_over_three;
   d(0, 1) = s(2, 0) * s(1, 2) - s(1, 0) * s(2, 2);
@@ -629,13 +688,14 @@ RankTwoTensor::dthirdInvariant() const
   return d;
 }
 
-RankFourTensor
-RankTwoTensor::d2thirdInvariant() const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::d2thirdInvariant() const
 {
-  RankTwoTensor s = 0.5 * deviatoric();
+  RankTwoTensorTempl<T> s = 0.5 * deviatoric();
   s += s.transpose();
 
-  RankFourTensor d2;
+  RankFourTensorTempl<T> d2;
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -720,10 +780,11 @@ RankTwoTensor::d2thirdInvariant() const
   return d2;
 }
 
-Real
-RankTwoTensor::sin3Lode(const Real r0, const Real r0_value) const
+template <typename T>
+T
+RankTwoTensorTempl<T>::sin3Lode(const T & r0, const T & r0_value) const
 {
-  Real bar = secondInvariant();
+  T bar = secondInvariant();
   if (bar <= r0)
     // in this case the Lode angle is not defined
     return r0_value;
@@ -733,29 +794,31 @@ RankTwoTensor::sin3Lode(const Real r0, const Real r0_value) const
                     -1.0);
 }
 
-RankTwoTensor
-RankTwoTensor::dsin3Lode(const Real r0) const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::dsin3Lode(const T & r0) const
 {
-  Real bar = secondInvariant();
+  T bar = secondInvariant();
   if (bar <= r0)
-    return RankTwoTensor();
+    return RankTwoTensorTempl<T>();
   else
     return -1.5 * std::sqrt(3.0) *
            (dthirdInvariant() / std::pow(bar, 1.5) -
             1.5 * dsecondInvariant() * thirdInvariant() / std::pow(bar, 2.5));
 }
 
-RankFourTensor
-RankTwoTensor::d2sin3Lode(const Real r0) const
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::d2sin3Lode(const T & r0) const
 {
-  Real bar = secondInvariant();
+  T bar = secondInvariant();
   if (bar <= r0)
-    return RankFourTensor();
+    return RankFourTensorTempl<T>();
 
-  Real J3 = thirdInvariant();
-  RankTwoTensor dII = dsecondInvariant();
-  RankTwoTensor dIII = dthirdInvariant();
-  RankFourTensor deriv =
+  T J3 = thirdInvariant();
+  RankTwoTensorTempl<T> dII = dsecondInvariant();
+  RankTwoTensorTempl<T> dIII = dthirdInvariant();
+  RankFourTensorTempl<T> deriv =
       d2thirdInvariant() / std::pow(bar, 1.5) - 1.5 * d2secondInvariant() * J3 / std::pow(bar, 2.5);
 
   for (unsigned i = 0; i < N; ++i)
@@ -770,10 +833,11 @@ RankTwoTensor::d2sin3Lode(const Real r0) const
   return deriv;
 }
 
-RankTwoTensor
-RankTwoTensor::ddet() const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::ddet() const
 {
-  RankTwoTensor d;
+  RankTwoTensorTempl<T> d;
 
   d(0, 0) = (*this)(1, 1) * (*this)(2, 2) - (*this)(2, 1) * (*this)(1, 2);
   d(0, 1) = (*this)(2, 0) * (*this)(1, 2) - (*this)(1, 0) * (*this)(2, 2);
@@ -788,10 +852,11 @@ RankTwoTensor::ddet() const
   return d;
 }
 
+template <typename T>
 void
-RankTwoTensor::print(std::ostream & stm) const
+RankTwoTensorTempl<T>::print(std::ostream & stm) const
 {
-  const RankTwoTensor & a = *this;
+  const RankTwoTensorTempl<T> & a = *this;
   for (unsigned int i = 0; i < N; ++i)
   {
     for (unsigned int j = 0; j < N; ++j)
@@ -800,27 +865,30 @@ RankTwoTensor::print(std::ostream & stm) const
   }
 }
 
+template <typename T>
 void
-RankTwoTensor::addIa(const Real a)
+RankTwoTensorTempl<T>::addIa(const T & a)
 {
   for (unsigned int i = 0; i < N; ++i)
     (*this)(i, i) += a;
 }
 
-Real
-RankTwoTensor::L2norm() const
+template <typename T>
+T
+RankTwoTensorTempl<T>::L2norm() const
 {
-  Real norm = 0.0;
+  T norm = 0.0;
   for (unsigned int i = 0; i < N2; ++i)
   {
-    Real v = _coords[i];
+    T v = this->_coords[i];
     norm += v * v;
   }
   return std::sqrt(norm);
 }
 
+template <typename T>
 void
-RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
+RankTwoTensorTempl<T>::surfaceFillFromInputVector(const std::vector<T> & input)
 {
   if (input.size() == 4)
   {
@@ -832,21 +900,24 @@ RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
     (*this)(1, 1) = input[3];
   }
   else
-    mooseError("please provide correct number of values for surface RankTwoTensor initialization.");
+    mooseError("please provide correct number of values for surface RankTwoTensorTempl<T> "
+               "initialization.");
 }
 
+template <typename T>
 void
-RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals) const
+RankTwoTensorTempl<T>::symmetricEigenvalues(std::vector<T> & eigvals) const
 {
-  std::vector<PetscScalar> a;
+  std::vector<T> a;
   syev("N", eigvals, a);
 }
 
+template <typename T>
 void
-RankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
-                                                RankTwoTensor & eigvecs) const
+RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals,
+                                                        RankTwoTensorTempl<T> & eigvecs) const
 {
-  std::vector<PetscScalar> a;
+  std::vector<T> a;
   syev("V", eigvals, a);
 
   for (unsigned int i = 0; i < N; ++i)
@@ -854,18 +925,19 @@ RankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
       eigvecs(j, i) = a[i * N + j];
 }
 
+template <typename T>
 void
-RankTwoTensor::dsymmetricEigenvalues(std::vector<Real> & eigvals,
-                                     std::vector<RankTwoTensor> & deigvals) const
+RankTwoTensorTempl<T>::dsymmetricEigenvalues(std::vector<T> & eigvals,
+                                             std::vector<RankTwoTensorTempl<T>> & deigvals) const
 {
   deigvals.resize(N);
 
-  std::vector<PetscScalar> a;
+  std::vector<T> a;
   syev("V", eigvals, a);
 
   // now a contains the eigenvetors
   // extract these and place appropriately in deigvals
-  std::vector<Real> eig_vec;
+  std::vector<T> eig_vec;
   eig_vec.resize(N);
 
   for (unsigned int i = 0; i < N; ++i)
@@ -892,15 +964,16 @@ RankTwoTensor::dsymmetricEigenvalues(std::vector<Real> & eigvals,
     deigvals[1] = deigvals[2] = (deigvals[1] + deigvals[2]) / 2.0;
 }
 
+template <typename T>
 void
-RankTwoTensor::d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const
+RankTwoTensorTempl<T>::d2symmetricEigenvalues(std::vector<RankFourTensorTempl<T>> & deriv) const
 {
-  std::vector<PetscScalar> eigvec;
-  std::vector<PetscScalar> eigvals;
-  Real ev[N][N];
+  std::vector<T> eigvec;
+  std::vector<T> eigvals;
+  T ev[N][N];
 
   // reset rank four tensor
-  deriv.assign(N, RankFourTensor());
+  deriv.assign(N, RankFourTensorTempl<T>());
 
   // get eigen values and eigen vectors
   syev("V", eigvals, eigvec);
@@ -928,10 +1001,11 @@ RankTwoTensor::d2symmetricEigenvalues(std::vector<RankFourTensor> & deriv) const
     }
 }
 
+template <typename T>
 void
-RankTwoTensor::syev(const char * calculation_type,
-                    std::vector<PetscScalar> & eigvals,
-                    std::vector<PetscScalar> & a) const
+RankTwoTensorTempl<T>::syev(const char * calculation_type,
+                            std::vector<T> & eigvals,
+                            std::vector<T> & a) const
 {
   eigvals.resize(N);
   a.resize(N * N);
@@ -960,11 +1034,19 @@ RankTwoTensor::syev(const char * calculation_type,
                info);
 }
 
+template <>
 void
-RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
+RankTwoTensorTempl<ADReal>::syev(const char *, std::vector<ADReal> &, std::vector<ADReal> &) const
 {
-  const RankTwoTensor & a = *this;
-  RankTwoTensor c, diag, evec;
+  mooseError("ADRankTwoTensor does not sypport the syev method");
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::getRUDecompositionRotation(RankTwoTensorTempl<T> & rot) const
+{
+  const RankTwoTensorTempl<T> & a = *this;
+  RankTwoTensorTempl<T> c, diag, evec;
   PetscScalar cmat[N][N], work[10];
   PetscReal w[N];
 
@@ -996,16 +1078,25 @@ RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
   rot = a * ((evec.transpose() * diag * evec).inverse());
 }
 
+template <>
 void
-RankTwoTensor::initRandom(unsigned int rand_seed)
+RankTwoTensorTempl<ADReal>::getRUDecompositionRotation(RankTwoTensorTempl<ADReal> &) const
+{
+  mooseError("ADRankTwoTensor does not support getRUDecompositionRotation");
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::initRandom(unsigned int rand_seed)
 {
   MooseRandom::seed(rand_seed);
 }
 
-RankTwoTensor
-RankTwoTensor::genRandomTensor(Real scale, Real offset)
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::genRandomTensor(T scale, T offset)
 {
-  RankTwoTensor tensor;
+  RankTwoTensorTempl<T> tensor;
 
   for (unsigned int i = 0; i < N; i++)
     for (unsigned int j = 0; j < N; j++)
@@ -1014,10 +1105,11 @@ RankTwoTensor::genRandomTensor(Real scale, Real offset)
   return tensor;
 }
 
-RankTwoTensor
-RankTwoTensor::genRandomSymmTensor(Real scale, Real offset)
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
 {
-  RankTwoTensor tensor;
+  RankTwoTensorTempl<T> tensor;
 
   for (unsigned int i = 0; i < N; i++)
     for (unsigned int j = i; j < N; j++)
@@ -1026,46 +1118,51 @@ RankTwoTensor::genRandomSymmTensor(Real scale, Real offset)
   return tensor;
 }
 
+template <typename T>
 void
-RankTwoTensor::vectorOuterProduct(const TypeVector<Real> & v1, const TypeVector<Real> & v2)
+RankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & v1, const TypeVector<T> & v2)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       (*this)(i, j) = v1(i) * v2(j);
 }
 
+template <typename T>
 void
-RankTwoTensor::fillRealTensor(RealTensorValue & tensor)
+RankTwoTensorTempl<T>::fillRealTensor(TensorValue<T> & tensor)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       tensor(i, j) = (*this)(i, j);
 }
 
+template <typename T>
 void
-RankTwoTensor::fillRow(unsigned int r, const TypeVector<Real> & v)
+RankTwoTensorTempl<T>::fillRow(unsigned int r, const TypeVector<T> & v)
 {
   for (unsigned int i = 0; i < N; ++i)
     (*this)(r, i) = v(i);
 }
 
+template <typename T>
 void
-RankTwoTensor::fillColumn(unsigned int c, const TypeVector<Real> & v)
+RankTwoTensorTempl<T>::fillColumn(unsigned int c, const TypeVector<T> & v)
 {
   for (unsigned int i = 0; i < N; ++i)
     (*this)(i, c) = v(i);
 }
 
-RankTwoTensor
-RankTwoTensor::initialContraction(const RankFourTensor & b) const
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::initialContraction(const RankFourTensorTempl<T> & b) const
 {
-  RankTwoTensor result;
+  RankTwoTensorTempl<T> result;
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
     {
-      const Real a = (*this)(i, j);
+      const T & a = (*this)(i, j);
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
           result(k, l) += a * b._vals[index++];
@@ -1073,3 +1170,6 @@ RankTwoTensor::initialContraction(const RankFourTensor & b) const
 
   return result;
 }
+
+template class RankTwoTensorTempl<Real>;
+template class RankTwoTensorTempl<ADReal>;

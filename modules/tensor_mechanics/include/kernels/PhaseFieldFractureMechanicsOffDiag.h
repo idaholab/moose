@@ -21,7 +21,6 @@
  */
 
 class PhaseFieldFractureMechanicsOffDiag;
-class RankTwoTensor;
 
 template <>
 InputParameters validParams<PhaseFieldFractureMechanicsOffDiag>();

@@ -186,9 +186,19 @@ doesMapContainValue(const std::map<T1, T2> & the_map, const T2 & value)
  * @param tol The tolerance to be used
  * @return true if var1 and var2 are equal within tol
  */
-bool absoluteFuzzyEqual(const libMesh::Real & var1,
-                        const libMesh::Real & var2,
-                        const libMesh::Real & tol = libMesh::TOLERANCE * libMesh::TOLERANCE);
+template <typename T,
+          typename T2,
+          typename T3 = T,
+          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
+                                      ScalarTraits<T3>::value,
+                                  int>::type = 0>
+bool
+absoluteFuzzyEqual(const T & var1,
+                   const T2 & var2,
+                   const T3 & tol = libMesh::TOLERANCE * libMesh::TOLERANCE)
+{
+  return (std::abs(var1 - var2) <= tol);
+}
 
 /**
  * Function to check whether a variable is greater than or equal to another variable within an
@@ -244,9 +254,16 @@ bool absoluteFuzzyLessThan(const libMesh::Real & var1,
  * @param tol The relative tolerance to be used
  * @return true if var1 and var2 are equal within relative tol
  */
-bool relativeFuzzyEqual(const libMesh::Real & var1,
-                        const libMesh::Real & var2,
-                        const libMesh::Real & tol = libMesh::TOLERANCE * libMesh::TOLERANCE);
+template <typename T,
+          typename T2,
+          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value, int>::type = 0>
+bool
+relativeFuzzyEqual(const T & var1,
+                   const T2 & var2,
+                   const Real & tol = libMesh::TOLERANCE * libMesh::TOLERANCE)
+{
+  return (absoluteFuzzyEqual(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
+}
 
 /**
  * Function to check whether a variable is greater than or equal to another variable within a

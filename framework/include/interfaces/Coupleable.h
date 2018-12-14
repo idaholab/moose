@@ -26,8 +26,10 @@ template <typename T>
 class DenseVector;
 }
 
-#define adCoupledValue(Name) this->template adCoupledValueTemplate<compute_stage>(Name)
-#define adCoupledGradient(Name) this->template adCoupledGradientTemplate<compute_stage>(Name)
+#define adCoupledValue this->template adCoupledValueTemplate<compute_stage>
+#define adCoupledGradient this->template adCoupledGradientTemplate<compute_stage>
+#define adZero this->template adZeroTemplate<compute_stage>
+#define adGradZero this->template adGradZeroTemplate<compute_stage>
 
 /**
  * Interface for objects that needs coupling capabilities
@@ -596,6 +598,20 @@ protected:
   virtual const DenseVector<Number> & coupledSolutionDoFsOlder(const std::string & var_name,
                                                                unsigned int comp = 0);
 
+  /**
+   * Template method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
+   * computing objects
+   */
+  template <ComputeStage compute_stage>
+  const typename VariableValueType<compute_stage>::type & adZeroTemplate();
+
+  /**
+   * Template method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
+   * JACOBIAN computing objects
+   */
+  template <ComputeStage compute_stage>
+  const typename VariableGradientType<compute_stage>::type & adGradZeroTemplate();
+
 protected:
   // Reference to the interface's input parameters
   const InputParameters & _c_parameters;
@@ -867,5 +883,25 @@ Coupleable::getADDefaultGradient()
 
 template <>
 VariableGradient & Coupleable::getADDefaultGradient<RESIDUAL>();
+
+template <ComputeStage compute_stage>
+const typename VariableValueType<compute_stage>::type &
+Coupleable::adZeroTemplate()
+{
+  return _zero;
+}
+
+template <>
+const typename VariableValueType<JACOBIAN>::type & Coupleable::adZeroTemplate<JACOBIAN>();
+
+template <ComputeStage compute_stage>
+const typename VariableGradientType<compute_stage>::type &
+Coupleable::adGradZeroTemplate()
+{
+  return _grad_zero;
+}
+
+template <>
+const typename VariableGradientType<JACOBIAN>::type & Coupleable::adGradZeroTemplate<JACOBIAN>();
 
 #endif /* COUPLEABLE_H */

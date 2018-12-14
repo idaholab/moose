@@ -16,8 +16,6 @@
 
 // Forward Declarations
 class StressDivergenceTensors;
-class RankTwoTensor;
-class RankFourTensor;
 
 template <>
 InputParameters validParams<StressDivergenceTensors>();

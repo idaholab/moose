@@ -19,9 +19,13 @@
 
 // Forward declarations
 class MooseEnum;
-class RankTwoTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
 class RankThreeTensor;
-class RankFourTensor;
+template <typename>
+class RankFourTensorTempl;
+typedef RankFourTensorTempl<Real> RankFourTensor;
 
 template <typename T>
 void mooseSetToZero(T & v);

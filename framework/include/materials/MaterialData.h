@@ -165,7 +165,7 @@ protected:
    * Calls resizeProps helper function for regular material properties
    */
   template <typename T>
-  void resizeProps(unsigned int size);
+  void resizeProps(unsigned int size, bool declared_ad = false);
 
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
@@ -211,7 +211,7 @@ MaterialData::haveProperty(const std::string & prop_name) const
 
 template <typename T>
 void
-MaterialData::resizeProps(unsigned int size)
+MaterialData::resizeProps(unsigned int size, bool declared_ad)
 {
   auto n = size + 1;
   if (_props.size() < n)
@@ -222,7 +222,7 @@ MaterialData::resizeProps(unsigned int size)
     _props_older.resize(n, nullptr);
 
   if (_props[size] == nullptr)
-    _props[size] = new ADMaterialPropertyObject<T>;
+    _props[size] = new ADMaterialPropertyObject<T>(declared_ad);
   if (_props_old[size] == nullptr)
     _props_old[size] = new ADMaterialPropertyObject<T>;
   if (_props_older[size] == nullptr)
@@ -277,7 +277,7 @@ MaterialData::declareADHelper(MaterialProperties & props,
                               const std::string & libmesh_dbg_var(prop_name),
                               unsigned int prop_id)
 {
-  resizeProps<T>(prop_id);
+  resizeProps<T>(prop_id, true);
   auto prop = dynamic_cast<ADMaterialPropertyObject<T> *>(props[prop_id]);
   mooseAssert(prop != nullptr, "Internal error in declaring material property: " + prop_name);
   return *prop;

@@ -4262,13 +4262,13 @@ FEProblemBase::advanceState()
   _vpps_data.copyValuesBack();
 
   if (_material_props.hasStatefulProperties())
-    _material_props.shift();
+    _material_props.shift(*this);
 
   if (_bnd_material_props.hasStatefulProperties())
-    _bnd_material_props.shift();
+    _bnd_material_props.shift(*this);
 
   if (_neighbor_material_props.hasStatefulProperties())
-    _neighbor_material_props.shift();
+    _neighbor_material_props.shift(*this);
 }
 
 void
