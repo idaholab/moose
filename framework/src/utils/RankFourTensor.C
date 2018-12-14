@@ -137,40 +137,12 @@ auto RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
 }
 
 template <typename T>
-template <typename T2>
-auto RankFourTensorTempl<T>::operator*(const T2 & b) const ->
-    typename std::enable_if<ScalarTraits<T2>::value,
-                            RankFourTensorTempl<decltype(T() * T2())>>::type
-{
-  typedef decltype(T() * T2()) ValueType;
-  RankFourTensorTempl<ValueType> result;
-
-  for (unsigned int i = 0; i < N4; ++i)
-    result._vals[i] = _vals[i] * b;
-
-  return result;
-}
-
-template <typename T>
 RankFourTensorTempl<T> &
 RankFourTensorTempl<T>::operator*=(const T & a)
 {
   for (unsigned int i = 0; i < N4; ++i)
     _vals[i] *= a;
   return *this;
-}
-
-template <typename T>
-template <typename T2>
-auto
-RankFourTensorTempl<T>::operator/(const T2 & b) const ->
-    typename std::enable_if<ScalarTraits<T2>::value,
-                            RankFourTensorTempl<decltype(T() / T2())>>::type
-{
-  RankFourTensorTempl<decltype(T() / T2())> result;
-  for (unsigned int i = 0; i < N4; ++i)
-    result._vals[i] = _vals[i] / b;
-  return result;
 }
 
 template <typename T>
@@ -950,16 +922,6 @@ template class RankFourTensorTempl<ADReal>;
 RankTwoTensorMultInstantiate(RankTwoTensorTempl);
 RankTwoTensorMultInstantiate(TensorValue);
 RankTwoTensorMultInstantiate(TypeTensor);
-
-template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::operator*(const Real & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator*(const Real & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::operator*(const ADReal & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator*(const ADReal & a) const;
-
-template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::operator/(const Real & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator/(const Real & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::operator/(const ADReal & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator/(const ADReal & a) const;
 
 template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
 operator+(const RankFourTensorTempl<Real> & a) const;

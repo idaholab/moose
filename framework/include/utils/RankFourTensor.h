@@ -426,6 +426,34 @@ RankFourTensorTempl<T>::RankFourTensorTempl(const RankFourTensorTempl<T2> & copy
     _vals[i] = copy._vals[i];
 }
 
+template <typename T>
+template <typename T2>
+auto RankFourTensorTempl<T>::operator*(const T2 & b) const ->
+    typename std::enable_if<ScalarTraits<T2>::value,
+                            RankFourTensorTempl<decltype(T() * T2())>>::type
+{
+  typedef decltype(T() * T2()) ValueType;
+  RankFourTensorTempl<ValueType> result;
+
+  for (unsigned int i = 0; i < N4; ++i)
+    result._vals[i] = _vals[i] * b;
+
+  return result;
+}
+
+template <typename T>
+template <typename T2>
+auto
+RankFourTensorTempl<T>::operator/(const T2 & b) const ->
+    typename std::enable_if<ScalarTraits<T2>::value,
+                            RankFourTensorTempl<decltype(T() / T2())>>::type
+{
+  RankFourTensorTempl<decltype(T() / T2())> result;
+  for (unsigned int i = 0; i < N4; ++i)
+    result._vals[i] = _vals[i] / b;
+  return result;
+}
+
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<ADReal> ADRankFourTensor;
 
