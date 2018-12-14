@@ -1,5 +1,5 @@
 [Tests]
-  design = '\LayeredSideIntegral.md'
+  design = 'userobject/LayeredSideIntegral.md'
   issues = '#1289'
   [./test]
     type = 'Exodiff'
@@ -21,7 +21,7 @@
     exodiff = 'layered_side_flux_average_out.e'
     requirement = "MOOSE shall allow taking averages of the flux of variables along a coordinate axis in layers on a boundary"
   [../]
-  
+
   [./layered_side_average_error_check]
     type = RunException
     input = 'layered_side_average.i'
