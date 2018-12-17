@@ -14,7 +14,9 @@
 #include "RankThreeTensor.h"
 
 class ACInterfaceStress;
-class RankTwoTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 template <>
 InputParameters validParams<ACInterfaceStress>();

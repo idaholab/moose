@@ -12,7 +12,9 @@
 
 #include "Material.h"
 
-class RankTwoTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 class ComputeEigenstrainBase;
 

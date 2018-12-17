@@ -133,7 +133,7 @@ private:
   bool _cumulative;
 
   /// List of SubdomainIDs, if given
-  std::vector<SubdomainID> _blocks;
+  std::vector<SubdomainID> _layer_bounding_blocks;
 };
 
 #endif

@@ -93,7 +93,7 @@ BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var)
 
     Real d = _x2[x2u] - _x2[x2l];
 
-    if (!MooseUtils::absoluteFuzzyEqual(d, 0.0))
+    if (!MooseUtils::absoluteFuzzyEqual(d, Real(0.0)))
       sample_deriv /= d;
 
     return sample_deriv;
@@ -123,7 +123,7 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
 
     Real d = _x1[x1u] - _x1[x1l];
 
-    if (!MooseUtils::absoluteFuzzyEqual(d, 0.0))
+    if (!MooseUtils::absoluteFuzzyEqual(d, Real(0.0)))
       sample_deriv /= (d * d);
 
     return sample_deriv;
@@ -141,7 +141,7 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
 
     Real d = _x2[x2u] - _x2[x2l];
 
-    if (!MooseUtils::absoluteFuzzyEqual(d, 0.0))
+    if (!MooseUtils::absoluteFuzzyEqual(d, Real(0.0)))
       sample_deriv /= (d * d);
 
     return sample_deriv;
@@ -178,12 +178,12 @@ BicubicInterpolation::sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real
 
   Real d1 = _x1[x1u] - _x1[x1l];
 
-  if (!MooseUtils::absoluteFuzzyEqual(d1, 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(d1, Real(0.0)))
     dy1 /= d1;
 
   Real d2 = _x2[x2u] - _x2[x2l];
 
-  if (!MooseUtils::absoluteFuzzyEqual(d2, 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(d2, Real(0.0)))
     dy2 /= d2;
 }
 
@@ -339,7 +339,7 @@ BicubicInterpolation::findInterval(
   Real d = x[khi] - x[klo];
   xs = xi - x[klo];
 
-  if (!MooseUtils::absoluteFuzzyEqual(d, 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(d, Real(0.0)))
     xs /= d;
 }
 

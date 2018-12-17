@@ -13,7 +13,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class ColumnMajorMatrix;
 class HomogenizationKernel;
 class SymmElasticityTensor;
 class SymmTensor;

@@ -11,6 +11,7 @@
 #define MOOSETYPES_H
 
 #include "Moose.h"
+#include "ADReal.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -19,12 +20,6 @@
 #include "libmesh/petsc_macro.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/parameters.h"
-#include "libmesh/vector_value.h"
-#include "libmesh/tensor_value.h"
-#include "libmesh/type_n_tensor.h"
-
-#include "metaphysicl/dualnumber.h"
-#include "metaphysicl/numberarray.h"
 
 // BOOST include
 #include "bitmask_operators.h"
@@ -77,12 +72,32 @@
  */
 template <typename>
 class MooseArray;
-class RankTwoTensor;
-class RankFourTensor;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
+typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
+template <typename>
+class RankFourTensorTempl;
 template <typename>
 class MaterialProperty;
 template <typename>
 class ADMaterialPropertyObject;
+
+namespace libMesh
+{
+template <typename>
+class VectorValue;
+typedef VectorValue<Real> RealVectorValue;
+template <typename>
+class TypeVector;
+template <typename>
+class TensorValue;
+typedef TensorValue<Real> RealTensorValue;
+template <typename>
+class TypeTensor;
+template <unsigned int, typename>
+class TypeNTensor;
+}
 
 /**
  * MOOSE typedefs
@@ -159,14 +174,6 @@ typedef MooseArray<std::vector<TensorValue<Real>>> VectorVariableTestGradient;
 typedef MooseArray<std::vector<TypeNTensor<3, Real>>> VectorVariableTestSecond;
 typedef MooseArray<std::vector<VectorValue<Real>>> VectorVariableTestCurl;
 
-/*
- * DualNumber naming
- */
-#define AD_MAX_DOFS_PER_ELEM 50
-using MetaPhysicL::DualNumber;
-using MetaPhysicL::NumberArray;
-
-typedef DualNumber<Real, NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> ADReal;
 template <template <class> class W>
 using TemplateDN = W<ADReal>;
 
@@ -175,41 +182,6 @@ typedef TemplateDN<TensorValue> ADRealTensorValue;
 
 typedef ADRealVectorValue ADRealGradient;
 typedef ADRealTensorValue ADRealTensor;
-
-namespace libMesh
-{
-template <typename T, typename T2, typename D>
-struct CompareTypes<T, DualNumber<T2, D>>
-{
-  typedef DualNumber<typename CompareTypes<T, T2>::supertype,
-                     typename D::template rebind<typename CompareTypes<T, T2>::supertype>::other>
-      supertype;
-};
-template <typename T, typename D, typename T2>
-struct CompareTypes<DualNumber<T, D>, T2>
-{
-  typedef DualNumber<typename CompareTypes<T, T2>::supertype,
-                     typename D::template rebind<typename CompareTypes<T, T2>::supertype>::other>
-      supertype;
-};
-template <typename T, typename D, typename T2, typename D2>
-struct CompareTypes<DualNumber<T, D>, DualNumber<T2, D2>>
-{
-  typedef DualNumber<typename CompareTypes<T, T2>::supertype,
-                     typename D::template rebind<typename CompareTypes<T, T2>::supertype>::other>
-      supertype;
-};
-template <typename T, typename D>
-struct CompareTypes<DualNumber<T, D>, DualNumber<T, D>>
-{
-  typedef DualNumber<T, D> supertype;
-};
-template <typename T, typename D>
-struct ScalarTraits<DualNumber<T, D>>
-{
-  static const bool value = ScalarTraits<T>::value;
-};
-}
 
 enum ComputeStage
 {
@@ -247,15 +219,52 @@ struct VariableSecondType<JACOBIAN>
 {
   typedef MooseArray<ADRealTensor> type;
 };
+
 template <ComputeStage compute_stage>
-struct ResidualReturnType
+struct RealType
 {
   typedef Real type;
 };
 template <>
-struct ResidualReturnType<JACOBIAN>
+struct RealType<JACOBIAN>
 {
   typedef ADReal type;
+};
+template <ComputeStage compute_stage>
+struct RealVectorValueType
+{
+  typedef RealVectorValue type;
+};
+template <>
+struct RealVectorValueType<JACOBIAN>
+{
+  typedef ADRealVectorValue type;
+};
+template <ComputeStage compute_stage>
+struct RealTensorValueType
+{
+  typedef RealTensorValue type;
+};
+template <>
+struct RealTensorValueType<JACOBIAN>
+{
+  typedef ADRealTensorValue type;
+};
+template <ComputeStage compute_stage>
+struct RankTwoTensorType
+{
+  typedef RankTwoTensor type;
+};
+template <>
+struct RankTwoTensorType<JACOBIAN>
+{
+  typedef ADRankTwoTensor type;
+};
+
+template <ComputeStage compute_stage>
+struct ResidualReturnType
+{
+  typedef typename RealType<compute_stage>::type type;
 };
 template <ComputeStage compute_stage, typename mat_prop_type>
 struct MaterialPropertyType

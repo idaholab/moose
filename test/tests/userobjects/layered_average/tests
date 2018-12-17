@@ -100,4 +100,13 @@
     design = '/LayeredAverage.md'
     issues = '#8835 #12152'
   [../]
+  [./block_restricted_bounding_block]
+    type = 'Exodiff'
+    input = 'layered_average_bounding_block.i'
+    exodiff = 'layered_average_bounding_block_out.e'
+
+    requirement = "MOOSE shall allow bounds for layered averages when using num_layers to come from a block different than the block restriction"
+    design = '/LayeredAverage.md'
+    issues = '#12479'
+  [../]
 []

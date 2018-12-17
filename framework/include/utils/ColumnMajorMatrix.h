@@ -11,12 +11,15 @@
 #define COLUMNMAJORMATRIX_H
 
 // MOOSE includes
-#include "Moose.h"      // using namespace libMesh
+#include "Moose.h" // using namespace libMesh
 #include "MooseError.h"
+#include "ADReal.h"
 
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
+#include "metaphysicl/dualnumber.h"
+#include "metaphysicl/numberarray.h"
 
 // C++ includes
 #include <iomanip>
@@ -26,36 +29,37 @@
  * a 3x3x3x3 Tensor can be represented as a 9x9 or an 81x1.  Further,
  * the values of this tensor are _COLUMN_ major ordered!
  */
-class ColumnMajorMatrix
+template <typename T>
+class ColumnMajorMatrixTempl
 {
 public:
   /**
    * Constructor that sets an initial number of entries and shape.
    * Defaults to creating the same size tensor as TensorValue
    */
-  explicit ColumnMajorMatrix(const unsigned int rows = LIBMESH_DIM,
-                             const unsigned int cols = LIBMESH_DIM);
+  explicit ColumnMajorMatrixTempl(const unsigned int rows = LIBMESH_DIM,
+                                  const unsigned int cols = LIBMESH_DIM);
 
   /**
    * Copy Constructor defined in terms of operator=()
    */
-  ColumnMajorMatrix(const ColumnMajorMatrix & rhs);
+  ColumnMajorMatrixTempl(const ColumnMajorMatrixTempl<T> & rhs);
 
   /**
-   * Constructor that fills in the ColumnMajorMatrix with values from a libMesh TypeTensor
+   * Constructor that fills in the ColumnMajorMatrixTempl with values from a libMesh TypeTensor
    */
-  explicit ColumnMajorMatrix(const TypeTensor<Real> & tensor);
+  explicit ColumnMajorMatrixTempl(const TypeTensor<T> & tensor);
 
-  explicit ColumnMajorMatrix(const DenseMatrix<Real> & rhs);
+  explicit ColumnMajorMatrixTempl(const DenseMatrix<T> & rhs);
 
-  explicit ColumnMajorMatrix(const DenseVector<Real> & rhs);
+  explicit ColumnMajorMatrixTempl(const DenseVector<T> & rhs);
 
   /**
    * Constructor that takes in 3 vectors and uses them to create columns
    */
-  ColumnMajorMatrix(const TypeVector<Real> & col1,
-                    const TypeVector<Real> & col2,
-                    const TypeVector<Real> & col3);
+  ColumnMajorMatrixTempl(const TypeVector<T> & col1,
+                         const TypeVector<T> & col2,
+                         const TypeVector<T> & col3);
 
   /**
    * The total number of entries in the Tensor.
@@ -73,15 +77,15 @@ public:
    * Get the i,j entry
    * j defaults to zero so you can use it as a column vector.
    */
-  Real & operator()(const unsigned int i, const unsigned int j = 0);
+  T & operator()(const unsigned int i, const unsigned int j = 0);
 
   /**
    * Get the i,j entry
    *
    * j defaults to zero so you can use it as a column vector.
-   * This is the version used for a const ColumnMajorMatrix.
+   * This is the version used for a const ColumnMajorMatrixTempl.
    */
-  Real operator()(const unsigned int i, const unsigned int j = 0) const;
+  T operator()(const unsigned int i, const unsigned int j = 0) const;
 
   /**
    * Print the tensor
@@ -96,50 +100,50 @@ public:
   /**
    * Fills the passed in tensor with the values from this tensor.
    */
-  void fill(TypeTensor<Real> & tensor);
+  void fill(TypeTensor<T> & tensor);
 
   /**
    * Fills the passed in dense matrix with the values from this tensor.
    */
-  void fill(DenseMatrix<Real> & rhs);
+  void fill(DenseMatrix<T> & rhs);
 
   /**
    * Fills the passed in dense vector with the values from this tensor.
    */
-  void fill(DenseVector<Real> & rhs);
+  void fill(DenseVector<T> & rhs);
 
   /**
    * Returns a matrix that is the transpose of the matrix this
    * was called on.
    */
-  ColumnMajorMatrix transpose() const;
+  ColumnMajorMatrixTempl<T> transpose() const;
 
   /**
    * Returns a matrix that is the deviatoric of the matrix this
    * was called on.
    */
-  ColumnMajorMatrix deviatoric();
+  ColumnMajorMatrixTempl<T> deviatoric();
 
   /**
    * Returns a matrix that is the absolute value of the matrix this
    * was called on.
    */
-  ColumnMajorMatrix abs();
+  ColumnMajorMatrixTempl<T> abs();
 
   /**
    * Set the value of each of the diagonals to the passed in value.
    */
-  void setDiag(Real value);
+  void setDiag(T value);
 
   /**
    * Add to each of the diagonals the passsed in value.
    */
-  void addDiag(Real value);
+  void addDiag(T value);
 
   /**
    * The trace of the CMM.
    */
-  Real tr() const;
+  T tr() const;
 
   /**
    * Zero the matrix.
@@ -154,12 +158,12 @@ public:
   /**
    * Double contraction of two matrices ie A : B = Sum(A_ab * B_ba)
    */
-  Real doubleContraction(const ColumnMajorMatrix & rhs) const;
+  T doubleContraction(const ColumnMajorMatrixTempl<T> & rhs) const;
 
   /**
    * The Euclidean norm of the matrix.
    */
-  Real norm();
+  T norm();
 
   /**
    * Returns the number of rows
@@ -174,91 +178,91 @@ public:
   /**
    * Returns eigen system solve for a symmetric real matrix
    */
-  void eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) const;
+  void eigen(ColumnMajorMatrixTempl<T> & eval, ColumnMajorMatrixTempl<T> & evec) const;
 
   /**
    * Returns eigen system solve for a non-symmetric real matrix
    */
-  void eigenNonsym(ColumnMajorMatrix & eval_real,
-                   ColumnMajorMatrix & eval_img,
-                   ColumnMajorMatrix & evec_right,
-                   ColumnMajorMatrix & eve_left) const;
+  void eigenNonsym(ColumnMajorMatrixTempl<T> & eval_real,
+                   ColumnMajorMatrixTempl<T> & eval_img,
+                   ColumnMajorMatrixTempl<T> & evec_right,
+                   ColumnMajorMatrixTempl<T> & eve_left) const;
 
   /**
    * Returns matrix that is the exponential of the matrix this was called on
    */
-  void exp(ColumnMajorMatrix & z) const;
+  void exp(ColumnMajorMatrixTempl<T> & z) const;
 
   /**
    * Returns inverse of a general matrix
    */
-  void inverse(ColumnMajorMatrix & invA) const;
+  void inverse(ColumnMajorMatrixTempl<T> & invA) const;
 
   /**
    * Returns a reference to the raw data pointer
    */
-  Real * rawData();
-  const Real * rawData() const;
+  T * rawData();
+  const T * rawData() const;
 
   /**
    * Kronecker Product
    */
-  ColumnMajorMatrix kronecker(const ColumnMajorMatrix & rhs) const;
+  ColumnMajorMatrixTempl<T> kronecker(const ColumnMajorMatrixTempl<T> & rhs) const;
 
   /**
    * Sets the values in _this_ tensor to the values on the RHS.
    * Will also reshape this tensor if necessary.
    */
-  ColumnMajorMatrix & operator=(const TypeTensor<Real> & rhs);
+  ColumnMajorMatrixTempl<T> & operator=(const TypeTensor<T> & rhs);
 
   /**
- * Sets the values in _this_ dense matrix to the values on the RHS.
- * Will also reshape this tensor if necessary.
- */
-  ColumnMajorMatrix & operator=(const DenseMatrix<Real> & rhs);
+   * Sets the values in _this_ dense matrix to the values on the RHS.
+   * Will also reshape this tensor if necessary.
+   */
+  ColumnMajorMatrixTempl<T> & operator=(const DenseMatrix<T> & rhs);
 
   /**
- * Sets the values in _this_ dense vector to the values on the RHS.
- * Will also reshape this tensor if necessary.
- */
-  ColumnMajorMatrix & operator=(const DenseVector<Real> & rhs);
+   * Sets the values in _this_ dense vector to the values on the RHS.
+   * Will also reshape this tensor if necessary.
+   */
+  ColumnMajorMatrixTempl<T> & operator=(const DenseVector<T> & rhs);
 
   /**
    * Sets the values in _this_ tensor to the values on the RHS
    * Will also reshape this tensor if necessary.
    */
-  ColumnMajorMatrix & operator=(const ColumnMajorMatrix & rhs);
+  ColumnMajorMatrixTempl<T> & operator=(const ColumnMajorMatrixTempl<T> & rhs);
 
   /**
-   * Scalar multiplication of the ColumnMajorMatrix
+   * Scalar multiplication of the ColumnMajorMatrixTempl
    */
-  ColumnMajorMatrix operator*(Real scalar) const;
+  ColumnMajorMatrixTempl<T> operator*(T scalar) const;
 
   /**
    * Matrix Vector Multiplication of the libMesh TypeVector Type
    */
-  ColumnMajorMatrix operator*(const TypeVector<Real> & rhs) const;
+  ColumnMajorMatrixTempl<T> operator*(const TypeVector<T> & rhs) const;
 
   //   /**
   //    * Matrix Vector Multiplication of the TypeTensor Product.  Note that the
   //    * Tensor type is treated as a single dimension Vector for this operation
   //    */
-  //   ColumnMajorMatrix operator*(const TypeTensor<Real> & rhs) const;
+  //   ColumnMajorMatrixTempl operator*(const TypeTensor<T> & rhs) const;
 
   /**
    * Matrix Matrix Multiplication
    */
-  ColumnMajorMatrix operator*(const ColumnMajorMatrix & rhs) const;
+  ColumnMajorMatrixTempl<T> operator*(const ColumnMajorMatrixTempl<T> & rhs) const;
 
   /**
    * Matrix Matrix Addition
    */
-  ColumnMajorMatrix operator+(const ColumnMajorMatrix & rhs) const;
+  ColumnMajorMatrixTempl<T> operator+(const ColumnMajorMatrixTempl<T> & rhs) const;
 
   /**
    * Matrix Matrix Subtraction
    */
-  ColumnMajorMatrix operator-(const ColumnMajorMatrix & rhs) const;
+  ColumnMajorMatrixTempl<T> operator-(const ColumnMajorMatrixTempl<T> & rhs) const;
 
   /**
    * Matrix Matrix Addition plus assignment
@@ -266,12 +270,12 @@ public:
    * Note that this is faster than regular addition
    * because the result doesn't have to get copied out
    */
-  ColumnMajorMatrix & operator+=(const ColumnMajorMatrix & rhs);
+  ColumnMajorMatrixTempl<T> & operator+=(const ColumnMajorMatrixTempl<T> & rhs);
 
   /**
    * Matrix Tensor Addition Plus Assignment
    */
-  ColumnMajorMatrix & operator+=(const TypeTensor<Real> & rhs);
+  ColumnMajorMatrixTempl<T> & operator+=(const TypeTensor<T> & rhs);
 
   /**
    * Matrix Matrix Subtraction plus assignment
@@ -279,27 +283,27 @@ public:
    * Note that this is faster than regular subtraction
    * because the result doesn't have to get copied out
    */
-  ColumnMajorMatrix & operator-=(const ColumnMajorMatrix & rhs);
+  ColumnMajorMatrixTempl<T> & operator-=(const ColumnMajorMatrixTempl<T> & rhs);
 
   /**
    * Scalar addition
    */
-  ColumnMajorMatrix operator+(Real scalar) const;
+  ColumnMajorMatrixTempl<T> operator+(T scalar) const;
 
   /**
    * Scalar Multiplication plus assignment
    */
-  ColumnMajorMatrix & operator*=(Real scalar);
+  ColumnMajorMatrixTempl<T> & operator*=(T scalar);
 
   /**
    * Scalar Division plus assignment
    */
-  ColumnMajorMatrix & operator/=(Real scalar);
+  ColumnMajorMatrixTempl<T> & operator/=(T scalar);
 
   /**
    * Scalar Addition plus assignment
    */
-  ColumnMajorMatrix & operator+=(Real scalar);
+  ColumnMajorMatrixTempl<T> & operator+=(T scalar);
 
   /**
    * Check if matrix is square
@@ -309,27 +313,29 @@ public:
   /**
    * Check if matrices are of same shape
    */
-  void checkShapeEquality(const ColumnMajorMatrix & rhs) const;
+  void checkShapeEquality(const ColumnMajorMatrixTempl<T> & rhs) const;
 
   /**
    * Equality operators
    */
-  bool operator==(const ColumnMajorMatrix & rhs) const;
-  bool operator!=(const ColumnMajorMatrix & rhs) const;
+  bool operator==(const ColumnMajorMatrixTempl<T> & rhs) const;
+  bool operator!=(const ColumnMajorMatrixTempl<T> & rhs) const;
 
 protected:
   unsigned int _n_rows, _n_cols, _n_entries;
-  std::vector<Real> _values;
+  std::vector<T> _values;
 };
 
+template <typename T>
 inline unsigned int
-ColumnMajorMatrix::numEntries() const
+ColumnMajorMatrixTempl<T>::numEntries() const
 {
   return _n_entries;
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::reshape(unsigned int rows, unsigned int cols)
+ColumnMajorMatrixTempl<T>::reshape(unsigned int rows, unsigned int cols)
 {
   if (cols * rows == _n_entries)
   {
@@ -345,8 +351,9 @@ ColumnMajorMatrix::reshape(unsigned int rows, unsigned int cols)
   }
 }
 
-inline Real &
-ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j)
+template <typename T>
+inline T &
+ColumnMajorMatrixTempl<T>::operator()(const unsigned int i, const unsigned int j)
 {
   if ((i * j) >= _n_entries)
     mooseError("Reference outside of ColumnMajorMatrix bounds!");
@@ -355,8 +362,9 @@ ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j)
   return _values[(j * _n_rows) + i];
 }
 
-inline Real
-ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j) const
+template <typename T>
+inline T
+ColumnMajorMatrixTempl<T>::operator()(const unsigned int i, const unsigned int j) const
 {
   if ((i * j) >= _n_entries)
     mooseError("Reference outside of ColumnMajorMatrix bounds!");
@@ -365,10 +373,11 @@ ColumnMajorMatrix::operator()(const unsigned int i, const unsigned int j) const
   return _values[(j * _n_rows) + i];
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::print()
+ColumnMajorMatrixTempl<T>::print()
 {
-  ColumnMajorMatrix & s = (*this);
+  ColumnMajorMatrixTempl<T> & s = (*this);
 
   for (unsigned int i = 0; i < _n_rows; i++)
   {
@@ -379,10 +388,11 @@ ColumnMajorMatrix::print()
   }
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::print_scientific(std::ostream & os)
+ColumnMajorMatrixTempl<T>::print_scientific(std::ostream & os)
 {
-  ColumnMajorMatrix & s = (*this);
+  ColumnMajorMatrixTempl<T> & s = (*this);
 
   for (unsigned int i = 0; i < _n_rows; i++)
   {
@@ -393,8 +403,9 @@ ColumnMajorMatrix::print_scientific(std::ostream & os)
   }
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::fill(TypeTensor<Real> & tensor)
+ColumnMajorMatrixTempl<T>::fill(TypeTensor<T> & tensor)
 {
   if (LIBMESH_DIM * LIBMESH_DIM != _n_entries)
     mooseError(
@@ -405,8 +416,9 @@ ColumnMajorMatrix::fill(TypeTensor<Real> & tensor)
       tensor(i, j) = _values[index];
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::fill(DenseMatrix<Real> & rhs)
+ColumnMajorMatrixTempl<T>::fill(DenseMatrix<T> & rhs)
 {
   if (rhs.n() * rhs.m() != _n_entries)
     mooseError(
@@ -417,8 +429,9 @@ ColumnMajorMatrix::fill(DenseMatrix<Real> & rhs)
       rhs(i, j) = _values[index];
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::fill(DenseVector<Real> & rhs)
+ColumnMajorMatrixTempl<T>::fill(DenseVector<T> & rhs)
 {
   if (_n_rows != rhs.size() || _n_cols != 1)
     mooseError("ColumnMajorMatrix and DenseVector must be the same shape for a fill!");
@@ -427,12 +440,13 @@ ColumnMajorMatrix::fill(DenseVector<Real> & rhs)
     rhs(i) = (*this)(i);
 }
 
-inline ColumnMajorMatrix
-ColumnMajorMatrix::transpose() const
+template <typename T>
+inline ColumnMajorMatrixTempl<T>
+ColumnMajorMatrixTempl<T>::transpose() const
 {
-  const ColumnMajorMatrix & s = (*this);
+  const ColumnMajorMatrixTempl<T> & s = (*this);
 
-  ColumnMajorMatrix ret_matrix(_n_cols, _n_rows);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_cols, _n_rows);
 
   for (unsigned int i = 0; i < _n_rows; i++)
     for (unsigned int j = 0; j < _n_cols; j++)
@@ -441,12 +455,13 @@ ColumnMajorMatrix::transpose() const
   return ret_matrix;
 }
 
-inline ColumnMajorMatrix
-ColumnMajorMatrix::deviatoric()
+template <typename T>
+inline ColumnMajorMatrixTempl<T>
+ColumnMajorMatrixTempl<T>::deviatoric()
 {
-  ColumnMajorMatrix & s = (*this);
+  ColumnMajorMatrixTempl<T> & s = (*this);
 
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols), I(_n_rows, _n_cols);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols), I(_n_rows, _n_cols);
 
   I.identity();
 
@@ -457,12 +472,13 @@ ColumnMajorMatrix::deviatoric()
   return ret_matrix;
 }
 
-inline ColumnMajorMatrix
-ColumnMajorMatrix::abs()
+template <typename T>
+inline ColumnMajorMatrixTempl<T>
+ColumnMajorMatrixTempl<T>::abs()
 {
-  ColumnMajorMatrix & s = (*this);
+  ColumnMajorMatrixTempl<T> & s = (*this);
 
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
 
   for (unsigned int j = 0; j < _n_cols; j++)
     for (unsigned int i = 0; i < _n_rows; i++)
@@ -471,8 +487,9 @@ ColumnMajorMatrix::abs()
   return ret_matrix;
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::setDiag(Real value)
+ColumnMajorMatrixTempl<T>::setDiag(T value)
 {
   this->checkSquareness();
 
@@ -480,8 +497,9 @@ ColumnMajorMatrix::setDiag(Real value)
     (*this)(i, i) = value;
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::addDiag(Real value)
+ColumnMajorMatrixTempl<T>::addDiag(T value)
 {
   this->checkSquareness();
 
@@ -489,12 +507,13 @@ ColumnMajorMatrix::addDiag(Real value)
     (*this)(i, i) += value;
 }
 
-inline Real
-ColumnMajorMatrix::tr() const
+template <typename T>
+inline T
+ColumnMajorMatrixTempl<T>::tr() const
 {
   this->checkSquareness();
 
-  Real trace = 0;
+  T trace = 0;
 
   for (unsigned int i = 0; i < _n_rows; i++)
     trace += (*this)(i, i);
@@ -502,15 +521,17 @@ ColumnMajorMatrix::tr() const
   return trace;
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::zero()
+ColumnMajorMatrixTempl<T>::zero()
 {
   for (unsigned int i = 0; i < _n_entries; i++)
     _values[i] = 0;
 }
 
+template <typename T>
 inline void
-ColumnMajorMatrix::identity()
+ColumnMajorMatrixTempl<T>::identity()
 {
   this->checkSquareness();
 
@@ -520,12 +541,13 @@ ColumnMajorMatrix::identity()
     (*this)(i, i) = 1;
 }
 
-inline Real
-ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs) const
+template <typename T>
+inline T
+ColumnMajorMatrixTempl<T>::doubleContraction(const ColumnMajorMatrixTempl<T> & rhs) const
 {
   this->checkShapeEquality(rhs);
 
-  Real value = 0;
+  T value = 0;
 
   for (unsigned int j = 0; j < _n_cols; j++)
     for (unsigned int i = 0; i < _n_rows; i++)
@@ -534,38 +556,44 @@ ColumnMajorMatrix::doubleContraction(const ColumnMajorMatrix & rhs) const
   return value;
 }
 
-inline Real
-ColumnMajorMatrix::norm()
+template <typename T>
+inline T
+ColumnMajorMatrixTempl<T>::norm()
 {
   return std::sqrt(doubleContraction(*this));
 }
 
+template <typename T>
 inline unsigned int
-ColumnMajorMatrix::n() const
+ColumnMajorMatrixTempl<T>::n() const
 {
   return _n_rows;
 }
 
+template <typename T>
 inline unsigned int
-ColumnMajorMatrix::m() const
+ColumnMajorMatrixTempl<T>::m() const
 {
   return _n_cols;
 }
 
-inline Real *
-ColumnMajorMatrix::rawData()
+template <typename T>
+inline T *
+ColumnMajorMatrixTempl<T>::rawData()
 {
   return &_values[0];
 }
 
-inline const Real *
-ColumnMajorMatrix::rawData() const
+template <typename T>
+inline const T *
+ColumnMajorMatrixTempl<T>::rawData() const
 {
   return &_values[0];
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator=(const TypeTensor<Real> & rhs)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator=(const TypeTensor<T> & rhs)
 {
   // Resize the tensor if necessary
   if ((LIBMESH_DIM * LIBMESH_DIM) != _n_entries)
@@ -577,7 +605,7 @@ ColumnMajorMatrix::operator=(const TypeTensor<Real> & rhs)
   // Make sure the shape is correct
   reshape(LIBMESH_DIM, LIBMESH_DIM);
 
-  ColumnMajorMatrix & s = (*this);
+  ColumnMajorMatrixTempl<T> & s = (*this);
 
   // Copy the values
   for (unsigned int j = 0; j < _n_cols; j++)
@@ -587,8 +615,9 @@ ColumnMajorMatrix::operator=(const TypeTensor<Real> & rhs)
   return *this;
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator=(const ColumnMajorMatrix & rhs)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator=(const ColumnMajorMatrixTempl<T> & rhs)
 {
   _n_rows = rhs._n_rows;
   _n_cols = rhs._n_cols;
@@ -602,9 +631,10 @@ ColumnMajorMatrix::operator=(const ColumnMajorMatrix & rhs)
   return *this;
 }
 
-inline ColumnMajorMatrix ColumnMajorMatrix::operator*(Real scalar) const
+template <typename T>
+inline ColumnMajorMatrixTempl<T> ColumnMajorMatrixTempl<T>::operator*(T scalar) const
 {
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
 
   for (unsigned int i = 0; i < _n_entries; i++)
     ret_matrix._values[i] = _values[i] * scalar;
@@ -612,13 +642,15 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(Real scalar) const
   return ret_matrix;
 }
 
-inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const TypeVector<Real> & rhs) const
+template <typename T>
+inline ColumnMajorMatrixTempl<T> ColumnMajorMatrixTempl<T>::
+operator*(const TypeVector<T> & rhs) const
 {
   if (_n_cols != LIBMESH_DIM)
     mooseError("Cannot perform matvec operation! The column dimension of "
                "the ColumnMajorMatrix does not match the TypeVector!");
 
-  ColumnMajorMatrix ret_matrix(_n_rows, 1);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, 1);
 
   for (unsigned int i = 0; i < _n_rows; ++i)
     for (unsigned int j = 0; j < _n_cols; ++j)
@@ -627,13 +659,14 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const TypeVector<Real> & r
   return ret_matrix;
 }
 
-// inline ColumnMajorMatrix
-// ColumnMajorMatrix::operator*(const TypeTensor<Real> & rhs) const
+// template <typename T>
+// inline ColumnMajorMatrixTempl<T>
+// ColumnMajorMatrixTempl<T>::operator*(const TypeTensor<T> & rhs) const
 // {
 //   mooseAssert(_n_cols == LIBMESH_DIM*LIBMESH_DIM, "Cannot perform matvec operation!  The
-//   ColumnMajorMatrix doesn't have the correct shape!");
+//   ColumnMajorMatrixTempl<T> doesn't have the correct shape!");
 
-//   ColumnMajorMatrix ret_matrix(_n_rows, 1);
+//   ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, 1);
 
 //   for (unsigned int i=0; i<_n_rows; ++i)
 //     for (unsigned int j=0; j<_n_cols; ++j)
@@ -643,13 +676,15 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const TypeVector<Real> & r
 //   return ret_matrix;
 // }
 
-inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const ColumnMajorMatrix & rhs) const
+template <typename T>
+inline ColumnMajorMatrixTempl<T> ColumnMajorMatrixTempl<T>::
+operator*(const ColumnMajorMatrixTempl<T> & rhs) const
 {
   if (_n_cols != rhs._n_rows)
     mooseError(
         "Cannot perform matrix multiply! The shapes of the two operands are not compatible!");
 
-  ColumnMajorMatrix ret_matrix(_n_rows, rhs._n_cols);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, rhs._n_cols);
 
   for (unsigned int i = 0; i < ret_matrix._n_rows; ++i)
     for (unsigned int j = 0; j < ret_matrix._n_cols; ++j)
@@ -659,12 +694,13 @@ inline ColumnMajorMatrix ColumnMajorMatrix::operator*(const ColumnMajorMatrix & 
   return ret_matrix;
 }
 
-inline ColumnMajorMatrix
-ColumnMajorMatrix::operator+(const ColumnMajorMatrix & rhs) const
+template <typename T>
+inline ColumnMajorMatrixTempl<T>
+ColumnMajorMatrixTempl<T>::operator+(const ColumnMajorMatrixTempl<T> & rhs) const
 {
   this->checkShapeEquality(rhs);
 
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
 
   for (unsigned int i = 0; i < _n_entries; i++)
     ret_matrix._values[i] = _values[i] + rhs._values[i];
@@ -672,12 +708,13 @@ ColumnMajorMatrix::operator+(const ColumnMajorMatrix & rhs) const
   return ret_matrix;
 }
 
-inline ColumnMajorMatrix
-ColumnMajorMatrix::operator-(const ColumnMajorMatrix & rhs) const
+template <typename T>
+inline ColumnMajorMatrixTempl<T>
+ColumnMajorMatrixTempl<T>::operator-(const ColumnMajorMatrixTempl<T> & rhs) const
 {
   this->checkShapeEquality(rhs);
 
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
 
   for (unsigned int i = 0; i < _n_entries; i++)
     ret_matrix._values[i] = _values[i] - rhs._values[i];
@@ -685,8 +722,9 @@ ColumnMajorMatrix::operator-(const ColumnMajorMatrix & rhs) const
   return ret_matrix;
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator+=(const ColumnMajorMatrixTempl<T> & rhs)
 {
   this->checkShapeEquality(rhs);
 
@@ -696,8 +734,9 @@ ColumnMajorMatrix::operator+=(const ColumnMajorMatrix & rhs)
   return *this;
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator+=(const TypeTensor<Real> & rhs)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator+=(const TypeTensor<T> & rhs)
 {
   if ((_n_rows != LIBMESH_DIM) || (_n_cols != LIBMESH_DIM))
     mooseError("Cannot perform matrix addition and assignment! The shapes of the two operands are "
@@ -710,8 +749,9 @@ ColumnMajorMatrix::operator+=(const TypeTensor<Real> & rhs)
   return *this;
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator-=(const ColumnMajorMatrix & rhs)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator-=(const ColumnMajorMatrixTempl<T> & rhs)
 {
   this->checkShapeEquality(rhs);
 
@@ -721,10 +761,11 @@ ColumnMajorMatrix::operator-=(const ColumnMajorMatrix & rhs)
   return *this;
 }
 
-inline ColumnMajorMatrix
-ColumnMajorMatrix::operator+(Real scalar) const
+template <typename T>
+inline ColumnMajorMatrixTempl<T>
+ColumnMajorMatrixTempl<T>::operator+(T scalar) const
 {
-  ColumnMajorMatrix ret_matrix(_n_rows, _n_cols);
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
 
   for (unsigned int i = 0; i < _n_entries; i++)
     ret_matrix._values[i] = _values[i] + scalar;
@@ -732,42 +773,48 @@ ColumnMajorMatrix::operator+(Real scalar) const
   return ret_matrix;
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator*=(Real scalar)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator*=(T scalar)
 {
   for (unsigned int i = 0; i < _n_entries; i++)
     _values[i] *= scalar;
   return *this;
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator/=(Real scalar)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator/=(T scalar)
 {
   for (unsigned int i = 0; i < _n_entries; i++)
     _values[i] /= scalar;
   return *this;
 }
 
-inline ColumnMajorMatrix &
-ColumnMajorMatrix::operator+=(Real scalar)
+template <typename T>
+inline ColumnMajorMatrixTempl<T> &
+ColumnMajorMatrixTempl<T>::operator+=(T scalar)
 {
   for (unsigned int i = 0; i < _n_entries; i++)
     _values[i] += scalar;
   return *this;
 }
 
+template <typename T>
 inline bool
-ColumnMajorMatrix::operator==(const ColumnMajorMatrix & rhs) const
+ColumnMajorMatrixTempl<T>::operator==(const ColumnMajorMatrixTempl<T> & rhs) const
 {
   if (_n_entries != rhs._n_entries || _n_rows != rhs._n_rows || _n_cols != rhs._n_cols)
     return false;
   return std::equal(_values.begin(), _values.end(), rhs._values.begin());
 }
 
+template <typename T>
 inline bool
-ColumnMajorMatrix::operator!=(const ColumnMajorMatrix & rhs) const
+ColumnMajorMatrixTempl<T>::operator!=(const ColumnMajorMatrixTempl<T> & rhs) const
 {
   return !(*this == rhs);
 }
 
+typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
 #endif // COLUMNMAJORMATRIX_H

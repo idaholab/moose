@@ -13,7 +13,11 @@
 #include "Material.h"
 #include "MooseTypes.h"
 
-#define usingMaterialMembers using ADMaterial<compute_stage>::_qp
+#define usingMaterialMembers                                                                       \
+  using ADMaterial<compute_stage>::_qp;                                                            \
+  using ADMaterial<compute_stage>::_ad_grad_zero;                                                  \
+  using ADMaterial<compute_stage>::_ad_zero;                                                       \
+  using ADMaterial<compute_stage>::coupledComponents
 
 // forward declarations
 template <ComputeStage>

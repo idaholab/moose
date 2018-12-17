@@ -26,29 +26,38 @@
 
 template <>
 void
-mooseSetToZero<RankFourTensor>(RankFourTensor & v)
+mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v)
+{
+  v.zero();
+}
+template <>
+void
+mooseSetToZero<RankFourTensorTempl<ADReal>>(RankFourTensorTempl<ADReal> & v)
 {
   v.zero();
 }
 
+template <typename T>
 MooseEnum
-RankFourTensor::fillMethodEnum()
+RankFourTensorTempl<T>::fillMethodEnum()
 {
   return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic "
                    "symmetric_isotropic_E_nu antisymmetric_isotropic axisymmetric_rz general "
                    "principal");
 }
 
-RankFourTensor::RankFourTensor()
+template <typename T>
+RankFourTensorTempl<T>::RankFourTensorTempl()
 {
-  mooseAssert(N == 3, "RankFourTensor is currently only tested for 3 dimensions.");
+  mooseAssert(N == 3, "RankFourTensorTempl<T> is currently only tested for 3 dimensions.");
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N4; ++i)
     _vals[index++] = 0.0;
 }
 
-RankFourTensor::RankFourTensor(const InitMethod init)
+template <typename T>
+RankFourTensorTempl<T>::RankFourTensorTempl(const InitMethod init)
 {
   unsigned int index = 0;
   switch (init)
@@ -79,127 +88,131 @@ RankFourTensor::RankFourTensor(const InitMethod init)
       break;
 
     default:
-      mooseError("Unknown RankFourTensor initialization pattern.");
+      mooseError("Unknown RankFourTensorTempl<T> initialization pattern.");
   }
 }
 
-RankFourTensor::RankFourTensor(const std::vector<Real> & input, FillMethod fill_method)
+template <typename T>
+RankFourTensorTempl<T>::RankFourTensorTempl(const std::vector<T> & input, FillMethod fill_method)
 {
   fillFromInputVector(input, fill_method);
 }
 
+template <typename T>
 void
-RankFourTensor::zero()
+RankFourTensorTempl<T>::zero()
 {
   for (unsigned int i = 0; i < N4; ++i)
     _vals[i] = 0.0;
 }
 
-RankFourTensor &
-RankFourTensor::operator=(const RankFourTensor & a)
+template <typename T>
+RankFourTensorTempl<T> &
+RankFourTensorTempl<T>::operator=(const RankFourTensorTempl<T> & a)
 {
   for (unsigned int i = 0; i < N4; ++i)
     _vals[i] = a._vals[i];
   return *this;
 }
 
-RankTwoTensor RankFourTensor::operator*(const RankTwoTensor & b) const
+template <typename T>
+template <template <typename> class Tensor, typename T2>
+auto RankFourTensorTempl<T>::operator*(const Tensor<T2> & b) const ->
+    typename std::enable_if<TwoTensorMultTraits<Tensor, T2>::value,
+                            RankTwoTensorTempl<decltype(T() * T2())>>::type
 {
-  RankTwoTensor result;
+  typedef decltype(T() * T2()) ValueType;
+  RankTwoTensorTempl<ValueType> result;
 
   unsigned int index = 0;
   for (unsigned int ij = 0; ij < N2; ++ij)
   {
-    Real tmp = 0;
+    ValueType tmp = 0;
     for (unsigned int kl = 0; kl < N2; ++kl)
-      tmp += _vals[index++] * b._coords[kl];
+      tmp += _vals[index++] * b(kl / LIBMESH_DIM, kl % LIBMESH_DIM);
     result._coords[ij] = tmp;
   }
 
   return result;
 }
 
-RankFourTensor RankFourTensor::operator*(const Real b) const
-{
-  RankFourTensor result;
-
-  for (unsigned int i = 0; i < N4; ++i)
-    result._vals[i] = _vals[i] * b;
-
-  return result;
-}
-
-RankFourTensor &
-RankFourTensor::operator*=(const Real a)
+template <typename T>
+RankFourTensorTempl<T> &
+RankFourTensorTempl<T>::operator*=(const T & a)
 {
   for (unsigned int i = 0; i < N4; ++i)
     _vals[i] *= a;
   return *this;
 }
 
-RankFourTensor
-RankFourTensor::operator/(const Real b) const
-{
-  RankFourTensor result;
-  for (unsigned int i = 0; i < N4; ++i)
-    result._vals[i] = _vals[i] / b;
-  return result;
-}
-
-RankFourTensor &
-RankFourTensor::operator/=(const Real a)
+template <typename T>
+RankFourTensorTempl<T> &
+RankFourTensorTempl<T>::operator/=(const T & a)
 {
   for (unsigned int i = 0; i < N4; ++i)
     _vals[i] /= a;
   return *this;
 }
 
-RankFourTensor &
-RankFourTensor::operator+=(const RankFourTensor & a)
+template <typename T>
+RankFourTensorTempl<T> &
+RankFourTensorTempl<T>::operator+=(const RankFourTensorTempl<T> & a)
 {
   for (unsigned int i = 0; i < N4; ++i)
     _vals[i] += a._vals[i];
   return *this;
 }
 
-RankFourTensor
-RankFourTensor::operator+(const RankFourTensor & b) const
+template <typename T>
+template <typename T2>
+auto
+RankFourTensorTempl<T>::operator+(const RankFourTensorTempl<T2> & b) const
+    -> RankFourTensorTempl<decltype(T() + T2())>
 {
-  RankFourTensor result;
+  RankFourTensorTempl<decltype(T() + T2())> result;
   for (unsigned int i = 0; i < N4; ++i)
     result._vals[i] = _vals[i] + b._vals[i];
   return result;
 }
 
-RankFourTensor &
-RankFourTensor::operator-=(const RankFourTensor & a)
+template <typename T>
+RankFourTensorTempl<T> &
+RankFourTensorTempl<T>::operator-=(const RankFourTensorTempl<T> & a)
 {
   for (unsigned int i = 0; i < N4; ++i)
     _vals[i] -= a._vals[i];
   return *this;
 }
 
-RankFourTensor
-RankFourTensor::operator-(const RankFourTensor & b) const
+template <typename T>
+template <typename T2>
+auto
+RankFourTensorTempl<T>::operator-(const RankFourTensorTempl<T2> & b) const
+    -> RankFourTensorTempl<decltype(T() - T2())>
 {
-  RankFourTensor result;
+  RankFourTensorTempl<decltype(T() - T2())> result;
   for (unsigned int i = 0; i < N4; ++i)
     result._vals[i] = _vals[i] - b._vals[i];
   return result;
 }
 
-RankFourTensor
-RankFourTensor::operator-() const
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::operator-() const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
   for (unsigned int i = 0; i < N4; ++i)
     result._vals[i] = -_vals[i];
   return result;
 }
 
-RankFourTensor RankFourTensor::operator*(const RankFourTensor & b) const
+template <typename T>
+template <typename T2>
+auto RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
+    -> RankFourTensorTempl<decltype(T() * T2())>
 {
-  RankFourTensor result;
+  typedef decltype(T() * T2()) ValueType;
+  RankFourTensorTempl<ValueType> result;
 
   unsigned int index = 0;
   unsigned int ij1 = 0;
@@ -211,7 +224,7 @@ RankFourTensor RankFourTensor::operator*(const RankFourTensor & b) const
       {
         for (unsigned int l = 0; l < N; ++l)
         {
-          Real sum = 0;
+          ValueType sum = 0;
           for (unsigned int p = 0; p < N; ++p)
           {
             unsigned int p1 = N * p;
@@ -228,10 +241,11 @@ RankFourTensor RankFourTensor::operator*(const RankFourTensor & b) const
   return result;
 }
 
-Real
-RankFourTensor::L2norm() const
+template <typename T>
+T
+RankFourTensorTempl<T>::L2norm() const
 {
-  Real l2 = 0;
+  T l2 = 0;
 
   for (unsigned int i = 0; i < N4; ++i)
     l2 += Utility::pow<2>(_vals[i]);
@@ -239,13 +253,14 @@ RankFourTensor::L2norm() const
   return std::sqrt(l2);
 }
 
-RankFourTensor
-RankFourTensor::invSymm() const
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::invSymm() const
 {
   unsigned int ntens = N * (N + 1) / 2;
   int nskip = N - 1;
 
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
   std::vector<PetscScalar> mat;
   mat.assign(ntens * ntens, 0);
 
@@ -360,10 +375,19 @@ RankFourTensor::invSymm() const
   return result;
 }
 
-void
-RankFourTensor::rotate(const TypeTensor<Real> & R)
+template <>
+RankFourTensorTempl<ADReal>
+RankFourTensorTempl<ADReal>::invSymm() const
 {
-  RankFourTensor old = *this;
+  mooseError("The invSymm operation calls to LAPACK, so AD is not supported.");
+  return {};
+}
+
+template <typename T>
+void
+RankFourTensorTempl<T>::rotate(const TypeTensor<T> & R)
+{
+  RankFourTensorTempl<T> old = *this;
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
@@ -375,16 +399,16 @@ RankFourTensor::rotate(const TypeTensor<Real> & R)
         for (unsigned int l = 0; l < N; ++l)
         {
           unsigned int index2 = 0;
-          Real sum = 0.0;
+          T sum = 0.0;
           for (unsigned int m = 0; m < N; ++m)
           {
-            const Real a = R(i, m);
+            const T & a = R(i, m);
             for (unsigned int n = 0; n < N; ++n)
             {
-              const Real ab = a * R(j, n);
+              const T & ab = a * R(j, n);
               for (unsigned int o = 0; o < N; ++o)
               {
-                const Real abc = ab * R(k, o);
+                const T & abc = ab * R(k, o);
                 for (unsigned int p = 0; p < N; ++p)
                   sum += abc * R(l, p) * old._vals[index2++];
               }
@@ -397,8 +421,9 @@ RankFourTensor::rotate(const TypeTensor<Real> & R)
   }
 }
 
+template <typename T>
 void
-RankFourTensor::print(std::ostream & stm) const
+RankFourTensorTempl<T>::print(std::ostream & stm) const
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -414,10 +439,11 @@ RankFourTensor::print(std::ostream & stm) const
     }
 }
 
-RankFourTensor
-RankFourTensor::transposeMajor() const
+template <typename T>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::transposeMajor() const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
 
   unsigned int index = 0;
   unsigned int i1 = 0;
@@ -438,8 +464,9 @@ RankFourTensor::transposeMajor() const
   return result;
 }
 
+template <typename T>
 void
-RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::surfaceFillFromInputVector(const std::vector<T> & input)
 {
   zero();
 
@@ -479,12 +506,13 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
     (*this)(1, 0, 1, 0) = (*this)(0, 1, 0, 1);
   }
   else
-    mooseError(
-        "Please provide correct number of inputs for surface RankFourTensor initialization.");
+    mooseError("Please provide correct number of inputs for surface RankFourTensorTempl<T> "
+               "initialization.");
 }
 
+template <typename T>
 void
-RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method)
+RankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMethod fill_method)
 {
   zero();
 
@@ -525,8 +553,9 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
   }
 }
 
+template <typename T>
 void
-RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> & input, bool all)
+RankFourTensorTempl<T>::fillSymmetricFromInputVector(const std::vector<T> & input, bool all)
 {
   if ((all == true && input.size() != 21) || (all == false && input.size() != 9))
     mooseError("Please check the number of entries in the stiffness input vector.");
@@ -584,8 +613,9 @@ RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> & input, bo
               (*this)(l, k, j, i) = (*this)(k, l, j, i) = (*this)(l, k, i, j) = (*this)(i, j, k, l);
 }
 
+template <typename T>
 void
-RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillAntisymmetricFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 6)
     mooseError(
@@ -629,8 +659,9 @@ RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> & input
     }
 }
 
+template <typename T>
 void
-RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillGeneralIsotropicFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 3)
     mooseError(
@@ -640,8 +671,9 @@ RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & in
   fillGeneralIsotropic(input[0], input[1], input[2]);
 }
 
+template <typename T>
 void
-RankFourTensor::fillGeneralIsotropic(Real i0, Real i1, Real i2)
+RankFourTensorTempl<T>::fillGeneralIsotropic(T i0, T i1, T i2)
 {
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
@@ -656,8 +688,9 @@ RankFourTensor::fillGeneralIsotropic(Real i0, Real i1, Real i2)
         }
 }
 
+template <typename T>
 void
-RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillAntisymmetricIsotropicFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 1)
     mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. "
@@ -666,14 +699,16 @@ RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real
   fillGeneralIsotropic(0.0, 0.0, input[0]);
 }
 
+template <typename T>
 void
-RankFourTensor::fillAntisymmetricIsotropic(Real i0)
+RankFourTensorTempl<T>::fillAntisymmetricIsotropic(T i0)
 {
   fillGeneralIsotropic(0.0, 0.0, i0);
 }
 
+template <typename T>
 void
-RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillSymmetricIsotropicFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 2)
     mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours "
@@ -682,14 +717,16 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & 
   fillGeneralIsotropic(input[0], input[1], 0.0);
 }
 
+template <typename T>
 void
-RankFourTensor::fillSymmetricIsotropic(Real i0, Real i1)
+RankFourTensorTempl<T>::fillSymmetricIsotropic(T i0, T i1)
 {
   fillGeneralIsotropic(i0, i1, 0.0);
 }
 
+template <typename T>
 void
-RankFourTensor::fillSymmetricIsotropicEandNuFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillSymmetricIsotropicEandNuFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 2)
     mooseError(
@@ -700,18 +737,20 @@ RankFourTensor::fillSymmetricIsotropicEandNuFromInputVector(const std::vector<Re
   fillSymmetricIsotropicEandNu(input[0], input[1]);
 }
 
+template <typename T>
 void
-RankFourTensor::fillSymmetricIsotropicEandNu(Real E, Real nu)
+RankFourTensorTempl<T>::fillSymmetricIsotropicEandNu(T E, T nu)
 {
   // Calculate lambda and the shear modulus from the given young's modulus and poisson's ratio
-  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
-  const Real G = E / (2.0 * (1.0 + nu));
+  const T & lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
+  const T & G = E / (2.0 * (1.0 + nu));
 
   fillGeneralIsotropic(lambda, G, 0.0);
 }
 
+template <typename T>
 void
-RankFourTensor::fillAxisymmetricRZFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillAxisymmetricRZFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 5)
     mooseError("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your "
@@ -732,8 +771,9 @@ RankFourTensor::fillAxisymmetricRZFromInputVector(const std::vector<Real> & inpu
                                false);
 }
 
+template <typename T>
 void
-RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillGeneralFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 81)
     mooseError("To use fillGeneralFromInputVector, your input must have size 81. Yours has size ",
@@ -743,8 +783,9 @@ RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
     _vals[i] = input[i];
 }
 
+template <typename T>
 void
-RankFourTensor::fillPrincipalFromInputVector(const std::vector<Real> & input)
+RankFourTensorTempl<T>::fillPrincipalFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 9)
     mooseError("To use fillPrincipalFromInputVector, your input must have size 9. Yours has size ",
@@ -763,15 +804,16 @@ RankFourTensor::fillPrincipalFromInputVector(const std::vector<Real> & input)
   (*this)(2, 2, 2, 2) = input[8];
 }
 
-RankTwoTensor
-RankFourTensor::innerProductTranspose(const RankTwoTensor & b) const
+template <typename T>
+RankTwoTensorTempl<T>
+RankFourTensorTempl<T>::innerProductTranspose(const RankTwoTensorTempl<T> & b) const
 {
-  RankTwoTensor result;
+  RankTwoTensorTempl<T> result;
 
   unsigned int index = 0;
   for (unsigned int ij = 0; ij < N2; ++ij)
   {
-    Real bb = b._coords[ij];
+    T bb = b._coords[ij];
     for (unsigned int kl = 0; kl < N2; ++kl)
       result._coords[kl] += _vals[index++] * bb;
   }
@@ -779,8 +821,9 @@ RankFourTensor::innerProductTranspose(const RankTwoTensor & b) const
   return result;
 }
 
-Real
-RankFourTensor::sum3x3() const
+template <typename T>
+T
+RankFourTensorTempl<T>::sum3x3() const
 {
   // summation of Ciijj for i and j ranging from 0 to 2 - used in the volumetric locking correction
   return (*this)(0, 0, 0, 0) + (*this)(0, 0, 1, 1) + (*this)(0, 0, 2, 2) + (*this)(1, 1, 0, 0) +
@@ -788,19 +831,21 @@ RankFourTensor::sum3x3() const
          (*this)(2, 2, 2, 2);
 }
 
-RealGradient
-RankFourTensor::sum3x1() const
+template <typename T>
+VectorValue<T>
+RankFourTensorTempl<T>::sum3x1() const
 {
   // used for volumetric locking correction
-  RealGradient a(3);
+  VectorValue<T> a(3);
   a(0) = (*this)(0, 0, 0, 0) + (*this)(0, 0, 1, 1) + (*this)(0, 0, 2, 2); // C0000 + C0011 + C0022
   a(1) = (*this)(1, 1, 0, 0) + (*this)(1, 1, 1, 1) + (*this)(1, 1, 2, 2); // C1100 + C1111 + C1122
   a(2) = (*this)(2, 2, 0, 0) + (*this)(2, 2, 1, 1) + (*this)(2, 2, 2, 2); // C2200 + C2211 + C2222
   return a;
 }
 
+template <typename T>
 bool
-RankFourTensor::isSymmetric() const
+RankFourTensorTempl<T>::isSymmetric() const
 {
   for (unsigned int i = 1; i < N; ++i)
     for (unsigned int j = 0; j < i; ++j)
@@ -819,15 +864,16 @@ RankFourTensor::isSymmetric() const
   return true;
 }
 
+template <typename T>
 bool
-RankFourTensor::isIsotropic() const
+RankFourTensorTempl<T>::isIsotropic() const
 {
   // prerequisite is symmetry
   if (!isSymmetric())
     return false;
 
   // inspect shear components
-  const Real mu = (*this)(0, 1, 0, 1);
+  const T & mu = (*this)(0, 1, 0, 1);
   // ...diagonal
   if ((*this)(1, 2, 1, 2) != mu || (*this)(2, 0, 2, 0) != mu)
     return false;
@@ -846,8 +892,8 @@ RankFourTensor::isIsotropic() const
   }
 
   // top left block
-  const Real K1 = (*this)(0, 0, 0, 0);
-  const Real K2 = (*this)(0, 0, 1, 1);
+  const T & K1 = (*this)(0, 0, 0, 0);
+  const T & K2 = (*this)(0, 0, 1, 1);
   if (!MooseUtils::relativeFuzzyEqual(K1 - 4.0 * mu / 3.0, K2 + 2.0 * mu / 3.0))
     return false;
   if ((*this)(1, 1, 1, 1) != K1 || (*this)(2, 2, 2, 2) != K1)
@@ -859,3 +905,47 @@ RankFourTensor::isIsotropic() const
 
   return true;
 }
+
+template class RankFourTensorTempl<Real>;
+template class RankFourTensorTempl<ADReal>;
+
+#define RankTwoTensorMultInstantiate(TemplateClass)                                                \
+  template RankTwoTensorTempl<Real> RankFourTensorTempl<Real>::operator*(                          \
+      const TemplateClass<Real> & a) const;                                                        \
+  template RankTwoTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator*(                      \
+      const TemplateClass<Real> & a) const;                                                        \
+  template RankTwoTensorTempl<ADReal> RankFourTensorTempl<Real>::operator*(                        \
+      const TemplateClass<ADReal> & a) const;                                                      \
+  template RankTwoTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator*(                      \
+      const TemplateClass<ADReal> & a) const
+
+RankTwoTensorMultInstantiate(RankTwoTensorTempl);
+RankTwoTensorMultInstantiate(TensorValue);
+RankTwoTensorMultInstantiate(TypeTensor);
+
+template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
+operator+(const RankFourTensorTempl<Real> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+operator+(const RankFourTensorTempl<Real> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::
+operator+(const RankFourTensorTempl<ADReal> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+operator+(const RankFourTensorTempl<ADReal> & a) const;
+
+template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
+operator-(const RankFourTensorTempl<Real> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+operator-(const RankFourTensorTempl<Real> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::
+operator-(const RankFourTensorTempl<ADReal> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+operator-(const RankFourTensorTempl<ADReal> & a) const;
+
+template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
+operator*(const RankFourTensorTempl<Real> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+operator*(const RankFourTensorTempl<Real> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::
+operator*(const RankFourTensorTempl<ADReal> & a) const;
+template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+operator*(const RankFourTensorTempl<ADReal> & a) const;

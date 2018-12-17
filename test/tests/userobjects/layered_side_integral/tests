@@ -1,19 +1,32 @@
 [Tests]
+  design = 'userobject/LayeredSideIntegral.md'
+  issues = '#1289'
   [./test]
     type = 'Exodiff'
     input = 'layered_side_integral_test.i'
     exodiff = 'out.e'
+    requirement = "MOOSE shall correctly compute layered integrals along a specified boundary"
   [../]
 
   [./average]
     type = 'Exodiff'
     input = 'layered_side_average.i'
     exodiff = 'layered_side_average_out.e'
+    requirement = "MOOSE shall allow taking averages of variables along a coordinate axis in layers on a boundary"
   [../]
 
   [./flux_average]
     type = 'Exodiff'
     input = 'layered_side_flux_average.i'
     exodiff = 'layered_side_flux_average_out.e'
+    requirement = "MOOSE shall allow taking averages of the flux of variables along a coordinate axis in layers on a boundary"
+  [../]
+
+  [./layered_side_average_error_check]
+    type = RunException
+    input = 'layered_side_average.i'
+    cli_args = 'UserObjects/layered_side_average/block=0'
+    expect_err = "Both block and boundary cannot be specified in LayeredSideIntegral. If you want to define the geometric bounds of the layers from a specified block set layer_bounding_block instead."
+    requirement = "MOOSE shall not allow both the block and boundary parameter to be specified for layered side integrals"
   [../]
 []

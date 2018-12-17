@@ -1,0 +1,39 @@
+[Tests]
+  design = 'jacobian_definitions.md'
+  issues = '#5658'
+  [./linear-hand-coded]
+    type = 'Exodiff'
+    input = 'linear-hand-coded.i'
+    exodiff = 'linear-out.e'
+    absent_out = '3 Nonlinear'
+    requirement = 'We shall be able to run a simple linear small-strain problem using a hand-coded Jacobian'
+  [../]
+  [./linear-ad]
+    type = 'Exodiff'
+    input = 'linear-ad.i'
+    exodiff = 'linear-out.e'
+    absent_out = '3 Nonlinear'
+    prereq = 'linear-hand-coded'
+    requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation'
+    allow_test_objects = true
+  [../]
+  [./linear-hand-coded-jac]
+    type = 'PetscJacobianTester'
+    input = 'linear-hand-coded.i'
+    run_sim = 'True'
+    prereq = 'linear-ad'
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+    requirement = 'The Jacobian for the hand-coded problem shall be perfect'
+  [../]
+  [./linear-ad-jac]
+    type = 'PetscJacobianTester'
+    input = 'linear-ad.i'
+    run_sim = 'True'
+    prereq = 'linear-ad'
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+    requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
+    allow_test_objects = true
+  [../]
+[]

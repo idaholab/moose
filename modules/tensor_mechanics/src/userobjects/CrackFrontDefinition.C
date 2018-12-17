@@ -342,8 +342,8 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<dof_id_type> & nodes)
           mooseError("Invalid axis.");
       }
 
-      Real node0coor0;
-      Real node0coor1;
+      Real node0coor0 = 0;
+      Real node0coor1 = 0;
 
       for (std::set<dof_id_type>::iterator sit = nodes.begin(); sit != nodes.end(); ++sit)
       {

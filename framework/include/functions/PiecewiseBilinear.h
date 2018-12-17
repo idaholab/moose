@@ -13,7 +13,9 @@
 #include "Function.h"
 
 class PiecewiseBilinear;
-class ColumnMajorMatrix;
+template <typename>
+class ColumnMajorMatrixTempl;
+typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
 class BilinearInterpolation;
 
 template <>

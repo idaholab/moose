@@ -14,7 +14,6 @@
 
 // Forward Declarations
 class HomogenizedElasticConstants;
-class ColumnMajorMatrix;
 class SymmElasticityTensor;
 class SymmTensor;
 
@@ -23,7 +22,7 @@ InputParameters validParams<HomogenizedElasticConstants>();
 
 /**
  * This postprocessor computes the average grain area in a polycrystal
-*/
+ */
 class HomogenizedElasticConstants : public ElementAverageValue
 {
 public:

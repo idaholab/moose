@@ -27,7 +27,7 @@ class PropertyValue;
  * types
  */
 template <typename P>
-PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type);
+PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type, bool use_ad);
 
 /**
  * Abstract definition of a property value.
@@ -70,11 +70,8 @@ public:
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
 
-  /**
-   * copy the Real version to the DualNumber<Real> version of the material property for the
-   * specified quadrature point
-   */
-  virtual void copyValueToDualNumber(const unsigned int i) = 0;
+  /// Mark whether this property is in AD mode. This method is necessary for switching the state after swapping material properties during stateful material calculations
+  virtual void markAD(bool use_ad) = 0;
 
   /**
    * copy the value portion (not the derivatives) of the DualNumber<Real> version of the material
@@ -106,11 +103,11 @@ class MaterialProperty : public PropertyValue
 {
 public:
   /// Explicitly declare a public constructor because we made the copy constructor private
-  MaterialProperty() : PropertyValue()
+  MaterialProperty(bool use_ad = false) : PropertyValue(), _use_ad(use_ad)
   { /* */
   }
 
-  virtual ~MaterialProperty() { _value.release(); }
+  virtual ~MaterialProperty() {}
 
   /**
    * @returns a read-only reference to the parameter value.
@@ -175,26 +172,12 @@ public:
   virtual void load(std::istream & stream) override;
 
   /**
-   * Friend helper function to handle scalar material property initializations
-   * @param size - the size corresponding to the quadrature rule
-   * @param prop - The Material property that we will resize since this is not a member
-   * @param the_type - This is just a template parameter used to identify the
-   *                   difference between the scalar and vector template functions
-   */
-  template <typename P>
-  friend PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type);
-
-  /**
-   * copy the Real version to the DualNumber<Real> version of the material property for the
-   * specified quadrature point
-   */
-  void copyValueToDualNumber(const unsigned int i) override { _value[i].copyValueToDualNumber(); }
-
-  /**
    * copy the value portion (not the derivatives) of the DualNumber<Real> version of the material
    * property to the Real version for the specified quadrature point
    */
   void copyDualNumberToValue(const unsigned int i) override { _value[i].copyDualNumberToValue(); }
+
+  void markAD(bool use_ad) override;
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
@@ -210,12 +193,24 @@ private:
   }
 
 protected:
+  /// Whether this property was declared as AD
+  bool _use_ad;
   /// Stored parameter value.
-  MooseArray<MooseADWrapper<T>> _value;
+  std::vector<MooseADWrapper<T>> _value;
 };
 
 // ------------------------------------------------------------
 // Material::Property<> class inline methods
+
+template <typename T>
+inline void
+MaterialProperty<T>::markAD(bool use_ad)
+{
+  _use_ad = use_ad;
+  for (auto && moose_wrapper : _value)
+    moose_wrapper.markAD(use_ad);
+}
+
 template <typename T>
 inline std::string
 MaterialProperty<T>::type()
@@ -227,14 +222,19 @@ template <typename T>
 inline PropertyValue *
 MaterialProperty<T>::init(int size)
 {
-  return _init_helper(size, this, static_cast<T *>(0));
+  return _init_helper(size, this, static_cast<T *>(0), _use_ad);
 }
 
 template <typename T>
 inline void
 MaterialProperty<T>::resize(int n)
 {
-  _value.resize(n);
+  auto diff = n - static_cast<int>(_value.size());
+  if (diff < 0)
+    _value.erase(_value.end() + diff, _value.end());
+  else
+    for (decltype(diff) i = 0; i < diff; ++i)
+      _value.emplace_back(MooseADWrapper<T>(_use_ad));
 }
 
 template <typename T>
@@ -275,7 +275,7 @@ template <typename T>
 class ADMaterialPropertyObject : public MaterialProperty<T>
 {
 public:
-  ADMaterialPropertyObject() : MaterialProperty<T>() {}
+  ADMaterialPropertyObject(bool use_ad = false) : MaterialProperty<T>(use_ad) {}
 
   /**
    * Get element i out of the array as a writeable reference.
@@ -358,10 +358,10 @@ dataLoad(std::istream & stream, MaterialProperties & v, void * context)
 // Scalar Init Helper Function
 template <typename P>
 PropertyValue *
-_init_helper(int size, PropertyValue * /*prop*/, const P *)
+_init_helper(int size, PropertyValue * /*prop*/, const P *, bool use_ad)
 {
-  MaterialProperty<P> * copy = new MaterialProperty<P>;
-  copy->_value.resize(size, MooseADWrapper<P>{});
+  ADMaterialPropertyObject<P> * copy = new ADMaterialPropertyObject<P>(use_ad);
+  copy->resize(size);
   return copy;
 }
 

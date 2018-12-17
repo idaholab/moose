@@ -18,8 +18,6 @@
 
 // Forward Declarations
 class CrackTipEnrichmentStressDivergenceTensors;
-class RankTwoTensor;
-class RankFourTensor;
 
 template <>
 InputParameters validParams<CrackTipEnrichmentStressDivergenceTensors>();
