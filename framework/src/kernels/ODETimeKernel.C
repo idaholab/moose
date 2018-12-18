@@ -21,7 +21,7 @@ validParams<ODETimeKernel>()
   InputParameters params = validParams<ODEKernel>();
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
-  params.set<MultiMooseEnum>("matrix_tags") = "system";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
 
   return params;
 }
