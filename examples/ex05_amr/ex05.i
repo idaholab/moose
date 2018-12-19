@@ -5,7 +5,7 @@
 # This is where mesh adaptivity magic happens:
 [Adaptivity]
   marker = errorfrac # this specifies which marker from 'Markers' subsection to use
-  steps = 6 # run adaptivity 6 times, recomputing solution, indicators, and markers each time
+  steps = 2 # run adaptivity 2 times, recomputing solution, indicators, and markers each time
 
   # Use an indicator to compute an error-estimate for each element:
   [./Indicators]
