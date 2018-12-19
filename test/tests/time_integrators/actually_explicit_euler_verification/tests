@@ -6,7 +6,6 @@
 # that the new capability works
 
 [Tests]
-  requirement = 'MOOSE shall allow efficient execution of explicit solves'
   design = '/ActuallyExplicitEuler.md'
   issues = '10837'
 
@@ -14,24 +13,28 @@
     type = 'Exodiff'
     input = 'ee-1d-linear.i'
     exodiff = 'ee-1d-linear_out.e'
+    requirement = 'MOOSE shall allow efficient execution of explicit solves'
   [../]
 
   [./1d-quadratic]
     type = 'Exodiff'
     input = 'ee-1d-quadratic.i'
     exodiff = 'ee-1d-quadratic_out.e'
+    requirement = 'MOOSE shall allow efficient execution of explicit solves'
   [../]
 
   [./1d-quadratic-neumann]
     type = 'Exodiff'
     input = 'ee-1d-quadratic-neumann.i'
     exodiff = 'ee-1d-quadratic-neumann_out.e'
+    requirement = 'MOOSE shall allow efficient execution of explicit solves'
   [../]
 
   [./2d-linear]
     type = 'Exodiff'
     input = 'ee-2d-linear.i'
     exodiff = 'ee-2d-linear_out.e'
+    requirement = 'MOOSE shall allow efficient execution of explicit solves'
   [../]
 
   [./2d-linear-adapt]
@@ -39,11 +42,20 @@
     input = 'ee-2d-linear-adapt.i'
     exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
     abs_zero = 1e-8
+    requirement = 'MOOSE shall allow efficient execution of explicit solves'
   [../]
 
   [./2d-quadratic]
     type = 'Exodiff'
     input = 'ee-2d-quadratic.i'
     exodiff = 'ee-2d-quadratic_out.e'
+    requirement = 'MOOSE shall allow efficient execution of explicit solves'
+  [../]
+
+  [./ode]
+    type = 'CSVDiff'
+    input = 'ee-ode.i'
+    csvdiff = 'ee-ode_out.csv'
+    requirement = 'MOOSE shall allow efficient execution of explicit solves'
   [../]
 []
