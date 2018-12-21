@@ -68,8 +68,8 @@ FluxLimitedTVDAdvection::computeJacobian()
   // Run through the nodes of this element using "i", getting the Jacobian contributions
   // d(residual_i)/du(node_j) for all nodes j that can have a nonzero Jacobian contribution.  Some
   // of these node_j will live in this element, but some will live in other elements connected with
-  // node "i", and some will live in the next layer of nodes (eg, in 1D residual_3 will have
-  // contributions from node1, node2, node3, node4 and node5 in principle).
+  // node "i", and some will live in the next layer of nodes (eg, in 1D residual_3 could have
+  // contributions from node1, node2, node3, node4 and node5).
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
     // global id of node "i"
@@ -102,6 +102,4 @@ FluxLimitedTVDAdvection::computeJacobian()
     // Add the result to the system's Jacobian matrix
     _assembly.cacheJacobianBlock(deriv_matrix, idof_indices, jdof_indices, _var.scalingFactor());
   }
-
-  // accumulateTaggedLocalMatrix();
 }

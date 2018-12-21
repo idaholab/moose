@@ -15,6 +15,9 @@
 // Forward Declaration
 class FluxLimitedTVDAdvection;
 
+template <>
+InputParameters validParams<FluxLimitedTVDAdvection>();
+
 /**
  * Advection of the variable with velocity set in the AdvectiveFluxCalculator
  *
@@ -26,9 +29,6 @@ class FluxLimitedTVDAdvection;
  * to build the residual and Jacobian contributions corresponding
  * to Kuzmin and Turek's stabilized advection
  */
-template <>
-InputParameters validParams<FluxLimitedTVDAdvection>();
-
 class FluxLimitedTVDAdvection : public Kernel
 {
 public:

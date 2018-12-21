@@ -51,8 +51,7 @@ AdvectiveFluxCalculatorBase::AdvectiveFluxCalculatorBase(const InputParameters &
 void
 AdvectiveFluxCalculatorBase::timestepSetup()
 {
-  // We don't want to recompute the neighboring nodes every nonlinear iteration.  We
-  // only need to do that at the beginning and when the mesh has changed because of adaptivity
+  // If needed, size and initialize quantities appropriately, and compute _valence
   if (_resizing_needed)
   {
     _kij.clear();
@@ -60,7 +59,7 @@ AdvectiveFluxCalculatorBase::timestepSetup()
     // QUERY: does this properly account for multiple processors, threading, and other things i
     // haven't thought about?
 
-    /**
+    /*
      * Initialize _kij for all nodes that can be seen by this processor and on relevant blocks
      *
      * MULTIPROC NOTE: this must loop over local elements and 2 layers of ghosted elements.
@@ -87,8 +86,8 @@ AdvectiveFluxCalculatorBase::timestepSetup()
       }
     }
 
-    /**
-     * Buikd _valence[i_j], which is the number of times the i_j pair is encountered when looping
+    /*
+     * Build _valence[i_j], which is the number of times the i_j pair is encountered when looping
      * over the entire mesh (and on relevant blocks)
      *
      * MULTIPROC NOTE: this must loop over local elements and >=1 layer of ghosted elements.
@@ -140,13 +139,14 @@ AdvectiveFluxCalculatorBase::meshChanged()
 {
   ElementUserObject::meshChanged();
 
-  // Signal that _kij and _valence need to be rebuilt
+  // Signal that _kij, _valence, etc need to be rebuilt
   _resizing_needed = true;
 }
 
 void
 AdvectiveFluxCalculatorBase::initialize()
 {
+  // Zero _kij, ready for building in execute() and finalize()
   for (auto & nodes : _kij)
     for (auto & neighbors : nodes.second)
       neighbors.second = 0.0;
@@ -155,7 +155,7 @@ AdvectiveFluxCalculatorBase::initialize()
 void
 AdvectiveFluxCalculatorBase::execute()
 {
-  /// compute _kij contributions from this element that is local to this processor
+  // compute _kij contributions from this element that is local to this processor
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
     const dof_id_type node_i = _current_elem->node_id(i);
@@ -173,7 +173,7 @@ void
 AdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
 {
   const AdvectiveFluxCalculatorBase & afc = static_cast<const AdvectiveFluxCalculatorBase &>(uo);
-  // because afc is const, loop through afc._kij rather than through _kij
+  // add the values of _kij computed by different threads
   for (const auto & nodes : afc._kij)
   {
     const dof_id_type i = nodes.first;
@@ -189,7 +189,11 @@ AdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
 void
 AdvectiveFluxCalculatorBase::finalize()
 {
-  /**
+  // Overall: ensure _kij is fully built, then compute Kuzmin-Turek D, L, f^a and
+  // relevant Jacobian information, and then the relevant quantities into _flux_out and
+  // _dflux_out_du
+
+  /*
    * MULTIPROC NOTE: execute() only computed contributions from the elements
    * local to this processor.  Now do the same for the 2 layers of ghosted elements
    */
@@ -209,7 +213,7 @@ AdvectiveFluxCalculatorBase::finalize()
   // This adds artificial diffusion, which eliminates any spurious oscillations
   // The idea is that D will remove all negative off-diagonal elements when it is added to K
   // This is identical to full upwinding
-  std::map<dof_id_type, std::map<dof_id_type, Real>> dij = {};
+  std::map<dof_id_type, std::map<dof_id_type, Real>> dij;
   for (auto & nodes : _kij)
   {
     const dof_id_type i = nodes.first;
@@ -227,7 +231,7 @@ AdvectiveFluxCalculatorBase::finalize()
 
   // Calculate KuzminTurek L matrix
   // See Fig 2: L = K + D
-  std::map<dof_id_type, std::map<dof_id_type, Real>> lij = {};
+  std::map<dof_id_type, std::map<dof_id_type, Real>> lij;
   for (auto & nodes : _kij)
   {
     const dof_id_type i = nodes.first;
@@ -242,10 +246,10 @@ AdvectiveFluxCalculatorBase::finalize()
   // Parallel: following will die because we only want to loop over nodes known by this processor
   // Compute KuzminTurek R matrices
   // See Eqns (49) and (12)
-  std::map<dof_id_type, Real> rP = {};
-  std::map<dof_id_type, Real> rM = {};
-  std::map<dof_id_type, std::map<dof_id_type, Real>> drP = {};
-  std::map<dof_id_type, std::map<dof_id_type, Real>> drM = {};
+  std::map<dof_id_type, Real> rP;
+  std::map<dof_id_type, Real> rM;
+  std::map<dof_id_type, std::map<dof_id_type, Real>> drP;
+  std::map<dof_id_type, std::map<dof_id_type, Real>> drM;
   for (const auto & nodes : _kij)
   {
     const dof_id_type i = nodes.first;
@@ -258,9 +262,9 @@ AdvectiveFluxCalculatorBase::finalize()
   // Calculate KuzminTurek f^{a} matrix
   // This is the antidiffusive flux
   // See Eqn (50)
-  std::map<dof_id_type, std::map<dof_id_type, Real>> fa = {};
-  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>> dfa =
-      {}; // dfa[i][j][k] = d(fa[i][j])/du[k]
+  std::map<dof_id_type, std::map<dof_id_type, Real>> fa;
+  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>>
+      dfa; // dfa[i][j][k] = d(fa[i][j])/du[k]
   for (const auto & nodes : _kij)
   {
     const dof_id_type i = nodes.first;
@@ -398,7 +402,7 @@ AdvectiveFluxCalculatorBase::rPlus(dof_id_type node_i,
   std::map<dof_id_type, Real> dq_du;
   const Real q = PQPlusMinus(node_i, PQPlusMinusEnum::QPlus, dq_du);
   const Real r = q / p;
-  std::map<dof_id_type, Real> dr_du = {};
+  std::map<dof_id_type, Real> dr_du;
   for (const auto & node_deriv : dp_du)
     dr_du[node_deriv.first] = dq_du[node_deriv.first] / p - q * node_deriv.second / std::pow(p, 2);
   Real limited;
@@ -425,7 +429,7 @@ AdvectiveFluxCalculatorBase::rMinus(dof_id_type node_i,
   std::map<dof_id_type, Real> dq_du;
   const Real q = PQPlusMinus(node_i, PQPlusMinusEnum::QMinus, dq_du);
   const Real r = q / p;
-  std::map<dof_id_type, Real> dr_du = {};
+  std::map<dof_id_type, Real> dr_du;
   for (const auto & node_deriv : dp_du)
     dr_du[node_deriv.first] = dq_du[node_deriv.first] / p - q * node_deriv.second / std::pow(p, 2);
   Real limited;
@@ -553,7 +557,7 @@ AdvectiveFluxCalculatorBase::getKij(dof_id_type node_i, dof_id_type node_j) cons
   return entry_find->second;
 }
 
-std::map<dof_id_type, Real>
+const std::map<dof_id_type, Real> &
 AdvectiveFluxCalculatorBase::getdFluxOutdu(dof_id_type node_i) const
 {
   const auto & row_find = _dflux_out_du.find(node_i);
@@ -609,7 +613,7 @@ AdvectiveFluxCalculatorBase::zeroedConnection(dof_id_type node_i) const
   mooseAssert(row_find != _kij.end(),
               "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij does not contain node "
                                                         << node_i);
-  std::map<dof_id_type, Real> result = {};
+  std::map<dof_id_type, Real> result;
   for (const auto & nk : row_find->second)
     result[nk.first] = 0.0;
   return result;

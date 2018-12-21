@@ -12,14 +12,14 @@
 
 #include "AdvectiveFluxCalculatorBase.h"
 
-/**
- * Computes Advective fluxes for a constant velocity
- **/
 class AdvectiveFluxCalculatorConstantVelocity;
 
 template <>
 InputParameters validParams<AdvectiveFluxCalculatorConstantVelocity>();
 
+/**
+ * Computes Advective fluxes for a constant velocity
+ */
 class AdvectiveFluxCalculatorConstantVelocity : public AdvectiveFluxCalculatorBase
 {
 public:
@@ -38,8 +38,6 @@ protected:
 
   /// the moose variable number of u
   unsigned _u_var_num;
-
-  const VariableValue & _u_coupledNV;
 
   /// Kuzmin-Turek shape function
   const VariablePhiValue & _phi;

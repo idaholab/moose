@@ -12,8 +12,13 @@
 
 #include "ElementUserObject.h"
 
+class AdvectiveFluxCalculatorBase;
+
+template <>
+InputParameters validParams<AdvectiveFluxCalculatorBase>();
+
 /**
- * Base class to ompute Advective fluxes.  Specifically,
+ * Base class to compute Advective fluxes.  Specifically,
  * computes K_ij, D_ij, L_ij, R+, R-, f^a_ij detailed in
  * D Kuzmin and S Turek "High-resolution FEM-TVD schemes based on a fully multidimensional flux
  * limiter" Journal of Computational Physics 198 (2004) 131-158
@@ -24,36 +29,22 @@
  * D_ij is a diffusion matrix that stabilizes K_ij (K+D has the LED property)
  * L = K + D
  * R^+_i and R^-_i and f^a_{ij} quantify how much antidiffusion to allow around node i
- **/
-class AdvectiveFluxCalculatorBase;
-
-template <>
-InputParameters validParams<AdvectiveFluxCalculatorBase>();
-
+ */
 class AdvectiveFluxCalculatorBase : public ElementUserObject
 {
 public:
   AdvectiveFluxCalculatorBase(const InputParameters & parameters);
 
-  /// If needed, size quantities appropriately and compute _valence
   virtual void timestepSetup() override;
 
-  /// Call ElementUserObject::meshChanged() and set _resizing_needed to true
   virtual void meshChanged() override;
 
-  /// Zeroes _kij
   virtual void initialize() override;
 
-  /// add _kij contributions
   virtual void threadJoin(const UserObject & uo) override;
 
-  /**
-   * Using _kij, computes Kuzmin-Turek's D, L, f^a, and relevant Jacobian information
-   * Then assemble the relevant quantities into _flux_out and _dflux_out_du
-   */
   virtual void finalize() override;
 
-  /// Compute contributions to _kij from the current element
   virtual void execute() override;
 
   /**
@@ -71,13 +62,18 @@ public:
    */
   Real getdFluxOutdu(dof_id_type node_i, dof_id_type node_j) const;
 
-  std::map<dof_id_type, Real> getdFluxOutdu(dof_id_type node_i) const;
+  /**
+   * Returns r where r[j] = d(flux out of node i)/du(node j) used in Jacobian computations
+   * @param node_i id of node
+   * @return the derivatives (after applying the KT procedure)
+   */
+  const std::map<dof_id_type, Real> & getdFluxOutdu(dof_id_type node_i) const;
 
   /**
    * Returns the valence of the i-j edge.
    * Valence is the number of times the edge is encountered in a loop over elements (that have
    * appropriate subdomain_id, if the user has employed the "blocks=" parameter) seen by this
-   * processor
+   * processor (including ghosted elements)
    * @param node_i id of i^th node
    * @param node_j id of j^th node
    * @return valence of the i-j edge
@@ -141,31 +137,23 @@ protected:
    */
   const enum class FluxLimiterTypeEnum { MinMod, VanLeer, MC, superbee, None } _flux_limiter_type;
 
-  /**
-   * Kuzmin-Turek K_ij matrix.  Along with R+ and R-, this is the key quantity computed
-   * by this UserObject.
-   * _kij[i][j] = k_ij corresponding to the i-j node pair.
-   * Because it explicitly holds info which nodes are paired with which other nodes, it is
-   * also used to perform: given a node_id, loop over all neighbouring nodes.
-   * This occurs in the computation of R+ and R-.
-   */
+  /// Kuzmin-Turek K_ij matrix.  Along with R+ and R-, this is the key quantity computed
+  /// by this UserObject.
+  /// _kij[i][j] = k_ij corresponding to the i-j node pair.
+  /// Because it explicitly holds info which nodes are paired with which other nodes, it is
+  /// also used to perform: given a node_id, loop over all neighbouring nodes.
+  /// This occurs in the computation of R+ and R-.
   std::map<dof_id_type, std::map<dof_id_type, Real>> _kij;
 
-  /**
-   * _flux_out[i] = flux of "heat" from node i
-   */
+  /// _flux_out[i] = flux of "heat" from node i
   std::map<dof_id_type, Real> _flux_out;
 
-  /**
-   * _dflux_out_du[i] = d(flux_out[i])/d(u[j])
-   */
+  /// _dflux_out_du[i] = d(flux_out[i])/d(u[j])
   std::map<dof_id_type, std::map<dof_id_type, Real>> _dflux_out_du;
 
-  /**
-   * _valence[(i, j)] = number of times, in a loop over elements owned by this processor,
-   * and are part of the block-restricted blocks of this UserObject, that the i-j edge is
-   * encountered
-   */
+  /// _valence[(i, j)] = number of times, in a loop over elements seen  by this processor
+  /// (viz, including ghost elements) and are part of the block-restricted blocks of this
+  /// UserObject, that the i-j edge is encountered
   std::map<std::pair<dof_id_type, dof_id_type>, unsigned> _valence;
 
   /// Signals to the PQPlusMinus method what should be computed

@@ -29,7 +29,6 @@ AdvectiveFluxCalculatorConstantVelocity::AdvectiveFluxCalculatorConstantVelocity
     _velocity(getParam<RealVectorValue>("velocity")),
     _u_nodal(getVar("u", 0)),
     _u_var_num(coupled("u", 0)),
-    _u_coupledNV(coupledNodalValue("u")),
     _phi(_assembly.fePhi<Real>(_u_nodal->feType())),
     _grad_phi(_assembly.feGradPhi<Real>(_u_nodal->feType()))
 {
@@ -48,35 +47,5 @@ AdvectiveFluxCalculatorConstantVelocity::getU(dof_id_type id) const
 {
   const Node & node = _mesh.getMesh().node_ref(id);
 
-  // two methods i experimented with
-  const bool meth = true;
-
-  if (meth)
-  {
-    dof_id_type dof = node.dof_number(_u_nodal->sys().number(), _u_var_num, 0);
-    const NumericVector<Real> & u = *_u_nodal->sys().currentSolution();
-    return u(dof);
-  }
-
   return _u_nodal->getNodalValue(node);
 }
-
-/*
-Real
-AdvectiveFluxCalculator::val_at_node(const Node & node) const
-{
-  Moose::out << "node id = " << node.unique_id() << " connected to:";
-  std::vector<const Node *> neighbors;
-  MeshTools::find_nodal_neighbors(_mesh, node, _nodes_to_elem_map, neighbors);
-  for (const auto & n : neighbors)
-    Moose::out << " " << n->unique_id();
-  Moose::out << "\n";
-
-  // This is fine:
-  // return _u_nodal->getNodalValue(node);
-  // This is more convoluted, but it is used below in pPlus, etc
-  dof_id_type dof = node.dof_number(_u_nodal->sys().number(), _u_var_num, 0);
-  const NumericVector<Real> & u = *_u_nodal->sys().currentSolution();
-  return u(dof);
-}
-*/

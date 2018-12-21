@@ -15,7 +15,7 @@
     csvdiff = 'fully_saturated_action_out_tracer_0011.csv'
     abs_zero = 1.0E-5
     threading = '!pthreads'
-    requirement = "PorousFlow shall be able to solve the advection of fluid species, using mass lumping and no upwinding"
+    requirement = "PorousFlow shall be able to solve the advection of fluid species, using mass lumping and no upwinding, employing an Action"
     issues = '#11013'
     design = 'porous_flow/numerical_diffusion.md'
   [../]
@@ -25,7 +25,7 @@
     csvdiff = 'no_action_out_tracer_0011.csv'
     abs_zero = 1.0E-5
     threading = '!pthreads'
-    requirement = "PorousFlow shall be able to solve the advection of fluid species, using mass lumping and full upwinding"
+    requirement = "PorousFlow shall be able to solve the advection of fluid species, using mass lumping and full upwinding, without employing an action"
     issues = '#11013'
     design = 'porous_flow/numerical_diffusion.md'
   [../]
@@ -37,7 +37,7 @@
     threading = '!pthreads'
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, but be able to use no antidiffusion'
   [../]
   [./fltvd]
     type = 'CSVDiff'
