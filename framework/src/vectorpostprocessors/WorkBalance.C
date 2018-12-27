@@ -47,18 +47,24 @@ validParams<WorkBalance>()
 WorkBalance::WorkBalance(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _system(getParam<MooseEnum>("system")),
+    _rank_map(_app.rankMap()),
+    _my_hardware_id(_rank_map.hardwareID(processor_id())),
     _sync_to_all_procs(getParam<bool>("sync_to_all_procs")),
     _local_num_elems(0),
     _local_num_nodes(0),
     _local_num_dofs(0),
     _local_num_partition_sides(0),
     _local_partition_surface_area(0),
+    _local_num_partition_hardware_id_sides(0),
+    _local_partition_hardware_id_surface_area(0),
     _pid(declareVector("pid")),
     _num_elems(declareVector("num_elems")),
     _num_nodes(declareVector("num_nodes")),
     _num_dofs(declareVector("num_dofs")),
     _num_partition_sides(declareVector("num_partition_sides")),
-    _partition_surface_area(declareVector("partition_surface_area"))
+    _partition_surface_area(declareVector("partition_surface_area")),
+    _num_partition_hardware_id_sides(declareVector("num_partition_hardware_id_sides")),
+    _partition_hardware_id_surface_area(declareVector("partition_hardware_id_surface_area"))
 {
 }
 
@@ -70,6 +76,8 @@ WorkBalance::initialize()
   _local_num_dofs = 0;
   _local_num_partition_sides = 0;
   _local_partition_surface_area = 0;
+  _local_num_partition_hardware_id_sides = 0;
+  _local_partition_hardware_id_surface_area = 0;
 }
 
 namespace
@@ -79,13 +87,17 @@ namespace
 class WBElementLoop : public ThreadedElementLoopBase<ConstElemRange>
 {
 public:
-  WBElementLoop(MooseMesh & mesh, int system)
+  WBElementLoop(MooseMesh & mesh, int system, const RankMap & rank_map)
     : ThreadedElementLoopBase(mesh),
       _system(system),
+      _rank_map(rank_map),
+      _my_hardware_id(rank_map.hardwareID(mesh.processor_id())),
       _local_num_elems(0),
       _local_num_dofs(0),
       _local_num_partition_sides(0),
       _local_partition_surface_area(0),
+      _local_num_partition_hardware_id_sides(0),
+      _local_partition_hardware_id_surface_area(0),
       _this_pid(_mesh.processor_id()) // Get this once because it is expensive
   {
   }
@@ -93,10 +105,14 @@ public:
   WBElementLoop(WBElementLoop & x, Threads::split split)
     : ThreadedElementLoopBase(x, split),
       _system(x._system),
+      _rank_map(x._rank_map),
+      _my_hardware_id(x._my_hardware_id),
       _local_num_elems(0),
       _local_num_dofs(0),
       _local_num_partition_sides(0),
       _local_partition_surface_area(0),
+      _local_num_partition_hardware_id_sides(0),
+      _local_partition_hardware_id_surface_area(0),
       _this_pid(x._this_pid)
   {
   }
@@ -109,6 +125,8 @@ public:
     _local_num_dofs = 0;
     _local_num_partition_sides = 0;
     _local_partition_surface_area = 0;
+    _local_num_partition_hardware_id_sides = 0;
+    _local_partition_hardware_id_surface_area = 0;
   }
 
   virtual void onElement(const Elem * elem) override
@@ -144,7 +162,14 @@ public:
 
       // Build the side so we can compute its volume
       auto side_elem = elem->build_side_ptr(side);
-      _local_partition_surface_area += side_elem->volume();
+      auto volume = side_elem->volume();
+      _local_partition_surface_area += volume;
+
+      if (_my_hardware_id != _rank_map.hardwareID(elem->neighbor_ptr(side)->processor_id()))
+      {
+        _local_num_partition_hardware_id_sides++;
+        _local_partition_hardware_id_surface_area += volume;
+      }
     }
   }
 
@@ -154,14 +179,22 @@ public:
     _local_num_dofs += y._local_num_dofs;
     _local_num_partition_sides += y._local_num_partition_sides;
     _local_partition_surface_area += y._local_partition_surface_area;
+    _local_num_partition_hardware_id_sides += y._local_num_partition_hardware_id_sides;
+    _local_partition_hardware_id_surface_area += y._local_partition_hardware_id_surface_area;
   }
 
   int _system;
+
+  const RankMap & _rank_map;
+
+  unsigned int _my_hardware_id;
 
   dof_id_type _local_num_elems;
   dof_id_type _local_num_dofs;
   dof_id_type _local_num_partition_sides;
   Real _local_partition_surface_area;
+  dof_id_type _local_num_partition_hardware_id_sides;
+  Real _local_partition_hardware_id_surface_area;
 
   processor_id_type _this_pid;
 };
@@ -232,7 +265,7 @@ WorkBalance::execute()
   auto & mesh = _fe_problem.mesh();
 
   // Get all of the Elem info first
-  auto wb_el = WBElementLoop(mesh, _system);
+  auto wb_el = WBElementLoop(mesh, _system, _rank_map);
 
   Threads::parallel_reduce(*mesh.getActiveLocalElementRange(), wb_el);
 
@@ -240,6 +273,8 @@ WorkBalance::execute()
   _local_num_dofs = wb_el._local_num_dofs;
   _local_num_partition_sides = wb_el._local_num_partition_sides;
   _local_partition_surface_area = wb_el._local_partition_surface_area;
+  _local_num_partition_hardware_id_sides = wb_el._local_num_partition_hardware_id_sides;
+  _local_partition_hardware_id_surface_area = wb_el._local_partition_hardware_id_surface_area;
 
   // Now Node info
   auto wb_nl = WBNodeLoop(_fe_problem, _system);
@@ -261,6 +296,11 @@ WorkBalance::finalize()
     _communicator.gather(0, static_cast<Real>(_local_num_dofs), _num_dofs);
     _communicator.gather(0, static_cast<Real>(_local_num_partition_sides), _num_partition_sides);
     _communicator.gather(0, _local_partition_surface_area, _partition_surface_area);
+    _communicator.gather(0,
+                         static_cast<Real>(_local_num_partition_hardware_id_sides),
+                         _num_partition_hardware_id_sides);
+    _communicator.gather(
+        0, _local_partition_hardware_id_surface_area, _partition_hardware_id_surface_area);
   }
   else
   {
@@ -270,6 +310,10 @@ WorkBalance::finalize()
     _communicator.allgather(static_cast<Real>(_local_num_dofs), _num_dofs);
     _communicator.allgather(static_cast<Real>(_local_num_partition_sides), _num_partition_sides);
     _communicator.allgather(_local_partition_surface_area, _partition_surface_area);
+    _communicator.allgather(static_cast<Real>(_local_num_partition_hardware_id_sides),
+                            _num_partition_hardware_id_sides);
+    _communicator.allgather(_local_partition_hardware_id_surface_area,
+                            _partition_hardware_id_surface_area);
   }
 
   // Fill in the PID column - this just makes plotting easier
