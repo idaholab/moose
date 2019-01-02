@@ -6,11 +6,10 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #ifndef ADHEATCONDUCTION_H
 #define ADHEATCONDUCTION_H
 
-#include "ADKernel.h"
+#include "ADDiffusion.h"
 
 template <ComputeStage compute_stage>
 class ADHeatConduction;
@@ -18,7 +17,7 @@ class ADHeatConduction;
 declareADValidParams(ADHeatConduction);
 
 template <ComputeStage compute_stage>
-class ADHeatConduction : public ADKernel<compute_stage>
+class ADHeatConduction : public ADDiffusion<compute_stage>
 {
 public:
   ADHeatConduction(const InputParameters & parameters);
