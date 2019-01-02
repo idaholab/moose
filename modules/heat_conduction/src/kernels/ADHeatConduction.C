@@ -11,14 +11,14 @@
 registerADMooseObject("HeatConductionApp", ADHeatConduction);
 
 defineADValidParams(ADHeatConduction,
-                    ADKernel,
+                    ADDiffusion,
                     params.addRequiredParam<MaterialPropertyName>(
                         "thermal_conductivity",
                         "the name of the thermal conductivity material property"););
 
 template <ComputeStage compute_stage>
 ADHeatConduction<compute_stage>::ADHeatConduction(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+  : ADDiffusion<compute_stage>(parameters),
     _thermal_conductivity(adGetADMaterialProperty<Real>("thermal_conductivity"))
 {
 }
@@ -27,5 +27,5 @@ template <ComputeStage compute_stage>
 ADResidual
 ADHeatConduction<compute_stage>::computeQpResidual()
 {
-  return _thermal_conductivity[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
+  return _thermal_conductivity[_qp] * ADDiffusion<compute_stage>::computeQpResidual();
 }
