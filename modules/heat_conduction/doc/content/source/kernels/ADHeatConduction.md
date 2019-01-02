@@ -2,7 +2,7 @@
 
 ## Description
 
-`ADHeatConduction` is the implementation of the heat diffusion equation in [HeatConduction](HeatConduction.md) within the framework of automatic differentiation.
+`ADHeatConduction` is the implementation of the heat diffusion equation in [HeatConduction](/HeatConduction.md) within the framework of automatic differentiation.
 The `ADHeatConduction` kernel implements the heat equation given by Fourier's Law where The heat flux is given as
 \begin{equation}
 \mathbf{q} = - k\nabla T,
