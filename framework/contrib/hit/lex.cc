@@ -1,6 +1,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "lex.h"
 
