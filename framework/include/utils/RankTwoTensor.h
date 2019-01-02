@@ -15,7 +15,6 @@
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
-#include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
 #include <petscsys.h>
@@ -32,6 +31,15 @@ class MooseArray;
 typedef MooseArray<Real> VariableValue;
 template <typename>
 class ColumnMajorMatrixTempl;
+namespace libMesh
+{
+template <typename>
+class TypeVector;
+template <typename>
+class TypeTensor;
+template <typename>
+class TensorValue;
+}
 
 template <typename T>
 void mooseSetToZero(T & v);

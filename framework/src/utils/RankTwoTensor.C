@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
-
 #include "RankTwoTensor.h"
 
 // MOOSE includes
-#include "MaterialProperty.h"
 #include "MooseEnum.h"
 #include "MooseUtils.h"
 #include "ColumnMajorMatrix.h"
 #include "MooseRandom.h"
 #include "RankFourTensor.h"
-
 #include "Conversion.h"
+#include "MooseArray.h"
+
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/vector_value.h"
 #include "libmesh/utility.h"
 
 // PETSc includes

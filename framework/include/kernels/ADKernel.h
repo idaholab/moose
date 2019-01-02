@@ -12,6 +12,9 @@
 
 #include "KernelBase.h"
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
 #define usingKernelMembers                                                                         \
   using ADKernel<compute_stage>::_test;                                                            \
   using ADKernel<compute_stage>::_qp;                                                              \

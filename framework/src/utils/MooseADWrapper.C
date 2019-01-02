@@ -1,7 +1,7 @@
+#include "MooseADWrapper.h"
+
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
-
-#include "MooseADWrapper.h"
 
 MooseADWrapper<Real>::MooseADWrapper(bool use_ad) : _use_ad(use_ad), _val(), _dual_number(nullptr)
 {

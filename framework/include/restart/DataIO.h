@@ -25,8 +25,8 @@
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
 #endif
-#include "metaphysicl/dualnumber.h"
 #include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
 
 // C++ includes
 #include <string>
