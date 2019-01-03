@@ -28,6 +28,7 @@ class MooseObjectWarehouse : public MooseObjectWarehouseBase<T>
 {
 public:
   using MooseObjectWarehouseBase<T>::checkThreadID;
+  using MooseObjectWarehouseBase<T>::_all_objects;
   using MooseObjectWarehouseBase<T>::_active_objects;
   using MooseObjectWarehouseBase<T>::hasActiveBlockObjects;
   using MooseObjectWarehouseBase<T>::getActiveBlockObjects;
@@ -142,7 +143,8 @@ void
 MooseObjectWarehouse<T>::initialSetup(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
-  for (const auto & object : _active_objects[tid])
+  // Initial Setup should be called on all objects because they may become active later
+  for (const auto & object : _all_objects[tid])
     object->initialSetup();
 }
 

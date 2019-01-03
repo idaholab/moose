@@ -797,7 +797,7 @@ FEProblemBase::initialSetup()
   // restored
 
   // Call initialSetup on the MultiApps
-  if (_multi_apps.hasActiveObjects())
+  if (_multi_apps.hasObjects())
   {
     _console << COLOR_CYAN << "Initializing MultiApps" << COLOR_DEFAULT << std::endl;
     _multi_apps.initialSetup();
@@ -3476,7 +3476,7 @@ FEProblemBase::hasMultiApp(const std::string & multi_app_name) const
 std::shared_ptr<MultiApp>
 FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 {
-  return _multi_apps.getActiveObject(multi_app_name);
+  return _multi_apps.getObject(multi_app_name);
 }
 
 void
