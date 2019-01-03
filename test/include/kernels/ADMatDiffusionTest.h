@@ -6,23 +6,23 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADMATDIFFUSION_H
-#define ADMATDIFFUSION_H
+#ifndef ADMATDIFFUSIONTEST_H
+#define ADMATDIFFUSIONTEST_H
 
 #include "ADKernel.h"
 #include "MaterialProperty.h"
 
 // Forward Declaration
 template <ComputeStage compute_stage>
-class ADMatDiffusion;
+class ADMatDiffusionTest;
 
-declareADValidParams(ADMatDiffusion);
+declareADValidParams(ADMatDiffusionTest);
 
 template <ComputeStage compute_stage>
-class ADMatDiffusion : public ADKernel<compute_stage>
+class ADMatDiffusionTest : public ADKernel<compute_stage>
 {
 public:
-  ADMatDiffusion(const InputParameters & parameters);
+  ADMatDiffusionTest(const InputParameters & parameters);
 
 protected:
   virtual ADResidual computeQpResidual();
@@ -36,4 +36,4 @@ protected:
   usingKernelMembers;
 };
 
-#endif // ADMATDIFFUSION_H
+#endif // ADMATDIFFUSIONTEST_H
