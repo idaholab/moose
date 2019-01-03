@@ -29,3 +29,6 @@ ADDiffusion<compute_stage>::computeQpResidual()
 {
   return _grad_u[_qp] * _grad_test[_i][_qp];
 }
+
+template class ADDiffusion<RESIDUAL>;
+template class ADDiffusion<JACOBIAN>;

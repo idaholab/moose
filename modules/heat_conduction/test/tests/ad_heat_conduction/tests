@@ -1,0 +1,14 @@
+[Tests]
+  [./stateful_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'test.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = 'AD heat conduction and the Jacobian shall be beautiful'
+    design = "jacobian_definition.md"
+    issues = "#5658 #12633"
+    allow_test_objects = true
+  [../]
+[]
