@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "ADThermalConductivityTest.h"
 
-registerADMooseObject("HeatConductionApp", ADThermalConductivityTest);
+registerADMooseObject("HeatConductionTestApp", ADThermalConductivityTest);
 
 defineADValidParams(
     ADThermalConductivityTest,
