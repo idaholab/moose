@@ -6,12 +6,12 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#include "ADMatDiffusion.h"
+#include "ADMatDiffusionTest.h"
 
-registerADMooseObject("MooseTestApp", ADMatDiffusion);
+registerADMooseObject("MooseTestApp", ADMatDiffusionTest);
 
 defineADValidParams(
-    ADMatDiffusion,
+    ADMatDiffusionTest,
     ADKernel,
     params.addParam<MaterialPropertyName>(
         "ad_mat_prop",
@@ -29,7 +29,7 @@ defineADValidParams(
                                "material."););
 
 template <ComputeStage compute_stage>
-ADMatDiffusion<compute_stage>::ADMatDiffusion(const InputParameters & parameters)
+ADMatDiffusionTest<compute_stage>::ADMatDiffusionTest(const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
     _ad_diff_from_ad_prop(adGetADMaterialProperty<Real>("ad_mat_prop")),
     _regular_diff_from_ad_prop(adGetMaterialProperty<Real>("ad_mat_prop")),
@@ -41,7 +41,7 @@ ADMatDiffusion<compute_stage>::ADMatDiffusion(const InputParameters & parameters
 
 template <ComputeStage compute_stage>
 ADResidual
-ADMatDiffusion<compute_stage>::computeQpResidual()
+ADMatDiffusionTest<compute_stage>::computeQpResidual()
 {
   if (_prop_to_use == "AdAd")
     return _ad_diff_from_ad_prop[_qp] * _grad_test[_i][_qp] * _grad_u[_qp];
