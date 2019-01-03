@@ -14,6 +14,7 @@
     requirement = 'AD thermo diffusion shall reproduce an analytical solution'
     design = ""
     issues = "#12633"
+    allow_test_objects = true
   [../]
   [./ad_thermo_diffusion_jacobian]
     type = 'PetscJacobianTester'
@@ -25,5 +26,6 @@
     requirement = 'AD thermo diffusion shall work with material properties and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658"
+    allow_test_objects = true
   [../]
 []

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "ADSoretCoeffTest.h"
 
-registerADMooseObject("MiscApp", ADSoretCoeffTest);
+registerADMooseObject("MiscTestApp", ADSoretCoeffTest);
 
 defineADValidParams(
     ADSoretCoeffTest, ADMaterial, params.addRequiredCoupledVar("coupled_var", "A coupled variable");
