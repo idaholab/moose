@@ -21,21 +21,12 @@ validParams<ThermalGraphiteProperties>()
   params.addClassDescription("Userobject defining graphite thermal properties.");
   params.addRangeCheckedParam<Real>(
       "density_room_temp", 1600.0, "density_room_temp > 0.0", "Density at room temperature");
-  params.addParam<MooseEnum>(
-      "surface", getSurfaceEnum("oxidized"), "The state of the solid surface");
-  params.addRangeCheckedParam<Real>("emissivity",
-                                    1.0,
-                                    "emissivity >= 0.0 & emissivity <= 1.0",
-                                    "Optional user-specified constant emissivity");
   return params;
 }
 
 ThermalGraphiteProperties::ThermalGraphiteProperties(const InputParameters & parameters)
   : ThermalSolidPropertiesMaterial(parameters),
     _rho_room_temp(getParam<Real>("density_room_temp")),
-    _surface(getParam<MooseEnum>("surface").getEnum<surface::SurfaceEnum>()),
-    _constant_emissivity(parameters.isParamSetByUser("emissivity") ? true : false),
-    _emissivity(getParam<Real>("emissivity")),
     _beta0(2.925e-6)
 {
 }
@@ -119,17 +110,3 @@ ThermalGraphiteProperties::beta() const
 
   return _beta0 + term;
 }
-
-// Real
-// ThermalGraphiteProperties::surface_emissivity() const
-//{
-//  if (_constant_emissivity)
-//    return _emissivity;
-//
-//  if (_surface == surface::oxidized)
-//    return 0.732 + 5.21e-5 * _temperature[_qp];
-//  else if (_surface == surface::polished)
-//    return 0.448 + 13.8e-5 * _temperature[_qp];
-//  else
-//    mooseError(name(), ": Unhandled SurfaceEnum in 'surface_emissivity'!");
-//}

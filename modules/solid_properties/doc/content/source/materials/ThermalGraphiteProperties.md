@@ -19,9 +19,6 @@ Density is calculated given a room temperature density and an estimation of an
 average thermal expansion coefficient from 20 $\degree$C to the temperature of
 interest according to thermal expansion data in [cite:baker].
 Molar mass is calculated assuming pure elemental graphite.
-<!--- Emissivity is calculated based on whether
-the surface is oxidized or polished according to data in [cite:baker], or
-specified as a constant value by the user.-->
 
 ## Range of Validity
 

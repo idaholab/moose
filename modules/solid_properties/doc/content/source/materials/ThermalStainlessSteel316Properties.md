@@ -9,8 +9,7 @@ stainless steel 316 as a function of temperature.
 
 Isobaric specific heat, thermal conductivity, and density as calculated as
 curve fits of tabulated data in [cite:mills]. Molar mass is calculated assuming the
-nominal composition in [cite:mills]. <!-- Emissivity is calculated based on whether
-the surface is oxidized or polished according to data in [cite:mills]. -->
+nominal composition in [cite:mills].
 
 ## Range of Validity
 
