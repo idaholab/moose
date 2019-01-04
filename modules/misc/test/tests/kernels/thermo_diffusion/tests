@@ -15,7 +15,6 @@
     design = ""
     issues = "#12633"
     allow_test_objects = true
-    custom_cmp = ad.cmp
   [../]
   [./ad_thermo_diffusion_jacobian]
     type = 'PetscJacobianTester'
