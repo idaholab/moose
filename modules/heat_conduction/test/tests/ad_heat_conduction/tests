@@ -1,5 +1,5 @@
 [Tests]
-  [./stateful_jacobian]
+  [./jacobian_test]
     type = 'PetscJacobianTester'
     input = 'test.i'
     ratio_tol = 1e-7

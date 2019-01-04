@@ -10,19 +10,10 @@
 
 [Variables]
   [./T]
+    initial_condition = 1
   [../]
   [./c]
-  [../]
-[]
-
-[ICs]
-  [./T_IC]
-    type = RandomIC
-    variable = T
-  [../]
-  [./c_IC]
-    type = RandomIC
-    variable = c
+    initial_condition = 1
   [../]
 []
 
@@ -32,11 +23,14 @@
     variable = T
     thermal_conductivity = thermal_conductivity
   [../]
-[]
-
-[Kernels]
+  [./heat_dt]
+    type = ADHeatConductionTimeDerivative
+    variable = T
+    specific_heat = thermal_conductivity
+    density_name = thermal_conductivity
+  [../]
   [./c]
-    type = Diffusion
+    type = ADDiffusion
     variable = c
   [../]
 []

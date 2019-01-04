@@ -31,12 +31,11 @@
     variable = T
     thermal_conductivity = thermal_conductivity
   [../]
-[]
-
-[Kernels]
-  [./HeatTdot]
-    type = HeatConductionTimeDerivative
+  [./heat_dt]
+    type = ADHeatConductionTimeDerivative
     variable = T
+    specific_heat = specific_heat
+    density_name = density
   [../]
 []
 
