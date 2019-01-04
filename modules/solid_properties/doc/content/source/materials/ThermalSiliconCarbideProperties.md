@@ -29,7 +29,7 @@ conductivity over 300 K $\le$ T $\le$ 1800 K with the Snead correlation
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/silicon_carbide/test.i block=Modules
+!listing modules/solid_properties/test/tests/silicon_carbide/test.i block=Materials
 
 !syntax parameters /Modules/SolidProperties/ThermalSiliconCarbideProperties
 

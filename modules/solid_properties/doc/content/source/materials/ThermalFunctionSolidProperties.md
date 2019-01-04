@@ -18,7 +18,7 @@ by the user. Note that arbitrary units can be specified with this material.
 
 ## Example Input File Syntax
 
-!listing modules/solid_properties/test/tests/functional/test.i block=Modules
+!listing modules/solid_properties/test/tests/functional/test.i block=Materials
 
 !syntax parameters /Modules/SolidProperties/ThermalFunctionSolidProperties
 
