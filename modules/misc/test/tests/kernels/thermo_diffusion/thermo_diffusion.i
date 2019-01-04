@@ -29,13 +29,8 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 1
-  ymin = 0
-  ymax = 1
-  nx = 10
-  ny = 1
+  dim = 1
+  nx = 100
 []
 
 [Variables]
@@ -55,16 +50,14 @@
     gas_constant = 1
   [../]
   [./diffC]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 1
   [../]
 
   # Heat diffusion gives a linear temperature profile to drive the Soret diffusion.
   [./diffT]
-    type = CoefDiffusion
+    type = Diffusion
     variable = temp
-    coef = 1
   [../]
 []
 
@@ -99,32 +92,16 @@
   [../]
 []
 
-[Functions]
-  # The correct (analytical) result for the solution of u.
-  [./concentration_profile]
-    type = ParsedFunction
-    value = 'exp(-x/(x+1))'
-  [../]
-[]
-
-[AuxVariables]
-  [./correct_u]
-  [../]
-[]
-
-[AuxKernels]
-  # This kernel is just being used to plot the correct result for u.
-  [./copy_from_function]
-    type = FunctionAux
-    variable = correct_u
-    function = concentration_profile
-  [../]
-[]
-
 [Executioner]
   type = Steady
+[]
 
-  solve_type = 'PJFNK'
+[Postprocessors]
+  [./error]
+    type = NodalL2Error
+    variable = u
+    function = 'exp(-x/(x+1))'
+  [../]
 []
 
 [Outputs]
