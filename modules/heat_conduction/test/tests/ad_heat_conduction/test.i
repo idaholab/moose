@@ -4,16 +4,18 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 3
-  ny = 3
+  nx = 5
+  ny = 5
+  xmax = 0.001
+  ymax = 0.001
 []
 
 [Variables]
   [./T]
-    initial_condition = 1
+    initial_condition = 1.5
   [../]
   [./c]
-    initial_condition = 1
+    initial_condition = 1.5
   [../]
 []
 
@@ -32,6 +34,40 @@
   [./c]
     type = ADDiffusion
     variable = c
+  [../]
+[]
+
+[Kernels]
+  [./c_dt]
+    type = TimeDerivative
+    variable = c
+  [../]
+[]
+
+[BCs]
+  [./left_c]
+    type = DirichletBC
+    variable = c
+    boundary = left
+    value = 2
+  [../]
+  [./right_c]
+    type = DirichletBC
+    variable = c
+    boundary = right
+    value = 1
+  [../]
+  [./left_T]
+    type = DirichletBC
+    variable = T
+    boundary = top
+    value = 1
+  [../]
+  [./right_T]
+    type = DirichletBC
+    variable = T
+    boundary = bottom
+    value = 2
   [../]
 []
 
