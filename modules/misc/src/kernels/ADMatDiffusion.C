@@ -13,8 +13,7 @@ registerADMooseObject("MiscApp", ADMatDiffusion);
 defineADValidParams(ADMatDiffusion,
                     ADDiffusion,
                     params.addRequiredParam<MaterialPropertyName>(
-                        "diffusivity",
-                        "the name of the thermal conductivity material property"););
+                        "diffusivity", "the name of the thermal conductivity material property"););
 
 template <ComputeStage compute_stage>
 ADMatDiffusion<compute_stage>::ADMatDiffusion(const InputParameters & parameters)
