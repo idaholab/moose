@@ -29,13 +29,8 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 1
-  ymin = 0
-  ymax = 1
-  nx = 10
-  ny = 1
+  dim = 1
+  nx = 100
 []
 
 [Variables]
@@ -87,28 +82,6 @@
   [../]
 []
 
-[Functions]
-  # The correct (analytical) result for the solution of u.
-  [./concentration_profile]
-    type = ParsedFunction
-    value = 'exp(-x/(x+1))'
-  [../]
-[]
-
-[AuxVariables]
-  [./correct_u]
-  [../]
-[]
-
-[AuxKernels]
-  # This kernel is just being used to plot the correct result for u.
-  [./copy_from_function]
-    type = FunctionAux
-    variable = correct_u
-    function = concentration_profile
-  [../]
-[]
-
 [ADMaterials]
   [./ad_soret_coefficient]
     type = ADSoretCoeffTest
@@ -126,8 +99,14 @@
 
 [Executioner]
   type = Steady
+[]
 
-  solve_type = 'PJFNK'
+[Postprocessors]
+  [./error]
+    type = NodalL2Error
+    variable = u
+    function = 'exp(-x/(x+1))'
+  [../]
 []
 
 [Outputs]
