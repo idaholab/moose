@@ -82,5 +82,6 @@
 []
 
 [Outputs]
+  execute_on = FINAL
   exodus = true
 []
