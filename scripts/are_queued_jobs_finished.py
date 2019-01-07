@@ -23,7 +23,7 @@ class Jobs:
         for k, v in self.__job_data.iteritems():
             yield k, v
 
-def hasTimedOutOrFailed(meta):
+def hasExited(meta):
     """
     determine which scheduler plugin was used to launch jobs, and query that
     system for current status on job
@@ -33,14 +33,14 @@ def hasTimedOutOrFailed(meta):
         qstat_process = subprocess.Popen([ 'qstat' , '-xf', job_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         qstat_result = qstat_process.communicate()[0]
         job_result = re.findall(r'Exit_status = (\d+)', qstat_result)
-        if job_result and job_result[0] == "271":
+        if job_result
             return True
 
 def isNotFinished(jobs):
     for path, meta in jobs.yieldJobsResultPath():
         if type(meta) == type({}) and meta.get('QUEUEING', {}):
             if (not os.path.exists(os.path.join(path, '.previous_test_results.json'))
-                and not hasTimedOutOrFailed(meta)):
+                and not hasExited(meta)):
                 return True
 
 def usage():
