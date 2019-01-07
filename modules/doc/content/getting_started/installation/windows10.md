@@ -6,9 +6,9 @@ Using MOOSE on Windows 10 is experimental and not fully supported.
 Caveats:
 
 - Peacock does not work correctly (artifacts during rendering: surface normals are flipped).
-- Different flavors of linux are available.
+- Different flavors of Linux are available.
 
-    - Be sure to choose an OS in which we support. While MOOSE will ultimately work on just about every flavor of linux, this document assumes you have chosen Ubuntu.
+    - Be sure to choose an OS in which we support. While MOOSE will ultimately work on just about every flavor of Linux, this document assumes you have chosen Ubuntu.
 !alert-end!
 
 Begin by performing the following external sets of instructions. Remember to choose Ubuntu, unless you know what you are doing.
