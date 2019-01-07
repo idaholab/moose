@@ -33,7 +33,7 @@ def hasExited(meta):
         qstat_process = subprocess.Popen([ 'qstat' , '-xf', job_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         qstat_result = qstat_process.communicate()[0]
         job_result = re.findall(r'Exit_status = (\d+)', qstat_result)
-        if job_result
+        if job_result:
             return True
 
 def isNotFinished(jobs):
