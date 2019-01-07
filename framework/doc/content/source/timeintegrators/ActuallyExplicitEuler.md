@@ -62,7 +62,7 @@ Note that even though we're doing an explicit solve we are currently doing it in
 
 To get the sum of each row of the mass matrix for "lumping" purposes a vector consisting of all `1`s is used in a matrix-vector product:
 
-!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=mass_matrix.vector_mult
+!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=system_matrix.vector_mult
 
 This is actually the very same way `MatGetRowSum` is implemented in PETSc.  Doing it ourselves though cuts down on vector creation/destruction and a few other bookkeeping bits.
 
