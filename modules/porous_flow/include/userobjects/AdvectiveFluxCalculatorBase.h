@@ -178,12 +178,12 @@ protected:
                    std::map<dof_id_type, Real> & derivs) const;
 
   /**
-   * Using _kij, returns result that has result[node_id] = 0.0 for all node_id connected with node_i
-   * @param node_i nodal id
-   * @return result whose keys are node ids connected to node_i (according to _kij) and whose values
-   * are zero
+   * Clears the_map, then, using _kij, constructs the_map so that
+   * the_map[node_id] = 0.0 for all node_id connected with node_i
+   * @param[out] the_map the map to be zeroed appropriately
+   * @param[in] node_i nodal id
    */
-  std::map<dof_id_type, Real> zeroedConnection(dof_id_type node_i) const;
+  void zeroedConnection(std::map<dof_id_type, Real> & the_map, dof_id_type node_i) const;
 };
 
 #endif // ADVECTIVEFLUXCALCULATORBASE_H

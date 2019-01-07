@@ -390,8 +390,7 @@ Real
 AdvectiveFluxCalculatorBase::rPlus(dof_id_type node_i,
                                    std::map<dof_id_type, Real> & dlimited_du) const
 {
-  dlimited_du.clear();
-  dlimited_du = zeroedConnection(node_i);
+  zeroedConnection(dlimited_du, node_i);
   if (_flux_limiter_type == FluxLimiterTypeEnum::None)
     return 0.0;
   std::map<dof_id_type, Real> dp_du;
@@ -417,8 +416,7 @@ Real
 AdvectiveFluxCalculatorBase::rMinus(dof_id_type node_i,
                                     std::map<dof_id_type, Real> & dlimited_du) const
 {
-  dlimited_du.clear();
-  dlimited_du = zeroedConnection(node_i);
+  zeroedConnection(dlimited_du, node_i);
   if (_flux_limiter_type == FluxLimiterTypeEnum::None)
     return 0.0;
   std::map<dof_id_type, Real> dp_du;
@@ -545,14 +543,14 @@ AdvectiveFluxCalculatorBase::getKij(dof_id_type node_i, dof_id_type node_j) cons
 {
 
   const auto & row_find = _kij.find(node_i);
-  mooseAssert(row_find != _kij.end(),
-              "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij does not contain node "
-                                                        << node_i);
+  if (row_find == _kij.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij does not contain node " +
+               Moose::stringify(node_i));
   const std::map<dof_id_type, Real> & kij_row = row_find->second;
   const auto & entry_find = kij_row.find(node_j);
-  mooseAssert(entry_find != kij_row.end(),
-              "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij on row " << node_i
-                                                        << " does not contain node " << node_j);
+  if (entry_find == kij_row.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij on row " +
+               Moose::stringify(node_i) + " does not contain node " + Moose::stringify(node_j));
 
   return entry_find->second;
 }
@@ -561,9 +559,9 @@ const std::map<dof_id_type, Real> &
 AdvectiveFluxCalculatorBase::getdFluxOutdu(dof_id_type node_i) const
 {
   const auto & row_find = _dflux_out_du.find(node_i);
-  mooseAssert(row_find != _dflux_out_du.end(),
-              "AdvectiveFluxCalculatorBase UserObject "
-                  << name() << " _dflux_out_du does not contain node " << node_i);
+  if (row_find == _dflux_out_du.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
+               " _dflux_out_du does not contain node " + Moose::stringify(node_i));
   return row_find->second;
 }
 
@@ -571,15 +569,14 @@ Real
 AdvectiveFluxCalculatorBase::getdFluxOutdu(dof_id_type node_i, dof_id_type node_j) const
 {
   const auto & row_find = _dflux_out_du.find(node_i);
-  mooseAssert(row_find != _dflux_out_du.end(),
-              "AdvectiveFluxCalculatorBase UserObject "
-                  << name() << " _dflux_out_du does not contain node " << node_i);
+  if (row_find == _dflux_out_du.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
+               " _dflux_out_du does not contain node " + Moose::stringify(node_i));
   const std::map<dof_id_type, Real> & dflux_out_du_row = row_find->second;
   const auto & entry_find = dflux_out_du_row.find(node_j);
-  mooseAssert(entry_find != dflux_out_du_row.end(),
-              "AdvectiveFluxCalculatorBase UserObject " << name() << " _dflux_out_du on row "
-                                                        << node_i << " does not contain node "
-                                                        << node_j);
+  if (entry_find == dflux_out_du_row.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " _dflux_out_du on row " +
+               Moose::stringify(node_i) + " does not contain node " + Moose::stringify(node_j));
 
   return entry_find->second;
 }
@@ -588,9 +585,9 @@ Real
 AdvectiveFluxCalculatorBase::getFluxOut(dof_id_type node_i) const
 {
   const auto & entry_find = _flux_out.find(node_i);
-  mooseAssert(entry_find != _flux_out.end(),
-              "AdvectiveFluxCalculatorBase UserObject "
-                  << name() << " _flux_out does not contain node " << node_i);
+  if (entry_find == _flux_out.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
+               " _flux_out does not contain node " + Moose::stringify(node_i));
   return entry_find->second;
 }
 
@@ -599,24 +596,24 @@ AdvectiveFluxCalculatorBase::getValence(dof_id_type node_i, dof_id_type node_j) 
 {
   const std::pair<dof_id_type, dof_id_type> i_j(node_i, node_j);
   const auto & entry_find = _valence.find(i_j);
-  mooseAssert(entry_find != _valence.end(),
-              "AdvectiveFluxCalculatorBase UserObject "
-                  << name() << " Valence does not contain node-pair " << node_i << " to "
-                  << node_j);
+  if (entry_find == _valence.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
+               " Valence does not contain node-pair " + Moose::stringify(node_i) + " to " +
+               Moose::stringify(node_j));
   return entry_find->second;
 }
 
-std::map<dof_id_type, Real>
-AdvectiveFluxCalculatorBase::zeroedConnection(dof_id_type node_i) const
+void
+AdvectiveFluxCalculatorBase::zeroedConnection(std::map<dof_id_type, Real> & the_map,
+                                              dof_id_type node_i) const
 {
+  the_map.clear();
   const auto & row_find = _kij.find(node_i);
-  mooseAssert(row_find != _kij.end(),
-              "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij does not contain node "
-                                                        << node_i);
-  std::map<dof_id_type, Real> result;
+  if (row_find == _kij.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij does not contain node " +
+               Moose::stringify(node_i));
   for (const auto & nk : row_find->second)
-    result[nk.first] = 0.0;
-  return result;
+    the_map[nk.first] = 0.0;
 }
 
 Real
@@ -630,15 +627,14 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
   // We're going to sum over all nodes connected with node_i
   // These nodes are found in _kij[node_i]
   const auto & row_find = _kij.find(node_i);
-  mooseAssert(row_find != _kij.end(),
-              "AdvectiveFluxCalculatorBase UserObject " << name() << " Kij does not contain node "
-                                                        << node_i);
+  if (row_find == _kij.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij does not contain node " +
+               Moose::stringify(node_i));
   const std::map<dof_id_type, Real> nodej_and_kij = row_find->second;
 
   // Initialize the results
   Real result = 0.0;
-  derivs.clear();
-  derivs = zeroedConnection(node_i);
+  zeroedConnection(derivs, node_i);
 
   // Sum over all nodes connected with node_i.
   for (const auto & nk : nodej_and_kij)
