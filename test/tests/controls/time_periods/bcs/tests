@@ -13,4 +13,10 @@
     exodiff = bcs_integrated_out.e
     requirement = "The Control system shall be capable of activating or deactivating IntegratedBC objects with time."
   [../]
+  [./enable_disable]
+    type = Exodiff
+    input = bcs_enable_disable.i
+    exodiff = bcs_enable_disable_out.e
+    requirement = "The Control system shall be capable of activating and deactivating NodalBC objects with time within a single TimePeriod block."
+  [../]
 []
