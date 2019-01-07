@@ -1,7 +1,31 @@
 [Tests]
-  [./test]
+  [./thermo_diffusion]
     type = 'Exodiff'
     input = 'thermo_diffusion.i'
     exodiff = 'thermo_diffusion_out.e'
+    requirement = 'Thermo diffusion shall reproduce an analytical solution'
+    design = "thermodiffusion.md"
+    issues = "#3392"
+  [../]
+  [./ad_thermo_diffusion]
+    type = 'Exodiff'
+    input = 'ad_thermo_diffusion.i'
+    exodiff = 'ad_thermo_diffusion_out.e'
+    requirement = 'AD thermo diffusion shall reproduce an analytical solution'
+    design = ""
+    issues = "#12633"
+    allow_test_objects = true
+  [../]
+  [./ad_thermo_diffusion_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_thermo_diffusion.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-3
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = 'AD thermo diffusion shall work with material properties and the Jacobian shall be beautiful'
+    design = "jacobian_definition.md"
+    issues = "#5658"
+    allow_test_objects = true
   [../]
 []

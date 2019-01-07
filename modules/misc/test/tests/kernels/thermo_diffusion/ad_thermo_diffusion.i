@@ -42,21 +42,20 @@
   [../]
 []
 
-[Kernels]
+[ADKernels]
   [./soret]
-    type = ThermoDiffusion
+    type = ADThermoDiffusion
     variable = u
-    temp = temp
-    gas_constant = 1
+    temperature = temp
   [../]
   [./diffC]
-    type = Diffusion
+    type = ADDiffusion
     variable = u
   [../]
 
   # Heat diffusion gives a linear temperature profile to drive the Soret diffusion.
   [./diffT]
-    type = Diffusion
+    type = ADDiffusion
     variable = temp
   [../]
 []
@@ -83,12 +82,18 @@
   [../]
 []
 
-[Materials]
-  [./fake_material]
-     type = GenericConstantMaterial
-     block = 0
-     prop_names = 'mass_diffusivity heat_of_transport'
-     prop_values = '1 1'
+[ADMaterials]
+  [./ad_soret_coefficient]
+    type = ADSoretCoeffTest
+    temperature = temp
+    coupled_var = u
+  [../]
+[]
+
+[Preconditioning]
+  [./full]
+    type = SMP
+    full = true
   [../]
 []
 
