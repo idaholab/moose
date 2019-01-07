@@ -19,7 +19,18 @@
   using ADKernel<compute_stage>::_u;                                                               \
   using ADKernel<compute_stage>::_var;                                                             \
   using ADKernel<compute_stage>::_grad_test;                                                       \
-  using ADKernel<compute_stage>::_grad_u
+  using ADKernel<compute_stage>::_grad_u;                                                          \
+  using ADKernel<compute_stage>::_JxW;                                                             \
+  using ADKernel<compute_stage>::_coord;                                                           \
+  using ADKernel<compute_stage>::_local_re;                                                        \
+  using ADKernel<compute_stage>::_qrule;                                                           \
+  using ADKernel<compute_stage>::_save_in;                                                         \
+  using ADKernel<compute_stage>::_has_save_in;                                                     \
+  using ADKernel<compute_stage>::_current_elem_volume;                                             \
+  using ADKernel<compute_stage>::coupled;                                                          \
+  using ADKernel<compute_stage>::coupledComponents;                                                \
+  using ADKernel<compute_stage>::getBlockCoordSystem;                                              \
+  using ADKernel<compute_stage>::isParamValid
 
 template <ComputeStage compute_stage>
 class ADKernel;

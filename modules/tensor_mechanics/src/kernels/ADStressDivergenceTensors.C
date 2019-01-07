@@ -8,12 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADStressDivergenceTensors.h"
-
-// MOOSE includes
-// #include "Material.h"
-// #include "MooseVariable.h"
-// #include "SystemBase.h"
-
 #include "libmesh/quadrature.h"
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
@@ -39,17 +33,16 @@ template <ComputeStage compute_stage>
 ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
     const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
-    _base_name(this->template isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_"
-                                                        : ""),
+    _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
     _stress(adGetADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _component(adGetParam<unsigned int>("component")),
-    _ndisp(this->template coupledComponents("displacements")),
+    _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _avg_grad_test(),
     _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var[i] = this->template coupled("displacements", i);
+    _disp_var[i] = coupled("displacements", i);
 
   // Error if volumetric locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)
@@ -60,7 +53,7 @@ template <ComputeStage compute_stage>
 void
 ADStressDivergenceTensors<compute_stage>::initialSetup()
 {
-  if (this->template getBlockCoordSystem() != Moose::COORD_XYZ)
+  if (getBlockCoordSystem() != Moose::COORD_XYZ)
     mooseError(
         "The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
 }
