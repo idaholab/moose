@@ -28,7 +28,8 @@ validParams<StackGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
-  params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The meshes we want to stitch together");
+  params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs",
+                                                          "The meshes we want to stitch together");
 
   params.addParam<Real>("bottom_height", 0, "The height of the bottom of the final mesh");
 
@@ -50,9 +51,6 @@ StackGenerator::StackGenerator(const InputParameters & parameters)
   _mesh_ptrs.reserve(_input_names.size());
   for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
     _mesh_ptrs.push_back(&getMeshByName(_input_names[i]));
-
-
-      
 }
 
 std::unique_ptr<MeshBase>
@@ -60,7 +58,7 @@ StackGenerator::generate()
 {
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[0]);
 
-  if (mesh->mesh_dimension() != 3 )
+  if (mesh->mesh_dimension() != 3)
     mooseError("The first mesh is not in 3D !");
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
@@ -69,18 +67,16 @@ StackGenerator::generate()
   // Read in all of the other meshes
   for (auto i = beginIndex(_input_names, 1); i < _input_names.size(); ++i)
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
-  
+
   // Check that we have 3D meshes
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
     if (_meshes[i]->mesh_dimension() != 3)
-      mooseError("Mesh from MeshGenerator : ", _input_names[i+1], " is not in 3D.");
+      mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in 3D.");
 
   boundary_id_type front =
       mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
   boundary_id_type back =
       mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
-
-
 
   // Getting the z width of each mesh
   std::vector<Real> z_heights;
@@ -104,13 +100,17 @@ StackGenerator::zWidth(const MeshBase & mesh)
 {
   std::set<subdomain_id_type> sub_ids;
   mesh.subdomain_ids(sub_ids);
-  BoundingBox bbox(Point(std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max()),
-                   Point(std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest()));
+  BoundingBox bbox(Point(std::numeric_limits<Real>::max(),
+                         std::numeric_limits<Real>::max(),
+                         std::numeric_limits<Real>::max()),
+                   Point(std::numeric_limits<Real>::lowest(),
+                         std::numeric_limits<Real>::lowest(),
+                         std::numeric_limits<Real>::lowest()));
   for (auto id : sub_ids)
   {
     BoundingBox sub_bbox = MeshTools::create_subdomain_bounding_box(mesh, id);
     bbox.union_with(sub_bbox);
   }
-  
+
   return bbox.max()(2) - bbox.min()(2);
 }
