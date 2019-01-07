@@ -33,9 +33,9 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
   /// The mesh width in the x, y and z directions
-  const Real _x_width;
-  const Real _y_width;
-  const Real _z_width;
+  Real _x_width;
+  Real _y_width;
+  Real _z_width;
 };
 
 #endif // TILEDMESHGENERATOR_H
