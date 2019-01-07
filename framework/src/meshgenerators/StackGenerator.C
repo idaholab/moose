@@ -93,8 +93,7 @@ StackGenerator::generate()
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
   {
     MeshTools::Modification::translate(*_meshes[i], 0, 0, z_heights[i]);
-    mesh->stitch_meshes(
-			*_meshes[i], front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    mesh->stitch_meshes(*_meshes[i], front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
@@ -106,7 +105,7 @@ StackGenerator::zWidth(const MeshBase & mesh)
   std::set<subdomain_id_type> sub_ids;
   mesh.subdomain_ids(sub_ids);
   BoundingBox bbox(Point(std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max()),
-		   Point(std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest()));
+                   Point(std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest()));
   for (auto id : sub_ids)
   {
     BoundingBox sub_bbox = MeshTools::create_subdomain_bounding_box(mesh, id);
