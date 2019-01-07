@@ -74,14 +74,12 @@ TiledMeshGenerator::generate()
   // Getting the x,y,z widths
   std::set<subdomain_id_type> sub_ids;
   mesh->subdomain_ids(sub_ids);
-  BoundingBox bbox(Point(0, 0, 0), Point(0, 0, 0));
+  BoundingBox bbox(Point(std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max()),
+  Point(std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest(), std::numeric_limits<Real>::lowest()));
   for (auto id : sub_ids)
   {
     BoundingBox sub_bbox = MeshTools::create_subdomain_bounding_box(*mesh, id);
-    if (bbox.min() == bbox.max())
-      bbox = sub_bbox;
-    else
-      bbox.union_with(sub_bbox);
+    bbox.union_with(sub_bbox);
   }
 
   _x_width = bbox.max()(0) - bbox.min()(0);
