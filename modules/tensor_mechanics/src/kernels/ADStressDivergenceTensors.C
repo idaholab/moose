@@ -1,0 +1,99 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADStressDivergenceTensors.h"
+
+// MOOSE includes
+// #include "Material.h"
+// #include "MooseVariable.h"
+// #include "SystemBase.h"
+
+#include "libmesh/quadrature.h"
+
+registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
+
+defineADValidParams(
+    ADStressDivergenceTensors,
+    ADKernel,
+    params.addClassDescription("Stress divergence kernel with automatic differentiation for the "
+                               "Cartesian coordinate system");
+    params.addRequiredParam<unsigned int>("component",
+                                          "An integer corresponding to the direction "
+                                          "the variable this kernel acts in. (0 for x, "
+                                          "1 for y, 2 for z)");
+    params.addRequiredCoupledVar("displacements",
+                                 "The string of displacements suitable for the problem statement");
+    params.addParam<std::string>("base_name", "Material property base name");
+    params.set<bool>("use_displaced_mesh") = false;
+    params.addParam<bool>("volumetric_locking_correction",
+                          false,
+                          "Set to false to turn off volumetric locking correction"););
+
+template <ComputeStage compute_stage>
+ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
+    const InputParameters & parameters)
+  : ADKernel<compute_stage>(parameters),
+    _base_name(this->template isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_"
+                                                        : ""),
+    _stress(adGetADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+    _component(adGetParam<unsigned int>("component")),
+    _ndisp(this->template coupledComponents("displacements")),
+    _disp_var(_ndisp),
+    _avg_grad_test(),
+    _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction"))
+{
+  for (unsigned int i = 0; i < _ndisp; ++i)
+    _disp_var[i] = this->template coupled("displacements", i);
+
+  // Error if volumetric locking correction is turned on for 1D problems
+  if (_ndisp == 1 && _volumetric_locking_correction)
+    mooseError("Volumetric locking correction should be set to false for 1-D problems.");
+}
+
+template <ComputeStage compute_stage>
+void
+ADStressDivergenceTensors<compute_stage>::initialSetup()
+{
+  if (this->template getBlockCoordSystem() != Moose::COORD_XYZ)
+    mooseError(
+        "The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
+}
+
+template <ComputeStage compute_stage>
+ADResidual
+ADStressDivergenceTensors<compute_stage>::computeQpResidual()
+{
+  ADResidual residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
+
+  // volumetric locking correction
+  if (_volumetric_locking_correction)
+    residual += _stress[_qp].trace() / 3.0 *
+                (_avg_grad_test[_i](_component) - _grad_test[_i][_qp](_component));
+
+  return residual;
+}
+
+template <ComputeStage compute_stage>
+void
+ADStressDivergenceTensors<compute_stage>::precalculateResidual()
+{
+  if (!_volumetric_locking_correction)
+    return;
+
+  // Calculate volume averaged value of shape function derivative
+  _avg_grad_test.resize(_test.size());
+  for (_i = 0; _i < _test.size(); ++_i)
+  {
+    _avg_grad_test[_i](_component) = 0.0;
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+      _avg_grad_test[_i](_component) += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
+
+    _avg_grad_test[_i](_component) /= _current_elem_volume;
+  }
+}
