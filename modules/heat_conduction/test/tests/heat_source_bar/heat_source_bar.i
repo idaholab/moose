@@ -1,19 +1,19 @@
-#This is a simple 1D test of the volumetric heat source with material properties
-#of a representative ceramic material.  A bar is uniformly heated, and a temperature
-#boundary condition is applied to the left side of the bar.
+# This is a simple 1D test of the volumetric heat source with material properties
+# of a representative ceramic material.  A bar is uniformly heated, and a temperature
+# boundary condition is applied to the left side of the bar.
 
-#Important properties of problem:
-#Length: 0.01 m
-#Thermal conductivity = 3.0 W/(mK)
-#Specific heat = 300.0 J/K
-#density = 10431.0 kg/m^3
-#Prescribed temperature on left side: 600 K
+# Important properties of problem:
+# Length: 0.01 m
+# Thermal conductivity = 3.0 W/(mK)
+# Specific heat = 300.0 J/K
+# density = 10431.0 kg/m^3
+# Prescribed temperature on left side: 600 K
 
-#When it has reached steady state, the temperature as a function of position is:
-# T = -q/(2*k) (x^2 - 2*x*length) + 600
-# or
-# T = -6.3333e+7 * (x^2 - 0.02*x) + 600
-# on left side: T=600, on right side, T=6933.3
+# When it has reached steady state, the temperature as a function of position is:
+#  T = -q/(2*k) (x^2 - 2*x*length) + 600
+#  or
+#  T = -6.3333e+7 * (x^2 - 0.02*x) + 600
+#  on left side: T=600, on right side, T=6933.3
 
 [Mesh]
   type = GeneratedMesh

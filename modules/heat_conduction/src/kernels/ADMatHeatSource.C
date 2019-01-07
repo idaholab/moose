@@ -14,14 +14,14 @@ defineADValidParams(
     ADMatHeatSource,
     ADKernel,
     params.addParam<Real>("scalar", 1.0, "Scalar multiplied by the body force term");
-    params.addRequiredParam<MaterialPropertyName>("material",
-                                                  "Material multiplied by the body force term"););
+    params.addRequiredParam<MaterialPropertyName>("material_property",
+                                                  "Material property describing the body force"););
 
 template <ComputeStage compute_stage>
 ADMatHeatSource<compute_stage>::ADMatHeatSource(const InputParameters & parameters)
   : ADKernel<compute_stage>(parameters),
     _scalar(adGetParam<Real>("scalar")),
-    _material(adGetADMaterialProperty<Real>("material"))
+    _material_property(adGetADMaterialProperty<Real>("material_property"))
 {
 }
 
@@ -29,5 +29,5 @@ template <ComputeStage compute_stage>
 ADResidual
 ADMatHeatSource<compute_stage>::computeQpResidual()
 {
-  return -_scalar * _material[_qp] * _test[_i][_qp];
+  return -_scalar * _material_property[_qp] * _test[_i][_qp];
 }

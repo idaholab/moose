@@ -26,7 +26,7 @@ protected:
   virtual ADResidual computeQpResidual();
 
   const Real _scalar;
-  const ADMaterialProperty(Real) & _material;
+  const ADMaterialProperty(Real) & _material_property;
 
   usingKernelMembers;
 };
