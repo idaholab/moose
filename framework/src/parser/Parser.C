@@ -340,8 +340,8 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
     if (is_parent)
       continue;
     if (_syntax.isDeprecatedSyntax(registered_identifier))
-      mooseDeprecated(
-          hit::errormsg(getFileName(), n, _syntax.deprecatedActionSyntaxMessage(registered_identifier)));
+      mooseDeprecated(hit::errormsg(
+          getFileName(), n, _syntax.deprecatedActionSyntaxMessage(registered_identifier)));
 
     params = _action_factory.getValidParams(it->second._action);
 
