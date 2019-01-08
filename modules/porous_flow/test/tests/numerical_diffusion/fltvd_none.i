@@ -1,4 +1,5 @@
-# Using framework objects: no mass lumping or upwinding
+# Using Flux-Limited TVD Advection ala Kuzmin and Turek
+# No antidiffusion, so this is identical to full-upwinding
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -22,13 +23,22 @@
 
 [Kernels]
   [./mass_dot]
-    type = TimeDerivative
+    type = MassLumpedTimeDerivative
     variable = tracer
   [../]
   [./flux]
-    type = ConservativeAdvection
-    velocity = '0.1 0 0'
+    type = FluxLimitedTVDAdvection
     variable = tracer
+    advective_flux_calculator = fluo
+  [../]
+[]
+
+[UserObjects]
+  [./fluo]
+    type = AdvectiveFluxCalculator
+    flux_limiter_type = none
+    u = tracer
+    velocity = '0.1 0 0'
   [../]
 []
 
@@ -40,8 +50,8 @@
     boundary = left
   [../]
   [./remove_tracer]
-    # Ideally, an OutflowBC would be used, but that does not exist in the framework
-    # In 1D VacuumBC is the same as OutflowBC, with the alpha parameter being twice the velocity
+# Ideally, an OutflowBC would be used, but that does not exist in the framework
+# In 1D VacuumBC is the same as OutflowBC, with the alpha parameter being twice the velocity
     type = VacuumBC
     boundary = right
     alpha = 0.2 # 2 * velocity
@@ -83,6 +93,7 @@
   end_time = 6
   dt = 6E-1
   nl_abs_tol = 1E-8
+  nl_max_its = 500
   timestep_tolerance = 1E-3
 []
 

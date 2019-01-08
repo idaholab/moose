@@ -186,7 +186,6 @@
 []
 
 [Outputs]
-  #exodus = true
   csv = true
   execute_on = final
 []

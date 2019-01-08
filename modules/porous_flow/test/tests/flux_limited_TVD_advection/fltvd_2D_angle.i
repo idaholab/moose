@@ -1,10 +1,14 @@
-# Using framework objects: no mass lumping or upwinding
+# Using Flux-Limited TVD Advection ala Kuzmin and Turek, with antidiffusion from superbee flux limiting
+# 2D version with velocity = (0.1, 0.2, 0)
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 100
+  dim = 2
+  nx = 10
   xmin = 0
   xmax = 1
+  ny = 10
+  ymin = 0
+  ymax = 1
 []
 
 [Variables]
@@ -16,19 +20,28 @@
   [./tracer]
     type = FunctionIC
     variable = tracer
-    function = 'if(x<0.1,0,if(x>0.3,0,1))'
+    function = 'if(x<0.1 | x > 0.3 | y < 0.1 | y > 0.3, 0, 1)'
   [../]
 []
 
 [Kernels]
   [./mass_dot]
-    type = TimeDerivative
+    type = MassLumpedTimeDerivative
     variable = tracer
   [../]
   [./flux]
-    type = ConservativeAdvection
-    velocity = '0.1 0 0'
+    type = FluxLimitedTVDAdvection
     variable = tracer
+    advective_flux_calculator = fluo
+  [../]
+[]
+
+[UserObjects]
+  [./fluo]
+    type = AdvectiveFluxCalculatorConstantVelocity
+    flux_limiter_type = superbee
+    u = tracer
+    velocity = '0.1 0.2 0'
   [../]
 []
 
@@ -40,8 +53,8 @@
     boundary = left
   [../]
   [./remove_tracer]
-    # Ideally, an OutflowBC would be used, but that does not exist in the framework
-    # In 1D VacuumBC is the same as OutflowBC, with the alpha parameter being twice the velocity
+# Ideally, an OutflowBC would be used, but that does not exist in the framework
+# In 1D VacuumBC is the same as OutflowBC, with the alpha parameter being twice the velocity
     type = VacuumBC
     boundary = right
     alpha = 0.2 # 2 * velocity
@@ -66,27 +79,16 @@
   [../]
 []
 
-[VectorPostprocessors]
-  [./tracer]
-    type = LineValueSampler
-    start_point = '0 0 0'
-    end_point = '1 0 0'
-    num_points = 101
-    sort_by = x
-    variable = tracer
-  [../]
-[]
-
 [Executioner]
   type = Transient
   solve_type = Newton
-  end_time = 6
-  dt = 6E-1
-  nl_abs_tol = 1E-8
-  timestep_tolerance = 1E-3
+  end_time = 2
+  dt = 0.1
 []
 
 [Outputs]
+  exodus = true
   csv = true
-  execute_on = final
+  print_linear_residuals = false
+  execute_on = 'initial final'
 []
