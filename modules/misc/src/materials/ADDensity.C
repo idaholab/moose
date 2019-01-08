@@ -68,11 +68,11 @@ ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)
 
     // couple gradients
     _grad_disp = {is_x_coupled ? &adCoupledGradient("disp_x")
-                         : (is_r_coupled ? &adCoupledGradient("disp_r") : &adGradZero()),
+                               : (is_r_coupled ? &adCoupledGradient("disp_r") : &adGradZero()),
                   is_y_coupled ? &adCoupledGradient("disp_y")
-                         : (is_z_coupled ? &adCoupledGradient("disp_z") : &adGradZero()),
+                               : (is_z_coupled ? &adCoupledGradient("disp_z") : &adGradZero()),
                   _coord_system != Moose::COORD_RZ && is_z_coupled ? &adCoupledGradient("disp_z")
-                                                             : &adGradZero()};
+                                                                   : &adGradZero()};
   }
 
   // no coupling
@@ -90,9 +90,9 @@ ADDensity<compute_stage>::initQpStatefulProperties()
   _density[_qp] = _orig_density;
 }
 
-template <ComputeStage compute_stage>
+template <>
 void
-ADDensity<compute_stage>::computeQpProperties()
+ADDensity<RESIDUAL>::computeQpProperties()
 {
   if (_is_coupled)
   {
@@ -118,13 +118,13 @@ ADDensity<compute_stage>::computeQpProperties()
         break;
 
       case Moose::COORD_RZ:
-        if (this->template _q_point[_qp](0) != 0.0)
-          Azz = _disp_r[_qp] / this->template _q_point[_qp](0) + 1.0;
+        if (_q_point[_qp](0) != 0.0)
+          Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
         break;
 
       case Moose::COORD_RSPHERICAL:
-        if (this->template _q_point[_qp](0) != 0.0)
-          Ayy = Azz = _disp_r[_qp] / this->template _q_point[_qp](0) + 1.0;
+        if (_q_point[_qp](0) != 0.0)
+          Ayy = Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
         break;
     }
 
@@ -134,4 +134,10 @@ ADDensity<compute_stage>::computeQpProperties()
   }
   else
     _density[_qp] = _orig_density;
+}
+
+template <>
+void
+ADDensity<JACOBIAN>::computeQpProperties()
+{
 }

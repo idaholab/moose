@@ -80,6 +80,7 @@
     prereq = 'rz_nonlinear'
     requirement = 'The solid mechanics formulation of elastic 2DRZ eigenstrain solution and density shall match the analytical expression'
     issues = "#8642"
+    design = "/solid_mechanics/index.md"
   [../]
 
   [./rspherical]

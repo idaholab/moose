@@ -62,6 +62,7 @@
     cli_args = 'BCs/bot_x/boundary=10 BCs/bot_y/boundary=10 BCs/bot_z/boundary=10 Outputs/out/file_base=shear_y_test_out BCs/top_y/type=FunctionDirichletBC BCs/top_y/function=rampConstant1 BCs/top_y/boundary=12 BCs/top_z/boundary=12 BCs/top_z/value=0 BCs/top_z/type=DirichletBC BCs/top_x/boundary=12 BCs/top_x/value=0 BCs/top_x/type=DirichletBC
                 ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
     prereq = 'test_shear_y_tm'
+    design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
   [../]
@@ -130,6 +131,7 @@
     prereq = 'test_z_tm'
     issues = "#12633"
     design = "/Mass.md"
+    requirement = "Mass shall remain constant"
   [../]
 
   [./test_y_tm]

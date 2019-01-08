@@ -16,7 +16,7 @@
 #
 # Since the strain is 1e-3 in all three directions, the new density should be
 #   new_density = original_density * V_0 / V
-#   new_density = 0.283 / (1 + 9.95e−3 + 9.95e−3 + 9.95e−3) = 0.2747973
+#   new_density = 0.283 / (1 + 9.95e-3 + 9.95e-3 + 9,95e-3) = 0.2747973
 #
 # The code computes a new density of .2746770
 
