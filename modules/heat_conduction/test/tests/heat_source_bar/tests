@@ -1,0 +1,29 @@
+[Tests]
+  [./heat_source_bar]
+    type = 'Exodiff'
+    input = 'heat_source_bar.i'
+    exodiff = 'heat_source_bar_out.e'
+    requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar'
+    design = "\HeatSource.md"
+    issues = "#2582"
+  [../]
+  [./ad_heat_source_bar]
+    type = 'Exodiff'
+    input = 'ad_heat_source_bar.i'
+    exodiff = 'ad_heat_source_bar_out.e'
+    requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar using AD kernels'
+    design = "\ADMatHeatSource"
+    issues = "#12633"
+  [../]
+  [./ad_heat_source_bar_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_heat_source_bar.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-2
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = 'The AD heat conduction and heat source Jacobian shall be beautiful'
+    design = "jacobian_definition.md"
+    issues = "#5658 #12633"
+  [../]
+[]
