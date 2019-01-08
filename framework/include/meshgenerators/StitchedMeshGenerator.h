@@ -44,6 +44,9 @@ protected:
 
   /// The meshes to be stitched together.
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
+
+  /// Type of algorithm used to find matching nodes (binary or exhaustive)
+  MooseEnum _algorithm;
 };
 
 #endif // STITCHEDMESHGENERATOR_H

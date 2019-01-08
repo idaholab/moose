@@ -22,11 +22,17 @@ validParams<StitchedMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
+  MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
+
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
   params.addParam<bool>(
       "clear_stitched_boundary_ids", true, "Whether or not to clear the stitchd boundary IDs");
   params.addRequiredParam<std::vector<std::vector<std::string>>>(
       "stitch_boundaries_pairs", "Pairs of boundaries to be stitched together");
+  params.addParam<MooseEnum>(
+      "algorithm",
+      algorithm,
+      "Control the use of binary search for the nodes of the stitched surfaces.");
 
   return params;
 }
@@ -36,7 +42,8 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
     _stitch_boundaries_pairs(
-        getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs"))
+        getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs")),
+    _algorithm(parameters.get<MooseEnum>("algorithm"))
 {
   // Grab the input meshes
   _mesh_ptrs.reserve(_input_names.size());
@@ -118,7 +125,15 @@ StitchedMeshGenerator::generate()
       }
     }
 
-    mesh->stitch_meshes(*_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
+    const bool use_binary_search = (_algorithm == "BINARY");
+
+    mesh->stitch_meshes(*_meshes[i],
+                        first,
+                        second,
+                        TOLERANCE,
+                        _clear_stitched_boundary_ids,
+                        /*verbose = */ true,
+                        use_binary_search);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
