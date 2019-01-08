@@ -16,6 +16,7 @@
 #include "RotationTensor.h"
 
 #define usingComputeStrainBaseMembers                                                              \
+  usingMaterialMembers;                                                                            \
   using ADComputeStrainBase<compute_stage>::_disp;                                                 \
   using ADComputeStrainBase<compute_stage>::_grad_disp;                                            \
   using ADComputeStrainBase<compute_stage>::_mechanical_strain;                                    \
@@ -64,5 +65,8 @@ protected:
 
   usingMaterialMembers;
 };
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeStrainBase);
 
 #endif // ADCOMPUTESTRAINBASE_H

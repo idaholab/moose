@@ -31,7 +31,6 @@ public:
 protected:
   virtual void computeQpStress();
 
-  usingMaterialMembers;
   usingComputeStressBaseMembers;
 };
 

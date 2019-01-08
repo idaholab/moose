@@ -16,6 +16,7 @@
 #include "Function.h"
 
 #define usingComputeStressBaseMembers                                                              \
+  usingMaterialMembers;                                                                            \
   using ADComputeStressBase<compute_stage>::_stress;                                               \
   using ADComputeStressBase<compute_stage>::_mechanical_strain;                                    \
   using ADComputeStressBase<compute_stage>::_elastic_strain;                                       \
@@ -59,5 +60,8 @@ protected:
 
   usingMaterialMembers;
 };
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeStressBase);
 
 #endif // ADCOMPUTESTRESSBASE_H

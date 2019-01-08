@@ -29,7 +29,6 @@ public:
 protected:
   virtual void computeProperties() override;
 
-  usingMaterialMembers;
   usingComputeStrainBaseMembers;
 };
 

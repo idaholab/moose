@@ -26,6 +26,11 @@ InputParameters validParams<MooseObject>();
 // needed to avoid #include cycle with MooseApp and MooseObject
 [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 
+// helper macro to explicitly instantiate AD classes
+#define adBaseClass(X)                                                                             \
+  template class X<RESIDUAL>;                                                                      \
+  template class X<JACOBIAN>;
+
 #define adGetParam this->template getParam
 
 /**
@@ -97,8 +102,7 @@ public:
    * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args)
-  {
+  [[noreturn]] void paramError(const std::string & param, Args... args) {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
       prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
@@ -137,8 +141,7 @@ public:
   }
 
   template <typename... Args>
-  [[noreturn]] void mooseError(Args &&... args) const
-  {
+  [[noreturn]] void mooseError(Args &&... args) const {
     std::ostringstream oss;
     moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
     std::string msg = oss.str();

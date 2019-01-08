@@ -30,6 +30,7 @@
   using ADKernel<compute_stage>::coupled;                                                          \
   using ADKernel<compute_stage>::coupledComponents;                                                \
   using ADKernel<compute_stage>::getBlockCoordSystem;                                              \
+  using ADKernel<compute_stage>::paramError;                                                       \
   using ADKernel<compute_stage>::isParamValid
 
 template <ComputeStage compute_stage>
