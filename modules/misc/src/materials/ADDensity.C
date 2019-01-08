@@ -90,9 +90,9 @@ ADDensity<compute_stage>::initQpStatefulProperties()
   _density[_qp] = _orig_density;
 }
 
-template <>
+template <ComputeStage compute_stage>
 void
-ADDensity<RESIDUAL>::computeQpProperties()
+ADDensity<compute_stage>::computeQpProperties()
 {
   if (_is_coupled)
   {
@@ -118,13 +118,13 @@ ADDensity<RESIDUAL>::computeQpProperties()
         break;
 
       case Moose::COORD_RZ:
-        if (_q_point[_qp](0) != 0.0)
-          Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
+        if (this->template _q_point[_qp](0) != 0.0)
+          Azz = _disp_r[_qp] / this->template _q_point[_qp](0) + 1.0;
         break;
 
       case Moose::COORD_RSPHERICAL:
-        if (_q_point[_qp](0) != 0.0)
-          Ayy = Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
+        if (this->template _q_point[_qp](0) != 0.0)
+          Ayy = Azz = _disp_r[_qp] / this->template _q_point[_qp](0) + 1.0;
         break;
     }
 
@@ -134,10 +134,4 @@ ADDensity<RESIDUAL>::computeQpProperties()
   }
   else
     _density[_qp] = _orig_density;
-}
-
-template <>
-void
-ADDensity<JACOBIAN>::computeQpProperties()
-{
 }
