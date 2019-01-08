@@ -26,7 +26,7 @@
 []
 
 [ADKernels]
-  [./HeatDiff]
+  [./diff]
     type = ADMatDiffusion
     variable = T
     diffusivity = diffusivity
@@ -60,7 +60,6 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity'
     prop_values = '0.95'
-    block = 0
   [../]
 []
 
@@ -74,8 +73,8 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  dt = 2
-  end_time = 100
+  dt = 1e-2
+  end_time = 1
 []
 
 [Postprocessors]
