@@ -24,9 +24,6 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-
   [./temp]
     initial_condition = 117.56
   [../]
