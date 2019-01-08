@@ -1358,7 +1358,7 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
   }
 
   // Automatic differentiation
-  if (_need_ad && _computing_jacobian)
+  if (_need_ad && _subproblem.currentlyComputingJacobian())
     computeAD(num_dofs, nqp);
 }
 
@@ -1780,7 +1780,7 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
     }
   }
 
-  if (_need_neighbor_ad && _computing_jacobian)
+  if (_need_neighbor_ad && _subproblem.currentlyComputingJacobian())
     computeADNeighbor(num_dofs, nqp);
 }
 

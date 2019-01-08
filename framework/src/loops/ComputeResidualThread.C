@@ -99,9 +99,6 @@ ComputeResidualThread::subdomainChanged()
     _ibc_warehouse = &(_integrated_bcs.getVectorTagsObjectWarehouse(_tags, _tid));
     _ik_warehouse = &(_interface_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
   }
-
-  for (auto & var : needed_moose_vars)
-    var->computingJacobian(false);
 }
 
 void
