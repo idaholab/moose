@@ -3,11 +3,33 @@
     type = 'Exodiff'
     input = '1D_transient.i'
     exodiff = '1D_transient_out.e'
+    requirement = "Heat conduction shall match the answer from an analytical solution"
+    design = "HeatConduction.md"
+    issues = "#5975"
+  [../]
+  [./ad_1D_transient_ad_mat]
+    type = 'Exodiff'
+    input = 'ad_1D_transient.i'
+    exodiff = 'ad_1D_transient_out.e'
+    requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
+    design = "jacobian_definition.md"
+    issues = "#5658 #12633"
   [../]
 
   [./2D_steady_state]
     type = 'Exodiff'
     input = '2d_steady_state_final_prob.i'
     exodiff = '2d_steady_state_final_prob_out.e'
+    requirement = "Heat conduction shall match the answer from an analytical solution"
+    design = "HeatConduction.md"
+    issues = "#8194"
+  [../]
+  [./ad_2D_steady_state_ad_mat]
+    type = 'Exodiff'
+    input = 'ad_2d_steady_state_final_prob.i'
+    exodiff = 'ad_2d_steady_state_final_prob_out.e'
+    requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
+    design = "jacobian_definition.md"
+    issues = "#5658 #12633"
   [../]
 []

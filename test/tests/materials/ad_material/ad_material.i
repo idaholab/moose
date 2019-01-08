@@ -13,7 +13,7 @@
 
 [ADKernels]
   [./diff]
-    type = ADMatDiffusion
+    type = ADMatDiffusionTest
     variable = u
     prop_to_use = 'AdAd'
     ad_mat_prop = ad_diffusivity
