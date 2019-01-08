@@ -1,30 +1,29 @@
 #
-# Patch test for 1D spherical elements
+# This problem is taken from the Abaqus verification manual:
+#   "1.5.1 Membrane patch test"
+# The stress solution is given as:
+#   xx = yy = 1600
+#   zz = 800
+#   xy = 400
+#   yz = zx = 0
 #
-# The 1D mesh is pinned at x=0.  The displacement at the outer node is set to
-#   3e-3*X where X is the x-coordinate of that node.  That gives a strain of
-#   3e-3 for the x, y, and z directions.
-#
-# Young's modulus is 1e6, and Poisson's ratio is 0.25.  This gives:
-#
-# Stress xx, yy, zz = E/(1+nu)/(1-2nu)*strain*((1-nu) + nu + nu) = 6000
-#
+# Since the strain is 1e-3 in both directions, the new density should be
+#   new_density = original_density * V_0 / V
+#   new_density = 0.283 / (1 + 1e-3 + 1e-3) = 0.282435
 
 [GlobalParams]
-  displacements = 'disp_x'
+  displacements = 'disp_x disp_y'
   temperature = temp
 []
 
-[Problem]
-  coord_type = RSPHERICAL
-[]
-
 [Mesh]
-  file = elastic_patch_rspherical.e
+  file = elastic_patch_rz.e
 []
 
 [Variables]
   [./disp_x]
+  [../]
+  [./disp_y]
   [../]
 
   [./temp]
@@ -35,8 +34,9 @@
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   incremental = true
+  planar_formulation = PLANE_STRAIN
   add_variables = true
-  generate_output = 'stress_xx stress_yy stress_zz'
+  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 []
 
 [Kernels]
@@ -50,8 +50,14 @@
   [./ur]
     type = FunctionDirichletBC
     variable = disp_x
-    boundary = '1 2'
-    function = '3e-3*x'
+    boundary = 10
+    function = '1e-3*(x+0.5*y)'
+  [../]
+  [./uz]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = 10
+    function = '1e-3*(y+0.5*x)'
   [../]
 []
 
@@ -64,9 +70,11 @@
   [./stress]
     type = ComputeStrainIncrementBasedStress
   [../]
+[]
 
+[ADMaterials]
   [./density]
-    type = Density
+    type = ADDensity
     density = 0.283
     outputs = all
   [../]

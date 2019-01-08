@@ -14,6 +14,12 @@
 # increment_calculation = eigen.  There is a small error when the
 # rashidapprox option is used.
 #
+# Since the strain is 1e-3 in all three directions, the new density should be
+#   new_density = original_density * V_0 / V
+#   new_density = 0.283 / (1 + 9.95e−3 + 9.95e−3 + 9.95e−3) = 0.2747973
+#
+# The code computes a new density of .2746770
+
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -26,21 +32,6 @@
 
 [Mesh]
   file = elastic_patch_rz.e
-[]
-
-[Functions]
-  [./ur]
-    type = ParsedFunction
-    value = '1e-2*x'
-  [../]
-  [./uz]
-    type = ParsedFunction
-    value = '1e-2*y'
-  [../]
-  [./body]
-    type = ParsedFunction
-    value = '0'
-  [../]
 []
 
 [Variables]
@@ -57,21 +48,13 @@
 [Modules/TensorMechanics/Master/All]
   strain = FINITE
   decomposition_method = EigenSolution
-  eigenstrain_names = eigenstrain
   add_variables = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 []
 
 [Kernels]
-  [./body]
-    type = BodyForce
-    variable = disp_y
-    value = 1
-    function = body
-  [../]
-
   [./heat]
-    type = HeatConduction
+    type = TimeDerivative
     variable = temp
   [../]
 []
@@ -81,20 +64,13 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 10
-    function = ur
+    function = '1e-2*x'
   [../]
   [./uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
-    function = uz
-  [../]
-
-  [./temp]
-    type = DirichletBC
-    variable = temp
-    boundary = 10
-    value = 117.56
+    function = '1e-2*y'
   [../]
 []
 
@@ -104,25 +80,14 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
   [../]
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 117.56
-    thermal_expansion_coeff = 0.0
-    eigenstrain_name = eigenstrain
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-
-  [./heat]
-    type = HeatConductionMaterial
-    specific_heat = 0.116
-    thermal_conductivity = 4.85e-4
   [../]
 
   [./density]
     type = Density
     density = 0.283
+    outputs = all
   [../]
 []
 
@@ -130,7 +95,6 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  start_time = 0.0
   end_time = 1.0
 []
 

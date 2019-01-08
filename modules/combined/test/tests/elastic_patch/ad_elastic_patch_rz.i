@@ -1,19 +1,21 @@
 #
 # This problem is taken from the Abaqus verification manual:
-#   "1.5.1 Membrane patch test"
+#   "1.5.4 Patch test for axisymmetric elements"
 # The stress solution is given as:
-#   xx = yy = 1600
-#   zz = 800
+#   xx = yy = zz = 2000
 #   xy = 400
-#   yz = zx = 0
 #
-# Since the strain is 1e-3 in both directions, the new density should be
+# Since the strain is 1e-3 in all three directions, the new density should be
 #   new_density = original_density * V_0 / V
-#   new_density = 0.283 / (1 + 1e-3 + 1e-3) = 0.282435
+#   new_density = 0.283 / (1 + 1e-3 + 1e-3 + 1e-3) = 0.282153
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
   temperature = temp
+[]
+
+[Problem]
+  coord_type = RZ
 []
 
 [Mesh]
@@ -34,12 +36,18 @@
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   incremental = true
-  planar_formulation = PLANE_STRAIN
   add_variables = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 []
 
 [Kernels]
+  [./body]
+    type = BodyForce
+    variable = disp_y
+    value = 1
+    function = '-400/x'
+  [../]
+
   [./heat]
     type = TimeDerivative
     variable = temp
@@ -51,13 +59,13 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 10
-    function = '1e-3*(x+0.5*y)'
+    function = '1e-3*x'
   [../]
   [./uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
-    function = '1e-3*(y+0.5*x)'
+    function = '1e-3*(x+y)'
   [../]
 []
 
@@ -70,9 +78,11 @@
   [./stress]
     type = ComputeStrainIncrementBasedStress
   [../]
+[]
 
+[ADMaterials]
   [./density]
-    type = Density
+    type = ADDensity
     density = 0.283
     outputs = all
   [../]
@@ -86,5 +96,8 @@
 []
 
 [Outputs]
-  exodus = true
+  [./out]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
 []
