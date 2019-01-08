@@ -330,6 +330,24 @@ TEST(HitTests, BraceExpressions)
        "bar",
        "23",
        hit::Field::Kind::Int},
+      {"super-complicated",
+       "foo1 = 42\n"
+       "foo2 = 43\n"
+       "[section1]\n"
+       "  num = 1\n"
+       "  bar = ${${raw foo ${num}}} # becomes 42\n"
+       "[]\n"
+       "[section2]\n"
+       "  num = 2\n"
+       "  bar = ${${raw foo ${num}}}  # becomes 43\n"
+       "[]\n"
+       "\n"
+       "a = ${fparse\n"
+       "      ${section1/bar} + foo1 / foo2\n"
+       "     }\n",
+       "a",
+       "42.97674418604651",
+       hit::Field::Kind::Float},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
