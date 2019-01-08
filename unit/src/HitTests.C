@@ -288,7 +288,7 @@ TEST(HitTests, ParseFields)
              << strkind(f->kind()) << "', want '" << strkind(test.kind) << "'\n";
   }
 }
-TEST(ExpandWalkerTests, All)
+TEST(HitTests, BraceExpressions)
 {
   ValCase cases[] = {
       {"substitute string", "foo=bar boo=${foo}", "boo", "bar", hit::Field::Kind::String},
@@ -316,6 +316,20 @@ TEST(ExpandWalkerTests, All)
        "hello/boo",
        "baz",
        hit::Field::Kind::String},
+      {"multi-line brace expression",
+       "foo=${raw 4\n"
+       "          2\n"
+       "     }",
+       "foo",
+       "42",
+       hit::Field::Kind::String},
+      {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", hit::Field::Kind::Float},
+      {"fparse-with-var", "var=39 foo=${fparse var + 3}", "foo", "42", hit::Field::Kind::Float},
+      {"brace-expression-ends-before-newline",
+       "foo=${raw 42} bar=23",
+       "bar",
+       "23",
+       hit::Field::Kind::Int},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
@@ -326,6 +340,10 @@ TEST(ExpandWalkerTests, All)
     {
       root = hit::parse("TEST", test.input);
       hit::BraceExpander exw("TEST");
+      hit::RawEvaler raw;
+      FuncParseEvaler fparse_ev;
+      exw.registerEvaler("fparse", fparse_ev);
+      exw.registerEvaler("raw", raw);
       root->walk(&exw);
       if (exw.errors.size() > 0 && test.kind != hit::Field::Kind::None)
       {

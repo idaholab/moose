@@ -50,6 +50,7 @@ private:
   std::vector<BraceNode> _list;
 };
 
+size_t parseBraceNode(const std::string & input, size_t start, BraceNode & n);
 class BraceExpander;
 
 class Evaler

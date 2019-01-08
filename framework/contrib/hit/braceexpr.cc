@@ -64,6 +64,8 @@ ReplaceEvaler::eval(Field * n, const std::list<std::string> & args, BraceExpande
     if (src && src != n && src->type() == NodeType::Field)
     {
       exp.used.push_back(pathJoin({curr->fullpath(), var}));
+      // change kind only (not val)
+      n->setVal(n->val(), dynamic_cast<Field *>(src)->kind());
       return curr->param<std::string>(var);
     }
   }
@@ -93,7 +95,8 @@ BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*node
   {
     std::string s;
     s = expand(f, f->val());
-    f->setVal(s);
+    if (errors.size() == 0)
+      f->setVal(s);
   }
   catch (Error & err)
   {
@@ -107,6 +110,7 @@ BraceExpander::expand(Field * f, const std::string & input)
 {
   std::string result = input;
   size_t start = 0;
+  int count = 0;
   while ((start = result.find("${", start)) != std::string::npos)
   {
     BraceNode root;
@@ -115,11 +119,17 @@ BraceExpander::expand(Field * f, const std::string & input)
     auto replace_text = expand(f, root);
     result.replace(root.offset(), root.len(), replace_text);
     start = root.offset() + replace_text.size();
+    count++;
   }
+
+  // switch kind back to string if there are multiple top-level brace expressions or there is text
+  // outside of the single brace expression
+  if (count > 1 || (count == 1 && (input.rfind("}") - input.find("${") + 1 < input.size())))
+    // change kind only (not val)
+    f->setVal(f->val(), Field::Kind::String);
+
   return result;
 }
-
-//  ${hello}
 
 std::string
 BraceExpander::expand(Field * n, BraceNode & expr)
@@ -169,7 +179,7 @@ parseBraceNode(const std::string & input, size_t start, BraceNode & n)
   start = parseBraceBody(input, start, n);
   start = skipSpace(input, start);
   if (input[start] != '}')
-    throw std::runtime_error("missing closing '}' in brace expression");
+    throw Error("missing closing '}' in brace expression");
   start++; // eat closing "}"
   n.len() = start - n.offset();
   return start;
