@@ -103,7 +103,7 @@ KernelValue::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 Real
 KernelValue::computeQpResidual()
 {
-  return 0.0;
+  mooseError("Override precomputeQpResidual() in your KernelValue derived class!");
 }
 
 Real

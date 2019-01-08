@@ -12,7 +12,7 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage compute_stage>
+template <ComputeStage>
 class ADDiffusion;
 
 declareADValidParams(ADDiffusion);
