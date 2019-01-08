@@ -12,6 +12,7 @@
 
 #include "MeshGenerator.h"
 #include "libmesh/replicated_mesh.h"
+#include "MooseEnum.h"
 
 // Forward declarations
 class StitchedMeshGenerator;
