@@ -66,7 +66,4 @@ protected:
   usingMaterialMembers;
 };
 
-// explicit instantiation is required for AD base classes
-adBaseClass(ADComputeStrainBase);
-
 #endif // ADCOMPUTESTRAINBASE_H

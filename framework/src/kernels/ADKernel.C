@@ -205,5 +205,5 @@ ADKernel<compute_stage>::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
   */
 }
 
-template class ADKernel<RESIDUAL>;
-template class ADKernel<JACOBIAN>;
+// explicit instantiation is required for AD base classes
+adBaseClass(ADKernel);

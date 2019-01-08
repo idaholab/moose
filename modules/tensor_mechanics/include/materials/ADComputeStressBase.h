@@ -61,7 +61,4 @@ protected:
   usingMaterialMembers;
 };
 
-// explicit instantiation is required for AD base classes
-adBaseClass(ADComputeStressBase);
-
 #endif // ADCOMPUTESTRESSBASE_H

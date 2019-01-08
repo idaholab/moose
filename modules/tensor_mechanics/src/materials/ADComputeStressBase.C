@@ -52,3 +52,6 @@ ADComputeStressBase<compute_stage>::computeQpProperties()
   // Add in extra stress
   //_stress[_qp] += _extra_stress[_qp];
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeStressBase);

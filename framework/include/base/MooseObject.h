@@ -29,7 +29,7 @@ InputParameters validParams<MooseObject>();
 // helper macro to explicitly instantiate AD classes
 #define adBaseClass(X)                                                                             \
   template class X<RESIDUAL>;                                                                      \
-  template class X<JACOBIAN>;
+  template class X<JACOBIAN>
 
 #define adGetParam this->template getParam
 

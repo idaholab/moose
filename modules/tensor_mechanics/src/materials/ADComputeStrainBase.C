@@ -99,3 +99,6 @@ ADComputeStrainBase<compute_stage>::initQpStatefulProperties()
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeStrainBase);
