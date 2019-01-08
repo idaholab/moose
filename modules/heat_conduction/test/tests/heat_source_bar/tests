@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'heat_source_bar.i'
     exodiff = 'heat_source_bar_out.e'
-    abs_zero = 1e-8
+    abs_zero = 1e-7
     requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar'
     design = "\HeatSource.md"
     issues = "#2582"
@@ -12,7 +12,7 @@
     type = 'Exodiff'
     input = 'ad_heat_source_bar.i'
     exodiff = 'ad_heat_source_bar_out.e'
-    abs_zero = 1e-8
+    abs_zero = 1e-7
     requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar using AD kernels'
     design = "\ADMatHeatSource"
     issues = "#12633"
