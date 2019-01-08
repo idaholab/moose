@@ -153,12 +153,6 @@
     type = ComputeLinearElasticStress
     block = PATCH
   [../]
-
-  [./density]
-    type = Density
-    block = PATCH
-    density = 12.335297548665
-  [../]
 []
 
 [Executioner]
