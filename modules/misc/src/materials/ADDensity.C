@@ -25,25 +25,25 @@ template <ComputeStage compute_stage>
 ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
     _is_coupled(true),
-    _disp_r(this->template isCoupled("displacements")
+    _disp_r(isCoupled("displacements")
                 ? adCoupledValue("displacements", 0)
-                : (this->template isCoupled("disp_r") ? adCoupledValue("disp_r") : adZero())),
+                : (isCoupled("disp_r") ? adCoupledValue("disp_r") : adZero())),
     _orig_density(adGetParam<Real>("density")),
     _density(adDeclareADProperty<Real>("density"))
 {
-  const bool is_r_coupled = this->template isCoupled("disp_r");
-  const bool is_x_coupled = this->template isCoupled("disp_x");
-  const bool is_y_coupled = this->template isCoupled("disp_y");
-  const bool is_z_coupled = this->template isCoupled("disp_z");
+  const bool is_r_coupled = isCoupled("disp_r");
+  const bool is_x_coupled = isCoupled("disp_x");
+  const bool is_y_coupled = isCoupled("disp_y");
+  const bool is_z_coupled = isCoupled("disp_z");
 
   // new parameter scheme
-  if (this->template isCoupled("displacements"))
+  if (isCoupled("displacements"))
   {
     // get coordinate system
-    _coord_system = this->template getBlockCoordSystem();
+    _coord_system = getBlockCoordSystem();
 
     // get coupled gradients
-    const unsigned int ndisp = this->template coupledComponents("displacements");
+    const unsigned int ndisp = coupledComponents("displacements");
     _grad_disp.resize(ndisp);
     for (unsigned int i = 0; i < ndisp; ++i)
       _grad_disp[i] = &adCoupledGradient("displacements", i);

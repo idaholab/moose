@@ -32,6 +32,7 @@
   using ADKernel<compute_stage>::getBlockCoordSystem;                                              \
   using ADKernel<compute_stage>::paramError;                                                       \
   using ADKernel<compute_stage>::isParamValid
+  using ADKernel<compute_stage>::isCoupled
 
 // forward declarations
 template <ComputeStage compute_stage>
