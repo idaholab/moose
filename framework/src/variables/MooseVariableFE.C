@@ -46,9 +46,11 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_curl(false),
     _need_curl_old(false),
     _need_curl_older(false),
+    _need_ad(false),
     _need_ad_u(false),
     _need_ad_grad_u(false),
     _need_ad_second_u(false),
+    _need_neighbor_ad(false),
     _need_neighbor_ad_u(false),
     _need_neighbor_ad_grad_u(false),
     _need_neighbor_ad_second_u(false),
@@ -1356,7 +1358,7 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
   }
 
   // Automatic differentiation
-  if (_need_ad_u && _computing_jacobian)
+  if (_need_ad && _computing_jacobian)
     computeAD(num_dofs, nqp);
 }
 
@@ -1372,7 +1374,8 @@ void
 MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned int & nqp)
 {
   _ad_dofs.resize(num_dofs);
-  _ad_u.resize(nqp);
+  if (_need_ad_u)
+    _ad_u.resize(nqp);
 
   if (_need_ad_grad_u)
     _ad_grad_u.resize(nqp);
@@ -1390,7 +1393,8 @@ MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned i
 
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
-    _ad_u[qp] = 0;
+    if (_need_ad_u)
+      _ad_u[qp] = 0;
 
     if (_need_ad_grad_u)
       _ad_grad_u[qp] = 0;
@@ -1412,7 +1416,8 @@ MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned i
   {
     for (unsigned int qp = 0; qp < nqp; qp++)
     {
-      _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
+      if (_need_ad_u)
+        _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
 
       if (_need_ad_grad_u)
         _ad_grad_u[qp] += _ad_dofs[i] * _grad_phi[i][qp];
@@ -1435,7 +1440,8 @@ void
 MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const unsigned int & nqp)
 {
   _neighbor_ad_dofs.resize(num_dofs);
-  _neighbor_ad_u.resize(nqp);
+  if (_need_neighbor_ad_u)
+    _neighbor_ad_u.resize(nqp);
 
   if (_need_neighbor_ad_grad_u)
     _neighbor_ad_grad_u.resize(nqp);
@@ -1453,7 +1459,8 @@ MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const un
 
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
-    _neighbor_ad_u[qp] = 0;
+    if (_need_neighbor_ad_u)
+      _neighbor_ad_u[qp] = 0;
 
     if (_need_neighbor_ad_grad_u)
       _neighbor_ad_grad_u[qp] = 0;
@@ -1475,7 +1482,8 @@ MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const un
   {
     for (unsigned int qp = 0; qp < nqp; qp++)
     {
-      _neighbor_ad_u[qp] += _neighbor_ad_dofs[i] * _phi_neighbor[i][qp];
+      if (_need_neighbor_ad_u)
+        _neighbor_ad_u[qp] += _neighbor_ad_dofs[i] * _phi_neighbor[i][qp];
 
       if (_need_neighbor_ad_grad_u)
         _neighbor_ad_grad_u[qp] += _neighbor_ad_dofs[i] * _grad_phi_neighbor[i][qp];
@@ -1771,6 +1779,9 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
       }
     }
   }
+
+  if (_need_neighbor_ad && _computing_jacobian)
+    computeADNeighbor(num_dofs, nqp);
 }
 
 template <typename OutputType>
