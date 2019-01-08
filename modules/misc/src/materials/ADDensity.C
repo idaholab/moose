@@ -118,13 +118,13 @@ ADDensity<compute_stage>::computeQpProperties()
         break;
 
       case Moose::COORD_RZ:
-        if (this->template _q_point[_qp](0) != 0.0)
-          Azz = _disp_r[_qp] / this->template _q_point[_qp](0) + 1.0;
+        if (_q_point[_qp](0) != 0.0)
+          Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
         break;
 
       case Moose::COORD_RSPHERICAL:
-        if (this->template _q_point[_qp](0) != 0.0)
-          Ayy = Azz = _disp_r[_qp] / this->template _q_point[_qp](0) + 1.0;
+        if (_q_point[_qp](0) != 0.0)
+          Ayy = Azz = _disp_r[_qp] / _q_point[_qp](0) + 1.0;
         break;
     }
 

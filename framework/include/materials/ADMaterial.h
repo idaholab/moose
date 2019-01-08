@@ -20,6 +20,7 @@
   using ADMaterial<compute_stage>::_qrule;                                                         \
   using ADMaterial<compute_stage>::_JxW;                                                           \
   using ADMaterial<compute_stage>::_coord;                                                         \
+  using ADMaterial<compute_stage>::_q_point;                                                       \
   using ADMaterial<compute_stage>::_assembly;                                                      \
   using ADMaterial<compute_stage>::_mesh;                                                          \
   using ADMaterial<compute_stage>::coupled;                                                        \
