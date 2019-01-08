@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MemoryUtils.h"
+#include "MooseError.h"
 
 #include <unistd.h>
 #include <mpi.h>
@@ -18,6 +19,7 @@
 #include <mach/task.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
+#include <mach/vm_page_size.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
@@ -58,7 +60,7 @@ getMPIProcessorName()
 }
 
 void
-getMemoryStats(Stats & stats)
+getMemoryStats(Stats & stats, MemUnit units)
 {
   enum StatItem
   {
@@ -96,17 +98,22 @@ getMemoryStats(Stats & stats)
                                   reinterpret_cast<task_info_t>(&t_info),
                                   &t_info_count))
     {
-      val[index_virtual_size] = t_info.virtual_size;
-      val[index_resident_size] = t_info.resident_size;
+      val[index_virtual_size] = t_info.virtual_size;   // in bytes
+      val[index_resident_size] = t_info.resident_size; // in bytes
     }
+    else
+      mooseDoOnce(::mooseWarning("task_info call failed, memory usage numbers will be incorrect"));
 #endif
   }
 
+  // Create the proper divisor based on the units
+  const long divisor = 1 << (static_cast<unsigned int>(units) * 10);
+
   // physical mem
-  stats._physical_memory = val[index_resident_size];
+  stats._physical_memory = val[index_resident_size] / divisor;
 
   // virtual mem
-  stats._virtual_memory = val[index_virtual_size];
+  stats._virtual_memory = val[index_virtual_size] / divisor;
 
   // page faults
   stats._page_faults = val[index_page_faults];
