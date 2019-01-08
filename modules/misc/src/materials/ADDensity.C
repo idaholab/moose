@@ -19,7 +19,7 @@ defineADValidParams(
     params.addCoupledVar(
         "displacements",
         "The displacements appropriate for the simulation geometry and coordinate system");
-    params.addRequiredParam<Real>("density", "Density"););
+    params.addRequiredParam<Real>("density", "Initial density"););
 
 template <ComputeStage compute_stage>
 ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)
@@ -28,7 +28,7 @@ ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)
     _disp_r(isCoupled("displacements")
                 ? adCoupledValue("displacements", 0)
                 : (isCoupled("disp_r") ? adCoupledValue("disp_r") : adZero())),
-    _orig_density(adGetParam<Real>("density")),
+    _initial_density(adGetParam<Real>("density")),
     _density(adDeclareADProperty<Real>("density"))
 {
   const bool is_r_coupled = isCoupled("disp_r");
@@ -87,7 +87,7 @@ template <ComputeStage compute_stage>
 void
 ADDensity<compute_stage>::initQpStatefulProperties()
 {
-  _density[_qp] = _orig_density;
+  _density[_qp] = _initial_density;
 }
 
 template <ComputeStage compute_stage>
@@ -130,8 +130,8 @@ ADDensity<compute_stage>::computeQpProperties()
 
     const auto detF = Axx * Ayy * Azz + Axy * Ayz * Azx + Axz * Ayx * Azy - Azx * Ayy * Axz -
                       Azy * Ayz * Axx - Azz * Ayx * Axy;
-    _density[_qp] = _orig_density / detF;
+    _density[_qp] = _initial_density / detF;
   }
   else
-    _density[_qp] = _orig_density;
+    _density[_qp] = _initial_density;
 }
