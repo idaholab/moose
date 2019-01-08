@@ -1,31 +1,24 @@
 # Stress Divergence Tensors with Automatic Differentiation
 
-!syntax description /Kernels/ADStressDivergenceTensors
+!syntax description /ADKernels/ADStressDivergenceTensors<RESIDUAL>
 
 ## Description
 
 The `ADStressDivergenceTensors` kernel calculates the residual of the stress
-divergence for 1D, 2D, and 3D problems in the Cartesian coordinate system.  <!--
-This kernel can be automatically created with the [TensorMechanics Master
-Action](/Modules/TensorMechanics/Master/index.md). Use of the tensor mechanics
-master action is recommended to ensure the consistent setting of the
-_use_displaced_mesh_ parameter for the strain formulation selected.  For a
-detailed explanation of the settings for _use_displaced_mesh_ in mechanics
-problems and the TensorMechanics Master Action usage, see the
-[Introduction/StressDivergence](auto::/introduction/StressDivergence) page. -->
+divergence for 1D, 2D, and 3D problems in the Cartesian coordinate system.
+
+The Jacobian in `ADStressDivergenceTensors` is computed using forward automatic
+differentiation.
 
 ## Residual Calculation
 
 !include modules/tensor_mechanics/common/supplementalStressDivergenceKernels.md
 
-The Jacobian in `ADStressDivergenceTensors` is computed using forward automatic
-differentiation.
-
 Either 1, 2, or 3 displacement variables can be used in the stress divergence
 calculator for the Cartesian system.
 
-!syntax parameters /Kernels/ADStressDivergenceTensors<RESIDUAL>
+!syntax parameters /ADKernels/ADStressDivergenceTensors<RESIDUAL>
 
-!syntax inputs /Kernels/ADStressDivergenceTensors<RESIDUAL>
+!syntax inputs /ADKernels/ADStressDivergenceTensors<RESIDUAL>
 
-!syntax children /Kernels/ADStressDivergenceTensors<RESIDUAL>
+!syntax children /ADKernels/ADStressDivergenceTensors<RESIDUAL>
