@@ -34,7 +34,7 @@ BraceNode::append()
 }
 
 std::string
-EnvEvaler::eval(Node * /*n*/, std::list<std::string> & args)
+EnvEvaler::eval(Field * /*n*/, const std::list<std::string> & args, BraceExpander & /*exp*/)
 {
   std::string var = args.front();
   std::string val;
@@ -45,12 +45,32 @@ EnvEvaler::eval(Node * /*n*/, std::list<std::string> & args)
 }
 
 std::string
-RawEvaler::eval(Node * /*n*/, std::list<std::string> & args)
+RawEvaler::eval(Field * /*n*/, const std::list<std::string> & args, BraceExpander & /*exp*/)
 {
   std::string s;
   for (auto & arg : args)
     s += arg;
   return s;
+}
+
+std::string
+ReplaceEvaler::eval(Field * n, const std::list<std::string> & args, BraceExpander & exp)
+{
+  auto & var = args.front();
+  Node * curr = n;
+  while ((curr = curr->parent()))
+  {
+    auto src = curr->find(var);
+    if (src && src != n && src->type() == NodeType::Field)
+    {
+      exp.used.push_back(pathJoin({curr->fullpath(), var}));
+      return curr->param<std::string>(var);
+    }
+  }
+
+  exp.errors.push_back(
+      errormsg(exp.fname, n, "no variable '", var, "' found for substitution expression"));
+  return n->val();
 }
 
 size_t parseBraceNode(const std::string & input, size_t start, BraceNode & n);
@@ -62,8 +82,28 @@ BraceExpander::registerEvaler(const std::string & name, Evaler & ev)
   _evalers[name] = &ev;
 }
 
+void
+BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, Node * n)
+{
+  auto f = dynamic_cast<Field *>(n);
+  if (!f)
+    throw Error("BraceExpander cannot walk non-Field-type nodes");
+
+  try
+  {
+    std::string s;
+    s = expand(f, f->val());
+    f->setVal(s);
+  }
+  catch (Error & err)
+  {
+    errors.push_back(errormsg(fname, f, err.what()));
+    return;
+  }
+}
+
 std::string
-BraceExpander::expand(Node * n, const std::string & input)
+BraceExpander::expand(Field * f, const std::string & input)
 {
   std::string result = input;
   size_t start = 0;
@@ -72,37 +112,35 @@ BraceExpander::expand(Node * n, const std::string & input)
     BraceNode root;
     parseBraceNode(result, start, root);
 
-    // skip brace expressions that are a single word - they are a special case for intra-input
-    // replacement based on HIT paths.
-    if (root.list().size() < 2)
-    {
-      start += root.len();
-      continue;
-    }
-
-    auto replace_text = expand(n, root);
+    auto replace_text = expand(f, root);
     result.replace(root.offset(), root.len(), replace_text);
     start = root.offset() + replace_text.size();
   }
   return result;
 }
 
+//  ${hello}
+
 std::string
-BraceExpander::expand(Node * n, BraceNode & expr)
+BraceExpander::expand(Field * n, BraceNode & expr)
 {
-  auto args = expr.list();
-  if (args.size() == 0)
+  if (!expr.val().empty())
     return expr.val();
 
+  auto args = expr.list();
   std::list<std::string> expanded_args;
   for (auto it = args.begin(); it != args.end(); ++it)
     expanded_args.push_back(expand(n, *it));
 
+  // Just use replace expander if no args given
+  if (expanded_args.size() == 1)
+    return _replace.eval(n, expanded_args, *this);
+
   auto cmd = expanded_args.front();
   if (_evalers.count(cmd) == 0)
-    throw std::runtime_error("no valid evaler '" + cmd + "'");
+    throw hit::Error("invalid brace-expression command '" + cmd + "'");
   expanded_args.pop_front();
-  return _evalers[cmd]->eval(n, expanded_args);
+  return _evalers[cmd]->eval(n, expanded_args, *this);
 }
 
 size_t
@@ -155,70 +193,6 @@ parseBraceBody(const std::string & input, size_t start, BraceNode & n)
     start = skipSpace(input, start);
   }
   return start;
-}
-
-ExpandWalker::ExpandWalker(std::string fname, BraceExpander& expander)
-  : _fname(fname), _expander(expander)
-{
-}
-
-void
-ExpandWalker::walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, Node * n)
-{
-  auto f = dynamic_cast<Field *>(n);
-  if (!f)
-    return;
-
-  std::string s;
-  try
-  {
-    s = _expander.expand(n, f->val());
-  }
-  catch (Error & err)
-  {
-    errors.push_back(errormsg(_fname, n, err.what()));
-    return;
-  }
-
-  auto start = s.find("${");
-  while (start < s.size())
-  {
-    auto end = s.find("}", start);
-    if (end != std::string::npos)
-    {
-      auto var = s.substr(start + 2, end - (start + 2));
-
-      auto curr = n;
-      while ((curr = curr->parent()))
-      {
-        auto src = curr->find(var);
-        if (src && src != n && src->type() == NodeType::Field)
-        {
-          used.push_back(pathJoin({curr->fullpath(), var}));
-          s = s.substr(0, start) + curr->param<std::string>(var) +
-              s.substr(end + 1, s.size() - (end + 1));
-
-          if (end + 1 - start == f->val().size())
-            f->setVal(s, dynamic_cast<Field *>(curr->find(var))->kind());
-          else
-            f->setVal(s);
-
-          // move end back to the position of the end of the replacement text - not the replaced
-          // text since the former is the one relevant to the string for remaining replacements.
-          end = start + curr->param<std::string>(var).size();
-          break;
-        }
-      }
-
-      if (curr == nullptr)
-        errors.push_back(
-            errormsg(_fname, n, "no variable '", var, "' found for substitution expression"));
-    }
-    else
-      errors.push_back(errormsg(_fname, n, "missing substitution expression terminator '}'"));
-    start = s.find("${", end);
-  }
-  f->setVal(s);
 }
 
 } // namespace hit

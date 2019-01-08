@@ -50,49 +50,51 @@ private:
   std::vector<BraceNode> _list;
 };
 
+class BraceExpander;
+
 class Evaler
 {
 public:
-  virtual std::string eval(Node * n, std::list<std::string> & args) = 0;
+  virtual std::string eval(Field * n, const std::list<std::string> & args, BraceExpander & exp) = 0;
 };
 
 class EnvEvaler : public Evaler
 {
 public:
-  virtual std::string eval(Node * n, std::list<std::string> & args) override;
+  virtual std::string
+  eval(Field * n, const std::list<std::string> & args, BraceExpander & exp) override;
 };
 
 class RawEvaler : public Evaler
 {
 public:
-  virtual std::string eval(Node * n, std::list<std::string> & args) override;
+  virtual std::string
+  eval(Field * n, const std::list<std::string> & args, BraceExpander & exp) override;
 };
 
-class BraceExpander
+class ReplaceEvaler : public Evaler
 {
 public:
+  virtual std::string
+  eval(Field * n, const std::list<std::string> & args, BraceExpander & exp) override;
+};
+
+class BraceExpander : public Walker
+{
+public:
+  BraceExpander(const std::string & fname) : fname(fname) {}
   void registerEvaler(const std::string & name, Evaler & ev);
-  std::string expand(Node * n, const std::string & input);
-
-private:
-  std::string expand(Node * n, BraceNode & expr);
-
-  std::map<std::string, Evaler *> _evalers;
-};
-
-// Expands ${...} substitution expressions with variable values from the tree.
-class ExpandWalker : public Walker
-{
-public:
-  ExpandWalker(std::string fname, BraceExpander& expander);
   virtual void walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, Node * n);
+  std::string expand(Field * n, const std::string & input);
 
   std::vector<std::string> used;
   std::vector<std::string> errors;
+  std::string fname;
 
 private:
-  std::string _fname;
-  BraceExpander& _expander;
+  std::string expand(Field * n, BraceNode & expr);
+  std::map<std::string, Evaler *> _evalers;
+  ReplaceEvaler _replace;
 };
 
 } // namespace hit

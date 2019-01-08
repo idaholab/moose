@@ -52,40 +52,50 @@
 class FuncParseEvaler : public hit::Evaler
 {
 public:
-  virtual std::string eval(hit::Node * n, std::list<std::string> & args)
+  virtual std::string
+  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
   {
     std::string func_text;
     for (auto & s : args)
       func_text += s;
+    auto n_errs = exp.errors.size();
 
     FunctionParser fp;
     std::vector<std::string> var_names;
     auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
     if (ret != -1)
-      throw hit::Error(std::string("fparse error: ") + fp.ErrorMsg());
+    {
+      exp.errors.push_back(hit::errormsg(exp.fname, n, "fparse error: ", fp.ErrorMsg()));
+      return n->val();
+    }
 
     std::string errors;
     std::vector<double> var_vals;
     for (auto & var : var_names)
     {
       // recursively check all parent scopes for the needed variables
-      auto curr = n;
+      hit::Node * curr = n;
       while ((curr = curr->parent()))
       {
         auto src = curr->find(var);
         if (src && src != n && src->type() == hit::NodeType::Field)
         {
+          exp.used.push_back(hit::pathJoin({curr->fullpath(), var}));
           var_vals.push_back(curr->param<double>(var));
           break;
         }
       }
 
       if (curr == nullptr)
-        errors += "\n    no variable '" + var + "' found for use in function parser expression";
+        exp.errors.push_back(hit::errormsg(exp.fname,
+                                           n,
+                                           "\n    no variable '",
+                                           var,
+                                           "' found for use in function parser expression"));
     }
 
-    if (!errors.empty())
-      throw hit::Error(errors);
+    if (exp.errors.size() != n_errs)
+      return n->val();
 
     std::stringstream ss;
     ss << std::setprecision(17) << fp.Eval(var_vals.data());
@@ -573,14 +583,13 @@ Parser::parse(const std::string & input_filename)
 
   // expand ${bla} parameter values and mark/include variables used in expansions as "used".  This
   // MUST occur before parameter extraction - otherwise parameters will get wrong values.
-  hit::BraceExpander expander;
   hit::RawEvaler raw;
   hit::EnvEvaler env;
   FuncParseEvaler fparse_ev;
-  expander.registerEvaler("raw", raw);
-  expander.registerEvaler("env", env);
-  expander.registerEvaler("fparse", fparse_ev);
-  hit::ExpandWalker exw(_input_filename, expander);
+  hit::BraceExpander exw(_input_filename);
+  exw.registerEvaler("raw", raw);
+  exw.registerEvaler("env", env);
+  exw.registerEvaler("fparse", fparse_ev);
   _root->walk(&exw);
   for (auto & var : exw.used)
     _extracted_vars.insert(var);
@@ -1381,12 +1390,12 @@ Parser::setScalarParameter(const std::string & full_name,
     {
       bool isbool = toBool(strval, param->set());
       if (!isbool)
-        _errmsg += errormsg(_input_filename,
-                            _root->find(full_name),
-                            "invalid boolean syntax for parameter: ",
-                            full_name,
-                            "=",
-                            strval) +
+        _errmsg += hit::errormsg(_input_filename,
+                                 _root->find(full_name),
+                                 "invalid boolean syntax for parameter: ",
+                                 full_name,
+                                 "=",
+                                 strval) +
                    "\n";
     }
     else
@@ -1461,7 +1470,7 @@ Parser::setVectorParameter(const std::string & full_name,
     }
     catch (hit::Error & err)
     {
-      _errmsg += errormsg(_input_filename, _root->find(full_name), err.what());
+      _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what());
       return;
     }
   }
@@ -1535,7 +1544,7 @@ Parser::setDoubleIndexParameter(const std::string & full_name,
   for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
     if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
     {
-      _errmsg += errormsg(
+      _errmsg += hit::errormsg(
           _input_filename, _root->find(full_name), "invalid format for parameter ", full_name);
       return;
     }
@@ -1568,20 +1577,20 @@ Parser::setScalarComponentParameter(const std::string & full_name,
   }
   catch (hit::Error & err)
   {
-    _errmsg += errormsg(_input_filename, _root->find(full_name), err.what());
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what());
     return;
   }
 
   if (vec.size() != LIBMESH_DIM)
   {
-    _errmsg += errormsg(_input_filename,
-                        _root->find(full_name),
-                        "wrong number of values in scalar component parameter ",
-                        full_name,
-                        ": size ",
-                        vec.size(),
-                        " is not a multiple of ",
-                        LIBMESH_DIM);
+    _errmsg += hit::errormsg(_input_filename,
+                             _root->find(full_name),
+                             "wrong number of values in scalar component parameter ",
+                             full_name,
+                             ": size ",
+                             vec.size(),
+                             " is not a multiple of ",
+                             LIBMESH_DIM);
     return;
   }
 
@@ -1612,20 +1621,20 @@ Parser::setVectorComponentParameter(const std::string & full_name,
   }
   catch (hit::Error & err)
   {
-    _errmsg += errormsg(_input_filename, _root->find(full_name), err.what());
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what());
     return;
   }
 
   if (vec.size() % LIBMESH_DIM)
   {
-    _errmsg += errormsg(_input_filename,
-                        _root->find(full_name),
-                        "wrong number of values in vector component parameter ",
-                        full_name,
-                        ": size ",
-                        vec.size(),
-                        " is not a multiple of ",
-                        LIBMESH_DIM);
+    _errmsg += hit::errormsg(_input_filename,
+                             _root->find(full_name),
+                             "wrong number of values in vector component parameter ",
+                             full_name,
+                             ": size ",
+                             vec.size(),
+                             " is not a multiple of ",
+                             LIBMESH_DIM);
     return;
   }
 
@@ -1755,14 +1764,14 @@ Parser::setScalarParameter<RealTensorValue, RealTensorValue>(
   auto vec = _root->param<std::vector<double>>(full_name);
   if (vec.size() != LIBMESH_DIM * LIBMESH_DIM)
   {
-    _errmsg += errormsg(_input_filename,
-                        _root->find(full_name),
-                        "invalid RealTensorValue parameter ",
-                        full_name,
-                        ": size is ",
-                        vec.size(),
-                        " but should be ",
-                        LIBMESH_DIM * LIBMESH_DIM);
+    _errmsg += hit::errormsg(_input_filename,
+                             _root->find(full_name),
+                             "invalid RealTensorValue parameter ",
+                             full_name,
+                             ": size is ",
+                             vec.size(),
+                             " but should be ",
+                             LIBMESH_DIM * LIBMESH_DIM);
     return;
   }
 
@@ -1908,7 +1917,7 @@ Parser::setVectorParameter<VariableName, VariableName>(
     for (unsigned int i = 0; i < vec.size(); ++i)
       if (var_names[i] == "")
       {
-        _errmsg += errormsg(
+        _errmsg += hit::errormsg(
             _input_filename,
             _root->find(full_name),
             "invalid value for ",

@@ -264,8 +264,7 @@ TEST(HitTests, ParseFields)
   {
     auto test = cases[i];
     auto root = hit::parse("TEST", test.input);
-    hit::BraceExpander expander;
-    hit::ExpandWalker exw("TEST", expander);
+    hit::BraceExpander exw("TEST");
     root->walk(&exw);
     auto n = root->find(test.key);
     if (!n)
@@ -326,8 +325,7 @@ TEST(ExpandWalkerTests, All)
     try
     {
       root = hit::parse("TEST", test.input);
-      hit::BraceExpander expander;
-      hit::ExpandWalker exw("TEST", expander);
+      hit::BraceExpander exw("TEST");
       root->walk(&exw);
       if (exw.errors.size() > 0 && test.kind != hit::Field::Kind::None)
       {
