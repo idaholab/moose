@@ -57,6 +57,8 @@ std::unique_ptr<MeshBase>
 StackGenerator::generate()
 {
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[0]);
+  if (mesh == nullptr)
+    mooseError("StackGenerator only works with ReplicatedMesh : mesh from Meshgenerator ", _input_names[0], "is not a ReplicatedMesh.");
 
   if (mesh->mesh_dimension() != 3)
     mooseError("The first mesh is not in 3D !");
@@ -70,8 +72,12 @@ StackGenerator::generate()
 
   // Check that we have 3D meshes
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
+  {
+    if (_meshes[i] == nullptr)
+      mooseError("StackGenerator only works with ReplicatedMesh : mesh from Meshgenerator ", _input_names[i + 1], "is not a ReplicatedMesh.");
     if (_meshes[i]->mesh_dimension() != 3)
       mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in 3D.");
+  }
 
   boundary_id_type front =
       mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
