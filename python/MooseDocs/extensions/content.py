@@ -56,7 +56,8 @@ class ContentCommand(command.CommandComponent):
         location = self.settings['location']
 
         func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
-        nodes = self.translator.findPages(func)
+        nodes = self.translator.findPages(func).sort(key=lambda n: n.local)
+
         for node in nodes:
             key = tuple(node.local.strip(os.sep).replace(location, '').split(os.sep))[:-1]
             for i in xrange(1, len(key) + 1):
