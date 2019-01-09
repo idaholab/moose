@@ -35,8 +35,9 @@
 
 [Kernels]
   [./dt]
-    type = TimeDerivative
+    type = CoefTimeDerivative
     variable = T
+    Coefficient = 0.82064
   [../]
 []
 
@@ -72,7 +73,6 @@
 
 [Executioner]
   type = Transient
-  scheme = bdf2
   dt = 1e-2
   end_time = 1
 []
@@ -80,7 +80,7 @@
 [Postprocessors]
   [./error]
     type = NodalL2Error
-    function = '100*sin(pi*x/80)*exp(-0.95*pi^2/80^2*t)'
+    function = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
     variable = T
     outputs = console
   [../]
