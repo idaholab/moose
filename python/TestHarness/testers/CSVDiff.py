@@ -8,7 +8,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from FileTester import FileTester
-from TestHarness.CSVDiffer import CSVDiffer
+from TestHarness import util
+import os
 
 class CSVDiff(FileTester):
 
@@ -17,9 +18,12 @@ class CSVDiff(FileTester):
         params = FileTester.validParams()
         params.addRequiredParam('csvdiff',   [], "A list of files to run CSVDiff on.")
         params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
-        params.addParam('override_rel_err',   [], "A list of customized relative error tolerances .")
+        params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
         params.addParam('only_compare_custom', False, "Only compare (and require) the listed custom columns.")
+        params.addParam('comparison_file', "Use supplied custom comparison config file.")
+        params.addParam('rel_err', "A customized relative error tolerances.")
+        params.addParam('abs_zero', "A customized relative error tolerances.")
         return params
 
     def __init__(self, name, params):
@@ -37,32 +41,67 @@ class CSVDiff(FileTester):
            return False
         return FileTester.checkRunnable(self, options)
 
+    def processResultsCommand(self, moose_dir, options):
+        commands = []
+
+        for file in self.specs['csvdiff']:
+            csvdiff = [os.path.join(moose_dir, 'python', 'csvdiff', 'csvdiff.py')]
+
+            # Due to required positional nargs with the ability to support custom positional args (--argument), we need to specify the required ones first
+            csvdiff.append(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
+
+            if self.specs.isValid('rel_err'):
+                csvdiff.append('--relative-tolerance %s' % (self.specs['rel_err']))
+
+            if self.specs.isValid('abs_zero'):
+                csvdiff.append('--abs-zero %s' % (self.specs['abs_zero']))
+
+            if self.specs.isValid('comparison_file'):
+                csvdiff.append('--comparison-file %s' % (self.specs['comparison_file']))
+
+            if self.specs.isValid('override_columns'):
+                self.addCaveats('deprecated override_params. Build and use a comparison_file')
+                csvdiff.append('--custom-columns %s' % (' '.join(self.specs['override_columns'])))
+
+            if self.specs.isValid('override_rel_err'):
+                csvdiff.append('--custom-rel-err %s' % (' '.join(self.specs['override_rel_err'])))
+
+            if self.specs.isValid('override_abs_zero'):
+                csvdiff.append('--custom-abs-zero %s' % (' '.join(self.specs['override_abs_zero'])))
+
+            if self.specs.isValid('only_compare_custom') and self.specs['only_compare_custom']:
+                csvdiff.append('--only-compare-custom')
+
+            commands.append(' '.join(csvdiff))
+
+        return commands
+
     def processResults(self, moose_dir, options, output):
         FileTester.processResults(self, moose_dir, options, output)
 
-        specs = self.specs
-
-        if self.isFail() or specs['skip_checks']:
+        if self.isFail() or self.specs['skip_checks']:
             return output
 
         # Don't Run CSVDiff on Scaled Tests
-        if options.scaling and specs['scale_refine']:
-            self.addCaveats('SCALING=True')
-            self.setStatus(self.skip)
+        if options.scaling and self.specs['scale_refine']:
             return output
 
-        if len(specs['csvdiff']) > 0:
-            differ = CSVDiffer(specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'], specs['gold_dir'],
-                               specs['override_columns'], specs['override_rel_err'], specs['override_abs_zero'], specs['only_compare_custom'])
-            msg = differ.diff()
-            output += 'Running CSVDiffer.py\n' + msg
-            if msg != '':
-                if msg.find("Gold file does not exist!") != -1:
-                    self.setStatus(self.fail, 'MISSING GOLD FILE')
-                elif msg.find("File does not exist!") != -1:
-                    self.setStatus(self.fail, 'FILE DOES NOT EXIST')
-                else:
+        # Make sure that all of the Exodiff files are actually available
+        for file in self.specs['csvdiff']:
+            if not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)):
+                output += "File Not Found: " + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
+                self.setStatus(self.fail, 'MISSING GOLD FILE')
+                break
+
+        if not self.isFail():
+            # Retrieve the commands
+            commands = self.processResultsCommand(moose_dir, options)
+
+            for command in commands:
+                exo_output = util.runCommand(command)
+                output += 'Running csvdiff: ' + command + '\n' + exo_output
+                if not "Files are the same" in exo_output:
                     self.setStatus(self.diff, 'CSVDIFF')
-                return output
+                    break
 
         return output

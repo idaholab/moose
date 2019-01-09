@@ -22,4 +22,4 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertRegexpMatches(e.output, r'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
         self.assertRegexpMatches(e.output, r'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
         self.assertRegexpMatches(e.output, r'test_harness\.exodiff.*?Running exodiff')
-        self.assertRegexpMatches(e.output, r'test_harness\.csvdiff.*?Running CSVDiffer.py')
+        self.assertRegexpMatches(e.output, r'test_harness\.csvdiff.*?Running csvdiff')

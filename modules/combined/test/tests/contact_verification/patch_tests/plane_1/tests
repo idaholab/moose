@@ -29,6 +29,7 @@
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D plane geometry with the deprecated solid mechanics module (NAFEMS
       CGS1 contact patch test with matched nodes)."
+    skip = "Separate csvdiff configs necessary"
   [../]
   [./glued_pen]
     type = 'CSVDiff'

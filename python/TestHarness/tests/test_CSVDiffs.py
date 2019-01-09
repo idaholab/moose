@@ -20,5 +20,5 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         self.assertRegexpMatches(e.output, r'test_harness\.test_csvdiff.*?FAILED \(Override inputs not the same length\)')
-        self.assertRegexpMatches(e.output, r'test_harness\.test_badfile.*?FAILED \(FILE DOES NOT EXIST\)')
+        self.assertRegexpMatches(e.output, r'test_harness\.test_badfile.*?FAILED \(MISSING GOLD FILE\)')
         self.checkStatus(e.output, failed=2)

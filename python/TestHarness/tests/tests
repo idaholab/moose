@@ -158,12 +158,6 @@
     requirement = "TestHarness shall write the output (stdout|stderr) that an executed test generated to a file as designated by user supplied arguments"
     issues = '#11116'
   [../]
-  [./CSVDiffer]
-    type = PythonUnitTest
-    input = test_CSVDiffer.py
-    requirement = "TestHarness shall present a failure when encountering a CSV differential result."
-    issues = '#11250 #11251'
-  [../]
   [./recover_tests]
     type = PythonUnitTest
     input = test_Recover.py
