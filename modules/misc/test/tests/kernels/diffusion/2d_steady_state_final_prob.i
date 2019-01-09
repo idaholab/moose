@@ -19,11 +19,12 @@
   [../]
 []
 
-[ADKernels]
-  [./HeatDiff]
-    type = ADMatDiffusion
+[Kernels]
+  [./diff]
+    type = CoefDiffusion
     variable = T
-    diffusivity = diffusivity
+    coef = 0.9
+    function = 0.05
   [../]
 []
 
@@ -54,25 +55,18 @@
   [../]
 []
 
-[Materials]
-  [./k]
-    type = GenericConstantMaterial
-    prop_names = diffusivity
-    prop_values = 1
-  [../]
-[]
-
-
 [Postprocessors]
   [./nodal_error]
     type = NodalL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
+    outputs = console
   [../]
   [./elemental_error]
     type = ElementL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
+    outputs = console
   [../]
 []
 
