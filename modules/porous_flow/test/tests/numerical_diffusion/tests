@@ -49,4 +49,14 @@
     design = 'porous_flow/numerical_diffusion.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization'
   [../]
+  [./pffltvd]
+    type = 'CSVDiff'
+    input = 'pffltvd.i'
+    csvdiff = 'pffltvd_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    threading = '!pthreads'
+    issues = '#12370 #12118 #10426'
+    design = 'porous_flow/numerical_diffusion.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations.  The advection via the Darcy velocity shall have the correct velocity.  With no flux-limiter the results should be the same as full upwinding.  The results for simulations involving PorousFlow Kernels and UserObjects when the Darcy velocity is constant shall be the same as the constant-velocity, non-PorousFlow case.'
+  [../]
 []

@@ -48,6 +48,19 @@ public:
   virtual void execute() override;
 
   /**
+   * This is called by multiple times in  execute() in a double loop over _current_elem's nodes
+   * (local_i and local_j) nested in a loop over each of _current_elem's quadpoints (qp). It is used
+   * to compute _kij and its derivatives
+   * @param global_i global node id corresponding to the local node local_i
+   * @param global_j global node id corresponding to the local node local_j
+   * @param local_i local node number of the _current_elem
+   * @param local_j local node number of the _current_elem
+   * @param qp quadpoint number of the _current_elem
+   */
+  virtual void executeOnElement(
+      dof_id_type global_i, dof_id_type global_j, unsigned local_i, unsigned local_j, unsigned qp);
+
+  /**
    * Returns the flux out of lobal node id
    * @param node_i id of node
    * @return advective flux out of node after applying the KT procedure
@@ -63,11 +76,21 @@ public:
   Real getdFluxOutdu(dof_id_type node_i, dof_id_type node_j) const;
 
   /**
-   * Returns r where r[j] = d(flux out of node i)/du(node j) used in Jacobian computations
-   * @param node_i id of node
+   * Returns r where r[j] = d(flux out of global node i)/du(global node j) used in Jacobian
+   * computations
+   * @param node_i global id of node
    * @return the derivatives (after applying the KT procedure)
    */
   const std::map<dof_id_type, Real> & getdFluxOutdu(dof_id_type node_i) const;
+
+  /**
+   * Returns r where r[j] = d(flux out of global node i)/dK[global node j][global node k] used in
+   * Jacobian computations
+   * @param node_i global id of node
+   * @return the derivatives (after applying the KT procedure)
+   */
+  const std::map<dof_id_type, std::map<dof_id_type, Real>> &
+  getdFluxOutdKjk(dof_id_type node_i) const;
 
   /**
    * Returns the valence of the i-j edge.
@@ -92,10 +115,10 @@ protected:
   virtual Real getInternodalVelocity(unsigned i, unsigned j, unsigned qp) const = 0;
 
   /**
-   * Returns the value of u at the global node id
-   * @param id global node id (not the local one within an element)
+   * Returns the value of u at the local node id of the current element
+   * @param i local node id of the current element
    */
-  virtual Real getU(dof_id_type id) const = 0;
+  virtual Real getU(unsigned i) const = 0;
 
   /// whether _kij, etc, need to be sized appropriately (and valence recomputed) at the start of the timestep
   bool _resizing_needed;
@@ -112,16 +135,25 @@ protected:
   /**
    * Returns the value of R_{i}^{+}, Eqn (49) of KT
    * @param node_i nodal id
-   * @param dlimited_du[out] dlimited_du[node_id] = d(R_{i}^{+})/du[node_id]
+   * @param dlimited_du[out] dlimited_du[node_id] = d(R_{i}^{+})/du[node_id]   (Here node_id is a
+   * global node id)
+   * @param dlimited_dk[out] dlimited_dk[node_id] = d(R_{i}^{+})/d(K[i][node_id]).  Derivatives
+   * w.r.t. K[l][m] with l!=i are zero
    */
-  Real rPlus(dof_id_type node_i, std::map<dof_id_type, Real> & dlimited_du) const;
+  Real rPlus(dof_id_type node_i,
+             std::map<dof_id_type, Real> & dlimited_du,
+             std::map<dof_id_type, Real> & dlimited_dk) const;
 
   /**
    * Returns the value of R_{i}^{-}, Eqn (49) of KT
    * @param node_i nodal id
    * @param dlimited_du[out] dlimited_du[node_id] = d(R_{i}^{-})/du[node_id]
+   * @param dlimited_dk[out] dlimited_dk[node_id] = d(R_{i}^{-})/d(K[i][node_id]).  Derivatives
+   * w.r.t. K[l][m] with l!=i are zero
    */
-  Real rMinus(dof_id_type node_i, std::map<dof_id_type, Real> & dlimited_du) const;
+  Real rMinus(dof_id_type node_i,
+              std::map<dof_id_type, Real> & dlimited_du,
+              std::map<dof_id_type, Real> & dlimited_dk) const;
 
   /**
    * Returns the value of k_ij as computed by KT Eqns (18)-(20).
@@ -148,13 +180,22 @@ protected:
   /// _flux_out[i] = flux of "heat" from node i
   std::map<dof_id_type, Real> _flux_out;
 
-  /// _dflux_out_du[i] = d(flux_out[i])/d(u[j])
+  /// _dflux_out_du[i][j] = d(flux_out[i])/d(u[j]).  Here j must be connected to i, or to a node that is connected to i.
   std::map<dof_id_type, std::map<dof_id_type, Real>> _dflux_out_du;
+
+  /// _dflux_out_dKjk[i][j][k] = d(flux_out[i])/d(K[j][k]).  Here j must be connected to i (this does include j = i), and k must be connected to j (this does include k = i and k = j)
+  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>> _dflux_out_dKjk;
 
   /// _valence[(i, j)] = number of times, in a loop over elements seen  by this processor
   /// (viz, including ghost elements) and are part of the block-restricted blocks of this
   /// UserObject, that the i-j edge is encountered
   std::map<std::pair<dof_id_type, dof_id_type>, unsigned> _valence;
+
+  /// _u_nodal[i] = value of _u at global node number i
+  std::map<dof_id_type, Real> _u_nodal;
+
+  /// _u_nodal_computed_by_thread[i] = true if _u_nodal[i] has been computed in execute() by the thread on this processor
+  std::map<dof_id_type, bool> _u_nodal_computed_by_thread;
 
   /// Signals to the PQPlusMinus method what should be computed
   enum class PQPlusMinusEnum
@@ -168,14 +209,17 @@ protected:
   /**
    * Returns the value of P_{i}^{+}, P_{i}^{-}, Q_{i}^{+} or Q_{i}^{-} (depending on pq_plus_minus)
    * which are defined in Eqns (47) and (48) of KT
-   * @param node_i nodal id
+   * @param node_i global nodal id
    * @param pq_plus_minus indicates whether P_{i}^{+}, P_{i}^{-}, Q_{i}^{+} or Q_{i}^{-} should be
    * returned
-   * @param derivs[out] derivs[i] = d(result)/d(u[node_id])
+   * @param derivs[out] derivs[j] = d(result)/d(u[global node j])
+   * @param dpq_dk[out] dpq_dk[j] = d(result)/d(K[node_i][global node j]).  Recall that
+   * d(result)/d(K[l][m]) are zero unless l=node_i
    */
   Real PQPlusMinus(dof_id_type node_i,
                    const PQPlusMinusEnum pq_plus_minus,
-                   std::map<dof_id_type, Real> & derivs) const;
+                   std::map<dof_id_type, Real> & derivs,
+                   std::map<dof_id_type, Real> & dpq_dk) const;
 
   /**
    * Clears the_map, then, using _kij, constructs the_map so that
@@ -184,6 +228,12 @@ protected:
    * @param[in] node_i nodal id
    */
   void zeroedConnection(std::map<dof_id_type, Real> & the_map, dof_id_type node_i) const;
+
+  /**
+   * Returns the value of u at the global id node_i
+   * @param node_i global node id
+   */
+  Real getUnodal(dof_id_type node_i) const;
 };
 
 #endif // ADVECTIVEFLUXCALCULATORBASE_H

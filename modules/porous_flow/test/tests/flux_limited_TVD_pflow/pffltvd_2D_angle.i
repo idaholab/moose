@@ -1,0 +1,172 @@
+# Using flux-limited TVD advection ala Kuzmin and Turek, mploying PorousFlow Kernels and UserObjects, with superbee flux-limiter
+# 2D version with velocity = (0.1, 0.2, 0)
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  xmin = 0
+  xmax = 1
+  ny = 10
+  ymin = 0
+  ymax = 1
+[]
+
+[GlobalParams]
+  PorousFlowDictator = dictator
+  gravity = '0 0 0'
+[]
+
+[Variables]
+  [./porepressure]
+  [../]
+  [./tracer]
+  [../]
+[]
+
+[ICs]
+  [./porepressure]
+    type = FunctionIC
+    variable = porepressure
+    function = '1 - x - 2 * y'
+  [../]
+  [./tracer]
+    type = FunctionIC
+    variable = tracer
+    function = 'if(x<0.1 | x > 0.3 | y < 0.1 | y > 0.3, 0, 1)'
+  [../]
+[]
+
+[Kernels]
+  [./mass0]
+    type = PorousFlowMassTimeDerivative
+    fluid_component = 0
+    variable = tracer
+  [../]
+  [./flux0]
+    type = PorousFlowFluxLimitedTVDAdvection
+    variable = tracer
+    advective_flux_calculator = advective_flux_calculator_0
+  [../]
+  [./mass1]
+    type = PorousFlowMassTimeDerivative
+    fluid_component = 1
+    variable = porepressure
+  [../]
+  [./flux1]
+    type = PorousFlowFluxLimitedTVDAdvection
+    variable = porepressure
+    advective_flux_calculator = advective_flux_calculator_1
+  [../]
+[]
+
+[BCs]
+  [./constant_boundary_porepressure]
+    type = FunctionPresetBC
+    variable = porepressure
+    function = '1 - x - 2 * y'
+    boundary = 'left right top bottom'
+  [../]
+  [./no_tracer_at_boundary]
+    type = PresetBC
+    variable = tracer
+    value = 0
+    boundary = 'left right top bottom'
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./the_simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 2E9
+      thermal_expansion = 0
+      viscosity = 1.0
+      density0 = 1000.0
+    [../]
+  [../]
+[]
+
+[UserObjects]
+  [./dictator]
+    type = PorousFlowDictator
+    porous_flow_vars = 'porepressure tracer'
+    number_fluid_phases = 1
+    number_fluid_components = 2
+  [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureConst
+  [../]
+  [./advective_flux_calculator_0]
+    type = PorousFlowAdvectiveFluxCalculator
+    flux_limiter_type = superbee
+    fluid_component = 0
+  [../]
+  [./advective_flux_calculator_1]
+    type = PorousFlowAdvectiveFluxCalculator
+    flux_limiter_type = superbee
+    fluid_component = 1
+  [../]
+[]
+
+[Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./ppss]
+    type = PorousFlow1PhaseP
+    porepressure = porepressure
+    capillary_pressure = pc
+  [../]
+  [./massfrac]
+    type = PorousFlowMassFraction
+    mass_fraction_vars = tracer
+  [../]
+  [./simple_fluid]
+    type = PorousFlowSingleComponentFluid
+    fp = the_simple_fluid
+    phase = 0
+  [../]
+  [./relperm]
+    type = PorousFlowRelativePermeabilityConst
+    phase = 0
+  [../]
+  [./porosity]
+    type = PorousFlowPorosity
+    porosity_zero = 0.1
+  [../]
+  [./permeability]
+    type = PorousFlowPermeabilityConst
+    permeability = '1E-2 0 0   0 1E-2 0   0 0 1E-2'
+  [../]
+[]
+
+[Preconditioning]
+  active = basic
+  [./basic]
+    type = SMP
+    full = true
+    petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
+    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
+    petsc_options_value = ' asm      lu           NONZERO                   2'
+  [../]
+  [./preferred_but_might_not_be_installed]
+    type = SMP
+    full = true
+    petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+    petsc_options_value = ' lu       mumps'
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = Newton
+  end_time = 2
+  dt = 0.1
+[]
+
+[Outputs]
+  exodus = true
+  csv = true
+  print_linear_residuals = false
+  execute_on = 'initial final'
+[]

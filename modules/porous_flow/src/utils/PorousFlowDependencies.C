@@ -238,4 +238,13 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("porosity_qp", "pressure_saturation_qp");
   _deps.insertDependency("porosity_qp", "temperature_qp");
   //_deps.insertDependency("porosity_qp", "volumetric_strain_qp");
+
+  // UserObject dependencies
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "permeability_qp");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "pressure_saturation_qp");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "density_qp");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "density_nodal");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "viscosity_nodal");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "mass_fraction_nodal");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "relative_permeability_nodal");
 }

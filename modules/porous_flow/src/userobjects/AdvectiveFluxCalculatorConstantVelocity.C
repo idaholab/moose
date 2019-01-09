@@ -27,10 +27,9 @@ AdvectiveFluxCalculatorConstantVelocity::AdvectiveFluxCalculatorConstantVelocity
     const InputParameters & parameters)
   : AdvectiveFluxCalculatorBase(parameters),
     _velocity(getParam<RealVectorValue>("velocity")),
-    _u_nodal(getVar("u", 0)),
-    _u_var_num(coupled("u", 0)),
-    _phi(_assembly.fePhi<Real>(_u_nodal->feType())),
-    _grad_phi(_assembly.feGradPhi<Real>(_u_nodal->feType()))
+    _u_nodal(coupledNodalValue("u")),
+    _phi(_assembly.fePhi<Real>(getVar("u", 0)->feType())),
+    _grad_phi(_assembly.feGradPhi<Real>(getVar("u", 0)->feType()))
 {
 }
 
@@ -43,9 +42,7 @@ AdvectiveFluxCalculatorConstantVelocity::getInternodalVelocity(unsigned i,
 }
 
 Real
-AdvectiveFluxCalculatorConstantVelocity::getU(dof_id_type id) const
+AdvectiveFluxCalculatorConstantVelocity::getU(unsigned i) const
 {
-  const Node & node = _mesh.getMesh().node_ref(id);
-
-  return _u_nodal->getNodalValue(node);
+  return _u_nodal[i];
 }
