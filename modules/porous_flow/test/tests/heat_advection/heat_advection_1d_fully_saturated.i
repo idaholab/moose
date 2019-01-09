@@ -10,6 +10,7 @@
 
 [GlobalParams]
   PorousFlowDictator = dictator
+  gravity = '0 0 0'
 []
 
 [Variables]
@@ -64,7 +65,6 @@
   [./advection]
     type = PorousFlowFullySaturatedDarcyBase
     variable = pp
-    gravity = '0 0 0'
   [../]
   [./energy_dot]
     type = PorousFlowEnergyTimeDerivative
@@ -73,7 +73,6 @@
   [./convection]
     type = PorousFlowFullySaturatedHeatAdvection
     variable = temp
-    gravity = '0 0 0'
   [../]
 []
 

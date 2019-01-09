@@ -110,6 +110,15 @@ public:
   unsigned int porousFlowVariableNum(unsigned int moose_var_num) const;
 
   /**
+   * The Moose variable number
+   * @param porous_flow_var_num the PorousFlow variable number
+   * eg if porous_flow_vars = 'pwater pgas', and the variables in
+   * the simulation are 'energy pwater pgas shape'
+   * then mooseVariableNum(1) = 2
+   */
+  unsigned int mooseVariableNum(unsigned int porous_flow_var_num) const;
+
+  /**
    * Returns true if moose_var_num is a porous flow variable
    * @param moose_var_num the MOOSE variable number
    * eg if porous_flow_vars = 'pwater pgas', and the variables in
@@ -126,6 +135,19 @@ public:
    * then notPorousFlowVariable(0) = true, notPorousFlowVariable(1) = false
    */
   bool notPorousFlowVariable(unsigned int moose_var_num) const;
+
+  /**
+   * Whether the porous_flow_vars all have the same FEType or
+   * if no porous_flow_vars were provided
+   */
+  bool consistentFEType() const;
+
+  /**
+   * The FEType of the first porous_flow_variable.
+   * Note, this is meaningless if there are no named porous_flow_variables: consistentFEType()
+   * should be used to check this
+   */
+  FEType feType() const;
 
 protected:
   /// Number of PorousFlow variables
@@ -147,6 +169,12 @@ protected:
   const unsigned int _aqueous_phase_number;
 
 private:
+  /// Whether the porous_flow_vars all have the same fe_type
+  bool _consistent_fe_type;
+
+  /// FE type used by the PorousFlow variables
+  FEType _fe_type;
+
   /// _moose_var_num[i] = the moose variable number corresponding to porous flow variable i
   std::vector<unsigned int> _moose_var_num;
 

@@ -2,7 +2,7 @@
   [./head_advection_1d]
     type = Exodiff
     input = heat_advection_1d.i
-    exodiff = heat_advection_1d.e
+    exodiff = heat_advection_1d_out.e
     threading = '!pthreads'
   [../]
   [./head_advection_1d_fully_saturated]
@@ -10,5 +10,33 @@
     input = heat_advection_1d_fully_saturated.i
     exodiff = heat_advection_1d_fully_saturated.e
     threading = '!pthreads'
+  [../]
+  [./heat_advection_1d_KT]
+    type = Exodiff
+    input = heat_advection_1d_KT.i
+    exodiff = heat_advection_1d_KT_out.e
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid'
+  [../]
+  [./heat_advection_1d_fully_saturated_action]
+    type = Exodiff
+    input = heat_advection_1d_fully_saturated_action.i
+    exodiff = heat_advection_1d_KT_out.e
+    prereq = heat_advection_1d_KT
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid, and the user should be able to activiate this stabilization using the PorousFlow Action system'
+  [../]
+  [./heat_advection_1d_KT_threads]
+    type = Exodiff
+    input = heat_advection_1d_KT.i
+    exodiff = heat_advection_1d_KT_out.e
+    min_threads = 2
+    max_threads = 2
+    prereq = heat_advection_1d_fully_saturated_action
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid'
   [../]
 []

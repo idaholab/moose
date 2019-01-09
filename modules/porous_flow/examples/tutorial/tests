@@ -53,6 +53,17 @@
     exodiff = '06_out.e'
     threading = '!pthreads'
   [../]
+  [./06_KT]
+    type = Exodiff
+    input = '06_KT.i'
+    exodiff = '06_KT_out.e'
+    heavy = true
+    cli_args = 'Executioner/end_time=1E5'
+    threading = '!pthreads'
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_06.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
+  [../]
   [./07]
     type = Exodiff
     input = '07.i'
@@ -64,7 +75,19 @@
     type = Exodiff
     input = '08.i'
     exodiff = '08_out.e'
+    heavy = true
     threading = '!pthreads'
+  [../]
+  [./08_KT]
+    type = Exodiff
+    input = '08_KT.i'
+    exodiff = '08_KT_out.e'
+    heavy = true
+    cli_args = 'Executioner/end_time=1E5'
+    threading = '!pthreads'
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_08.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
   [../]
   [./10]
     type = Exodiff

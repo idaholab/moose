@@ -12,6 +12,7 @@
 
 #include "Action.h"
 #include "PorousFlowDependencies.h"
+#include "MooseEnum.h"
 
 class PorousFlowActionBase;
 
@@ -68,6 +69,11 @@ protected:
 
   /// Displacement Variable names
   std::vector<VariableName> _coupled_displacements;
+
+  /// Flux limiter type in the Kuzmin-Turek FEM-TVD stabilization scheme
+  const MooseEnum _flux_limiter_type;
+
+  const enum class StabilizationEnum { Full, KT } _stabilization;
 
   /// Coordinate system of the simulation (eg RZ, XYZ, etc)
   Moose::CoordinateSystemType _coord_system;
@@ -180,6 +186,32 @@ protected:
    * @param userobject_name name of the user object
    */
   void addCapillaryPressureVG(Real m, Real alpha, std::string userobject_name);
+
+  void addAdvectiveFluxCalculatorSaturated(unsigned phase,
+                                           bool multiply_by_density,
+                                           std::string userobject_name);
+
+  void addAdvectiveFluxCalculatorUnsaturated(unsigned phase,
+                                             bool multiply_by_density,
+                                             std::string userobject_name);
+
+  void addAdvectiveFluxCalculatorSaturatedHeat(unsigned phase,
+                                               bool multiply_by_density,
+                                               std::string userobject_name);
+
+  void addAdvectiveFluxCalculatorUnsaturatedHeat(unsigned phase,
+                                                 bool multiply_by_density,
+                                                 std::string userobject_name);
+
+  void addAdvectiveFluxCalculatorSaturatedMultiComponent(unsigned phase,
+                                                         unsigned fluid_component,
+                                                         bool multiply_by_density,
+                                                         std::string userobject_name);
+
+  void addAdvectiveFluxCalculatorUnsaturatedMultiComponent(unsigned phase,
+                                                           unsigned fluid_component,
+                                                           bool multiply_by_density,
+                                                           std::string userobject_name);
 };
 
 #endif // POROUSFLOWACTIONBASE_H

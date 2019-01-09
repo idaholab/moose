@@ -18,10 +18,6 @@ There are evidently some more input parameters:
 - The `van_genuchten` capillarity parameters.  These are documented in
   [Capillary pressure](porous_flow/capillary_pressure.md)
 
-Because mass-lumping is used, compared with [Page 01](porous_flow/tutorial_01.md), the porosity must be evaluated at the nodes instead of the quadpoints:
-
-!listing modules/porous_flow/examples/tutorial/08.i start=[./porosity_nodal] end=[./permeability_aquifer]
-
 The [`PorousFlowConstantBiotModulus`](PorousFlowConstantBiotModulus.md) is not needed here (it's only needed by `PorousFlowBasicTHM`).  Because of the multiplication of the fluid mass-balance equation by density, an appropriate `nl_abs_tol` is $10^{-7}$ in contrast to the $10^{-10}$ calculated on [Page 02](porous_flow/tutorial_02.md):
 
 !listing modules/porous_flow/examples/tutorial/08.i start=[Executioner] end=[Outputs]
@@ -38,6 +34,9 @@ Try to run the simulation with `use_relperm = false` and you'll see very poor co
 
 The simulation may be promoted to a full THMC simulation using the approach used in [Page 03](porous_flow/tutorial_03.md), [Page 04](porous_flow/tutorial_04.md) and [Page 06](porous_flow/tutorial_06.md).  The arguments made about scaling the variables must be modified to take into account the fluid density appearing in the fluid equation (see [Page 06](porous_flow/tutorial_06.md)) so the scaling will be approximately $10^{-5}$ for the temperature and $10^{-7}$ for the displacement variables.  The [porosity](porous_flow/porosity.md) may depend on porepressure, temperature, volumetric strain and chemistry.
 
+The simulation described so far uses full upwinding, which is the default in PorousFlow.  TVD stabilization (see [numerical diffusion](numerical_diffusion.md) and [a worked example of KT stablization](kt_worked.md)) may be used instead by simply changing the `PorousFlowUnsaturated` block to:
+
+!listing modules/porous_flow/examples/tutorial/08_KT.i start=[PorousFlowUnsaturated] end=[BCs]
 
 
 [Start](porous_flow/tutorial_00.md) |

@@ -76,6 +76,7 @@ Details about numerical issues.
 - [Nonlinear convergence problems](nonlinear_convergence_problems.md)
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+- [How to use Kuzmin-Turek stabilization in PorousFlow simulations](kt.md)
 
 ## The Dictator
 

@@ -53,6 +53,17 @@
     rel_err = 1.0E-5
     threading = '!pthreads'
   [../]
+  [./heat04_action_KT]
+    type = 'CSVDiff'
+    input = 'heat04_action_KT.i'
+    csvdiff = 'heat04_action.csv'
+    prereq = heat04_action
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated anisothermal single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
+  [../]
   [./heat05]
     type = 'CSVDiff'
     input = 'heat05.i'
