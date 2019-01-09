@@ -4,26 +4,26 @@
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
-//* Licensed under LGPL 2.1, please see LICENSE for details;
+//* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADKERNELVALUE_H
-#define ADKERNELVALUE_H
+#ifndef ADKERNELGRAD_H
+#define ADKERNELGRAD_H
 
 #include "ADKernel.h"
 
-#define usingKernelValueMembers usingKernelMembers
+#define usingKernelGradMembers usingKernelMembers
 
 template <ComputeStage>
-class ADKernelValue;
+class ADKernelGrad;
 
-declareADValidParams(ADKernelValue);
+declareADValidParams(ADKernelGrad);
 
 template <ComputeStage compute_stage>
-class ADKernelValue : public ADKernel<compute_stage>
+class ADKernelGrad : public ADKernel<compute_stage>
 {
 public:
-  ADKernelValue(const InputParameters & parameters);
+  ADKernelGrad(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -33,11 +33,11 @@ protected:
   /**
    * Called before forming the residual for an element
    */
-  virtual ADResidual precomputeQpResidual() = 0;
+  virtual ADGradResidual precomputeQpResidual() = 0;
 
   virtual ADResidual computeQpResidual() final;
 
   usingKernelMembers;
 };
 
-#endif /* ADKERNELVALUE_H */
+#endif /* ADKERNELGRAD_H */
