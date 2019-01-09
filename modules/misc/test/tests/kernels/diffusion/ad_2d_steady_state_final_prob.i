@@ -68,11 +68,13 @@
     type = NodalL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
+    outputs = console
   [../]
   [./elemental_error]
     type = ElementL2Error
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
+    outputs = console
   [../]
 []
 

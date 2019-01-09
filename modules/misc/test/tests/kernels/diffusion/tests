@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = '1D_transient.i'
     exodiff = '1D_transient_out.e'
-    abs_zero = 1e-4
     requirement = "Diffusion with a diffusivity shall match the answer from an analytical solution"
     design = "\CoefDiffusion.md"
     issues = "#2582"
@@ -12,7 +11,6 @@
     type = 'Exodiff'
     input = 'ad_1D_transient.i'
     exodiff = 'ad_1D_transient_out.e'
-    abs_zero = 1e-4
     requirement = "Diffusion with a diffusivity from an AD kernel shall get the same answer as a traditional kernel"
     design = "\ADMatDiffusion.md"
     issues = "#5658 #12633"
@@ -22,7 +20,6 @@
     type = 'Exodiff'
     input = '2d_steady_state_final_prob.i'
     exodiff = '2d_steady_state_final_prob_out.e'
-    abs_zero = 1e-8
     requirement = "Diffusion with a diffusivity shall match the answer from an analytical solution"
     design = "\CoefDiffusion.md"
     issues = "#2582"
@@ -31,7 +28,6 @@
     type = 'Exodiff'
     input = 'ad_2d_steady_state_final_prob.i'
     exodiff = 'ad_2d_steady_state_final_prob_out.e'
-    abs_zero = 1e-8
     requirement = "Diffusion with a diffusivityfrom an AD kernel shall get the same answer as a traditional kernel"
     design = "\ADMatDiffusion.md"
     issues = "#5658 #12633"

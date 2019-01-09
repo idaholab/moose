@@ -82,6 +82,7 @@
     type = NodalL2Error
     function = '100*sin(pi*x/80)*exp(-0.95*pi^2/80^2*t)'
     variable = T
+    outputs = console
   [../]
 []
 
