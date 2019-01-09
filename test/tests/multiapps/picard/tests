@@ -4,23 +4,45 @@
     input = 'picard_master.i'
     exodiff = 'picard_master_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = "The system shall allow transient multiapps to use Picard iterations to rerun the time step"
   [../]
   [./iteration_adaptive]
     type = 'Exodiff'
     input = 'picard_adaptive_master.i'
     exodiff = 'picard_adaptive_master_out.e'
+    cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#2116 #10311'
+    requirement = "The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances"
+  [../]
+  [./iteration_adaptive_picard_max_its]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_picard_max_its.e'
+    cli_args = "Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its"
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#12618'
+    requirement = "The system shall reject the solve if the maximum number of Picard iterations is reached without converging"
   [../]
 
   [./rel_tol]
     type = 'Exodiff'
     input = 'picard_rel_tol_master.i'
     exodiff = 'picard_rel_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = "The system shall allow transient multiapps with Picard iterations controlled by relative tolerances"
   [../]
 
   [./abs_tol]
     type = 'Exodiff'
     input = 'picard_abs_tol_master.i'
     exodiff = 'picard_abs_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = "The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances"
   [../]
 
   [./function_dt]
@@ -28,5 +50,8 @@
     input = 'function_dt_master.i'
     exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
     rel_err = 5e-5  # Loosened for recovery tests
+    design = 'timesteppers/FunctionDT.md'
+    issues = '#5800'
+    requirement = "The system shall allow function-defined time stepping for transient multiapps"
   [../]
 []

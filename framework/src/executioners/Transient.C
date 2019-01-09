@@ -111,11 +111,13 @@ validParams<Transient>()
                         "default) then the minimum over the master dt "
                         "and the MultiApps is used");
 
-  params.addParam<unsigned int>("picard_max_its",
-                                1,
-                                "Number of times each timestep will be solved.  Mainly used when "
-                                "wanting to do Picard iterations with MultiApps that are set to "
-                                "execute_on timestep_end or timestep_begin");
+  params.addParam<unsigned int>(
+      "picard_max_its",
+      1,
+      "Maximum number of times each timestep will be solved.  Mainly used when "
+      "wanting to do Picard iterations with MultiApps that are set to "
+      "execute_on timestep_end or timestep_begin. Setting this parameter to 1 turns off the Picard "
+      "iterations.");
   params.addParam<Real>("picard_rel_tol",
                         1e-8,
                         "The relative nonlinear residual drop to shoot for "
@@ -199,7 +201,7 @@ Transient::Transient(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _picard_it(declareRecoverableData<int>("picard_it", 0)),
+    _picard_it(declareRecoverableData<unsigned int>("picard_it", 0)),
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
     _picard_converged(declareRecoverableData<bool>("picard_converged", false)),
     _picard_initial_norm(declareRecoverableData<Real>("picard_initial_norm", 0.0)),
@@ -636,6 +638,13 @@ Transient::solveStep(Real input_dt)
 
       _picard_converged = true;
       _time_stepper->acceptStep();
+      return;
+    }
+    else if (numPicardIts() == _picard_max_its)
+    {
+      _console << COLOR_RED << "Maximum number of Picard iterations reached! Reject time step."
+               << COLOR_DEFAULT << std::endl;
+      _time_stepper->rejectStep();
       return;
     }
   }
