@@ -107,6 +107,8 @@ class RenderContentToken(components.RenderComponent):
                     li = html.Tag(ul, 'li')
                     html.Tag(li, 'a', href=href, string=unicode(text.replace('.md', '')))
 
+    def createLatex(self, parent, token, page):
+        return None
 
 class RenderCollapsible(components.RenderComponent):
     def createHTML(self, parent, token, page):
