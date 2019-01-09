@@ -33,6 +33,7 @@
   using ADKernel<compute_stage>::paramError;                                                       \
   using ADKernel<compute_stage>::isParamValid
 
+// forward declarations
 template <ComputeStage compute_stage>
 class ADKernel;
 

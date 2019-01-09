@@ -32,10 +32,7 @@
 template <ComputeStage>
 class ADMaterial;
 
-template <>
-InputParameters validParams<ADMaterial<RESIDUAL>>();
-template <>
-InputParameters validParams<ADMaterial<JACOBIAN>>();
+declareADValidParams(ADMaterial);
 
 /**
  * ADMaterials compute ADMaterialProperties.
