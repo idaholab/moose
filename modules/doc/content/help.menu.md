@@ -11,6 +11,7 @@
 !col! class=s12 m6 l6
 ## Information and Tools
 
+- [A to Z Index](help/a-to-z.md)
 - [Git](git.md)
 - [Developer Tools](help/development/index.md)
 - [Finite Element Concepts](finite_element_concepts/index.md)
