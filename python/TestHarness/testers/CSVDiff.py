@@ -45,7 +45,7 @@ class CSVDiff(FileTester):
         commands = []
 
         for file in self.specs['csvdiff']:
-            csvdiff = [os.path.join(moose_dir, 'framework', 'contrib', 'csvdiff', 'csvdiff')]
+            csvdiff = [os.path.join(moose_dir, 'python', 'csvdiff', 'csvdiff.py')]
 
             # Due to required positional nargs with the ability to support custom positional args (--argument), we need to specify the required ones first
             csvdiff.append(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))

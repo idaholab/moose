@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python2
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -18,7 +18,7 @@ class CSVTools:
 
     def addError(self, f, message):
         """Add error message and increment the error count"""
-        self.__msg.append('In ' + os.path.basename(f.name) + ': ' + message)
+        self.__msg.append('In file ' + os.path.basename(f.name) + ': ' + message)
         self.__num_errors += 1
         return self.__msg
 
@@ -70,6 +70,10 @@ class CSVTools:
 
         return table_pair
 
+    def getParamValues(self, param, param_line):
+        """ return a list of discovered values for param """
+        return re.findall(param + "\s+([0-9e.-]+)", param_line)
+
     def parseComparisonFile(self, config_file):
         """ Walk through comparison file and populate/return a dictionary as best we can """
         # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
@@ -85,17 +89,21 @@ class CSVTools:
             if a_line and a_line.lower().find('time steps') == 0:
                 continue
 
-            # This is the important line we were looking for, containing some default paramaters
-            if a_line and (set(a_line.split()).intersection(tollerance_params) or
-                           set(a_line.split()).intersection(zero_params)):
-                # populate important paramaters (floor, rel_tol, etc)
-                for param in set(a_line.split()).intersection(tollerance_params):
-                    custom_params['RELATIVE'] = re.findall(param + "\s+([0-9e.-]+)", a_line)[0]
-                for param in set(a_line.split()).intersection(zero_params):
-                    custom_params['ZERO'] = re.findall(param + "\s+([0-9e.-]+)", a_line)[0]
+            words = set(a_line.split())
+            if a_line and (words.intersection(tollerance_params) or
+                          words.intersection(zero_params)):
+                try:
+                    for value in words.intersection(tollerance_params):
+                        custom_params['RELATIVE'] = self.getParamValues(value, a_line)[0]
+
+                    for value in words.intersection(zero_params):
+                        custom_params['ZERO'] = self.getParamValues(value, a_line)[0]
+
+                except IndexError as e:
+                    self.addError(config_file, "Error parsing comparison file. Field: '%s' has no value\n\n\t%s" % (value, a_line))
 
             # A line starting with a white-space character, with a possible tollerance value
-            elif a_line and (re.findall(r'\s', a_line[0]) and len(a_line.split()) >= 2):
+            elif a_line and (re.findall(r'\s', a_line[0]) and len(words) >= 2):
                 field = a_line.split()[0]
                 try:
                     val = float(a_line.split()[1])
@@ -110,8 +118,8 @@ class CSVSummary(CSVTools):
     def __init__(self, args):
         CSVTools.__init__(self)
         self.files = args.summary
-        self.abs_zero = float(str(args.abs_zero))
-        self.rel_tol = float(str(args.relative_tolerance))
+        self.abs_zero = float(args.abs_zero)
+        self.rel_tol = float(args.relative_tolerance)
 
     def __enter__(self):
         return self
@@ -164,8 +172,8 @@ class CSVDiffer(CSVTools):
         CSVTools.__init__(self)
         self.files = args.csv_file
         self.config = args.comparison_file
-        self.abs_zero = float(str(args.abs_zero))
-        self.rel_tol = float(str(args.relative_tolerance))
+        self.abs_zero = float(args.abs_zero)
+        self.rel_tol = float(args.relative_tolerance)
         self.custom_columns = args.custom_columns
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
@@ -192,6 +200,9 @@ class CSVDiffer(CSVTools):
         if self.config:
             self.only_compare_custom = True
             custom_params = self.parseComparisonFile(self.config)
+            if self.getNumErrors():
+                return self.getMessages()
+
             self.custom_columns = []
             self.custom_rel_err = []
             self.custom_abs_zero = []
