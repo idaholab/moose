@@ -99,7 +99,7 @@ class CSVTools:
                     for value in words.intersection(zero_params):
                         custom_params['ZERO'] = self.getParamValues(value, a_line)[0]
 
-                except IndexError as e:
+                except IndexError:
                     self.addError(config_file, "Error parsing comparison file. Field: '%s' has no value\n\n\t%s" % (value, a_line))
 
             # A line starting with a white-space character, with a possible tollerance value
