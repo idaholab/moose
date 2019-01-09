@@ -531,11 +531,13 @@ Parser::parse(const std::string & input_filename)
   // MUST occur before parameter extraction - otherwise parameters will get wrong values.
   hit::RawEvaler raw;
   hit::EnvEvaler env;
+  hit::ReplaceEvaler repl;
   FuncParseEvaler fparse_ev;
   hit::BraceExpander exw(_input_filename);
   exw.registerEvaler("raw", raw);
   exw.registerEvaler("env", env);
   exw.registerEvaler("fparse", fparse_ev);
+  exw.registerEvaler("replace", repl);
   _root->walk(&exw);
   for (auto & var : exw.used)
     _extracted_vars.insert(var);

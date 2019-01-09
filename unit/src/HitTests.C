@@ -292,6 +292,11 @@ TEST(HitTests, BraceExpressions)
 {
   ValCase cases[] = {
       {"substitute string", "foo=bar boo=${foo}", "boo", "bar", hit::Field::Kind::String},
+      {"substitute string explicit",
+       "foo=bar boo=${replace foo}",
+       "boo",
+       "bar",
+       hit::Field::Kind::String},
       {"trailing space", "foo=bar boo=${foo} ", "boo", "bar", hit::Field::Kind::String},
       {"substute number", "foo=42 boo=${foo}", "boo", "42", hit::Field::Kind::Int},
       {"multiple replacements",
@@ -359,9 +364,11 @@ TEST(HitTests, BraceExpressions)
       root = hit::parse("TEST", test.input);
       hit::BraceExpander exw("TEST");
       hit::RawEvaler raw;
+      hit::ReplaceEvaler repl;
       FuncParseEvaler fparse_ev;
       exw.registerEvaler("fparse", fparse_ev);
       exw.registerEvaler("raw", raw);
+      exw.registerEvaler("replace", repl);
       root->walk(&exw);
       if (exw.errors.size() > 0 && test.kind != hit::Field::Kind::None)
       {

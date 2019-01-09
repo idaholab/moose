@@ -6,7 +6,9 @@ These documentation pages aid in running MOOSE-based applications.  For developm
 
 [Mesh Block and Type](mesh_block_type.md)
 
-[Peacock](peacock.md)
+[Input File Syntax](input_syntax.md)
+
+[Peacock](peacock.md) - Graphical user interface and results visualization
 
 [Tracked Apps](tracked_apps.md) - A list of applications being developped
 
