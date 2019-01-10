@@ -27,5 +27,6 @@
     requirement = 'The AD heat conduction and heat source Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
+    prereq = 'ad_heat_source_bar' # same input file
   [../]
 []
