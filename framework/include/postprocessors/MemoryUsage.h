@@ -12,6 +12,7 @@
 
 #include "GeneralPostprocessor.h"
 #include "MemoryUsageReporter.h"
+#include "MemoryUtils.h"
 
 class MemoryUsage;
 
@@ -48,6 +49,9 @@ protected:
     max_process,
     min_process
   } _value_type;
+
+  /// The units in which to report memory statistics (kilobyte, megabyte, etc).
+  MemoryUtils::MemUnit _mem_units;
 
   /// memory usage metric in bytes
   Real _value;

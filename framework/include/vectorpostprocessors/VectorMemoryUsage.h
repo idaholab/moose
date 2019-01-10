@@ -12,6 +12,7 @@
 
 #include "GeneralVectorPostprocessor.h"
 #include "MemoryUsageReporter.h"
+#include "MemoryUtils.h"
 
 class VectorMemoryUsage;
 
@@ -34,10 +35,13 @@ public:
   virtual void finalize() override;
 
 protected:
-  /// hardware id for the phyical node the rank is located at
+  /// The units in which to report memory statistics (kilobyte, megabyte, etc).
+  MemoryUtils::MemUnit _mem_units;
+
+  /// hardware id for the physical node the rank is located at
   VectorPostprocessorValue & _col_hardware_id;
 
-  /// total RAM available on the phyical node the rank is located at
+  /// total RAM available on the physical node the rank is located at
   VectorPostprocessorValue & _col_total_ram;
 
   /// physical memory usage per rank

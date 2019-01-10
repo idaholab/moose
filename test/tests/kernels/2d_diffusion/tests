@@ -26,7 +26,7 @@
     exodiff = 'matdiffusion_out.e'
     requirement = 'MOOSE shall provide a diffusion kernel that obtains the diffusion coefficient from a material property'
     issues = '#12074'
-    design = 'MatDiffusion.md'
+    design = '/MatDiffusion.md'
   [../]
 
   [./testbodyforce]

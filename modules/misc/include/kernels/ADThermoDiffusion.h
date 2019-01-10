@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDIFFUSION_H
-#define ADDIFFUSION_H
+#ifndef ADTHERMODIFFUSION_H
+#define ADTHERMODIFFUSION_H
 
 #include "ADKernel.h"
 
@@ -32,4 +32,4 @@ protected:
   usingKernelMembers;
 };
 
-#endif /* ADDIFFUSION_H */
+#endif /* ADTHERMODIFFUSION_H */

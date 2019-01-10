@@ -26,12 +26,16 @@ validParams<VectorMemoryUsage>()
                         "If the vectorpostprocessor is executed more than once "
                         "during a time step, report the aggregated peak "
                         "value.");
+  MooseEnum mem_units("bytes kilobytes megabytes gigabytes", "megabytes");
+  params.addParam<MooseEnum>(
+      "mem_units", mem_units, "The unit used to report memory usage, default: Megabytes");
   return params;
 }
 
 VectorMemoryUsage::VectorMemoryUsage(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     MemoryUsageReporter(this),
+    _mem_units(getParam<MooseEnum>("mem_units").getEnum<MemoryUtils::MemUnit>()),
     _col_hardware_id(declareVector("hardware_id")),
     _col_total_ram(declareVector("total_ram")),
     _col_physical_mem(declareVector("physical_mem")),
@@ -69,6 +73,7 @@ VectorMemoryUsage::execute()
 {
   MemoryUtils::Stats stats;
   MemoryUtils::getMemoryStats(stats);
+  MemoryUtils::getMemoryStats(stats, _mem_units);
 
   if (_report_peak_value)
   {

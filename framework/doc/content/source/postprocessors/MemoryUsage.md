@@ -8,6 +8,9 @@ This postprocessor collects various memory usage metrics:
 - virtual memory
 - major page faults (how often disk swap is accessed)
 
+The units for memory default to MegaBytes, but users can report usage in other
+units through the mem_units parameter: (bytes, kilobytes, megabytes, gigabytes).
+
 The data can be reduced in parallel as
 
 - maximum out of all MPI ranks

@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'heat_source_bar.i'
-    exodiff = 'heat_source_bar_out.e'
-  [../]
-[]

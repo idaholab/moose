@@ -9,7 +9,7 @@
 
 #include "ADThermoDiffusion.h"
 
-registerADMooseObject("MooseApp", ADThermoDiffusion);
+registerADMooseObject("MiscApp", ADThermoDiffusion);
 
 defineADValidParams(
     ADThermoDiffusion,
