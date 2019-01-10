@@ -93,30 +93,24 @@ StackGenerator::generate()
       mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in ", _dim, "D.");
   }
 
-  boundary_id_type first, second;
+  boundary_id_type first =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
+  boundary_id_type second =
+      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
 
-  switch (_dim)
+  if (dim == 3)
   {
-    case 2:
-    {
-      first = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
-      second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
-      break;
-    }
-    case 3:
-    {
-      first = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
-      second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
-      break;
-    }
+    first = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
+    second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
   }
 
-  // Getting the z width of each mesh
+  // Getting the width of each mesh
   std::vector<Real> heights;
   heights.push_back(computeWidth(*mesh, _dim) + _bottom_height);
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
     heights.push_back(computeWidth(*_meshes[i], _dim) + *heights.rbegin());
 
+  // Move the first mesh at the provided height
   switch (_dim)
   {
     case 2:
@@ -127,6 +121,7 @@ StackGenerator::generate()
       break;
   }
 
+  // Move all of the other meshes in the right spots then stitch them one by one to the first one
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
   {
     switch (_dim)
