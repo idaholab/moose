@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
-registerMooseObject("MooseApp", PerformanceData);
+registerMooseObjectReplaced("MooseApp", PerformanceData, "02/01/2019 00:00", PerfGraphData);
 
 template <>
 InputParameters
