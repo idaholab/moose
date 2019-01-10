@@ -1,6 +1,6 @@
 [Tests]
   issues = 'r2275 #3492 #12658'
-  design = '/syntax/Kernels/index.md'
+  design = '/kernels/Kernel.md'
 
   [./test]
     type = 'Exodiff'
