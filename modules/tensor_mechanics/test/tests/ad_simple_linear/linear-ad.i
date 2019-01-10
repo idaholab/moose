@@ -6,6 +6,10 @@
   nz = 2
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -17,17 +21,17 @@
 
 [ADKernels]
   [./stress_x]
-    type = ADStressDivergenceTest
+    type = ADStressDivergenceTensors
     component = 0
     variable = disp_x
   [../]
   [./stress_y]
-    type = ADStressDivergenceTest
+    type = ADStressDivergenceTensors
     component = 1
     variable = disp_y
   [../]
   [./stress_z]
-    type = ADStressDivergenceTest
+    type = ADStressDivergenceTensors
     component = 2
     variable = disp_z
   [../]
@@ -60,12 +64,20 @@
   [../]
 []
 
-[ADMaterials]
-  [./linear]
-    type = TensorMechADMatTest
-    displacements = 'disp_x disp_y disp_z'
+[Materials]
+  [./elasticity]
+    type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e10
+  [../]
+[]
+
+[ADMaterials]
+  [./strain]
+    type = ADComputeSmallStrain
+  [../]
+  [./stress]
+    type = ADComputeLinearElasticStress
   [../]
 []
 

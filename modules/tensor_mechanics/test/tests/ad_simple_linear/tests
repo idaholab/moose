@@ -14,15 +14,6 @@
     exodiff = 'linear-out.e'
     absent_out = '3 Nonlinear'
     prereq = 'linear-hand-coded'
-    requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation'
-    allow_test_objects = true
-  [../]
-  [./linear-ad-production]
-    type = 'Exodiff'
-    input = 'linear-ad-production.i'
-    exodiff = 'linear-out.e'
-    absent_out = '3 Nonlinear'
-    prereq = 'linear-ad'
     requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation in the production stress divergence kernel'
     allow_test_objects = true
   [../]
@@ -30,7 +21,7 @@
     type = 'PetscJacobianTester'
     input = 'linear-hand-coded.i'
     run_sim = 'True'
-    prereq = 'linear-ad-production'
+    prereq = 'linear-ad'
     ratio_tol = 1e-8
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the hand-coded problem shall be perfect'
@@ -39,17 +30,7 @@
     type = 'PetscJacobianTester'
     input = 'linear-ad.i'
     run_sim = 'True'
-    prereq = 'linear-ad-production'
-    ratio_tol = 1e-8
-    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
-    requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
-    allow_test_objects = true
-  [../]
-  [./linear-ad-jac-production]
-    type = 'PetscJacobianTester'
-    input = 'linear-ad-production.i'
-    run_sim = 'True'
-    prereq = 'linear-ad-production'
+    prereq = 'linear-ad'
     ratio_tol = 1e-8
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
