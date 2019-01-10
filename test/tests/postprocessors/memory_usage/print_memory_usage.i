@@ -78,9 +78,9 @@
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./walltime]
-    type = PerformanceData
-    event = ALIVE
-    execute_on = 'INITIAL TIMESTEP_END'
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
   [../]
 []
 

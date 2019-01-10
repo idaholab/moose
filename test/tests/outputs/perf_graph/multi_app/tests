@@ -1,0 +1,29 @@
+[Tests]
+  [./perf_with_multi]
+    requirement = "MOOSE shall output a performance log for multiapps with sub_cycling enabled."
+    design = 'PerfGraphOutput.md'
+    issues = '#11551 #11453 #12186'
+    type = 'RunApp'
+    input = 'master.i'
+    expect_out = 'MooseTestApp (sub_app0)'
+    match_literal = true
+  [../]
+  [./perf_with_sub_cycle]
+    requirement = "MOOSE shall output a performance log for multiapps with sub_cycling enabled."
+    design = 'PerfGraphOutput.md'
+    issues = '#11551 #11453 #12186'
+    type = 'RunApp'
+    input = 'master_sub_cycle.i'
+    expect_out = 'MooseTestApp (sub_app0)'
+    match_literal = true
+  [../]
+  [./perf_with_full]
+    requirement = "MOOSE shall output a performance log for multiapps with sub_cycling enabled."
+    design = 'PerfGraphOutput.md'
+    issues = '#11551 #11453 #12186'
+    type = 'RunApp'
+    input = 'master_full.i'
+    expect_out = 'MooseTestApp (full_solve0)'
+    match_literal = true
+  [../]
+[]

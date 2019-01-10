@@ -39,8 +39,9 @@
 
 [Postprocessors]
   [./sum]
-    type = PerformanceData
-    event = 'alive'
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
     execute_on = 'initial nonlinear timestep_end'
   [../]
 []

@@ -12,11 +12,10 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
+    type = Diffusion
     variable = u
-    coef = 0.1
   [../]
-  [./time]
+  [./td]
     type = TimeDerivative
     variable = u
   [../]
@@ -37,21 +36,27 @@
   [../]
 []
 
-[Postprocessors]
-  [./elapsed]
-    type = PerfGraphData
-    section_name = "Root"
-    data_type = total
-  [../]
-[]
-
 [Executioner]
   type = Transient
   num_steps = 5
-  dt = 0.1
+  dt = 0.2
 
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+[]
+
+[Outputs]
+  perf_graph = true
+[]
+
+[MultiApps]
+  [./sub_app]
+    positions = '0 0 0'
+    type = TransientMultiApp
+    input_files = 'sub_sub_cycle.i'
+    app_type = MooseTestApp
+    sub_cycling = true
+  [../]
 []

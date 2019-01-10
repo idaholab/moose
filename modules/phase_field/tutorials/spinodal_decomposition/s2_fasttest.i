@@ -111,9 +111,10 @@
   [./evaluations]           # Cumulative residual calculations for simulation
     type = NumResidualEvaluations
   [../]
-  [./active_time]           # Time computer spent on simulation
-    type = PerformanceData
-    event =  ACTIVE
+  [./elapsed]
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
   [../]
 []
 
