@@ -11,8 +11,6 @@
 #define ADCOMPUTESTRESSBASE_H
 
 #include "ADMaterial.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 #include "Function.h"
 
 #define usingComputeStressBaseMembers                                                              \
@@ -24,8 +22,17 @@
   using ADComputeStressBase<compute_stage>::_elasticity_tensor;                                    \
   using ADComputeStressBase<compute_stage>::_initial_stress_fcn
 
+// Forward Declarations
 template <ComputeStage>
 class ADComputeStressBase;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
+typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
+template <typename>
+class RankFourTensorTempl;
+typedef RankFourTensorTempl<Real> RankFourTensor;
+typedef RankFourTensorTempl<ADReal> ADRankFourTensor;
 
 declareADValidParams(ADComputeStressBase);
 
@@ -51,9 +58,6 @@ protected:
   ADMaterialProperty(RankTwoTensor) & _elastic_strain;
 
   const ADMaterialProperty(RankFourTensor) & _elasticity_tensor;
-
-  /// Extra stress tensor
-  // const ADMaterialProperty(RankTwoTensor) & _extra_stress;
 
   /// initial stress components
   std::vector<Function *> _initial_stress_fcn;

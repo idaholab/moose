@@ -11,9 +11,6 @@
 #define ADCOMPUTESTRAINBASE_H
 
 #include "ADMaterial.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
-#include "RotationTensor.h"
 
 #define usingComputeStrainBaseMembers                                                              \
   usingMaterialMembers;                                                                            \
@@ -26,8 +23,13 @@
   using ADComputeStrainBase<compute_stage>::_eigenstrains;                                         \
   using ADComputeStrainBase<compute_stage>::_total_strain
 
+// Forward Declarations
 template <ComputeStage>
 class ADComputeStrainBase;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
+typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
 
 declareADValidParams(ADComputeStrainBase);
 

@@ -47,10 +47,11 @@ ADComputeSmallStrain<compute_stage>::computeProperties()
   {
     if (_volumetric_locking_correction)
     {
-      typename RealType<compute_stage>::type trace = _total_strain[_qp].trace();
-      _total_strain[_qp](0, 0) += (volumetric_strain - trace) / 3.0;
-      _total_strain[_qp](1, 1) += (volumetric_strain - trace) / 3.0;
-      _total_strain[_qp](2, 2) += (volumetric_strain - trace) / 3.0;
+      typename RealType<compute_stage>::type correction =
+          (volumetric_strain - _total_strain[_qp].trace()) / 3.0;
+      _total_strain[_qp](0, 0) += correction;
+      _total_strain[_qp](1, 1) += correction;
+      _total_strain[_qp](2, 2) += correction;
     }
 
     if (_global_strain)

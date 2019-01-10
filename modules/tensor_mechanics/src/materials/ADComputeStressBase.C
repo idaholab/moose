@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputeStressBase.h"
-#include "ComputeElasticityTensorBase.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 defineADValidParams(
     ADComputeStressBase,
@@ -28,7 +29,6 @@ ADComputeStressBase<compute_stage>::ADComputeStressBase(const InputParameters & 
     _stress(adDeclareADProperty<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "elastic_strain")),
     _elasticity_tensor(adGetADMaterialProperty<RankFourTensor>(_elasticity_tensor_name))
-// _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
 {
 
   if (adGetParam<bool>("use_displaced_mesh"))
@@ -49,8 +49,7 @@ ADComputeStressBase<compute_stage>::computeQpProperties()
 {
   computeQpStress();
 
-  // Add in extra stress
-  //_stress[_qp] += _extra_stress[_qp];
+  // TODO: Add in extra stress (using a list of extra_stress_names analogous to eigenstrain_names)
 }
 
 // explicit instantiation is required for AD base classes

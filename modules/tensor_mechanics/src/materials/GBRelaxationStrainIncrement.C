@@ -18,7 +18,7 @@ validParams<GBRelaxationStrainIncrement>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Compute strain increment based on lattice relaxation at GB");
-  params.addParam<MaterialPropertyName>("prefactor_name", "Name of perfactor property");
+  params.addParam<MaterialPropertyName>("prefactor_name", "Name of prefactor property");
   params.addParam<MaterialPropertyName>("gb_normal_name", "Name of GB normal property");
   params.addParam<MaterialPropertyName>("property_name",
                                         "Name of GB relaxation strain increment property");

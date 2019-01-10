@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADStressDivergenceTensors.h"
+#include "RankTwoTensor.h"
 #include "libmesh/quadrature.h"
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
@@ -66,8 +67,8 @@ ADStressDivergenceTensors<compute_stage>::computeQpResidual()
 
   // volumetric locking correction
   if (_volumetric_locking_correction)
-    residual += _stress[_qp].trace() / 3.0 *
-                (_avg_grad_test[_i](_component) - _grad_test[_i][_qp](_component));
+    residual += (_avg_grad_test[_i](_component) - _grad_test[_i][_qp](_component)) / 3.0 *
+                _stress[_qp].trace();
 
   return residual;
 }

@@ -33,7 +33,7 @@ ComputeElasticityTensorBase::ComputeElasticityTensorBase(const InputParameters &
     _elasticity_tensor(declareProperty<RankFourTensor>(_elasticity_tensor_name)),
     _prefactor_function(isParamValid("elasticity_tensor_prefactor")
                             ? &getFunction("elasticity_tensor_prefactor")
-                            : NULL)
+                            : nullptr)
 {
 }
 

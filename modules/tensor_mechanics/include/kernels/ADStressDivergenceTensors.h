@@ -11,19 +11,19 @@
 #define ADSTRESSDIVERGENCETENSORS_H
 
 #include "ADKernel.h"
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 
-// Forward Declaration
+// Forward Declarations
 template <ComputeStage>
 class ADStressDivergenceTensors;
+template <typename>
+class RankTwoTensorTempl;
+typedef RankTwoTensorTempl<Real> RankTwoTensor;
+typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
 
 declareADValidParams(ADStressDivergenceTensors);
 
 /**
- * ADStressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
- * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
- * to allow for more mathematical transparancy.
+ * ADStressDivergenceTensors is the automatic differentiation version of StressDivergenceTensors
  */
 template <ComputeStage compute_stage>
 class ADStressDivergenceTensors : public ADKernel<compute_stage>

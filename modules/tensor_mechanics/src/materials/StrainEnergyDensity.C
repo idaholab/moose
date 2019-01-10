@@ -39,8 +39,9 @@ StrainEnergyDensity::StrainEnergyDensity(const InputParameters & parameters)
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _mechanical_strain(getMaterialProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _strain_increment(
-        _incremental ? &getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment") : NULL)
+    _strain_increment(_incremental
+                          ? &getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")
+                          : nullptr)
 {
 }
 

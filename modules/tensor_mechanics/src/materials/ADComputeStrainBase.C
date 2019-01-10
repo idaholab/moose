@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputeStrainBase.h"
+#include "RankTwoTensor.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
 
@@ -44,7 +45,7 @@ ADComputeStrainBase<compute_stage>::ADComputeStrainBase(const InputParameters & 
     _eigenstrains(_eigenstrain_names.size()),
     _global_strain(isParamValid("global_strain")
                        ? &adGetADMaterialProperty<RankTwoTensor>(_base_name + "global_strain")
-                       : NULL),
+                       : nullptr),
     _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction")),
     _current_elem_volume(_assembly.elemVolume())
 {
