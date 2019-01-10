@@ -1,5 +1,4 @@
 [Tests]
-  requirement = 'MOOSE shall provide optimized kernels for residuals with the test function[gradient] factored out.'
   issues = 'r2275 #3492 #12658'
   design = '/syntax/Kernels/index.md'
 
@@ -8,6 +7,7 @@
     input = 'kernel_precompute_test.i'
     exodiff = 'out.e'
     scale_refine = 5
+    requirement = 'MOOSE shall provide optimized kernels for residuals with the test function or its gradient factored out.'
   [../]
   [./adtest]
     type = 'Exodiff'
@@ -15,5 +15,6 @@
     exodiff = 'out.e'
     prereq = 'test'
     scale_refine = 5
+    requirement = 'MOOSE shall provide optimized kernels for residuals with the test function or its gradient factored out in the automatic differentiation system.'
   [../]
 []
