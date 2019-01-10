@@ -28,8 +28,16 @@ struct Stats
   std::size_t _page_faults;
 };
 
+enum class MemUnit
+{
+  Bytes,
+  Kilobytes,
+  Megabytes,
+  Gigabytes,
+};
+
 /// get all memory stats for the current process
-void getMemoryStats(Stats & stats);
+void getMemoryStats(Stats & stats, MemUnit units = MemUnit::Megabytes);
 
 } // namespace MemoryUtils
 

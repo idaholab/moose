@@ -38,6 +38,7 @@
     type = VectorMemoryUsage
     execute_on = 'INITIAL TIMESTEP_END NONLINEAR LINEAR'
     report_peak_value = true
+    mem_units = kilobytes # or bytes, megabytes, gigabytes
   [../]
 []
 
