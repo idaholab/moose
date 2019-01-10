@@ -12,6 +12,7 @@
 
 #include "MeshGenerator.h"
 #include "libmesh/replicated_mesh.h"
+#include "MooseEnum.h"
 
 // Forward declarations
 class StackGenerator;
@@ -30,6 +31,9 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// The dimension of the mesh
+  MooseEnum _dim;
+
   /// The meshgenerators to read
   const std::vector<MeshGeneratorName> & _input_names;
 
@@ -42,7 +46,7 @@ protected:
   /// The meshes to be stitched together.
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 
-  Real zWidth(const MeshBase & mesh);
+  Real computeWidth(const MeshBase & mesh, const int & dim);
 };
 
 #endif // STACKGENERATOR_H

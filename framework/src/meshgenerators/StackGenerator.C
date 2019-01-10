@@ -28,12 +28,19 @@ validParams<StackGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
 
+  MooseEnum dims("2=2 3=3");
+  params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
+
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs",
                                                           "The meshes we want to stitch together");
 
   params.addParam<Real>("bottom_height", 0, "The height of the bottom of the final mesh");
 
-  // z boundary names
+  // y boundary names (2D case)
+  params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
+  params.addParam<BoundaryName>("bottom_boundary", "bottom", "name of the bottom (y) boundary");
+
+  // z boundary names (3D case)
   params.addParam<BoundaryName>("front_boundary", "front", "name of the front (z) boundary");
   params.addParam<BoundaryName>("back_boundary", "back", "name of the back (z) boundary");
 
@@ -44,6 +51,7 @@ validParams<StackGenerator>()
 
 StackGenerator::StackGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
+    _dim(getParam<MooseEnum>("dim")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _bottom_height(getParam<Real>("bottom_height"))
 {
@@ -62,8 +70,10 @@ StackGenerator::generate()
                _input_names[0],
                "is not a ReplicatedMesh.");
 
-  if (mesh->mesh_dimension() != 3)
-    mooseError("The first mesh is not in 3D !");
+  int dim = static_cast<int>(_dim);
+
+  if (dim != int(mesh->mesh_dimension()))
+    mooseError("The first mesh's dimension and the dimension provided don't match !");
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
   _meshes.reserve(_input_names.size() - 1);
@@ -72,41 +82,71 @@ StackGenerator::generate()
   for (auto i = beginIndex(_input_names, 1); i < _input_names.size(); ++i)
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
 
-  // Check that we have 3D meshes
+  // Check that the casts didn't fail, and that the dimensions match
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
   {
     if (_meshes[i] == nullptr)
       mooseError("StackGenerator only works with ReplicatedMesh : mesh from Meshgenerator ",
                  _input_names[i + 1],
                  "is not a ReplicatedMesh.");
-    if (_meshes[i]->mesh_dimension() != 3)
-      mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in 3D.");
+    if (int(_meshes[i]->mesh_dimension()) != dim)
+      mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in ", _dim, "D.");
   }
 
-  boundary_id_type front =
-      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
-  boundary_id_type back =
-      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
+  boundary_id_type first, second;
+
+  switch (_dim)
+  {
+    case 2:
+    {
+      first = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
+      second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
+      break;
+    }
+    case 3:
+    {
+      first = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
+      second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
+      break;
+    }
+  }
 
   // Getting the z width of each mesh
-  std::vector<Real> z_heights;
-  z_heights.push_back(zWidth(*mesh) + _bottom_height);
+  std::vector<Real> heights;
+  heights.push_back(computeWidth(*mesh, _dim) + _bottom_height);
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
-    z_heights.push_back(zWidth(*_meshes[i]) + *z_heights.rbegin());
+    heights.push_back(computeWidth(*_meshes[i], _dim) + *heights.rbegin());
 
-  MeshTools::Modification::translate(*mesh, 0, 0, _bottom_height);
+  switch (_dim)
+  {
+    case 2:
+      MeshTools::Modification::translate(*mesh, 0, _bottom_height, 0);
+      break;
+    case 3:
+      MeshTools::Modification::translate(*mesh, 0, 0, _bottom_height);
+      break;
+  }
 
   for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
   {
-    MeshTools::Modification::translate(*_meshes[i], 0, 0, z_heights[i]);
-    mesh->stitch_meshes(*_meshes[i], front, back, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    switch (_dim)
+    {
+      case 2:
+        MeshTools::Modification::translate(*_meshes[i], 0, heights[i], 0);
+        break;
+      case 3:
+        MeshTools::Modification::translate(*_meshes[i], 0, 0, heights[i]);
+        break;
+    }
+    mesh->stitch_meshes(
+        *_meshes[i], first, second, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 Real
-StackGenerator::zWidth(const MeshBase & mesh)
+StackGenerator::computeWidth(const MeshBase & mesh, const int & dim)
 {
   std::set<subdomain_id_type> sub_ids;
   mesh.subdomain_ids(sub_ids);
@@ -122,5 +162,5 @@ StackGenerator::zWidth(const MeshBase & mesh)
     bbox.union_with(sub_bbox);
   }
 
-  return bbox.max()(2) - bbox.min()(2);
+  return bbox.max()(dim - 1) - bbox.min()(dim - 1);
 }

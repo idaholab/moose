@@ -21,6 +21,7 @@
 
   [./stack]
     type = StackGenerator
+    dim = 3
     inputs = 'layer1 layer2'
   []
 []
