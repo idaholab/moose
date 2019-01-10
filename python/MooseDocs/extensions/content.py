@@ -10,6 +10,7 @@
 
 import os
 import uuid
+import collections
 import mooseutils
 from MooseDocs.base import components
 from MooseDocs.tree import pages, tokens, html
@@ -19,7 +20,7 @@ def make_extension(**kwargs):
     return ContentExtension(**kwargs)
 
 Collapsible = tokens.newToken('Collapsible', summary=u'')
-ContentToken = tokens.newToken('ContentToken', location=u'')
+ContentToken = tokens.newToken('ContentToken', location=u'', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location=u'', level=None, buttons=bool)
 
 class ContentExtension(command.CommandExtension):
@@ -37,6 +38,7 @@ class ContentExtension(command.CommandExtension):
         self.addCommand(reader, AtoZCommand())
         renderer.add('Collapsible', RenderCollapsible())
         renderer.add('AtoZToken', RenderAtoZ())
+        renderer.add('ContentToken', RenderContentToken())
 
 class ContentCommand(command.CommandComponent):
     COMMAND = 'contents' #TODO: Change this to content after format is working
@@ -46,32 +48,11 @@ class ContentCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['location'] = (None, "The markdown content directory to build contents.")
+        settings['level'] = (2, 'Heading level for top-level headings.')
         return settings
 
     def createToken(self, parent, info, page):
-
-        tree = dict()
-        tree[(u'',)] = core.UnorderedList(parent, browser_default=False)
-
-        location = self.settings['location']
-
-        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
-        nodes = self.translator.findPages(func)
-        for node in nodes:
-            key = tuple(node.local.strip(os.sep).replace(location, '').split(os.sep))[:-1]
-            for i in xrange(1, len(key) + 1):
-                k = key[:i]
-                if k not in tree:
-                    col = Collapsible(tree[k[:-1]], summary=k[-1])
-                    li = core.ListItem(col, class_='moose-source-item', tooltip=False)
-                    tree[k] = core.UnorderedList(li, browser_default=False)
-
-        for node in nodes:
-            key = tuple(node.local.strip(os.sep).replace(location, '').split(os.sep))[:-1]
-            loc = node.relativeDestination(page)
-            li = core.ListItem(tree[key])
-            core.Link(li, url=loc, string=node.name, class_='moose-source-item', tooltip=False)
-
+        ContentToken(parent, location=self.settings['location'], level=self.settings['level'])
         return parent
 
 class AtoZCommand(command.CommandComponent):
@@ -88,6 +69,47 @@ class AtoZCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
         return AtoZToken(parent, level=self.settings['level'], buttons=self.settings['buttons'])
 
+class RenderContentToken(components.RenderComponent):
+
+    def createHTML(self, parent, token, page):
+        pass
+
+    def createMaterialize(self, parent, token, page):
+
+        location = token['location']
+        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
+        nodes = self.translator.findPages(func)
+        nodes.sort(key=lambda n: n.local)
+
+        headings = collections.defaultdict(list)
+        for node in nodes:
+            key = tuple(node.local.replace(location, '').strip(os.sep).split(os.sep))
+            head = key[0] if len(key) > 1 else u''
+            headings[head].append((node.name, node.relativeDestination(page)))
+
+        headings = [(h, items) for h, items in headings.iteritems()]
+        headings.sort(key=lambda h: h[0])
+
+        # Build lists
+        for head, items in headings:
+
+            if head:
+                html.Tag(parent, 'h{}'.format(token['level']),
+                         class_='moose-a-to-z',
+                         string=unicode(head))
+
+            row = html.Tag(parent, 'div', class_='row')
+
+            for chunk in mooseutils.make_chunks(items, 3):
+                col = html.Tag(row, 'div', class_='col s12 m6 l4')
+                ul = html.Tag(col, 'ul', class_='moose-a-to-z')
+                for text, href in chunk:
+                    li = html.Tag(ul, 'li')
+                    html.Tag(li, 'a', href=href, string=unicode(text.replace('.md', '')))
+
+    def createLatex(self, parent, token, page):
+        return None
+
 class RenderCollapsible(components.RenderComponent):
     def createHTML(self, parent, token, page):
 
@@ -99,7 +121,6 @@ class RenderCollapsible(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         pass
-
 
 class RenderAtoZ(components.RenderComponent):
     def createHTML(self, parent, token, page):
