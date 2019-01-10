@@ -4,6 +4,9 @@ MOOSE is a dynamic project with changes occurring daily. In order to help users 
 major changes to the project monthly highlights will be produced. These highlights will be emailed
 monthly to the [MOOSE users](contact_us.md) as well as provided below.
 
+## 2019
+
+- [January, 2019](2019_01.md)
 
 ## 2018
 
