@@ -139,7 +139,7 @@ class CSVSummary(CSVTools):
         if self.getNumErrors():
             return self.getMessages()
 
-        formatted_messages = ['default value tolerances: relative %s floor %s' % (self.rel_tol, self.abs_zero) ]
+        formatted_messages = ['GLOBAL VARIABLES relative %s floor %s' % (self.rel_tol, self.abs_zero) ]
 
         field_len = []
         value_len = []
@@ -153,7 +153,7 @@ class CSVSummary(CSVTools):
         for field, value in table1.iteritems():
             if field == 'time':
                 # Tolerance for time steps will be the same for value tolerances for now (future csvdiff capability will separate this tolerance)
-                formatted_messages.insert(0, 'default time step tolerances: relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
+                formatted_messages.insert(0, 'TIME STEPS relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
                                           ( self.rel_tol, self.abs_zero, min(value), value.index(min(value)), max(value), value.index(max(value))))
 
             formatted_messages.append('%s%s%s# min: %.3e @ t%d%smax: %.3e @ t%d' % \
