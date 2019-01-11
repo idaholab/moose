@@ -1,5 +1,5 @@
 [Tests]
-  design = 'source/MultiApp.md'
+  design = 'syntax/MultiApps/index.md'
   issues = '#12576'
   [master]
     type = Exodiff

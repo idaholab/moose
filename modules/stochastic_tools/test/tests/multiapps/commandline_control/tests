@@ -1,5 +1,5 @@
 [Tests]
-  design = 'source/MultiApp.md'
+  design = 'syntax/MultiApps/index.md'
   issues = '#12576'
   [master_single]
     type = CSVDiff
@@ -19,6 +19,7 @@
     type = RunException
     input = master_wrong_size.i
     expect_err = "The number of sub apps \(2\) created by MultiApp object 'sub' must be equal to the number for rows \(10\) for the 'sample' Sampler object"
+    design = 'source/multiapps/MultiAppCommandLineControl.md'
     requirement = "The MultiAppCommandLineControl object shall error when the number of samplers differs from the number of sub apps."
   []
 
@@ -26,7 +27,7 @@
     type = RunException
     input = master_wrong_num_params.i
     expect_err = "The number of columns \(2\) must match the number of parameters \(3\)"
+    design = 'source/multiapps/MultiAppCommandLineControl.md'
     requirement = "The MultiAppCommandLineControl object shall error when the number of samples differs from the number of command line parameters."
   []
-
 []

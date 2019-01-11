@@ -1,6 +1,6 @@
 [Tests]
   issues = '#12576'
-  design = 'syntax/Controls/index.md source/Control.md'
+  design = 'syntax/Controls/index.md'
   [error]
     type = RunException
     input = exec_flag_error.i
