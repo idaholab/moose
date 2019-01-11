@@ -79,14 +79,14 @@ class CSVTools:
         # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
         zero_params = set(['floor', 'abs_zero', 'absolute'])
         tollerance_params = set(['relative', 'rel_tol'])
-
         custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : [] }
-        config_text = config_file.read()
-        line_settings = ''.join(re.findall(r"[^#]*", config_text)).split('\n')
 
-        for a_line in line_settings:
-            # Ignore TIME STEPS header (future csvdiff capability)
-            if a_line and a_line.lower().find('time steps') == 0:
+        config_file.seek(0)
+        for a_line in config_file:
+            s_line = a_line.strip()
+
+            # Ignore commented lines, and lines begining with TIME STEPS (possible future CSVdiff capability)
+            if s_line.startswith("#") or s_line.lower().find('time steps') == 0:
                 continue
 
             words = set(a_line.split())
@@ -139,7 +139,7 @@ class CSVSummary(CSVTools):
         if self.getNumErrors():
             return self.getMessages()
 
-        formatted_messages = ['default value tolerances: relative %s floor %s' % (self.rel_tol, self.abs_zero) ]
+        formatted_messages = ['GLOBAL VARIABLES relative %s floor %s' % (self.rel_tol, self.abs_zero) ]
 
         field_len = []
         value_len = []
@@ -150,10 +150,15 @@ class CSVSummary(CSVTools):
         field_justify = max(field_len) + 10
         value_justify = max(value_len) + 5
 
+        # Generate a 'TIME STEPS' summary line if a time field does not exist. This is to maintain compliance with an exodiff summary
+        if 'time' not in [x.lower() for x in table1.keys()]:
+            value_count = len(table1[table1.keys()[0]]) - 1
+            formatted_messages.insert(0, 'TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n' % (value_count, value_count))
+
         for field, value in table1.iteritems():
-            if field == 'time':
+            if field.lower() == 'time':
                 # Tolerance for time steps will be the same for value tolerances for now (future csvdiff capability will separate this tolerance)
-                formatted_messages.insert(0, 'default time step tolerances: relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
+                formatted_messages.insert(0, 'TIME STEPS relative %s floor %s  # min: %d @ t%d  max: %d @ t%d\n' % \
                                           ( self.rel_tol, self.abs_zero, min(value), value.index(min(value)), max(value), value.index(max(value))))
 
             formatted_messages.append('%s%s%s# min: %.3e @ t%d%smax: %.3e @ t%d' % \
