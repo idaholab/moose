@@ -13,6 +13,7 @@
 #include "KernelBase.h"
 
 #define usingKernelMembers                                                                         \
+  usingCoupleableMembers;                                                                          \
   using ADKernel<compute_stage>::_test;                                                            \
   using ADKernel<compute_stage>::_qp;                                                              \
   using ADKernel<compute_stage>::_i;                                                               \
@@ -34,8 +35,6 @@
   using ADKernel<compute_stage>::_current_elem_volume;                                             \
   using ADKernel<compute_stage>::_sys;                                                             \
   using ADKernel<compute_stage>::_assembly;                                                        \
-  using ADKernel<compute_stage>::coupled;                                                          \
-  using ADKernel<compute_stage>::coupledComponents;                                                \
   using ADKernel<compute_stage>::getBlockCoordSystem;                                              \
   using ADKernel<compute_stage>::precalculateResidual;                                             \
   using ADKernel<compute_stage>::prepareVectorTag;                                                 \

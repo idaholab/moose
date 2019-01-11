@@ -16,6 +16,19 @@
 #include "MooseVariableFE.h"
 #include "InputParameters.h"
 
+#define usingCoupleableMembers                                                                     \
+  using Coupleable::_zero;                                                                         \
+  using Coupleable::_grad_zero;                                                                    \
+  using Coupleable::isCoupled;                                                                     \
+  using Coupleable::coupledComponents;                                                             \
+  using Coupleable::coupled;                                                                       \
+  using Coupleable::coupledValue;                                                                  \
+  using Coupleable::coupledValueOld;                                                               \
+  using Coupleable::coupledValueOlder;                                                             \
+  using Coupleable::coupledGradient;                                                               \
+  using Coupleable::coupledGradientOld;                                                            \
+  using Coupleable::coupledGradientOlder
+
 // Forward declarations
 class MooseVariableScalar;
 class MooseObject;
