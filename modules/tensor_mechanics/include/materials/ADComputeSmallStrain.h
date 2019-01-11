@@ -12,6 +12,8 @@
 
 #include "ADComputeStrainBase.h"
 
+#define usingComputeSmallStrainMembers usingComputeStrainBaseMembers
+
 template <ComputeStage>
 class ADComputeSmallStrain;
 
@@ -26,9 +28,9 @@ class ADComputeSmallStrain : public ADComputeStrainBase<compute_stage>
 public:
   ADComputeSmallStrain(const InputParameters & parameters);
 
-protected:
   virtual void computeProperties() override;
 
+protected:
   usingComputeStrainBaseMembers;
 };
 

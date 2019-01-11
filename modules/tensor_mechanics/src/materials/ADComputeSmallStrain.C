@@ -62,4 +62,6 @@ ADComputeSmallStrain<compute_stage>::computeProperties()
     for (auto es : _eigenstrains)
       _mechanical_strain[_qp] -= (*es)[_qp];
   }
+
+  copyDualNumbersToValues();
 }

@@ -45,8 +45,9 @@ class ADComputeStrainBase : public ADMaterial<compute_stage>
 public:
   ADComputeStrainBase(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
+
+protected:
   virtual void initQpStatefulProperties() override;
   virtual void displacementIntegrityCheck();
 
