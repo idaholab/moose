@@ -264,6 +264,8 @@ TEST(HitTests, ParseFields)
   {
     auto test = cases[i];
     auto root = hit::parse("TEST", test.input);
+    hit::BraceExpander exw("TEST");
+    root->walk(&exw);
     auto n = root->find(test.key);
     if (!n)
     {
@@ -286,10 +288,15 @@ TEST(HitTests, ParseFields)
              << strkind(f->kind()) << "', want '" << strkind(test.kind) << "'\n";
   }
 }
-TEST(ExpandWalkerTests, All)
+TEST(HitTests, BraceExpressions)
 {
   ValCase cases[] = {
       {"substitute string", "foo=bar boo=${foo}", "boo", "bar", hit::Field::Kind::String},
+      {"substitute string explicit",
+       "foo=bar boo=${replace foo}",
+       "boo",
+       "bar",
+       hit::Field::Kind::String},
       {"trailing space", "foo=bar boo=${foo} ", "boo", "bar", hit::Field::Kind::String},
       {"substute number", "foo=42 boo=${foo}", "boo", "42", hit::Field::Kind::Int},
       {"multiple replacements",
@@ -314,6 +321,38 @@ TEST(ExpandWalkerTests, All)
        "hello/boo",
        "baz",
        hit::Field::Kind::String},
+      {"multi-line brace expression",
+       "foo=${raw 4\n"
+       "          2\n"
+       "     }",
+       "foo",
+       "42",
+       hit::Field::Kind::String},
+      {"fparse", "foo=${fparse 40 + 2}\n", "foo", "42", hit::Field::Kind::Float},
+      {"fparse-with-var", "var=39 foo=${fparse var + 3}", "foo", "42", hit::Field::Kind::Float},
+      {"brace-expression-ends-before-newline",
+       "foo=${raw 42} bar=23",
+       "bar",
+       "23",
+       hit::Field::Kind::Int},
+      {"super-complicated",
+       "foo1 = 42\n"
+       "foo2 = 43\n"
+       "[section1]\n"
+       "  num = 1\n"
+       "  bar = ${${raw foo ${num}}} # becomes 42\n"
+       "[]\n"
+       "[section2]\n"
+       "  num = 2\n"
+       "  bar = ${${raw foo ${num}}}  # becomes 43\n"
+       "[]\n"
+       "\n"
+       "a = ${fparse\n"
+       "      ${section1/bar} + foo1 / foo2\n"
+       "     }\n",
+       "a",
+       "42.97674418604651",
+       hit::Field::Kind::Float},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
@@ -323,7 +362,13 @@ TEST(ExpandWalkerTests, All)
     try
     {
       root = hit::parse("TEST", test.input);
-      ExpandWalker exw("TEST");
+      hit::BraceExpander exw("TEST");
+      hit::RawEvaler raw;
+      hit::ReplaceEvaler repl;
+      FuncParseEvaler fparse_ev;
+      exw.registerEvaler("fparse", fparse_ev);
+      exw.registerEvaler("raw", raw);
+      exw.registerEvaler("replace", repl);
       root->walk(&exw);
       if (exw.errors.size() > 0 && test.kind != hit::Field::Kind::None)
       {

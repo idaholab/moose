@@ -17,16 +17,21 @@
   using ADMaterial<compute_stage>::_qp;                                                            \
   using ADMaterial<compute_stage>::_ad_grad_zero;                                                  \
   using ADMaterial<compute_stage>::_ad_zero;                                                       \
-  using ADMaterial<compute_stage>::coupledComponents
+  using ADMaterial<compute_stage>::_qrule;                                                         \
+  using ADMaterial<compute_stage>::_JxW;                                                           \
+  using ADMaterial<compute_stage>::_coord;                                                         \
+  using ADMaterial<compute_stage>::_assembly;                                                      \
+  using ADMaterial<compute_stage>::_mesh;                                                          \
+  using ADMaterial<compute_stage>::coupled;                                                        \
+  using ADMaterial<compute_stage>::coupledComponents;                                              \
+  using ADMaterial<compute_stage>::isParamValid;                                                   \
+  using ADMaterial<compute_stage>::paramError
 
 // forward declarations
 template <ComputeStage>
 class ADMaterial;
 
-template <>
-InputParameters validParams<ADMaterial<RESIDUAL>>();
-template <>
-InputParameters validParams<ADMaterial<JACOBIAN>>();
+declareADValidParams(ADMaterial);
 
 /**
  * ADMaterials compute ADMaterialProperties.

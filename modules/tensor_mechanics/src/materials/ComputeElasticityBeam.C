@@ -39,7 +39,7 @@ ComputeElasticityBeam::ComputeElasticityBeam(const InputParameters & parameters)
     _material_stiffness(declareProperty<RealVectorValue>("material_stiffness")),
     _material_flexure(declareProperty<RealVectorValue>("material_flexure")),
     _prefactor_function(isParamValid("elasticity_prefactor") ? &getFunction("elasticity_prefactor")
-                                                             : NULL),
+                                                             : nullptr),
     _youngs_modulus(coupledValue("youngs_modulus")),
     _poissons_ratio(coupledValue("poissons_ratio")),
     _shear_coefficient(coupledValue("shear_coefficient"))

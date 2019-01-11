@@ -25,7 +25,7 @@ pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 # hit (new getpot parser)
 #
 hit_DIR       := $(FRAMEWORK_DIR)/contrib/hit
-hit_srcfiles  := $(hit_DIR)/parse.cc $(hit_DIR)/lex.cc
+hit_srcfiles  := $(hit_DIR)/parse.cc $(hit_DIR)/lex.cc $(hit_DIR)/braceexpr.cc
 hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(hit_DIR)/libhit-$(METHOD).la
 # dependency files
@@ -34,7 +34,7 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 #
 # hit python bindings
 #
-pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc
+pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
 pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
 # some systems have python2 but no python2-config command - fall back to python-config for them

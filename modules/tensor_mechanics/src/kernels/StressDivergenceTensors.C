@@ -100,7 +100,7 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _rotation_increment = &getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment");
   }
 
-  // Error if volumetic locking correction is turned on for 1D problems
+  // Error if volumetric locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)
     mooseError("Volumetric locking correction should be set to false for 1-D problems.");
 }
