@@ -46,7 +46,7 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
     _eigenstrains(_eigenstrain_names.size()),
     _global_strain(isParamValid("global_strain")
                        ? &getMaterialProperty<RankTwoTensor>(_base_name + "global_strain")
-                       : NULL),
+                       : nullptr),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction")),
     _current_elem_volume(_assembly.elemVolume())
 {

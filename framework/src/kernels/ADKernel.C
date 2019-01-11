@@ -89,6 +89,7 @@ ADKernel<compute_stage>::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
+  precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
@@ -117,6 +118,7 @@ ADKernel<compute_stage>::computeJacobian()
 
   size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
 
+  precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
   {
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -203,5 +205,5 @@ ADKernel<compute_stage>::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
   */
 }
 
-template class ADKernel<RESIDUAL>;
-template class ADKernel<JACOBIAN>;
+// explicit instantiation is required for AD base classes
+adBaseClass(ADKernel);

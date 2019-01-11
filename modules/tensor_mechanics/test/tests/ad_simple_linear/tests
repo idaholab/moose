@@ -14,7 +14,7 @@
     exodiff = 'linear-out.e'
     absent_out = '3 Nonlinear'
     prereq = 'linear-hand-coded'
-    requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation'
+    requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation in the production stress divergence kernel'
     allow_test_objects = true
   [../]
   [./linear-hand-coded-jac]

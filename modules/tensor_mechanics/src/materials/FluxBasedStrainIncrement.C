@@ -32,8 +32,8 @@ FluxBasedStrainIncrement::FluxBasedStrainIncrement(const InputParameters & param
     _grad_jx(&coupledGradient("xflux")),
     _has_yflux(isCoupled("yflux")),
     _has_zflux(isCoupled("zflux")),
-    _grad_jy(_has_yflux ? &coupledGradient("yflux") : NULL),
-    _grad_jz(_has_zflux ? &coupledGradient("zflux") : NULL),
+    _grad_jy(_has_yflux ? &coupledGradient("yflux") : nullptr),
+    _grad_jz(_has_zflux ? &coupledGradient("zflux") : nullptr),
     _gb(isCoupled("gb") ? coupledValue("gb") : _zero),
     _strain_increment(
         declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("property_name")))

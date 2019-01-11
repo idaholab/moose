@@ -22,7 +22,7 @@ template <>
 InputParameters
 validParams<ADMaterial<JACOBIAN>>()
 {
-  return validParams<ADMaterial<JACOBIAN>>();
+  return validParams<ADMaterial<RESIDUAL>>();
 }
 
 template <ComputeStage compute_stage>
@@ -30,5 +30,5 @@ ADMaterial<compute_stage>::ADMaterial(const InputParameters & parameters) : Mate
 {
 }
 
-template class ADMaterial<RESIDUAL>;
-template class ADMaterial<JACOBIAN>;
+// explicit instantiation is required for AD base classes
+adBaseClass(ADMaterial);
