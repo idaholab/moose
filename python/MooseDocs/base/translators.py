@@ -158,9 +158,6 @@ class Translator(mixins.ConfigObject):
            nodes = self.findPages('name')
            nodes = self.findPages(lambda p: p.name == 'foo')
 
-        The string version is equivalent to:
-           nodes = self.findPages(lambda p: p.local.endswith(arg))
-
         Inputs:
             name[str|unicode|lambda]: The partial name to search against or the function to use
                                       to test for matches.
@@ -171,7 +168,7 @@ class Translator(mixins.ConfigObject):
         if isinstance(arg, (str, unicode)):
             items = self.__page_cache.get(arg, None)
             if items is None:
-                func = lambda p: p.local.endswith(arg)
+                func = lambda p: (p.local == arg) or  p.local.endswith(os.sep + arg.lstrip(os.sep))
                 items = [page for page in self.__content if func(page)]
                 self.__page_cache[arg] = items
 
