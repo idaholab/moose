@@ -95,6 +95,29 @@ In tensor mechanics, there are two decomposition options to obtain the strain in
 TaylorExpansion and EigenSolution, with the default set to TaylorExpansion. See the
 [ComputeFiniteStrain](/ComputeFiniteStrain.md) for a description of both decomposition options.
 
+### Large Strain Closed Loop Loading Cycle id=large_strain_closed_loop_loading_cycle
+
+It is important to note that some inaccuracies are inherently present in
+incremental (hypoelastic) representations of finite strain behavior. This is
+an issue for the MOOSE implementation discussed here, as well as the
+implementations of other major commercial codes. The magnitude of the error
+increases as the magnitude of the strain increases, so this is typically only
+a practical issue for very large strains, for which hyperelastic models are
+more appropriate. This can be demonstrated with the closed loop loading cycle
+illustrated in [closed_loop_cycle_loading]. Since the initial and final
+configurations are the same, with elastic material, one would expect that the
+stress would return to zero in the final underformed state. With this
+incremental formulation, however, a residual stress remains, and the magnitude
+of that residual stress increases with the magnitude of the loading cycle.
+This occurs because the integral of the rate-of-deformation over the full
+loading cycle is not zero. A detailed explanation can be found in
+[cite:belytschko2003].
+
+!media tensor_mechanics/closed_loop_large_deform_cycle_loading.png
+       id=closed_loop_cycle_loading
+       style=width:95%;float:right;padding-top:1.5%;
+       caption=Closed loop large deformation loading cycle.
+
 ### Volumetric Locking Correction
 
 In [ComputeFiniteStrain](/ComputeFiniteStrain.md) $\hat{\boldsymbol{F}}$ is calculated and can optionally include a volumetric locking correction following the B-bar method:

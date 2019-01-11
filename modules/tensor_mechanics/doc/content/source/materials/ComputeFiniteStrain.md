@@ -169,7 +169,9 @@ is required to maintain consistency in the test function gradients and the
 strain formulation. For a complete discussion of the stress diveregence kernel
 settings and the corresponding strain classes, see the section on
 [Consistency Between Stress and Strain](/tensor_mechanics/StressDivergence.md#consistency_stress_strain_use_displaced_mesh)
-in the TensorMechanics module overview.
+in the TensorMechanics module overview. In addition, be aware of the loading
+cycle limitations while using finite strains as outlined in the section
+[Large Strain Closed Loop Loading Cycle](/tensor_mechanics/Strains.md#large_strain_closed_loop_loading_cycle).
 
 
 !syntax parameters /Materials/ComputeFiniteStrain
