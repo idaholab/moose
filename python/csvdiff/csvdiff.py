@@ -79,14 +79,14 @@ class CSVTools:
         # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
         zero_params = set(['floor', 'abs_zero', 'absolute'])
         tollerance_params = set(['relative', 'rel_tol'])
-
         custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : [] }
-        config_text = config_file.read()
-        line_settings = ''.join(re.findall(r"[^#]*", config_text)).split('\n')
 
-        for a_line in line_settings:
-            # Ignore TIME STEPS header (future csvdiff capability)
-            if a_line and a_line.lower().find('time steps') == 0:
+        config_file.seek(0)
+        for a_line in config_file:
+            s_line = a_line.strip()
+
+            # Ignore commented lines, and lines begining with TIME STEPS (possible future CSVdiff capability)
+            if s_line.startswith("#") or s_line.lower().find('time steps') == 0:
                 continue
 
             words = set(a_line.split())
