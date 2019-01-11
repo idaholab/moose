@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "lex.h"
+#include "braceexpr.h"
 
 namespace hit
 {
@@ -341,11 +342,37 @@ consumeUnquotedString(Lexer * l)
   l->backup();
 }
 
+void
+consumeBraceExpression(Lexer * l)
+{
+  BraceNode n;
+  auto offset = parseBraceNode(l->input(), l->start(), n);
+  for (auto i = l->start(); i < offset; i++)
+    l->next();
+}
+
 _LexFunc
 lexString(Lexer * l)
 {
   l->acceptRun(allspace);
   l->ignore();
+
+  char n = l->next();
+  char nn = l->peek();
+  l->backup();
+  if (n == '$' && nn == '{')
+  {
+    try
+    {
+      consumeBraceExpression(l);
+      l->emit(TokType::String);
+      return lexHit;
+    }
+    catch (Error & err)
+    {
+      return l->error(err.what());
+    }
+  }
 
   if (!charIn(l->peek(), "'\""))
   {

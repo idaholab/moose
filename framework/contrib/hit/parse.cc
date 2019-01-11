@@ -857,8 +857,10 @@ parseField(Parser * p, Node * n)
       field = p->emit(new Field(fieldtok.val, Field::Kind::String, strval));
     }
   }
+  else if (valtok.type == TokType::Error)
+    p->error(valtok, valtok.val);
   else
-    p->error(valtok, "malformed field value");
+    p->error(valtok, "unexpected field token type");
   n->addChild(field);
 }
 

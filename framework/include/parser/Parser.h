@@ -30,81 +30,61 @@ class ActionFactory;
 class GlobalParamsAction;
 class JsonSyntaxTree;
 
-inline std::string
-errormsg(std::string /*fname*/, hit::Node * /*n*/)
-{
-  return "";
-}
-
-template <typename T, typename... Args>
-std::string
-errormsg(std::string fname, hit::Node * n, T arg, Args... args)
-{
-  std::stringstream ss;
-  if (n && fname.size() > 0)
-    ss << fname << ":" << n->line() << ": ";
-  else if (fname.size() > 0)
-    ss << fname << ":0: ";
-  ss << arg;
-  ss << errormsg("", nullptr, args...);
-  return ss.str();
-}
-
-// Expands ${...} substitution expressions with variable values from the tree.
-class ExpandWalker : public hit::Walker
+class FuncParseEvaler : public hit::Evaler
 {
 public:
-  ExpandWalker(std::string fname) : _fname(fname) {}
-  virtual void
-  walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, hit::Node * n) override
+  virtual std::string
+  eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
   {
-    auto f = dynamic_cast<hit::Field *>(n);
-    auto s = f->val();
+    std::string func_text;
+    for (auto & s : args)
+      func_text += s;
+    auto n_errs = exp.errors.size();
 
-    auto start = s.find("${");
-    while (start < s.size())
+    FunctionParser fp;
+    std::vector<std::string> var_names;
+    auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
+    if (ret != -1)
     {
-      auto end = s.find("}", start);
-      if (end != std::string::npos)
-      {
-        auto var = s.substr(start + 2, end - (start + 2));
-        auto curr = n;
-        while ((curr = curr->parent()))
-        {
-          auto src = curr->find(var);
-          if (src && src != n && src->type() == hit::NodeType::Field)
-          {
-            used.push_back(hit::pathJoin({curr->fullpath(), var}));
-            s = s.substr(0, start) + curr->param<std::string>(var) +
-                s.substr(end + 1, s.size() - (end + 1));
-
-            if (end + 1 - start == f->val().size())
-              f->setVal(s, dynamic_cast<hit::Field *>(curr->find(var))->kind());
-            else
-              f->setVal(s);
-
-            // move end back to the position of the end of the replacement text - not the replaced
-            // text since the former is the one relevant to the string for remaining replacements.
-            end = start + curr->param<std::string>(var).size();
-            break;
-          }
-        }
-
-        if (curr == nullptr)
-          errors.push_back(
-              errormsg(_fname, n, "no variable '", var, "' found for substitution expression"));
-      }
-      else
-        errors.push_back(errormsg(_fname, n, "missing substitution expression terminator '}'"));
-      start = s.find("${", end);
+      exp.errors.push_back(hit::errormsg(exp.fname, n, "fparse error: ", fp.ErrorMsg()));
+      return n->val();
     }
+
+    std::string errors;
+    std::vector<double> var_vals;
+    for (auto & var : var_names)
+    {
+      // recursively check all parent scopes for the needed variables
+      hit::Node * curr = n;
+      while ((curr = curr->parent()))
+      {
+        auto src = curr->find(var);
+        if (src && src != n && src->type() == hit::NodeType::Field)
+        {
+          exp.used.push_back(hit::pathJoin({curr->fullpath(), var}));
+          var_vals.push_back(curr->param<double>(var));
+          break;
+        }
+      }
+
+      if (curr == nullptr)
+        exp.errors.push_back(hit::errormsg(exp.fname,
+                                           n,
+                                           "\n    no variable '",
+                                           var,
+                                           "' found for use in function parser expression"));
+    }
+
+    if (exp.errors.size() != n_errs)
+      return n->val();
+
+    std::stringstream ss;
+    ss << std::setprecision(17) << fp.Eval(var_vals.data());
+
+    // change kind only (not val)
+    n->setVal(n->val(), hit::Field::Kind::Float);
+    return ss.str();
   }
-
-  std::vector<std::string> used;
-  std::vector<std::string> errors;
-
-private:
-  std::string _fname;
 };
 
 /**
