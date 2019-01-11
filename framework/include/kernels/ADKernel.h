@@ -22,6 +22,7 @@
   using ADKernel<compute_stage>::_grad_u;                                                          \
   using ADKernel<compute_stage>::_JxW;                                                             \
   using ADKernel<compute_stage>::_coord;                                                           \
+  using ADKernel<compute_stage>::_q_point;                                                         \
   using ADKernel<compute_stage>::_local_re;                                                        \
   using ADKernel<compute_stage>::_qrule;                                                           \
   using ADKernel<compute_stage>::_save_in;                                                         \
@@ -31,7 +32,8 @@
   using ADKernel<compute_stage>::coupledComponents;                                                \
   using ADKernel<compute_stage>::getBlockCoordSystem;                                              \
   using ADKernel<compute_stage>::paramError;                                                       \
-  using ADKernel<compute_stage>::isParamValid
+  using ADKernel<compute_stage>::isParamValid;                                                     \
+  using ADKernel<compute_stage>::isCoupled
 
 // forward declarations
 template <ComputeStage compute_stage>

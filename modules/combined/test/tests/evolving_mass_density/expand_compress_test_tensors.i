@@ -102,12 +102,6 @@
     type = ComputeLinearElasticStress
     block = '1 2 3 4 5 6 7'
   [../]
-
-  [./density]
-    type = Density
-    block = '1 2 3 4 5 6 7'
-    density = 1.0
-  [../]
 []
 
 [Executioner]

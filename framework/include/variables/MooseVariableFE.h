@@ -361,21 +361,21 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableValueType<compute_stage>::type & adSln()
   {
-    _need_ad_u = true;
+    _need_ad = _need_ad_u = true;
     return _ad_u;
   }
 
   template <ComputeStage compute_stage>
   const typename VariableGradientType<compute_stage>::type & adGradSln()
   {
-    _need_ad_grad_u = true;
+    _need_ad = _need_ad_grad_u = true;
     return _ad_grad_u;
   }
 
   template <ComputeStage compute_stage>
   const typename VariableSecondType<compute_stage>::type & adSecondSln()
   {
-    _need_ad_second_u = true;
+    _need_ad = _need_ad_second_u = true;
     secondPhi();
     secondPhiFace();
     return _ad_second_u;
@@ -384,21 +384,21 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableValueType<compute_stage>::type & adSlnNeighbor()
   {
-    _need_neighbor_ad_u = true;
+    _need_neighbor_ad = _need_neighbor_ad_u = true;
     return _neighbor_ad_u;
   }
 
   template <ComputeStage compute_stage>
   const typename VariableGradientType<compute_stage>::type & adGradSlnNeighbor()
   {
-    _need_neighbor_ad_grad_u = true;
+    _need_neighbor_ad = _need_neighbor_ad_grad_u = true;
     return _neighbor_ad_grad_u;
   }
 
   template <ComputeStage compute_stage>
   const typename VariableSecondType<compute_stage>::type & adSecondSlnNeighbor()
   {
-    _need_neighbor_ad_second_u = true;
+    _need_neighbor_ad = _need_neighbor_ad_second_u = true;
     secondPhiFaceNeighbor();
     return _neighbor_ad_second_u;
   }
@@ -810,9 +810,11 @@ protected:
   bool _need_curl_old;
   bool _need_curl_older;
 
+  bool _need_ad;
   bool _need_ad_u;
   bool _need_ad_grad_u;
   bool _need_ad_second_u;
+  bool _need_neighbor_ad;
   bool _need_neighbor_ad_u;
   bool _need_neighbor_ad_grad_u;
   bool _need_neighbor_ad_second_u;

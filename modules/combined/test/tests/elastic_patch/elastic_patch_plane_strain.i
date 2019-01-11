@@ -7,6 +7,9 @@
 #   xy = 400
 #   yz = zx = 0
 #
+# Since the strain is 1e-3 in both directions, the new density should be
+#   new_density = original_density * V_0 / V
+#   new_density = 0.283 / (1 + 1e-3 + 1e-3) = 0.282435
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -17,23 +20,7 @@
   file = elastic_patch_rz.e
 []
 
-[Functions]
-  [./ux]
-    type = ParsedFunction
-    value = '1e-3*(x+0.5*y)'
-  [../]
-  [./uy]
-    type = ParsedFunction
-    value = '1e-3*(y+0.5*x)'
-  [../]
-[]
-
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-
   [./temp]
     initial_condition = 117.56
   [../]
@@ -42,7 +29,6 @@
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   incremental = true
-  eigenstrain_names = eigenstrain
   planar_formulation = PLANE_STRAIN
   add_variables = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
@@ -50,7 +36,7 @@
 
 [Kernels]
   [./heat]
-    type = HeatConduction
+    type = TimeDerivative
     variable = temp
   [../]
 []
@@ -60,20 +46,13 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 10
-    function = ux
+    function = '1e-3*(x+0.5*y)'
   [../]
   [./uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
-    function = uy
-  [../]
-
-  [./temp]
-    type = DirichletBC
-    variable = temp
-    boundary = 10
-    value = 117.56
+    function = '1e-3*(y+0.5*x)'
   [../]
 []
 
@@ -83,25 +62,14 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.25
   [../]
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 117.56
-    thermal_expansion_coeff = 0.0
-    eigenstrain_name = eigenstrain
-  [../]
   [./stress]
     type = ComputeStrainIncrementBasedStress
-  [../]
-
-  [./heat]
-    type = HeatConductionMaterial
-    specific_heat = 0.116
-    thermal_conductivity = 4.85e-4
   [../]
 
   [./density]
     type = Density
     density = 0.283
+    outputs = all
   [../]
 []
 
@@ -109,7 +77,6 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  start_time = 0.0
   end_time = 1.0
 []
 

@@ -78,9 +78,11 @@
   [./stress]
     type = ComputeFiniteStrainElasticStress
   [../]
+[]
 
+[ADMaterials]
   [./density]
-    type = Density
+    type = ADDensity
     density = 0.283
     outputs = all
   [../]

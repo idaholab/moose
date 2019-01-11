@@ -1,33 +1,19 @@
 #
 # This problem is taken from the Abaqus verification manual:
-#   "1.5.4 Patch test for axisymmetric elements"
+#   "1.5.1 Membrane patch test"
 # The stress solution is given as:
-#   xx = yy = zz = 19900
-#   xy = 0
+#   xx = yy = 1600
+#   zz = 800
+#   xy = 400
+#   yz = zx = 0
 #
-# If strain = log(1+1e-2) = 0.00995033...
-# then
-# stress = E/(1+PR)/(1-2*PR)*(1-PR +PR +PR)*strain = 19900.6617
-# with E = 1e6 and PR = 0.25.
-#
-# The code computes stress = 19900.6617 when
-# increment_calculation = eigen.  There is a small error when the
-# rashidapprox option is used.
-#
-# Since the strain is 1e-3 in all three directions, the new density should be
+# Since the strain is 1e-3 in both directions, the new density should be
 #   new_density = original_density * V_0 / V
-#   new_density = 0.283 / (1 + 9.95e-3 + 9.95e-3 + 9,95e-3) = 0.2747973
-#
-# The code computes a new density of .2746770
-
+#   new_density = 0.283 / (1 + 1e-3 + 1e-3) = 0.282435
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
   temperature = temp
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Mesh]
@@ -41,8 +27,9 @@
 []
 
 [Modules/TensorMechanics/Master/All]
-  strain = FINITE
-  decomposition_method = EigenSolution
+  strain = SMALL
+  incremental = true
+  planar_formulation = PLANE_STRAIN
   add_variables = true
   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 []
@@ -59,13 +46,13 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 10
-    function = '1e-2*x'
+    function = '1e-3*(x+0.5*y)'
   [../]
   [./uz]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 10
-    function = '1e-2*y'
+    function = '1e-3*(y+0.5*x)'
   [../]
 []
 
@@ -76,11 +63,13 @@
     poissons_ratio = 0.25
   [../]
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeStrainIncrementBasedStress
   [../]
+[]
 
+[ADMaterials]
   [./density]
-    type = Density
+    type = ADDensity
     density = 0.283
     outputs = all
   [../]
