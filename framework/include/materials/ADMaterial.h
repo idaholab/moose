@@ -27,7 +27,6 @@
   using ADMaterial<compute_stage>::coupledComponents;                                              \
   using ADMaterial<compute_stage>::isParamValid;                                                   \
   using ADMaterial<compute_stage>::paramError;                                                     \
-  using ADMaterial<compute_stage>::getParam;                                                       \
   using ADMaterial<compute_stage>::isCoupled;                                                      \
   using ADMaterial<compute_stage>::getBlockCoordSystem
 
