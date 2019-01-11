@@ -32,7 +32,7 @@ PorousFlowFluxLimitedTVDAdvection::PorousFlowFluxLimitedTVDAdvection(
     const InputParameters & parameters)
   : Kernel(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _fluo(getUserObject<PorousFlowAdvectiveFluxCalculator>("advective_flux_calculator"))
+    _fluo(getUserObject<PorousFlowAdvectiveFluxCalculatorSaturated>("advective_flux_calculator"))
 {
 }
 

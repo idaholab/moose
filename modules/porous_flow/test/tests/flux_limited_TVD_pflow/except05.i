@@ -50,7 +50,7 @@
     number_fluid_components = 2
   [../]
   [./advective_flux_calculator]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorSaturated
     PorousFlowDictator = dummy_dictator
   [../]
 []

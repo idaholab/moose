@@ -5,10 +5,9 @@
   nx = 3
   xmin = 0
   xmax = 1
-  ny = 2
+  ny = 1
   ymin = -1
   ymax = 2
-  bias_y = 1.5
 []
 
 [GlobalParams]
@@ -89,17 +88,17 @@
     m = 0.5
   [../]
   [./advective_flux_calculator_0]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
     flux_limiter_type = None
     fluid_component = 0
   [../]
   [./advective_flux_calculator_1]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
     flux_limiter_type = None
     fluid_component = 1
   [../]
   [./advective_flux_calculator_2]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
     flux_limiter_type = None
     fluid_component = 2
   [../]

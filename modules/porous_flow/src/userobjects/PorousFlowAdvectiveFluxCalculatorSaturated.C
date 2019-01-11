@@ -5,13 +5,14 @@
 //* under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PorousFlowAdvectiveFluxCalculator.h"
+#include "PorousFlowAdvectiveFluxCalculatorSaturated.h"
+#include "libmesh/string_to_enum.h"
 
-registerMooseObject("PorousFlowApp", PorousFlowAdvectiveFluxCalculator);
+registerMooseObject("PorousFlowApp", PorousFlowAdvectiveFluxCalculatorSaturated);
 
 template <>
 InputParameters
-validParams<PorousFlowAdvectiveFluxCalculator>()
+validParams<PorousFlowAdvectiveFluxCalculatorSaturated>()
 {
   InputParameters params = validParams<AdvectiveFluxCalculatorBase>();
   params.addClassDescription(
@@ -24,9 +25,13 @@ validParams<PorousFlowAdvectiveFluxCalculator>()
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<unsigned int>(
-      "fluid_component", 0, "The index corresponding to the fluid component for this UserObject");
-  params.addParam<unsigned int>(
       "phase", 0, "The index corresponding to the phase for this UserObject");
+  params.addParam<bool>(
+      "multiply_by_density",
+      true,
+      "If true, then the advective flux will be multiplied by density, so it is a mass flux, which "
+      "is the most common way of using PorousFlow.  If false, then the advective flux will be a "
+      "volume flux, which is common in poro-mechanics");
   MooseEnum families("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN");
   params.addParam<MooseEnum>(
       "fe_family",
@@ -42,42 +47,36 @@ validParams<PorousFlowAdvectiveFluxCalculator>()
   return params;
 }
 
-PorousFlowAdvectiveFluxCalculator::PorousFlowAdvectiveFluxCalculator(
+PorousFlowAdvectiveFluxCalculatorSaturated::PorousFlowAdvectiveFluxCalculatorSaturated(
     const InputParameters & parameters)
   : AdvectiveFluxCalculatorBase(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _multiply_by_density(getParam<bool>("multiply_by_density")),
     _gravity(getParam<RealVectorValue>("gravity")),
-    _fluid_component(getParam<unsigned int>("fluid_component")),
     _phase(getParam<unsigned int>("phase")),
     _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
     _dpermeability_dvar(
         getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
     _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue>>>(
         "dPorousFlow_permeability_qp_dgradvar")),
-    _fluid_density_node(
-        getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
-    _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
-        "dPorousFlow_fluid_phase_density_nodal_dvar")),
+    _fluid_density_node(_multiply_by_density ? &getMaterialProperty<std::vector<Real>>(
+                                                   "PorousFlow_fluid_phase_density_nodal")
+                                             : nullptr),
+    _dfluid_density_node_dvar(_multiply_by_density
+                                  ? &getMaterialProperty<std::vector<std::vector<Real>>>(
+                                        "dPorousFlow_fluid_phase_density_nodal_dvar")
+                                  : nullptr),
     _fluid_density_qp(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
     _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
         "dPorousFlow_fluid_phase_density_qp_dvar")),
     _fluid_viscosity(getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_nodal")),
     _dfluid_viscosity_dvar(
         getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_nodal_dvar")),
-    _pp(getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_nodal")),
     _grad_p(getMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
     _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real>>>(
         "dPorousFlow_grad_porepressure_qp_dgradvar")),
     _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>(
         "dPorousFlow_grad_porepressure_qp_dvar")),
-    _mass_fractions(
-        getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
-    _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
-        "dPorousFlow_mass_frac_nodal_dvar")),
-    _relative_permeability(
-        getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_nodal")),
-    _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
-        "dPorousFlow_relative_permeability_nodal_dvar")),
     _fe_type(isParamValid("fe_family") && isParamValid("fe_order")
                  ? FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("fe_order")),
                           Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("fe_family")))
@@ -94,11 +93,6 @@ PorousFlowAdvectiveFluxCalculator::PorousFlowAdvectiveFluxCalculator(
                "Phase number entered is greater than the number of phases specified in the "
                "Dictator. Remember that indexing starts at 0");
 
-  if (_fluid_component >= _dictator.numComponents())
-    paramError("fluid_component",
-               "Fluid component number entered is greater than the number of fluid components "
-               "specified in the Dictator. Remember that indexing starts at 0");
-
   if (isParamValid("fe_family") && !isParamValid("fe_order"))
     paramError("fe_order", "If you specify fe_family you must also specify fe_order");
   if (isParamValid("fe_order") && !isParamValid("fe_family"))
@@ -111,7 +105,9 @@ PorousFlowAdvectiveFluxCalculator::PorousFlowAdvectiveFluxCalculator(
 }
 
 Real
-PorousFlowAdvectiveFluxCalculator::getInternodalVelocity(unsigned i, unsigned j, unsigned qp) const
+PorousFlowAdvectiveFluxCalculatorSaturated::getInternodalVelocity(unsigned i,
+                                                                  unsigned j,
+                                                                  unsigned qp) const
 {
   // The following is but one choice.
   // If you change this, you will probably have to change
@@ -124,7 +120,7 @@ PorousFlowAdvectiveFluxCalculator::getInternodalVelocity(unsigned i, unsigned j,
 }
 
 void
-PorousFlowAdvectiveFluxCalculator::executeOnElement(
+PorousFlowAdvectiveFluxCalculatorSaturated::executeOnElement(
     dof_id_type global_i, dof_id_type global_j, unsigned local_i, unsigned local_j, unsigned qp)
 {
   AdvectiveFluxCalculatorBase::executeOnElement(global_i, global_j, local_i, local_j, qp);
@@ -149,35 +145,30 @@ PorousFlowAdvectiveFluxCalculator::executeOnElement(
 }
 
 Real
-PorousFlowAdvectiveFluxCalculator::getU(unsigned i) const
+PorousFlowAdvectiveFluxCalculatorSaturated::getU(unsigned i) const
 {
   // The following is but one choice.
   // If you change this, you will probably have to change
   // - getInternodalVelocity
   // - the derivative in executeOnElement
   // - dU_dvar
-  return _mass_fractions[i][_phase][_fluid_component] * _fluid_density_node[i][_phase] *
-         _relative_permeability[i][_phase] / _fluid_viscosity[i][_phase];
+  if (_multiply_by_density)
+    return (*_fluid_density_node)[i][_phase] / _fluid_viscosity[i][_phase];
+  return 1.0 / _fluid_viscosity[i][_phase];
 }
 
 Real
-PorousFlowAdvectiveFluxCalculator::dU_dvar(unsigned i, unsigned pvar) const
+PorousFlowAdvectiveFluxCalculatorSaturated::dU_dvar(unsigned i, unsigned pvar) const
 {
-  Real du = _dmass_fractions_dvar[i][_phase][_fluid_component][pvar] *
-            _fluid_density_node[i][_phase] * _relative_permeability[i][_phase] /
-            _fluid_viscosity[i][_phase];
-  du += _mass_fractions[i][_phase][_fluid_component] * _dfluid_density_node_dvar[i][_phase][pvar] *
-        _relative_permeability[i][_phase] / _fluid_viscosity[i][_phase];
-  du += _mass_fractions[i][_phase][_fluid_component] * _fluid_density_node[i][_phase] *
-        _drelative_permeability_dvar[i][_phase][pvar] / _fluid_viscosity[i][_phase];
-  du -= _mass_fractions[i][_phase][_fluid_component] * _fluid_density_node[i][_phase] *
-        _relative_permeability[i][_phase] * _dfluid_viscosity_dvar[i][_phase][pvar] /
-        std::pow(_fluid_viscosity[i][_phase], 2);
+  Real du = -_dfluid_viscosity_dvar[i][_phase][pvar] / std::pow(_fluid_viscosity[i][_phase], 2);
+  if (_multiply_by_density)
+    du = du * (*_fluid_density_node)[i][_phase] +
+         (*_dfluid_density_node_dvar)[i][_phase][pvar] / _fluid_viscosity[i][_phase];
   return du;
 }
 
 void
-PorousFlowAdvectiveFluxCalculator::timestepSetup()
+PorousFlowAdvectiveFluxCalculatorSaturated::timestepSetup()
 {
   const bool resizing_was_needed =
       _resizing_needed; // _resizing_needed gets set to false at the end of
@@ -214,7 +205,7 @@ PorousFlowAdvectiveFluxCalculator::timestepSetup()
 }
 
 void
-PorousFlowAdvectiveFluxCalculator::initialize()
+PorousFlowAdvectiveFluxCalculatorSaturated::initialize()
 {
   AdvectiveFluxCalculatorBase::initialize();
   for (const auto & nodes : _kij)
@@ -226,7 +217,7 @@ PorousFlowAdvectiveFluxCalculator::initialize()
 }
 
 void
-PorousFlowAdvectiveFluxCalculator::execute()
+PorousFlowAdvectiveFluxCalculatorSaturated::execute()
 {
   AdvectiveFluxCalculatorBase::execute();
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
@@ -239,11 +230,11 @@ PorousFlowAdvectiveFluxCalculator::execute()
 }
 
 void
-PorousFlowAdvectiveFluxCalculator::threadJoin(const UserObject & uo)
+PorousFlowAdvectiveFluxCalculatorSaturated::threadJoin(const UserObject & uo)
 {
   AdvectiveFluxCalculatorBase::threadJoin(uo);
-  const PorousFlowAdvectiveFluxCalculator & pfafc =
-      static_cast<const PorousFlowAdvectiveFluxCalculator &>(uo);
+  const PorousFlowAdvectiveFluxCalculatorSaturated & pfafc =
+      static_cast<const PorousFlowAdvectiveFluxCalculatorSaturated &>(uo);
   // add the values of _dkij_dvar computed by different threads
   for (const auto & i_and_jmap : pfafc._dkij_dvar)
   {
@@ -270,33 +261,34 @@ PorousFlowAdvectiveFluxCalculator::threadJoin(const UserObject & uo)
 }
 
 const std::vector<Real> &
-PorousFlowAdvectiveFluxCalculator::getdU_dvar(dof_id_type node_i) const
+PorousFlowAdvectiveFluxCalculatorSaturated::getdU_dvar(dof_id_type node_i) const
 {
   const auto & node_du = _du_dvar.find(node_i);
   if (node_du == _du_dvar.end())
-    mooseError("PorousFlowAdvectiveFluxCalculator UserObject " + name() +
+    mooseError("PorousFlowAdvectiveFluxCalculatorSaturated UserObject " + name() +
                " _du_dvar does not contain node " + Moose::stringify(node_i));
   return node_du->second;
 }
 
 const std::map<dof_id_type, std::vector<Real>> &
-PorousFlowAdvectiveFluxCalculator::getdK_dvar(dof_id_type node_i, dof_id_type node_j) const
+PorousFlowAdvectiveFluxCalculatorSaturated::getdK_dvar(dof_id_type node_i, dof_id_type node_j) const
 {
   const auto & row_find = _dkij_dvar.find(node_i);
   if (row_find == _dkij_dvar.end())
-    mooseError("PorousFlowAdvectiveFluxCalculator UserObject " + name() +
+    mooseError("PorousFlowAdvectiveFluxCalculatorSaturated UserObject " + name() +
                " _dkij_dvar does not contain node " + Moose::stringify(node_i));
   const std::map<dof_id_type, std::map<dof_id_type, std::vector<Real>>> & dkij_dvar_row =
       row_find->second;
   const auto & column_find = dkij_dvar_row.find(node_j);
   if (column_find == dkij_dvar_row.end())
-    mooseError("PorousFlowAdvectiveFluxCalculator UserObject " + name() + " _dkij_dvar on row " +
-               Moose::stringify(node_i) + " does not contain node " + Moose::stringify(node_j));
+    mooseError("PorousFlowAdvectiveFluxCalculatorSaturated UserObject " + name() +
+               " _dkij_dvar on row " + Moose::stringify(node_i) + " does not contain node " +
+               Moose::stringify(node_j));
   return column_find->second;
 }
 
 void
-PorousFlowAdvectiveFluxCalculator::getdFluxOut_dvars(
+PorousFlowAdvectiveFluxCalculatorSaturated::getdFluxOut_dvars(
     std::map<dof_id_type, std::vector<Real>> & derivs, unsigned node_id) const
 {
   derivs.clear();

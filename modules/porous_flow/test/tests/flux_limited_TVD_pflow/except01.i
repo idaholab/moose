@@ -33,7 +33,7 @@
 
 [UserObjects]
   [./advective_flux_calculator]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorSaturated
     phase = 2
   [../]
 []

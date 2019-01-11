@@ -115,25 +115,25 @@
     m = 0.5
   [../]
   [./advective_flux_calculator_ph0_sp0]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
     flux_limiter_type = minmod
     phase = 0
     fluid_component = 0
   [../]
   [./advective_flux_calculator_ph0_sp1]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
     flux_limiter_type = vanleer
     phase = 0
     fluid_component = 1
   [../]
   [./advective_flux_calculator_ph1_sp0]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
     flux_limiter_type = mc
     phase = 1
     fluid_component = 0
   [../]
   [./advective_flux_calculator_ph1_sp1]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent
     flux_limiter_type = superbee
     phase = 1
     fluid_component = 1

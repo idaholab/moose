@@ -116,12 +116,12 @@
     type = PorousFlowCapillaryPressureConst
   [../]
   [./advective_flux_calculator_0]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent
     flux_limiter_type = superbee
     fluid_component = 0
   [../]
   [./advective_flux_calculator_1]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent
     flux_limiter_type = superbee
     fluid_component = 1
   [../]

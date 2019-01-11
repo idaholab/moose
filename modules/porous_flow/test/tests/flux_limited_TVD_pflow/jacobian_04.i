@@ -22,11 +22,11 @@
   ny = 4
   ymin = -1
   ymax = 2
-  bias_y = 1.5
+#  bias_y = 1.5
   nz = 4
   zmin = 1
   zmax = 2
-  bias_z = 0.8
+#  bias_z = 0.8
 []
 
 [GlobalParams]
@@ -81,7 +81,7 @@
     m = 0.5
   [../]
   [./advective_flux_calculator]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorUnsaturated
     flux_limiter_type = minmod
   [../]
 []

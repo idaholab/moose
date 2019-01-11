@@ -1,0 +1,44 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef POROUSFLOWADVECTIEFLUXCALCULATORSATURATEDMULTICOMPONENT_H
+#define POROUSFLOWADVECTIEFLUXCALCULATORSATURATEDMULTICOMPONENT_H
+
+#include "PorousFlowAdvectiveFluxCalculatorSaturated.h"
+
+class PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent;
+
+template <>
+InputParameters validParams<PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent>();
+
+/**
+ * TODO
+ */
+class PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent
+  : public PorousFlowAdvectiveFluxCalculatorSaturated
+{
+public:
+  PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent(const InputParameters & parameters);
+
+protected:
+  virtual Real getU(unsigned i) const override;
+
+  virtual Real dU_dvar(unsigned i, unsigned pvar) const override;
+
+  /// The fluid component
+  const unsigned int _fluid_component;
+
+  /// Mass fraction of each component in each phase
+  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;
+
+  /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_fractions_dvar;
+};
+
+#endif // POROUSFLOWADVECTIEFLUXCALCULATORSATURATEDMULTICOMPONENT_H

@@ -10,7 +10,7 @@
 #define POROUSFLOWFLUXLIMITEDTVDADVECTION_H
 
 #include "Kernel.h"
-#include "PorousFlowAdvectiveFluxCalculator.h"
+#include "PorousFlowAdvectiveFluxCalculatorSaturated.h"
 
 // Forward Declaration
 class PorousFlowFluxLimitedTVDAdvection;
@@ -45,7 +45,7 @@ protected:
   const PorousFlowDictator & _dictator;
 
   /// The user object that computes Kuzmin and Turek's K_ij, R+ and R-, etc quantities
-  const PorousFlowAdvectiveFluxCalculator & _fluo;
+  const PorousFlowAdvectiveFluxCalculatorSaturated & _fluo;
 };
 
 #endif // POROUSFLOWFLUXLIMITEDTVDADVECTION_H

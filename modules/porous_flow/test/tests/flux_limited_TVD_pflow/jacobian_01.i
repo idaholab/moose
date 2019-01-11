@@ -9,11 +9,11 @@
   ny = 4
   ymin = -1
   ymax = 2
-  bias_y = 1.5
+#  bias_y = 1.5
   nz = 4
   zmin = 1
   zmax = 2
-  bias_z = 0.8
+#  bias_z = 0.8
 []
 
 [GlobalParams]
@@ -66,7 +66,7 @@
     type = PorousFlowCapillaryPressureConst
   [../]
   [./advective_flux_calculator]
-    type = PorousFlowAdvectiveFluxCalculator
+    type = PorousFlowAdvectiveFluxCalculatorSaturated
     flux_limiter_type = None
   [../]
 []

@@ -240,11 +240,33 @@ PorousFlowDependencies::PorousFlowDependencies()
   //_deps.insertDependency("porosity_qp", "volumetric_strain_qp");
 
   // UserObject dependencies
-  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "permeability_qp");
-  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "pressure_saturation_qp");
-  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "density_qp");
-  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "density_nodal");
-  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "viscosity_nodal");
-  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "mass_fraction_nodal");
-  _deps.insertDependency("PorousFlowAdvectiveFluxCalculator", "relative_permeability_nodal");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturated", "permeability_qp");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturated", "pressure_saturation_qp");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturated", "density_qp");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturated", "density_nodal");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturated", "viscosity_nodal");
+
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent",
+                         "PorousFlowAdvectiveFluxCalculatorSaturated");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent",
+                         "mass_fraction_nodal");
+
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorUnsaturated",
+                         "PorousFlowAdvectiveFluxCalculatorSaturated");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorUnsaturated",
+                         "relative_permeability_nodal");
+
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent",
+                         "PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent",
+                         "relative_permeability_nodal");
+
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturatedHeat",
+                         "PorousFlowAdvectiveFluxCalculatorSaturated");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorSaturatedHeat", "enthalpy_nodal");
+
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat",
+                         "PorousFlowAdvectiveFluxCalculatorSaturatedHeat");
+  _deps.insertDependency("PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat",
+                         "relative_permeability_nodal");
 }

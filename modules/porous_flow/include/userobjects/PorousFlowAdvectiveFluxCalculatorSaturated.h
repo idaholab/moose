@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POROUSFLOWADVECTIEFLUXCALCULATOR_H
-#define POROUSFLOWADVECTIEFLUXCALCULATOR_H
+#ifndef POROUSFLOWADVECTIEFLUXCALCULATORSATURATED_H
+#define POROUSFLOWADVECTIEFLUXCALCULATORSATURATED_H
 
 #include "AdvectiveFluxCalculatorBase.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowAdvectiveFluxCalculator;
+class PorousFlowAdvectiveFluxCalculatorSaturated;
 
 template <>
-InputParameters validParams<PorousFlowAdvectiveFluxCalculator>();
+InputParameters validParams<PorousFlowAdvectiveFluxCalculatorSaturated>();
 
 /**
  * TODO
  */
-class PorousFlowAdvectiveFluxCalculator : public AdvectiveFluxCalculatorBase
+class PorousFlowAdvectiveFluxCalculatorSaturated : public AdvectiveFluxCalculatorBase
 {
 public:
-  PorousFlowAdvectiveFluxCalculator(const InputParameters & parameters);
+  PorousFlowAdvectiveFluxCalculatorSaturated(const InputParameters & parameters);
 
   /**
    * computes d(flux_out)/d(porous_flow_variables
@@ -74,11 +74,11 @@ protected:
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
+  /// Whether to multiply the flux by the fluid density
+  const bool _multiply_by_density;
+
   /// Gravity
   const RealVectorValue _gravity;
-
-  /// The fluid component
-  const unsigned int _fluid_component;
 
   /// The phase
   const unsigned int _phase;
@@ -93,10 +93,10 @@ protected:
   const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_dgradvar;
 
   /// Fluid density for each phase (at the node)
-  const MaterialProperty<std::vector<Real>> & _fluid_density_node;
+  const MaterialProperty<std::vector<Real>> * const _fluid_density_node;
 
   /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the node)
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_node_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_node_dvar;
 
   /// Fluid density for each phase (at the qp)
   const MaterialProperty<std::vector<Real>> & _fluid_density_qp;
@@ -110,9 +110,6 @@ protected:
   /// Derivative of the fluid viscosity for each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_viscosity_dvar;
 
-  /// Nodal pore pressure in each phase
-  const MaterialProperty<std::vector<Real>> & _pp;
-
   /// Gradient of the pore pressure in each phase
   const MaterialProperty<std::vector<RealGradient>> & _grad_p;
 
@@ -121,18 +118,6 @@ protected:
 
   /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
-
-  /// Mass fraction of each component in each phase
-  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;
-
-  /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_fractions_dvar;
-
-  /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real>> & _relative_permeability;
-
-  /// Derivative of relative permeability of each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 
   /// FEType to use
   const FEType _fe_type;
@@ -153,4 +138,4 @@ protected:
   std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, std::vector<Real>>>> _dkij_dvar;
 };
 
-#endif // POROUSFLOWADVECTIEFLUXCALCULATOR_H
+#endif // POROUSFLOWADVECTIEFLUXCALCULATORSATURATED_H
