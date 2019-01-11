@@ -25,7 +25,6 @@
   using ADMaterial<compute_stage>::coupled;                                                        \
   using ADMaterial<compute_stage>::coupledComponents;                                              \
   using ADMaterial<compute_stage>::isParamValid;                                                   \
-  using ADMaterial<compute_stage>::getParam;                                                       \
   using ADMaterial<compute_stage>::paramError
 
 // forward declarations

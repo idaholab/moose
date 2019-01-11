@@ -1,4 +1,4 @@
-# ADComputeSmallStrain<RESIDUAL>
+# ADComputeSmallStrain
 
 !syntax description /ADMaterials/ADComputeSmallStrain<RESIDUAL>
 
