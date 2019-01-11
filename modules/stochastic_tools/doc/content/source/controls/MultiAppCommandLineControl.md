@@ -29,7 +29,7 @@ object must be created:
 A sampling scheme must be defined for capturing values from the uniform distribution. In
 this example, since there are two pieces of data to be controlled ("xmax" and "ymax") the
 uniform distribution is sampled twice. Since this sampled data will only be used during
-"PRE_INITIAL" execution, so the "execute_on" parameter is setup to match.
+"PRE_MULTIAPP_SETUP" execution, so the "execute_on" parameter is setup to match.
 
 !listing commandline_control/master_multiple.i block=Samplers
 

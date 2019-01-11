@@ -25,7 +25,7 @@ validParams<Sampler>()
   params.addClassDescription("A base class for distribution sampling.");
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_PRE_INITIAL);
+  exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);
 
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "The names of distributions that you want to sample.");

@@ -48,7 +48,7 @@ Steady::init()
   }
 
   checkIntegrity();
-  _problem.execute(EXEC_PRE_INITIAL);
+  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
 
   _problem.outputStep(EXEC_INITIAL);

@@ -24,7 +24,7 @@ validParams<MultiAppCommandLineControl>()
   params.addClassDescription("Control for modifying the command line arguments of MultiApps.");
 
   // Set and suppress the 'execute_on' flag, it doesn't work with any other flag
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_PRE_INITIAL};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_PRE_MULTIAPP_SETUP};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
   params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to control.");
@@ -60,7 +60,7 @@ void
 MultiAppCommandLineControl::initialSetup()
 {
   // Do not put anything here, this method is being called after execute because the execute_on
-  // is set to PRE_INITIAL for this class. It won't work any other way.
+  // is set to PRE_MULTIAPP_SETUP for this class. It won't work any other way.
 }
 
 void

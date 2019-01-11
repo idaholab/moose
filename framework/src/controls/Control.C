@@ -21,7 +21,7 @@ validParams<Control>()
   params += validParams<FunctionInterface>();
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_PRE_INITIAL);
+  exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
   params.registerBase("Control");

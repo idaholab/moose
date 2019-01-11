@@ -147,7 +147,7 @@ validParams<MultiApp>()
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
-  params.declareControllable("cli_args", {EXEC_PRE_INITIAL});
+  params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
   return params;

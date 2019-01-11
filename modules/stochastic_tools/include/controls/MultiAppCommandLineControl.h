@@ -34,7 +34,7 @@ public:
 
   /**
    * Do not allow the use of initialSetup, because this class is designed to operate
-   * on PRE_INITIAL, which occurs before this callback. This will prevent a child class
+   * on PRE_MULTIAPP_SETUP, which occurs before this callback. This will prevent a child class
    * adding something to this function without it doing anything.
    */
   virtual void initialSetup() override final;
