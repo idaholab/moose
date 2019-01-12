@@ -8,11 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADKernelGrad.h"
-#include "Assembly.h"
-#include "MooseVariable.h"
-#include "Problem.h"
-#include "SubProblem.h"
-#include "NonlinearSystemBase.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

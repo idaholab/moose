@@ -6,7 +6,7 @@ of non-linear scalar field variables.
 Derived from it are two sets of optimized base classes that - through loop
 reordering - reduce the number of necessary residual evaluations and enable the
 compiler to perform code vectorization. These base classes have restrictions on
-the mathematical for of the residuals they can be applied to.
+the mathematical form of the residuals they can be applied to.
 
 - [KernelValue](/KernelValue.md)]
 - [ADKernelValue](/ADKernelValue.md)

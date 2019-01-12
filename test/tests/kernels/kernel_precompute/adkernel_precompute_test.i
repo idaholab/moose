@@ -18,11 +18,11 @@
   [../]
 []
 
-[Kernels]
-  active = 'diff conv'
+[ADKernels]
+  # active = 'diff conv'
 
   [./diff]
-    type = DiffusionPrecompute
+    type = ADDiffusionPrecompute
     variable = convected
   [../]
 
@@ -54,7 +54,7 @@
 [Executioner]
   type = Steady
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 []
 
 [Outputs]

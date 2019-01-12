@@ -6,8 +6,9 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifndef ADCOUPLEDCONVECTION_H_
-#define ADCOUPLEDCONVECTION_H_
+
+#ifndef ADCOUPLEDCONVECTION_H
+#define ADCOUPLEDCONVECTION_H
 
 #include "ADKernel.h"
 
@@ -20,7 +21,6 @@ declareADValidParams(ADCoupledConvection);
  * Define the ADKernel for a convection operator that looks like:
  *
  * grad_some_var dot u'
- *
  */
 template <ComputeStage compute_stage>
 class ADCoupledConvection : public ADKernel<compute_stage>
