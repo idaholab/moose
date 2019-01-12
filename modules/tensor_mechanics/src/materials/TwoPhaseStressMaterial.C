@@ -28,7 +28,7 @@ validParams<TwoPhaseStressMaterial>()
 }
 
 TwoPhaseStressMaterial::TwoPhaseStressMaterial(const InputParameters & parameters)
-  : Material(parameters),
+  : DerivativeMaterialInterface<Material>(parameters),
     _h_eta(getMaterialProperty<Real>("h")),
 
     _base_A(getParam<std::string>("base_A") + "_"),
@@ -41,7 +41,8 @@ TwoPhaseStressMaterial::TwoPhaseStressMaterial(const InputParameters & parameter
 
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(declareProperty<RankTwoTensor>(_base_name + "stress")),
-    _dstress_dstrain(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult"))
+    _dstress_dstrain(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
+    _global_extra_stress(getDefaultMaterialProperty<RankTwoTensor>("extra_stress"))
 {
 }
 
@@ -49,6 +50,10 @@ void
 TwoPhaseStressMaterial::computeQpProperties()
 {
   _stress[_qp] = _h_eta[_qp] * _stress_B[_qp] + (1.0 - _h_eta[_qp]) * _stress_A[_qp];
+
+  // Add in global extra stress
+  _stress[_qp] += _global_extra_stress[_qp];
+
   _dstress_dstrain[_qp] =
       _h_eta[_qp] * _dstress_dstrain_B[_qp] + (1.0 - _h_eta[_qp]) * _dstress_dstrain_A[_qp];
 }
