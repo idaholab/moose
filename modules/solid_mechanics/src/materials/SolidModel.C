@@ -236,6 +236,11 @@ SolidModel::SolidModel(const InputParameters & parameters)
   // Use the first block to figure out the coordinate system (the above check ensures that they are
   // the same)
   _coord_type = _subproblem.getCoordSystem(_block_id[0]);
+
+  if (_coord_type == Moose::COORD_RZ && _subproblem.getAxisymmetricRadialCoord() != 0)
+    mooseError(
+        "rz_coord_axis=Y is the only supported option for axisymmetric SolidMechanics models");
+
   _element = createElement();
 
   const std::vector<std::string> & dmp = getParam<std::vector<std::string>>("dep_matl_props");

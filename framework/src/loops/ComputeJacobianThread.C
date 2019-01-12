@@ -172,9 +172,6 @@ ComputeJacobianThread::subdomainChanged()
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ik_warehouse = &(_interface_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
   }
-
-  for (auto & var : needed_moose_vars)
-    var->computingJacobian(true);
 }
 
 void

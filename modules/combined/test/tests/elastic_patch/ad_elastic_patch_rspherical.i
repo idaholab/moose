@@ -24,6 +24,9 @@
 []
 
 [Variables]
+  [./disp_x]
+  [../]
+
   [./temp]
     initial_condition = 117.56
   [../]
@@ -61,9 +64,11 @@
   [./stress]
     type = ComputeStrainIncrementBasedStress
   [../]
+[]
 
+[ADMaterials]
   [./density]
-    type = Density
+    type = ADDensity
     density = 0.283
     outputs = all
   [../]

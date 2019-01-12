@@ -179,6 +179,7 @@
     type = Density
     block = 1
     density = 0.283
+    outputs = all
   [../]
 []
 

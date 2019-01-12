@@ -108,8 +108,6 @@ public:
    */
   virtual bool isVector() const = 0;
 
-  void computingJacobian(bool computing_jacobian) { _computing_jacobian = computing_jacobian; }
-
 protected:
   /// variable number (from libMesh)
   unsigned int _var_num;
@@ -136,8 +134,6 @@ protected:
 
   /// scaling factor for this variable
   Real _scaling_factor;
-
-  bool _computing_jacobian;
 
   /// Thread ID
   THREAD_ID _tid;

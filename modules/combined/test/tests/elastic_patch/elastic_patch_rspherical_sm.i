@@ -34,7 +34,7 @@
   [../]
 
   [./temp]
-    initial_condition = 100.0
+    initial_condition = 117.56
   [../]
 []
 
@@ -67,7 +67,7 @@
 
 [Kernels]
   [./heat]
-    type = HeatConduction
+    type = TimeDerivative
     variable = temp
   [../]
 []
@@ -105,13 +105,6 @@
     boundary = '1 2'
     function = ur
   [../]
-
-  [./temp]
-    type = DirichletBC
-    variable = temp
-    boundary = 1
-    value = 117.56
-  [../]
 []
 
 [Materials]
@@ -139,6 +132,7 @@
     type = Density
     block = '1 2 3'
     density = 0.283
+    outputs = all
   [../]
 []
 
