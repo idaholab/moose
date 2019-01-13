@@ -10,8 +10,6 @@
 []
 
 [Variables]
-  active = 'convected'
-
   [./convected]
     order = FIRST
     family = LAGRANGE
@@ -19,8 +17,6 @@
 []
 
 [ADKernels]
-  # active = 'diff conv'
-
   [./diff]
     type = ADDiffusionPrecompute
     variable = convected
@@ -34,8 +30,6 @@
 []
 
 [BCs]
-  active = 'bottom top'
-
   [./bottom]
     type = DirichletBC
     variable = convected
@@ -53,7 +47,6 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'NEWTON'
 []
 

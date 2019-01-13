@@ -1,7 +1,6 @@
 [Tests]
   issues = 'r2275 #3492 #12658'
   design = '/kernels/Kernel.md'
-
   [./test]
     type = 'Exodiff'
     input = 'kernel_precompute_test.i'
@@ -9,22 +8,20 @@
     scale_refine = 5
     requirement = 'MOOSE shall provide optimized kernels for residuals with the test function or its gradient factored out.'
   [../]
-#  [./adtest]
-#    type = 'Exodiff'
-#    input = 'adkernel_precompute_test.i'
-#    exodiff = 'out.e'
-#    prereq = 'test'
-#    scale_refine = 5
-#    requirement = 'MOOSE shall provide optimized kernels for residuals with the test function or its gradient factored out in the automatic differentiation system.'
-#    allow_test_objects = true
-#  [../]
+  [./adtest]
+    type = 'Exodiff'
+    input = 'adkernel_precompute_test.i'
+    exodiff = 'out.e'
+    prereq = 'test'
+    scale_refine = 5
+    requirement = 'MOOSE shall provide optimized kernels for residuals with the test function or its gradient factored out in the automatic differentiation system.'
+    allow_test_objects = true
+  [../]
   [./adtest-jac]
     type = 'PetscJacobianTester'
     input = 'adkernel_precompute_test.i'
-#    prereq = 'adtest'
+    prereq = 'adtest'
     run_sim = 'True'
-    #ratio_tol = 1e-8
-    #difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
     allow_test_objects = true
   [../]

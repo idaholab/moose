@@ -68,7 +68,7 @@ ADKernelGrad<compute_stage>::computeJacobian()
     {
       const auto residual = value * _grad_test[_i][_qp];
       for (_j = 0; _j < _var.phiSize(); _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
+        _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
     }
   }
   accumulateTaggedLocalMatrix();
@@ -118,7 +118,7 @@ ADKernelGrad<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
       {
         const auto residual = value * _grad_test[_i][_qp];
         for (_j = 0; _j < jvar.phiSize(); _j++)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
+          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
       }
     }
 
