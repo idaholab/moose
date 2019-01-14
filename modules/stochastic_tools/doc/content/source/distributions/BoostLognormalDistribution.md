@@ -1,7 +1,7 @@
-# LognormalDistribution
+# BoostLognormalDistribution
 
 !alert warning
-The lognormalDistribution object requires that libMesh be configured to utilize an external
+The BoostLognormalDistribution object requires that libMesh be configured to utilize an external
 [Boost](www.boost.org) library. This may be done by using the `--with-boost` configuration option
 when compiling libMesh.
 
@@ -30,10 +30,10 @@ where $m$ is the location parameter and $s$ is the scale parameter ($s > 0$).
 The following input file defines a lognormal distribution with the location parameter -0.371 and the
 scale parameter 0.52.
 
-!listing modules/stochastic_tools/test/tests/distributions/lognormal.i block=Distributions
+!listing modules/stochastic_tools/test/tests/distributions/boost_lognormal.i block=Distributions
 
-!syntax parameters /Distributions/LognormalDistribution
+!syntax parameters /Distributions/BoostLognormalDistribution
 
-!syntax inputs /Distributions/LognormalDistribution
+!syntax inputs /Distributions/BoostLognormalDistribution
 
-!syntax children /Distributions/LognormalDistribution
+!syntax children /Distributions/BoostLognormalDistribution

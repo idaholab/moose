@@ -7,23 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LOGNORMALDISTRIBUTION_H
-#define LOGNORMALDISTRIBUTION_H
+#ifndef BOOSTLOGNORMALDISTRIBUTION_H
+#define BOOSTLOGNORMALDISTRIBUTION_H
 
 #include "BoostDistribution.h"
 
-class LognormalDistribution;
+class BoostLognormalDistribution;
 
 template <>
-InputParameters validParams<LognormalDistribution>();
+InputParameters validParams<BoostLognormalDistribution>();
 
 /**
  * A class used to generate Lognormal distribution via Boost
  */
-class LognormalDistribution : public BoostDistribution<boost::math::lognormal_distribution<Real>>
+class BoostLognormalDistribution
+  : public BoostDistribution<boost::math::lognormal_distribution<Real>>
 {
 public:
-  LognormalDistribution(const InputParameters & parameters);
+  BoostLognormalDistribution(const InputParameters & parameters);
 };
 
-#endif // LOGNORMALDISTRIBUTION_H
+#endif // BOOSTLOGNORMALDISTRIBUTION_H
