@@ -1,10 +1,14 @@
 [Tests]
+  issues = ''
   [./multi_test]
     type = 'Exodiff'
     input = 'multismoothcircleIC_test.i'
     exodiff = 'multismoothcircleIC_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
+    rel_err = 4e-5
+    design = 'MultiSmoothCircleIC.md'
+    requirement = 'We shall be able to generate multiple smooth circle initial conditions with uniform radius variation type'
   [../]
 
   [./multi_normal_test]
@@ -14,6 +18,9 @@
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1 # See #9886
+    rel_err = 2e-5
+    design = 'MultiSmoothCircleIC.md'
+    requirement = 'We shall be able to generate multiple smooth circle initial conditions with normal radius variation type'
   [../]
 
   [./lattice_bounds]
@@ -21,6 +28,8 @@
     input = 'latticesmoothcircleIC_bounds.i'
     exodiff = 'latticesmoothcircleIC_bounds_out.e'
     valgrind = 'HEAVY'
+    design = 'LatticeSmoothCircleIC.md'
+    requirement = 'We shall be able to produce a lattice of smooth circle initial conditions, allowing the circles to exist on the simulation cell boundaries and using a uniform radius variation type'
   [../]
 
   [./lattice_test]
@@ -30,6 +39,8 @@
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1 # See #9886
+    design = 'LatticeSmoothCircleIC.md'
+    requirement = 'We shall be able to produce a lattice of smooth circle initial conditions, using a uniform radius variation type'
   [../]
 
   [./lattice_normal_test]
@@ -39,6 +50,8 @@
     scale_refine = 1
     valgrind = 'HEAVY'
     max_parallel = 1 # See #9886
+    design = 'LatticeSmoothCircleIC.md'
+    requirement = 'We shall be able to produce a lattice of smooth circle initial conditions using a normal radius variation type'
   [../]
 
   [./lattice_small_invalue_test]
@@ -47,6 +60,8 @@
     exodiff = 'latticesmoothcircleIC_small_invalue_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
+    design = 'LatticeSmoothCircleIC.md'
+    requirement = 'We shall be able to create multiple SpecifiedSmoothCircleICs with a small invalue'
   [../]
 
   [./specified_test]
@@ -55,5 +70,7 @@
     exodiff = 'specifiedsmoothcircleIC_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
+    design = 'SpecifiedSmoothCircleIC.md'
+    requirement = 'We shall be able to create several SpecifiedSmoothCircleICs with a standard invalue'
   [../]
 []
