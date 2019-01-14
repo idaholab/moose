@@ -57,7 +57,12 @@ class CSVDiff(FileTester):
                 csvdiff.append('--abs-zero %s' % (self.specs['abs_zero']))
 
             if self.specs.isValid('comparison_file'):
-                csvdiff.append('--comparison-file %s' % (self.specs['comparison_file']))
+                comparison_file = os.path.join(self.specs['test_dir'], self.specs['comparison_file'])
+                if os.path.exists(comparison_file):
+                    csvdiff.append('--comparison-file %s' % (comparison_file))
+                else:
+                    self.setStatus(self.fail, 'MISSING COMPARISON FILE')
+                    return commands
 
             if self.specs.isValid('override_columns'):
                 csvdiff.append('--custom-columns %s' % (' '.join(self.specs['override_columns'])))

@@ -72,26 +72,30 @@ class CSVTools:
 
     def getParamValues(self, param, param_line):
         """ return a list of discovered values for param """
-        return re.findall(param + "\s+([0-9e.-]+)", param_line)
+        return re.findall(param + "\s+([0-9e.\-\+]+)", param_line)
 
     def parseComparisonFile(self, config_file):
         """ Walk through comparison file and populate/return a dictionary as best we can """
         # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
         zero_params = set(['floor', 'abs_zero', 'absolute'])
         tollerance_params = set(['relative', 'rel_tol'])
-        custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : [] }
+        custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : {} }
 
         config_file.seek(0)
         for a_line in config_file:
             s_line = a_line.strip()
 
-            # Ignore commented lines, and lines begining with TIME STEPS (possible future CSVdiff capability)
-            if s_line.startswith("#") or s_line.lower().find('time steps') == 0:
+            # Ignore line if commented, denoted 'time steps' header, or logical nots
+            if s_line and \
+               (s_line.startswith("#") \
+                or s_line.lower().find('time steps') == 0 \
+                or s_line[0] == "!"):
                 continue
 
             words = set(a_line.split())
-            if a_line and (words.intersection(tollerance_params) or
-                          words.intersection(zero_params)):
+            # Set globals
+            if a_line and (words.intersection(tollerance_params) or words.intersection(zero_params)) \
+               and not re.findall(r'\s', a_line[0]):
                 try:
                     for value in words.intersection(tollerance_params):
                         custom_params['RELATIVE'] = self.getParamValues(value, a_line)[0]
@@ -102,15 +106,19 @@ class CSVTools:
                 except IndexError:
                     self.addError(config_file, "Error parsing comparison file. Field: '%s' has no value\n\n\t%s" % (value, a_line))
 
-            # A line starting with a white-space character, with a possible tollerance value
+            # Set fields (line starts with a whitespace)
             elif a_line and (re.findall(r'\s', a_line[0]) and len(words) >= 2):
-                field = a_line.split()[0]
+                field_key = a_line.split()[0]
+                custom_params['FIELDS'][field_key] = {}
                 try:
-                    val = float(a_line.split()[1])
-                except ValueError:
-                    val = custom_params['RELATIVE']
+                    for value in words.intersection(tollerance_params):
+                        custom_params['FIELDS'][field_key]['RELATIVE'] = self.getParamValues(value, a_line)[0]
 
-                custom_params['FIELDS'].append((field, val))
+                    for value in words.intersection(zero_params):
+                        custom_params['FIELDS'][field_key]['ZERO'] = self.getParamValues(value, a_line)[0]
+
+                except IndexError:
+                    self.addError(config_file, "Error parsing comparison file. Field: '%s' has no value\n\n\t%s" % (value, a_line))
 
         return custom_params
 
@@ -198,6 +206,8 @@ class CSVDiffer(CSVTools):
     # This method should only be called once. If it called again you must
     # manually clear messages by calling clearDiff
     def diff(self):
+        abs_zero = self.abs_zero
+        rel_tol = self.rel_tol
 
         # Setup custom values based on supplied config file. Override any information
         # in self.custom_colums (indeed, verifyArgs will not allow both --custom and
@@ -205,6 +215,8 @@ class CSVDiffer(CSVTools):
         if self.config:
             self.only_compare_custom = True
             custom_params = self.parseComparisonFile(self.config)
+            abs_zero = custom_params.get('ZERO', abs_zero)
+            rel_tol = custom_params.get('RELATIVE', rel_tol)
             if self.getNumErrors():
                 return self.getMessages()
 
@@ -212,10 +224,10 @@ class CSVDiffer(CSVTools):
             self.custom_rel_err = []
             self.custom_abs_zero = []
 
-            for field_id, value in custom_params['FIELDS']:
+            for field_id, value in custom_params['FIELDS'].iteritems():
                 self.custom_columns.append(field_id)
-                self.custom_abs_zero.append(custom_params['ZERO'])
-                self.custom_rel_err.append(value)
+                self.custom_abs_zero.append(value.get('ZERO', abs_zero))
+                self.custom_rel_err.append(value.get('RELATIVE', rel_tol))
 
         # Setup data structures for holding customized relative tolerance and absolute
         # zero values and flag for checking variable names
@@ -275,8 +287,6 @@ class CSVDiffer(CSVTools):
             return self.getMessages()
 
         # now check all the values in the table
-        abs_zero = self.abs_zero
-        rel_tol = self.rel_tol
         for key in keys1:
             for val1, val2 in zip( table1[key], table2[key] ):
                 # if customized tolerances specified use them otherwise
