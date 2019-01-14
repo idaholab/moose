@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ADDIFFUSION_H
-#define ADDIFFUSION_H
+#ifndef ADDIFFUSIONPRECOMPUTE_H
+#define ADDIFFUSIONPRECOMPUTE_H
 
-#include "ADKernel.h"
+#include "ADKernelGrad.h"
 
 template <ComputeStage>
-class ADDiffusion;
+class ADDiffusionPrecompute;
 
-declareADValidParams(ADDiffusion);
+declareADValidParams(ADDiffusionPrecompute);
 
 template <ComputeStage compute_stage>
-class ADDiffusion : public ADKernel<compute_stage>
+class ADDiffusionPrecompute : public ADKernelGrad<compute_stage>
 {
 public:
-  ADDiffusion(const InputParameters & parameters);
+  ADDiffusionPrecompute(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADGradResidual precomputeQpResidual();
 
-  usingKernelMembers;
+  usingKernelGradMembers;
 };
 
-#endif /* ADDIFFUSION_H */
+#endif /* ADDIFFUSIONPRECOMPUTE_H */

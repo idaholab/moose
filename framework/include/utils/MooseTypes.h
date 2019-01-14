@@ -278,6 +278,7 @@ struct MaterialPropertyType<JACOBIAN, mat_prop_type>
 };
 
 #define ADResidual typename ResidualReturnType<compute_stage>::type
+#define ADGradResidual typename RealVectorValueType<compute_stage>::type
 #define ADVariableValue typename VariableValueType<compute_stage>::type
 #define ADVariableGradient typename VariableGradientType<compute_stage>::type
 #define ADVariableSecond typename VariableSecondType<compute_stage>::type

@@ -8,13 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KernelValue.h"
-
-// MOOSE includes
-#include "Assembly.h"
-#include "MooseVariableFE.h"
-#include "SubProblem.h"
-#include "SystemBase.h"
-
 #include "libmesh/quadrature.h"
 
 template <>
@@ -103,7 +96,7 @@ KernelValue::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 Real
 KernelValue::computeQpResidual()
 {
-  return 0.0;
+  mooseError("Override precomputeQpResidual() in your KernelValue derived class!");
 }
 
 Real

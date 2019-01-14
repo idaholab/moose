@@ -55,7 +55,7 @@ protected:
    */
   virtual Real precomputeQpJacobian();
 
-  virtual Real computeQpResidual() override;
+  virtual Real computeQpResidual() final;
 };
 
 #endif // KERNELVALUE_H

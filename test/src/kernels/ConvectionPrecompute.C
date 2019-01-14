@@ -9,12 +9,12 @@
 
 #include "ConvectionPrecompute.h"
 
+registerMooseObject("MooseTestApp", ConvectionPrecompute);
+
 /**
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
-registerMooseObject("MooseTestApp", ConvectionPrecompute);
-
 template <>
 InputParameters
 validParams<ConvectionPrecompute>()

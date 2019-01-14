@@ -80,7 +80,7 @@
   [./dump_test]
     type = 'RunApp'
     input = 'IGNORED'
-    expect_out = 'block\s*=\s*ANY_BLOCK_ID'
+    expect_out = 'type\s*=\s*ADDiffusion' 
     cli_args = '--dump'
     issues = '#1404 #1131'
     design = 'command_line_usage.md'
