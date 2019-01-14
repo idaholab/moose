@@ -216,7 +216,7 @@ AdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
   for (const auto & node_u : afc._u_nodal)
   {
     const dof_id_type i = node_u.first;
-    if (!_u_nodal_computed_by_thread[i])
+    if (!_u_nodal_computed_by_thread[i] && afc.getUnodalComputedByThread(i))
       _u_nodal[i] = node_u.second;
   }
 }
@@ -857,5 +857,15 @@ AdvectiveFluxCalculatorBase::getUnodal(dof_id_type node_i) const
   if (node_u == _u_nodal.end())
     mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
                " _u_nodal does not contain node " + Moose::stringify(node_i));
+  return node_u->second;
+}
+
+bool
+AdvectiveFluxCalculatorBase::getUnodalComputedByThread(dof_id_type node_i) const
+{
+  const auto & node_u = _u_nodal_computed_by_thread.find(node_i);
+  if (node_u == _u_nodal_computed_by_thread.end())
+    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
+               " _u_nodal_computed_by_thread does not contain node " + Moose::stringify(node_i));
   return node_u->second;
 }

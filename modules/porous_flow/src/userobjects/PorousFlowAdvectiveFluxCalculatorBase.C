@@ -221,7 +221,7 @@ PorousFlowAdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
   for (const auto & node_du : pfafc._du_dvar)
   {
     const dof_id_type i = node_du.first;
-    if (!_du_dvar_computed_by_thread[i])
+    if (!_du_dvar_computed_by_thread[i] && pfafc.getdU_dvarComputedByThread(i))
       _du_dvar[i] = node_du.second;
   }
 }
@@ -233,6 +233,16 @@ PorousFlowAdvectiveFluxCalculatorBase::getdU_dvar(dof_id_type node_i) const
   if (node_du == _du_dvar.end())
     mooseError("PorousFlowAdvectiveFluxCalculatorBase UserObject " + name() +
                " _du_dvar does not contain node " + Moose::stringify(node_i));
+  return node_du->second;
+}
+
+bool
+PorousFlowAdvectiveFluxCalculatorBase::getdU_dvarComputedByThread(dof_id_type node_i) const
+{
+  const auto & node_du = _du_dvar_computed_by_thread.find(node_i);
+  if (node_du == _du_dvar_computed_by_thread.end())
+    mooseError("PorousFlowAdvectiveFluxCalculatorBase UserObject " + name() +
+               " _du_dvar_computed_by_thread does not contain node " + Moose::stringify(node_i));
   return node_du->second;
 }
 
