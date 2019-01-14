@@ -227,6 +227,14 @@ protected:
    * @param node_i global node id
    */
   Real getUnodal(dof_id_type node_i) const;
+
+  /**
+   * Returns the value of _u_nodal_computed_by_thread at the global id node_i.
+   * This will have been initialized to false in initialize() and potentially set true during
+   * execute()
+   * @param node_i global node id
+   */
+  bool getUnodalComputedByThread(dof_id_type node_i) const;
 };
 
 #endif // ADVECTIVEFLUXCALCULATORBASE_H

@@ -42,17 +42,14 @@ FluxLimitedTVDAdvection::computeResidual()
   prepareVectorTag(_assembly, _var.number());
   precalculateResidual();
 
-  std::vector<dof_id_type> idof_indices(_current_elem->n_nodes());
   // get the residual contributions from _fluo
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
     const dof_id_type node_id_i = _current_elem->node_id(i);
-    idof_indices[i] =
-        _mesh.getMesh().node_ref(node_id_i).dof_number(_sys.number(), _var.number(), 0);
     _local_re(i) = _fluo.getFluxOut(node_id_i) / _fluo.getValence(node_id_i, node_id_i);
   }
 
-  _assembly.cacheResidualNodes(_local_re, idof_indices);
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {

@@ -4,12 +4,18 @@
     input = heat_advection_1d.i
     exodiff = heat_advection_1d_out.e
     threading = '!pthreads'
+    issues = '#7984'
+    design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md'
+    requirement = 'PorousFlow shall correctly advect heat energy with a moving fluid'
   [../]
   [./head_advection_1d_fully_saturated]
     type = Exodiff
     input = heat_advection_1d_fully_saturated.i
     exodiff = heat_advection_1d_fully_saturated.e
     threading = '!pthreads'
+    issues = '#7984'
+    design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md'
+    requirement = 'PorousFlow shall correctly advect heat energy with a moving fluid, and users should be able to use the PorousFlow Action system to simulate this'
   [../]
   [./heat_advection_1d_KT]
     type = Exodiff
@@ -32,8 +38,8 @@
     type = Exodiff
     input = heat_advection_1d_KT.i
     exodiff = heat_advection_1d_KT_out.e
-    min_threads = 2
-    max_threads = 2
+    min_threads = 3
+    max_threads = 3
     prereq = heat_advection_1d_fully_saturated_action
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'

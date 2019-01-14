@@ -70,7 +70,7 @@
     type = PorousFlowEnergyTimeDerivative
     variable = temp
   [../]
-  [./convection]
+  [./heat_advection]
     type = PorousFlowHeatAdvection
     variable = temp
   [../]

@@ -6,7 +6,7 @@
 
 The [`PorousFlowSink`](porous_flow/boundaries.md) has been mentioned in this tutorial already, but now is an appropriate time to study it more carefully.  It is a very powerful BC which can handle virtually all physical situations.  It also helps enormously in resolving some [convergence problems](porous_flow/nonlinear_convergence_problems.md).  Therefore, it is well worth studying, so please feel free to take a break from this tutorial and read the info [here](porous_flow/boundaries).
 
-Now that you've finished studying the `PorousFlowSink` let's apply it in a simple situation.  The purely fluid-flow model of [Page 01](porous_flow/tutorial_01.md) is extended to include unsaturated flow.  Firstly, the `PorousFlowBasicTHM` `Action` must be replaced by a `PorousFlowUnsaturated` `Action`:
+Now that you've finished studying the `PorousFlowSink` let's apply it in a simple situation.  The purely fluid-flow model of [Page 01](porous_flow/tutorial_01.md) is extended to include unsaturated flow.  Firstly, the `PorousFlowBasicTHM` `Action` must be replaced by a [PorousFlowUnsaturated](actions/PorousFlowUnsaturated.md) `Action`:
 
 !listing modules/porous_flow/examples/tutorial/08.i start=[PorousFlowUnsaturated] end=[BCs]
 
@@ -34,7 +34,7 @@ Try to run the simulation with `use_relperm = false` and you'll see very poor co
 
 The simulation may be promoted to a full THMC simulation using the approach used in [Page 03](porous_flow/tutorial_03.md), [Page 04](porous_flow/tutorial_04.md) and [Page 06](porous_flow/tutorial_06.md).  The arguments made about scaling the variables must be modified to take into account the fluid density appearing in the fluid equation (see [Page 06](porous_flow/tutorial_06.md)) so the scaling will be approximately $10^{-5}$ for the temperature and $10^{-7}$ for the displacement variables.  The [porosity](porous_flow/porosity.md) may depend on porepressure, temperature, volumetric strain and chemistry.
 
-The simulation described so far uses full upwinding, which is the default in PorousFlow.  TVD stabilization (see [numerical diffusion](numerical_diffusion.md) and [a worked example of KT stablization](kt_worked.md)) may be used instead by simply changing the `PorousFlowUnsaturated` block to:
+The simulation described so far uses [full upwinding](upwinding.md), which is the default in PorousFlow.  [TVD stabilization](kt.md) (see also [numerical diffusion](numerical_diffusion.md) and [a worked example of KT stablization](kt_worked.md)) may be used instead by simply changing the `PorousFlowUnsaturated` block to:
 
 !listing modules/porous_flow/examples/tutorial/08_KT.i start=[PorousFlowUnsaturated] end=[BCs]
 

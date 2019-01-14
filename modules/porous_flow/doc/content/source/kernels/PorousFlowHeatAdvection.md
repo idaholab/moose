@@ -11,7 +11,7 @@ where all parameters are defined in the [nomenclature](/nomenclature.md).
 !alert note
 A fully-upwinded version is implemented, where the mobility of the upstream nodes is used.
 
-See [upwinding](/upwinding.md) for details.
+See [upwinding](/upwinding.md) for details.  Other Kernels implement [Kuzmin-Turek TVD stabilization](kt.md).
 
 !syntax parameters /Kernels/PorousFlowHeatAdvection
 

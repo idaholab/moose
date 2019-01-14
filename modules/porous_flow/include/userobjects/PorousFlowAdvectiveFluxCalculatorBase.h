@@ -72,6 +72,13 @@ protected:
   const std::vector<Real> & getdU_dvar(dof_id_type node_i) const;
 
   /**
+   * Returns _du_dvar_computed_by_thread[node_i]
+   * This is initialized to false in initialize() and potentially set to true during execute()
+   * @param node_i global node id
+   */
+  bool getdU_dvarComputedByThread(dof_id_type node_i) const;
+
+  /**
    * Returns, r, where r[global node k][a] = d(K[node_i][node_j])/d(porous_flow_variable[global node
    * k][porous_flow_variable a]) param node_i global node id param node_j global node id
    */

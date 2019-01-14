@@ -4,7 +4,7 @@
 
 # Porous Flow Tutorial Page 06.  Adding a tracer
 
-On this Page we will depart from `PorousFlowBasicTHM` and use `PorousFlowFullySaturated`.  This action employs [mass lumping](porous_flow/mass_lumping.md) but no numerical stabilization by default.  Therefore, the results will be slightly different than those achieved by `PorousFlowBasicTHM` (no lumping or stabilization) and from the remainder of PorousFlow ([mass lumping](porous_flow/mass_lumping) and either [full upwinding](porous_flow/upwinding.md) or [TVD stabilization](kt_worked.md)).
+On this Page we will depart from [PorousFlowBasicTHM](actions/PorousFlowBasicTHM.md) and use [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md).  This action employs [mass lumping](porous_flow/mass_lumping.md) but no numerical stabilization by default.  Therefore, the results will be slightly different than those achieved by `PorousFlowBasicTHM` (no lumping or stabilization) and from the remainder of PorousFlow ([mass lumping](porous_flow/mass_lumping) and either [full upwinding](porous_flow/upwinding.md) or [TVD stabilization](kt_worked.md)).
 
 The reason for using `PorousFlowFullySaturated` is that it allows multi-component physics to be studied.  Denoting the mass fraction by $\chi^{\kappa}$ (where $\kappa = 0,\ldots,N_{\mathrm{components}}-1$), the [fluid equations](porous_flow/governing_equations.md) are
 \begin{equation}
@@ -55,11 +55,11 @@ are saying "add or remove the tracer so that its concentration remains fixed".  
 
 ## Lack of numerical stabilization
 
-Broadly speaking, the animation shows the expected behaviour, but what are those "stripes" of low and high concentration towards the end of the simulation?  This is caused by the lack of numerical stabilization.  As mentioned in the introduction to this Page, stabilization is standard in most PorousFlow simulations, but is not used in the above simulation.  In fact, if you run the simulation yourself, you'll see that `tracer_concentration` does not even lie within its expected range of $[0, 0.5]$!
+Broadly speaking, the animation shows the expected behaviour, but what are those "stripes" of low and high concentration towards the end of the simulation?  This is caused by the lack of numerical stabilization.  As mentioned in the introduction to this Page, [stabilization is standard](stabilization.md) in most PorousFlow simulations, but is not used in the above simulation.  In fact, if you run the simulation yourself, you'll see that `tracer_concentration` does not even lie within its expected range of $[0, 0.5]$!
 
-The "stripes" are removed by numerical stabilization, but this comes at a cost.  PorousFlow offers two types of numerical stabilization.  Full-upwinding is excellent at eliminating overshoots and undershoots, and the convergence speed is also excellent, but it introduces extra diffusion, so that sharp fronts are not maintained!  On the other hand, KT stabilization also eliminates overshoots and undershoots and introduces very little or zero extra diffusion so that sharp fronts are maintained as well as without any numerical stabilization, but its convergence speed and runtime are always greater.  Further details may be found in the [numerical diffusion](numerical_diffusion.md) page.
+The "stripes" are removed by numerical stabilization, but this comes at a cost.  PorousFlow offers two types of [numerical stabilization](stabilization.md).  [Full-upwinding](upwinding.md) is excellent at eliminating overshoots and undershoots, and the convergence speed is also excellent, but it introduces extra diffusion, so that sharp fronts are not maintained!  On the other hand, [KT stabilization](kt.md) also eliminates overshoots and undershoots and introduces very little or zero extra diffusion so that sharp fronts are maintained as well as without any numerical stabilization, but its convergence speed and runtime are always greater.  Further details regarding the diffusion of fronts may be found in the [numerical diffusion](numerical_diffusion.md) page.
 
-It is not possible to use full-upwinding with the `PorousFlowFullySaturated` Action, but KT stabilization may be easily introduced:
+It is not possible to use full-upwinding with the [PorousFlowFullySaturated](actions/PorousFlowFullySaturated.md) Action, but KT stabilization may be easily introduced:
 
 !listing modules/porous_flow/examples/tutorial/06_KT.i start=[PorousFlowFullySaturated] end=[]
 

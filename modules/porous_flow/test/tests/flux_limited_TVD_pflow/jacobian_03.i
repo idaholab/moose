@@ -1,7 +1,7 @@
 # Checking the Jacobian of Flux-Limited TVD Advection, 2 phases, 2 components, using flux_limiter_type = None
 [Mesh]
   type = GeneratedMesh
-  dim = 3
+  dim = 2
   nx = 2
   xmin = 0
   xmax = 1
