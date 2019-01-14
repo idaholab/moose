@@ -32,6 +32,9 @@ InputParameters validParams<MaterialPropertyInterface>();
 #define adGetADMaterialProperty this->template getADMaterialProperty
 #define adGetMaterialProperty this->template getMaterialProperty
 #define adGetMaterialPropertyOld this->template getMaterialPropertyOld
+#define adGetADMaterialPropertyByName this->template getADMaterialPropertyByName
+#define adGetMaterialPropertyByName this->template getMaterialPropertyByName
+#define adGetMaterialPropertyOldByName this->template getMaterialPropertyOldByName
 
 /**
  * \class MaterialPropertyInterface

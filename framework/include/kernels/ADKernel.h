@@ -16,6 +16,7 @@
   usingCoupleableMembers;                                                                          \
   using ADKernel<compute_stage>::_test;                                                            \
   using ADKernel<compute_stage>::_qp;                                                              \
+  using ADKernel<compute_stage>::_q_point;                                                         \
   using ADKernel<compute_stage>::_i;                                                               \
   using ADKernel<compute_stage>::_j;                                                               \
   using ADKernel<compute_stage>::_u;                                                               \

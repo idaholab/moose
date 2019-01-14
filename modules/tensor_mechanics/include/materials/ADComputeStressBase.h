@@ -20,6 +20,7 @@
   using ADComputeStressBase<compute_stage>::_elastic_strain;                                       \
   using ADComputeStressBase<compute_stage>::_base_name;                                            \
   using ADComputeStressBase<compute_stage>::_elasticity_tensor;                                    \
+  using ADComputeStressBase<compute_stage>::_elasticity_tensor_name;                               \
   using ADComputeStressBase<compute_stage>::_initial_stress_fcn
 
 // Forward Declarations
