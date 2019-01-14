@@ -21,10 +21,13 @@
 // System Includes
 #include <chrono>
 
-PerfGraph::PerfGraph() : _current_position(0), _active(true)
+const std::string PerfGraph::ROOT_NAME = "Root";
+
+PerfGraph::PerfGraph(const std::string & root_name)
+  : _root_name(root_name), _current_position(0), _active(true)
 {
   // Not done in the initialization list on purpose because this object needs to be complete first
-  _root_node = libmesh_make_unique<PerfNode>(registerSection("App", 0));
+  _root_node = libmesh_make_unique<PerfNode>(registerSection(ROOT_NAME, 0));
 
   // Set the initial time
   _root_node->setStartTime(std::chrono::steady_clock::now());
@@ -34,8 +37,6 @@ PerfGraph::PerfGraph() : _current_position(0), _active(true)
 
   _stack[0] = _root_node.get();
 }
-
-PerfGraph::~PerfGraph() {}
 
 unsigned int
 PerfGraph::registerSection(const std::string & section_name, unsigned int level)
@@ -74,7 +75,10 @@ PerfGraph::getNumCalls(const std::string & section_name)
   auto section_it = _section_time.find(section_name);
 
   if (section_it == _section_time.end())
-    mooseError("Unknown section_name: ", section_name, " in PerfGraph::getNumCalls() ");
+    mooseError(
+        "Unknown section_name: ",
+        section_name,
+        " in PerfGraph::getNumCalls()\nIf you are attempting to retrieve the root use \"Root\".");
 
   return section_it->second._num_calls;
 }
@@ -87,7 +91,10 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
   auto section_it = _section_time.find(section_name);
 
   if (section_it == _section_time.end())
-    mooseError("Unknown section_name: ", section_name, " in PerfGraph::getTime() ");
+    mooseError(
+        "Unknown section_name: ",
+        section_name,
+        " in PerfGraph::getTime()\nIf you are attempting to retrieve the root use \"Root\".");
 
   auto app_time = _section_time_ptrs[0]->_total;
 
@@ -217,7 +224,8 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
 {
   mooseAssert(_id_to_section_name.find(current_node->id()) != _id_to_section_name.end(),
               "Unable to find section name!");
-  auto & name = _id_to_section_name[current_node->id()];
+
+  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_name[current_node->id()];
 
   mooseAssert(_id_to_level.find(current_node->id()) != _id_to_level.end(), "Unable to find level!");
   auto & node_level = _id_to_level[current_node->id()];
@@ -272,7 +280,7 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before recursivelyPrintGraph!");
 
-  auto & name = _id_to_section_name[current_node->id()];
+  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_name[current_node->id()];
 
   auto section = std::string(current_depth * 2, ' ') + name;
 
@@ -409,7 +417,6 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
                       _section_time_ptrs.end(),
                       sorted,
                       [](SectionTime * lhs, SectionTime * rhs) {
-
                         if (lhs && rhs)
                           return lhs->_self > rhs->_self;
 
@@ -442,7 +449,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   {
     auto id = sorted[i];
 
-    vtable.addRow(_id_to_section_name[id],
+    vtable.addRow(id == 0 ? _root_name : _id_to_section_name[id],
                   _section_time_ptrs[id]->_num_calls,
                   _section_time_ptrs[id]->_self,
                   _section_time_ptrs[id]->_self /

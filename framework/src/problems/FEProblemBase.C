@@ -312,7 +312,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _check_nonlinear_convergence_timer(registerTimedSection("checkNonlinearConvergence", 5)),
     _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence", 5)),
     _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3)),
-    _exec_multi_apps_timer(registerTimedSection("execMultiApps", 3)),
+    _exec_multi_apps_timer(registerTimedSection("execMultiApps", 1)),
     _backup_multi_apps_timer(registerTimedSection("backupMultiApps", 5)),
     _u_dot_requested(false),
     _u_dotdot_requested(false),
@@ -3567,6 +3567,15 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 
   // If we made it here then everything passed
   return true;
+}
+
+void
+FEProblemBase::finalizeMultiApps()
+{
+  const auto & multi_apps = _multi_apps.getActiveObjects();
+
+  for (const auto & multi_app : multi_apps)
+    multi_app->finalize();
 }
 
 void

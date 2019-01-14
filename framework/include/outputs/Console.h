@@ -72,6 +72,13 @@ public:
   void meshChanged() override;
 
   /**
+   * A helper function for outputting norms in color
+   * @param old_norm The old residual norm to compare against
+   * @param norm The current residual norm
+   */
+  static std::string outputNorm(const Real & old_norm, const Real & norm);
+
+  /**
    * Return system information flags
    */
   MultiMooseEnum & systemInfoFlags()
@@ -115,13 +122,6 @@ protected:
    * Print system information
    */
   virtual void outputSystemInformation() override;
-
-  /**
-   * A helper function for outputting norms in color
-   * @param old_norm The old residual norm to compare against
-   * @param norm The current residual norm
-   */
-  std::string outputNorm(const Real & old_norm, const Real & norm);
 
   /**
    * Prints the time step information for the screen output
