@@ -205,7 +205,7 @@ public:
   /// returns _coords + a
   template <typename T2>
   RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-  operator+(const RankTwoTensorTempl<T2> & a) const;
+  operator+(const TypeTensor<T2> & a) const;
 
   /// sets _coords -= a and returns vals
   RankTwoTensorTempl<T> & operator-=(const RankTwoTensorTempl<T> & a);
@@ -213,7 +213,7 @@ public:
   /// returns _coords - a
   template <typename T2>
   RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-  operator-(const RankTwoTensorTempl<T2> & a) const;
+  operator-(const TypeTensor<T2> & a) const;
 
   /// returns -_coords
   RankTwoTensorTempl<T> operator-() const;
@@ -483,7 +483,7 @@ typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
 template <typename T>
 template <typename T2>
 RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-RankTwoTensorTempl<T>::operator+(const RankTwoTensorTempl<T2> & b) const
+RankTwoTensorTempl<T>::operator+(const TypeTensor<T2> & b) const
 {
   return TensorValue<T>::operator+(b);
 }
@@ -491,7 +491,7 @@ RankTwoTensorTempl<T>::operator+(const RankTwoTensorTempl<T2> & b) const
 template <typename T>
 template <typename T2>
 RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-RankTwoTensorTempl<T>::operator-(const RankTwoTensorTempl<T2> & b) const
+RankTwoTensorTempl<T>::operator-(const TypeTensor<T2> & b) const
 {
   return TensorValue<T>::operator-(b);
 }
