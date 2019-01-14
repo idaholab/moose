@@ -76,6 +76,8 @@
     requirement = "The GrainTracker/PolycrystalUserObject base class shall support having only a grain halo bleeding over a periodic edge."
     issues = '#6713 #8926'
     design = "GrainTracker.md"
+    abs_zero = 1e-7
+    rel_err = 4e-5
   [../]
 
   [./test_remapping_serial]
