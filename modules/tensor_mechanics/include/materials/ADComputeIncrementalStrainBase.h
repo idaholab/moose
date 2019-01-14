@@ -21,7 +21,8 @@
   using ADComputeIncrementalStrainBase<compute_stage>::_deformation_gradient;                      \
   using ADComputeIncrementalStrainBase<compute_stage>::_mechanical_strain_old;                     \
   using ADComputeIncrementalStrainBase<compute_stage>::_total_strain_old;                          \
-  using ADComputeIncrementalStrainBase<compute_stage>::_eigenstrains_old
+  using ADComputeIncrementalStrainBase<compute_stage>::_eigenstrains_old;                          \
+  using ADComputeIncrementalStrainBase<compute_stage>::subtractEigenstrainIncrementFromStrain
 
 template <ComputeStage>
 class ADComputeIncrementalStrainBase;

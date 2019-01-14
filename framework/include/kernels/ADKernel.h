@@ -24,7 +24,6 @@
   using ADKernel<compute_stage>::_grad_u;                                                          \
   using ADKernel<compute_stage>::_JxW;                                                             \
   using ADKernel<compute_stage>::_coord;                                                           \
-  using ADKernel<compute_stage>::_q_point;                                                         \
   using ADKernel<compute_stage>::_local_re;                                                        \
   using ADKernel<compute_stage>::_local_ke;                                                        \
   using ADKernel<compute_stage>::_qrule;                                                           \
@@ -43,8 +42,7 @@
   using ADKernel<compute_stage>::accumulateTaggedLocalMatrix;                                      \
   using ADKernel<compute_stage>::variable;                                                         \
   using ADKernel<compute_stage>::paramError;                                                       \
-  using ADKernel<compute_stage>::isParamValid;                                                     \
-  using ADKernel<compute_stage>::isCoupled
+  using ADKernel<compute_stage>::isParamValid
 
 // forward declarations
 template <ComputeStage>
