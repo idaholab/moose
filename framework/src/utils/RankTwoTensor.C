@@ -327,25 +327,11 @@ RankTwoTensorTempl<T>::operator+=(const RankTwoTensorTempl<T> & a)
 }
 
 template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::operator+(const RankTwoTensorTempl<T> & b) const
-{
-  return TensorValue<T>::operator+(b);
-}
-
-template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator-=(const RankTwoTensorTempl<T> & a)
 {
   TensorValue<T>::operator-=(a);
   return *this;
-}
-
-template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::operator-(const RankTwoTensorTempl<T> & b) const
-{
-  return TensorValue<T>::operator-(b);
 }
 
 template <typename T>
@@ -364,36 +350,11 @@ RankTwoTensorTempl<T>::operator*=(const T & a)
 }
 
 template <typename T>
-RankTwoTensorTempl<T> RankTwoTensorTempl<T>::operator*(const T & b) const
-{
-  return TensorValue<T>::operator*(b);
-}
-
-template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator/=(const T & a)
 {
   TensorValue<T>::operator/=(a);
   return *this;
-}
-
-template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::operator/(const T & b) const
-{
-  return TensorValue<T>::operator/(b);
-}
-
-template <typename T>
-TypeVector<T> RankTwoTensorTempl<T>::operator*(const TypeVector<T> & b) const
-{
-  return TensorValue<T>::operator*(b);
-}
-
-template <typename T>
-RankTwoTensorTempl<T> RankTwoTensorTempl<T>::operator*(const TypeTensor<T> & b) const
-{
-  return TensorValue<T>::operator*(b);
 }
 
 template <typename T>

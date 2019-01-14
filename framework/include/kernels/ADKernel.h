@@ -43,7 +43,8 @@
   using ADKernel<compute_stage>::accumulateTaggedLocalMatrix;                                      \
   using ADKernel<compute_stage>::variable;                                                         \
   using ADKernel<compute_stage>::paramError;                                                       \
-  using ADKernel<compute_stage>::isParamValid
+  using ADKernel<compute_stage>::isParamValid;                                                     \
+  using ADKernel<compute_stage>::_q_point
 
 // forward declarations
 template <ComputeStage>
