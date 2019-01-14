@@ -24,8 +24,8 @@ public:
   ConvectionPrecompute(const InputParameters & parameters);
 
 protected:
-  virtual Real precomputeQpResidual();
-  virtual Real precomputeQpJacobian();
+  Real precomputeQpResidual() override;
+  Real precomputeQpJacobian() override;
 
 private:
   RealVectorValue _velocity;
