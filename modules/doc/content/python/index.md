@@ -8,3 +8,4 @@ MOOSE.  Click on each one for further information
 | :- | :- |
 | [TestHarness.md] | Tool testing that applications work correctly as code is developed. |
 | [memory_logger.md] | Tool for gathering memory usage of a running process. |
+| [CSVDiff.md] | Tool for performing differentiations with comma separated value (CSV) files. |
