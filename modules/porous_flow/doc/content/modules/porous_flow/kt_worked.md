@@ -1,5 +1,14 @@
 # Worked example of Kuzmin-Turek stabilization
 
+This page is part of a set of pages devoted to discussions of numerical stabilization in PorousFlow.  See:
+
+- [Numerical stabilization lead page](stabilization.md)
+- [Mass lumping](mass_lumping.md)
+- [Full upwinding](upwinding.md)
+- [Kuzmin-Turek stabilization](kt.md)
+- [Numerical diffusion](numerical_diffusion.md)
+- [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+
 Kuzmin and Turek [citep:KuzminTurek2004] describe a method of stabilising advection while minimising artificial numerical diffusion.  In this page "Kuzmin and Turek" is abbreviatved to "KT".  This page will make much more sense if you read it in tandem with the KT paper!  KT consider a single scalar quantity $u$ that is being advected.  For sake of argument, in this page we think of $u$ as "heat".
 
 In this page, the 1D example studied in the [numerical diffusion page](numerical_diffusion.md) is used to explicitly illustrate how their approach works.  The input file is
@@ -8,7 +17,7 @@ In this page, the 1D example studied in the [numerical diffusion page](numerical
 
 The mesh sits in the domain $0\leq x \leq 1$ and is meshed with 100 elements.  The initial condition is $u(x)=1$ if $0.1\leq x \leq 3$, and $u(x)=0$ otherwise.  The velocity is uniform to the right: $v=0.1$.
 
-The key differences between this input file and any other that simulated advection is the use of the [FluxLimitedTVDAdvection](FluxLimitedTVDAdvection.md) Kernel and the [AdvectiveFluxCalculatorConstantVelocity](AdvectiveFluxCalculatorConstantVelocity.md) UserObject.  The latter computes $K$, $R^{+}$ and $R^{-}$ that are used by the Kernel as described in detail in this page.
+The key differences between this input file and any other that simulated advection is the use of the [FluxLimitedTVDAdvection](kernels/FluxLimitedTVDAdvection.md) Kernel and the [AdvectiveFluxCalculatorConstantVelocity](AdvectiveFluxCalculatorConstantVelocity.md) UserObject.  The latter computes $K$, $R^{+}$ and $R^{-}$ that are used by the Kernel as described in detail in this page.
 
 The above input file sets the `flux_limiter_type = superbee`, but different types, such as `none`, `vanleer`, `minmod` or `mc` may be chosen.  As explained in detail below, these add antidiffusion to counteract the artificial numerical diffusion added to stabilize the problem (except for the `none` choice that adds no antidiffusion).
 

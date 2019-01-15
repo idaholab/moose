@@ -62,8 +62,8 @@
     cli_args = 'UserObjects/fluo/flux_limiter_type=vanleer'
     ratio_tol = 1E-7
     difference_tol = 1E10
-    min_threads = 2
-    max_threads = 2
+    min_threads = 3
+    max_threads = 3
     prereq = jacobian_02_vanleer
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
@@ -103,8 +103,8 @@
     input = 'fltvd_1D.i'
     csvdiff = 'fltvd_1D_out_tracer_0101.csv'
     abs_zero = 1.0E-5
-    min_threads = 2
-    max_threads = 2
+    min_threads = 3
+    max_threads = 3
     prereq = fltvd_1D
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
@@ -124,8 +124,8 @@
     input = 'fltvd_2D.i'
     csvdiff = 'fltvd_2D_out_tracer_0101.csv'
     abs_zero = 1.0E-5
-    min_threads = 2
-    max_threads = 2
+    min_threads = 3
+    max_threads = 3
     prereq = 'fltvd_1D_threads fltvd_2D'
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
@@ -165,8 +165,8 @@
     input = 'fltvd_2D_trimesh.i'
     csvdiff = 'fltvd_2D_trimesh_out_tracer_0101.csv'
     heavy = true
-    min_threads = 2
-    max_threads = 2
+    min_threads = 3
+    max_threads = 3
     prereq = 'fltvd_2D_trimesh'
     abs_zero = 1.0E-5
     issues = '#12370 #12118 #10426'
@@ -187,8 +187,8 @@
     input = 'fltvd_2D_blocks.i'
     csvdiff = 'fltvd_2D_blocks_out_tracer_bot_0101.csv fltvd_2D_blocks_out_tracer_top_0101.csv'
     abs_zero = 1.0E-5
-    min_threads = 2
-    max_threads = 2
+    min_threads = 3
+    max_threads = 3
     prereq = 'fltvd_1D_threads fltvd_2D_blocks'
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
@@ -208,8 +208,8 @@
     input = 'fltvd_1D_adaptivity.i'
     csvdiff = 'fltvd_1D_adaptivity_out_tracer_0101.csv'
     abs_zero = 1.0E-5
-    min_threads = 2
-    max_threads = 2
+    min_threads = 3
+    max_threads = 3
     prereq = 'fltvd_1D_threads fltvd_1D_adaptivity'
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'

@@ -1,0 +1,286 @@
+[Tests]
+  [./except01]
+    type = 'RunException'
+    input = 'except01.i'
+    expect_err = "Phase number entered is greater than the number of phases specified in the Dictator. Remember that indexing starts at 0"
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations, and shall error-out if the AdvectiveFluxCalculator UserObject has phase number >= number of phases in the model'
+  [../]
+  [./except02]
+    type = 'RunException'
+    input = 'except02.i'
+    expect_err = "Fluid component number entered is greater than the number of fluid components specified in the Dictator. Remember that indexing starts at 0"
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations, and shall error-out if the AdvectiveFluxCalculator UserObject has fluid component number >= number of fluid components in the model'
+  [../]
+  [./except03]
+    type = 'RunException'
+    input = 'except03.i'
+    expect_err = "fe_order: If you specify fe_family you must also specify fe_order"
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations, and shall error-out if the AdvectiveFluxCalculator UserObject specifies fe_family but not fe_order'
+  [../]
+  [./except04]
+    type = 'RunException'
+    input = 'except04.i'
+    expect_err = "fe_family: If you specify fe_order you must also specify fe_family"
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations, and shall error-out if the AdvectiveFluxCalculator UserObject specifies fe_order but not fe_family'
+  [../]
+  [./except05]
+    type = 'RunException'
+    input = 'except05.i'
+    expect_err = "fe_family: The PorousFlowDictator cannot determine the appropriate FE type to use because your porous_flow_vars are of different types.  You must specify the appropriate fe_family and fe_order to use."
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations, and shall error-out if the PorousFlowDictator cannot determine a consistent FE type to use and if no FE type is specified in the AdvectiveFluxCalculator UserObject'
+  [../]
+  [./jacobian_01]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    heavy = true
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving full saturation of 1 phase and 1 component, and shall fully compute all Jacobian entries when there is no antidiffusion'
+  [../]
+  [./jacobian_01_threads]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    heavy = true
+    min_threads = 3
+    max_threads = 3
+    prereq = jacobian_01
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving full saturation of 1 phase and 1 component, and shall fully compute all Jacobian entries when there is no antidiffusion, for more than 1 thread'
+  [../]
+  [./jacobian_02]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving unsaturated 1 phase and multiple components, and shall fully compute all Jacobian entries when there is no antidiffusion'
+  [../]
+  [./jacobian_03]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    heavy = true
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving multiple phases and multiple components, and shall fully compute all Jacobian entries when there is no antidiffusion'
+  [../]
+  [./jacobian_03_threads]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    heavy = true
+    issues = '#10426'
+    min_threads = 3
+    max_threads = 3
+    prereq = jacobian_03
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving multiple phases and multiple components, and shall fully compute all Jacobian entries when there is no antidiffusion, for more than 1 thread'
+  [../]
+  [./jacobian_04_minmod]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_04.i'
+    cli_args = 'UserObjects/advective_flux_calculator/flux_limiter_type=minmod'
+    heavy = true
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving full saturation of 1 phase and 1 component, and shall fully compute all Jacobian entries when the flux limiter is minmod'
+  [../]
+  [./jacobian_04_vanleer]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_04.i'
+    cli_args = 'UserObjects/advective_flux_calculator/flux_limiter_type=vanleer'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    heavy = true
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving full saturation of 1 phase and 1 component, and shall fully compute all Jacobian entries when the flux limiter is vanleer'
+  [../]
+  [./jacobian_04_mc]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_04.i'
+    cli_args = 'UserObjects/advective_flux_calculator/flux_limiter_type=mc'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    heavy = true
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving full saturation of 1 phase and 1 component, and shall fully compute all Jacobian entries when the flux limiter is mc'
+  [../]
+  [./jacobian_04_superbee]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_04.i'
+    cli_args = 'UserObjects/advective_flux_calculator/flux_limiter_type=superbee'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    heavy = true
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving full saturation of 1 phase and 1 component, and shall fully compute all Jacobian entries when the flux limiter is superbee'
+  [../]
+  [./jacobian_04_vanleer_threads]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_04.i'
+    cli_args = 'UserObjects/advective_flux_calculator/flux_limiter_type=vanleer'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    issues = '#10426'
+    heavy = true
+    min_threads = 3
+    max_threads = 3
+    prereq = jacobian_04_vanleer
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving full saturation of 1 phase and 1 component, and shall fully compute all Jacobian entries when the flux limiter is vanleer, for more than 1 thread'
+  [../]
+  [./jacobian_05]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_05.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving multiple phases and multiple componentst, and shall fully compute all Jacobian entries with nontrivial flux limiter'
+  [../]
+  [./jacobian_05_threads]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_05.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    min_threads = 3
+    max_threads = 3
+    prereq = jacobian_05
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving multiple phases and multiple componentst, and shall fully compute all Jacobian entries with nontrivial flux limiter, for more than 1 thread'
+  [../]
+  [./pffltvd_1D]
+    type = 'CSVDiff'
+    input = 'pffltvd_1D.i'
+    csvdiff = 'pffltvd_1D_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D for PorousFlow simulations'
+  [../]
+  [./pffltvd_1D_threads]
+    type = 'CSVDiff'
+    input = 'pffltvd_1D.i'
+    csvdiff = 'pffltvd_1D_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    min_threads = 3
+    max_threads = 3
+    prereq = pffltvd_1D
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D for PorousFlow simulations, for more than 1 thread'
+  [../]
+  [./pffltvd_2D]
+    type = 'CSVDiff'
+    input = 'pffltvd_2D.i'
+    csvdiff = 'pffltvd_2D_out_tracer_0011.csv'
+    cli_args = 'Executioner/end_time=0.6'
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations'
+  [../]
+  [./pffltvd_2D_threads]
+    type = 'CSVDiff'
+    input = 'pffltvd_2D.i'
+    csvdiff = 'pffltvd_2D_out_tracer_0011.csv'
+    cli_args = 'Executioner/end_time=0.6'
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    min_threads = 3
+    max_threads = 3
+    prereq = 'pffltvd_1D_threads pffltvd_2D'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations, for more than 1 thread'
+  [../]
+  [./pffltvd_3D]
+    type = 'CSVDiff'
+    input = 'pffltvd_3D.i'
+    csvdiff = 'pffltvd_3D_out_tracer_0006.csv'
+    cli_args = 'Executioner/end_time=0.3'
+    heavy = true
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations'
+  [../]
+  [./pffltvd_2D_angle]
+    type = Exodiff
+    input = 'pffltvd_2D_angle.i'
+    exodiff = 'pffltvd_2D_angle_out.e'
+    abs_zero = 4.0E-4
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations, when the Darcy velocity is not aligned with the mesh'
+  [../]
+  [./pffltvd_2D_trimesh]
+    type = CSVDiff
+    input = 'pffltvd_2D_trimesh.i'
+    csvdiff = 'pffltvd_2D_trimesh_out_tracer_0006.csv'
+    cli_args = 'Executioner/end_time=0.3'
+    heavy = true
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations, when using triangular mesh elements'
+  [../]
+  [./pffltvd_2D_trimesh_threads]
+    type = CSVDiff
+    input = 'pffltvd_2D_trimesh.i'
+    csvdiff = 'pffltvd_2D_trimesh_out_tracer_0006.csv'
+    cli_args = 'Executioner/end_time=0.3'
+    heavy = true
+    min_threads = 3
+    max_threads = 3
+    prereq = 'pffltvd_2D_trimesh'
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 2D for PorousFlow simulations, when using triangular mesh elements, and more than 1 thread'
+  [../]
+  [./pffltvd_1D_adaptivity]
+    type = 'CSVDiff'
+    input = 'pffltvd_1D_adaptivity.i'
+    csvdiff = 'pffltvd_1D_adaptivity_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D for PorousFlow simulations when mesh adaptivity is used'
+  [../]
+  [./pffltvd_1D_adaptivity_threads]
+    type = 'CSVDiff'
+    input = 'pffltvd_1D_adaptivity.i'
+    csvdiff = 'pffltvd_1D_adaptivity_out_tracer_0101.csv'
+    abs_zero = 1.0E-5
+    min_threads = 3
+    max_threads = 3
+    prereq = 'pffltvd_1D_threads pffltvd_1D_adaptivity'
+    issues = '#10426'
+    design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization in 1D for PorousFlow simulations when mesh adaptivity is used, and when more than 1 thread is used'
+  [../]
+[]
