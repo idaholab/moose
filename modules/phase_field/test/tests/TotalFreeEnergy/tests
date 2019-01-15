@@ -1,14 +1,19 @@
 [Tests]
+  issues = '#4413'
+  design = 'TotalFreeEnergy.md'
   [./TotalFreeEnergy]
     type = 'Exodiff'
     input = 'TotalFreeEnergy_test.i'
     exodiff = 'TotalFreeEnergy_test_out.e'
     max_parallel = 1                      # -pc_type lu
+    requirement = 'We shall be able to calculate the free energy (with one variable) using an AuxKernel'
   [../]
   [./2var]
     type = 'Exodiff'
     input = 'TotalFreeEnergy_2var_test.i'
     exodiff = 'TotalFreeEnergy_2var_test_out.e-s004'
     fparser_jit = True
+    rel_err = 1e-5
+    requirement = 'We shall be able to calculate the free energy (with two variables) using an AuxKernel'
   [../]
 []
