@@ -1,6 +1,6 @@
 [Tests]
   design = 'jacobian_definitions.md'
-  issues = '#5658'
+  issues = '#5658 #12650'
   [./linear-hand-coded]
     type = 'Exodiff'
     input = 'linear-hand-coded.i'

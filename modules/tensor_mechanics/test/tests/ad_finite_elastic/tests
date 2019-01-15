@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#12650'
+  design = 'jacobian_definitions.md'
   [./finite_elastic-noad]
     type = 'Exodiff'
     input = 'finite_elastic.i'
