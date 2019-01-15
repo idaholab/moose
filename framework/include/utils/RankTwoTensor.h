@@ -453,6 +453,7 @@ public:
 private:
   static constexpr unsigned int N = LIBMESH_DIM;
   static constexpr unsigned int N2 = N * N;
+  static constexpr Real identityCoords[N2] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
   template <class T2>
   friend void dataStore(std::ostream &, RankTwoTensorTempl<T2> &, void *);
@@ -462,6 +463,9 @@ private:
   template <class T2>
   friend class RankFourTensorTempl;
   friend class RankThreeTensor;
+
+public:
+  void setToIdentity();
 };
 
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

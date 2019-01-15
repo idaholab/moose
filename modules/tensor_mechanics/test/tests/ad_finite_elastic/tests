@@ -1,8 +1,16 @@
 [Tests]
+  [./finite_elastic-noad]
+    type = 'Exodiff'
+    input = 'finite_elastic.i'
+    exodiff = 'finite_elastic_out.e'
+    requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation in the production stress divergence kernel'
+    allow_test_objects = true
+  [../]
   [./finite_elastic]
     type = 'Exodiff'
     input = 'finite_elastic.i'
     exodiff = 'finite_elastic_out.e'
+    prereq = 'finite_elastic-noad'
     requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation in the production stress divergence kernel'
     allow_test_objects = true
   [../]
@@ -11,8 +19,8 @@
     input = 'finite_elastic.i'
     run_sim = 'True'
     prereq = 'finite_elastic'
-#    ratio_tol = 1e-8
-#    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the hand-coded problem shall be perfect'
   [../]
 []

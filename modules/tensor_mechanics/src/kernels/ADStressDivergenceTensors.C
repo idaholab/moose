@@ -67,8 +67,7 @@ ADStressDivergenceTensors<compute_stage>::computeQpResidual()
 
   // volumetric locking correction
   if (_volumetric_locking_correction)
-    residual += (_avg_grad_test[_i] - _grad_test[_i][_qp](_component)) / 3.0 *
-                _stress[_qp].trace();
+    residual += (_avg_grad_test[_i] - _grad_test[_i][_qp](_component)) / 3.0 * _stress[_qp].trace();
 
   return residual;
 }

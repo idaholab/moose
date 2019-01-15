@@ -19,21 +19,21 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./stress_x]
-    type = ADStressDivergenceTensors
+    type = StressDivergenceTensors
     component = 0
     variable = disp_x
     # use_displaced_mesh = true
   [../]
   [./stress_y]
-    type = ADStressDivergenceTensors
+    type = StressDivergenceTensors
     component = 1
     variable = disp_y
     # use_displaced_mesh = true
   [../]
   [./stress_z]
-    type = ADStressDivergenceTensors
+    type = StressDivergenceTensors
     component = 2
     variable = disp_z
     # use_displaced_mesh = true
@@ -73,14 +73,11 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e10
   [../]
-[]
-
-[ADMaterials]
   [./strain]
-    type = ADComputeIncrementalSmallStrain
+    type = ComputeIncrementalSmallStrain
   [../]
   [./stress]
-    type = ADComputeFiniteStrainElasticStress
+    type = ComputeFiniteStrainElasticStress
   [../]
 []
 
@@ -105,4 +102,5 @@
 
 [Outputs]
   exodus = true
+  file_base = finite_elastic_out
 []

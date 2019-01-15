@@ -27,7 +27,7 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(
     _strain_increment(getMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _stress_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "elastic_strain"))
 {
 }

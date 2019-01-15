@@ -25,7 +25,7 @@ ADComputeFiniteStrainElasticStress<compute_stage>::ADComputeFiniteStrainElasticS
         adGetADMaterialPropertyByName<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(
         adGetADMaterialPropertyByName<RankTwoTensor>(_base_name + "rotation_increment")),
-    _stress_old(adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
+    _stress_old(adGetMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain_old(
         adGetMaterialPropertyOldByName<RankTwoTensor>(_base_name + "elastic_strain"))
 {

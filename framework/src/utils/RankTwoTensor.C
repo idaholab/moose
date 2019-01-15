@@ -1171,5 +1171,14 @@ RankTwoTensorTempl<T>::initialContraction(const RankFourTensorTempl<T> & b) cons
   return result;
 }
 
+template <typename T>
+void
+RankTwoTensorTempl<T>::setToIdentity()
+{
+  mooseAssert(N2 == 6, "RankTwoTensorTempl is currently only tested for 3 dimensions.");
+  for (unsigned int i = 0; i < N2; ++i)
+    this->_coords[i] = identityCoords[i];
+}
+
 template class RankTwoTensorTempl<Real>;
 template class RankTwoTensorTempl<ADReal>;

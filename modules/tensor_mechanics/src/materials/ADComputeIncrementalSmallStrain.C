@@ -66,6 +66,9 @@ ADComputeIncrementalSmallStrain<compute_stage>::computeProperties()
 
     // Update strain in intermediate configuration: rotations are not needed
     _mechanical_strain[_qp] = _strain_increment[_qp] + _mechanical_strain_old[_qp];
+
+    // incremental small strain does not include rotation
+    _rotation_increment[_qp].setToIdentity();
   }
 
   copyDualNumbersToValues();
