@@ -617,7 +617,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // will be cached by the MooseApp object so that it can be used
   // during FEProblemBase::initialSetup() during runInputFile()
   if (_app.isRestarting() || _app.isRecovering())
-    app->restore(_backups[i]);
+    app->setBackupObject(_backups[i]);
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);

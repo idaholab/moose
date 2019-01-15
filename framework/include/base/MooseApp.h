@@ -646,6 +646,15 @@ public:
    */
   const ExecFlagEnum & getExecuteOnEnum() const { return _execute_flags; }
 
+  /**
+   * Method for setting the backup object to be restored at a later time. This method is called
+   * during simulation restart or recover before the application is completely setup. The backup
+   * object set here, will be restored when needed by a call to restoreCachedBackup().
+   *
+   * @param backup The Backup holding the data for the app.
+   */
+  void setBackupObject(std::shared_ptr<Backup> backup);
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
