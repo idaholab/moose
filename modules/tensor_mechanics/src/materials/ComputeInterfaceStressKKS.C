@@ -58,14 +58,12 @@ ComputeInterfaceStressKKS::computeQpProperties()
   if (grad_norm_sq > libMesh::TOLERANCE)
     fsum += 0.5 * _kappa[_qp] * grad_norm_sq;
 
-
   S(0, 0) += fsum - _kappa[_qp] * nx * nx;
   S(0, 1) += -_kappa[_qp] * nx * ny;
   S(1, 1) += fsum - _kappa[_qp] * ny * ny;
   S(0, 2) += -_kappa[_qp] * nx * nz;
   S(1, 2) += -_kappa[_qp] * ny * nz;
   S(2, 2) += fsum - _kappa[_qp] * nz * nz;
-
 
   // fill in symmetrically
   S(1, 0) = S(0, 1);
