@@ -5,6 +5,14 @@
     exodiff = 'lid_driven_out.e'
     custom_cmp = 'lid_driven.cmp'
   [../]
+  [./ad_lid_driven]
+    type = 'Exodiff'
+    input = 'ad_lid_driven.i'
+    exodiff = 'lid_driven_out.e'
+    custom_cmp = 'lid_driven.cmp'
+    prereq = 'lid_driven'
+    cli_args = 'Outputs/file_base=lid_driven_out'
+  [../]
   [./lid_driven_stabilized]
     type = 'Exodiff'
     input = 'lid_driven_stabilized.i'
