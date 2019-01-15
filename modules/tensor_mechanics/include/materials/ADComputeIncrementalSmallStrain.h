@@ -30,8 +30,10 @@ public:
 protected:
   virtual void computeProperties() override;
 
-  /// Computes the current and old deformation gradients and passes back the
-  /// total strain increment tensor
+  /**
+   * Computes the current and old deformation gradients and passes back the
+   * total strain increment tensor.
+   */
   virtual void computeTotalStrainIncrement(
       typename RankTwoTensorType<compute_stage>::type & total_strain_increment);
 

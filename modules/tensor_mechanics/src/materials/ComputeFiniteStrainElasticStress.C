@@ -41,12 +41,6 @@ ComputeFiniteStrainElasticStress::initialSetup()
 }
 
 void
-ComputeFiniteStrainElasticStress::initQpStatefulProperties()
-{
-  ComputeStressBase::initQpStatefulProperties();
-}
-
-void
 ComputeFiniteStrainElasticStress::computeQpStress()
 {
   // Calculate the stress in the intermediate configuration

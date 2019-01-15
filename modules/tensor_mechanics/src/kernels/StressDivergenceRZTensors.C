@@ -21,11 +21,11 @@ validParams<StressDivergenceRZTensors>()
   InputParameters params = validParams<StressDivergenceTensors>();
   params.addClassDescription(
       "Calculate stress divergence for an axisymmetric problem in cylindrical coordinates.");
-  params.addRequiredParam<unsigned int>(
+  params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
+      "component < 2",
       "An integer corresponding to the direction the variable this kernel acts in. (0 "
-      "for x, 1 for y, 2 for z; note in this kernel x refers to the radial "
-      "displacement and y refers to the axial displacement.)");
+      "refers to the radial and 1 to the axial displacement.)");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }

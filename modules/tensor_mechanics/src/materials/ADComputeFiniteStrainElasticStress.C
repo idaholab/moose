@@ -43,13 +43,6 @@ ADComputeFiniteStrainElasticStress<compute_stage>::initialSetup()
 
 template <ComputeStage compute_stage>
 void
-ADComputeFiniteStrainElasticStress<compute_stage>::initQpStatefulProperties()
-{
-  ADComputeStressBase<compute_stage>::initQpStatefulProperties();
-}
-
-template <ComputeStage compute_stage>
-void
 ADComputeFiniteStrainElasticStress<compute_stage>::computeQpStress()
 {
   // Calculate the stress in the intermediate configuration

@@ -32,7 +32,6 @@ public:
   void initialSetup() override;
 
 protected:
-  virtual void initQpStatefulProperties() override;
   virtual void computeQpStress() override;
 
   const ADMaterialProperty(RankTwoTensor) & _strain_increment;
