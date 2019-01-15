@@ -143,19 +143,6 @@ StackGenerator::generate()
 Real
 StackGenerator::computeWidth(const MeshBase & mesh, const int & dim)
 {
-  std::set<subdomain_id_type> sub_ids;
-  mesh.subdomain_ids(sub_ids);
-  BoundingBox bbox(Point(std::numeric_limits<Real>::max(),
-                         std::numeric_limits<Real>::max(),
-                         std::numeric_limits<Real>::max()),
-                   Point(std::numeric_limits<Real>::lowest(),
-                         std::numeric_limits<Real>::lowest(),
-                         std::numeric_limits<Real>::lowest()));
-  for (auto id : sub_ids)
-  {
-    BoundingBox sub_bbox = MeshTools::create_subdomain_bounding_box(mesh, id);
-    bbox.union_with(sub_bbox);
-  }
-
+  BoundingBox bbox = MeshTools::create_bounding_box(mesh);
   return bbox.max()(dim - 1) - bbox.min()(dim - 1);
 }
