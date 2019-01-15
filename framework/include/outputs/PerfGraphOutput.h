@@ -25,15 +25,10 @@ InputParameters validParams<PerfGraphOutput>();
 class PerfGraphOutput : public Output
 {
 public:
-  /**
-   * Class constructor
-   */
   PerfGraphOutput(const InputParameters & parameters);
 
 protected:
-  /**
-   * Perform the output of control information
-   */
+  virtual bool shouldOutput(const ExecFlagType & type) override;
   virtual void output(const ExecFlagType & type) override;
 
   // Detail level

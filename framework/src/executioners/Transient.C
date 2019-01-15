@@ -22,6 +22,7 @@
 #include "MooseMesh.h"
 #include "AllLocalDofIndicesThread.h"
 #include "TimeIntegrator.h"
+#include "Console.h"
 
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -383,6 +384,7 @@ Transient::execute()
   {
     TIME_SECTION(_final_timer);
 
+    _problem.finalizeMultiApps();
     _problem.outputStep(EXEC_FINAL);
     _problem.execute(EXEC_FINAL);
   }
@@ -500,12 +502,14 @@ Transient::solveStep(Real input_dt)
 
   if (_picard_max_its > 1)
   {
-    _console << "\nBeginning Picard Iteration " << _picard_it << "\n" << std::endl;
+    _console << COLOR_MAGENTA << "Beginning Picard Iteration " << _picard_it << COLOR_DEFAULT
+             << '\n';
 
     if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
     {
       _picard_initial_norm = _problem.computeResidualL2Norm();
-      _console << "Initial Picard Norm: " << _picard_initial_norm << '\n';
+      _console << COLOR_MAGENTA << "Initial Picard Norm: " << COLOR_GREEN << _picard_initial_norm
+               << COLOR_DEFAULT << '\n';
     }
   }
 
@@ -529,8 +533,8 @@ Transient::solveStep(Real input_dt)
   {
     _picard_timestep_begin_norm = _problem.computeResidualL2Norm();
 
-    _console << "Picard Norm after TIMESTEP_BEGIN MultiApps: " << _picard_timestep_begin_norm
-             << '\n';
+    _console << COLOR_MAGENTA << "Picard Norm after TIMESTEP_BEGIN MultiApps: "
+             << Console::outputNorm(_picard_initial_norm, _picard_timestep_begin_norm) << '\n';
   }
 
   // Perform output for timestep begin
@@ -628,11 +632,12 @@ Transient::solveStep(Real input_dt)
   {
     _picard_timestep_end_norm = _problem.computeResidualL2Norm();
 
-    _console << "Picard Norm after TIMESTEP_END MultiApps: " << _picard_timestep_end_norm << '\n';
+    _console << COLOR_MAGENTA << "\nPicard Norm after TIMESTEP_END MultiApps: "
+             << Console::outputNorm(_picard_initial_norm, _picard_timestep_end_norm) << '\n';
 
     if (picardConverged())
     {
-      _console << "Picard converged!" << std::endl;
+      _console << COLOR_MAGENTA << "Picard converged!" << COLOR_DEFAULT << std::endl;
 
       _picard_converged = true;
       _time_stepper->acceptStep();

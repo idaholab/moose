@@ -54,12 +54,12 @@ public:
   /**
    * Create a new PerfGraph
    */
-  PerfGraph();
+  PerfGraph(const std::string & root_name);
 
   /**
    * Destructor
    */
-  ~PerfGraph();
+  ~PerfGraph() = default;
 
   /**
    * Registers a named section of code
@@ -237,6 +237,12 @@ protected:
    * @param console Where to print to
    */
   void printHeaviestSections(const ConsoleStream & console);
+
+  /// The name (handle) of the root node
+  static const std::string ROOT_NAME;
+
+  /// The name to display for the root of the graph when printing the entire graph
+  const std::string _root_name;
 
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;

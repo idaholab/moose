@@ -14,7 +14,7 @@
 
 TEST(PerfGraphTest, test)
 {
-  PerfGraph graph;
+  PerfGraph graph("Unit");
 
   auto a_id = graph.registerSection("a", 1);
   auto b_id = graph.registerSection("b", 1);

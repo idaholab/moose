@@ -921,6 +921,8 @@ public:
    */
   bool execMultiApps(ExecFlagType type, bool auto_advance = true);
 
+  void finalizeMultiApps();
+
   /**
    * Advance the MultiApps t_step (incrementStepOrReject) associated with the ExecFlagType
    */

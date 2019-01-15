@@ -61,6 +61,14 @@ public:
 
   virtual void preExecute() {}
 
+  /**
+   * Method called towards the end of the simulation to execute on final.
+   */
+  virtual void finalize();
+
+  /**
+   * Method called at the end of the simulation (after finalize)
+   */
   virtual void postExecute();
 
   /**

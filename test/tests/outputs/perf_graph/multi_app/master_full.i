@@ -12,12 +12,7 @@
 
 [Kernels]
   [./diff]
-    type = CoefDiffusion
-    variable = u
-    coef = 0.1
-  [../]
-  [./time]
-    type = TimeDerivative
+    type = Diffusion
     variable = u
   [../]
 []
@@ -37,21 +32,24 @@
   [../]
 []
 
-[Postprocessors]
-  [./elapsed]
-    type = PerfGraphData
-    section_name = "Root"
-    data_type = total
-  [../]
-[]
-
 [Executioner]
-  type = Transient
-  num_steps = 5
-  dt = 0.1
+  type = Steady
 
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+[]
+
+[Outputs]
+  perf_graph = true
+[]
+
+[MultiApps]
+  [./full_solve]
+    type = FullSolveMultiApp
+    execute_on = initial
+    positions = '0 0 0'
+    input_files = sub_full.i
+  [../]
 []

@@ -142,8 +142,9 @@
     mat_prop = prec_indic
   [../]
   [./active_time]           # Time computer spent on simulation
-    type = PerformanceData
-    event =  ACTIVE
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
   [../]
 []
 

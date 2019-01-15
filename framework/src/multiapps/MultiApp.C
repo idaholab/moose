@@ -344,10 +344,28 @@ MultiApp::getExecutioner(unsigned int app)
 }
 
 void
+MultiApp::finalize()
+{
+  for (const auto & app_ptr : _apps)
+  {
+    auto * executioner = app_ptr->getExecutioner();
+    mooseAssert(executioner, "Executioner is nullptr");
+
+    executioner->feProblem().execute(EXEC_FINAL);
+    executioner->feProblem().outputStep(EXEC_FINAL);
+  }
+}
+
+void
 MultiApp::postExecute()
 {
   for (const auto & app_ptr : _apps)
-    app_ptr->getExecutioner()->postExecute();
+  {
+    auto * executioner = app_ptr->getExecutioner();
+    mooseAssert(executioner, "Executioner is nullptr");
+
+    executioner->postExecute();
+  }
 }
 
 void
