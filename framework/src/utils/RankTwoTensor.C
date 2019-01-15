@@ -35,6 +35,9 @@
 #include <vector>
 #include <array>
 
+template <typename T>
+constexpr Real RankTwoTensorTempl<T>::identityCoords[];
+
 template <>
 void
 mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
@@ -1136,7 +1139,7 @@ template <typename T>
 void
 RankTwoTensorTempl<T>::setToIdentity()
 {
-  mooseAssert(N2 == 6, "RankTwoTensorTempl is currently only tested for 3 dimensions.");
+  mooseAssert(N2 == 9, "RankTwoTensorTempl is currently only tested for 3 dimensions.");
   for (unsigned int i = 0; i < N2; ++i)
     this->_coords[i] = identityCoords[i];
 }

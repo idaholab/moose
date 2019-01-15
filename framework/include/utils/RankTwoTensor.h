@@ -459,6 +459,9 @@ public:
   /// returns this_ij * b_ijkl
   RankTwoTensorTempl<T> initialContraction(const RankFourTensorTempl<T> & b) const;
 
+  /// set the tensor to the identity matrix
+  void setToIdentity();
+
 private:
   static constexpr unsigned int N = LIBMESH_DIM;
   static constexpr unsigned int N2 = N * N;
@@ -472,9 +475,6 @@ private:
   template <class T2>
   friend class RankFourTensorTempl;
   friend class RankThreeTensor;
-
-public:
-  void setToIdentity();
 };
 
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

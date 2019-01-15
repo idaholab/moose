@@ -182,12 +182,9 @@ void
 FiniteStrainHyperElasticViscoPlastic::initQpStatefulProperties()
 {
   _stress[_qp].zero();
-
-  _fp[_qp].zero();
-  _fp[_qp].addIa(1.0);
   _ce[_qp].zero();
-
   _pk2[_qp].zero();
+  _fp[_qp].setToIdentity();
 
   for (unsigned int i = 0; i < _num_flow_rate_uos; ++i)
     (*_flow_rate_prop[i])[_qp] = 0.0;
@@ -481,8 +478,7 @@ FiniteStrainHyperElasticViscoPlastic::computePK2StressAndDerivative()
 void
 FiniteStrainHyperElasticViscoPlastic::computeElasticStrain()
 {
-  RankTwoTensor iden;
-  iden.addIa(1.0);
+  RankTwoTensor iden(RankTwoTensor::initIdentity);
   _ee = 0.5 * (_ce[_qp] - iden);
 }
 
@@ -505,8 +501,7 @@ FiniteStrainHyperElasticViscoPlastic::computeElasticRightCauchyGreenTensor()
 void
 FiniteStrainHyperElasticViscoPlastic::computeElasticPlasticDeformGrad()
 {
-  RankTwoTensor iden;
-  iden.addIa(1.0);
+  RankTwoTensor iden(RankTwoTensor::initIdentity);
 
   RankTwoTensor val;
   for (unsigned int i = 0; i < _num_flow_rate_uos; ++i)
