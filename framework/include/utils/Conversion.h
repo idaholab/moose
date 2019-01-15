@@ -16,10 +16,13 @@
 // libMesh
 #include "libmesh/enum_order.h"
 #include "libmesh/enum_quadrature_type.h"
-#include "libmesh/point.h"
 
 // Forward declarations
 class MultiMooseEnum;
+namespace libMesh
+{
+class Point;
+}
 
 namespace Moose
 {

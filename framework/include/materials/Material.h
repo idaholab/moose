@@ -11,6 +11,7 @@
 #define MATERIAL_H
 
 // MOOOSE includes
+#include "MaterialProperty.h"
 #include "MooseObject.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
@@ -30,7 +31,6 @@
 #include "MeshChangedInterface.h"
 #include "OutputInterface.h"
 #include "RandomInterface.h"
-#include "MaterialProperty.h"
 
 // forward declarations
 class Material;

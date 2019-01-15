@@ -50,6 +50,7 @@ validParams<KernelBase>()
                         "are provided in the Mesh block the "
                         "undisplaced mesh will still be used.");
   params.addParamNamesToGroup(" diag_save_in save_in use_displaced_mesh", "Advanced");
+  params.addCoupledVar("displacements", "The displacements");
 
   params.declareControllable("enable");
   return params;
@@ -91,6 +92,9 @@ KernelBase::KernelBase(const InputParameters & parameters)
     _has_diag_save_in(false),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
+  auto num_disp = coupledComponents("displacements");
+  for (decltype(num_disp) i = 0; i < num_disp; ++i)
+    _displacements.push_back(coupled("displacements", i));
 }
 
 KernelBase::~KernelBase() {}

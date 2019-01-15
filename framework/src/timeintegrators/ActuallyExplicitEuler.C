@@ -120,6 +120,14 @@ ActuallyExplicitEuler::computeTimeDerivatives()
 }
 
 void
+ActuallyExplicitEuler::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  const auto & local_old = _solution_old(dof);
+  ad_u_dot -= local_old;
+  ad_u_dot *= 1. / _dt;
+}
+
+void
 ActuallyExplicitEuler::solve()
 {
   auto & es = _fe_problem.es();

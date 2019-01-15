@@ -71,6 +71,23 @@ ExplicitTVDRK2::computeTimeDerivatives()
 }
 
 void
+ExplicitTVDRK2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  if (_stage < 3)
+  {
+    ad_u_dot -= _solution_old(dof);
+    ad_u_dot *= 1. / _dt;
+  }
+  else
+  {
+    ad_u_dot *= 2.;
+    ad_u_dot -= _solution_old(dof);
+    ad_u_dot -= _solution_older(dof);
+    ad_u_dot *= 0.5 / _dt;
+  }
+}
+
+void
 ExplicitTVDRK2::solve()
 {
   Real time_new = _fe_problem.time();

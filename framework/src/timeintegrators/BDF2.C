@@ -70,6 +70,24 @@ BDF2::computeTimeDerivatives()
 }
 
 void
+BDF2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  if (_t_step == 1)
+  {
+    const auto & local_old = _solution_old(dof);
+    ad_u_dot -= local_old;
+    ad_u_dot *= 1 / _dt;
+  }
+  else
+  {
+    ad_u_dot *= _weight[0];
+    ad_u_dot += _weight[1] * _solution_old(dof);
+    ad_u_dot += _weight[2] * _solution_older(dof);
+    ad_u_dot *= 1. / _dt;
+  }
+}
+
+void
 BDF2::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;

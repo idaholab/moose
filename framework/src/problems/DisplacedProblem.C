@@ -8,9 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "DisplacedProblem.h"
 
-#include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
@@ -20,6 +18,8 @@
 #include "ResetDisplacedMeshThread.h"
 #include "SubProblem.h"
 #include "UpdateDisplacedMeshThread.h"
+#include "Assembly.h"
+#include "DisplacedProblem.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -63,6 +63,8 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   _assembly.reserve(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
     _assembly.emplace_back(libmesh_make_unique<Assembly>(_displaced_nl, i));
+
+  _displaced_nl.addTimeIntegrator(_mproblem.getNonlinearSystemBase().getSharedTimeIntegrator());
 }
 
 bool
@@ -97,7 +99,17 @@ void
 DisplacedProblem::init()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
     _assembly[tid]->init(_mproblem.couplingMatrix());
+    std::vector<unsigned> disp_numbers;
+    for (const auto & disp_string : _displacements)
+    {
+      const auto & disp_variable = getVariable(tid, disp_string);
+      if (disp_variable.kind() == Moose::VarKindType::VAR_NONLINEAR)
+        disp_numbers.push_back(disp_variable.number());
+    }
+    _assembly[tid]->assignDisplacements(std::move(disp_numbers));
+  }
 
   _displaced_nl.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_nl);
   _displaced_aux.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_aux);

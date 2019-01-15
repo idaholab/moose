@@ -10,6 +10,7 @@
 #include "MortarPeriodicMesh.h"
 
 #include "libmesh/mesh_modification.h"
+#include "libmesh/elem.h"
 
 registerMooseObject("PhaseFieldApp", MortarPeriodicMesh);
 

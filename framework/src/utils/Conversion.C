@@ -14,6 +14,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/string_to_enum.h"
+#include "libmesh/point.h"
 
 // system includes
 #include <iomanip>

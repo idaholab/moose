@@ -63,6 +63,17 @@ ExplicitRK2::computeTimeDerivatives()
 }
 
 void
+ExplicitRK2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  if (_stage < 3)
+    ad_u_dot -= _solution_old(dof);
+  else
+    ad_u_dot -= _solution_older(dof);
+
+  ad_u_dot *= 1. / _dt;
+}
+
+void
 ExplicitRK2::solve()
 {
   Real time_new = _fe_problem.time();

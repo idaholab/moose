@@ -102,7 +102,6 @@ protected:
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
-  virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian() { return 0; }
   /**
    * This is the virtual that derived classes should override for computing an off-diagonal jacobian

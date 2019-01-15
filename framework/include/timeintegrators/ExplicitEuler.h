@@ -28,6 +28,7 @@ public:
   virtual void preSolve() override;
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
+  virtual void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:

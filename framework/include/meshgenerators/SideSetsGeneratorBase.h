@@ -12,8 +12,6 @@
 
 #include "MeshGenerator.h"
 
-#include "libmesh/fe_base.h"
-
 // Forward declarations
 class SideSetsGeneratorBase;
 
@@ -21,6 +19,10 @@ class SideSetsGeneratorBase;
 namespace libMesh
 {
 class QGauss;
+class Elem;
+template <typename>
+class FEGenericBase;
+typedef FEGenericBase<Real> FEBase;
 }
 
 template <>

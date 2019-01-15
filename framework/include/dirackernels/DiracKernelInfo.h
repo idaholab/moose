@@ -12,9 +12,6 @@
 
 #include "Moose.h"
 
-// libMesh
-#include "libmesh/point.h"
-
 #include <set>
 #include <map>
 #include <memory>
@@ -26,6 +23,7 @@ namespace libMesh
 {
 class Elem;
 class PointLocatorBase;
+class Point;
 }
 
 /**

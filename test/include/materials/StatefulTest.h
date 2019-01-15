@@ -31,7 +31,7 @@ protected:
   virtual void computeQpProperties();
 
   // optional coupled variable
-  const VariableValue * _coupled_val;
+  const Real * _coupled_val;
 
   std::vector<std::string> _prop_names;
   std::vector<Real> _prop_values;

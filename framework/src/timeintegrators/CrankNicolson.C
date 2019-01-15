@@ -44,6 +44,13 @@ CrankNicolson::computeTimeDerivatives()
 }
 
 void
+CrankNicolson::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  ad_u_dot -= _solution_old(dof);
+  ad_u_dot *= 2. / _dt;
+}
+
+void
 CrankNicolson::init()
 {
   if (!_sys.solutionUDot())

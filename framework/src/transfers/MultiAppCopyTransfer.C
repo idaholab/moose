@@ -7,16 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppCopyTransfer.h"
-
 // MOOSE includes
-#include "DisplacedProblem.h"
 #include "FEProblem.h"
-#include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 #include "MultiApp.h"
 #include "NonlinearSystem.h"
+#include "MultiAppCopyTransfer.h"
+#include "DisplacedProblem.h"
+#include "MooseMesh.h"
 
 #include "libmesh/system.h"
 #include "libmesh/id_types.h"

@@ -17,6 +17,13 @@
 #include <map>
 #include <set>
 
+namespace libMesh
+{
+template <typename>
+class VectorValue;
+typedef VectorValue<Real> RealVectorValue;
+}
+
 class MooseVariableBase;
 class MooseVariableFEBase;
 template <typename>

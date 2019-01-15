@@ -9,6 +9,8 @@
 
 #include "StripeMesh.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseTestApp", StripeMesh);
 
 template <>

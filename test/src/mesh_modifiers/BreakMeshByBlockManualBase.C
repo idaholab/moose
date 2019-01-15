@@ -10,6 +10,9 @@
 #include "BreakMeshByBlockManualBase.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+
 template <>
 InputParameters
 validParams<BreakMeshByBlockManualBase>()

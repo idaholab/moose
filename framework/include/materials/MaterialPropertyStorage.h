@@ -11,13 +11,13 @@
 #define MATERIALPROPERTYSTORAGE_H
 
 #include "Moose.h"
-#include "MaterialProperty.h"
 #include "HashMap.h"
 
 // Forward declarations
 class Material;
 class MaterialData;
 class QpMap;
+class MaterialProperties;
 
 // libMesh forward declarations
 namespace libMesh

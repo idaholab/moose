@@ -1,0 +1,39 @@
+[Tests]
+  [./test_smp]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+    expect_out = "0 of 11"
+  [../]
+  [./test_fd_coloring]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+    prereq = 'test_smp'
+    expect_out = "0 of 11"
+    cli_args = "Preconditioning/pre/type=FDP"
+    allow_warnings = True
+  [../]
+  [./test_fd_standard]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+    prereq = 'test_fd_coloring'
+    expect_out = "0 of 11"
+    cli_args = "Preconditioning/pre/type=FDP Preconditioning/pre/finite_difference_type=standard"
+    allow_warnings = True
+  [../]
+  [./test_mf]
+    type = 'Exodiff'
+    input = 'simple_diffusion.i'
+    exodiff = 'simple_diffusion_out.e'
+    prereq = 'test_fd_standard'
+    cli_args = "-snes_mf_operator -pc_type asm"
+  [../]
+  [./test_smp_jacobian]
+    type = PetscJacobianTester
+    input = 'simple_diffusion.i'
+    run_sim = True
+    cli_args = 'Outputs/exodus=false -snes_test_jacobian_view'
+  [../]
+[]

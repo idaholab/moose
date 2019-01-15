@@ -46,6 +46,11 @@ public:
   void computeJacobianBlockScalar(unsigned int jvar) override;
 
 protected:
+  /**
+   * method for computing the residual at quadrature points
+   */
+  virtual Real computeQpResidual() = 0;
+
   MooseVariable & _var;
 
   /// normals at quadrature points

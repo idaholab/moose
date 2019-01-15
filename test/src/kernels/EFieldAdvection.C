@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 #include "EFieldAdvection.h"
+#include "Assembly.h"
 
 registerMooseObject("MooseTestApp", EFieldAdvection);
 

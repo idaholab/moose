@@ -15,79 +15,94 @@
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
 
-#define usingKernelMembers                                                                         \
+#define usingTemplKernelMembers(type)                                                              \
   usingCoupleableMembers;                                                                          \
-  using ADKernel<compute_stage>::_test;                                                            \
-  using ADKernel<compute_stage>::_qp;                                                              \
-  using ADKernel<compute_stage>::_q_point;                                                         \
-  using ADKernel<compute_stage>::_i;                                                               \
-  using ADKernel<compute_stage>::_j;                                                               \
-  using ADKernel<compute_stage>::_u;                                                               \
-  using ADKernel<compute_stage>::_var;                                                             \
-  using ADKernel<compute_stage>::_grad_test;                                                       \
-  using ADKernel<compute_stage>::_grad_u;                                                          \
-  using ADKernel<compute_stage>::_JxW;                                                             \
-  using ADKernel<compute_stage>::_coord;                                                           \
-  using ADKernel<compute_stage>::_local_re;                                                        \
-  using ADKernel<compute_stage>::_local_ke;                                                        \
-  using ADKernel<compute_stage>::_qrule;                                                           \
-  using ADKernel<compute_stage>::_has_save_in;                                                     \
-  using ADKernel<compute_stage>::_save_in;                                                         \
-  using ADKernel<compute_stage>::_has_diag_save_in;                                                \
-  using ADKernel<compute_stage>::_diag_save_in;                                                    \
-  using ADKernel<compute_stage>::_current_elem_volume;                                             \
-  using ADKernel<compute_stage>::_sys;                                                             \
-  using ADKernel<compute_stage>::_assembly;                                                        \
-  using ADKernel<compute_stage>::getBlockCoordSystem;                                              \
-  using ADKernel<compute_stage>::precalculateResidual;                                             \
-  using ADKernel<compute_stage>::prepareVectorTag;                                                 \
-  using ADKernel<compute_stage>::prepareMatrixTag;                                                 \
-  using ADKernel<compute_stage>::accumulateTaggedLocalResidual;                                    \
-  using ADKernel<compute_stage>::accumulateTaggedLocalMatrix;                                      \
-  using ADKernel<compute_stage>::variable;                                                         \
-  using ADKernel<compute_stage>::paramError;                                                       \
-  using ADKernel<compute_stage>::isParamValid
+  using ADKernelTempl<type, compute_stage>::_test;                                                 \
+  using ADKernelTempl<type, compute_stage>::_qp;                                                   \
+  using ADKernelTempl<type, compute_stage>::_q_point;                                              \
+  using ADKernelTempl<type, compute_stage>::_i;                                                    \
+  using ADKernelTempl<type, compute_stage>::_j;                                                    \
+  using ADKernelTempl<type, compute_stage>::_u;                                                    \
+  using ADKernelTempl<type, compute_stage>::_var;                                                  \
+  using ADKernelTempl<type, compute_stage>::_grad_test;                                            \
+  using ADKernelTempl<type, compute_stage>::_grad_u;                                               \
+  using ADKernelTempl<type, compute_stage>::_JxW;                                                  \
+  using ADKernelTempl<type, compute_stage>::_coord;                                                \
+  using ADKernelTempl<type, compute_stage>::_local_re;                                             \
+  using ADKernelTempl<type, compute_stage>::_local_ke;                                             \
+  using ADKernelTempl<type, compute_stage>::_qrule;                                                \
+  using ADKernelTempl<type, compute_stage>::_has_save_in;                                          \
+  using ADKernelTempl<type, compute_stage>::_save_in;                                              \
+  using ADKernelTempl<type, compute_stage>::_has_diag_save_in;                                     \
+  using ADKernelTempl<type, compute_stage>::_diag_save_in;                                         \
+  using ADKernelTempl<type, compute_stage>::_current_elem_volume;                                  \
+  using ADKernelTempl<type, compute_stage>::_sys;                                                  \
+  using ADKernelTempl<type, compute_stage>::_assembly;                                             \
+  using ADKernelTempl<type, compute_stage>::_current_elem;                                         \
+  using ADKernelTempl<type, compute_stage>::getBlockCoordSystem;                                   \
+  using ADKernelTempl<type, compute_stage>::precalculateResidual;                                  \
+  using ADKernelTempl<type, compute_stage>::prepareVectorTag;                                      \
+  using ADKernelTempl<type, compute_stage>::prepareMatrixTag;                                      \
+  using ADKernelTempl<type, compute_stage>::accumulateTaggedLocalResidual;                         \
+  using ADKernelTempl<type, compute_stage>::accumulateTaggedLocalMatrix;                           \
+  using ADKernelTempl<type, compute_stage>::variable;                                              \
+  using ADKernelTempl<type, compute_stage>::paramError;                                            \
+  using ADKernelTempl<type, compute_stage>::isParamValid;                                          \
+  using ADKernelTempl<type, compute_stage>::getFunction
+
+#define usingKernelMembers usingTemplKernelMembers(Real)
+#define usingVectorKernelMembers usingTemplKernelMembers(RealVectorValue)
 
 // forward declarations
-template <ComputeStage>
-class ADKernel;
-
-declareADValidParams(ADKernel);
+template <typename, ComputeStage>
+class ADKernelTempl;
 
 template <ComputeStage compute_stage>
-class ADKernel : public KernelBase, public MooseVariableInterface<Real>
+using ADKernel = ADKernelTempl<Real, compute_stage>;
+template <ComputeStage compute_stage>
+using ADVectorKernel = ADKernelTempl<RealVectorValue, compute_stage>;
+
+declareADValidParams(ADKernel);
+declareADValidParams(ADVectorKernel);
+
+template <typename T, ComputeStage compute_stage>
+class ADKernelTempl : public KernelBase, public MooseVariableInterface<T>
 {
 public:
-  ADKernel(const InputParameters & parameters);
+  ADKernelTempl(const InputParameters & parameters);
 
-  virtual ~ADKernel();
+  virtual ~ADKernelTempl();
 
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeADOffDiagJacobian() override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-  virtual MooseVariable & variable() override { return _var; }
+  virtual MooseVariableFE<T> & variable() override { return _var; }
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADResidual computeQpResidual() = 0;
 
   /// This is a regular kernel so we cast to a regular MooseVariable
-  MooseVariable & _var;
+  MooseVariableFE<T> & _var;
 
   /// the current test function
-  const ADVariableTestValue & _test;
+  const ADTemplateVariableTestValue & _test;
 
   /// gradient of the test function
-  const ADVariableTestGradient & _grad_test;
+  const typename VariableTestGradientType<compute_stage, T>::type & _grad_test;
 
   /// Holds the solution at current quadrature points
-  const ADVariableValue & _u;
+  const ADTemplateVariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
-  const ADVariableGradient & _grad_u;
+  const ADTemplateVariableGradient & _grad_u;
+
+  /// The ad version of JxW
+  const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW;
 };
 
 #endif /* ADKERNEL_H */

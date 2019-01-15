@@ -42,6 +42,13 @@ ImplicitEuler::computeTimeDerivatives()
 }
 
 void
+ImplicitEuler::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  ad_u_dot -= _solution_old(dof);
+  ad_u_dot *= 1 / _dt;
+}
+
+void
 ImplicitEuler::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;

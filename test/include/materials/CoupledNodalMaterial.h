@@ -31,7 +31,7 @@ protected:
   /// The time level of the coupled variable
   MooseEnum _lag;
   /// Values of the coupled variable
-  const VariableValue & _coupled_val;
+  const Real & _coupled_val;
 };
 
 #endif // COUPLEDNODALMATERIAL_H

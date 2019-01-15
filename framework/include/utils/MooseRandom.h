@@ -84,7 +84,7 @@ public:
    */
   inline double rand(std::size_t i)
   {
-    mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
+    // mooseAssert(_states.find(i) != _states.end(), "No random state initialized for id: " << i);
     return mts_ldrand(&(_states[i].first));
   }
 

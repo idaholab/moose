@@ -14,6 +14,8 @@
 
 #include "FunctionalBasisInterface.h"
 
+#include "libmesh/point.h"
+
 class SingleSeriesBasisInterface;
 
 /**

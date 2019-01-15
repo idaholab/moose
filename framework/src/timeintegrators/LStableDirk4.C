@@ -66,6 +66,13 @@ LStableDirk4::computeTimeDerivatives()
 }
 
 void
+LStableDirk4::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  ad_u_dot -= _solution_old(dof);
+  ad_u_dot *= 1. / _dt;
+}
+
+void
 LStableDirk4::solve()
 {
   // Time at end of step

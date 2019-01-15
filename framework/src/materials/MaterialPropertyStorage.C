@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MaterialPropertyStorage.h"
+#include "MaterialProperty.h"
 #include "Material.h"
 #include "MaterialData.h"
 #include "MooseMesh.h"

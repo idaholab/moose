@@ -107,12 +107,18 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_kernel",                   VectorKernel);
 
   registerMooseObjectTask("add_ad_kernel",                ADKernel,               false);
+  appendMooseObjectTask  ("add_ad_kernel",                ADVectorKernel);
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
   registerMooseObjectTask("add_material",                 Material,               false);
   registerMooseObjectTask("add_ad_material",              ADMaterial,             false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
+  registerMooseObjectTask("add_ad_bc",                    ADIntegratedBC,         false);
+  appendMooseObjectTask  ("add_ad_bc",                    ADVectorIntegratedBC);
+  appendMooseObjectTask  ("add_ad_bc",                    ADNodalBC);
+  appendMooseObjectTask  ("add_ad_bc",                    ADVectorNodalBC);
+
   registerMooseObjectTask("add_function",                 Function,               false);
   registerMooseObjectTask("add_distribution",             Distribution,           false);
   registerMooseObjectTask("add_sampler",                  Sampler,                false);
@@ -228,75 +234,76 @@ addActionTypes(Syntax & syntax)
    * Additional dependencies can be inserted later inside of user applications with calls to
    * ActionWarehouse::addDependency("task", "pre_req")
    */
-  syntax.addDependencySets("(meta_action)"
-                           "(dynamic_object_registration)"
-                           "(common_output)"
-                           "(set_global_params)"
-                           "(setup_recover_file_base)"
-                           "(setup_mesh)"
-                           "(add_mesh_generator)"
-                           "(execute_mesh_generators)"
-                           "(set_mesh_base)"
-                           "(check_copy_nodal_vars)"
-                           "(add_partitioner)"
-                           "(add_geometric_rm)"
-                           "(init_mesh)"
-                           "(prepare_mesh)"
-                           "(add_mesh_modifier)"
-                           "(execute_mesh_modifiers)"
-                           "(add_mortar_interface)"
-                           "(uniform_refine_mesh)"
-                           "(setup_mesh_complete)"
-                           "(determine_system_type)"
-                           "(create_problem)"
-                           "(create_problem_custom)"
-                           "(create_problem_default)"
-                           "(create_problem_complete)"
-                           "(setup_postprocessor_data)"
-                           "(setup_time_integrator)"
-                           "(setup_executioner)"
-                           "(check_integrity_early)"
-                           "(setup_predictor)"
-                           "(init_displaced_problem)"
-                           "(add_aux_variable, add_variable, add_elemental_field_variable,"
-                           " add_external_aux_variables)"
-                           "(setup_variable_complete)"
-                           "(setup_quadrature)"
-                           "(add_function)"
-                           "(add_distribution)"
-                           "(add_sampler)"
-                           "(add_periodic_bc)"
-                           "(add_user_object)"
-                           "(setup_function_complete)"
-                           "(setup_adaptivity)"
-                           "(set_adaptivity_options)"
-                           "(add_ic)"
-                           "(add_constraint, add_field_split)"
-                           "(add_preconditioning)"
-                           "(setup_time_stepper)"
-                           "(ready_to_init)"
-                           "(setup_dampers)"
-                           "(setup_residual_debug)"
-                           "(add_bounds_vectors)"
-                           "(add_multi_app)"
-                           "(add_transfer)"
-                           "(copy_nodal_vars, copy_nodal_aux_vars)"
-                           "(add_material, add_ad_material)"
-                           "(setup_material_output)" // DEPRECATED: Remove by 12/31/2018
-                           "(add_output_aux_variables)"
-                           "(add_algebraic_rm)"
-                           "(init_problem)"
-                           "(setup_debug)" // DEPRECATED: Remove by 12/31/2018
-                           "(add_output)"
-                           "(add_postprocessor)"
-                           "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
-                                                        // to be after material objects are created.
-                           "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
-                           " add_ad_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel,"
-                           " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
-                           "(add_control)"
-                           "(check_output)"
-                           "(check_integrity)");
+  syntax.addDependencySets(
+      "(meta_action)"
+      "(dynamic_object_registration)"
+      "(common_output)"
+      "(set_global_params)"
+      "(setup_recover_file_base)"
+      "(setup_mesh)"
+      "(add_mesh_generator)"
+      "(execute_mesh_generators)"
+      "(set_mesh_base)"
+      "(check_copy_nodal_vars)"
+      "(add_partitioner)"
+      "(add_geometric_rm)"
+      "(init_mesh)"
+      "(prepare_mesh)"
+      "(add_mesh_modifier)"
+      "(execute_mesh_modifiers)"
+      "(add_mortar_interface)"
+      "(uniform_refine_mesh)"
+      "(setup_mesh_complete)"
+      "(determine_system_type)"
+      "(create_problem)"
+      "(create_problem_custom)"
+      "(create_problem_default)"
+      "(create_problem_complete)"
+      "(setup_postprocessor_data)"
+      "(setup_time_integrator)"
+      "(setup_executioner)"
+      "(check_integrity_early)"
+      "(setup_predictor)"
+      "(init_displaced_problem)"
+      "(add_aux_variable, add_variable, add_elemental_field_variable,"
+      " add_external_aux_variables)"
+      "(setup_variable_complete)"
+      "(setup_quadrature)"
+      "(add_function)"
+      "(add_distribution)"
+      "(add_sampler)"
+      "(add_periodic_bc)"
+      "(add_user_object)"
+      "(setup_function_complete)"
+      "(setup_adaptivity)"
+      "(set_adaptivity_options)"
+      "(add_ic)"
+      "(add_constraint, add_field_split)"
+      "(add_preconditioning)"
+      "(setup_time_stepper)"
+      "(ready_to_init)"
+      "(setup_dampers)"
+      "(setup_residual_debug)"
+      "(add_bounds_vectors)"
+      "(add_multi_app)"
+      "(add_transfer)"
+      "(copy_nodal_vars, copy_nodal_aux_vars)"
+      "(add_material, add_ad_material)"
+      "(setup_material_output)" // DEPRECATED: Remove by 12/31/2018
+      "(add_output_aux_variables)"
+      "(add_algebraic_rm)"
+      "(init_problem)"
+      "(setup_debug)" // DEPRECATED: Remove by 12/31/2018
+      "(add_output)"
+      "(add_postprocessor)"
+      "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
+                                   // to be after material objects are created.
+      "(add_aux_kernel, add_bc, add_ad_bc, add_damper, add_dirac_kernel, add_kernel,"
+      " add_ad_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel,"
+      " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+      "(add_control)"
+      "(check_output)"
+      "(check_integrity)");
 }
 
 /**
@@ -388,6 +395,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
   registerSyntaxTask("AddBCAction", "BCs/*", "add_bc");
+  registerSyntaxTask("AddADBCAction", "ADBCs/*", "add_ad_bc");
 
   registerSyntax("CreateProblemAction", "Problem");
   registerSyntax("DynamicObjectRegistrationAction", "Problem");

@@ -19,6 +19,8 @@
 #include "AppFactory.h"
 #include "Registry.h"
 
+#include "libmesh/vector_value.h"
+
 // C++ includes
 #include <algorithm>
 #include <cctype>

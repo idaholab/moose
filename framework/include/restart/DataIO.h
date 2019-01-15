@@ -11,22 +11,19 @@
 #define DATAIO_H
 
 // MOOSE includes
+#include "DualReal.h"
 #include "MooseTypes.h"
-#include "MooseADWrapper.h"
 #include "HashMap.h"
 #include "MooseError.h"
 #include "Backup.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "MooseADWrapper.h"
 
-#include "libmesh/vector_value.h"
-#include "libmesh/tensor_value.h"
 #include "libmesh/parallel.h"
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>
 #endif
-#include "metaphysicl/numberarray.h"
-#include "metaphysicl/dualnumber.h"
 
 // C++ includes
 #include <string>
@@ -41,6 +38,7 @@
 template <typename>
 class ColumnMajorMatrixTempl;
 typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
+
 namespace libMesh
 {
 template <typename T>
@@ -49,7 +47,12 @@ template <typename T>
 class DenseMatrix;
 template <typename T>
 class DenseVector;
+template <typename T>
+class VectorValue;
+template <typename T>
+class TensorValue;
 class Elem;
+class Point;
 }
 
 /**
@@ -162,7 +165,7 @@ dataStore(std::ostream & stream, T & v, void * /*context*/)
                 "Cannot serialize a class that has virtual "
                 "members!\nWrite a custom dataStore() "
                 "template specialization!\n\n");
-  static_assert(std::is_trivially_copyable<T>::value || std::is_same<T, Point>::value,
+  static_assert(std::is_trivially_copyable<T>::value,
                 "Cannot serialize a class that is not trivially copyable!\nWrite a custom "
                 "dataStore() template specialization!\n\n");
 #endif
@@ -179,6 +182,8 @@ dataStore(std::ostream & /*stream*/, T *& /*v*/, void * /*context*/)
              demangle(typeid(T).name()),
              " *\" as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
 }
+
+void dataStore(std::ostream & stream, Point & p, void * context);
 
 template <typename T, typename U>
 inline void
@@ -336,14 +341,8 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template <>
 void dataStore(std::ostream & stream, std::stringstream *& s, void * context);
-
-inline void
-dataStore(std::ostream & stream, DualReal & dn, void * context)
-{
-  dataStore(stream, dn.value(), context);
-  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
-    dataStore(stream, dn.derivatives()[i], context);
-}
+template <>
+void dataStore(std::ostream & stream, DualReal & dn, void * context);
 
 template <std::size_t N>
 inline void
@@ -385,29 +384,10 @@ template <>
 void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * context);
 
 template <typename T>
-void
-dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
-{
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
-    {
-      T r = v(i, j);
-      dataStore(stream, r, context);
-    }
-}
+void dataStore(std::ostream & stream, TensorValue<T> & v, void * context);
 
 template <typename T>
-void
-dataStore(std::ostream & stream, VectorValue<T> & v, void * context)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
-  // won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-  {
-    T r = v(i);
-    dataStore(stream, r, context);
-  }
-}
+void dataStore(std::ostream & stream, VectorValue<T> & v, void * context);
 
 template <typename T>
 void
@@ -608,15 +588,8 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 template <>
 void dataLoad(std::istream & stream, std::stringstream *& s, void * context);
-
-inline void
-dataLoad(std::istream & stream, DualReal & dn, void * context)
-{
-  dataLoad(stream, dn.value(), context);
-
-  for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
-    dataLoad(stream, dn.derivatives()[i], context);
-}
+template <>
+void dataLoad(std::istream & stream, DualReal & dn, void * context);
 
 template <typename T>
 void
@@ -651,33 +624,10 @@ template <>
 void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * context);
 
 template <typename T>
-void
-dataLoad(std::istream & stream, TensorValue<T> & v, void * context)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
-  // won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    for (unsigned int j = 0; i < LIBMESH_DIM; i++)
-    {
-      T r = 0;
-      dataLoad(stream, r, context);
-      v(i, j) = r;
-    }
-}
+void dataLoad(std::istream & stream, TensorValue<T> & v, void * context);
 
 template <typename T>
-void
-dataLoad(std::istream & stream, VectorValue<T> & v, void * context)
-{
-  // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
-  // won't work.
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-  {
-    T r = 0;
-    dataLoad(stream, r, context);
-    v(i) = r;
-  }
-}
+void dataLoad(std::istream & stream, VectorValue<T> & v, void * context);
 
 template <typename T>
 void
@@ -855,6 +805,8 @@ dataLoad(std::istream & stream, Backup *& backup, void * context)
   for (unsigned int i = 0; i < backup->_restartable_data.size(); i++)
     dataLoad(stream, backup->_restartable_data[i], context);
 }
+
+void dataLoad(std::istream & stream, Point & p, void * context);
 
 /**
  * The following methods are specializations for using the libMesh::Parallel::packed_range_*

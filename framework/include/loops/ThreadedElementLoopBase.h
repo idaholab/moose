@@ -14,6 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseException.h"
+#include "libmesh/libmesh_exceptions.h"
 
 /**
  * Base class for assembly-like calculations.
@@ -172,66 +173,73 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
 {
   try
   {
-    ParallelUniqueId puid;
-    _tid = bypass_threading ? 0 : puid.id;
-
-    pre();
-
-    _subdomain = Moose::INVALID_BLOCK_ID;
-    _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
-    typename RangeType::const_iterator el = range.begin();
-    for (el = range.begin(); el != range.end(); ++el)
+    try
     {
-      if (!keepGoing())
-        break;
+      ParallelUniqueId puid;
+      _tid = bypass_threading ? 0 : puid.id;
 
-      const Elem * elem = *el;
+      pre();
 
-      preElement(elem);
-
-      _old_subdomain = _subdomain;
-      _subdomain = elem->subdomain_id();
-      if (_subdomain != _old_subdomain)
-        subdomainChanged();
-
-      onElement(elem);
-
-      for (unsigned int side = 0; side < elem->n_sides(); side++)
+      _subdomain = Moose::INVALID_BLOCK_ID;
+      _neighbor_subdomain = Moose::INVALID_BLOCK_ID;
+      typename RangeType::const_iterator el = range.begin();
+      for (el = range.begin(); el != range.end(); ++el)
       {
-        std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
+        if (!keepGoing())
+          break;
 
-        if (boundary_ids.size() > 0)
-          for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
-               it != boundary_ids.end();
-               ++it)
-            onBoundary(elem, side, *it);
+        const Elem * elem = *el;
 
-        const Elem * neighbor = elem->neighbor_ptr(side);
-        if (neighbor != nullptr)
+        preElement(elem);
+
+        _old_subdomain = _subdomain;
+        _subdomain = elem->subdomain_id();
+        if (_subdomain != _old_subdomain)
+          subdomainChanged();
+
+        onElement(elem);
+
+        for (unsigned int side = 0; side < elem->n_sides(); side++)
         {
-          preInternalSide(elem, side);
-
-          _old_neighbor_subdomain = _neighbor_subdomain;
-          _neighbor_subdomain = neighbor->subdomain_id();
-          if (_neighbor_subdomain != _old_neighbor_subdomain)
-            neighborSubdomainChanged();
-
-          onInternalSide(elem, side);
+          std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
 
           if (boundary_ids.size() > 0)
             for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
                  it != boundary_ids.end();
                  ++it)
-              onInterface(elem, side, *it);
+              onBoundary(elem, side, *it);
 
-          postInternalSide(elem, side);
-        }
-      } // sides
-      postElement(elem);
+          const Elem * neighbor = elem->neighbor_ptr(side);
+          if (neighbor != nullptr)
+          {
+            preInternalSide(elem, side);
 
-    } // range
+            _old_neighbor_subdomain = _neighbor_subdomain;
+            _neighbor_subdomain = neighbor->subdomain_id();
+            if (_neighbor_subdomain != _old_neighbor_subdomain)
+              neighborSubdomainChanged();
 
-    post();
+            onInternalSide(elem, side);
+
+            if (boundary_ids.size() > 0)
+              for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
+                   it != boundary_ids.end();
+                   ++it)
+                onInterface(elem, side, *it);
+
+            postInternalSide(elem, side);
+          }
+        } // sides
+        postElement(elem);
+
+      } // range
+
+      post();
+    }
+    catch (libMesh::LogicError & e)
+    {
+      throw MooseException("We caught a libMesh error");
+    }
   }
   catch (MooseException & e)
   {

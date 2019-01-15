@@ -17,7 +17,6 @@
 
 #include "MooseTypes.h"
 #include "MultiMooseEnum.h"
-#include "Assembly.h"
 
 #include "libmesh/dense_vector.h"
 #include "libmesh/dense_matrix.h"
@@ -27,6 +26,7 @@ class InputParameters;
 class MooseObject;
 class TaggingInterface;
 class SubProblem;
+class Assembly;
 
 template <typename T>
 InputParameters validParams();

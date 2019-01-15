@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", ElementIntegralIndicator);
+
 template <>
 InputParameters
 validParams<ElementIntegralIndicator>()
