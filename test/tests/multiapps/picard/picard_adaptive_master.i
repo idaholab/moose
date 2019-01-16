@@ -67,10 +67,8 @@
 
   [./TimeStepper]
     type = IterationAdaptiveDT
-    cutback_factor = 0.4
-    growth_factor = 1.2
-    optimal_iterations = 6
     dt = 0.1
+    # cutback_factor, growth_factor, optimal_iterations, time_dt and time_t added through CLI args
   [../]
 []
 

@@ -291,8 +291,8 @@ protected:
    * Picard Related
    */
   /// Number of Picard iterations to perform
-  int & _picard_it;
-  Real _picard_max_its;
+  unsigned int & _picard_it;
+  unsigned int _picard_max_its;
   bool & _picard_converged;
   Real & _picard_initial_norm;
   Real & _picard_timestep_begin_norm;
