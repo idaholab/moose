@@ -296,6 +296,7 @@ Transient::init()
     _time_stepper = _app.getFactory().create<TimeStepper>("ConstantDT", "TimeStepper", pars);
   }
 
+  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
 
   _time_stepper->init();

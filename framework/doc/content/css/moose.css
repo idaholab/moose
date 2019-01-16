@@ -96,6 +96,10 @@ a {
     width:100%;
 }
 
+.card-content .moose-alert-content img{
+    width:auto;
+}
+
 .moose-exception {
   color: red;
 }
@@ -858,6 +862,7 @@ li p {
     float:left;
     margin-right:10px;
     height:100px;
+    width:unset;
 }
 
 .card-content .moose-alert-content img

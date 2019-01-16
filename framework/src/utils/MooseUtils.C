@@ -14,6 +14,7 @@
 #include "MultiMooseEnum.h"
 #include "InputParameters.h"
 #include "ExecFlagEnum.h"
+#include "InfixIterator.h"
 
 #include "libmesh/elem.h"
 
@@ -775,6 +776,38 @@ linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type 
     return leftovers + (new_item_id / global_num_local_items);
   }
 }
+
+std::vector<std::string>
+split(const std::string & str, const std::string & delimiter)
+{
+  std::vector<std::string> output;
+  size_t prev = 0, pos = 0;
+  do
+  {
+    pos = str.find(delimiter, prev);
+    output.push_back(str.substr(prev, pos - prev));
+    prev = pos + delimiter.length();
+  } while (pos != string::npos);
+  return output;
+}
+
+template <typename T>
+std::string
+join(const T & strings, const std::string & delimiter)
+{
+  std::ostringstream oss;
+  std::copy(
+      strings.begin(), strings.end(), infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
+  return oss.str();
+}
+template std::string join<std::vector<std::string>>(const std::vector<std::string> &,
+                                                    const std::string &);
+template std::string join<std::set<std::string>>(const std::set<std::string> &,
+                                                 const std::string &);
+template std::string join<std::vector<MooseEnumItem>>(const std::vector<MooseEnumItem> &,
+                                                      const std::string &);
+template std::string join<std::set<MooseEnumItem>>(const std::set<MooseEnumItem> &,
+                                                   const std::string &);
 
 } // MooseUtils namespace
 

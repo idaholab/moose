@@ -10,7 +10,6 @@
 #include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
-#include "InfixIterator.h"
 #include "Conversion.h"
 
 #include <sstream>

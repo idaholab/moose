@@ -67,6 +67,11 @@ public:
   bool check();
 
   /**
+   * Check the execute flags.
+   */
+  void checkExecuteOnType(const ExecFlagType & current) const;
+
+  /**
    * Adds the supplied item with the other items within this object.
    */
   void add(ControllableItem * item);

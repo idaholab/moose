@@ -138,9 +138,16 @@ validParams<MultiApp>()
   params.addParam<std::vector<Point>>("move_positions",
                                       "The positions corresponding to each move_app.");
 
+  params.addParam<std::vector<std::string>>(
+      "cli_args",
+      std::vector<std::string>(),
+      "Additional command line arguments to pass to the sub apps. If one set is provided the "
+      "arguments are applied to all, otherwise there must be a set for each sub app.");
+
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
+  params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
   return params;
@@ -174,7 +181,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _move_positions(getParam<std::vector<Point>>("move_positions")),
     _move_happened(false),
     _has_an_app(true),
-    _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
+    _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
+    _cli_args(getParam<std::vector<std::string>>("cli_args"))
 {
 }
 
@@ -189,6 +197,10 @@ MultiApp::init(unsigned int num)
 
   _has_bounding_box.resize(_my_num_apps, false);
   _bounding_box.resize(_my_num_apps);
+
+  if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
+    paramError("cli_args",
+               "The number of items supplied must be 1 or equal to the number of sub apps.");
 }
 
 void
@@ -579,6 +591,29 @@ MultiApp::createApp(unsigned int i, Real start_time)
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
+
+  // Single set of "cli_args" to be applied to all sub apps
+  if (_cli_args.size() == 1)
+  {
+    for (const std::string & str : MooseUtils::split(_cli_args[0], ";"))
+    {
+      std::ostringstream oss;
+      oss << full_name << ":" << str;
+      app_params.get<std::shared_ptr<CommandLine>>("_command_line")->addArgument(oss.str());
+    }
+  }
+
+  // Unique set of "cli_args" to be applied to each sub apps
+  else if (_cli_args.size() > 1)
+  {
+    for (const std::string & str : MooseUtils::split(_cli_args[i + _first_local_app], ";"))
+    {
+      std::ostringstream oss;
+      oss << full_name << ":" << str;
+      app_params.get<std::shared_ptr<CommandLine>>("_command_line")->addArgument(oss.str());
+    }
+  }
+
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
