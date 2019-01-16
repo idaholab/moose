@@ -22,7 +22,7 @@ Once the build is complete you should end up with a "debug executable" that look
 
 ## Debuggers
 
-Many different debuggers exist: `lldb`, `gdb`, `ddd`, Totalview and Intel Debugger are just a few.  While a command-line debugger (like `lldb` or `gdb`) might seem daunting at first, they are an invaluable tool for quick debugging and debugging in complicated scenarios such as when you're running on a cluster.  Learning one should be essential to any computational scientist.
+Many different debuggers exist: `lldb`, `gdb`, `ddd`, and Totalview are just a few.  While a command-line debugger (like `lldb` or `gdb`) might seem daunting at first, they are an invaluable tool for quick debugging and debugging in complicated scenarios such as when you're running on a cluster.  Learning one should be essential to any computational scientist.
 
 For debugging MOOSE-based applications we recommend `lldb` if you're using the clang compiler (default on Mac OSX) and `gdb` for the `gcc` compiler (default on Linux).
 

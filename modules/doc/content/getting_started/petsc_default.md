@@ -24,8 +24,3 @@ F90FLAGS='-fPIC -fopenmp' \
 F77FLAGS='-fPIC -fopenmp' \
 PETSC_DIR=`pwd`
 ```
-
-!alert note
-The options used were chosen exclusively for GCC compilers. If you plan on using an Intel compiler,
-know that these options will not work (-fopenmp needs to be -openmp for one thing. fblaslapack may
-also fail as Intel provides its own).
