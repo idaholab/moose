@@ -25,6 +25,7 @@ class TextAnnotationSource(base.ChiggerSourceBase):
         opt = base.ChiggerSourceBase.getOptions()
         opt.add('position', [0.5, 0.5], "The text position within the viewport, in relative "
                                         "coordinates.", vtype=tuple)
+        opt.add('opacity', 1, "Set the text opacity.", vtype=float)
         opt += utils.FontOptions.get_options()
         return opt
 
@@ -44,3 +45,7 @@ class TextAnnotationSource(base.ChiggerSourceBase):
         if self.isOptionValid('text'):
             self._vtkmapper.GetTextProperty().Modified()
             self._vtkmapper.SetInput(self.getOption('text'))
+
+        if self.isOptionValid('opacity'):
+            self._vtkmapper.GetTextProperty().Modified()
+            self._vtkmapper.GetTextProperty().SetOpacity(self.getOption('opacity'))
