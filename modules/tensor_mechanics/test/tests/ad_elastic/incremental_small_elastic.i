@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
+  nx = 3
+  ny = 3
+  nz = 3
 []
 
 [GlobalParams]
@@ -78,10 +78,10 @@
 
 [ADMaterials]
   [./strain]
-    type = ADComputeSmallStrain
+    type = ADComputeIncrementalSmallStrain
   [../]
   [./stress]
-    type = ADComputeLinearElasticStress
+    type = ADComputeFiniteStrainElasticStress
   [../]
 []
 
@@ -106,5 +106,4 @@
 
 [Outputs]
   exodus = true
-  file_base = "linear-out"
 []

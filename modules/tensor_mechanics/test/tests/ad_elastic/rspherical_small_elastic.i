@@ -1,69 +1,43 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
+  dim = 1
+  nx = 5
+[]
+
+[Problem]
+  coord_type = RSPHERICAL
 []
 
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_r'
 []
 
 [Variables]
   # scale with one over Young's modulus
-  [./disp_x]
-    scaling = 1e-10
-  [../]
-  [./disp_y]
-    scaling = 1e-10
-  [../]
-  [./disp_z]
+  [./disp_r]
     scaling = 1e-10
   [../]
 []
 
 [ADKernels]
-  [./stress_x]
-    type = ADStressDivergenceTensors
+  [./stress_r]
+    type = ADStressDivergenceRSphericalTensors
     component = 0
-    variable = disp_x
-  [../]
-  [./stress_y]
-    type = ADStressDivergenceTensors
-    component = 1
-    variable = disp_y
-  [../]
-  [./stress_z]
-    type = ADStressDivergenceTensors
-    component = 2
-    variable = disp_z
+    variable = disp_r
   [../]
 []
 
 [BCs]
-  [./symmy]
+  [./center]
     type = PresetBC
-    variable = disp_y
-    boundary = bottom
-    value = 0
-  [../]
-  [./symmx]
-    type = PresetBC
-    variable = disp_x
+    variable = disp_r
     boundary = left
     value = 0
   [../]
-  [./symmz]
+  [./rdisp]
     type = PresetBC
-    variable = disp_z
-    boundary = back
-    value = 0
-  [../]
-  [./tdisp]
-    type = PresetBC
-    variable = disp_z
-    boundary = front
+    variable = disp_r
+    boundary = right
     value = 0.1
   [../]
 []
@@ -78,7 +52,7 @@
 
 [ADMaterials]
   [./strain]
-    type = ADComputeSmallStrain
+    type = ADComputeRSphericalSmallStrain
   [../]
   [./stress]
     type = ADComputeLinearElasticStress
@@ -106,5 +80,4 @@
 
 [Outputs]
   exodus = true
-  file_base = "linear-out"
 []

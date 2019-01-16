@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
+  nx = 3
+  ny = 3
+  nz = 3
 []
 
 [GlobalParams]
@@ -23,21 +23,24 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./stress_x]
-    type = ADStressDivergenceTensors
+    type = StressDivergenceTensors
     component = 0
     variable = disp_x
+    use_displaced_mesh = true
   [../]
   [./stress_y]
-    type = ADStressDivergenceTensors
+    type = StressDivergenceTensors
     component = 1
     variable = disp_y
+    use_displaced_mesh = true
   [../]
   [./stress_z]
-    type = ADStressDivergenceTensors
+    type = StressDivergenceTensors
     component = 2
     variable = disp_z
+    use_displaced_mesh = true
   [../]
 []
 
@@ -74,14 +77,11 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e10
   [../]
-[]
-
-[ADMaterials]
   [./strain]
-    type = ADComputeSmallStrain
+    type = ComputeFiniteStrain
   [../]
   [./stress]
-    type = ADComputeLinearElasticStress
+    type = ComputeFiniteStrainElasticStress
   [../]
 []
 
@@ -106,5 +106,5 @@
 
 [Outputs]
   exodus = true
-  file_base = "linear-out"
+  file_base = finite_elastic_out
 []

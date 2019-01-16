@@ -1,21 +1,21 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
+  dim = 2
+  nx = 3
+  ny = 3
+[]
+
+[Problem]
+  coord_type = RZ
 []
 
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_r disp_z'
 []
 
 [Variables]
   # scale with one over Young's modulus
-  [./disp_x]
-    scaling = 1e-10
-  [../]
-  [./disp_y]
+  [./disp_r]
     scaling = 1e-10
   [../]
   [./disp_z]
@@ -23,47 +23,38 @@
   [../]
 []
 
-[ADKernels]
-  [./stress_x]
-    type = ADStressDivergenceTensors
+[Kernels]
+  [./stress_r]
+    type = StressDivergenceRZTensors
     component = 0
-    variable = disp_x
-  [../]
-  [./stress_y]
-    type = ADStressDivergenceTensors
-    component = 1
-    variable = disp_y
+    variable = disp_r
+    use_displaced_mesh = true
   [../]
   [./stress_z]
-    type = ADStressDivergenceTensors
-    component = 2
+    type = StressDivergenceRZTensors
+    component = 1
     variable = disp_z
+    use_displaced_mesh = true
   [../]
 []
 
 [BCs]
-  [./symmy]
+  [./bottom]
     type = PresetBC
-    variable = disp_y
+    variable = disp_z
     boundary = bottom
     value = 0
   [../]
-  [./symmx]
+  [./axial]
     type = PresetBC
-    variable = disp_x
+    variable = disp_r
     boundary = left
     value = 0
   [../]
-  [./symmz]
+  [./rdisp]
     type = PresetBC
-    variable = disp_z
-    boundary = back
-    value = 0
-  [../]
-  [./tdisp]
-    type = PresetBC
-    variable = disp_z
-    boundary = front
+    variable = disp_r
+    boundary = right
     value = 0.1
   [../]
 []
@@ -74,14 +65,11 @@
     poissons_ratio = 0.3
     youngs_modulus = 1e10
   [../]
-[]
-
-[ADMaterials]
   [./strain]
-    type = ADComputeSmallStrain
+    type = ComputeAxisymmetricRZFiniteStrain
   [../]
   [./stress]
-    type = ADComputeLinearElasticStress
+    type = ComputeFiniteStrainElasticStress
   [../]
 []
 
@@ -106,5 +94,5 @@
 
 [Outputs]
   exodus = true
-  file_base = "linear-out"
+  file_base = rz_finite_elastic_out
 []
