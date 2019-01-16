@@ -206,8 +206,10 @@ Transient::Transient(const InputParameters & parameters)
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
     _picard_converged(declareRecoverableData<bool>("picard_converged", false)),
     _picard_initial_norm(declareRecoverableData<Real>("picard_initial_norm", 0.0)),
-    _picard_timestep_begin_norm(declareRecoverableData<Real>("picard_timestep_begin_norm", 0.0)),
-    _picard_timestep_end_norm(declareRecoverableData<Real>("picard_timestep_end_norm", 0.0)),
+    _picard_timestep_begin_norm(
+        declareRecoverableData<std::vector<Real>>("picard_timestep_begin_norm")),
+    _picard_timestep_end_norm(
+        declareRecoverableData<std::vector<Real>>("picard_timestep_end_norm")),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose")),
@@ -509,9 +511,16 @@ Transient::solveStep(Real input_dt)
 
     if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
     {
+      _picard_timestep_begin_norm.assign(_picard_max_its, 0);
+      _picard_timestep_end_norm.assign(_picard_max_its, 0);
+
       _picard_initial_norm = _problem.computeResidualL2Norm();
-      _console << COLOR_MAGENTA << "Initial Picard Norm: " << COLOR_GREEN << _picard_initial_norm
-               << COLOR_DEFAULT << '\n';
+      _console << COLOR_MAGENTA << "Initial Picard Norm: " << COLOR_DEFAULT;
+      if (_picard_initial_norm == std::numeric_limits<Real>::max())
+        _console << " MAX ";
+      else
+        _console << std::scientific << _picard_initial_norm;
+      _console << COLOR_DEFAULT << '\n';
     }
   }
 
@@ -531,12 +540,15 @@ Transient::solveStep(Real input_dt)
 
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
-  if (_picard_max_its > 1)
+  if (_picard_max_its > 1 && _problem.hasMultiApps(EXEC_TIMESTEP_BEGIN))
   {
-    _picard_timestep_begin_norm = _problem.computeResidualL2Norm();
+    _picard_timestep_begin_norm[_picard_it] = _problem.computeResidualL2Norm();
 
     _console << COLOR_MAGENTA << "Picard Norm after TIMESTEP_BEGIN MultiApps: "
-             << Console::outputNorm(_picard_initial_norm, _picard_timestep_begin_norm) << '\n';
+             << Console::outputNorm(_picard_it > 0 ? _picard_timestep_begin_norm[_picard_it - 1]
+                                                   : std::numeric_limits<Real>::max(),
+                                    _picard_timestep_begin_norm[_picard_it])
+             << '\n';
   }
 
   // Perform output for timestep begin
@@ -632,10 +644,18 @@ Transient::solveStep(Real input_dt)
 
   if (_picard_max_its > 1 && lastSolveConverged())
   {
-    _picard_timestep_end_norm = _problem.computeResidualL2Norm();
+    if (_problem.hasMultiApps(EXEC_TIMESTEP_END))
+    {
+      _picard_timestep_end_norm[_picard_it] = _problem.computeResidualL2Norm();
 
-    _console << COLOR_MAGENTA << "\nPicard Norm after TIMESTEP_END MultiApps: "
-             << Console::outputNorm(_picard_initial_norm, _picard_timestep_end_norm) << '\n';
+      _console << COLOR_MAGENTA << "Picard Norm after TIMESTEP_END MultiApps: "
+               << Console::outputNorm(_picard_it > 0 ? _picard_timestep_end_norm[_picard_it - 1]
+                                                     : std::numeric_limits<Real>::max(),
+                                      _picard_timestep_end_norm[_picard_it])
+               << '\n';
+    }
+
+    printPicardNorms();
 
     if (picardConverged())
     {
@@ -658,10 +678,26 @@ Transient::solveStep(Real input_dt)
   _time = _time_old;
 }
 
+void
+Transient::printPicardNorms() const
+{
+  _console << "\n 0 Picard |R| = "
+           << Console::outputNorm(std::numeric_limits<Real>::max(), _picard_initial_norm) << '\n';
+
+  for (unsigned int i = 1; i < _picard_it; ++i)
+  {
+    Real max_norm = std::max(_picard_timestep_begin_norm[i], _picard_timestep_end_norm[i]);
+
+    _console << std::setw(2) << i
+             << " Picard |R| = " << Console::outputNorm(_picard_initial_norm, max_norm) << '\n';
+  }
+}
+
 bool
 Transient::picardConverged() const
 {
-  Real max_norm = std::max(_picard_timestep_begin_norm, _picard_timestep_end_norm);
+  Real max_norm =
+      std::max(_picard_timestep_begin_norm[_picard_it], _picard_timestep_end_norm[_picard_it]);
 
   Real max_relative_drop = max_norm / _picard_initial_norm;
 

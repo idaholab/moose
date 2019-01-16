@@ -3468,6 +3468,12 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 }
 
 bool
+FEProblemBase::hasMultiApps(ExecFlagType type) const
+{
+  return _multi_apps[type].hasActiveObjects();
+}
+
+bool
 FEProblemBase::hasMultiApp(const std::string & multi_app_name) const
 {
   return _multi_apps.hasActiveObject(multi_app_name);
