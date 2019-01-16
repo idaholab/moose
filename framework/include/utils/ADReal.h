@@ -29,6 +29,8 @@ using MetaPhysicL::NumberArray;
 
 typedef DualNumber<Real, NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> ADReal;
 
+#ifndef LIBMESH_DUAL_NUMBER_COMPARE_TYPES
+
 namespace libMesh
 {
 template <typename T, typename T2, typename D>
@@ -64,4 +66,5 @@ struct ScalarTraits<DualNumber<T, D>>
 };
 }
 
+#endif
 #endif
