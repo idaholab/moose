@@ -888,10 +888,10 @@ MooseApp::registerRecoverableData(std::string name)
 std::shared_ptr<Backup>
 MooseApp::backup()
 {
+  mooseAssert(_executioner, "Executioner is nullptr");
   FEProblemBase & fe_problem = _executioner->feProblem();
 
   RestartableDataIO rdio(fe_problem);
-
   return rdio.createBackup();
 }
 
@@ -900,18 +900,10 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 {
   TIME_SECTION(_restore_timer);
 
-  // This means that a Backup is coming through to use for restart / recovery
-  // We should just cache it for now
-  if (!_executioner)
-  {
-    _cached_backup = backup;
-    return;
-  }
-
+  mooseAssert(_executioner, "Executioner is nullptr");
   FEProblemBase & fe_problem = _executioner->feProblem();
 
   RestartableDataIO rdio(fe_problem);
-
   rdio.restoreBackup(backup, for_restart);
 }
 
@@ -1570,6 +1562,12 @@ void
 MooseApp::setRecover(const bool & value)
 {
   _recover = value;
+}
+
+void
+MooseApp::setBackupObject(std::shared_ptr<Backup> backup)
+{
+  _cached_backup = backup;
 }
 
 void
