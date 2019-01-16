@@ -1,0 +1,12 @@
+[Tests]
+  [./full_jacobian_thread_active_bcs]
+    type = 'PetscJacobianTester'
+    input = 'full_jacobian_thread_active_bcs.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-7
+    max_threads = 1
+    requirement = "MOOSE shall correctly compute Jacobians when boundary conditions are disabled."
+    design = 'syntax/Executioner/index.md'
+    issues = '#12627'
+  [../]
+[]

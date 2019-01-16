@@ -137,7 +137,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be
       // any)
-      const auto & bcs = _ibc_warehouse->getBoundaryObjects(bnd_id, _tid);
+      const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & bc : bcs)
         if (bc->shouldApply() && bc->variable().number() == ivar.number() && bc->isImplicit())
         {
