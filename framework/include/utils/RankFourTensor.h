@@ -13,17 +13,22 @@
 #include "Moose.h"
 #include "ADReal.h"
 
-#include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
-#include "libmesh/vector_value.h"
 #include "libmesh/tuple_of.h"
 
 #include <petscsys.h>
 
 using libMesh::Real;
-using libMesh::RealGradient;
-using libMesh::RealTensorValue;
 using libMesh::tuple_of;
+namespace libMesh
+{
+template <typename>
+class TensorValue;
+template <typename>
+class TypeTensor;
+template <typename>
+class VectorValue;
+}
 
 // Forward declarations
 class MooseEnum;

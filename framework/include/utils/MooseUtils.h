@@ -12,9 +12,12 @@
 
 // MOOSE includes
 #include "HashMap.h"
-#include "MaterialProperty.h" // MaterialProperties
 #include "InfixIterator.h"
 #include "MooseEnumItem.h"
+#include "MooseError.h"
+#include "Moose.h"
+
+#include "libmesh/compare_types.h"
 
 // C++ includes
 #include <string>
@@ -26,6 +29,7 @@
 // Forward Declarations
 class InputParameters;
 class ExecFlagEnum;
+class MaterialProperties;
 
 namespace libMesh
 {
@@ -36,6 +40,18 @@ class Communicator;
 }
 }
 class MultiMooseEnum;
+namespace MetaPhysicL
+{
+template <typename, typename>
+class DualNumber;
+}
+namespace std
+{
+template <typename T, typename D>
+MetaPhysicL::DualNumber<T, D> abs(const MetaPhysicL::DualNumber<T, D> & in);
+template <typename T, typename D>
+MetaPhysicL::DualNumber<T, D> abs(MetaPhysicL::DualNumber<T, D> && in);
+}
 
 namespace MooseUtils
 {

@@ -13,6 +13,9 @@
 #include "Material.h"
 #include "MooseTypes.h"
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
 #define usingMaterialMembers                                                                       \
   using ADMaterial<compute_stage>::_qp;                                                            \
   using ADMaterial<compute_stage>::_ad_grad_zero;                                                  \
