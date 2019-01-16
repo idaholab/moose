@@ -43,7 +43,9 @@ ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
     _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var[i] = coupled("displacements", i);
+    // the next line should be _disp_var[i] = coupled("displacements", i);
+    // but the Coupleable:: is required to avoid triggering an internal Intel compiler bug
+    _disp_var[i] = Coupleable::coupled("displacements", i);
 
   // Error if volumetric locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)
