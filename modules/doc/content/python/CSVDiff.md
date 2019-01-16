@@ -68,10 +68,6 @@ Always specify the two files you wish to perform a differentiation on, before an
 Using a comparison file is ideal when needing to adjust a complex set of fields and tolerances, which would make for a very long and confusing command line argument. The CSVDiff tool can generate this comparison
 file which, can be used to set the above arguments quickly.
 
-| Argument | Value | Help |
-| :- | :- | :- |
-| `--summary or -s` | *csv_file* | Supply a valid comma separated value (CSV) file  |
-
 To generate a comparison file, run the CSVdiff tool with the appropriate `--summary csv_file` argument. In the following example, we use `echo` to create a simple csv file. We then instruct csvdiff.py to create
 a comparison file from our csv file, and redirect the output to a file named `a.cmp`:
 
@@ -185,7 +181,12 @@ GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
 ```
 
-Each of the above example comparison files, would allow a and b to be considered identical.
+Any one of the above example comparison files, would allow a and b to be considered identical:
+
+```
+> moose/scripts/csvdiff.py a b --comparison-file a.cmp
+Files are the same
+```
 
 !alert note title=Exodiff-like summary report
 The summary report follows the same output style as another popular tool: `exodiff -summary`. By design, the two summary reports are interchangeable.
