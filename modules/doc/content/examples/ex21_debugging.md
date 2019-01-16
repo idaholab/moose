@@ -5,7 +5,7 @@ For a more in-depth discussion of debugging with MOOSE [see the Debugging Docume
 - It's inevitable: at some point in your MOOSE application development career, you will create a bug.
 - Sometimes, print statements are sufficient to help you determine the cause of the error.
 - For more complex bugs, a debugger can be more effective than print statements in helping to pinpoint the problem.
-- Many debuggers exist: LLDB, GDB, Totalview, ddd, Intel Debugger, etc.
+- Many debuggers exist: LLDB, GDB, Totalview, ddd, etc.
 - It's typically best to use a debugger that is associated with your compiler, if one is available.
 - Here we focus on LLDB/GDB since it is relatively simple to use and is included in the MOOSE binary redistributable package.
 - A "Segmentation fault," "Segfault," or "Signal 11" error denotes a memory bug (often array access out of bounds).
