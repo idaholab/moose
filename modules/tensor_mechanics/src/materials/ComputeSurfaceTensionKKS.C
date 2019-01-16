@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeInterfaceStressKKS.h"
+#include "ComputeSurfaceTensionKKS.h"
 #include "RankTwoTensor.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeInterfaceStressKKS);
+registerMooseObject("TensorMechanicsApp", ComputeSurfaceTensionKKS);
 
 template <>
 InputParameters
-validParams<ComputeInterfaceStressKKS>()
+validParams<ComputeSurfaceTensionKKS>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription(
@@ -30,7 +30,7 @@ validParams<ComputeInterfaceStressKKS>()
   return params;
 }
 
-ComputeInterfaceStressKKS::ComputeInterfaceStressKKS(const InputParameters & parameters)
+ComputeSurfaceTensionKKS::ComputeSurfaceTensionKKS(const InputParameters & parameters)
   : Material(parameters),
     _v(coupledValue("v")),
     _grad_v(coupledGradient("v")),
@@ -43,7 +43,7 @@ ComputeInterfaceStressKKS::ComputeInterfaceStressKKS(const InputParameters & par
 }
 
 void
-ComputeInterfaceStressKKS::computeQpProperties()
+ComputeSurfaceTensionKKS::computeQpProperties()
 {
   auto & S = _planar_stress[_qp];
   S.zero();

@@ -354,7 +354,7 @@
     base_B = ppt
   [../]
   [./interface_stress]
-    type = ComputeInterfaceStressKKS
+    type = ComputeSurfaceTensionKKS
     v = eta
     kappa_name = kappa
     w = 0.0033

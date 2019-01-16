@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'surface_tension_KKS.i'
+    exodiff = 'surface_tension_KKS_out.e'
+  [../]
+[]

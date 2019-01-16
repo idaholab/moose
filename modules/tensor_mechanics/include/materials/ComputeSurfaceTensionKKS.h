@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEINTERFACESTRESSKKS_H
-#define COMPUTEINTERFACESTRESSKKS_H
+#ifndef COMPUTESURFACETENSIONKKS_H
+#define COMPUTESURFACETENSIONKKS_H
 
 #include "Material.h"
 
-class ComputeInterfaceStressKKS;
+class ComputeSurfaceTensionKKS;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 template <>
-InputParameters validParams<ComputeInterfaceStressKKS>();
+InputParameters validParams<ComputeSurfaceTensionKKS>();
 
-class ComputeInterfaceStressKKS : public Material
+class ComputeSurfaceTensionKKS : public Material
 {
 public:
-  ComputeInterfaceStressKKS(const InputParameters & parameters);
+  ComputeSurfaceTensionKKS(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -43,4 +43,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _planar_stress;
 };
 
-#endif // COMPUTEINTERFACESTRESSKKS_H
+#endif // COMPUTESURFACETENSIONKKS_H
