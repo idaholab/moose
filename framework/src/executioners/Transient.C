@@ -131,6 +131,11 @@ validParams<Transient>()
                         "during Picard iterations.  This check is "
                         "performed based on the Master app's nonlinear "
                         "residual.");
+  params.addParam<bool>(
+      "picard_force_norms",
+      false,
+      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
+      "existance of active MultiApps with those execute_on flags, default: false.");
 
   params.addParam<Real>("relaxation_factor",
                         1.0,
@@ -150,8 +155,9 @@ validParams<Transient>()
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
-  params.addParamNamesToGroup(
-      "picard_max_its picard_rel_tol picard_abs_tol relaxation_factor relaxed_variables", "Picard");
+  params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol picard_force_norms "
+                              "relaxation_factor relaxed_variables",
+                              "Picard");
 
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
   params.addParam<unsigned int>(
@@ -212,6 +218,7 @@ Transient::Transient(const InputParameters & parameters)
         declareRecoverableData<std::vector<Real>>("picard_timestep_end_norm")),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
+    _picard_force_norms(getParam<bool>("picard_force_norms")),
     _verbose(getParam<bool>("verbose")),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _relax_factor(getParam<Real>("relaxation_factor")),
@@ -540,7 +547,7 @@ Transient::solveStep(Real input_dt)
 
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
-  if (_picard_max_its > 1 && _problem.hasMultiApps(EXEC_TIMESTEP_BEGIN))
+  if (_picard_max_its > 1 && (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _picard_force_norms))
   {
     _picard_timestep_begin_norm[_picard_it] = _problem.computeResidualL2Norm();
 
@@ -644,7 +651,7 @@ Transient::solveStep(Real input_dt)
 
   if (_picard_max_its > 1 && lastSolveConverged())
   {
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_END))
+    if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _picard_force_norms)
     {
       _picard_timestep_end_norm[_picard_it] = _problem.computeResidualL2Norm();
 

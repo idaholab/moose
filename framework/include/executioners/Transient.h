@@ -305,6 +305,7 @@ protected:
   std::vector<Real> & _picard_timestep_end_norm;
   Real _picard_rel_tol;
   Real _picard_abs_tol;
+  bool _picard_force_norms;
 
   ///should detailed diagnostic output be printed
   bool _verbose;
