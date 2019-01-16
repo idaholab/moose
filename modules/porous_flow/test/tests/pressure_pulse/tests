@@ -17,7 +17,7 @@
     threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse_1d.pdf'
-    requirement = 'PorousFlow shall find the steady-state distribution resul resulting from a pressure pulse in 1D using 1 phase physics'
+    requirement = 'PorousFlow shall find the steady-state distribution resulting from a pressure pulse in 1D using 1 phase physics'
   [../]
   [./pressure_pulse_1d_3comp]
     type = 'CSVDiff'
@@ -58,7 +58,7 @@
     threading = '!pthreads'
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for multi-phase, multi-component PorousFlow simulations'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for multi-phase, multi-component PorousFlow simulations, and illustrate this through the transient evolution of a pressure pulse'
   [../]
   [./pressure_pulse_1d_2phasePSVG]
     type = 'CSVDiff'

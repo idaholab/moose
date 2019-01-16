@@ -6,7 +6,7 @@
     threading = '!pthreads'
     issues = '#10959'
     design = 'tutorial_00.md'
-    requirement = 'PorousFlow tutorial shall explain the model used during the tutorial'
+    requirement = 'PorousFlow tutorial shall explain the 3D model used during the tutorial'
   [../]
   [./00_2D]
     type = Exodiff
@@ -15,7 +15,7 @@
     threading = '!pthreads'
     issues = '#10959'
     design = 'tutorial_00.md'
-    requirement = 'PorousFlow tutorial shall explain the model used during the tutorial'
+    requirement = 'PorousFlow tutorial shall explain the 2D model used during the tutorial'
   [../]
   [./01]
     type = Exodiff
@@ -139,7 +139,7 @@
     threading = '!pthreads'
     issues = '#10959'
     design = 'tutorial_11.md'
-    requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem'
+    requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem in 3D'
   [../]
   [./11_2D]
     type = Exodiff
@@ -151,7 +151,7 @@
     threading = '!pthreads'
     issues = '#10959'
     design = 'tutorial_11.md'
-    requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem and explain how to reduce it to 2D'
+    requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem in 3D and explain how to reduce it to 2D'
   [../]
   [./13]
     type = Exodiff

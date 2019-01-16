@@ -30,5 +30,5 @@ At present, PorousFlow offers two types of numerical stabilization: [full upwind
 | Diffusion | <span style="color:green">minimal</span> | <span style="color:red">maximal</span> | <span style="color:green">minimal</span> |
 
 !alert note
-The Kuzmin-Turek stabilization is new and users are strongly encouraged to experiment with it and report their findings to the moose-users gmail group to iron out any problems and so we can collectively gain experience.
+The Kuzmin-Turek stabilization is new and users are strongly encouraged to experiment with it and report their findings to the moose-users google group to iron out any problems and so we can collectively gain experience.
 

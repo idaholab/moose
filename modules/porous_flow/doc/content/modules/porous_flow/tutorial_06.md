@@ -63,7 +63,7 @@ It is not possible to use full-upwinding with the [PorousFlowFullySaturated](act
 
 !listing modules/porous_flow/examples/tutorial/06_KT.i start=[PorousFlowFullySaturated] end=[]
 
-Users are strongly encouraged to experiment with KT stabilization and report their findings back to the moose-users gmail group, since this stabilization is still at the development stage.
+Users are strongly encouraged to experiment with KT stabilization and report their findings back to the moose-users google group, since this stabilization is still at the development stage.
 
 
 [Start](porous_flow/tutorial_00.md) |

@@ -502,8 +502,7 @@ AdvectiveFluxCalculatorBase::finalize()
         _dflux_out_du[i][dof_deriv.first] -= dof_deriv.second;
 
       _dflux_out_dKjk[i][i][j] -= 1.0 * u_j; // from the K in L = K + D
-      /* NOTE: put back in and change _kij[i][j] to lij[i][j] in 2 places above, andremove the 0 *
-       * above */
+
       if (j == i)
         for (const auto & dof_deriv : dDii_dKij[i])
           _dflux_out_dKjk[i][i][dof_deriv.first] -= dof_deriv.second * u_j;
