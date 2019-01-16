@@ -98,7 +98,7 @@
     threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse_1d.pdf'
-    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the PorousFlowFullySaturatedDarcyBase Kernel'
+    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow'
   [../]
   [./pressure_pulse_1d_3comp_fully_saturated]
     type = 'CSVDiff'
@@ -108,7 +108,7 @@
     threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse_1d.pdf'
-    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase with 3 components and employing the PorousFlowFullySaturatedDarcyBase Kernel'
+    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase with 3 components and employing the fully-saturated version of Darcy flow'
   [../]
   [./pressure_pulse_1d_fully_saturated_2]
     type = 'CSVDiff'
@@ -118,6 +118,6 @@
     threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse_1d.pdf'
-    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the PorousFlowFullySaturatedDarcyBase and PorousFlowFullySaturatedMassTimeDerivative Kernels'
+    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow along with the fully-saturated version of the fluid-mass time derivative'
   [../]
 []

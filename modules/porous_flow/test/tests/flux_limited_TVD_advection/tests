@@ -5,7 +5,7 @@
     expect_err = "The AdvectiveFluxCalculator UserObject fluo execute_on parameter must include, at least, 'linear'.  This is to ensure that this UserObject computes all necessary quantities just before the Kernels evaluate their Residuals"
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
-    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall error-out if the AdvectiveFluxCalculator UserObject is not evaluated on linear'
+    requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall error-out if the flux-limiting computations are not evaluated on linear'
   [../]
   [./jacobian_01]
     type = 'PetscJacobianTester'
