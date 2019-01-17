@@ -331,7 +331,8 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
                              n,
                              "section '",
                              curr_identifier,
-                             "' does not have an associated \"Action\".\nDid you misspell it?");
+                             "' does not have an associated \"Action\".\nDid you misspell it?") +
+               "\n";
     return;
   }
 
@@ -1418,7 +1419,7 @@ Parser::setVectorParameter(const std::string & full_name,
     }
     catch (hit::Error & err)
     {
-      _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what());
+      _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
       return;
     }
   }
@@ -1492,8 +1493,10 @@ Parser::setDoubleIndexParameter(const std::string & full_name,
   for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
     if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
     {
-      _errmsg += hit::errormsg(
-          _input_filename, _root->find(full_name), "invalid format for parameter ", full_name);
+      _errmsg +=
+          hit::errormsg(
+              _input_filename, _root->find(full_name), "invalid format for parameter ", full_name) +
+          "\n";
       return;
     }
 
@@ -1525,7 +1528,7 @@ Parser::setScalarComponentParameter(const std::string & full_name,
   }
   catch (hit::Error & err)
   {
-    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what());
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
     return;
   }
 
@@ -1538,7 +1541,8 @@ Parser::setScalarComponentParameter(const std::string & full_name,
                              ": size ",
                              vec.size(),
                              " is not a multiple of ",
-                             LIBMESH_DIM);
+                             LIBMESH_DIM) +
+               "\n";
     return;
   }
 
@@ -1569,7 +1573,7 @@ Parser::setVectorComponentParameter(const std::string & full_name,
   }
   catch (hit::Error & err)
   {
-    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what());
+    _errmsg += hit::errormsg(_input_filename, _root->find(full_name), err.what()) + "\n";
     return;
   }
 
@@ -1582,7 +1586,8 @@ Parser::setVectorComponentParameter(const std::string & full_name,
                              ": size ",
                              vec.size(),
                              " is not a multiple of ",
-                             LIBMESH_DIM);
+                             LIBMESH_DIM) +
+               "\n";
     return;
   }
 
@@ -1719,7 +1724,8 @@ Parser::setScalarParameter<RealTensorValue, RealTensorValue>(
                              ": size is ",
                              vec.size(),
                              " but should be ",
-                             LIBMESH_DIM * LIBMESH_DIM);
+                             LIBMESH_DIM * LIBMESH_DIM) +
+               "\n";
     return;
   }
 
@@ -1865,14 +1871,16 @@ Parser::setVectorParameter<VariableName, VariableName>(
     for (unsigned int i = 0; i < vec.size(); ++i)
       if (var_names[i] == "")
       {
-        _errmsg += hit::errormsg(
-            _input_filename,
-            _root->find(full_name),
-            "invalid value for ",
-            full_name,
-            ":\n"
-            "    MOOSE does not currently support a coupled vector where some parameters are ",
-            "reals and others are variables");
+        _errmsg +=
+            hit::errormsg(
+                _input_filename,
+                _root->find(full_name),
+                "invalid value for ",
+                full_name,
+                ":\n"
+                "    MOOSE does not currently support a coupled vector where some parameters are ",
+                "reals and others are variables") +
+            "\n";
         return;
       }
       else

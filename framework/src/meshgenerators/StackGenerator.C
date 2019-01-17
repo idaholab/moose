@@ -73,7 +73,11 @@ StackGenerator::generate()
   int dim = static_cast<int>(_dim);
 
   if (dim != int(mesh->mesh_dimension()))
-    mooseError("The first mesh's dimension and the dimension provided don't match !");
+    paramError("dim",
+               "incompatible mesh dimensions: dim=",
+               dim,
+               " and first mesh dimension is ",
+               mesh->mesh_dimension());
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
   _meshes.reserve(_input_names.size() - 1);
