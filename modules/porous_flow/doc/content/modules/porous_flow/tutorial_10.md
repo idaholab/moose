@@ -51,7 +51,7 @@ The final block to create is the `Materials`.  This is always the most complicat
   unsensible to test obscure aspects of PorousFlow) but at least they
   are guaranteed to run!
 
-- You can ask on the moose-users google mailing list.
+- You can ask on the moose-users google group.
 
 In this case, the DEs involve porosity, fluid saturation, fluid density, permeability and viscosity.  The fluid mass is lumped to the nodes, so we'll only need porosity at the nodes:
 

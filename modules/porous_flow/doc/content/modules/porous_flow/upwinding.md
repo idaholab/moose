@@ -1,24 +1,29 @@
-# Upwinding
+# Full upwinding
 
-Upwinding is necessary in scenarios with nonlinear advection, such as the
-physics modelled by PorousFlow [citep:huyakorn1978, Dalen1979, helmig1998]. For
-multi-phase situations many upwinding schemes can lead to disaster as the
-algorithm attempts to withdraw fluid from a node where there is no fluid.  In
-situations where one phase disappears, or almost disappears, full upwinding is
-advisable, and hence PorousFlow employs full upwinding by default.
+This page is part of a set of pages devoted to discussions of numerical stabilization in PorousFlow.  See:
+
+- [Numerical stabilization lead page](stabilization.md)
+- [Mass lumping](mass_lumping.md)
+- [Full upwinding](upwinding.md)
+- [Kuzmin-Turek stabilization](kt.md)
+- [Numerical diffusion](numerical_diffusion.md)
+- [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+
+Numerical stabilization is necessary in scenarios with nonlinear advection, such as the physics modelled by PorousFlow.  One such stabilization is upwinding [citep:huyakorn1978, Dalen1979, helmig1998]. For multi-phase situations many upwinding schemes can lead to disaster as the algorithm attempts to withdraw fluid from a node where there is no fluid.  In situations where one phase disappears, or almost disappears, full upwinding is often advantageous, since it prevents such attempted withdrawls, and hence PorousFlow employs full upwinding by default.
 
 The [`PorousFlowBasicAdvection`](PorousFlowBasicAdvection.md) kernel
 implements a very naive non-upwinded version of advection.  Its use is
 not recommended.
 
-Full upwinding has the numerical disadvantage that it is not smooth (in contrast
-to the SUPG upwinding scheme, see  [citet:brooks1982, hughes1986, hughes1986b],
-for instance), so that close to steady-state where the fluxes are zero, the
-upwind direction can oscillate, leading to nonconvergence, however this is dealt
-with by placing a cutoff on the upwinding in PorousFlow. The remainder of this
+Full upwinding is numerically cheap compared with other stabilization schemes, but it suffers from two disadvantages.  Firstly, it is not smooth (in contrast
+to the SUPG upwinding scheme [citep:brooks1982, hughes1986, hughes1986b] or the [Kuzmin-Turek scheme](kt.md) [citep:KuzminTurek2004], for instance), so that close to steady-state where the fluxes are zero, the
+upwind direction can oscillate, leading to nonconvergence.  This is dealt
+with by placing a cutoff on the upwinding in PorousFlow.  Secondly, upwinding is adding numerical diffusion, which can be critical in some simulations: see [numerical diffusion](numerical_diffusion.md) for a discussion.  PorousFlow also offers the [Kuzmin-Turek stabilization scheme](kt.md) for users who are concerned with these disadvantages.
+
+The remainder of this
 section describes full upwinding for the single-phase unsaturated situation.
 The multi-phase, multi-component scenario, and the advective term in the
-heat-flow equation are analogous.  Upwinding is adding numerical diffusion, which can be critical in some simulations: see [numerical diffusion](numerical_diffusion.md) for a discussion.
+heat-flow equation are analogous.  
 
 The weak form of the Darcy flux of for a single element is
 \begin{equation}

@@ -26,18 +26,15 @@ public:
   AdvectiveFluxCalculatorConstantVelocity(const InputParameters & parameters);
 
 protected:
-  virtual Real getInternodalVelocity(unsigned i, unsigned j, unsigned qp) const override;
+  virtual Real computeVelocity(unsigned i, unsigned j, unsigned qp) const override;
 
-  virtual Real getU(dof_id_type id) const override;
+  virtual Real computeU(unsigned i) const override;
 
   /// advection velocity
   RealVectorValue _velocity;
 
   /// the nodal values of u
-  MooseVariable * _u_nodal;
-
-  /// the moose variable number of u
-  unsigned _u_var_num;
+  const VariableValue & _u_nodal;
 
   /// Kuzmin-Turek shape function
   const VariablePhiValue & _phi;

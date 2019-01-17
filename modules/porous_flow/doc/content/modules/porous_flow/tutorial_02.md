@@ -77,11 +77,11 @@ R \approx V|\kappa|\epsilon /\mu \approx 10^{-11} V\epsilon
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[Executioner] end=[Outputs]
 
-## Upwinding and mass lumping
+## Numerical stabilization
 
-A very careful reader will have noticed that during the simulation the porepressure falls below its initial value of 0: look again at the scale on the resulting animation shown in [Previous](porous_flow/tutorial_01.md).  This is completely unphysical.
+A very careful reader will have noticed that during the simulation the porepressure falls below its initial value of 0: look again at the scale on the resulting animation shown in [the previous page](porous_flow/tutorial_01.md).  This is completely unphysical.
 
-This is purely a numerical issue that occurs in all simple-minded finite-element (and finite-difference) simulations, and is discussed in [mass lumping](porous_flow/mass_lumping.md) and [upwinding](porous_flow/upwinding.md).  In later tutorial pages, upwinding and mass lumping will be employed, since they are the default in most of PorousFlow, but let us ignore this issue for now.
+This is purely a numerical issue that occurs in all simple-minded finite-element (and finite-difference) simulations, and is discussed in the [numerical stabilization](porous_flow/stabilization.md) page.  In later tutorial pages, numerical stabilization will be employed, since it is the default in most of PorousFlow, but let us ignore this issue for now.
 
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_01.md) |

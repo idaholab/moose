@@ -55,11 +55,22 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
     _num_components(getParam<unsigned int>("number_fluid_components")),
     _num_aqueous_equilibrium(getParam<unsigned int>("number_aqueous_equilibrium")),
     _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
-    _aqueous_phase_number(getParam<unsigned int>("aqueous_phase_number"))
+    _aqueous_phase_number(getParam<unsigned int>("aqueous_phase_number")),
+    _consistent_fe_type(false),
+    _fe_type(0)
 {
   _moose_var_num.resize(_num_variables);
   for (unsigned int i = 0; i < _num_variables; ++i)
     _moose_var_num[i] = coupled("porous_flow_vars", i);
+
+  if (_num_variables > 0)
+  {
+    _consistent_fe_type = true;
+    _fe_type = FEType(getVar("porous_flow_vars", 0)->feType());
+    for (unsigned int i = 1; i < _num_variables; ++i)
+      if (getVar("porous_flow_vars", i)->feType() != _fe_type)
+        _consistent_fe_type = false;
+  }
 
   _pf_var_num.assign(_fe_problem.getNonlinearSystemBase().nVariables(),
                      _num_variables); // Note: the _num_variables assignment indicates that "this is
@@ -126,6 +137,16 @@ PorousFlowDictator::porousFlowVariableNum(unsigned int moose_var_num) const
   return _pf_var_num[moose_var_num];
 }
 
+unsigned int
+PorousFlowDictator::mooseVariableNum(unsigned int porous_flow_var_num) const
+{
+  if (porous_flow_var_num >= _num_variables)
+    mooseError("The Dictator proclaims that there is no such PorousFlow variable with number ",
+               porous_flow_var_num,
+               ".  Exiting with error code 1984.");
+  return _moose_var_num[porous_flow_var_num];
+}
+
 bool
 PorousFlowDictator::isPorousFlowVariable(unsigned int moose_var_num) const
 {
@@ -136,4 +157,16 @@ bool
 PorousFlowDictator::notPorousFlowVariable(unsigned int moose_var_num) const
 {
   return moose_var_num >= _pf_var_num.size() || _pf_var_num[moose_var_num] == _num_variables;
+}
+
+bool
+PorousFlowDictator::consistentFEType() const
+{
+  return _consistent_fe_type;
+}
+
+FEType
+PorousFlowDictator::feType() const
+{
+  return _fe_type;
 }
