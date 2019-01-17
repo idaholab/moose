@@ -16,7 +16,7 @@
     csvdiff = csvdiff_comparison_removed_field_out.csv
     # comparison file tests removed z_field (z_field not present in comparison file)
     comparison_file = csvdiff_comparison_removed_field.cmp
-    requirement = 'comparison file shall instruct csvdiff to ignore specified fields'
+    requirement = 'comparison file shall instruct csvdiff to ignore missing fields'
   [../]
   [./test_csvdiff_comparison_floor]
     type = CSVDiff
