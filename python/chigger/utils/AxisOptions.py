@@ -45,6 +45,7 @@ def get_options():
     opt.add('axis_point2', [0, 0], 'Ending location of axis, in absolute viewport coordinates.')
     opt.add('axis_scale', 1, "The axis scaling factor.", vtype=float)
     opt.add('axis_factor', 0, "Offset the axis by adding a factor.", vtype=float)
+    opt.add('axis_opacity', 1, "The vtkAxis opacity.", vtype=float)
     opt.add('zero_tol', 1e-10, "Tolerance for considering limits to be the same.")
     return opt
 
@@ -57,6 +58,13 @@ def set_options(vtkaxis, opt):
     vtkaxis.SetTicksVisible(opt['ticks_visible'])
     vtkaxis.SetAxisVisible(opt['axis_visible'])
     vtkaxis.SetLabelsVisible(opt['labels_visible'])
+
+    # Opacity
+    if opt.isOptionValid('axis_opacity'):
+        opacity = opt['axis_opacity']
+        vtkaxis.SetOpacity(opacity)
+        vtkaxis.GetTitleProperties().SetOpacity(opacity)
+        vtkaxis.GetLabelProperties().SetOpacity(opacity)
 
     # Ticks
     if opt.isOptionValid('num_ticks'):

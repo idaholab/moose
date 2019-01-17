@@ -141,7 +141,7 @@ follow this format.
   versions of Linux.
 - 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
 - 100 GB disk space
-- C++11 compatible compiler (GCC, Clang, or Intel)
+- C++11 compatible compiler (GCC, Clang)
 - Python 2.6+
 - Git
 !sqa-end!
