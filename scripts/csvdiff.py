@@ -84,41 +84,39 @@ class CSVTools:
         config_file.seek(0)
         for a_line in config_file:
             s_line = a_line.strip()
+            words = set(a_line.split())
 
-            # Ignore line if commented, denoted 'time steps' header, or logical nots
+            # Ignore this line if commented, is the 'time steps' header, or contains logical nots
             if s_line and \
                (s_line.startswith("#") \
                 or s_line.lower().find('time steps') == 0 \
                 or s_line[0] == "!"):
                 continue
 
-            words = set(a_line.split())
-            # Set globals
-            if a_line and (words.intersection(tollerance_params) or words.intersection(zero_params)) \
-               and not re.findall(r'\s', a_line[0]):
-                try:
-                    for value in words.intersection(tollerance_params):
-                        custom_params['RELATIVE'] = self.getParamValues(value, a_line)[0]
+            field_key = re.findall(r'^\s+(\S+)', a_line)
+            if field_key:
+                custom_params['FIELDS'][field_key[0]] = {}
 
-                    for value in words.intersection(zero_params):
-                        custom_params['ZERO'] = self.getParamValues(value, a_line)[0]
+            # Capture invalid/empty paramater key values
+            try:
+                # Possible global header containing floor params
+                if not re.match(r'^\s', a_line) and words.intersection(zero_params):
+                    custom_params['ZERO'] = self.getParamValues(words.intersection(zero_params).pop(), a_line)[0]
 
-                except IndexError:
-                    self.addError(config_file, "Error parsing comparison file. Field: '%s' has no value\n\n\t%s" % (value, a_line))
+                # Possible global header containing tollerance params
+                if not re.match(r'^\s', a_line) and words.intersection(tollerance_params):
+                    custom_params['RELATIVE'] = self.getParamValues(words.intersection(tollerance_params).pop(), a_line)[0]
 
-            # Set fields (line starts with a whitespace)
-            elif a_line and (re.findall(r'\s', a_line[0]) and len(words) >= 2):
-                field_key = a_line.split()[0]
-                custom_params['FIELDS'][field_key] = {}
-                try:
-                    for value in words.intersection(tollerance_params):
-                        custom_params['FIELDS'][field_key]['RELATIVE'] = self.getParamValues(value, a_line)[0]
+                # Possible field containing floor params
+                if field_key and words.intersection(zero_params):
+                    custom_params['FIELDS'][field_key[0]]['ZERO'] = self.getParamValues(words.intersection(zero_params).pop(), a_line)[0]
 
-                    for value in words.intersection(zero_params):
-                        custom_params['FIELDS'][field_key]['ZERO'] = self.getParamValues(value, a_line)[0]
+                # Possible field containing tollerance params
+                if field_key and words.intersection(tollerance_params):
+                    custom_params['FIELDS'][field_key[0]]['RELATIVE'] = self.getParamValues(words.intersection(tollerance_params).pop(), a_line)[0]
 
-                except IndexError:
-                    self.addError(config_file, "Error parsing comparison file. Field: '%s' has no value\n\n\t%s" % (value, a_line))
+            except IndexError:
+                self.addError(config_file, "Error parsing comparison file on line: \n%s" % (a_line))
 
         return custom_params
 
