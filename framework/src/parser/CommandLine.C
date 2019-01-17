@@ -16,25 +16,34 @@
 // C++ includes
 #include <iomanip>
 
-CommandLine::CommandLine(int argc, char * argv[]) : _argc(argc), _argv(argv)
+CommandLine::CommandLine(int argc, char * argv[]) { addArguments(argc, argv); }
+
+void
+CommandLine::addArguments(int argc, char * argv[])
 {
   for (int i = 0; i < argc; i++)
+    addArgument(argv[i]);
+}
+
+void
+CommandLine::addArgument(std::string arg)
+{
+  _argv.push_back(arg);
+
+  auto arg_value = std::string(arg);
+
+  // Handle using a "="
+  if (arg_value.find("=") != std::string::npos)
   {
-    auto arg_value = std::string(argv[i]);
+    std::vector<std::string> arg_split;
 
-    // Handle using a "="
-    if (arg_value.find("=") != std::string::npos)
-    {
-      std::vector<std::string> arg_split;
+    MooseUtils::tokenize(arg_value, arg_split, 1, "=");
 
-      MooseUtils::tokenize(arg_value, arg_split, 1, "=");
-
-      for (auto & arg_piece : arg_split)
-        _args.push_back(MooseUtils::trim(arg_piece));
-    }
-    else
-      _args.push_back(arg_value);
+    for (auto & arg_piece : arg_split)
+      _args.push_back(MooseUtils::trim(arg_piece));
   }
+  else
+    _args.push_back(arg_value);
 }
 
 CommandLine::~CommandLine() {}

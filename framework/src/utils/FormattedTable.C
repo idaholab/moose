@@ -9,7 +9,6 @@
 
 #include "FormattedTable.h"
 #include "MooseError.h"
-#include "InfixIterator.h"
 #include "MooseUtils.h"
 
 #include "libmesh/exodusII_io.h"

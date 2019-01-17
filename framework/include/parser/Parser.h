@@ -264,7 +264,7 @@ protected:
 private:
   std::string _errmsg;
   std::string _warnmsg;
-  std::string hitCLIFilter(std::string appname, int argc, char * argv[]);
+  std::string hitCLIFilter(std::string appname, const std::vector<std::string> & argv);
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };
 

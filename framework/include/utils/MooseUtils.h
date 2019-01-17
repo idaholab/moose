@@ -12,9 +12,12 @@
 
 // MOOSE includes
 #include "HashMap.h"
-#include "MaterialProperty.h" // MaterialProperties
 #include "InfixIterator.h"
 #include "MooseEnumItem.h"
+#include "MooseError.h"
+#include "Moose.h"
+
+#include "libmesh/compare_types.h"
 
 // C++ includes
 #include <string>
@@ -26,6 +29,7 @@
 // Forward Declarations
 class InputParameters;
 class ExecFlagEnum;
+class MaterialProperties;
 
 namespace libMesh
 {
@@ -36,6 +40,18 @@ class Communicator;
 }
 }
 class MultiMooseEnum;
+namespace MetaPhysicL
+{
+template <typename, typename>
+class DualNumber;
+}
+namespace std
+{
+template <typename T, typename D>
+MetaPhysicL::DualNumber<T, D> abs(const MetaPhysicL::DualNumber<T, D> & in);
+template <typename T, typename D>
+MetaPhysicL::DualNumber<T, D> abs(MetaPhysicL::DualNumber<T, D> && in);
+}
 
 namespace MooseUtils
 {
@@ -61,6 +77,21 @@ void escape(std::string & str);
  * Standard scripting language trim function
  */
 std::string trim(const std::string & str, const std::string & white_space = " \t\n\v\f\r");
+
+/**
+ * Python like split function for strings.
+ *
+ * NOTE: This is similar to the tokenize function, but it maintains empty items, which tokenize does
+ *       not. For example, "foo;bar;;" becomes {"foo", "bar", "", ""}.
+ */
+std::vector<std::string> split(const std::string & str, const std::string & delimiter);
+
+/**
+ * Python like join function for strings.
+
+ */
+template <typename T>
+std::string join(const T & strings, const std::string & delimiter);
 
 /**
  * This function tokenizes a path and checks to see if it contains the string to look for

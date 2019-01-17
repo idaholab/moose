@@ -11,7 +11,9 @@
 #include "ConsoleUtils.h"
 
 ControllableItem::ControllableItem(const MooseObjectParameterName & name,
-                                   libMesh::Parameters::Value * value)
+                                   libMesh::Parameters::Value * value,
+                                   const std::set<ExecFlagType> & flags)
+  : _execute_flags(flags)
 {
   _pairs.emplace_back(name, value);
 }

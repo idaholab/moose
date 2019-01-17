@@ -15,10 +15,14 @@
 #include "MooseException.h"
 #include "MooseUtils.h"
 #include "MatrixTools.h"
-#include "MaterialProperty.h"
 #include "PermutationTensor.h"
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
 #include "libmesh/utility.h"
+#include "libmesh/tensor_value.h"
+#include "libmesh/vector_value.h"
 
 // C++ includes
 #include <iomanip>

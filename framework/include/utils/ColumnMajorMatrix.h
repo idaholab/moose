@@ -18,8 +18,6 @@
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"
 #include "libmesh/dense_vector.h"
-#include "metaphysicl/dualnumber.h"
-#include "metaphysicl/numberarray.h"
 
 // C++ includes
 #include <iomanip>
@@ -473,21 +471,6 @@ ColumnMajorMatrixTempl<T>::deviatoric()
 }
 
 template <typename T>
-inline ColumnMajorMatrixTempl<T>
-ColumnMajorMatrixTempl<T>::abs()
-{
-  ColumnMajorMatrixTempl<T> & s = (*this);
-
-  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
-
-  for (unsigned int j = 0; j < _n_cols; j++)
-    for (unsigned int i = 0; i < _n_rows; i++)
-      ret_matrix(i, j) = std::abs(s(i, j));
-
-  return ret_matrix;
-}
-
-template <typename T>
 inline void
 ColumnMajorMatrixTempl<T>::setDiag(T value)
 {
@@ -554,13 +537,6 @@ ColumnMajorMatrixTempl<T>::doubleContraction(const ColumnMajorMatrixTempl<T> & r
       value += (*this)(i, j) * rhs(i, j);
 
   return value;
-}
-
-template <typename T>
-inline T
-ColumnMajorMatrixTempl<T>::norm()
-{
-  return std::sqrt(doubleContraction(*this));
 }
 
 template <typename T>

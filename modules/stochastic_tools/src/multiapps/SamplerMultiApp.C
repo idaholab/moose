@@ -9,6 +9,7 @@
 
 // StochasticTools includes
 #include "SamplerMultiApp.h"
+#include "Sampler.h"
 
 registerMooseObject("StochasticToolsApp", SamplerMultiApp);
 
@@ -17,6 +18,7 @@ InputParameters
 validParams<SamplerMultiApp>()
 {
   InputParameters params = validParams<TransientMultiApp>();
+  params += validParams<SamplerInterface>();
   params.addClassDescription("Creates a sub-application for each row of each Sampler matrix.");
   params.addParam<SamplerName>("sampler", "The Sampler object to utilize for creating MultiApps.");
   params.suppressParameter<std::vector<Point>>("positions");

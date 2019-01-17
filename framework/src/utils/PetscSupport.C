@@ -263,11 +263,9 @@ PetscErrorCode
 petscSetupOutput(CommandLine * cmd_line)
 {
   char code[10] = {45, 45, 109, 111, 111, 115, 101};
-  int argc = cmd_line->argc();
-  char ** argv = cmd_line->argv();
-  for (int i = 0; i < argc; i++)
+  const std::vector<std::string> argv = cmd_line->getArguments();
+  for (const auto & arg : argv)
   {
-    std::string arg(argv[i]);
     if (arg == std::string(code, 10))
     {
       Console::petscSetupOutput();

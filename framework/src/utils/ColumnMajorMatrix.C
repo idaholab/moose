@@ -10,6 +10,9 @@
 // MOOSE includes
 #include "ColumnMajorMatrix.h"
 
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
+
 #include "libmesh/petsc_macro.h"
 
 // PETSc includes
@@ -343,6 +346,28 @@ void
 ColumnMajorMatrixTempl<ADReal>::inverse(ColumnMajorMatrixTempl<ADReal> &) const
 {
   mooseError("Inverse solves with AD types is not supported for the ColumnMajorMatrix class.");
+}
+
+template <typename T>
+inline ColumnMajorMatrixTempl<T>
+ColumnMajorMatrixTempl<T>::abs()
+{
+  ColumnMajorMatrixTempl<T> & s = (*this);
+
+  ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
+
+  for (unsigned int j = 0; j < _n_cols; j++)
+    for (unsigned int i = 0; i < _n_rows; i++)
+      ret_matrix(i, j) = std::abs(s(i, j));
+
+  return ret_matrix;
+}
+
+template <typename T>
+inline T
+ColumnMajorMatrixTempl<T>::norm()
+{
+  return std::sqrt(doubleContraction(*this));
 }
 
 template class ColumnMajorMatrixTempl<Real>;

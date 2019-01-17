@@ -20,7 +20,10 @@ validParams<Control>()
   params += validParams<SetupInterface>();
   params += validParams<FunctionInterface>();
 
-  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);
+  exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+
   params.registerBase("Control");
 
   params.addParam<std::vector<std::string>>(
@@ -90,5 +93,6 @@ Control::getControllableParameterByName(const MooseObjectParameterName & param_n
                "' was not located for the '",
                name(),
                "' object, it either does not exist or has not been declared as controllable.");
+  out.checkExecuteOnType(_fe_problem.getCurrentExecuteOnFlag());
   return out;
 }
