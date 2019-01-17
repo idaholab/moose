@@ -91,8 +91,7 @@
   solve_type = 'PJFNK'
 
   l_tol = 1e-3
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]
