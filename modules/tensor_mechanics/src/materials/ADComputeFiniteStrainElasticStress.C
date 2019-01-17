@@ -46,7 +46,7 @@ void
 ADComputeFiniteStrainElasticStress<compute_stage>::computeQpStress()
 {
   // Calculate the stress in the intermediate configuration
-  typename RankTwoTensorType<compute_stage>::type intermediate_stress;
+  ADRankTwoTensor intermediate_stress;
 
   intermediate_stress =
       _elasticity_tensor[_qp] * (_strain_increment[_qp] + _elastic_strain_old[_qp]);
