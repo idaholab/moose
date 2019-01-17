@@ -25,3 +25,11 @@ traditional markdown format.
 | :- | - | -: |
 | This text is aligned to the left | This text is centered | This is aligned to the right |
 !devel-end!
+
+Example demonstrating CSS
+
+!devel! example caption=Example showing alignment of columns.
+| Left | Center | Right |
+| text-alignment=left background-color=red color=#FFFFFF vertical-align=bottom | width=10% | color=yellow background-color=darkgrey text-align=right vertical-align=top |
+| This text is aligned to the bottom left | This text has little width to work with, causing many word wraps | This is aligned to the top right |
+!devel-end!

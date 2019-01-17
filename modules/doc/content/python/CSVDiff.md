@@ -51,7 +51,7 @@ of a comparison file.
 Always specify the two files you wish to perform a differentiation on, before any other options
 
 | Arguments | Value | Help |
-| :- | :- | :- |
+| :- width=23% | -: width=12% | :- |
 | `--summary or -s` | *csv_file* | Create a comparison file based on *csv file* |
 | `--comparison-file or -c` | *comparison file* | Use specified comparison file while performing differentiations |
 | `--ignore-fields` | *str* | A list of space separated fields to ignore when performing differentiations |

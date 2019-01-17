@@ -32,21 +32,18 @@ find and run your tests and display the results.
 To see more options for `run_tests` you can invoke it with `-h`.  There are many options to look
 through, but some of the important ones are:
 
-- `--failed-tests`: Runs the tests that just failed.  Note: as long as you keep using the
-  `--failed-tests` option the set of failed tests will not change.
-- `--n-threads #`: Causes the tests to run with `#` of (OpenMP/Pthread/TBB) threads.
-- `-p #`: Causes the tests to run with `#` MPI processes.  Useful for guaranteeing that you get the
-  same result in parallel!
-- `--valgrind`: Run all of the tests with the [Valgrind](http://valgrind.org) utility.  Does
-  extensive memory checking to catch segfaults and uninitialized memory errors.
-- `--recover`: Run all of the tests in "recovery" mode.  This runs the test halfway, stops, then
-  attempts to "recover" it and run until the end.  This is very rigorous testing that tests whether
-  everything in your application can work with restart/recover.
-- `--opt` (The default) Builds an optimized executable suitable for running calculations.
-- `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems
-- `--oprof` Not normally used. Can be used for "code profiling": running your code with a utility like oprof, gprof, vtune, etc.
-- `--pro` An alias to `--oprof`
-- `--devel` Something in-between opt and dbg. Attempts to be faster but also does some more run-time checks (asserts and mooseAsserts)
+| Argument | About |
+| text-align=left width=25% | text-align-left |
+| `--failed-tests` | Runs the tests that just failed.  Note: as long as you keep using the `--failed-tests` option the set of failed tests will not change. |
+| `--n-threads` *int* | Causes the tests to run with *int* number of (OpenMP/Pthread/TBB) threads. |
+| `-p` *int* | Causes the tests to run with *int* MPI processes. Useful for guaranteeing that you get the same result in parallel! |
+| `--valgrind` | Run all of the tests with the [Valgrind](http://valgrind.org) utility. Does extensive memory checking to catch segfaults and uninitialized memory errors. |
+| `--recover` | Run all of the tests in "recovery" mode. This runs the test halfway, stops, then attempts to "recover" it and run until the end. This is very rigorous testing that tests whether everything in your application can work with restart/recover. |
+| `--opt` | (The default) Builds an optimized executable suitable for running calculations. |
+| `--dbg` | An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems |
+| `--oprof` | Not normally used. Can be used for "code profiling": running your code with a utility like oprof, gprof, vtune, etc. |
+| `--pro` | An alias to `--oprof` |
+| `--devel` | Something in-between opt and dbg. Attempts to be faster but also does some more run-time checks (asserts and mooseAsserts) |
 
 ## `testroot`
 

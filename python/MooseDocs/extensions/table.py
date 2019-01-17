@@ -12,6 +12,7 @@ import re
 
 import MooseDocs
 from MooseDocs.base import components, LatexRenderer
+from MooseDocs import common
 from MooseDocs.extensions import command, floats
 from MooseDocs.tree import html, tokens, latex
 
@@ -108,49 +109,62 @@ class TableCommandComponent(command.CommandComponent):
 class TableComponent(components.TokenComponent):
     RE = re.compile(r'(?:\A|\n{2,})^(?P<table>\|.*?)(?=\Z|\n{2,})',
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
-    FORMAT_RE = re.compile(r'^(?P<format>\|[ \|:\-]+\|)$', flags=re.MULTILINE|re.UNICODE)
+
+    TABLE_FORMAT_DEFAULTS = { 'color' : 'black', 'text-align' : 'left' }
+    # CSS styles we want to support, but otherwise do not want to set a default for
+    SUPPORTED_FORMATS = ['width', 'background-color', 'vertical-align', 'border']
+
+    def __replaceToken(self, md_token, css, styles):
+        if re.search(r'(^|\s)' + md_token + '($|\s)', styles):
+            return styles.replace(md_token, css, 1)
+        return styles
 
     def createToken(self, parent, info, page):
-        content = info['table']
+        content = info['table'].split('\n')
         table = Table(parent)
+        table_format = dict()
         head = None
-        body = None
         form = None
 
-        format_match = self.FORMAT_RE.search(content)
-        if format_match:
-            head = [item.strip() for item in \
-                    content[:format_match.start('format')-1].split('|') if item]
-            body = content[format_match.end('format'):]
-            form = [item.strip() for item in format_match.group('format').split('|') if item]
+        # Table with formating rules
+        if len(content) > 2:
+            head = content[0].split('|')
+            form = content[1].split('|')
+            body = content[2:]
 
-        if form:
-            for i, string in enumerate(form):
-                if string.startswith(':'):
-                    form[i] = 'left'
-                elif string.endswith(':'):
-                    form[i] = 'right'
-                elif string.startswith('-'):
-                    form[i] = 'center'
-                else:
-                    # TODO: warning/error
-                    form[i] = 'left'
+        # A basic table without headers
+        else:
+            body = content
 
-        #TODO: check lengths of form, head, body
         if head:
+            for i, styles in enumerate([x for x in form if x]):
+                # Support markdown alignment syntax
+                for md_token, css in [(':-', 'text-align=left'),
+                                      ('-:', 'text-align=right'),
+                                      ('-', 'text-align=center')]:
+                    styles = self.__replaceToken(md_token, css, styles)
+
+                table_format[i], unknown = common.match_settings(self.TABLE_FORMAT_DEFAULTS, styles)
+                for supported_style in [x for x in self.SUPPORTED_FORMATS if x in unknown.keys()]:
+                    table_format[i][supported_style] = unknown[supported_style]
+
             row = TableRow(TableHead(table))
-            for i, h in enumerate(head):
-                hitem = TableHeadItem(row, align=form[i])
+            for i, h in enumerate([x for x in head if x]):
+                hitem = TableHeadItem(row, **table_format[i])
                 self.reader.tokenize(hitem, h, page, MooseDocs.INLINE)
 
-        for line in body.splitlines():
-            if line:
-                row = TableRow(TableBody(table))
-                for i, content in enumerate([item.strip() for item in line.split('|') if item]):
-                    item = TableItem(row, align=form[i]) #pylint: disable=redefined-variable-type
-                    self.reader.tokenize(item, content, page, MooseDocs.INLINE)
+        if body:
+            for line in body:
+                if line:
+                    row = TableRow(TableBody(table))
+                    for i, content in enumerate([item.strip() for item in line.split('|') if item]):
+                        if table_format:
+                            styles = table_format[i]
+                        else:
+                            styles, unknown = common.match_settings(self.TABLE_FORMAT_DEFAULTS, '')
 
-        table['form'] = form
+                        item = TableItem(row, **styles)
+                        self.reader.tokenize(item, content, page, MooseDocs.INLINE)
         return table
 
 class RenderTable(components.RenderComponent):
@@ -195,7 +209,9 @@ class RenderTag(components.RenderComponent):
 class RenderItem(RenderTag):
     def createHTML(self, parent, token, page):
         tag = RenderTag.createHTML(self, parent, token, page)
-        tag.addStyle('text-align:{}'.format(token['align']))
+        #tag.addStyle('text-align:{}'.format(token['align']))
+        for style_key, style_value in token.iteritems():
+            tag.addStyle('%s:%s' % (style_key, style_value))
         return tag
 
     def createLatex(self, parent, token, page):

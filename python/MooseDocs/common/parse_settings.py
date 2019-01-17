@@ -25,7 +25,7 @@ def get_settings_as_dict(settings):
         output[key] = value[0]
     return output
 
-def match_settings(known, raw):
+def match_settings(defaults, raw):
     """
     Parses a raw string for key, value pairs separated by an equal sign.
 
@@ -33,6 +33,7 @@ def match_settings(known, raw):
         default[dict]: The default values for the known keys.
         raw[str]: The raw string to parse and inject into a dict().
     """
+    known = dict(defaults)
     unknown = dict()
 
     if not raw:
