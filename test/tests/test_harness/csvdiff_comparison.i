@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 2
+  nx = 20
+  ny = 20
 []
 
 [Variables]
@@ -47,16 +47,20 @@
 []
 
 [Postprocessors]
-  [./u_field]
-    type = PointValue
-    variable = u
-    point = '0.5 0.5 0'
-  [../]
-  # Gold file does not have an x_field
   [./x_field]
     type = PointValue
     variable = u
     point = '0.5 0.5 0'
+  [../]
+  [./y_field]
+    type = PointValue
+    variable = u
+    point = '0.25 0.25 0'
+  [../]
+  [./z_field]
+    type = PointValue
+    variable = u
+    point = '0.75 0.75 0'
   [../]
 []
 

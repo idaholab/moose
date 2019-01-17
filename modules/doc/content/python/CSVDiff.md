@@ -58,7 +58,6 @@ Always specify the two files you wish to perform a differentiation on, before an
 | `--diff-fields` | *str* | A list of space separated fields to include when performing differentiations |
 | `--abs-zero` | *str float* | A scientific notiation or float value representing zero (the floor). Any values lower than this amount will be considered zero. (default: 1e-11) |
 | `--relative-tolerance` | *str float* | A float or scientific notation value representing an acceptable degree of tolerance between two opposing values. Any float comparison which falls within this tolerance will be considered the same number. (default 5.5e-6) |
-| `--only-compare-custom` | *boolean* | While using --custom-* arguments below, ignore every field except those specified in --custom-columns |
 | `--custom-columns` | *str* | Space separated list of custom field IDs to compare |
 | `--custom-abs-zero` | *str float* | Space separated list of scientific notations or floats for absolute zero, corresponding to the values in --custom-colums |
 | `--custom-rel-err` | *str float* | Space separated list of scientific notations or floats for relative tolerance, corresponding to the values in --custom-colums |
@@ -148,7 +147,9 @@ We can create a comparison file to set forth new tolerances which will allow the
 > moose/scripts/csvdiff.py --summary a > a.cmp
 ```
 
-If we want to loosen the error tolerances for 'y', we would modify the comparison file like so:
+The following example changes would allow both files to be considered identical:
+
+Loosen the error tolerances for 'y':
 
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
@@ -159,7 +160,18 @@ GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
 ```
 
-We can also instruct CSVDiff to ignore field 'y' all together:
+Raise the floor tolerance:
+
+```
+TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
+
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+    y floor 1e-5         # min: 0.000e+00 @ t0          max: 1.000e-06 @ t1
+    x                    # min: 0.000e+00 @ t0          max: 1.000e+00 @ t1
+    z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
+```
+
+Ignore field 'y' by including a not '!' statement:
 
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
@@ -170,13 +182,12 @@ GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
 ```
 
-Or, instruct CSVDiff to treat values smaller than 1e-05 for field 'y' as an absolute zero (the floor):
+Removing the offending field from the comparison file:
 
 ```
 TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 1 @ t1
 
 GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
-    y floor 1e-5         # min: 0.000e+00 @ t0          max: 1.000e-06 @ t1
     x                    # min: 0.000e+00 @ t0          max: 1.000e+00 @ t1
     z                    # min: 1.000e+00 @ t1          max: 1.000e+02 @ t0
 ```

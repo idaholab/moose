@@ -20,7 +20,6 @@ class CSVDiff(FileTester):
         params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
         params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
-        params.addParam('only_compare_custom', False, "Only compare (and require) the listed custom columns.")
         params.addParam('comparison_file', "Use supplied custom comparison config file.")
         params.addParam('rel_err', "A customized relative error tolerances.")
         params.addParam('abs_zero', "A customized relative error tolerances.")
@@ -72,9 +71,6 @@ class CSVDiff(FileTester):
 
             if self.specs.isValid('override_abs_zero'):
                 csvdiff.append('--custom-abs-zero %s' % (' '.join(self.specs['override_abs_zero'])))
-
-            if self.specs.isValid('only_compare_custom') and self.specs['only_compare_custom']:
-                csvdiff.append('--only-compare-custom')
 
             commands.append(' '.join(csvdiff))
 
