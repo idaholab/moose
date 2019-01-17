@@ -19,6 +19,7 @@ ifeq ($(ALL_MODULES),yes)
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
         XFEM                        := yes
+        EXTERNAL_PETSC_SOLVER       := yes
 endif
 
 ifeq ($(XFEM),yes)
@@ -46,7 +47,7 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem"
+MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem external_petsc_solver"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -177,6 +178,14 @@ ifeq ($(XFEM),yes)
   #Dependency on solid_mechanics
   DEPEND_MODULES     := solid_mechanics
   SUFFIX             := xfem
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(EXTERNAL_PETSC_SOLVER),yes)
+  APPLICATION_NAME   := external_petsc_solver
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/${APPLICATION_NAME}
+
+  SUFFIX             := eps
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

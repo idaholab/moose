@@ -61,6 +61,9 @@
 #ifdef XFEM_ENABLED
 #include "XFEMApp.h"
 #endif
+#ifdef EXTERNAL_PETSC_SOLVER_ENABLED
+#include "ExternalPetscSolverApp.h"
+#endif
 
 ///@{
 /**
@@ -367,6 +370,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef XFEM_ENABLED
   XFEMApp::registerAll(f, af, s);
+#endif
+
+#ifdef EXTERNAL_PETSC_SOLVER_ENABLED
+  ExternalPetscSolverApp::registerAll(f, af, s);
 #endif
 
   clearUnusedWarnings(f);
