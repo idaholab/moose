@@ -2,7 +2,7 @@
 #define MOOSEADWRAPPER_H
 
 #include "MooseError.h"
-#include "ADReal.h"
+#include "DualReal.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
@@ -102,15 +102,15 @@ public:
   MooseADWrapper(bool use_ad = false);
   MooseADWrapper(MooseADWrapper<Real> &&) = default;
 
-  typedef ADReal DNType;
+  typedef DualReal DNType;
 
   const Real & value() const { return _val; }
 
   Real & value() { return _val; }
 
-  const ADReal & dn(bool = true) const;
+  const DualReal & dn(bool = true) const;
 
-  ADReal & dn(bool = true);
+  DualReal & dn(bool = true);
 
   void copyDualNumberToValue();
 
@@ -122,7 +122,7 @@ public:
 private:
   bool _use_ad;
   Real _val;
-  mutable std::unique_ptr<ADReal> _dual_number;
+  mutable std::unique_ptr<DualReal> _dual_number;
   friend void dataStore<Real>(std::ostream &, MooseADWrapper<Real> &, void *);
   friend void dataLoad<Real>(std::istream &, MooseADWrapper<Real> &, void *);
 };
@@ -134,15 +134,15 @@ public:
   MooseADWrapper(bool use_ad = false);
   MooseADWrapper(MooseADWrapper<VectorValue<Real>> &&) = default;
 
-  typedef VectorValue<ADReal> DNType;
+  typedef VectorValue<DualReal> DNType;
 
   const VectorValue<Real> & value() const { return _val; }
 
   VectorValue<Real> & value() { return _val; }
 
-  const VectorValue<ADReal> & dn(bool = true) const;
+  const VectorValue<DualReal> & dn(bool = true) const;
 
-  VectorValue<ADReal> & dn(bool = true);
+  VectorValue<DualReal> & dn(bool = true);
 
   void copyDualNumberToValue();
 
@@ -154,7 +154,7 @@ public:
 private:
   bool _use_ad;
   VectorValue<Real> _val;
-  mutable std::unique_ptr<VectorValue<ADReal>> _dual_number;
+  mutable std::unique_ptr<VectorValue<DualReal>> _dual_number;
   friend void
   dataStore<VectorValue<Real>>(std::ostream &, MooseADWrapper<VectorValue<Real>> &, void *);
   friend void
@@ -168,15 +168,15 @@ public:
   MooseADWrapper(bool use_ad = false);
   MooseADWrapper(MooseADWrapper<TensorValue<Real>> &&) = default;
 
-  typedef TensorValue<ADReal> DNType;
+  typedef TensorValue<DualReal> DNType;
 
   const TensorValue<Real> & value() const { return _val; }
 
   TensorValue<Real> & value() { return _val; }
 
-  const TensorValue<ADReal> & dn(bool = true) const;
+  const TensorValue<DualReal> & dn(bool = true) const;
 
-  TensorValue<ADReal> & dn(bool = true);
+  TensorValue<DualReal> & dn(bool = true);
 
   void copyDualNumberToValue();
 
@@ -188,7 +188,7 @@ public:
 private:
   bool _use_ad;
   TensorValue<Real> _val;
-  mutable std::unique_ptr<TensorValue<ADReal>> _dual_number;
+  mutable std::unique_ptr<TensorValue<DualReal>> _dual_number;
   friend void
   dataStore<TensorValue<Real>>(std::ostream &, MooseADWrapper<TensorValue<Real>> &, void *);
   friend void
@@ -202,15 +202,15 @@ public:
   MooseADWrapper(bool use_ad = false);
   MooseADWrapper(MooseADWrapper<RankTwoTensorTempl<Real>> &&) = default;
 
-  typedef RankTwoTensorTempl<ADReal> DNType;
+  typedef RankTwoTensorTempl<DualReal> DNType;
 
   const RankTwoTensorTempl<Real> & value() const { return _val; }
 
   RankTwoTensorTempl<Real> & value() { return _val; }
 
-  const RankTwoTensorTempl<ADReal> & dn(bool = true) const;
+  const RankTwoTensorTempl<DualReal> & dn(bool = true) const;
 
-  RankTwoTensorTempl<ADReal> & dn(bool = true);
+  RankTwoTensorTempl<DualReal> & dn(bool = true);
 
   void copyDualNumberToValue();
 
@@ -224,7 +224,7 @@ public:
 private:
   bool _use_ad;
   RankTwoTensorTempl<Real> _val;
-  mutable std::unique_ptr<RankTwoTensorTempl<ADReal>> _dual_number;
+  mutable std::unique_ptr<RankTwoTensorTempl<DualReal>> _dual_number;
   friend void dataStore<RankTwoTensorTempl<Real>>(std::ostream &,
                                                   MooseADWrapper<RankTwoTensorTempl<Real>> &,
                                                   void *);
@@ -240,15 +240,15 @@ public:
   MooseADWrapper(bool use_ad = false);
   MooseADWrapper(MooseADWrapper<RankFourTensorTempl<Real>> &&) = default;
 
-  typedef RankFourTensorTempl<ADReal> DNType;
+  typedef RankFourTensorTempl<DualReal> DNType;
 
   const RankFourTensorTempl<Real> & value() const { return _val; }
 
   RankFourTensorTempl<Real> & value() { return _val; }
 
-  const RankFourTensorTempl<ADReal> & dn(bool = true) const;
+  const RankFourTensorTempl<DualReal> & dn(bool = true) const;
 
-  RankFourTensorTempl<ADReal> & dn(bool = true);
+  RankFourTensorTempl<DualReal> & dn(bool = true);
 
   void copyDualNumberToValue();
 
@@ -262,7 +262,7 @@ public:
 private:
   bool _use_ad;
   RankFourTensorTempl<Real> _val;
-  mutable std::unique_ptr<RankFourTensorTempl<ADReal>> _dual_number;
+  mutable std::unique_ptr<RankFourTensorTempl<DualReal>> _dual_number;
   friend void dataStore<RankFourTensorTempl<Real>>(std::ostream &,
                                                    MooseADWrapper<RankFourTensorTempl<Real>> &,
                                                    void *);

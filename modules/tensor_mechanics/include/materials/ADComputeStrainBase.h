@@ -32,7 +32,7 @@ class ADComputeStrainBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
+typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 
 declareADValidParams(ADComputeStrainBase);
 

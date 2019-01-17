@@ -47,7 +47,7 @@ mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
 
 template <>
 void
-mooseSetToZero<RankTwoTensorTempl<ADReal>>(RankTwoTensorTempl<ADReal> & v)
+mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v)
 {
   v.zero();
 }
@@ -1000,9 +1000,11 @@ RankTwoTensorTempl<T>::syev(const char * calculation_type,
 
 template <>
 void
-RankTwoTensorTempl<ADReal>::syev(const char *, std::vector<ADReal> &, std::vector<ADReal> &) const
+RankTwoTensorTempl<DualReal>::syev(const char *,
+                                   std::vector<DualReal> &,
+                                   std::vector<DualReal> &) const
 {
-  mooseError("ADRankTwoTensor does not sypport the syev method");
+  mooseError("DualRankTwoTensor does not sypport the syev method");
 }
 
 template <typename T>
@@ -1044,9 +1046,9 @@ RankTwoTensorTempl<T>::getRUDecompositionRotation(RankTwoTensorTempl<T> & rot) c
 
 template <>
 void
-RankTwoTensorTempl<ADReal>::getRUDecompositionRotation(RankTwoTensorTempl<ADReal> &) const
+RankTwoTensorTempl<DualReal>::getRUDecompositionRotation(RankTwoTensorTempl<DualReal> &) const
 {
-  mooseError("ADRankTwoTensor does not support getRUDecompositionRotation");
+  mooseError("DualRankTwoTensor does not support getRUDecompositionRotation");
 }
 
 template <typename T>
@@ -1145,4 +1147,4 @@ RankTwoTensorTempl<T>::setToIdentity()
 }
 
 template class RankTwoTensorTempl<Real>;
-template class RankTwoTensorTempl<ADReal>;
+template class RankTwoTensorTempl<DualReal>;

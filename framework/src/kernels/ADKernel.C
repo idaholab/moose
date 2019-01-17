@@ -123,7 +123,7 @@ ADKernel<compute_stage>::computeJacobian()
   {
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      ADReal residual =
+      DualReal residual =
           computeQpResidual(); // This will also compute the derivative with respect to all dofs
       for (_j = 0; _j < _var.phiSize(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
@@ -172,7 +172,7 @@ ADKernel<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     {
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
-        ADReal residual =
+        DualReal residual =
             computeQpResidual(); // This will also compute the derivative with respect to all dofs
 
         for (_j = 0; _j < jvar.phiSize(); _j++)
