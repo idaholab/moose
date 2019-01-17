@@ -58,6 +58,11 @@ ExternalPETScProblem::syncSolutions(Direction direction)
   {
     _console << "syncSolutions from external petsc App" << std::endl;
     DM da;
+    // xs: start grid point in x direction on local
+    // ys: start grid point in y direciton on local
+    // xm: number of grid points in x direciton on local
+    // ym: number of grid points in y direction on local
+    // Mx: number of grid points in x direction on all processors
     PetscInt i, j, xs, ys, xm, ym, Mx;
     PetscScalar ** _petsc_sol_array;
     TSGetDM(_ts, &da);
@@ -78,6 +83,9 @@ ExternalPETScProblem::syncSolutions(Direction direction)
     DMDAGetCorners(da, &xs, &ys, NULL, &xm, &ym, NULL);
     DMDAVecGetArray(da, _petsc_sol, &_petsc_sol_array);
 
+    // Take the solution from PETSc, and sync it to one MOOSE variable
+    // We currently support one variable only but it is straightforward
+    // to have multiple moose variables
     MeshBase & to_mesh = mesh().getMesh();
     auto & sync_to_var = getVariable(
         0, _sync_to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
@@ -90,6 +98,7 @@ ExternalPETScProblem::syncSolutions(Direction direction)
           mooseError("Does not support multiple components");
 
         dof_id_type dof = to_node->dof_number(sync_to_var.sys().number(), sync_to_var.number(), 0);
+        // Copy the solution to the right location
         sync_to_var.sys().solution().set(dof, _petsc_sol_array[j][i]);
       }
 
@@ -100,6 +109,7 @@ ExternalPETScProblem::syncSolutions(Direction direction)
   else if (direction == Direction::TO_EXTERNAL_APP)
   {
     _console << "syncSolutions to external petsc App " << std::endl;
+    // We could the similar thing to sync the solution back to PETSc.
   }
 #endif
 }

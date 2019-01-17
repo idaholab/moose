@@ -1,6 +1,6 @@
 Content:
     ExternalPetscSolver:
-        root_dir: ${ROOT_DIR}/doc/content
+        root_dir: ${MOOSE_DIR}/modules/external_petsc_solver/doc/content
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
@@ -8,13 +8,21 @@ Content:
             - css/*
             - contrib/**
             - media/**
-
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: ExternalPetscSolver
-
+    repo: https://github.com/idaholab/moose
+    home: /modules/external_petsc_solver
 Extensions:
     MooseDocs.extensions.appsyntax:
-        executable: ${ROOT_DIR}
+        executable: ${MOOSE_DIR}/modules/external_petsc_solver
+        hide:
+            framework: !include framework/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
         includes:
-            - include
+            - framework/include
+            - ${MOOSE_DIR}/modules/external_petsc_solver/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml

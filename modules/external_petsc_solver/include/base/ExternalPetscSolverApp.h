@@ -16,6 +16,12 @@ class ExternalPetscSolverApp;
 template <>
 InputParameters validParams<ExternalPetscSolverApp>();
 
+/**
+ * This is a demo used to demonstrate how to couple an external app
+ * through the MOOSE wrapper APP.
+ * We are using a PETSc application as an example. ExternalPetscSolverApp
+ * create and destroys an external PETSc FEM/FDM solver.
+ */
 class ExternalPetscSolverApp : public MooseApp
 {
 public:
@@ -26,10 +32,14 @@ public:
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 
 #if LIBMESH_HAVE_PETSC
+  /**
+   * Return a time-stepping (TS) component that holds all the ingredients of applicaiton
+   */
   TS & getExternalPETScTS() { return _ts; }
 #endif
 private:
 #if LIBMESH_HAVE_PETSC
+  /// Time-stepping (TS) object
   TS _ts;
 #endif
 };

@@ -18,7 +18,12 @@ template <>
 InputParameters validParams<PETScDMDAMesh>();
 
 /**
- * Mesh generated from parameters
+ * Generate a parallel (distributed) mesh from PETSc DMDA.
+ * DMDA could be passed in from an application such as ExternalPetscSolverApp
+ * or created on the fly. Note that this mesh object does not have one layer of
+ * ghost elements. It is designed for holding the solution from an external PETSc
+ * application. And then the solution can be coupled to other MOOSE-based applications
+ * using the existing MultiApp transfers.
  */
 class PETScDMDAMesh : public MooseMesh
 {
@@ -55,8 +60,10 @@ protected:
   /// The type of element to build
   ElemType _elem_type;
 
+  /// If DMDA is created on the fly, we should destroy it.
   bool _need_to_destroy_dmda;
 #if LIBMESH_HAVE_PETSC
+  /// Mesh object
   DM _dmda;
 #endif
 };

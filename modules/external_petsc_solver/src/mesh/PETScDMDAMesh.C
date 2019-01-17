@@ -29,7 +29,7 @@
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
-registerMooseObject("MooseApp", PETScDMDAMesh);
+registerMooseObject("ExternalPetscSolverApp", PETScDMDAMesh);
 
 template <>
 InputParameters
@@ -85,6 +85,8 @@ PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters)
   // All generated meshes are regular orthogonal meshes
   _regular_orthogonal_mesh = true;
 
+  // We support 2D mesh only at this point. If you need 3D or 1D
+  // Please contact MOOSE developers
   if (_dim != 2)
     mooseError("Support 2 dimensional mesh only");
 
@@ -95,6 +97,7 @@ PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters)
   if (petsc_app)
   {
     TS & ts = petsc_app->getExternalPETScTS();
+    // Retrieve mesh from TS
     TSGetDM(ts, &_dmda);
     _need_to_destroy_dmda = false;
   }
@@ -115,7 +118,9 @@ PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters)
                  NULL,
                  NULL,
                  &_dmda);
+    // Let DMDA take PETSc options
     DMSetFromOptions(_dmda);
+    // Finalize mesh setup
     DMSetUp(_dmda);
     _need_to_destroy_dmda = true;
   }
@@ -171,6 +176,8 @@ node_id_Quad4(const ElemType /*type*/,
               const dof_id_type /*k*/)
 
 {
+  // Transform a grid coordinate (i, j) to its global node ID
+  // This match what PETSc does
   return i + j * (nx + 1);
 }
 
@@ -188,6 +195,10 @@ add_element_Quad4(DM da,
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
 #if LIBMESH_HAVE_PETSC
+  // Mx: number of grid points in x direction for all processors
+  // My: number of grid points in y direction for all processors
+  // xp: number of processors in x direction
+  // yp: number of processors in y direction
   PetscInt Mx, My, xp, yp;
   DMDAGetInfo(da,
               PETSC_IGNORE,
@@ -206,11 +217,16 @@ add_element_Quad4(DM da,
 
   const PetscInt *lx, *ly;
   PetscInt *lxo, *lyo;
+  // PETSc-3.8.x or older use PetscDataType
 #if PETSC_VERSION_LESS_THAN(3, 9, 0)
   DMGetWorkArray(da, xp + yp + 2, PETSC_INT, &lxo);
 #else
+  // PETSc-3.9.x or newer use MPI_DataType
   DMGetWorkArray(da, xp + yp + 2, MPIU_INT, &lxo);
 #endif
+  // Gets the ranges of indices in the x, y and z direction that are owned by each process
+  // Ranges here are different from what we have in Mat and Vec.
+  // It means how many points each processor holds
   DMDAGetOwnershipRanges(da, &lx, &ly, NULL);
   lxo[0] = 0;
   for (PetscInt i = 0; i < xp; i++)
@@ -221,8 +237,11 @@ add_element_Quad4(DM da,
   for (PetscInt i = 0; i < yp; i++)
     lyo[i + 1] = lyo[i] + ly[i];
 
+  // Try to calculate processor-grid coordinate (xpid, ypid)
   PetscInt xpid, ypid, xpidplus, ypidplus;
-
+  // Finds integer in a sorted array of integers
+  // Loc:  the location if found, otherwise -(slot+1)
+  // where slot is the place the value would go
   PetscFindInt(i, xp + 1, lxo, &xpid);
 
   xpid = xpid < 0 ? -xpid - 1 - 1 : xpid;
@@ -249,6 +268,7 @@ add_element_Quad4(DM da,
                                   node_id_Quad4(type, nx, 0, i, j, 0));
   node0_ptr->set_unique_id() = node_id_Quad4(type, nx, 0, i, j, 0);
   node0_ptr->set_id() = node0_ptr->unique_id();
+  // xpid + ypid * xp is the global processor ID
   node0_ptr->processor_id() = xpid + ypid * xp;
 
   // Bottom Right
@@ -275,6 +295,7 @@ add_element_Quad4(DM da,
   node3_ptr->set_id() = node3_ptr->unique_id();
   node3_ptr->processor_id() = xpid + ypidplus * xp;
 
+  // New an element and attach four nodes to it
   Elem * elem = new Quad4;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
@@ -309,25 +330,6 @@ set_boundary_names_Quad4(BoundaryInfo & boundary_info)
   boundary_info.sideset_name(1) = "right";
   boundary_info.sideset_name(2) = "top";
   boundary_info.sideset_name(3) = "left";
-}
-
-void
-scale_nodal_positions_Quad4(dof_id_type /*nx*/,
-                            dof_id_type /*ny*/,
-                            dof_id_type /*nz*/,
-                            Real xmin,
-                            Real xmax,
-                            Real ymin,
-                            Real ymax,
-                            Real /*zmin*/,
-                            Real /*zmax*/,
-                            MeshBase & mesh)
-{
-  for (auto & node_ptr : mesh.node_ptr_range())
-  {
-    (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
-    (*node_ptr)(1) = (*node_ptr)(1) * (ymax - ymin) + ymin;
-  }
 }
 
 void
@@ -435,7 +437,14 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da, const ElemType type)
   const auto pid = mesh.comm().rank();
 
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-
+  // xs: start grid point (not element) index on local in x direction
+  // ys: start grid point index on local in y direction
+  // xm: number of grid points owned by the local processor in x direction
+  // ym: number of grid points owned by the local processor in y direction
+  // Mx: number of grid points on all processors in x direction
+  // My: number of grid points on all processors in y direction
+  // xp: number of processor cores in x direction
+  // yp: number of processor cores in y direction
   PetscInt xs, ys, xm, ym, Mx, My, xp, yp;
 
   /* Get local grid boundaries */
@@ -458,6 +467,11 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da, const ElemType type)
   for (PetscInt j = ys; j < ys + ym; j++)
     for (PetscInt i = xs; i < xs + xm; i++)
     {
+      // We loop over grid points, but we are
+      // here building elements. So that we just
+      // simply skip the first x and y points since the
+      // number of grid ponts is one more than
+      // the number of grid elements
       if (!i || !j)
         continue;
 
