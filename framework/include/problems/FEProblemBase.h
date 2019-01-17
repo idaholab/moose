@@ -756,11 +756,14 @@ public:
    */
   PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
 
+  ///@{
   /**
    * Returns whether or not the current simulation has any multiapps
    */
   bool hasMultiApps() const { return _multi_apps.hasActiveObjects(); }
+  bool hasMultiApps(ExecFlagType type) const;
   bool hasMultiApp(const std::string & name) const;
+  ///@}
 
   /**
    * Check existence of the VectorPostprocessor.

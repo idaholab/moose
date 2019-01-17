@@ -194,15 +194,21 @@ public:
 
   /**
    * Get the number of Picard iterations performed
+   * Because this returns the number of Picard iterations, rather than the current
+   * iteration count (which starts at 0), increment by 1.
+   *
    * @return Number of Picard iterations performed
    */
-  // Because this returns the number of Picard iterations, rather than the current
-  // iteration count (which starts at 0), increment by 1.
-  Real numPicardIts() { return _picard_it + 1; }
+  unsigned int numPicardIts() const { return _picard_it + 1; }
+
+  /**
+   * Print the Picard norms before the convergence check
+   */
+  virtual void printPicardNorms() const;
 
   /**
    * Check if Picard iteration converged when maximum number of Picard iterations is greater than
-   * one
+   * one.
    */
   virtual bool picardConverged() const;
 
@@ -295,10 +301,11 @@ protected:
   unsigned int _picard_max_its;
   bool & _picard_converged;
   Real & _picard_initial_norm;
-  Real & _picard_timestep_begin_norm;
-  Real & _picard_timestep_end_norm;
+  std::vector<Real> & _picard_timestep_begin_norm;
+  std::vector<Real> & _picard_timestep_end_norm;
   Real _picard_rel_tol;
   Real _picard_abs_tol;
+  bool _picard_force_norms;
 
   ///should detailed diagnostic output be printed
   bool _verbose;

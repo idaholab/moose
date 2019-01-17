@@ -382,8 +382,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       }
       else
       {
-        _console << "Solving Normal Step!" << std::endl;
-
         if (_first && !_app.isRecovering())
           problem.advanceState();
 
