@@ -12,6 +12,16 @@
 
 #include "ADKernel.h"
 
+#define usingStressDivergenceTensorsMembers                                                        \
+  usingKernelMembers;                                                                              \
+  using ADStressDivergenceTensors<compute_stage>::_base_name;                                      \
+  using ADStressDivergenceTensors<compute_stage>::_stress;                                         \
+  using ADStressDivergenceTensors<compute_stage>::_component;                                      \
+  using ADStressDivergenceTensors<compute_stage>::_ndisp;                                          \
+  using ADStressDivergenceTensors<compute_stage>::_disp_var;                                       \
+  using ADStressDivergenceTensors<compute_stage>::_avg_grad_test;                                  \
+  using ADStressDivergenceTensors<compute_stage>::_volumetric_locking_correction
+
 // Forward Declarations
 template <ComputeStage>
 class ADStressDivergenceTensors;
@@ -32,10 +42,10 @@ public:
   ADStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup() override;
+  void initialSetup() override;
 
-  virtual ADResidual computeQpResidual() override;
-  virtual void precalculateResidual() override;
+  ADResidual computeQpResidual() override;
+  void precalculateResidual() override;
 
   const std::string _base_name;
 
@@ -47,7 +57,7 @@ protected:
   std::vector<unsigned int> _disp_var;
 
   /// Gradient of test function averaged over the element. Used in volumetric locking correction calculation.
-  std::vector<typename RealVectorValueType<compute_stage>::type> _avg_grad_test;
+  std::vector<typename RealType<compute_stage>::type> _avg_grad_test;
 
   /// Flag for volumetric locking correction
   const bool _volumetric_locking_correction;

@@ -43,7 +43,9 @@ ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
     _volumetric_locking_correction(adGetParam<bool>("volumetric_locking_correction"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var[i] = coupled("displacements", i);
+    // the next line should be _disp_var[i] = coupled("displacements", i);
+    // but the Coupleable:: is required to avoid triggering an internal Intel compiler bug
+    _disp_var[i] = Coupleable::coupled("displacements", i);
 
   // Error if volumetric locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)
@@ -67,8 +69,7 @@ ADStressDivergenceTensors<compute_stage>::computeQpResidual()
 
   // volumetric locking correction
   if (_volumetric_locking_correction)
-    residual += (_avg_grad_test[_i](_component) - _grad_test[_i][_qp](_component)) / 3.0 *
-                _stress[_qp].trace();
+    residual += (_avg_grad_test[_i] - _grad_test[_i][_qp](_component)) / 3.0 * _stress[_qp].trace();
 
   return residual;
 }
@@ -84,10 +85,13 @@ ADStressDivergenceTensors<compute_stage>::precalculateResidual()
   _avg_grad_test.resize(_test.size());
   for (_i = 0; _i < _test.size(); ++_i)
   {
-    _avg_grad_test[_i](_component) = 0.0;
+    _avg_grad_test[_i] = 0.0;
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      _avg_grad_test[_i](_component) += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
+      _avg_grad_test[_i] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
 
-    _avg_grad_test[_i](_component) /= _current_elem_volume;
+    _avg_grad_test[_i] /= _current_elem_volume;
   }
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADStressDivergenceTensors);

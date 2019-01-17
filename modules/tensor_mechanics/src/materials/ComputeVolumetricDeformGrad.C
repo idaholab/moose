@@ -40,11 +40,8 @@ ComputeVolumetricDeformGrad::ComputeVolumetricDeformGrad(const InputParameters &
 void
 ComputeVolumetricDeformGrad::initQpStatefulProperties()
 {
-  _volumetric_deform_grad[_qp].zero();
-  _volumetric_deform_grad[_qp].addIa(1.0);
-
-  _post_deform_grad[_qp].zero();
-  _post_deform_grad[_qp].addIa(1.0);
+  _post_deform_grad[_qp].setToIdentity();
+  _volumetric_deform_grad[_qp].setToIdentity();
 }
 
 void
@@ -57,6 +54,5 @@ ComputeVolumetricDeformGrad::computeQpProperties()
 void
 ComputeVolumetricDeformGrad::createVolumetricDeformGrad()
 {
-  _volumetric_deform_grad[_qp].zero();
-  _volumetric_deform_grad[_qp].addIa(1.0);
+  _volumetric_deform_grad[_qp].setToIdentity();
 }

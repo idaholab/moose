@@ -14,12 +14,15 @@
 
 #define usingComputeStrainBaseMembers                                                              \
   usingMaterialMembers;                                                                            \
+  using ADComputeStrainBase<compute_stage>::_ndisp;                                                \
   using ADComputeStrainBase<compute_stage>::_disp;                                                 \
   using ADComputeStrainBase<compute_stage>::_grad_disp;                                            \
+  using ADComputeStrainBase<compute_stage>::_base_name;                                            \
   using ADComputeStrainBase<compute_stage>::_mechanical_strain;                                    \
   using ADComputeStrainBase<compute_stage>::_global_strain;                                        \
   using ADComputeStrainBase<compute_stage>::_volumetric_locking_correction;                        \
   using ADComputeStrainBase<compute_stage>::_current_elem_volume;                                  \
+  using ADComputeStrainBase<compute_stage>::_eigenstrain_names;                                    \
   using ADComputeStrainBase<compute_stage>::_eigenstrains;                                         \
   using ADComputeStrainBase<compute_stage>::_total_strain
 

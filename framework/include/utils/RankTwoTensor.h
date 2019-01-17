@@ -211,13 +211,17 @@ public:
   RankTwoTensorTempl<T> & operator+=(const RankTwoTensorTempl<T> & a);
 
   /// returns _coords + a
-  RankTwoTensorTempl<T> operator+(const RankTwoTensorTempl<T> & a) const;
+  template <typename T2>
+  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  operator+(const TypeTensor<T2> & a) const;
 
   /// sets _coords -= a and returns vals
   RankTwoTensorTempl<T> & operator-=(const RankTwoTensorTempl<T> & a);
 
   /// returns _coords - a
-  RankTwoTensorTempl<T> operator-(const RankTwoTensorTempl<T> & a) const;
+  template <typename T2>
+  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  operator-(const TypeTensor<T2> & a) const;
 
   /// returns -_coords
   RankTwoTensorTempl<T> operator-() const;
@@ -226,19 +230,24 @@ public:
   RankTwoTensorTempl<T> & operator*=(const T & a);
 
   /// returns _coords*a
-  RankTwoTensorTempl<T> operator*(const T & a) const;
+  template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
+  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> operator*(const T2 & a) const;
 
   /// performs _coords /= a
   RankTwoTensorTempl<T> & operator/=(const T & a);
 
   /// returns _coords/a
-  RankTwoTensorTempl<T> operator/(const T & a) const;
+  template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
+  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> operator/(const T2 & a) const;
 
   /// Defines multiplication with a vector to get a vector
-  TypeVector<T> operator*(const TypeVector<T> & a) const;
+  template <typename T2>
+  TypeVector<typename CompareTypes<T, T2>::supertype> operator*(const TypeVector<T2> & a) const;
 
   /// Defines multiplication with a TypeTensor<T>
-  RankTwoTensorTempl<T> operator*(const TypeTensor<T> & a) const;
+  template <typename T2>
+  RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+  operator*(const TypeTensor<T2> & a) const;
 
   /// Defines multiplication with a TypeTensor<T>
   RankTwoTensorTempl<T> & operator*=(const TypeTensor<T> & a);
@@ -458,9 +467,13 @@ public:
   /// returns this_ij * b_ijkl
   RankTwoTensorTempl<T> initialContraction(const RankFourTensorTempl<T> & b) const;
 
+  /// set the tensor to the identity matrix
+  void setToIdentity();
+
 private:
   static constexpr unsigned int N = LIBMESH_DIM;
   static constexpr unsigned int N2 = N * N;
+  static constexpr Real identityCoords[N2] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
   template <class T2>
   friend void dataStore(std::ostream &, RankTwoTensorTempl<T2> &, void *);
@@ -475,4 +488,51 @@ private:
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
 
+template <typename T>
+template <typename T2>
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+RankTwoTensorTempl<T>::operator+(const TypeTensor<T2> & b) const
+{
+  return TensorValue<T>::operator+(b);
+}
+
+template <typename T>
+template <typename T2>
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+RankTwoTensorTempl<T>::operator-(const TypeTensor<T2> & b) const
+{
+  return TensorValue<T>::operator-(b);
+}
+
+template <typename T>
+template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type>
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
+operator*(const T2 & b) const
+{
+  return TensorValue<T>::operator*(b);
+}
+
+template <typename T>
+template <typename T2>
+TypeVector<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
+operator*(const TypeVector<T2> & b) const
+{
+  return TensorValue<T>::operator*(b);
+}
+
+template <typename T>
+template <typename T2>
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
+operator*(const TypeTensor<T2> & b) const
+{
+  return TensorValue<T>::operator*(b);
+}
+
+template <typename T>
+template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type>
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+RankTwoTensorTempl<T>::operator/(const T2 & b) const
+{
+  return TensorValue<T>::operator/(b);
+}
 #endif // RANKTWOTENSOR_H

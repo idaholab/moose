@@ -94,4 +94,7 @@ ComputeCosseratIncrementalSmallStrain::computeQpProperties()
   RankTwoTensor curv_old((*_grad_wc_old[0])[_qp], (*_grad_wc_old[1])[_qp], (*_grad_wc_old[2])[_qp]);
   _curvature_increment[_qp] = curv - curv_old;
   _curvature[_qp] = _curvature_old[_qp] + _curvature_increment[_qp];
+
+  // incremental small strain does not include rotation
+  _rotation_increment[_qp].setToIdentity();
 }

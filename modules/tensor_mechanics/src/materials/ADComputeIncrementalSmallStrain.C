@@ -7,34 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeIncrementalSmallStrain.h"
-#include "Assembly.h"
+#include "ADComputeIncrementalSmallStrain.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeIncrementalSmallStrain);
+registerADMooseObject("TensorMechanicsApp", ADComputeIncrementalSmallStrain);
 
-template <>
-InputParameters
-validParams<ComputeIncrementalSmallStrain>()
-{
-  InputParameters params = validParams<ComputeIncrementalStrainBase>();
-  params.addClassDescription(
-      "Compute a strain increment and rotation increment for small strains.");
-  return params;
-}
+defineADValidParams(ADComputeIncrementalSmallStrain,
+                    ADComputeIncrementalStrainBase,
+                    params.addClassDescription(
+                        "Compute a strain increment and rotation increment for small strains."););
 
-ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParameters & parameters)
-  : ComputeIncrementalStrainBase(parameters)
+template <ComputeStage compute_stage>
+ADComputeIncrementalSmallStrain<compute_stage>::ADComputeIncrementalSmallStrain(
+    const InputParameters & parameters)
+  : ADComputeIncrementalStrainBase<compute_stage>(parameters)
 {
 }
 
+template <ComputeStage compute_stage>
 void
-ComputeIncrementalSmallStrain::computeProperties()
+ADComputeIncrementalSmallStrain<compute_stage>::computeProperties()
 {
-  Real volumetric_strain = 0.0;
+  typename RealType<compute_stage>::type volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    RankTwoTensor total_strain_increment;
+    typename RankTwoTensorType<compute_stage>::type total_strain_increment;
     computeTotalStrainIncrement(total_strain_increment);
 
     _strain_increment[_qp] = total_strain_increment;
@@ -42,20 +39,21 @@ ComputeIncrementalSmallStrain::computeProperties()
     if (_volumetric_locking_correction)
       volumetric_strain += total_strain_increment.trace() * _JxW[_qp] * _coord[_qp];
   }
+
   if (_volumetric_locking_correction)
     volumetric_strain /= _current_elem_volume;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    Real trace = _strain_increment[_qp].trace();
     if (_volumetric_locking_correction)
     {
-      _strain_increment[_qp](0, 0) += (volumetric_strain - trace) / 3.0;
-      _strain_increment[_qp](1, 1) += (volumetric_strain - trace) / 3.0;
-      _strain_increment[_qp](2, 2) += (volumetric_strain - trace) / 3.0;
+      const auto correction = (volumetric_strain - _strain_increment[_qp].trace()) / 3.0;
+      _strain_increment[_qp](0, 0) += correction;
+      _strain_increment[_qp](1, 1) += correction;
+      _strain_increment[_qp](2, 2) += correction;
     }
 
-    _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+    _total_strain[_qp] = _strain_increment[_qp] + _total_strain_old[_qp];
 
     // Remove the Eigen strain increment
     subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
@@ -67,18 +65,22 @@ ComputeIncrementalSmallStrain::computeProperties()
       _strain_rate[_qp].zero();
 
     // Update strain in intermediate configuration: rotations are not needed
-    _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
+    _mechanical_strain[_qp] = _strain_increment[_qp] + _mechanical_strain_old[_qp];
 
     // incremental small strain does not include rotation
     _rotation_increment[_qp].setToIdentity();
   }
+
+  copyDualNumbersToValues();
 }
 
+template <ComputeStage compute_stage>
 void
-ComputeIncrementalSmallStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
+ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement(
+    typename RankTwoTensorType<compute_stage>::type & total_strain_increment)
 {
   // Deformation gradient
-  RankTwoTensor A(
+  typename RankTwoTensorType<compute_stage>::type A(
       (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); // Deformation gradient
   RankTwoTensor Fbar((*_grad_disp_old[0])[_qp],
                      (*_grad_disp_old[1])[_qp],
