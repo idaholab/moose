@@ -3,5 +3,8 @@
     type = 'Exodiff'
     input = 'surface_tension_KKS.i'
     exodiff = 'surface_tension_KKS_out.e'
+    design = 'source/materials/ComputeSurfaceTensionKKS.md'
+    issues = '#12705'
+    requirement = 'The ComputeSurfaceTensionKKS material shall produce a hydrostatic stress state inside a precipitate'
   [../]
 []
