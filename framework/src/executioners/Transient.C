@@ -183,7 +183,6 @@ Transient::Transient(const InputParameters & parameters)
     _dt_old(_problem.dtOld()),
     _unconstrained_dt(declareRecoverableData<Real>("unconstrained_dt", -1)),
     _at_sync_point(declareRecoverableData<bool>("at_sync_point", false)),
-    _first(declareRecoverableData<bool>("first", true)),
     _multiapps_converged(declareRecoverableData<bool>("multiapps_converged", true)),
     _last_solve_converged(declareRecoverableData<bool>("last_solve_converged", true)),
     _xfem_repeat_step(false),
@@ -371,18 +370,12 @@ Transient::execute()
   // in the future eventually.
   if (!_app.isRecovering())
     _problem.advanceState();
+  else
+    incrementStepOrReject();
 
   // Start time loop...
-  while (true)
+  while (keepGoing())
   {
-    if (_first != true)
-      incrementStepOrReject();
-
-    _first = false;
-
-    if (!keepGoing())
-      break;
-
     preStep();
     computeDT();
     takeStep();
@@ -390,6 +383,8 @@ Transient::execute()
     postStep();
 
     _steps_taken++;
+
+    incrementStepOrReject();
   }
 
   if (!_app.halfTransient())
@@ -461,8 +456,6 @@ Transient::incrementStepOrReject()
     _time_stepper->rejectStep();
     _time = _time_old;
   }
-
-  _first = false;
 }
 
 void
