@@ -424,7 +424,7 @@ Transient::incrementStepOrReject()
       _problem.adaptMesh();
 #endif
 
-      _time_old = _time; // = _time_old + _dt;
+      _time_old = _time;
       _t_step++;
 
       _problem.advanceState();
@@ -461,6 +461,24 @@ Transient::incrementStepOrReject()
 void
 Transient::takeStep(Real input_dt)
 {
+  _dt_old = _dt;
+
+  if (input_dt == -1.0)
+    _dt = computeConstrainedDT();
+  else
+    _dt = input_dt;
+
+  Real current_dt = _dt;
+
+  _time_stepper->preSolve();
+
+  // Increment time
+  _time = _time_old + _dt;
+
+  _problem.timestepSetup();
+
+  _problem.onTimestepBegin();
+
   _picard_it = 0;
 
   _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
@@ -475,7 +493,20 @@ Transient::takeStep(Real input_dt)
       _problem.restoreMultiApps(EXEC_TIMESTEP_END);
     }
 
-    solveStep(input_dt);
+    solveStep();
+
+    _dt = current_dt; // _dt might be smaller than this at this point for multistep methods
+
+    if (_picard_max_its > 1 && lastSolveConverged())
+    {
+      if (picardConverged())
+        _picard_converged = true;
+      else if (numPicardIts() == _picard_max_its)
+      {
+        _fe_problem.restoreSolutions();
+        _time_stepper->rejectStep();
+      }
+    }
 
     // If the last solve didn't converge then we need to exit this step completely (even in the case
     // of Picard)
@@ -485,26 +516,41 @@ Transient::takeStep(Real input_dt)
 
     ++_picard_it;
   }
+
+  _sln_diff_norm = relativeSolutionDifferenceNorm();
+  _solution_change_norm = _sln_diff_norm / _dt;
+
+  if (lastSolveConverged())
+  {
+    if (!_problem.haveXFEM())
+      if (_picard_max_its <= 1)
+        _time_stepper->acceptStep();
+  }
+
+  if (_picard_max_its > 1 && lastSolveConverged())
+  {
+    if (picardConverged())
+    {
+      _console << COLOR_MAGENTA << "Picard converged!" << COLOR_DEFAULT << std::endl;
+
+      _time_stepper->acceptStep();
+    }
+    else if (numPicardIts() == _picard_max_its)
+    {
+      _console << COLOR_RED << "Maximum number of Picard iterations reached! Reject time step."
+               << COLOR_DEFAULT << std::endl;
+      _time_stepper->rejectStep();
+    }
+  }
+
+  _time = _time_old;
+
+  _time_stepper->postSolve();
 }
 
 void
-Transient::solveStep(Real input_dt)
+Transient::solveStep()
 {
-  _dt_old = _dt;
-
-  if (input_dt == -1.0)
-    _dt = computeConstrainedDT();
-  else
-    _dt = input_dt;
-
-  Real current_dt = _dt;
-
-  if (_picard_it == 0)
-    _problem.onTimestepBegin();
-
-  // Increment time
-  _time = _time_old + _dt;
-
   if (_picard_max_its > 1)
   {
     _console << COLOR_MAGENTA << "Beginning Picard Iteration " << _picard_it << COLOR_DEFAULT
@@ -535,9 +581,6 @@ Transient::solveStep(Real input_dt)
     _problem.updateMeshXFEM();
 
   preSolve();
-  _time_stepper->preSolve();
-
-  _problem.timestepSetup();
 
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
@@ -616,12 +659,6 @@ Transient::solveStep(Real input_dt)
         _console << "XFEM not modifying mesh, continuing" << std::endl;
       }
 
-      if (_picard_max_its <= 1)
-        _time_stepper->acceptStep();
-
-      _sln_diff_norm = relativeSolutionDifferenceNorm();
-      _solution_change_norm = _sln_diff_norm / _dt;
-
       _problem.onTimestepEnd();
       _problem.execute(EXEC_TIMESTEP_END);
 
@@ -641,7 +678,6 @@ Transient::solveStep(Real input_dt)
   }
 
   postSolve();
-  _time_stepper->postSolve();
 
   if (_picard_max_its > 1 && lastSolveConverged())
   {
@@ -657,26 +693,7 @@ Transient::solveStep(Real input_dt)
     }
 
     printPicardNorms();
-
-    if (picardConverged())
-    {
-      _console << COLOR_MAGENTA << "Picard converged!" << COLOR_DEFAULT << std::endl;
-
-      _picard_converged = true;
-      _time_stepper->acceptStep();
-      return;
-    }
-    else if (numPicardIts() == _picard_max_its)
-    {
-      _console << COLOR_RED << "Maximum number of Picard iterations reached! Reject time step."
-               << COLOR_DEFAULT << std::endl;
-      _time_stepper->rejectStep();
-      return;
-    }
   }
-
-  _dt = current_dt; // _dt might be smaller than this at this point for multistep methods
-  _time = _time_old;
 }
 
 void
