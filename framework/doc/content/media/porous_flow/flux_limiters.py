@@ -20,7 +20,7 @@ def vanleer(x):
     return 2 * np.abs(x) / (1 + np.abs(x))
 
 def mc(x):
-    return np.minimum(0.5 * np.abs(1 + x), 2, 2 * np.abs(x))
+    return np.minimum(0.5 * np.abs(1 + x), np.minimum(2, 2 * np.abs(x)))
 
 def superbee(x):
     return np.maximum(np.minimum(2, np.abs(x)), np.minimum(1, 2 * np.abs(x)))
