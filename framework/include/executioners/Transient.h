@@ -245,9 +245,6 @@ protected:
   Real & _unconstrained_dt;
   bool & _at_sync_point;
 
-  /// Is it our first time through the execution loop?
-  bool & _first;
-
   /// Whether or not the multiapps failed during the last timestem
   bool & _multiapps_converged;
 

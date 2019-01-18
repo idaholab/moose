@@ -43,8 +43,6 @@ AdaptAndModify::incrementStepOrReject()
     _time_stepper->rejectStep();
     _time = _time_old;
   }
-
-  _first = false;
 }
 
 void
