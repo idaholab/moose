@@ -60,7 +60,6 @@ class CSVDiff(FileTester):
                 csvdiff.append('--comparison-file %s' % (self.specs['comparison_file']))
 
             if self.specs.isValid('override_columns'):
-                self.addCaveats('deprecated override_params. Build and use a comparison_file')
                 csvdiff.append('--custom-columns %s' % (' '.join(self.specs['override_columns'])))
 
             if self.specs.isValid('override_rel_err'):
