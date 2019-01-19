@@ -15,6 +15,14 @@ SolverParams::SolverParams()
     _mffd_type(Moose::MFFD_INVALID),
     _eigen_solve_type(Moose::EST_KRYLOVSCHUR),
     _eigen_problem_type(Moose::EPT_SLEPC_DEFAULT),
-    _which_eigen_pairs(Moose::WEP_SLEPC_DEFAULT)
+    _which_eigen_pairs(Moose::WEP_SLEPC_DEFAULT),
+    _has_picard_its(false),
+    _picard_max_its(1),
+    _picard_rel_tol(1e-8),
+    _picard_abs_tol(1e-50),
+    _picard_force_norms(false),
+    _picard_relaxation_factor(1),
+    _max_xfem_update(std::numeric_limits<unsigned int>::max()),
+    _update_xfem_at_timestep_begin(false)
 {
 }

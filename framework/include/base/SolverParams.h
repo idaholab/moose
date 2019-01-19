@@ -25,6 +25,19 @@ public:
   Moose::EigenSolveType _eigen_solve_type;
   Moose::EigenProblemType _eigen_problem_type;
   Moose::WhichEigenPairs _which_eigen_pairs;
+
+  // solver parameters for Picard iteration
+  bool _has_picard_its;
+  unsigned int _picard_max_its;
+  Real _picard_rel_tol;
+  Real _picard_abs_tol;
+  bool _picard_force_norms;
+  Real _picard_relaxation_factor;
+  std::vector<std::string> _picard_relaxed_variables;
+
+  // solver parameters for XFEM
+  unsigned int _max_xfem_update;
+  bool _update_xfem_at_timestep_begin;
 };
 
 #endif /* SOLVERPARAMS_H */
