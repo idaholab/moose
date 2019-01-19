@@ -218,15 +218,6 @@ Transient::Transient(const InputParameters & parameters)
       _num_steps = 1;
   }
 
-  // Set up relaxation
-  if (_relax_factor != 1.0)
-  {
-    if (_relax_factor >= 2.0 || _relax_factor <= 0.0)
-      mooseError("The Picard iteration relaxation factor should be between 0.0 and 2.0");
-
-    // Store a copy of the previous solution here
-    _nl.addVector("relax_previous", false, PARALLEL);
-  }
   // This lets us know if we are at Picard iteration > 0, works for both master- AND sub-app.
   // Initialize such that _prev_time != _time for the first Picard iteration
   _prev_time = _time - 1.0;

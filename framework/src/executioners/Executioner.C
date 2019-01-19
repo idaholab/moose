@@ -112,10 +112,11 @@ validParams<Executioner>()
       "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
       "existance of active MultiApps with those execute_on flags, default: false.");
 
-  params.addParam<Real>("relaxation_factor",
-                        1.0,
-                        "Fraction of newly computed value to keep."
-                        "Set between 0 and 2.");
+  params.addRangeCheckedParam<Real>("relaxation_factor",
+                                    1.0,
+                                    "relaxation_factor>0 & relaxation_factor<2",
+                                    "Fraction of newly computed value to keep."
+                                    "Set between 0 and 2.");
   params.addParam<std::vector<std::string>>("relaxed_variables",
                                             std::vector<std::string>(),
                                             "List of variables to relax during Picard Iteration");
@@ -210,6 +211,11 @@ Executioner::Executioner(const InputParameters & parameters)
 
   solver_params._max_xfem_update = getParam<unsigned int>("max_xfem_update");
   solver_params._update_xfem_at_timestep_begin = getParam<bool>("update_xfem_at_timestep_begin");
+
+  // Set up relaxation
+  if (solver_params._picard_relaxation_factor != 1.0)
+    // Store a copy of the previous solution here
+    _fe_problem.getNonlinearSystemBase().addVector("relax_previous", false, PARALLEL);
 }
 
 Executioner::~Executioner() {}
