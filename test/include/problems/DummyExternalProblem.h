@@ -26,7 +26,11 @@ class DummyExternalProblem : public ExternalProblem
 public:
   DummyExternalProblem(const InputParameters & params);
 
-  virtual void externalSolve() override { _console << "Dummy External Solve!" << std::endl; }
+  virtual bool externalSolve() override
+  {
+    _console << "Dummy External Solve!" << std::endl;
+    return true;
+  }
   virtual void syncSolutions(Direction /*direction*/) override {}
   virtual bool converged() override { return true; }
 };

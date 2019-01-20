@@ -85,6 +85,7 @@ public:
   void dumpGeneratedSyntax(const std::string path);
 
   /// output data in solve
+  virtual bool newSolve() override;
   virtual void solve() override;
 
   virtual void initialSetup() override {}

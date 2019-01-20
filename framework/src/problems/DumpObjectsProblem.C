@@ -284,6 +284,13 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
   // clang-format on
 }
 
+bool
+DumpObjectsProblem::newSolve()
+{
+  dumpGeneratedSyntax(getParam<std::string>("dump_path"));
+  return true;
+}
+
 void
 DumpObjectsProblem::solve()
 {

@@ -31,7 +31,7 @@ public:
   /**
    * Solve is implemented to providing syncing to/from the "transfer" mesh.
    */
-  virtual void solve() override final;
+  virtual bool newSolve() override final;
 
   /**
    * External problems should provide an override for converged, not inherit the default from
@@ -43,7 +43,7 @@ public:
    * New interface for solving an External problem. "solve()" is finalized here to provide
    * callbacks for solution syncing.
    */
-  virtual void externalSolve() = 0;
+  virtual bool externalSolve() = 0;
 
   /**
    * Method to transfer data to/from the external application to the associated transfer mesh.

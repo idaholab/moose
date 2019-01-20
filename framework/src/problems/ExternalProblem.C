@@ -43,10 +43,11 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
   createTagVectors();
 }
 
-void
-ExternalProblem::solve()
+bool
+ExternalProblem::newSolve()
 {
   syncSolutions(Direction::TO_EXTERNAL_APP);
-  externalSolve();
+  bool converged = externalSolve();
   syncSolutions(Direction::FROM_EXTERNAL_APP);
+  return converged;
 }

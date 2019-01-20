@@ -23,6 +23,6 @@
   [./bad_relax_factor]
     type = 'RunException'
     input = 'bad_relax_factor_master.i'
-    expect_err = 'The Picard iteration relaxation factor should be between 0.0 and 2.0'
+    expect_err = 'Expression: relaxation_factor>0 & relaxation_factor<2'
   [../]
 []

@@ -41,12 +41,13 @@ ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
 }
 #endif
 
-void
+bool
 ExternalPETScProblem::externalSolve()
 {
 #if LIBMESH_HAVE_PETSC
   _console << "PETSc External Solve!" << std::endl;
   externalPETScDiffusionFDMSolve(_ts, _petsc_sol, dt(), time());
+  return true;
 #endif
 }
 

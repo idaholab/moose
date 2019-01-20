@@ -28,6 +28,19 @@ FailingProblem::FailingProblem(const InputParameters & params)
 }
 
 bool
+FailingProblem::newSolve()
+{
+  bool converged = FEProblem::newSolve();
+  if (!_failed && (_t_step == static_cast<int>(_fail_step)))
+  {
+    _failed = true;
+    return false;
+  }
+
+  return converged;
+}
+
+bool
 FailingProblem::converged()
 {
   if (!_failed && (_t_step == static_cast<int>(_fail_step)))

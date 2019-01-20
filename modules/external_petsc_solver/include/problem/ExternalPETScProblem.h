@@ -33,7 +33,7 @@ public:
   ~ExternalPETScProblem() { VecDestroy(&_petsc_sol); }
 #endif
 
-  virtual void externalSolve() override;
+  virtual bool externalSolve() override;
   virtual void syncSolutions(Direction /*direction*/) override;
 
   virtual bool converged() override { return true; }

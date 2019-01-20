@@ -407,14 +407,14 @@ Transient::incrementStepOrReject()
 void
 Transient::takeStep(Real input_dt)
 {
+  _console << COLOR_MAGENTA << "NEW TIME STEP \n" << COLOR_DEFAULT;
+
   _dt_old = _dt;
 
   if (input_dt == -1.0)
     _dt = computeConstrainedDT();
   else
     _dt = input_dt;
-
-  Real current_dt = _dt;
 
   _time_stepper->preSolve();
 
@@ -424,6 +424,32 @@ Transient::takeStep(Real input_dt)
   _problem.timestepSetup();
 
   _problem.onTimestepBegin();
+
+  // try new solver
+
+  _time_stepper->step();
+  _xfem_repeat_step = _problem.XFEMRepeatStep();
+
+  _multiapps_converged = true;
+
+  if (!(_problem.haveXFEM() && _problem.XFEMRepeatStep()))
+  {
+    if (lastSolveConverged())
+      _time_stepper->acceptStep();
+    else
+      _time_stepper->rejectStep();
+  }
+
+  _time = _time_old;
+
+  _time_stepper->postSolve();
+
+  _sln_diff_norm = relativeSolutionDifferenceNorm();
+  _solution_change_norm = _sln_diff_norm / _dt;
+
+  return;
+
+  Real current_dt = _dt;
 
   _picard_it = 0;
 
