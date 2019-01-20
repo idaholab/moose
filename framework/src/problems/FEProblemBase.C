@@ -85,6 +85,8 @@
 #include "TimeIntegrator.h"
 #include "LineSearch.h"
 #include "FloatingPointExceptionGuard.h"
+#include "AllLocalDofIndicesThread.h"
+#include "Console.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -317,7 +319,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dot_requested(false),
     _u_dotdot_requested(false),
     _u_dot_old_requested(false),
-    _u_dotdot_old_requested(false)
+    _u_dotdot_old_requested(false),
+    _xfem_update_count(0),
+    _xfem_repeat_step(false),
+    _picard_it(0)
 {
 
   _time = 0.0;
@@ -4177,6 +4182,312 @@ FEProblemBase::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
+}
+
+bool
+FEProblemBase::newSolve()
+{
+  TIME_SECTION(_solve_timer);
+
+  const auto & solver_params = solverParams();
+
+  Real current_dt = dt();
+
+  // these variables can just be local, but because we need to keep them for reporting
+  // at timestep end, we make them member variables so that postprocessors can see them.
+  // They really are modified locally!
+  unsigned int & picard_it = _picard_it;
+  Real & picard_initial_norm = _picard_initial_norm;
+  std::vector<Real> & picard_timestep_begin_norm = _picard_timestep_begin_norm;
+  std::vector<Real> & picard_timestep_end_norm = _picard_timestep_end_norm;
+
+  picard_timestep_begin_norm.resize(solver_params._picard_max_its);
+  picard_timestep_end_norm.resize(solver_params._picard_max_its);
+
+  bool converged = true;
+  _picard_status = MOOSE_PICARD_ITERATING;
+
+  // need to back up multi-apps even when not doing Picard iteration for recovering from failed
+  // multiapp solve
+  backupMultiApps(EXEC_TIMESTEP_BEGIN);
+  backupMultiApps(EXEC_TIMESTEP_END);
+
+  // Prepare to relax variables.
+  std::set<dof_id_type> relaxed_dofs;
+  if (solver_params._picard_relaxation_factor != 1.0)
+  {
+    // Snag all of the local dof indices for all of these variables
+    System & libmesh_nl_system = _nl->system();
+    AllLocalDofIndicesThread aldit(libmesh_nl_system, solver_params._picard_relaxed_variables);
+    ConstElemRange & elem_range = *mesh().getActiveLocalElementRange();
+    Threads::parallel_reduce(elem_range, aldit);
+
+    relaxed_dofs = aldit._all_dof_indices;
+  }
+
+  picard_it = 0;
+  while (picard_it < solver_params._picard_max_its)
+  {
+    if (solver_params._has_picard_its)
+    {
+      _console << COLOR_MAGENTA << "Beginning Picard Iteration " << picard_it << COLOR_DEFAULT
+               << '\n';
+
+      if (picard_it ==
+          0) // First Picard iteration - need to save off the initial nonlinear residual
+      {
+        picard_initial_norm = computeResidualL2Norm();
+        _console << COLOR_MAGENTA << "Initial Picard Norm: " << COLOR_DEFAULT;
+        if (picard_initial_norm == std::numeric_limits<Real>::max())
+          _console << " MAX ";
+        else
+          _console << std::scientific << picard_initial_norm;
+        _console << COLOR_DEFAULT << '\n';
+      }
+      else
+      {
+        // For every iteration other than the first, we need to restore the state of the MultiApps
+        restoreMultiApps(EXEC_TIMESTEP_BEGIN);
+        restoreMultiApps(EXEC_TIMESTEP_END);
+      }
+    }
+
+    Real begin_norm_old = (picard_it > 0 ? picard_timestep_begin_norm[picard_it - 1]
+                                         : std::numeric_limits<Real>::max());
+    Real end_norm_old = (picard_it > 0 ? picard_timestep_end_norm[picard_it - 1]
+                                       : std::numeric_limits<Real>::max());
+    bool relax = (solver_params._picard_relaxation_factor != 1) && (picard_it > 0);
+    bool solve_converged = solveStep(begin_norm_old,
+                                     picard_timestep_begin_norm[picard_it],
+                                     end_norm_old,
+                                     picard_timestep_end_norm[picard_it],
+                                     relax,
+                                     relaxed_dofs);
+
+    if (solve_converged)
+    {
+      if (solver_params._has_picard_its)
+      {
+        _console << "\n 0 Picard |R| = "
+                 << Console::outputNorm(std::numeric_limits<Real>::max(), picard_initial_norm)
+                 << '\n';
+
+        for (unsigned int i = 1; i <= picard_it; ++i)
+        {
+          Real max_norm = std::max(picard_timestep_begin_norm[i], picard_timestep_end_norm[i]);
+          _console << std::setw(2) << i
+                   << " Picard |R| = " << Console::outputNorm(picard_initial_norm, max_norm)
+                   << '\n';
+        }
+
+        Real max_norm =
+            std::max(picard_timestep_begin_norm[picard_it], picard_timestep_end_norm[picard_it]);
+
+        Real max_relative_drop = max_norm / picard_initial_norm;
+
+        if (max_norm < solver_params._picard_abs_tol)
+        {
+          _picard_status = MOOSE_PICARD_CONVERGED_ABS;
+          break;
+        }
+        if (max_relative_drop < solver_params._picard_rel_tol)
+        {
+          _picard_status = MOOSE_PICARD_CONVERGED_RELATIVE;
+          break;
+        }
+        if (extraPicardConvergenceCheck())
+        {
+          _picard_status = MOOSE_PICARD_CONVERGED_CUSTOM;
+          break;
+        }
+        if (picard_it + 1 == solver_params._picard_max_its)
+        {
+          _picard_status = MOOSE_PICARD_DIVERGED_MAX_ITS;
+          converged = false;
+          break;
+        }
+      }
+    }
+    else
+    {
+      // If the last solve didn't converge then we need to exit this step completely (even in the
+      // case of Picard). So we can retry...
+      converged = false;
+      break;
+    }
+
+    dt() = current_dt; // _dt might be smaller than this at this point for multistep methods
+
+    ++picard_it;
+  }
+
+  _console << "Picard converged reason: " << _picard_status << std::endl;
+  return converged;
+}
+
+bool
+FEProblemBase::solveStep(Real begin_norm_old,
+                         Real & begin_norm,
+                         Real end_norm_old,
+                         Real & end_norm,
+                         bool relax,
+                         const std::set<dof_id_type> & relaxed_dofs)
+{
+  const auto & solver_params = solverParams();
+
+  execTransfers(EXEC_TIMESTEP_BEGIN);
+  if (!execMultiApps(EXEC_TIMESTEP_BEGIN, !solverParams()._has_picard_its))
+  {
+    _picard_status = MOOSE_PICARD_DIVERGED_FAILED_MULTIAPP;
+    return false;
+  }
+
+  if (haveXFEM() && solverParams()._update_xfem_at_timestep_begin)
+    updateMeshXFEM();
+
+  execute(EXEC_TIMESTEP_BEGIN);
+
+  if (solver_params._has_picard_its)
+    if (hasMultiApps(EXEC_TIMESTEP_BEGIN) || solver_params._picard_force_norms)
+    {
+      begin_norm = computeResidualL2Norm();
+
+      _console << COLOR_MAGENTA << "Picard Norm after TIMESTEP_BEGIN MultiApps: "
+               << Console::outputNorm(begin_norm_old, begin_norm) << '\n';
+    }
+
+  // Perform output for timestep begin
+  outputStep(EXEC_TIMESTEP_BEGIN);
+
+  // Update warehouse active objects
+  updateActiveObjects();
+
+  if (relax)
+  {
+    NumericVector<Number> & solution = _nl->solution();
+    NumericVector<Number> & relax_previous = _nl->getVector("relax_previous");
+
+    // Save off the current solution
+    relax_previous = solution;
+  }
+
+  if (!baseSolve())
+  {
+    _picard_status = MOOSE_PICARD_DIVERGED_NONLINEAR;
+    return false;
+  }
+  else
+    _picard_status = MOOSE_PICARD_CONVERGED_NONLINEAR;
+
+  _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
+
+  // Relax the "relaxed_variables"
+  if (relax)
+  {
+    NumericVector<Number> & solution = _nl->solution();
+    NumericVector<Number> & relax_previous = _nl->getVector("relax_previous");
+    Real factor = solver_params._picard_relaxation_factor;
+    for (const auto & dof : relaxed_dofs)
+      solution.set(dof, (relax_previous(dof) * (1.0 - factor)) + (solution(dof) * factor));
+    solution.close();
+    _nl->update();
+  }
+
+  if (haveXFEM() && (_xfem_update_count < solver_params._max_xfem_update) && updateMeshXFEM())
+  {
+    _console << "XFEM modifying mesh, repeating step" << std::endl;
+    _xfem_repeat_step = true;
+    ++_xfem_update_count;
+  }
+  else
+  {
+    if (haveXFEM())
+    {
+      _xfem_repeat_step = false;
+      _xfem_update_count = 0;
+      _console << "XFEM not modifying mesh, continuing" << std::endl;
+    }
+
+    onTimestepEnd();
+    execute(EXEC_TIMESTEP_END);
+
+    execTransfers(EXEC_TIMESTEP_END);
+    if (!execMultiApps(EXEC_TIMESTEP_END, !solver_params._has_picard_its))
+    {
+      _picard_status = MOOSE_PICARD_DIVERGED_FAILED_MULTIAPP;
+      return false;
+    }
+  }
+
+  if (solver_params._has_picard_its)
+    if (hasMultiApps(EXEC_TIMESTEP_END) || solver_params._picard_force_norms)
+    {
+      end_norm = computeResidualL2Norm();
+
+      _console << COLOR_MAGENTA << "Picard Norm after TIMESTEP_END MultiApps: "
+               << Console::outputNorm(end_norm_old, end_norm) << '\n';
+    }
+
+  return true;
+}
+
+bool
+FEProblemBase::baseSolve()
+{
+  TIME_SECTION(_solve_timer);
+
+#ifdef LIBMESH_HAVE_PETSC
+  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
+#endif
+
+  Moose::setSolverDefaults(*this);
+
+  // Setup the output system for printing linear/nonlinear iteration information
+  initPetscOutput();
+
+  possiblyRebuildGeomSearchPatches();
+
+  // reset flag so that linear solver does not use
+  // the old converged reason "DIVERGED_NANORINF", when
+  // we throw  an exception and stop solve
+  _fail_next_linear_convergence_check = false;
+
+  bool solve_converged;
+  if (_solve)
+  {
+    _nl->solve();
+    _nl->update();
+    solve_converged = _nl->converged();
+  }
+  else
+    solve_converged = true;
+
+  if (!solve_converged)
+  {
+    _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
+
+    // Perform the output of the current, failed time step (this only occurs if desired)
+    outputStep(EXEC_FAILED);
+    return false;
+  }
+
+  // sync solutions in displaced problem
+  if (_displaced_problem)
+    _displaced_problem->syncSolutions();
+
+  return solve_converged;
+}
+
+bool
+FEProblemBase::XFEMRepeatStep() const
+{
+  return _xfem_repeat_step;
+}
+
+MoosePicardConvergenceReason
+FEProblemBase::checkConvergence() const
+{
+  return _picard_status;
 }
 
 void

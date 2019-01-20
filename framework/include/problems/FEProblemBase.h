@@ -127,6 +127,18 @@ enum MooseLinearConvergenceReason
   MOOSE_DIVERGED_PCSETUP_FAILED = -11
 };
 
+enum MoosePicardConvergenceReason
+{
+  MOOSE_PICARD_ITERATING = 0,
+  MOOSE_PICARD_CONVERGED_NONLINEAR = 1,
+  MOOSE_PICARD_CONVERGED_ABS = 2,
+  MOOSE_PICARD_CONVERGED_RELATIVE = 3,
+  MOOSE_PICARD_CONVERGED_CUSTOM = 4,
+  MOOSE_PICARD_DIVERGED_MAX_ITS = -1,
+  MOOSE_PICARD_DIVERGED_NONLINEAR = -2,
+  MOOSE_PICARD_DIVERGED_FAILED_MULTIAPP = -3
+};
+
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
@@ -395,7 +407,59 @@ public:
   virtual void initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl);
 
   virtual void init() override;
+
+  /**
+   * Solve the FEProblem.
+   * @return True if solver is converged.
+   */
   virtual void solve() override;
+
+  virtual bool newSolve();
+
+  /**
+   * Perform one Picard iteration or a full solve.
+   *
+   * @param begin_norm_old Residual norm after timestep_begin execution of previous Picard iteration
+   * @param begin_norm     Residual norm after timestep_begin execution
+   * @param end_norm_old   Residual norm after timestep_end execution of previous Picard iteration
+   * @param end_norm       Residual norm after timestep_end execution
+   * @param relax          Whether or not we do relaxation in this iteration
+   * @param relaxed_dofs   DoFs to be relaxed
+   *
+   * @return True if both nonlinear solve and the execution of multiapps are successful.
+   *
+   * Note: this function also set _xfem_repeat_step flag for XFEM. It tracks _xfem_update_count
+   * state.
+   * FIXME: The proper design will be to let XFEM use Picard iteration to control the execution.
+   */
+  virtual bool solveStep(Real begin_norm_old,
+                         Real & begin_norm,
+                         Real end_norm_old,
+                         Real & end_norm,
+                         bool relax,
+                         const std::set<dof_id_type> & relaxed_dofs);
+
+  /// Solve nonlinear system and some basic pre and post processing.
+  /// @return True if solver is converged.
+  virtual bool baseSolve();
+
+  /// Give user a chance to override this function to detect Picard iteration convergence differently
+  virtual bool extraPicardConvergenceCheck() { return false; }
+
+  /**
+   * Get the number of Picard iterations performed
+   * Because this returns the number of Picard iterations, rather than the current
+   * iteration count (which starts at 0), increment by 1.
+   *
+   * @return Number of Picard iterations performed
+   */
+  unsigned int numPicardIts() const { return _picard_it + 1; }
+
+  /// This function checks the _xfem_repeat_step flag set by solve.
+  bool XFEMRepeatStep() const;
+
+  /// Check the solver status
+  virtual MoosePicardConvergenceReason checkConvergence() const;
 
   const ConstElemRange & getEvaluableElementRange();
 
@@ -1930,6 +1994,21 @@ private:
 
   /// Whether old solution second time derivative needs to be stored
   bool _u_dotdot_old_requested;
+
+  /// Picard solving status
+  MoosePicardConvergenceReason _picard_status;
+
+  /// Counter for number of xfem updates that have been performed in the current step
+  unsigned int _xfem_update_count;
+
+  /// Whether step should be repeated due to xfem modifying the mesh
+  bool _xfem_repeat_step;
+
+  /// information to be kept for Picard iteration
+  unsigned int _picard_it;
+  Real _picard_initial_norm;
+  std::vector<Real> _picard_timestep_begin_norm;
+  std::vector<Real> _picard_timestep_end_norm;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;
