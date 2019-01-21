@@ -5,6 +5,7 @@
 
 #ifdef LIBMESH_HAVE_PETSC
 
+#include "libmesh/petsc_macro.h"
 #include <petscdm.h>
 #include <petscdmda.h>
 #include <petscts.h>

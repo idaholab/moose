@@ -90,7 +90,9 @@ PetscErrorCode
 externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
 {
   PetscErrorCode ierr;
+#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   PetscInt current_step;
+#endif
   DM da;
 
   PetscFunctionBeginUser;
@@ -112,10 +114,14 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
   CHKERRQ(ierr);
   ierr = TSSetTime(ts, time - dt);
   CHKERRQ(ierr);
+#if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   ierr = TSGetStepNumber(ts, &current_step);
   CHKERRQ(ierr);
   ierr = TSSetMaxSteps(ts, current_step + 1);
   CHKERRQ(ierr);
+#else
+  SETERRQ(PetscObjectComm((PetscObject)ts), PETSC_ERR_SUP, "Require PETSc-3.8.x or higher ");
+#endif
   /*  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Sets various TS parameters from user options
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

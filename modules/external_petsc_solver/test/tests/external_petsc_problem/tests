@@ -9,5 +9,7 @@
     design = "ExternalProblem.md"
     allow_warnings = true
     issues = "#12595"
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
   []
 []
