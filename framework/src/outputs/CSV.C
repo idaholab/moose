@@ -160,40 +160,26 @@ CSV::output(const ExecFlagType & type)
 
     for (auto & it : _vector_postprocessor_tables)
     {
-      const std::string & vpp_name = it.first;
-      std::string short_name = MooseUtils::shortName(vpp_name);
-
-      std::ostringstream output;
-      output << _file_base << "_" << short_name;
-
-      if (!vpp_data.containsCompleteHistory(vpp_name))
-        output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
-               << std::right << timeStep();
-      output << ".csv";
-
-      _latest_vpp_filenames.emplace_back(output.str(), _file_base + "_" + short_name);
-
+      const auto & vpp_name = it.first;
       it.second.setDelimiter(_delimiter);
       it.second.setPrecision(_precision);
       if (_sort_columns)
         it.second.sortColumns();
 
       auto include_time_suffix = !vpp_data.containsCompleteHistory(vpp_name);
-
-      it.second.printCSV(getVectorPostprocessorFileName(vpp_name, include_time_suffix), 1, _align);
+      std::string fname = getVectorPostprocessorFileName(vpp_name, include_time_suffix);
+      std::string fprefix = getVectorPostprocessorFilePrefix(vpp_name);
+      _latest_vpp_filenames.emplace_back(fname, fprefix);
+      it.second.printCSV(fname, 1, _align);
 
       if (_create_latest_symlink)
       {
-        std::string out_latest = _file_base + "_" + short_name + "_LATEST.csv";
-        MooseUtils::createSymlink(output.str(), out_latest);
+        std::string out_latest = fprefix + "_LATEST.csv";
+        MooseUtils::createSymlink(fname, out_latest);
       }
 
       if (_time_data)
-      {
-        std::ostringstream filename;
-        filename << _file_base << "_" << short_name << "_time.csv";
-        _vector_postprocessor_time_tables[vpp_name].printCSV(filename.str());
-      }
+        _vector_postprocessor_time_tables[vpp_name].printCSV(fprefix + "_time.csv");
     }
   }
 
@@ -209,4 +195,10 @@ CSV::output(const ExecFlagType & type)
   // Re-set write flags
   _write_all_table = false;
   _write_vector_table = false;
+}
+
+std::string
+CSV::getVectorPostprocessorFilePrefix(const std::string & vpp_name)
+{
+  return _file_base + "_" + MooseUtils::shortName(vpp_name);
 }
