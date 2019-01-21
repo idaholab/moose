@@ -813,12 +813,17 @@ template std::string join<std::set<MooseEnumItem>>(const std::set<MooseEnumItem>
 void
 createSymlink(const std::string & target, const std::string & link)
 {
-  struct stat sbuf;
-  if (lstat(link.c_str(), &sbuf) == 0)
-    unlink(link.c_str());
+  clearSymlink(link);
   symlink(target.c_str(), link.c_str());
 }
 
+void
+clearSymlink(const std::string & link)
+{
+  struct stat sbuf;
+  if (lstat(link.c_str(), &sbuf) == 0)
+    unlink(link.c_str());
+}
 } // MooseUtils namespace
 
 std::string

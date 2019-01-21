@@ -24,6 +24,7 @@
     type = CheckFiles
     input = final.i
     cli_args = Outputs/out/create_final_symlink=false
+    delete_output_before_running = false
     check_not_exists = 'final_out_line_sample_FINAL.csv'
     requirement = "The CSV output object 'create_final_symlink' parameter shall be able to disable "
                   "the creation of the final symlink."
@@ -39,6 +40,7 @@
   [no_latest]
     type = CheckFiles
     input = latest.i
+    delete_output_before_running = false
     cli_args = Outputs/out/create_latest_symlink=false
     check_not_exists = 'latest_out_line_sample_LATEST.csv'
     requirement = "The CSV output object 'create_latest_symlink' parameter shall be able to disable "

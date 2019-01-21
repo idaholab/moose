@@ -74,6 +74,17 @@ CSV::initialSetup()
 
   if (_recovering)
     _all_data_table.append(true);
+
+  // Clear any existing symbolic links to LATEST and/or FINAL
+  const std::set<std::string> & out = getVectorPostprocessorOutput();
+  for (const auto & vpp_name : out)
+  {
+    std::string short_name = MooseUtils::shortName(vpp_name);
+    std::string out_latest = _file_base + "_" + short_name + "_LATEST.csv";
+    std::string out_final = _file_base + "_" + short_name + "_FINAL.csv";
+    MooseUtils::clearSymlink(out_latest);
+    MooseUtils::clearSymlink(out_final);
+  }
 }
 
 std::string
