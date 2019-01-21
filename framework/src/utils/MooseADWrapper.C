@@ -6,20 +6,20 @@
 MooseADWrapper<Real>::MooseADWrapper(bool use_ad) : _use_ad(use_ad), _val(), _dual_number(nullptr)
 {
   if (_use_ad)
-    _dual_number = libmesh_make_unique<ADReal>();
+    _dual_number = libmesh_make_unique<DualReal>();
 }
 
-const ADReal &
+const DualReal &
 MooseADWrapper<Real>::dn(bool) const
 {
   if (!_dual_number)
-    _dual_number = libmesh_make_unique<ADReal>(_val);
+    _dual_number = libmesh_make_unique<DualReal>(_val);
   else if (!_use_ad)
     _dual_number->value() = _val;
   return *_dual_number;
 }
 
-ADReal &
+DualReal &
 MooseADWrapper<Real>::dn(bool)
 {
   return *_dual_number;
@@ -37,7 +37,7 @@ MooseADWrapper<Real>::markAD(bool use_ad)
   if (!use_ad && _use_ad)
     _dual_number = nullptr;
   else if (use_ad && !_use_ad)
-    _dual_number = libmesh_make_unique<ADReal>();
+    _dual_number = libmesh_make_unique<DualReal>();
   _use_ad = use_ad;
 }
 
@@ -56,21 +56,21 @@ MooseADWrapper<VectorValue<Real>>::MooseADWrapper(bool use_ad)
   : _use_ad(use_ad), _val(), _dual_number(nullptr)
 {
   if (_use_ad)
-    _dual_number = libmesh_make_unique<VectorValue<ADReal>>();
+    _dual_number = libmesh_make_unique<VectorValue<DualReal>>();
 }
 
-const VectorValue<ADReal> &
+const VectorValue<DualReal> &
 MooseADWrapper<VectorValue<Real>>::dn(bool) const
 {
   if (!_dual_number)
-    _dual_number = libmesh_make_unique<VectorValue<ADReal>>(_val);
+    _dual_number = libmesh_make_unique<VectorValue<DualReal>>(_val);
   else if (!_use_ad)
     for (std::size_t i = 0; i < LIBMESH_DIM; ++i)
       (*_dual_number)(i).value() = _val(i);
   return *_dual_number;
 }
 
-VectorValue<ADReal> &
+VectorValue<DualReal> &
 MooseADWrapper<VectorValue<Real>>::dn(bool)
 {
   return *_dual_number;
@@ -89,7 +89,7 @@ MooseADWrapper<VectorValue<Real>>::markAD(bool use_ad)
   if (!use_ad && _use_ad)
     _dual_number = nullptr;
   else if (use_ad && !_use_ad)
-    _dual_number = libmesh_make_unique<VectorValue<ADReal>>();
+    _dual_number = libmesh_make_unique<VectorValue<DualReal>>();
   _use_ad = use_ad;
 }
 
@@ -108,14 +108,14 @@ MooseADWrapper<TensorValue<Real>>::MooseADWrapper(bool use_ad)
   : _use_ad(use_ad), _val(), _dual_number(nullptr)
 {
   if (_use_ad)
-    _dual_number = libmesh_make_unique<TensorValue<ADReal>>();
+    _dual_number = libmesh_make_unique<TensorValue<DualReal>>();
 }
 
-const TensorValue<ADReal> &
+const TensorValue<DualReal> &
 MooseADWrapper<TensorValue<Real>>::dn(bool) const
 {
   if (!_dual_number)
-    _dual_number = libmesh_make_unique<TensorValue<ADReal>>(_val);
+    _dual_number = libmesh_make_unique<TensorValue<DualReal>>(_val);
   else if (!_use_ad)
     for (std::size_t i = 0; i < LIBMESH_DIM; ++i)
       for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
@@ -123,7 +123,7 @@ MooseADWrapper<TensorValue<Real>>::dn(bool) const
   return *_dual_number;
 }
 
-TensorValue<ADReal> &
+TensorValue<DualReal> &
 MooseADWrapper<TensorValue<Real>>::dn(bool)
 {
   return *_dual_number;
@@ -143,7 +143,7 @@ MooseADWrapper<TensorValue<Real>>::markAD(bool use_ad)
   if (!use_ad && _use_ad)
     _dual_number = nullptr;
   else if (use_ad && !_use_ad)
-    _dual_number = libmesh_make_unique<TensorValue<ADReal>>();
+    _dual_number = libmesh_make_unique<TensorValue<DualReal>>();
   _use_ad = use_ad;
 }
 
@@ -162,14 +162,14 @@ MooseADWrapper<RankTwoTensorTempl<Real>>::MooseADWrapper(bool use_ad)
   : _use_ad(use_ad), _val(), _dual_number(nullptr)
 {
   if (_use_ad)
-    _dual_number = libmesh_make_unique<RankTwoTensorTempl<ADReal>>();
+    _dual_number = libmesh_make_unique<RankTwoTensorTempl<DualReal>>();
 }
 
-const RankTwoTensorTempl<ADReal> &
+const RankTwoTensorTempl<DualReal> &
 MooseADWrapper<RankTwoTensorTempl<Real>>::dn(bool) const
 {
   if (!_dual_number)
-    _dual_number = libmesh_make_unique<RankTwoTensorTempl<ADReal>>(_val);
+    _dual_number = libmesh_make_unique<RankTwoTensorTempl<DualReal>>(_val);
   else if (!_use_ad)
     for (std::size_t i = 0; i < LIBMESH_DIM; ++i)
       for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
@@ -177,7 +177,7 @@ MooseADWrapper<RankTwoTensorTempl<Real>>::dn(bool) const
   return *_dual_number;
 }
 
-RankTwoTensorTempl<ADReal> &
+RankTwoTensorTempl<DualReal> &
 MooseADWrapper<RankTwoTensorTempl<Real>>::dn(bool)
 {
   return *_dual_number;
@@ -197,7 +197,7 @@ MooseADWrapper<RankTwoTensorTempl<Real>>::markAD(bool use_ad)
   if (!use_ad && _use_ad)
     _dual_number = nullptr;
   else if (use_ad && !_use_ad)
-    _dual_number = libmesh_make_unique<RankTwoTensorTempl<ADReal>>();
+    _dual_number = libmesh_make_unique<RankTwoTensorTempl<DualReal>>();
   _use_ad = use_ad;
 }
 
@@ -217,14 +217,14 @@ MooseADWrapper<RankFourTensorTempl<Real>>::MooseADWrapper(bool use_ad)
   : _use_ad(use_ad), _val(), _dual_number(nullptr)
 {
   if (_use_ad)
-    _dual_number = libmesh_make_unique<RankFourTensorTempl<ADReal>>();
+    _dual_number = libmesh_make_unique<RankFourTensorTempl<DualReal>>();
 }
 
-const RankFourTensorTempl<ADReal> &
+const RankFourTensorTempl<DualReal> &
 MooseADWrapper<RankFourTensorTempl<Real>>::dn(bool) const
 {
   if (!_dual_number)
-    _dual_number = libmesh_make_unique<RankFourTensorTempl<ADReal>>(_val);
+    _dual_number = libmesh_make_unique<RankFourTensorTempl<DualReal>>(_val);
   else if (!_use_ad)
     for (std::size_t i = 0; i < LIBMESH_DIM; ++i)
       for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
@@ -234,7 +234,7 @@ MooseADWrapper<RankFourTensorTempl<Real>>::dn(bool) const
   return *_dual_number;
 }
 
-RankFourTensorTempl<ADReal> &
+RankFourTensorTempl<DualReal> &
 MooseADWrapper<RankFourTensorTempl<Real>>::dn(bool)
 {
   return *_dual_number;
@@ -256,7 +256,7 @@ MooseADWrapper<RankFourTensorTempl<Real>>::markAD(bool use_ad)
   if (!use_ad && _use_ad)
     _dual_number = nullptr;
   else if (use_ad && !_use_ad)
-    _dual_number = libmesh_make_unique<RankFourTensorTempl<ADReal>>();
+    _dual_number = libmesh_make_unique<RankFourTensorTempl<DualReal>>();
   _use_ad = use_ad;
 }
 

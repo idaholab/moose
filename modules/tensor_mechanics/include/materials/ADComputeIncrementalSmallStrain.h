@@ -34,8 +34,7 @@ protected:
    * Computes the current and old deformation gradients and passes back the
    * total strain increment tensor.
    */
-  virtual void computeTotalStrainIncrement(
-      typename RankTwoTensorType<compute_stage>::type & total_strain_increment);
+  virtual void computeTotalStrainIncrement(ADRankTwoTensor & total_strain_increment);
 
   usingComputeIncrementalStrainBaseMembers;
 };

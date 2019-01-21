@@ -28,10 +28,10 @@ template <ComputeStage compute_stage>
 void
 ADComputeIncrementalSmallStrain<compute_stage>::computeProperties()
 {
-  typename RealType<compute_stage>::type volumetric_strain = 0.0;
+  ADReal volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    typename RankTwoTensorType<compute_stage>::type total_strain_increment;
+    ADRankTwoTensor total_strain_increment;
     computeTotalStrainIncrement(total_strain_increment);
 
     _strain_increment[_qp] = total_strain_increment;
@@ -77,10 +77,10 @@ ADComputeIncrementalSmallStrain<compute_stage>::computeProperties()
 template <ComputeStage compute_stage>
 void
 ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement(
-    typename RankTwoTensorType<compute_stage>::type & total_strain_increment)
+    ADRankTwoTensor & total_strain_increment)
 {
   // Deformation gradient
-  typename RankTwoTensorType<compute_stage>::type A(
+  ADRankTwoTensor A(
       (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); // Deformation gradient
   RankTwoTensor Fbar((*_grad_disp_old[0])[_qp],
                      (*_grad_disp_old[1])[_qp],

@@ -13,7 +13,7 @@
 // MOOSE includes
 #include "Moose.h" // using namespace libMesh
 #include "MooseError.h"
-#include "ADReal.h"
+#include "DualReal.h"
 
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_matrix.h"

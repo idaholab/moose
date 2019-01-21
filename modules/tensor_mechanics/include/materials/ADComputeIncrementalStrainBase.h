@@ -43,8 +43,7 @@ protected:
   void initialSetup() override;
   virtual void initQpStatefulProperties() override;
 
-  void
-  subtractEigenstrainIncrementFromStrain(typename RankTwoTensorType<compute_stage>::type & strain);
+  void subtractEigenstrainIncrementFromStrain(ADRankTwoTensor & strain);
 
   std::vector<const VariableGradient *> _grad_disp_old;
 

@@ -27,7 +27,7 @@ using MetaPhysicL::NumberArray;
 
 #define AD_MAX_DOFS_PER_ELEM 50
 
-typedef DualNumber<Real, NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> ADReal;
+typedef DualNumber<Real, NumberArray<AD_MAX_DOFS_PER_ELEM, Real>> DualReal;
 
 #ifndef LIBMESH_DUAL_NUMBER_COMPARE_TYPES
 

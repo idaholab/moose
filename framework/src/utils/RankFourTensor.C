@@ -36,7 +36,7 @@ mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v)
 }
 template <>
 void
-mooseSetToZero<RankFourTensorTempl<ADReal>>(RankFourTensorTempl<ADReal> & v)
+mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v)
 {
   v.zero();
 }
@@ -380,8 +380,8 @@ RankFourTensorTempl<T>::invSymm() const
 }
 
 template <>
-RankFourTensorTempl<ADReal>
-RankFourTensorTempl<ADReal>::invSymm() const
+RankFourTensorTempl<DualReal>
+RankFourTensorTempl<DualReal>::invSymm() const
 {
   mooseError("The invSymm operation calls to LAPACK, so AD is not supported.");
   return {};
@@ -911,17 +911,17 @@ RankFourTensorTempl<T>::isIsotropic() const
 }
 
 template class RankFourTensorTempl<Real>;
-template class RankFourTensorTempl<ADReal>;
+template class RankFourTensorTempl<DualReal>;
 
 #define RankTwoTensorMultInstantiate(TemplateClass)                                                \
   template RankTwoTensorTempl<Real> RankFourTensorTempl<Real>::operator*(                          \
       const TemplateClass<Real> & a) const;                                                        \
-  template RankTwoTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator*(                      \
+  template RankTwoTensorTempl<DualReal> RankFourTensorTempl<DualReal>::operator*(                  \
       const TemplateClass<Real> & a) const;                                                        \
-  template RankTwoTensorTempl<ADReal> RankFourTensorTempl<Real>::operator*(                        \
-      const TemplateClass<ADReal> & a) const;                                                      \
-  template RankTwoTensorTempl<ADReal> RankFourTensorTempl<ADReal>::operator*(                      \
-      const TemplateClass<ADReal> & a) const
+  template RankTwoTensorTempl<DualReal> RankFourTensorTempl<Real>::operator*(                      \
+      const TemplateClass<DualReal> & a) const;                                                    \
+  template RankTwoTensorTempl<DualReal> RankFourTensorTempl<DualReal>::operator*(                  \
+      const TemplateClass<DualReal> & a) const
 
 RankTwoTensorMultInstantiate(RankTwoTensorTempl);
 RankTwoTensorMultInstantiate(TensorValue);
@@ -929,27 +929,27 @@ RankTwoTensorMultInstantiate(TypeTensor);
 
 template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
 operator+(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
 operator+(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::
-operator+(const RankFourTensorTempl<ADReal> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
-operator+(const RankFourTensorTempl<ADReal> & a) const;
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<Real>::
+operator+(const RankFourTensorTempl<DualReal> & a) const;
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
+operator+(const RankFourTensorTempl<DualReal> & a) const;
 
 template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
 operator-(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
 operator-(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::
-operator-(const RankFourTensorTempl<ADReal> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
-operator-(const RankFourTensorTempl<ADReal> & a) const;
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<Real>::
+operator-(const RankFourTensorTempl<DualReal> & a) const;
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
+operator-(const RankFourTensorTempl<DualReal> & a) const;
 
 template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
 operator*(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
 operator*(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<Real>::
-operator*(const RankFourTensorTempl<ADReal> & a) const;
-template RankFourTensorTempl<ADReal> RankFourTensorTempl<ADReal>::
-operator*(const RankFourTensorTempl<ADReal> & a) const;
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<Real>::
+operator*(const RankFourTensorTempl<DualReal> & a) const;
+template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
+operator*(const RankFourTensorTempl<DualReal> & a) const;

@@ -11,7 +11,7 @@
 #define RANKFOURTENSOR_H
 
 #include "Moose.h"
-#include "ADReal.h"
+#include "DualReal.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
@@ -49,7 +49,7 @@ void mooseSetToZero(T & v);
 template <>
 void mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v);
 template <>
-void mooseSetToZero<RankFourTensorTempl<ADReal>>(RankFourTensorTempl<ADReal> & v);
+void mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v);
 
 /**
  * RankFourTensorTempl is designed to handle any N-dimensional fourth order tensor, C.
@@ -460,6 +460,6 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
 }
 
 typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<ADReal> ADRankFourTensor;
+typedef RankFourTensorTempl<DualReal> ADRankFourTensor;
 
 #endif // RANKFOURTENSOR_H

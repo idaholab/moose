@@ -26,12 +26,12 @@ template <ComputeStage compute_stage>
 void
 ADComputeSmallStrain<compute_stage>::computeProperties()
 {
-  typename RealType<compute_stage>::type volumetric_strain = 0.0;
+  ADReal volumetric_strain = 0.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // strain = (grad_disp + grad_disp^T)/2
-    typename RankTwoTensorType<compute_stage>::type grad_tensor(
+    ADRankTwoTensor grad_tensor(
         (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
     _total_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
@@ -47,8 +47,7 @@ ADComputeSmallStrain<compute_stage>::computeProperties()
   {
     if (_volumetric_locking_correction)
     {
-      typename RealType<compute_stage>::type correction =
-          (volumetric_strain - _total_strain[_qp].trace()) / 3.0;
+      ADReal correction = (volumetric_strain - _total_strain[_qp].trace()) / 3.0;
       _total_strain[_qp](0, 0) += correction;
       _total_strain[_qp](1, 1) += correction;
       _total_strain[_qp](2, 2) += correction;
