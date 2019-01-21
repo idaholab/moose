@@ -31,7 +31,7 @@ AdaptAndModify::AdaptAndModify(const InputParameters & parameters)
 void
 AdaptAndModify::incrementStepOrReject()
 {
-  if (_last_solve_converged)
+  if (lastSolveConverged())
   {
     _time_old = _time;
     _t_step++;
@@ -53,8 +53,7 @@ AdaptAndModify::endStep(Real input_time)
   else
     _time = input_time;
 
-  _last_solve_converged = lastSolveConverged();
-  if (_last_solve_converged)
+  if (lastSolveConverged())
   {
     // Compute the Error Indicators and Markers
     for (unsigned int i = 0; i < _adapt_cycles; i++)
