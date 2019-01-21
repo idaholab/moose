@@ -88,10 +88,19 @@ std::vector<std::string> split(const std::string & str, const std::string & deli
 
 /**
  * Python like join function for strings.
-
  */
 template <typename T>
 std::string join(const T & strings, const std::string & delimiter);
+
+/**
+ * Check if file exists.
+ */
+bool file_exists(const std::string & filename);
+
+/**
+ * Check the file size.
+ */
+std::size_t file_size(const std::string & filename);
 
 /**
  * This function tokenizes a path and checks to see if it contains the string to look for

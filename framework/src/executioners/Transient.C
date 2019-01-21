@@ -225,7 +225,7 @@ Transient::Transient(const InputParameters & parameters)
     _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables")),
     _final_timer(registerTimedSection("final", 1))
 {
-  // Handl deprecated parameters
+  // Handle deprecated parameters
   if (!parameters.isParamSetByAddParam("trans_ss_check"))
     _steady_state_detection = getParam<bool>("trans_ss_check");
 

@@ -260,8 +260,10 @@ Exodus::outputNodalVariables()
     _exodus_io_ptr->write_timestep_discontinuous(
         filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
   else
+  {
     _exodus_io_ptr->write_timestep(
         filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  }
 
   if (!_overwrite)
     _exodus_num++;
@@ -363,10 +365,6 @@ Exodus::outputInput()
 void
 Exodus::output(const ExecFlagType & type)
 {
-  // Do nothing if there is nothing to output
-  if (!hasOutput(type))
-    return;
-
   // Prepare the ExodusII_IO object
   outputSetup();
   LockFile lf(filename(), processor_id() == 0);
@@ -399,6 +397,23 @@ Exodus::output(const ExecFlagType & type)
 
   // Reset the mesh changed flag
   _exodus_mesh_changed = false;
+
+  // Remove empty files
+  // Because of the ability to control when different items output independently (i.e.,
+  // "execute_on_input") it is possible to create an empty file if the solve stops early, such as
+  // the case when --half-transient is used. Thus, to avoid having empty files laying around the
+  // following cleans them up. It is not possible to know if anything will be output to the file
+  // prior to attempting. A long story short, an exodus file with only info records doesn't write
+  // correctly. Deleting the file here actually doesn't fix this problem, but it seems like poor
+  // form to leave empty files around.
+  std::string current = filename();
+  if (MooseUtils::file_exists(current) && (MooseUtils::file_size(current) == 0) &&
+      processor_id() == 0)
+  {
+    int err = std::remove(current.c_str());
+    if (err != 0)
+      mooseError("MOOSE failed to remove the empty file ", current);
+  }
 }
 
 std::string

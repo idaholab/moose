@@ -49,5 +49,6 @@
   [final]
     type = Exodus
     execute_on = 'FINAL'
+    execute_input_on = 'NONE' # This is needed to avoid problems with creating a file w/o data during --recover testing
   []
 []
