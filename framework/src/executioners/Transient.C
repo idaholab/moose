@@ -395,10 +395,11 @@ Transient::execute()
   if (!_app.halfTransient())
   {
     TIME_SECTION(_final_timer);
-
     _problem.finalizeMultiApps();
-    _problem.outputStep(EXEC_FINAL);
+    _problem.execMultiAppTransfers(EXEC_FINAL, MultiAppTransfer::TO_MULTIAPP);
+    _problem.execMultiAppTransfers(EXEC_FINAL, MultiAppTransfer::FROM_MULTIAPP);
     _problem.execute(EXEC_FINAL);
+    _problem.outputStep(EXEC_FINAL);
   }
 
   // This method is to finalize anything else we want to do on the problem side.
