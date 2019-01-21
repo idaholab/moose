@@ -217,6 +217,37 @@ EigenProblem::checkProblemIntegrity()
   _nl_eigen->checkIntegrity();
 }
 
+bool
+EigenProblem::baseSolve()
+{
+  bool solve_converged;
+  if (_solve)
+  {
+    TIME_SECTION(_solve_timer);
+    _nl->solve();
+    _nl->update();
+    solve_converged = _nl->converged();
+  }
+  else
+    solve_converged = true;
+
+  if (!solve_converged)
+  {
+    _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
+
+    // Perform the output of the current, failed time step (this only occurs if desired)
+    outputStep(EXEC_FAILED);
+    //    _picard_status = MOOSE_PICARD_DIVERGED_NONLINEAR;
+    return false;
+  }
+
+  // sync solutions in displaced problem
+  if (_displaced_problem)
+    _displaced_problem->syncSolutions();
+
+  return solve_converged;
+}
+
 void
 EigenProblem::solve()
 {
