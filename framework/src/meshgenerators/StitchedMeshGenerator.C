@@ -28,7 +28,9 @@ validParams<StitchedMeshGenerator>()
   params.addParam<bool>(
       "clear_stitched_boundary_ids", true, "Whether or not to clear the stitchd boundary IDs");
   params.addRequiredParam<std::vector<std::vector<std::string>>>(
-      "stitch_boundaries_pairs", "Pairs of boundaries to be stitched together");
+      "stitch_boundaries_pairs",
+      "Pairs of boundaries to be stitched together between the 1st mesh in inputs and each "
+      "consecutive mesh");
   params.addParam<MooseEnum>(
       "algorithm",
       algorithm,
@@ -93,7 +95,7 @@ StitchedMeshGenerator::generate()
         for (auto & ss_name_map_pair : sideset_id_name_map)
           error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
 
-        mooseError(error.str());
+        paramError("stitch_boundaries_pairs", error.str());
       }
     }
 
@@ -121,7 +123,7 @@ StitchedMeshGenerator::generate()
         for (auto & ss_name_map_pair : sideset_id_name_map)
           error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
 
-        mooseError(error.str());
+        paramError("stitch_boundaries_pairs", error.str());
       }
     }
 

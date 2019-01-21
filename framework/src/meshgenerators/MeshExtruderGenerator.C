@@ -103,7 +103,7 @@ MeshExtruderGenerator::generate()
     changeID(*mesh, getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
 
   // Update the dimension
-  mesh->set_mesh_dimension(mesh->mesh_dimension() + 1);
+  mesh->set_mesh_dimension(source_mesh->mesh_dimension() + 1);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -126,21 +126,20 @@ MeshExtruderGenerator::changeID(MeshBase & mesh,
 }
 
 MeshExtruderGenerator::QueryElemSubdomainID::QueryElemSubdomainID(
-    std::vector<SubdomainID> existing_subdomains,
+    const std::vector<SubdomainID> & existing_subdomains,
     std::vector<unsigned int> layers,
-    std::vector<unsigned int> new_ids,
-    unsigned int libmesh_dbg_var(num_layers))
-  : QueryElemSubdomainIDBase()
-#ifndef NDEBUG
-    ,
-    _num_layers(num_layers)
-#endif
+    const std::vector<unsigned int> & new_ids,
+    unsigned int num_layers)
+  : QueryElemSubdomainIDBase(), _num_layers(num_layers)
 {
   // Setup our stride depending on whether the user passed unique sets in new ids or just a single
   // set of new ids
-  const unsigned int zero = 0;
   const unsigned int stride =
-      existing_subdomains.size() == new_ids.size() ? zero : existing_subdomains.size();
+      existing_subdomains.size() == new_ids.size() ? 0 : existing_subdomains.size();
+
+  if (layers.size() == 0)
+    for (unsigned int i = 0; i < _num_layers; i++)
+      layers.push_back(i);
 
   // Populate the data structure
   for (unsigned int i = 0; i < layers.size(); ++i)
