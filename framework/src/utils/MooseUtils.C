@@ -814,7 +814,9 @@ void
 createSymlink(const std::string & target, const std::string & link)
 {
   clearSymlink(link);
-  symlink(target.c_str(), link.c_str());
+  int err = symlink(target.c_str(), link.c_str());
+  if (err != 0)
+    mooseError("Failed to create symbolic link (via 'symlink') from ", target, " to ", link);
 }
 
 void
@@ -822,7 +824,11 @@ clearSymlink(const std::string & link)
 {
   struct stat sbuf;
   if (lstat(link.c_str(), &sbuf) == 0)
-    unlink(link.c_str());
+  {
+    int err = unlink(link.c_str());
+    if (err != 0)
+      mooseError("Failed to remove symbolic link (via 'unlink') to ", link);
+  }
 }
 } // MooseUtils namespace
 
