@@ -25,15 +25,15 @@ DistributionInterface::DistributionInterface(const MooseObject * moose_object)
 {
 }
 
-Distribution &
-DistributionInterface::getDistribution(const std::string & name)
+const Distribution &
+DistributionInterface::getDistribution(const std::string & name) const
 {
   DistributionName dist_name = _dni_params.get<DistributionName>(name);
   return _dni_feproblem.getDistribution(dist_name);
 }
 
-Distribution &
-DistributionInterface::getDistributionByName(const DistributionName & name)
+const Distribution &
+DistributionInterface::getDistributionByName(const DistributionName & name) const
 {
   return _dni_feproblem.getDistribution(name);
 }

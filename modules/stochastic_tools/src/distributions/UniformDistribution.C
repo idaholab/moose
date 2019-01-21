@@ -32,7 +32,7 @@ UniformDistribution::UniformDistribution(const InputParameters & parameters)
 }
 
 Real
-UniformDistribution::pdf(const Real & x)
+UniformDistribution::pdf(const Real & x) const
 {
   if (x < _lower_bound || x > _upper_bound)
     return 0.0;
@@ -41,7 +41,7 @@ UniformDistribution::pdf(const Real & x)
 }
 
 Real
-UniformDistribution::cdf(const Real & x)
+UniformDistribution::cdf(const Real & x) const
 {
   if (x < _lower_bound)
     return 0.0;
@@ -52,7 +52,7 @@ UniformDistribution::cdf(const Real & x)
 }
 
 Real
-UniformDistribution::quantile(const Real & y)
+UniformDistribution::quantile(const Real & y) const
 {
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");

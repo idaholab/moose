@@ -33,7 +33,7 @@ public:
 
 protected:
   /// Object of statistics distribution
-  Distribution & _distribution;
+  const Distribution & _distribution;
 
   /// The value to supply to method
   const Real & _value;

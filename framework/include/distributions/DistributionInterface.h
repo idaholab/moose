@@ -43,14 +43,14 @@ public:
    * @param name The name of the parameter key of the distribution to retrieve
    * @return The distribution with name associated with the parameter 'name'
    */
-  Distribution & getDistribution(const std::string & name);
+  const Distribution & getDistribution(const std::string & name) const;
 
   /**
    * Get a distribution with a given name
    * @param name The name of the distribution to retrieve
    * @return The distribution with name 'name'
    */
-  Distribution & getDistributionByName(const DistributionName & name);
+  const Distribution & getDistributionByName(const DistributionName & name) const;
 
 private:
   /// Parameters of the object with this interface
