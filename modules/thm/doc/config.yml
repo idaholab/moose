@@ -1,20 +1,30 @@
 Content:
     THM:
         root_dir: ${ROOT_DIR}/doc/content
-    moose:
-        root_dir: ${MOOSE_DIR}/framework/doc/content
-        content:
-            - js/*
-            - css/*
-            - contrib/**
-            - media/**
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: THM
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        menu:
+            Developers:
+                Build Status: https://moosebuild.inl.gov/repo/idaholab/thm/
+
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
+        hide:
+            framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
         includes:
             - include
+            - ${MOOSE_DIR}/framework/include
+        remove:
+            framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
+
+    MooseDocs.extensions.common:
+        shortcuts:
+            framework: !include ${MOOSE_DIR}/framework/doc/globals.yml
+
+    MooseDocs.extensions.acronym:
+        acronyms: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
