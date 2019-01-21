@@ -22,6 +22,7 @@ SolverParams::SolverParams()
     _picard_abs_tol(1e-50),
     _picard_force_norms(false),
     _picard_relaxation_factor(1),
+    _picard_self_relaxation_factor(1),
     _max_xfem_update(std::numeric_limits<unsigned int>::max()),
     _update_xfem_at_timestep_begin(false)
 {

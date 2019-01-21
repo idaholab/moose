@@ -34,6 +34,8 @@ public:
   bool _picard_force_norms;
   Real _picard_relaxation_factor;
   std::vector<std::string> _picard_relaxed_variables;
+  Real _picard_self_relaxation_factor;
+  std::vector<std::string> _picard_self_relaxed_variables;
 
   // solver parameters for XFEM
   unsigned int _max_xfem_update;

@@ -507,6 +507,7 @@ public:
   virtual int & timeStep() const { return _t_step; }
   virtual Real & dt() const { return _dt; }
   virtual Real & dtOld() const { return _dt_old; }
+  Real & previousTimeAsSubapp() { return _prev_time_as_subapp; }
 
   virtual void transient(bool trans) { _transient = trans; }
   virtual bool isTransient() const override { return _transient; }
@@ -2009,6 +2010,9 @@ private:
   Real _picard_initial_norm;
   std::vector<Real> _picard_timestep_begin_norm;
   std::vector<Real> _picard_timestep_end_norm;
+
+  // Used to track time as a subapp
+  Real _prev_time_as_subapp;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

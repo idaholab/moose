@@ -4212,7 +4212,7 @@ FEProblemBase::newSolve()
   backupMultiApps(EXEC_TIMESTEP_BEGIN);
   backupMultiApps(EXEC_TIMESTEP_END);
 
-  // Prepare to relax variables.
+  // Prepare to relax variables as a master
   std::set<dof_id_type> relaxed_dofs;
   if (solver_params._picard_relaxation_factor != 1.0)
   {
@@ -4223,6 +4223,27 @@ FEProblemBase::newSolve()
     Threads::parallel_reduce(elem_range, aldit);
 
     relaxed_dofs = aldit._all_dof_indices;
+  }
+
+  // Prepare to relax variables as a subapp
+  std::set<dof_id_type> self_relaxed_dofs;
+  if (solverParams()._picard_self_relaxation_factor != 1.0)
+  {
+    // Snag all of the local dof indices for all of these variables
+    System & libmesh_nl_system = _nl->system();
+    AllLocalDofIndicesThread aldit(libmesh_nl_system,
+                                   solverParams()._picard_self_relaxed_variables);
+    ConstElemRange & elem_range = *mesh().getActiveLocalElementRange();
+    Threads::parallel_reduce(elem_range, aldit);
+
+    self_relaxed_dofs = aldit._all_dof_indices;
+
+    if (previousTimeAsSubapp() == _time)
+    {
+      NumericVector<Number> & solution = _nl->solution();
+      NumericVector<Number> & relax_previous = _nl->getVector("self_relax_previous");
+      relax_previous = solution;
+    }
   }
 
   picard_it = 0;
@@ -4319,6 +4340,21 @@ FEProblemBase::newSolve()
     dt() = current_dt; // _dt might be smaller than this at this point for multistep methods
 
     ++picard_it;
+  }
+
+  if (converged && solverParams()._picard_self_relaxation_factor != 1.0)
+  {
+    if (previousTimeAsSubapp() == time())
+    {
+      NumericVector<Number> & solution = _nl->solution();
+      NumericVector<Number> & relax_previous = _nl->getVector("self_relax_previous");
+      Real factor = solverParams()._picard_self_relaxation_factor;
+      for (const auto & dof : self_relaxed_dofs)
+        solution.set(dof, (relax_previous(dof) * (1.0 - factor)) + (solution(dof) * factor));
+      solution.close();
+      _nl->update();
+    }
+    previousTimeAsSubapp() = time();
   }
 
   _console << "Picard converged reason: " << _picard_status << std::endl;
