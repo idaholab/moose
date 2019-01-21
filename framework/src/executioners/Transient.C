@@ -395,9 +395,8 @@ Transient::execute()
   if (!_app.halfTransient())
   {
     TIME_SECTION(_final_timer);
+    _problem.execMultiApps(EXEC_FINAL);
     _problem.finalizeMultiApps();
-    _problem.execMultiAppTransfers(EXEC_FINAL, MultiAppTransfer::TO_MULTIAPP);
-    _problem.execMultiAppTransfers(EXEC_FINAL, MultiAppTransfer::FROM_MULTIAPP);
     _problem.execute(EXEC_FINAL);
     _problem.outputStep(EXEC_FINAL);
   }

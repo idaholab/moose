@@ -7,7 +7,10 @@
 
 [Variables]
   [u]
-    initial_condition = 12345
+    initial_condition = 1234
+  []
+  [v]
+    initial_condition = 2458
   []
 []
 
@@ -38,6 +41,15 @@
     direction = from_multiapp
     source_variable = u
     variable = u
+    multi_app = sub
+    check_multiapp_execute_on = false
+    execute_on = 'FINAL'
+  []
+  [to_sub]
+    type = MultiAppCopyTransfer
+    direction = to_multiapp
+    source_variable = v
+    variable = v
     multi_app = sub
     check_multiapp_execute_on = false
     execute_on = 'FINAL'
