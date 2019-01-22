@@ -267,7 +267,7 @@ Executioner::getTimeStepperName()
 bool
 Executioner::lastSolveConverged()
 {
-  return _fe_problem.converged();
+  return true;
 }
 
 void

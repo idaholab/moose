@@ -292,12 +292,6 @@ DumpObjectsProblem::newSolve()
 }
 
 void
-DumpObjectsProblem::solve()
-{
-  dumpGeneratedSyntax(getParam<std::string>("dump_path"));
-}
-
-void
 DumpObjectsProblem::dumpGeneratedSyntax(const std::string path)
 {
   auto pathit = _generated_syntax.find(path);

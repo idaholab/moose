@@ -4572,15 +4572,6 @@ FEProblemBase::checkExceptionAndStopSolve()
   }
 }
 
-bool
-FEProblemBase::converged()
-{
-  if (_solve)
-    return _nl->converged();
-  else
-    return true;
-}
-
 unsigned int
 FEProblemBase::nNonlinearIterations() const
 {

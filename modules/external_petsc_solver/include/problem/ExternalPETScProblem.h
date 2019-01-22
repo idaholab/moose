@@ -36,8 +36,6 @@ public:
   virtual bool externalSolve() override;
   virtual void syncSolutions(Direction /*direction*/) override;
 
-  virtual bool converged() override { return true; }
-
 private:
   /// The name of the variable to transfer to
   const VariableName & _sync_to_var_name;

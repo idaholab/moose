@@ -26,7 +26,6 @@ class FailingProblem : public FEProblem
 public:
   FailingProblem(const InputParameters & params);
   virtual bool newSolve() override;
-  virtual bool converged() override;
 
 protected:
   bool _failed;

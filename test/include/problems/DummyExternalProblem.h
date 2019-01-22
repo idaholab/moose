@@ -32,7 +32,6 @@ public:
     return true;
   }
   virtual void syncSolutions(Direction /*direction*/) override {}
-  virtual bool converged() override { return true; }
 };
 
 #endif /* DUMMYEXTERNALPROBLEM_H */

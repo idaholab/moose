@@ -46,6 +46,8 @@ public:
 
   virtual void checkIntegrity();
 
+  virtual bool lastSolveConverged() override { return _last_solve_converged; }
+
 protected:
   FEProblemBase & _problem;
 
@@ -53,6 +55,8 @@ protected:
   Real & _time;
 
   PerfID _final_timer;
+
+  bool _last_solve_converged;
 };
 
 #endif // STEADY_H

@@ -846,12 +846,6 @@ DisplacedProblem::solve()
 }
 
 bool
-DisplacedProblem::converged()
-{
-  return _mproblem.converged();
-}
-
-bool
 DisplacedProblem::computingInitialResidual() const
 {
   return _mproblem.computingInitialResidual();

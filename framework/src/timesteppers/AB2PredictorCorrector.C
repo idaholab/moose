@@ -85,8 +85,7 @@ AB2PredictorCorrector::step()
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
 
-  _fe_problem.solve();
-  _converged = _fe_problem.converged();
+  _converged = _fe_problem.newSolve();
   if (_converged)
   {
     _u1 = *nl.currentSolution();

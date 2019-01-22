@@ -154,9 +154,6 @@ void
 TimeStepper::step()
 {
   _converged = _fe_problem.newSolve();
-
-  //_fe_problem.solve();
-  //_converged = _fe_problem.converged();
 }
 
 void

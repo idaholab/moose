@@ -86,7 +86,6 @@ public:
 
   /// output data in solve
   virtual bool newSolve() override;
-  virtual void solve() override;
 
   virtual void initialSetup() override {}
   virtual void advanceState() override {}

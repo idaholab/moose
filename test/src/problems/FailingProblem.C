@@ -31,6 +31,7 @@ bool
 FailingProblem::newSolve()
 {
   bool converged = FEProblem::newSolve();
+  // fail for the first time of solving this step
   if (!_failed && (_t_step == static_cast<int>(_fail_step)))
   {
     _failed = true;
@@ -38,16 +39,4 @@ FailingProblem::newSolve()
   }
 
   return converged;
-}
-
-bool
-FailingProblem::converged()
-{
-  if (!_failed && (_t_step == static_cast<int>(_fail_step)))
-  {
-    _failed = true;
-    return false;
-  }
-
-  return FEProblemBase::converged();
 }

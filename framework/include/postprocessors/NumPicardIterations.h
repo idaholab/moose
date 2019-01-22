@@ -15,7 +15,6 @@
 
 // Forward Declarations
 class NumPicardIterations;
-class Transient;
 
 template <>
 InputParameters validParams<NumPicardIterations>();
@@ -29,13 +28,10 @@ class NumPicardIterations : public GeneralPostprocessor
 public:
   NumPicardIterations(const InputParameters & parameters);
 
-  virtual void initialize() override;
+  virtual void initialize() override {}
   virtual void execute() override {}
 
   virtual Real getValue() override;
-
-protected:
-  Transient * _transient_executioner;
 };
 
 #endif // NUMPICARDITERATIONS_H

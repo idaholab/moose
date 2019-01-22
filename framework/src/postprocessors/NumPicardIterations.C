@@ -9,8 +9,7 @@
 
 // MOOSE includes
 #include "NumPicardIterations.h"
-#include "Transient.h"
-#include "MooseApp.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", NumPicardIterations);
 
@@ -23,24 +22,12 @@ validParams<NumPicardIterations>()
 }
 
 NumPicardIterations::NumPicardIterations(const InputParameters & parameters)
-  : GeneralPostprocessor(parameters), _transient_executioner(NULL)
+  : GeneralPostprocessor(parameters)
 {
-}
-
-void
-NumPicardIterations::initialize()
-{
-  _transient_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
-  if (!_transient_executioner)
-  {
-    mooseError(
-        "The NumPicardIterations Postprocessor can only be used with a Transient Executioner");
-  }
 }
 
 Real
 NumPicardIterations::getValue()
 {
   return _fe_problem.numPicardIts();
-  //  return _transient_executioner->numPicardIts();
 }

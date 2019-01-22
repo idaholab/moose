@@ -55,7 +55,6 @@ public:
 
   virtual void init() override;
   virtual void solve() override;
-  virtual bool converged() override;
 
   /**
    * Allocate vectors and save old solutions into them.

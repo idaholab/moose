@@ -488,7 +488,6 @@ public:
    */
   virtual void checkExceptionAndStopSolve();
 
-  virtual bool converged() override;
   virtual unsigned int nNonlinearIterations() const override;
   virtual unsigned int nLinearIterations() const override;
   virtual Real finalNonlinearResidual() const override;

@@ -71,7 +71,7 @@ ImplicitMidpoint::solve()
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged())
+  if (!_fe_problem.getNonlinearSystemBase().converged())
     return;
 
   // Compute second stage
