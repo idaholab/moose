@@ -29,6 +29,7 @@
 #include "StochasticToolsApp.h"
 #include "TensorMechanicsApp.h"
 #include "XFEMApp.h"
+#include "ExternalPetscSolverApp.h"
 
 template <>
 InputParameters
@@ -75,6 +76,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   StochasticToolsApp::registerAll(f, af, s);
   TensorMechanicsApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
+  ExternalPetscSolverApp::registerAll(f, af, s);
 }
 
 void

@@ -1,0 +1,15 @@
+[Tests]
+  [external_transient]
+    type = 'Exodiff'
+    input = 'external_petsc_master.i'
+    exodiff = 'external_petsc_master_out.e external_petsc_master_out_sub_app0.e'
+    max_parallel = 2
+    min_parallel = 2
+    requirement = "MOOSE shall support an code coupling interface for PETSc external solver."
+    design = "ExternalProblem.md"
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+  []
+[]

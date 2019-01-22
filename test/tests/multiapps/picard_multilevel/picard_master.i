@@ -67,6 +67,7 @@
   nl_abs_tol = 1e-9
   picard_rel_tol = 1e-8
   picard_abs_tol = 1e-9
+#  picard_force_norms = true
 []
 
 [Outputs]

@@ -11,6 +11,7 @@
 #include "AddKernelAction.h"
 #include "AddMaterialAction.h"
 #include "AddPostprocessorAction.h"
+#include "AddUserObjectAction.h"
 #include "PorousFlowActionBase.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
@@ -126,6 +127,11 @@ PorousFlowAddMaterialAction::createDependencyList()
   auto postprocessors = _awh.getActions<AddPostprocessorAction>();
   for (auto & postprocessor : postprocessors)
     _dependency_list.insert(postprocessor->getMooseObjectType());
+
+  // Unique list of userojects added in input file
+  auto userobjects = _awh.getActions<AddUserObjectAction>();
+  for (auto & userobject : userobjects)
+    _dependency_list.insert(userobject->getMooseObjectType());
 }
 
 bool

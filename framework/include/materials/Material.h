@@ -205,6 +205,12 @@ protected:
    */
   virtual void initQpStatefulProperties();
 
+  /**
+   * Copies dual number values from ADMaterials into Real property values for Material<->ADMaterial
+   * interoperability.
+   */
+  void copyDualNumbersToValues();
+
   SubProblem & _subproblem;
 
   FEProblemBase & _fe_problem;

@@ -35,6 +35,9 @@
 #include <vector>
 #include <array>
 
+template <typename T>
+constexpr Real RankTwoTensorTempl<T>::identityCoords[];
+
 template <>
 void
 mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
@@ -327,25 +330,11 @@ RankTwoTensorTempl<T>::operator+=(const RankTwoTensorTempl<T> & a)
 }
 
 template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::operator+(const RankTwoTensorTempl<T> & b) const
-{
-  return TensorValue<T>::operator+(b);
-}
-
-template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator-=(const RankTwoTensorTempl<T> & a)
 {
   TensorValue<T>::operator-=(a);
   return *this;
-}
-
-template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::operator-(const RankTwoTensorTempl<T> & b) const
-{
-  return TensorValue<T>::operator-(b);
 }
 
 template <typename T>
@@ -364,36 +353,11 @@ RankTwoTensorTempl<T>::operator*=(const T & a)
 }
 
 template <typename T>
-RankTwoTensorTempl<T> RankTwoTensorTempl<T>::operator*(const T & b) const
-{
-  return TensorValue<T>::operator*(b);
-}
-
-template <typename T>
 RankTwoTensorTempl<T> &
 RankTwoTensorTempl<T>::operator/=(const T & a)
 {
   TensorValue<T>::operator/=(a);
   return *this;
-}
-
-template <typename T>
-RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::operator/(const T & b) const
-{
-  return TensorValue<T>::operator/(b);
-}
-
-template <typename T>
-TypeVector<T> RankTwoTensorTempl<T>::operator*(const TypeVector<T> & b) const
-{
-  return TensorValue<T>::operator*(b);
-}
-
-template <typename T>
-RankTwoTensorTempl<T> RankTwoTensorTempl<T>::operator*(const TypeTensor<T> & b) const
-{
-  return TensorValue<T>::operator*(b);
 }
 
 template <typename T>
@@ -1169,6 +1133,15 @@ RankTwoTensorTempl<T>::initialContraction(const RankFourTensorTempl<T> & b) cons
     }
 
   return result;
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::setToIdentity()
+{
+  mooseAssert(N2 == 9, "RankTwoTensorTempl is currently only tested for 3 dimensions.");
+  for (unsigned int i = 0; i < N2; ++i)
+    this->_coords[i] = identityCoords[i];
 }
 
 template class RankTwoTensorTempl<Real>;

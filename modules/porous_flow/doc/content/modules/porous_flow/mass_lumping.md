@@ -1,5 +1,14 @@
 # Mass lumping
 
+This page is part of a set of pages devoted to discussions of numerical stabilization in PorousFlow.  See:
+
+- [Numerical stabilization lead page](stabilization.md)
+- [Mass lumping](mass_lumping.md)
+- [Full upwinding](upwinding.md)
+- [Kuzmin-Turek stabilization](kt.md)
+- [Numerical diffusion](numerical_diffusion.md)
+- [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
+
 Consider here just the fluid-flow equation, as the heat-energy equation is analogous.  The
 time-derivative term is discretised as
 

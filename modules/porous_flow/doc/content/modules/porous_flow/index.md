@@ -69,13 +69,15 @@ A number of fluid and/or heat sources/sinks are available for use in PorousFlow.
 
 Details about numerical issues.
 
-- [Mass lumping](mass_lumping.md)
-- [Upwinding](upwinding.md)
+- [Numerical stabilization page](stabilization.md)
+- [Numerical stabilization: Mass lumping](mass_lumping.md)
+- [Numerical stabilization: full upwinding](upwinding.md)
+- [Numerical stabilization: Kuzmin-Turek](kt.md)
+- [Numerical stabilization: numerical diffusion](numerical_diffusion.md)
+- [Numerical stabilization: A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 - [Preconditioning and solvers](solvers.md)
 - [Convergence criteria](convergence.md)
 - [Nonlinear convergence problems](nonlinear_convergence_problems.md)
-- [Numerical diffusion](numerical_diffusion.md)
-- [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
 ## The Dictator
 

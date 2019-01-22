@@ -1,8 +1,22 @@
 [Tests]
+   design = 'multiapps/TransientMultiApp.md'
   [./test]
     type = 'Exodiff'
     input = 'picard_master.i'
     exodiff = 'picard_master_out.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
-    allow_warnings = true
+
+    issues = '#5126'
+    requirement = 'The system shall support Picard iteration with multiple levels of Multiapps.'
+  [../]
+  [./test_force_norms]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    cli_args = 'Executioner/picard_force_norms=true Outputs/file_base=picard_master_out_extra'
+
+    exodiff = 'picard_master_out_extra.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
+    prereq = test
+
+    issues = '#12709'
+    requirement = 'The system shall support the evaluation of TIMESTEP_BEGIN and TIMESTEP_END norms even when there are not active Multiapps on both of those execute_on times.'
   [../]
 []

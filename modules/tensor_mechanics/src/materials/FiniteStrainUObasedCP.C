@@ -187,16 +187,11 @@ FiniteStrainUObasedCP::initQpStatefulProperties()
         _uo_state_var_evol_rate_comps[i]->variableSize());
 
   _stress[_qp].zero();
-
-  _fp[_qp].zero();
-  _fp[_qp].addIa(1.0);
-
   _pk2[_qp].zero();
-
   _lag_e[_qp].zero();
 
-  _update_rot[_qp].zero();
-  _update_rot[_qp].addIa(1.0);
+  _fp[_qp].setToIdentity();
+  _update_rot[_qp].setToIdentity();
 
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
@@ -306,8 +301,7 @@ FiniteStrainUObasedCP::postSolveQp()
   // Calculate jacobian for preconditioner
   calcTangentModuli();
 
-  RankTwoTensor iden;
-  iden.addIa(1.0);
+  RankTwoTensor iden(RankTwoTensor::initIdentity);
 
   _lag_e[_qp] = _deformation_gradient[_qp].transpose() * _deformation_gradient[_qp] - iden;
   _lag_e[_qp] = _lag_e[_qp] * 0.5;
@@ -524,15 +518,9 @@ FiniteStrainUObasedCP::getSlipRates()
 void
 FiniteStrainUObasedCP::calcResidual()
 {
-  RankTwoTensor iden, ce, ee, ce_pk2, eqv_slip_incr, pk2_new;
-
-  iden.zero();
-  iden.addIa(1.0);
-
-  eqv_slip_incr.zero();
+  RankTwoTensor iden(RankTwoTensor::initIdentity), ce, ee, ce_pk2, eqv_slip_incr, pk2_new;
 
   getSlipRates();
-
   if (_err_tol)
     return;
 

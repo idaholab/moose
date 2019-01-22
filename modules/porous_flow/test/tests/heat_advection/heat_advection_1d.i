@@ -7,27 +7,9 @@
   xmax = 1
 []
 
-[Adaptivity]
-  active = ''
-  max_h_level = 1
-  [./Markers]
-    [./error_frac]
-      indicator = ind
-      type = ErrorFractionMarker
-      refine = 0.1
-      coarsen = 0.1
-    [../]
-  [../]
-  [./Indicators]
-    [./ind]
-      type = GradientJumpIndicator
-      variable = temp
-    [../]
-  [../]
-[]
-
 [GlobalParams]
   PorousFlowDictator = dictator
+  gravity = '0 0 0'
 []
 
 [Variables]
@@ -83,16 +65,14 @@
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pp
-    gravity = '0 0 0'
   [../]
   [./energy_dot]
     type = PorousFlowEnergyTimeDerivative
     variable = temp
   [../]
-  [./convection]
+  [./heat_advection]
     type = PorousFlowHeatAdvection
     variable = temp
-    gravity = '0 0 0'
   [../]
 []
 
@@ -178,7 +158,6 @@
 []
 
 [Outputs]
-  file_base = heat_advection_1d
   exodus = true
   interval = 10
 []

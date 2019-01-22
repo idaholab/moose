@@ -51,15 +51,7 @@ ComputeIncrementalStrainBase::initQpStatefulProperties()
 {
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
-  _deformation_gradient[_qp].zero();
-  _deformation_gradient[_qp].addIa(1.0);
-
-  // Note that for some models (small strain), the rotation increment is
-  // never updated. Because we always have stateful properties, this method
-  // always gets called, so we can rely on this getting set here without
-  // setting it again when properties get computed.
-  _rotation_increment[_qp].zero();
-  _rotation_increment[_qp].addIa(1.0);
+  _deformation_gradient[_qp].setToIdentity();
 }
 
 void

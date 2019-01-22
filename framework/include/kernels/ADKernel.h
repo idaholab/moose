@@ -16,8 +16,10 @@
 #include "metaphysicl/dualnumber.h"
 
 #define usingKernelMembers                                                                         \
+  usingCoupleableMembers;                                                                          \
   using ADKernel<compute_stage>::_test;                                                            \
   using ADKernel<compute_stage>::_qp;                                                              \
+  using ADKernel<compute_stage>::_q_point;                                                         \
   using ADKernel<compute_stage>::_i;                                                               \
   using ADKernel<compute_stage>::_j;                                                               \
   using ADKernel<compute_stage>::_u;                                                               \
@@ -26,7 +28,6 @@
   using ADKernel<compute_stage>::_grad_u;                                                          \
   using ADKernel<compute_stage>::_JxW;                                                             \
   using ADKernel<compute_stage>::_coord;                                                           \
-  using ADKernel<compute_stage>::_q_point;                                                         \
   using ADKernel<compute_stage>::_local_re;                                                        \
   using ADKernel<compute_stage>::_local_ke;                                                        \
   using ADKernel<compute_stage>::_qrule;                                                           \
@@ -37,8 +38,6 @@
   using ADKernel<compute_stage>::_current_elem_volume;                                             \
   using ADKernel<compute_stage>::_sys;                                                             \
   using ADKernel<compute_stage>::_assembly;                                                        \
-  using ADKernel<compute_stage>::coupled;                                                          \
-  using ADKernel<compute_stage>::coupledComponents;                                                \
   using ADKernel<compute_stage>::getBlockCoordSystem;                                              \
   using ADKernel<compute_stage>::precalculateResidual;                                             \
   using ADKernel<compute_stage>::prepareVectorTag;                                                 \
@@ -47,8 +46,7 @@
   using ADKernel<compute_stage>::accumulateTaggedLocalMatrix;                                      \
   using ADKernel<compute_stage>::variable;                                                         \
   using ADKernel<compute_stage>::paramError;                                                       \
-  using ADKernel<compute_stage>::isParamValid;                                                     \
-  using ADKernel<compute_stage>::isCoupled
+  using ADKernel<compute_stage>::isParamValid
 
 // forward declarations
 template <ComputeStage>

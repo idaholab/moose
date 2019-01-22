@@ -87,6 +87,12 @@ PorousFlowUnsaturated::PorousFlowUnsaturated(const InputParameters & params)
     _objects_to_add.push_back("PorousFlowHeatAdvection");
   if (_add_saturation_aux)
     _objects_to_add.push_back("SaturationAux");
+  if (_stabilization == StabilizationEnum::KT)
+    _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent");
+  if (_stabilization == StabilizationEnum::KT &&
+      (_coupling_type == CouplingTypeEnum::ThermoHydro ||
+       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
+    _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat");
 }
 
 void
@@ -97,23 +103,47 @@ PorousFlowUnsaturated::act()
   // add the kernels
   if (_current_task == "add_kernel")
   {
-    std::string kernel_name = "PorousFlowUnsaturated_AdvectiveFlux";
-    std::string kernel_type = "PorousFlowAdvectiveFlux";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<RealVectorValue>("gravity") = _gravity;
-
-    for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
+    if (_stabilization == StabilizationEnum::Full)
     {
-      kernel_name = "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(i);
-      params.set<unsigned int>("fluid_component") = i;
-      params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
+      const std::string kernel_type = "PorousFlowAdvectiveFlux";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+      params.set<RealVectorValue>("gravity") = _gravity;
+
+      for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
+      {
+        const std::string kernel_name = "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(i);
+        params.set<unsigned int>("fluid_component") = i;
+        params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
+        _problem->addKernel(kernel_type, kernel_name, params);
+      }
+      const std::string kernel_name =
+          "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(_num_mass_fraction_vars);
+      params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
+      params.set<NonlinearVariableName>("variable") = _pp_var;
       _problem->addKernel(kernel_type, kernel_name, params);
     }
-    kernel_name = "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(_num_mass_fraction_vars);
-    params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
-    params.set<NonlinearVariableName>("variable") = _pp_var;
-    _problem->addKernel(kernel_type, kernel_name, params);
+    else if (_stabilization == StabilizationEnum::KT)
+    {
+      const std::string kernel_type = "PorousFlowFluxLimitedTVDAdvection";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+
+      for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
+      {
+        const std::string kernel_name = "PorousFlowFluxLimited_DarcyFlow" + Moose::stringify(i);
+        params.set<UserObjectName>("advective_flux_calculator") =
+            "PorousFlowUnsaturated_AC_" + Moose::stringify(i);
+        params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
+        _problem->addKernel(kernel_type, kernel_name, params);
+      }
+      const std::string kernel_name =
+          "PorousFlowFluxLimited_DarcyFlow" + Moose::stringify(_num_mass_fraction_vars);
+      params.set<NonlinearVariableName>("variable") = _pp_var;
+      params.set<UserObjectName>("advective_flux_calculator") =
+          "PorousFlowUnsaturated_AC_" + Moose::stringify(_num_mass_fraction_vars);
+      _problem->addKernel(kernel_type, kernel_name, params);
+    }
   }
   if (_current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
   {
@@ -162,13 +192,26 @@ PorousFlowUnsaturated::act()
        _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
       _current_task == "add_kernel")
   {
-    std::string kernel_name = "PorousFlowUnsaturated_HeatAdvection";
-    std::string kernel_type = "PorousFlowHeatAdvection";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<NonlinearVariableName>("variable") = _temperature_var[0];
-    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<RealVectorValue>("gravity") = _gravity;
-    _problem->addKernel(kernel_type, kernel_name, params);
+    if (_stabilization == StabilizationEnum::Full)
+    {
+      const std::string kernel_name = "PorousFlowUnsaturated_HeatAdvection";
+      const std::string kernel_type = "PorousFlowHeatAdvection";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_var[0];
+      params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+      params.set<RealVectorValue>("gravity") = _gravity;
+      _problem->addKernel(kernel_type, kernel_name, params);
+    }
+    else if (_stabilization == StabilizationEnum::KT)
+    {
+      const std::string kernel_name = "PorousFlowUnsaturated_HeatAdvection";
+      const std::string kernel_type = "PorousFlowFluxLimitedTVDAdvection";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_var[0];
+      params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+      params.set<UserObjectName>("advective_flux_calculator") = "PorousFlowUnsaturatedHeat_AC";
+      _problem->addKernel(kernel_type, kernel_name, params);
+    }
   }
 
   // Add the capillary pressure UserObject
@@ -219,6 +262,30 @@ PorousFlowUnsaturated::act()
   if (_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
       _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal"))
     addVolumetricStrainMaterial(_coupled_displacements, true);
+
+  // add Advective Flux calculator UserObjects, if required
+  if (_current_task == "add_user_object" && _stabilization == StabilizationEnum::KT)
+  {
+    for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
+    {
+      const std::string userobject_name = "PorousFlowUnsaturated_AC_" + Moose::stringify(i);
+      addAdvectiveFluxCalculatorUnsaturatedMultiComponent(0, i, true, userobject_name);
+    }
+    const std::string userobject_name =
+        "PorousFlowUnsaturated_AC_" + Moose::stringify(_num_mass_fraction_vars);
+    if (_num_mass_fraction_vars == 0)
+      addAdvectiveFluxCalculatorUnsaturated(0, true, userobject_name); // 1 component only
+    else
+      addAdvectiveFluxCalculatorUnsaturatedMultiComponent(
+          0, _num_mass_fraction_vars, true, userobject_name);
+
+    if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
+        _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
+    {
+      const std::string userobject_name = "PorousFlowUnsaturatedHeat_AC";
+      addAdvectiveFluxCalculatorUnsaturatedHeat(0, true, userobject_name);
+    }
+  }
 
   // add relevant AuxVariables and AuxKernels
   if (_add_saturation_aux)

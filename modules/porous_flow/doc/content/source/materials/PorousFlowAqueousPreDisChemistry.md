@@ -33,7 +33,7 @@ between the `chemical reactions` module and `PorousFlow`.  These are:
   Then the `reactions` input is `1 2 -3 4 -5 6`.
 
 !alert note
-If the equilibrium constants are AuxVariables that depend on temperature (or other Variables) the computed Jacobian will not be exact and you may experience poor nonlinear convergence.  If this becomes frustrating, please contact the moose-users email group.
+If the equilibrium constants are AuxVariables that depend on temperature (or other Variables) the computed Jacobian will not be exact and you may experience poor nonlinear convergence.  If this becomes frustrating, please contact the moose-users google group.
 
 !syntax parameters /Materials/PorousFlowAqueousPreDisChemistry
 

@@ -17,20 +17,19 @@
 #include "metaphysicl/dualnumber.h"
 
 #define usingMaterialMembers                                                                       \
+  usingCoupleableMembers;                                                                          \
+  using ADMaterial<compute_stage>::_dt;                                                            \
   using ADMaterial<compute_stage>::_qp;                                                            \
-  using ADMaterial<compute_stage>::_ad_grad_zero;                                                  \
-  using ADMaterial<compute_stage>::_ad_zero;                                                       \
   using ADMaterial<compute_stage>::_qrule;                                                         \
   using ADMaterial<compute_stage>::_JxW;                                                           \
   using ADMaterial<compute_stage>::_coord;                                                         \
   using ADMaterial<compute_stage>::_q_point;                                                       \
+  using ADMaterial<compute_stage>::_fe_problem;                                                    \
   using ADMaterial<compute_stage>::_assembly;                                                      \
   using ADMaterial<compute_stage>::_mesh;                                                          \
-  using ADMaterial<compute_stage>::coupled;                                                        \
-  using ADMaterial<compute_stage>::coupledComponents;                                              \
   using ADMaterial<compute_stage>::isParamValid;                                                   \
   using ADMaterial<compute_stage>::paramError;                                                     \
-  using ADMaterial<compute_stage>::isCoupled;                                                      \
+  using ADMaterial<compute_stage>::copyDualNumbersToValues;                                        \
   using ADMaterial<compute_stage>::getBlockCoordSystem
 
 // forward declarations
