@@ -10,7 +10,7 @@
 #ifndef WEIBULLDISTRIBUTION_H
 #define WEIBULLDISTRIBUTION_H
 
-#include "BoostDistribution.h"
+#include "Distribution.h"
 
 class WeibullDistribution;
 
@@ -18,12 +18,26 @@ template <>
 InputParameters validParams<WeibullDistribution>();
 
 /**
- * A class used to generate Weibull distribution via Boost
+ * A class used to generate a three-parameter Weibull distribution
  */
-class WeibullDistribution : public BoostDistribution<boost::math::weibull_distribution<Real>>
+class WeibullDistribution : public Distribution
 {
 public:
   WeibullDistribution(const InputParameters & parameters);
+
+  virtual Real pdf(const Real & x) override;
+  virtual Real cdf(const Real & x) override;
+  virtual Real quantile(const Real & p) override;
+
+protected:
+  /// The location parameter (a or low)
+  const Real & _a;
+
+  /// The scale parameter (b or lambda)
+  const Real & _b;
+
+  /// The shape parameter (c or k)
+  const Real & _c;
 };
 
-#endif // WEIBULLDISTRIBUTION_H
+#endif /* WEIBULLDISTRIBUTION_H */

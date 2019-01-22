@@ -11,32 +11,32 @@
 []
 
 [Distributions]
-  [./lognormal_test]
-    type = LognormalDistribution
-    location = -0.371
-    scale = 0.52
+  [./weibull]
+    type = BoostWeibullDistribution
+    shape = 5
+    scale = 1
   [../]
 []
 
 [Postprocessors]
   [./cdf]
     type = TestDistributionPostprocessor
-    distribution = lognormal_test
-    value = 0.6
+    distribution = weibull
+    value = 1
     method = cdf
     execute_on = initial
   [../]
   [./pdf]
     type = TestDistributionPostprocessor
-    distribution = lognormal_test
-    value = 0.6
+    distribution = weibull
+    value = 1
     method = pdf
     execute_on = initial
   [../]
   [./quantile]
     type = TestDistributionPostprocessor
-    distribution = lognormal_test
-    value = 0.5
+    distribution = weibull
+    value = 0.63212055882856
     method = quantile
     execute_on = initial
   [../]
@@ -54,4 +54,5 @@
 [Outputs]
   execute_on = 'INITIAL'
   csv = true
+  file_base = 'weibull_out'
 []

@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LognormalDistribution.h"
+#include "BoostLognormalDistribution.h"
 
-registerMooseObject("StochasticToolsApp", LognormalDistribution);
+registerMooseObject("StochasticToolsApp", BoostLognormalDistribution);
 
 template <>
 InputParameters
-validParams<LognormalDistribution>()
+validParams<BoostLognormalDistribution>()
 {
   InputParameters params = validParams<Distribution>();
   params.addClassDescription("Boost Lognormal distribution.");
@@ -22,7 +22,7 @@ validParams<LognormalDistribution>()
   return params;
 }
 
-LognormalDistribution::LognormalDistribution(const InputParameters & parameters)
+BoostLognormalDistribution::BoostLognormalDistribution(const InputParameters & parameters)
   : BoostDistribution<boost::math::lognormal_distribution<Real>>(parameters)
 {
   _distribution_unique_ptr = libmesh_make_unique<boost::math::lognormal_distribution<Real>>(
