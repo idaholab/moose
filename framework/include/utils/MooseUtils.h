@@ -518,6 +518,16 @@ unsigned long long int convert<unsigned long long int>(const std::string & str,
                                                        bool throw_on_failure);
 
 /**
+ * Create a symbolic link, if the link already exists it is replaced.
+ */
+void createSymlink(const std::string & target, const std::string & link);
+
+/**
+ * Remove a symbolic link, if the given filename is a link.
+ */
+void clearSymlink(const std::string & link);
+
+/**
  * Convert supplied string to upper case.
  * @params name The string to convert upper case.
  */

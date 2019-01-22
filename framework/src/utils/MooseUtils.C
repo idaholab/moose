@@ -731,6 +731,7 @@ stringToInteger(const std::string & input, bool throw_on_failure)
 }
 
 void
+
 linearPartitionItems(dof_id_type num_items,
                      dof_id_type num_chunks,
                      dof_id_type chunk_id,
@@ -809,6 +810,26 @@ template std::string join<std::vector<MooseEnumItem>>(const std::vector<MooseEnu
 template std::string join<std::set<MooseEnumItem>>(const std::set<MooseEnumItem> &,
                                                    const std::string &);
 
+void
+createSymlink(const std::string & target, const std::string & link)
+{
+  clearSymlink(link);
+  int err = symlink(target.c_str(), link.c_str());
+  if (err != 0)
+    mooseError("Failed to create symbolic link (via 'symlink') from ", target, " to ", link);
+}
+
+void
+clearSymlink(const std::string & link)
+{
+  struct stat sbuf;
+  if (lstat(link.c_str(), &sbuf) == 0)
+  {
+    int err = unlink(link.c_str());
+    if (err != 0)
+      mooseError("Failed to remove symbolic link (via 'unlink') to ", link);
+  }
+}
 } // MooseUtils namespace
 
 std::string

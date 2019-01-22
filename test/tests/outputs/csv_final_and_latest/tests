@@ -1,0 +1,50 @@
+[Tests]
+  issues = "#11087"
+  design = "/VectorPostprocessors/index.md /CSV.md"
+  [final]
+    type = CSVDiff
+    input = final.i
+    csvdiff = final_out_line_sample_FINAL.csv
+    requirement = "The CSV output object shall create a symlink to the final output with "
+                  "with a '_FINAL' suffix for VectorPostprocessor data when there are execute flags "
+                  "in addition to FINAL."
+  []
+  [final_only]
+    type = CheckFiles
+    input = final.i
+    cli_args = Outputs/out/execute_on=FINAL
+    check_not_exists = 'final_out_line_sample_0009.csv'
+    check_files = 'final_out_line_sample_0011.csv final_out_line_sample_FINAL.csv'
+    requirement = "The CSV output object shall create a symlink to the final output with "
+                  "with a '_FINAL' suffix for VectorPostprocessor data when the execute flag is "
+                  "set to FINAL."
+    prereq = final
+  []
+  [no_link]
+    type = CheckFiles
+    input = final.i
+    cli_args = Outputs/out/create_final_symlink=false
+    delete_output_before_running = false
+    check_not_exists = 'final_out_line_sample_FINAL.csv'
+    requirement = "The CSV output object 'create_final_symlink' parameter shall be able to disable "
+                  "the creation of the final symlink."
+    prereq = final_only
+  []
+  [latest]
+    type = CSVDiff
+    input = latest.i
+    csvdiff = latest_out_line_sample_LATEST.csv
+    requirement = "The CSV output object shall create a symlink to the most recent output with "
+                  "with a '_LATEST' suffix for VectorPostprocessor data."
+  []
+  [no_latest]
+    type = CheckFiles
+    input = latest.i
+    delete_output_before_running = false
+    cli_args = Outputs/out/create_latest_symlink=false
+    check_not_exists = 'latest_out_line_sample_LATEST.csv'
+    requirement = "The CSV output object 'create_latest_symlink' parameter shall be able to disable "
+                  "the creation of the latest symlink."
+    prereq = latest
+  []
+[]

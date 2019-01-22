@@ -97,6 +97,22 @@ private:
 
   /// Flag indicating MOOSE is recovering via --recover command-line option
   bool _recovering;
+
+  /// Flag for creating a _FINAL symlink
+  bool _create_final_symlink;
+
+  /// Flag for creating a _LATEST symlink
+  bool _create_latest_symlink;
+
+  /// Current list of VPP filenames for creating _LATEST/_FINAL symlinks
+  // The pair is composed of the complete filename (foo_variable_0001.csv) and the incomplete name
+  // (foo_variable) to which the _FINAL or _LATEST is to be applied.
+  std::vector<std::pair<std::string, std::string>> _latest_vpp_filenames;
+
+  /**
+   * Returns the filename without the time/timestep information.
+   */
+  std::string getVectorPostprocessorFilePrefix(const std::string & vpp_name);
 };
 
 #endif /* CSV_H */
