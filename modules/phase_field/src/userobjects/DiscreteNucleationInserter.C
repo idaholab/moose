@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DiscreteNucleationInserter.h"
-#include "libmesh/parallel_algebra.h"
 
+#include "libmesh/parallel_algebra.h"
 #include "libmesh/quadrature.h"
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleationInserter);
@@ -42,7 +42,7 @@ DiscreteNucleationInserter::initialize()
   _changes_made = {0, 0};
 
   // expire entries from the local nucleus list (if the current time step converged)
-  if (_fe_problem.converged())
+  if (_fe_problem.checkConvergence() == MoosePicardConvergenceReason::CONVERGED_NONLINEAR)
   {
     unsigned int i = 0;
     while (i < _local_nucleus_list.size())

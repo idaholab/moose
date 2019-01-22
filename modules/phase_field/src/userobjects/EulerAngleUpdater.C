@@ -11,6 +11,7 @@
 #include "GrainTrackerInterface.h"
 #include "GrainForceAndTorqueInterface.h"
 #include "RotationTensor.h"
+#include "NonlinearSystemBase.h"
 
 registerMooseObject("PhaseFieldApp", EulerAngleUpdater);
 
@@ -63,7 +64,7 @@ EulerAngleUpdater::initialize()
 
   for (unsigned int i = 0; i < grain_num; ++i)
   {
-    if (!_first_time && !_fe_problem.converged())
+    if (!_first_time && !_fe_problem.getNonlinearSystemBase().converged())
       _angles[i] = _angles_old[i];
 
     RealGradient torque = _grain_torque.getTorqueValues()[i];
