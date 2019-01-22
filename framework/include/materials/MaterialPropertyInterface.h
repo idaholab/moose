@@ -423,7 +423,10 @@ MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyNam
 
   _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
-  return _material_data->getADProperty<T>(name);
+  auto & m = _material_data->getADProperty<T>(name);
+  if (!m.isAD())
+    mooseWarning("AD material property '", name, "' retrieval resulted in a non-AD value");
+  return m;
 }
 
 template <typename T>

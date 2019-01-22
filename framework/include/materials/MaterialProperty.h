@@ -72,6 +72,7 @@ public:
 
   /// Mark whether this property is in AD mode. This method is necessary for switching the state after swapping material properties during stateful material calculations
   virtual void markAD(bool use_ad) = 0;
+  virtual bool isAD() = 0;
 
   /**
    * copy the value portion (not the derivatives) of the DualNumber<Real> version of the material
@@ -178,6 +179,7 @@ public:
   void copyDualNumberToValue(const unsigned int i) override { _value[i].copyDualNumberToValue(); }
 
   void markAD(bool use_ad) override;
+  virtual bool isAD() override { return _use_ad; }
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
