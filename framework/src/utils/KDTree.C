@@ -48,3 +48,12 @@ KDTree::neighborSearch(Point & query_point,
   return_index.resize(n_result);
   return_dist_sqr.resize(n_result);
 }
+
+void
+KDTree::radiusSearch(Point & query_point,
+                     Real radius,
+                     std::vector<std::pair<std::size_t, Real>> & indices_dist)
+{
+  nanoflann::SearchParams sp;
+  _kd_tree->radiusSearch(&query_point(0), radius * radius, indices_dist, sp);
+}
