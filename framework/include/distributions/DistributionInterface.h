@@ -38,6 +38,7 @@ public:
    */
   DistributionInterface(const MooseObject * moose_object);
 
+  ///@{
   /**
    * Get a distribution with a given name
    * @param name The name of the parameter key of the distribution to retrieve
@@ -45,6 +46,11 @@ public:
    */
   const Distribution & getDistribution(const std::string & name) const;
 
+  template <typename T>
+  const T & getDistribution(const std::string & name) const;
+  ///@}
+
+  ///@{
   /**
    * Get a distribution with a given name
    * @param name The name of the distribution to retrieve
@@ -52,12 +58,58 @@ public:
    */
   const Distribution & getDistributionByName(const DistributionName & name) const;
 
+  template <typename T>
+  const T & getDistributionByName(const std::string & name) const;
+  ///@}
+
 private:
   /// Parameters of the object with this interface
   const InputParameters & _dni_params;
 
   /// Reference to FEProblemBase instance
   FEProblemBase & _dni_feproblem;
+
+  /// Pointer to the MooseObject
+  const MooseObject * _dni_moose_object_ptr;
 };
+
+template <typename T>
+const T &
+DistributionInterface::getDistribution(const std::string & name) const
+{
+  try
+  {
+    const T & dist = dynamic_cast<const T &>(getDistribution(name));
+    return dist;
+  }
+  catch (std::bad_cast & exception)
+  {
+    DistributionName dist_name = _dni_params.get<DistributionName>(name);
+    mooseError("The '",
+               _dni_moose_object_ptr->name(),
+               "' object failed to retrieve '",
+               dist_name,
+               "' distribution with the desired type.");
+  }
+}
+
+template <typename T>
+const T &
+DistributionInterface::getDistributionByName(const std::string & name) const
+{
+  try
+  {
+    const T & dist = dynamic_cast<const T &>(getDistribution(name));
+    return dist;
+  }
+  catch (std::bad_cast & exception)
+  {
+    mooseError("The '",
+               _dni_moose_object_ptr->name(),
+               "' object failed to retrieve '",
+               name,
+               "' distribution with the desired type.");
+  }
+}
 
 #endif /* DISTRIBUTIONINTERFACE_H */
