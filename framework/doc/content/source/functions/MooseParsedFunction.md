@@ -9,8 +9,13 @@ expression can be a function of time (t) or coordinate (x, y, or z).  The expres
 can include common mathematical functions.  Examples include `4e4+1e2*t`,
 `sqrt(x*x+y*y+z*z)`, and `if(t\textless=1.0, 0.1*t, (1.0+0.1)*cos(pi/2*(t-1.0)) - 1.0)`.
 
-Constant variables may be used in the expression if they have been declared with `vars`
-and defined with `vals`.
+Additional variables may be declared in the `vars` parameter vector. The
+corresponding `vals` parameter vector should list the items these variables are
+bound to. Variables can be bound to:
+
+- Constant number literals (for example `vars = kB` and `vals = 8.61733e-5`)
+- A PostProcessor name (providing the value form the PP's last execution)
+- A Function name (providing an immediate evaluation of the specified function)
 
 Further information can be found at the
 [function parser site](http://warp.povusers.org/FunctionParser/).
