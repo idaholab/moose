@@ -189,7 +189,7 @@ private:
 
 // template <>
 // const MaterialProperty<Real> *
-// castToMatProp<ADReal, Real>(PropertyValue const * const & prop_to_be_cast)
+// castToMatProp<DualReal, Real>(PropertyValue const * const & prop_to_be_cast)
 // {
 //   return dynamic_cast<const MaterialProperty<Real> *>(prop_to_be_cast);
 // }

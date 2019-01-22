@@ -57,7 +57,7 @@ ADComputeIncrementalStrainBase<compute_stage>::initQpStatefulProperties()
 template <ComputeStage compute_stage>
 void
 ADComputeIncrementalStrainBase<compute_stage>::subtractEigenstrainIncrementFromStrain(
-    typename RankTwoTensorType<compute_stage>::type & strain)
+    ADRankTwoTensor & strain)
 {
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
   {

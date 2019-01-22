@@ -11,7 +11,7 @@
 #define RANKTWOTENSOR_H
 
 #include "Moose.h"
-#include "ADReal.h"
+#include "DualReal.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
@@ -56,7 +56,7 @@ void mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v);
  * Needed by DerivativeMaterialInterface
  */
 template <>
-void mooseSetToZero<RankTwoTensorTempl<ADReal>>(RankTwoTensorTempl<ADReal> & v);
+void mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v);
 
 /**
  * RankTwoTensorTempl is designed to handle the Stress or Strain Tensor for a fully anisotropic
@@ -486,7 +486,7 @@ private:
 };
 
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
+typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 
 template <typename T>
 template <typename T2>

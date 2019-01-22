@@ -180,8 +180,8 @@ ColumnMajorMatrixTempl<T>::eigen(ColumnMajorMatrixTempl<T> & eval,
 
 template <>
 void
-ColumnMajorMatrixTempl<ADReal>::eigen(ColumnMajorMatrixTempl<ADReal> &,
-                                      ColumnMajorMatrixTempl<ADReal> &) const
+ColumnMajorMatrixTempl<DualReal>::eigen(ColumnMajorMatrixTempl<DualReal> &,
+                                        ColumnMajorMatrixTempl<DualReal> &) const
 {
   mooseError("Eigen solves with AD types is not supported.");
 }
@@ -260,10 +260,10 @@ ColumnMajorMatrixTempl<T>::eigenNonsym(ColumnMajorMatrixTempl<T> & eval_real,
 
 template <>
 void
-ColumnMajorMatrixTempl<ADReal>::eigenNonsym(ColumnMajorMatrixTempl<ADReal> &,
-                                            ColumnMajorMatrixTempl<ADReal> &,
-                                            ColumnMajorMatrixTempl<ADReal> &,
-                                            ColumnMajorMatrixTempl<ADReal> &) const
+ColumnMajorMatrixTempl<DualReal>::eigenNonsym(ColumnMajorMatrixTempl<DualReal> &,
+                                              ColumnMajorMatrixTempl<DualReal> &,
+                                              ColumnMajorMatrixTempl<DualReal> &,
+                                              ColumnMajorMatrixTempl<DualReal> &) const
 {
   mooseError("Eigen solves with AD types is not supported.");
 }
@@ -343,7 +343,7 @@ ColumnMajorMatrixTempl<T>::checkShapeEquality(const ColumnMajorMatrixTempl<T> & 
 
 template <>
 void
-ColumnMajorMatrixTempl<ADReal>::inverse(ColumnMajorMatrixTempl<ADReal> &) const
+ColumnMajorMatrixTempl<DualReal>::inverse(ColumnMajorMatrixTempl<DualReal> &) const
 {
   mooseError("Inverse solves with AD types is not supported for the ColumnMajorMatrix class.");
 }
@@ -371,4 +371,4 @@ ColumnMajorMatrixTempl<T>::norm()
 }
 
 template class ColumnMajorMatrixTempl<Real>;
-template class ColumnMajorMatrixTempl<ADReal>;
+template class ColumnMajorMatrixTempl<DualReal>;

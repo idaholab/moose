@@ -987,15 +987,15 @@ protected:
   FieldVariableCurl _curl_u_old, _curl_u_old_bak;
   FieldVariableCurl _curl_u_older;
 
-  MooseArray<ADReal> _ad_u;
-  MooseArray<ADRealGradient> _ad_grad_u;
+  MooseArray<DualReal> _ad_u;
+  MooseArray<DualRealGradient> _ad_grad_u;
   MooseArray<ADRealTensor> _ad_second_u;
-  std::vector<ADReal> _ad_dofs;
+  std::vector<DualReal> _ad_dofs;
 
-  MooseArray<ADReal> _neighbor_ad_u;
-  MooseArray<ADRealGradient> _neighbor_ad_grad_u;
+  MooseArray<DualReal> _neighbor_ad_u;
+  MooseArray<DualRealGradient> _neighbor_ad_grad_u;
   MooseArray<ADRealTensor> _neighbor_ad_second_u;
-  std::vector<ADReal> _neighbor_ad_dofs;
+  std::vector<DualReal> _neighbor_ad_dofs;
 
   FieldVariableValue _u_neighbor;
   FieldVariableValue _u_old_neighbor;

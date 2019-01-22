@@ -28,7 +28,7 @@ class ADStressDivergenceTensors;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
+typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 
 declareADValidParams(ADStressDivergenceTensors);
 
@@ -57,7 +57,7 @@ protected:
   std::vector<unsigned int> _disp_var;
 
   /// Gradient of test function averaged over the element. Used in volumetric locking correction calculation.
-  std::vector<typename RealType<compute_stage>::type> _avg_grad_test;
+  std::vector<ADReal> _avg_grad_test;
 
   /// Flag for volumetric locking correction
   const bool _volumetric_locking_correction;

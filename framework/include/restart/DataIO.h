@@ -338,7 +338,7 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream *& s, void * context);
 
 inline void
-dataStore(std::ostream & stream, ADReal & dn, void * context)
+dataStore(std::ostream & stream, DualReal & dn, void * context)
 {
   dataStore(stream, dn.value(), context);
   for (auto i = beginIndex(dn.derivatives()); i < dn.derivatives().size(); ++i)
@@ -347,7 +347,7 @@ dataStore(std::ostream & stream, ADReal & dn, void * context)
 
 template <std::size_t N>
 inline void
-dataStore(std::ostream & stream, ADReal (&dn)[N], void * context)
+dataStore(std::ostream & stream, DualReal (&dn)[N], void * context)
 {
   for (std::size_t i = 0; i < N; ++i)
     dataStore(stream, dn[i], context);
@@ -610,7 +610,7 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream *& s, void * context);
 
 inline void
-dataLoad(std::istream & stream, ADReal & dn, void * context)
+dataLoad(std::istream & stream, DualReal & dn, void * context)
 {
   dataLoad(stream, dn.value(), context);
 

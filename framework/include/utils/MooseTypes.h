@@ -11,7 +11,7 @@
 #define MOOSETYPES_H
 
 #include "Moose.h"
-#include "ADReal.h"
+#include "DualReal.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -75,7 +75,7 @@ class MooseArray;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
+typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 template <typename>
@@ -98,6 +98,14 @@ class TypeTensor;
 template <unsigned int, typename>
 class TypeNTensor;
 }
+
+/**
+ * Convenience macros for automatic dual/non-dual typing
+ */
+#define ADReal typename RealType<compute_stage>::type
+#define ADRealVectorValue typename RealVectorValueType<compute_stage>::type
+#define ADRealTensorValue typename RealTensorValueType<compute_stage>::type
+#define ADRankTwoTensor typename RankTwoTensorType<compute_stage>::type
 
 /**
  * MOOSE typedefs
@@ -175,13 +183,13 @@ typedef MooseArray<std::vector<TypeNTensor<3, Real>>> VectorVariableTestSecond;
 typedef MooseArray<std::vector<VectorValue<Real>>> VectorVariableTestCurl;
 
 template <template <class> class W>
-using TemplateDN = W<ADReal>;
+using TemplateDN = W<DualReal>;
 
-typedef TemplateDN<VectorValue> ADRealVectorValue;
-typedef TemplateDN<TensorValue> ADRealTensorValue;
+typedef TemplateDN<VectorValue> DualRealVectorValue;
+typedef TemplateDN<TensorValue> DualRealTensorValue;
 
-typedef ADRealVectorValue ADRealGradient;
-typedef ADRealTensorValue ADRealTensor;
+typedef DualRealVectorValue DualRealGradient;
+typedef DualRealTensorValue ADRealTensor;
 
 enum ComputeStage
 {
@@ -197,7 +205,7 @@ struct VariableValueType
 template <>
 struct VariableValueType<JACOBIAN>
 {
-  typedef MooseArray<ADReal> type;
+  typedef MooseArray<DualReal> type;
 };
 template <ComputeStage compute_stage>
 struct VariableGradientType
@@ -207,7 +215,7 @@ struct VariableGradientType
 template <>
 struct VariableGradientType<JACOBIAN>
 {
-  typedef MooseArray<ADRealGradient> type;
+  typedef MooseArray<DualRealGradient> type;
 };
 template <ComputeStage compute_stage>
 struct VariableSecondType
@@ -228,7 +236,7 @@ struct RealType
 template <>
 struct RealType<JACOBIAN>
 {
-  typedef ADReal type;
+  typedef DualReal type;
 };
 template <ComputeStage compute_stage>
 struct RealVectorValueType
@@ -238,7 +246,7 @@ struct RealVectorValueType
 template <>
 struct RealVectorValueType<JACOBIAN>
 {
-  typedef ADRealVectorValue type;
+  typedef DualRealVectorValue type;
 };
 template <ComputeStage compute_stage>
 struct RealTensorValueType
@@ -248,7 +256,7 @@ struct RealTensorValueType
 template <>
 struct RealTensorValueType<JACOBIAN>
 {
-  typedef ADRealTensorValue type;
+  typedef DualRealTensorValue type;
 };
 template <ComputeStage compute_stage>
 struct RankTwoTensorType
@@ -258,7 +266,7 @@ struct RankTwoTensorType
 template <>
 struct RankTwoTensorType<JACOBIAN>
 {
-  typedef ADRankTwoTensor type;
+  typedef DualRankTwoTensor type;
 };
 
 template <ComputeStage compute_stage>

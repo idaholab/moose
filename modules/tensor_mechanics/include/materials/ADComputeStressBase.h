@@ -29,11 +29,11 @@ class ADComputeStressBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
+typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<ADReal> ADRankFourTensor;
+typedef RankFourTensorTempl<DualReal> ADRankFourTensor;
 
 declareADValidParams(ADComputeStressBase);
 
