@@ -104,7 +104,7 @@ class Point;
 /**
  * Convenience macros for automatic dual/non-dual typing
  */
-#define ADReal typename RealType<compute_stage>::type
+#define ADReal typename Moose::RealType<compute_stage>::type
 #define ADRealVectorValue typename RealVectorValueType<compute_stage>::type
 #define ADRealTensorValue typename RealTensorValueType<compute_stage>::type
 #define ADRankTwoTensor typename RankTwoTensorType<compute_stage>::type
