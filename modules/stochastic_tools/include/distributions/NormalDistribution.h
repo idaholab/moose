@@ -25,25 +25,36 @@ class NormalDistribution : public Distribution
 public:
   NormalDistribution(const InputParameters & parameters);
 
-  virtual Real pdf(const Real & x) override;
-  virtual Real cdf(const Real & x) override;
+  virtual Real pdf(const Real & x) const override;
+  virtual Real cdf(const Real & x) const override;
+  virtual Real quantile(const Real & p) const override;
 
-  /**
-   * Compute the quantile
-   * @param p The cdf for which the quantile is evaluated
-   **/
-  virtual Real quantile(const Real & p) override;
+  Real pdf(const Real & x, const Real & mean, const Real & std_dev) const;
+  Real cdf(const Real & x, const Real & mean, const Real & std_dev) const;
+  Real quantile(const Real & p, const Real & mean, const Real & std_dev) const;
 
 protected:
-  /// Coefficients for the rational function used to approximate the quantile:
-  const std::vector<Real> _a;
-  const std::vector<Real> _b;
+
+  ///@{
+  /// Coefficients for the rational function used to approximate the quantile
+  const std::vector<Real> _a = {-0.322232431088,
+        -1.0,
+        -0.342242088547,
+        -0.0204231210245,
+        -0.0000453642210148};
+
+  const std::vector<Real> _b = {0.099348462606,
+        0.588581570495,
+        0.531103462366,
+        0.10353775285,
+        0.0038560700634};
+  ///@}
 
   /// The mean (or expectation) of the distribution (mu)
-  Real _mean;
+  const Real & _mean;
 
   /// The standard deviation of the distribution (sigma)
-  Real _standard_deviation;
+  const Real & _standard_deviation;
 };
 
-#endif /* NORMALDISTRIBUTION_H */
+#endif

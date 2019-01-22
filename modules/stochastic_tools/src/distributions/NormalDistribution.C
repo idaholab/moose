@@ -26,37 +26,26 @@ validParams<NormalDistribution>()
 }
 
 NormalDistribution::NormalDistribution(const InputParameters & parameters)
-  : Distribution(parameters),
-    _a({-0.322232431088,
-        -1.0,
-        -0.342242088547,
-        -0.0204231210245,
-        -0.0000453642210148}), // Documented in ref for quantile function
-    _b({0.099348462606,
-        0.588581570495,
-        0.531103462366,
-        0.10353775285,
-        0.0038560700634}), // Documented in ref for quantile function
-    _mean(getParam<Real>("mean")),
-    _standard_deviation(getParam<Real>("standard_deviation"))
+    : Distribution(parameters),
+      _mean(getParam<Real>("mean")),
+      _standard_deviation(getParam<Real>("standard_deviation"))
 {
+}
+Real
+NormalDistribution::pdf(const Real & x, const Real & mean, const Real & std_dev) const
+{
+  return 1.0 / (std_dev * std::sqrt(2.0 * M_PI)) *
+    std::exp(-0.5 * Utility::pow<2>((x - mean) / std_dev));
 }
 
 Real
-NormalDistribution::pdf(const Real & x)
+NormalDistribution::cdf(const Real & x, const Real & mean, const Real & std_dev) const
 {
-  return 1.0 / (_standard_deviation * std::sqrt(2.0 * M_PI)) *
-         std::exp(-0.5 * Utility::pow<2>((x - _mean) / _standard_deviation));
+  return 0.5 * (1.0 + std::erf((x - mean) / (std_dev * std::sqrt(2.0))));
 }
 
 Real
-NormalDistribution::cdf(const Real & x)
-{
-  return 0.5 * (1.0 + std::erf((x - _mean) / (_standard_deviation * std::sqrt(2.0))));
-}
-
-Real
-NormalDistribution::quantile(const Real & p)
+NormalDistribution::quantile(const Real & p, const Real & mean, const Real & std_dev) const
 {
   Real x = (p < 0.5 ? p : 1.0 - p);
   Real y = std::sqrt(-2.0 * std::log(x));
@@ -65,5 +54,23 @@ NormalDistribution::quantile(const Real & p)
                         _a[3] * Utility::pow<3>(y) + _a[4] * Utility::pow<4>(y)) /
                            (_b[0] + _b[1] * y + _b[2] * Utility::pow<2>(y) +
                             _b[3] * Utility::pow<3>(y) + _b[4] * Utility::pow<4>(y)));
-  return Zp * _standard_deviation + _mean;
+  return Zp * std_dev + mean;
+}
+
+Real
+NormalDistribution::pdf(const Real & x) const
+{
+  return pdf(x, _mean, _standard_deviation);
+}
+
+Real
+NormalDistribution::cdf(const Real & x) const
+{
+  return cdf(x, _mean, _standard_deviation);
+}
+
+Real
+NormalDistribution::quantile(const Real & p) const
+{
+  return quantile(p, _mean, _standard_deviation);
 }
