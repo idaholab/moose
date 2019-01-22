@@ -12,6 +12,12 @@
 
 #include "Moose.h"
 
+#define usingTransientInterfaceMembers                                                             \
+  using TransientInterface::_t;                                                                    \
+  using TransientInterface::_t_step;                                                               \
+  using TransientInterface::_dt;                                                                   \
+  using TransientInterface::_dt_old
+
 // Forward declarations
 class FEProblemBase;
 class InputParameters;

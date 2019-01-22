@@ -33,7 +33,7 @@ typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> ADRankFourTensor;
+typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
 declareADValidParams(ADComputeStressBase);
 

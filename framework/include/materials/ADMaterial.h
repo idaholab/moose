@@ -18,7 +18,8 @@
 
 #define usingMaterialMembers                                                                       \
   usingCoupleableMembers;                                                                          \
-  using ADMaterial<compute_stage>::_dt;                                                            \
+  usingTransientInterfaceMembers;                                                                  \
+  using ConsoleStreamInterface::_console;                                                          \
   using ADMaterial<compute_stage>::_qp;                                                            \
   using ADMaterial<compute_stage>::_qrule;                                                         \
   using ADMaterial<compute_stage>::_JxW;                                                           \
