@@ -54,9 +54,7 @@ ComputeSurfaceTensionKKS::computeQpProperties()
   const Real nx = _grad_v[_qp](0);
   const Real ny = _grad_v[_qp](1);
   const Real nz = _grad_v[_qp](2);
-  Real fsum = _w * _g[_qp];
-  if (grad_norm_sq > libMesh::TOLERANCE)
-    fsum += 0.5 * _kappa[_qp] * grad_norm_sq;
+  Real fsum = _w * _g[_qp] + 0.5 * _kappa[_qp] * grad_norm_sq;
 
   S(0, 0) += fsum - _kappa[_qp] * nx * nx;
   S(0, 1) += -_kappa[_qp] * nx * ny;

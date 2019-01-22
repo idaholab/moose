@@ -389,18 +389,11 @@
   l_max_its = 30
   nl_max_its = 10
   l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-8
-  nl_abs_tol = 1.0e-9
+  nl_rel_tol = 1.0e-9
+  nl_abs_tol = 1.0e-10
 
   num_steps = 2
-
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 0.5
-    optimal_iterations = 8
-    iteration_window = 2
-  [../]
-
+  dt = 0.5
 []
 
 [Outputs]
