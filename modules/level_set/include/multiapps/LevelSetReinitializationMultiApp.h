@@ -31,8 +31,6 @@ public:
   LevelSetReinitializationMultiApp(const InputParameters & parameters);
 
   virtual void initialSetup() override;
-  virtual void incrementTStep() override {}
-  virtual void finishStep() override {}
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
 protected:
