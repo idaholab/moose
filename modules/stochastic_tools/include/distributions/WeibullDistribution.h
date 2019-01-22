@@ -25,9 +25,14 @@ class WeibullDistribution : public Distribution
 public:
   WeibullDistribution(const InputParameters & parameters);
 
-  virtual Real pdf(const Real & x) override;
-  virtual Real cdf(const Real & x) override;
-  virtual Real quantile(const Real & p) override;
+  virtual Real pdf(const Real & x) const override;
+  virtual Real cdf(const Real & x) const override;
+  virtual Real quantile(const Real & p) const override;
+
+  Real pdf(const Real & x, const Real & location, const Real & scale, const Real & shape) const;
+  Real cdf(const Real & x, const Real & location, const Real & scale, const Real & shape) const;
+  Real
+  quantile(const Real & p, const Real & location, const Real & scale, const Real & shape) const;
 
 protected:
   /// The location parameter (a or low)
