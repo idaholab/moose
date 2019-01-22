@@ -57,12 +57,12 @@ public:
   virtual const VariableSecond & coupledNeighborSecond(const std::string & var_name,
                                                        unsigned int i = 0);
 
-  virtual const DenseVector<Number> & coupledNeighborSolutionDoFs(const std::string & var_name,
-                                                                  unsigned int comp = 0);
-  virtual const DenseVector<Number> & coupledNeighborSolutionDoFsOld(const std::string & var_name,
-                                                                     unsigned int comp = 0);
-  virtual const DenseVector<Number> & coupledNeighborSolutionDoFsOlder(const std::string & var_name,
-                                                                       unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborDofValues(const std::string & var_name,
+                                                         unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborDofValuesOld(const std::string & var_name,
+                                                            unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborDofValuesOlder(const std::string & var_name,
+                                                              unsigned int comp = 0);
 
 protected:
   bool _neighbor_nodal;

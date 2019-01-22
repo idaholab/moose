@@ -159,37 +159,6 @@ public:
 
   const MooseArray<Point> & normals() const override { return _normals; }
 
-  const DenseVector<Number> & solutionDoFs() override
-  {
-    _need_solution_dofs = true;
-    return _solution_dofs;
-  }
-  const DenseVector<Number> & solutionDoFsOld() override
-  {
-    _need_solution_dofs_old = true;
-    return _solution_dofs_old;
-  }
-  const DenseVector<Number> & solutionDoFsOlder() override
-  {
-    _need_solution_dofs_older = true;
-    return _solution_dofs_older;
-  }
-  const DenseVector<Number> & solutionDoFsNeighbor() override
-  {
-    _need_solution_dofs_neighbor = true;
-    return _solution_dofs_neighbor;
-  }
-  const DenseVector<Number> & solutionDoFsOldNeighbor() override
-  {
-    _need_solution_dofs_old_neighbor = true;
-    return _solution_dofs_old_neighbor;
-  }
-  const DenseVector<Number> & solutionDoFsOlderNeighbor() override
-  {
-    _need_solution_dofs_older_neighbor = true;
-    return _solution_dofs_older_neighbor;
-  }
-
   virtual void prepareIC() override;
 
   const FieldVariablePhiValue & phi() { return _phi; }
@@ -891,13 +860,6 @@ protected:
   bool _need_curl_old_neighbor;
   bool _need_curl_older_neighbor;
 
-  bool _need_solution_dofs;
-  bool _need_solution_dofs_old;
-  bool _need_solution_dofs_older;
-  bool _need_solution_dofs_neighbor;
-  bool _need_solution_dofs_old_neighbor;
-  bool _need_solution_dofs_older_neighbor;
-
   bool _need_dof_values;
   bool _need_dof_values_old;
   bool _need_dof_values_older;
@@ -977,14 +939,6 @@ protected:
   MooseArray<Real> _dof_values_dotdot_old_neighbor;
   MooseArray<Real> _dof_du_dot_du_neighbor;
   MooseArray<Real> _dof_du_dotdot_du_neighbor;
-
-  /// local elemental DoFs
-  DenseVector<Number> _solution_dofs;
-  DenseVector<Number> _solution_dofs_old;
-  DenseVector<Number> _solution_dofs_older;
-  DenseVector<Number> _solution_dofs_neighbor;
-  DenseVector<Number> _solution_dofs_old_neighbor;
-  DenseVector<Number> _solution_dofs_older_neighbor;
 
   // Shape function values, gradients, second derivatives
   const FieldVariablePhiValue & _phi;

@@ -633,28 +633,28 @@ protected:
    * Returns DoFs in the current solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a DenseVector for the DoFs of the coupled variable
+   * @return Reference to a VariableValue for the DoFs of the coupled variable
    */
-  virtual const DenseVector<Number> & coupledSolutionDoFs(const std::string & var_name,
-                                                          unsigned int comp = 0);
+  virtual const VariableValue & coupledDofValues(const std::string & var_name,
+                                                 unsigned int comp = 0);
 
   /**
    * Returns DoFs in the old solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a DenseVector for the old DoFs of the coupled variable
+   * @return Reference to a VariableValue for the old DoFs of the coupled variable
    */
-  virtual const DenseVector<Number> & coupledSolutionDoFsOld(const std::string & var_name,
-                                                             unsigned int comp = 0);
+  virtual const VariableValue & coupledDofValuesOld(const std::string & var_name,
+                                                    unsigned int comp = 0);
 
   /**
    * Returns DoFs in the older solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a DenseVector for the older DoFs of the coupled variable
+   * @return Reference to a VariableValue for the older DoFs of the coupled variable
    */
-  virtual const DenseVector<Number> & coupledSolutionDoFsOlder(const std::string & var_name,
-                                                               unsigned int comp = 0);
+  virtual const VariableValue & coupledDofValuesOlder(const std::string & var_name,
+                                                      unsigned int comp = 0);
 
   /**
    * Template method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN

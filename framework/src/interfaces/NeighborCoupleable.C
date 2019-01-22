@@ -170,38 +170,37 @@ NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned
   return (_c_is_implicit) ? var->secondSlnNeighbor() : var->secondSlnOldNeighbor();
 }
 
-const DenseVector<Number> &
-NeighborCoupleable::coupledNeighborSolutionDoFs(const std::string & var_name, unsigned int comp)
+const VariableValue &
+NeighborCoupleable::coupledNeighborDofValues(const std::string & var_name, unsigned int comp)
 {
   if (_neighbor_nodal)
-    mooseError("nodal objects should not call coupledSolutionDoFs");
+    mooseError("nodal objects should not call coupledDofValues");
 
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit) ? var->solutionDoFsNeighbor() : var->solutionDoFsOldNeighbor();
+  return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
 }
 
-const DenseVector<Number> &
-NeighborCoupleable::coupledNeighborSolutionDoFsOld(const std::string & var_name, unsigned int comp)
+const VariableValue &
+NeighborCoupleable::coupledNeighborDofValuesOld(const std::string & var_name, unsigned int comp)
 {
   if (_neighbor_nodal)
-    mooseError("nodal objects should not call coupledSolutionDoFsOld");
+    mooseError("nodal objects should not call coupledDofValuesOld");
 
-  validateExecutionerType(var_name, "coupledNeighborSolutionDoFsOld");
+  validateExecutionerType(var_name, "coupledNeighborDofValuesOld");
   MooseVariable * var = getVar(var_name, comp);
-  return (_c_is_implicit) ? var->solutionDoFsOldNeighbor() : var->solutionDoFsOlderNeighbor();
+  return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
 }
 
-const DenseVector<Number> &
-NeighborCoupleable::coupledNeighborSolutionDoFsOlder(const std::string & var_name,
-                                                     unsigned int comp)
+const VariableValue &
+NeighborCoupleable::coupledNeighborDofValuesOlder(const std::string & var_name, unsigned int comp)
 {
   if (_neighbor_nodal)
-    mooseError("nodal objects should not call coupledSolutionDoFsOlder");
+    mooseError("nodal objects should not call coupledDofValuesOlder");
 
-  validateExecutionerType(var_name, "coupledNeighborSolutionDoFsOlder");
+  validateExecutionerType(var_name, "coupledNeighborDofValuesOlder");
   MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
-    return var->solutionDoFsOlderNeighbor();
+    return var->dofValuesOlderNeighbor();
   else
     mooseError("Older values not available for explicit schemes");
 }

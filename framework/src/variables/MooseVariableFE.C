@@ -80,12 +80,6 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_curl_neighbor(false),
     _need_curl_old_neighbor(false),
     _need_curl_older_neighbor(false),
-    _need_solution_dofs(false),
-    _need_solution_dofs_old(false),
-    _need_solution_dofs_older(false),
-    _need_solution_dofs_neighbor(false),
-    _need_solution_dofs_old_neighbor(false),
-    _need_solution_dofs_older_neighbor(false),
     _need_dof_values(false),
     _need_dof_values_old(false),
     _need_dof_values_older(false),
@@ -1093,15 +1087,6 @@ MooseVariableFE<OutputType>::computeValuesHelper(
       _dof_values_dotdot_old.resize(num_dofs);
   }
 
-  if (_need_solution_dofs)
-    _solution_dofs.resize(num_dofs);
-
-  if (_need_solution_dofs_old)
-    _solution_dofs_old.resize(num_dofs);
-
-  if (_need_solution_dofs_older)
-    _solution_dofs_older.resize(num_dofs);
-
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
@@ -1154,9 +1139,6 @@ MooseVariableFE<OutputType>::computeValuesHelper(
     if (_need_dof_values_previous_nl)
       _dof_values_previous_nl[i] = soln_previous_nl_local;
 
-    if (_need_solution_dofs)
-      _solution_dofs(i) = soln_local;
-
     if (is_transient)
     {
       if (_need_u_old || _need_grad_old || _need_second_old || _need_dof_values_old)
@@ -1197,12 +1179,6 @@ MooseVariableFE<OutputType>::computeValuesHelper(
         if (_need_dof_values_dotdot_old)
           _dof_values_dotdot_old[i] = u_dotdot_old_local;
       }
-
-      if (_need_solution_dofs_old)
-        _solution_dofs_old(i) = solution_old(idx);
-
-      if (_need_solution_dofs_older)
-        _solution_dofs_older(i) = solution_older(idx);
     }
 
     for (unsigned int qp = 0; qp < nqp; qp++)
@@ -1647,15 +1623,6 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
       _dof_values_dotdot_old_neighbor.resize(num_dofs);
   }
 
-  if (_need_solution_dofs_neighbor)
-    _solution_dofs_neighbor.resize(num_dofs);
-
-  if (_need_solution_dofs_old_neighbor)
-    _solution_dofs_old_neighbor.resize(num_dofs);
-
-  if (_need_solution_dofs_older_neighbor)
-    _solution_dofs_older_neighbor.resize(num_dofs);
-
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
@@ -1687,15 +1654,12 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
     if (_need_dof_values_neighbor)
       _dof_values_neighbor[i] = soln_local;
 
-    if (_need_solution_dofs_neighbor)
-      _solution_dofs_neighbor(i) = soln_local;
-
     if (is_transient)
     {
-      if (_need_u_old_neighbor)
+      if (_need_u_old_neighbor || _need_dof_values_old_neighbor)
         soln_old_local = solution_old(idx);
 
-      if (_need_u_older_neighbor)
+      if (_need_u_older_neighbor || _need_dof_values_older_neighbor)
         soln_older_local = solution_older(idx);
 
       if (_need_dof_values_old_neighbor)
@@ -1730,12 +1694,6 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
         if (_need_dof_values_dotdot_old_neighbor)
           _dof_values_dotdot_old_neighbor[i] = u_dotdot_old_local;
       }
-
-      if (_need_solution_dofs_old_neighbor)
-        _solution_dofs_old_neighbor(i) = solution_old(idx);
-
-      if (_need_solution_dofs_older_neighbor)
-        _solution_dofs_older_neighbor(i) = solution_older(idx);
     }
 
     for (unsigned int qp = 0; qp < nqp; ++qp)
@@ -2491,7 +2449,8 @@ MooseVariableFE<OutputType>::setNodalValue(const DenseVector<Number> & values,
   for (unsigned int i = 0; i < values.size(); i++)
   {
     _dof_values[i] = values(i);
-    assignNodalValue(values(i), i % nc);
+    if (_continuity == C_ZERO || _continuity == C_ONE)
+      assignNodalValue(values(i), i % nc);
   }
 
   _has_nodal_value = true;

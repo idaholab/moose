@@ -1435,67 +1435,68 @@ Coupleable::coupledNodalDotDotOld(const std::string & var_name, unsigned int com
   else
     return var->dofValuesDotDotOldNeighbor();
 }
-const DenseVector<Number> &
-Coupleable::coupledSolutionDoFs(const std::string & var_name, unsigned int comp)
+
+const VariableValue &
+Coupleable::coupledDofValues(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   // default coupling is not available for elemental solutions
   if (!isCoupled(var_name))
-    mooseError(_c_name, ": invalid variable name for coupledSolutionDoFs");
+    mooseError(_c_name, ": invalid variable name for coupledDofValues");
 
   if (_c_nodal)
-    mooseError(_c_name, ": nodal objects should not call coupledSolutionDoFs");
+    mooseError(_c_name, ": nodal objects should not call coupledDofValues");
 
   coupledCallback(var_name, false);
   MooseVariableFEBase * var = getFEVar(var_name, comp);
 
   if (!_coupleable_neighbor)
-    return (_c_is_implicit) ? var->solutionDoFs() : var->solutionDoFsOld();
+    return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
   else
-    return (_c_is_implicit) ? var->solutionDoFsNeighbor() : var->solutionDoFsOldNeighbor();
+    return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
 }
 
-const DenseVector<Number> &
-Coupleable::coupledSolutionDoFsOld(const std::string & var_name, unsigned int comp)
+const VariableValue &
+Coupleable::coupledDofValuesOld(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   // default coupling is not available for elemental solutions
   if (!isCoupled(var_name))
-    mooseError(_c_name, ": invalid variable name for coupledSolutionDoFsOld");
+    mooseError(_c_name, ": invalid variable name for coupledDofValuesOld");
 
   if (_c_nodal)
-    mooseError(_c_name, ": nodal objects should not call coupledSolutionDoFsOld");
+    mooseError(_c_name, ": nodal objects should not call coupledDofValuesOld");
 
-  validateExecutionerType(var_name, "coupledSolutionDoFsOld");
+  validateExecutionerType(var_name, "coupledDofValuesOld");
   coupledCallback(var_name, true);
   MooseVariableFEBase * var = getFEVar(var_name, comp);
 
   if (!_coupleable_neighbor)
-    return (_c_is_implicit) ? var->solutionDoFsOld() : var->solutionDoFsOlder();
+    return (_c_is_implicit) ? var->dofValuesOld() : var->dofValuesOlder();
   else
-    return (_c_is_implicit) ? var->solutionDoFsOldNeighbor() : var->solutionDoFsOlderNeighbor();
+    return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
 }
 
-const DenseVector<Number> &
-Coupleable::coupledSolutionDoFsOlder(const std::string & var_name, unsigned int comp)
+const VariableValue &
+Coupleable::coupledDofValuesOlder(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
   // default coupling is not available for elemental solutions
   if (!isCoupled(var_name))
-    mooseError(_c_name, ": invalid variable name for coupledSolutionDoFsOlder");
+    mooseError(_c_name, ": invalid variable name for coupledDofValuesOlder");
 
   if (_c_nodal)
-    mooseError(_c_name, ": nodal objects should not call coupledSolutionDoFsOlder");
+    mooseError(_c_name, ": nodal objects should not call coupledDofValuesOlder");
 
-  validateExecutionerType(var_name, "coupledSolutionDoFsOlder");
+  validateExecutionerType(var_name, "coupledDofValuesOlder");
   coupledCallback(var_name, true);
   MooseVariableFEBase * var = getFEVar(var_name, comp);
   if (_c_is_implicit)
   {
     if (!_coupleable_neighbor)
-      return var->solutionDoFsOlder();
+      return var->dofValuesOlder();
     else
-      return var->solutionDoFsOlderNeighbor();
+      return var->dofValuesOlderNeighbor();
   }
   else
     mooseError(_c_name, ": Older values not available for explicit schemes");

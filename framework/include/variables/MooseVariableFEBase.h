@@ -76,13 +76,6 @@ public:
    */
   virtual bool activeOnSubdomain(SubdomainID subdomain) const = 0;
 
-  virtual const DenseVector<Number> & solutionDoFs() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOld() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOlder() = 0;
-  virtual const DenseVector<Number> & solutionDoFsNeighbor() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOldNeighbor() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOlderNeighbor() = 0;
-
   /**
    * Prepare the initial condition
    */
