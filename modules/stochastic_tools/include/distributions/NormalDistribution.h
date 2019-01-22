@@ -34,20 +34,13 @@ public:
   Real quantile(const Real & p, const Real & mean, const Real & std_dev) const;
 
 protected:
-
   ///@{
   /// Coefficients for the rational function used to approximate the quantile
-  const std::vector<Real> _a = {-0.322232431088,
-        -1.0,
-        -0.342242088547,
-        -0.0204231210245,
-        -0.0000453642210148};
+  const std::vector<Real> _a = {
+      -0.322232431088, -1.0, -0.342242088547, -0.0204231210245, -0.0000453642210148};
 
-  const std::vector<Real> _b = {0.099348462606,
-        0.588581570495,
-        0.531103462366,
-        0.10353775285,
-        0.0038560700634};
+  const std::vector<Real> _b = {
+      0.099348462606, 0.588581570495, 0.531103462366, 0.10353775285, 0.0038560700634};
   ///@}
 
   /// The mean (or expectation) of the distribution (mu)
