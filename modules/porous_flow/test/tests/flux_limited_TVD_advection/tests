@@ -12,6 +12,7 @@
     input = 'jacobian_01.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
+    heavy = true
     issues = '#12370 #12118 #10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization, and shall fully compute all Jacobian entries when there is no antidiffusion'
