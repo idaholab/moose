@@ -4222,7 +4222,7 @@ FEProblemBase::solve()
     if (solver_params._has_picard_its)
     {
       _console << COLOR_MAGENTA << "Beginning Picard Iteration " << picard_it << COLOR_DEFAULT
-               << '\n';
+               << "\n\n";
 
       if (picard_it == 0)
       {
@@ -4270,6 +4270,7 @@ FEProblemBase::solve()
                    << " Picard |R| = " << Console::outputNorm(picard_initial_norm, max_norm)
                    << '\n';
         }
+        _console << '\n';
 
         Real max_norm =
             std::max(picard_timestep_begin_norm[picard_it], picard_timestep_end_norm[picard_it]);
@@ -4407,6 +4408,8 @@ FEProblemBase::solveStep(Real begin_norm_old,
     relax_previous = solution;
   }
 
+  if (solver_params._has_picard_its)
+    _console << COLOR_MAGENTA << "\nMaster solve:\n" << COLOR_DEFAULT;
   if (!nonlinearSolve())
   {
     _picard_status = MoosePicardConvergenceReason::DIVERGED_NONLINEAR;
