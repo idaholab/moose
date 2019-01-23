@@ -33,6 +33,10 @@ public:
                       std::vector<std::size_t> & return_index,
                       std::vector<Real> & return_dist_sqr);
 
+  void radiusSearch(Point & query_point,
+                    Real radius,
+                    std::vector<std::pair<std::size_t, Real>> & indices_dist);
+
   using KdTreeT = nanoflann::KDTreeSingleIndexAdaptor<
       nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<Point>>,
       PointListAdaptor<Point>,

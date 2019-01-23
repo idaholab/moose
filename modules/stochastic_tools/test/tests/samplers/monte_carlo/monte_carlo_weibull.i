@@ -12,7 +12,7 @@
 
 [Distributions]
   [./weibull]
-    type = WeibullDistribution
+    type = BoostWeibullDistribution
     scale = 1
     shape = 5
   [../]

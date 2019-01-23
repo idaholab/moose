@@ -11,33 +11,32 @@
 []
 
 [Distributions]
-  [./weibull]
-    type = WeibullDistribution
-    shape = 5
-    scale = 1
-    location = 0
+  [./normal_test]
+    type = BoostNormalDistribution
+    mean =  0
+    standard_deviation = 1
   [../]
 []
 
 [Postprocessors]
   [./cdf]
     type = TestDistributionPostprocessor
-    distribution = weibull
-    value = 1
+    distribution = normal_test
+    value = 0
     method = cdf
     execute_on = initial
   [../]
   [./pdf]
     type = TestDistributionPostprocessor
-    distribution = weibull
-    value = 1
+    distribution = normal_test
+    value = 0
     method = pdf
     execute_on = initial
   [../]
   [./quantile]
     type = TestDistributionPostprocessor
-    distribution = weibull
-    value = 0.63212055882856
+    distribution = normal_test
+    value = 0.5
     method = quantile
     execute_on = initial
   [../]
@@ -55,4 +54,5 @@
 [Outputs]
   execute_on = 'INITIAL'
   csv = true
+  file_base = 'normal_out'
 []
