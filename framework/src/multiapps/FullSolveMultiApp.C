@@ -24,10 +24,7 @@ validParams<FullSolveMultiApp>()
   return params;
 }
 
-FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
-  : MultiApp(parameters), _solved(false)
-{
-}
+FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters) : MultiApp(parameters) {}
 
 void
 FullSolveMultiApp::initialSetup()
@@ -57,15 +54,9 @@ FullSolveMultiApp::initialSetup()
 }
 
 bool
-FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advance)
+FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool /*auto_advance*/)
 {
-  if (!auto_advance)
-    mooseError("FullSolveMultiApp is not compatible with auto_advance=false");
-
   if (!_has_an_app)
-    return true;
-
-  if (_solved)
     return true;
 
   Moose::ScopedCommSwapper swapper(_my_comm);
@@ -83,8 +74,6 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
     if (!ex->lastSolveConverged())
       last_solve_converged = false;
   }
-
-  _solved = true;
 
   return last_solve_converged;
 }

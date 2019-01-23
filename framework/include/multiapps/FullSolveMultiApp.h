@@ -20,9 +20,7 @@ template <>
 InputParameters validParams<FullSolveMultiApp>();
 
 /**
- * This type of MultiApp will completely solve itself the first time it is asked to take a step.
- *
- * Each "step" after that it will do nothing.
+ * This type of MultiApp will do a full solve when it is asked to take a step.
  */
 class FullSolveMultiApp : public MultiApp
 {
@@ -37,13 +35,8 @@ public:
 
   virtual void finishStep() override {}
 
-  virtual bool isSolved() const override { return _solved; }
-
 private:
   std::vector<Executioner *> _executioners;
-
-  /// Whether or not this MultiApp has already been solved.
-  bool _solved;
 };
 
 #endif // FULLSOLVEMULTIAPP_H
