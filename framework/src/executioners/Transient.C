@@ -390,8 +390,6 @@ Transient::incrementStepOrReject()
 void
 Transient::takeStep(Real input_dt)
 {
-  _console << COLOR_MAGENTA << "NEW TIME STEP \n" << COLOR_DEFAULT;
-
   _dt_old = _dt;
 
   if (input_dt == -1.0)
