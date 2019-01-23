@@ -31,12 +31,12 @@ validParams<CSV>()
   params.addParam<std::string>("delimiter", ",", "Assign the delimiter (default is ','");
   params.addParam<unsigned int>("precision", 14, "Set the output precision");
   params.addParam<bool>("create_final_symlink",
-                        true,
+                        false,
                         "Enable/disable the creation of a _FINAL symlink for vector postprocessor "
                         "data with 'execute_on' includes 'FINAL'.");
   params.addParam<bool>(
       "create_latest_symlink",
-      true,
+      false,
       "Enable/disable the creation of a _LATEST symlink for vector postprocessor data.");
 
   // Suppress unused parameters

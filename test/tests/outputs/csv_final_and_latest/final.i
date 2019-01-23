@@ -63,6 +63,6 @@
   [./out]
     type = CSV
     execute_on = 'TIMESTEP_END FINAL'
-    create_latest_symlink = false
+    create_final_symlink = true
   [../]
 []
