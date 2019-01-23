@@ -231,17 +231,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      _console << "Ready to solve multiapp dt: " << dt << " target: " << target_time << std::endl;
-
       FEProblemBase & problem = appProblemBase(_first_local_app + i);
 
       Transient * ex = _transient_executioners[i];
 
       // The App might have a different local time from the rest of the problem
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
-
-      _console << "Multiapp getTime(): " << ex->getTime() << " end time: " << ex->endTime()
-               << " app_time_offset: " << app_time_offset << std::endl;
 
       // Maybe this MultiApp was already solved
       if ((ex->getTime() + app_time_offset + 2e-14 >= target_time) ||
@@ -404,7 +399,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           problem.allowOutput(true);
 
         ex->takeStep(dt);
-        _console << "Just took a step" << std::endl;
 
         if (auto_advance)
         {
@@ -459,7 +453,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         }
         else // auto_advance == false
         {
-          _console << "Auto advance = false\n";
           if (!ex->lastSolveConverged())
           {
             // Even if we don't allow auto_advance - we can still catch up to the current time if
@@ -548,10 +541,8 @@ TransientMultiApp::incrementTStep(Real target_time)
       // The App might have a different local time from the rest of the problem
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
-      _console << " This Executioner time: " << ex->getTime()
-               << " App time offset: " << app_time_offset << " Target time: " << target_time
-               << std::endl;
-
+      // Only increment the step if we are after (target_time) the
+      // start_time (app_time_offset) of this sub_app.
       if (app_time_offset < target_time)
         ex->incrementStepOrReject();
     }

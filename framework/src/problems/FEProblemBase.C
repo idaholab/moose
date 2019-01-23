@@ -4270,8 +4270,6 @@ FEProblemBase::advanceState()
 {
   TIME_SECTION(_advance_state_timer);
 
-  _console << "Advancing state!" << std::endl;
-
   _nl->copyOldSolutions();
   _aux->copyOldSolutions();
 
