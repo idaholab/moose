@@ -44,14 +44,6 @@ validParams<PatternedMeshGenerator>()
   params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
   params.addParam<BoundaryName>("bottom_boundary", "bottom", "name of the bottom (y) boundary");
 
-  // x boundary ids
-  params.addParam<boundary_id_type>("left_boundary_id", "id of the left (x) boundary");
-  params.addParam<boundary_id_type>("right_boundary_id", "id of the right (x) boundary");
-
-  // y boundary ids
-  params.addParam<boundary_id_type>("top_boundary_id", "name of the top (y) boundary");
-  params.addParam<boundary_id_type>("bottom_boundary_id", "name of the bottom (y) boundary");
-
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
       "pattern", "A double-indexed array starting with the upper-left corner");
 
@@ -89,25 +81,16 @@ PatternedMeshGenerator::generate()
   // Data structure that holds each row
   _row_meshes.resize(_pattern.size());
 
-  // Trying to get the boundaries by name
-  boundary_id_type left =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
-  boundary_id_type right =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("right_boundary"));
-  boundary_id_type top =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
-  boundary_id_type bottom =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
+  // Getting the boundaries provided by the user
+  std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("left_boundary"),
+                                              getParam<BoundaryName>("right_boundary"),
+                                              getParam<BoundaryName>("top_boundary"),
+                                              getParam<BoundaryName>("bottom_boundary")};
 
-  // For each boundary, check if the user provided an id
-  if (isParamValid("left_boundary_id"))
-    left = getParam<boundary_id_type>("left_boundary_id");
-  if (isParamValid("right_boundary_id"))
-    right = getParam<boundary_id_type>("right_boundary_id");
-  if (isParamValid("top_boundary_id"))
-    top = getParam<boundary_id_type>("top_boundary_id");
-  if (isParamValid("bottom_boundary_id"))
-    bottom = getParam<boundary_id_type>("bottom_boundary_id");
+  std::vector<boundary_id_type> ids =
+      MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
+
+  boundary_id_type left = ids[0], right = ids[1], top = ids[2], bottom = ids[3];
 
   // Check if all the boundaries have been initialized
   if (left == -123)

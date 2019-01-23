@@ -24,10 +24,10 @@
                0 1 0 0 0 0 0 0 0 0 0 0 1 0 ;
                0 1 0 0 0 0 0 0 0 0 0 0 1 0 ;
                0 0 0 0 0 0 0 0 0 0 0 0 0 0'
-    bottom_boundary_id = 1
-    right_boundary_id = 2
-    top_boundary_id = 3
-    left_boundary_id = 4
+    bottom_boundary = 1
+    right_boundary = 2
+    top_boundary = 3
+    left_boundary = 4
   []
 []
 
