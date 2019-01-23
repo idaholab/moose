@@ -112,4 +112,13 @@
     design = 'NormalDistribution.md'
     issues = '#12720'
   [../]
+  [./johnsonsb]
+    type = CSVDiff
+    input = johnsonsb.i
+    csvdiff = 'johnsonsb_out.csv'
+    allow_test_objects = true
+    requirement = 'MOOSE shall provide an ability to define a Johnson Special Bounded (SB) distribution.'
+    design = 'JohnsonSBDistribution.md'
+    issues = '#12720'
+  [../]
 []
