@@ -389,6 +389,21 @@ typedef VectorVariableTestSecond ADVectorVariableTestSecond;
   }                                                                                                \
   void mooseClangFormatFunction()
 
+#define defineADValidParamsFromEmpty(ADObjectType, addedParamCode)                                 \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  {                                                                                                \
+    InputParameters params = emptyInputParameters();                                               \
+    addedParamCode;                                                                                \
+    return params;                                                                                 \
+  }                                                                                                \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
+  {                                                                                                \
+    return validParams<ADObjectType<RESIDUAL>>();                                                  \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
 namespace Moose
 {
 extern const SubdomainID ANY_BLOCK_ID;
