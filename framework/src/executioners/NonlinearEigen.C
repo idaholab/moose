@@ -121,7 +121,7 @@ NonlinearEigen::takeStep()
   _problem.advanceState();
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
-  nonlinearSolve(_rel_tol, _abs_tol, _pfactor, _eigenvalue);
+  _last_solve_converged = nonlinearSolve(_rel_tol, _abs_tol, _pfactor, _eigenvalue);
   postSolve();
 
   if (lastSolveConverged())

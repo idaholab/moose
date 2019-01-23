@@ -264,12 +264,6 @@ Executioner::getTimeStepperName()
   return std::string();
 }
 
-bool
-Executioner::lastSolveConverged()
-{
-  return true;
-}
-
 void
 Executioner::addAttributeReporter(const std::string & name,
                                   Real & attribute,

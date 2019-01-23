@@ -107,7 +107,7 @@ public:
   /**
    * Whether or not the last solve converged.
    */
-  virtual bool lastSolveConverged();
+  virtual bool lastSolveConverged() = 0;
 
 protected:
   /**

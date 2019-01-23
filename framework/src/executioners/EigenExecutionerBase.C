@@ -154,7 +154,7 @@ EigenExecutionerBase::checkIntegrity()
     mooseError("You have not specified any eigen kernels in your eigenvalue simulation");
 }
 
-void
+bool
 EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
                                             unsigned int max_iter,
                                             Real pfactor,
@@ -184,7 +184,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // not perform any iteration when max_iter==0
   if (max_iter == 0)
-    return;
+    return true;
 
   // turn off nonlinear flag so that RHS kernels opterate on previous solutions
   _eigen_sys.eigenKernelOnOld();
@@ -221,6 +221,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   std::vector<Real> keff_history;
   std::vector<Real> diff_history;
 
+  bool converged;
+
   unsigned int iter = 0;
 
   // power iteration loop...
@@ -246,7 +248,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _source_integral_old = _source_integral;
 
     preIteration();
-    _problem.solve();
+    converged = _problem.newSolve();
+    if (!converged)
+      break;
     postIteration();
 
     // save the initial residual
@@ -326,7 +330,6 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
       // no need to check convergence of the last iteration
       if (iter != max_iter)
       {
-        bool converged = true;
         Real keff_error = fabs(k_old - k) / k;
         if (keff_error > tol_eig)
           converged = false;
@@ -337,7 +340,10 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
           break;
       }
       else
+      {
+        converged = false;
         break;
+      }
     }
   }
 
@@ -350,6 +356,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   _problem.restoreOldSolutions();
   if (_problem.getDisplacedProblem() != NULL)
     _problem.getDisplacedProblem()->restoreOldSolutions();
+
+  return converged;
 }
 
 void
@@ -549,7 +557,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters,
   chebyshev_parameters.flux_error_norm_old = *solution_diff;
 }
 
-void
+bool
 EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k)
 {
   makeBXConsistent(k);
@@ -567,7 +575,7 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real>("linear solver tolerance") = pfactor;
 
   // call nonlinear solve
-  _problem.solve();
+  bool converged = _problem.newSolve();
 
   k = _source_integral;
   _eigenvalue = k;
@@ -575,4 +583,6 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real>("nonlinear solver absolute residual tolerance") = tol1;
   _problem.es().parameters.set<Real>("linear solver tolerance") = tol2;
   _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = tol3;
+
+  return converged;
 }
