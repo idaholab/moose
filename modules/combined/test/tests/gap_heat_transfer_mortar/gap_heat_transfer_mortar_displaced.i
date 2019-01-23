@@ -67,11 +67,17 @@
 []
 
 [Kernels]
-  [./hc]
+  [./hc_displaced_block]
     type = HeatConduction
     variable = temp
     use_displaced_mesh = true
-    block = '1 2'
+    block = '1'
+  [../]
+  [./hc_undisplaced_block]
+    type = HeatConduction
+    variable = temp
+    use_displaced_mesh = false
+    block = '2'
   [../]
 []
 
