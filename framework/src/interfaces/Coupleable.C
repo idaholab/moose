@@ -1440,12 +1440,9 @@ const VariableValue &
 Coupleable::coupledDofValues(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
-  // default coupling is not available for elemental solutions
-  if (!isCoupled(var_name))
-    mooseError(_c_name, ": invalid variable name for coupledDofValues");
 
-  if (_c_nodal)
-    mooseError(_c_name, ": nodal objects should not call coupledDofValues");
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name, comp);
 
   coupledCallback(var_name, false);
   MooseVariableFEBase * var = getFEVar(var_name, comp);
@@ -1460,12 +1457,9 @@ const VariableValue &
 Coupleable::coupledDofValuesOld(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
-  // default coupling is not available for elemental solutions
-  if (!isCoupled(var_name))
-    mooseError(_c_name, ": invalid variable name for coupledDofValuesOld");
 
-  if (_c_nodal)
-    mooseError(_c_name, ": nodal objects should not call coupledDofValuesOld");
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name, comp);
 
   validateExecutionerType(var_name, "coupledDofValuesOld");
   coupledCallback(var_name, true);
@@ -1481,12 +1475,9 @@ const VariableValue &
 Coupleable::coupledDofValuesOlder(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
-  // default coupling is not available for elemental solutions
-  if (!isCoupled(var_name))
-    mooseError(_c_name, ": invalid variable name for coupledDofValuesOlder");
 
-  if (_c_nodal)
-    mooseError(_c_name, ": nodal objects should not call coupledDofValuesOlder");
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name, comp);
 
   validateExecutionerType(var_name, "coupledDofValuesOlder");
   coupledCallback(var_name, true);
