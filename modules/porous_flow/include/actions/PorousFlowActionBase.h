@@ -14,6 +14,8 @@
 #include "PorousFlowDependencies.h"
 #include "MooseEnum.h"
 
+#include "libmesh/vector_value.h"
+
 class PorousFlowActionBase;
 
 template <>
