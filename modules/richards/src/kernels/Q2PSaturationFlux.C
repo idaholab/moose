@@ -46,7 +46,7 @@ Q2PSaturationFlux::Q2PSaturationFlux(const InputParameters & parameters)
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _pp(coupledValue("porepressure_variable")),
     _grad_pp(coupledGradient("porepressure_variable")),
-    _pp_nodal(coupledNodalValue("porepressure_variable")),
+    _pp_nodal(coupledDofValues("porepressure_variable")),
     _pp_var(coupled("porepressure_variable")),
     _relperm(getUserObject<RichardsRelPerm>("fluid_relperm")),
     _viscosity(getParam<Real>("fluid_viscosity")),

@@ -66,7 +66,7 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
   for (unsigned i = 0; i < _num_passed_mf_vars; ++i)
   {
     _mf_vars_num[i] = coupled("mass_fraction_vars", i);
-    _mf_vars[i] = (_nodal_material ? &coupledNodalValue("mass_fraction_vars", i)
+    _mf_vars[i] = (_nodal_material ? &coupledDofValues("mass_fraction_vars", i)
                                    : &coupledValue("mass_fraction_vars", i));
     _grad_mf_vars[i] = &coupledGradient("mass_fraction_vars", i);
   }

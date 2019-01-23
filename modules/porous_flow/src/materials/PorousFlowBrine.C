@@ -121,7 +121,7 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
                                                _temperature_variable_name))
                       : nullptr),
 
-    _xnacl(_nodal_material ? coupledNodalValue("xnacl") : coupledValue("xnacl"))
+    _xnacl(_nodal_material ? coupledDofValues("xnacl") : coupledValue("xnacl"))
 {
   // BrineFluidProperties UserObject
   std::string brine_name = name() + ":brine";

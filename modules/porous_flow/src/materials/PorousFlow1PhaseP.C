@@ -29,7 +29,7 @@ validParams<PorousFlow1PhaseP>()
 PorousFlow1PhaseP::PorousFlow1PhaseP(const InputParameters & parameters)
   : PorousFlowVariableBase(parameters),
 
-    _porepressure_var(_nodal_material ? coupledNodalValue("porepressure")
+    _porepressure_var(_nodal_material ? coupledDofValues("porepressure")
                                       : coupledValue("porepressure")),
     _gradp_qp_var(coupledGradient("porepressure")),
     _porepressure_varnum(coupled("porepressure")),

@@ -36,7 +36,7 @@ validParams<PorousFlowFluidState>()
 PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
   : PorousFlowVariableBase(parameters),
 
-    _gas_porepressure(_nodal_material ? coupledNodalValue("gas_porepressure")
+    _gas_porepressure(_nodal_material ? coupledDofValues("gas_porepressure")
                                       : coupledValue("gas_porepressure")),
     _gas_gradp_qp(coupledGradient("gas_porepressure")),
     _gas_porepressure_varnum(coupled("gas_porepressure")),
@@ -45,7 +45,7 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
               : 0),
 
     _num_Z_vars(coupledComponents("z")),
-    _Xnacl(_nodal_material ? coupledNodalValue("xnacl") : coupledValue("xnacl")),
+    _Xnacl(_nodal_material ? coupledDofValues("xnacl") : coupledValue("xnacl")),
     _grad_Xnacl_qp(coupledGradient("xnacl")),
     _Xnacl_varnum(coupled("xnacl")),
     _Xvar(_dictator.isPorousFlowVariable(_Xnacl_varnum)
@@ -125,7 +125,7 @@ PorousFlowFluidState::PorousFlowFluidState(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _num_Z_vars; ++i)
   {
-    _Z[i] = (_nodal_material ? &coupledNodalValue("z", i) : &coupledValue("z", i));
+    _Z[i] = (_nodal_material ? &coupledDofValues("z", i) : &coupledValue("z", i));
     _gradZ_qp[i] = &coupledGradient("z", i);
     _Z_varnum[i] = coupled("z", i);
     _Zvar[i] = (_dictator.isPorousFlowVariable(_Z_varnum[i])
