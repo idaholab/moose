@@ -21,19 +21,20 @@ validParams<DistributionInterface>()
 
 DistributionInterface::DistributionInterface(const MooseObject * moose_object)
   : _dni_params(moose_object->parameters()),
-    _dni_feproblem(*_dni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+    _dni_feproblem(*_dni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _dni_moose_object_ptr(moose_object)
 {
 }
 
-Distribution &
-DistributionInterface::getDistribution(const std::string & name)
+const Distribution &
+DistributionInterface::getDistribution(const std::string & name) const
 {
   DistributionName dist_name = _dni_params.get<DistributionName>(name);
   return _dni_feproblem.getDistribution(dist_name);
 }
 
-Distribution &
-DistributionInterface::getDistributionByName(const DistributionName & name)
+const Distribution &
+DistributionInterface::getDistributionByName(const DistributionName & name) const
 {
   return _dni_feproblem.getDistribution(name);
 }

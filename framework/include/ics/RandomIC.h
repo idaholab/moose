@@ -50,7 +50,7 @@ protected:
   const Real _max;
 
   /// Distribution object optionally used to define distribution of random numbers
-  Distribution * _distribution;
+  Distribution const * _distribution;
 };
 
 #endif // RANDOMIC_H

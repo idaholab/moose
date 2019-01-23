@@ -34,31 +34,58 @@ WeibullDistribution::WeibullDistribution(const InputParameters & parameters)
 }
 
 Real
-WeibullDistribution::pdf(const Real & x)
+WeibullDistribution::pdf(const Real & x,
+                         const Real & location,
+                         const Real & scale,
+                         const Real & shape) const
 {
-  if (x <= _a)
+  if (x <= location)
     return 0.0;
   else
   {
-    const Real y = (x - _a) / _b;
-    return _c / _b * std::pow(y, _c - 1.0) * std::exp(-std::pow(y, _c));
+    const Real y = (x - location) / scale;
+    return shape / scale * std::pow(y, shape - 1.0) * std::exp(-std::pow(y, shape));
   }
 }
 
 Real
-WeibullDistribution::cdf(const Real & x)
+WeibullDistribution::cdf(const Real & x,
+                         const Real & location,
+                         const Real & scale,
+                         const Real & shape) const
 {
-  if (x <= _a)
+  if (x <= location)
     return 0.0;
   else
   {
-    const Real y = (x - _a) / _b;
-    return 1.0 - std::exp(-std::pow(y, _c));
+    const Real y = (x - location) / scale;
+    return 1.0 - std::exp(-std::pow(y, shape));
   }
 }
 
 Real
-WeibullDistribution::quantile(const Real & p)
+WeibullDistribution::quantile(const Real & p,
+                              const Real & location,
+                              const Real & scale,
+                              const Real & shape) const
 {
-  return _a + _b * std::pow(-std::log(1 - p), 1.0 / _c);
+  return location + scale * std::pow(-std::log(1 - p), 1.0 / shape);
+}
+
+Real
+WeibullDistribution::pdf(const Real & x) const
+{
+  return pdf(x, _a, _b, _c);
+}
+
+Real
+WeibullDistribution::cdf(const Real & x) const
+{
+  return cdf(x, _a, _b, _c);
+}
+
+Real
+WeibullDistribution::quantile(const Real & p) const
+{
+  return quantile(p, _a, _b, _c);
 }
