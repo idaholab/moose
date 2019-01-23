@@ -38,7 +38,7 @@ validParams<ThermalContactBCsAction>()
   params.addParam<std::vector<VariableName>>("disp_y", "The y displacement");
   params.addParam<std::vector<VariableName>>("disp_z", "The z displacement");
 
-  params.addParam<std::vector<NonlinearVariableName>>(
+  params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 

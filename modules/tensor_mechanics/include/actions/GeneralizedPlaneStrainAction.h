@@ -25,7 +25,7 @@ public:
   void act() override;
 
 protected:
-  std::vector<NonlinearVariableName> _displacements;
+  std::vector<VariableName> _displacements;
   unsigned int _ndisp;
   const unsigned int _out_of_plane_direction;
 };

@@ -32,8 +32,8 @@ validParams<GlobalStrainAction>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription("Set up the GlobalStrainAction environment");
-  params.addRequiredParam<NonlinearVariableName>("scalar_global_strain",
-                                                 "Scalar variable for global strain");
+  params.addRequiredParam<VariableName>("scalar_global_strain",
+                                        "Scalar variable for global strain");
   params.addParam<std::vector<VariableName>>("displacements", "The displacement variables");
   params.addParam<std::vector<AuxVariableName>>(
       "auxiliary_displacements",
@@ -97,8 +97,7 @@ GlobalStrainAction::act()
     InputParameters params = _factory.getValidParams(sk_type);
     params.applyParameters(parameters());
     params.set<bool>("use_displaced_mesh") = false;
-    params.set<NonlinearVariableName>("variable") =
-        getParam<NonlinearVariableName>("scalar_global_strain");
+    params.set<NonlinearVariableName>("variable") = getParam<VariableName>("scalar_global_strain");
     params.set<UserObjectName>("global_strain_uo") = uo_name;
 
     _problem->addScalarKernel(sk_type, _name + "_GlobalStrain", params);
@@ -114,7 +113,7 @@ GlobalStrainAction::act()
     params.applyParameters(parameters(), {"scalar_global_strain"});
     params.set<bool>("use_displaced_mesh") = false;
     params.set<std::vector<VariableName>>("scalar_global_strain") = {
-        getParam<NonlinearVariableName>("scalar_global_strain")};
+        getParam<VariableName>("scalar_global_strain")};
     params.set<UserObjectName>("global_strain_uo") = uo_name;
 
     _problem->addMaterial(mat_type, _name + "_global_strain", params);
@@ -165,7 +164,7 @@ GlobalStrainAction::act()
       params.set<bool>("use_displaced_mesh") = false;
       params.set<bool>("output_global_displacement") = false;
       params.set<std::vector<VariableName>>("scalar_global_strain") = {
-          getParam<NonlinearVariableName>("scalar_global_strain")};
+          getParam<VariableName>("scalar_global_strain")};
       params.set<UserObjectName>("global_strain_uo") = uo_name;
       params.set<unsigned int>("component") = i;
 
@@ -184,7 +183,7 @@ GlobalStrainAction::act()
       params.set<bool>("use_displaced_mesh") = false;
       params.set<bool>("output_global_displacement") = true;
       params.set<std::vector<VariableName>>("scalar_global_strain") = {
-          getParam<NonlinearVariableName>("scalar_global_strain")};
+          getParam<VariableName>("scalar_global_strain")};
       params.set<UserObjectName>("global_strain_uo") = uo_name;
       params.set<unsigned int>("component") = i;
 

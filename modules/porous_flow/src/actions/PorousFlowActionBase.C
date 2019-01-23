@@ -52,7 +52,7 @@ validParams<PorousFlowActionBase>()
                                 "The number of secondary species in the aqueous-kinetic reaction "
                                 "system involved in precipitation and dissolution.  (Leave as zero "
                                 "if the simulation does not involve chemistry)");
-  params.addParam<std::vector<NonlinearVariableName>>(
+  params.addParam<std::vector<VariableName>>(
       "displacements",
       "The name of the displacement variables (relevant only for "
       "mechanically-coupled simulations)");
@@ -88,13 +88,13 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
     _mass_fraction_vars(getParam<std::vector<VariableName>>("mass_fraction_vars")),
     _num_mass_fraction_vars(_mass_fraction_vars.size()),
     _temperature_var(getParam<std::vector<VariableName>>("temperature")),
-    _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
+    _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
     _flux_limiter_type(getParam<MooseEnum>("flux_limiter_type")),
     _stabilization(getParam<MooseEnum>("stabilization").getEnum<StabilizationEnum>())
 {
-  // convert vector of NonlinearVariableName to vector of VariableName
+  // convert vector of VariableName to vector of VariableName
   for (unsigned int i = 0; i < _ndisp; ++i)
     _coupled_displacements[i] = _displacements[i];
 }
