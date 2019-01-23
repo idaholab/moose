@@ -40,9 +40,17 @@ validParams<StackGenerator>()
   params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
   params.addParam<BoundaryName>("bottom_boundary", "bottom", "name of the bottom (y) boundary");
 
+  // y boundary ids (2D case)
+  params.addParam<boundary_id_type>("top_boundary_id", "name of the top (y) boundary");
+  params.addParam<boundary_id_type>("bottom_boundary_id", "name of the bottom (y) boundary");
+
   // z boundary names (3D case)
   params.addParam<BoundaryName>("front_boundary", "front", "name of the front (z) boundary");
   params.addParam<BoundaryName>("back_boundary", "back", "name of the back (z) boundary");
+
+  // z boundary ids (3D case)
+  params.addParam<boundary_id_type>("front_boundary_id", "name of the front (z) boundary");
+  params.addParam<boundary_id_type>("back_boundary_id", "name of the back (z) boundary");
 
   params.addClassDescription("Use the supplied meshes and stitch them on top of each other");
 
@@ -106,6 +114,22 @@ StackGenerator::generate()
   {
     first = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
     second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
+  }
+
+  //Check if the user provided boundary ids instead of names
+  if (dim == 3)
+  {
+    if (isParamValid("front_boundary_id"))
+      first = getParam<boundary_id_type>("front_boundary_id");
+    if (isParamValid("back_boundary_id"))
+      second = getParam<boundary_id_type>("back_boundary_id");
+  }
+  if (dim == 2)
+  {
+    if (isParamValid("top_boundary_id"))
+      first = getParam<boundary_id_type>("top_boundary_id");
+    if (isParamValid("bottom_boundary_id"))
+      second = getParam<boundary_id_type>("bottom_boundary_id");
   }
 
   // Getting the width of each mesh
