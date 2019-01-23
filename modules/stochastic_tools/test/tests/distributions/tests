@@ -121,4 +121,13 @@
     design = 'JohnsonSBDistribution.md'
     issues = '#12720'
   [../]
+  [./logistic]
+    type = CSVDiff
+    input = logistic.i
+    csvdiff = 'logistic_out.csv'
+    allow_test_objects = true
+    requirement = 'MOOSE shall provide an ability to define a logistic distribution.'
+    design = 'LogisticDistribution.md'
+    issues = '#12720'
+  [../]
 []

@@ -43,7 +43,11 @@ JohnsonSBDistribution::JohnsonSBDistribution(const InputParameters & parameters)
 }
 
 Real
-JohnsonSBDistribution::pdf(const Real & x, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2) const
+JohnsonSBDistribution::pdf(const Real & x,
+                           const Real & a,
+                           const Real & b,
+                           const Real & alpha_1,
+                           const Real & alpha_2) const
 {
   if (x <= a)
     return 0.0;
@@ -57,7 +61,11 @@ JohnsonSBDistribution::pdf(const Real & x, const Real & a, const Real & b, const
 }
 
 Real
-JohnsonSBDistribution::cdf(const Real & x, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2) const
+JohnsonSBDistribution::cdf(const Real & x,
+                           const Real & a,
+                           const Real & b,
+                           const Real & alpha_1,
+                           const Real & alpha_2) const
 {
   if (x <= a)
     return 0.0;
@@ -70,11 +78,14 @@ JohnsonSBDistribution::cdf(const Real & x, const Real & a, const Real & b, const
 }
 
 Real
-JohnsonSBDistribution::quantile(const Real & p, const Real & a, const Real & b, const Real & alpha_1, const Real & alpha_2) const
+JohnsonSBDistribution::quantile(const Real & p,
+                                const Real & a,
+                                const Real & b,
+                                const Real & alpha_1,
+                                const Real & alpha_2) const
 {
   const Real Z = NormalDistribution::quantile(p);
-  return (a + b * std::exp((Z - alpha_1) / alpha_2)) /
-    (1.0 + std::exp((Z - alpha_1) / alpha_2));
+  return (a + b * std::exp((Z - alpha_1) / alpha_2)) / (1.0 + std::exp((Z - alpha_1) / alpha_2));
 }
 
 Real
