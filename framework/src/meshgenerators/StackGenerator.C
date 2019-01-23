@@ -116,7 +116,7 @@ StackGenerator::generate()
     second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
   }
 
-  //Check if the user provided boundary ids instead of names
+  // Check if the user provided boundary ids instead of names
   if (dim == 3)
   {
     if (isParamValid("front_boundary_id"))

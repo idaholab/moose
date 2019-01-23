@@ -51,9 +51,9 @@ protected:
   // Holds a mesh for each row, these will be stitched together in the end
   std::vector<std::unique_ptr<ReplicatedMesh>> _row_meshes;
 
-  const Real _x_width;
-  const Real _y_width;
-  const Real _z_width;
+  Real _x_width;
+  Real _y_width;
+  Real _z_width;
 };
 
 #endif // PATTERNEDMESHGENERATOR_H

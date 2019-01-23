@@ -15,6 +15,7 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_modification.h"
+#include "libmesh/mesh_tools.h"
 
 registerMooseObject("MooseApp", PatternedMeshGenerator);
 
@@ -25,12 +26,9 @@ validParams<PatternedMeshGenerator>()
   InputParameters params = validParams<MeshGenerator>();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
-  params.addRangeCheckedParam<Real>(
-      "x_width", 0, "x_width>=0", "The tile width in the x direction");
-  params.addRangeCheckedParam<Real>(
-      "y_width", 0, "y_width>=0", "The tile width in the y direction");
-  params.addRangeCheckedParam<Real>(
-      "z_width", 0, "z_width>=0", "The tile width in the z direction");
+  params.addRangeCheckedParam<Real>("x_width", "x_width>=0", "The tile width in the x direction");
+  params.addRangeCheckedParam<Real>("y_width", "y_width>=0", "The tile width in the y direction");
+  params.addRangeCheckedParam<Real>("z_width", "z_width>=0", "The tile width in the z direction");
 
   // Boundaries : user has to provide id or name for each boundary
   // If an id is provided, any provided name for this particular boundary will be ignored.
@@ -63,14 +61,26 @@ validParams<PatternedMeshGenerator>()
 PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
-    _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
-    _x_width(getParam<Real>("x_width")),
-    _y_width(getParam<Real>("y_width")),
-    _z_width(getParam<Real>("z_width"))
+    _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern"))
 {
   _mesh_ptrs.reserve(_input_names.size());
   for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
     _mesh_ptrs.push_back(&getMeshByName(_input_names[i]));
+
+  if (isParamValid("x_width"))
+    _x_width = getParam<Real>("x_width");
+  else
+    _x_width = -1;
+
+  if (isParamValid("y_width"))
+    _y_width = getParam<Real>("y_width");
+  else
+    _y_width = -1;
+
+  if (isParamValid("z_width"))
+    _z_width = getParam<Real>("z_width");
+  else
+    _z_width = -1;
 }
 
 std::unique_ptr<MeshBase>
@@ -117,6 +127,16 @@ PatternedMeshGenerator::generate()
     mooseError("The top boundary has not been initialized properly.");
   if (bottom == -123)
     mooseError("The bottom boundary has not been initialized properly.");
+
+  // Check if the user has provided the x, y and z widths.
+  // If not (their value is -1), compute them
+  auto bbox = MeshTools::create_bounding_box(*_meshes[0]);
+  if (_x_width < 0)
+    _x_width = bbox.max()(0) - bbox.min()(0);
+  if (_y_width < 0)
+    _y_width = bbox.max()(1) - bbox.min()(1);
+  if (_z_width < 0)
+    _z_width = bbox.max()(2) - bbox.min()(2);
 
   // Build each row mesh
   for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)

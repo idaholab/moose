@@ -28,9 +28,8 @@
     right_boundary_id = 2
     top_boundary_id = 3
     left_boundary_id = 4
-    y_width = 1.2
-    x_width = 1.2
-    #parallel_type = replicated
+    #y_width = 1.2
+    #x_width = 1.2
   []
 []
 
