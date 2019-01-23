@@ -102,9 +102,6 @@ MeshExtruderGenerator::generate()
   if (isParamValid("top_sideset"))
     changeID(*mesh, getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
 
-  // Update the dimension
-  mesh->set_mesh_dimension(source_mesh->mesh_dimension() + 1);
-
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
