@@ -407,8 +407,8 @@ Exodus::output(const ExecFlagType & type)
   // correctly. Deleting the file here actually doesn't fix this problem, but it seems like poor
   // form to leave empty files around.
   std::string current = filename();
-  if (MooseUtils::file_exists(current) && (MooseUtils::file_size(current) == 0) &&
-      processor_id() == 0)
+  if (processor_id() == 0 && MooseUtils::checkFileReadable(current) &&
+      (MooseUtils::fileSize(current) == 0))
   {
     int err = std::remove(current.c_str());
     if (err != 0)

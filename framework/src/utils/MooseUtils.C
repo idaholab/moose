@@ -810,7 +810,6 @@ template std::string join<std::vector<MooseEnumItem>>(const std::vector<MooseEnu
 template std::string join<std::set<MooseEnumItem>>(const std::set<MooseEnumItem> &,
                                                    const std::string &);
 
-
 void
 createSymlink(const std::string & target, const std::string & link)
 {
@@ -830,16 +829,10 @@ clearSymlink(const std::string & link)
     if (err != 0)
       mooseError("Failed to remove symbolic link (via 'unlink') to ", link);
   }
-
-bool
-file_exists(const std::string & filename)
-{
-  struct stat buffer;
-  return (stat(filename.c_str(), &buffer) == 0);
 }
 
 std::size_t
-file_size(const std::string & filename)
+fileSize(const std::string & filename)
 {
   struct stat buffer;
   if (stat(filename.c_str(), &buffer))
