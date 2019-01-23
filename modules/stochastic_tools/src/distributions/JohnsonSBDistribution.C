@@ -35,8 +35,8 @@ validParams<JohnsonSBDistribution>()
 
 JohnsonSBDistribution::JohnsonSBDistribution(const InputParameters & parameters)
   : NormalDistribution(parameters),
-    _a(getParam<Real>("a")),
-    _b(getParam<Real>("b")),
+    _lower(getParam<Real>("a")),
+    _upper(getParam<Real>("b")),
     _alpha_1(getParam<Real>("alpha_1")),
     _alpha_2(getParam<Real>("alpha_2"))
 {
@@ -91,17 +91,17 @@ JohnsonSBDistribution::quantile(const Real & p,
 Real
 JohnsonSBDistribution::pdf(const Real & x) const
 {
-  return pdf(x, _a, _b, _alpha_1, _alpha_2);
+  return pdf(x, _lower, _upper, _alpha_1, _alpha_2);
 }
 
 Real
 JohnsonSBDistribution::cdf(const Real & x) const
 {
-  return cdf(x, _a, _b, _alpha_1, _alpha_2);
+  return cdf(x, _lower, _upper, _alpha_1, _alpha_2);
 }
 
 Real
 JohnsonSBDistribution::quantile(const Real & p) const
 {
-  return quantile(p, _a, _b, _alpha_1, _alpha_2);
+  return quantile(p, _lower, _upper, _alpha_1, _alpha_2);
 }

@@ -19,7 +19,6 @@ InputParameters validParams<JohnsonSBDistribution>();
 
 /**
  * A class used to generate a Johnson SB distribution
- * This provides a method to set the parameters after it has been constructed.
  */
 class JohnsonSBDistribution : public NormalDistribution
 {
@@ -48,10 +47,10 @@ public:
 
 protected:
   /// The lower location parameter, a
-  const Real & _a;
+  const Real & _lower;
 
   /// The upper location parameter, b
-  const Real & _b;
+  const Real & _upper;
 
   /// The first shape parameter, alpha_1
   const Real & _alpha_1;

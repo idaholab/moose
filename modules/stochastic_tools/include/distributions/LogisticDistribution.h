@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRIZZLYLOGISTICDISTRIBUTION_H
-#define GRIZZLYLOGISTICDISTRIBUTION_H
+#ifndef LOGISTICDISTRIBUTION_H
+#define LOGISTICDISTRIBUTION_H
 
 #include "Distribution.h"
 
@@ -19,7 +19,6 @@ InputParameters validParams<LogisticDistribution>();
 
 /**
  * A class used to generate a logistic distribution
- * This provides a method to set the parameters after it has been constructed.
  */
 class LogisticDistribution : public Distribution
 {
