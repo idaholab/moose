@@ -237,7 +237,7 @@ EigenProblem::baseSolve()
 
     // Perform the output of the current, failed time step (this only occurs if desired)
     outputStep(EXEC_FAILED);
-    //    _picard_status = MOOSE_PICARD_DIVERGED_NONLINEAR;
+    //    _picard_status = DIVERGED_NONLINEAR;
     return false;
   }
 

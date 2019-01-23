@@ -334,15 +334,15 @@ petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason
 
   switch (moose_reason)
   {
-    case MOOSE_CONVERGED_RTOL:
+    case MooseLinearConvergenceReason::CONVERGED_RTOL:
       *reason = KSP_CONVERGED_RTOL;
       break;
 
-    case MOOSE_CONVERGED_ITS:
+    case MooseLinearConvergenceReason::CONVERGED_ITS:
       *reason = KSP_CONVERGED_ITS;
       break;
 
-    case MOOSE_DIVERGED_NANORINF:
+    case MooseLinearConvergenceReason::DIVERGED_NANORINF:
 #if PETSC_VERSION_LESS_THAN(3, 4, 0)
       // Report divergence due to exceeding the divergence tolerance.
       *reason = KSP_DIVERGED_DTOL;
@@ -352,7 +352,7 @@ petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason
 #endif
       break;
 #if !PETSC_VERSION_LESS_THAN(3, 6, 0) // A new convergence enum in PETSc 3.6
-    case MOOSE_DIVERGED_PCSETUP_FAILED:
+    case MooseLinearConvergenceReason::DIVERGED_PCSETUP_FAILED:
       *reason = KSP_DIVERGED_PCSETUP_FAILED;
       break;
 #endif
@@ -448,19 +448,19 @@ petscNonlinearConverged(SNES snes,
 
   switch (moose_reason)
   {
-    case MOOSE_NONLINEAR_ITERATING:
+    case MooseNonlinearConvergenceReason::ITERATING:
       *reason = SNES_CONVERGED_ITERATING;
       break;
 
-    case MOOSE_CONVERGED_FNORM_ABS:
+    case MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS:
       *reason = SNES_CONVERGED_FNORM_ABS;
       break;
 
-    case MOOSE_CONVERGED_FNORM_RELATIVE:
+    case MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE:
       *reason = SNES_CONVERGED_FNORM_RELATIVE;
       break;
 
-    case MOOSE_CONVERGED_SNORM_RELATIVE:
+    case MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE:
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
       *reason = SNES_CONVERGED_PNORM_RELATIVE;
 #else
@@ -468,15 +468,15 @@ petscNonlinearConverged(SNES snes,
 #endif
       break;
 
-    case MOOSE_DIVERGED_FUNCTION_COUNT:
+    case MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT:
       *reason = SNES_DIVERGED_FUNCTION_COUNT;
       break;
 
-    case MOOSE_DIVERGED_FNORM_NAN:
+    case MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN:
       *reason = SNES_DIVERGED_FNORM_NAN;
       break;
 
-    case MOOSE_DIVERGED_LINE_SEARCH:
+    case MooseNonlinearConvergenceReason::DIVERGED_LINE_SEARCH:
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
       *reason = SNES_DIVERGED_LS_FAILURE;
 #else

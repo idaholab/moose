@@ -90,7 +90,9 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
 
   bool _augLM_repeat_step;
 
-  if (reason > 0)
+  if (reason == MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS ||
+      reason == MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE ||
+      reason == MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE)
   {
     if (_num_lagmul_iterations < _max_lagmul_iters)
     {
@@ -147,7 +149,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
       if (_augLM_repeat_step)
       {
         // force it to keep iterating
-        reason = MOOSE_NONLINEAR_ITERATING;
+        reason = MooseNonlinearConvergenceReason::ITERATING;
         _console << "Augmented Lagrangian Multiplier needs updating." << std::endl;
         _num_lagmul_iterations++;
       }
@@ -159,7 +161,7 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
     {
       // maxed out
       _console << "Maximum Augmented Lagrangian contact iterations have been reached." << std::endl;
-      reason = MOOSE_DIVERGED_FUNCTION_COUNT;
+      reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
     }
   }
 

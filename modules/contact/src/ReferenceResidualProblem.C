@@ -367,27 +367,27 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
   }
 
   NonlinearSystemBase & system = getNonlinearSystemBase();
-  MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
+  MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
   std::stringstream oss;
 
   if (fnorm != fnorm)
   {
     oss << "Failed to converge, function norm is NaN\n";
-    reason = MOOSE_DIVERGED_FNORM_NAN;
+    reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
   }
   else if (fnorm < abstol && (it || !force_iteration))
   {
     oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
-    reason = MOOSE_CONVERGED_FNORM_ABS;
+    reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
   }
   else if (nfuncs >= max_funcs)
   {
     oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs
         << std::endl;
-    reason = MOOSE_DIVERGED_FUNCTION_COUNT;
+    reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
   }
 
-  if (it && !reason)
+  if (it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
     if (checkConvergenceIndividVars(fnorm, abstol, rtol, ref_resid))
     {
@@ -399,7 +399,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
       else
         oss << "Converged due to function norm " << fnorm << " < "
             << " (relative tolerance)" << std::endl;
-      reason = MOOSE_CONVERGED_FNORM_RELATIVE;
+      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
     }
     else if (it >= _accept_iters &&
              checkConvergenceIndividVars(
@@ -415,14 +415,14 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
         oss << "Converged due to function norm " << fnorm << " < "
             << " (acceptable relative tolerance)" << std::endl;
       _console << "ACCEPTABLE" << std::endl;
-      reason = MOOSE_CONVERGED_FNORM_RELATIVE;
+      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
     }
 
     else if (snorm < stol * xnorm)
     {
       oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
           << std::endl;
-      reason = MOOSE_CONVERGED_SNORM_RELATIVE;
+      reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
     }
   }
 
