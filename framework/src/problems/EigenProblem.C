@@ -218,7 +218,7 @@ EigenProblem::checkProblemIntegrity()
 }
 
 bool
-EigenProblem::baseSolve()
+EigenProblem::nonlinearSolve()
 {
   bool solve_converged;
   if (_solve)
@@ -246,22 +246,6 @@ EigenProblem::baseSolve()
     _displaced_problem->syncSolutions();
 
   return solve_converged;
-}
-
-void
-EigenProblem::solve()
-{
-  if (_solve)
-  {
-    TIME_SECTION(_solve_timer);
-
-    _nl->solve();
-    _nl->update();
-  }
-
-  // sync solutions in displaced problem
-  if (_displaced_problem)
-    _displaced_problem->syncSolutions();
 }
 
 bool

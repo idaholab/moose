@@ -414,9 +414,7 @@ public:
    * Solve the FEProblem.
    * @return True if solver is converged.
    */
-  virtual void solve() override;
-
-  virtual bool newSolve();
+  virtual bool solve() override;
 
   /**
    * Perform one Picard iteration or a full solve.
@@ -441,9 +439,9 @@ public:
                          bool relax,
                          const std::set<dof_id_type> & relaxed_dofs);
 
-  /// Solve nonlinear system and some basic pre and post processing.
+  /// Solve nonlinear system with some basic pre and post processing.
   /// @return True if solver is converged.
-  virtual bool baseSolve();
+  virtual bool nonlinearSolve();
 
   /// Give user a chance to override this function to detect Picard iteration convergence differently
   virtual bool extraPicardConvergenceCheck() { return false; }

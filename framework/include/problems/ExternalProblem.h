@@ -31,7 +31,7 @@ public:
   /**
    * Solve is implemented to providing syncing to/from the "transfer" mesh.
    */
-  virtual bool newSolve() override final;
+  virtual bool solve() override final;
 
   /**
    * New interface for solving an External problem. "solve()" is finalized here to provide

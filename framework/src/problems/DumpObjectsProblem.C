@@ -285,7 +285,7 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 }
 
 bool
-DumpObjectsProblem::newSolve()
+DumpObjectsProblem::solve()
 {
   dumpGeneratedSyntax(getParam<std::string>("dump_path"));
   return true;

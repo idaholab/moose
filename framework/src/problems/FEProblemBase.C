@@ -4155,40 +4155,8 @@ FEProblemBase::init()
   _initialized = true;
 }
 
-void
-FEProblemBase::solve()
-{
-  TIME_SECTION(_solve_timer);
-
-#ifdef LIBMESH_HAVE_PETSC
-  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
-#endif
-
-  Moose::setSolverDefaults(*this);
-
-  // Setup the output system for printing linear/nonlinear iteration information
-  initPetscOutput();
-
-  possiblyRebuildGeomSearchPatches();
-
-  // reset flag so that linear solver does not use
-  // the old converged reason "DIVERGED_NANORINF", when
-  // we throw  an exception and stop solve
-  _fail_next_linear_convergence_check = false;
-
-  if (_solve)
-    _nl->solve();
-
-  if (_solve)
-    _nl->update();
-
-  // sync solutions in displaced problem
-  if (_displaced_problem)
-    _displaced_problem->syncSolutions();
-}
-
 bool
-FEProblemBase::newSolve()
+FEProblemBase::solve()
 {
   TIME_SECTION(_solve_timer);
 
@@ -4439,7 +4407,7 @@ FEProblemBase::solveStep(Real begin_norm_old,
     relax_previous = solution;
   }
 
-  if (!baseSolve())
+  if (!nonlinearSolve())
   {
     _picard_status = MoosePicardConvergenceReason::DIVERGED_NONLINEAR;
     return false;
@@ -4500,7 +4468,7 @@ FEProblemBase::solveStep(Real begin_norm_old,
 }
 
 bool
-FEProblemBase::baseSolve()
+FEProblemBase::nonlinearSolve()
 {
   TIME_SECTION(_solve_timer);
 

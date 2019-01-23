@@ -248,7 +248,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _source_integral_old = _source_integral;
 
     preIteration();
-    converged = _problem.newSolve();
+    converged = _problem.solve();
     if (!converged)
       break;
     postIteration();
@@ -575,7 +575,7 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real>("linear solver tolerance") = pfactor;
 
   // call nonlinear solve
-  bool converged = _problem.newSolve();
+  bool converged = _problem.solve();
 
   k = _source_integral;
   _eigenvalue = k;

@@ -76,7 +76,7 @@ Steady::execute()
     preSolve();
     _problem.timestepSetup();
 
-    _last_solve_converged = _problem.newSolve();
+    _last_solve_converged = _problem.solve();
     if (!_last_solve_converged)
     {
       _console << "Aborting as solve did not converge\n";

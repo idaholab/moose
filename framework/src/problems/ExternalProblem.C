@@ -44,7 +44,7 @@ ExternalProblem::ExternalProblem(const InputParameters & parameters) : FEProblem
 }
 
 bool
-ExternalProblem::newSolve()
+ExternalProblem::solve()
 {
   syncSolutions(Direction::TO_EXTERNAL_APP);
   bool converged = externalSolve();

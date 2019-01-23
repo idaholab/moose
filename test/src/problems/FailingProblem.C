@@ -28,9 +28,9 @@ FailingProblem::FailingProblem(const InputParameters & params)
 }
 
 bool
-FailingProblem::newSolve()
+FailingProblem::solve()
 {
-  bool converged = FEProblem::newSolve();
+  bool converged = FEProblem::solve();
   // fail for the first time of solving this step
   if (!_failed && (_t_step == static_cast<int>(_fail_step)))
   {

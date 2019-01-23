@@ -840,9 +840,10 @@ DisplacedProblem::refMesh()
   return _ref_mesh;
 }
 
-void
+bool
 DisplacedProblem::solve()
 {
+  return true;
 }
 
 bool

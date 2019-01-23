@@ -153,7 +153,7 @@ TimeStepper::constrainStep(Real & dt)
 void
 TimeStepper::step()
 {
-  _converged = _fe_problem.newSolve();
+  _converged = _fe_problem.solve();
 }
 
 void
