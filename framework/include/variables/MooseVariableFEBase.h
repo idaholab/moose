@@ -108,7 +108,7 @@ public:
   /**
    * Set values for this variable to keep everything up to date
    */
-  virtual void setNodalValue(const DenseVector<Number> & value, unsigned int nc = 1) = 0;
+  virtual void setDofValues(const DenseVector<Number> & value) = 0;
   /**
    * Get the value of this variable at given node
    */

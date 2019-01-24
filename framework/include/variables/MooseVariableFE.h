@@ -139,11 +139,11 @@ public:
   bool isVector() const override;
   const Node *& node() const { return _node; }
   virtual dof_id_type & nodalDofIndex() override { return _nodal_dof_index; }
-  bool isNodalDefined() const { return _has_dofs; }
+  bool isNodalDefined() const { return _has_dof_indices; }
 
   const Node *& nodeNeighbor() const { return _node_neighbor; }
   virtual dof_id_type & nodalDofIndexNeighbor() override { return _nodal_dof_index_neighbor; }
-  bool isNodalNeighborDefined() const { return _neighbor_has_dofs; }
+  bool isNodalNeighborDefined() const { return _neighbor_has_dof_indices; }
 
   const Elem *& currentElem() const override { return _elem; }
 
@@ -619,7 +619,7 @@ public:
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
   void setNodalValue(OutputType value, unsigned int idx = 0);
-  void setNodalValue(const DenseVector<Number> & value, unsigned int nc = 1) override;
+  void setDofValues(const DenseVector<Number> & value) override;
   Number getNodalValue(const Node & node) override;
   Number getNodalValueOld(const Node & node) override;
   Number getNodalValueOlder(const Node & node) override;
@@ -890,13 +890,13 @@ protected:
   /// if variable is nodal
   bool _is_nodal;
   /// If we have dofs
-  bool _has_dofs;
+  bool _has_dof_indices;
   /// If the neighor has dofs
-  bool _neighbor_has_dofs;
+  bool _neighbor_has_dof_indices;
 
-  /// If true, the nodal value gets inserted on calling insert()
-  bool _has_nodal_value;
-  bool _has_nodal_value_neighbor;
+  /// If true, the dof values get inserted on calling insert()
+  bool _has_dof_values;
+  bool _has_dof_values_neighbor;
 
   const Node *& _node;
   const Node *& _node_neighbor;

@@ -102,10 +102,10 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_dof_du_dotdot_du_neighbor(false),
     _normals(_assembly.normals()),
     _is_nodal(true),
-    _has_dofs(false),
-    _neighbor_has_dofs(false),
-    _has_nodal_value(false),
-    _has_nodal_value_neighbor(false),
+    _has_dof_indices(false),
+    _neighbor_has_dof_indices(false),
+    _has_dof_values(false),
+    _has_dof_values_neighbor(false),
     _node(_assembly.node()),
     _node_neighbor(_assembly.nodeNeighbor()),
     _phi(_assembly.fePhi<OutputType>(_fe_type)),
@@ -318,15 +318,15 @@ void
 MooseVariableFE<OutputType>::prepare()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
-  _has_nodal_value = false;
-  _has_nodal_value_neighbor = false;
+  _has_dof_values = false;
+  _has_dof_values_neighbor = false;
 
   // FIXME: remove this when the Richard's module is migrated to use the new NodalCoupleable
   // interface.
   if (_dof_indices.size() > 0)
-    _has_dofs = true;
+    _has_dof_indices = true;
   else
-    _has_dofs = false;
+    _has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -334,16 +334,16 @@ void
 MooseVariableFE<OutputType>::prepareNeighbor()
 {
   _dof_map.dof_indices(_neighbor, _dof_indices_neighbor, _var_num);
-  _has_nodal_value = false;
-  _has_nodal_value_neighbor = false;
+  _has_dof_values = false;
+  _has_dof_values_neighbor = false;
 }
 
 template <typename OutputType>
 void
 MooseVariableFE<OutputType>::prepareAux()
 {
-  _has_nodal_value = false;
-  _has_nodal_value_neighbor = false;
+  _has_dof_values = false;
+  _has_dof_values_neighbor = false;
 }
 
 template <typename OutputType>
@@ -358,12 +358,12 @@ MooseVariableFE<OutputType>::reinitNode()
     // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
     // NodalBC for example
     _nodal_dof_index = _dof_indices[0];
-    _has_dofs = true;
+    _has_dof_indices = true;
   }
   else
   {
     _dof_indices.clear(); // Clear these so Assembly doesn't think there's dofs here
-    _has_dofs = false;
+    _has_dof_indices = false;
   }
 }
 
@@ -388,10 +388,10 @@ MooseVariableFE<OutputType>::reinitAux()
     for (auto & dof_u : _matrix_tags_dof_u)
       dof_u.resize(_dof_indices.size());
 
-    _has_dofs = true;
+    _has_dof_indices = true;
   }
   else
-    _has_dofs = false;
+    _has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -409,13 +409,13 @@ MooseVariableFE<OutputType>::reinitAuxNeighbor()
       _dof_values_neighbor.resize(_dof_indices_neighbor.size());
       _sys.currentSolution()->get(_dof_indices_neighbor, &_dof_values_neighbor[0]);
 
-      _neighbor_has_dofs = true;
+      _neighbor_has_dof_indices = true;
     }
     else
-      _neighbor_has_dofs = false;
+      _neighbor_has_dof_indices = false;
   }
   else
-    _neighbor_has_dofs = false;
+    _neighbor_has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -437,9 +437,9 @@ MooseVariableFE<OutputType>::reinitNodes(const std::vector<dof_id_type> & nodes)
   }
 
   if (_dof_indices.size() > 0)
-    _has_dofs = true;
+    _has_dof_indices = true;
   else
-    _has_dofs = false;
+    _has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -461,9 +461,9 @@ MooseVariableFE<OutputType>::reinitNodesNeighbor(const std::vector<dof_id_type> 
   }
 
   if (_dof_indices_neighbor.size() > 0)
-    _neighbor_has_dofs = true;
+    _neighbor_has_dof_indices = true;
   else
-    _neighbor_has_dofs = false;
+    _neighbor_has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -560,7 +560,7 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::insert(NumericVector<Number> & residual)
 {
-  if (_has_nodal_value)
+  if (_has_dof_values)
     residual.insert(&_dof_values[0], _dof_indices);
 }
 
@@ -568,7 +568,7 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::add(NumericVector<Number> & residual)
 {
-  if (_has_nodal_value)
+  if (_has_dof_values)
     residual.add_vector(&_dof_values[0], _dof_indices);
 }
 
@@ -2052,7 +2052,7 @@ MooseVariableFE<OutputType>::computeNodalValues()
   auto & active_coupleable_vector_tags =
       _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
 
-  if (_has_dofs)
+  if (_has_dof_indices)
   {
     auto n = _dof_indices.size();
     mooseAssert(n, "There must be a non-zero number of degrees of freedom");
@@ -2175,7 +2175,7 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeNodalNeighborValues()
 {
-  if (_neighbor_has_dofs)
+  if (_neighbor_has_dof_indices)
   {
     const unsigned int n = _dof_indices_neighbor.size();
     mooseAssert(n, "There must be a non-zero number of degrees of freedom");
@@ -2443,17 +2443,12 @@ MooseVariableFE<RealVectorValue>::assignNeighborNodalValuePreviousNL(const Real 
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::setNodalValue(const DenseVector<Number> & values,
-                                           unsigned int nc /* = 1*/)
+MooseVariableFE<OutputType>::setDofValues(const DenseVector<Number> & values)
 {
   for (unsigned int i = 0; i < values.size(); i++)
-  {
     _dof_values[i] = values(i);
-    if (_continuity == C_ZERO || _continuity == C_ONE)
-      assignNodalValue(values(i), i % nc);
-  }
 
-  _has_nodal_value = true;
+  _has_dof_values = true;
 
   for (unsigned int qp = 0; qp < _u.size(); qp++)
   {
@@ -2468,7 +2463,7 @@ void
 MooseVariableFE<OutputType>::setNodalValue(OutputType value, unsigned int idx /* = 0*/)
 {
   _dof_values[idx] = value; // update variable nodal value
-  _has_nodal_value = true;
+  _has_dof_values = true;
   assignNodalValue(value, 0);
 
   // Update the qp values as well
