@@ -1,13 +1,13 @@
-#ifndef DERIVATIVEMATERIALINTERFACERELAP_H
-#define DERIVATIVEMATERIALINTERFACERELAP_H
+#ifndef DERIVATIVEMATERIALINTERFACETHM_H
+#define DERIVATIVEMATERIALINTERFACETHM_H
 
 #include "DerivativeMaterialInterface.h"
 
 template <class T>
-class DerivativeMaterialInterfaceRelap : public DerivativeMaterialInterface<T>
+class DerivativeMaterialInterfaceTHM : public DerivativeMaterialInterface<T>
 {
 public:
-  DerivativeMaterialInterfaceRelap(const InputParameters & parameters);
+  DerivativeMaterialInterfaceTHM(const InputParameters & parameters);
 
 protected:
   /**
@@ -21,9 +21,9 @@ protected:
    * variable vector
    */
   template <typename U>
-  MaterialProperty<U> & declarePropertyDerivativeRelap(const std::string & base,
-                                                       const std::string & var_name,
-                                                       const unsigned int i = 0);
+  MaterialProperty<U> & declarePropertyDerivativeTHM(const std::string & base,
+                                                     const std::string & var_name,
+                                                     const unsigned int i = 0);
 
   /**
    * Method for retrieving derivative material properties
@@ -36,9 +36,9 @@ protected:
    * variable vector
    */
   template <typename U>
-  const MaterialProperty<U> & getMaterialPropertyDerivativeRelap(const std::string & base,
-                                                                 const std::string & var_name,
-                                                                 const unsigned int i = 0);
+  const MaterialProperty<U> & getMaterialPropertyDerivativeTHM(const std::string & base,
+                                                               const std::string & var_name,
+                                                               const unsigned int i = 0);
 
   /**
    * Method for retrieving derivative material properties corresponding to phase-dependent
@@ -60,15 +60,15 @@ protected:
    *   variable vector
    */
   template <typename U>
-  const MaterialProperty<U> & getMaterialPropertyDerivativeRelapPhase(const std::string & base,
-                                                                      bool property_is_liquid,
-                                                                      const std::string & var_name,
-                                                                      bool var_is_liquid,
-                                                                      const unsigned int i = 0);
+  const MaterialProperty<U> & getMaterialPropertyDerivativeTHMPhase(const std::string & base,
+                                                                    bool property_is_liquid,
+                                                                    const std::string & var_name,
+                                                                    bool var_is_liquid,
+                                                                    const unsigned int i = 0);
 };
 
 template <class T>
-DerivativeMaterialInterfaceRelap<T>::DerivativeMaterialInterfaceRelap(
+DerivativeMaterialInterfaceTHM<T>::DerivativeMaterialInterfaceTHM(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<T>(parameters)
 {
@@ -77,9 +77,9 @@ DerivativeMaterialInterfaceRelap<T>::DerivativeMaterialInterfaceRelap(
 template <class T>
 template <typename U>
 MaterialProperty<U> &
-DerivativeMaterialInterfaceRelap<T>::declarePropertyDerivativeRelap(const std::string & base,
-                                                                    const std::string & var_name,
-                                                                    const unsigned int i)
+DerivativeMaterialInterfaceTHM<T>::declarePropertyDerivativeTHM(const std::string & base,
+                                                                const std::string & var_name,
+                                                                const unsigned int i)
 {
   return this->template declarePropertyDerivative<U>(base, this->getVar(var_name, i)->name());
 }
@@ -87,8 +87,9 @@ DerivativeMaterialInterfaceRelap<T>::declarePropertyDerivativeRelap(const std::s
 template <class T>
 template <typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelap(
-    const std::string & base, const std::string & var_name, const unsigned int i)
+DerivativeMaterialInterfaceTHM<T>::getMaterialPropertyDerivativeTHM(const std::string & base,
+                                                                    const std::string & var_name,
+                                                                    const unsigned int i)
 {
   // get the base property name
   const std::string prop_name = this->deducePropertyName(base);
@@ -103,7 +104,7 @@ DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelap(
 template <class T>
 template <typename U>
 const MaterialProperty<U> &
-DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelapPhase(
+DerivativeMaterialInterfaceTHM<T>::getMaterialPropertyDerivativeTHMPhase(
     const std::string & base,
     bool property_is_liquid,
     const std::string & var_name,
@@ -112,7 +113,7 @@ DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelapPhase(
 {
   if (property_is_liquid == var_is_liquid)
   {
-    return getMaterialPropertyDerivativeRelap<U>(base, var_name, i);
+    return getMaterialPropertyDerivativeTHM<U>(base, var_name, i);
   }
   else
   {
@@ -123,4 +124,4 @@ DerivativeMaterialInterfaceRelap<T>::getMaterialPropertyDerivativeRelapPhase(
   }
 }
 
-#endif // DERIVATIVEMATERIALINTERFACERELAP_H
+#endif // DERIVATIVEMATERIALINTERFACETHM_H

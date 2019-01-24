@@ -2,7 +2,7 @@
 #define ONEDMASSFLUX_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDMassFlux;
 
@@ -12,7 +12,7 @@ InputParameters validParams<OneDMassFlux>();
 /**
  * Mass flux
  */
-class OneDMassFlux : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDMassFlux : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDMassFlux(const InputParameters & parameters);

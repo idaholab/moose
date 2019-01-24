@@ -1,6 +1,6 @@
 #include "OneDMassFlux.h"
 
-registerMooseObject("RELAP7App", OneDMassFlux);
+registerMooseObject("THMApp", OneDMassFlux);
 
 template <>
 InputParameters
@@ -23,23 +23,23 @@ validParams<OneDMassFlux>()
 }
 
 OneDMassFlux::OneDMassFlux(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
     _A(coupledValue("A")),
 
     _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
-    _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta")
+    _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("alpha", "beta")
                                     : nullptr),
 
     _rho(getMaterialProperty<Real>("rho")),
-    _drho_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("rho", "beta")
+    _drho_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("rho", "beta")
                                   : nullptr),
-    _drho_darhoA(getMaterialPropertyDerivativeRelap<Real>("rho", "arhoA")),
+    _drho_darhoA(getMaterialPropertyDerivativeTHM<Real>("rho", "arhoA")),
 
     _vel(getMaterialProperty<Real>("vel")),
-    _dvel_darhoA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhoA")),
-    _dvel_darhouA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhouA")),
+    _dvel_darhoA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhoA")),
+    _dvel_darhouA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhouA")),
 
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
     _arhouA_var_number(coupled("arhouA"))
