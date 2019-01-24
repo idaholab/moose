@@ -545,6 +545,15 @@ public:
 
   std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
 
+  /**
+   * Method for setting whether we have any ad objects
+   */
+  virtual void haveADObjects(bool have_ad_objects) { _have_ad_objects = have_ad_objects; }
+  /**
+   * Method for reading wehther we have any ad objects
+   */
+  bool haveADObjects() const { return _have_ad_objects; }
+
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -640,6 +649,9 @@ protected:
 
   /// Is it safe to retrieve data from tagged vectors
   bool _safe_access_tagged_vectors;
+
+  /// AD flag indicating whether **any** AD objects have been added
+  bool _have_ad_objects;
 
 private:
   ///@{ Helper functions for checking MaterialProperties

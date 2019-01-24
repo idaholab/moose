@@ -59,7 +59,7 @@ template <typename T>
 ADMaterialPropertyObject<T> &
 ADMaterial<compute_stage>::declareADProperty(const std::string & prop_name)
 {
-  _fe_problem.setUsingADFlag(true);
+  _fe_problem.usingADMatProps(true);
   registerPropName(prop_name, false, Material::CURRENT, compute_stage == JACOBIAN);
   return _material_data->declareADProperty<T>(prop_name);
 }

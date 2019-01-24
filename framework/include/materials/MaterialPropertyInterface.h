@@ -421,7 +421,7 @@ template <typename T>
 const ADMaterialPropertyObject<T> &
 MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
 {
-  _mi_feproblem.setUsingADFlag(true);
+  _mi_feproblem.usingADMatProps(true);
 
   checkExecutionStage();
   checkMaterialProperty(name);

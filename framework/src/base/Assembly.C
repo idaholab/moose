@@ -35,9 +35,10 @@
 
 Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   : _sys(sys),
+    _subproblem(_sys.subproblem()),
     _displaced(dynamic_cast<DisplacedSystem *>(&sys) ? true : false),
-    _nonlocal_cm(_sys.subproblem().nonlocalCouplingMatrix()),
-    _computing_jacobian(_sys.subproblem().currentlyComputingJacobian()),
+    _nonlocal_cm(_subproblem.nonlocalCouplingMatrix()),
+    _computing_jacobian(_subproblem.currentlyComputingJacobian()),
     _dof_map(_sys.dofMap()),
     _tid(tid),
     _mesh(sys.mesh()),
@@ -504,7 +505,7 @@ Assembly::reinitFE(const Elem * elem)
       const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
   _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
 
-  if (_computing_jacobian)
+  if (_computing_jacobian && _subproblem.haveADObjects())
   {
     auto n_qp = _current_qrule->n_points();
     resizeMappingObjects(n_qp, dim);
@@ -958,7 +959,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     _curvatures.shallowCopy(
         const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_curvatures()));
 
-  if (_computing_jacobian)
+  if (_computing_jacobian && _subproblem.haveADObjects())
   {
     const std::unique_ptr<const Elem> side_elem(elem->build_side_ptr(side));
 
@@ -1374,8 +1375,8 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     // set the coord transformation
     _coord_neighbor.resize(qrule->n_points());
     Moose::CoordinateSystemType coord_type =
-        _sys.subproblem().getCoordSystem(_current_neighbor_subdomain_id);
-    unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
+        _subproblem.getCoordSystem(_current_neighbor_subdomain_id);
+    unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
     const std::vector<Real> & JxW = fe->get_JxW();
     const std::vector<Point> & q_points = fe->get_xyz();
 
@@ -1433,8 +1434,8 @@ void
 Assembly::setCoordinateTransformation(const QBase * qrule, const MooseArray<Point> & q_points)
 {
   _coord.resize(qrule->n_points());
-  _coord_type = _sys.subproblem().getCoordSystem(_current_elem->subdomain_id());
-  unsigned int rz_radial_coord = _sys.subproblem().getAxisymmetricRadialCoord();
+  _coord_type = _subproblem.getCoordSystem(_current_elem->subdomain_id());
+  unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
 
   switch (_coord_type)
   {
@@ -1742,8 +1743,8 @@ Assembly::init(const CouplingMatrix * cm)
   if (_block_diagonal_matrix && scalar_vars.size() != 0)
     _block_diagonal_matrix = false;
 
-  auto num_vector_tags = _sys.subproblem().numVectorTags();
-  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
+  auto num_vector_tags = _subproblem.numVectorTags();
+  auto num_matrix_tags = _subproblem.numMatrixTags();
 
   _sub_Re.resize(num_vector_tags);
   _sub_Rn.resize(num_vector_tags);
@@ -2368,7 +2369,7 @@ Assembly::addCachedResidual(NumericVector<Number> & residual, TagID tag_id)
   if (!_sys.hasVector(tag_id))
   {
     // Only clean up things when tag exists
-    if (_sys.subproblem().vectorTagExists(tag_id))
+    if (_subproblem.vectorTagExists(tag_id))
     {
       _cached_residual_values[tag_id].clear();
       _cached_residual_rows[tag_id].clear();
@@ -2530,7 +2531,7 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & /*jacobian*/)
 void
 Assembly::addCachedJacobian()
 {
-  if (!_sys.subproblem().checkNonlocalCouplingRequirement())
+  if (!_subproblem.checkNonlocalCouplingRequirement())
   {
     mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
                 "Error: Cached data sizes MUST be the same!");

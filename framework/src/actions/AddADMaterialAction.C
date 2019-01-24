@@ -27,6 +27,7 @@ AddADMaterialAction::AddADMaterialAction(InputParameters params) : MooseADObject
 void
 AddADMaterialAction::act()
 {
+  flagDoingAD();
   _problem->addADResidualMaterial(_type, _name, _moose_object_pars);
   std::string to_erase = "<RESIDUAL>";
   std::string::size_type match = _type.find(to_erase);

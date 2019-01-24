@@ -278,7 +278,7 @@ MaterialPropertyStorage::shift(const FEProblemBase & fe_problem)
 
   // Intentional fall through for case above and for handling just using old properties
   std::swap(_props_elem_old, _props_elem);
-  if (fe_problem.usingAD())
+  if (fe_problem.usingADMatProps())
   {
     for (auto && elem_pair : (*_props_elem))
       for (auto && side_pair : elem_pair.second)

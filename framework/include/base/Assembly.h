@@ -54,6 +54,7 @@ class MooseVariableScalar;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 class XFEMInterface;
+class SubProblem;
 
 /**
  * Keeps track of stuff related to assembling
@@ -1121,6 +1122,7 @@ protected:
 
 protected:
   SystemBase & _sys;
+  SubProblem & _subproblem;
 
   const bool _displaced;
 

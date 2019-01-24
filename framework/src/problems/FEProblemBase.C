@@ -256,7 +256,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _line_search(nullptr),
-    _using_ad(false),
+    _using_ad_mat_props(false),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
@@ -5923,4 +5923,12 @@ FEProblemBase::addOutput(const std::string & object_type,
   // Create the object and add it to the warehouse
   std::shared_ptr<Output> output = _factory.create<Output>(object_type, object_name, parameters);
   output_warehouse.addOutput(output);
+}
+
+void
+FEProblemBase::haveADObjects(bool have_ad_objects)
+{
+  _have_ad_objects = have_ad_objects;
+  if (_displaced_problem)
+    _displaced_problem->haveADObjects(have_ad_objects);
 }

@@ -15,6 +15,7 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 #include "MooseApp.h"
+#include "FEProblemBase.h"
 
 template <>
 InputParameters
@@ -72,4 +73,10 @@ void MooseADObjectAction::addRelationshipManagers(Moose::RelationshipManagerType
         _factory.releaseSharedObjects(*rm_obj);
     }
   }
+}
+
+void
+MooseADObjectAction::flagDoingAD()
+{
+  _problem->haveADObjects(true);
 }

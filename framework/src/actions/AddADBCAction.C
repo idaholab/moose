@@ -27,6 +27,7 @@ AddADBCAction::AddADBCAction(InputParameters params) : MooseADObjectAction(param
 void
 AddADBCAction::act()
 {
+  flagDoingAD();
   _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
   std::string to_erase = "<RESIDUAL>";
   std::string::size_type match = _type.find(to_erase);
