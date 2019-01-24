@@ -15,6 +15,10 @@
 
 // Forward declarations
 class MultiAppNearestNodeTransfer;
+namespace libMesh
+{
+class DofObject;
+}
 
 template <>
 InputParameters validParams<MultiAppNearestNodeTransfer>();

@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/fparser_ad.hh"
+#include "libmesh/elem.h"
 
 registerMooseObject("MooseApp", ParsedSubdomainMeshModifier);
 
@@ -89,9 +90,8 @@ ParsedSubdomainMeshModifier::modify()
     _func_params[2] = elem->centroid()(2);
     bool contains = evaluate(_func_F);
 
-    if (contains &&
-        std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
-            _excluded_ids.end())
+    if (contains && std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
+                        _excluded_ids.end())
       elem->subdomain_id() = _block_id;
   }
 

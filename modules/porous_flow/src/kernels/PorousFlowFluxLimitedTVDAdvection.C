@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowFluxLimitedTVDAdvection.h"
+#include "Assembly.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowFluxLimitedTVDAdvection);
 

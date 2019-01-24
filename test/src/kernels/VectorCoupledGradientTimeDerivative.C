@@ -9,6 +9,7 @@
 
 #include "VectorCoupledGradientTimeDerivative.h"
 #include "Function.h"
+#include "Assembly.h"
 
 registerMooseObject("MooseTestApp", VectorCoupledGradientTimeDerivative);
 

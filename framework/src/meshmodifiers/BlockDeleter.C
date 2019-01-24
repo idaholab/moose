@@ -10,6 +10,8 @@
 #include "BlockDeleter.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", BlockDeleter);
 
 template <>

@@ -14,6 +14,8 @@
 #include "RankTwoTensor.h"
 #include "MooseError.h"
 
+#include "libmesh/point.h"
+
 namespace RankTwoScalarTools
 {
 

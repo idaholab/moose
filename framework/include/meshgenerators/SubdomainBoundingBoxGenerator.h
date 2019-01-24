@@ -13,6 +13,8 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
+#include "libmesh/bounding_box.h"
+
 // Forward declarations
 class SubdomainBoundingBoxGenerator;
 

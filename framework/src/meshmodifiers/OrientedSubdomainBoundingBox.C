@@ -10,6 +10,8 @@
 #include "OrientedSubdomainBoundingBox.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", OrientedSubdomainBoundingBox);
 
 template <>

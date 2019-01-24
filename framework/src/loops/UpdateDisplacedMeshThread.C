@@ -14,6 +14,8 @@
 #include "MooseMesh.h"
 
 #include "libmesh/numeric_vector.h"
+#include "libmesh/transient_system.h"
+#include "libmesh/explicit_system.h"
 
 UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(FEProblemBase & fe_problem,
                                                      DisplacedProblem & displaced_problem)

@@ -14,6 +14,8 @@
 #include "ImageSubdomain.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", ImageSubdomain);
 
 template <>

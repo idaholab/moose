@@ -15,6 +15,7 @@
 #include "MooseTypes.h"
 #include "MooseException.h"
 #include "libmesh/libmesh_exceptions.h"
+#include "libmesh/elem.h"
 
 /**
  * Base class for assembly-like calculations.

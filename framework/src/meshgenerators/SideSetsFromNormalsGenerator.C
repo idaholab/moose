@@ -19,6 +19,8 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/elem.h"
+#include "libmesh/fe_base.h"
 
 #include <typeinfo>
 

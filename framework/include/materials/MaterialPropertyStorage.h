@@ -12,17 +12,19 @@
 
 #include "Moose.h"
 #include "HashMap.h"
+#include "DataIO.h"
+#include "MaterialProperty.h"
 
 // Forward declarations
 class Material;
 class MaterialData;
 class QpMap;
-class MaterialProperties;
 
 // libMesh forward declarations
 namespace libMesh
 {
 class QBase;
+class Elem;
 }
 
 /**

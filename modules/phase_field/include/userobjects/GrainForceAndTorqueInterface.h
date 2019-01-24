@@ -12,6 +12,13 @@
 
 #include "MooseObject.h"
 
+namespace libMesh
+{
+template <typename>
+class VectorValue;
+typedef VectorValue<Real> RealGradient;
+}
+
 /**
  * This class provides interface for extracting the forces and torques computed in other UserObjects
  */

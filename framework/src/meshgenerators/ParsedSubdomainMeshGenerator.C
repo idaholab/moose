@@ -13,6 +13,7 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/fparser_ad.hh"
+#include "libmesh/elem.h"
 
 registerMooseObject("MooseApp", ParsedSubdomainMeshGenerator);
 

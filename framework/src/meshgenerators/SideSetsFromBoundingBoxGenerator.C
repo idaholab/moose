@@ -14,6 +14,7 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/elem.h"
 
 #include <typeinfo>
 

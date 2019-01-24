@@ -18,6 +18,9 @@ template <typename>
 class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
 class FEType;
+class Elem;
+class Node;
+class Point;
 }
 
 namespace Moose
