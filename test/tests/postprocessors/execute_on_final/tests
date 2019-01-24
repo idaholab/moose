@@ -1,5 +1,5 @@
 [Tests]
-  issue = '#9923'
+  issues = '#9923'
   design = 'VectorPostprocessors/index.md Outputs/index.md'
   [execute_on_final]
     type = CSVDiff
