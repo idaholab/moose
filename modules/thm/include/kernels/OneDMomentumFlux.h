@@ -2,7 +2,7 @@
 #define ONEDMOMENTUMFLUX_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDMomentumFlux;
 
@@ -12,7 +12,7 @@ InputParameters validParams<OneDMomentumFlux>();
 /**
  * Momentum flux
  */
-class OneDMomentumFlux : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDMomentumFlux : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDMomentumFlux(const InputParameters & parameters);

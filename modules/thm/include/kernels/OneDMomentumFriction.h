@@ -2,7 +2,7 @@
 #define ONEDMOMENTUMFRICTION_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDMomentumFriction;
 
@@ -14,7 +14,7 @@ InputParameters validParams<OneDMomentumFriction>();
  *
  * See RELAP-7 Theory Manual, pg. 71, Equation (230) {eq:wall_friction_force_2phase}
  */
-class OneDMomentumFriction : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDMomentumFriction : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDMomentumFriction(const InputParameters & parameters);

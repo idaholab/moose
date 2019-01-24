@@ -20,18 +20,18 @@ validParams<OneDMomentumAreaGradient>()
 }
 
 OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
     _alpha(getMaterialProperty<Real>("alpha")),
-    _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta")
+    _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("alpha", "beta")
                                     : nullptr),
 
     _area_grad(coupledGradient("A")),
     _dir(getMaterialProperty<RealVectorValue>("direction")),
     _pressure(getMaterialProperty<Real>("p")),
-    _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
-    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoA")),
-    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "arhouA")),
-    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoEA")),
+    _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("p", "beta") : nullptr),
+    _dp_darhoA(getMaterialPropertyDerivativeTHM<Real>("p", "arhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeTHM<Real>("p", "arhouA")),
+    _dp_darhoEA(getMaterialPropertyDerivativeTHM<Real>("p", "arhoEA")),
 
     _arhoA_var_number(coupled("arhoA")),
     _arhoE_var_number(coupled("arhoEA")),

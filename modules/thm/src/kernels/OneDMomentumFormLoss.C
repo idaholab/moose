@@ -27,30 +27,30 @@ validParams<OneDMomentumFormLoss>()
 }
 
 OneDMomentumFormLoss::OneDMomentumFormLoss(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
 
     _A(coupledValue("A")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
-    _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta")
+    _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("alpha", "beta")
                                     : nullptr),
 
     _rho(getMaterialProperty<Real>("rho")),
-    _drho_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("rho", "beta")
+    _drho_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("rho", "beta")
                                   : nullptr),
-    _drho_darhoA(getMaterialPropertyDerivativeRelap<Real>("rho", "arhoA")),
+    _drho_darhoA(getMaterialPropertyDerivativeTHM<Real>("rho", "arhoA")),
 
     _vel(getMaterialProperty<Real>("vel")),
-    _dvel_darhoA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhoA")),
-    _dvel_darhouA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhouA")),
+    _dvel_darhoA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhoA")),
+    _dvel_darhouA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhouA")),
 
     _mult(getMaterialProperty<Real>("2phase_multiplier")),
     _dmult_dbeta(isCoupled("beta")
-                     ? &getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "beta")
+                     ? &getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "beta")
                      : nullptr),
-    _dmult_darhoA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhoA")),
-    _dmult_darhouA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhouA")),
-    _dmult_darhoEA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhoEA")),
+    _dmult_darhoA(getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "arhoA")),
+    _dmult_darhouA(getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "arhouA")),
+    _dmult_darhoEA(getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "arhoEA")),
 
     _K_prime(getFunction("K_prime")),
 

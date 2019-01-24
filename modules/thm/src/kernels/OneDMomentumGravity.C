@@ -24,17 +24,17 @@ validParams<OneDMomentumGravity>()
 }
 
 OneDMomentumGravity::OneDMomentumGravity(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
     _has_beta(isCoupled("beta")),
 
     _A(coupledValue("A")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
-    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr),
+    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeTHM<Real>("alpha", "beta") : nullptr),
 
     _rho(getMaterialProperty<Real>("rho")),
-    _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("rho", "beta") : nullptr),
-    _drho_darhoA(getMaterialPropertyDerivativeRelap<Real>("rho", "arhoA")),
+    _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeTHM<Real>("rho", "beta") : nullptr),
+    _drho_darhoA(getMaterialPropertyDerivativeTHM<Real>("rho", "arhoA")),
 
     _dir(getMaterialProperty<RealVectorValue>("direction")),
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),

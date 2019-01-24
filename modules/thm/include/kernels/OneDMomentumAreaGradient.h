@@ -2,7 +2,7 @@
 #define ONEDMOMENTUMAREAGRADIENT_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDMomentumAreaGradient;
 
@@ -17,7 +17,7 @@ InputParameters validParams<OneDMomentumAreaGradient>();
  *   p_k \alpha_k \frac{\partial A}{\partial x} .
  * \f]
  */
-class OneDMomentumAreaGradient : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDMomentumAreaGradient : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDMomentumAreaGradient(const InputParameters & parameters);

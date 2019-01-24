@@ -2,7 +2,7 @@
 #define ONEDMOMENTUMFORMLOSS_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDMomentumFormLoss;
 class Function;
@@ -16,7 +16,7 @@ InputParameters validParams<OneDMomentumFormLoss>();
  *
  * See RELAP-7 Theory Manual, pg. 72, Equation (239) {eq:form_loss_force_2phase}
  */
-class OneDMomentumFormLoss : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDMomentumFormLoss : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDMomentumFormLoss(const InputParameters & parameters);

@@ -2,7 +2,7 @@
 #define ONEDMOMENTUMGRAVITY_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDMomentumGravity;
 
@@ -12,7 +12,7 @@ InputParameters validParams<OneDMomentumGravity>();
 /**
  * Computes gravity term for the momentum equation
  */
-class OneDMomentumGravity : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDMomentumGravity : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDMomentumGravity(const InputParameters & parameters);

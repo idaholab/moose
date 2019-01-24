@@ -19,27 +19,26 @@ validParams<OneDMomentumFriction>()
 }
 
 OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
     _A(coupledValue("A")),
 
     _vel(getMaterialProperty<Real>("vel")),
-    _dvel_darhoA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhoA")),
-    _dvel_darhouA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhouA")),
+    _dvel_darhoA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhoA")),
+    _dvel_darhouA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhouA")),
 
     _Cw(getMaterialProperty<Real>("Cw")),
-    _dCw_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("Cw", "beta")
-                                 : nullptr),
-    _dCw_darhoA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhoA")),
-    _dCw_darhouA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhouA")),
-    _dCw_darhoEA(getMaterialPropertyDerivativeRelap<Real>("Cw", "arhoEA")),
+    _dCw_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("Cw", "beta") : nullptr),
+    _dCw_darhoA(getMaterialPropertyDerivativeTHM<Real>("Cw", "arhoA")),
+    _dCw_darhouA(getMaterialPropertyDerivativeTHM<Real>("Cw", "arhouA")),
+    _dCw_darhoEA(getMaterialPropertyDerivativeTHM<Real>("Cw", "arhoEA")),
 
     _mult(getMaterialProperty<Real>("2phase_multiplier")),
     _dmult_dbeta(isCoupled("beta")
-                     ? &getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "beta")
+                     ? &getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "beta")
                      : nullptr),
-    _dmult_darhoA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhoA")),
-    _dmult_darhouA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhouA")),
-    _dmult_darhoEA(getMaterialPropertyDerivativeRelap<Real>("2phase_multiplier", "arhoEA")),
+    _dmult_darhoA(getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "arhoA")),
+    _dmult_darhouA(getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "arhouA")),
+    _dmult_darhoEA(getMaterialPropertyDerivativeTHM<Real>("2phase_multiplier", "arhoEA")),
 
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
     _arhoA_var_number(coupled("arhoA")),
