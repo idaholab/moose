@@ -396,16 +396,17 @@ Exodus::output(const ExecFlagType & type)
   // Reset the mesh changed flag
   _exodus_mesh_changed = false;
 
-  // Remove empty files
-  // Because of the ability to control when different items output independently (i.e.,
-  // "execute_on_input") it is possible to create an empty file if the solve stops early, such as
-  // the case when --half-transient is used. Thus, to avoid having empty files laying around the
-  // following cleans them up. It is not possible to know if anything will be output to the file
-  // prior to attempting. A long story short, an exodus file with only info records doesn't write
-  // correctly. Deleting the file here actually doesn't fix this problem, but it seems like poor
-  // form to leave empty files around.
+  // It is possible to have an empty file created with the following scenario. By default the
+  // 'execute_on_input' flag is setup to run on INITIAL. If the 'execute_on' is set to FINAL
+  // but the simulation stops early (e.g., --half-transient) the Exodus file is created but there
+  // is no data in it, because of the initial call to write the input data seems to create the file
+  // but doesn't actually write the data into the solution/mesh is also supplied to the IO object.
+  // Then if --recover is used this empty file fails to open for appending.
+  //
+  // The code below will delete any empty files that exist. Another solution is to set the
+  // 'execute_on_input' flag to NONE.
   std::string current = filename();
-  if (processor_id() == 0 && MooseUtils::checkFileReadable(current) &&
+  if (processor_id() == 0 && MooseUtils::checkFileReadable(current, false, false) &&
       (MooseUtils::fileSize(current) == 0))
   {
     int err = std::remove(current.c_str());
