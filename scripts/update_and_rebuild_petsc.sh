@@ -25,9 +25,9 @@ echo $SCRIPT_DIR
 # Display help
 if [[ -n "$help" ]]; then
   cd $SCRIPT_DIR/..
-  echo "Usage: $0 [-h | --help | --fast | --skip-submodule-update | <libmesh options> ]"
+  echo "Usage: $0 [-h | --help | --fast | --skip-submodule-update | <PETSc options> ]"
   echo
-  echo "-h | --help              Display this message and list of available libmesh options"
+  echo "-h | --help              Display this message and list of available PETSc options"
   echo "--fast                   Run PETSc 'make all' only, do NOT run configure"
   echo "--skip-submodule-update  Do not update the PETSc submodule, use the current version"
   echo "*************************************************************************************"
@@ -93,6 +93,7 @@ if [ -z "$go_fast" ]; then
       -FCFLAGS='-fPIC -fopenmp' \
       -F90FLAGS='-fPIC -fopenmp' \
       -F77FLAGS='-fPIC -fopenmp' \
+      $* \
 
    make all
 else
