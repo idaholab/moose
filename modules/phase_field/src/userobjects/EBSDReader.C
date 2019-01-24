@@ -269,11 +269,15 @@ EBSDReader::indexFromPoint(const Point & p) const
 
   x_index = (unsigned int)((p(0) - _minx) / _dx);
   y_index = (unsigned int)((p(1) - _miny) / _dy);
-
+  if (p(0) <= _minx || p(0) >= _maxx || p(1) <= _miny || p(1) >= _maxy)
+    mooseError("Data points must be on the interior of the mesh elements. In EBSDReader ", name());
   if (_mesh_dimension == 3)
   {
     z_index = (unsigned int)((p(2) - _minz) / _dz);
     global_index = z_index * _ny;
+    if (p(2) <= _minz || p(2) >= _maxz)
+      mooseError("Data points must be on the interior of the mesh elements. In EBSDReader ",
+                 name());
   }
   else
     global_index = 0;
