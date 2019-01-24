@@ -2,7 +2,7 @@
 #define ONEDENERGYGRAVITY_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDEnergyGravity;
 
@@ -12,7 +12,7 @@ InputParameters validParams<OneDEnergyGravity>();
 /**
  * Computes gravity term for the energy equation
  */
-class OneDEnergyGravity : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDEnergyGravity : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDEnergyGravity(const InputParameters & parameters);

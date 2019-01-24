@@ -2,7 +2,7 @@
 #define ONEDENERGYFLUX_H
 
 #include "Kernel.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class OneDEnergyFlux;
 
@@ -12,7 +12,7 @@ InputParameters validParams<OneDEnergyFlux>();
 /**
  * Energy flux
  */
-class OneDEnergyFlux : public DerivativeMaterialInterfaceRelap<Kernel>
+class OneDEnergyFlux : public DerivativeMaterialInterfaceTHM<Kernel>
 {
 public:
   OneDEnergyFlux(const InputParameters & parameters);

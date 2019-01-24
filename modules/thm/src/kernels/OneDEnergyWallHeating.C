@@ -20,11 +20,11 @@ validParams<OneDEnergyWallHeating>()
 }
 
 OneDEnergyWallHeating::OneDEnergyWallHeating(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
     _temperature(getMaterialProperty<Real>("T")),
-    _dT_drhoA(getMaterialPropertyDerivativeRelap<Real>("T", "rhoA")),
-    _dT_drhouA(getMaterialPropertyDerivativeRelap<Real>("T", "rhouA")),
-    _dT_drhoEA(getMaterialPropertyDerivativeRelap<Real>("T", "rhoEA")),
+    _dT_drhoA(getMaterialPropertyDerivativeTHM<Real>("T", "rhoA")),
+    _dT_drhouA(getMaterialPropertyDerivativeTHM<Real>("T", "rhouA")),
+    _dT_drhoEA(getMaterialPropertyDerivativeTHM<Real>("T", "rhoEA")),
     _Hw(coupledValue("Hw")),
     _T_wall(coupledValue("T_wall")),
     _P_hf(coupledValue("P_hf")),

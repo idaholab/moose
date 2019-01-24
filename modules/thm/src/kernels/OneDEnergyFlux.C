@@ -27,7 +27,7 @@ validParams<OneDEnergyFlux>()
 }
 
 OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
 
     _has_beta(isCoupled("beta")),
 
@@ -36,26 +36,26 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
     _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
-    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr),
+    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeTHM<Real>("alpha", "beta") : nullptr),
 
     _rho(getMaterialProperty<Real>("rho")),
-    _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("rho", "beta") : nullptr),
-    _drho_darhoA(getMaterialPropertyDerivativeRelap<Real>("rho", "arhoA")),
+    _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeTHM<Real>("rho", "beta") : nullptr),
+    _drho_darhoA(getMaterialPropertyDerivativeTHM<Real>("rho", "arhoA")),
 
     _vel(getMaterialProperty<Real>("vel")),
-    _dvel_darhoA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhoA")),
-    _dvel_darhouA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhouA")),
+    _dvel_darhoA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhoA")),
+    _dvel_darhouA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhouA")),
 
     _e(getMaterialProperty<Real>("e")),
-    _de_darhoA(getMaterialPropertyDerivativeRelap<Real>("e", "arhoA")),
-    _de_darhouA(getMaterialPropertyDerivativeRelap<Real>("e", "arhouA")),
-    _de_darhoEA(getMaterialPropertyDerivativeRelap<Real>("e", "arhoEA")),
+    _de_darhoA(getMaterialPropertyDerivativeTHM<Real>("e", "arhoA")),
+    _de_darhouA(getMaterialPropertyDerivativeTHM<Real>("e", "arhouA")),
+    _de_darhoEA(getMaterialPropertyDerivativeTHM<Real>("e", "arhoEA")),
 
     _p(getMaterialProperty<Real>("p")),
-    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
-    _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoA")),
-    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("p", "arhouA")),
-    _dp_darhoEA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoEA")),
+    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeTHM<Real>("p", "beta") : nullptr),
+    _dp_darhoA(getMaterialPropertyDerivativeTHM<Real>("p", "arhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeTHM<Real>("p", "arhouA")),
+    _dp_darhoEA(getMaterialPropertyDerivativeTHM<Real>("p", "arhoEA")),
 
     _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
     _arhoA_var_number(coupled("arhoA")),

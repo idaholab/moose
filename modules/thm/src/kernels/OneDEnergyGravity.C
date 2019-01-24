@@ -26,21 +26,21 @@ validParams<OneDEnergyGravity>()
 }
 
 OneDEnergyGravity::OneDEnergyGravity(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Kernel>(parameters),
+  : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
     _has_beta(isCoupled("beta")),
 
     _A(coupledValue("A")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
-    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr),
+    _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeTHM<Real>("alpha", "beta") : nullptr),
 
     _rho(getMaterialProperty<Real>("rho")),
-    _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("rho", "beta") : nullptr),
-    _drho_darhoA(getMaterialPropertyDerivativeRelap<Real>("rho", "arhoA")),
+    _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeTHM<Real>("rho", "beta") : nullptr),
+    _drho_darhoA(getMaterialPropertyDerivativeTHM<Real>("rho", "arhoA")),
 
     _vel(getMaterialProperty<Real>("vel")),
-    _dvel_darhoA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhoA")),
-    _dvel_darhouA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhouA")),
+    _dvel_darhoA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhoA")),
+    _dvel_darhouA(getMaterialPropertyDerivativeTHM<Real>("vel", "arhouA")),
 
     _dir(getMaterialProperty<RealVectorValue>("direction")),
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
