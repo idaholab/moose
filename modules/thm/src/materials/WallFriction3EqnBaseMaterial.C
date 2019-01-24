@@ -20,12 +20,12 @@ validParams<WallFriction3EqnBaseMaterial>()
 }
 
 WallFriction3EqnBaseMaterial::WallFriction3EqnBaseMaterial(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Material>(parameters),
+  : DerivativeMaterialInterfaceTHM<Material>(parameters),
     _Cw_name(getParam<MaterialPropertyName>("Cw")),
     _Cw(declareProperty<Real>(_Cw_name)),
-    _dCw_drhoA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhoA")),
-    _dCw_drhouA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhouA")),
-    _dCw_drhoEA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhoEA")),
+    _dCw_drhoA(declarePropertyDerivativeTHM<Real>(_Cw_name, "rhoA")),
+    _dCw_drhouA(declarePropertyDerivativeTHM<Real>(_Cw_name, "rhouA")),
+    _dCw_drhoEA(declarePropertyDerivativeTHM<Real>(_Cw_name, "rhoEA")),
 
     _mu(getMaterialProperty<Real>("mu")),
     _rho(coupledValue("rho")),

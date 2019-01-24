@@ -2,7 +2,7 @@
 #define WALLFRICTION3EQNBASEMATERIAL_H
 
 #include "Material.h"
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class WallFriction3EqnBaseMaterial;
 
@@ -12,7 +12,7 @@ InputParameters validParams<WallFriction3EqnBaseMaterial>();
 /**
  * Base class for computing wall friction coefficient for 1-phase flow
  */
-class WallFriction3EqnBaseMaterial : public DerivativeMaterialInterfaceRelap<Material>
+class WallFriction3EqnBaseMaterial : public DerivativeMaterialInterfaceTHM<Material>
 {
 public:
   WallFriction3EqnBaseMaterial(const InputParameters & parameters);
