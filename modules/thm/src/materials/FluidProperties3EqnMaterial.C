@@ -21,46 +21,46 @@ validParams<FluidProperties3EqnMaterial>()
 }
 
 FluidProperties3EqnMaterial::FluidProperties3EqnMaterial(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Material>(parameters),
+  : DerivativeMaterialInterfaceTHM<Material>(parameters),
     _area(coupledValue("A")),
     _rhoA(coupledValue("rhoA")),
     _rhouA(coupledValue("rhouA")),
     _rhoEA(coupledValue("rhoEA")),
 
     _rho(declareProperty<Real>("rho")),
-    _drho_drhoA(declarePropertyDerivativeRelap<Real>("rho", "rhoA")),
+    _drho_drhoA(declarePropertyDerivativeTHM<Real>("rho", "rhoA")),
 
     _v(declareProperty<Real>("v")),
-    _dv_drhoA(declarePropertyDerivativeRelap<Real>("v", "rhoA")),
+    _dv_drhoA(declarePropertyDerivativeTHM<Real>("v", "rhoA")),
 
     _vel(declareProperty<Real>("vel")),
-    _dvel_drhoA(declarePropertyDerivativeRelap<Real>("vel", "rhoA")),
-    _dvel_drhouA(declarePropertyDerivativeRelap<Real>("vel", "rhouA")),
+    _dvel_drhoA(declarePropertyDerivativeTHM<Real>("vel", "rhoA")),
+    _dvel_drhouA(declarePropertyDerivativeTHM<Real>("vel", "rhouA")),
 
     _e(declareProperty<Real>("e")),
-    _de_drhoA(declarePropertyDerivativeRelap<Real>("e", "rhoA")),
-    _de_drhouA(declarePropertyDerivativeRelap<Real>("e", "rhouA")),
-    _de_drhoEA(declarePropertyDerivativeRelap<Real>("e", "rhoEA")),
+    _de_drhoA(declarePropertyDerivativeTHM<Real>("e", "rhoA")),
+    _de_drhouA(declarePropertyDerivativeTHM<Real>("e", "rhouA")),
+    _de_drhoEA(declarePropertyDerivativeTHM<Real>("e", "rhoEA")),
 
     _p(declareProperty<Real>("p")),
-    _dp_drhoA(declarePropertyDerivativeRelap<Real>("p", "rhoA")),
-    _dp_drhouA(declarePropertyDerivativeRelap<Real>("p", "rhouA")),
-    _dp_drhoEA(declarePropertyDerivativeRelap<Real>("p", "rhoEA")),
+    _dp_drhoA(declarePropertyDerivativeTHM<Real>("p", "rhoA")),
+    _dp_drhouA(declarePropertyDerivativeTHM<Real>("p", "rhouA")),
+    _dp_drhoEA(declarePropertyDerivativeTHM<Real>("p", "rhoEA")),
 
     _T(declareProperty<Real>("T")),
-    _dT_drhoA(declarePropertyDerivativeRelap<Real>("T", "rhoA")),
-    _dT_drhouA(declarePropertyDerivativeRelap<Real>("T", "rhouA")),
-    _dT_drhoEA(declarePropertyDerivativeRelap<Real>("T", "rhoEA")),
+    _dT_drhoA(declarePropertyDerivativeTHM<Real>("T", "rhoA")),
+    _dT_drhouA(declarePropertyDerivativeTHM<Real>("T", "rhouA")),
+    _dT_drhoEA(declarePropertyDerivativeTHM<Real>("T", "rhoEA")),
 
     _h(declareProperty<Real>("h")),
-    _dh_drhoA(declarePropertyDerivativeRelap<Real>("h", "rhoA")),
-    _dh_drhouA(declarePropertyDerivativeRelap<Real>("h", "rhouA")),
-    _dh_drhoEA(declarePropertyDerivativeRelap<Real>("h", "rhoEA")),
+    _dh_drhoA(declarePropertyDerivativeTHM<Real>("h", "rhoA")),
+    _dh_drhouA(declarePropertyDerivativeTHM<Real>("h", "rhouA")),
+    _dh_drhoEA(declarePropertyDerivativeTHM<Real>("h", "rhoEA")),
 
     _H(declareProperty<Real>("H")),
-    _dH_drhoA(declarePropertyDerivativeRelap<Real>("H", "rhoA")),
-    _dH_drhouA(declarePropertyDerivativeRelap<Real>("H", "rhouA")),
-    _dH_drhoEA(declarePropertyDerivativeRelap<Real>("H", "rhoEA")),
+    _dH_drhoA(declarePropertyDerivativeTHM<Real>("H", "rhoA")),
+    _dH_drhouA(declarePropertyDerivativeTHM<Real>("H", "rhouA")),
+    _dH_drhoEA(declarePropertyDerivativeTHM<Real>("H", "rhoEA")),
 
     _c(declareProperty<Real>("c")),
 

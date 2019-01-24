@@ -1,7 +1,7 @@
 #ifndef FLUIDPROPERTIESVUMATERIAL_H
 #define FLUIDPROPERTIESVUMATERIAL_H
 
-#include "DerivativeMaterialInterfaceRelap.h"
+#include "DerivativeMaterialInterfaceTHM.h"
 
 class FluidProperties3EqnMaterial;
 class SinglePhaseFluidProperties;
@@ -12,7 +12,7 @@ InputParameters validParams<FluidProperties3EqnMaterial>();
 /**
  * Computes velocity and thermodynamic variables from solution variables for 1-phase flow.
  */
-class FluidProperties3EqnMaterial : public DerivativeMaterialInterfaceRelap<Material>
+class FluidProperties3EqnMaterial : public DerivativeMaterialInterfaceTHM<Material>
 {
 public:
   FluidProperties3EqnMaterial(const InputParameters & parameters);
