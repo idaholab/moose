@@ -260,10 +260,8 @@ Exodus::outputNodalVariables()
     _exodus_io_ptr->write_timestep_discontinuous(
         filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
   else
-  {
     _exodus_io_ptr->write_timestep(
         filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
-  }
 
   if (!_overwrite)
     _exodus_num++;
