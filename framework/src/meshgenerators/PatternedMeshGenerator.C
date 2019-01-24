@@ -16,6 +16,7 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_tools.h"
+#include "MooseMeshUtils.h"
 
 registerMooseObject("MooseApp", PatternedMeshGenerator);
 
@@ -34,7 +35,6 @@ validParams<PatternedMeshGenerator>()
       "z_width", 0, "z_width>=0", "The tile width in the z direction");
 
   // Boundaries : user has to provide id or name for each boundary
-  // If an id is provided, any provided name for this particular boundary will be ignored.
 
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left", "name of the left (x) boundary");
