@@ -17,6 +17,7 @@
 #include "libmesh/bounding_box.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/point.h"
+#include "MooseMeshUtils.h"
 
 #include <typeinfo>
 
@@ -97,16 +98,17 @@ StackGenerator::generate()
       mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in ", _dim, "D.");
   }
 
-  boundary_id_type first =
-      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
-  boundary_id_type second =
-      mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
-
+  // Getting the boundaries provided by the user
+  std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("top_boundary"),
+                                              getParam<BoundaryName>("bottom_boundary")};
   if (dim == 3)
-  {
-    first = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("front_boundary"));
-    second = mesh->get_boundary_info().get_id_by_name(getParam<BoundaryName>("back_boundary"));
-  }
+    boundary_names = {getParam<BoundaryName>("front_boundary"),
+                      getParam<BoundaryName>("back_boundary")};
+
+  std::vector<boundary_id_type> ids =
+      MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
+
+  boundary_id_type first = ids[0], second = ids[1];
 
   // Getting the width of each mesh
   std::vector<Real> heights;
