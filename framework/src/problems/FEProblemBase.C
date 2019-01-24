@@ -4261,10 +4261,10 @@ FEProblemBase::solve()
                  << Console::outputNorm(std::numeric_limits<Real>::max(), picard_initial_norm)
                  << '\n';
 
-        for (unsigned int i = 1; i <= picard_it; ++i)
+        for (unsigned int i = 0; i <= picard_it; ++i)
         {
           Real max_norm = std::max(picard_timestep_begin_norm[i], picard_timestep_end_norm[i]);
-          _console << std::setw(2) << i
+          _console << std::setw(2) << i + 1
                    << " Picard |R| = " << Console::outputNorm(picard_initial_norm, max_norm)
                    << '\n';
         }
