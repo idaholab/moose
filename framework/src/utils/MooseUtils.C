@@ -830,6 +830,16 @@ clearSymlink(const std::string & link)
       mooseError("Failed to remove symbolic link (via 'unlink') to ", link);
   }
 }
+
+std::size_t
+fileSize(const std::string & filename)
+{
+  struct stat buffer;
+  if (stat(filename.c_str(), &buffer))
+    return 0;
+
+  return buffer.st_size;
+}
 } // MooseUtils namespace
 
 std::string

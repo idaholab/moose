@@ -146,7 +146,7 @@ public:
   void clear();
 
   /**
-   * Return the number of items in the MultiMooseEnum
+   * Return the number of active items in the MultiMooseEnum
    */
   unsigned int size() const;
 
