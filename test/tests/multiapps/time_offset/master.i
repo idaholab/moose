@@ -41,8 +41,6 @@
   num_steps = 10
   dt = 0.2
 
-  solve_type = 'PJFNK'
-
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -53,10 +51,8 @@
 
 [MultiApps]
   [./sub_app]
-    positions = '0 0 0'
     type = TransientMultiApp
     input_files = 'sub.i'
-    app_type = MooseTestApp
-    start_time = 0.8
+    global_time_offset = 0.8
   [../]
 []

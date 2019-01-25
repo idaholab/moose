@@ -112,11 +112,11 @@ validParams<MultiApp>()
       false,
       "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
 
-  params.addParam<Real>(
-      "start_time",
-      0,
-      "The start time of the application in terms of the global time. When this parameter is "
-      "non-zero. The global time will be ahead by the offset specified here.");
+  params.addParam<Real>("global_time_offset",
+                        0,
+                        "The time offset relative to the master application for the purpose of "
+                        "starting a subapp at different time from the master application. The "
+                        "global time will be ahead by the offset specified here.");
   params.addParam<Real>("reset_time",
                         std::numeric_limits<Real>::max(),
                         "The time at which to reset Apps given by the 'reset_apps' parameter.  "
@@ -178,7 +178,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _bounding_box_padding(getParam<Point>("bounding_box_padding")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
-    _start_time(getParam<Real>("start_time")),
+    _global_time_offset(getParam<Real>("global_time_offset")),
     _reset_time(getParam<Real>("reset_time")),
     _reset_apps(getParam<std::vector<unsigned int>>("reset_apps")),
     _reset_happened(false),
@@ -235,7 +235,7 @@ MultiApp::initialSetup()
         _app_type, getParam<std::string>("library_path"), getParam<std::string>("library_name"));
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
-    createApp(i, _start_time);
+    createApp(i, _global_time_offset);
 }
 
 void

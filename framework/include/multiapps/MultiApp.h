@@ -391,7 +391,7 @@ protected:
   bool _output_in_position;
 
   /// The offset time so the MultiApp local time relative to the global time
-  const Real _start_time;
+  const Real _global_time_offset;
 
   /// The time at which to reset apps
   Real _reset_time;
