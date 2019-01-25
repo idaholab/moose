@@ -15,14 +15,22 @@
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
 
-#define usingKernelMembers                                                                         \
-  using ADDGKernel<compute_stage>::_test;                                                            \
-  using ADDGKernel<compute_stage>::_qp;                                                              \
-  using ADDGKernel<compute_stage>::_i;                                                               \
-  using ADDGKernel<compute_stage>::_u;                                                               \
-  using ADDGKernel<compute_stage>::_var;                                                             \
-  using ADDGKernel<compute_stage>::_grad_test;                                                       \
-  using ADDGKernel<compute_stage>::_grad_u
+#define usingKernelMembers                               \
+  using ADDGKernel<compute_stage>::_test;                \
+  using ADDGKernel<compute_stage>::_qp;                  \
+  using ADDGKernel<compute_stage>::_i;                    \
+  using ADDGKernel<compute_stage>::_u;                    \
+  using ADDGKernel<compute_stage>::_var;                  \
+  using ADDGKernel<compute_stage>::_grad_test;            \
+  using ADDGKernel<compute_stage>::_grad_u;               \
+  using ADDGKernel<compute_stage>::_current_elem;         \
+  using ADDGKernel<compute_stage>::_current_side_elem;    \
+  using ADDGKernel<compute_stage>::_normals;              \
+  using ADDGKernel<compute_stage>::_grad_u_neighbor;      \
+  using ADDGKernel<compute_stage>::_u_neighbor;           \
+  using ADDGKernel<compute_stage>::_test_neighbor;        \
+  using ADDGKernel<compute_stage>::_grad_test_neighbor;
+
 
 template <ComputeStage compute_stage>
 class ADDGKernel;
@@ -60,6 +68,12 @@ protected:
 
   /// Holds the solution gradient at the current quadrature points
   const ADVariableGradient & _grad_u;
+
+  /// Holds the current solution at the current quadrature point
+  const ADVariableValue & _u_neighbor;
+
+  /// Holds the current solution gradient at the current quadrature point
+  const ADVariableGradient & _grad_u_neighbor;
 };
 
 #endif /* ADDGKERNEL_H */

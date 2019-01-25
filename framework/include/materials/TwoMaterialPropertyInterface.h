@@ -19,6 +19,8 @@ class TwoMaterialPropertyInterface;
 template <>
 InputParameters validParams<TwoMaterialPropertyInterface>();
 
+#define adGetNeighborMaterialProperty this->template getNeighborMaterialProperty
+
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
 public:

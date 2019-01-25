@@ -108,6 +108,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_ad_kernel",                ADKernel,               false);
   appendMooseObjectTask  ("add_ad_kernel",                ADVectorKernel);
+  registerMooseObjectTask("add_ad_dg_kernel",             ADDGKernel,             false);
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
@@ -299,7 +300,7 @@ addActionTypes(Syntax & syntax)
       "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                    // to be after material objects are created.
       "(add_aux_kernel, add_bc, add_ad_bc, add_damper, add_dirac_kernel, add_kernel,"
-      " add_ad_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel,"
+      " add_ad_kernel, add_nodal_kernel, add_dg_kernel, add_ad_dg_kernel, add_interface_kernel,"
       " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
       "(add_control)"
       "(check_output)"
@@ -390,6 +391,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
   registerSyntaxTask("AddADKernelAction", "ADKernels/*", "add_ad_kernel");
+  registerSyntaxTask("AddADDGKernelAction", "ADDGKernels/*", "add_ad_dg_kernel");
 
   registerSyntaxTask("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
   registerSyntaxTask("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");

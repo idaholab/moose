@@ -44,6 +44,9 @@ public:
   void flagDoingAD();
 
 protected:
+  /// Type base
+  std::string _base_type;
+
   /// The Object type that is being created
   std::string _type;
 

@@ -28,10 +28,6 @@ void
 AddADKernelAction::act()
 {
   flagDoingAD();
-  _problem->addKernel(_type, _name, _moose_object_pars);
-  std::string to_erase = "<RESIDUAL>";
-  std::string::size_type match = _type.find(to_erase);
-  if (match != std::string::npos)
-    _type.erase(match, to_erase.length());
-  _problem->addKernel(_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
+  _problem->addKernel(_base_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
+  _problem->addKernel(_base_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
 }
