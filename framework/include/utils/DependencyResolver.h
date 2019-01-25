@@ -246,7 +246,7 @@ DependencyResolver<T>::deleteDependency(const T & key, const T & value)
   // We don't want to remove every entry in the multimap with this key. We need to find the exact
   // entry (e.g. the key/value pair).
   auto eq_range = _depends.equal_range(key);
-  for (typename std::multimap<T, T>::iterator it = eq_range.first; it != eq_range.second; ++it)
+  for (auto it = eq_range.first; it != eq_range.second; ++it)
     if (*it == k)
     {
       _depends.erase(it);
@@ -275,8 +275,7 @@ void
 DependencyResolver<T>::deleteDependenciesOfKey(const T & key)
 {
   auto eq_range = _depends.equal_range(key);
-  for (typename std::multimap<T, T>::iterator it = eq_range.first; it != eq_range.second; ++it)
-    _depends.erase(it);
+  _depends.erase(eq_range.first, eq_range.second);
 }
 
 template <typename T>
@@ -418,8 +417,7 @@ DependencyResolver<T>::getSortedValuesSets()
     {
 
       /* If the last set difference was empty but there are still items that haven't come out then
-       * there is
-       * a cyclic dependency somewhere in the map
+       * there is a cyclic dependency somewhere in the map.
        */
       if (!depends.empty())
       {
@@ -470,9 +468,8 @@ DependencyResolver<T>::dependsOn(const T & key, const T & value)
     return true;
 
   // recursively call dependsOn on all the things that key depends on
-  std::pair<typename std::multimap<T, T>::iterator, typename std::multimap<T, T>::iterator> ret;
-  ret = _depends.equal_range(key);
-  for (typename std::multimap<T, T>::iterator it = ret.first; it != ret.second; ++it)
+  auto ret = _depends.equal_range(key);
+  for (auto it = ret.first; it != ret.second; ++it)
     if (dependsOn(it->second, value))
       return true;
 
@@ -499,10 +496,9 @@ DependencyResolver<T>::getValues(const T & key)
 {
   _values_vector.clear();
 
-  std::pair<typename std::multimap<T, T>::iterator, typename std::multimap<T, T>::iterator> ret;
-  ret = _depends.equal_range(key);
+  auto ret = _depends.equal_range(key);
 
-  for (typename std::multimap<T, T>::iterator it = ret.first; it != ret.second; ++it)
+  for (auto it = ret.first; it != ret.second; ++it)
     _values_vector.push_back(it->second);
 
   return _values_vector;
@@ -515,10 +511,8 @@ DependencyResolver<T>::operator()(const T & a, const T & b)
   if (_ordered_items_vector.empty())
     getSortedValues();
 
-  typename std::vector<T>::const_iterator a_it =
-      std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), a);
-  typename std::vector<T>::const_iterator b_it =
-      std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), b);
+  auto a_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), a);
+  auto b_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), b);
 
   /**
    * It's possible that a and/or b are not in the resolver in which case
