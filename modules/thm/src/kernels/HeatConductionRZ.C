@@ -1,6 +1,6 @@
 #include "HeatConductionRZ.h"
 
-registerMooseObject("RELAP7App", HeatConductionRZ);
+registerMooseObject("THMApp", HeatConductionRZ);
 
 template <>
 InputParameters

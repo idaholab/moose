@@ -1,6 +1,6 @@
 #include "HeatConductionTimeDerivativeRZ.h"
 
-registerMooseObject("RELAP7App", HeatConductionTimeDerivativeRZ);
+registerMooseObject("THMApp", HeatConductionTimeDerivativeRZ);
 
 template <>
 InputParameters

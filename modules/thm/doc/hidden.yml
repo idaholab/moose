@@ -1,3 +1,5 @@
+- /Kernels/HeatConductionRZ
+- /Kernels/HeatConductionTimeDerivativeRZ
 - /Kernels/OneDEnergyFlux
 - /Kernels/OneDEnergyGravity
 - /Kernels/OneDEnergyHeatSource
@@ -6,5 +8,10 @@
 - /Kernels/OneDHeatForcingFunction
 - /Kernels/OneDHeatForcingFunctionRZ
 - /Kernels/OneDMassFlux
+- /Kernels/OneDMomentumAreaGradient
+- /Kernels/OneDMomentumFlux
+- /Kernels/OneDMomentumFormLoss
+- /Kernels/OneDMomentumFriction
+- /Kernels/OneDMomentumGravity
 
 - /Materials/DerivativeMaterialInterfaceTHM

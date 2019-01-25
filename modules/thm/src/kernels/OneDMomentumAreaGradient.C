@@ -1,6 +1,6 @@
 #include "OneDMomentumAreaGradient.h"
 
-registerMooseObject("RELAP7App", OneDMomentumAreaGradient);
+registerMooseObject("THMApp", OneDMomentumAreaGradient);
 
 template <>
 InputParameters

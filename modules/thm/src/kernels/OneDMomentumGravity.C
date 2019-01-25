@@ -1,6 +1,6 @@
 #include "OneDMomentumGravity.h"
 
-registerMooseObject("RELAP7App", OneDMomentumGravity);
+registerMooseObject("THMApp", OneDMomentumGravity);
 
 template <>
 InputParameters

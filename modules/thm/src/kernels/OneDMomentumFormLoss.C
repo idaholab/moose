@@ -1,7 +1,7 @@
 #include "OneDMomentumFormLoss.h"
 #include "Function.h"
 
-registerMooseObject("RELAP7App", OneDMomentumFormLoss);
+registerMooseObject("THMApp", OneDMomentumFormLoss);
 
 template <>
 InputParameters
