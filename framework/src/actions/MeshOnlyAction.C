@@ -66,7 +66,6 @@ MeshOnlyAction::act()
   // that behavior here.
   if (mesh_file.find(".e") + 2 == mesh_file.size())
   {
-    //    mooseAssert(_app.hasOutputWarehouse(), "Output warehouse should exist in MeshOnlyAction");
     std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>();
     if (ptrs.size() > 1)
       mooseError(
