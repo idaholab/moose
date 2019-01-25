@@ -198,6 +198,12 @@ Exodus::outputSetup()
     _exodus_num = 1;
   }
 
+  setOutputDimensionInExodusWriter(*_exodus_io_ptr, _es_ptr->get_mesh());
+}
+
+void
+Exodus::setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io, const MeshBase & mesh)
+{
   switch (_output_dimension)
   {
     case 0: // default
@@ -210,8 +216,8 @@ Exodus::outputSetup()
       // not be visualized correctly.  Note: the mesh_dimension() should
       // get changed back to 1 the next time MeshBase::prepare_for_use()
       // is called.
-      if (_es_ptr->get_mesh().spatial_dimension() == 1)
-        _exodus_io_ptr->write_as_dimension(3);
+      if (mesh.spatial_dimension() == 1)
+        exodus_io.write_as_dimension(3);
 
       // If the spatial_dimension is 2 (again, only possible in recent
       // versions of libmesh), then we need to be careful as this mesh
@@ -223,28 +229,27 @@ Exodus::outputSetup()
       // particular case, we force writing with num_dim==3.  Note: the
       // humor of writing a mesh of 1D elements which lives in 2D space
       // as num_dim==3 is not lost on me.
-      if (_es_ptr->get_mesh().spatial_dimension() == 2 && _es_ptr->get_mesh().mesh_dimension() == 1)
-        _exodus_io_ptr->write_as_dimension(3);
+      if (mesh.spatial_dimension() == 2 && mesh.mesh_dimension() == 1)
+        exodus_io.write_as_dimension(3);
 
       // Utilize the spatial dimension.  This value of this flag is
       // superseded by the value passed to write_as_dimension(), if any.
-      if (_es_ptr->get_mesh().mesh_dimension() != 1)
-        _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
-
+      if (mesh.mesh_dimension() != 1)
+        exodus_io.use_mesh_dimension_instead_of_spatial_dimension(true);
       break;
 
     case 1:
     case 2:
     case 3:
-      _exodus_io_ptr->write_as_dimension((int)_output_dimension);
+      exodus_io.write_as_dimension(static_cast<int>(_output_dimension));
       break;
 
     case 4: // problem_dimension
-      _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
+      exodus_io.use_mesh_dimension_instead_of_spatial_dimension(true);
       break;
 
     default:
-      mooseError("Unknown output_dimension");
+      ::mooseError("Unknown output_dimension in Exodus writer");
   }
 }
 

@@ -11,6 +11,7 @@
 
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "Exodus.h"
 #include "libmesh/exodusII_io.h"
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
@@ -65,8 +66,17 @@ MeshOnlyAction::act()
   // that behavior here.
   if (mesh_file.find(".e") + 2 == mesh_file.size())
   {
+    //    mooseAssert(_app.hasOutputWarehouse(), "Output warehouse should exist in MeshOnlyAction");
+    std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>();
+    if (ptrs.size() > 1)
+      mooseError(
+          "MeshOnlyOutput is currently only designed to work with a single Exodus Output object");
+
     ExodusII_IO exio(mesh_ptr->getMesh());
-    if (mesh_ptr->getMesh().mesh_dimension() != 1)
+
+    if (ptrs.size() == 1)
+      ptrs[0]->setOutputDimensionInExodusWriter(exio, mesh_ptr->getMesh());
+    else if (mesh_ptr->getMesh().mesh_dimension() != 1)
       exio.use_mesh_dimension_instead_of_spatial_dimension(true);
 
     exio.write(mesh_file);

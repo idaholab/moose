@@ -65,6 +65,18 @@ public:
   void insertDependency(const T & key, const T & value);
 
   /**
+   * Delete a dependency (only the edge) between items in the resolver. If either item is orphaned
+   * due to the deletion of the edge, the items are inserted into the independent items set so they
+   * will still come out when running the resolver.
+   */
+  void deleteDependency(const T & key, const T & value);
+
+  /**
+   * Removes dependencies of the given key. Does not fixup the graph or change indpendent items.
+   */
+  void deleteDependenciesOfKey(const T & key);
+
+  /**
    * Add an independent item to the set
    */
   void addItem(const T & value);
@@ -217,11 +229,54 @@ DependencyResolver<T>::insertDependency(const T & key, const T & value)
     throw CyclicDependencyException<T>(
         "DependencyResolver: attempt to insert dependency will result in cyclic graph", _depends);
   }
-  _depends.insert(std::make_pair(key, value));
+  _depends.insert(k);
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), key) == _ordering_vector.end())
     _ordering_vector.push_back(key);
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
     _ordering_vector.push_back(value);
+}
+
+template <typename T>
+void
+DependencyResolver<T>::deleteDependency(const T & key, const T & value)
+{
+  std::pair<const int, int> k = std::make_pair(key, value);
+  _unique_deps.erase(k);
+
+  // We don't want to remove every entry in the multimap with this key. We need to find the exact
+  // entry (e.g. the key/value pair).
+  auto eq_range = _depends.equal_range(key);
+  for (typename std::multimap<T, T>::iterator it = eq_range.first; it != eq_range.second; ++it)
+    if (*it == k)
+    {
+      _depends.erase(it);
+      break;
+    }
+
+  // Now that we've removed the dependency, we need to see if either one of the items is orphaned.
+  // If it is, we'll need to add those items to the independent set.
+  if (_depends.find(key) == _depends.end())
+    addItem(key);
+
+  bool found = false;
+  for (auto pair_it : _depends)
+    if (pair_it.second == value)
+    {
+      found = true;
+      break;
+    }
+
+  if (!found)
+    addItem(value);
+}
+
+template <typename T>
+void
+DependencyResolver<T>::deleteDependenciesOfKey(const T & key)
+{
+  auto eq_range = _depends.equal_range(key);
+  for (typename std::multimap<T, T>::iterator it = eq_range.first; it != eq_range.second; ++it)
+    _depends.erase(it);
 }
 
 template <typename T>
