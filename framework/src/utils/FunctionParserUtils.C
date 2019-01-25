@@ -109,7 +109,7 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
 {
   // check constant vectors
   unsigned int nconst = constant_expressions.size();
-  if (nconst != constant_expressions.size())
+  if (nconst != constant_names.size())
     mooseError("The parameter vectors constant_names and constant_values must have equal length.");
 
   // previously evaluated constant_expressions may be used in following constant_expressions

@@ -15,6 +15,8 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_modification.h"
+#include "libmesh/mesh_tools.h"
+#include "MooseMeshUtils.h"
 
 registerMooseObject("MooseApp", PatternedMeshGenerator);
 
@@ -33,7 +35,6 @@ validParams<PatternedMeshGenerator>()
       "z_width", 0, "z_width>=0", "The tile width in the z direction");
 
   // Boundaries : user has to provide id or name for each boundary
-  // If an id is provided, any provided name for this particular boundary will be ignored.
 
   // x boundary names
   params.addParam<BoundaryName>("left_boundary", "left", "name of the left (x) boundary");
@@ -42,14 +43,6 @@ validParams<PatternedMeshGenerator>()
   // y boundary names
   params.addParam<BoundaryName>("top_boundary", "top", "name of the top (y) boundary");
   params.addParam<BoundaryName>("bottom_boundary", "bottom", "name of the bottom (y) boundary");
-
-  // x boundary ids
-  params.addParam<boundary_id_type>("left_boundary_id", "id of the left (x) boundary");
-  params.addParam<boundary_id_type>("right_boundary_id", "id of the right (x) boundary");
-
-  // y boundary ids
-  params.addParam<boundary_id_type>("top_boundary_id", "name of the top (y) boundary");
-  params.addParam<boundary_id_type>("bottom_boundary_id", "name of the bottom (y) boundary");
 
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
       "pattern", "A double-indexed array starting with the upper-left corner");
@@ -88,25 +81,16 @@ PatternedMeshGenerator::generate()
   // Data structure that holds each row
   _row_meshes.resize(_pattern.size());
 
-  // Trying to get the boundaries by name
-  boundary_id_type left =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("left_boundary"));
-  boundary_id_type right =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("right_boundary"));
-  boundary_id_type top =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("top_boundary"));
-  boundary_id_type bottom =
-      _meshes[0]->get_boundary_info().get_id_by_name(getParam<BoundaryName>("bottom_boundary"));
+  // Getting the boundaries provided by the user
+  std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("left_boundary"),
+                                              getParam<BoundaryName>("right_boundary"),
+                                              getParam<BoundaryName>("top_boundary"),
+                                              getParam<BoundaryName>("bottom_boundary")};
 
-  // For each boundary, check if the user provided an id
-  if (isParamValid("left_boundary_id"))
-    left = getParam<boundary_id_type>("left_boundary_id");
-  if (isParamValid("right_boundary_id"))
-    right = getParam<boundary_id_type>("right_boundary_id");
-  if (isParamValid("top_boundary_id"))
-    top = getParam<boundary_id_type>("top_boundary_id");
-  if (isParamValid("bottom_boundary_id"))
-    bottom = getParam<boundary_id_type>("bottom_boundary_id");
+  std::vector<boundary_id_type> ids =
+      MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
+
+  boundary_id_type left = ids[0], right = ids[1], top = ids[2], bottom = ids[3];
 
   // Check if all the boundaries have been initialized
   if (left == -123)
@@ -117,6 +101,16 @@ PatternedMeshGenerator::generate()
     mooseError("The top boundary has not been initialized properly.");
   if (bottom == -123)
     mooseError("The bottom boundary has not been initialized properly.");
+
+  // Check if the user has provided the x, y and z widths.
+  // If not (their value is 0 by default), compute them
+  auto bbox = MeshTools::create_bounding_box(*_meshes[0]);
+  if (_x_width == 0)
+    _x_width = bbox.max()(0) - bbox.min()(0);
+  if (_y_width == 0)
+    _y_width = bbox.max()(1) - bbox.min()(1);
+  if (_z_width == 0)
+    _z_width = bbox.max()(2) - bbox.min()(2);
 
   // Build each row mesh
   for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)

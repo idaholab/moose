@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#9923'
+  design = 'VectorPostprocessors/index.md Outputs/index.md'
+  [execute_on_final]
+    type = CSVDiff
+    input = execute_on_final.i
+    csvdiff = 'execute_on_final_out.csv execute_on_final_on_final.csv'
+    requirement = "Postprocessor objects shall be able to execute and output after the simulation is complete."
+  []
+[]
