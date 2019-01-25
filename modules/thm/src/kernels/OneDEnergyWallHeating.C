@@ -1,6 +1,6 @@
 #include "OneDEnergyWallHeating.h"
 
-registerMooseObject("RELAP7App", OneDEnergyWallHeating);
+registerMooseObject("THMApp", OneDEnergyWallHeating);
 
 template <>
 InputParameters

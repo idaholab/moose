@@ -1,6 +1,6 @@
 #include "OneDEnergyGravity.h"
 
-registerMooseObject("RELAP7App", OneDEnergyGravity);
+registerMooseObject("THMApp", OneDEnergyGravity);
 
 template <>
 InputParameters

@@ -1,7 +1,7 @@
 #include "OneDEnergyHeatSource.h"
 #include "Function.h"
 
-registerMooseObject("RELAP7App", OneDEnergyHeatSource);
+registerMooseObject("THMApp", OneDEnergyHeatSource);
 
 template <>
 InputParameters

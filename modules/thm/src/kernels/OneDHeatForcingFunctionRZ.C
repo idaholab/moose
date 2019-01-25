@@ -1,6 +1,6 @@
 #include "OneDHeatForcingFunctionRZ.h"
 
-registerMooseObject("RELAP7App", OneDHeatForcingFunctionRZ);
+registerMooseObject("THMApp", OneDHeatForcingFunctionRZ);
 
 template <>
 InputParameters
