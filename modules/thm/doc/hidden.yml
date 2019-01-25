@@ -1,3 +1,10 @@
+- /Kernels/OneDEnergyFlux
+- /Kernels/OneDEnergyGravity
+- /Kernels/OneDEnergyHeatSource
+- /Kernels/OneDEnergyWallHeatFlux
+- /Kernels/OneDEnergyWallHeating
+- /Kernels/OneDHeatForcingFunction
+- /Kernels/OneDHeatForcingFunctionRZ
 - /Kernels/OneDMassFlux
 
 - /Materials/DerivativeMaterialInterfaceTHM
