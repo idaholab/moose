@@ -72,45 +72,51 @@ class CSVTools:
 
     def getParamValues(self, param, param_line):
         """ return a list of discovered values for param """
-        return re.findall(param + "\s+([0-9e.-]+)", param_line)
+        return re.findall(param + "\s+([0-9e.\-\+]+)", param_line)
 
     def parseComparisonFile(self, config_file):
         """ Walk through comparison file and populate/return a dictionary as best we can """
         # A set of known paramater naming conventions. The comparison file can have these set, and we will use them.
         zero_params = set(['floor', 'abs_zero', 'absolute'])
-        tollerance_params = set(['relative', 'rel_tol'])
-        custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : [] }
+        tolerance_params = set(['relative', 'rel_tol'])
+        custom_params = {'RELATIVE' : 0.0, 'ZERO' : 0.0, 'FIELDS' : {} }
 
         config_file.seek(0)
         for a_line in config_file:
             s_line = a_line.strip()
+            words = set(a_line.split())
 
-            # Ignore commented lines, and lines begining with TIME STEPS (possible future CSVdiff capability)
-            if s_line.startswith("#") or s_line.lower().find('time steps') == 0:
+            # Ignore this line if commented, is the 'time steps' header, or contains logical nots
+            if s_line and \
+               (s_line.startswith("#") \
+                or s_line.lower().find('time steps') == 0 \
+                or s_line[0] == "!"):
                 continue
 
-            words = set(a_line.split())
-            if a_line and (words.intersection(tollerance_params) or
-                          words.intersection(zero_params)):
-                try:
-                    for value in words.intersection(tollerance_params):
-                        custom_params['RELATIVE'] = self.getParamValues(value, a_line)[0]
+            field_key = re.findall(r'^\s+(\S+)', a_line)
+            if field_key:
+                custom_params['FIELDS'][field_key[0]] = {}
 
-                    for value in words.intersection(zero_params):
-                        custom_params['ZERO'] = self.getParamValues(value, a_line)[0]
+            # Capture invalid/empty paramater key values
+            try:
+                # Possible global header containing floor params
+                if not re.match(r'^\s', a_line) and words.intersection(zero_params):
+                    custom_params['ZERO'] = self.getParamValues(words.intersection(zero_params).pop(), a_line)[0]
 
-                except IndexError:
-                    self.addError(config_file, "Error parsing comparison file. Field: '%s' has no value\n\n\t%s" % (value, a_line))
+                # Possible global header containing tolerance params
+                if not re.match(r'^\s', a_line) and words.intersection(tolerance_params):
+                    custom_params['RELATIVE'] = self.getParamValues(words.intersection(tolerance_params).pop(), a_line)[0]
 
-            # A line starting with a white-space character, with a possible tollerance value
-            elif a_line and (re.findall(r'\s', a_line[0]) and len(words) >= 2):
-                field = a_line.split()[0]
-                try:
-                    val = float(a_line.split()[1])
-                except ValueError:
-                    val = custom_params['RELATIVE']
+                # Possible field containing floor params
+                if field_key and words.intersection(zero_params):
+                    custom_params['FIELDS'][field_key[0]]['ZERO'] = self.getParamValues(words.intersection(zero_params).pop(), a_line)[0]
 
-                custom_params['FIELDS'].append((field, val))
+                # Possible field containing tolerance params
+                if field_key and words.intersection(tolerance_params):
+                    custom_params['FIELDS'][field_key[0]]['RELATIVE'] = self.getParamValues(words.intersection(tolerance_params).pop(), a_line)[0]
+
+            except IndexError:
+                self.addError(config_file, "Error parsing comparison file on line: \n%s" % (a_line))
 
         return custom_params
 
@@ -182,7 +188,7 @@ class CSVDiffer(CSVTools):
         self.custom_columns = args.custom_columns
         self.custom_rel_err = args.custom_rel_err
         self.custom_abs_zero = args.custom_abs_zero
-        self.only_compare_custom = args.only_compare_custom
+        self.__only_compare_custom = False
 
     def __enter__(self):
         return self
@@ -198,13 +204,17 @@ class CSVDiffer(CSVTools):
     # This method should only be called once. If it called again you must
     # manually clear messages by calling clearDiff
     def diff(self):
+        abs_zero = self.abs_zero
+        rel_tol = self.rel_tol
 
         # Setup custom values based on supplied config file. Override any information
         # in self.custom_colums (indeed, verifyArgs will not allow both --custom and
         # --config to be used together anyway)
         if self.config:
-            self.only_compare_custom = True
+            self.__only_compare_custom = True
             custom_params = self.parseComparisonFile(self.config)
+            abs_zero = custom_params.get('ZERO', abs_zero)
+            rel_tol = custom_params.get('RELATIVE', rel_tol)
             if self.getNumErrors():
                 return self.getMessages()
 
@@ -212,10 +222,10 @@ class CSVDiffer(CSVTools):
             self.custom_rel_err = []
             self.custom_abs_zero = []
 
-            for field_id, value in custom_params['FIELDS']:
+            for field_id, value in custom_params['FIELDS'].iteritems():
                 self.custom_columns.append(field_id)
-                self.custom_abs_zero.append(custom_params['ZERO'])
-                self.custom_rel_err.append(value)
+                self.custom_abs_zero.append(value.get('ZERO', abs_zero))
+                self.custom_rel_err.append(value.get('RELATIVE', rel_tol))
 
         # Setup data structures for holding customized relative tolerance and absolute
         # zero values and flag for checking variable names
@@ -242,7 +252,7 @@ class CSVDiffer(CSVTools):
 
         # check if custom tolerances used, column name exists in one of
         # the CSV files
-        if self.custom_columns and self.only_compare_custom:
+        if self.custom_columns and self.__only_compare_custom:
             # For the rest of the comparison, we only care about custom columns
             keys1 = self.custom_columns
             for key in self.custom_columns:
@@ -275,8 +285,6 @@ class CSVDiffer(CSVTools):
             return self.getMessages()
 
         # now check all the values in the table
-        abs_zero = self.abs_zero
-        rel_tol = self.rel_tol
         for key in keys1:
             for val1, val2 in zip( table1[key], table2[key] ):
                 # if customized tolerances specified use them otherwise
@@ -326,7 +334,7 @@ class CSVDiffer(CSVTools):
 
         # Loop over variable names to check if any are missing from all the
         # CSV files being compared
-        if self.custom_columns and not self.only_compare_custom:
+        if self.custom_columns and not self.__only_compare_custom:
            for mykey2 in self.custom_columns:
                if not found_column[mykey2]:
                   self.addError(self.files[0], "all CSV files Variable '" + mykey2 + "' in custom_columns is missing" )
@@ -374,7 +382,6 @@ def parseArgs(args=None):
     parser.add_argument('--diff-fields', '-f', nargs='+', metavar='id', help='Perform diff tests only on space-separated field IDs')
     parser.add_argument('--abs-zero', metavar='absolute zero', default='1e-11', help='Value representing an absolute zero (default: 1e-11)')
     parser.add_argument('--relative-tolerance', metavar='tolerance', default='5.5e-6', help='Value representing the acceptable tolerance between comparisons (default: 5.5e-6)')
-    parser.add_argument('--only-compare-custom', action='store_const', const=True, default=False, help='If using --custom-* options, ignore every field except those specified in --custom-columns')
     parser.add_argument('--custom-columns', nargs='+', metavar='field', help='Space separated list of custom field IDs to compare')
     parser.add_argument('--custom-abs-zero', nargs='+', metavar='exponential', help='Space separated list of corresponding exponential absolute zero values for --custom-colums')
     parser.add_argument('--custom-rel-err', nargs='+', metavar='exponential', help='Space separated list of corresponding acceptable exponential tolerance values for --custom-colums')
