@@ -25,8 +25,8 @@ protected:
   const MaterialProperty<Real> & _dT_drhoA;
   const MaterialProperty<Real> & _dT_drhouA;
   const MaterialProperty<Real> & _dT_drhoEA;
+  const MaterialProperty<Real> & _Hw;
 
-  const VariableValue & _Hw;
   const VariableValue & _T_wall;
   const VariableValue & _P_hf;
 
