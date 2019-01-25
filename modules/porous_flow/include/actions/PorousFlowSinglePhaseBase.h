@@ -41,6 +41,10 @@ protected:
     ThermoHydroMechanical
   } _coupling_type;
 
+  /// Flags to indicate whether thermal or mechanical effects are included
+  const bool _thermal;
+  const bool _mechanical;
+
   /// Whether steady or transient simulation
   const enum class SimulationTypeChoiceEnum { STEADY, TRANSIENT } _simulation_type;
 

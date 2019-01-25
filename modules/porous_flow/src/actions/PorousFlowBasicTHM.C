@@ -58,8 +58,7 @@ PorousFlowBasicTHM::PorousFlowBasicTHM(const InputParameters & params)
   _objects_to_add.push_back("PorousFlowFullySaturatedDarcyBase");
   if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowFullySaturatedMassTimeDerivative");
-  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
+  if (_thermal)
     _objects_to_add.push_back("PorousFlowFullySaturatedHeatAdvection");
 }
 
@@ -93,9 +92,7 @@ PorousFlowBasicTHM::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _current_task == "add_kernel")
+  if (_thermal && _current_task == "add_kernel")
   {
     std::string kernel_name = "PorousFlowBasicTHM_HeatAdvection";
     std::string kernel_type = "PorousFlowFullySaturatedHeatAdvection";
@@ -131,8 +128,7 @@ PorousFlowBasicTHM::act()
 
   if ((_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
        _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal")) &&
-      (_coupling_type == CouplingTypeEnum::HydroMechanical ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
+      _mechanical)
     addVolumetricStrainMaterial(_coupled_displacements, false);
 
   if (_deps.dependsOn(_objects_to_add, "relative_permeability_qp"))

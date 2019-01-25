@@ -48,18 +48,13 @@ PorousFlowFullySaturated::PorousFlowFullySaturated(const InputParameters & param
   _objects_to_add.push_back("PorousFlowFullySaturatedDarcyFlow");
   if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowMassTimeDerivative");
-  if ((_coupling_type == CouplingTypeEnum::HydroMechanical ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+  if (_mechanical && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowMassVolumetricExpansion");
-  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
+  if (_thermal)
     _objects_to_add.push_back("PorousFlowFullySaturatedHeatAdvection");
   if (_stabilization == StabilizationEnum::KT)
     _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent");
-  if (_stabilization == StabilizationEnum::KT &&
-      (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
+  if (_stabilization == StabilizationEnum::KT && _thermal)
     _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorSaturatedHeat");
 }
 
@@ -134,9 +129,8 @@ PorousFlowFullySaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == CouplingTypeEnum::HydroMechanical ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+  if (_mechanical && _current_task == "add_kernel" &&
+      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
   {
     std::string kernel_name = "PorousFlowFullySaturated_MassVolumetricExpansion";
     std::string kernel_type = "PorousFlowMassVolumetricExpansion";
@@ -156,9 +150,7 @@ PorousFlowFullySaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _current_task == "add_kernel")
+  if (_thermal && _current_task == "add_kernel")
   {
     if (_stabilization == StabilizationEnum::Full)
     {
@@ -222,8 +214,7 @@ PorousFlowFullySaturated::act()
       addAdvectiveFluxCalculatorSaturatedMultiComponent(
           0, _num_mass_fraction_vars, true, userobject_name);
 
-    if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-        _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
+    if (_thermal)
     {
       const std::string userobject_name = "PorousFlowFullySaturatedHeat_AC";
       addAdvectiveFluxCalculatorSaturatedHeat(0, true, userobject_name);

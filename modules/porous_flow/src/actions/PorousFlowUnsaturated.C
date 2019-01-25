@@ -78,20 +78,15 @@ PorousFlowUnsaturated::PorousFlowUnsaturated(const InputParameters & params)
   _objects_to_add.push_back("PorousFlowAdvectiveFlux");
   if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowMassTimeDerivative");
-  if ((_coupling_type == CouplingTypeEnum::HydroMechanical ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+  if (_mechanical && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
     _objects_to_add.push_back("PorousFlowMassVolumetricExpansion");
-  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
+  if (_thermal)
     _objects_to_add.push_back("PorousFlowHeatAdvection");
   if (_add_saturation_aux)
     _objects_to_add.push_back("SaturationAux");
   if (_stabilization == StabilizationEnum::KT)
     _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent");
-  if (_stabilization == StabilizationEnum::KT &&
-      (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
+  if (_stabilization == StabilizationEnum::KT && _thermal)
     _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat");
 }
 
@@ -166,9 +161,8 @@ PorousFlowUnsaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == CouplingTypeEnum::HydroMechanical ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+  if (_mechanical && _current_task == "add_kernel" &&
+      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
   {
     std::string kernel_name = "PorousFlowUnsaturated_MassVolumetricExpansion";
     std::string kernel_type = "PorousFlowMassVolumetricExpansion";
@@ -188,9 +182,7 @@ PorousFlowUnsaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _current_task == "add_kernel")
+  if (_thermal && _current_task == "add_kernel")
   {
     if (_stabilization == StabilizationEnum::Full)
     {
@@ -279,8 +271,7 @@ PorousFlowUnsaturated::act()
       addAdvectiveFluxCalculatorUnsaturatedMultiComponent(
           0, _num_mass_fraction_vars, true, userobject_name);
 
-    if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-        _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
+    if (_thermal)
     {
       const std::string userobject_name = "PorousFlowUnsaturatedHeat_AC";
       addAdvectiveFluxCalculatorUnsaturatedHeat(0, true, userobject_name);
