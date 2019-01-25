@@ -154,7 +154,7 @@ protected:
   void reinit(const std::vector<DenseMatrix<Real>> & data);
 
   /// Map used to store the perturbed parameters and their corresponding distributions
-  std::vector<Distribution *> _distributions;
+  std::vector<Distribution const *> _distributions;
 
   /// Distribution names
   const std::vector<DistributionName> & _distribution_names;

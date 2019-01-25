@@ -34,29 +34,65 @@ TruncatedNormalDistribution::TruncatedNormalDistribution(const InputParameters &
 }
 
 Real
-TruncatedNormalDistribution::pdf(const Real & x)
+TruncatedNormalDistribution::pdf(const Real & x,
+                                 const Real & mean,
+                                 const Real & std_dev,
+                                 const Real & lower_bound,
+                                 const Real & upper_bound) const
 {
-  if (x <= _lower_bound || x >= _upper_bound)
+  if (x <= lower_bound || x >= upper_bound)
     return 0.0;
   else
-    return (NormalDistribution::pdf(x)) /
-           (NormalDistribution::cdf(_upper_bound) - NormalDistribution::cdf(_lower_bound));
+    return (NormalDistribution::pdf(x, mean, std_dev)) /
+           (NormalDistribution::cdf(upper_bound, mean, std_dev) -
+            NormalDistribution::cdf(lower_bound, mean, std_dev));
 }
 
 Real
-TruncatedNormalDistribution::cdf(const Real & x)
+TruncatedNormalDistribution::cdf(const Real & x,
+                                 const Real & mean,
+                                 const Real & std_dev,
+                                 const Real & lower_bound,
+                                 const Real & upper_bound) const
 {
-  if (x <= _lower_bound || x >= _upper_bound)
+
+  if (x <= lower_bound || x >= upper_bound)
     return 0.0;
   else
-    return (NormalDistribution::cdf(x) - NormalDistribution::cdf(_lower_bound)) /
-           (NormalDistribution::cdf(_upper_bound) - NormalDistribution::cdf(_lower_bound));
+    return (NormalDistribution::cdf(x, mean, std_dev) -
+            NormalDistribution::cdf(lower_bound, mean, std_dev)) /
+           (NormalDistribution::cdf(upper_bound, mean, std_dev) -
+            NormalDistribution::cdf(lower_bound, mean, std_dev));
 }
 
 Real
-TruncatedNormalDistribution::quantile(const Real & p)
+TruncatedNormalDistribution::quantile(const Real & p,
+                                      const Real & mean,
+                                      const Real & std_dev,
+                                      const Real & lower_bound,
+                                      const Real & upper_bound) const
 {
-  return NormalDistribution::quantile(
-      NormalDistribution::cdf(_lower_bound) +
-      p * (NormalDistribution::cdf(_upper_bound) - NormalDistribution::cdf(_lower_bound)));
+  return NormalDistribution::quantile(NormalDistribution::cdf(lower_bound, mean, std_dev) +
+                                          p * (NormalDistribution::cdf(upper_bound, mean, std_dev) -
+                                               NormalDistribution::cdf(lower_bound, mean, std_dev)),
+                                      mean,
+                                      std_dev);
+}
+
+Real
+TruncatedNormalDistribution::pdf(const Real & x) const
+{
+  return pdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
+}
+
+Real
+TruncatedNormalDistribution::cdf(const Real & x) const
+{
+  return cdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
+}
+
+Real
+TruncatedNormalDistribution::quantile(const Real & p) const
+{
+  return quantile(p, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }

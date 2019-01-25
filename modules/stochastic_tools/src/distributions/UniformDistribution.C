@@ -32,30 +32,50 @@ UniformDistribution::UniformDistribution(const InputParameters & parameters)
 }
 
 Real
-UniformDistribution::pdf(const Real & x)
+UniformDistribution::pdf(const Real & x, const Real & lower_bound, const Real & upper_bound) const
 {
-  if (x < _lower_bound || x > _upper_bound)
+  if (x < lower_bound || x > upper_bound)
     return 0.0;
   else
-    return 1.0 / (_upper_bound - _lower_bound);
+    return 1.0 / (upper_bound - lower_bound);
 }
 
 Real
-UniformDistribution::cdf(const Real & x)
+UniformDistribution::cdf(const Real & x, const Real & lower_bound, const Real & upper_bound) const
 {
-  if (x < _lower_bound)
+  if (x < lower_bound)
     return 0.0;
-  else if (x > _upper_bound)
+  else if (x > upper_bound)
     return 1.0;
   else
-    return (x - _lower_bound) / (_upper_bound - _lower_bound);
+    return (x - lower_bound) / (upper_bound - lower_bound);
 }
 
 Real
-UniformDistribution::quantile(const Real & y)
+UniformDistribution::quantile(const Real & y,
+                              const Real & lower_bound,
+                              const Real & upper_bound) const
 {
   if (y < 0 || y > 1)
     mooseError("The cdf_value provided is out of range 0 to 1.");
   else
-    return y * (_upper_bound - _lower_bound) + _lower_bound;
+    return y * (upper_bound - lower_bound) + lower_bound;
+}
+
+Real
+UniformDistribution::pdf(const Real & x) const
+{
+  return pdf(x, _lower_bound, _upper_bound);
+}
+
+Real
+UniformDistribution::cdf(const Real & x) const
+{
+  return cdf(x, _lower_bound, _upper_bound);
+}
+
+Real
+UniformDistribution::quantile(const Real & y) const
+{
+  return quantile(y, _lower_bound, _upper_bound);
 }

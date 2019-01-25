@@ -27,22 +27,22 @@ public:
   /**
    * Compute the probability with given probability distribution function (PDF) at x
    */
-  virtual Real pdf(const Real & x) = 0;
+  virtual Real pdf(const Real & x) const = 0;
 
   /**
    * Compute the cumulative probability with given cumulative probability distribution (CDF) at x
    */
-  virtual Real cdf(const Real & x) = 0;
+  virtual Real cdf(const Real & x) const = 0;
 
   /**
    * Compute the inverse CDF (quantile function) value for given variable value y
    */
-  virtual Real quantile(const Real & y) = 0;
+  virtual Real quantile(const Real & y) const = 0;
 
   /**
    * Compute the median of the distribution
    */
-  virtual Real median();
+  virtual Real median() const;
 };
 
 #endif /* DISTRIBUTION_H */
