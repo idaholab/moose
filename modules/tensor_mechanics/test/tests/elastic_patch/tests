@@ -110,19 +110,4 @@
              'ComputeFiniteStrainElasticStress.md'
     issues = '#620'
   [../]
-  [./elastic_patch_quadratic_Bbar]
-    type = Exodiff
-    input = 'elastic_patch_quadratic.i'
-    exodiff = 'elastic_patch_quadratic_out.e'
-    cli_args = 'GlobalParams/volumetric_locking_correction=true'
-    prereq = 'elastic_patch_quadratic'
-    requirement = 'The tensor mechanics module shall have the ability to '
-                  'compute spatially uniform stresses under prescribed '
-                  'linearly varying displacements on a set of irregular '
-                  '20-noded quadratic hexes when employing volumetric locking '
-                  'correction.'
-    design = 'ElasticEnergyAux.md ComputeIsotropicElasticityTensor.md '
-             'ComputeFiniteStrainElasticStress.md VolumetricLocking.md'
-    issues = '#620'
- [../]
 []

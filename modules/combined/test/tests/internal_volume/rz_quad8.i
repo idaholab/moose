@@ -44,7 +44,6 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    volumetric_locking_correction = true
     incremental = true
     strain = FINITE
   [../]
