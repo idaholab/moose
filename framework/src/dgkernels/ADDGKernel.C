@@ -81,7 +81,7 @@ ADDGKernel<compute_stage>::computeElemNeighJacobian(Moose::DGJacobianType type)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
     {
-      ADReal residual =
+      DualReal residual =
         computeADQpResidual((type == Moose::ElementElement || type == Moose::ElementNeighbor)? Moose::Element: Moose::Neighbor);
       for (_j = 0; _j < loc_phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
@@ -139,7 +139,7 @@ ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
     {
-     ADReal residual =
+     DualReal residual =
         computeADQpResidual((type == Moose::ElementElement || type == Moose::ElementNeighbor)? Moose::Element: Moose::Neighbor);
       for (_j = 0; _j < loc_phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp]  * residual.derivatives()[ad_offset + _j];

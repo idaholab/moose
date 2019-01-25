@@ -29,7 +29,7 @@
   using ADDGKernel<compute_stage>::_grad_u_neighbor;      \
   using ADDGKernel<compute_stage>::_u_neighbor;           \
   using ADDGKernel<compute_stage>::_test_neighbor;        \
-  using ADDGKernel<compute_stage>::_grad_test_neighbor;
+  using ADDGKernel<compute_stage>::_grad_test_neighbor
 
 
 template <ComputeStage compute_stage>
