@@ -1,0 +1,7 @@
+TIME STEPS relative 5.5e-06 floor 1e-11  # min: 0 @ t0  max: 0 @ t5
+
+GLOBAL VARIABLES relative 5.5e-06 floor 1e+01
+    z_field                    # min: 0.000e+00 @ t0          max: 4.025e-01 @ t5
+    x_field                    # min: 0.000e+00 @ t0          max: 1.103e-01 @ t5
+    y_field                    # min: 0.000e+00 @ t0          max: 2.262e-02 @ t5
+    time                       # min: 0.000e+00 @ t0          max: 5.000e-01 @ t5

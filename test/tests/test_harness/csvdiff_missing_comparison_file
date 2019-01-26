@@ -1,0 +1,12 @@
+[Tests]
+  design = 'CSVDiff.md'
+  issues = '#12683 #12687'
+  [./test_csvdiff_comparison_file_missing]
+    type = CSVDiff
+    input = csvdiff_comparison.i
+    csvdiff = csvdiff_comparison_out.csv
+    # comparison file does not exist
+    comparison_file = does_not_exist.cmp
+    requirement = 'TestHarness shall error in the event the comparison file is missing'
+  [../]
+[]

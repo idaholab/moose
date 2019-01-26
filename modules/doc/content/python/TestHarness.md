@@ -81,7 +81,7 @@ PYTHONPATH functions just as PATH does (semi-colon separate list of paths, for w
 Set the `METHOD` environment variable to one of the following to control which type of application binary to use:
 
 | Variable Name | Argument | Usage |
-| - | - | - |
+| :- | :- | :- |
 | METHOD | opt | TestHarness will use the binary built with optimizations while running tests: `your_appname-opt` (the default) |
 | METHOD | dbg | TestHarness will use the binary built with debugging symbols while running tests: `your_appname-dbg` |
 | METHOD | oprof | TestHarness will use the binary built with code profiling while running tests: `your_appname-oprof` |
@@ -96,7 +96,7 @@ The methods described here can also be controlled via command line arguments. Se
 Set `MOOSE_TERM_FORMAT` to any or all of the following, as well as in a particular order and case (restricted) to control where, what, and how the TestHarness prints that specific item:
 
 | Variable Name | Argument | Usage |
-| - | - | - |
+| :- | :- | :- |
 | MOOSE_TERM_FORMAT | c | Print caveats |
 | MOOSE_TERM_FORMAT | j | Print justification filler |
 | MOOSE_TERM_FORMAT | p | Print pre-formated status (10 character buffer fill) |
@@ -119,7 +119,7 @@ Caveats with the... caveats of MOOSE_TERM_FORMAT; When caveats are requested to 
 Set `MOOSE_TERM_COLS` to a positive integer, to set the available terminal column count to this amount:
 
 | Variable Name | Argument | Usage |
-| - | - | - |
+| :- | :- | :- |
 | MOOSE_TERM_COLS | (int) | Allow for this many columns when printing output |
 
 Example, if we set MOOSE_TERM_COLS to 50, we will restrict the default amount of columns the TestHarness normally uses while printing output:

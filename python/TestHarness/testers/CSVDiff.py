@@ -20,7 +20,6 @@ class CSVDiff(FileTester):
         params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
         params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
-        params.addParam('only_compare_custom', False, "Only compare (and require) the listed custom columns.")
         params.addParam('comparison_file', "Use supplied custom comparison config file.")
         params.addParam('rel_err', "A customized relative error tolerances.")
         params.addParam('abs_zero', "A customized relative error tolerances.")
@@ -45,7 +44,7 @@ class CSVDiff(FileTester):
         commands = []
 
         for file in self.specs['csvdiff']:
-            csvdiff = [os.path.join(moose_dir, 'python', 'csvdiff', 'csvdiff.py')]
+            csvdiff = [os.path.join(moose_dir, 'scripts', 'csvdiff.py')]
 
             # Due to required positional nargs with the ability to support custom positional args (--argument), we need to specify the required ones first
             csvdiff.append(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
@@ -57,7 +56,12 @@ class CSVDiff(FileTester):
                 csvdiff.append('--abs-zero %s' % (self.specs['abs_zero']))
 
             if self.specs.isValid('comparison_file'):
-                csvdiff.append('--comparison-file %s' % (self.specs['comparison_file']))
+                comparison_file = os.path.join(self.specs['test_dir'], self.specs['comparison_file'])
+                if os.path.exists(comparison_file):
+                    csvdiff.append('--comparison-file %s' % (comparison_file))
+                else:
+                    self.setStatus(self.fail, 'MISSING COMPARISON FILE')
+                    return commands
 
             if self.specs.isValid('override_columns'):
                 csvdiff.append('--custom-columns %s' % (' '.join(self.specs['override_columns'])))
@@ -67,9 +71,6 @@ class CSVDiff(FileTester):
 
             if self.specs.isValid('override_abs_zero'):
                 csvdiff.append('--custom-abs-zero %s' % (' '.join(self.specs['override_abs_zero'])))
-
-            if self.specs.isValid('only_compare_custom') and self.specs['only_compare_custom']:
-                csvdiff.append('--only-compare-custom')
 
             commands.append(' '.join(csvdiff))
 
