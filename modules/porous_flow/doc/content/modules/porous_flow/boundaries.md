@@ -38,6 +38,7 @@ This basic sink boundary condition is implemented in [`PorousFlowSink`](PorousFl
 The basic sink may be multiplied by a MOOSE Function of the pressure
 of a fluid phase *or* the temperature:
 \begin{equation}
+  \label{eq:s_f_g}
 s = f(t, x) \times g(P^{\beta} - P_{\mathrm{e}}) \ \ \ \textrm{or}\ \ \ s = f(t, x)
 \times g(T - T_{\mathrm{e}}) \ .
 \end{equation}
@@ -75,6 +76,8 @@ Dirichlet conditions is inappropriate.
   as it forces areas near the boundary close to unphysical or unlikely
   regions in parameter space.
 
+### Physical Intuition Behind PorousFlowSink
+
 It is advantageous to think of what the boundary condition
 is physically trying to represent before using Dirichlet conditions,
 and often a [`PorousFlowSink`](PorousFlowSink.md) is more appropriate to use.
@@ -94,7 +97,7 @@ environment.  The flux of fluid from the model to this environment is
 (approximately)
 \begin{equation}
   \label{eq:fix_pp_bc}
-  f = \frac{\rho k_{nn}
+  \frac{\rho k_{nn}
     k_{\mathrm{r}}}{\mu}\frac{P-P_{\mathrm{e}}}{L} \ .
 \end{equation}
 A similar equation holds for temperature (but in PorousFlow
@@ -108,10 +111,12 @@ porepressure is $P_{\mathrm{e}}$ and the boundary porepressure is
 $P$.
 
 If $L\sim 0$ this effectively fixes the porepressure to $P\sim
-P_{\mathrm{e}}$, since $f$ is very large otherwise (physically:
+P_{\mathrm{e}}$, since the flux is very large otherwise (physically:
 fluid is rapidly removed or added to the system by the environment to
 ensure $P=P_{\mathrm{e}}$).  If $L\sim\infty$ the boundary flux is
 almost zero and does nothing.
+
+### Numerical Implementation
 
 [eq:fix_pp_bc] may be implemented in a number of ways, the 2 most
 common being the following.
