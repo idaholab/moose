@@ -112,16 +112,7 @@ public:
    * which is called either directly from solveStep() for loose coupling cases
    * or through finishStep() for Picard coupling cases)
    */
-  virtual void incrementTStep() {}
-
-  /**
-   * Deprecated method. Use finishStep
-   */
-  virtual void advanceStep()
-  {
-    mooseDeprecated("advanceStep() is deprecated; please use finishStep() instead");
-    finishStep();
-  }
+  virtual void incrementTStep(Real /*target_time*/) {}
 
   /**
    * Calls multi-apps executioners' endStep and postStep methods which creates output and advances
@@ -398,6 +389,9 @@ protected:
 
   /// Whether or not to move the output of the MultiApp into position
   bool _output_in_position;
+
+  /// The offset time so the MultiApp local time relative to the global time
+  const Real _global_time_offset;
 
   /// The time at which to reset apps
   Real _reset_time;
