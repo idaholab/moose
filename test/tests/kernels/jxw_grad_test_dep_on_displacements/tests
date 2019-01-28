@@ -1,0 +1,21 @@
+[Tests]
+  [./jxw_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'not-handling-jxw.i'
+    ratio_tol = 2e-7
+    difference_tol = 1e-5
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements"
+  [../]
+  [./jxw_jacobian_2]
+    type = 'PetscJacobianTester'
+    input = 'not-handling-jxw.i'
+    ratio_tol = 2e-7
+    difference_tol = 1e-5
+    run_sim = True
+    petsc_version = '>=3.9'
+    cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4'
+    requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements"
+  [../]
+[]
