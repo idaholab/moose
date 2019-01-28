@@ -1540,7 +1540,7 @@ MooseApp::executeMeshGenerators()
     }
 
     // Prepare the final mesh
-    _final_generated_mesh->prepare_for_use();
+    //    _final_generated_mesh->prepare_for_use();
   }
 }
 
