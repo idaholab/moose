@@ -1,6 +1,6 @@
 #include "VariableProductIC.h"
 
-registerMooseObject("RELAP7App", VariableProductIC);
+registerMooseObject("THMApp", VariableProductIC);
 
 template <>
 InputParameters

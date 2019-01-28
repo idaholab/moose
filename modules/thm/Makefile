@@ -28,7 +28,7 @@ ALL_MODULES         := no
 
 CHEMICAL_REACTIONS  := no
 CONTACT             := no
-FLUID_PROPERTIES    := no
+FLUID_PROPERTIES    := yes
 HEAT_CONDUCTION     := yes
 MISC                := no
 NAVIER_STOKES       := no

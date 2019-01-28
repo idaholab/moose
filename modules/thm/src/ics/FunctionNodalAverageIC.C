@@ -1,7 +1,7 @@
 #include "FunctionNodalAverageIC.h"
 #include "Function.h"
 
-registerMooseObject("RELAP7App", FunctionNodalAverageIC);
+registerMooseObject("THMApp", FunctionNodalAverageIC);
 
 template <>
 InputParameters

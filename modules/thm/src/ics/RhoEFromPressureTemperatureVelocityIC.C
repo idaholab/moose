@@ -1,7 +1,7 @@
 #include "RhoEFromPressureTemperatureVelocityIC.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("RELAP7App", RhoEFromPressureTemperatureVelocityIC);
+registerMooseObject("THMApp", RhoEFromPressureTemperatureVelocityIC);
 
 template <>
 InputParameters

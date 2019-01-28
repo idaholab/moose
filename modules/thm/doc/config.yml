@@ -16,6 +16,7 @@ Extensions:
         executable: ${ROOT_DIR}
         hide:
             framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
+            fluid_properties: !include ${MOOSE_DIR}/modules/fluid_properties/doc/hidden.yml
             heat_conduction: !include ${MOOSE_DIR}/modules/heat_conduction/doc/hidden.yml
             thm: !include ${ROOT_DIR}/doc/hidden.yml
         includes:

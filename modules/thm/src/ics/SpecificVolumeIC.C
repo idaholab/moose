@@ -1,6 +1,6 @@
 #include "SpecificVolumeIC.h"
 
-registerMooseObject("RELAP7App", SpecificVolumeIC);
+registerMooseObject("THMApp", SpecificVolumeIC);
 
 template <>
 InputParameters
