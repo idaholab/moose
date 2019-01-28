@@ -27,6 +27,28 @@
     issues = "#10049"
     requirement = "MOOSE shall be able to solve multi-dimensional problems with LAGRANGE_VEC variables"
   [../]
+  [./ad_lagrange_vec]
+    type = Exodiff
+    input = 'ad_lagrange_vec.i'
+    exodiff = 'lagrange_vec_out.e'
+    abs_zero = 1e-7
+    design = "jacobian_definition.md ADLagrangeVecFunctionDirichletBC.md"
+    issues = "#5658"
+    requirement = "MOOSE shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and reproduce the hand-coded result"
+    prereq = 'lagrange_vec'
+    cli_args = 'Outputs/file_base=lagrange_vec_out'
+  [../]
+  [./ad_lagrange_vec_jacobian]
+    type = PetscJacobianTester
+    input = 'ad_lagrange_vec.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    run_sim = True
+    design = "jacobian_definition.md ADLagrangeVecFunctionDirichletBC.md"
+    issues = "#5658"
+    requirement = "MOOSE shall be able to solve multi-d LAGRANGE_VEC problems with automatic differentiation and have a perfect Jacobian"
+    cli_args = 'Mesh/nx=2 Mesh/ny=2'
+  [../]
   [./jacobian]
     type = PetscJacobianTester
     input = 'coupled_scalar_vector_jacobian.i'

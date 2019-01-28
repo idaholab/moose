@@ -17,11 +17,14 @@
   [../]
 []
 
-[Kernels]
+[ADKernels]
   [./diff]
-    type = VectorDiffusion
+    type = ADVectorDiffusion
     variable = u
   [../]
+[]
+
+[Kernels]
   [./body_force]
     type = VectorBodyForce
     variable = u
@@ -30,13 +33,12 @@
   [../]
 []
 
-[BCs]
+[ADBCs]
   [./bnd]
-    type = LagrangeVecFunctionDirichletBC
+    type = ADLagrangeVecFunctionDirichletBC
     variable = u
     x_exact_soln = 'x_exact_sln'
     y_exact_soln = 'y_exact_sln'
-    z_exact_soln = '0'
     boundary = 'left right top bottom'
   [../]
 []
@@ -68,6 +70,7 @@
 
 [Executioner]
   type = Steady
+  solve_type = 'NEWTON'
 []
 
 [Outputs]

@@ -55,7 +55,12 @@ declareADValidParams(ADVectorNodalBC);
 #define usingTemplNodalBCMembers(type)                                                             \
   using ADNodalBCTempl<type, compute_stage>::_u;                                                   \
   using ADNodalBCTempl<type, compute_stage>::_var;                                                 \
-  using ADNodalBCTempl<type, compute_stage>::_current_node
+  using ADNodalBCTempl<type, compute_stage>::_current_node;                                        \
+  using ADNodalBCTempl<type, compute_stage>::_t;                                                   \
+  using ADNodalBCTempl<type, compute_stage>::getFunction;                                          \
+  using ADNodalBCTempl<type, compute_stage>::variable;                                             \
+  using ADNodalBCTempl<type, compute_stage>::paramError;                                           \
+  using ADNodalBCTempl<type, compute_stage>::isParamValid
 
 #define usingNodalBCMembers usingTemplNodalBCMembers(Real)
 #define usingVectorNodalBCMembers usingTemplNodalBCMembers(RealVectorValue)
