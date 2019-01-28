@@ -40,7 +40,7 @@ public:
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
-  virtual void incrementTStep() override;
+  virtual void incrementTStep(Real target_time) override;
 
   virtual void finishStep() override;
 

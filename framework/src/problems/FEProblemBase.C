@@ -3608,7 +3608,7 @@ FEProblemBase::incrementMultiAppTStep(ExecFlagType type)
 
   if (multi_apps.size())
     for (const auto & multi_app : multi_apps)
-      multi_app->incrementTStep();
+      multi_app->incrementTStep(_time);
 }
 
 void
