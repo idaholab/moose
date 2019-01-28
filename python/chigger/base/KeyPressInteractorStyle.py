@@ -19,8 +19,6 @@ class KeyPressInteractorStyle(vtk.vtkInteractorStyleMultiTouchCamera):
         self.AddObserver("KeyPressEvent", self.keyPress)
         super(KeyPressInteractorStyle, self).__init__(parent, **kwargs)
 
-        self.SetMotionFactor(0.1*self.GetMotionFactor())
-
     def keyPress(self, obj, event): #pylint: disable=unused-argument
         """
         Executes when a key is pressed.
