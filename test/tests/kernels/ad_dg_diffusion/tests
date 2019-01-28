@@ -1,10 +1,10 @@
 [Tests]
   [./test]
     type = 'Exodiff'
-    input = 'ad_simple_diffusion.i'
-    exodiff = 'ad_simple_diffusion_out.e'
-    requirement = "Jacobian entries generated with AD for a simple diffusion problem shall be accurate"
-    design = "jacobian_definition.md ADDiffusion.md"
+    input = '2d_diffusion_ad_dg_test.i'
+    exodiff = '2d_diffusion_ad_dg_test_out.e'
+    requirement = "MOOSE should support AD in DG Kernels"
+    design = "jacobian_definition.md"
     issues = "#5658"
   [../]
 []

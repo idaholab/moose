@@ -30,7 +30,6 @@
 
   [./exact_fn]
     type = ParsedGradFunction
-
     value = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
@@ -43,7 +42,7 @@
     variable = u
   [../]
 
-  [./abs]
+  [./abs]          # u * v
     type = Reaction
     variable = u
   [../]
@@ -78,12 +77,13 @@
 [Executioner]
   type = Steady
 
-  solve_type = 'PJFNK'
-#  [./Adaptivity]
-#    steps = 2
-#    refine_fraction = 1.0
-#    coarsen_fraction = 0
-#  [../]
+  solve_type = 'NEWTON'
+  [./Adaptivity]
+    steps = 2
+    refine_fraction = 1.0
+    coarsen_fraction = 0
+    max_h_level = 8
+  [../]
 
   nl_rel_tol = 1e-10
 []
@@ -105,7 +105,6 @@
 []
 
 [Outputs]
-  file_base = out
   exodus = true
   csv = true
 []

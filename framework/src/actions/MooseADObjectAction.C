@@ -34,7 +34,7 @@ InputParameters validParams<MooseObject>();
 MooseADObjectAction::MooseADObjectAction(InputParameters params)
   : Action(params),
     _base_type(getParam<std::string>("type")),
-    _type(_base_type+"<RESIDUAL>"),
+    _type(_base_type + "<RESIDUAL>"),
     // We will create a second parameters object from the main factory unless instructed otherwise
     _moose_object_pars(!params.have_parameter<bool>("skip_param_construction") ||
                                (params.have_parameter<bool>("skip_param_construction") &&

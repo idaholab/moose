@@ -36,9 +36,9 @@ public:
 
 protected:
   virtual ADResidual computeADQpResidual(Moose::DGResidualType type) override;
-  virtual Real computeQpResidual(Moose::DGResidualType /*type*/) override { return 0.0;}
-  virtual Real computeQpJacobian(Moose::DGJacobianType /*type*/) override { return 0.0;}
-  //virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
+  virtual Real computeQpResidual(Moose::DGResidualType /*type*/) override { return 0.0; }
+  virtual Real computeQpJacobian(Moose::DGJacobianType /*type*/) override { return 0.0; }
+  // virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
   Real _epsilon;
   Real _sigma;

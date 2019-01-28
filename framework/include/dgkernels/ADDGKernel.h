@@ -15,22 +15,21 @@
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
 
-#define usingKernelMembers                               \
-  using ADDGKernel<compute_stage>::_test;                \
-  using ADDGKernel<compute_stage>::_qp;                  \
-  using ADDGKernel<compute_stage>::_i;                    \
-  using ADDGKernel<compute_stage>::_u;                    \
-  using ADDGKernel<compute_stage>::_var;                  \
-  using ADDGKernel<compute_stage>::_grad_test;            \
-  using ADDGKernel<compute_stage>::_grad_u;               \
-  using ADDGKernel<compute_stage>::_current_elem;         \
-  using ADDGKernel<compute_stage>::_current_side_elem;    \
-  using ADDGKernel<compute_stage>::_normals;              \
-  using ADDGKernel<compute_stage>::_grad_u_neighbor;      \
-  using ADDGKernel<compute_stage>::_u_neighbor;           \
-  using ADDGKernel<compute_stage>::_test_neighbor;        \
+#define usingKernelMembers                                                                         \
+  using ADDGKernel<compute_stage>::_test;                                                          \
+  using ADDGKernel<compute_stage>::_qp;                                                            \
+  using ADDGKernel<compute_stage>::_i;                                                             \
+  using ADDGKernel<compute_stage>::_u;                                                             \
+  using ADDGKernel<compute_stage>::_var;                                                           \
+  using ADDGKernel<compute_stage>::_grad_test;                                                     \
+  using ADDGKernel<compute_stage>::_grad_u;                                                        \
+  using ADDGKernel<compute_stage>::_current_elem;                                                  \
+  using ADDGKernel<compute_stage>::_current_side_elem;                                             \
+  using ADDGKernel<compute_stage>::_normals;                                                       \
+  using ADDGKernel<compute_stage>::_grad_u_neighbor;                                               \
+  using ADDGKernel<compute_stage>::_u_neighbor;                                                    \
+  using ADDGKernel<compute_stage>::_test_neighbor;                                                 \
   using ADDGKernel<compute_stage>::_grad_test_neighbor
-
 
 template <ComputeStage compute_stage>
 class ADDGKernel;
@@ -47,12 +46,15 @@ public:
 
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
+  virtual void computeElemNeighResidual(Moose::DGResidualType type) override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
   virtual void computeElemNeighJacobian(Moose::DGJacobianType type) override;
-  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar) override;
+  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
+                                               unsigned int jvar) override;
 
   virtual MooseVariable & variable() override { return _var; }
+
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADResidual computeADQpResidual(Moose::DGResidualType type) = 0;

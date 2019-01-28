@@ -16,14 +16,15 @@
 
 registerADMooseObject("MooseApp", ADDGDiffusion);
 
-defineADValidParams(
-    ADDGDiffusion,
-    ADDGKernel,
-    // See header file for sigma and epsilon
-    params.addRequiredParam<Real>("sigma", "sigma");
-    params.addRequiredParam<Real>("epsilon", "epsilon");
-    params.addParam<MaterialPropertyName>(
-        "diff", 1., "The diffusion (or thermal conductivity or viscosity) coefficient."););
+defineADValidParams(ADDGDiffusion,
+                    ADDGKernel,
+                    // See header file for sigma and epsilon
+                    params.addRequiredParam<Real>("sigma", "sigma");
+                    params.addRequiredParam<Real>("epsilon", "epsilon");
+                    params.addParam<MaterialPropertyName>(
+                        "diff",
+                        1.,
+                        "The diffusion (or thermal conductivity or viscosity) coefficient."););
 
 template <ComputeStage compute_stage>
 ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)
@@ -48,8 +49,9 @@ ADDGDiffusion<compute_stage>::computeADQpResidual(Moose::DGResidualType type)
   switch (type)
   {
     case Moose::Element:
-      r -= 0.5 * (_diff[_qp] * _grad_u[_qp] * _normals[_qp] +
-                  _diff_neighbor[_qp] * _grad_u_neighbor[_qp] * _normals[_qp]) *
+      r -= 0.5 *
+           (_diff[_qp] * _grad_u[_qp] * _normals[_qp] +
+            _diff_neighbor[_qp] * _grad_u_neighbor[_qp] * _normals[_qp]) *
            _test[_i][_qp];
       r += _epsilon * 0.5 * (_u[_qp] - _u_neighbor[_qp]) * _diff[_qp] * _grad_test[_i][_qp] *
            _normals[_qp];
@@ -57,8 +59,9 @@ ADDGDiffusion<compute_stage>::computeADQpResidual(Moose::DGResidualType type)
       break;
 
     case Moose::Neighbor:
-      r += 0.5 * (_diff[_qp] * _grad_u[_qp] * _normals[_qp] +
-                  _diff_neighbor[_qp] * _grad_u_neighbor[_qp] * _normals[_qp]) *
+      r += 0.5 *
+           (_diff[_qp] * _grad_u[_qp] * _normals[_qp] +
+            _diff_neighbor[_qp] * _grad_u_neighbor[_qp] * _normals[_qp]) *
            _test_neighbor[_i][_qp];
       r += _epsilon * 0.5 * (_u[_qp] - _u_neighbor[_qp]) * _diff_neighbor[_qp] *
            _grad_test_neighbor[_i][_qp] * _normals[_qp];

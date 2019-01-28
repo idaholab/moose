@@ -51,6 +51,46 @@ ADDGKernel<JACOBIAN>::computeResidual()
 
 template <ComputeStage compute_stage>
 void
+ADDGKernel<compute_stage>::computeElemNeighResidual(Moose::DGResidualType type)
+{
+  bool is_elem;
+  if (type == Moose::Element)
+    is_elem = true;
+  else
+    is_elem = false;
+
+  const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
+
+  if (is_elem)
+    prepareVectorTag(_assembly, _var.number());
+  else
+    prepareVectorTagNeighbor(_assembly, _var.number());
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeADQpResidual(type);
+
+  accumulateTaggedLocalResidual();
+
+  if (_has_save_in)
+  {
+    Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
+    for (const auto & var : _save_in)
+    {
+      std::vector<dof_id_type> & dof_indices =
+          is_elem ? var->dofIndices() : var->dofIndicesNeighbor();
+      var->sys().solution().add_vector(_local_re, dof_indices);
+    }
+  }
+}
+
+template <>
+void ADDGKernel<JACOBIAN>::computeElemNeighResidual(Moose::DGResidualType /*type*/)
+{
+}
+
+template <ComputeStage compute_stage>
+void
 ADDGKernel<compute_stage>::computeJacobian()
 {
   DGKernel::computeJacobian();
@@ -76,13 +116,19 @@ ADDGKernel<compute_stage>::computeElemNeighJacobian(Moose::DGJacobianType type)
   else
     prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), type);
 
-  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+  size_t ad_offset = 0;
+  if (type == Moose::ElementElement || type == Moose::NeighborElement)
+    ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+  else
+    ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem() +
+                (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
     {
-      DualReal residual =
-        computeADQpResidual((type == Moose::ElementElement || type == Moose::ElementNeighbor)? Moose::Element: Moose::Neighbor);
+      DualReal residual = computeADQpResidual(
+          (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? Moose::Element
+                                                                            : Moose::Neighbor);
       for (_j = 0; _j < loc_phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
     }
@@ -122,7 +168,8 @@ ADDGKernel<RESIDUAL>::computeOffDiagJacobian(unsigned int)
 
 template <ComputeStage compute_stage>
 void
-ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar)
+ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
+                                                           unsigned int jvar)
 {
   const VariableTestValue & test_space =
       (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
@@ -134,15 +181,21 @@ ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   else
     prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, type);
 
-  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+  size_t ad_offset = 0;
+  if (type == Moose::ElementElement || type == Moose::NeighborElement)
+    ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+  else
+    ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem() +
+                (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
     {
-     DualReal residual =
-        computeADQpResidual((type == Moose::ElementElement || type == Moose::ElementNeighbor)? Moose::Element: Moose::Neighbor);
+      DualReal residual = computeADQpResidual(
+          (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? Moose::Element
+                                                                            : Moose::Neighbor);
       for (_j = 0; _j < loc_phi.size(); _j++)
-        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp]  * residual.derivatives()[ad_offset + _j];
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * residual.derivatives()[ad_offset + _j];
     }
 
   accumulateTaggedLocalMatrix();
