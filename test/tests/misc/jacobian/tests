@@ -4,6 +4,9 @@
     input = simple.i
     expect_out = "\(0,0\) On-diagonal Jacobian is slightly off \(by 0.500132 %\).*\(1,1\) On-diagonal Jacobian is wrong \(off by 100.0 %\).*\(2,2\) On-diagonal Jacobian needs to be implemented.*\(3,3\) On-diagonal Jacobian should just return  zero"
     recover = false
+    design = 'analyze_jacobian.md'
+    issues = '#4182'
+    requirement = 'We shall be able the scrape the DOFMapOutput and determine when the Jacobian is slightly off'
   [../]
 
   [./med]
@@ -11,6 +14,9 @@
     input = med.i
     expect_out = "\(0,0\) On-diagonal Jacobian is questionable \(off by 10.00 %\).*\(1,1\) On-diagonal Jacobian is wrong \(off by 30.0 %\)"
     recover = false
+    design = 'analyze_jacobian.md'
+    issues = '#4182'
+    requirement = 'We shall be able the scrape the DOFMapOutput and determine when the Jacobian is questionable'
   [../]
 
   # this test only has a wrong off-diagonal Jacobian, but we switch of testing
@@ -21,11 +27,17 @@
     off_diagonal = false
     expect_out = "No errors detected. :-\)"
     recover = false
+    design = 'analyze_jacobian.md'
+    issues = '#6624'
+    requirement = 'We shall throw no errors if the off-diagonal Jacobian is wrong if we are only testing the on-diagonal Jacobian'
   [../]
 
   [./no_negative_jacobian]
     type = RunApp
     input = no_negative_jacobian.i
+    design = 'failed_solves.md'
+    issues = '#9740'
+    requirement = 'A simulation shall run fine if there are no negative element Jacobians'
   [../]
   [./jacobian_zero]
     type = RunException
@@ -34,6 +46,9 @@
     cli_args = 'Kernels/diff/use_displaced_mesh=true'
     expect_err = 'ERROR: negative Jacobian 0 at point \(x,y,z\)=\(       0, 0.211325, 0.211325\) in element 0'
     should_crash = False
+    design = 'failed_solves.md'
+    issues = '#9740'
+    requirement = 'A simulation shall throw an exception if there is a zero element Jacobians'
   [../]
   [./jacobian_negative]
     type = RunException
@@ -42,6 +57,9 @@
     cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.8'
     expect_err = 'ERROR: negative Jacobian -0.0625 at point \(x,y,z\)=\(-0.105662, 0.211325, 0.211325\) in element 0'
     should_crash = False
+    design = 'failed_solves.md'
+    issues = '#9740'
+    requirement = 'A simulation shall throw an exception if there is a negative element Jacobians'
   [../]
 
   [./inf_nan]
@@ -51,5 +69,8 @@
     ratio_tol = nan
     difference_tol = nan
     cli_args = '--no-trap-fpe'
+    design = 'failed_solves.md'
+    issues = '#10788'
+    requirement = 'The PETSc Jacobian test shall reveal nans if there are nans in the matrix'
   [../]
 []
