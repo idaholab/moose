@@ -100,7 +100,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
-  registerMooseObjectTask("add_mesh_generator",           MeshGenerator,           false);
+  registerMooseObjectTask("add_mesh_generator",           MeshGenerator,          false);
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
@@ -233,8 +233,8 @@ addActionTypes(Syntax & syntax)
                            "(common_output)"
                            "(set_global_params)"
                            "(setup_recover_file_base)"
-                           "(add_mesh_generator)"
                            "(setup_mesh)"
+                           "(add_mesh_generator)"
                            "(execute_mesh_generators)"
                            "(set_mesh_base)"
                            "(check_copy_nodal_vars)"

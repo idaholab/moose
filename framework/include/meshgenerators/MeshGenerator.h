@@ -13,6 +13,9 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 
+// Included so mesh generators don't need to include this when constructing MeshBase objects
+#include "MooseMesh.h"
+
 #include "libmesh/mesh_base.h"
 
 // Forward declarations

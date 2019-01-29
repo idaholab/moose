@@ -34,5 +34,8 @@ AddMeshGeneratorAction::act()
   if (_app.isRecovering())
     return;
 
+  if (!_mesh)
+    mooseError("No mesh file was supplied and no generation block was provided");
+
   _app.addMeshGenerator(_type, _name, _moose_object_pars);
 }

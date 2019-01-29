@@ -1455,6 +1455,7 @@ MooseMesh::dimensionWidth(unsigned int component) const
 Real
 MooseMesh::getMinInDimension(unsigned int component) const
 {
+  mooseAssert(_mesh, "The MeshBase has not been constructed");
   mooseAssert(component < _bounds.size(), "Requested dimension out of bounds");
 
   return _bounds[component][MIN];
@@ -1463,6 +1464,7 @@ MooseMesh::getMinInDimension(unsigned int component) const
 Real
 MooseMesh::getMaxInDimension(unsigned int component) const
 {
+  mooseAssert(_mesh, "The MeshBase has not been constructed");
   mooseAssert(component < _bounds.size(), "Requested dimension out of bounds");
 
   return _bounds[component][MAX];
