@@ -22,4 +22,11 @@
 - /Kernels/OneDMomentumFriction
 - /Kernels/OneDMomentumGravity
 
+- /Materials/AverageWallTemperature3EqnMaterial
+- /Materials/ConstantMaterial
+- /Materials/CoupledVariableValueMaterial
 - /Materials/DerivativeMaterialInterfaceTHM
+- /Materials/DirectionMaterial
+- /Materials/TemperatureWall3EqnMaterial
+- /Materials/WallFriction3EqnBaseMaterial
+- /Materials/WeightedAverageMaterial
