@@ -30,5 +30,5 @@ PrandtlNumberAux::computeValue()
   Real cp = _fp.cp_from_v_e(_v[_qp], _e[_qp]);
   Real mu = _fp.mu_from_v_e(_v[_qp], _e[_qp]);
   Real k = _fp.k_from_v_e(_v[_qp], _e[_qp]);
-  return RELAP7::Prandtl(cp, mu, k);
+  return THM::Prandtl(cp, mu, k);
 }

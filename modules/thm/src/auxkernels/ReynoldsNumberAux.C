@@ -36,5 +36,5 @@ Real
 ReynoldsNumberAux::computeValue()
 {
   Real visc = _fp.mu_from_v_e(_v[_qp], _e[_qp]);
-  return RELAP7::Reynolds(_alpha[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], visc);
+  return THM::Reynolds(_alpha[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], visc);
 }
