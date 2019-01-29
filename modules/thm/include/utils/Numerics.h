@@ -7,7 +7,7 @@
 
 using namespace libMesh;
 
-namespace RELAP7
+namespace THM
 {
 
 // Default value for magnitude of acceleration due to gravity

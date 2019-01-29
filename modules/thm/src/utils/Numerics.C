@@ -1,6 +1,6 @@
 #include "Numerics.h"
 
-namespace RELAP7
+namespace THM
 {
 
 Real
@@ -196,4 +196,4 @@ isOutlet(Real vel, Real normal)
 {
   return (vel * normal) >= 0;
 }
-} // namespace RELAP7
+} // namespace THM

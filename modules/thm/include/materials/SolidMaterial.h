@@ -11,7 +11,7 @@ template <>
 InputParameters validParams<SolidMaterial>();
 
 /**
- * A class to define materials for the solid structures in the RELAP-7 application.
+ * A class to define materials for the solid structures in the THM application.
  */
 class SolidMaterial : public Material
 {

@@ -71,7 +71,7 @@ protected:
   static const unsigned int _n_sten;
 };
 
-namespace RELAP7
+namespace THM
 {
 template <>
 SlopeReconstruction1DInterface::ESlopeReconstructionType

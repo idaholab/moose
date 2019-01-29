@@ -27,6 +27,11 @@
 - /Materials/CoupledVariableValueMaterial
 - /Materials/DerivativeMaterialInterfaceTHM
 - /Materials/DirectionMaterial
+- /Materials/FluidProperties3EqnMaterial
+- /Materials/SolidMaterial
 - /Materials/TemperatureWall3EqnMaterial
 - /Materials/WallFriction3EqnBaseMaterial
+- /Materials/WallFrictionChurchillMaterial
 - /Materials/WeightedAverageMaterial
+
+- /UserObjects/SolidMaterialProperties

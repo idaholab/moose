@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "MooseEnum.h"
 
-namespace RELAP7
+namespace THM
 {
 
 /**
@@ -106,7 +106,7 @@ const std::map<unsigned int, std::string> wall_heat_transfer_flow_regime_type_to
 
 template <typename T>
 T
-RELAP7::stringToEnum(const std::string & s, const std::map<std::string, T> & enum_map)
+THM::stringToEnum(const std::string & s, const std::map<std::string, T> & enum_map)
 {
   std::string upper(s);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
@@ -119,7 +119,7 @@ RELAP7::stringToEnum(const std::string & s, const std::map<std::string, T> & enu
 
 template <typename T>
 MooseEnum
-RELAP7::getMooseEnum(const std::string & default_key, const std::map<std::string, T> & enum_map)
+THM::getMooseEnum(const std::string & default_key, const std::map<std::string, T> & enum_map)
 {
   std::string keys_string;
   for (typename std::map<std::string, T>::const_iterator it = enum_map.begin();

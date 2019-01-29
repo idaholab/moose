@@ -2,7 +2,7 @@
 #include "WallFrictionModels.h"
 #include "Numerics.h"
 
-registerMooseObject("RELAP7App", WallFrictionChurchillMaterial);
+registerMooseObject("THMApp", WallFrictionChurchillMaterial);
 
 template <>
 InputParameters
@@ -32,7 +32,7 @@ WallFrictionChurchillMaterial::WallFrictionChurchillMaterial(const InputParamete
 void
 WallFrictionChurchillMaterial::computeQpProperties()
 {
-  Real Re = RELAP7::Reynolds(1, _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
+  Real Re = THM::Reynolds(1, _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
 
   _Cw[_qp] = WallFriction::Churchill(Re, _roughness, _D_h[_qp]) * 2. * _rho[_qp] / _D_h[_qp];
   _dCw_drhoA[_qp] = 0;

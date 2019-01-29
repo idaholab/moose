@@ -2,7 +2,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
-registerMooseObject("RELAP7App", FluidProperties3EqnMaterial);
+registerMooseObject("THMApp", FluidProperties3EqnMaterial);
 
 template <>
 InputParameters
@@ -83,15 +83,15 @@ FluidProperties3EqnMaterial::computeQpProperties()
   _drho_drhoA[_qp] = 1.0 / _area[_qp];
 
   _v[_qp] = 1.0 / _rho[_qp];
-  _dv_drhoA[_qp] = RELAP7::dv_darhoA(_area[_qp], _rhoA[_qp]);
+  _dv_drhoA[_qp] = THM::dv_darhoA(_area[_qp], _rhoA[_qp]);
 
-  RELAP7::vel_from_arhoA_arhouA(
+  THM::vel_from_arhoA_arhouA(
       _rhoA[_qp], _rhouA[_qp], _vel[_qp], _dvel_drhoA[_qp], _dvel_drhouA[_qp]);
 
   _e[_qp] = (_rhoEA[_qp] - 0.5 * _rhouA[_qp] * _rhouA[_qp] / _rhoA[_qp]) / _rhoA[_qp];
-  _de_drhoA[_qp] = RELAP7::de_darhoA(_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp]);
-  _de_drhouA[_qp] = RELAP7::de_darhouA(_rhoA[_qp], _rhouA[_qp]);
-  _de_drhoEA[_qp] = RELAP7::de_darhoEA(_rhoA[_qp]);
+  _de_drhoA[_qp] = THM::de_darhoA(_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp]);
+  _de_drhouA[_qp] = THM::de_darhouA(_rhoA[_qp], _rhouA[_qp]);
+  _de_drhoEA[_qp] = THM::de_darhoEA(_rhoA[_qp]);
 
   _p[_qp] = _fp.p_from_v_e(_v[_qp], _e[_qp]);
   Real p, dp_dv, dp_de;

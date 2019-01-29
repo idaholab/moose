@@ -9,13 +9,13 @@ const std::map<std::string, SlopeReconstruction1DInterface::ESlopeReconstruction
 MooseEnum
 SlopeReconstruction1DInterface::getSlopeReconstructionMooseEnum(const std::string & name)
 {
-  return RELAP7::getMooseEnum<SlopeReconstruction1DInterface::ESlopeReconstructionType>(
+  return THM::getMooseEnum<SlopeReconstruction1DInterface::ESlopeReconstructionType>(
       name, _slope_reconstruction_type_to_enum);
 }
 
 template <>
 SlopeReconstruction1DInterface::ESlopeReconstructionType
-RELAP7::stringToEnum(const std::string & s)
+THM::stringToEnum(const std::string & s)
 {
   return stringToEnum<SlopeReconstruction1DInterface::ESlopeReconstructionType>(
       s, SlopeReconstruction1DInterface::_slope_reconstruction_type_to_enum);
@@ -39,7 +39,7 @@ validParams<SlopeReconstruction1DInterface>()
 }
 
 SlopeReconstruction1DInterface::SlopeReconstruction1DInterface(const MooseObject * moose_object)
-  : _scheme(RELAP7::stringToEnum<ESlopeReconstructionType>(
+  : _scheme(THM::stringToEnum<ESlopeReconstructionType>(
         moose_object->parameters().get<MooseEnum>("scheme")))
 {
 }

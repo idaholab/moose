@@ -1,7 +1,7 @@
 #include "RDG3EqnMaterial.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("RELAP7App", RDG3EqnMaterial);
+registerMooseObject("THMApp", RDG3EqnMaterial);
 
 template <>
 InputParameters
