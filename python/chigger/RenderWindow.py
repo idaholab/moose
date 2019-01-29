@@ -34,6 +34,8 @@ class RenderWindow(base.ChiggerObject):
                 allow=['interactive', 'modal', 'interactive2D'])
         opt.add('test', False, "When True the interaction is disabled and the window closes "
                                "immediately after rendering.")
+        opt.add('motion_factor', "Control the interaction motion rate. "
+                                 "(calls vtkInteractorStyle::SetMotionFactor)")
         opt.add('offscreen', False, "Enable offscreen rendering.")
         opt.add('chigger', False, "Places a chigger logo in the lower left corner.")
         opt.add('smoothing', False, "Enable VTK render window smoothing options.")
@@ -200,6 +202,10 @@ class RenderWindow(base.ChiggerObject):
                 self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
             elif style == 'modal':
                 self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleUser())
+
+        if self.isOptionValid('motion_factor'):
+            self.__vtkinteractor.GetInteractorStyle(). \
+                SetMotionFactor(self.getOption('motion_factor'))
 
         # Background settings
         self._results[0].updateOptions(self._options)
