@@ -8,7 +8,7 @@ const std::map<std::string, FlowConnection::EEndType> FlowConnection::_end_type_
 
 template <>
 FlowConnection::EEndType
-RELAP7::stringToEnum(const std::string & s)
+THM::stringToEnum(const std::string & s)
 {
   return stringToEnum<FlowConnection::EEndType>(s, FlowConnection::_end_type_to_enum);
 }
@@ -137,7 +137,7 @@ FlowConnection::addConnection(const BoundaryName & boundary_name)
       const std::string connected_component_name = boundary_name.substr(0, colon_pos);
       const std::string str_end =
           boundary_name.substr(colon_pos + 1, boundary_name.length() - colon_pos - 1);
-      const EEndType end_type = RELAP7::stringToEnum<EEndType>(str_end);
+      const EEndType end_type = THM::stringToEnum<EEndType>(str_end);
 
       _connections.push_back(Connection(boundary_name, connected_component_name, end_type));
       _connected_component_names.push_back(connected_component_name);

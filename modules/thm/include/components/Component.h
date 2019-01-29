@@ -496,7 +496,7 @@ T
 Component::getEnumParam(const std::string & param) const
 {
   const MooseEnum & moose_enum = getParam<MooseEnum>(param);
-  const T value = RELAP7::stringToEnum<T>(moose_enum);
+  const T value = THM::stringToEnum<T>(moose_enum);
   if (value < 0)
   {
     // Get the keys from the MooseEnum. Unfortunately, this returns a list of

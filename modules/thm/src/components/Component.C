@@ -13,7 +13,7 @@ validParams<Component>()
 {
   InputParameters params = validParams<RELAP7Object>();
   params.addParam<RealVectorValue>(
-      "gravity_vector", RELAP7::default_gravity_vector, "Gravitational acceleration vector");
+      "gravity_vector", THM::default_gravity_vector, "Gravitational acceleration vector");
   params.addPrivateParam<Simulation *>("_sim");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
