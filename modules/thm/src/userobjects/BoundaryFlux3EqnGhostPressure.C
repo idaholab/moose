@@ -61,7 +61,7 @@ BoundaryFlux3EqnGhostPressure::getGhostCellSolutionJacobian(const std::vector<Re
   const Real drho_drhoA = 1.0 / A;
 
   Real vel, dvel_drhoA, dvel_drhouA;
-  RELAP7::vel_from_arhoA_arhouA(rhoA, rhouA, vel, dvel_drhoA, dvel_drhouA);
+  THM::vel_from_arhoA_arhouA(rhoA, rhouA, vel, dvel_drhoA, dvel_drhouA);
 
   Real e, de_dp, de_drho;
   _fp.e_from_p_rho(_p, rho, e, de_dp, de_drho);

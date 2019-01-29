@@ -64,14 +64,14 @@ BoundaryFlux3EqnFreeOutflow::calcJacobian(unsigned int /*iside*/,
   const Real A = U1[RELAP73Eqn::CONS_VAR_AREA];
 
   const Real v = A / rhoA;
-  const Real dv_drhoA = RELAP7::dv_darhoA(A, rhoA);
+  const Real dv_drhoA = THM::dv_darhoA(A, rhoA);
 
   const Real vel = rhouA / rhoA;
 
   const Real e = rhoEA / rhoA - 0.5 * rhouA * rhouA / (rhoA * rhoA);
-  const Real de_drhoA = RELAP7::de_darhoA(rhoA, rhouA, rhoEA);
-  const Real de_drhouA = RELAP7::de_darhouA(rhoA, rhouA);
-  const Real de_drhoEA = RELAP7::de_darhoEA(rhoA);
+  const Real de_drhoA = THM::de_darhoA(rhoA, rhouA, rhoEA);
+  const Real de_drhouA = THM::de_darhouA(rhoA, rhouA);
+  const Real de_drhoEA = THM::de_darhoEA(rhoA);
 
   Real p, dp_dv, dp_de;
   _fp.p_from_v_e(v, e, p, dp_dv, dp_de);

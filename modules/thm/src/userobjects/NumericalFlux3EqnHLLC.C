@@ -210,34 +210,34 @@ NumericalFlux3EqnHLLC::calcJacobian(const std::vector<Real> & U1,
 
   // velocity
   Real u1, du1_drho1, du1_drhou1;
-  RELAP7::vel_from_arhoA_arhouA(rho1, rhou1, u1, du1_drho1, du1_drhou1);
+  THM::vel_from_arhoA_arhouA(rho1, rhou1, u1, du1_drho1, du1_drhou1);
   const Real q1 = u1 * nx;
   const Real dq1_drho1 = du1_drho1 * nx;
   const Real dq1_drhou1 = du1_drhou1 * nx;
 
   Real u2, du2_drho2, du2_drhou2;
-  RELAP7::vel_from_arhoA_arhouA(rho2, rhou2, u2, du2_drho2, du2_drhou2);
+  THM::vel_from_arhoA_arhouA(rho2, rhou2, u2, du2_drho2, du2_drhou2);
   const Real q2 = u2 * nx;
   const Real dq2_drho2 = du2_drho2 * nx;
   const Real dq2_drhou2 = du2_drhou2 * nx;
 
   // specific volume
   const Real v1 = 1.0 / rho1;
-  const Real dv1_drho1 = RELAP7::dv_darhoA(1.0, rho1);
+  const Real dv1_drho1 = THM::dv_darhoA(1.0, rho1);
 
   const Real v2 = 1.0 / rho2;
-  const Real dv2_drho2 = RELAP7::dv_darhoA(1.0, rho2);
+  const Real dv2_drho2 = THM::dv_darhoA(1.0, rho2);
 
   // specific internal energy
   const Real e1 = rhoE1 / rho1 - 0.5 * rhou1 * rhou1 / (rho1 * rho1);
-  const Real de1_drho1 = RELAP7::de_darhoA(rho1, rhou1, rhoE1);
-  const Real de1_drhou1 = RELAP7::de_darhouA(rho1, rhou1);
-  const Real de1_drhoE1 = RELAP7::de_darhoEA(rho1);
+  const Real de1_drho1 = THM::de_darhoA(rho1, rhou1, rhoE1);
+  const Real de1_drhou1 = THM::de_darhouA(rho1, rhou1);
+  const Real de1_drhoE1 = THM::de_darhoEA(rho1);
 
   const Real e2 = rhoE2 / rho2 - 0.5 * rhou2 * rhou2 / (rho2 * rho2);
-  const Real de2_drho2 = RELAP7::de_darhoA(rho2, rhou2, rhoE2);
-  const Real de2_drhou2 = RELAP7::de_darhouA(rho2, rhou2);
-  const Real de2_drhoE2 = RELAP7::de_darhoEA(rho2);
+  const Real de2_drho2 = THM::de_darhoA(rho2, rhou2, rhoE2);
+  const Real de2_drhou2 = THM::de_darhouA(rho2, rhou2);
+  const Real de2_drhoE2 = THM::de_darhoEA(rho2);
 
   // pressure
   Real p1, dp1_dv1, dp1_de1;

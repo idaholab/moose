@@ -76,7 +76,7 @@ BoundaryFlux3EqnGhostStagnationPressureTemperature::getGhostCellSolutionJacobian
   const Real A = U[RELAP73Eqn::CONS_VAR_AREA];
 
   Real vel, dvel_drhoA, dvel_drhouA;
-  RELAP7::vel_from_arhoA_arhouA(rhoA, rhouA, vel, dvel_drhoA, dvel_drhouA);
+  THM::vel_from_arhoA_arhouA(rhoA, rhouA, vel, dvel_drhoA, dvel_drhouA);
 
   // compute stagnation quantities
   const Real rho0 = _fp.rho_from_p_T(_p0, _T0);
