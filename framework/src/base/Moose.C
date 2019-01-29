@@ -172,7 +172,7 @@ addActionTypes(Syntax & syntax)
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
   registerTask("add_geometric_rm", true);
-  registerTask("setup_mesh_complete", false); // calls prepare
+  registerTask("setup_mesh_complete", true); // calls prepare
 
   registerTask("init_displaced_problem", false);
 
