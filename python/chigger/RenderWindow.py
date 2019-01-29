@@ -214,9 +214,6 @@ class RenderWindow(base.ChiggerObject):
             self.__vtkwindow.SetPolygonSmoothing(smooth)
             self.__vtkwindow.SetPointSmoothing(smooth)
 
-        if self.isOptionValid('antialiasing'):
-            self.__vtkwindow.SetAAFrames(self.getOption('antialiasing'))
-
         if self.isOptionValid('multisamples'):
             self.__vtkwindow.SetMultiSamples(self.getOption('multisamples'))
 
@@ -229,6 +226,8 @@ class RenderWindow(base.ChiggerObject):
         n = self.__vtkwindow.GetNumberOfLayers()
         for result in self._results:
             renderer = result.getVTKRenderer()
+            if self.isOptionValid('antialiasing'):
+                renderer.SetUseFXAA(True)
             if not self.__vtkwindow.HasRenderer(renderer):
                 self.__vtkwindow.AddRenderer(renderer)
             if result.needsUpdate():
