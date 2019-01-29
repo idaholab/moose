@@ -321,7 +321,7 @@ const T &
 Coupleable::getNodalDefaultValue(const std::string & var_name, unsigned int comp)
 {
   auto && default_variable_value = getDefaultValue(var_name, comp);
-  return default_variable_value->firstElement();
+  return *default_variable_value->data();
 }
 
 template <>
@@ -329,7 +329,7 @@ const RealVectorValue &
 Coupleable::getNodalDefaultValue<RealVectorValue>(const std::string & var_name, unsigned int)
 {
   auto && default_variable_value = getVectorDefaultValue(var_name);
-  return default_variable_value->firstElement();
+  return *default_variable_value->data();
 }
 
 const VariableValue &

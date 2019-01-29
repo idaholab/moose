@@ -172,7 +172,7 @@ public:
   /**
    * Reference to first element of array
    */
-  const T & firstElement() { return *_data; }
+  const T * data() const { return _data; }
 
 private:
   /// Actual data pointer.
