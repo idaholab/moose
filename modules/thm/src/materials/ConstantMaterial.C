@@ -1,6 +1,6 @@
 #include "ConstantMaterial.h"
 
-registerMooseObject("RELAP7App", ConstantMaterial);
+registerMooseObject("THMApp", ConstantMaterial);
 
 template <>
 InputParameters

@@ -1,6 +1,6 @@
 #include "CoupledVariableValueMaterial.h"
 
-registerMooseObject("RELAP7App", CoupledVariableValueMaterial);
+registerMooseObject("THMApp", CoupledVariableValueMaterial);
 
 template <>
 InputParameters

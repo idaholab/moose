@@ -1,6 +1,6 @@
 #include "WeightedAverageMaterial.h"
 
-registerMooseObject("RELAP7App", WeightedAverageMaterial);
+registerMooseObject("THMApp", WeightedAverageMaterial);
 
 template <>
 InputParameters

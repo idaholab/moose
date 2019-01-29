@@ -1,6 +1,6 @@
 #include "DirectionMaterial.h"
 
-registerMooseObject("RELAP7App", DirectionMaterial);
+registerMooseObject("THMApp", DirectionMaterial);
 
 template <>
 InputParameters

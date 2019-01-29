@@ -1,6 +1,6 @@
 #include "AverageWallTemperature3EqnMaterial.h"
 
-registerMooseObject("RELAP7App", AverageWallTemperature3EqnMaterial);
+registerMooseObject("THMApp", AverageWallTemperature3EqnMaterial);
 
 template <>
 InputParameters

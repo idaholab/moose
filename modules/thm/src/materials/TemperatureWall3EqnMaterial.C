@@ -1,6 +1,6 @@
 #include "TemperatureWall3EqnMaterial.h"
 
-registerMooseObject("RELAP7App", TemperatureWall3EqnMaterial);
+registerMooseObject("THMApp", TemperatureWall3EqnMaterial);
 
 template <>
 InputParameters
