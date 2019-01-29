@@ -1548,11 +1548,11 @@ Coupleable::adZeroSecondTemplate<RESIDUAL>()
   return _second_zero;
 }
 
-template <ComputeStage compute_stage, typename T>
-const typename Moose::ValueType<compute_stage, T>::type &
+template <typename T, ComputeStage compute_stage>
+const typename Moose::ValueType<T, compute_stage>::type &
 Coupleable::adCoupledNodalValueTemplate(const std::string & var_name, unsigned int comp)
 {
-  static const typename Moose::ValueType<compute_stage, T>::type zero = 0;
+  static const typename Moose::ValueType<T, compute_stage>::type zero = 0;
   if (!isCoupled(var_name))
     return zero;
 
@@ -1603,14 +1603,14 @@ template const RealVectorValue &
 Coupleable::coupledNodalDot<RealVectorValue>(const std::string & var_name, unsigned int comp);
 
 template const Real &
-Coupleable::adCoupledNodalValueTemplate<RESIDUAL, Real>(const std::string & var_name,
+Coupleable::adCoupledNodalValueTemplate<Real, RESIDUAL>(const std::string & var_name,
                                                         unsigned int comp);
 template const RealVectorValue &
-Coupleable::adCoupledNodalValueTemplate<RESIDUAL, RealVectorValue>(const std::string & var_name,
+Coupleable::adCoupledNodalValueTemplate<RealVectorValue, RESIDUAL>(const std::string & var_name,
                                                                    unsigned int comp);
 template const DualReal &
-Coupleable::adCoupledNodalValueTemplate<JACOBIAN, Real>(const std::string & var_name,
+Coupleable::adCoupledNodalValueTemplate<Real, JACOBIAN>(const std::string & var_name,
                                                         unsigned int comp);
 template const libMesh::VectorValue<DualReal> &
-Coupleable::adCoupledNodalValueTemplate<JACOBIAN, RealVectorValue>(const std::string & var_name,
+Coupleable::adCoupledNodalValueTemplate<RealVectorValue, JACOBIAN>(const std::string & var_name,
                                                                    unsigned int comp);

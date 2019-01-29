@@ -49,7 +49,7 @@ protected:
   /// test function values (in QPs)
   const ADTemplateVariableTestValue & _test;
   /// gradients of test functions  (in QPs)
-  const typename VariableTestGradientType<compute_stage, T>::type & _grad_test;
+  const typename VariableTestGradientType<T, compute_stage>::type & _grad_test;
 
   /// the values of the unknown variable this BC is acting on
   const ADTemplateVariableValue & _u;

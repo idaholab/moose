@@ -900,7 +900,7 @@ MooseVariableFE<OutputType>::computeValuesHelper(
     const FieldVariablePhiGradient & grad_phi,
     const FieldVariablePhiSecond *& second_phi,
     const FieldVariablePhiValue *& curl_phi,
-    const typename VariableTestGradientType<JACOBIAN, OutputType>::type & ad_grad_phi)
+    const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi)
 
 {
   bool is_transient = _subproblem.isTransient();
@@ -1328,7 +1328,7 @@ MooseVariableFE<OutputType>::computeAD(
     const FieldVariablePhiValue & phi,
     const FieldVariablePhiGradient & grad_phi,
     const FieldVariablePhiSecond *& second_phi,
-    const typename VariableTestGradientType<JACOBIAN, OutputType>::type & ad_grad_phi)
+    const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi)
 {
   _ad_dof_values.resize(num_dofs);
   if (_need_ad_u)
@@ -2658,7 +2658,7 @@ MooseVariableFE<RealVectorValue>::adDofValues<RESIDUAL>()
 
 template <typename OutputType>
 template <ComputeStage compute_stage>
-const typename Moose::ValueType<compute_stage, OutputType>::type &
+const typename Moose::ValueType<OutputType, compute_stage>::type &
 MooseVariableFE<OutputType>::adNodalValue()
 {
   _need_ad = true;

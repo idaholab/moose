@@ -235,19 +235,19 @@ public:
   const MooseArray<Real> & JxW() { return _current_JxW; }
 
   template <ComputeStage compute_stage>
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & adJxW() const
+  const MooseArray<ADReal> & adJxW() const
   {
     return _ad_JxW;
   }
 
   template <ComputeStage compute_stage>
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & adJxWFace() const
+  const MooseArray<ADReal> & adJxWFace() const
   {
     return _current_JxW_face;
   }
 
   template <ComputeStage compute_stage>
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & adCurvatures() const;
+  const MooseArray<ADReal> & adCurvatures() const;
 
   /**
    * Returns the reference to the coordinate transformation coefficients
@@ -286,13 +286,13 @@ public:
   const MooseArray<Point> & normals() { return _current_normals; }
 
   template <ComputeStage compute_stage>
-  const typename PointType<compute_stage>::type & adNormals() const
+  const ADPoint & adNormals() const
   {
     return _current_normals;
   }
 
   template <ComputeStage compute_stage>
-  const typename PointType<compute_stage>::type & adQPointsFace() const
+  const ADPoint & adQPointsFace() const
   {
     return _current_q_points_face;
   }
@@ -680,8 +680,8 @@ public:
 
   // Read-only references
   const VariablePhiValue & phi() const { return _phi; }
-  template <ComputeStage compute_stage, typename T>
-  const typename VariableTestGradientType<compute_stage, T>::type &
+  template <typename T, ComputeStage compute_stage>
+  const typename VariableTestGradientType<T, compute_stage>::type &
   adGradPhi(const MooseVariableFE<T> & v) const
   {
     return gradPhi(v);
@@ -871,7 +871,7 @@ public:
   }
 
   template <typename OutputType>
-  const typename VariableTestGradientType<ComputeStage::JACOBIAN, OutputType>::type &
+  const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
   feADGradPhi(FEType type)
   {
     return _ad_grad_phi_data[type];
@@ -900,7 +900,7 @@ public:
   }
 
   template <typename OutputType>
-  const typename VariableTestGradientType<ComputeStage::JACOBIAN, OutputType>::type &
+  const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
   feADGradPhiFace(FEType type)
   {
     return _ad_grad_phi_data_face[type];
@@ -1110,7 +1110,7 @@ protected:
   void computeGradPhiAD(
       const Elem * elem,
       unsigned int n_qp,
-      typename VariableTestGradientType<ComputeStage::JACOBIAN, OutputType>::type & grad_phi,
+      typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
       FEGenericBase<OutputType> * fe);
   void resizeMappingObjects(unsigned int n_qp, unsigned int dim);
   void computeAffineMapAD(const Elem * elem,
@@ -1386,13 +1386,13 @@ protected:
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_neighbor;
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
 
-  std::map<FEType, typename VariableTestGradientType<ComputeStage::JACOBIAN, Real>::type>
+  std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
       _ad_grad_phi_data;
-  std::map<FEType, typename VariableTestGradientType<ComputeStage::JACOBIAN, RealVectorValue>::type>
+  std::map<FEType, typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
       _ad_vector_grad_phi_data;
-  std::map<FEType, typename VariableTestGradientType<ComputeStage::JACOBIAN, Real>::type>
+  std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
       _ad_grad_phi_data_face;
-  std::map<FEType, typename VariableTestGradientType<ComputeStage::JACOBIAN, RealVectorValue>::type>
+  std::map<FEType, typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
       _ad_vector_grad_phi_data_face;
 
   /// Values cached by calling cacheResidual() (the first vector is for TIME vs NONTIME)
@@ -1460,14 +1460,14 @@ protected:
 };
 
 template <>
-inline const typename VariableTestGradientType<ComputeStage::JACOBIAN, RealVectorValue>::type &
+inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
 Assembly::feADGradPhi<RealVectorValue>(FEType type)
 {
   return _ad_vector_grad_phi_data[type];
 }
 
 template <>
-inline const typename VariableTestGradientType<ComputeStage::JACOBIAN, RealVectorValue>::type &
+inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
 Assembly::feADGradPhiFace<RealVectorValue>(FEType type)
 {
   return _ad_vector_grad_phi_data_face[type];
@@ -1478,7 +1478,7 @@ inline void
 Assembly::computeGradPhiAD<RealVectorValue>(
     const Elem *,
     unsigned int,
-    typename VariableTestGradientType<ComputeStage::JACOBIAN, RealVectorValue>::type &,
+    typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &,
     FEGenericBase<RealVectorValue> *)
 {
   mooseError("Not implemented");
@@ -1578,12 +1578,13 @@ const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
 Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type);
 
 template <>
-const typename VariableTestGradientType<ComputeStage::JACOBIAN, Real>::type &
-Assembly::adGradPhi<ComputeStage::JACOBIAN>(const MooseVariableFE<Real> & v) const;
+const typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type &
+Assembly::adGradPhi<Real, ComputeStage::JACOBIAN>(const MooseVariableFE<Real> & v) const;
 
 template <>
-const typename VariableTestGradientType<ComputeStage::JACOBIAN, RealVectorValue>::type &
-Assembly::adGradPhi<ComputeStage::JACOBIAN>(const MooseVariableFE<RealVectorValue> & v) const;
+const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
+Assembly::adGradPhi<RealVectorValue, ComputeStage::JACOBIAN>(
+    const MooseVariableFE<RealVectorValue> & v) const;
 
 template <>
 const MooseArray<typename Moose::RealType<RESIDUAL>::type> & Assembly::adJxW<RESIDUAL>() const;

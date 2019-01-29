@@ -108,6 +108,7 @@ class Point;
 #define ADRealVectorValue typename RealVectorValueType<compute_stage>::type
 #define ADRealTensorValue typename RealTensorValueType<compute_stage>::type
 #define ADRankTwoTensor typename RankTwoTensorType<compute_stage>::type
+#define ADPoint typename PointType<compute_stage>::type
 
 /**
  * MOOSE typedefs
@@ -212,45 +213,45 @@ struct RealType<JACOBIAN>
   typedef DualReal type;
 };
 
-template <ComputeStage compute_stage, typename T>
+template <typename T, ComputeStage compute_stage>
 struct ValueType;
 template <ComputeStage compute_stage>
-struct ValueType<compute_stage, Real>
+struct ValueType<Real, compute_stage>
 {
   typedef typename RealType<compute_stage>::type type;
 };
 
 template <ComputeStage compute_stage, template <typename> class W>
-struct ValueType<compute_stage, W<Real>>
+struct ValueType<W<Real>, compute_stage>
 {
   typedef W<typename RealType<compute_stage>::type> type;
 };
 } // MOOSE
 
-template <ComputeStage compute_stage, typename T>
+template <typename T, ComputeStage compute_stage>
 struct VariableValueType
 {
   typedef
-      typename OutputTools<typename Moose::ValueType<compute_stage, T>::type>::VariableValue type;
+      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableValue type;
 };
-template <ComputeStage compute_stage, typename T>
+template <typename T, ComputeStage compute_stage>
 struct VariableGradientType
 {
-  typedef typename OutputTools<typename Moose::ValueType<compute_stage, T>::type>::VariableGradient
+  typedef typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableGradient
       type;
 };
-template <ComputeStage compute_stage, typename T>
+template <typename T, ComputeStage compute_stage>
 struct VariableTestGradientType
 {
   typedef
-      typename OutputTools<typename Moose::ValueType<compute_stage, T>::type>::VariableTestGradient
+      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableTestGradient
           type;
 };
-template <ComputeStage compute_stage, typename T>
+template <typename T, ComputeStage compute_stage>
 struct VariableSecondType
 {
   typedef
-      typename OutputTools<typename Moose::ValueType<compute_stage, T>::type>::VariableSecond type;
+      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableSecond type;
 };
 
 template <ComputeStage compute_stage>
@@ -290,13 +291,13 @@ struct ResidualReturnType
   typedef typename Moose::RealType<compute_stage>::type type;
 };
 
-template <ComputeStage compute_stage, typename mat_prop_type>
+template <typename mat_prop_type, ComputeStage compute_stage>
 struct MaterialPropertyType
 {
   typedef MaterialProperty<mat_prop_type> type;
 };
 template <typename mat_prop_type>
-struct MaterialPropertyType<JACOBIAN, mat_prop_type>
+struct MaterialPropertyType<mat_prop_type, JACOBIAN>
 {
   typedef ADMaterialPropertyObject<mat_prop_type> type;
 };
@@ -315,19 +316,19 @@ struct PointType<JACOBIAN>
 #define ADResidual typename ResidualReturnType<compute_stage>::type
 #define ADGradResidual typename RealVectorValueType<compute_stage>::type
 
-#define ADVariableValue typename VariableValueType<compute_stage, Real>::type
-#define ADVariableGradient typename VariableGradientType<compute_stage, Real>::type
-#define ADVariableSecond typename VariableSecondType<compute_stage, Real>::type
+#define ADVariableValue typename VariableValueType<Real, compute_stage>::type
+#define ADVariableGradient typename VariableGradientType<Real, compute_stage>::type
+#define ADVariableSecond typename VariableSecondType<Real, compute_stage>::type
 
-#define ADVectorVariableValue typename VariableValueType<compute_stage, RealVectorValue>::type
-#define ADVectorVariableGradient typename VariableGradientType<compute_stage, RealVectorValue>::type
-#define ADVectorVariableSecond typename VariableSecondType<compute_stage, RealVectorValue>::type
+#define ADVectorVariableValue typename VariableValueType<RealVectorValue, compute_stage>::type
+#define ADVectorVariableGradient typename VariableGradientType<RealVectorValue, compute_stage>::type
+#define ADVectorVariableSecond typename VariableSecondType<RealVectorValue, compute_stage>::type
 
-#define ADTemplateVariableValue typename VariableValueType<compute_stage, T>::type
-#define ADTemplateVariableGradient typename VariableGradientType<compute_stage, T>::type
-#define ADTemplateVariableSecond typename VariableSecondType<compute_stage, T>::type
+#define ADTemplateVariableValue typename VariableValueType<T, compute_stage>::type
+#define ADTemplateVariableGradient typename VariableGradientType<T, compute_stage>::type
+#define ADTemplateVariableSecond typename VariableSecondType<T, compute_stage>::type
 
-#define ADMaterialProperty(Type) typename MaterialPropertyType<compute_stage, Type>::type
+#define ADMaterialProperty(Type) typename MaterialPropertyType<Type, compute_stage>::type
 
 typedef VariableTestValue ADVariableTestValue;
 typedef VariableTestGradient ADVariableTestGradient;

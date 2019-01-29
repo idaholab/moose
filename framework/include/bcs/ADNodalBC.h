@@ -32,7 +32,7 @@ protected:
   /**
    * Compute this NodalBC's contribution to the residual at the current quadrature point
    */
-  virtual typename Moose::ValueType<compute_stage, T>::type computeQpResidual() = 0;
+  virtual typename Moose::ValueType<T, compute_stage>::type computeQpResidual() = 0;
 
   /// The variable that this NodalBC operates on
   MooseVariableFE<T> & _var;
@@ -41,7 +41,7 @@ protected:
   const Node *& _current_node;
 
   /// Value of the unknown variable this BC is acting on
-  const typename Moose::ValueType<compute_stage, T>::type & _u;
+  const typename Moose::ValueType<T, compute_stage>::type & _u;
 };
 
 template <ComputeStage compute_stage>

@@ -94,7 +94,7 @@ protected:
   const ADTemplateVariableTestValue & _test;
 
   /// gradient of the test function
-  const typename VariableTestGradientType<compute_stage, T>::type & _grad_test;
+  const typename VariableTestGradientType<T, compute_stage>::type & _grad_test;
 
   /// Holds the solution at current quadrature points
   const ADTemplateVariableValue & _u;

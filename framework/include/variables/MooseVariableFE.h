@@ -182,13 +182,13 @@ public:
   const FieldVariablePhiCurl & curlPhiFaceNeighbor();
 
   template <ComputeStage compute_stage>
-  const typename VariableTestGradientType<compute_stage, OutputType>::type & adGradPhi()
+  const typename VariableTestGradientType<OutputType, compute_stage>::type & adGradPhi()
   {
     return _ad_grad_phi;
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableTestGradientType<compute_stage, OutputType>::type & adGradPhiFace()
+  const typename VariableTestGradientType<OutputType, compute_stage>::type & adGradPhiFace()
   {
     return _ad_grad_phi_face;
   }
@@ -312,21 +312,21 @@ public:
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableValueType<compute_stage, OutputType>::type & adSln()
+  const typename VariableValueType<OutputType, compute_stage>::type & adSln()
   {
     _need_ad = _need_ad_u = true;
     return _ad_u;
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableGradientType<compute_stage, OutputType>::type & adGradSln()
+  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln()
   {
     _need_ad = _need_ad_grad_u = true;
     return _ad_grad_u;
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableSecondType<compute_stage, OutputType>::type & adSecondSln()
+  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSln()
   {
     _need_ad = _need_ad_second_u = true;
     secondPhi();
@@ -335,28 +335,28 @@ public:
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableValueType<compute_stage, OutputType>::type & adUDot()
+  const typename VariableValueType<OutputType, compute_stage>::type & adUDot()
   {
     _need_ad = true;
     return _ad_u_dot;
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableValueType<compute_stage, OutputType>::type & adSlnNeighbor()
+  const typename VariableValueType<OutputType, compute_stage>::type & adSlnNeighbor()
   {
     _need_neighbor_ad = _need_neighbor_ad_u = true;
     return _neighbor_ad_u;
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableGradientType<compute_stage, OutputType>::type & adGradSlnNeighbor()
+  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSlnNeighbor()
   {
     _need_neighbor_ad = _need_neighbor_ad_grad_u = true;
     return _neighbor_ad_grad_u;
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableSecondType<compute_stage, OutputType>::type & adSecondSlnNeighbor()
+  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSlnNeighbor()
   {
     _need_neighbor_ad = _need_neighbor_ad_second_u = true;
     secondPhiFaceNeighbor();
@@ -427,7 +427,7 @@ public:
   }
 
   template <ComputeStage compute_stage>
-  const typename VariableValueType<compute_stage, OutputType>::type & adUDotNeighbor()
+  const typename VariableValueType<OutputType, compute_stage>::type & adUDotNeighbor()
   {
     _need_neighbor_ad = true;
     return _neighbor_ad_u_dot;
@@ -604,7 +604,7 @@ public:
       const FieldVariablePhiGradient & grad_phi,
       const FieldVariablePhiSecond *& second_phi,
       const FieldVariablePhiCurl *& curl_phi,
-      const typename VariableTestGradientType<JACOBIAN, OutputType>::type & ad_grad_phi);
+      const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi);
 
   /**
    * Helper function for computing values
@@ -736,7 +736,7 @@ public:
   const MooseArray<Real> & nodalMatrixTagValue(TagID tag);
 
   template <ComputeStage compute_stage>
-  const typename Moose::ValueType<compute_stage, OutputType>::type & adNodalValue();
+  const typename Moose::ValueType<OutputType, compute_stage>::type & adNodalValue();
 
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
@@ -747,7 +747,7 @@ public:
                  const FieldVariablePhiValue & phi,
                  const FieldVariablePhiGradient & grad_phi,
                  const FieldVariablePhiSecond *& second_phi,
-                 const typename VariableTestGradientType<JACOBIAN, OutputType>::type & ad_grad_phi);
+                 const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi);
   void computeADNeighbor(const unsigned int & num_dofs,
                          const unsigned int & nqp,
                          const bool & is_transient,
@@ -964,8 +964,8 @@ protected:
   const FieldVariablePhiSecond * _second_phi_face_neighbor;
   const FieldVariablePhiCurl * _curl_phi_face_neighbor;
 
-  const typename VariableTestGradientType<JACOBIAN, OutputShape>::type & _ad_grad_phi;
-  const typename VariableTestGradientType<JACOBIAN, OutputShape>::type & _ad_grad_phi_face;
+  const typename VariableTestGradientType<OutputShape, JACOBIAN>::type & _ad_grad_phi;
+  const typename VariableTestGradientType<OutputShape, JACOBIAN>::type & _ad_grad_phi_face;
 
   std::vector<FieldVariableValue> _vector_tag_u;
   std::vector<bool> _need_vector_tag_u;
@@ -990,19 +990,19 @@ protected:
   FieldVariableCurl _curl_u_old;
   FieldVariableCurl _curl_u_older;
 
-  typename VariableValueType<JACOBIAN, OutputShape>::type _ad_u;
-  typename VariableGradientType<JACOBIAN, OutputShape>::type _ad_grad_u;
-  typename VariableSecondType<JACOBIAN, OutputShape>::type _ad_second_u;
+  typename VariableValueType<OutputShape, JACOBIAN>::type _ad_u;
+  typename VariableGradientType<OutputShape, JACOBIAN>::type _ad_grad_u;
+  typename VariableSecondType<OutputShape, JACOBIAN>::type _ad_second_u;
   MooseArray<DualReal> _ad_dof_values;
   MooseArray<DualReal> _ad_dofs_dot;
-  typename VariableValueType<JACOBIAN, OutputShape>::type _ad_u_dot;
+  typename VariableValueType<OutputShape, JACOBIAN>::type _ad_u_dot;
 
-  typename VariableValueType<JACOBIAN, OutputShape>::type _neighbor_ad_u;
-  typename VariableGradientType<JACOBIAN, OutputShape>::type _neighbor_ad_grad_u;
-  typename VariableSecondType<JACOBIAN, OutputShape>::type _neighbor_ad_second_u;
+  typename VariableValueType<OutputShape, JACOBIAN>::type _neighbor_ad_u;
+  typename VariableGradientType<OutputShape, JACOBIAN>::type _neighbor_ad_grad_u;
+  typename VariableSecondType<OutputShape, JACOBIAN>::type _neighbor_ad_second_u;
   MooseArray<DualReal> _neighbor_ad_dof_values;
   MooseArray<DualReal> _neighbor_ad_dofs_dot;
-  typename VariableValueType<JACOBIAN, OutputShape>::type _neighbor_ad_u_dot;
+  typename VariableValueType<OutputShape, JACOBIAN>::type _neighbor_ad_u_dot;
 
   FieldVariableValue _u_neighbor;
   FieldVariableValue _u_old_neighbor;
@@ -1074,7 +1074,7 @@ protected:
   OutputType _nodal_value_dotdot_old;
 
   /// AD nodal value
-  typename Moose::ValueType<JACOBIAN, OutputType>::type _ad_nodal_value;
+  typename Moose::ValueType<OutputType, JACOBIAN>::type _ad_nodal_value;
 
   /// A zero AD variable
   const DualReal _ad_zero;
@@ -1170,7 +1170,7 @@ const RealVectorValue & MooseVariableFE<RealVectorValue>::adNodalValue<RESIDUAL>
 
 template <>
 template <>
-inline const typename VariableTestGradientType<RESIDUAL, Real>::type &
+inline const typename VariableTestGradientType<Real, RESIDUAL>::type &
 MooseVariableFE<Real>::adGradPhi<RESIDUAL>()
 {
   return _grad_phi;
@@ -1178,7 +1178,7 @@ MooseVariableFE<Real>::adGradPhi<RESIDUAL>()
 
 template <>
 template <>
-inline const typename VariableTestGradientType<RESIDUAL, RealVectorValue>::type &
+inline const typename VariableTestGradientType<RealVectorValue, RESIDUAL>::type &
 MooseVariableFE<RealVectorValue>::adGradPhi<RESIDUAL>()
 {
   return _grad_phi;
@@ -1186,7 +1186,7 @@ MooseVariableFE<RealVectorValue>::adGradPhi<RESIDUAL>()
 
 template <>
 template <>
-inline const typename VariableTestGradientType<RESIDUAL, Real>::type &
+inline const typename VariableTestGradientType<Real, RESIDUAL>::type &
 MooseVariableFE<Real>::adGradPhiFace<RESIDUAL>()
 {
   return _grad_phi_face;
@@ -1194,7 +1194,7 @@ MooseVariableFE<Real>::adGradPhiFace<RESIDUAL>()
 
 template <>
 template <>
-inline const typename VariableTestGradientType<RESIDUAL, RealVectorValue>::type &
+inline const typename VariableTestGradientType<RealVectorValue, RESIDUAL>::type &
 MooseVariableFE<RealVectorValue>::adGradPhiFace<RESIDUAL>()
 {
   return _grad_phi_face;

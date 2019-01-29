@@ -578,7 +578,7 @@ void
 Assembly::computeGradPhiAD(
     const Elem * elem,
     unsigned int n_qp,
-    typename VariableTestGradientType<ComputeStage::JACOBIAN, OutputType>::type & grad_phi,
+    typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
     FEGenericBase<OutputType> * fe)
 {
   auto dim = elem->dim();
@@ -3122,15 +3122,16 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type)
 }
 
 template <>
-const typename VariableTestGradientType<ComputeStage::JACOBIAN, Real>::type &
-Assembly::adGradPhi<ComputeStage::JACOBIAN>(const MooseVariableFE<Real> & v) const
+const typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type &
+Assembly::adGradPhi<Real, ComputeStage::JACOBIAN>(const MooseVariableFE<Real> & v) const
 {
   return _ad_grad_phi_data.at(v.feType());
 }
 
 template <>
-const typename VariableTestGradientType<ComputeStage::JACOBIAN, RealVectorValue>::type &
-Assembly::adGradPhi<ComputeStage::JACOBIAN>(const MooseVariableFE<RealVectorValue> & v) const
+const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
+Assembly::adGradPhi<RealVectorValue, ComputeStage::JACOBIAN>(
+    const MooseVariableFE<RealVectorValue> & v) const
 {
   return _ad_vector_grad_phi_data.at(v.feType());
 }
@@ -3143,7 +3144,7 @@ Assembly::adJxW<RESIDUAL>() const
 }
 
 template <ComputeStage compute_stage>
-const MooseArray<typename Moose::RealType<compute_stage>::type> &
+const MooseArray<ADReal> &
 Assembly::adCurvatures() const
 {
   _calculate_curvatures = true;
@@ -3158,5 +3159,5 @@ Assembly::adCurvatures<RESIDUAL>() const;
 template void Assembly::computeGradPhiAD<Real>(
     const Elem * elem,
     unsigned int n_qp,
-    typename VariableTestGradientType<ComputeStage::JACOBIAN, Real>::type & grad_phi,
+    typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type & grad_phi,
     FEGenericBase<Real> * fe);
