@@ -54,11 +54,6 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters)
   // The StitchedMesh class only works with ReplicatedMesh
   errorIfDistributedMesh("StitchedMesh");
 
-  // Get the original mesh
-  _original_mesh = dynamic_cast<ReplicatedMesh *>(&getMesh());
-  if (!_original_mesh)
-    mooseError("StitchedMesh does not support DistributedMesh");
-
   if (_stitch_boundaries.size() % 2 != 0)
     mooseError("There must be an even amount of stitch_boundaries in ", name());
 
@@ -77,8 +72,6 @@ StitchedMesh::StitchedMesh(const StitchedMesh & other_mesh)
 {
 }
 
-StitchedMesh::~StitchedMesh() {}
-
 std::unique_ptr<MooseMesh>
 StitchedMesh::safeClone() const
 {
@@ -88,6 +81,9 @@ StitchedMesh::safeClone() const
 void
 StitchedMesh::buildMesh()
 {
+  // Get the original mesh
+  _original_mesh = static_cast<ReplicatedMesh *>(&getMesh());
+
   // Read the first mesh into the original mesh... then we'll stitch all of the others into that
   _original_mesh->read(_files[0]);
 

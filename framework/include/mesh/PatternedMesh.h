@@ -38,7 +38,7 @@ class PatternedMesh : public MooseMesh
 public:
   PatternedMesh(const InputParameters & parameters);
   PatternedMesh(const PatternedMesh & other_mesh);
-  virtual ~PatternedMesh();
+  virtual ~PatternedMesh() = default;
 
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 

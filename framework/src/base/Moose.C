@@ -97,6 +97,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("determine_system_type",        Executioner,            true);
 
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
+  registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
   registerMooseObjectTask("add_mesh_generator",           MeshGenerator,           false);
@@ -233,9 +234,10 @@ addActionTypes(Syntax & syntax)
                            "(set_global_params)"
                            "(setup_recover_file_base)"
                            "(add_mesh_generator)"
-                           "(execute_mesh_generators)"
-                           "(check_copy_nodal_vars)"
                            "(setup_mesh)"
+                           "(execute_mesh_generators)"
+                           "(set_mesh_base)"
+                           "(check_copy_nodal_vars)"
                            "(add_partitioner)"
                            "(add_geometric_rm)"
                            "(init_mesh)"

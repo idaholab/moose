@@ -170,6 +170,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
                              ? getParam<unsigned int>("ghosting_patch_size")
                              : 5 * _patch_size),
     _max_leaf_size(getParam<unsigned int>("max_leaf_size")),
+    _patch_update_strategy(
+        getParam<MooseEnum>("patch_update_strategy").getEnum<Moose::PatchUpdateType>()),
     _regular_orthogonal_mesh(false),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
@@ -205,63 +207,9 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _add_mortar_interface_timer(registerTimedSection("addMortarInterface", 5))
 {
-  MooseEnum temp_patch_update_strategy = getParam<MooseEnum>("patch_update_strategy");
-  if (temp_patch_update_strategy == "never")
-    _patch_update_strategy = Moose::Never;
-  else if (temp_patch_update_strategy == "always")
-    _patch_update_strategy = Moose::Always;
-  else if (temp_patch_update_strategy == "auto")
-    _patch_update_strategy = Moose::Auto;
-  else if (temp_patch_update_strategy == "iteration")
-    _patch_update_strategy = Moose::Iteration;
-  else
-    mooseError("Patch update strategy should be never, always, auto or iteration.");
-
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
                "only when 'iteration' patch update strategy is used.");
-
-  switch (_mesh_parallel_type)
-  {
-    case 0: // PARALLEL
-      _use_distributed_mesh = true;
-      break;
-    case 1: // SERIAL
-      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _app.isUseSplit())
-        _parallel_type_overridden = true;
-      break;
-    case 2: // DEFAULT
-      // The user did not specify 'parallel_type = XYZ' in the input file,
-      // so we allow the --distributed-mesh command line arg to possibly turn
-      // on DistributedMesh.  If the command line arg is not present, we pick ReplicatedMesh.
-      if (_app.getDistributedMeshOnCommandLine())
-        _use_distributed_mesh = true;
-
-      break;
-      // No default switch needed for MooseEnum
-  }
-
-  // If the user specifies 'nemesis = true' in the Mesh block, or they are using --use-split,
-  // we must use DistributedMesh.
-  if (_is_nemesis || _app.isUseSplit())
-    _use_distributed_mesh = true;
-
-  unsigned dim = getParam<MooseEnum>("dim");
-
-  if (_use_distributed_mesh)
-  {
-    _mesh = libmesh_make_unique<DistributedMesh>(_communicator, dim);
-    if (_partitioner_name != "default" && _partitioner_name != "parmetis")
-    {
-      _partitioner_name = "parmetis";
-      _partitioner_overridden = true;
-    }
-  }
-  else
-    _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
-
-  if (!getParam<bool>("allow_renumbering"))
-    _mesh->allow_renumbering(false);
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
@@ -387,6 +335,8 @@ void
 MooseMesh::prepare(bool force)
 {
   TIME_SECTION(_prepare_timer);
+
+  mooseAssert(_mesh, "The MeshBase has not been constructed");
 
   if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
   {
@@ -2003,9 +1953,73 @@ MooseMesh::clone() const
   mooseError("MooseMesh::clone() is no longer supported, use MooseMesh::safeClone() instead.");
 }
 
+std::unique_ptr<MeshBase>
+MooseMesh::constructMeshBase()
+{
+  switch (_mesh_parallel_type)
+  {
+    case 0: // PARALLEL
+      _use_distributed_mesh = true;
+      break;
+    case 1: // SERIAL
+      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _app.isUseSplit())
+        _parallel_type_overridden = true;
+      break;
+    case 2: // DEFAULT
+      // The user did not specify 'parallel_type = XYZ' in the input file,
+      // so we allow the --distributed-mesh command line arg to possibly turn
+      // on DistributedMesh.  If the command line arg is not present, we pick ReplicatedMesh.
+      if (_app.getDistributedMeshOnCommandLine())
+        _use_distributed_mesh = true;
+
+      break;
+      // No default switch needed for MooseEnum
+  }
+
+  // If the user specifies 'nemesis = true' in the Mesh block, or they are using --use-split,
+  // we must use DistributedMesh.
+  if (_is_nemesis || _app.isUseSplit())
+    _use_distributed_mesh = true;
+
+  unsigned dim = getParam<MooseEnum>("dim");
+
+  std::unique_ptr<MeshBase> mesh;
+  if (_use_distributed_mesh)
+  {
+    mesh = libmesh_make_unique<DistributedMesh>(_communicator, dim);
+    if (_partitioner_name != "default" && _partitioner_name != "parmetis")
+    {
+      _partitioner_name = "parmetis";
+      _partitioner_overridden = true;
+    }
+  }
+  else
+    mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
+
+  if (!getParam<bool>("allow_renumbering"))
+    mesh->allow_renumbering(false);
+
+  return mesh;
+}
+
+void
+MooseMesh::setMeshBase(std::unique_ptr<MeshBase> mesh_base)
+{
+  _mesh = std::move(mesh_base);
+}
+
 void
 MooseMesh::init()
 {
+  /**
+   * If the mesh base hasn't been constructed by the time init is called, just do it here.
+   * This can happen if somebody builds a mesh outside of the normal Action system. Forcing
+   * developers to create, construct the MeshBase, and then init separately is a bit much for casual
+   * use but it gives us the ability to run MeshGenerators in-between.
+   */
+  if (!_mesh)
+    _mesh = constructMeshBase();
+
   if (_app.isSplitMesh() && _use_distributed_mesh)
     mooseError("You cannot use the mesh splitter capability with DistributedMesh!");
 

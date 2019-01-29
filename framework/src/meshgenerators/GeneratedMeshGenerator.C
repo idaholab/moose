@@ -102,7 +102,7 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
 std::unique_ptr<MeshBase>
 GeneratedMeshGenerator::generate()
 {
-  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  auto mesh = _mesh->constructMeshBase();
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 

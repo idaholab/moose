@@ -18,9 +18,7 @@
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
-registerMooseAction("TensorMechanicsApp", LineElementAction, "meta_action");
-
-registerMooseAction("TensorMechanicsApp", LineElementAction, "setup_mesh_complete");
+registerMooseAction("TensorMechanicsApp", LineElementAction, "create_problem");
 
 registerMooseAction("TensorMechanicsApp", LineElementAction, "add_variable");
 
@@ -365,7 +363,7 @@ void
 LineElementAction::act()
 {
   // Get the subdomain involved in the action once the mesh setup is complete
-  if (_current_task == "setup_mesh_complete")
+  if (_current_task == "create_problem")
   {
     // get subdomain IDs
     for (auto & name : _subdomain_names)

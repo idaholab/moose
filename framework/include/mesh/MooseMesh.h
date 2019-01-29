@@ -96,6 +96,18 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const = 0;
 
   /**
+   * Method to construct a libMesh::MeshBase object that is normally set and used by the MooseMesh
+   * object during the "init()" phase.
+   */
+  std::unique_ptr<MeshBase> constructMeshBase();
+
+  /**
+   * Method to set the mesh_base object. If this method is NOT called prior to calling init(), a
+   * MeshBase object will be automatically constructed and set.
+   */
+  void setMeshBase(std::unique_ptr<MeshBase> mesh_base);
+
+  /**
    * Initialize the Mesh object.  Most of the time this will turn around
    * and call build_mesh so the child class can build the Mesh object.
    *
