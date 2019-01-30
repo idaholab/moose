@@ -63,13 +63,13 @@ validParams<MooseMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  MooseEnum mesh_parallel_type("DISTRIBUTED=0 REPLICATED DEFAULT", "DEFAULT");
+  MooseEnum parallel_type("DEFAULT REPLICATED DISTRIBUTED", "DEFAULT");
   params.addParam<MooseEnum>("parallel_type",
-                             mesh_parallel_type,
-                             "DISTRIBUTED: Always use libMesh::DistributedMesh "
-                             "REPLICATED: Always use libMesh::ReplicatedMesh "
+                             parallel_type,
                              "DEFAULT: Use libMesh::ReplicatedMesh unless --distributed-mesh is "
-                             "specified on the command line");
+                             "specified on the command line "
+                             "REPLICATED: Always use libMesh::ReplicatedMesh "
+                             "DISTRIBUTED: Always use libMesh::DistributedMesh");
 
   params.addParam<bool>(
       "allow_renumbering",
@@ -152,7 +152,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   : MooseObject(parameters),
     Restartable(this, "Mesh"),
     PerfGraphInterface(this),
-    _mesh_parallel_type(getParam<MooseEnum>("parallel_type")),
+    _parallel_type(getParam<MooseEnum>("parallel_type").getEnum<MooseMesh::ParallelType>()),
     _use_distributed_mesh(false),
     _distribution_overridden(false),
     _parallel_type_overridden(false),
@@ -216,7 +216,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   : MooseObject(other_mesh._pars),
     Restartable(this, "Mesh"),
     PerfGraphInterface(this, "CopiedMesh"),
-    _mesh_parallel_type(other_mesh._mesh_parallel_type),
+    _parallel_type(other_mesh._parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
     _mesh(other_mesh.getMesh().clone()),
@@ -1956,26 +1956,24 @@ MooseMesh::clone() const
 }
 
 std::unique_ptr<MeshBase>
-MooseMesh::constructMeshBase()
+MooseMesh::buildMeshBaseObject(ParallelType override_type)
 {
-  switch (_mesh_parallel_type)
+  switch (_parallel_type)
   {
-    case 0: // PARALLEL
-      _use_distributed_mesh = true;
-      break;
-    case 1: // SERIAL
-      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _app.isUseSplit())
-        _parallel_type_overridden = true;
-      break;
-    case 2: // DEFAULT
+    case ParallelType::DEFAULT:
       // The user did not specify 'parallel_type = XYZ' in the input file,
       // so we allow the --distributed-mesh command line arg to possibly turn
       // on DistributedMesh.  If the command line arg is not present, we pick ReplicatedMesh.
       if (_app.getDistributedMeshOnCommandLine())
         _use_distributed_mesh = true;
-
       break;
-      // No default switch needed for MooseEnum
+    case ParallelType::REPLICATED:
+      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis || _app.isUseSplit())
+        _parallel_type_overridden = true;
+      break;
+    case ParallelType::DISTRIBUTED:
+      _use_distributed_mesh = true;
+      break;
   }
 
   // If the user specifies 'nemesis = true' in the Mesh block, or they are using --use-split,
@@ -1988,6 +1986,10 @@ MooseMesh::constructMeshBase()
   std::unique_ptr<MeshBase> mesh;
   if (_use_distributed_mesh)
   {
+    if (override_type == ParallelType::REPLICATED)
+      mooseError("The requested override_type of \"Replicated\" may not be used when MOOSE is "
+                 "running with a DistributedMesh");
+
     mesh = libmesh_make_unique<DistributedMesh>(_communicator, dim);
     if (_partitioner_name != "default" && _partitioner_name != "parmetis")
     {
@@ -1996,7 +1998,13 @@ MooseMesh::constructMeshBase()
     }
   }
   else
+  {
+    if (override_type == ParallelType::DISTRIBUTED)
+      mooseError("The requested override_type of \"Distributed\" may not be used when MOOSE is "
+                 "running with a DistributedMesh");
+
     mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
+  }
 
   if (!getParam<bool>("allow_renumbering"))
     mesh->allow_renumbering(false);
@@ -2020,7 +2028,7 @@ MooseMesh::init()
    * use but it gives us the ability to run MeshGenerators in-between.
    */
   if (!_mesh)
-    _mesh = constructMeshBase();
+    _mesh = buildMeshBaseObject();
 
   if (_app.isSplitMesh() && _use_distributed_mesh)
     mooseError("You cannot use the mesh splitter capability with DistributedMesh!");

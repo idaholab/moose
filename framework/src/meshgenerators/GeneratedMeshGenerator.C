@@ -103,7 +103,7 @@ std::unique_ptr<MeshBase>
 GeneratedMeshGenerator::generate()
 {
   // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
-  auto mesh = _mesh->constructMeshBase();
+  auto mesh = _mesh->buildMeshBaseObject();
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 

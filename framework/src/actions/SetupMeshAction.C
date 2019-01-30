@@ -220,9 +220,9 @@ SetupMeshAction::act()
   }
   else if (_current_task == "set_mesh_base")
   {
-    _mesh->setMeshBase(_mesh->constructMeshBase());
+    _mesh->setMeshBase(_mesh->buildMeshBaseObject());
     if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
-      _displaced_mesh->setMeshBase(_displaced_mesh->constructMeshBase());
+      _displaced_mesh->setMeshBase(_displaced_mesh->buildMeshBaseObject());
   }
   else if (_current_task == "init_mesh")
   {

@@ -78,7 +78,7 @@ protected:
     mesh_params.set<std::string>("_type") = "GeneratedMesh";
     mesh_params.set<MooseEnum>("dim") = "3";
     _mesh = libmesh_make_unique<GeneratedMesh>(mesh_params);
-    _mesh->setMeshBase(_mesh->constructMeshBase());
+    _mesh->setMeshBase(_mesh->buildMeshBaseObject());
 
     InputParameters problem_params = _factory.getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
