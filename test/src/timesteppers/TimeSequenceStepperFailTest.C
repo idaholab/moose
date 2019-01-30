@@ -26,7 +26,7 @@ TimeSequenceStepperFailTest::TimeSequenceStepperFailTest(const InputParameters &
 }
 
 bool
-TimeSequenceStepperFailTest::converged()
+TimeSequenceStepperFailTest::converged() const
 {
   // The goal is to fail exactly one timestep which matches its
   // original sequence point order, other than the initial condition.

@@ -592,7 +592,7 @@ Transient::estimateTimeError()
 }
 
 bool
-Transient::lastSolveConverged()
+Transient::lastSolveConverged() const
 {
   return _time_stepper->converged();
 }

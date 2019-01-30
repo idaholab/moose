@@ -27,6 +27,8 @@ public:
 
   virtual void execute() override;
 
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
+
 protected:
   virtual void takeStep();
 
@@ -36,6 +38,7 @@ protected:
   const Real & _pfactor;
   bool _output_pi;
   bool _output_after_pi;
+  bool _last_solve_converged;
 };
 
 #endif // NONLINEAREIGEN_H

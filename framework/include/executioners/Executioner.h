@@ -108,7 +108,7 @@ public:
   /**
    * Whether or not the last solve converged.
    */
-  virtual bool lastSolveConverged();
+  virtual bool lastSolveConverged() const = 0;
 
   /// Return underlining PicardSolve object.
   PicardSolve & picardSolve() { return _picard_solve; }

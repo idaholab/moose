@@ -174,7 +174,7 @@ TimeStepper::rejectStep()
 }
 
 bool
-TimeStepper::converged()
+TimeStepper::converged() const
 {
   return _converged;
 }

@@ -67,7 +67,7 @@ public:
   /**
    * Whether or not the last solve converged.
    */
-  virtual bool lastSolveConverged() override;
+  virtual bool lastSolveConverged() const override;
 
   virtual void preExecute() override;
 

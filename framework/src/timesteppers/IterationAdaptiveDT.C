@@ -272,7 +272,7 @@ IterationAdaptiveDT::computeFailedDT()
 }
 
 bool
-IterationAdaptiveDT::converged()
+IterationAdaptiveDT::converged() const
 {
   if (!_reject_large_step)
     return TimeStepper::converged();
@@ -309,7 +309,7 @@ IterationAdaptiveDT::converged()
 }
 
 void
-IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT)
+IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT) const
 {
   if (_pps_value && _t_step > 1)
   {
