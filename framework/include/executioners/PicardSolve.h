@@ -128,6 +128,7 @@ protected:
   bool _update_xfem_at_timestep_begin;
 
 private:
+  /// Timer for Picard iteration
   const PerfID _picard_timer;
 
   ///@{ Variables used by the Picard iteration
@@ -141,6 +142,7 @@ private:
   std::vector<Real> _picard_timestep_end_norm;
   /// Status of Picard solve
   MoosePicardConvergenceReason _picard_status;
+  ///@}
 
   /// Counter for number of xfem updates that have been performed in the current step
   unsigned int _xfem_update_count;
