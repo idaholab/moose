@@ -109,18 +109,85 @@ public:
    */
   virtual bool lastSolveConverged();
 
-  class PicardSolve : public MooseObject
+  class PicardSolve : public MooseObject, public PerfGraphInterface
   {
+  public:
     PicardSolve(const InputParameters & parameters);
 
-    bool solve() { return true; }
+    /**
+     * Picard solve the FEProblem.
+     * @return True if solver is converged.
+     */
+    bool solve();
+
+    /// Enumeration for Picard convergence reasons
+    enum class MoosePicardConvergenceReason
+    {
+      UNSOLVED = 0,
+      CONVERGED_NONLINEAR = 1,
+      CONVERGED_ABS = 2,
+      CONVERGED_RELATIVE = 3,
+      CONVERGED_CUSTOM = 4,
+      DIVERGED_MAX_ITS = -1,
+      DIVERGED_NONLINEAR = -2,
+      DIVERGED_FAILED_MULTIAPP = -3
+    };
+
+    /**
+     * Get the number of Picard iterations performed
+     * Because this returns the number of Picard iterations, rather than the current
+     * iteration count (which starts at 0), increment by 1.
+     *
+     * @return Number of Picard iterations performed
+     */
+    unsigned int numPicardIts() const { return _picard_it + 1; }
+
+    /// Check the solver status
+    MoosePicardConvergenceReason checkConvergence() const { return _picard_status; }
+
+    /// This function checks the _xfem_repeat_step flag set by solve.
+    bool XFEMRepeatStep() const { return _xfem_repeat_step; }
+
+    /// Clear Picard status
+    void clearPicardStatus() { _picard_status = MoosePicardConvergenceReason::UNSOLVED; }
+
+    /// Whether or not this has Picard iterations
+    bool hasPicardIteration() { return _has_picard_its; }
 
   protected:
+    /**
+     * Perform one Picard iteration or a full solve.
+     *
+     * @param begin_norm_old Residual norm after timestep_begin execution of previous Picard
+     * iteration
+     * @param begin_norm     Residual norm after timestep_begin execution
+     * @param end_norm_old   Residual norm after timestep_end execution of previous Picard iteration
+     * @param end_norm       Residual norm after timestep_end execution
+     * @param relax          Whether or not we do relaxation in this iteration
+     * @param relaxed_dofs   DoFs to be relaxed
+     *
+     * @return True if both nonlinear solve and the execution of multiapps are successful.
+     *
+     * Note: this function also set _xfem_repeat_step flag for XFEM. It tracks _xfem_update_count
+     * state.
+     * FIXME: The proper design will be to let XFEM use Picard iteration to control the execution.
+     */
+    bool solveStep(Real begin_norm_old,
+                   Real & begin_norm,
+                   Real end_norm_old,
+                   Real & end_norm,
+                   bool relax,
+                   const std::set<dof_id_type> & relaxed_dofs);
+
     /// Reference to FEProblem
     FEProblemBase & _problem;
+    /// Reference to nonlinear system base for faster access
+    NonlinearSystemBase & _nl;
 
     /// Maximum Picard iterations
     unsigned int _picard_max_its;
+    /// Whether or not we activate Picard iteration
+    bool _has_picard_its;
     /// Relative tolerance on residual norm
     Real _picard_rel_tol;
     /// Absolute tolerance on residual norm
@@ -138,6 +205,8 @@ public:
     bool _update_xfem_at_timestep_begin;
 
   private:
+    const PerfID _picard_timer;
+
     ///@{ Variables used by the Picard iteration
     /// Picard iteration counter
     unsigned int _picard_it;
@@ -147,7 +216,16 @@ public:
     std::vector<Real> _picard_timestep_begin_norm;
     /// Full history of residual norm after evaluation of timestep_end
     std::vector<Real> _picard_timestep_end_norm;
+    /// Status of Picard solve
+    MoosePicardConvergenceReason _picard_status;
+
+    /// Counter for number of xfem updates that have been performed in the current step
+    unsigned int _xfem_update_count;
+    /// Whether step should be repeated due to xfem modifying the mesh
+    bool _xfem_repeat_step;
   };
+
+  PicardSolve & picardSolve() { return _picard_solve; }
 
 protected:
   /**
@@ -161,6 +239,8 @@ protected:
                                     const std::string execute_on = "");
 
   FEProblemBase & _fe_problem;
+
+  PicardSolve _picard_solve;
 
   /// Initial Residual Variables
   Real _initial_residual_norm;
