@@ -10,10 +10,10 @@
 
 import collections
 
-from MooseDocs.base import components
+from MooseDocs.base import components, renderers
 from MooseDocs.common import exceptions
 from MooseDocs.extensions import command, table, floats
-from MooseDocs.tree import tokens, html
+from MooseDocs.tree import tokens, html, latex
 
 def make_extension(**kwargs):
     return AcronymExtension(**kwargs)
@@ -62,6 +62,10 @@ class AcronymExtension(command.CommandExtension):
                 self.__used.add(key)
             acro = AcronymItem(key=key, name=acro, used=used)
 
+        else:
+            msg = "The acronym '{}' was not found."
+            raise exceptions.MooseDocsException(msg, key)
+
         return acro
 
     def getAcronyms(self, complete=False):
@@ -78,6 +82,9 @@ class AcronymExtension(command.CommandExtension):
         self.addCommand(reader, AcronymListComponent())
         renderer.add('AcronymToken', RenderAcronymToken())
         renderer.add('AcronymListToken', RenderAcronymListToken())
+
+        if isinstance(renderer, renderers.LatexRenderer):
+            renderer.addPackage('tabulary')
 
 class AcronymComponent(command.CommandComponent):
     COMMAND = 'acro'
@@ -104,19 +111,18 @@ class AcronymListComponent(command.CommandComponent):
     def createToken(self, parent, info, page):
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   **self.attributes)
-        AcronymListToken(flt,
-                         complete=self.settings['complete'],
-                         heading=self.settings['heading'])
+        acro = AcronymListToken(flt,
+                                complete=self.settings['complete'],
+                                heading=self.settings['heading'])
+        if flt is parent:
+            acro.attributes.update(**self.attributes)
+
         return parent
 
 class RenderAcronymToken(components.RenderComponent):
 
     def _createSpan(self, parent, token, page):
         acro = self.extension.getAcronym(token['acronym'])
-        if acro is None:
-            msg = "The acronym '{}' was not found."
-            raise exceptions.MooseDocsException(msg, token['acronym'])
-
         content = unicode(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
         return html.Tag(parent, 'span', string=content), acro
 
@@ -132,7 +138,9 @@ class RenderAcronymToken(components.RenderComponent):
             span['data-delay'] = 50
 
     def createLatex(self, parent, token, page):
-        pass
+        acro = self.extension.getAcronym(token['acronym'])
+        content = unicode(acro.key) if acro.used else u'{} ({})'.format(acro.name, acro.key)
+        latex.String(parent, content=content)
 
 class RenderAcronymListToken(components.RenderComponent):
 
@@ -146,4 +154,10 @@ class RenderAcronymListToken(components.RenderComponent):
         self.renderer.render(parent, tbl, page)
 
     def createLatex(self, parent, token, page):
-        pass
+
+        env = latex.Environment(parent, 'tabulary',
+                                args=[latex.Brace(None, string=u'\\linewidth', escape=False),
+                                      latex.Brace(None, string=u'LL')])
+
+        for key, value in self.extension.getAcronyms(True).iteritems():
+            latex.String(env, content=u'{}&{}\\\\'.format(key, value), escape=False)

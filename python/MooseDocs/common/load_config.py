@@ -40,10 +40,11 @@ DEFAULT_EXTENSIONS = ['MooseDocs.extensions.core',
                       'MooseDocs.extensions.materialicon',
                       'MooseDocs.extensions.acronym',
                       'MooseDocs.extensions.content',
-                      'MooseDocs.extensions.plotly',
+                      'MooseDocs.extensions.graph',
                       'MooseDocs.extensions.heading',
                       'MooseDocs.extensions.gallery',
-                      'MooseDocs.extensions.navigation']
+                      'MooseDocs.extensions.navigation',
+                      'MooseDocs.extensions.template']
 
 DEFAULT_READER = 'MooseDocs.base.MarkdownReader'
 DEFAULT_RENDERER = 'MooseDocs.base.MarkdownReader'
@@ -141,6 +142,9 @@ def _yaml_load_extensions(config):
 
         if isinstance(settings, dict):
             ext_configs[ext_type].update(settings)
+
+        elif isinstance(settings, str) and (settings == 'disable'):
+            ext_configs[ext_type]['active'] = False
 
         elif isinstance(settings, str) and (settings == 'default'):
             continue

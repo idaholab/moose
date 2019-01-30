@@ -168,7 +168,7 @@ class ComponentObject(object):
         check_type("component", comp, MooseDocs.base.components.Component)
         self.__components.append(comp)
 
-class TranslatorMixin(object):
+class TranslatorObject(object):
     """
     Mixin for accessing translator (e.g., Extensions and Components).
     """

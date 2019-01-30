@@ -14,14 +14,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Package Extension"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Package", 
                         "recursive": true
                     }, 
@@ -50,7 +42,6 @@
         {
             "attributes": {
                 "recursive": true, 
-                "tooltip": true, 
                 "url": "http://www.mooseframework.org/moose_packages/moose-environment.pkg"
             }, 
             "children": [
@@ -216,6 +207,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -234,6 +226,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

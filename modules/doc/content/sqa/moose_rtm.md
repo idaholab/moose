@@ -1,6 +1,7 @@
-!sqa load template=system_requirements_traceability_matrix.md.template
-project=MOOSE
+!template load file=system_requirements_traceability_matrix.template.md
+               project=MOOSE
 
-!sqa! item key=requirements-traceability-matrix
+!template! item key=requirements-traceability-matrix
 !sqa requirements
-!sqa-end!
+!template-end!
+

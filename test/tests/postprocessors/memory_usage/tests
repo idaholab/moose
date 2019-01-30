@@ -3,7 +3,7 @@
     type = CheckFiles
     input = print_memory_usage.i
     check_files = print_memory_usage_out.csv
-    issues = '8619'
+    issues = '#8619'
     requirement = "MOOSE shall provide a postprocessor to measure physical and virtual memory usage and the major page fault count, depending on the operating system's ability to make those values available"
     design = '/MemoryUsage.md'
   [../]
@@ -11,7 +11,7 @@
     type = CheckFiles
     input = vector_memory_usage.i
     check_files = vector_memory_usage_out_mem_0001.csv
-    issues = '12333'
+    issues = '#12333'
     requirement = "MOOSE shall provide a vectorpostprocessor to on each rank measure physical and virtual memory usage, major page fault count, and total available ram available, depending on the operating system's ability to make those values available"
     design = '/VectorMemoryUsage.md'
   [../]

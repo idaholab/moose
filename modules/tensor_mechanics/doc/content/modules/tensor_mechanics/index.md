@@ -44,7 +44,7 @@ to learn more about the tensor mechanics module and to get started with your own
 continuum mechanics and combined physics simulations.
 
 !row!
-!col! class=s12 m4 l4 icon=device_hub
+!col! small=12 medium=4 large=4 icon=device_hub
 
 ### Plug-n-Play Structure Overview class=center style=font-weight:200;
 
@@ -60,7 +60,7 @@ These types of code classes make up the core of the tensor mechanics module.
 
 !col-end!
 
-!col! class=s12 m4 l4 icon=school
+!col! small=12 medium=4 large=4 icon=school
 
 ### Examples and Tutorials class=center style=font-weight:200;
 
@@ -75,7 +75,7 @@ Now you're ready to start creating your own mechanics simulations.
 
 !col-end!
 
-!col! class=s12 m4 l4 icon=storage
+!col! small=12 medium=4 large=4 icon=storage
 
 ### Advanced Features class=center style=font-weight:200;
 

@@ -14,14 +14,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Acronym Extension"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Acronym", 
                         "recursive": true
                     }, 
@@ -49,9 +41,12 @@
         }, 
         {
             "attributes": {
+                "class": "", 
                 "complete": false, 
                 "heading": true, 
-                "recursive": true
+                "id": "", 
+                "recursive": true, 
+                "style": ""
             }, 
             "children": [], 
             "name": "AcronymListToken"
@@ -164,6 +159,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -182,6 +178,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

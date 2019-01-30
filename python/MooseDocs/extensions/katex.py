@@ -39,6 +39,15 @@ class KatexExtension(components.Extension):
                                    r"the \\label content.")
         return config
 
+    def __init__(self, *args, **kwargs):
+        components.Extension.__init__(self, *args, **kwargs)
+        self.__labels = set()
+
+    @property
+    def labels(self):
+        """Set of labels used by latex."""
+        return self.__labels
+
     def extend(self, reader, renderer):
         """
         Add the necessary components for reading and rendering LaTeX.
@@ -48,22 +57,27 @@ class KatexExtension(components.Extension):
         reader.addInline(KatexInlineEquationComponent(), location='_begin')
         renderer.add('LatexBlockEquation', RenderLatexEquation())
         renderer.add('LatexInlineEquation', RenderLatexEquation())
+        renderer.add(u'ShortcutLink', RenderEquationLink())
 
         if isinstance(renderer, renderers.HTMLRenderer):
             renderer.addCSS('katex', "contrib/katex/katex.min.css")
             renderer.addJavaScript('katex', "contrib/katex/katex.min.js")
 
     def postTokenize(self, ast, page, meta, reader):
+        self.__labels = set()
         count = 0
         func = lambda n: (n.name == 'LatexBlockEquation') and n['numbered']
         for node in anytree.PreOrderIter(ast, filter_=func):
             count += 1
             node.set('number', count)
             if node['label']:
-                core.Shortcut(ast,
-                              key=node['label'],
-                              string='{} ({})'.format(self.get('prefix'), count),
-                              link=u'#{}'.format(node['bookmark']))
+                if isinstance(self.translator.renderer, renderers.LatexRenderer):
+                    self.labels.add(node['label'])
+                else:
+                    core.Shortcut(ast,
+                                  key=node['label'],
+                                  string='{} ({})'.format(self.get('prefix'), count),
+                                  link=u'#{}'.format(node['bookmark']))
 
 class KatexBlockEquationComponent(components.TokenComponent):
     """
@@ -79,7 +93,7 @@ class KatexBlockEquationComponent(components.TokenComponent):
         """Create a LatexBlockEquation token."""
 
         # Raw LaTeX appropriate for passing to KaTeX render method
-        tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ').encode('string-escape')
+        tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ')
 
         # Define a unique equation ID for use by KaTeX
         eq_id = 'moose-equation-{}'.format(uuid.uuid4())
@@ -109,7 +123,7 @@ class KatexInlineEquationComponent(components.TokenComponent):
         """Create LatexInlineEquation"""
 
         # Raw LaTeX appropriate for passing to KaTeX render method
-        tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ').encode('string-escape')
+        tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ')
 
         # Define a unique equation ID for use by KaTeX
         eq_id = 'moose-equation-{}'.format(uuid.uuid4())
@@ -144,15 +158,29 @@ class RenderLatexEquation(components.RenderComponent):
         script = html.Tag(div, 'script')
         content = u'var element = document.getElementById("%s");' % token['bookmark']
         content += u'katex.render("%s", element, {displayMode:%s,throwOnError:false});' % \
-                   (token['tex'], display)
+                   (token['tex'].encode('string-escape'), display)
         html.String(script, content=content)
 
         return parent
 
     def createLatex(self, parent, token, page): #pylint: disable=no-self-use
         if token.name == 'LatexInlineEquation':
-            latex.String(parent, content=u'${}$'.format(token['tex']))
+            latex.String(parent, content=u'${}$'.format(token['tex']), escape=False)
         else:
             cmd = 'equation' if token['number'] else 'equation*'
-            latex.Environment(parent, cmd, string=unicode(token['tex']))
+            env = latex.Environment(parent, cmd)
+            if token['label']:
+                latex.Command(env, 'label', string=token['label'], end='\n')
+            latex.String(env, content=token['tex'], escape=False)
+
         return parent
+
+class RenderEquationLink(core.RenderShortcutLink):
+
+    def createLatex(self, parent, token, page):
+        key = token['key']
+        if key in self.extension.labels:
+            latex.String(parent, content=self.extension['prefix'] + '~', escape=False)
+            latex.Command(parent, 'eqref', string=key)
+            return parent
+        return core.RenderShortcutLink.createLatex(self, parent, token, page)

@@ -1,7 +1,7 @@
-!sqa load template=system_requirement_specification.md.template
-project=MOOSE
+!template load file=system_requirement_specification.template.md
+               project=MOOSE
 
-!sqa! item key=system-purpose
+!template! item key=system-purpose
 The !!acro MOOSE!! is a tool for solving complex coupled
 Multiphysics equations using the finite element method. !!acro MOOSE!! uses an object-oriented design
 to abstract data structure management, parallelism, threading and compiling while providing an easy
@@ -24,9 +24,9 @@ and engineers will be free to implement completely new algorithms using pieces o
 possible, and extending the framework's capabilities where it makes sense to do so. Commercial
 applications do not have this capability, and instead opt for either a more rigid parameter system or
 a limited application-specific metalanguage.
-!sqa-end!
+!template-end!
 
-!sqa! item key=system-scope
+!template! item key=system-scope
 !!acro MOOSE!!'s scope is to provide a set of interfaces for building !!acro FEM!!
 simulations. Abstractions to all underlying libraries are provided.
 
@@ -84,10 +84,10 @@ opportunities. !!acro MOOSE!! maintains a set of objects that hide parallel inte
 advanced spatial and temporal coupling algorithms in the framework.  This accessible approach places
 developmental technology into the hands of scientists and engineers, which can speed the pace of
 scientific discovery.
-!sqa-end!
+!template-end!
 
 
-!sqa! item key=user-characteristics
+!template! item key=user-characteristics
 
 - +Framework Developers+: These are the core developers of the framework. They will be responsible
   for following and enforcing the appropriate software development standards. They will be
@@ -103,40 +103,40 @@ scientific discovery.
   they perform.  These users may interact with developers of the system requesting new features and
   reporting bugs found and will typically make heavy use of the input file format.
 
-!sqa-end!
+!template-end!
 
 
-!sqa! item key=assumptions-and-dependencies
+!template! item key=assumptions-and-dependencies
 The software should be designed with the fewest possible constraints. Ideally the software should run
 on a wide variety of evolving hardware so it should follow well-adopted standards and guidelines. The
 software should run on any !!acro POSIX!! compliant system. The software will also make use FEM and
 numerical libraries that run on !!acro POSIX!! systems as well. The main interface for the software
 will be command line based with no assumptions requiring advanced terminal capabilities such as
 coloring and line control.
-!sqa-end!
+!template-end!
 
-!sqa item key=definitions-and-acronyms
+!template item key=definitions-and-acronyms
 
-!sqa! item key=definitions
+!template! item key=definitions
 - +Verification+: (1) The process of: evaluating a system or component to determine whether the
   products of a given development phase satisfy the conditions imposed at the start of that
   phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews,
-  system tests) [citep:ISO-systems-software].
-!sqa-end!
+  system tests) [citep!ISO-systems-software].
+!template-end!
 
-!sqa! item key=acronyms
+!template! item key=acronyms
 !acronym list
-!sqa-end!
+!template-end!
 
 
-!sqa! item key=system-requirements
+!template! item key=system-requirements
 !alert construction
 The creation of the requirements for !!acro MOOSE!! is an ongoing progress. The
 [#functional-requirements] are being generated from source code and soon all requirements should
 follow this format.
-!sqa-end!
+!template-end!
 
-!sqa! item key=minimum-requirements
+!template! item key=minimum-requirements
 - A !!acro POSIX!! compliant Unix including the two most recent versions of MacOS and most current
   versions of Linux.
 - 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
@@ -144,41 +144,41 @@ follow this format.
 - C++11 compatible compiler (GCC, Clang)
 - Python 2.6+
 - Git
-!sqa-end!
+!template-end!
 
-!sqa! item key=functional-requirements
+!template! item key=functional-requirements
 !sqa requirements link=False
-!sqa-end!
+!template-end!
 
-!sqa! item key=useability-requirements
+!template! item key=useability-requirements
 !sqa requirements-matrix prefix=U
 - The system will be command-line and input file driven.
 - The system shall return usage messages when unidentified arguments or incorrectly used arguments are passed.
 - The system shall provide diagnostics when the input file fails to parse, or the format is incorrect.
 - The system will provide on screen information about the simulation and performance characteristics of the solves under normal operating conditions.
-!sqa-end!
+!template-end!
 
-!sqa! item key=performance-requirements
+!template! item key=performance-requirements
 !sqa requirements-matrix prefix=P
 - The system will support multi-process distributed memory execution.
 - The system will support multi-process shared memory execution.
 - The system will support execution on Unix-based laptops.
 - The system will support execution on Unix-based workstation systems.
 - The system will support execution on large Unix-based cluster systems.
-!sqa-end!
+!template-end!
 
-!sqa! item key=system-interfaces
+!template! item key=system-interfaces
 !sqa requirements-matrix prefix=S
 - The system shall support POSIX compliant systems.
 - The system shall support the Message Passing Interface (MPI) standard.
 - The system shall support POSIX ``pthreads''.
 - The system shall support Intel Threaded Building Blocks (TBB) interface.
 - The system shall support the OpenMP threading interface.
-!sqa-end!
+!template-end!
 
 
 
-!sqa! item key=maintainability
+!template! item key=maintainability
 - The latest working version (defined as the version that passes all tests in the current regression
   test suite) shall be publicly available at all times through the repository host provider.
 - Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The
@@ -188,18 +188,19 @@ follow this format.
   (within two business days).
 - The core framework in its entirety will be made publicly available under the !!acro LGPL!!
   version 2.0 license.
-!sqa-end!
+!template-end!
 
 
-!sqa item key=reliability
+!template item key=reliability
 The regression test suite will cover at least 80% of all lines of code at all times. Known
 regressions will be recorded and tracked (see [#maintainability]) to an independent and
 satisfactory resolution.
 
-!sqa item key=information-management
+!template item key=information-management
 The core framework in its entirety will be made publicly available on an appropriate repository
 hosting site. Backups and security services will be provided by the hosting service.
 
-!sqa item key=verification
+!template item key=verification
 The regression test suite will employ several verification tests using comparison against known
 analytical solutions, the method of manufactured solutions, and convergence rate analysis.
+

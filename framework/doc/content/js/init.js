@@ -1,7 +1,8 @@
 (function($){
     $(function(){
-
+        $('.tooltipped').tooltip();
         $('.modal').modal();
+        $('.collapsible').collapsible();
         $('.slider').slider();
         $('.dropdown-trigger').dropdown({
             inDuration: 300,
@@ -11,6 +12,7 @@
             coverTrigger: false, // Displays dropdown below the button
             alignment: 'left' // Displays dropdown with edge aligned to the left of button
         });
+
 
    // $('.collapsible').collapsible({
    //   onOpen: function(el) {var icons = $(el).find('i'); $(icons[0]).text('keyboard_arrow_up');},

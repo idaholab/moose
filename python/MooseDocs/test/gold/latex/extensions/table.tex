@@ -1,6 +1,37 @@
 
 \chapter{\label{table-extensions}Table Extensions}
-\chapter{\label{center}Center}
-\chapter{\label{left}Left}
-\chapter{\label{right}Right}
-\chapter{\label{float}Float}
+\section{\label{center}Center}\par\begin{tabulary}{\textwidth}{CC}
+\toprule
+Heading 1 &Heading 2 \\
+\midrule
+Item 1 &Item 2 \\
+\bottomrule
+\end{tabulary}
+
+\section{\label{left}Left}\par\begin{tabulary}{\textwidth}{LL}
+\toprule
+Heading 1 &Heading 2 \\
+\midrule
+Item 1 &Item 2 \\
+\bottomrule
+\end{tabulary}
+
+\section{\label{right}Right}\par\begin{tabulary}{\textwidth}{RR}
+\toprule
+Heading 1 &Heading 2 \\
+\midrule
+Item 1 &Item 2 \\
+\bottomrule
+\end{tabulary}
+
+\section{\label{float}Float}
+\begin{table}
+\center\caption{\label{float-table}This has a caption.}\par\begin{tabulary}{\textwidth}{L}
+\toprule
+H \\
+\midrule
+1 \\
+\bottomrule
+\end{tabulary}
+
+\end{table}

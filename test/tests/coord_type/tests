@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#4531 6629'
+  issues = '#4531 #6629'
   design = 'syntax/Problem/index.md'
   [./rz-y-rotation]
     # Simple diffusion with rotation around the y-axis

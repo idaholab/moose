@@ -5,9 +5,9 @@
 ## Description
 
 This material generates a surface tension tensor in the interface between two phases
-in the Kim-Kim-Suzuki (KKS) phase-field model ([cite:kim_phase-field_1999]).
+in the Kim-Kim-Suzuki (KKS) phase-field model ([cite!kim_phase-field_1999]).
 The surface tension consists of two orthogonal principal components lying in plane
-of the interface. The approach is based on the formulation described in [cite:Levitas2011].
+of the interface. The approach is based on the formulation described in [cite!Levitas2011].
 (For solid surfaces where the surface stress is to be specifed rather than surface tension,
   use the [ComputeInterfaceStress](ComputeInterfaceStress.md) kernel instead.)
 

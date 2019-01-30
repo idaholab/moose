@@ -10,18 +10,20 @@
 
 import os
 import re
-
+import logging
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.base import components
 from MooseDocs.extensions import core, floats, heading
-from MooseDocs.tree import tokens
+from MooseDocs.tree import tokens, latex
 
 def make_extension(**kwargs):
     return AutoLinkExtension(**kwargs)
 
 PAGE_LINK_RE = re.compile(r'(?P<filename>.*?\.md)?(?P<bookmark>#.*)?', flags=re.UNICODE)
+LOG = logging.getLogger(__name__)
 
+SourceLink = tokens.newToken('SourceLink')
 LocalLink = tokens.newToken('LocalLink', bookmark=u'')
 AutoLink = tokens.newToken('AutoLink', page=u'', bookmark=u'', optional=False)
 
@@ -47,6 +49,7 @@ class AutoLinkExtension(components.Extension):
 
         renderer.add('LocalLink', RenderLocalLink())
         renderer.add('AutoLink', RenderAutoLink())
+        renderer.add('SourceLink', RenderSourceLink())
 
 def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=False):
     match = PAGE_LINK_RE.search(info[key])
@@ -64,11 +67,12 @@ def createTokenHelper(key, parent, info, page, use_key_in_modal=False, optional=
     else:
         source = common.project_find(info[key])
         if len(source) == 1:
+            src_link = SourceLink(parent)
             src = unicode(source[0])
             content = common.fix_moose_header(common.read(os.path.join(MooseDocs.ROOT_DIR, src)))
             code = core.Code(None, language=common.get_language(src), content=content)
             local = src.replace(MooseDocs.ROOT_DIR, '')
-            link = floats.create_modal_link(parent, content=code, title=local)
+            link = floats.create_modal_link(src_link, content=code, title=local)
             if use_key_in_modal:
                 tokens.String(link, content=os.path.basename(info[key]))
             return link
@@ -120,10 +124,7 @@ class RenderLinkBase(components.RenderComponent):
 
         # Handle 'optional' linking
         if desired is None:
-            tok = tokens.Token(None)
-            for child in token.copy():
-                child.parent = tok
-            self.renderer.render(parent, tok, page)
+            self._createOptionalContent(parent, token, page)
             return None
 
         url = unicode(desired.relativeDestination(page))
@@ -135,17 +136,52 @@ class RenderLinkBase(components.RenderComponent):
             head = heading.find_heading(self.translator, desired, bookmark)
 
             if head is not None:
-                for child in head:
-                    child.parent = link
+                head.copyToToken(link)
             else:
                 tokens.String(link, content=url)
-
         else:
-            for child in token.copy():
-                child.parent = link
+            token.copyToToken(link)
 
         self.renderer.render(parent, link, page)
         return None
+
+    def createLatexHelper(self, parent, token, page, desired):
+        func = lambda p, t, u, l: latex.Command(p, 'hyperref', token=t,
+                                                args=[latex.Bracket(string=l)])
+        # Create optional content
+        bookmark = token['bookmark']
+        if desired is None:
+            self._createOptionalContent(parent, token, page)
+            return None
+
+        url = unicode(desired.relativeDestination(page))
+        head = heading.find_heading(self.translator, desired, bookmark)#
+
+        if head is None:
+            msg = "The linked page ({}) does not contain a heading, so the filename " \
+                  "is being utilized.".format(desired.local)
+            LOG.warning(common.report_error(msg, page.source, token.info.line, token.info[0],
+                                            prefix='WARNING'))
+
+        else:
+            label = head.get('id') or re.sub(r' +', r'-', head.text().lower())
+            href = func(parent, token, url, label)
+
+            tok = tokens.Token(None)
+            if len(token.children) == 0:
+                head.copyToToken(tok)
+            else:
+                token.copyToToken(tok)
+
+            self.renderer.render(href, tok, page)
+
+        return None
+
+    def _createOptionalContent(self, parent, token, page):
+        """Renders text without link for optional link."""
+        tok = tokens.Token(None)
+        token.copyToToken(tok)
+        self.renderer.render(parent, tok, page)
 
 class RenderLocalLink(RenderLinkBase):
     """
@@ -155,7 +191,7 @@ class RenderLocalLink(RenderLinkBase):
         return self.createHTMLHelper(parent, token, page, page)
 
     def createLatex(self, parent, token, page):
-        pass
+        return self.createLatexHelper(parent, token, page, page)
 
 class RenderAutoLink(RenderLinkBase):
     """
@@ -166,4 +202,16 @@ class RenderAutoLink(RenderLinkBase):
         return self.createHTMLHelper(parent, token, page, desired)
 
     def createLatex(self, parent, token, page):
-        pass
+        desired = self.translator.findPage(token['page'], throw_on_zero=not token['optional'])
+        return self.createLatexHelper(parent, token, page, desired)
+
+class RenderSourceLink(components.RenderComponent):
+
+    def createHTML(self, parent, token, page):
+        return parent
+
+    def createLatex(self, parent, token, page):
+        root = tokens.Token(None)
+        token(0).copyToToken(root)
+        self.renderer.render(parent, root, page)
+        return None
