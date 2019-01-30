@@ -134,6 +134,9 @@ MultiAppInterpolationTransfer::execute()
         for (const auto & from_node : from_mesh->local_node_ptr_range())
         {
           // Assuming LAGRANGE!
+          if (from_node->n_comp(from_sys_num, from_var_num) == 0)
+            continue;
+
           dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
 
           src_pts.push_back(*from_node);
@@ -197,6 +200,9 @@ MultiAppInterpolationTransfer::execute()
                 Real value = vals.front();
 
                 // The zero only works for LAGRANGE!
+                if (node->n_comp(from_sys_num, from_var_num) == 0)
+                  continue;
+
                 dof_id_type dof = node->dof_number(sys_num, var_num, 0);
 
                 solution.set(dof, value);
@@ -332,6 +338,9 @@ MultiAppInterpolationTransfer::execute()
           for (const auto & from_node : from_mesh->local_node_ptr_range())
           {
             // Assuming LAGRANGE!
+            if (from_node->n_comp(from_sys_num, from_var_num) == 0)
+              continue;
+
             dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
 
             src_pts.push_back(*from_node + app_position);
@@ -344,6 +353,9 @@ MultiAppInterpolationTransfer::execute()
                as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
           {
             // Assuming LAGRANGE!
+            if (from_element->n_comp(from_sys_num, from_var_num) == 0)
+              continue;
+
             dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, 0);
 
             src_pts.push_back(from_element->centroid() + app_position);
