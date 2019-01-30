@@ -270,3 +270,18 @@ Executioner::addAttributeReporter(const std::string & name,
     params.set<ExecFlagEnum>("execute_on") = execute_on;
   problem->addPostprocessor("ExecutionerAttributeReporter", name, params);
 }
+
+Executioner::PicardSolve::PicardSolve(const InputParameters & parameters)
+  : MooseObject(parameters),
+    _problem(*getCheckedPointerParam<FEProblemBase *>(
+        "_fe_problem_base", "This might happen if you don't have a mesh")),
+    _picard_max_its(getParam<unsigned int>("picard_max_its")),
+    _picard_rel_tol(getParam<Real>("picard_rel_tol")),
+    _picard_abs_tol(getParam<Real>("picard_abs_tol")),
+    _picard_force_norms(getParam<bool>("picard_force_norms")),
+    _relax_factor(getParam<Real>("relaxation_factor")),
+    _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables")),
+    _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
+    _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin"))
+{
+}
