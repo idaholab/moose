@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#11722'
+  issues = '11722'
   design = 'source/constraints/EqualValueEmbeddedConstraint.md'
   [1D_2D_kinematic]
     type = 'Exodiff'

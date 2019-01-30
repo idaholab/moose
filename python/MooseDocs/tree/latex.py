@@ -9,16 +9,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 #pylint: enable=missing-docstring
 import re
-import copy
 from base import NodeBase
 from MooseDocs.common import exceptions
-
-def parse_style(token):
-    """Helper for converting style entries into a dict."""
-    style = dict()
-    for match in re.finditer(r'(?P<key>\S+?)\s*:\s*(?P<value>.*?)(?:;|\Z)', token.get('style', '')):
-        style[match.group('key')] = match.group('value').strip()
-    return style
 
 def escape(text):
     """
@@ -52,15 +44,10 @@ class LatexBase(NodeBase):
     """Base class for Latex nodes."""
     def __init__(self, *args, **kwargs):
         string = kwargs.pop('string', None)
-        kwargs.setdefault('info', None)
         NodeBase.__init__(self, *args, **kwargs)
 
         if string is not None:
-            String(self, content=string, escape=kwargs.get('escape', True))
-
-    def copy(self):
-        """Creates copy of the Node"""
-        return copy.copy(self)
+            String(self, content=string)
 
 class EnclosureBase(LatexBase):
     """
@@ -113,21 +100,39 @@ class Command(LatexBase):
     def __init__(self, parent, name, **kwargs):
         kwargs.setdefault('start', u'')
         kwargs.setdefault('end', u'')
-        kwargs.setdefault('args', [])
-        kwargs.setdefault('optional', False)
+        kwargs.setdefault('options', dict())
         LatexBase.__init__(self, name, parent, **kwargs)
 
     def write(self):
-        optional = self.get('optional', False)
         out = self.get('start')
         out += '\\%s' % self.name
-        for arg in self.get('args'):
-            out += arg.write()
         if self.children:
-            out += '[' if optional else '{'
+            out += '{'
             for child in self.children:
                 out += child.write()
-            out += ']' if optional else '}'
+            out += '}'
+        out += self.get('end')
+        return out
+
+class CustomCommand(LatexBase):
+    """
+    Class for building up arbitrary commands.
+
+    Children should be Bracket or Brace objects to build up the command.
+    """
+    def __init__(self, parent, name, **kwargs):
+        kwargs.setdefault('start', u'')
+        kwargs.setdefault('end', u'')
+        LatexBase.__init__(self, name, parent, **kwargs)
+
+    def write(self):
+        """
+        Write to LaTeX string.
+        """
+        out = self.get('start')
+        out += '\\%s' % self.name
+        for child in self.children:
+            out += child.write()
         out += self.get('end')
         return out
 
@@ -137,8 +142,7 @@ class Environment(LatexBase):
     """
     def __init__(self, parent, name, **kwargs):
         kwargs.setdefault('start', u'\n')
-        kwargs.setdefault('end', u'\n')
-        kwargs.setdefault('args', [])
+        kwargs.setdefault('end', u'')
         kwargs.setdefault('after_begin', u'\n')
         kwargs.setdefault('before_end', u'\n')
         LatexBase.__init__(self, name, parent, **kwargs)
@@ -147,10 +151,7 @@ class Environment(LatexBase):
         """
         Write to LaTeX string.
         """
-        out = '%s\\begin{%s}' % (self.get('start'), self.name)
-        for arg in self.get('args'):
-            out += arg.write()
-        out += self.get('after_begin')
+        out = '%s\\begin{%s}%s' % (self.get('start'), self.name, self.get('after_begin'))
         for child in self.children:
             out += child.write()
         out += '%s\\end{%s}%s' % (self.get('before_end'), self.name, self.get('end'))
@@ -173,10 +174,3 @@ class String(NodeBase):
         for child in self.children:
             out += child.write()
         return out
-
-def create_settings(*args, **kwargs):
-    """Creates token with key, value pairs settings application."""
-    args = list(args)
-    args += ["{}={}".format(k, v) for k, v in kwargs.iteritems()]
-    opt = Bracket(None, escape=False, string=u",".join(args))
-    return opt

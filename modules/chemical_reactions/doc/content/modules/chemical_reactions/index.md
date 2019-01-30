@@ -2,7 +2,7 @@
 
 The chemical reactions module provides a set of tools for the calculation of multicomponent aqueous
 reactive transport in porous media, originally developed as the [MOOSE] application RAT
-[citep!guo2013].
+[citep:guo2013].
 
 ## Theory
 
@@ -11,7 +11,7 @@ species from which every other species (including minerals) can be expressed in 
 chemical species that can be expressed as combinations of primary species are termed *secondary*
 species.
 
-Following [cite!lichtner1996], the mass conservation equation is formulated in terms of the total
+Following [citet:lichtner1996], the mass conservation equation is formulated in terms of the total
 concentration of a primary species $j$, $\Psi_j$, and has the form
 
 \begin{equation}
@@ -211,7 +211,7 @@ The syntax for solid kinetic reactions is similar, except that no equilibrium co
 the reactions block.
 
 To demonstrate the use of the reaction network parser, consider the geochemical model used in
-[cite!guo2013], which features aqueous equilibrium reactions as well as kinetic mineral dissolution
+[citet:guo2013], which features aqueous equilibrium reactions as well as kinetic mineral dissolution
 and precipitation.
 
 Equilibrium reactions:

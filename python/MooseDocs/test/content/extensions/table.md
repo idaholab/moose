@@ -1,26 +1,26 @@
 # Table Extensions
 
-## Center
+# Center
 
 | Heading 1 | Heading 2 |
 | - | - |
 | Item 1 | Item 2 |
 
 
-## Left
+# Left
 
 | Heading 1 | Heading 2 |
 | :- | :- |
 | Item 1 | Item 2 |
 
 
-## Right
+# Right
 
 | Heading 1 | Heading 2 |
 | -: | -: |
 | Item 1 | Item 2 |
 
-## Float
+# Float
 
 !table id=float-table caption=This has a caption.
 | H |

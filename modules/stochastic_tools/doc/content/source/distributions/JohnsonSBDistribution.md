@@ -2,7 +2,7 @@
 
 ## Description
 
-The Johnson Special Bounded (SB) distribution [cite!johnson1994continuous]
+The Johnson Special Bounded (SB) distribution [cite:johnson1994continuous]
 is related to the normal distribution. Four parameters
 are needed: $\gamma$, $\delta$, $\lambda$, and $\epsilon$. It is a continuous distribution defined on
 bounded range $\epsilon \leq x \leq \epsilon + \lambda$, and the distribution can be symmetric or

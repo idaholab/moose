@@ -12,9 +12,9 @@
 
 ## Non-local headings with ID
 
-[core.md#ordered-single-level-lists]
+[core.md#single-level-lists]
 
-[this is local](core.md#unordered-single-level-lists)
+[this is local](core.md#single-level-lists)
 
 ## Source Filename
 

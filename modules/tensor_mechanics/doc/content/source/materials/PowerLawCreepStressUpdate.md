@@ -15,7 +15,7 @@ where $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress, $G$ is 
 
 This class calculates an effective trial stress, an effective creep strain rate increment and the derivative of the creep strain rate, and an effective scalar inelastic strain increment; these values are passed to the [RadialReturnStressUpdate](/RadialReturnStressUpdate.md) to compute the radial return stress increment.  This isotropic plasticity class also computes the plastic strain as a stateful material property.
 
-This class is based on the implicit integration algorithm in [cite!dunne2005introduction] pg. 146 - 149.
+This class is based on the implicit integration algorithm in [cite:dunne2005introduction] pg. 146 - 149.
 
 ## Example Input File
 

@@ -15,7 +15,7 @@ import mooseutils
 
 LOG = logging.getLogger(__name__)
 
-@mooseutils.addProperty('base', ptype=str)                  # set by Translator::init
+@mooseutils.addProperty('base', ptype=str)   # set by Translator::init
 @mooseutils.addProperty('source', ptype=str, required=True) # supplied source file/directory
 class Page(mooseutils.AutoPropertyMixin):
     """
@@ -25,6 +25,7 @@ class Page(mooseutils.AutoPropertyMixin):
     """
     def __init__(self, fullname, **kwargs):
         super(Page, self).__init__(**kwargs)
+
         self._fullname = fullname            # local path of the node
         self._name = fullname.split('/')[-1] # file/folder name
         self.__unique_id = uuid.uuid4()      # a unique identifier
@@ -48,11 +49,6 @@ class Page(mooseutils.AutoPropertyMixin):
     def destination(self):
         """Returns the translator destination location."""
         return os.path.join(self.base, self.local)
-
-    @property
-    def depth(self):
-        """Returns the local folder depth"""
-        return self.local.strip(os.sep).count(os.sep)
 
     def relativeSource(self, other):
         """Location of this page related to the other page."""

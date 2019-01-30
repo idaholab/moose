@@ -127,7 +127,7 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 ### First Invariant
 
 The scalar type `FirstInvariant` calculates the first invariant of the specified Rank-2 tensor,
-$T_{ij}$, according to [eq:first_invariant_scalar_type] from [cite!malvern1969introduction].
+$T_{ij}$, according to [eq:first_invariant_scalar_type] from [cite:malvern1969introduction].
 \begin{equation}
 \label{eq:first_invariant_scalar_type}
 I_T = Tr \left( T_{ij} \right) = T_{ii}
@@ -147,7 +147,7 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 
 Similarly, the scalar type `SecondInvariant` finds the second invariant of the Rank-2 tensor,
 $T_{ij}$, as shown in [eq:second_invariant_scalar_type].
-This method is defined in [cite!hjelmstad2007fundamentals].
+This method is defined in [cite:hjelmstad2007fundamentals].
 \begin{equation}
 \label{eq:second_invariant_scalar_type}
 II_T = T_{ii} T_{jj} - \frac{1}{2} \left( T_{ij} T_{ij} + T_{ji} T_{ji} \right)
@@ -167,7 +167,7 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 ### Third Invariant
 
 The scalar type `ThirdInvariant` computes the value of the Rank-2 tensor, $T_ij$, third invariant as
-given in [eq:third_invariant_scalar_type] from [cite!malvern1969introduction].
+given in [eq:third_invariant_scalar_type] from [cite:malvern1969introduction].
 \begin{equation}
 \label{eq:third_invariant_scalar_type}
 III_T = det \left( T_{ij} \right)  = \frac{1}{6} e_{ijk} e_{pqr} T_{ip} T_{jq} T_{kr}

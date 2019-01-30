@@ -20,7 +20,7 @@ the derivative of the scalar effective plastic strain increment; these values ar
 increment.  This isotropic plasticity class also computes the plastic strain as a stateful material
 property.
 
-This class is based on the implicit integration algorithm in [cite!dunne2005introduction]
+This class is based on the implicit integration algorithm in [cite:dunne2005introduction]
 pg. 146--149.
 
 ## Example Input File Syntax

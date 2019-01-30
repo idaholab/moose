@@ -2,7 +2,7 @@
 
 !syntax description /Materials/PorousFlowRelativePermeabilityBC
 
-The [cite!brookscorey1966] relative permeability model is an extension of the previous  [cite!corey1954] formulation where the relative permeability of the wetting phase is given by
+The [citet:brookscorey1966] relative permeability model is an extension of the previous  [citet:corey1954] formulation where the relative permeability of the wetting phase is given by
 \begin{equation*}
 k_{\mathrm{r, w}} = \left(S_{\mathrm{eff}}\right)^{(2 + 3 \lambda)/\lambda},
 \end{equation*}

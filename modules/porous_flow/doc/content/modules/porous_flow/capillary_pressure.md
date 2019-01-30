@@ -2,20 +2,20 @@
 
 The capillary pressure is the pressure difference between two fluid phases in a porous medium that
 arises due to the interfacial tension between the fluid phases and the surface tension between fluids
-and the porous medium. Capillary pressure, $P_c$, is commonly defined as [citep!bear1972]
+and the porous medium. Capillary pressure, $P_c$, is commonly defined as [citep:bear1972]
 \begin{equation}
 P_c = P_{nw} - P_w,
 \end{equation}
 where $P_{nw}$ is the pressure of the non-wetting phase (typically the gas phase), and $P_w$ is the
 pressure of the wetting phase (typically the liquid phase).
 
-The capillary pressure is given by the Young-Laplace equation [citep!bear1972]
+The capillary pressure is given by the Young-Laplace equation [citep:bear1972]
 \begin{equation}
 P_c = \frac{2 \gamma \cos(\theta)}{r_c},
 \end{equation}
 where $\gamma$ is the interfacial tension, $\theta$ is the contact angle of the wetting phase on the
 surface of the porous medium, and $r_c$ is the radius of curvature at the interface, see
-[cite!bear1972].
+[citet:bear1972].
 
 Due to the difficulty in measuring $\gamma$ and $\theta$ in real porous rocks, empirical and
 semi-impirical formulations for capillary pressure have been proposed that relate capillary pressure
@@ -39,7 +39,7 @@ This formulation is useful for testing purposes.
 
 [`PorousFlowCapillaryPressureVG`](/PorousFlowCapillaryPressureVG.md)
 
-van Genuchten's capillary-pressure relationship is [citep!vangenuchten1980]
+van Genuchten's capillary-pressure relationship is [citep:vangenuchten1980]
 
 \begin{equation}
 \label{eq:vg_cap}
@@ -111,7 +111,7 @@ $S_{\mathrm{eff}}\rightarrow 1$.  Occasionally setting $r<1$ is advantageous in 
 
 [`PorousFlowCapillaryPressureBC`](/PorousFlowCapillaryPressureBC.md)
 
-The Brooks-Corey capillary-pressure relationship is [citep!brookscorey1966]
+The Brooks-Corey capillary-pressure relationship is [citep:brookscorey1966]
 
 \begin{equation}
 S_{\mathrm{eff}} = \left( \frac{P_c}{P_e} \right)^{-\lambda},
@@ -129,7 +129,7 @@ while a value of greater than 2 was suggested for broad distributions of pore si
 
 [`PorousFlowCapillaryPressureBW`](/PorousFlowCapillaryPressureBW.md)
 
-The Broadbridge-White capillarity relationship valid for small $K_{n}$ is [citep!broadbridge1988]
+The Broadbridge-White capillarity relationship valid for small $K_{n}$ is [citep:broadbridge1988]
 \begin{equation}
 S_{\mathrm{eff}} = S_{n} + (S_{s} - S_{n}) \frac{c}{1 + L(x)} \ .
 \end{equation}
@@ -139,8 +139,8 @@ x = (c - 1) e^{c - 1 - c P/\lambda} \ ,
 \end{equation}
 and $L(x)$ is the Lambert W-function that satisfies $L(z)e^{L(z)}=z$.  This is of limited use in real
 simulations, and is only used in the Porous Flow module for comparison with the analytical solutions
-of [cite!broadbridge1988] and
-[cite!warrick1990] for multi-phase infiltration and drainage problems.
+of [citet:broadbridge1988] and
+[citet:warrick1990] for multi-phase infiltration and drainage problems.
 
 !alert note
 Only effective saturation as a function of capillary pressure is available in
@@ -150,7 +150,7 @@ Only effective saturation as a function of capillary pressure is available in
 
 [`PorousFlowCapillaryPressureRSC`](/PorousFlowCapillaryPressureRSC.md)
 
-The Rogers-Stallybrass-Clements capillary relationship is [citep!rsc1983]
+The Rogers-Stallybrass-Clements capillary relationship is [citep:rsc1983]
 \begin{equation}
 S_{\mathrm{eff}} = \frac{1}{\sqrt{1 + \exp((P_{c} - A)/B)}} \ ,
 \end{equation}
@@ -175,7 +175,7 @@ pressure and its derivatives. While this approach does avoid infinite values, it
 numerical difficulties for saturations close to residual due to the discontinuous derivative of
 capillary pressure with respect to saturation.
 
-To overcome this, the logarithmic extension detailed by [cite!webb2000] is implemented for low
+To overcome this, the logarithmic extension detailed by [citet:webb2000] is implemented for low
 saturations in formulations where capillary pressure approaches infinity for small liquid
 saturations. An extension to the raw capillary pressure curve
 \begin{equation}

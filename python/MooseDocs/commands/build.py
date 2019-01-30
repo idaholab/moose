@@ -55,9 +55,9 @@ def command_line_options(subparser, parent):
                         help="The host port for live web server (default: %(default)s).")
     parser.add_argument('--host', default='127.0.0.1', type=str,
                         help="The local host for live web server (default: %(default)s).")
-    parser.add_argument('--clean', type=str, choices=['0', 'false', 'no', '1', 'true', 'yes'],
-                        help="Clean the destination directory, by default this is False  when " \
-                             "the '--files' option is used, otherwise the default is True.")
+    parser.add_argument('--clean', action='store_true',
+                        help="Clean the destination directory when the '--files' option is used. "
+                             "The destination directory is always cleaned otherwise.")
     parser.add_argument('-f', '--files', default=[], nargs='*',
                         help="A list of file to build, this is useful for testing. The paths " \
                              "should be as complete as necessary to make the name unique, just " \
@@ -197,13 +197,9 @@ def main(options):
             print '{}: {}'.format(page.local, page.source)
         sys.exit()
 
-    # Set default for --clean: clean when --files is NOT used.
-    if options.clean is None:
-        options.clean = options.files == []
-    else:
-        options.clean = options.clean.lower() in ['true', 'yes', '1']
-
-    if options.clean and os.path.exists(translator['destination']):
+    # Clean when --files is NOT used or when --clean is used with --files.
+    if ((options.files == []) or (options.files != [] and options.clean)) \
+       and os.path.exists(translator['destination']):
         log = logging.getLogger('MooseDocs.build')
         log.info("Cleaning destination %s", translator['destination'])
         shutil.rmtree(translator['destination'])

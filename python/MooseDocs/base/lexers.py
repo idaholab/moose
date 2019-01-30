@@ -242,7 +242,6 @@ class Lexer(object):
                         obj.info = info
                         line += match.group(0).count('\n')
                         pos = match.end()
-
                         break
                     else:
                         continue

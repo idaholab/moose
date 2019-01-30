@@ -25,7 +25,7 @@ c_0(x) =  h(\eta_0(x))c_S^e + [1-h(\eta_0(x))]c_L^e
 
 where we use the switching function $h(\eta) = \eta^3(6\eta^2-15\eta+10)$, the
 gradient energy coefficient $\epsilon^2 = 1$ and the barrier function height $w=1$.
-(Note that there is a typo in Eq. (49) of [cite!kim_phase-field_1999], $\epsilon$ should be in the
+(Note that there is a typo in Eq. (49) of [cite:kim_phase-field_1999], $\epsilon$ should be in the
 denominator of the argument to the $\tanh$ function, not $\sqrt{\epsilon}$.) In
 the following example, we equilibrate a flat interface between a solid phase
 ($\eta = 1$, $f^S = (c_S-c_S^e)^2$, $c_S^e = 0.9$) and a liquid phase

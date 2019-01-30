@@ -5,8 +5,6 @@
     "children": [
         {
             "attributes": {
-                "bottom": false, 
-                "command": "figure", 
                 "img": false, 
                 "recursive": true
             }, 
@@ -19,7 +17,7 @@
                         "recursive": true
                     }, 
                     "children": [], 
-                    "name": "FloatCaption"
+                    "name": "Caption"
                 }, 
                 {
                     "attributes": {
@@ -30,16 +28,15 @@
                         "style": "max-height:350px;"
                     }, 
                     "children": [], 
-                    "name": "ListingCode"
+                    "name": "Code"
                 }
             ], 
-            "name": "Listing"
+            "name": "Float"
         }, 
         {
             "attributes": {
                 "key": "two", 
                 "link": "#two", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -58,7 +55,6 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -77,7 +73,6 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

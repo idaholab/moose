@@ -12,41 +12,20 @@ import uuid
 import collections
 import anytree
 import MooseDocs
-from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer
+from MooseDocs.base import components
 from MooseDocs.extensions import core
-from MooseDocs.tree import tokens, html, latex
+from MooseDocs.tree import tokens, html
 
 def make_extension(**kwargs):
     return FloatExtension(**kwargs)
 
-Float = tokens.newToken('Float', img=False, bottom=False, command=u'figure')
-FloatCaption = tokens.newToken('FloatCaption', key=u'', prefix=u'', number='?')
-ModalLink = tokens.newToken('ModalLink', bookmark=True, bottom=False, close=True)
-ModalLinkTitle = tokens.newToken('ModalLinkTitle')
-ModalLinkContent = tokens.newToken('ModalLinkContent')
-
-def create_float(parent, extension, reader, page, settings, bottom=False, img=False,
-                 token_type=Float, **kwargs):
-    """
-    Helper for optionally creating a float based on the existence of caption and/or id.
-
-    Inputs:
-        parent: The parent token that float should be placed
-        extension: The extension object (to extract 'prefix' from config items)
-        reader: The Reader object for tokenization of the heading
-        page: The Page object for passing to the tokenization routine
-        settings: The command settings to extract a local 'prefix'
-        bottom[True|False]: Set flag on the float for placing the caption at the bottom
-        img[True|False]: Set to True if the contents are an image (Materialize only)
-        token_type: The type of Token object to create; it should derive from Float
-    """
-    cap, _ = _add_caption(None, extension, reader, page, settings)
+def create_float(parent, extension, reader, page, settings, **kwargs):
+    """Helper for optionally creating a float based on the existence of caption and/or id."""
+    cap = _add_caption(None, extension, reader, page, settings)
     if cap:
-        flt = token_type(parent, img=img, bottom=bottom, **kwargs)
+        flt = Float(parent, **kwargs)
         cap.parent = flt
         return flt
-
     return parent
 
 def caption_settings():
@@ -60,23 +39,19 @@ def _add_caption(parent, extension, reader, page, settings):
     """Helper for adding captions to float tokens."""
     cap = settings['caption']
     key = settings['id']
-    prefix = settings.get('prefix')
-    if prefix is None:
-        prefix = extension.get('prefix', None)
-
-    if prefix is None:
-        msg = "The 'prefix' must be supplied via the settings or the extension configuration."
-        raise exceptions.MooseDocsException(msg)
-
     caption = None
     if key:
-        caption = FloatCaption(parent, key=key, prefix=prefix)
+        if settings['prefix'] is not None:
+            prefix = settings['prefix']
+        else:
+            prefix = extension.get('prefix', None)
+        caption = Caption(parent, key=key, prefix=prefix)
         if cap:
             reader.tokenize(caption, cap, page, MooseDocs.INLINE)
     elif cap:
-        caption = FloatCaption(parent)
+        caption = Caption(parent)
         reader.tokenize(caption, cap, page, MooseDocs.INLINE)
-    return caption, prefix
+    return caption
 
 def create_modal(parent, title=None, content=None, **kwargs):
     """
@@ -107,6 +82,12 @@ def create_modal_link(parent, title=None, content=None, string=None, **kwargs):
     create_modal(parent, title, content, **kwargs)
     return link
 
+Float = tokens.newToken('Float', img=False)
+Caption = tokens.newToken('Caption', key=u'', prefix=u'', number='?')
+ModalLink = tokens.newToken('ModalLink', bookmark=True, bottom=False, close=True)
+ModalLinkTitle = tokens.newToken('ModalLinkTitle')
+ModalLinkContent = tokens.newToken('ModalLinkContent')
+
 class FloatExtension(components.Extension):
     """
     Provides ability to add caption float elements (e.g., figures, table, etc.). This is only a
@@ -115,33 +96,25 @@ class FloatExtension(components.Extension):
     """
     def extend(self, reader, renderer):
         renderer.add('Float', RenderFloat())
-        renderer.add('FloatCaption', RenderFloatCaption())
+        renderer.add('Caption', RenderCaption())
         renderer.add('ModalLink', RenderModalLink())
         renderer.add('ModalLinkTitle', RenderModalLinkTitle())
         renderer.add('ModalLinkContent', RenderModalLinkContent())
-
-        if isinstance(renderer, LatexRenderer):
-            renderer.addPackage('caption', labelsep='period')
 
     def initMetaData(self, page, meta):
         meta.initData('counts', collections.defaultdict(int))
 
     def postTokenize(self, ast, page, meta, reader):
         """Set float number for each counter."""
-        for node in anytree.PreOrderIter(ast, filter_=lambda n: n.name == 'FloatCaption'):
+        for node in anytree.PreOrderIter(ast, filter_=lambda n: n.name == 'Caption'):
             prefix = node.get('prefix', None)
             if prefix is not None:
                 meta.getData('counts')[prefix] += 1
                 node['number'] = meta.getData('counts')[prefix]
             key = node.get('key')
             if key:
-                shortcut = core.Shortcut(ast.root, key=key, link=u'#{}'.format(key))
-
-                # TODO: This is a bit of a hack to get Figure~\ref{} etc. working in general
-                if isinstance(self.translator.renderer, LatexRenderer):
-                    shortcut['prefix'] = prefix.title()
-                else:
-                    tokens.String(shortcut, content=u'{} {}'.format(prefix.title(), node['number']))
+                core.Shortcut(ast.root, key=key, link=u'#{}'.format(key),
+                              string=u'{} {}'.format(prefix.title(), node['number']))
 
 
 class RenderFloat(components.RenderComponent):
@@ -154,54 +127,34 @@ class RenderFloat(components.RenderComponent):
         div = html.Tag(parent, 'div', token)
         div.addClass('card')
         content = html.Tag(div, 'div')
-
         if token['img']:
             content.addClass('card-image')
         else:
             content.addClass('card-content')
 
-        if token['bottom']:
-            cap = token(0)
-            cap.parent = None
-            cap.parent = token
-
         return content
 
     def createLatex(self, parent, token, page):
+        pass
 
-        env = latex.Environment(parent, token['command'])
-        style = latex.parse_style(token)
-
-        width = style.get('width', None)
-        if width and token(0).name == 'Image':
-            token(0).set('style', 'width:{};'.format(width))
-
-        if style.get('text-align', None) == 'center':
-            latex.Command(env, 'centering')
-
-        return env
-
-class RenderFloatCaption(components.RenderComponent):
+class RenderCaption(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
-
         caption = html.Tag(parent, 'p', class_="moose-caption")
         prefix = token.get('prefix', None)
         if prefix:
             heading = html.Tag(caption, 'span', class_="moose-caption-heading")
             html.String(heading, content=u"{} {}: ".format(prefix, token['number']))
 
-        return html.Tag(caption, 'span', class_="moose-caption-text")
+        text = html.Tag(caption, 'span', class_="moose-caption-text")
+        return text
 
     def createLatex(self, parent, token, page):
-        caption = latex.Command(parent, 'caption')
-        if token['key']:
-            latex.Command(caption, 'label', string=token['key'], escape=True)
-        return caption
+        pass
 
 class RenderModalLink(core.RenderLink):
 
     def createLatex(self, parent, token, page):
-        return None
+        pass
 
     def createHTML(self, parent, token, page):
         return parent
@@ -227,7 +180,7 @@ class RenderModalLinkTitle(components.RenderComponent):
         return html.Tag(parent, 'h4')
 
     def createLatex(self, parent, token, page):
-        return None
+        pass
 
 class RenderModalLinkContent(components.RenderComponent):
 
@@ -235,4 +188,4 @@ class RenderModalLinkContent(components.RenderComponent):
         return parent
 
     def createLatex(self, parent, token, page):
-        return None
+        pass

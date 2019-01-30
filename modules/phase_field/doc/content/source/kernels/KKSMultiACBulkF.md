@@ -11,7 +11,7 @@ R = \left(\frac{\partial h_1}{\partial \eta_1} F_1 + \frac{\partial h_2}{\partia
 \end{equation}
 
 where $c_i$ is the phase concentration for phase $i$ and $h_i$ is the interpolation
-function for phase $i$ defined in [cite!Folch05] (referred to as $g_i$ there, but we use $h_i$ to maintain consistency with other interpolation functions in MOOSE). Here $g_i = \eta_i^2 (1-\eta_i)^2$, also for consistency with notation in MOOSE. $W_1$ is the free energy barrier height.
+function for phase $i$ defined in [cite:Folch05] (referred to as $g_i$ there, but we use $h_i$ to maintain consistency with other interpolation functions in MOOSE). Here $g_i = \eta_i^2 (1-\eta_i)^2$, also for consistency with notation in MOOSE. $W_1$ is the free energy barrier height.
 
 ### Jacobian
 

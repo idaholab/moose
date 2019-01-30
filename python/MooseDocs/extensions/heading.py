@@ -16,10 +16,9 @@ def make_extension(**kwargs):
 
 def find_heading(translator, node, bookmark=u''):
     """Helper for returning a copy of the heading tokens."""
-
     data = translator.getMetaData(node, 'heading')
     h = data.get(bookmark, None)
-    if h is not None:
+    if h:
         return h.copy()
 
 class HeadingExtension(components.Extension):
@@ -32,12 +31,12 @@ class HeadingExtension(components.Extension):
         return config
 
     def initMetaData(self, page, meta):
-        meta.initData('heading', dict())
+        meta.initData('heading')
 
     def postTokenize(self, ast, page, meta, reader):
         data = dict()
         func = lambda n: (n.name == 'Heading')
-        for node in anytree.PreOrderIter(ast.root, filter_=func):
+        for node in anytree.PreOrderIter(ast, filter_=func):
             id_ = node.get('id', u'')
             if id_ not in data:
                 data[id_] = node.copy()

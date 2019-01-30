@@ -1,5 +1,5 @@
 !row! class=row
-!col! small=12 medium=6 large=6
+!col! class=s12 m6 l6
 ## Questions
 
 - [MOOSE Users Mailing List](https://groups.google.com/forum/#!forum/moose-users)
@@ -8,7 +8,7 @@
 
 !col-end!
 
-!col! small=12 medium=6 large=6
+!col! class=s12 m6 l6
 ## Information and Tools
 
 - [A to Z Index](help/a-to-z.md)

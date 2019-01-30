@@ -1,10 +1,7 @@
 [Tests]
-  issues = '#8465'
-  design = 'level_set/index.md LevelSetMeshRefinementTransfer.md'
   [./test]
     type = Exodiff
     input = master.i
     exodiff = 'master_out.e master_out_sub0.e'
-    requirement = "The level set module shall include the ability to transfer refinement patterns, with a single level of refinement, to a sub-application."
   [../]
 []

@@ -12,9 +12,9 @@ along with water to provide variable density brine.
 ## Phase composition
 
 The mass fractions of CO$_2$ in the liquid phase and H$_2$O in the gas phase are calculated
-using the accurate fugacity-based formulation of [cite!spycher2003] and [cite!spycher2005]
+using the accurate fugacity-based formulation of [citet:spycher2003] and [citet:spycher2005]
 for temperatures below 100$^{\circ}$C, and the elevated temperature formulation of
-[cite!spycher2010] for temperatures above 110$^{\circ}$C.
+[citet:spycher2010] for temperatures above 110$^{\circ}$C.
 
 As these formulations do not coincide for temperatures near 100$^{\circ}$C, a cubic
 polynomial is used to join the two curves smoothly, see [soltemp] for an example:
@@ -30,7 +30,7 @@ polynomial is used to join the two curves smoothly, see [soltemp] for an example
 The mutual solubilities in the elevated temperature regime must be calculated iteratively,
 so an increase in computational expense can be expected.
 
-This is similar to the formulation provided in the ECO2N module of TOUGH2 [citep!pruess1999],
+This is similar to the formulation provided in the ECO2N module of TOUGH2 [citep:pruess1999],
 see [xco2l] and [yh2og] for a comparison between the two codes.
 
 !media media/porous_flow/brineco2_xco2l.png
@@ -70,7 +70,7 @@ The density of the aqueous phase with the contribution of dissolved CO$_2$ is ca
 where $\rho_b$ is the density of brine (supplied using a
 [`BrineFluidProperties`](/BrineFluidProperties.md) UserObject), $X_{CO2}$ is the
 mass fraction of CO$_2$ dissolved in the aqueous phase, and $\rho_{CO2}$ is the partial
-density of dissolved CO$_2$ [citep!garcia2001].
+density of dissolved CO$_2$ [citep:garcia2001].
 
 As water vapor is only ever a small component of the gas phase in the temperature and pressure ranges
 that this class is valid for, the density of the gas phase is assumed to be simply the density of CO$_2$
@@ -101,7 +101,7 @@ phase, which includes the enthalpy of dissolution $h_{dis}$
 h_{CO2,aq} = h_{CO2} + h_{dis}.
 \end{equation}
 
-In the range of pressures and temperatures considered, CO$_2$ may exist as a gas or a supercritical fluid. Using a linear fit to the model of [cite!duan2003], the enthalpy of
+In the range of pressures and temperatures considered, CO$_2$ may exist as a gas or a supercritical fluid. Using a linear fit to the model of [citet:duan2003], the enthalpy of
 dissolution of both gas phase and supercritical CO$_2$ is calculated as
 \begin{equation}
 h_{dis}(T) = \frac{-58353.3 + 134.519 T}{M_{CO2}}.
