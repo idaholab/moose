@@ -112,39 +112,6 @@ validParams<Transient>()
                         "default) then the minimum over the master dt "
                         "and the MultiApps is used");
 
-  params.addParam<unsigned int>(
-      "picard_max_its",
-      1,
-      "Maximum number of times each timestep will be solved.  Mainly used when "
-      "wanting to do Picard iterations with MultiApps that are set to "
-      "execute_on timestep_end or timestep_begin. Setting this parameter to 1 turns off the Picard "
-      "iterations.");
-  params.addParam<Real>("picard_rel_tol",
-                        1e-8,
-                        "The relative nonlinear residual drop to shoot for "
-                        "during Picard iterations.  This check is "
-                        "performed based on the Master app's nonlinear "
-                        "residual.");
-  params.addParam<Real>("picard_abs_tol",
-                        1e-50,
-                        "The absolute nonlinear residual to shoot for "
-                        "during Picard iterations.  This check is "
-                        "performed based on the Master app's nonlinear "
-                        "residual.");
-  params.addParam<bool>(
-      "picard_force_norms",
-      false,
-      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existance of active MultiApps with those execute_on flags, default: false.");
-
-  params.addParam<Real>("relaxation_factor",
-                        1.0,
-                        "Fraction of newly computed value to keep."
-                        "Set between 0 and 2.");
-  params.addParam<std::vector<std::string>>("relaxed_variables",
-                                            std::vector<std::string>(),
-                                            "List of variables to relax during Picard Iteration");
-
   params.addParamNamesToGroup(
       "steady_state_detection steady_state_tolerance steady_state_start_time",
       "Steady State Detection");
@@ -155,19 +122,7 @@ validParams<Transient>()
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
-  params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol picard_force_norms "
-                              "relaxation_factor relaxed_variables",
-                              "Picard");
-
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
-  params.addParam<unsigned int>(
-      "max_xfem_update",
-      std::numeric_limits<unsigned int>::max(),
-      "Maximum number of times to update XFEM crack topology in a step due to evolving cracks");
-  params.addParam<bool>("update_xfem_at_timestep_begin",
-                        false,
-                        "Should XFEM update the mesh at the beginning of the timestep");
-
   return params;
 }
 
@@ -263,15 +218,6 @@ Transient::Transient(const InputParameters & parameters)
       _num_steps = 1;
   }
 
-  // Set up relaxation
-  if (_relax_factor != 1.0)
-  {
-    if (_relax_factor >= 2.0 || _relax_factor <= 0.0)
-      mooseError("The Picard iteration relaxation factor should be between 0.0 and 2.0");
-
-    // Store a copy of the previous solution here
-    _nl.addVector("relax_previous", false, PARALLEL);
-  }
   // This lets us know if we are at Picard iteration > 0, works for both master- AND sub-app.
   // Initialize such that _prev_time != _time for the first Picard iteration
   _prev_time = _time - 1.0;

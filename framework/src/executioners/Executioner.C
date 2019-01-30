@@ -87,6 +87,52 @@ validParams<Executioner>()
                         "Use the residual norm computed *before* PresetBCs are imposed in relative "
                         "convergence check");
 
+  params.addParam<unsigned int>(
+      "picard_max_its",
+      1,
+      "Maximum number of times each timestep will be solved.  Mainly used when "
+      "wanting to do Picard iterations with MultiApps that are set to "
+      "execute_on timestep_end or timestep_begin. Setting this parameter to 1 turns off the Picard "
+      "iterations.");
+  params.addParam<Real>("picard_rel_tol",
+                        1e-8,
+                        "The relative nonlinear residual drop to shoot for "
+                        "during Picard iterations.  This check is "
+                        "performed based on the Master app's nonlinear "
+                        "residual.");
+  params.addParam<Real>("picard_abs_tol",
+                        1e-50,
+                        "The absolute nonlinear residual to shoot for "
+                        "during Picard iterations.  This check is "
+                        "performed based on the Master app's nonlinear "
+                        "residual.");
+  params.addParam<bool>(
+      "picard_force_norms",
+      false,
+      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
+      "existance of active MultiApps with those execute_on flags, default: false.");
+
+  params.addRangeCheckedParam<Real>("relaxation_factor",
+                                    1.0,
+                                    "relaxation_factor>0 & relaxation_factor<2",
+                                    "Fraction of newly computed value to keep."
+                                    "Set between 0 and 2.");
+  params.addParam<std::vector<std::string>>("relaxed_variables",
+                                            std::vector<std::string>(),
+                                            "List of variables to relax during Picard Iteration");
+
+  params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol picard_force_norms "
+                              "relaxation_factor relaxed_variables",
+                              "Picard");
+
+  params.addParam<unsigned int>(
+      "max_xfem_update",
+      std::numeric_limits<unsigned int>::max(),
+      "Maximum number of times to update XFEM crack topology in a step due to evolving cracks");
+  params.addParam<bool>("update_xfem_at_timestep_begin",
+                        false,
+                        "Should XFEM update the mesh at the beginning of the timestep");
+
   params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
                               "compute_initial_residual_before_preset_bcs",
@@ -152,6 +198,10 @@ Executioner::Executioner(const InputParameters & parameters)
 
   _fe_problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                                  parameters.isParamSetByUser("snesmf_reuse_base"));
+
+  if (getParam<Real>("relaxation_factor") != 1.0)
+    // Store a copy of the previous solution here
+    _fe_problem.getNonlinearSystemBase().addVector("relax_previous", false, PARALLEL);
 }
 
 Executioner::~Executioner() {}
