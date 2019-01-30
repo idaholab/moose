@@ -60,8 +60,9 @@
   [sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    positions = '0 0 0 0.6 0 0'
+    positions = '0.05 0.5 0 0.55 0.5 0'
     input_files = fromrestrictedsub_sub.i
+    output_in_position = true
   []
 []
 
