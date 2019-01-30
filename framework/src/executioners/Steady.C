@@ -24,7 +24,9 @@ validParams<Steady>()
 {
   auto params = validParams<Transient>();
 
+  params.set<bool>("_is_transient") = false;
   params.set<unsigned int>("num_steps") = 1;
+  params.set<bool>("abort_on_solve_fail") = true;
 
   return params;
 }
@@ -37,5 +39,5 @@ Steady::Steady(const InputParameters & parameters) : Transient(parameters)
     return;
   }
 
-  _problem.transient(false);
+  _num_steps = _problem.adaptivity().getSteps() + 1;
 }

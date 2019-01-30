@@ -311,7 +311,9 @@ template <typename T>
 void
 Adaptivity::setParam(const std::string & param_name, const T & param_value)
 {
-  if (param_name == "refine fraction")
+  if (param_name == "steps")
+    _steps = param_value;
+  else if (param_name == "refine fraction")
   {
     _mesh_refinement->refine_fraction() = param_value;
     if (_displaced_mesh_refinement)

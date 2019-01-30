@@ -332,6 +332,9 @@ protected:
   std::set<dof_id_type> _relaxed_dofs;
 
   PerfID _final_timer;
+
+  /// Whether or not we're really doing a Transient solve
+  const bool _is_transient;
 };
 
 #endif // TRANSIENTEXECUTIONER_H

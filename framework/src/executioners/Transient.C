@@ -168,6 +168,8 @@ validParams<Transient>()
                         false,
                         "Should XFEM update the mesh at the beginning of the timestep");
 
+  params.addPrivateParam<bool>("_is_transient", true);
+
   return params;
 }
 
@@ -223,7 +225,8 @@ Transient::Transient(const InputParameters & parameters)
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables")),
-    _final_timer(registerTimedSection("final", 1))
+    _final_timer(registerTimedSection("final", 1)),
+    _is_transient(getParam<bool>("_is_transient"))
 {
   // Handle deprecated parameters
   if (!parameters.isParamSetByAddParam("trans_ss_check"))
@@ -248,7 +251,7 @@ Transient::Transient(const InputParameters & parameters)
     _app.setStartTime(_start_time);
 
   _time = _time_old = _start_time;
-  _problem.transient(true);
+  _problem.transient(getParam<bool>("_is_transient"));
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
@@ -626,8 +629,13 @@ Transient::solveStep(Real input_dt)
       if (_picard_max_its <= 1)
         _time_stepper->acceptStep();
 
-      _sln_diff_norm = relativeSolutionDifferenceNorm();
-      _solution_change_norm = _sln_diff_norm / _dt;
+      if (_is_transient)
+      {
+        _sln_diff_norm = relativeSolutionDifferenceNorm();
+        _solution_change_norm = _sln_diff_norm / _dt;
+      }
+      else
+        _solution_change_norm = std::numeric_limits<Real>::max();
 
       _problem.onTimestepEnd();
       _problem.execute(EXEC_TIMESTEP_END);

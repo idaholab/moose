@@ -8,6 +8,7 @@
     input = 'bad_transient.i'
     expect_err = 'Vector tag: TIME does not exist'
     requirement = "Time kernel requires a transient executioner"
+    deleted = true # This is no longer valid since all runs initialize the time tags
   [../]
 
   [./bad_vector_tag]

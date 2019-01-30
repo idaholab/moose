@@ -514,7 +514,7 @@
   [./scalar_old_integrity_check]
     type = 'RunException'
     input = 'scalar_old_integrity_check.i'
-    expect_err = 'Vector tag: TIME does not exist'
+    expect_err = 'Calling \'coupledScalarValueOld\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
   [../]
 
   [./scalar_dot_integrity_check]

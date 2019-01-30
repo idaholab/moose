@@ -191,11 +191,13 @@ addActionTypes(Syntax & syntax)
   registerTask("no_action", false); // Used for Empty Action placeholders
   registerTask("set_global_params", false);
   registerTask("setup_adaptivity", false);
+  registerTask("setup_adaptivity_early", false);
   registerTask("meta_action", false);
   registerTask("setup_residual_debug", false);
   registerTask("setup_oversampling", false);
   registerTask("deprecated_block", false);
   registerTask("set_adaptivity_options", false);
+  registerTask("set_adaptivity_options_early", false);
   registerTask("add_mortar_interface", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
@@ -252,6 +254,10 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_complete)"
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
+
+                           "(setup_adaptivity_early)"
+                           "(set_adaptivity_options_early)"
+
                            "(setup_executioner)"
                            "(check_integrity_early)"
                            "(setup_predictor)"

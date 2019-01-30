@@ -13,6 +13,7 @@
 #include "libmesh/fe.h"
 
 registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_options");
+registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_options_early");
 
 template <>
 InputParameters
@@ -54,19 +55,25 @@ SetAdaptivityOptionsAction::act()
 {
   Adaptivity & adapt = _problem->adaptivity();
 
-  if (isParamValid("marker"))
-    adapt.setMarkerVariableName(getParam<MarkerName>("marker"));
-  if (isParamValid("initial_marker"))
-    adapt.setInitialMarkerVariableName(getParam<MarkerName>("initial_marker"));
+  if (_current_task == "set_adaptivity_options_early")
+    adapt.setParam("steps", getParam<unsigned int>("steps"));
 
-  adapt.setCyclesPerStep(getParam<unsigned int>("cycles_per_step"));
+  if (_current_task == "set_adaptivity_options")
+  {
+    adapt.setCyclesPerStep(getParam<unsigned int>("cycles_per_step"));
 
-  adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));
+    adapt.setMaxHLevel(getParam<unsigned int>("max_h_level"));
 
-  adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
-  adapt.setUseNewSystem();
+    adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
 
-  adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
+    adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
 
-  adapt.setRecomputeMarkersFlag(getParam<bool>("recompute_markers_during_cycles"));
+    if (isParamValid("marker"))
+      adapt.setMarkerVariableName(getParam<MarkerName>("marker"));
+    if (isParamValid("initial_marker"))
+      adapt.setInitialMarkerVariableName(getParam<MarkerName>("initial_marker"));
+
+    adapt.setUseNewSystem();
+    adapt.init(getParam<unsigned int>("steps"), getParam<unsigned int>("initial_steps"));
+  }
 }
