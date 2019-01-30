@@ -25,4 +25,21 @@
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the hand-coded problem shall be perfect'
   [../]
+
+  [./green-lagrange]
+    type = 'Exodiff'
+    input = 'green-lagrange.i'
+    exodiff = 'green-lagrange_out.e'
+    requirement = 'MOOSE shall provide an AD enabled Green-Lagrange strain calculator'
+    allow_test_objects = true
+  [../]
+  [./green-lagrange-jac]
+    type = 'PetscJacobianTester'
+    input = 'green-lagrange.i'
+    run_sim = 'True'
+    prereq = 'green-lagrange'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian for the Green-Lagrange strain calculator shall be perfect'
+  [../]
 []
