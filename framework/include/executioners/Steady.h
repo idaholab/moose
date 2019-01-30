@@ -10,7 +10,7 @@
 #ifndef STEADY_H
 #define STEADY_H
 
-#include "Executioner.h"
+#include "Transient.h"
 
 // System includes
 #include <string>
@@ -29,7 +29,7 @@ InputParameters validParams<Steady>();
 /**
  * Steady executioners usually only call "solve()" on the NonlinearSystem once.
  */
-class Steady : public Executioner
+class Steady : public Transient
 {
 public:
   /**
@@ -39,20 +39,6 @@ public:
    * @return Whether or not the solve was successful.
    */
   Steady(const InputParameters & parameters);
-
-  virtual void init() override;
-
-  virtual void execute() override;
-
-  virtual void checkIntegrity();
-
-protected:
-  FEProblemBase & _problem;
-
-  int & _time_step;
-  Real & _time;
-
-  PerfID _final_timer;
 };
 
 #endif // STEADY_H

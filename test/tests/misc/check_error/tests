@@ -520,7 +520,7 @@
   [./scalar_dot_integrity_check]
     type = 'RunException'
     input = 'scalar_dot_integrity_check.i'
-    expect_err = 'Vector tag: TIME does not exist.'
+    expect_err = 'Calling \'coupledScalarDot\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
   [../]
 
   [./node_value_off_block]
