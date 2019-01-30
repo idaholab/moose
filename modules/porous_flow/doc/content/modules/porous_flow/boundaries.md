@@ -38,6 +38,7 @@ This basic sink boundary condition is implemented in [`PorousFlowSink`](PorousFl
 The basic sink may be multiplied by a MOOSE Function of the pressure
 of a fluid phase *or* the temperature:
 \begin{equation}
+  \label{eq:s_f_g}
 s = f(t, x) \times g(P^{\beta} - P_{\mathrm{e}}) \ \ \ \textrm{or}\ \ \ s = f(t, x)
 \times g(T - T_{\mathrm{e}}) \ .
 \end{equation}
@@ -75,6 +76,8 @@ Dirichlet conditions is inappropriate.
   as it forces areas near the boundary close to unphysical or unlikely
   regions in parameter space.
 
+### Physical Intuition Behind PorousFlowSink
+
 It is advantageous to think of what the boundary condition
 is physically trying to represent before using Dirichlet conditions,
 and often a [`PorousFlowSink`](PorousFlowSink.md) is more appropriate to use.
@@ -94,42 +97,50 @@ environment.  The flux of fluid from the model to this environment is
 (approximately)
 \begin{equation}
   \label{eq:fix_pp_bc}
-  f = \frac{\rho k_{nn}
+  \frac{\rho k_{nn}
     k_{\mathrm{r}}}{\mu}\frac{P-P_{\mathrm{e}}}{L} \ .
 \end{equation}
 A similar equation holds for temperature (but in PorousFlow
 simulations the heat is sometimes supplied by the fluid, in which case
 the appropriate equation to use for the heat may be the above equation
 multiplied by the enthalpy).  Here $k_{nn}$ is the permeability of the
-region between the model and the imaginary environment,
+region between the model and the imaginary environment 
+(which can also be thought of as the permeability of the adjacent element),
 $k_{\mathrm{r}}$ is the relative permeability in this region, $\rho$
 and $\mu$ are the fluid density and viscosity.  The environment
 porepressure is $P_{\mathrm{e}}$ and the boundary porepressure is
 $P$.
 
 If $L\sim 0$ this effectively fixes the porepressure to $P\sim
-P_{\mathrm{e}}$, since $f$ is very large otherwise (physically:
+P_{\mathrm{e}}$, since the flux is very large otherwise (physically:
 fluid is rapidly removed or added to the system by the environment to
 ensure $P=P_{\mathrm{e}}$).  If $L\sim\infty$ the boundary flux is
 almost zero and does nothing.
 
-[eq:fix_pp_bc] may be implemented in a number of ways, the 2 most
-common being the following.
+### Numerical Implementation
 
-A [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
-may be constructed that models
-\begin{equation}
-f = C (P -
-P_{\mathrm{e}}) \ ,
-\end{equation}
-that is, with `pt_vals = '-1E9 1E9'`, `multipliers = '-1E9 1E9'`,
-`PT_shift = Pe` and `flux_function = C`.  Here the `1E9` is just an
-example: the point is that it should be much greater than any expected
-porepressure) and $P_{\mathrm{e}}$ provided by an AuxVariable (or set
-to a constant value).  The numerical value of the conductance, $C$, is
+The [`PorousFlowSink`](PorousFlowSink.md) is implemented in a fairly general way 
+that allows for flexibility in setting combinations of pressure and temperature boundary conditions. Due to its implementation, 
+it is difficult to draw a perfect analogy to the physical flux. Nevertheless,
+[eq:fix_pp_bc] may be implemented in a number of ways, and one of the most
+common involves a [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
+that follows the format of [eq:s_f_g] using $f(x,t)=C$ and $g(P-P_{\mathrm{e}})$ as a
+piecewise linear function between ordered pairs of `pt_vals` (on the x-axis) and 
+`multiplier` (on the y-axis). The function $g$ is shown in the figure below. It accepts $P-P_{\mathrm{e}}$ as an input and returns 
+a value that ends up multiplying $C$ to give a flux. $C$ can be thought of as the conductance and is specified with `flux_function = C`. $P_{\mathrm{e}}$ can be specified using an AuxVariable or set to a constant value using `PT_shift = Pe`.
+
+
+!media piecewiselinear_g_function.png style=width:50%;margin-left:10px caption=Depiction of $g(P-P_{\mathrm{e}})$ for PorousFlowPiecewiseLinearSink. The function accepts $P-P_{\mathrm{e}}$ as an input (i.e. the difference between a specified environment pressure and the pressure on the boundary element) and returns a value that multiplies $C$ to give the flux out of the domain. id=PiecewiseLinear_g_Function
+
+To set a Dirichlet boundary condition $P = P_{\mathrm{e}}$, either $C$ or the slope of $g$ should be very large. 
+It is usually convenient to make the slope of $g$ equal to 1 by setting `pt_vals = '-1E9 1E9'` and `multipliers = '-1E9 1E9'`, and then $C$ can be selected appropriately.
+Assigning a large range for `pt_vals` ensures that $g$ is defined for the porepressures encountered in the simulation, and defining $g$ for $P-P_{\mathrm{e}}>0$ and $P-P_{\mathrm{e}}<0$ allows for outflow and inflow.
+If $P - P_{\mathrm{e}}$ falls outside of the range defined in `pt_vals`, then $g = 0$ by default. This can be useful to set a boundary condition that will only allow for outflow (e.g. by using  `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`).`
+
+
+The numerical value of the conductance, $C$, is
 $\rho k_{nn}k_{\mathrm{r}}/\mu/L$, must be set at an appropriate value
 for the model.
-
 Alternately, a
 [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
 may be constructed with the same `pt_vals`, `multipliers` and `PT_shift`, but with `use_mobility = true` and `use_relperm =
@@ -137,7 +148,11 @@ true`, and then $C = 1/L$.  This has three advantages: (1) the MOOSE
 input file is simpler; (2) MOOSE automatically chooses the correct
 mobility and relative permeability to use; (3) these parameters are
 appropriate to the model so it reduces the potential for difficult
-numerical situations occuring.
+numerical situations occuring. Also note, if $C \times g$ is too large, the boundary residual will be much larger than residuals within the domain. This results in poor convergance. 
+
+So what value should be assigned to $C$? In the example below, $C = 10^{-6}$, $\rho \sim 10^3$ kg/m$^3$, $k = 10^{-15}$ m$^2$, $k_r = 1$, and $\mu \sim 10^{-3}$ Pa-s. Therefore $L \sim 10^{-3}$ m. This value of $L$ is small enough to ensure that the Dirichlet boundary condition is satisfied. If $C$ is increased to $10^{-2}$, $L \sim 10^{-7}$ m, and the simulation has difficulty converging. If $C = 10^{-11}$, $L\sim10^2$ m, and the boundary acts like a source of fluid from a distant reservoir (i.e. it no longer acts like a Dirichlet boundary condition). The value of $C$ would need to be adjusted if `use_mobility = true` and/or if `use_relperm = true`.
+
+!listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i start=[BCs] end=[Postprocessors]
 
 ## Injection of fluid at a fixed temperature
 
