@@ -287,13 +287,16 @@ Executioner::PicardSolve::PicardSolve(const InputParameters & parameters)
     _picard_force_norms(getParam<bool>("picard_force_norms")),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables")),
+    // this value will be set by MultiApp
+    _picard_self_relaxation_factor(1.0),
     _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
     _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin")),
     _picard_timer(registerTimedSection("PicardSolve", 1)),
     _picard_it(0),
     _picard_status(MoosePicardConvergenceReason::UNSOLVED),
     _xfem_update_count(0),
-    _xfem_repeat_step(false)
+    _xfem_repeat_step(false),
+    _previous_entering_time(_problem.time() - 1)
 {
 }
 
@@ -325,6 +328,26 @@ Executioner::PicardSolve::solve()
     Threads::parallel_reduce(elem_range, aldit);
 
     relaxed_dofs = aldit._all_dof_indices;
+  }
+
+  // Prepare to relax variables as a subapp
+  std::set<dof_id_type> self_relaxed_dofs;
+  if (_picard_self_relaxation_factor != 1.0)
+  {
+    // Snag all of the local dof indices for all of these variables
+    System & libmesh_nl_system = _nl.system();
+    AllLocalDofIndicesThread aldit(libmesh_nl_system, _picard_self_relaxed_variables);
+    ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
+    Threads::parallel_reduce(elem_range, aldit);
+
+    self_relaxed_dofs = aldit._all_dof_indices;
+
+    if (_previous_entering_time == _problem.time())
+    {
+      NumericVector<Number> & solution = _nl.solution();
+      NumericVector<Number> & relax_previous = _nl.getVector("self_relax_previous");
+      relax_previous = solution;
+    }
   }
 
   _picard_it = 0;
@@ -415,6 +438,21 @@ Executioner::PicardSolve::solve()
 
     _problem.dt() =
         current_dt; // _dt might be smaller than this at this point for multistep methods
+  }
+
+  if (converged && _picard_self_relaxation_factor != 1.0)
+  {
+    if (_previous_entering_time == _problem.time())
+    {
+      NumericVector<Number> & solution = _nl.solution();
+      NumericVector<Number> & relax_previous = _nl.getVector("self_relax_previous");
+      Real factor = _picard_self_relaxation_factor;
+      for (const auto & dof : self_relaxed_dofs)
+        solution.set(dof, (relax_previous(dof) * (1.0 - factor)) + (solution(dof) * factor));
+      solution.close();
+      _nl.update();
+    }
+    _previous_entering_time = _problem.time();
   }
 
   if (_has_picard_its)

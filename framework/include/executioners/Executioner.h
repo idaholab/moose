@@ -154,6 +154,15 @@ public:
     /// Whether or not this has Picard iterations
     bool hasPicardIteration() { return _has_picard_its; }
 
+    /// Set relaxation factor for the current solve as a MultiApp
+    void setMultiAppRelaxationFactor(Real factor) { _picard_self_relaxation_factor = factor; }
+
+    /// Set relaxation variables for the current solve as a MultiApp
+    void setMultiAppRelaxationVariables(const std::vector<std::string> & vars)
+    {
+      _picard_self_relaxed_variables = vars;
+    }
+
   protected:
     /**
      * Perform one Picard iteration or a full solve.
@@ -199,6 +208,11 @@ public:
     /// The transferred variables that are going to be relaxed
     std::vector<std::string> _relaxed_vars;
 
+    /// Relaxation factor outside of Picard iteration (used as a subapp)
+    Real _picard_self_relaxation_factor;
+    /// Variables to be relaxed outside of Picard iteration (used as a subapp)
+    std::vector<std::string> _picard_self_relaxed_variables;
+
     /// Maximum number of xfem updates per step
     unsigned int _max_xfem_update;
     /// Controls whether xfem should update the mesh at the beginning of the time step
@@ -223,6 +237,9 @@ public:
     unsigned int _xfem_update_count;
     /// Whether step should be repeated due to xfem modifying the mesh
     bool _xfem_repeat_step;
+
+    /// Time of previous Picard solve as a subapp
+    Real _previous_entering_time;
   };
 
   PicardSolve & picardSolve() { return _picard_solve; }
