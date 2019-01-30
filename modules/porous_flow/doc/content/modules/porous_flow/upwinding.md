@@ -9,14 +9,14 @@ This page is part of a set of pages devoted to discussions of numerical stabiliz
 - [Numerical diffusion](numerical_diffusion.md)
 - [A worked example of Kuzmin-Turek stabilization](kt_worked.md)
 
-Numerical stabilization is necessary in scenarios with nonlinear advection, such as the physics modelled by PorousFlow.  One such stabilization is upwinding [citep!huyakorn1978, Dalen1979, helmig1998]. For multi-phase situations many upwinding schemes can lead to disaster as the algorithm attempts to withdraw fluid from a node where there is no fluid.  In situations where one phase disappears, or almost disappears, full upwinding is often advantageous, since it prevents such attempted withdrawls, and hence PorousFlow employs full upwinding by default.
+Numerical stabilization is necessary in scenarios with nonlinear advection, such as the physics modelled by PorousFlow.  One such stabilization is upwinding [citep:huyakorn1978, Dalen1979, helmig1998]. For multi-phase situations many upwinding schemes can lead to disaster as the algorithm attempts to withdraw fluid from a node where there is no fluid.  In situations where one phase disappears, or almost disappears, full upwinding is often advantageous, since it prevents such attempted withdrawls, and hence PorousFlow employs full upwinding by default.
 
 The [`PorousFlowBasicAdvection`](PorousFlowBasicAdvection.md) kernel
 implements a very naive non-upwinded version of advection.  Its use is
 not recommended.
 
 Full upwinding is numerically cheap compared with other stabilization schemes, but it suffers from two disadvantages.  Firstly, it is not smooth (in contrast
-to the SUPG upwinding scheme [citep!brooks1982, hughes1986, hughes1986b] or the [Kuzmin-Turek scheme](kt.md) [citep!KuzminTurek2004], for instance), so that close to steady-state where the fluxes are zero, the
+to the SUPG upwinding scheme [citep:brooks1982, hughes1986, hughes1986b] or the [Kuzmin-Turek scheme](kt.md) [citep:KuzminTurek2004], for instance), so that close to steady-state where the fluxes are zero, the
 upwind direction can oscillate, leading to nonconvergence.  This is dealt
 with by placing a cutoff on the upwinding in PorousFlow.  Secondly, upwinding is adding numerical diffusion, which can be critical in some simulations: see [numerical diffusion](numerical_diffusion.md) for a discussion.  PorousFlow also offers the [Kuzmin-Turek stabilization scheme](kt.md) for users who are concerned with these disadvantages.
 
@@ -63,7 +63,7 @@ R_{a} \equiv m_{a}I_{a} \ \ \ \textrm{if}\ \ \ I_{a}\geq 0 \ .
 
 The nodes for which $I_{a}\geq 0$ are called *upwind nodes*, since fluid is
 flowing from them to the *downwind nodes*.  This approach was first introduced
-by [cite!dalen1979].
+by [citet:dalen1979].
 
 The residual at the downwind nodes is determined by conserving mass.
 Specifically, let

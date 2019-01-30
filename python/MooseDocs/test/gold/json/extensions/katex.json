@@ -14,6 +14,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "KaTeX Extension"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "KaTeX", 
                         "recursive": true
                     }, 
@@ -48,6 +56,14 @@
                 "style": ""
             }, 
             "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "Inline"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
                 {
                     "attributes": {
                         "content": "Inline", 
@@ -111,6 +127,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "Block"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "Block", 
                         "recursive": true
                     }, 
@@ -152,7 +176,7 @@
                         "number": null, 
                         "numbered": false, 
                         "recursive": true, 
-                        "tex": "G_{\\mu\\nu} = 8\\pi G(T_{\\mu\\nu} + \\rho_{\\Lambda} g_{\\mu\\nu})"
+                        "tex": "G_{\\\\mu\\\\nu} = 8\\\\pi G(T_{\\\\mu\\\\nu} + \\\\rho_{\\\\Lambda} g_{\\\\mu\\\\nu})"
                     }, 
                     "children": [], 
                     "name": "LatexBlockEquation"
@@ -172,7 +196,7 @@
                         "number": 2, 
                         "numbered": true, 
                         "recursive": true, 
-                        "tex": "t' = t \\frac{1}{\\sqrt{1 - \\frac{\\nu^2}{c^2}}}"
+                        "tex": "t\\' = t \\\\frac{1}{\\\\sqrt{1 - \\\\frac{\\\\nu^2}{c^2}}}"
                     }, 
                     "children": [], 
                     "name": "LatexBlockEquation"
@@ -220,7 +244,7 @@
                         "number": 4, 
                         "numbered": true, 
                         "recursive": true, 
-                        "tex": " \\int_a^b f'(x)dx = f(b) - f(a)"
+                        "tex": "\\ \\\\int_a^b f\\'(x)dx = f(b) - f(a)"
                     }, 
                     "children": [], 
                     "name": "LatexBlockEquation"
@@ -355,7 +379,6 @@
             "attributes": {
                 "key": "calculus", 
                 "link": "#moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -374,7 +397,6 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -393,7 +415,6 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

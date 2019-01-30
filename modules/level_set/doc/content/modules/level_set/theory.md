@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The level set method is commonly used for front tracking problems [cite!osher2006level]. It is
+The level set method is commonly used for front tracking problems [cite:osher2006level]. It is
 modeled with the multi-dimensional advection equation
 
 \begin{equation}
@@ -47,7 +47,7 @@ As with any pure convection equation, implementing the level set equation with t
 element method requires numerical stabilization if node-to-node oscillations are to be avoided and
 standard solution accuracy is to be maintained.  The level set module also includes kernels which
 implement the Streamline Upwind/Petrov-Galerkin (SUPG) stabilization method
-[cite!brooks1982streamline,donea2003finite] for [eqn:pure_advection_weak], which is given by
+[cite:brooks1982streamline,donea2003finite] for [eqn:pure_advection_weak], which is given by
 
 \begin{equation}
   \label{eqn:supg}

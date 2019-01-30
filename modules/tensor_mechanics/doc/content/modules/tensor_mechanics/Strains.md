@@ -16,7 +16,7 @@ gradient term is neglected in the small strain definition to give:
 \begin{equation}
 \epsilon = \frac{1}{2} \left( u \nabla + \nabla u \right) \quad when \quad \frac{\partial u}{ \partial x} << 1
 \end{equation}
-For more details on the linearized small strain assumption and derivation, see a Continuum Mechanics text such as [cite!malvern1969introduction] or [cite!bower2009applied], specifically [Chapter 2](http://solidmechanics.org/Text/Chapter2_1/Chapter2_1.php#Sect2_1_7).
+For more details on the linearized small strain assumption and derivation, see a Continuum Mechanics text such as [cite:malvern1969introduction] or [cite:bower2009applied], specifically [Chapter 2](http://solidmechanics.org/Text/Chapter2_1/Chapter2_1.php#Sect2_1_7).
 
 Total strain theories are path independent: in MOOSE, path independence means
 that the total strain, from the beginning of the entire simulation, is used to
@@ -25,7 +25,7 @@ hand, use the increment of strain at timestep to calculate stress.  Because the
 total strain formulation `ComputeSmallStrain` is path independent, no old values
 of strain or stress from the previous timestep are stored in MOOSE.  For a comparison
 of total strain vs incremental strain theories with experimental data,
-see [cite!shammamy1967incremental].
+see [cite:shammamy1967incremental].
 
 The input file syntax for small strain is
 
@@ -62,7 +62,7 @@ For finite strains, use [ComputeFiniteStrain](/ComputeFiniteStrain.md) in which 
 ### Incremental Deformation Gradient
 
 The finite strain mechanics approach used in the MOOSE tensor_mechanics module
-is the incremental corotational form from [cite!rashid1993incremental]. In this
+is the incremental corotational form from [cite:rashid1993incremental]. In this
 form, the generic time increment under consideration is such that $t \in [t_n, t_{n+1}]$.
 The configurations of the material element under consideration at $t = t_n$ and
 $t = t_{n+1}$ are denoted by $\kappa_n$, and $\kappa_{n + 1}$, respectively. The
@@ -111,7 +111,7 @@ incremental formulation, however, a residual stress remains, and the magnitude
 of that residual stress increases with the magnitude of the loading cycle.
 This occurs because the integral of the rate-of-deformation over the full
 loading cycle is not zero. A detailed explanation can be found in
-[cite!belytschko2003].
+[cite:belytschko2003].
 
 !media tensor_mechanics/closed_loop_large_deform_cycle_loading.png
        id=closed_loop_cycle_loading

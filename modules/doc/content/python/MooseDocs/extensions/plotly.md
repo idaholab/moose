@@ -1,11 +1,11 @@
-# Graph Extension
+# plotly Extension
 
 MooseDocs uses [plotly] for creating interactive graphs. Graphs are invoked
 with the `!plot` command, the available sub-commands are detailed in the following
 sections. [plotly-ext-config] lists the configuration options for the extension.
 
-!devel settings module=MooseDocs.extensions.graph
-                object=GraphExtension
+!devel settings module=MooseDocs.extensions.plotly
+                object=PlotlyExtension
                 id=plotly-ext-config
                 caption=Available configuration options for the `PlotlyExtension` object.
 
@@ -44,10 +44,9 @@ same.
 A complete list of settings available to the `plot scatter` command are included in
 [plot-scatter-settings].
 
-!devel settings module=MooseDocs.extensions.graph
-                object=GraphScatter
+!devel settings module=MooseDocs.extensions.plotly
+                object=PlotlyScatter
                 id=plot-scatter-settings
                 caption=Available settings for the `plot scatter` command.
 
 [plotly]: https://plot.ly/
-

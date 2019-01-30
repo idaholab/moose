@@ -13,15 +13,9 @@ import os
 import mooseutils
 
 import MooseDocs
-from MooseDocs.base import LatexRenderer
 from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.extensions import core, command, floats
-from MooseDocs.tree import tokens, latex
-
-Listing = tokens.newToken('Listing', floats.Float)
-ListingCode = tokens.newToken('ListingCode', core.Code)
-ListingLink = tokens.newToken('ListingLink', core.Link)
 
 def make_extension(**kwargs):
     return ListingExtension(**kwargs)
@@ -43,23 +37,6 @@ class ListingExtension(command.CommandExtension):
         self.addCommand(reader, FileListingCommand())
         self.addCommand(reader, InputListingCommand())
 
-        renderer.add('Listing', RenderListing())
-        renderer.add('ListingCode', RenderListingCode())
-        renderer.add('ListingLink', RenderListingLink())
-
-        if isinstance(renderer, LatexRenderer):
-            renderer.addPackage('listings')
-            renderer.addPackage('xcolor')
-
-            renderer.addPreamble(u"\\lstset{"
-                                 u"basicstyle=\\ttfamily,"
-                                 u"columns=fullflexible,"
-                                 u"frame=single,"
-                                 u"breaklines=true,"
-                                 u"showstringspaces=false,"
-                                 u"showspaces=false,"
-                                 u"postbreak=\\mbox{\\textcolor{red}{$\\hookrightarrow$}\\space},}")
-
 class LocalListingCommand(command.CommandComponent):
     COMMAND = 'listing'
     SUBCOMMAND = None
@@ -75,18 +52,10 @@ class LocalListingCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  token_type=Listing)
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)
         content = info['inline'] if 'inline' in info else info['block']
-        code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
-                         language=self.settings['language'], content=content)
-
-        if flt is parent:
-            code.attributes.update(**self.attributes)
-
-        if flt is not parent:
-            code.name = 'ListingCode'
-
+        core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
+                  language=self.settings['language'], content=content)
         return parent
 
 class FileListingCommand(LocalListingCommand):
@@ -106,20 +75,14 @@ class FileListingCommand(LocalListingCommand):
         """
 
         filename = common.check_filenames(info['subcommand'])
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  token_type=Listing)
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)
+
         # Create code token
         lang = self.settings.get('language')
         content = self.extractContent(filename)
         lang = lang if lang else common.get_language(filename)
-        code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
-                         content=content, language=lang)
-
-        if flt is parent:
-            code.attributes.update(**self.attributes)
-
-        if flt is not parent:
-            code.name = 'ListingCode'
+        core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
+                  content=content, language=lang)
 
         # Add bottom modal
         if self.settings['link']:
@@ -138,8 +101,8 @@ class FileListingCommand(LocalListingCommand):
                                             content=code,
                                             title=unicode(filename),
                                             string=u'({})'.format(rel_filename))
-            link.name = 'ListingLink'
             link['data-tooltip'] = unicode(rel_filename)
+
 
         return parent
 
@@ -187,70 +150,3 @@ class InputListingCommand(FileListingCommand):
                 raise exceptions.MooseDocsException(msg, block, filename)
             out.append(unicode(node.render()))
         return '\n'.join(out)
-
-def get_listing_options(token):
-    opts = latex.Bracket(None)
-
-    lang = token['language'] or ''
-    if lang.lower() == 'cpp':
-        lang = 'C++'
-    elif lang.lower() == 'text':
-        lang = None
-
-    if lang:
-        latex.String(opts, content=u"language={},".format(lang))
-
-    return [opts]
-
-class RenderListing(floats.RenderFloat):
-
-    def createLatex(self, parent, token, page):
-
-        ctoken = token(1)
-        opts = get_listing_options(ctoken)
-
-        cap = token(0)
-        key = cap['key']
-        if key:
-            latex.String(opts[0], content=u"label={},".format(key))
-
-        tok = tokens.Token()
-        cap.copyToToken(tok)
-        if key:
-            latex.String(opts[0], content=u"caption=")
-        else:
-            latex.String(opts[0], content=u"title=")
-
-        if not cap.children:
-            latex.String(opts[0], content=u"\\mbox{}", escape=False)
-        else:
-            self.translator.renderer.render(latex.Brace(opts[0]), tok, page)
-
-        latex.Environment(parent, 'lstlisting',
-                          string=ctoken['content'].strip('\n'),
-                          escape=False,
-                          after_begin='\n',
-                          before_end='\n',
-                          args=opts,
-                          info=token.info)
-
-        token.children = tuple()
-        return parent
-
-class RenderListingCode(core.RenderCode):
-
-    def createLatex(self, parent, token, page):
-        opts = get_listing_options(token)
-        latex.Environment(parent, 'lstlisting',
-                          string=token['content'].strip('\n'),
-                          escape=False,
-                          after_begin='\n',
-                          before_end='\n',
-                          args=opts,
-                          info=token.info)
-        return parent
-
-class RenderListingLink(core.RenderLink):
-    """Removes 'ListingLink' from LaTeX output."""
-    def createLatex(self, parent, token, page):
-        return None

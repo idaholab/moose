@@ -1,7 +1,7 @@
-!template load file=system_design_description.template.md
-               project=MOOSE
+!sqa load template=system_design_description.md.template
+project=MOOSE
 
-!template! item key=introduction
+!sqa! item key=introduction
 Frameworks are a software development construct aiming to simplify the creation of specific classes
 of applications through abstraction of low-level details. The main object of creating a framework is
 to provide an interface to application developers that saves time and provides advanced capabilities
@@ -56,10 +56,10 @@ input files for driving a simulation, run the application, and analyze the resul
 through MOOSE are primarily through the command-line interface and through a customizable block-based
 input file.
 
-!template-end!
+!sqa-end!
 
 
-!template! item key=system-design
+!sqa! item key=system-design
 The MOOSE framework itself is composed of a wide range of pluggable systems. Each system is generally
 composed of a single or small set of C++ objects intended to be specialized by a Developer to solve a
 specific problem. To accomplish this design goal, MOOSE uses several modern object-oriented design
@@ -67,12 +67,12 @@ patterns. The primary overarching pattern is the "Factory Pattern". Users needin
 may inherit from one of MOOSE's systems to providing an implementation meeting his or her needs. The
 design of each of these systems is documented on the mooseframework.org wiki in the Tutorial
 section. Additionally, up-to-date documentation extracted from the source is maintained on the the
-moosefram<ework.org documentation site after every successful merge to MOOSE's stable branch. After
+mooseframework.org documentation site after every successful merge to MOOSE's stable branch. After
 these objects are created, the can be registered with the framework and used immediately in a MOOSE
 input file.
-!template-end!
+!sqa-end!
 
-!template! item key=system-structure
+!sqa! item key=system-structure
 The MOOSE framework architecture consists of a core and several pluggable systems. The core of MOOSE
 consists of a number of key objects responsible for setting up and managing the user-defined objects
 of a finite element simulation. This core set of objects has limited extendability and exist for
@@ -98,11 +98,10 @@ set of defined polymorphic interfaces and are designed to accomplish a specific 
 simulation. The design of these systems is fluid and is managed through agile methods and ticket
 request system on the Github.org website.
 
-!template-end!
+!sqa-end!
 
-!template! item key=requirements-cross-reference
+!sqa! item key=requirements-cross-reference
 
 !sqa cross-reference
 
-!template-end!
-
+!sqa-end!

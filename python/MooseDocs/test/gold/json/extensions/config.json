@@ -14,6 +14,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "Config Extension"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "Config", 
                         "recursive": true
                     }, 
@@ -41,12 +49,21 @@
         }, 
         {
             "attributes": {
-                "bottom": true, 
-                "command": "figure", 
+                "class": "", 
+                "id": "michigan-flag", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": ""
             }, 
             "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "src": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Flag_of_Michigan.svg"
+                    }, 
+                    "children": [], 
+                    "name": "Image"
+                }, 
                 {
                     "attributes": {
                         "key": "michigan-flag", 
@@ -64,16 +81,7 @@
                             "name": "Word"
                         }
                     ], 
-                    "name": "FloatCaption"
-                }, 
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "src": "Flag_of_Michigan.svg", 
-                        "tex": "Flag_of_Michigan.pdf"
-                    }, 
-                    "children": [], 
-                    "name": "Image"
+                    "name": "Caption"
                 }
             ], 
             "name": "Float"
@@ -82,7 +90,6 @@
             "attributes": {
                 "key": "michigan-flag", 
                 "link": "#michigan-flag", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -101,7 +108,6 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -120,7 +126,6 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

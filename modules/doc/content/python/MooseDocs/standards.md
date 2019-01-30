@@ -23,7 +23,7 @@ will appear in the right-hand sidebar as navigation links.
 
 When appropriate, include citation information for the models implemented in the class being
 documented.  Avoid accidental duplication of the citation information in the documentation text by
-listing and immediately citing the source; use only `[cite!example_reference]` which will render as
+listing and immediately citing the source; use only `[cite:example_reference]` which will render as
 the author name and publication year in the documentation page.  If a reference is not currently
 included in the appropriate bibtex file, add the reference citation information to the bibtex file.
 

@@ -16,7 +16,7 @@ angles in the base class, [ComputeElasticityTensor](/ComputeElasticityTensor.md)
 because of the active rotation convention used in crystal plasticity simulations.
 
 The fill method `symmetric9` is appropriate for materials with three orthotropic planes of symmetry
-[citep!malvern1969introduction], and is used for simulations of anistropic materials such as cubic
+[citep:malvern1969introduction], and is used for simulations of anistropic materials such as cubic
 crystals.  The engineering elasticity tensor notation for an orthotropic material is given in
 [eq:symmetric9_fill_method]:
 \begin{equation}

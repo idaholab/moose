@@ -1,10 +1,7 @@
 [Tests]
-  issues = '#8465'
-  design = 'LevelSetOlssonBubble.md'
   [./test]
     type = Exodiff
     input = olsson_bubble.i
     exodiff = olsson_bubble_out.e
-    requirement = "The level set module shall include the bubble function defined in [cite!olsson2005conservative]."
   [../]
 []

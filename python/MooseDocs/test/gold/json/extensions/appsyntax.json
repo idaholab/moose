@@ -1,0 +1,221 @@
+{
+    "attributes": {
+        "recursive": true
+    }, 
+    "children": [
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 1, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "Application Syntax Extension (disabled)"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Application", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Syntax", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "Extension", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "(", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
+                        "content": "disabled", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "content": ")", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "recursive": true, 
+                "tag": "p"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "\n\n!syntax description /Controls/RealFunctionControl", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "DisabledToken"
+        }, 
+        {
+            "attributes": {
+                "recursive": true, 
+                "tag": "p"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "\n\n!syntax parameters /Controls/RealFunctionControl", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "DisabledToken"
+        }, 
+        {
+            "attributes": {
+                "recursive": true, 
+                "tag": "p"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "\n\n!syntax parameters /Controls/RealFunctionControl groups=Advanced hide=implicit heading=None", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "DisabledToken"
+        }, 
+        {
+            "attributes": {
+                "recursive": true, 
+                "tag": "p"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "\n\n!syntax parameters /Controls/RealFunctionControl show=function enable visible=required", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "DisabledToken"
+        }, 
+        {
+            "attributes": {
+                "recursive": true, 
+                "tag": "p"
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "\n\n!syntax list /Mesh", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "DisabledToken"
+        }, 
+        {
+            "attributes": {
+                "key": "MOOSE", 
+                "link": "https:://mooseframework.org", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "MOOSE", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }, 
+        {
+            "attributes": {
+                "key": "libMesh", 
+                "link": "https://libmesh.github.io/", 
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "libMesh", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "String"
+                }
+            ], 
+            "name": "Shortcut"
+        }
+    ], 
+    "name": null
+}

@@ -1,7 +1,5 @@
 # Material Icon
 
-This is a paragraph.
+!icon help
 
-!icon help faicon=question-circle
-
-This is an icon !!icon home!! that inline with the text.
+This is icon !!icon home!! that is in the text

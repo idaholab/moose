@@ -4,8 +4,4 @@
 
 # Config Extension
 
-!media Flag_of_Michigan.svg
-       latex_src=Flag_of_Michigan.pdf
-       caption=Michigan
-       id=michigan-flag
-       style=width:50%;text-align:center;
+!media https://upload.wikimedia.org/wikipedia/commons/b/b5/Flag_of_Michigan.svg caption=Michigan id=michigan-flag

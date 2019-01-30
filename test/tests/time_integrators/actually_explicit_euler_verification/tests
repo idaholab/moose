@@ -7,7 +7,7 @@
 
 [Tests]
   design = '/ActuallyExplicitEuler.md'
-  issues = '#10837'
+  issues = '10837'
 
   [./1d-linear]
     type = 'Exodiff'

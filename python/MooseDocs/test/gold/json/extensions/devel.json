@@ -14,6 +14,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "Devel Extension"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "Devel", 
                         "recursive": true
                     }, 
@@ -42,29 +50,10 @@
         {
             "attributes": {
                 "class": "", 
-                "id": "", 
-                "level": 2, 
+                "id": "markdown-example", 
+                "img": false, 
                 "recursive": true, 
                 "style": ""
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "content": "Examples", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }
-            ], 
-            "name": "Heading"
-        }, 
-        {
-            "attributes": {
-                "bottom": false, 
-                "command": "figure", 
-                "img": false, 
-                "recursive": true
             }, 
             "children": [
                 {
@@ -124,11 +113,11 @@
                             "name": "Punctuation"
                         }
                     ], 
-                    "name": "FloatCaption"
+                    "name": "Caption"
                 }, 
                 {
                     "attributes": {
-                        "content": "This is a +test+.", 
+                        "content": "This is a test.", 
                         "escape": true, 
                         "language": "text", 
                         "recursive": true
@@ -191,19 +180,11 @@
                         }, 
                         {
                             "attributes": {
+                                "content": "test", 
                                 "recursive": true
                             }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "content": "test", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Word"
-                                }
-                            ], 
-                            "name": "Strong"
+                            "children": [], 
+                            "name": "Word"
                         }, 
                         {
                             "attributes": {
@@ -217,19 +198,20 @@
                     "name": "Paragraph"
                 }
             ], 
-            "name": "ExampleFloat"
+            "name": "Float"
         }, 
         {
             "attributes": {
-                "bottom": false, 
-                "command": "figure", 
+                "class": "", 
+                "id": "markdown-example", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": ""
             }, 
             "children": [
                 {
                     "attributes": {
-                        "key": "markdown-example2", 
+                        "key": "markdown-example", 
                         "number": 2, 
                         "prefix": "Example", 
                         "recursive": true
@@ -277,54 +259,6 @@
                         }, 
                         {
                             "attributes": {
-                                "count": 1, 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Space"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": "with", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "count": 1, 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Space"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": "block", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "count": 1, 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Space"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": "format", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
                                 "content": ".", 
                                 "recursive": true
                             }, 
@@ -332,11 +266,11 @@
                             "name": "Punctuation"
                         }
                     ], 
-                    "name": "FloatCaption"
+                    "name": "Caption"
                 }, 
                 {
                     "attributes": {
-                        "content": "First paragraph.\n\nSecond paragraph.\n", 
+                        "content": "# Heading\n\nAnd some text.\n", 
                         "escape": true, 
                         "language": "text", 
                         "recursive": true
@@ -346,43 +280,31 @@
                 }, 
                 {
                     "attributes": {
-                        "recursive": true
+                        "class": "", 
+                        "id": "", 
+                        "level": 1, 
+                        "recursive": true, 
+                        "style": ""
                     }, 
                     "children": [
                         {
                             "attributes": {
-                                "content": "First", 
+                                "recursive": true, 
+                                "text": "Heading"
+                            }, 
+                            "children": [], 
+                            "name": "Label"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "Heading", 
                                 "recursive": true
                             }, 
                             "children": [], 
                             "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "count": 1, 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Space"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": "paragraph", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": ".", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Punctuation"
                         }
                     ], 
-                    "name": "Paragraph"
+                    "name": "Heading"
                 }, 
                 {
                     "attributes": {
@@ -391,7 +313,7 @@
                     "children": [
                         {
                             "attributes": {
-                                "content": "Second", 
+                                "content": "And", 
                                 "recursive": true
                             }, 
                             "children": [], 
@@ -407,7 +329,23 @@
                         }, 
                         {
                             "attributes": {
-                                "content": "paragraph", 
+                                "content": "some", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "text", 
                                 "recursive": true
                             }, 
                             "children": [], 
@@ -433,933 +371,12 @@
                     "name": "Paragraph"
                 }
             ], 
-            "name": "ExampleFloat"
-        }, 
-        {
-            "attributes": {
-                "class": "", 
-                "id": "", 
-                "level": 2, 
-                "recursive": true, 
-                "style": ""
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "content": "Settings", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }
-            ], 
-            "name": "Heading"
-        }, 
-        {
-            "attributes": {
-                "recursive": true
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "content": "The", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "available", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "settings", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "for", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "code", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "blocks", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "are", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "listed", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "in", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "class": "", 
-                        "id": "", 
-                        "key": "code-settings", 
-                        "recursive": true, 
-                        "style": ""
-                    }, 
-                    "children": [], 
-                    "name": "ShortcutLink"
-                }, 
-                {
-                    "attributes": {
-                        "content": ".", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Punctuation"
-                }
-            ], 
-            "name": "Paragraph"
-        }, 
-        {
-            "attributes": {
-                "class": "", 
-                "form": "LLL", 
-                "id": "", 
-                "recursive": true, 
-                "style": ""
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "recursive": true
-                    }, 
-                    "children": [
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "Key", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableHeadItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "Default", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableHeadItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "Description", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableHeadItem"
-                                }
-                            ], 
-                            "name": "TableRow"
-                        }
-                    ], 
-                    "name": "TableHead"
-                }, 
-                {
-                    "attributes": {
-                        "recursive": true
-                    }, 
-                    "children": [
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "style", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "The style settings that are passed to rendered HTML tag.", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }
-                            ], 
-                            "name": "TableRow"
-                        }, 
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "class", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "The class settings to be passed to rendered HTML tag.", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }
-                            ], 
-                            "name": "TableRow"
-                        }, 
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "language", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "text", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "The code language to use for highlighting.", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }
-                            ], 
-                            "name": "TableRow"
-                        }, 
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "id", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "align": "left", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "content": "The class settings to be passed to the rendered tag.", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [], 
-                                            "name": "String"
-                                        }
-                                    ], 
-                                    "name": "TableItem"
-                                }
-                            ], 
-                            "name": "TableRow"
-                        }
-                    ], 
-                    "name": "TableBody"
-                }
-            ], 
-            "name": "Table"
-        }, 
-        {
-            "attributes": {
-                "bottom": false, 
-                "command": "figure", 
-                "img": false, 
-                "recursive": true
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "key": "code-settings", 
-                        "number": 1, 
-                        "prefix": "Table", 
-                        "recursive": true
-                    }, 
-                    "children": [
-                        {
-                            "attributes": {
-                                "content": "Settings", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "count": 1, 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Space"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": "for", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "count": 1, 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Space"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": "code", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "count": 1, 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Space"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": "blocks", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Word"
-                        }, 
-                        {
-                            "attributes": {
-                                "content": ".", 
-                                "recursive": true
-                            }, 
-                            "children": [], 
-                            "name": "Punctuation"
-                        }
-                    ], 
-                    "name": "FloatCaption"
-                }, 
-                {
-                    "attributes": {
-                        "form": "LLL", 
-                        "recursive": true
-                    }, 
-                    "children": [
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "Key", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableHeadItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "Default", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableHeadItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "Description", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableHeadItem"
-                                        }
-                                    ], 
-                                    "name": "TableRow"
-                                }
-                            ], 
-                            "name": "TableHead"
-                        }, 
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "style", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "The style settings that are passed to rendered HTML tag.", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }
-                                    ], 
-                                    "name": "TableRow"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "class", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "The class settings to be passed to rendered HTML tag.", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }
-                                    ], 
-                                    "name": "TableRow"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "language", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "text", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "The code language to use for highlighting.", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }
-                                    ], 
-                                    "name": "TableRow"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "recursive": true
-                                    }, 
-                                    "children": [
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "id", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }, 
-                                        {
-                                            "attributes": {
-                                                "align": "left", 
-                                                "recursive": true
-                                            }, 
-                                            "children": [
-                                                {
-                                                    "attributes": {
-                                                        "content": "The class settings to be passed to the rendered tag.", 
-                                                        "recursive": true
-                                                    }, 
-                                                    "children": [], 
-                                                    "name": "String"
-                                                }
-                                            ], 
-                                            "name": "TableItem"
-                                        }
-                                    ], 
-                                    "name": "TableRow"
-                                }
-                            ], 
-                            "name": "TableBody"
-                        }
-                    ], 
-                    "name": "Table"
-                }
-            ], 
-            "name": "TableFloat"
+            "name": "Float"
         }, 
         {
             "attributes": {
                 "key": "markdown-example", 
                 "link": "#markdown-example", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -1376,9 +393,8 @@
         }, 
         {
             "attributes": {
-                "key": "markdown-example2", 
-                "link": "#markdown-example2", 
-                "prefix": "", 
+                "key": "markdown-example", 
+                "link": "#markdown-example", 
                 "recursive": true
             }, 
             "children": [
@@ -1395,28 +411,8 @@
         }, 
         {
             "attributes": {
-                "key": "code-settings", 
-                "link": "#code-settings", 
-                "prefix": "", 
-                "recursive": true
-            }, 
-            "children": [
-                {
-                    "attributes": {
-                        "content": "Table 1", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "String"
-                }
-            ], 
-            "name": "Shortcut"
-        }, 
-        {
-            "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -1435,7 +431,6 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

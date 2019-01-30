@@ -1,7 +1,7 @@
 # LevelSetForcingFunctionSUPG
 
 This kernel adds the Streamline Upwind/Petrov-Galerkin (SUPG) stabilization
-term [citep!brooks1982streamline, donea2003finite]  to a forcing or source term of a partial differential equation:
+term [citep:brooks1982streamline, donea2003finite]  to a forcing or source term of a partial differential equation:
 
 \begin{equation}
 \label{eq:LevelSetForcingFunctionSUPG:weak}

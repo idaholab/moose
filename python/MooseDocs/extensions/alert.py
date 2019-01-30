@@ -10,9 +10,9 @@
 
 import os
 import MooseDocs
-from MooseDocs.base import components, LatexRenderer
+from MooseDocs.base import components
 from MooseDocs.extensions import command
-from MooseDocs.tree import tokens, html, latex
+from MooseDocs.tree import tokens, html
 
 def make_extension(**kwargs):
     return AlertExtension(**kwargs)
@@ -20,20 +20,6 @@ def make_extension(**kwargs):
 AlertToken = tokens.newToken('AlertToken', brand=u'')
 AlertTitle = tokens.newToken('AlertTitle', brand=u'', prefix=True)
 AlertContent = tokens.newToken('AlertContent', brand=u'', icon=True)
-
-# LaTeX alert environment that uses tcolorbox package
-ALERT_LATEX = u"""\\setlength\\intextsep{0pt}
-\\NewDocumentEnvironment{alert}{O{#2}moO{white}}{%
-  \\ifthenelse{\\isempty{#1}}{%
-      \\IfValueT{#3}{\\tcbset{title=#3}}
-    }{%
-      \\tcbset{title=\\MakeUppercase{#1}\\IfValueT{#3}{: #3}}
-    }
-  \\begin{tcolorbox}[arc=0mm,fonttitle=\\bfseries,colback=alert-#2!5,colframe=alert-#2,coltitle=#4]
-}{%
-  \\end{tcolorbox}
-}
-"""
 
 class AlertExtension(command.CommandExtension):
     """
@@ -53,20 +39,6 @@ class AlertExtension(command.CommandExtension):
         renderer.add('AlertToken', RenderAlertToken())
         renderer.add('AlertTitle', RenderAlertTitle())
         renderer.add('AlertContent', RenderAlertContent())
-
-        if isinstance(renderer, LatexRenderer):
-            renderer.addPackage('xcolor')
-            renderer.addPackage('xparse')
-            renderer.addPackage('xifthen')
-            renderer.addPackage('tcolorbox')
-            renderer.addPackage('wrapfig')
-            renderer.addPackage('graphicx')
-
-            renderer.addPreamble(u'\\definecolor{alert-error}{RGB}{153,0,0}')
-            renderer.addPreamble(u'\\definecolor{alert-note}{RGB}{0,88,151}')
-            renderer.addPreamble(u'\\definecolor{alert-warning}{RGB}{220,200,100}')
-            renderer.addPreamble(u'\\definecolor{alert-construction}{RGB}{255,114,33}')
-            renderer.addPreamble(ALERT_LATEX)
 
 class AlertCommand(command.CommandComponent):
     COMMAND = 'alert'
@@ -97,6 +69,7 @@ class AlertCommand(command.CommandComponent):
 
         return AlertContent(alert_token, brand=brand, icon=self.settings['icon'])
 
+
 class RenderAlertToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
@@ -110,32 +83,7 @@ class RenderAlertToken(components.RenderComponent):
                         class_='card moose-alert moose-alert-{}'.format(token['brand']))
 
     def createLatex(self, parent, token, page):
-
-        # Argument list (see ALERT above)
-        args = []
-        if token(0)['prefix']:
-            args.append(latex.Bracket(string=token['brand']))
-        else:
-            args.append(latex.Bracket())
-
-        args.append(latex.Brace(string=token['brand']))
-
-        if token(0).children:
-            title = latex.Bracket()
-            self.renderer.render(title, token(0), page)
-            args.append(title)
-
-        c_icon = token(1)['icon'] and (token['brand'] == 'construction')
-        if c_icon:
-            latex.Command(parent, 'tcbset', string=u'height from=1in to 200in', escape=False)
-
-        env = latex.Environment(parent, 'alert', args=args)
-
-        if c_icon:
-            latex.Command(parent, 'tcbset', string=u'height from=0in to 200in', escape=False)
-
-        token(0).parent = None
-        return env
+        pass
 
 class RenderAlertContent(components.RenderComponent):
 
@@ -155,16 +103,8 @@ class RenderAlertContent(components.RenderComponent):
         return html.Tag(content, 'p')
 
     def createLatex(self, parent, token, page):
+        pass
 
-        if token['icon'] and (token['brand'] == 'construction'):
-            src = 'media/framework/under-construction.png'
-            wrapfig = latex.Environment(parent, 'wrapfigure',
-                                        args=[latex.Brace(string=u'l'),
-                                              latex.Brace(string=u'1in', escape=False)])
-            latex.Command(wrapfig, 'includegraphics',
-                          args=[latex.Bracket(string=u'height=0.6in', escape=False)],
-                          string=src)
-        return parent
 
 class RenderAlertTitle(components.RenderComponent):
 
@@ -185,4 +125,4 @@ class RenderAlertTitle(components.RenderComponent):
         return title
 
     def createLatex(self, parent, token, page):
-        return parent
+        pass

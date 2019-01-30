@@ -32,15 +32,15 @@ class Meta(object):
         """Initialize dict key with the supplied type."""
         self.__data[key] = default
 
-    def getData(self, key, default=None):
+    def getData(self, key):
         """Retrieve data for the supplied key."""
-        return self.__data.get(key, default)
+        return self.__data[key]
 
     def setData(self, key, value):
         """Set the data for the supplied key."""
         self.__data[key] = value
 
-class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
+class Executioner(mixins.ConfigObject, mixins.TranslatorMixin):
     """
     Base object for tokenization and rendering computations.
 
@@ -87,20 +87,14 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
     def __init__(self, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
-        mixins.TranslatorObject.__init__(self)
+        mixins.TranslatorMixin.__init__(self)
         self._meta_data = dict()
         self._tree_data = dict()
-        self._result_data = dict()
         self._ast_available = False
-        self._result_available = False
 
     def isSyntaxTreeAvailable(self):
         """Returns True if the AST creation is complete."""
         return self._ast_available
-
-    def isResultTreeAvailable(self):
-        """Returns True if the AST creation is complete."""
-        return self._result_available
 
     def getSyntaxTree(self, page):
         """Return a copy of the syntax tree for the supplied page."""
@@ -123,13 +117,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         return data
 
     def getMetaData(self, page, key):
-        """Return the desired meta data for the supplied page and key."""
-        meta = self.getMetaDataObject(page)
-        if meta is not None:
-            return meta.getData(key)
-
-    def getMetaDataObject(self, page):
-        """Return the desired meta data object for the supplied page."""
+        """Return the desired meta data for the supplied page."""
 
         if not self.isSyntaxTreeAvailable():
             msg = "The meta data for {} page is not available until tokenization is complete, " \
@@ -137,20 +125,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
                   "createToken methods."
             raise exceptions.MooseDocsException(msg, page.local)
 
-        return self._meta_data.get(page.uid, None)
-
-    def getResultTree(self, page):
-        """Return a copy of the rendered result for the supplied page."""
-        if not self.isResultTreeAvailable():
-            msg = "The result tree data for {} page is not available until rendering is complete, "\
-                  "therefore this method cannot not be used until the postExecute methods."
-            raise exceptions.MooseDocsException(msg, page.local)
-
-        data = self._result_data.get(page.uid, None)
-        if data is not None:
-            data = data.copy()
-
-        return data
+        meta = self._meta_data.get(page.uid, None)
+        if meta is not None:
+            return meta.getData(key)
 
     def execute(self, nodes, num_threads=1):
         """
@@ -201,7 +178,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         LOG.info('Total Time [%s sec.]', time.time() - total)
 
     def tokenize(self, node):
-        """Perform tokenization and call all associated callbacks for the supplied page."""
+        """Perform tokenization and call all associated callbaccks for the supplied page."""
 
         meta = Meta()
         self._executeExtensionFunction('initMetaData', node, args=(node, meta))
@@ -209,42 +186,35 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         self._executeExtensionFunction('postRead', node, args=(content, node, meta))
 
         ast = self.translator.reader.getRoot()
-        if meta.getData('active', True):
-            self._callFunction(self.translator.reader, 'preTokenize', node, args=(ast, node, meta))
-            self._executeExtensionFunction('preTokenize', node,
-                                           args=(ast, node, meta, self.translator.reader))
+        self._callFunction(self.translator.reader, 'preTokenize', node, args=(ast, node, meta))
+        self._executeExtensionFunction('preTokenize', node,
+                                       args=(ast, node, meta, self.translator.reader))
 
-            self.translator.reader.tokenize(ast, content, node)
+        self.translator.reader.tokenize(ast, content, node)
 
-            self._callFunction(self.translator.reader, 'postTokenize', node, args=(ast, node, meta))
-            self._executeExtensionFunction('postTokenize', node,
-                                           args=(ast, node, meta, self.translator.reader))
+        self._callFunction(self.translator.reader, 'postTokenize', node, args=(ast, node, meta))
+        self._executeExtensionFunction('postTokenize', node,
+                                       args=(ast, node, meta, self.translator.reader))
 
+        #self.translator.resetConfigurations()
         return ast, meta
 
     def render(self, node, ast, meta):
-        """Perform rendering and call all associated callbacks for the supplied page."""
+        """Perform rendering and call all associated callbaccks for the supplied page."""
 
         result = self.translator.renderer.getRoot()
+        self._callFunction(self.translator.renderer, 'preRender', node, args=(result, node, meta))
+        self._executeExtensionFunction('preRender', node,
+                                       args=(result, node, meta, self.translator.renderer))
 
-        if meta.getData('active', True):
-            self._callFunction(self.translator.renderer, 'preRender', node,
-                               args=(result, node, meta))
-            self._executeExtensionFunction('preRender', node,
-                                           args=(result, node, meta, self.translator.renderer))
+        self.translator.renderer.render(result, ast, node)
 
-            self.translator.renderer.render(result, ast, node)
+        self._callFunction(self.translator.renderer, 'postRender', node, args=(result, node, ast))
+        self._executeExtensionFunction('postRender', node,
+                                       args=(result, node, meta, self.translator.renderer))
 
-            self._callFunction(self.translator.renderer, 'postRender', node,
-                               args=(result, node, ast))
-            self._executeExtensionFunction('postRender', node,
-                                           args=(result, node, meta, self.translator.renderer))
-
-        if meta.getData('output', True):
-            self.translator.renderer.write(node, result.root)
-            self._executeExtensionFunction('postWrite', node)
-
-        return result
+        self.translator.renderer.write(node, result.root)
+        self._executeExtensionFunction('postWrite', node)
 
     def finalize(self, other_nodes, num_threads):
         """Complete copying of non-source (e.g., images) files."""
@@ -288,7 +258,6 @@ class Serial(Executioner):
         self.__tokenize_helper(nodes)
         self._ast_available = True
         self.__render_helper(nodes)
-        self._result_available = True
 
     def __tokenize_helper(self, nodes):
         """Helper for tokenization."""
@@ -302,8 +271,8 @@ class Serial(Executioner):
         for node in nodes:
             ast = self._tree_data[node.uid]
             meta = self._meta_data[node.uid]
-            result = self.render(node, ast, meta)
-            self._result_data[node.uid] = result
+            self.render(node, ast, meta)
+
 
 class ParallelBarrier(Executioner):
     """
@@ -322,10 +291,7 @@ class ParallelBarrier(Executioner):
         self._manager = multiprocessing.Manager()
         self._meta_data = self._manager.dict()
         self._tree_data = self._manager.dict()
-        self._result_data = self._manager.dict()
-
         self._ast_available = self._manager.Value('i', 0)
-        self._result_available = self._manager.Value('i', 0)
 
     def isSyntaxTreeAvailable(self):
         """Override to allow this check to work across processes."""
@@ -361,10 +327,7 @@ class ParallelBarrier(Executioner):
         for node in nodes:
             ast = self._tree_data[node.uid]
             meta = self._meta_data[node.uid]
-            result = self.render(node, ast, meta)
-            self._result_data[node.uid] = result
-
-        self._result_available.value = True
+            self.render(node, ast, meta)
 
 class ParallelPipe(Executioner):
     """

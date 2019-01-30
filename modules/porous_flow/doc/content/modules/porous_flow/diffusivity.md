@@ -18,7 +18,7 @@ A simple model where the diffusion constants and tortuosity are constant.
 
 [`PorousFlowDiffusivityMillingtonQuirk`](/PorousFlowDiffusivityMillingtonQuirk.md)
 
-A saturation dependent model proposed by [cite!millington-quirk1961], where the
+A saturation dependent model proposed by [citet:millington-quirk1961], where the
 diffusion coefficients are constant but the tortuosity is
 \begin{equation}
 \tau_0 \tau_{\beta}(S_{\beta}) = \phi^{1/3} S_{\beta}^{10/3}.

@@ -66,7 +66,6 @@
     command = 'python moosedocs.py verify --form json --executioner MooseDocs.base.Serial'
     requirement = "MooseDocs shall be able to convert markdown to an abstract syntax tree represented in JSON files with the Serial executioner."
     prereq = json_barrier
-    skip = 'WIP'
   []
   [json_pipe]
     type = RunCommand
@@ -95,7 +94,6 @@
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
     requirement = "MooseDocs shall be able to convert markdown to latex with the Serial executioner."
     prereq = latex_barrier
-    skip = 'WIP'
   []
   [latex_pipe]
     type = RunCommand
@@ -108,7 +106,7 @@
     type = RunCommand
     command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelDemand'
     requirement = "MooseDocs shall be able to convert markdown to latex with the ParallelDemand executioner."
-    #prereq = latex_pip
+#    prereq = latex_pip
     skip = 'WIP'
   []
 []

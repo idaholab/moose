@@ -3,14 +3,14 @@
 !syntax description /Modules/FluidProperties/HydrogenFluidProperties
 
 Fluid properties for hydrogen are mainly calculated using the Leachman et al. equation of state
-[citep!leachman2009]. This formulation uses density and temperature as the primary variables with
+[citep:leachman2009]. This formulation uses density and temperature as the primary variables with
 which to calculate properties such as density, enthalpy and internal energy.
 
 When used with the pressure and temperature interface, which is the case in the Porous Flow module, hydrogen properties are typically calculated by first calculating density iteratively for a given pressure and temperature. This density is then used to calculate the other properties, such as internal energy, directly.
 
-Viscosity is calculated using the formulation presented in [cite!muzny2013]. Thermal conductivity is calculated using the relationship presented in [cite!assael2011]
+Viscosity is calculated using the formulation presented in [citet:muzny2013]. Thermal conductivity is calculated using the relationship presented in [citet:assael2011]
 
-Dissolution of hydrogen into water is calculated using Henry's law [citep!iapws2004].
+Dissolution of hydrogen into water is calculated using Henry's law [citep:iapws2004].
 
 ## Properties of hydrogen
 

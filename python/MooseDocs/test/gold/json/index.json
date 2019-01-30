@@ -14,6 +14,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "MooseDocs Test Pages"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "MooseDocs", 
                         "recursive": true
                     }, 
@@ -1039,7 +1047,7 @@
                                     "attributes": {
                                         "bookmark": "", 
                                         "optional": false, 
-                                        "page": "extensions/graph.md", 
+                                        "page": "extensions/plotly.md", 
                                         "recursive": true
                                     }, 
                                     "children": [], 
@@ -1112,74 +1120,6 @@
                                     }, 
                                     "children": [], 
                                     "name": "AutoLink"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "count": 1, 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Break"
-                                }
-                            ], 
-                            "name": "Paragraph"
-                        }
-                    ], 
-                    "name": "ListItem"
-                }, 
-                {
-                    "attributes": {
-                        "recursive": true
-                    }, 
-                    "children": [
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "bookmark": "", 
-                                        "optional": false, 
-                                        "page": "extensions/template.md", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "AutoLink"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "count": 1, 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Break"
-                                }
-                            ], 
-                            "name": "Paragraph"
-                        }
-                    ], 
-                    "name": "ListItem"
-                }, 
-                {
-                    "attributes": {
-                        "recursive": true
-                    }, 
-                    "children": [
-                        {
-                            "attributes": {
-                                "recursive": true
-                            }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "bookmark": "", 
-                                        "optional": false, 
-                                        "page": "extensions/sqa.md", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "AutoLink"
                                 }
                             ], 
                             "name": "Paragraph"
@@ -1194,7 +1134,6 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -1213,7 +1152,6 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

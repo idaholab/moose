@@ -2,9 +2,9 @@
 
 ## Description
 
-The generalized plane strain problem has found use in many important applications. Many different presentations can be found in the literature. The simplest one is an extension of the plane strain problem by allowing a non-vanishing constant direction strain in the out-of-plane direction [citep!Adams1967gps]. It has been further generalized by allowing two rotations degrees of freedom [citep!Abaqus2014gps]. An even more generalized form includes the anticlastic problem associated with the out-of-plane shear [citep!Adams1984gps, Li1999gps].
+The generalized plane strain problem has found use in many important applications. Many different presentations can be found in the literature. The simplest one is an extension of the plane strain problem by allowing a non-vanishing constant direction strain in the out-of-plane direction [citep:Adams1967gps]. It has been further generalized by allowing two rotations degrees of freedom [citep:Abaqus2014gps]. An even more generalized form includes the anticlastic problem associated with the out-of-plane shear [citep:Adams1984gps, Li1999gps].
 
-In the [tensor mechanics module](tensor_mechanics/index.md), the simplest form was implemented, i.e. an extra degree of freedom representing the out-of-plane direct strain is included in addition to the conventional plane strain problem [citep!Li2005gps].
+In the [tensor mechanics module](tensor_mechanics/index.md), the simplest form was implemented, i.e. an extra degree of freedom representing the out-of-plane direct strain is included in addition to the conventional plane strain problem [citep:Li2005gps].
 
 ## Formulation
 

@@ -27,7 +27,7 @@ A combination of these may be used, to simulate, for instance, THM or HM couplin
 
 ## Evolution of porosity
 
-The evolution of the porosity is governed by [citep!detournayET93, chen2009]
+The evolution of the porosity is governed by [citep:detournayET93, chen2009]
 \begin{equation}
 \label{eq:phi_dog}
 \frac{\partial}{\partial t}(\phi + M) = (\alpha_{B} -
@@ -113,7 +113,7 @@ following requirements:
 ## Evolution of porosity for an isothermal, mineral-free, situation
 
 The evolution of porosity is fundamental to the coupling between flow and solid mechanics.  Consider
-the isothermal situation with no plasticity.  The following presentation is mostly drawn from [citep!detournayET93].
+the isothermal situation with no plasticity.  The following presentation is mostly drawn from [citep:detournayET93].
 
 Denote the change of a quantity, q, by $\Delta
 q$.  Recall that the porosity is defined by $\phi = V_{\mathrm{f}}/V$,

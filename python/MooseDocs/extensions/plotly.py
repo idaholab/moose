@@ -11,26 +11,18 @@
 import os
 import re
 import uuid
-import tempfile
-
-try:
-    import plotly
-    HAVE_PYTHON_PLOTLY = True
-except ImportError:
-    HAVE_PYTHON_PLOTLY = False
-
 import mooseutils
 from MooseDocs import common
 from MooseDocs.extensions import command, floats
 from MooseDocs.base import components, renderers
-from MooseDocs.tree import tokens, html, latex
+from MooseDocs.tree import tokens, html
 
 def make_extension(**kwargs):
-    return GraphExtension(**kwargs)
+    return PlotlyExtension(**kwargs)
 
 ScatterToken = tokens.newToken('ScatterToken', data=[], layout=dict())
 
-class GraphExtension(command.CommandExtension):
+class PlotlyExtension(command.CommandExtension):
     """
     Extension for creating graphs via Plotly: https://plot.ly
     """
@@ -39,31 +31,17 @@ class GraphExtension(command.CommandExtension):
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
         config['prefix'] = (u'Figure', "The caption prefix (e.g., Fig.).")
-        config['draft'] = (False, "Enable draft mode for LaTeX output.")
         return config
 
     def extend(self, reader, renderer):
         self.requires(command, floats)
-        self.addCommand(reader, GraphScatter())
+        self.addCommand(reader, PlotlyScatter())
         renderer.add('ScatterToken', RenderScatter())
 
         if isinstance(renderer, renderers.HTMLRenderer):
             renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js")
 
-        if isinstance(renderer, renderers.LatexRenderer):
-            if not HAVE_PYTHON_PLOTLY and not self.get('draft'):
-                self.update(draft=True)
-                renderer.addPackage('draftfigure',
-                                    content="{Draft mode enabled, plotly package failed to load, "
-                                            "install with 'conda install plolty plotly-orca'}")
-            elif self.get('draft'):
-                renderer.addPackage('draftfigure',
-                                    content="{Draft mode enabled in the graph extension.}")
-
-            renderer.addPackage('graphicx')
-
-
-class GraphScatter(command.CommandComponent):
+class PlotlyScatter(command.CommandComponent):
     """
     Scatter plot.
     """
@@ -105,22 +83,22 @@ class GraphScatter(command.CommandComponent):
                 data[i]['x'] = reader(line['x']).tolist()
                 data[i]['y'] = reader(line['y']).tolist()
 
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  bottom=True)
-        scatter = ScatterToken(flt, data=data, layout=eval(self.settings['layout']))
-
-        if flt is parent:
-            scatter.attributes.update(**self.attributes)
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)
+        ScatterToken(flt, data=data, layout=eval(self.settings['layout']))
+        if flt.children[0].name == 'Caption':
+            cap = flt.children[0]
+            cap.parent = None
+            cap.parent = flt
 
         return parent
 
-class GraphTemplate(object):
+class PlotlyTemplate(object):
     """
     Helper for loading plotly javascript templates.
 
     The template can contain markers such as MOOSEDOCS_ID, which will be
     replaced by the supplied "id" key when the __call__ method is used. Any trailing
-    underscore from the key is used (e.g.,v"id_" == "id").
+    underscore from the key is used (e.g., "id_" == "id").
     """
     RE = re.compile(r'MOOSEDOCS_(?P<key>\w+)')
     def __init__(self, name):
@@ -145,40 +123,12 @@ class GraphTemplate(object):
 class RenderScatter(components.RenderComponent):
     """Render a plotly scatter plot."""
 
-    # Shares loaded template content across all instances
-    HTML_TEMPLATE = GraphTemplate('scatter.js')
-
+    TEMPLATE = PlotlyTemplate('scatter.js')
     def createHTML(self, parent, token, page):
         plot_id = unicode(uuid.uuid4())
-        content = self.HTML_TEMPLATE(id_=plot_id,
-                                     data=repr(token['data']),
-                                     layout=repr(token['layout']))
+        content = self.TEMPLATE(id_=plot_id, data=repr(token['data']), layout=repr(token['layout']))
         html.Tag(parent, 'div', id_=plot_id)
         html.Tag(parent, 'script', string=content)
 
     def createLatex(self, parent, token, page):
-
-        args = []
-        if self.extension['draft']:
-            args.append('draft')
-            loc = 'draft.pdf'
-        else:
-            layout = token['layout']
-            layout.setdefault('font', dict(family='Computer Modern', size=12, color='#000000'))
-            layout.setdefault('xaxis', dict())
-            layout['xaxis'].setdefault('linewidth', 1)
-            layout.setdefault('yaxis', dict())
-            layout['yaxis'].setdefault('linewidth', 1)
-
-
-            layout = plotly.graph_objs.Layout(**layout)
-            fig = plotly.graph_objs.Figure(layout=layout)
-            for data in token['data']:
-                fig.add_scatter(**data)
-
-            _, loc = tempfile.mkstemp(suffix='.pdf', dir=os.path.dirname(page.destination))
-            plotly.io.write_image(fig, loc)
-
-        args = [latex.create_settings(*args, width='\\textwidth')]
-        latex.Command(parent, 'par', start='\n')
-        latex.Command(parent, 'includegraphics', args=args, string=loc, start='\n', escape=False)
+        pass

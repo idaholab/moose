@@ -1,5 +1,5 @@
 !row! class=row
-!col! small=12 medium=6 large=4
+!col! class=s12 m6 l4
 ## [Application Usage](application_usage/index.md)
 
 - [Examples](examples/index.md)
@@ -14,7 +14,7 @@
 - [Old Wiki(deprecated)](https://www.mooseframework.org/old/wiki)
 !col-end!
 
-!col! small=12 medium=6 large=4
+!col! class=s12 m6 l4
 ## [Application Development](application_development/index.md)
 
 - [Source Pages](source/index.md)
@@ -31,7 +31,7 @@
 - [libMesh Doxygen](http://mooseframework.org/docs/doxygen/libmesh/classes.html)
 !col-end!
 
-!col! small=12 medium=6 large=4
+!col! class=s12 m6 l4
 ## [MOOSEDocs](MooseDocs/index.md)
 
 - [MooseDocs/specification.md]

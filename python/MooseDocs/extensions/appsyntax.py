@@ -21,9 +21,9 @@ import mooseutils
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.tree import html, tokens, syntax, latex, app_syntax
-from MooseDocs.extensions import core, floats, table, autolink, materialicon
+from MooseDocs.base import components
+from MooseDocs.tree import html, tokens, syntax, app_syntax
+from MooseDocs.extensions import core, floats, autolink, materialicon
 
 from MooseDocs.extensions import command
 
@@ -41,43 +41,8 @@ InputParametersToken = tokens.newToken('InputParametersToken',
                                        visible=set())
 
 SyntaxList = tokens.newToken('SyntaxList')
-SyntaxListItem = tokens.newToken('SyntaxListItem', syntax=u'', group=u'', header=False)
-SyntaxLink = tokens.newToken('SyntaxLink', core.Link)
-
-LATEX_PARAMETER = """
-\\DeclareDocumentEnvironment{InputParameter}{mooo}{%
-  \\begin{minipage}{\\textwidth}
-  \\textbf{#1} \\newline
-  \\smallskip
-  \\hfill
-  \\begin{minipage}{0.95\\textwidth}
-  \\smallskip
-}{%
-  \\newline
-  \\IfValueT{#2}{\\textit{Group}:~#2\\\\}
-  \\IfValueT{#3}{\\textit{C++ Type}:~\\texttt{#3}\\\\}
-  \\IfValueT{#4}{\\textit{Default}:~#4\\\\}
-  \\end{minipage}
-  \\end{minipage}
-}
-"""
-
-LATEX_OBJECT = """
-\\DeclareDocumentEnvironment{ObjectDescription}{moo}{%
-  \\begin{minipage}{\\textwidth}
-  \\textbf{#1} \\newline
-  \\smallskip
-  \\hfill
-  \\begin{minipage}{0.95\\textwidth}
-    \\smallskip
-}{%
-  \\newline
-  \\IfValueT{#2}{\\textit{Registered to}~#2\\\\}
-  \\IfValueT{#3}{\\textit{Base Type:}~\\texttt{#3}\\\\}
-  \\end{minipage}
-  \\end{minipage}
-}
-"""
+SyntaxListItem = tokens.newToken('SyntaxListItem', header=False)
+DatabaseListToken = tokens.newToken('DatabaseListToken', level=2)
 
 class AppSyntaxExtension(command.CommandExtension):
 
@@ -212,7 +177,7 @@ class AppSyntaxExtension(command.CommandExtension):
             raise common.MooseDocsException(msg, name)
 
     def extend(self, reader, renderer):
-        self.requires(core, floats, table, autolink, materialicon)
+        self.requires(core, floats, autolink, materialicon)
 
         self.addCommand(reader, SyntaxDescriptionCommand())
         self.addCommand(reader, SyntaxParametersCommand())
@@ -224,12 +189,6 @@ class AppSyntaxExtension(command.CommandExtension):
         renderer.add('InputParametersToken', RenderInputParametersToken())
         renderer.add('SyntaxList', RenderSyntaxList())
         renderer.add('SyntaxListItem', RenderSyntaxListItem())
-        renderer.add('SyntaxLink', RenderSyntaxLink())
-
-        if isinstance(renderer, LatexRenderer):
-            renderer.addPreamble(LATEX_PARAMETER)
-            renderer.addPreamble(LATEX_OBJECT)
-            renderer.addPackage('xcolor')
 
 class SyntaxCommandBase(command.CommandComponent):
     NODE_TYPE = None
@@ -322,8 +281,7 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
             parameters.update(obj.parameters)
 
         self.createHeading(parent, page)
-        token = InputParametersToken(parent, syntax=obj.name, parameters=parameters,
-                                     **self.attributes)
+        token = InputParametersToken(parent, parameters=parameters, **self.attributes)
         if self.settings['groups']:
             token['groups'] = [group.strip() for group in self.settings['groups'].split(' ')]
 
@@ -365,13 +323,12 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
                 lang = common.get_language(filename)
                 content = common.fix_moose_header(common.read(os.path.join(MooseDocs.ROOT_DIR,
                                                                            filename)))
-                code = core.Code(None, language=lang, content=content)
-                link = floats.create_modal_link(li,
-                                                url=filename,
-                                                content=code,
-                                                title=filename,
-                                                string=filename)
-                link.name = 'SyntaxLink'
+                code = core.Code(None, language=lang, code=content)
+                floats.create_modal_link(li,
+                                         url=filename,
+                                         content=code,
+                                         title=filename,
+                                         string=filename)
         return parent
 
 class SyntaxInputsCommand(SyntaxChildrenCommand):
@@ -418,9 +375,9 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
             count = 0
             if self.settings['actions']:
-                count += self._addItems(master, info, page, group, obj.actions(), 'Action')
+                count += self._addItems(master, info, page, group, obj.actions())
             if self.settings['objects']:
-                count += self._addItems(master, info, page, group, obj.objects(), 'MooseObject')
+                count += self._addItems(master, info, page, group, obj.objects())
             if self.settings['subsystems']:
                 count += self._addItems(master, info, page, group, obj.syntax())
 
@@ -449,21 +406,19 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
         super(SyntaxListCommand, self).createHeading(parent, page, copy.copy(self.settings))
 
-    def _addItems(self, parent, info, page, group, objects, base=None):
+    def _addItems(self, parent, info, page, group, objects):
 
         count = 0
         for obj in objects:
             if group in obj.groups:
                 count += 1
-                item = SyntaxListItem(parent, group=group, syntax=obj.name)
-                if base:
-                    item['base'] = base
+                item = SyntaxListItem(parent)
                 nodes = self.translator.findPages(obj.markdown())
                 if len(nodes) == 0:
                     tokens.String(item, content=unicode(obj.name))
                 else:
-                    SyntaxLink(item, string=unicode(obj.name),
-                               url=unicode(nodes[0].relativeDestination(page)))
+                    core.Link(item, string=unicode(obj.name),
+                              url=unicode(nodes[0].relativeDestination(page)))
 
                 if obj.description:
                     self.reader.tokenize(item, obj.description, page, MooseDocs.INLINE, info.line)
@@ -507,21 +462,7 @@ class RenderSyntaxListItem(components.RenderComponent):
         return html.Tag(parent, 'li', class_=class_)
 
     def createLatex(self, parent, token, page):
-        if token['header']:
-            return None
-
-        title = latex.Brace(string=token(0)['content'])
-        reg = latex.Bracket(string=token['group'])
-        args = [title, reg]
-
-        if token['base']:
-            args.append(latex.Bracket(string=token['base']))
-
-        token(0).parent = None
-        env = latex.Environment(parent, 'ObjectDescription', args=args)
-        if len(token) == 0:
-            latex.String(env, content="\\textcolor{red}{No Description.}", escape=False)
-        return env
+        pass
 
 class RenderSyntaxList(components.RenderComponent):
     def createHTML(self, parent, token, page):
@@ -531,8 +472,16 @@ class RenderSyntaxList(components.RenderComponent):
         collection = html.Tag(parent, 'ul', class_='moose-syntax-list collection with-header')
         return collection
 
+    def _addItems(self, parent, items):
+        for name, href, description in items:
+            li = html.Tag(parent, 'li', class_='moose-syntax-item collection-item')
+            html.Tag(li, 'a', class_='moose-syntax-item-name', string=unicode(name), href=href)
+            if description:
+                desc = html.Tag(li, 'span', class_='moose-syntax-item-description')
+                html.String(desc, content=description)
+
     def createLatex(self, parent, token, page):
-        return parent
+        pass
 
 class RenderInputParametersToken(components.RenderComponent):
 
@@ -606,29 +555,7 @@ class RenderInputParametersToken(components.RenderComponent):
         return groups
 
     def createLatex(self, parent, token, page):
-
-        groups = self._getParameters(token, token['parameters'])
-        for group, params in groups.iteritems():
-            if not params:
-                continue
-
-            for name, param in params.iteritems():
-                if param['deprecated']:
-                    continue
-
-                args = [latex.Brace(string=name), latex.Bracket(string=group), latex.Bracket()]
-                latex.Command(args[2], 'texttt', string=param['cpp_type'])
-                default = _format_default(param) or ''
-                if default:
-                    args.append(latex.Bracket(string=default))
-
-                latex.Environment(parent, 'InputParameter',
-                                  args=args,
-                                  string=param['description'])
-
-class RenderSyntaxLink(core.RenderLink):
-    def createLatex(self, parent, token, page):
-        return parent
+        pass
 
 
 def _insert_parameter(parent, name, param):

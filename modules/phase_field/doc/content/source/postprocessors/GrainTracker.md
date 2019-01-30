@@ -59,13 +59,13 @@ created.
 ## Grain Remapping
 
 !row!
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_conflict.svg
        id=remap_red_conflict
        caption=Red feature bounding boxes intersecting (fast check).
 !col-end!
 
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_halo.svg
        id=remap_red_halo
        caption=Red feature halos intersecting (complete check).
@@ -98,20 +98,20 @@ then sorted in reverse order putting the grains furthest away near the front and
 several overlaps near the back.
 
 !row!
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_yellow.svg
        id=remap_red_yellow
        caption=Distance check against "B" Features.
 !col-end!
 
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_green.svg
        id=remap_red_green
        caption=Distance check against "C" Features.
 !col-end!
 
 
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_blue.svg
        id=remap_red_blue
        caption=Distance check against "D" Features.
@@ -119,7 +119,7 @@ several overlaps near the back.
 !row-end!
 
 !row!
-!col! small=12 medium=12 large=12
+!col! class=s12 m12 l12
 !table id=large_red style=border:4px solid black;width:350px; caption=Large Red Distances
 | Variable | Distance |
 |----------|----------|
@@ -137,19 +137,19 @@ for $D$.  The empty list ($\varnothing$) is used for the variable represented by
 ensure that the same variable is never considered as a possible remapping option.
 
 !row!
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_green_red.svg
        id=remap_green_red
        caption=Distance check against "A" Features.
 !col-end!
 
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_green_yellow.svg
        id=remap_green_yellow
        caption=Distance check against "B" Features.
 !col-end!
 
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_green_blue.svg
        id=remap_green_blue
        caption=Distance check against "D" Features.
@@ -157,7 +157,7 @@ ensure that the same variable is never considered as a possible remapping option
 !row-end!
 
 !row!
-!col! small=12 medium=12 large=12
+!col! class=s12 m12 l12
 !table id=large_red style=border:4px solid black;width:350px; caption=Small light blue distances
 | Variable | Distance |
 |----------|----------|
@@ -188,19 +188,19 @@ are indicated by turning on the `DIRTY` status flag in the feature's data struct
 status uses an independent bit so it can exist simultaneously with another status.
 
 !row!
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_to_red_pre.svg
        id=remap_to_red_pre
        caption=Ready to remap.
 !col-end!
 
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_to_red.svg
        id=remap_to_red
        caption=Remap to "A".
 !col-end!
 
-!col! small=12 medium=4 large=4
+!col! class=s12 m4 l4
 !media media/phase_field/remap_to_green.svg
        id=remap_to_green
        caption=Remap to "C".
@@ -210,13 +210,13 @@ status uses an independent bit so it can exist simultaneously with another statu
 ## 3D Halo Images
 
 !row!
-!col! small=12 medium=6 large=6
+!col! class=s12 m6 l6
 !media media/phase_field/3D_halos_start.png
        id=3D_start
        caption=6000 grains in 3D
 !col-end!
 
-!col! small=12 medium=6 large=6
+!col! class=s12 m6 l6
 !media media/phase_field/3D_halos_end.png
        id=3D_end
        caption=grain structure after several simulation steps.

@@ -14,6 +14,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "Autolink Extension"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "Autolink", 
                         "recursive": true
                     }, 
@@ -127,6 +135,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "Local Headings"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "Local", 
                         "recursive": true
                     }, 
@@ -236,6 +252,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "Non-local headings with ID"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "Non", 
                         "recursive": true
                     }, 
@@ -316,7 +340,7 @@
             "children": [
                 {
                     "attributes": {
-                        "bookmark": "ordered-single-level-lists", 
+                        "bookmark": "single-level-lists", 
                         "optional": false, 
                         "page": "core.md", 
                         "recursive": true
@@ -334,7 +358,7 @@
             "children": [
                 {
                     "attributes": {
-                        "bookmark": "unordered-single-level-lists", 
+                        "bookmark": "single-level-lists", 
                         "optional": false, 
                         "page": "core.md", 
                         "recursive": true
@@ -397,6 +421,14 @@
             "children": [
                 {
                     "attributes": {
+                        "recursive": true, 
+                        "text": "Source Filename"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
+                {
+                    "attributes": {
                         "content": "Source", 
                         "recursive": true
                     }, 
@@ -429,29 +461,22 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true
+                        "class": "modal-trigger", 
+                        "recursive": true, 
+                        "tooltip": true, 
+                        "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
                     }, 
                     "children": [
                         {
                             "attributes": {
-                                "class": "modal-trigger", 
-                                "recursive": true, 
-                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                                "content": "RealFunctionControl.C", 
+                                "recursive": true
                             }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "content": "RealFunctionControl.C", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "String"
-                                }
-                            ], 
-                            "name": "Link"
+                            "children": [], 
+                            "name": "String"
                         }
                     ], 
-                    "name": "SourceLink"
+                    "name": "Link"
                 }
             ], 
             "name": "Paragraph"
@@ -508,45 +533,38 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true
+                        "class": "modal-trigger", 
+                        "recursive": true, 
+                        "tooltip": true, 
+                        "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
                     }, 
                     "children": [
                         {
                             "attributes": {
-                                "class": "modal-trigger", 
-                                "recursive": true, 
-                                "url": "#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                                "content": "Some", 
+                                "recursive": true
                             }, 
-                            "children": [
-                                {
-                                    "attributes": {
-                                        "content": "Some", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Word"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "count": 1, 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Space"
-                                }, 
-                                {
-                                    "attributes": {
-                                        "content": "Code", 
-                                        "recursive": true
-                                    }, 
-                                    "children": [], 
-                                    "name": "Word"
-                                }
-                            ], 
-                            "name": "Link"
+                            "children": [], 
+                            "name": "Word"
+                        }, 
+                        {
+                            "attributes": {
+                                "count": 1, 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Space"
+                        }, 
+                        {
+                            "attributes": {
+                                "content": "Code", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
                         }
                     ], 
-                    "name": "SourceLink"
+                    "name": "Link"
                 }
             ], 
             "name": "Paragraph"
@@ -605,6 +623,14 @@
                 "style": ""
             }, 
             "children": [
+                {
+                    "attributes": {
+                        "recursive": true, 
+                        "text": "Optional Links"
+                    }, 
+                    "children": [], 
+                    "name": "Label"
+                }, 
                 {
                     "attributes": {
                         "content": "Optional", 
@@ -703,7 +729,6 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -722,7 +747,6 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
-                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

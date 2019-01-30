@@ -2,7 +2,7 @@
 
 Random close-packing (RCP) structure can be realized by a spatial sampling process known as Maximal Poisson-Disk Sampling (MPS). For the RCP structure, the average aspect ratio of each Voronoi cell is approximately one. The RCP Voronoi structure provides an equiaxed grain structure.
 
-The MPS algorithm is described in [cite!Ebeida_2012] and it is implemented in [MeshingGenie](https://github.com/trilinos/Trilinos/tree/master/packages/meshinggenie) package in [Trilinos](https://trilinos.org). MeshingGenie will generate a list of grain centroids as a text file that can then be read into the PolycrystalVoronoi initial condition.
+The MPS algorithm is described in [cite:Ebeida_2012] and it is implemented in [MeshingGenie](https://github.com/trilinos/Trilinos/tree/master/packages/meshinggenie) package in [Trilinos](https://trilinos.org). MeshingGenie will generate a list of grain centroids as a text file that can then be read into the PolycrystalVoronoi initial condition.
 
 ## Build instruction for standalone version of MeshingGenie
 

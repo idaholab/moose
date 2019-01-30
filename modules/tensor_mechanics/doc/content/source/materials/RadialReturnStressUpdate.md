@@ -14,9 +14,9 @@ surface.  Because the von Mises yield surface in the deviatoric stress space has
 circle, the _plastic correction stress_ is always directed towards the center of the yield surface
 circle.
 
-In addition to the [cite!simo2006computational] textbook, [cite!dunne2005introduction] is an excellent reference for users working
+In addition to the [cite:simo2006computational] textbook, [cite:dunne2005introduction] is an excellent reference for users working
 with the `RadialReturnStressUpdate` materials; several of the isotropic plasticity and creep
-effective plastic strain increment algorithms are taken from [cite!dunne2005introduction].
+effective plastic strain increment algorithms are taken from [cite:dunne2005introduction].
 
 ### The Radial Return Stress Update Description
 

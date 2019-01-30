@@ -11,22 +11,21 @@
 import re
 
 import MooseDocs
-from MooseDocs.base import components, LatexRenderer
+from MooseDocs.base import components
 from MooseDocs.extensions import command, floats
-from MooseDocs.tree import html, tokens, latex
+from MooseDocs.tree import html, tokens
 
 def make_extension(**kwargs):
     return TableExtension(**kwargs)
 
-Table = tokens.newToken('Table', form=[])
+Table = tokens.newToken('Table')
 TableBody = tokens.newToken('TableBody')
 TableHead = tokens.newToken('TableHead')
 TableHeadItem = tokens.newToken('TableHeadItem')
 TableRow = tokens.newToken('TableRow')
 TableItem = tokens.newToken('TableItem', align='center')
-TableFloat = tokens.newToken('TableFloat', floats.Float)
 
-def builder(rows, headings=None, form=None):
+def builder(rows, headings=None):
     """Helper for creating tokens for a table."""
     node = Table(None)
     if headings:
@@ -34,25 +33,15 @@ def builder(rows, headings=None, form=None):
         row = TableRow(thead)
         for h in headings:
             th = TableHeadItem(row, align='left')
-            if isinstance(h, tokens.Token):
-                h.parent = th
-            else:
-                tokens.String(th, content=unicode(h))
+            tokens.String(th, content=unicode(h))
 
     tbody = TableBody(node)
     for data in rows:
         row = TableRow(tbody)
         for d in data:
             tr = TableItem(row, align='left')
-            if isinstance(d, tokens.Token):
-                d.parent = tr
-            else:
-                tokens.String(tr, content=unicode(d))
+            tokens.String(tr, content=unicode(d))
 
-    if form is None:
-        form = 'L'*len(rows[0])
-
-    node['form'] = form
     return node
 
 class TableExtension(command.CommandExtension):
@@ -77,11 +66,6 @@ class TableExtension(command.CommandExtension):
         renderer.add('TableRow', RenderTag('tr'))
         renderer.add('TableHeadItem', RenderItem('th'))
         renderer.add('TableItem', RenderItem('td'))
-        renderer.add('TableFloat', RenderTableFloat())
-
-        if isinstance(renderer, LatexRenderer):
-            renderer.addPackage('tabulary')
-            renderer.addPackage('booktabs')
 
 class TableCommandComponent(command.CommandComponent):
     COMMAND = 'table'
@@ -90,19 +74,15 @@ class TableCommandComponent(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings.update(floats.caption_settings())
+        settings['caption'] = (None, "The caption to use for the listing content.")
+        settings['prefix'] = (None, "Text to include prior to the included text.")
         return settings
 
     def createToken(self, parent, info, page):
 
         content = info['block'] if 'block' in info else info['inline']
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  token_type=TableFloat)
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)
         self.reader.tokenize(flt, content, page, MooseDocs.BLOCK)
-
-        if flt is parent:
-            parent(0).attributes.update(**self.attributes)
-
         return parent
 
 class TableComponent(components.TokenComponent):
@@ -111,6 +91,7 @@ class TableComponent(components.TokenComponent):
     FORMAT_RE = re.compile(r'^(?P<format>\|[ \|:\-]+\|)$', flags=re.MULTILINE|re.UNICODE)
 
     def createToken(self, parent, info, page):
+
         content = info['table']
         table = Table(parent)
         head = None
@@ -150,7 +131,6 @@ class TableComponent(components.TokenComponent):
                     item = TableItem(row, align=form[i]) #pylint: disable=redefined-variable-type
                     self.reader.tokenize(item, content, page, MooseDocs.INLINE)
 
-        table['form'] = form
         return table
 
 class RenderTable(components.RenderComponent):
@@ -159,15 +139,10 @@ class RenderTable(components.RenderComponent):
         div.addClass('moose-table-div')
         tbl = html.Tag(div, 'table')
         return tbl
-
     def createMaterialize(self, parent, token, page):
         return self.createHTML(parent, token, page)
-
     def createLatex(self, parent, token, page):
-
-        args = [latex.Brace(string=u'\\textwidth', escape=False),
-                latex.Brace(string=u"".join([f[0].upper() for f in token['form']]))]
-        return latex.Environment(parent, 'tabulary', start='\\par', args=args)
+        pass
 
 class RenderTag(components.RenderComponent):
     def __init__(self, tag):
@@ -181,36 +156,10 @@ class RenderTag(components.RenderComponent):
         return html.Tag(parent, self.__tag)
 
     def createLatex(self, parent, token, page):
-
-        items = parent
-        if token.name == 'TableHead':
-            latex.String(parent, content=u'\\toprule\n', escape=False)
-            items = latex.String(parent)
-            latex.String(parent, content=u'\\midrule\n', escape=False)
-        elif (token.name == 'TableBody') and (token is token.parent.children[-1]):
-            items = latex.String(parent)
-            latex.String(parent, content=u'\\bottomrule', escape=False)
-        return items
+        pass
 
 class RenderItem(RenderTag):
     def createHTML(self, parent, token, page):
         tag = RenderTag.createHTML(self, parent, token, page)
         tag.addStyle('text-align:{}'.format(token['align']))
         return tag
-
-    def createLatex(self, parent, token, page):
-
-        item = latex.String(parent)
-        end = u' \\\\\n' if token is token.parent.children[-1] else u' &'
-        latex.String(parent, content=end, escape=False)
-
-        return item
-
-class RenderTableFloat(floats.RenderFloat):
-
-    def createLatex(self, parent, token, page):
-        #token.children = reversed(token.children)
-        token['command'] = 'table'
-        flt = floats.RenderFloat.createLatex(self, parent, token, page)
-        latex.Command(flt, 'center')
-        return flt

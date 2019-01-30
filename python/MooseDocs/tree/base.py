@@ -56,15 +56,8 @@ class NodeBase(anytree.NodeMixin):
         String returned from this function is for screen output. This allows coloring to be
         handled automatically.
         """
-        return '{}: Attributes: {}'.format(self.name, repr(self.__attributes))
-
-    def remove(self):
-        """
-        Remove the node and children from the tree.
-        """
-        self.parent = None
-        for child in self.children:
-            child.parent = None
+        return '{}: Attributes: {}'. \
+            format(self.name, repr(self.__attributes))
 
     def insert(self, idx, child):
         """Insert a child node."""

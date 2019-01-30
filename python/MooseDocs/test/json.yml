@@ -31,14 +31,9 @@ Extensions:
     MooseDocs.extensions.layout: default
     MooseDocs.extensions.config: default
     MooseDocs.extensions.content: default
-    MooseDocs.extensions.graph: default
+    MooseDocs.extensions.plotly: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: default
-    MooseDocs.extensions.template: default
-    MooseDocs.extensions.sqa:
-        repo: https://github.com/idaholab/moose
-        directories:
-            - modules/level_set/test/tests
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
@@ -58,12 +53,7 @@ Extensions:
             MOOSE: https:://mooseframework.org
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
-        executable: ${MOOSE_DIR}/modules/level_set
-        hide: !include framework/doc/hidden.yml
-        remove: !include framework/doc/remove.yml
-        includes:
-            - framework/include
-            - modules/level_set/include
+        active: False
 
 Translator:
     type: MooseDocs.base.Translator

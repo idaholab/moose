@@ -7,42 +7,33 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import logging
-from MooseDocs.base import components, LatexRenderer
-from MooseDocs.extensions import command, core, media
-from MooseDocs.tree import tokens, html, latex
+from MooseDocs.base import components
+from MooseDocs.extensions import command, core
+from MooseDocs.tree import tokens, html
 LOG = logging.getLogger(__name__)
-
 def make_extension(**kwargs):
     return GalleryExtension(**kwargs)
 
-CARD_LATEX = u"""\\NewDocumentEnvironment{card}{mm}{ %
-  \\tcbset{width=#1,title=#2}
-  \\begin{tcolorbox}[fonttitle=\\bfseries, colback=white, colframe=card-frame]
-}{ %
-  \\end{tcolorbox}
-}
-"""
 
 Card = tokens.newToken('Card')
-CardImage = tokens.newToken('CardImage', src=u'', media_source=u'')
+CardImage = tokens.newToken('CardImage', src=u'')
 CardTitle = tokens.newToken('CardTitle')
 CardContent = tokens.newToken('CardContent')
 Gallery = tokens.newToken('Gallery', large=3, medium=6, small=12)
 
-class GalleryExtension(media.MediaExtensionBase):
+class GalleryExtension(command.CommandExtension):
     """
     Adds commands needed to create image galleries.
     """
 
     @staticmethod
     def defaultConfig():
-        config = media.MediaExtensionBase.defaultConfig()
+        config = command.CommandExtension.defaultConfig()
         return config
 
     def extend(self, reader, renderer):
-        self.requires(core, command, media)
+        self.requires(core, command)
         self.addCommand(reader, CardComponent())
         self.addCommand(reader, GalleryComponent())
         renderer.add('Card', RenderCard())
@@ -50,12 +41,6 @@ class GalleryExtension(media.MediaExtensionBase):
         renderer.add('CardTitle', RenderCardTitle())
         renderer.add('CardContent', RenderCardContent())
         renderer.add('Gallery', RenderGallery())
-
-        if isinstance(renderer, LatexRenderer):
-            renderer.addPackage('tcolorbox')
-            renderer.addPackage('xparse')
-            renderer.addPreamble(u'\\definecolor{card-frame}{RGB}{0,88,151}')
-            renderer.addPreamble(CARD_LATEX)
 
 class CardComponent(command.CommandComponent):
     COMMAND = 'card'
@@ -74,12 +59,10 @@ class CardComponent(command.CommandComponent):
         src = info['subcommand']
         if src.startswith('http'):
             location = src
-            media_source = src
         else:
             node = self.translator.findPage(src)
             location = unicode(node.relativeSource(page))
-            media_source = node.source
-        CardImage(card, src=location, media_source=media_source)
+        CardImage(card, src=location)
 
         if self.settings['title']:
             card_title = CardTitle(card)
@@ -111,6 +94,9 @@ class GalleryComponent(command.CommandComponent):
                        small=self.settings['small'])
 
 class RenderCard(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        return None
+
     def createHTML(self, parent, token, page):
         return None
 
@@ -126,28 +112,9 @@ class RenderCard(components.RenderComponent):
         div.addClass('moose-card')
         return div
 
-    def createLatex(self, parent, token, page):
-
-        args = []
-        style = latex.parse_style(token)
-        width = style.get('width', None)
-        if width:
-            if width.endswith('%'):
-                width = u'{}\\textwidth'.format(int(width[:-1])/100.)
-            args.append(latex.Brace(string=width, escape=False))
-            token.children[0]['width'] = width
-        else:
-            args.append(latex.Brace(string=u'\\textwidth', escape=False))
-
-        if (len(token.children) > 1) and (token.children[1].name == 'CardTitle'):
-            title = latex.Brace()
-            self.translator.renderer.render(title, token.children[1], page)
-            token.children[1].parent = None
-            args.append(title)
-
-        return latex.Environment(latex.Environment(parent, 'center'), 'card', args=args)
-
 class RenderCardImage(components.RenderComponent):
+    def createLatex(self, parent, token, page):
+        return None
 
     def createHTML(self, parent, token, page):
         return None
@@ -156,28 +123,9 @@ class RenderCardImage(components.RenderComponent):
         div = html.Tag(parent, 'div', class_='card-image')
         html.Tag(div, 'img', class_='activator', src=token['src'])
 
-    def createLatex(self, parent, token, page):
-
-        fname = token['src']
-        if fname.startswith('http'):
-            fname, errcode = self.extension.getOnlineMedia(parent, fname)
-            if errcode:
-                return parent
-
-        else:
-            dest = os.path.join(os.path.dirname(page.destination), token['src'])
-            dest = os.path.dirname(os.path.abspath(dest))
-            fname, errcode = self.extension.convertImage(token['media_source'], '.png', dest)
-            if errcode:
-                return parent
-
-        img = self.extension.latexImage(latex.Environment(parent, 'center'), token, fname)
-        img['args'] = [latex.Bracket(string=u'width=\\textwidth', escape=False)]
-        return parent
-
 class RenderCardTitle(components.RenderComponent):
     def createLatex(self, parent, token, page):
-        return parent
+        return None
 
     def createHTML(self, parent, token, page):
         return None
@@ -191,7 +139,7 @@ class RenderCardTitle(components.RenderComponent):
 
 class RenderCardContent(components.RenderComponent):
     def createLatex(self, parent, token, page):
-        return parent
+        return None
 
     def createHTML(self, parent, token, page):
         return None
@@ -207,7 +155,7 @@ class RenderCardContent(components.RenderComponent):
 
 class RenderGallery(components.RenderComponent):
     def createLatex(self, parent, token, page):
-        return parent
+        return None
 
     def createHTML(self, parent, token, page):
         return None

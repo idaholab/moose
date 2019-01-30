@@ -1,4 +1,4 @@
-# Application Syntax Extension
+# Application Syntax Extension (disabled)
 
 !syntax description /Controls/RealFunctionControl
 
@@ -8,8 +8,4 @@
 
 !syntax parameters /Controls/RealFunctionControl show=function enable visible=required
 
-!syntax list /Controls
-
-!syntax inputs /Controls/RealFunctionControl
-
-!syntax children /Kernels/BodyForce
+!syntax list /Mesh
