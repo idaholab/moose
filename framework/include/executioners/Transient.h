@@ -193,36 +193,11 @@ public:
   void parentOutputPositionChanged() override { _fe_problem.parentOutputPositionChanged(); }
 
   /**
-   * Get the number of Picard iterations performed
-   * Because this returns the number of Picard iterations, rather than the current
-   * iteration count (which starts at 0), increment by 1.
-   *
-   * @return Number of Picard iterations performed
-   */
-  unsigned int numPicardIts() const { return _picard_it + 1; }
-
-  /**
-   * Print the Picard norms before the convergence check
-   */
-  virtual void printPicardNorms() const;
-
-  /**
-   * Check if Picard iteration converged when maximum number of Picard iterations is greater than
-   * one.
-   */
-  virtual bool picardConverged() const;
-
-  /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */
   virtual Real relativeSolutionDifferenceNorm();
 
 protected:
-  /**
-   * This should execute the solve for one timestep.
-   */
-  virtual void solveStep();
-
   /// Here for backward compatibility
   FEProblemBase & _problem;
 
@@ -290,20 +265,6 @@ protected:
   Real & _target_time;
   bool _use_multiapp_dt;
 
-  /**
-   * Picard Related
-   */
-  /// Number of Picard iterations to perform
-  unsigned int & _picard_it;
-  unsigned int _picard_max_its;
-  bool & _picard_converged;
-  Real & _picard_initial_norm;
-  std::vector<Real> & _picard_timestep_begin_norm;
-  std::vector<Real> & _picard_timestep_end_norm;
-  Real _picard_rel_tol;
-  Real _picard_abs_tol;
-  bool _picard_force_norms;
-
   ///should detailed diagnostic output be printed
   bool _verbose;
 
@@ -313,20 +274,6 @@ protected:
   NumericVector<Number> & _sln_diff;
 
   void setupTimeIntegrator();
-
-  /// Relaxation factor for Picard Iteration
-  Real _relax_factor;
-
-  /// The _time when this app solved last.
-  /// This allows a sub-app to know if this is the first
-  /// Picard iteration or not.
-  Real _prev_time;
-
-  /// The transferred variables that are going to be relaxed
-  std::vector<std::string> _relaxed_vars;
-
-  /// The DoFs associates with all of the relaxed variables
-  std::set<dof_id_type> _relaxed_dofs;
 
   PerfID _final_timer;
 };

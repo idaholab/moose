@@ -153,8 +153,7 @@ TimeStepper::constrainStep(Real & dt)
 void
 TimeStepper::step()
 {
-  _fe_problem.solve();
-  _converged = _fe_problem.converged();
+  _converged = _executioner.picardSolve().solve();
 }
 
 void
