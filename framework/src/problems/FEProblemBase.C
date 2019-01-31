@@ -5658,7 +5658,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   TIME_SECTION(_check_nonlinear_convergence_timer);
 
   NonlinearSystemBase & system = getNonlinearSystemBase();
-  MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
+  MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
 
   // This is the first residual before any iterations have been done,
   // but after PresetBCs (if any) have been imposed on the solution
@@ -5671,26 +5671,26 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   if (fnorm != fnorm)
   {
     oss << "Failed to converge, function norm is NaN\n";
-    reason = MOOSE_DIVERGED_FNORM_NAN;
+    reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
   }
   else if (fnorm < abstol && (it || !force_iteration))
   {
     oss << "Converged due to function norm " << fnorm << " < " << abstol << '\n';
-    reason = MOOSE_CONVERGED_FNORM_ABS;
+    reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
   }
   else if (nfuncs >= max_funcs)
   {
     oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs
         << '\n';
-    reason = MOOSE_DIVERGED_FUNCTION_COUNT;
+    reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
   }
   else if (it && fnorm > system._last_nl_rnorm && fnorm >= div_threshold)
   {
     oss << "Nonlinear solve was blowing up!\n";
-    reason = MOOSE_DIVERGED_LINE_SEARCH;
+    reason = MooseNonlinearConvergenceReason::DIVERGED_LINE_SEARCH;
   }
 
-  if (it && !reason)
+  if (it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
     // If compute_initial_residual_before_preset_bcs==false, then use the
     // first residual computed by Petsc to determine convergence.
@@ -5701,13 +5701,13 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     {
       oss << "Converged due to function norm " << fnorm << " < "
           << " (relative tolerance)\n";
-      reason = MOOSE_CONVERGED_FNORM_RELATIVE;
+      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
     }
     else if (snorm < stol * xnorm)
     {
       oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
           << '\n';
-      reason = MOOSE_CONVERGED_SNORM_RELATIVE;
+      reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
     }
   }
 
@@ -5718,7 +5718,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   if (_app.multiAppLevel() > 0)
     MooseUtils::indentMessage(_app.name(), msg);
 
-  return (reason);
+  return reason;
 }
 
 MooseLinearConvergenceReason
@@ -5736,12 +5736,12 @@ FEProblemBase::checkLinearConvergence(std::string & /*msg*/,
   {
     // Unset the flag
     _fail_next_linear_convergence_check = false;
-    return MOOSE_DIVERGED_NANORINF;
+    return MooseLinearConvergenceReason::DIVERGED_NANORINF;
   }
 
   // We initialize the reason to something that basically means MOOSE
   // has not made a decision on convergence yet.
-  MooseLinearConvergenceReason reason = MOOSE_LINEAR_ITERATING;
+  MooseLinearConvergenceReason reason = MooseLinearConvergenceReason::ITERATING;
 
   // Get a reference to our Nonlinear System
   NonlinearSystemBase & system = getNonlinearSystemBase();
@@ -5756,18 +5756,19 @@ FEProblemBase::checkLinearConvergence(std::string & /*msg*/,
 
   // If the linear residual norm is less than the System's linear absolute
   // step tolerance, we consider it to be converged and set the reason as
-  // MOOSE_CONVERGED_RTOL.
+  // MooseLinearConvergenceReason::CONVERGED_RTOL.
   if (std::abs(rnorm - system._last_rnorm) < system._l_abs_step_tol)
-    reason = MOOSE_CONVERGED_RTOL;
+    reason = MooseLinearConvergenceReason::CONVERGED_RTOL;
 
   // If we hit max its, then we consider that converged (rather than
   // KSP_DIVERGED_ITS).
   if (n >= maxits)
-    reason = MOOSE_CONVERGED_ITS;
+    reason = MooseLinearConvergenceReason::CONVERGED_ITS;
 
   // If either of our convergence criteria is met, store the number of linear
   // iterations in the System.
-  if (reason == MOOSE_CONVERGED_ITS || reason == MOOSE_CONVERGED_RTOL)
+  if (reason == MooseLinearConvergenceReason::CONVERGED_ITS ||
+      reason == MooseLinearConvergenceReason::CONVERGED_RTOL)
     system._current_l_its.push_back(static_cast<unsigned int>(n));
 
   return reason;
