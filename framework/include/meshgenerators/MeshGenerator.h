@@ -13,6 +13,9 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 
+// Included so mesh generators don't need to include this when constructing MeshBase objects
+#include "MooseMesh.h"
+
 #include "libmesh/mesh_base.h"
 
 // Forward declarations
@@ -65,6 +68,9 @@ protected:
    */
   std::unique_ptr<MeshBase> &
   getMeshByName(const MeshGeneratorName & input_mesh_generator_parameter_name);
+
+  /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
+  std::shared_ptr<MooseMesh> & _mesh;
 
 private:
   /// A list of generators that are required to run before this generator may run

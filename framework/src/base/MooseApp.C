@@ -1538,9 +1538,6 @@ MooseApp::executeMeshGenerators()
         }
       }
     }
-
-    // Prepare the final mesh
-    _final_generated_mesh->prepare_for_use();
   }
 }
 
@@ -1589,12 +1586,11 @@ MooseApp::createMinimalApp()
 {
   TIME_SECTION(_create_minimal_app_timer);
 
-  // SetupMeshAction (setup_mesh)
+  // SetupMeshAction
   {
     // Build the Action parameters
     InputParameters action_params = _action_factory.getValidParams("SetupMeshAction");
     action_params.set<std::string>("type") = "GeneratedMesh";
-    action_params.set<std::string>("task") = "setup_mesh";
 
     // Create The Action
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
@@ -1606,19 +1602,6 @@ MooseApp::createMinimalApp()
     params.set<unsigned int>("nx") = 1;
 
     // Add Action to the warehouse
-    _action_warehouse.addActionBlock(action);
-  }
-
-  // SetupMeshAction (init_mesh)
-  {
-    // Action parameters
-    InputParameters action_params = _action_factory.getValidParams("SetupMeshAction");
-    action_params.set<std::string>("type") = "GeneratedMesh";
-    action_params.set<std::string>("task") = "init_mesh";
-
-    // Build the action
-    std::shared_ptr<Action> action =
-        _action_factory.create("SetupMeshAction", "Mesh", action_params);
     _action_warehouse.addActionBlock(action);
   }
 

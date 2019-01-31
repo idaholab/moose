@@ -16,7 +16,7 @@
 #include "Factory.h"
 
 registerMooseAction("MooseApp", SetupMeshAction, "setup_mesh");
-
+registerMooseAction("MooseApp", SetupMeshAction, "set_mesh_base");
 registerMooseAction("MooseApp", SetupMeshAction, "init_mesh");
 
 template <>
@@ -217,6 +217,12 @@ SetupMeshAction::act()
     _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
     if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
       _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);
+  }
+  else if (_current_task == "set_mesh_base")
+  {
+    _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+    if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
+      _displaced_mesh->setMeshBase(_displaced_mesh->buildMeshBaseObject());
   }
   else if (_current_task == "init_mesh")
   {

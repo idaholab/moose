@@ -102,7 +102,8 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
 std::unique_ptr<MeshBase>
 GeneratedMeshGenerator::generate()
 {
-  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
+  auto mesh = _mesh->buildMeshBaseObject();
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
 
@@ -168,22 +169,25 @@ GeneratedMeshGenerator::generate()
   // Apply the bias if any exists
   if (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0)
   {
+    const auto MIN = std::numeric_limits<Real>::max();
 
     // Biases
-    Real bias[3] = {_bias_x, _bias_y, _bias_z};
+    std::array<Real, LIBMESH_DIM> bias = {
+        {_bias_x, _dim > 1 ? _bias_y : 1.0, _dim > 2 ? _bias_z : 1.0}};
 
     // "width" of the mesh in each direction
-    Real width[3] = {_xmax - _xmin, _ymax - _ymin, _zmax - _zmin};
+    std::array<Real, LIBMESH_DIM> width = {
+        {_xmax - _xmin, _dim > 1 ? _ymax - _ymin : 0, _dim > 2 ? _zmax - _zmin : 0}};
 
     // Min mesh extent in each direction.
-    Real mins[3] = {_xmin, _ymin, _zmin};
+    std::array<Real, LIBMESH_DIM> mins = {{_xmin, _dim > 1 ? _ymin : MIN, _dim > 2 ? _zmin : MIN}};
 
     // Number of elements in each direction.
-    unsigned int nelem[3] = {_nx, _ny, _nz};
+    std::array<unsigned int, LIBMESH_DIM> nelem = {{_nx, _dim > 1 ? _ny : 1, _dim > 2 ? _nz : 1}};
 
     // We will need the biases raised to integer powers in each
     // direction, so let's pre-compute those...
-    std::vector<std::vector<Real>> pows(LIBMESH_DIM);
+    std::array<std::vector<Real>, LIBMESH_DIM> pows;
     for (unsigned int dir = 0; dir < LIBMESH_DIM; ++dir)
     {
       pows[dir].resize(nelem[dir] + 1);
@@ -219,6 +223,9 @@ GeneratedMeshGenerator::generate()
             // of using "integer_part", since that could be off by a
             // lot (e.g. we want 3.9999 to map to 4.0 instead of 3.0).
             int index = round(float_index);
+
+            mooseAssert(index >= static_cast<int>(0) && index < static_cast<int>(pows[dir].size()),
+                        "Scaled \"index\" out of range");
 
             // Move node to biased location.
             node(dir) =
