@@ -1,3 +1,7 @@
+- /HeatStructureMaterials
+- /HeatStructureMaterials/AddHeatStructureMaterialAction
+- /HeatStructureMaterials/SolidMaterialProperties
+
 - /ICs/RhoEFromPressureTemperatureVelocityIC
 - /ICs/RhoFromPressureTemperatureIC
 - /ICs/SpecificInternalEnergyIC

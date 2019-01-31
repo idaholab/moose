@@ -10,14 +10,14 @@ associateSyntax(Syntax & syntax)
 {
   syntax.registerActionSyntax("AddHeatStructureMaterialAction",
                               "HeatStructureMaterials/*",
-                              "RELAP7:add_heat_structure_material");
+                              "THM:add_heat_structure_material");
 }
 
 void
 registerActions(Syntax & syntax)
 {
-  registerMooseObjectTask("RELAP7:add_heat_structure_material", SolidMaterialProperties, false);
+  registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
 
-  syntax.addDependency("RELAP7:add_heat_structure_material", "add_function");
+  syntax.addDependency("THM:add_heat_structure_material", "add_function");
 }
 }

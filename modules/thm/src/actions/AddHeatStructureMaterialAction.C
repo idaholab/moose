@@ -1,8 +1,6 @@
 #include "AddHeatStructureMaterialAction.h"
 
-registerMooseAction("RELAP7App",
-                    AddHeatStructureMaterialAction,
-                    "RELAP7:add_heat_structure_material");
+registerMooseAction("THMApp", AddHeatStructureMaterialAction, "THM:add_heat_structure_material");
 
 template <>
 InputParameters
