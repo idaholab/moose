@@ -286,11 +286,6 @@ IterationAdaptiveDT::converged() const
   if (_dt == _dt_min || _t_step < 2)
     return true;
 
-  // we need to update the post-processor value
-  // (otherwise, _pps_value is the value computed at the previous time step)
-  if (_pps_value)
-    _fe_problem.execute(EXEC_TIMESTEP_END);
-
   // we get what the next time step should be
   Real dt_test = _dt;
   limitDTToPostprocessorValue(dt_test);
