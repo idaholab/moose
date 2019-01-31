@@ -742,15 +742,8 @@ MooseApp::setupOptions()
 
     if (isParamValid("mesh_only"))
     {
-      // Insert add_output right after the problem has been constructed
-      _syntax.deleteTaskDependencies("add_output");
-      _syntax.addDependency("add_output", "create_problem_complete");
-
-      // This line is here to serialize the tasks right after the newly inserted add_output
-      _syntax.addDependency("setup_postprocessor_data", "add_output");
-
       _syntax.registerTaskName("mesh_only", true);
-      _syntax.addDependency("mesh_only", "add_output");
+      _syntax.addDependency("mesh_only", "setup_mesh_complete");
       _action_warehouse.setFinalTask("mesh_only");
     }
     else if (isParamValid("split_mesh"))

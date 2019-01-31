@@ -84,9 +84,9 @@ public:
    * the dimension and coordinates of the passed in mesh.
    *
    * @param exodus_io The ExodusII_IO object to modify
-   * @param mesh The MeshBase object that is queried to determine the appropriate output dimension.
+   * @param mesh The MooseMesh object that is queried to determine the appropriate output dimension.
    */
-  void setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io, const MeshBase & mesh);
+  void setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io, const MooseMesh & mesh);
 
 protected:
   /**

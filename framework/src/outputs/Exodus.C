@@ -120,7 +120,7 @@ void
 Exodus::initialSetup()
 {
   // Call base class setup method
-  AdvancedOutput::initialSetup();
+  OversampleOutput::initialSetup();
 
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
@@ -198,44 +198,16 @@ Exodus::outputSetup()
     _exodus_num = 1;
   }
 
-  setOutputDimensionInExodusWriter(*_exodus_io_ptr, _es_ptr->get_mesh());
+  setOutputDimensionInExodusWriter(*_exodus_io_ptr, *_mesh_ptr);
 }
 
 void
-Exodus::setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io, const MeshBase & mesh)
+Exodus::setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io, const MooseMesh & mesh)
 {
   switch (_output_dimension)
   {
     case 0: // default
-      // If the spatial_dimension is 1 (this can only happen in recent
-      // versions of libmesh where the meaning of spatial_dimension has
-      // changed), then force the Exodus file to be written with
-      // num_dim==3.
-      //
-      // This works around an issue in Paraview where 1D meshes cannot
-      // not be visualized correctly.  Note: the mesh_dimension() should
-      // get changed back to 1 the next time MeshBase::prepare_for_use()
-      // is called.
-      if (mesh.spatial_dimension() == 1)
-        exodus_io.write_as_dimension(3);
-
-      // If the spatial_dimension is 2 (again, only possible in recent
-      // versions of libmesh), then we need to be careful as this mesh
-      // would not have been written with num_dim==2 in the past.
-      //
-      // We *can't* simply write it with num_dim==mesh_dimension,
-      // because mesh_dimension might be 1, and as discussed above, we
-      // don't allow num_dim==1 Exodus files.  Therefore, in this
-      // particular case, we force writing with num_dim==3.  Note: the
-      // humor of writing a mesh of 1D elements which lives in 2D space
-      // as num_dim==3 is not lost on me.
-      if (mesh.spatial_dimension() == 2 && mesh.mesh_dimension() == 1)
-        exodus_io.write_as_dimension(3);
-
-      // Utilize the spatial dimension.  This value of this flag is
-      // superseded by the value passed to write_as_dimension(), if any.
-      if (mesh.mesh_dimension() != 1)
-        exodus_io.use_mesh_dimension_instead_of_spatial_dimension(true);
+      exodus_io.write_as_dimension(std::max(2, static_cast<int>(mesh.effectiveSpatialDimension())));
       break;
 
     case 1:

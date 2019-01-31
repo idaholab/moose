@@ -136,6 +136,13 @@ public:
   virtual unsigned int dimension() const;
 
   /**
+   * Returns the effective spatial dimension determined by the coordinates actually used by the
+   * mesh. This means that a 1D mesh that has non-zero z or y coordinates is actually a 2D or 3D
+   * mesh, respectively. Likewise a 2D mesh that has non-zero z coordinates is actually 3D mesh.
+   */
+  virtual unsigned int effectiveSpatialDimension() const;
+
+  /**
    * Returns a vector of boundary IDs for the requested element on the
    * requested side.
    */

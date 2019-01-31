@@ -57,26 +57,19 @@ MeshOnlyAction::act()
     mesh_file = mesh_file.substr(0, pos) + "_in.e";
   }
 
-  // If we're writing an Exodus file, write the Mesh using its logical
-  // element dimension rather than the spatial dimension, unless it's
-  // a 1D Mesh.  One reason to prefer this approach is that sidesets
-  // are displayed incorrectly for 2D triangular elements in both
-  // Paraview and Cubit if num_dim==3 in the Exodus file. We do the
-  // same thing in MOOSE's Exodus Output object, so we are mimicking
-  // that behavior here.
+  /**
+   * If we're writing an Exodus file, write the Mesh using it's effective spatial dimension unless
+   * it's a 1D mesh. This is to work around a Paraview bug where 1D meshes are not visualized
+   * properly.
+   */
   if (mesh_file.find(".e") + 2 == mesh_file.size())
   {
-    std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>();
-    if (ptrs.size() > 1)
-      mooseError(
-          "MeshOnlyOutput is currently only designed to work with a single Exodus Output object");
+    auto effective_spatial_dimension = mesh_ptr->effectiveSpatialDimension();
 
     ExodusII_IO exio(mesh_ptr->getMesh());
 
-    if (ptrs.size() == 1)
-      ptrs[0]->setOutputDimensionInExodusWriter(exio, mesh_ptr->getMesh());
-    else if (mesh_ptr->getMesh().mesh_dimension() != 1)
-      exio.use_mesh_dimension_instead_of_spatial_dimension(true);
+    // Set the minimum output dimension to at least 2
+    exio.write_as_dimension(std::max(2, static_cast<int>(effective_spatial_dimension)));
 
     exio.write(mesh_file);
   }

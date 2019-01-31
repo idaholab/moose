@@ -292,6 +292,14 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
 
   for (const auto & node_bnd_id : node_boundaries)
     boundary_info.nodeset_name(node_bnd_id) = other_boundary_info.get_nodeset_name(node_bnd_id);
+
+  _bounds.resize(other_mesh._bounds.size());
+  for (std::size_t i = 0; i < _bounds.size(); ++i)
+  {
+    _bounds[i].resize(other_mesh._bounds[i].size());
+    for (std::size_t j = 0; j < _bounds[i].size(); ++j)
+      _bounds[i][j] = other_mesh._bounds[i][j];
+  }
 }
 
 MooseMesh::~MooseMesh()
@@ -2124,6 +2132,20 @@ unsigned int
 MooseMesh::dimension() const
 {
   return getMesh().mesh_dimension();
+}
+
+unsigned int
+MooseMesh::effectiveSpatialDimension() const
+{
+  const Real abs_zero = 1e-12;
+
+  // See if the mesh is completely containd in the z and y planes to calculate effective spatial dim
+  for (unsigned int dim = LIBMESH_DIM; dim >= 1; --dim)
+    if (dimensionWidth(dim - 1) >= abs_zero)
+      return dim;
+
+  // If we get here, we have a 1D mesh on the x-axis.
+  return 1;
 }
 
 std::vector<BoundaryID>

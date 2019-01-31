@@ -43,28 +43,12 @@ InputParameters validParams<OversampleOutput>();
 class OversampleOutput : public AdvancedOutput
 {
 public:
-  /**
-   * Class constructor
-   *
-   * If oversampling is desired the constructor will perform the correct initialization
-   * required for oversampling.
-   * @see initOversample()
-   */
   OversampleOutput(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   *
-   * Cleans up the various objects associated with the oversample EquationsSystem and Mesh
-   * objects.
-   */
   virtual ~OversampleOutput();
 
-  /**
-   * Executes when the mesh alterted and sets a flag used by oversampling
-   */
+  virtual void initialSetup() override;
   virtual void meshChanged() override;
-
   virtual void outputStep(const ExecFlagType & type) override;
 
 protected:
