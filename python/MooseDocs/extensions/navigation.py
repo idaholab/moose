@@ -416,11 +416,7 @@ class NavigationExtension(components.Extension):
         wrap = html.Tag(div, 'div', class_='moose-mega-menu-wrapper')
         node = self.translator.findPage(filename)
         ast = self.translator.getSyntaxTree(node) #pylint: disable=no-member
-
-        if ast is None:
-            print page.local
-        else:
-            self.translator.renderer.render(wrap, ast, page) #pylint: disable=no-member
+        self.translator.renderer.render(wrap, ast, page) #pylint: disable=no-member
 
     def _buildDropdown(self, parent, page, tag_id, items):
         """Creates sublist for dropdown navigation."""

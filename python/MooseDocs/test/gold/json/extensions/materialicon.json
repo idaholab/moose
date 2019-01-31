@@ -14,14 +14,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Material Icon"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Material", 
                         "recursive": true
                     }, 
@@ -46,14 +38,6 @@
                 }
             ], 
             "name": "Heading"
-        }, 
-        {
-            "attributes": {
-                "icon": "help", 
-                "recursive": true
-            }, 
-            "children": [], 
-            "name": "IconToken"
         }, 
         {
             "attributes": {
@@ -94,7 +78,7 @@
                 }, 
                 {
                     "attributes": {
-                        "content": "icon", 
+                        "content": "a", 
                         "recursive": true
                     }, 
                     "children": [], 
@@ -110,23 +94,47 @@
                 }, 
                 {
                     "attributes": {
-                        "icon": "home", 
+                        "content": "paragraph", 
                         "recursive": true
                     }, 
                     "children": [], 
-                    "name": "IconToken"
+                    "name": "Word"
                 }, 
                 {
                     "attributes": {
-                        "count": 1, 
+                        "content": ".", 
                         "recursive": true
                     }, 
                     "children": [], 
-                    "name": "Space"
-                }, 
+                    "name": "Punctuation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "faicon": "question-circle", 
+                "icon": "help", 
+                "recursive": true
+            }, 
+            "children": [], 
+            "name": "Icon"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
                 {
                     "attributes": {
-                        "content": "that", 
+                        "content": "This", 
                         "recursive": true
                     }, 
                     "children": [], 
@@ -158,7 +166,88 @@
                 }, 
                 {
                     "attributes": {
-                        "content": "in", 
+                        "content": "an", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "icon", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "faicon": null, 
+                        "icon": "home", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Icon"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "that", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "inline", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }, 
+                {
+                    "attributes": {
+                        "count": 1, 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Space"
+                }, 
+                {
+                    "attributes": {
+                        "content": "with", 
                         "recursive": true
                     }, 
                     "children": [], 
@@ -198,6 +287,14 @@
                 }, 
                 {
                     "attributes": {
+                        "content": ".", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Punctuation"
+                }, 
+                {
+                    "attributes": {
                         "count": 1, 
                         "recursive": true
                     }, 
@@ -211,6 +308,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -229,6 +327,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

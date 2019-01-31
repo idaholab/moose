@@ -15,7 +15,7 @@
                         "number": 1, 
                         "numbered": true, 
                         "recursive": true, 
-                        "tex": "t\\' = t \\\\frac{1}{\\\\sqrt{1 - \\\\frac{\\\\nu^2}{c^2}}}"
+                        "tex": "t' = t \\frac{1}{\\sqrt{1 - \\frac{\\nu^2}{c^2}}}"
                     }, 
                     "children": [], 
                     "name": "LatexBlockEquation"
@@ -55,6 +55,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -73,6 +74,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

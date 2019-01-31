@@ -2,17 +2,25 @@ Content:
     framework:
         root_dir: framework/doc/content
         content:
+            - media/framework/under-construction.png
+            - large_media/testing/*
             - large_media/level_set/vortex_out.gif
+            - bib/*
             - contrib/**
             - css/*
             - js/*
     test:
         root_dir: python/MooseDocs/test/content
+    level_set:
+        root_dir: modules/level_set/doc/content
+        content:
+            - bib/*
 
 Renderer:
     type: MooseDocs.base.LatexRenderer
 
 Extensions:
+    MooseDocs.extensions.pdf: default
     MooseDocs.extensions.core: default
     MooseDocs.extensions.floats: default
     MooseDocs.extensions.command: default
@@ -30,9 +38,15 @@ Extensions:
     MooseDocs.extensions.layout: default
     MooseDocs.extensions.config: default
     MooseDocs.extensions.content: default
-    MooseDocs.extensions.plotly: default
+    MooseDocs.extensions.graph:
+        draft: True
     MooseDocs.extensions.heading: default
-    MooseDocs.extensions.gallery: default
+    MooseDocs.extensions.gallery: disable
+    MooseDocs.extensions.template: default
+    MooseDocs.extensions.sqa:
+        directories:
+            - modules/level_set/test/tests
+
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
@@ -52,7 +66,12 @@ Extensions:
             MOOSE: https:://mooseframework.org
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
-        active: False
+        executable: ${MOOSE_DIR}/modules/level_set
+        hide: !include framework/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/level_set/include
 
 Translator:
     type: MooseDocs.base.Translator

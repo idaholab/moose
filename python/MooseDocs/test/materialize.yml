@@ -2,6 +2,7 @@ Content:
     framework:
         root_dir: framework/doc/content
         content:
+            - large_media/testing/*
             - media/framework/under-construction.gif
             - media/framework/github-logo.png
             - media/framework/github-mark.png
@@ -10,6 +11,10 @@ Content:
             - contrib/**
             - css/*
             - js/*
+    level_set:
+        root_dir: modules/level_set/doc/content
+        content:
+            - bib/*
     test:
         root_dir: python/MooseDocs/test/content
 
@@ -36,9 +41,15 @@ Extensions:
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.layout: default
     MooseDocs.extensions.content: default
-    MooseDocs.extensions.plotly: default
+    MooseDocs.extensions.graph: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: default
+    MooseDocs.extensions.pdf: default
+    MooseDocs.extensions.template: default
+    MooseDocs.extensions.sqa:
+        repo: https://github.com/idaholab/moose
+        directories:
+            - modules/level_set/test/tests
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
@@ -58,7 +69,12 @@ Extensions:
             MOOSE: https:://mooseframework.org
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
-        active: False
+        executable: ${MOOSE_DIR}/modules/level_set
+        hide: !include framework/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/level_set/include
 
 Translator:
     type: MooseDocs.base.Translator

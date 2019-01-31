@@ -29,6 +29,8 @@ def command_line_options(subparser, parent):
     parser.add_argument('-f', '--form', default='materialize',
                         choices=['materialize', 'html', 'json', 'latex'],
                         help="The desired output format to verify.")
+    parser.add_argument('--disable', nargs='*', default=[],
+                        help="A list of extensions to disable.")
     parser.add_argument('--update-gold', action='store_true',
                         help="Copy the rendered results to the gold directory.")
     parser.add_argument('--executioner',
@@ -40,6 +42,7 @@ def prepare_content(content):
     content = insert_moose_dir(content)
     content = replace_uuid4(content)
     content = replace_package_file(content)
+    content = replace_tmp_file(content)
     return content
 
 def insert_moose_dir(content):
@@ -54,6 +57,10 @@ def replace_uuid4(content):
 def replace_package_file(content):
     """Replace the package filename with something consistent."""
     return re.sub(r'(moose-environment\S*\.pkg)', r'moose-environment.pkg', content)
+
+def replace_tmp_file(content):
+    """Replace tmp filenames."""
+    return re.sub(r'tmp(.*?)(\.\w{3})', r'tmpXXXXX\2', content)
 
 def update_gold_helper(gold, out_content):
     """Update the gold files."""
@@ -108,7 +115,8 @@ def main(options):
     config = options.form + '.yml'
     subprocess.check_output(['python', 'moosedocs.py', 'build',
                              '--config', config,
-                             '--executioner', options.executioner],
+                             '--executioner', options.executioner,
+                             '--disable', ' '.join(options.disable)],
                             cwd=os.path.join(MooseDocs.MOOSE_DIR, 'python', 'MooseDocs', 'test'))
 
     # Define output and gold directories

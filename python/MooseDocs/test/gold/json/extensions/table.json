@@ -14,14 +14,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Table Extensions"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Table", 
                         "recursive": true
                     }, 
@@ -51,19 +43,11 @@
             "attributes": {
                 "class": "", 
                 "id": "", 
-                "level": 1, 
+                "level": 2, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Center"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Center", 
@@ -77,6 +61,10 @@
         }, 
         {
             "attributes": {
+                "form": [
+                    "center", 
+                    "center"
+                ], 
                 "recursive": true
             }, 
             "children": [
@@ -251,19 +239,11 @@
             "attributes": {
                 "class": "", 
                 "id": "", 
-                "level": 1, 
+                "level": 2, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Left"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Left", 
@@ -277,6 +257,10 @@
         }, 
         {
             "attributes": {
+                "form": [
+                    "left", 
+                    "left"
+                ], 
                 "recursive": true
             }, 
             "children": [
@@ -451,19 +435,11 @@
             "attributes": {
                 "class": "", 
                 "id": "", 
-                "level": 1, 
+                "level": 2, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Right"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Right", 
@@ -477,6 +453,10 @@
         }, 
         {
             "attributes": {
+                "form": [
+                    "right", 
+                    "right"
+                ], 
                 "recursive": true
             }, 
             "children": [
@@ -651,19 +631,11 @@
             "attributes": {
                 "class": "", 
                 "id": "", 
-                "level": 1, 
+                "level": 2, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Float"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Float", 
@@ -677,6 +649,8 @@
         }, 
         {
             "attributes": {
+                "bottom": false, 
+                "command": "figure", 
                 "img": false, 
                 "recursive": true
             }, 
@@ -754,10 +728,13 @@
                             "name": "Punctuation"
                         }
                     ], 
-                    "name": "Caption"
+                    "name": "FloatCaption"
                 }, 
                 {
                     "attributes": {
+                        "form": [
+                            "left"
+                        ], 
                         "recursive": true
                     }, 
                     "children": [
@@ -831,12 +808,13 @@
                     "name": "Table"
                 }
             ], 
-            "name": "Float"
+            "name": "TableFloat"
         }, 
         {
             "attributes": {
                 "key": "float-table", 
                 "link": "#float-table", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -855,6 +833,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -873,6 +852,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

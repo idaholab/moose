@@ -13,7 +13,7 @@ and converting tokens to rendered HTML.
 from MooseDocs.common import exceptions, parse_settings, mixins
 from MooseDocs.tree import tokens
 
-class Extension(mixins.ConfigObject, mixins.TranslatorMixin):
+class Extension(mixins.ConfigObject, mixins.TranslatorObject):
     """
     Base class for creating extensions. An extension is simply a mechanism to allow for
     the creation of reader/renderer components to be added to the translation process.
@@ -34,13 +34,8 @@ class Extension(mixins.ConfigObject, mixins.TranslatorMixin):
 
     def __init__(self, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
-        mixins.TranslatorMixin.__init__(self)
+        mixins.TranslatorObject.__init__(self)
         self.__requires = set()
-
-        # The 'active' setting must be able to be set outside of the configure options to allow
-        # for object constructors (i.e., appsyntax) to disable an extension internally. Because,
-        # if only the config is used it is reset after building the page to the default to
-        # support the config extension.
         self.__active = self.get('active')
 
         # Extension name
@@ -57,8 +52,16 @@ class Extension(mixins.ConfigObject, mixins.TranslatorMixin):
         return self.__active
 
     def setActive(self, value):
-        """Set the active state for the extension."""
+        """
+        Set the active state for the extension.
+
+        The default 'active' setting must be able to be set outside of the configure options to
+        allow for object constructors (i.e., appsyntax) to disable an extension internally. Because,
+        if only the config is used it is reset after building the page to the default to
+        support the config extension.
+        """
         self.__active = value
+        self._ConfigObject__initial_config['active'] = value #pylint: disable=no-member
 
     def extend(self, reader, renderer):
         """
@@ -151,14 +154,14 @@ class Extension(mixins.ConfigObject, mixins.TranslatorMixin):
         """
         pass
 
-class Component(mixins.TranslatorMixin):
+class Component(mixins.TranslatorObject):
     """
     Each extension is made up of components, both for tokenizing and rendering. The components
     provide a means for defining settings as well as other customizable features required for
     translation.
     """
     def __init__(self):
-        mixins.TranslatorMixin.__init__(self)
+        mixins.TranslatorObject.__init__(self)
         self.__extension = None
 
     @property

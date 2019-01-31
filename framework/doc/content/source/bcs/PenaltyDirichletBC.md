@@ -57,12 +57,12 @@ boundary condition
 \end{equation}
 
 replacing the original Dirichlet boundary condition. It has been shown
-[cite:juntunen2009nitsche] that in order for the solution to this perturbed
+[cite!juntunen2009nitsche] that in order for the solution to this perturbed
 problem to converge to the solution of the original problem in the
 limit as $\epsilon \rightarrow 0$, the penalty parameter must depend
 on the mesh size, and that as we refine the mesh, the problem becomes
 increasingly ill-conditioned.  A related method for imposing Dirichlet boundary
-conditions, known as Nitsche's method [cite:juntunen2009nitsche], does not
+conditions, known as Nitsche's method [cite!juntunen2009nitsche], does not
 suffer from the same ill-conditioning issues, and is slated for inclusion
 in MOOSE some time in the future.
 

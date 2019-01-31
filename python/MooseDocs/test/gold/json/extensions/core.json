@@ -14,14 +14,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Core Extension Tests"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Core", 
                         "recursive": true
                     }, 
@@ -43,22 +35,6 @@
                     }, 
                     "children": [], 
                     "name": "Word"
-                }, 
-                {
-                    "attributes": {
-                        "count": 1, 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Space"
-                }, 
-                {
-                    "attributes": {
-                        "content": "Tests", 
-                        "recursive": true
-                    }, 
-                    "children": [], 
-                    "name": "Word"
                 }
             ], 
             "name": "Heading"
@@ -72,14 +48,6 @@
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Code Blocks"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Code", 
@@ -157,14 +125,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Quotations"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Quotations", 
                         "recursive": true
                     }, 
@@ -183,14 +143,6 @@
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Multiline Quotation"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Multiline", 
@@ -1413,14 +1365,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Nested Quotations and Lists"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Nested", 
                         "recursive": true
                     }, 
@@ -2146,14 +2090,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Headings"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Headings", 
                         "recursive": true
                     }, 
@@ -2172,14 +2108,6 @@
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "One"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "One", 
@@ -2202,14 +2130,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Two"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Two", 
                         "recursive": true
                     }, 
@@ -2228,14 +2148,6 @@
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Three"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Three", 
@@ -2258,14 +2170,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Four"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Four", 
                         "recursive": true
                     }, 
@@ -2284,14 +2188,6 @@
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Five"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Five", 
@@ -2314,14 +2210,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Six"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Six", 
                         "recursive": true
                     }, 
@@ -2340,14 +2228,6 @@
                 "style": "color:red;"
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Heading with Style"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Heading", 
@@ -2402,14 +2282,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Unordered Lists"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Unordered", 
                         "recursive": true
                     }, 
@@ -2438,20 +2310,12 @@
         {
             "attributes": {
                 "class": "", 
-                "id": "single-level-lists", 
+                "id": "unordered-single-level-lists", 
                 "level": 3, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Single level lists"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Single", 
@@ -3449,20 +3313,12 @@
         {
             "attributes": {
                 "class": "", 
-                "id": "", 
+                "id": "unordered-nested-lists", 
                 "level": 3, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Nested lists"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Nested", 
@@ -4106,14 +3962,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Ordered List"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Ordered", 
                         "recursive": true
                     }, 
@@ -4142,20 +3990,12 @@
         {
             "attributes": {
                 "class": "", 
-                "id": "", 
+                "id": "ordered-single-level-lists", 
                 "level": 3, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Single level lists"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Single", 
@@ -4568,14 +4408,6 @@
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Starting number"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Starting", 
@@ -5178,20 +5010,12 @@
         {
             "attributes": {
                 "class": "", 
-                "id": "", 
+                "id": "ordered-nested-lists", 
                 "level": 3, 
                 "recursive": true, 
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Nested lists"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Nested", 
@@ -5882,14 +5706,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Shortcuts and Shortcut links."
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Shortcuts", 
                         "recursive": true
                     }, 
@@ -6065,7 +5881,8 @@
         {
             "attributes": {
                 "key": "google", 
-                "link": "www.google.com", 
+                "link": "https://www.google.com", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -6089,14 +5906,6 @@
                 "style": ""
             }, 
             "children": [
-                {
-                    "attributes": {
-                        "recursive": true, 
-                        "text": "Inline formatting"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
                 {
                     "attributes": {
                         "content": "Inline", 
@@ -7375,14 +7184,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Links"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Links", 
                         "recursive": true
                     }, 
@@ -7479,11 +7280,23 @@
                 }, 
                 {
                     "attributes": {
-                        "bookmark": "links", 
-                        "recursive": true
+                        "class": "", 
+                        "id": "", 
+                        "recursive": true, 
+                        "style": "", 
+                        "url": "https://www.google.com"
                     }, 
-                    "children": [], 
-                    "name": "LocalLink"
+                    "children": [
+                        {
+                            "attributes": {
+                                "content": "google", 
+                                "recursive": true
+                            }, 
+                            "children": [], 
+                            "name": "Word"
+                        }
+                    ], 
+                    "name": "Link"
                 }, 
                 {
                     "attributes": {
@@ -7508,6 +7321,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -7526,6 +7340,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [

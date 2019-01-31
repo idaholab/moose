@@ -7,6 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+import os
 import collections
 from MooseDocs import common
 from MooseDocs.extensions import command
@@ -27,6 +28,10 @@ class ConfigExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
         self.__configurations = collections.defaultdict(dict)
 
+    def initMetaData(self, page, meta):
+        """Initialize the page as active."""
+        meta.initData('active', True)
+
     def postRead(self, content, page, meta):
         """Updates configuration items."""
         if content:
@@ -34,7 +39,19 @@ class ConfigExtension(command.CommandExtension):
                 if match.group('command') == 'config':
                     subcommand = match.group('subcommand')
                     _, settings = common.match_settings(dict(), match.group('settings'))
-                    self.__configurations[page.uid][subcommand] = settings
+                    if subcommand == 'disable':
+                        self.__configPageDisable(page, meta, settings)
+                    else:
+                        self.__configurations[page.uid][subcommand] = settings
+
+    @staticmethod
+    def __configPageDisable(page, meta, settings):
+        """Activate/deactivate based on extension."""
+
+        _, ext = os.path.splitext(page.destination)
+        extensions = eval(settings.get('extensions'))
+        if extensions and ext in extensions:
+            meta.setData('active', False)
 
     def preTokenize(self, ast, page, meta, reader):
         for key, value in self.__configurations[page.uid].iteritems():
@@ -52,13 +69,30 @@ class ConfigExtension(command.CommandExtension):
 
     def extend(self, reader, renderer):
         self.requires(command)
-        self.addCommand(reader, ConfigRendererCommand())
+        self.addCommand(reader, ConfigCommand())
+        self.addCommand(reader, ConfigPageActiveCommand())
 
-class ConfigRendererCommand(command.CommandComponent):
+class ConfigCommand(command.CommandComponent):
     """This does nothing but serves to hide the command syntax from outputting."""
     COMMAND = 'config'
     SUBCOMMAND = '*'
     PARSE_SETTINGS = False
+
+    def createToken(self, parent, info, page):
+        return parent
+
+class ConfigPageActiveCommand(command.CommandComponent):
+    """This does nothing but serves to hide the command syntax from outputting."""
+    COMMAND = 'config'
+    SUBCOMMAND = 'disable'
+    PARSE_SETTINGS = False
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['extensions'] = ([], "If the output extension matches the page is disabled from " \
+                                      "translation.")
+        return settings
 
     def createToken(self, parent, info, page):
         return parent

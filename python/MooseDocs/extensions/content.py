@@ -11,22 +11,32 @@
 import os
 import uuid
 import collections
+import logging
 import mooseutils
-from MooseDocs.base import components
-from MooseDocs.tree import pages, tokens, html
+from MooseDocs.common import exceptions
+from MooseDocs.base import components, LatexRenderer
+from MooseDocs.tree import pages, tokens, html, latex
 from MooseDocs.extensions import core, command, heading
+
+LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):
     return ContentExtension(**kwargs)
 
-Collapsible = tokens.newToken('Collapsible', summary=u'')
 ContentToken = tokens.newToken('ContentToken', location=u'', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location=u'', level=None, buttons=bool)
+
+LATEX_CONTENTLIST = """
+\\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
+"""
 
 class ContentExtension(command.CommandExtension):
     """
     Allows for the creation of markdown contents lists.
     """
+    LETTER = 10
+    FOLDER = 11
+
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
@@ -36,9 +46,53 @@ class ContentExtension(command.CommandExtension):
         self.requires(core, heading, command)
         self.addCommand(reader, ContentCommand())
         self.addCommand(reader, AtoZCommand())
-        renderer.add('Collapsible', RenderCollapsible())
         renderer.add('AtoZToken', RenderAtoZ())
         renderer.add('ContentToken', RenderContentToken())
+
+        if isinstance(renderer, LatexRenderer):
+            renderer.addPreamble(LATEX_CONTENTLIST)
+
+    def binContent(self, location=None, method=None):
+        """
+        Helper method for creating page bins.
+
+        Inputs:
+            location[str]: The content page local path must begin with the given string.
+            method[LETTER|FOLDER]: Method for bin assignment.
+        """
+
+        location = location
+        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
+        nodes = self.translator.findPages(func)
+        nodes.sort(key=lambda n: n.local)
+
+        headings = collections.defaultdict(list)
+        func = lambda n: n.local.startswith(location) and isinstance(n, pages.Source)
+        for node in nodes:
+            h_node = heading.find_heading(self.translator, node)
+
+            if h_node is None:
+                pass
+                #msg = "The page, '%s', does not have a title, it will be ignored in the " \
+                #      "content output."
+                #LOG.warning(msg, node.local)
+
+            else:
+                text = h_node.text()
+                label = text.replace(' ', '-').lower()
+                if method == ContentExtension.LETTER:
+                    key = label[0]
+                elif method == ContentExtension.FOLDER:
+                    parts = tuple(node.local.replace(location, '').strip(os.sep).split(os.sep))
+                    key = parts[0] if len(parts) > 1 else u''
+                else:
+                    raise exceptions.MooseDocsException("Unknown method.")
+                headings[key].append((text, label, node.local))
+
+        for value in headings.itervalues():
+            value.sort(key=lambda x: x[2])
+
+        return headings
 
 class ContentCommand(command.CommandComponent):
     COMMAND = 'contents' #TODO: Change this to content after format is working
@@ -67,7 +121,8 @@ class AtoZCommand(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-        return AtoZToken(parent, level=self.settings['level'], buttons=self.settings['buttons'])
+        AtoZToken(parent, level=self.settings['level'], buttons=self.settings['buttons'])
+        return parent
 
 class RenderContentToken(components.RenderComponent):
 
@@ -76,77 +131,50 @@ class RenderContentToken(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
 
-        location = token['location']
-        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
-        nodes = self.translator.findPages(func)
-        nodes.sort(key=lambda n: n.local)
-
-        headings = collections.defaultdict(list)
-        for node in nodes:
-            key = tuple(node.local.replace(location, '').strip(os.sep).split(os.sep))
-            head = key[0] if len(key) > 1 else u''
-            headings[head].append((node.name, node.relativeDestination(page)))
-
-        headings = [(h, items) for h, items in headings.iteritems()]
-        headings.sort(key=lambda h: h[0])
+        headings = self.extension.binContent(token['location'], ContentExtension.FOLDER)
 
         # Build lists
-        for head, items in headings:
+        for head, items in headings.iteritems():
 
             if head:
-                html.Tag(parent, 'h{}'.format(token['level']),
+                html.Tag(parent, 'h{:d}'.format(int(token['level'])),
                          class_='moose-a-to-z',
                          string=unicode(head))
 
             row = html.Tag(parent, 'div', class_='row')
-
-            for chunk in mooseutils.make_chunks(items, 3):
+            for chunk in mooseutils.make_chunks(list(items), 3):
                 col = html.Tag(row, 'div', class_='col s12 m6 l4')
                 ul = html.Tag(col, 'ul', class_='moose-a-to-z')
-                for text, href in chunk:
+                for text, href, local in chunk:
                     li = html.Tag(ul, 'li')
-                    html.Tag(li, 'a', href=href, string=unicode(text.replace('.md', '')))
+                    a = html.Tag(li, 'a', href=href, string=unicode(text.replace('.md', '')))
+                    a.addClass('tooltipped')
+                    a['data-position'] = 'top'
+                    a['data-tooltip'] = local
 
     def createLatex(self, parent, token, page):
-        return None
 
-class RenderCollapsible(components.RenderComponent):
-    def createHTML(self, parent, token, page):
-
-        details = html.Tag(parent, 'details')
-        summary = html.Tag(details, 'summary')
-        html.Tag(summary, 'span', class_='moose-section-icon')
-        html.Tag(summary, 'span', string=token['summary'])
-        return details
-
-    def createLatex(self, parent, token, page):
-        pass
+        headings = self.extension.binContent(token['location'], ContentExtension.FOLDER)
+        latex.Command(parent, 'par', start='\n')
+        for items in headings.itervalues():
+            for text, label, local in sorted(items, key=lambda x: x[2]):
+                args = [latex.Brace(string=local, escape=False),
+                        latex.Brace(string=label, escape=False)]
+                latex.Command(parent, 'ContentItem', start='\n', args=args, string=text)
+            latex.Command(parent, 'par', start='\n')
 
 class RenderAtoZ(components.RenderComponent):
+
     def createHTML(self, parent, token, page):
         pass
 
     def createMaterialize(self, parent, token, page):
 
         # Initialized alphabetized storage
-        headings = dict()
-        for letter in 'ABCDEFGHIJKLNMOPQRSTUVWXYZ':
-            headings[letter] = dict()
-
-        # Extract headings, default to filename if a heading is not found
-        func = lambda n: n.local.startswith(token['location']) and isinstance(n, pages.Source)
-        for node in self.translator.findPages(func):
-            h_node = heading.find_heading(self.translator, node)
-            if h_node is not None:
-                r = html.Tag(None, 'span')
-                self.renderer.render(r, h_node, page)
-                key = r.text()
-            else:
-                r = None
-                key = node.name
-
-            letter = key[0].upper()
-            headings[letter][key] = node.relativeDestination(page)
+        headings = self.extension.binContent(token['location'], ContentExtension.LETTER)
+        for letter in 'abcdefghijklmnopqrstuvwxyz':
+            if letter not in headings:
+                headings[letter] = set()
 
         # Buttons
         buttons = html.Tag(parent, 'div', class_='moose-a-to-z-buttons')
@@ -157,7 +185,7 @@ class RenderAtoZ(components.RenderComponent):
         for letter, items in headings.iteritems():
             id_ = uuid.uuid4()
             btn = html.Tag(buttons, 'a',
-                           string=unicode(letter),
+                           string=unicode(letter.upper()),
                            class_='btn moose-a-to-z-button',
                            href='#{}'.format(id_))
 
@@ -165,20 +193,29 @@ class RenderAtoZ(components.RenderComponent):
                 btn.addClass('disabled')
                 continue
 
-            html.Tag(parent, 'h{}'.format(token['level']),
+            html.Tag(parent, 'h{:d}'.format(int(token['level'])),
                      class_='moose-a-to-z',
                      id_=unicode(id_),
                      string=unicode(letter))
 
             row = html.Tag(parent, 'div', class_='row')
-
-            links = [(text, href) for text, href in items.iteritems()]
-            for chunk in mooseutils.make_chunks(links, 3):
+            for chunk in mooseutils.make_chunks(list(items), 3):
                 col = html.Tag(row, 'div', class_='col s12 m6 l4')
                 ul = html.Tag(col, 'ul', class_='moose-a-to-z')
-                for text, href in chunk:
+                for text, href, local in chunk:
                     li = html.Tag(ul, 'li')
-                    html.Tag(li, 'a', href=href, string=unicode(text))
+                    a = html.Tag(li, 'a', href=href, string=unicode(text))
+                    a.addClass('tooltipped')
+                    a['data-position'] = 'top'
+                    a['data-tooltip'] = local
 
     def createLatex(self, parent, token, page):
-        pass
+
+        headings = self.extension.binContent(token['location'], ContentExtension.LETTER)
+        latex.Command(parent, 'par', start='\n')
+        for items in headings.values():
+            for text, label, local in sorted(items, key=lambda x: x[2]):
+                args = [latex.Brace(string=local, escape=False),
+                        latex.Brace(string=label, escape=False)]
+                latex.Command(parent, 'ContentItem', start='\n', args=args, string=text)
+            latex.Command(parent, 'par', start='\n')
