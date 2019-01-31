@@ -10,14 +10,16 @@
 #include "PicardSolve.h"
 
 #include "FEProblem.h"
+#include "Executioner.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
-PicardSolve::PicardSolve(const InputParameters & parameters)
-  : MooseObject(parameters),
+PicardSolve::PicardSolve(const Executioner * ex)
+  : MooseObject(ex->parameters()),
     PerfGraphInterface(this),
+    _executioner(*ex),
     _problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _nl(_problem.getNonlinearSystemBase()),
@@ -161,6 +163,11 @@ PicardSolve::solve()
           _picard_status = MoosePicardConvergenceReason::CONVERGED_RELATIVE;
           break;
         }
+        if (_executioner.augmentedPicardConvergenceCheck())
+        {
+          _picard_status = MoosePicardConvergenceReason::CONVERGED_CUSTOM;
+          break;
+        }
         if (_picard_it + 1 == _picard_max_its)
         {
           _picard_status = MoosePicardConvergenceReason::DIVERGED_MAX_ITS;
@@ -206,6 +213,9 @@ PicardSolve::solve()
         break;
       case MoosePicardConvergenceReason::CONVERGED_RELATIVE:
         _console << "CONVERGED_RELATIVE";
+        break;
+      case MoosePicardConvergenceReason::CONVERGED_CUSTOM:
+        _console << "CONVERGED_CUSTOM";
         break;
       case MoosePicardConvergenceReason::DIVERGED_MAX_ITS:
         _console << "DIVERGED_MAX_ITS";

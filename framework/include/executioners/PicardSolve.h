@@ -16,13 +16,14 @@
 // System includes
 #include <string>
 
+class Executioner;
 class FEProblemBase;
 class NonlinearSystemBase;
 
 class PicardSolve : public MooseObject, public PerfGraphInterface
 {
 public:
-  PicardSolve(const InputParameters & parameters);
+  PicardSolve(const Executioner * ex);
 
   /**
    * Picard solve the FEProblem.
@@ -37,6 +38,7 @@ public:
     CONVERGED_NONLINEAR = 1,
     CONVERGED_ABS = 2,
     CONVERGED_RELATIVE = 3,
+    CONVERGED_CUSTOM = 4,
     DIVERGED_MAX_ITS = -1,
     DIVERGED_NONLINEAR = -2,
     DIVERGED_FAILED_MULTIAPP = -3
@@ -97,6 +99,8 @@ protected:
                  bool relax,
                  const std::set<dof_id_type> & relaxed_dofs);
 
+  /// Executioner used to construct this
+  const Executioner & _executioner;
   /// Reference to FEProblem
   FEProblemBase & _problem;
   /// Reference to nonlinear system base for faster access

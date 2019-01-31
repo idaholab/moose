@@ -113,6 +113,9 @@ public:
   /// Return underlining PicardSolve object.
   PicardSolve & picardSolve() { return _picard_solve; }
 
+  /// Augmented Picard convergence check that can be overridden by derived executioners
+  virtual bool augmentedPicardConvergenceCheck() const { return false; }
+
 protected:
   /**
    * Adds a postprocessor to report a Real class attribute

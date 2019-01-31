@@ -150,7 +150,7 @@ Executioner::Executioner(const InputParameters & parameters)
     PerfGraphInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
-    _picard_solve(parameters),
+    _picard_solve(this),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
