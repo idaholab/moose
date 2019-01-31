@@ -19,5 +19,6 @@
 []
 
 [Outputs]
+  execute_on = initial
   exodus = true
 []
