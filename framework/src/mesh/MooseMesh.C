@@ -2001,7 +2001,7 @@ MooseMesh::buildMeshBaseObject(ParallelType override_type)
   {
     if (override_type == ParallelType::DISTRIBUTED)
       mooseError("The requested override_type of \"Distributed\" may not be used when MOOSE is "
-                 "running with a DistributedMesh");
+                 "running with a ReplicatedMesh");
 
     mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
   }
