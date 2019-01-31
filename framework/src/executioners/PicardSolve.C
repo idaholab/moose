@@ -235,8 +235,10 @@ PicardSolve::solveStep(Real begin_norm_old,
                        bool relax,
                        const std::set<dof_id_type> & relaxed_dofs)
 {
+  bool auto_advance = !(_has_picard_its && _problem.isTransient());
+
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-  if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, !_has_picard_its))
+  if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
   {
     _picard_status = MoosePicardConvergenceReason::DIVERGED_FAILED_MULTIAPP;
     return false;
@@ -313,7 +315,7 @@ PicardSolve::solveStep(Real begin_norm_old,
     _problem.execute(EXEC_TIMESTEP_END);
 
     _problem.execTransfers(EXEC_TIMESTEP_END);
-    if (!_problem.execMultiApps(EXEC_TIMESTEP_END, !_has_picard_its))
+    if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
     {
       _picard_status = MoosePicardConvergenceReason::DIVERGED_FAILED_MULTIAPP;
       return false;
