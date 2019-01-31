@@ -11,10 +11,6 @@ Content:
             - js/*
     test:
         root_dir: python/MooseDocs/test/content
-    level_set:
-        root_dir: modules/level_set/doc/content
-        content:
-            - bib/*
 
 Renderer:
     type: MooseDocs.base.LatexRenderer
@@ -66,12 +62,12 @@ Extensions:
             MOOSE: https:://mooseframework.org
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
-        executable: ${MOOSE_DIR}/modules/level_set
+        executable: ${MOOSE_DIR}/test
         hide: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include
-            - modules/level_set/include
+            - test/include
 
 Translator:
     type: MooseDocs.base.Translator
