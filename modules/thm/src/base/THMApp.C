@@ -1,4 +1,5 @@
 #include "THMApp.h"
+#include "THMSyntax.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "ModulesApp.h"
@@ -25,6 +26,8 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerActionsTo(af, {"THMApp"});
 
   /* register custom execute flags, action syntax, etc. here */
+  THM::associateSyntax(s);
+  THM::registerActions(s);
 }
 
 void
