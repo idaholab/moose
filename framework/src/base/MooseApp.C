@@ -1485,12 +1485,21 @@ MooseApp::executeMeshGenerators()
 
     if (ordered_generators.size())
     {
+      // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
+      auto final_generator_name = ordered_generators.back()->name();
+
+      _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(final_generator_name));
+
+      // Need to grab two if we're going to be making a displaced mesh
+      if (_action_warehouse.displacedMesh())
+        _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(final_generator_name));
+
       // Run the MeshGenerators in the proper order
       for (const auto & generator : ordered_generators)
       {
         auto name = generator->name();
 
-        _final_generated_mesh = generator->generate();
+        auto current_mesh = generator->generate();
 
         // Now we need to possibly give this mesh to downstream generators
         auto & outputs = _mesh_generator_outputs[name];
@@ -1499,7 +1508,7 @@ MooseApp::executeMeshGenerators()
         {
           auto & first_output = *outputs.begin();
 
-          first_output = std::move(_final_generated_mesh);
+          first_output = std::move(current_mesh);
 
           const auto & copy_from = *first_output;
 

@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'displaced_mesh.i'
+    exodiff = 'displaced_mesh_in.e'
+    cli_args = '--mesh-only'
+  [../]
+[]
