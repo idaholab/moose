@@ -53,6 +53,12 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
+  /**
+   * Helper function that actually does the math for computing the time derivative
+   */
+  template <typename T, typename T2>
+  void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old);
+
   //! Indicates the current stage (1 or 2).
   unsigned int _stage;
 
@@ -65,5 +71,13 @@ protected:
   // The parameter of the method, set at construction time and cannot be changed.
   const Real _alpha;
 };
+
+template <typename T, typename T2>
+void
+LStableDirk2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
+{
+  u_dot -= u_old;
+  u_dot *= 1. / _dt;
+}
 
 #endif /* LSTABLEDIRK2_H */

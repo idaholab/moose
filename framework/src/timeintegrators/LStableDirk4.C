@@ -59,8 +59,7 @@ LStableDirk4::computeTimeDerivatives()
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot = *_solution;
-  u_dot -= _solution_old;
-  u_dot *= 1. / _dt;
+  computeTimeDerivativeHelper(u_dot, _solution_old);
   u_dot.close();
   _du_dot_du = 1. / _dt;
 }
@@ -68,8 +67,7 @@ LStableDirk4::computeTimeDerivatives()
 void
 LStableDirk4::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
 {
-  ad_u_dot -= _solution_old(dof);
-  ad_u_dot *= 1. / _dt;
+  computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof));
 }
 
 void

@@ -13,6 +13,8 @@
 #include "Moose.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
+#include "libmesh/numeric_vector.h"
+#include "libmesh/compare_types.h"
 
 namespace MathUtils
 {
@@ -51,6 +53,28 @@ inline Real
 negativePart(Real x)
 {
   return x < 0.0 ? x : 0.0;
+}
+
+template <typename T,
+          typename T2,
+          typename T3,
+          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
+                                      ScalarTraits<T3>::value,
+                                  int>::type = 0>
+void
+addScaled(const T & a, const T2 & b, T3 & result)
+{
+  result += a * b;
+}
+
+template <typename T,
+          typename T2,
+          typename T3,
+          typename std::enable_if<ScalarTraits<T>::value, int>::type = 0>
+void
+addScaled(const T & scalar, const NumericVector<T2> & numeric_vector, NumericVector<T3> & result)
+{
+  result.add(scalar, numeric_vector);
 }
 
 } // namespace MathUtils

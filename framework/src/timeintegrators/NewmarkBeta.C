@@ -79,20 +79,8 @@ NewmarkBeta::computeTimeDerivatives()
   NumericVector<Number> & u_dotdot_old = *_sys.solutionUDotDotOld();
 
   u_dotdot = *_solution;
-  u_dotdot -= _solution_old;
-  u_dotdot *= 1.0 / _beta / _dt / _dt;
-  u_dotdot.add(-1.0 / _beta / _dt, u_dot_old);
-  u_dotdot.add(-0.5 / _beta + 1.0, u_dotdot_old);
 
-  // compute first derivative
-  // according to Newmark-Beta method
-  // u_dot = first_term + second_term + third_term
-  //       first_term = u_dot_old
-  //      second_term = u_dotdot_old * (1 - gamma) * dt
-  //       third_term = u_dotdot * gamma * dt
-  u_dot = u_dot_old;
-  u_dot.add((1.0 - _gamma) * _dt, u_dotdot_old);
-  u_dot.add(_gamma * _dt, u_dotdot);
+  computeTimeDerivativeHelper(u_dot, _solution_old, u_dot_old, u_dotdot, u_dotdot_old);
 
   // make sure _u_dotdot and _u_dot are in good state
   u_dotdot.close();
@@ -110,21 +98,9 @@ NewmarkBeta::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & d
   const auto & u_dot_old = (*_sys.solutionUDotOld())(dof);
   const auto & u_dotdot_old = (*_sys.solutionUDotDotOld())(dof);
 
-  auto u_dotdot = ad_u_dot - u_old;
+  auto u_dotdot = ad_u_dot;
 
-  u_dotdot *= 1.0 / _beta / _dt / _dt;
-  u_dotdot += -1.0 / _beta / _dt * u_dot_old;
-  u_dotdot += (-0.5 / _beta + 1.0) * u_dotdot_old;
-
-  // compute first derivative
-  // according to Newmark-Beta method
-  // u_dot = first_term + second_term + third_term
-  //       first_term = u_dot_old
-  //      second_term = u_dotdot_old * (1 - gamma) * dt
-  //       third_term = u_dotdot * gamma * dt
-  ad_u_dot = u_dot_old;
-  ad_u_dot += ((1.0 - _gamma) * _dt) * u_dotdot_old;
-  ad_u_dot += _gamma * _dt * u_dotdot;
+  computeTimeDerivativeHelper(ad_u_dot, u_old, u_dot_old, u_dotdot, u_dotdot_old);
 }
 
 void

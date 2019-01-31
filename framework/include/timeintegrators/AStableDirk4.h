@@ -66,6 +66,12 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
+  /**
+   * Helper function that actually does the math for computing the time derivative
+   */
+  template <typename T, typename T2>
+  void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old);
+
   // Indicates the current stage.
   unsigned int _stage;
 
@@ -98,5 +104,13 @@ protected:
   // A pointer to the "bootstrapping" method to use if _safe_start==true.
   std::shared_ptr<LStableDirk4> _bootstrap_method;
 };
+
+template <typename T, typename T2>
+void
+AStableDirk4::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
+{
+  u_dot -= u_old;
+  u_dot *= 1. / _dt;
+}
 
 #endif // ASTABLEDIRK4_H

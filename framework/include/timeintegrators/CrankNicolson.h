@@ -38,7 +38,21 @@ public:
   virtual void postStep() override;
 
 protected:
+  /**
+   * Helper function that actually does the math for computing the time derivative
+   */
+  template <typename T, typename T2>
+  void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old);
+
   NumericVector<Number> & _residual_old;
 };
+
+template <typename T, typename T2>
+void
+CrankNicolson::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
+{
+  u_dot -= u_old;
+  u_dot *= 2. / _dt;
+}
 
 #endif /* CRANKNICOLSON_H */

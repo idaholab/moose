@@ -52,12 +52,8 @@ ExplicitRK2::computeTimeDerivatives()
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot = *_solution;
-  if (_stage < 3)
-    u_dot -= _solution_old;
-  else
-    u_dot -= _solution_older;
+  computeTimeDerivativeHelper(u_dot, _solution_old, _solution_older);
 
-  u_dot *= 1. / _dt;
   _du_dot_du = 1. / _dt;
   u_dot.close();
 }
@@ -65,12 +61,7 @@ ExplicitRK2::computeTimeDerivatives()
 void
 ExplicitRK2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
 {
-  if (_stage < 3)
-    ad_u_dot -= _solution_old(dof);
-  else
-    ad_u_dot -= _solution_older(dof);
-
-  ad_u_dot *= 1. / _dt;
+  computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof), _solution_older(dof));
 }
 
 void

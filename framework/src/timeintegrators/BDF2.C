@@ -50,41 +50,24 @@ BDF2::computeTimeDerivatives()
   if (_t_step == 1)
   {
     u_dot = *_solution;
-    u_dot -= _solution_old;
-    u_dot *= 1 / _dt;
-    u_dot.close();
-
-    _du_dot_du = 1.0 / _dt;
+    _du_dot_du = 1. / _dt;
   }
   else
   {
     u_dot.zero();
-    u_dot.add(_weight[0], *_solution);
-    u_dot.add(_weight[1], _solution_old);
-    u_dot.add(_weight[2], _solution_older);
-    u_dot.scale(1. / _dt);
-    u_dot.close();
-
     _du_dot_du = _weight[0] / _dt;
   }
+  computeTimeDerivativeHelper(u_dot, *_solution, _solution_old, _solution_older);
+  u_dot.close();
 }
 
 void
 BDF2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
 {
-  if (_t_step == 1)
-  {
-    const auto & local_old = _solution_old(dof);
-    ad_u_dot -= local_old;
-    ad_u_dot *= 1 / _dt;
-  }
-  else
-  {
-    ad_u_dot *= _weight[0];
-    ad_u_dot += _weight[1] * _solution_old(dof);
-    ad_u_dot += _weight[2] * _solution_older(dof);
-    ad_u_dot *= 1. / _dt;
-  }
+  auto ad_sln = ad_u_dot;
+  if (_t_step != 1)
+    ad_u_dot = 0;
+  computeTimeDerivativeHelper(ad_u_dot, ad_sln, _solution_old(dof), _solution_older(dof));
 }
 
 void

@@ -55,6 +55,12 @@ protected:
    */
   bool checkLinearConvergence();
 
+  /**
+   * Helper function that actually does the math for computing the time derivative
+   */
+  template <typename T, typename T2>
+  void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old);
+
   MooseEnum _solve_type;
 
   /// Residual used for the RHS
@@ -81,5 +87,13 @@ protected:
   /// Save off current time to reset it back and forth
   Real _current_time;
 };
+
+template <typename T, typename T2>
+void
+ActuallyExplicitEuler::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
+{
+  u_dot -= u_old;
+  u_dot *= 1. / _dt;
+}
 
 #endif // ACTUALLYEXPLICITEULER_H
