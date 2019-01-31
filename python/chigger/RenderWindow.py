@@ -17,6 +17,7 @@ import observers
 import misc
 import mooseutils
 
+VTK_MAJOR_VERSION = vtk.vtkVersion.GetVTKMajorVersion()
 
 class RenderWindow(base.ChiggerObject):
     """
@@ -39,7 +40,6 @@ class RenderWindow(base.ChiggerObject):
         opt.add('offscreen', False, "Enable offscreen rendering.")
         opt.add('chigger', False, "Places a chigger logo in the lower left corner.")
         opt.add('smoothing', False, "Enable VTK render window smoothing options.")
-        opt.add('multisamples', None, "Set the number of multi-samples.", vtype=int)
         opt.add('antialiasing', 0, "Number of antialiasing frames to perform "
                                    "(set vtkRenderWindow::SetAAFrames).", vtype=int)
 
@@ -220,12 +220,6 @@ class RenderWindow(base.ChiggerObject):
             self.__vtkwindow.SetPolygonSmoothing(smooth)
             self.__vtkwindow.SetPointSmoothing(smooth)
 
-        if self.isOptionValid('antialiasing'):
-            self.__vtkwindow.SetAAFrames(self.getOption('antialiasing'))
-
-        if self.isOptionValid('multisamples'):
-            self.__vtkwindow.SetMultiSamples(self.getOption('multisamples'))
-
         if self.isOptionValid('size'):
             self.__vtkwindow.SetSize(self.getOption('size'))
 
@@ -235,6 +229,13 @@ class RenderWindow(base.ChiggerObject):
         n = self.__vtkwindow.GetNumberOfLayers()
         for result in self._results:
             renderer = result.getVTKRenderer()
+            if self.isOptionValid('antialiasing'):
+                if VTK_MAJOR_VERSION < 8:
+                    self.__vtkwindow.SetAAFrames(self.getOption('antialiasing'))
+                else:
+                    renderer.SetUseFXAA(True)
+                    self.__vtkwindow.SetMultiSamples(self.getOption('antialiasing'))
+
             if not self.__vtkwindow.HasRenderer(renderer):
                 self.__vtkwindow.AddRenderer(renderer)
             if result.needsUpdate():
