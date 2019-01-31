@@ -10,7 +10,7 @@
 #ifndef ADDGKERNEL_H
 #define ADDGKERNEL_H
 
-#include "DGKernel.h"
+#include "DGKernelBase.h"
 
 #include "metaphysicl/numberarray.h"
 #include "metaphysicl/dualnumber.h"
@@ -37,7 +37,7 @@ class ADDGKernel;
 declareADValidParams(ADDGKernel);
 
 template <ComputeStage compute_stage>
-class ADDGKernel : public DGKernel
+class ADDGKernel : public DGKernelBase
 {
 public:
   ADDGKernel(const InputParameters & parameters);
@@ -57,7 +57,7 @@ public:
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
-  virtual ADResidual computeADQpResidual(Moose::DGResidualType type) = 0;
+  virtual ADResidual computeQpResidual(Moose::DGResidualType type) = 0;
 
   /// the current test function
   const ADVariableTestValue & _test;

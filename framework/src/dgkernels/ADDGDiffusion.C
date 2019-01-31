@@ -38,7 +38,7 @@ ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)
 
 template <ComputeStage compute_stage>
 ADResidual
-ADDGDiffusion<compute_stage>::computeADQpResidual(Moose::DGResidualType type)
+ADDGDiffusion<compute_stage>::computeQpResidual(Moose::DGResidualType type)
 {
   ADResidual r = 0;
 

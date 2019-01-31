@@ -17,11 +17,11 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADBaseValidParams(ADDGKernel, DGKernel, params.registerBase("ADDGKernel"););
+defineADBaseValidParams(ADDGKernel, DGKernelBase, params.registerBase("ADDGKernel"););
 
 template <ComputeStage compute_stage>
 ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)
-  : DGKernel(parameters),
+  : DGKernelBase(parameters),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
     _u(_var.adSln<compute_stage>()),
@@ -40,7 +40,7 @@ template <ComputeStage compute_stage>
 void
 ADDGKernel<compute_stage>::computeResidual()
 {
-  DGKernel::computeResidual();
+  DGKernelBase::computeResidual();
 }
 
 template <>
@@ -68,7 +68,7 @@ ADDGKernel<compute_stage>::computeElemNeighResidual(Moose::DGResidualType type)
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
-      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeADQpResidual(type);
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
 
   accumulateTaggedLocalResidual();
 
@@ -93,7 +93,7 @@ template <ComputeStage compute_stage>
 void
 ADDGKernel<compute_stage>::computeJacobian()
 {
-  DGKernel::computeJacobian();
+  DGKernelBase::computeJacobian();
 }
 
 template <>
@@ -126,7 +126,7 @@ ADDGKernel<compute_stage>::computeElemNeighJacobian(Moose::DGJacobianType type)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
     {
-      DualReal residual = computeADQpResidual(
+      DualReal residual = computeQpResidual(
           (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? Moose::Element
                                                                             : Moose::Neighbor);
       for (_j = 0; _j < loc_phi.size(); _j++)
@@ -157,7 +157,7 @@ template <ComputeStage compute_stage>
 void
 ADDGKernel<compute_stage>::computeOffDiagJacobian(unsigned int jvar)
 {
-  DGKernel::computeOffDiagJacobian(jvar);
+  DGKernelBase::computeOffDiagJacobian(jvar);
 }
 
 template <>
@@ -191,7 +191,7 @@ ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
     {
-      DualReal residual = computeADQpResidual(
+      DualReal residual = computeQpResidual(
           (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? Moose::Element
                                                                             : Moose::Neighbor);
       for (_j = 0; _j < loc_phi.size(); _j++)
