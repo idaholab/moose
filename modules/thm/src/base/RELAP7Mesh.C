@@ -14,7 +14,6 @@ validParams<RELAP7Mesh>()
 RELAP7Mesh::RELAP7Mesh(const InputParameters & parameters)
   : MooseMesh(parameters), _dim(getParam<MooseEnum>("dim"))
 {
-  getMesh().set_spatial_dimension(_dim);
 }
 
 RELAP7Mesh::RELAP7Mesh(const RELAP7Mesh & other_mesh) : MooseMesh(other_mesh), _dim(other_mesh._dim)
@@ -42,6 +41,7 @@ RELAP7Mesh::safeClone() const
 void
 RELAP7Mesh::buildMesh()
 {
+  getMesh().set_spatial_dimension(_dim);
 }
 
 void
