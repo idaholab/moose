@@ -1,22 +1,24 @@
-## This is an example input file showing how to set a Type I BC with PorousFlowPiecewiseLinearSink
+## This is an example input file showing how to set a Type I (Dirichlet) BC with PorousFlowPiecewiseLinearSink
+##
+## Problem setup:
+##   - The boundaries are set to P(x = 0) = 2e6 Pa, P(x = 1) = 1e6 and run to steady state.
+##   - The 2d domain is 1 m x 1 m
+##   - The permeability is set to 1E-15 m2, fluid viscosity = 1E-3 Pa-s
+##   - The steady state flux is calculated q = -k/mu*grad(P) = 1e-6 m/s
+##
+## Problem verification (in csv output):
+##   - The flux in and out of the domain are 1e-6 m/s (matching steady state solution)
+##   - The pressure at the left and right boundaries are set to 2e6 and 1e6 Pa, respectively 
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
+  nx = 5
   xmin = 0
   xmax = 1
-  ny = 10
+  ny = 2
   ymin = 0
   ymax = 1
-[]
-
-[MeshModifiers]
-  [./aquifer]
-    type = SubdomainBoundingBox
-    block_id = 11
-    bottom_left = '0 0 0'
-    top_right = '1 1 1'
-  [../]
 []
 
 [GlobalParams]
@@ -25,7 +27,7 @@
 
 [Variables]
   [./porepressure]
-    initial_condition = 1.e6 # initial pressure in domain
+    initial_condition = 1.5e6 # initial pressure in domain
   [../]
 []
 
@@ -34,12 +36,12 @@
   coupling_type = Hydro
   gravity = '0 0 0'
   fp = the_simple_fluid
-  number_fluid_phases = 1
-  number_fluid_components = 1
 []
 
 [AuxVariables]
   [./fluxes_out]
+  [../]
+  [./fluxes_in]
   [../]
 []
 
@@ -51,9 +53,20 @@
     pt_vals = '-1e9 1e9' # x coordinates defining g
     multipliers = '-1e9 1e9' # y coordinates defining g
     PT_shift = 2.E6   # BC pressure
-    flux_function = 1E-6 # Variable C
+    flux_function = 1E-5 # Variable C
     fluid_phase = 0
     save_in = fluxes_out
+  [../]
+  [./out_right]
+    type = PorousFlowPiecewiseLinearSink
+    variable = porepressure
+    boundary = 'right'
+    pt_vals = '-1e9 1e9' # x coordinates defining g
+    multipliers = '-1e9 1e9' # y coordinates defining g
+    PT_shift = 1.E6   # BC pressure
+    flux_function = 1E-6 # Variable C
+    fluid_phase = 0
+    save_in = fluxes_in
   [../]
 []
 
@@ -64,13 +77,31 @@
     variable = fluxes_out
     execute_on = 'timestep_end'
   [../]
+  [./right_flux]
+    type = NodalSum
+    boundary = 'right'
+    variable = fluxes_in
+    execute_on = 'timestep_end'
+  [../]
+  [./left_pressure]
+    type = SideAverageValue 
+    boundary = 'left'
+    variable = porepressure
+    execute_on = 'timestep_end'
+  [../]
+  [./right_pressure]
+    type = SideAverageValue 
+    boundary = 'right'
+    variable = porepressure
+    execute_on = 'timestep_end'
+  [../]
 []
 
 [Modules]
   [./FluidProperties]
     [./the_simple_fluid]
       type = SimpleFluidProperties
-      bulk_modulus = 2E9
+      thermal_expansion = 0
       viscosity = 1.0E-3
       density0 = 1000.0
     [../]
@@ -90,7 +121,6 @@
   [../]
   [./permeability_aquifer]
     type = PorousFlowPermeabilityConst
-    block = 11
     permeability = '1E-15 0 0   0 1E-15 0   0 0 1E-15'
   [../]
   #### The following Material give porepressure at nodes, which is required for PorousFlowPiecewiseLienarSink
@@ -101,31 +131,14 @@
   [../]
 []
 
-[Preconditioning]
-  active = basic
-  [./basic]
-    type = SMP
-    full = true
-    petsc_options = '-ksp_diagonal_scale -ksp_diagonal_scale_fix'
-    petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -pc_asm_overlap'
-    petsc_options_value = ' asm      lu           NONZERO                   2'
-  [../]
-  [./preferred_but_might_not_be_installed]
-    type = SMP
-    full = true
-    petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-    petsc_options_value = ' lu       mumps'
-  [../]
-[]
-
 [Executioner]
   type = Transient
   solve_type = Newton
-  end_time = 1E5
-  dt = 1E3
+  end_time = 1E6
+  dt = 1E5
   nl_abs_tol = 1E-10
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

@@ -57,7 +57,7 @@ In addition, the sink may be multiplied by any or all of the following
 quantities
 
 - Fluid relative permeability
-- Fluid mobility ($k_{ij}n_{i}n_{j}k_{r} \rho / \mu$, where $n$ is the normal vector to the boundary)
+- Fluid mobility ($k_{ij}n_{i}n_{j} \rho / \mu$, where $n$ is the normal vector to the boundary)
 - Fluid mass fraction
 - Fluid internal energy
 - Thermal conductivity
@@ -126,17 +126,17 @@ it is difficult to draw a perfect analogy to the physical flux. Nevertheless,
 common involves a [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
 that follows the format of [eq:s_f_g] using $f(x,t)=C$ and $g(P-P_{\mathrm{e}})$ as a
 piecewise linear function between ordered pairs of `pt_vals` (on the x-axis) and 
-`multiplier` (on the y-axis). The function $g$ is shown in the figure below. It accepts $P-P_{\mathrm{e}}$ as an input and returns 
-a value that ends up multiplying $C$ to give a flux. $C$ can be thought of as the conductance and is specified with `flux_function = C`. $P_{\mathrm{e}}$ can be specified using an AuxVariable or set to a constant value using `PT_shift = Pe`.
+`multiplier` (on the y-axis). An example of the function $g$ is shown in the figure below. It accepts $P-P_{\mathrm{e}}$ as an input and returns 
+a value that ends up multiplying $C$ to give a flux (as in [eq:s_f_g]). $C$ can be thought of as the conductance and is specified with `flux_function = C`. Its numerical value is discussed below. $P_{\mathrm{e}}$ can be specified using an AuxVariable or set to a constant value using `PT_shift = Pe`.
 
 
 !media piecewiselinear_g_function.png style=width:50%;margin-left:10px caption=Depiction of $g(P-P_{\mathrm{e}})$ for PorousFlowPiecewiseLinearSink. The function accepts $P-P_{\mathrm{e}}$ as an input (i.e. the difference between a specified environment pressure and the pressure on the boundary element) and returns a value that multiplies $C$ to give the flux out of the domain. id=PiecewiseLinear_g_Function
 
 To set a Dirichlet boundary condition $P = P_{\mathrm{e}}$, either $C$ or the slope of $g$ should be very large. 
 It is usually convenient to make the slope of $g$ equal to 1 by setting `pt_vals = '-1E9 1E9'` and `multipliers = '-1E9 1E9'`, and then $C$ can be selected appropriately.
-Assigning a large range for `pt_vals` ensures that $g$ is defined for the porepressures encountered in the simulation, and defining $g$ for $P-P_{\mathrm{e}}>0$ and $P-P_{\mathrm{e}}<0$ allows for outflow and inflow.
-If $P - P_{\mathrm{e}}$ falls outside of the range defined in `pt_vals`, then $g = 0$ by default. This can be useful to set a boundary condition that will only allow for outflow (e.g. by using  `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`).`
-
+The range for `pt_vals` should be sufficiently large that the simulation always occupies the region between the values specified (`-1E9 1E9` is a typical choice because porepressures encountered in many simulations are $O(10^6)$).
+This ensures good convergence, and if in doubt set the `pt_vals` at a higher value than you expect. 
+If $P - P_{\mathrm{e}}$ falls outside of the range defined in `pt_vals`, then the slope of $g = 0$. This can be useful to set a boundary condition that will only allow for outflow (e.g. by using  `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`).`
 
 The numerical value of the conductance, $C$, is
 $\rho k_{nn}k_{\mathrm{r}}/\mu/L$, must be set at an appropriate value
@@ -148,9 +148,12 @@ true`, and then $C = 1/L$.  This has three advantages: (1) the MOOSE
 input file is simpler; (2) MOOSE automatically chooses the correct
 mobility and relative permeability to use; (3) these parameters are
 appropriate to the model so it reduces the potential for difficult
-numerical situations occuring. Also note, if $C \times g$ is too large, the boundary residual will be much larger than residuals within the domain. This results in poor convergance. 
+numerical situations occurring. 
 
-So what value should be assigned to $C$? In the example below, $C = 10^{-6}$, $\rho \sim 10^3$ kg/m$^3$, $k = 10^{-15}$ m$^2$, $k_r = 1$, and $\mu \sim 10^{-3}$ Pa-s. Therefore $L \sim 10^{-3}$ m. This value of $L$ is small enough to ensure that the Dirichlet boundary condition is satisfied. If $C$ is increased to $10^{-2}$, $L \sim 10^{-7}$ m, and the simulation has difficulty converging. If $C = 10^{-11}$, $L\sim10^2$ m, and the boundary acts like a source of fluid from a distant reservoir (i.e. it no longer acts like a Dirichlet boundary condition). The value of $C$ would need to be adjusted if `use_mobility = true` and/or if `use_relperm = true`.
+Also note, if $C \times g$ is too large, the boundary residual will be much larger than residuals within the domain. This results in poor convergence. 
+
+So what value should be assigned to $C$? In the example below, $C = 10^{-5}$, $\rho \sim 10^3$ kg/m$^3$, $k = 10^{-15}$ m$^2$, $k_r = 1$, and $\mu \sim 10^{-3}$ Pa-s. Therefore $L \sim 10^{-4}$ m. This value of $L$ is small enough to ensure that the Dirichlet boundary condition is satisfied. If $C$ is increased to $10^{-2}$, $L \sim 10^{-7}$ m, and the simulation has difficulty converging. If $C = 10^{-11}$, $L\sim10^2$ m, and the boundary acts like a source of fluid from a distant reservoir (i.e. it no longer acts like a Dirichlet boundary condition). 
+The value of $C$ is simply $1/L$ if `use_mobility = true` and `use_relperm = true`.
 
 !listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i start=[BCs] end=[Postprocessors]
 
@@ -163,7 +166,7 @@ are detailed in the test suite documentation.
 
 ## Fluids that both enter and exit the boundary
 
-Commonly, if fluid or heat is exiting the porous material, multiplication by relative permeaility,
+Commonly, if fluid or heat is exiting the porous material, multiplication by relative permeability,
 mobility, mass fraction, enthalpy or thermal conductivity is necessary, while if fluid or heat is
 entering the porous material this multiplication is not necessary.  Two sinks can be constructed
 in a MOOSE input file: one involving *production* which is only active for $P>P_{\mathrm{e}}$ using a
