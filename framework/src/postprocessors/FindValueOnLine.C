@@ -90,7 +90,7 @@ FindValueOnLine::execute()
 
   bool found_it = false;
   Real value = 0;
-  for (auto i = decltype(_depth)(0); i < _depth; ++i)
+  for (unsigned int i = 0; i < _depth; ++i)
   {
     // find midpoint
     s = (s_left + s_right) / 2.0;
