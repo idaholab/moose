@@ -20,10 +20,16 @@ template <>
 InputParameters validParams<PorousFlowActionBase>();
 
 /**
- * Base class for PorousFlow actions.  This act() method simply
- * defines the name of the PorousFlowDictator.  However, this
- * class also contains a number of utility functions that may
- * be used by derived classes
+ * Base class for PorousFlow actions.  This act() method makes consistency checks and
+ * calls several methods that should be implemented in derived classes. This class also
+ * contains a number of utility functions that may be used by derived classes.
+ *
+ * Derived classes should typically only override the following methods:
+ * * addUserObjects()
+ * * addMaterialDependencies()
+ * * addMaterials()
+ * * addAuxObjects()
+ * * addKernels()
  */
 class PorousFlowActionBase : public Action, public PorousFlowDependencies
 {
@@ -78,10 +84,39 @@ protected:
   /// Coordinate system of the simulation (eg RZ, XYZ, etc)
   Moose::CoordinateSystemType _coord_system;
 
+  /// Flag to denote if the simulation is transient
+  bool _transient;
+
   /**
    * Add the PorousFlowDictator object
    */
   virtual void addDictator() = 0;
+
+  /**
+   * Add all other UserObjects
+   */
+  virtual void addUserObjects();
+
+  /**
+   * Add all AuxVariables and AuxKernels
+   */
+  virtual void addAuxObjects();
+
+  /**
+   * Add all Kernels
+   */
+  virtual void addKernels();
+
+  /**
+   * Add all material dependencies so that the correct
+   * version of each material can be added
+   */
+  virtual void addMaterialDependencies();
+
+  /**
+   * Add all Materials
+   */
+  virtual void addMaterials();
 
   /**
    * Add an AuxVariable and AuxKernel to calculate saturation

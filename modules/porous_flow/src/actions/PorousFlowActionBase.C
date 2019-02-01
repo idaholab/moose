@@ -102,6 +102,10 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
 void
 PorousFlowActionBase::act()
 {
+  // Check if the simulation is transient (note: can't do this in the ctor)
+  _transient = _problem->isTransient();
+
+  // Make sure that all mesh subdomains have the same coordinate system
   const auto & all_subdomains = _problem->mesh().meshSubdomains();
   if (all_subdomains.empty())
     mooseError("No subdomains found");
@@ -111,8 +115,48 @@ PorousFlowActionBase::act()
       mooseError(
           "The PorousFlow Actions require all subdomains to have the same coordinate system.");
 
+  // Note: this must be called before addMaterials!
+  addMaterialDependencies();
+
   if (_current_task == "add_user_object")
-    addDictator();
+    addUserObjects();
+
+  if (_current_task == "add_aux_variable" || _current_task == "add_aux_kernel")
+    addAuxObjects();
+
+  if (_current_task == "add_kernel")
+    addKernels();
+
+  if (_current_task == "add_material")
+    addMaterials();
+}
+
+void
+PorousFlowActionBase::addMaterialDependencies()
+{
+  // Check to see if there are any other PorousFlow objects like BCs that
+  // may require specific versions of materials
+}
+
+void
+PorousFlowActionBase::addUserObjects()
+{
+  addDictator();
+}
+
+void
+PorousFlowActionBase::addAuxObjects()
+{
+}
+
+void
+PorousFlowActionBase::addKernels()
+{
+}
+
+void
+PorousFlowActionBase::addMaterials()
+{
 }
 
 void

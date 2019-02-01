@@ -73,74 +73,87 @@ PorousFlowUnsaturated::PorousFlowUnsaturated(const InputParameters & params)
     _relperm_type(
         getParam<MooseEnum>("relative_permeability_type").getEnum<RelpermTypeChoiceEnum>()),
     _relative_permeability_exponent(getParam<Real>("relative_permeability_exponent")),
-    _s_res(getParam<Real>("residual_saturation"))
+    _s_res(getParam<Real>("residual_saturation")),
+    _capillary_pressure_name("PorousFlowUnsaturated_CapillaryPressureVG")
 {
+}
+
+void
+PorousFlowUnsaturated::addMaterialDependencies()
+{
+  PorousFlowSinglePhaseBase::addMaterialDependencies();
+
+  // Add necessary objects to list of PorousFlow objects added by this action
   _objects_to_add.push_back("PorousFlowAdvectiveFlux");
-  if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+
+  if (_transient)
     _objects_to_add.push_back("PorousFlowMassTimeDerivative");
-  if (_mechanical && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+
+  if (_mechanical && _transient)
     _objects_to_add.push_back("PorousFlowMassVolumetricExpansion");
+
   if (_thermal)
     _objects_to_add.push_back("PorousFlowHeatAdvection");
+
   if (_add_saturation_aux)
     _objects_to_add.push_back("SaturationAux");
+
   if (_stabilization == StabilizationEnum::KT)
     _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent");
+
   if (_stabilization == StabilizationEnum::KT && _thermal)
     _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat");
 }
 
 void
-PorousFlowUnsaturated::act()
+PorousFlowUnsaturated::addKernels()
 {
-  PorousFlowSinglePhaseBase::act();
+  PorousFlowSinglePhaseBase::addKernels();
 
   // add the kernels
-  if (_current_task == "add_kernel")
+  if (_stabilization == StabilizationEnum::Full)
   {
-    if (_stabilization == StabilizationEnum::Full)
-    {
-      const std::string kernel_type = "PorousFlowAdvectiveFlux";
-      InputParameters params = _factory.getValidParams(kernel_type);
-      params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-      params.set<RealVectorValue>("gravity") = _gravity;
+    const std::string kernel_type = "PorousFlowAdvectiveFlux";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<RealVectorValue>("gravity") = _gravity;
 
-      for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
-      {
-        const std::string kernel_name = "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(i);
-        params.set<unsigned int>("fluid_component") = i;
-        params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
-        _problem->addKernel(kernel_type, kernel_name, params);
-      }
-      const std::string kernel_name =
-          "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(_num_mass_fraction_vars);
-      params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
-      params.set<NonlinearVariableName>("variable") = _pp_var;
+    for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
+    {
+      const std::string kernel_name = "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(i);
+      params.set<unsigned int>("fluid_component") = i;
+      params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
       _problem->addKernel(kernel_type, kernel_name, params);
     }
-    else if (_stabilization == StabilizationEnum::KT)
-    {
-      const std::string kernel_type = "PorousFlowFluxLimitedTVDAdvection";
-      InputParameters params = _factory.getValidParams(kernel_type);
-      params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-
-      for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
-      {
-        const std::string kernel_name = "PorousFlowFluxLimited_DarcyFlow" + Moose::stringify(i);
-        params.set<UserObjectName>("advective_flux_calculator") =
-            "PorousFlowUnsaturated_AC_" + Moose::stringify(i);
-        params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
-        _problem->addKernel(kernel_type, kernel_name, params);
-      }
-      const std::string kernel_name =
-          "PorousFlowFluxLimited_DarcyFlow" + Moose::stringify(_num_mass_fraction_vars);
-      params.set<NonlinearVariableName>("variable") = _pp_var;
-      params.set<UserObjectName>("advective_flux_calculator") =
-          "PorousFlowUnsaturated_AC_" + Moose::stringify(_num_mass_fraction_vars);
-      _problem->addKernel(kernel_type, kernel_name, params);
-    }
+    const std::string kernel_name =
+        "PorousFlowUnsaturated_AdvectiveFlux" + Moose::stringify(_num_mass_fraction_vars);
+    params.set<unsigned int>("fluid_component") = _num_mass_fraction_vars;
+    params.set<NonlinearVariableName>("variable") = _pp_var;
+    _problem->addKernel(kernel_type, kernel_name, params);
   }
-  if (_current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+  else if (_stabilization == StabilizationEnum::KT)
+  {
+    const std::string kernel_type = "PorousFlowFluxLimitedTVDAdvection";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+
+    for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
+    {
+      const std::string kernel_name = "PorousFlowFluxLimited_DarcyFlow" + Moose::stringify(i);
+      params.set<UserObjectName>("advective_flux_calculator") =
+          "PorousFlowUnsaturated_AC_" + Moose::stringify(i);
+      params.set<NonlinearVariableName>("variable") = _mass_fraction_vars[i];
+      _problem->addKernel(kernel_type, kernel_name, params);
+    }
+    const std::string kernel_name =
+        "PorousFlowFluxLimited_DarcyFlow" + Moose::stringify(_num_mass_fraction_vars);
+    params.set<NonlinearVariableName>("variable") = _pp_var;
+    params.set<UserObjectName>("advective_flux_calculator") =
+        "PorousFlowUnsaturated_AC_" + Moose::stringify(_num_mass_fraction_vars);
+    _problem->addKernel(kernel_type, kernel_name, params);
+  }
+
+  if (_transient)
   {
     std::string kernel_name = "PorousFlowUnsaturated_MassTimeDerivative";
     std::string kernel_type = "PorousFlowMassTimeDerivative";
@@ -161,13 +174,13 @@ PorousFlowUnsaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if (_mechanical && _current_task == "add_kernel" &&
-      _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+  if (_mechanical && _transient)
   {
     std::string kernel_name = "PorousFlowUnsaturated_MassVolumetricExpansion";
     std::string kernel_type = "PorousFlowMassVolumetricExpansion";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
       kernel_name = "PorousFlowUnsaturated_MassVolumetricExpansion" + Moose::stringify(i);
@@ -182,7 +195,7 @@ PorousFlowUnsaturated::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if (_thermal && _current_task == "add_kernel")
+  if (_thermal)
   {
     if (_stabilization == StabilizationEnum::Full)
     {
@@ -205,58 +218,18 @@ PorousFlowUnsaturated::act()
       _problem->addKernel(kernel_type, kernel_name, params);
     }
   }
+}
+
+void
+PorousFlowUnsaturated::addUserObjects()
+{
+  PorousFlowSinglePhaseBase::addUserObjects();
 
   // Add the capillary pressure UserObject
-  std::string capillary_pressure_name = "PorousFlowUnsaturated_CapillaryPressureVG";
-  addCapillaryPressureVG(_van_genuchten_m, _van_genuchten_alpha, capillary_pressure_name);
-
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_qp") && _current_task == "add_material")
-  {
-    std::string material_type = "PorousFlow1PhaseP";
-    InputParameters params = _factory.getValidParams(material_type);
-
-    std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_qp";
-    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
-    params.set<UserObjectName>("capillary_pressure") = capillary_pressure_name;
-    params.set<bool>("at_nodes") = false;
-    _problem->addMaterial(material_type, material_name, params);
-  }
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_nodal") &&
-      _current_task == "add_material")
-  {
-    std::string material_type = "PorousFlow1PhaseP";
-    InputParameters params = _factory.getValidParams(material_type);
-
-    std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_nodal";
-    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
-    params.set<UserObjectName>("capillary_pressure") = capillary_pressure_name;
-    params.set<bool>("at_nodes") = true;
-    _problem->addMaterial(material_type, material_name, params);
-  }
-
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_qp"))
-  {
-    if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
-      addRelativePermeabilityFLAC(false, 0, _relative_permeability_exponent, _s_res, _s_res);
-    else
-      addRelativePermeabilityCorey(false, 0, _relative_permeability_exponent, _s_res, _s_res);
-  }
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_nodal"))
-  {
-    if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
-      addRelativePermeabilityFLAC(true, 0, _relative_permeability_exponent, _s_res, _s_res);
-    else
-      addRelativePermeabilityCorey(true, 0, _relative_permeability_exponent, _s_res, _s_res);
-  }
-
-  if (_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
-      _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal"))
-    addVolumetricStrainMaterial(_coupled_displacements, true);
+  addCapillaryPressureVG(_van_genuchten_m, _van_genuchten_alpha, _capillary_pressure_name);
 
   // add Advective Flux calculator UserObjects, if required
-  if (_current_task == "add_user_object" && _stabilization == StabilizationEnum::KT)
+  if (_stabilization == StabilizationEnum::KT)
   {
     for (unsigned i = 0; i < _num_mass_fraction_vars; ++i)
     {
@@ -277,8 +250,62 @@ PorousFlowUnsaturated::act()
       addAdvectiveFluxCalculatorUnsaturatedHeat(0, true, userobject_name);
     }
   }
+}
 
-  // add relevant AuxVariables and AuxKernels
+void
+PorousFlowUnsaturated::addMaterials()
+{
+  PorousFlowSinglePhaseBase::addMaterials();
+
+  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_qp"))
+  {
+    const std::string material_type = "PorousFlow1PhaseP";
+    InputParameters params = _factory.getValidParams(material_type);
+    const std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_qp";
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
+    params.set<UserObjectName>("capillary_pressure") = _capillary_pressure_name;
+    params.set<bool>("at_nodes") = false;
+    _problem->addMaterial(material_type, material_name, params);
+  }
+  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_nodal"))
+  {
+    const std::string material_type = "PorousFlow1PhaseP";
+    InputParameters params = _factory.getValidParams(material_type);
+    const std::string material_name = "PorousFlowUnsaturated_1PhaseP_VG_nodal";
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<std::vector<VariableName>>("porepressure") = {_pp_var};
+    params.set<UserObjectName>("capillary_pressure") = _capillary_pressure_name;
+    params.set<bool>("at_nodes") = true;
+    _problem->addMaterial(material_type, material_name, params);
+  }
+
+  if (_deps.dependsOn(_objects_to_add, "relative_permeability_qp"))
+  {
+    if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
+      addRelativePermeabilityFLAC(false, 0, _relative_permeability_exponent, _s_res, _s_res);
+    else
+      addRelativePermeabilityCorey(false, 0, _relative_permeability_exponent, _s_res, _s_res);
+  }
+
+  if (_deps.dependsOn(_objects_to_add, "relative_permeability_nodal"))
+  {
+    if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
+      addRelativePermeabilityFLAC(true, 0, _relative_permeability_exponent, _s_res, _s_res);
+    else
+      addRelativePermeabilityCorey(true, 0, _relative_permeability_exponent, _s_res, _s_res);
+  }
+
+  if (_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
+      _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal"))
+    addVolumetricStrainMaterial(_coupled_displacements, true);
+}
+
+void
+PorousFlowUnsaturated::addAuxObjects()
+{
+  PorousFlowSinglePhaseBase::addAuxObjects();
+
   if (_add_saturation_aux)
     addSaturationAux(0);
 }
