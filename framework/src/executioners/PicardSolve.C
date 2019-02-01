@@ -16,7 +16,7 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
-PicardSolve::PicardSolve(const Executioner * ex)
+PicardSolve::PicardSolve(Executioner * ex)
   : MooseObject(ex->parameters()),
     PerfGraphInterface(this),
     _executioner(*ex),
@@ -247,6 +247,8 @@ PicardSolve::solveStep(Real begin_norm_old,
 {
   bool auto_advance = !(_has_picard_its && _problem.isTransient());
 
+  _executioner.preSolve();
+
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
   {
@@ -283,10 +285,16 @@ PicardSolve::solveStep(Real begin_norm_old,
     relax_previous = solution;
   }
 
+  if (_has_picard_its)
+    _console << COLOR_MAGENTA << "Master solve:\n";
   _problem.solve();
   if (!_problem.converged())
   {
     _picard_status = MoosePicardConvergenceReason::DIVERGED_NONLINEAR;
+
+    _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
+    // Perform the output of the current, failed time step (this only occurs if desired)
+    _problem.outputStep(EXEC_FAILED);
     return false;
   }
   else
@@ -331,6 +339,8 @@ PicardSolve::solveStep(Real begin_norm_old,
       return false;
     }
   }
+
+  _executioner.postSolve();
 
   if (_has_picard_its)
     if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _picard_force_norms)

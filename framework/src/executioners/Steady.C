@@ -75,7 +75,6 @@ Steady::execute()
   for (unsigned int r_step = 0; r_step <= steps; r_step++)
   {
 #endif // LIBMESH_ENABLE_AMR
-    preSolve();
     _problem.timestepSetup();
 
     _last_solve_converged = _picard_solve.solve();
@@ -85,8 +84,6 @@ Steady::execute()
       _console << "Aborting as solve did not converge\n";
       break;
     }
-
-    postSolve();
 
     _problem.computeIndicators();
     _problem.computeMarkers();

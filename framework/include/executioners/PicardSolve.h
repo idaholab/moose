@@ -23,7 +23,7 @@ class NonlinearSystemBase;
 class PicardSolve : public MooseObject, public PerfGraphInterface
 {
 public:
-  PicardSolve(const Executioner * ex);
+  PicardSolve(Executioner * ex);
 
   /**
    * Picard solve the FEProblem.
@@ -100,7 +100,7 @@ protected:
                  const std::set<dof_id_type> & relaxed_dofs);
 
   /// Executioner used to construct this
-  const Executioner & _executioner;
+  Executioner & _executioner;
   /// Reference to FEProblem
   FEProblemBase & _problem;
   /// Reference to nonlinear system base for faster access
