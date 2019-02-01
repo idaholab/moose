@@ -38,15 +38,15 @@ public:
   /**
    * Returns d(flux_out)/d(porous_flow_variables
    * @param[in] node_id global node id
-   * @param[out] derivs derivs[j][pvar] = d(flux_out[node_id])/d(porous_flow_variable pvar at global
-   * node j).  derivs is first cleared and then populated
+   * @return deriv[j][pvar] = d(flux_out[node_id])/d(porous_flow_variable pvar at global node j)
    */
-  void getdFluxOut_dvars(std::map<dof_id_type, std::vector<Real>> & derivs, unsigned node_id) const;
+  const std::map<dof_id_type, std::vector<Real>> & getdFluxOut_dvars(unsigned node_id) const;
 
 protected:
   virtual void timestepSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
+  virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
 
   virtual Real computeVelocity(unsigned i, unsigned j, unsigned qp) const override;
@@ -87,6 +87,9 @@ protected:
 
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
+
+  /// Number of PorousFlow variables
+  const unsigned _num_vars;
 
   /// Gravity
   const RealVectorValue _gravity;
@@ -135,6 +138,9 @@ protected:
 
   /// _dkij_dvar[i][j][k][a] = d(K[global node i][global node j])/d(porous_flow_variable[global_node k][porous_flow_variable a])
   std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, std::vector<Real>>>> _dkij_dvar;
+
+  /// _dflux_out_dvars[i][j][pvar] = d(flux_out[global node i])/d(porous_flow_variable pvar at global node j)
+  std::map<dof_id_type, std::map<dof_id_type, std::vector<Real>>> _dflux_out_dvars;
 };
 
 #endif // POROUSFLOWADVECTIEFLUXCALCULATORBASE_H

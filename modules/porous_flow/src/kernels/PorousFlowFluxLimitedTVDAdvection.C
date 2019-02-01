@@ -88,8 +88,7 @@ PorousFlowFluxLimitedTVDAdvection::computeJacobian()
     const unsigned valence = _fluo.getValence(node_id_i, node_id_i);
 
     // retrieve the derivative information from _fluo
-    std::map<dof_id_type, std::vector<Real>> derivs;
-    _fluo.getdFluxOut_dvars(derivs, node_id_i);
+    const std::map<dof_id_type, std::vector<Real>> derivs = _fluo.getdFluxOut_dvars(node_id_i);
 
     // now build up the dof numbers of all the "j" nodes and the derivative matrix
     // d(residual_i)/d(var_j)
