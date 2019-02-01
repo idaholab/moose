@@ -40,11 +40,11 @@ public:
 
 protected:
   /**
-   * List of Kernels, AuxKernels, Materials, etc, to be added.
+   * List of Kernels, AuxKernels, Materials, etc, that are added in this input file.
    * This list will be used to determine what Materials need
    * to be added. Actions may add or remove things from this list
    */
-  std::vector<std::string> _objects_to_add;
+  std::vector<std::string> _included_objects;
 
   /// The name of the PorousFlowDictator object to be added
   const std::string _dictator_name;

@@ -63,13 +63,13 @@ PorousFlowBasicTHM::addMaterialDependencies()
   PorousFlowSinglePhaseBase::addMaterialDependencies();
 
   // Add necessary objects to list of PorousFlow objects added by this action
-  _objects_to_add.push_back("PorousFlowFullySaturatedDarcyBase");
+  _included_objects.push_back("PorousFlowFullySaturatedDarcyBase");
 
   if (_transient)
-    _objects_to_add.push_back("PorousFlowFullySaturatedMassTimeDerivative");
+    _included_objects.push_back("PorousFlowFullySaturatedMassTimeDerivative");
 
   if (_thermal)
-    _objects_to_add.push_back("PorousFlowFullySaturatedHeatAdvection");
+    _included_objects.push_back("PorousFlowFullySaturatedHeatAdvection");
 }
 
 void
@@ -116,7 +116,7 @@ PorousFlowBasicTHM::addMaterials()
 {
   PorousFlowSinglePhaseBase::addMaterials();
 
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_qp"))
+  if (_deps.dependsOn(_included_objects, "pressure_saturation_qp"))
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
@@ -127,7 +127,7 @@ PorousFlowBasicTHM::addMaterials()
     _problem->addMaterial(material_type, material_name, params);
   }
 
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_nodal"))
+  if (_deps.dependsOn(_included_objects, "pressure_saturation_nodal"))
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
@@ -138,14 +138,14 @@ PorousFlowBasicTHM::addMaterials()
     _problem->addMaterial(material_type, material_name, params);
   }
 
-  if ((_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
-       _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal")) &&
+  if ((_deps.dependsOn(_included_objects, "volumetric_strain_qp") ||
+       _deps.dependsOn(_included_objects, "volumetric_strain_nodal")) &&
       _mechanical)
     addVolumetricStrainMaterial(_coupled_displacements, false);
 
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_qp"))
+  if (_deps.dependsOn(_included_objects, "relative_permeability_qp"))
     addRelativePermeabilityCorey(false, 0, 0.0, 0.0, 0.0);
 
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_nodal"))
+  if (_deps.dependsOn(_included_objects, "relative_permeability_nodal"))
     addRelativePermeabilityCorey(true, 0, 0.0, 0.0, 0.0);
 }

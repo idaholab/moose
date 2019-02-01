@@ -102,26 +102,26 @@ PorousFlowSinglePhaseBase::addMaterialDependencies()
   // Add necessary objects to list of PorousFlow objects added by this action
   if (_mechanical)
   {
-    _objects_to_add.push_back("StressDivergenceTensors");
-    _objects_to_add.push_back("Gravity");
-    _objects_to_add.push_back("PorousFlowEffectiveStressCoupling");
+    _included_objects.push_back("StressDivergenceTensors");
+    _included_objects.push_back("Gravity");
+    _included_objects.push_back("PorousFlowEffectiveStressCoupling");
   }
 
   if (_thermal)
   {
-    _objects_to_add.push_back("PorousFlowHeatConduction");
+    _included_objects.push_back("PorousFlowHeatConduction");
     if (_transient)
-      _objects_to_add.push_back("PorousFlowEnergyTimeDerivative");
+      _included_objects.push_back("PorousFlowEnergyTimeDerivative");
   }
 
   if (_thermal && _mechanical && _transient)
-    _objects_to_add.push_back("PorousFlowHeatVolumetricExpansion");
+    _included_objects.push_back("PorousFlowHeatVolumetricExpansion");
 
   if (_add_darcy_aux)
-    _objects_to_add.push_back("PorousFlowDarcyVelocityComponent");
+    _included_objects.push_back("PorousFlowDarcyVelocityComponent");
 
   if (_add_stress_aux && _mechanical)
-    _objects_to_add.push_back("StressAux");
+    _included_objects.push_back("StressAux");
 }
 
 void
@@ -222,22 +222,22 @@ PorousFlowSinglePhaseBase::addMaterials()
   PorousFlowActionBase::addMaterials();
 
   // add Materials
-  if (_deps.dependsOn(_objects_to_add, "temperature_qp"))
+  if (_deps.dependsOn(_included_objects, "temperature_qp"))
     addTemperatureMaterial(false);
 
-  if (_deps.dependsOn(_objects_to_add, "temperature_nodal"))
+  if (_deps.dependsOn(_included_objects, "temperature_nodal"))
     addTemperatureMaterial(true);
 
-  if (_deps.dependsOn(_objects_to_add, "mass_fraction_qp"))
+  if (_deps.dependsOn(_included_objects, "mass_fraction_qp"))
     addMassFractionMaterial(false);
 
-  if (_deps.dependsOn(_objects_to_add, "mass_fraction_nodal"))
+  if (_deps.dependsOn(_included_objects, "mass_fraction_nodal"))
     addMassFractionMaterial(true);
 
-  const bool compute_rho_mu_qp = _deps.dependsOn(_objects_to_add, "density_qp") ||
-                                 _deps.dependsOn(_objects_to_add, "viscosity_qp");
-  const bool compute_e_qp = _deps.dependsOn(_objects_to_add, "internal_energy_qp");
-  const bool compute_h_qp = _deps.dependsOn(_objects_to_add, "enthalpy_qp");
+  const bool compute_rho_mu_qp = _deps.dependsOn(_included_objects, "density_qp") ||
+                                 _deps.dependsOn(_included_objects, "viscosity_qp");
+  const bool compute_e_qp = _deps.dependsOn(_included_objects, "internal_energy_qp");
+  const bool compute_h_qp = _deps.dependsOn(_included_objects, "enthalpy_qp");
 
   if (compute_rho_mu_qp || compute_e_qp || compute_h_qp)
   {
@@ -250,10 +250,10 @@ PorousFlowSinglePhaseBase::addMaterials()
       addSingleComponentFluidMaterial(false, 0, compute_rho_mu_qp, compute_e_qp, compute_h_qp, _fp);
   }
 
-  const bool compute_rho_mu_nodal = _deps.dependsOn(_objects_to_add, "density_nodal") ||
-                                    _deps.dependsOn(_objects_to_add, "viscosity_nodal");
-  const bool compute_e_nodal = _deps.dependsOn(_objects_to_add, "internal_energy_nodal");
-  const bool compute_h_nodal = _deps.dependsOn(_objects_to_add, "enthalpy_nodal");
+  const bool compute_rho_mu_nodal = _deps.dependsOn(_included_objects, "density_nodal") ||
+                                    _deps.dependsOn(_included_objects, "viscosity_nodal");
+  const bool compute_e_nodal = _deps.dependsOn(_included_objects, "internal_energy_nodal");
+  const bool compute_h_nodal = _deps.dependsOn(_included_objects, "enthalpy_nodal");
 
   if (compute_rho_mu_nodal || compute_e_nodal || compute_h_nodal)
   {
@@ -267,10 +267,10 @@ PorousFlowSinglePhaseBase::addMaterials()
           true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal, _fp);
   }
 
-  if (_deps.dependsOn(_objects_to_add, "effective_pressure_qp"))
+  if (_deps.dependsOn(_included_objects, "effective_pressure_qp"))
     addEffectiveFluidPressureMaterial(false);
 
-  if (_deps.dependsOn(_objects_to_add, "effective_pressure_nodal"))
+  if (_deps.dependsOn(_included_objects, "effective_pressure_nodal"))
     addEffectiveFluidPressureMaterial(true);
 }
 

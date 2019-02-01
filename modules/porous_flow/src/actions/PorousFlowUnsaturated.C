@@ -84,25 +84,25 @@ PorousFlowUnsaturated::addMaterialDependencies()
   PorousFlowSinglePhaseBase::addMaterialDependencies();
 
   // Add necessary objects to list of PorousFlow objects added by this action
-  _objects_to_add.push_back("PorousFlowAdvectiveFlux");
+  _included_objects.push_back("PorousFlowAdvectiveFlux");
 
   if (_transient)
-    _objects_to_add.push_back("PorousFlowMassTimeDerivative");
+    _included_objects.push_back("PorousFlowMassTimeDerivative");
 
   if (_mechanical && _transient)
-    _objects_to_add.push_back("PorousFlowMassVolumetricExpansion");
+    _included_objects.push_back("PorousFlowMassVolumetricExpansion");
 
   if (_thermal)
-    _objects_to_add.push_back("PorousFlowHeatAdvection");
+    _included_objects.push_back("PorousFlowHeatAdvection");
 
   if (_add_saturation_aux)
-    _objects_to_add.push_back("SaturationAux");
+    _included_objects.push_back("SaturationAux");
 
   if (_stabilization == StabilizationEnum::KT)
-    _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent");
+    _included_objects.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent");
 
   if (_stabilization == StabilizationEnum::KT && _thermal)
-    _objects_to_add.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat");
+    _included_objects.push_back("PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat");
 }
 
 void
@@ -257,7 +257,7 @@ PorousFlowUnsaturated::addMaterials()
 {
   PorousFlowSinglePhaseBase::addMaterials();
 
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_qp"))
+  if (_deps.dependsOn(_included_objects, "pressure_saturation_qp"))
   {
     const std::string material_type = "PorousFlow1PhaseP";
     InputParameters params = _factory.getValidParams(material_type);
@@ -268,7 +268,7 @@ PorousFlowUnsaturated::addMaterials()
     params.set<bool>("at_nodes") = false;
     _problem->addMaterial(material_type, material_name, params);
   }
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_nodal"))
+  if (_deps.dependsOn(_included_objects, "pressure_saturation_nodal"))
   {
     const std::string material_type = "PorousFlow1PhaseP";
     InputParameters params = _factory.getValidParams(material_type);
@@ -280,7 +280,7 @@ PorousFlowUnsaturated::addMaterials()
     _problem->addMaterial(material_type, material_name, params);
   }
 
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_qp"))
+  if (_deps.dependsOn(_included_objects, "relative_permeability_qp"))
   {
     if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
       addRelativePermeabilityFLAC(false, 0, _relative_permeability_exponent, _s_res, _s_res);
@@ -288,7 +288,7 @@ PorousFlowUnsaturated::addMaterials()
       addRelativePermeabilityCorey(false, 0, _relative_permeability_exponent, _s_res, _s_res);
   }
 
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_nodal"))
+  if (_deps.dependsOn(_included_objects, "relative_permeability_nodal"))
   {
     if (_relperm_type == RelpermTypeChoiceEnum::FLAC)
       addRelativePermeabilityFLAC(true, 0, _relative_permeability_exponent, _s_res, _s_res);
@@ -296,8 +296,8 @@ PorousFlowUnsaturated::addMaterials()
       addRelativePermeabilityCorey(true, 0, _relative_permeability_exponent, _s_res, _s_res);
   }
 
-  if (_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
-      _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal"))
+  if (_deps.dependsOn(_included_objects, "volumetric_strain_qp") ||
+      _deps.dependsOn(_included_objects, "volumetric_strain_nodal"))
     addVolumetricStrainMaterial(_coupled_displacements, true);
 }
 
