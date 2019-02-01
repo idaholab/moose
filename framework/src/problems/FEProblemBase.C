@@ -168,11 +168,11 @@ validParams<FEProblemBase>()
                         true,
                         "Set to false to disable material->subdomain coverage check");
   params.addParam<bool>("parallel_barrier_messaging",
-                        true,
+                        false,
                         "Displays messaging from parallel "
                         "barrier notifications when executing "
                         "or transferring to/from Multiapps "
-                        "(default: true)");
+                        "(default: false)");
 
   params.addParam<FileNameNoExtension>("restart_file_base",
                                        "File base name used for restart (e.g. "
@@ -3510,7 +3510,6 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     for (const auto & transfer : transfers)
       transfer->execute();
 
-    _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
     _console << COLOR_CYAN << "Transfers on " << Moose::stringify(type) << " Are Finished\n"
@@ -3562,7 +3561,6 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
         break;
     }
 
-    _console << "Waiting For Other Processors To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
     _communicator.min(success);
@@ -3621,7 +3619,6 @@ FEProblemBase::finishMultiAppStep(ExecFlagType type)
     for (const auto & multi_app : multi_apps)
       multi_app->finishStep();
 
-    _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
     _console << COLOR_CYAN << "Finished Advancing MultiApps\n" << COLOR_DEFAULT << std::endl;
@@ -3642,7 +3639,6 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
     for (const auto & multi_app : multi_apps)
       multi_app->backup();
 
-    _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
     _console << COLOR_CYAN << "Finished Backing Up MultiApps\n" << COLOR_DEFAULT << std::endl;
@@ -3666,7 +3662,6 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
       if (force || multi_app->needsRestoration())
         multi_app->restore();
 
-    _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
     _console << COLOR_CYAN << "Finished Restoring MultiApps\n" << COLOR_DEFAULT << std::endl;

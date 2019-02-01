@@ -286,7 +286,7 @@ PicardSolve::solveStep(Real begin_norm_old,
   }
 
   if (_has_picard_its)
-    _console << COLOR_MAGENTA << "Master solve:\n";
+    _console << COLOR_MAGENTA << "\nMaster solve:\n" << COLOR_DEFAULT;
   _problem.solve();
   if (!_problem.converged())
   {
