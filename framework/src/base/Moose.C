@@ -97,9 +97,10 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("determine_system_type",        Executioner,            true);
 
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
+  registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
-  registerMooseObjectTask("add_mesh_generator",           MeshGenerator,           false);
+  registerMooseObjectTask("add_mesh_generator",           MeshGenerator,          false);
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
@@ -171,7 +172,7 @@ addActionTypes(Syntax & syntax)
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
   registerTask("add_geometric_rm", true);
-  registerTask("setup_mesh_complete", false); // calls prepare
+  registerTask("setup_mesh_complete", true); // calls prepare
 
   registerTask("init_displaced_problem", false);
 
@@ -232,10 +233,11 @@ addActionTypes(Syntax & syntax)
                            "(common_output)"
                            "(set_global_params)"
                            "(setup_recover_file_base)"
+                           "(setup_mesh)"
                            "(add_mesh_generator)"
                            "(execute_mesh_generators)"
+                           "(set_mesh_base)"
                            "(check_copy_nodal_vars)"
-                           "(setup_mesh)"
                            "(add_partitioner)"
                            "(add_geometric_rm)"
                            "(init_mesh)"

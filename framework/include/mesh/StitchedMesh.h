@@ -33,8 +33,6 @@ public:
   StitchedMesh(const InputParameters & parameters);
   StitchedMesh(const StitchedMesh & other_mesh);
 
-  virtual ~StitchedMesh();
-
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;

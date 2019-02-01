@@ -1,52 +1,40 @@
 [MeshGenerators]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
-    dim = 2
-    nx = 10
-    ny = 10
-    #parallel_type = replicated
+    dim = 3
+    nx = 3
+    ny = 3
+    nz = 4
+    bias_x = 2
+    bias_z = 0.5
   []
-
-  [./createNewSidesetOne]
-    type = SideSetsFromBoundingBoxGenerator
-    input = gmg
-    boundary_id_old = 'right'
-    boundary_id_new = 11
-    bottom_left = '-0.1 -0.1 0'
-    top_right = '0.9 0.9 0'
-    block_id = 0
-  []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./leftBC]
+  [leftBC]
     type = DirichletBC
     variable = u
-    boundary = 'left'
+    boundary = 10
     value = 1
-  [../]
-  [./rightBC]
+  []
+  [rightBC]
     type = DirichletBC
     variable = u
     boundary = 11
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

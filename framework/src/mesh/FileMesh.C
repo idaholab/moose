@@ -32,14 +32,15 @@ validParams<FileMesh>()
 FileMesh::FileMesh(const InputParameters & parameters)
   : MooseMesh(parameters),
     _file_name(getParam<MeshFileName>("file")),
+    _dim(getParam<MooseEnum>("dim")),
     _read_mesh_timer(registerTimedSection("readMesh", 2))
 {
-  getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh)
   : MooseMesh(other_mesh),
     _file_name(other_mesh._file_name),
+    _dim(other_mesh._dim),
     _read_mesh_timer(other_mesh._read_mesh_timer)
 {
 }
@@ -57,7 +58,7 @@ FileMesh::buildMesh()
 {
   TIME_SECTION(_read_mesh_timer);
 
-  std::string _file_name = getParam<MeshFileName>("file");
+  getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 
   if (_is_nemesis)
   {

@@ -78,10 +78,15 @@ public:
   MooseMesh(const InputParameters & parameters);
   MooseMesh(const MooseMesh & other_mesh);
 
-  /**
-   * Destructor
-   */
   virtual ~MooseMesh();
+
+  // The type of libMesh::MeshBase that will be used
+  enum class ParallelType
+  {
+    DEFAULT,
+    REPLICATED,
+    DISTRIBUTED
+  };
 
   /**
    * Clone method.  Allocates memory you are responsible to clean up.
@@ -94,6 +99,18 @@ public:
    * less likely that the caller will leak the memory in question.
    */
   virtual std::unique_ptr<MooseMesh> safeClone() const = 0;
+
+  /**
+   * Method to construct a libMesh::MeshBase object that is normally set and used by the MooseMesh
+   * object during the "init()" phase.
+   */
+  std::unique_ptr<MeshBase> buildMeshBaseObject(ParallelType override_type = ParallelType::DEFAULT);
+
+  /**
+   * Method to set the mesh_base object. If this method is NOT called prior to calling init(), a
+   * MeshBase object will be automatically constructed and set.
+   */
+  void setMeshBase(std::unique_ptr<MeshBase> mesh_base);
 
   /**
    * Initialize the Mesh object.  Most of the time this will turn around
@@ -838,7 +855,7 @@ protected:
 
   /// Can be set to DISTRIBUTED, REPLICATED, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
-  MooseEnum _mesh_parallel_type;
+  ParallelType _parallel_type;
 
   /// False by default.  Final value is determined by several factors
   /// including the 'distribution' setting in the input file, and whether
