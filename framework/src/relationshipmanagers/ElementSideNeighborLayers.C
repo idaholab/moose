@@ -70,7 +70,7 @@ void
 ElementSideNeighborLayers::internalInit()
 {
   auto functor = libmesh_make_unique<DefaultCoupling>();
-  functor->set_name(MooseObject::name() + ": " + getInfo());
+  // functor->set_name(MooseObject::name() + ": " + getInfo());
   functor->set_n_levels(_layers);
 
   // Need to see if there are periodic BCs - if so we need to dig them out
