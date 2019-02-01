@@ -223,6 +223,10 @@ MaterialData::resizeProps(unsigned int size, bool declared_ad)
 
   if (_props[size] == nullptr)
     _props[size] = new ADMaterialPropertyObject<T>(declared_ad);
+  // This branch is necessary in case the frist call to resizeProps for this property id was
+  // initiated through a getMaterialProperty call, which will have declared_ad = false
+  else if (declared_ad)
+    _props[size]->markAD(true);
   if (_props_old[size] == nullptr)
     _props_old[size] = new ADMaterialPropertyObject<T>;
   if (_props_older[size] == nullptr)
