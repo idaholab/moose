@@ -39,7 +39,8 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
     _Mnacl(_brine_fp.molarMassNaCl()),
     _Rbar(_R * 10.0),
     _Tlower(372.15),
-    _Tupper(382.15)
+    _Tupper(382.15),
+    _Zmin(1.0e-4)
 {
   // Check that the correct FluidProperties UserObjects have been provided
   if (_co2_fp.fluidName() != "co2")
@@ -166,27 +167,37 @@ PorousFlowBrineCO2::massFractions(Real pressure,
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  // Equilibrium mass fraction of CO2 in liquid and H2O in gas phases
   Real Xco2, dXco2_dp, dXco2_dT, dXco2_dX, Yh2o, dYh2o_dp, dYh2o_dT, dYh2o_dX;
-  equilibriumMassFractions(pressure,
-                           temperature,
-                           Xnacl,
-                           Xco2,
-                           dXco2_dp,
-                           dXco2_dT,
-                           dXco2_dX,
-                           Yh2o,
-                           dYh2o_dp,
-                           dYh2o_dT,
-                           dYh2o_dX);
+  Real Yco2, dYco2_dp, dYco2_dT, dYco2_dX;
 
-  Real Yco2 = 1.0 - Yh2o;
-  Real dYco2_dp = -dYh2o_dp;
-  Real dYco2_dT = -dYh2o_dT;
-  Real dYco2_dX = -dYh2o_dX;
+  // If the amount of CO2 is less than the smallest solubility, then all CO2 will
+  // be dissolved, and the equilibrium mass fractions do not need to be computed
+  if (Z < _Zmin)
+    phase_state = FluidStatePhaseEnum::LIQUID;
 
-  // Determine which phases are present based on the value of z
-  phaseState(Z, Xco2, Yco2, phase_state);
+  else
+  {
+    // Equilibrium mass fraction of CO2 in liquid and H2O in gas phases
+    equilibriumMassFractions(pressure,
+                             temperature,
+                             Xnacl,
+                             Xco2,
+                             dXco2_dp,
+                             dXco2_dT,
+                             dXco2_dX,
+                             Yh2o,
+                             dYh2o_dp,
+                             dYh2o_dT,
+                             dYh2o_dX);
+
+    Yco2 = 1.0 - Yh2o;
+    dYco2_dp = -dYh2o_dp;
+    dYco2_dT = -dYh2o_dT;
+    dYco2_dX = -dYh2o_dX;
+
+    // Determine which phases are present based on the value of z
+    phaseState(Z, Xco2, Yco2, phase_state);
+  }
 
   // The equilibrium mass fractions calculated above are only correct in the two phase
   // state. If only liquid or gas phases are present, the mass fractions are given by
