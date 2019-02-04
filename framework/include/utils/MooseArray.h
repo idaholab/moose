@@ -167,7 +167,7 @@ public:
    *
    * @return A _copy_ of the MooseArray contents.
    */
-  std::vector<T> stdVector();
+  std::vector<T> stdVector() const;
 
 private:
   /// Actual data pointer.
@@ -322,7 +322,7 @@ MooseArray<T>::operator=(const MooseArray<T> & rhs)
 
 template <class T>
 std::vector<T>
-MooseArray<T>::stdVector()
+MooseArray<T>::stdVector() const
 {
   return std::vector<T>(_data, _data + _size);
 }
