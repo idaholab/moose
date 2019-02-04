@@ -168,6 +168,7 @@ ADKernel<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     if (_local_ke.m() != _test.size() || _local_ke.n() != jvar.phiSize())
       return;
 
+    precalculateResidual();
     for (_i = 0; _i < _test.size(); _i++)
     {
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
