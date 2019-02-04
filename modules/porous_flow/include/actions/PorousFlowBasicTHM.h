@@ -28,9 +28,11 @@ class PorousFlowBasicTHM : public PorousFlowSinglePhaseBase
 public:
   PorousFlowBasicTHM(const InputParameters & params);
 
-  virtual void act() override;
-
 protected:
+  virtual void addKernels() override;
+  virtual void addMaterialDependencies() override;
+  virtual void addMaterials() override;
+
   // Whether to multiply the fluid kernels by the fluid density
   const bool _multiply_by_density;
 };

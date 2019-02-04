@@ -13,6 +13,9 @@
 #include "MooseMesh.h"
 #include "libmesh/string_to_enum.h"
 #include "Conversion.h"
+#include "AddKernelAction.h"
+#include "AddPostprocessorAction.h"
+#include "AddBCAction.h"
 
 template <>
 InputParameters
@@ -80,7 +83,7 @@ validParams<PorousFlowActionBase>()
 PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
   : Action(params),
     PorousFlowDependencies(),
-    _objects_to_add(),
+    _included_objects(),
     _dictator_name(getParam<std::string>("dictator_name")),
     _num_aqueous_equilibrium(getParam<unsigned int>("number_aqueous_equilibrium")),
     _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
@@ -102,6 +105,10 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
 void
 PorousFlowActionBase::act()
 {
+  // Check if the simulation is transient (note: can't do this in the ctor)
+  _transient = _problem->isTransient();
+
+  // Make sure that all mesh subdomains have the same coordinate system
   const auto & all_subdomains = _problem->mesh().meshSubdomains();
   if (all_subdomains.empty())
     mooseError("No subdomains found");
@@ -111,8 +118,68 @@ PorousFlowActionBase::act()
       mooseError(
           "The PorousFlow Actions require all subdomains to have the same coordinate system.");
 
+  // Note: this must be called before addMaterials!
+  addMaterialDependencies();
+
+  // Make the vector of added objects unique
+  std::sort(_included_objects.begin(), _included_objects.end());
+  _included_objects.erase(std::unique(_included_objects.begin(), _included_objects.end()),
+                          _included_objects.end());
+
   if (_current_task == "add_user_object")
-    addDictator();
+    addUserObjects();
+
+  if (_current_task == "add_aux_variable" || _current_task == "add_aux_kernel")
+    addAuxObjects();
+
+  if (_current_task == "add_kernel")
+    addKernels();
+
+  if (_current_task == "add_material")
+    addMaterials();
+}
+
+void
+PorousFlowActionBase::addMaterialDependencies()
+{
+  // Check to see if there are any other PorousFlow objects like BCs that
+  // may require specific versions of materials added using this action
+
+  // Unique list of auxkernels added in input file
+  auto auxkernels = _awh.getActions<AddKernelAction>();
+  for (auto & auxkernel : auxkernels)
+    _included_objects.push_back(auxkernel->getMooseObjectType());
+
+  // Unique list of postprocessors added in input file
+  auto postprocessors = _awh.getActions<AddPostprocessorAction>();
+  for (auto & postprocessor : postprocessors)
+    _included_objects.push_back(postprocessor->getMooseObjectType());
+
+  // Unique list of BCs added in input file
+  auto bcs = _awh.getActions<AddBCAction>();
+  for (auto & bc : bcs)
+    _included_objects.push_back(bc->getMooseObjectType());
+}
+
+void
+PorousFlowActionBase::addUserObjects()
+{
+  addDictator();
+}
+
+void
+PorousFlowActionBase::addAuxObjects()
+{
+}
+
+void
+PorousFlowActionBase::addKernels()
+{
+}
+
+void
+PorousFlowActionBase::addMaterials()
+{
 }
 
 void

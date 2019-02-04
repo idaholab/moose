@@ -25,10 +25,12 @@ class PorousFlowSinglePhaseBase : public PorousFlowActionBase
 public:
   PorousFlowSinglePhaseBase(const InputParameters & params);
 
-  virtual void act() override;
-
 protected:
   virtual void addDictator() override;
+  virtual void addKernels() override;
+  virtual void addAuxObjects() override;
+  virtual void addMaterialDependencies() override;
+  virtual void addMaterials() override;
 
   /// Porepressure NonlinearVariable name
   const NonlinearVariableName _pp_var;
@@ -41,8 +43,9 @@ protected:
     ThermoHydroMechanical
   } _coupling_type;
 
-  /// Whether steady or transient simulation
-  const enum class SimulationTypeChoiceEnum { STEADY, TRANSIENT } _simulation_type;
+  /// Flags to indicate whether thermal or mechanical effects are included
+  const bool _thermal;
+  const bool _mechanical;
 
   /// Name of the fluid-properties UserObject
   const UserObjectName & _fp;

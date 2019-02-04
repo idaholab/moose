@@ -12,6 +12,7 @@
 #include "AddMaterialAction.h"
 #include "AddPostprocessorAction.h"
 #include "AddUserObjectAction.h"
+#include "AddBCAction.h"
 #include "PorousFlowActionBase.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
@@ -132,6 +133,11 @@ PorousFlowAddMaterialAction::createDependencyList()
   auto userobjects = _awh.getActions<AddUserObjectAction>();
   for (auto & userobject : userobjects)
     _dependency_list.insert(userobject->getMooseObjectType());
+
+  // Unique list of BCs added in input file
+  auto bcs = _awh.getActions<AddBCAction>();
+  for (auto & bc : bcs)
+    _dependency_list.insert(bc->getMooseObjectType());
 }
 
 bool

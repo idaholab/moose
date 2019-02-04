@@ -55,32 +55,38 @@ PorousFlowBasicTHM::PorousFlowBasicTHM(const InputParameters & params)
   if (_num_mass_fraction_vars != 0)
     mooseError("PorousFlowBasicTHM can only be used for a single-component fluid, so that no "
                "mass-fraction variables should be provided");
-  _objects_to_add.push_back("PorousFlowFullySaturatedDarcyBase");
-  if (_simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
-    _objects_to_add.push_back("PorousFlowFullySaturatedMassTimeDerivative");
-  if (_coupling_type == CouplingTypeEnum::ThermoHydro ||
-      _coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
-    _objects_to_add.push_back("PorousFlowFullySaturatedHeatAdvection");
 }
 
 void
-PorousFlowBasicTHM::act()
+PorousFlowBasicTHM::addMaterialDependencies()
 {
-  PorousFlowSinglePhaseBase::act();
+  PorousFlowSinglePhaseBase::addMaterialDependencies();
 
-  // add the kernels
-  if (_current_task == "add_kernel")
-  {
-    std::string kernel_name = "PorousFlowBasicTHM_DarcyFlow";
-    std::string kernel_type = "PorousFlowFullySaturatedDarcyBase";
-    InputParameters params = _factory.getValidParams(kernel_type);
-    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<RealVectorValue>("gravity") = _gravity;
-    params.set<bool>("multiply_by_density") = _multiply_by_density;
-    params.set<NonlinearVariableName>("variable") = _pp_var;
-    _problem->addKernel(kernel_type, kernel_name, params);
-  }
-  if (_current_task == "add_kernel" && _simulation_type == SimulationTypeChoiceEnum::TRANSIENT)
+  // Add necessary objects to list of PorousFlow objects added by this action
+  _included_objects.push_back("PorousFlowFullySaturatedDarcyBase");
+
+  if (_transient)
+    _included_objects.push_back("PorousFlowFullySaturatedMassTimeDerivative");
+
+  if (_thermal)
+    _included_objects.push_back("PorousFlowFullySaturatedHeatAdvection");
+}
+
+void
+PorousFlowBasicTHM::addKernels()
+{
+  PorousFlowSinglePhaseBase::addKernels();
+
+  std::string kernel_name = "PorousFlowBasicTHM_DarcyFlow";
+  std::string kernel_type = "PorousFlowFullySaturatedDarcyBase";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+  params.set<RealVectorValue>("gravity") = _gravity;
+  params.set<bool>("multiply_by_density") = _multiply_by_density;
+  params.set<NonlinearVariableName>("variable") = _pp_var;
+  _problem->addKernel(kernel_type, kernel_name, params);
+
+  if (_transient)
   {
     std::string kernel_name = "PorousFlowBasicTHM_MassTimeDerivative";
     std::string kernel_type = "PorousFlowFullySaturatedMassTimeDerivative";
@@ -93,9 +99,7 @@ PorousFlowBasicTHM::act()
     _problem->addKernel(kernel_type, kernel_name, params);
   }
 
-  if ((_coupling_type == CouplingTypeEnum::ThermoHydro ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical) &&
-      _current_task == "add_kernel")
+  if (_thermal)
   {
     std::string kernel_name = "PorousFlowBasicTHM_HeatAdvection";
     std::string kernel_type = "PorousFlowFullySaturatedHeatAdvection";
@@ -105,9 +109,14 @@ PorousFlowBasicTHM::act()
     params.set<RealVectorValue>("gravity") = _gravity;
     _problem->addKernel(kernel_type, kernel_name, params);
   }
+}
 
-  // add Materials
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_qp") && _current_task == "add_material")
+void
+PorousFlowBasicTHM::addMaterials()
+{
+  PorousFlowSinglePhaseBase::addMaterials();
+
+  if (_deps.dependsOn(_included_objects, "pressure_saturation_qp"))
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
@@ -117,8 +126,8 @@ PorousFlowBasicTHM::act()
     params.set<bool>("at_nodes") = false;
     _problem->addMaterial(material_type, material_name, params);
   }
-  if (_deps.dependsOn(_objects_to_add, "pressure_saturation_nodal") &&
-      _current_task == "add_material")
+
+  if (_deps.dependsOn(_included_objects, "pressure_saturation_nodal"))
   {
     std::string material_type = "PorousFlow1PhaseFullySaturated";
     InputParameters params = _factory.getValidParams(material_type);
@@ -129,14 +138,14 @@ PorousFlowBasicTHM::act()
     _problem->addMaterial(material_type, material_name, params);
   }
 
-  if ((_deps.dependsOn(_objects_to_add, "volumetric_strain_qp") ||
-       _deps.dependsOn(_objects_to_add, "volumetric_strain_nodal")) &&
-      (_coupling_type == CouplingTypeEnum::HydroMechanical ||
-       _coupling_type == CouplingTypeEnum::ThermoHydroMechanical))
+  if ((_deps.dependsOn(_included_objects, "volumetric_strain_qp") ||
+       _deps.dependsOn(_included_objects, "volumetric_strain_nodal")) &&
+      _mechanical)
     addVolumetricStrainMaterial(_coupled_displacements, false);
 
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_qp"))
+  if (_deps.dependsOn(_included_objects, "relative_permeability_qp"))
     addRelativePermeabilityCorey(false, 0, 0.0, 0.0, 0.0);
-  if (_deps.dependsOn(_objects_to_add, "relative_permeability_nodal"))
+
+  if (_deps.dependsOn(_included_objects, "relative_permeability_nodal"))
     addRelativePermeabilityCorey(true, 0, 0.0, 0.0, 0.0);
 }
