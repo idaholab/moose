@@ -38,7 +38,6 @@ T stringToEnum(const std::string & s, const std::map<std::string, T> & enum_map)
  */
 template <typename T>
 MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::string, T> & enum_map);
-
 }
 
 template <typename T>
