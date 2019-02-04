@@ -79,6 +79,8 @@ typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
+typedef RankFourTensorTempl<Real> RankFourTensor;
+typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 template <typename>
 class MaterialProperty;
 template <typename>
@@ -106,9 +108,10 @@ class Point;
  */
 #define ADReal typename Moose::RealType<compute_stage>::type
 #define ADRealVectorValue typename RealVectorValueType<compute_stage>::type
+#define ADPoint typename PointType<compute_stage>::type
 #define ADRealTensorValue typename RealTensorValueType<compute_stage>::type
 #define ADRankTwoTensor typename RankTwoTensorType<compute_stage>::type
-#define ADPoint typename PointType<compute_stage>::type
+#define ADRankFourTensor typename RankFourTensorType<compute_stage>::type
 
 /**
  * MOOSE typedefs
@@ -283,6 +286,16 @@ template <>
 struct RankTwoTensorType<JACOBIAN>
 {
   typedef DualRankTwoTensor type;
+};
+template <ComputeStage compute_stage>
+struct RankFourTensorType
+{
+  typedef RankFourTensor type;
+};
+template <>
+struct RankFourTensorType<JACOBIAN>
+{
+  typedef DualRankFourTensor type;
 };
 
 template <ComputeStage compute_stage>
