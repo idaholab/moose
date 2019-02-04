@@ -10,11 +10,18 @@
 // Moose
 #include "Moose.h"
 
-// libMesh headers
-#include "libmesh/fe_base.h"
-
 // Forward declarations
 class PenetrationInfo;
+namespace libMesh
+{
+template <typename>
+class FEGenericBase;
+typedef FEGenericBase<Real> FEBase;
+class FEType;
+class Elem;
+class Node;
+class Point;
+}
 
 namespace Moose
 {

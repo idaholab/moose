@@ -10,6 +10,8 @@
 #include "SubdomainIDGenerator.h"
 #include "CastUniquePointer.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", SubdomainIDGenerator);
 
 template <>

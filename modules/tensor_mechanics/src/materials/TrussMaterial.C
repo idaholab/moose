@@ -26,7 +26,7 @@ validParams<TrussMaterial>()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
+  params.addRequiredParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addCoupledVar("youngs_modulus", "Variable containing Young's modulus");
@@ -42,8 +42,7 @@ TrussMaterial::TrussMaterial(const InputParameters & parameters)
     _axial_stress(declareProperty<Real>(_base_name + "axial_stress")),
     _e_over_l(declareProperty<Real>(_base_name + "e_over_l"))
 {
-  const std::vector<NonlinearVariableName> & nl_vnames(
-      getParam<std::vector<NonlinearVariableName>>("displacements"));
+  const std::vector<VariableName> & nl_vnames(getParam<std::vector<VariableName>>("displacements"));
   _ndisp = nl_vnames.size();
 
   // fetch nonlinear variables

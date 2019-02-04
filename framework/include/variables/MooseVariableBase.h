@@ -13,8 +13,6 @@
 #include "MooseTypes.h"
 #include "MooseArray.h"
 
-#include "libmesh/tensor_value.h"
-#include "libmesh/vector_value.h"
 #include "libmesh/fe_type.h"
 
 // libMesh forward declarations

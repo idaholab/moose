@@ -25,7 +25,7 @@ InputParameters
 validParams<PoroMechanicsAction>()
 {
   InputParameters params = validParams<TensorMechanicsAction>();
-  params.addRequiredParam<NonlinearVariableName>("porepressure", "The porepressure variable");
+  params.addRequiredParam<VariableName>("porepressure", "The porepressure variable");
   return params;
 }
 
@@ -42,15 +42,14 @@ PoroMechanicsAction::act()
   if (_current_task == "add_kernel")
   {
     // Prepare displacements and set value for dim
-    std::vector<NonlinearVariableName> displacements =
-        getParam<std::vector<NonlinearVariableName>>("displacements");
+    std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
     unsigned int dim = displacements.size();
 
     // all the kernels added below have porepressure as a coupled variable
     // add this to the kernel's params
     std::string type("PoroMechanicsCoupling");
     InputParameters params = _factory.getValidParams(type);
-    VariableName pp_var(getParam<NonlinearVariableName>("porepressure"));
+    VariableName pp_var(getParam<VariableName>("porepressure"));
     params.addCoupledVar("porepressure", "");
     params.set<std::vector<VariableName>>("porepressure") = {pp_var};
 

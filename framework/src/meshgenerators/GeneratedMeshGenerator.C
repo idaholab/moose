@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeneratedMeshGenerator.h"
+#include "CastUniquePointer.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_generation.h"
@@ -15,8 +16,7 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/periodic_boundary_base.h"
 #include "libmesh/unstructured_mesh.h"
-
-#include "CastUniquePointer.h"
+#include "libmesh/elem.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)

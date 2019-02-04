@@ -14,6 +14,8 @@
 #include "MooseEnum.h"
 #include "EulerAngles.h"
 
+#include "libmesh/point.h"
+
 /**
  * Mix-in class that adds so called access functors to select a field from
  * an EBSDPointData or EBSDPointData (todo) structure. The field name is specified

@@ -11,8 +11,9 @@
 #define MATERIALPROPERTYSTORAGE_H
 
 #include "Moose.h"
-#include "MaterialProperty.h"
 #include "HashMap.h"
+#include "DataIO.h"
+#include "MaterialProperty.h"
 
 // Forward declarations
 class Material;
@@ -23,6 +24,7 @@ class QpMap;
 namespace libMesh
 {
 class QBase;
+class Elem;
 }
 
 /**

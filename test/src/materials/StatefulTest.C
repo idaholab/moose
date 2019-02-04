@@ -26,7 +26,7 @@ validParams<StatefulTest>()
 
 StatefulTest::StatefulTest(const InputParameters & parameters)
   : Material(parameters),
-    _coupled_val(isParamValid("coupled") ? &coupledNodalValue("coupled") : nullptr),
+    _coupled_val(isParamValid("coupled") ? &coupledDofValues("coupled") : nullptr),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<Real>>("prop_values"))
 {

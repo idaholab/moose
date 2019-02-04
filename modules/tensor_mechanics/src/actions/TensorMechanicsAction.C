@@ -62,7 +62,7 @@ validParams<TensorMechanicsAction>()
 
 TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   : TensorMechanicsActionBase(params),
-    _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
+    _displacements(getParam<std::vector<VariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
     _save_in(getParam<std::vector<AuxVariableName>>("save_in")),
@@ -109,7 +109,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _use_displaced_mesh = use_displaced_mesh_param;
   }
 
-  // convert vector of NonlinearVariableName to vector of VariableName
+  // convert vector of VariableName to vector of VariableName
   for (unsigned int i = 0; i < _ndisp; ++i)
     _coupled_displacements[i] = _displacements[i];
 
@@ -273,7 +273,7 @@ TensorMechanicsAction::act()
 
     if (isParamValid("scalar_out_of_plane_strain"))
       params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
-          getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
+          getParam<VariableName>("scalar_out_of_plane_strain")};
 
     _problem->addMaterial(type, name() + "_strain", params);
   }

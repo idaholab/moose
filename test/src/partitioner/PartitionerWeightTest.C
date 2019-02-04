@@ -9,6 +9,8 @@
 
 #include "PartitionerWeightTest.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseTestApp", PartitionerWeightTest);
 
 template <>

@@ -57,14 +57,39 @@ public:
   virtual int order() override { return 2; }
 
   virtual void computeTimeDerivatives() override;
+  virtual void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) override;
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
+  /**
+   * Helper function that actually does the math for computing the time derivative
+   */
+  template <typename T, typename T2, typename T3>
+  void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old, const T3 & u_older);
+
   unsigned int _stage;
 
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_old;
 };
+
+template <typename T, typename T2, typename T3>
+void
+ExplicitTVDRK2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old, const T3 & u_older)
+{
+  if (_stage < 3)
+  {
+    u_dot -= u_old;
+    u_dot *= 1. / _dt;
+  }
+  else
+  {
+    u_dot *= 2.;
+    u_dot -= u_old;
+    u_dot -= u_older;
+    u_dot *= 0.5 / _dt;
+  }
+}
 
 #endif /* EXPLICITTVDRK2_H */

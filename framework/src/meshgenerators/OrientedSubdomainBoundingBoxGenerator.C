@@ -10,6 +10,8 @@
 #include "OrientedSubdomainBoundingBoxGenerator.h"
 #include "CastUniquePointer.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", OrientedSubdomainBoundingBoxGenerator);
 
 template <>

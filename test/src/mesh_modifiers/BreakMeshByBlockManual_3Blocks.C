@@ -10,6 +10,9 @@
 #include "BreakMeshByBlockManual_3Blocks.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+
 registerMooseObject("MooseTestApp", BreakMeshByBlockManual_3Blocks);
 
 template <>

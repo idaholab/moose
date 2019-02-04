@@ -41,7 +41,7 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     MooseVariableInterface<Real>(this,
                                  false,
                                  "variable",
-                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     _field_var(_subproblem.getStandardVariable(_tid, name())),
 

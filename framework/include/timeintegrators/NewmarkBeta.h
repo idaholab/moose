@@ -11,6 +11,7 @@
 #define NEWMARKBETA_H
 
 #include "TimeIntegrator.h"
+#include "MathUtils.h"
 
 class NewmarkBeta;
 
@@ -28,9 +29,17 @@ public:
 
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
+  virtual void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
+  /**
+   * Helper function that actually does the math for computing the time derivative
+   */
+  template <typename T, typename T2, typename T3, typename T4, typename T5>
+  void computeTimeDerivativeHelper(
+      T & u_dot, const T2 & u_old, const T3 & u_dot_old, T4 & u_dotdot, const T5 & u_dotdot_old);
+
   /// Newmark time integration parameter-beta
   Real _beta;
 
@@ -40,4 +49,26 @@ protected:
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
   Real & _du_dotdot_du;
 };
+
+template <typename T, typename T2, typename T3, typename T4, typename T5>
+void
+NewmarkBeta::computeTimeDerivativeHelper(
+    T & u_dot, const T2 & u_old, const T3 & u_dot_old, T4 & u_dotdot, const T5 & u_dotdot_old)
+{
+  u_dotdot -= u_old;
+  u_dotdot *= 1.0 / _beta / _dt / _dt;
+  MathUtils::addScaled(-1.0 / _beta / _dt, u_dot_old, u_dotdot);
+  MathUtils::addScaled(-0.5 / _beta + 1.0, u_dotdot_old, u_dotdot);
+
+  // compute first derivative
+  // according to Newmark-Beta method
+  // u_dot = first_term + second_term + third_term
+  //       first_term = u_dot_old
+  //      second_term = u_dotdot_old * (1 - gamma) * dt
+  //       third_term = u_dotdot * gamma * dt
+  u_dot = u_dot_old;
+  MathUtils::addScaled((1.0 - _gamma) * _dt, u_dotdot_old, u_dot);
+  MathUtils::addScaled(_gamma * _dt, u_dotdot, u_dot);
+}
+
 #endif /* NEWMARKBETA_H */

@@ -9,6 +9,10 @@
 
 #include "MooseVariableFE.h"
 #include <typeinfo>
+#include "TimeIntegrator.h"
+#include "NonlinearSystemBase.h"
+#include "DisplacedSystem.h"
+#include "Assembly.h"
 
 template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
@@ -18,6 +22,7 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
                                              Moose::VarKindType var_kind,
                                              THREAD_ID tid)
   : MooseVariableFEBase(var_num, fe_type, sys, var_kind, tid),
+    _displaced(dynamic_cast<DisplacedSystem *>(&sys) ? true : false),
     _assembly(assembly),
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),
@@ -75,12 +80,6 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_curl_neighbor(false),
     _need_curl_old_neighbor(false),
     _need_curl_older_neighbor(false),
-    _need_solution_dofs(false),
-    _need_solution_dofs_old(false),
-    _need_solution_dofs_older(false),
-    _need_solution_dofs_neighbor(false),
-    _need_solution_dofs_old_neighbor(false),
-    _need_solution_dofs_older_neighbor(false),
     _need_dof_values(false),
     _need_dof_values_old(false),
     _need_dof_values_older(false),
@@ -103,10 +102,10 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _need_dof_du_dotdot_du_neighbor(false),
     _normals(_assembly.normals()),
     _is_nodal(true),
-    _has_dofs(false),
-    _neighbor_has_dofs(false),
-    _has_nodal_value(false),
-    _has_nodal_value_neighbor(false),
+    _has_dof_indices(false),
+    _neighbor_has_dof_indices(false),
+    _has_dof_values(false),
+    _has_dof_values_neighbor(false),
     _node(_assembly.node()),
     _node_neighbor(_assembly.nodeNeighbor()),
     _phi(_assembly.fePhi<OutputType>(_fe_type)),
@@ -116,7 +115,19 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
     _phi_neighbor(_assembly.fePhiNeighbor<OutputType>(_fe_type)),
     _grad_phi_neighbor(_assembly.feGradPhiNeighbor<OutputType>(_fe_type)),
     _phi_face_neighbor(_assembly.fePhiFaceNeighbor<OutputType>(_fe_type)),
-    _grad_phi_face_neighbor(_assembly.feGradPhiFaceNeighbor<OutputType>(_fe_type))
+    _grad_phi_face_neighbor(_assembly.feGradPhiFaceNeighbor<OutputType>(_fe_type)),
+    _ad_grad_phi(_assembly.feADGradPhi<OutputType>(_fe_type)),
+    _ad_grad_phi_face(_assembly.feADGradPhiFace<OutputType>(_fe_type)),
+    _ad_u(),
+    _ad_grad_u(),
+    _ad_second_u(),
+    _ad_dof_values(),
+    _neighbor_ad_u(),
+    _neighbor_ad_grad_u(),
+    _neighbor_ad_second_u(),
+    _neighbor_ad_dof_values(),
+    _ad_zero(0),
+    _time_integrator(nullptr)
 {
   // FIXME: continuity of FE type seems equivalent with the definition of nodal variables.
   //        Continuity does not depend on the FE dimension, so we just pass in a valid dimension.
@@ -142,6 +153,8 @@ MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
 
   _need_matrix_tag_u.resize(num_matrix_tags);
   _matrix_tag_u.resize(num_matrix_tags);
+
+  _time_integrator = _sys.getTimeIntegrator();
 }
 
 template <typename OutputType>
@@ -190,17 +203,12 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _matrix_tag_u.clear();
 
   _u.release();
-  _u_bak.release();
   _u_old.release();
-  _u_old_bak.release();
   _u_older.release();
-  _u_older_bak.release();
   _u_previous_nl.release();
 
   _grad_u.release();
-  _grad_u_bak.release();
   _grad_u_old.release();
-  _grad_u_old_bak.release();
   _grad_u_older.release();
   _grad_u_older.release();
   _grad_u_previous_nl.release();
@@ -208,17 +216,12 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _grad_u_dotdot.release();
 
   _second_u.release();
-  _second_u_bak.release();
   _second_u_old.release();
-  _second_u_old_bak.release();
   _second_u_older.release();
-  _second_u_older_bak.release();
   _second_u_previous_nl.release();
 
   _curl_u.release();
-  _curl_u_bak.release();
   _curl_u_old.release();
-  _curl_u_old_bak.release();
   _curl_u_older.release();
 
   _ad_u.release();
@@ -226,9 +229,7 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _ad_second_u.release();
 
   _u_dot.release();
-  _u_dot_bak.release();
   _u_dot_neighbor.release();
-  _u_dot_bak_neighbor.release();
 
   _u_dotdot.release();
   _u_dotdot_bak.release();
@@ -246,9 +247,7 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _u_dotdot_old_bak_neighbor.release();
 
   _du_dot_du.release();
-  _du_dot_du_bak.release();
   _du_dot_du_neighbor.release();
-  _du_dot_du_bak_neighbor.release();
 
   _du_dotdot_du.release();
   _du_dotdot_du_bak.release();
@@ -277,6 +276,20 @@ MooseVariableFE<OutputType>::~MooseVariableFE()
   _curl_u_neighbor.release();
   _curl_u_old_neighbor.release();
   _curl_u_older_neighbor.release();
+
+  _ad_u.release();
+  _ad_grad_u.release();
+  _ad_second_u.release();
+  _ad_dof_values.release();
+  _ad_dofs_dot.release();
+  _ad_u_dot.release();
+
+  _neighbor_ad_u.release();
+  _neighbor_ad_grad_u.release();
+  _neighbor_ad_second_u.release();
+  _neighbor_ad_dof_values.release();
+  _neighbor_ad_dofs_dot.release();
+  _neighbor_ad_u_dot.release();
 }
 
 template <typename OutputType>
@@ -305,15 +318,15 @@ void
 MooseVariableFE<OutputType>::prepare()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
-  _has_nodal_value = false;
-  _has_nodal_value_neighbor = false;
+  _has_dof_values = false;
+  _has_dof_values_neighbor = false;
 
   // FIXME: remove this when the Richard's module is migrated to use the new NodalCoupleable
   // interface.
   if (_dof_indices.size() > 0)
-    _has_dofs = true;
+    _has_dof_indices = true;
   else
-    _has_dofs = false;
+    _has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -321,16 +334,16 @@ void
 MooseVariableFE<OutputType>::prepareNeighbor()
 {
   _dof_map.dof_indices(_neighbor, _dof_indices_neighbor, _var_num);
-  _has_nodal_value = false;
-  _has_nodal_value_neighbor = false;
+  _has_dof_values = false;
+  _has_dof_values_neighbor = false;
 }
 
 template <typename OutputType>
 void
 MooseVariableFE<OutputType>::prepareAux()
 {
-  _has_nodal_value = false;
-  _has_nodal_value_neighbor = false;
+  _has_dof_values = false;
+  _has_dof_values_neighbor = false;
 }
 
 template <typename OutputType>
@@ -345,12 +358,12 @@ MooseVariableFE<OutputType>::reinitNode()
     // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
     // NodalBC for example
     _nodal_dof_index = _dof_indices[0];
-    _has_dofs = true;
+    _has_dof_indices = true;
   }
   else
   {
     _dof_indices.clear(); // Clear these so Assembly doesn't think there's dofs here
-    _has_dofs = false;
+    _has_dof_indices = false;
   }
 }
 
@@ -375,10 +388,10 @@ MooseVariableFE<OutputType>::reinitAux()
     for (auto & dof_u : _matrix_tags_dof_u)
       dof_u.resize(_dof_indices.size());
 
-    _has_dofs = true;
+    _has_dof_indices = true;
   }
   else
-    _has_dofs = false;
+    _has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -396,13 +409,13 @@ MooseVariableFE<OutputType>::reinitAuxNeighbor()
       _dof_values_neighbor.resize(_dof_indices_neighbor.size());
       _sys.currentSolution()->get(_dof_indices_neighbor, &_dof_values_neighbor[0]);
 
-      _neighbor_has_dofs = true;
+      _neighbor_has_dof_indices = true;
     }
     else
-      _neighbor_has_dofs = false;
+      _neighbor_has_dof_indices = false;
   }
   else
-    _neighbor_has_dofs = false;
+    _neighbor_has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -424,9 +437,9 @@ MooseVariableFE<OutputType>::reinitNodes(const std::vector<dof_id_type> & nodes)
   }
 
   if (_dof_indices.size() > 0)
-    _has_dofs = true;
+    _has_dof_indices = true;
   else
-    _has_dofs = false;
+    _has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -448,9 +461,9 @@ MooseVariableFE<OutputType>::reinitNodesNeighbor(const std::vector<dof_id_type> 
   }
 
   if (_dof_indices_neighbor.size() > 0)
-    _neighbor_has_dofs = true;
+    _neighbor_has_dof_indices = true;
   else
-    _neighbor_has_dofs = false;
+    _neighbor_has_dof_indices = false;
 }
 
 template <typename OutputType>
@@ -547,7 +560,7 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::insert(NumericVector<Number> & residual)
 {
-  if (_has_nodal_value)
+  if (_has_dof_values)
     residual.insert(&_dof_values[0], _dof_indices);
 }
 
@@ -555,7 +568,7 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::add(NumericVector<Number> & residual)
 {
-  if (_has_nodal_value)
+  if (_has_dof_values)
     residual.add_vector(&_dof_values[0], _dof_indices);
 }
 
@@ -796,14 +809,15 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeElemValues()
 {
-  computeValuesHelper(_qrule, _phi, _grad_phi, _second_phi, _curl_phi);
+  computeValuesHelper(_qrule, _phi, _grad_phi, _second_phi, _curl_phi, _ad_grad_phi);
 }
 
 template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeElemValuesFace()
 {
-  computeValuesHelper(_qrule_face, _phi_face, _grad_phi_face, _second_phi_face, _curl_phi_face);
+  computeValuesHelper(
+      _qrule_face, _phi_face, _grad_phi_face, _second_phi_face, _curl_phi_face, _ad_grad_phi_face);
 }
 
 template <typename OutputType>
@@ -820,47 +834,6 @@ MooseVariableFE<OutputType>::computeNeighborValues()
 {
   computeNeighborValuesHelper(
       _qrule_neighbor, _phi_neighbor, _grad_phi_neighbor, _second_phi_neighbor);
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::setNodalValue(const DenseVector<Number> & values)
-{
-  for (unsigned int i = 0; i < values.size(); i++)
-    _dof_values[i] = values(i);
-
-  _has_nodal_value = true;
-
-  for (unsigned int qp = 0; qp < _u.size(); qp++)
-  {
-    _u[qp] = 0;
-    for (unsigned int i = 0; i < _dof_values.size(); i++)
-      _u[qp] += _phi[i][qp] * _dof_values[i];
-  }
-}
-
-template <typename OutputType>
-void
-MooseVariableFE<OutputType>::setNodalValue(OutputType value, unsigned int idx /* = 0*/)
-{
-  _dof_values[idx] = value; // update variable nodal value
-  _has_nodal_value = true;
-
-  // Update the qp values as well
-  for (unsigned int qp = 0; qp < _u.size(); qp++)
-    _u[qp] = value;
-}
-
-template <>
-void
-MooseVariableFE<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned int idx /* = 0*/)
-{
-  for (decltype(idx) i = 0; i < LIBMESH_DIM; ++i, ++idx)
-    _dof_values[idx] = value(i);
-
-  // Update the qp values as well
-  for (unsigned int qp = 0; qp < _u.size(); qp++)
-    _u[qp] = value;
 }
 
 template <typename OutputType>
@@ -921,11 +894,13 @@ MooseVariableFE<OutputType>::getValue(const Elem * elem,
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
-                                                 const FieldVariablePhiValue & phi,
-                                                 const FieldVariablePhiGradient & grad_phi,
-                                                 const FieldVariablePhiSecond *& second_phi,
-                                                 const FieldVariablePhiValue *& curl_phi)
+MooseVariableFE<OutputType>::computeValuesHelper(
+    QBase *& qrule,
+    const FieldVariablePhiValue & phi,
+    const FieldVariablePhiGradient & grad_phi,
+    const FieldVariablePhiSecond *& second_phi,
+    const FieldVariablePhiValue *& curl_phi,
+    const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi)
 
 {
   bool is_transient = _subproblem.isTransient();
@@ -1112,15 +1087,6 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
       _dof_values_dotdot_old.resize(num_dofs);
   }
 
-  if (_need_solution_dofs)
-    _solution_dofs.resize(num_dofs);
-
-  if (_need_solution_dofs_old)
-    _solution_dofs_old.resize(num_dofs);
-
-  if (_need_solution_dofs_older)
-    _solution_dofs_older.resize(num_dofs);
-
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
@@ -1173,9 +1139,6 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
     if (_need_dof_values_previous_nl)
       _dof_values_previous_nl[i] = soln_previous_nl_local;
 
-    if (_need_solution_dofs)
-      _solution_dofs(i) = soln_local;
-
     if (is_transient)
     {
       if (_need_u_old || _need_grad_old || _need_second_old || _need_dof_values_old)
@@ -1216,12 +1179,6 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
         if (_need_dof_values_dotdot_old)
           _dof_values_dotdot_old[i] = u_dotdot_old_local;
       }
-
-      if (_need_solution_dofs_old)
-        _solution_dofs_old(i) = solution_old(idx);
-
-      if (_need_solution_dofs_older)
-        _solution_dofs_older(i) = solution_older(idx);
     }
 
     for (unsigned int qp = 0; qp < nqp; qp++)
@@ -1359,21 +1316,21 @@ MooseVariableFE<OutputType>::computeValuesHelper(QBase *& qrule,
 
   // Automatic differentiation
   if (_need_ad && _subproblem.currentlyComputingJacobian())
-    computeAD(num_dofs, nqp);
+    computeAD(num_dofs, nqp, is_transient, phi, grad_phi, second_phi, ad_grad_phi);
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::computeAD(const unsigned int & /*num_dofs*/,
-                                       const unsigned int & /*nqp*/)
+MooseVariableFE<OutputType>::computeAD(
+    const unsigned int & num_dofs,
+    const unsigned int & nqp,
+    const bool & is_transient,
+    const FieldVariablePhiValue & phi,
+    const FieldVariablePhiGradient & grad_phi,
+    const FieldVariablePhiSecond *& second_phi,
+    const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi)
 {
-}
-
-template <>
-void
-MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned int & nqp)
-{
-  _ad_dofs.resize(num_dofs);
+  _ad_dof_values.resize(num_dofs);
   if (_need_ad_u)
     _ad_u.resize(nqp);
 
@@ -1382,6 +1339,12 @@ MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned i
 
   if (_need_ad_second_u)
     _ad_second_u.resize(nqp);
+
+  if (is_transient)
+  {
+    _ad_dofs_dot.resize(num_dofs);
+    _ad_u_dot.resize(nqp);
+  }
 
   // Derivatives are offset by the variable number
   size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
@@ -1394,21 +1357,30 @@ MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned i
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
     if (_need_ad_u)
-      _ad_u[qp] = 0;
+      _ad_u[qp] = _ad_zero;
 
     if (_need_ad_grad_u)
-      _ad_grad_u[qp] = 0;
+      _ad_grad_u[qp] = _ad_zero;
 
     if (_need_ad_second_u)
-      _ad_second_u[qp] = 0.;
+      _ad_second_u[qp] = _ad_zero;
+
+    if (is_transient)
+      _ad_u_dot[qp] = _ad_zero;
   }
 
   for (unsigned int i = 0; i < num_dofs; i++)
   {
-    _ad_dofs[i] = (*_sys.currentSolution())(_dof_indices[i]);
+    _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
 
     // NOTE!  You have to do this AFTER setting the value!
-    _ad_dofs[i].derivatives()[ad_offset + i] = 1.0;
+    _ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
+
+    if (is_transient && _time_integrator)
+    {
+      _ad_dofs_dot[i] = _ad_dof_values[i];
+      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
+    }
   }
 
   // Now build up the solution at each quadrature point:
@@ -1417,29 +1389,36 @@ MooseVariableFE<Real>::computeAD(const unsigned int & num_dofs, const unsigned i
     for (unsigned int qp = 0; qp < nqp; qp++)
     {
       if (_need_ad_u)
-        _ad_u[qp] += _ad_dofs[i] * _phi[i][qp];
+        _ad_u[qp] += _ad_dof_values[i] * phi[i][qp];
 
       if (_need_ad_grad_u)
-        _ad_grad_u[qp] += _ad_dofs[i] * _grad_phi[i][qp];
+      {
+        if (_displaced)
+          _ad_grad_u[qp] += _ad_dof_values[i] * ad_grad_phi[i][qp];
+        else
+          _ad_grad_u[qp] += _ad_dof_values[i] * grad_phi[i][qp];
+      }
 
       if (_need_ad_second_u)
-        _ad_second_u[qp] += _ad_dofs[i] * (*_second_phi)[i][qp];
+        _ad_second_u[qp] += _ad_dof_values[i] * (*second_phi)[i][qp];
+
+      if (is_transient)
+        _ad_u_dot[qp] += phi[i][qp] * _ad_dofs_dot[i];
     }
   }
 }
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int & /*num_dofs*/,
-                                               const unsigned int & /*nqp*/)
-{
-}
+MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int & num_dofs,
+                                               const unsigned int & nqp,
+                                               const bool & is_transient,
+                                               const FieldVariablePhiValue & phi,
+                                               const FieldVariablePhiGradient & grad_phi,
+                                               const FieldVariablePhiSecond *& second_phi)
 
-template <>
-void
-MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const unsigned int & nqp)
 {
-  _neighbor_ad_dofs.resize(num_dofs);
+  _neighbor_ad_dof_values.resize(num_dofs);
   if (_need_neighbor_ad_u)
     _neighbor_ad_u.resize(nqp);
 
@@ -1460,21 +1439,34 @@ MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const un
   for (unsigned int qp = 0; qp < nqp; qp++)
   {
     if (_need_neighbor_ad_u)
-      _neighbor_ad_u[qp] = 0;
+      _neighbor_ad_u[qp] = _ad_zero;
 
     if (_need_neighbor_ad_grad_u)
-      _neighbor_ad_grad_u[qp] = 0;
+      _neighbor_ad_grad_u[qp] = _ad_zero;
 
     if (_need_neighbor_ad_second_u)
-      _neighbor_ad_second_u[qp] = 0;
+      _neighbor_ad_second_u[qp] = _ad_zero;
+
+    if (is_transient)
+    {
+      _neighbor_ad_dofs_dot[qp] = _ad_zero;
+      _neighbor_ad_u_dot[qp] = _ad_zero;
+    }
   }
 
   for (unsigned int i = 0; i < num_dofs; i++)
   {
-    _neighbor_ad_dofs[i] = (*_sys.currentSolution())(_dof_indices[i]);
+    _neighbor_ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices_neighbor[i]);
 
     // NOTE!  You have to do this AFTER setting the value!
-    _neighbor_ad_dofs[i].derivatives()[ad_offset + i] = 1.0;
+    _neighbor_ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
+
+    if (is_transient && _time_integrator)
+    {
+      _neighbor_ad_dofs_dot[i] = _neighbor_ad_dof_values[i];
+      _time_integrator->computeADTimeDerivatives(_neighbor_ad_dofs_dot[i],
+                                                 _dof_indices_neighbor[i]);
+    }
   }
 
   // Now build up the solution at each quadrature point:
@@ -1483,13 +1475,16 @@ MooseVariableFE<Real>::computeADNeighbor(const unsigned int & num_dofs, const un
     for (unsigned int qp = 0; qp < nqp; qp++)
     {
       if (_need_neighbor_ad_u)
-        _neighbor_ad_u[qp] += _neighbor_ad_dofs[i] * _phi_neighbor[i][qp];
+        _neighbor_ad_u[qp] += _neighbor_ad_dof_values[i] * phi[i][qp];
 
       if (_need_neighbor_ad_grad_u)
-        _neighbor_ad_grad_u[qp] += _neighbor_ad_dofs[i] * _grad_phi_neighbor[i][qp];
+        _neighbor_ad_grad_u[qp] += _neighbor_ad_dof_values[i] * grad_phi[i][qp];
 
       if (_need_neighbor_ad_second_u)
-        _neighbor_ad_second_u[qp] += _neighbor_ad_dofs[i] * (*_second_phi_neighbor)[i][qp];
+        _neighbor_ad_second_u[qp] += _neighbor_ad_dof_values[i] * (*second_phi)[i][qp];
+
+      if (is_transient)
+        _neighbor_ad_u_dot[qp] += phi[i][qp] * _neighbor_ad_dofs_dot[i];
     }
   }
 }
@@ -1628,15 +1623,6 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
       _dof_values_dotdot_old_neighbor.resize(num_dofs);
   }
 
-  if (_need_solution_dofs_neighbor)
-    _solution_dofs_neighbor.resize(num_dofs);
-
-  if (_need_solution_dofs_old_neighbor)
-    _solution_dofs_old_neighbor.resize(num_dofs);
-
-  if (_need_solution_dofs_older_neighbor)
-    _solution_dofs_older_neighbor.resize(num_dofs);
-
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
   const NumericVector<Real> & solution_old = _sys.solutionOld();
   const NumericVector<Real> & solution_older = _sys.solutionOlder();
@@ -1668,15 +1654,12 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
     if (_need_dof_values_neighbor)
       _dof_values_neighbor[i] = soln_local;
 
-    if (_need_solution_dofs_neighbor)
-      _solution_dofs_neighbor(i) = soln_local;
-
     if (is_transient)
     {
-      if (_need_u_old_neighbor)
+      if (_need_u_old_neighbor || _need_dof_values_old_neighbor)
         soln_old_local = solution_old(idx);
 
-      if (_need_u_older_neighbor)
+      if (_need_u_older_neighbor || _need_dof_values_older_neighbor)
         soln_older_local = solution_older(idx);
 
       if (_need_dof_values_old_neighbor)
@@ -1711,12 +1694,6 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
         if (_need_dof_values_dotdot_old_neighbor)
           _dof_values_dotdot_old_neighbor[i] = u_dotdot_old_local;
       }
-
-      if (_need_solution_dofs_old_neighbor)
-        _solution_dofs_old_neighbor(i) = solution_old(idx);
-
-      if (_need_solution_dofs_older_neighbor)
-        _solution_dofs_older_neighbor(i) = solution_older(idx);
     }
 
     for (unsigned int qp = 0; qp < nqp; ++qp)
@@ -1780,8 +1757,9 @@ MooseVariableFE<OutputType>::computeNeighborValuesHelper(QBase *& qrule,
     }
   }
 
+  // Automatic differentiation
   if (_need_neighbor_ad && _subproblem.currentlyComputingJacobian())
-    computeADNeighbor(num_dofs, nqp);
+    computeADNeighbor(num_dofs, nqp, is_transient, phi, grad_phi, second_phi);
 }
 
 template <typename OutputType>
@@ -1820,6 +1798,21 @@ MooseVariableFE<OutputType>::nodalValue()
   {
     _need_dof_values = true;
     return _nodal_value;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const OutputType &
+MooseVariableFE<OutputType>::nodalValueNeighbor()
+{
+  if (isNodal())
+  {
+    _need_dof_values_neighbor = true;
+    return _neighbor_nodal_value;
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -1888,6 +1881,21 @@ MooseVariableFE<OutputType>::nodalValueOld()
 
 template <typename OutputType>
 const OutputType &
+MooseVariableFE<OutputType>::nodalValueOldNeighbor()
+{
+  if (isNodal())
+  {
+    _need_dof_values_old_neighbor = true;
+    return _neighbor_nodal_value_old;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const OutputType &
 MooseVariableFE<OutputType>::nodalValueOlder()
 {
   if (isNodal())
@@ -1903,12 +1911,42 @@ MooseVariableFE<OutputType>::nodalValueOlder()
 
 template <typename OutputType>
 const OutputType &
+MooseVariableFE<OutputType>::nodalValueOlderNeighbor()
+{
+  if (isNodal())
+  {
+    _need_dof_values_older_neighbor = true;
+    return _neighbor_nodal_value_older;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const OutputType &
 MooseVariableFE<OutputType>::nodalValuePreviousNL()
 {
   if (isNodal())
   {
     _need_dof_values_previous_nl = true;
     return _nodal_value_previous_nl;
+  }
+  else
+    mooseError("Nodal values can be requested only on nodal variables, variable '",
+               name(),
+               "' is not nodal.");
+}
+
+template <typename OutputType>
+const OutputType &
+MooseVariableFE<OutputType>::nodalValuePreviousNLNeighbor()
+{
+  if (isNodal())
+  {
+    _need_dof_values_previous_nl_neighbor = true;
+    return _neighbor_nodal_value_previous_nl;
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -2014,13 +2052,15 @@ MooseVariableFE<OutputType>::computeNodalValues()
   auto & active_coupleable_vector_tags =
       _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
 
-  if (_has_dofs)
+  if (_has_dof_indices)
   {
-    const size_t n = _dof_indices.size();
+    auto n = _dof_indices.size();
     mooseAssert(n, "There must be a non-zero number of degrees of freedom");
     _dof_values.resize(n);
+
     _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
-    _nodal_value = _dof_values[0];
+    for (decltype(n) i = 0; i < n; ++i)
+      assignNodalValue(_dof_values[i], i);
 
     for (auto tag : active_coupleable_vector_tags)
       _vector_tags_dof_u[tag].resize(n);
@@ -2057,7 +2097,8 @@ MooseVariableFE<OutputType>::computeNodalValues()
     {
       _dof_values_previous_nl.resize(n);
       _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
-      _nodal_value_previous_nl = _dof_values_previous_nl[0];
+      for (decltype(n) i = 0; i < n; ++i)
+        assignNodalValuePreviousNL(_dof_values_previous_nl[i], i);
     }
     if (_subproblem.isTransient())
     {
@@ -2065,8 +2106,11 @@ MooseVariableFE<OutputType>::computeNodalValues()
       _dof_values_older.resize(n);
       _sys.solutionOld().get(_dof_indices, &_dof_values_old[0]);
       _sys.solutionOlder().get(_dof_indices, &_dof_values_older[0]);
-      _nodal_value_old = _dof_values_old[0];
-      _nodal_value_older = _dof_values_older[0];
+      for (decltype(n) i = 0; i < n; ++i)
+      {
+        assignNodalValueOld(_dof_values_old[i], i);
+        assignNodalValueOlder(_dof_values_older[i], i);
+      }
 
       _dof_values_dot.resize(n);
       _dof_values_dotdot.resize(n);
@@ -2085,84 +2129,26 @@ MooseVariableFE<OutputType>::computeNodalValues()
         _dof_values_dotdot_old[0] = (*_sys.solutionUDotDotOld())(_dof_indices[0]);
       _dof_du_dot_du[0] = _sys.duDotDu();
       _dof_du_dotdot_du[0] = _sys.duDotDotDu();
-      _nodal_value_dot = _dof_values_dot[0];
-      _nodal_value_dotdot = _dof_values_dotdot[0];
-      _nodal_value_dot_old = _dof_values_dot_old[0];
-      _nodal_value_dotdot_old = _dof_values_dotdot_old[0];
-    }
-  }
-  else
-  {
-    _dof_values.resize(0);
-    if (_need_dof_values_previous_nl)
-      _dof_values_previous_nl.resize(0);
-    if (_subproblem.isTransient())
-    {
-      _dof_values_old.resize(0);
-      _dof_values_older.resize(0);
-      _dof_values_dot.resize(0);
-      _dof_values_dotdot.resize(0);
-      _dof_values_dot_old.resize(0);
-      _dof_values_dotdot_old.resize(0);
-      _dof_du_dot_du.resize(0);
-      _dof_du_dotdot_du.resize(0);
-    }
-  }
-}
 
-template <>
-void
-MooseVariableFE<RealVectorValue>::computeNodalValues()
-{
-  if (_has_dofs)
-  {
-    const std::size_t n = _dof_indices.size();
-    mooseAssert(n, "There must be a non-zero number of degrees of freedom");
-    _dof_values.resize(n);
-    _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
-    for (size_t i = 0; i < n; ++i)
-      _nodal_value(i) = _dof_values[i];
-
-    if (_need_dof_values_previous_nl)
-    {
-      _dof_values_previous_nl.resize(n);
-      _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
-      _nodal_value_previous_nl = _dof_values_previous_nl[0];
-      for (size_t i = 0; i < n; ++i)
-        _nodal_value_previous_nl(i) = _dof_values_previous_nl[i];
-    }
-
-    if (_subproblem.isTransient())
-    {
-      _dof_values_old.resize(n);
-      _dof_values_older.resize(n);
-      _sys.solutionOld().get(_dof_indices, &_dof_values_old[0]);
-      _sys.solutionOlder().get(_dof_indices, &_dof_values_older[0]);
-      for (size_t i = 0; i < n; ++i)
+      for (decltype(n) i = 0; i < n; ++i)
       {
-        _nodal_value_old(i) = _dof_values_old[i];
-        _nodal_value_older(i) = _dof_values_older[i];
+        assignNodalValueDot(_dof_values_dot[i], i);
+        assignNodalValueDotDot(_dof_values_dotdot[i], i);
+        assignNodalValueDotOld(_dof_values_dot_old[i], i);
+        assignNodalValueDotDotOld(_dof_values_dotdot_old[i], i);
       }
-      _dof_values_dot.resize(n);
-      _dof_values_dotdot.resize(n);
-      _dof_values_dot_old.resize(n);
-      _dof_values_dotdot_old.resize(n);
-      _dof_du_dot_du.resize(n);
-      _dof_du_dotdot_du.resize(n);
-      for (size_t i = 0; i < n; ++i)
+    }
+
+    if (_need_ad && _subproblem.currentlyComputingJacobian())
+    {
+      _ad_dof_values.resize(n);
+      auto ad_offset = _var_num * _sys.getMaxVarNDofsPerNode();
+
+      for (decltype(n) i = 0; i < n; ++i)
       {
-        if (_sys.solutionUDot())
-          _dof_values_dot[i] = (*_sys.solutionUDot())(_dof_indices[i]);
-        if (_sys.solutionUDotDot())
-          _dof_values_dotdot[i] = (*_sys.solutionUDotDot())(_dof_indices[i]);
-        if (_sys.solutionUDotOld())
-          _dof_values_dot_old[i] = (*_sys.solutionUDotOld())(_dof_indices[i]);
-        if (_sys.solutionUDotDotOld())
-          _dof_values_dotdot_old[i] = (*_sys.solutionUDotDotOld())(_dof_indices[i]);
-        _nodal_value_dot(i) = _dof_values_dot[i];
-        _nodal_value_dotdot(i) = _dof_values_dotdot[i];
-        _nodal_value_dot_old(i) = _dof_values_dot_old[i];
-        _nodal_value_dotdot_old(i) = _dof_values_dotdot_old[i];
+        _ad_dof_values[i] = _dof_values[i];
+        _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
+        assignADNodalValue(_ad_dof_values[i], i);
       }
     }
   }
@@ -2189,19 +2175,34 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeNodalNeighborValues()
 {
-  if (_neighbor_has_dofs)
+  if (_neighbor_has_dof_indices)
   {
     const unsigned int n = _dof_indices_neighbor.size();
     mooseAssert(n, "There must be a non-zero number of degrees of freedom");
     _dof_values_neighbor.resize(n);
     _sys.currentSolution()->get(_dof_indices_neighbor, &_dof_values_neighbor[0]);
+    for (unsigned int i = 0; i < n; ++i)
+      assignNeighborNodalValue(_dof_values_neighbor[i], i);
 
+    if (_need_dof_values_previous_nl_neighbor)
+    {
+      _dof_values_previous_nl_neighbor.resize(n);
+      _sys.solutionPreviousNewton()->get(_dof_indices_neighbor,
+                                         &_dof_values_previous_nl_neighbor[0]);
+      for (unsigned int i = 0; i < n; ++i)
+        assignNeighborNodalValuePreviousNL(_dof_values_previous_nl_neighbor[i], i);
+    }
     if (_subproblem.isTransient())
     {
       _dof_values_old_neighbor.resize(n);
       _dof_values_older_neighbor.resize(n);
       _sys.solutionOld().get(_dof_indices_neighbor, &_dof_values_old_neighbor[0]);
       _sys.solutionOlder().get(_dof_indices_neighbor, &_dof_values_older_neighbor[0]);
+      for (unsigned int i = 0; i < n; ++i)
+      {
+        assignNeighborNodalValueOld(_dof_values_old_neighbor[i], i);
+        assignNeighborNodalValueOlder(_dof_values_older_neighbor[i], i);
+      }
 
       _dof_values_dot_neighbor.resize(n);
       _dof_values_dotdot_neighbor.resize(n);
@@ -2228,6 +2229,8 @@ MooseVariableFE<OutputType>::computeNodalNeighborValues()
   else
   {
     _dof_values_neighbor.resize(0);
+    if (_need_dof_values_previous_nl_neighbor)
+      _dof_values_previous_nl_neighbor.resize(0);
     if (_subproblem.isTransient())
     {
       _dof_values_old_neighbor.resize(0);
@@ -2243,6 +2246,247 @@ MooseVariableFE<OutputType>::computeNodalNeighborValues()
 }
 
 template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValue(const Real & value, const unsigned int &)
+{
+  _nodal_value = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValue(const Real & value,
+                                                   const unsigned int & component)
+{
+  _nodal_value(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignADNodalValue(const DualReal & value, const unsigned int &)
+{
+  _ad_nodal_value = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignADNodalValue(const DualReal & value,
+                                                     const unsigned int & component)
+{
+  _ad_nodal_value(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValueOld(const Real & value, const unsigned int &)
+{
+  _nodal_value_old = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValueOld(const Real & value,
+                                                      const unsigned int & component)
+{
+  _nodal_value_old(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValueOlder(const Real & value, const unsigned int &)
+{
+  _nodal_value_older = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValueOlder(const Real & value,
+                                                        const unsigned int & component)
+{
+  _nodal_value_older(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValuePreviousNL(const Real & value, const unsigned int &)
+{
+  _nodal_value_previous_nl = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValuePreviousNL(const Real & value,
+                                                             const unsigned int & component)
+{
+  _nodal_value_previous_nl(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValueDot(const Real & value, const unsigned int &)
+{
+  _nodal_value_dot = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValueDot(const Real & value,
+                                                      const unsigned int & component)
+{
+  _nodal_value_dot(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValueDotOld(const Real & value, const unsigned int &)
+{
+  _nodal_value_dot_old = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValueDotOld(const Real & value,
+                                                         const unsigned int & component)
+{
+  _nodal_value_dot_old(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValueDotDot(const Real & value, const unsigned int &)
+{
+  _nodal_value_dotdot = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValueDotDot(const Real & value,
+                                                         const unsigned int & component)
+{
+  _nodal_value_dotdot(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNodalValueDotDotOld(const Real & value, const unsigned int &)
+{
+  _nodal_value_dotdot_old = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNodalValueDotDotOld(const Real & value,
+                                                            const unsigned int & component)
+{
+  _nodal_value_dotdot_old(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNeighborNodalValue(const Real & value, const unsigned int &)
+{
+  _neighbor_nodal_value = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNeighborNodalValue(const Real & value,
+                                                           const unsigned int & component)
+{
+  _neighbor_nodal_value(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNeighborNodalValueOld(const Real & value, const unsigned int &)
+{
+  _neighbor_nodal_value_old = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNeighborNodalValueOld(const Real & value,
+                                                              const unsigned int & component)
+{
+  _neighbor_nodal_value_old(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNeighborNodalValueOlder(const Real & value, const unsigned int &)
+{
+  _neighbor_nodal_value_older = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNeighborNodalValueOlder(const Real & value,
+                                                                const unsigned int & component)
+{
+  _neighbor_nodal_value_older(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::assignNeighborNodalValuePreviousNL(const Real & value,
+                                                                const unsigned int &)
+{
+  _neighbor_nodal_value_previous_nl = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::assignNeighborNodalValuePreviousNL(const Real & value,
+                                                                     const unsigned int & component)
+{
+  _neighbor_nodal_value_previous_nl(component) = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::setDofValues(const DenseVector<Number> & values)
+{
+  for (unsigned int i = 0; i < values.size(); i++)
+    _dof_values[i] = values(i);
+
+  _has_dof_values = true;
+
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+  {
+    _u[qp] = 0;
+    for (unsigned int i = 0; i < _dof_values.size(); i++)
+      _u[qp] += _phi[i][qp] * _dof_values[i];
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::setNodalValue(OutputType value, unsigned int idx /* = 0*/)
+{
+  _dof_values[idx] = value; // update variable nodal value
+  _has_dof_values = true;
+  assignNodalValue(value, 0);
+
+  // Update the qp values as well
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+    _u[qp] = value;
+}
+
+template <>
+void
+MooseVariableFE<RealVectorValue>::setNodalValue(RealVectorValue value, unsigned int idx /* = 0*/)
+{
+  for (decltype(idx) i = 0; i < LIBMESH_DIM; ++i, ++idx)
+  {
+    _dof_values[idx] = value(i);
+    assignNodalValue(value(i), i);
+  }
+
+  // Update the qp values as well
+  for (unsigned int qp = 0; qp < _u.size(); qp++)
+    _u[qp] = value;
+}
+
+template <typename OutputType>
 bool
 MooseVariableFE<OutputType>::isVector() const
 {
@@ -2254,7 +2498,14 @@ template <>
 const VariableValue &
 MooseVariableFE<Real>::adSln<RESIDUAL>()
 {
-  _need_ad_u = true;
+  return _u;
+}
+
+template <>
+template <>
+const VectorVariableValue &
+MooseVariableFE<RealVectorValue>::adSln<RESIDUAL>()
+{
   return _u;
 }
 
@@ -2263,7 +2514,14 @@ template <>
 const VariableGradient &
 MooseVariableFE<Real>::adGradSln<RESIDUAL>()
 {
-  _need_ad_grad_u = true;
+  return _grad_u;
+}
+
+template <>
+template <>
+const VectorVariableGradient &
+MooseVariableFE<RealVectorValue>::adGradSln<RESIDUAL>()
+{
   return _grad_u;
 }
 
@@ -2272,7 +2530,18 @@ template <>
 const VariableSecond &
 MooseVariableFE<Real>::adSecondSln<RESIDUAL>()
 {
-  _need_ad_second_u = true;
+  _need_second = true;
+  secondPhi();
+  secondPhiFace();
+  return _second_u;
+}
+
+template <>
+template <>
+const VectorVariableSecond &
+MooseVariableFE<RealVectorValue>::adSecondSln<RESIDUAL>()
+{
+  _need_second = true;
   secondPhi();
   secondPhiFace();
   return _second_u;
@@ -2281,9 +2550,32 @@ MooseVariableFE<Real>::adSecondSln<RESIDUAL>()
 template <>
 template <>
 const VariableValue &
+MooseVariableFE<Real>::adUDot<RESIDUAL>()
+{
+  return _u_dot;
+}
+
+template <>
+template <>
+const VectorVariableValue &
+MooseVariableFE<RealVectorValue>::adUDot<RESIDUAL>()
+{
+  return _u_dot;
+}
+
+template <>
+template <>
+const VariableValue &
 MooseVariableFE<Real>::adSlnNeighbor<RESIDUAL>()
 {
-  _need_neighbor_ad_u = true;
+  return _u_neighbor;
+}
+
+template <>
+template <>
+const VectorVariableValue &
+MooseVariableFE<RealVectorValue>::adSlnNeighbor<RESIDUAL>()
+{
   return _u_neighbor;
 }
 
@@ -2292,7 +2584,14 @@ template <>
 const VariableGradient &
 MooseVariableFE<Real>::adGradSlnNeighbor<RESIDUAL>()
 {
-  _need_neighbor_ad_grad_u = true;
+  return _grad_u_neighbor;
+}
+
+template <>
+template <>
+const VectorVariableGradient &
+MooseVariableFE<RealVectorValue>::adGradSlnNeighbor<RESIDUAL>()
+{
   return _grad_u_neighbor;
 }
 
@@ -2301,10 +2600,155 @@ template <>
 const VariableSecond &
 MooseVariableFE<Real>::adSecondSlnNeighbor<RESIDUAL>()
 {
-  _need_neighbor_ad_second_u = true;
+  _need_second_neighbor = true;
   secondPhiFaceNeighbor();
   return _second_u_neighbor;
 }
 
+template <>
+template <>
+const VectorVariableSecond &
+MooseVariableFE<RealVectorValue>::adSecondSlnNeighbor<RESIDUAL>()
+{
+  _need_second_neighbor = true;
+  secondPhiFaceNeighbor();
+  return _second_u_neighbor;
+}
+
+template <>
+template <>
+const VariableValue &
+MooseVariableFE<Real>::adUDotNeighbor<RESIDUAL>()
+{
+  return _u_dot_neighbor;
+}
+
+template <>
+template <>
+const VectorVariableValue &
+MooseVariableFE<RealVectorValue>::adUDotNeighbor<RESIDUAL>()
+{
+  return _u_dot_neighbor;
+}
+
+template <typename OutputType>
+template <ComputeStage compute_stage>
+const MooseArray<typename Moose::RealType<compute_stage>::type> &
+MooseVariableFE<OutputType>::adDofValues()
+{
+  _need_ad = true;
+  return _ad_dof_values;
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableFE<Real>::adDofValues<RESIDUAL>()
+{
+  return _dof_values;
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableFE<RealVectorValue>::adDofValues<RESIDUAL>()
+{
+  return _dof_values;
+}
+
+template <typename OutputType>
+template <ComputeStage compute_stage>
+const typename Moose::ValueType<OutputType, compute_stage>::type &
+MooseVariableFE<OutputType>::adNodalValue()
+{
+  _need_ad = true;
+  return _ad_nodal_value;
+}
+
+template <>
+template <>
+const Real &
+MooseVariableFE<Real>::adNodalValue<RESIDUAL>()
+{
+  return _nodal_value;
+}
+
+template <>
+template <>
+const RealVectorValue &
+MooseVariableFE<RealVectorValue>::adNodalValue<RESIDUAL>()
+{
+  return _nodal_value;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
+MooseVariableFE<OutputType>::secondPhi()
+{
+  _second_phi = &_assembly.feSecondPhi<OutputType>(_fe_type);
+  return *_second_phi;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
+MooseVariableFE<OutputType>::curlPhi()
+{
+  _curl_phi = &_assembly.feCurlPhi<OutputType>(_fe_type);
+  return *_curl_phi;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
+MooseVariableFE<OutputType>::secondPhiFace()
+{
+  _second_phi_face = &_assembly.feSecondPhiFace<OutputType>(_fe_type);
+  return *_second_phi_face;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
+MooseVariableFE<OutputType>::curlPhiFace()
+{
+  _curl_phi_face = &_assembly.feCurlPhiFace<OutputType>(_fe_type);
+  return *_curl_phi_face;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
+MooseVariableFE<OutputType>::secondPhiNeighbor()
+{
+  _second_phi_neighbor = &_assembly.feSecondPhiNeighbor<OutputType>(_fe_type);
+  return *_second_phi_neighbor;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
+MooseVariableFE<OutputType>::curlPhiNeighbor()
+{
+  _curl_phi_neighbor = &_assembly.feCurlPhiNeighbor<OutputType>(_fe_type);
+  return *_curl_phi_neighbor;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
+MooseVariableFE<OutputType>::secondPhiFaceNeighbor()
+{
+  _second_phi_face_neighbor = &_assembly.feSecondPhiFaceNeighbor<OutputType>(_fe_type);
+  return *_second_phi_face_neighbor;
+}
+
+template <typename OutputType>
+const typename MooseVariableFE<OutputType>::FieldVariablePhiCurl &
+MooseVariableFE<OutputType>::curlPhiFaceNeighbor()
+{
+  _curl_phi_face_neighbor = &_assembly.feCurlPhiFaceNeighbor<OutputType>(_fe_type);
+  return *_curl_phi_face_neighbor;
+}
+
 template class MooseVariableFE<Real>;
 template class MooseVariableFE<RealVectorValue>;
+template const MooseArray<DualReal> & MooseVariableFE<Real>::adDofValues<JACOBIAN>();
+template const MooseArray<DualReal> & MooseVariableFE<RealVectorValue>::adDofValues<JACOBIAN>();
+template const DualReal & MooseVariableFE<Real>::adNodalValue<JACOBIAN>();
+template const libMesh::VectorValue<DualReal> &
+MooseVariableFE<RealVectorValue>::adNodalValue<JACOBIAN>();

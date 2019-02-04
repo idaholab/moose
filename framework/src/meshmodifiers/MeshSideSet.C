@@ -11,6 +11,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/mesh_modification.h"
+#include "libmesh/elem.h"
 
 registerMooseObject("MooseApp", MeshSideSet);
 

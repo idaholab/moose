@@ -14,6 +14,8 @@
 #include "MeshModifier.h"
 #include "MooseEnum.h"
 
+#include "libmesh/bounding_box.h"
+
 // Forward Declaration
 class BoundingBoxNodeSet;
 namespace libMesh

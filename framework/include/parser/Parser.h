@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <iomanip>
 
 // Forward declarations
 class ActionWarehouse;

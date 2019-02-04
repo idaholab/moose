@@ -72,9 +72,9 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
                                            : std::numeric_limits<Real>::max()),
     _coeff((_biot - 1.0) / _solid_bulk),
 
-    _t_reference(_nodal_material ? coupledNodalValue("reference_temperature")
+    _t_reference(_nodal_material ? coupledDofValues("reference_temperature")
                                  : coupledValue("reference_temperature")),
-    _p_reference(_nodal_material ? coupledNodalValue("reference_porepressure")
+    _p_reference(_nodal_material ? coupledDofValues("reference_porepressure")
                                  : coupledValue("reference_porepressure")),
     _num_c_ref(coupledComponents("reference_chemistry")),
     _c_reference(_num_c_ref),
@@ -165,9 +165,9 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
 
   for (unsigned i = 0; i < _num_c_ref; ++i)
   {
-    _c_reference[i] = (_nodal_material ? &coupledNodalValue("reference_chemistry", i)
+    _c_reference[i] = (_nodal_material ? &coupledDofValues("reference_chemistry", i)
                                        : &coupledValue("reference_chemistry", i));
-    _initial_c[i] = (_nodal_material ? &coupledNodalValue("initial_mineral_concentrations", i)
+    _initial_c[i] = (_nodal_material ? &coupledDofValues("initial_mineral_concentrations", i)
                                      : &coupledValue("initial_mineral_concentrations", i));
   }
 }

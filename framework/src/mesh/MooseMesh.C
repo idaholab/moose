@@ -19,6 +19,7 @@
 #include <utility>
 
 // libMesh
+#include "libmesh/bounding_box.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel.h"

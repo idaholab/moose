@@ -14,6 +14,7 @@
 
 #include "libmesh/variable.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/system.h"
 
 MooseVariableBase::MooseVariableBase(unsigned int var_num,
                                      const FEType & fe_type,

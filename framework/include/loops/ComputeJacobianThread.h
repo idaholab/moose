@@ -69,6 +69,12 @@ protected:
   // A pointer to different warehouse
   MooseObjectWarehouse<KernelBase> * _warehouse;
 
+  /// Reference to ADKernel<JACOBIAN> storage structure
+  MooseObjectTagWarehouse<KernelBase> & _ad_jacobian_kernels;
+
+  /// Pointer to tags
+  MooseObjectWarehouse<KernelBase> * _adjk_warehouse;
+
   const std::set<TagID> & _tags;
 
   virtual void computeJacobian();

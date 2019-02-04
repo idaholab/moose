@@ -34,7 +34,7 @@ validParams<PorousFlow2PhasePP>()
 PorousFlow2PhasePP::PorousFlow2PhasePP(const InputParameters & parameters)
   : PorousFlowVariableBase(parameters),
 
-    _phase0_porepressure(_nodal_material ? coupledNodalValue("phase0_porepressure")
+    _phase0_porepressure(_nodal_material ? coupledDofValues("phase0_porepressure")
                                          : coupledValue("phase0_porepressure")),
     _phase0_gradp_qp(coupledGradient("phase0_porepressure")),
     _phase0_porepressure_varnum(coupled("phase0_porepressure")),
@@ -42,7 +42,7 @@ PorousFlow2PhasePP::PorousFlow2PhasePP(const InputParameters & parameters)
                ? _dictator.porousFlowVariableNum(_phase0_porepressure_varnum)
                : 0),
 
-    _phase1_porepressure(_nodal_material ? coupledNodalValue("phase1_porepressure")
+    _phase1_porepressure(_nodal_material ? coupledDofValues("phase1_porepressure")
                                          : coupledValue("phase1_porepressure")),
     _phase1_gradp_qp(coupledGradient("phase1_porepressure")),
     _phase1_porepressure_varnum(coupled("phase1_porepressure")),

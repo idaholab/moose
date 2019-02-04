@@ -36,7 +36,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _currently_computing_jacobian(false),
     _computing_nonlinear_residual(false),
     _safe_access_tagged_matrices(false),
-    _safe_access_tagged_vectors(false)
+    _safe_access_tagged_vectors(false),
+    _have_ad_objects(false)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);

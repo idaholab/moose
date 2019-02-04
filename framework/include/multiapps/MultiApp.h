@@ -15,6 +15,7 @@
 #include "Restartable.h"
 
 #include "libmesh/communicator.h"
+#include "libmesh/point.h"
 
 class MultiApp;
 class UserObject;

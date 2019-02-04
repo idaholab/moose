@@ -23,8 +23,8 @@ validParams<ElementJacobianDamper>()
 {
   InputParameters params = validParams<GeneralDamper>();
   params.addClassDescription("Damper that limits the change in element Jacobians");
-  params.addParam<std::vector<NonlinearVariableName>>("displacements",
-                                                      "The nonlinear displacement variables");
+  params.addParam<std::vector<VariableName>>("displacements",
+                                             "The nonlinear displacement variables");
   params.addParam<Real>(
       "max_increment",
       0.1,
@@ -48,8 +48,7 @@ ElementJacobianDamper::ElementJacobianDamper(const InputParameters & parameters)
 
   _mesh = &_displaced_problem->mesh();
 
-  const std::vector<NonlinearVariableName> & nl_vnames(
-      getParam<std::vector<NonlinearVariableName>>("displacements"));
+  const std::vector<VariableName> & nl_vnames(getParam<std::vector<VariableName>>("displacements"));
   _ndisp = nl_vnames.size();
 
   for (unsigned int i = 0; i < _ndisp; ++i)

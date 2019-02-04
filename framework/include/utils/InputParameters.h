@@ -11,15 +11,14 @@
 #define INPUTPARAMETERS_H
 
 // MOOSE includes
+#include "MooseUtils.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
-#include "MooseUtils.h"
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "Conversion.h"
 
 #include "libmesh/parameters.h"
-#include "libmesh/parsed_function.h"
 
 #ifdef LIBMESH_HAVE_FPARSER
 #include "libmesh/fparser.hh"

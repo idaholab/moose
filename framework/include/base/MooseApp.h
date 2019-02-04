@@ -24,6 +24,7 @@
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
+#include "libmesh/point.h"
 
 // C++ includes
 #include <list>

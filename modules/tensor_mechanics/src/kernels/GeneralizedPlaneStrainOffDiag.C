@@ -28,9 +28,9 @@ validParams<GeneralizedPlaneStrainOffDiag>()
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Generalized Plane Strain kernel to provide contribution of the "
                              "out-of-plane strain to other kernels");
-  params.addRequiredParam<std::vector<NonlinearVariableName>>("displacements",
-                                                              "Variable for the displacements");
-  params.addParam<NonlinearVariableName>("temperature", "Variable for the temperature");
+  params.addRequiredParam<std::vector<VariableName>>("displacements",
+                                                     "Variable for the displacements");
+  params.addParam<VariableName>("temperature", "Variable for the temperature");
 
   params.addCoupledVar("scalar_out_of_plane_strain",
                        "Scalar variable for generalized plane strain");
@@ -62,15 +62,13 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
     _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
                        ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
                        : 0),
-    _temp_var(
-        isParamValid("temperature")
-            ? &_subproblem.getStandardVariable(_tid, getParam<NonlinearVariableName>("temperature"))
-            : NULL),
-    _num_disp_var(getParam<std::vector<NonlinearVariableName>>("displacements").size()),
+    _temp_var(isParamValid("temperature")
+                  ? &_subproblem.getStandardVariable(_tid, getParam<VariableName>("temperature"))
+                  : NULL),
+    _num_disp_var(getParam<std::vector<VariableName>>("displacements").size()),
     _scalar_out_of_plane_strain_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
-  const std::vector<NonlinearVariableName> & nl_vnames(
-      getParam<std::vector<NonlinearVariableName>>("displacements"));
+  const std::vector<VariableName> & nl_vnames(getParam<std::vector<VariableName>>("displacements"));
 
   if (_scalar_out_of_plane_strain_direction == 2 && _num_disp_var > 2)
     mooseError("For 1D axisymmetric or 2D cartesian simulations where the out-of-plane direction "

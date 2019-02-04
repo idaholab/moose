@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KernelValue.h"
+#include "Assembly.h"
 #include "libmesh/quadrature.h"
 
 template <>

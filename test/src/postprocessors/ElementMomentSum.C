@@ -24,8 +24,8 @@ validParams<ElementMomentSum>()
 
 ElementMomentSum::ElementMomentSum(const InputParameters & parameters)
   : ElementIntegralVariablePostprocessor(parameters),
-    _elemental_sln(getParam<bool>("use_old") ? coupledSolutionDoFsOld("variable")
-                                             : coupledSolutionDoFs("variable"))
+    _elemental_sln(getParam<bool>("use_old") ? coupledDofValuesOld("variable")
+                                             : coupledDofValues("variable"))
 {
 }
 
@@ -35,7 +35,7 @@ ElementMomentSum::execute()
   unsigned int ndofs = _elemental_sln.size();
   Real v = 0;
   for (unsigned int i = 0; i < ndofs; ++i)
-    v += _elemental_sln(i);
+    v += _elemental_sln[i];
   v /= ndofs;
   v *= _current_elem_volume;
 

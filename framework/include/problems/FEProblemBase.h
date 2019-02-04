@@ -1472,8 +1472,9 @@ public:
   std::vector<VariableValue> _zero;
   std::vector<MooseArray<DualReal>> _ad_zero;
   std::vector<VariableGradient> _grad_zero;
-  std::vector<MooseArray<DualRealGradient>> _ad_grad_zero;
+  std::vector<MooseArray<DualRealVectorValue>> _ad_grad_zero;
   std::vector<VariableSecond> _second_zero;
+  std::vector<MooseArray<DualRealTensorValue>> _ad_second_zero;
   std::vector<VariablePhiSecond> _second_phi_zero;
   std::vector<Point> _point_zero;
   std::vector<VectorVariableValue> _vector_zero;
@@ -1551,12 +1552,12 @@ public:
    * Set the global automatic differentiaion (AD) flag which indicates whether any consumer has
    * requested an AD material property or whether any suppier has declared an AD material property
    */
-  void setUsingADFlag(bool using_ad) { _using_ad = using_ad; }
+  void usingADMatProps(bool using_ad_mat_props) { _using_ad_mat_props = using_ad_mat_props; }
 
   /**
    * Whether any object has requested/supplied an AD material property
    */
-  bool usingAD() const { return _using_ad; }
+  bool usingADMatProps() const { return _using_ad_mat_props; }
 
   /// Set boolean flag to true to store solution time derivative
   virtual void setUDotRequested(const bool u_dot_requested) { _u_dot_requested = u_dot_requested; };
@@ -1605,6 +1606,9 @@ public:
                  "`u_dotdot_requested` to true using setUDotDotRequested.");
     return _u_dotdot_old_requested;
   };
+
+  using SubProblem::haveADObjects;
+  void haveADObjects(bool have_ad_objects) override;
 
 protected:
   /// Create extra tagged vectors and matrices
@@ -1855,7 +1859,7 @@ protected:
 
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property
-  bool _using_ad;
+  bool _using_ad_mat_props;
 
 private:
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);

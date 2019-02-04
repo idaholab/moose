@@ -21,8 +21,7 @@ validParams<PorousFlowSinglePhaseBase>()
   params.addParam<bool>("add_darcy_aux", true, "Add AuxVariables that record Darcy velocity");
   params.addParam<bool>("add_stress_aux", true, "Add AuxVariables that record effective stress");
   params.addParam<bool>("use_brine", false, "Use PorousFlowBrine material for the fluid phase");
-  params.addRequiredParam<NonlinearVariableName>("porepressure",
-                                                 "The name of the porepressure variable");
+  params.addRequiredParam<VariableName>("porepressure", "The name of the porepressure variable");
   MooseEnum coupling_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
   params.addParam<MooseEnum>("coupling_type",
                              coupling_type,
@@ -65,7 +64,7 @@ validParams<PorousFlowSinglePhaseBase>()
 
 PorousFlowSinglePhaseBase::PorousFlowSinglePhaseBase(const InputParameters & params)
   : PorousFlowActionBase(params),
-    _pp_var(getParam<NonlinearVariableName>("porepressure")),
+    _pp_var(getParam<VariableName>("porepressure")),
     _coupling_type(getParam<MooseEnum>("coupling_type").getEnum<CouplingTypeEnum>()),
     _thermal(_coupling_type == CouplingTypeEnum::ThermoHydro ||
              _coupling_type == CouplingTypeEnum::ThermoHydroMechanical),

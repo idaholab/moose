@@ -43,7 +43,7 @@ validParams<Q2PNegativeNodalMassOld>()
 Q2PNegativeNodalMassOld::Q2PNegativeNodalMassOld(const InputParameters & parameters)
   : TimeKernel(parameters),
     _density(getUserObject<RichardsDensity>("fluid_density")),
-    _other_var_nodal_old(coupledNodalValueOld("other_var")),
+    _other_var_nodal_old(coupledDofValuesOld("other_var")),
     _var_is_pp(getParam<bool>("var_is_porepressure")),
     _porosity_old(getMaterialProperty<Real>("porosity_old"))
 {

@@ -10,6 +10,8 @@
 #include "RenameBlockGenerator.h"
 #include "CastUniquePointer.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", RenameBlockGenerator);
 
 template <>

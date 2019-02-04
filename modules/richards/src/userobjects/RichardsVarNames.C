@@ -58,12 +58,12 @@ RichardsVarNames::RichardsVarNames(const InputParameters & parameters)
                                                              // alias) to a VariableValue, and the &
                                                              // turns it into a pointer
     _moose_var_value_old[i] = (_is_transient ? &coupledValueOld("richards_vars", i) : &_zero);
-    _moose_nodal_var_value[i] = &coupledNodalValue("richards_vars", i); // coupledNodalValue returns
-                                                                        // a reference (an alias) to
-                                                                        // a VariableValue, and the
-                                                                        // & turns it into a pointer
+    _moose_nodal_var_value[i] = &coupledDofValues("richards_vars", i); // coupledDofValues returns
+                                                                       // a reference (an alias) to
+                                                                       // a VariableValue, and the
+                                                                       // & turns it into a pointer
     _moose_nodal_var_value_old[i] =
-        (_is_transient ? &coupledNodalValueOld("richards_vars", i) : &_zero);
+        (_is_transient ? &coupledDofValuesOld("richards_vars", i) : &_zero);
     _moose_grad_var[i] = &coupledGradient("richards_vars", i);
   }
 

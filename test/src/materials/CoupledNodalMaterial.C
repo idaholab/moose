@@ -25,9 +25,9 @@ validParams<CoupledNodalMaterial>()
 CoupledNodalMaterial::CoupledNodalMaterial(const InputParameters & parameters)
   : Material(parameters),
     _lag(getParam<MooseEnum>("lag")),
-    _coupled_val(_lag == 0 ? coupledNodalValue("coupled")
-                           : (_lag == 1 ? coupledNodalValueOld("coupled")
-                                        : coupledNodalValueOlder("coupled")))
+    _coupled_val(_lag == 0 ? coupledNodalValue<Real>("coupled")
+                           : (_lag == 1 ? coupledNodalValueOld<Real>("coupled")
+                                        : coupledNodalValueOlder<Real>("coupled")))
 {
 }
 

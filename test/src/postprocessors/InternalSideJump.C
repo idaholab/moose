@@ -26,8 +26,8 @@ InternalSideJump::InternalSideJump(const InputParameters & parameters)
   : InternalSidePostprocessor(parameters),
     _current_elem_volume(_assembly.elemVolume()),
     _current_neighbor_volume(_assembly.neighborVolume()),
-    _sln_dofs(coupledSolutionDoFs("variable")),
-    _sln_dofs_neig(coupledNeighborSolutionDoFs("variable"))
+    _sln_dofs(coupledDofValues("variable")),
+    _sln_dofs_neig(coupledNeighborDofValues("variable"))
 {
 }
 
@@ -43,13 +43,13 @@ InternalSideJump::execute()
   unsigned int ndofs = _sln_dofs.size();
   Real v = 0;
   for (unsigned int i = 0; i < ndofs; ++i)
-    v += _sln_dofs(i);
+    v += _sln_dofs[i];
   v /= ndofs;
 
   ndofs = _sln_dofs_neig.size();
   Real u = 0;
   for (unsigned int i = 0; i < ndofs; ++i)
-    u += _sln_dofs_neig(i);
+    u += _sln_dofs_neig[i];
   u /= ndofs;
 
   _integral_value += std::abs(u - v) * _current_side_volume;

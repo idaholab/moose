@@ -27,6 +27,7 @@
 #include "Conversion.h"
 #include "Executioner.h"
 #include "MooseMesh.h"
+#include "ComputeLineSearchObjectWrapper.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/linear_implicit_system.h"
@@ -965,16 +966,6 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   MatColoringDestroy(&mc);
 #endif
   ISColoringDestroy(&iscoloring);
-}
-
-ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
-{
-}
-
-void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
-{
-  _fe_problem.lineSearch();
 }
 
 } // Namespace PetscSupport

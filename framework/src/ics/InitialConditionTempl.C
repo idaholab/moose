@@ -252,7 +252,7 @@ InitialConditionTempl<T>::compute()
     {
       solution.set(_dof_indices[i], _Ue(i));
     }
-    _var.setNodalValue(_Ue);
+    _var.setDofValues(_Ue);
   }
 }
 

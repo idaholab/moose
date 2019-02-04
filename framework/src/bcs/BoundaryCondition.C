@@ -33,6 +33,7 @@ validParams<BoundaryCondition>()
                         "the undisplaced mesh will still be used.");
 
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addCoupledVar("displacements", "The displacements");
   params.declareControllable("enable");
   params.registerBase("BoundaryCondition");
 

@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "MooseApp.h"
 #include "MooseRevision.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -38,6 +37,7 @@
 #include "SerializerGuard.h"
 #include "PerfGraphInterface.h" // For TIME_SECTIOn
 #include "Attributes.h"
+#include "MooseApp.h"
 
 // Regular expression includes
 #include "pcrecpp.h"

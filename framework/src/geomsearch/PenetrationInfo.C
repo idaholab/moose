@@ -18,6 +18,8 @@
 #include "Moose.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+
 PenetrationInfo::PenetrationInfo(const Node * node,
                                  const Elem * elem,
                                  const Elem * side,

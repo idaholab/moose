@@ -20,6 +20,7 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/id_types.h"
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/dof_object.h"
 
 registerMooseObject("MooseApp", MultiAppNearestNodeTransfer);
 

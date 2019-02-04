@@ -12,6 +12,8 @@
 
 #include "SideSetsGeneratorBase.h"
 
+#include "libmesh/point.h"
+
 // Forward declarations
 class SideSetsAroundSubdomainGenerator;
 

@@ -9,10 +9,10 @@
 
 #include "Moose.h"
 #include "RandomInterface.h"
-#include "Assembly.h"
 #include "RandomData.h"
 #include "MooseRandom.h"
 #include "FEProblemBase.h"
+#include "Assembly.h"
 
 template <>
 InputParameters

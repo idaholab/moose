@@ -11,9 +11,9 @@
 #define MATERIALPROPERTYINTERFACE_H
 
 // MOOSE includes
+#include "MaterialProperty.h"
 #include "FEProblemBase.h"
 #include "MooseTypes.h"
-#include "MaterialProperty.h"
 #include "MaterialData.h"
 
 // Forward declarations
@@ -254,6 +254,9 @@ protected:
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
   /// Storage vector for ADMaterialPropertyObject<Real> default objects
   std::vector<std::unique_ptr<ADMaterialPropertyObject<Real>>> _default_ad_real_properties;
+  /// Storage vector for ADMaterialPropertyObject<RealVectorValue> default objects
+  std::vector<std::unique_ptr<ADMaterialPropertyObject<RealVectorValue>>>
+      _default_ad_real_vector_properties;
 
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
@@ -388,6 +391,14 @@ template <>
 const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty(const std::string & name);
 
+template <>
+const ADMaterialPropertyObject<Real> *
+MaterialPropertyInterface::defaultADMaterialProperty<Real>(const std::string & name);
+
+template <>
+const ADMaterialPropertyObject<RealVectorValue> *
+MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std::string & name);
+
 template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name)
@@ -410,7 +421,7 @@ template <typename T>
 const ADMaterialPropertyObject<T> &
 MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
 {
-  _mi_feproblem.setUsingADFlag(true);
+  _mi_feproblem.usingADMatProps(true);
 
   checkExecutionStage();
   checkMaterialProperty(name);

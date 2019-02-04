@@ -25,13 +25,13 @@
 #endif
 
 // MOOSE includes
-#include "PenetrationLocator.h"
-#include "NearestNodeLocator.h"
-#include "GeometricSearchData.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
+#include "PenetrationLocator.h"
+#include "NearestNodeLocator.h"
+#include "GeometricSearchData.h"
 
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"

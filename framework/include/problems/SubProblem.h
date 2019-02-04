@@ -17,6 +17,13 @@
 
 #include "libmesh/coupling_matrix.h"
 
+namespace libMesh
+{
+template <typename>
+class VectorValue;
+typedef VectorValue<Real> RealVectorValue;
+}
+
 class MooseMesh;
 class SubProblem;
 class Factory;
@@ -498,7 +505,12 @@ public:
   /**
    * Returns true if the problem is in the process of computing Jacobian
    */
-  virtual bool currentlyComputingJacobian() const { return _currently_computing_jacobian; };
+  virtual const bool & currentlyComputingJacobian() const { return _currently_computing_jacobian; };
+
+  virtual void setCurrentlyComputingJacobian(const bool & flag)
+  {
+    _currently_computing_jacobian = flag;
+  }
 
   /// Check whether residual being evaulated is non-linear
   bool & computingNonlinearResid() { return _computing_nonlinear_residual; }
@@ -532,6 +544,15 @@ public:
   std::set<TagID> & getActiveFEVariableCoupleableVectorTags(THREAD_ID tid);
 
   std::set<TagID> & getActiveFEVariableCoupleableMatrixTags(THREAD_ID tid);
+
+  /**
+   * Method for setting whether we have any ad objects
+   */
+  virtual void haveADObjects(bool have_ad_objects) { _have_ad_objects = have_ad_objects; }
+  /**
+   * Method for reading wehther we have any ad objects
+   */
+  bool haveADObjects() const { return _have_ad_objects; }
 
 protected:
   /**
@@ -628,6 +649,9 @@ protected:
 
   /// Is it safe to retrieve data from tagged vectors
   bool _safe_access_tagged_vectors;
+
+  /// AD flag indicating whether **any** AD objects have been added
+  bool _have_ad_objects;
 
 private:
   ///@{ Helper functions for checking MaterialProperties

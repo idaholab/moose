@@ -14,6 +14,8 @@
 #include "PorousFlowDependencies.h"
 #include "MooseEnum.h"
 
+#include "libmesh/vector_value.h"
+
 class PorousFlowActionBase;
 
 template <>
@@ -68,7 +70,7 @@ protected:
   const std::vector<VariableName> & _temperature_var;
 
   /// Displacement NonlinearVariable names (if any)
-  const std::vector<NonlinearVariableName> & _displacements;
+  const std::vector<VariableName> & _displacements;
 
   /// Number of displacement variables supplied
   const unsigned _ndisp;

@@ -169,6 +169,11 @@ public:
    */
   std::vector<T> stdVector() const;
 
+  /**
+   * Reference to first element of array
+   */
+  const T * data() const { return _data; }
+
 private:
   /// Actual data pointer.
   T * _data;

@@ -22,11 +22,11 @@ validParams<SolidMechanicsAction>()
   InputParameters params = validParams<Action>();
   MooseEnum elemType("truss undefined", "undefined");
   params.addParam<MooseEnum>("type", elemType, "The element type: " + elemType.getRawNames());
-  params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
-  params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
-  params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
-  params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
-  params.addParam<NonlinearVariableName>("temp", "", "The temperature");
+  params.addParam<VariableName>("disp_x", "", "The x displacement");
+  params.addParam<VariableName>("disp_y", "", "The y displacement");
+  params.addParam<VariableName>("disp_z", "", "The z displacement");
+  params.addParam<VariableName>("disp_r", "", "The r displacement");
+  params.addParam<VariableName>("temp", "", "The temperature");
   params.addParam<Real>("zeta", 0.0, "Stiffness dependent damping parameter for Rayleigh damping");
   params.addParam<Real>("alpha", 0.0, "alpha parameter for HHT time integration");
   params.addParam<std::string>(
@@ -63,11 +63,11 @@ validParams<SolidMechanicsAction>()
 
 SolidMechanicsAction::SolidMechanicsAction(const InputParameters & params)
   : Action(params),
-    _disp_x(getParam<NonlinearVariableName>("disp_x")),
-    _disp_y(getParam<NonlinearVariableName>("disp_y")),
-    _disp_z(getParam<NonlinearVariableName>("disp_z")),
-    _disp_r(getParam<NonlinearVariableName>("disp_r")),
-    _temp(getParam<NonlinearVariableName>("temp")),
+    _disp_x(getParam<VariableName>("disp_x")),
+    _disp_y(getParam<VariableName>("disp_y")),
+    _disp_z(getParam<VariableName>("disp_z")),
+    _disp_r(getParam<VariableName>("disp_r")),
+    _temp(getParam<VariableName>("temp")),
     _zeta(getParam<Real>("zeta")),
     _alpha(getParam<Real>("alpha"))
 {

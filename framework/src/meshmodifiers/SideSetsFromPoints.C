@@ -18,6 +18,8 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 #include "libmesh/enum_point_locator_type.h"
+#include "libmesh/elem.h"
+#include "libmesh/fe_base.h"
 
 registerMooseObject("MooseApp", SideSetsFromPoints);
 

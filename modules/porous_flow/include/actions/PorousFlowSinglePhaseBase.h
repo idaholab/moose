@@ -33,7 +33,7 @@ protected:
   virtual void addMaterials() override;
 
   /// Porepressure NonlinearVariable name
-  const NonlinearVariableName _pp_var;
+  const VariableName _pp_var;
 
   /// Determines the coupling type
   const enum class CouplingTypeEnum {

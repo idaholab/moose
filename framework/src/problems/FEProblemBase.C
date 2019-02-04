@@ -256,7 +256,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _line_search(nullptr),
-    _using_ad(false),
+    _using_ad_mat_props(false),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
@@ -335,6 +335,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _grad_zero.resize(n_threads);
   _ad_grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
+  _ad_second_zero.resize(n_threads);
   _second_phi_zero.resize(n_threads);
   _point_zero.resize(n_threads);
   _vector_zero.resize(n_threads);
@@ -459,6 +460,7 @@ FEProblemBase::~FEProblemBase()
     _vector_curl_zero[i].release();
     _ad_zero[i].release();
     _ad_grad_zero[i].release();
+    _ad_second_zero[i].release();
   }
 }
 
@@ -1852,6 +1854,9 @@ FEProblemBase::addKernel(const std::string & kernel_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    const auto & disp_names = _displaced_problem->getDisplacementVarNames();
+    parameters.set<std::vector<VariableName>>("displacements") =
+        std::vector<VariableName>(disp_names.begin(), disp_names.end());
     _reinit_displaced_elem = true;
   }
   else
@@ -1940,6 +1945,9 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    const auto & disp_names = _displaced_problem->getDisplacementVarNames();
+    parameters.set<std::vector<VariableName>>("displacements") =
+        std::vector<VariableName>(disp_names.begin(), disp_names.end());
     _reinit_displaced_face = true;
   }
   else
@@ -3014,7 +3022,11 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Set the current flag
   setCurrentExecuteOnFlag(exec_type);
   if (exec_type == EXEC_NONLINEAR)
+  {
     _currently_computing_jacobian = true;
+    if (_displaced_problem)
+      _displaced_problem->setCurrentlyComputingJacobian(true);
+  }
 
   // Samplers
   if (exec_type != EXEC_INITIAL)
@@ -3036,6 +3048,8 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
   _currently_computing_jacobian = false;
+  if (_displaced_problem)
+    _displaced_problem->setCurrentlyComputingJacobian(false);
 }
 
 void
@@ -3962,6 +3976,7 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
     _ad_grad_zero[tid].resize(max_qpts, DualRealGradient(0));
     _second_zero[tid].resize(max_qpts, RealTensor(0.));
+    _ad_second_zero[tid].resize(max_qpts, DualRealTensorValue(0));
     _second_phi_zero[tid].resize(max_qpts,
                                  std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
     _vector_zero[tid].resize(max_qpts, RealGradient(0.));
@@ -4669,6 +4684,8 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _current_execute_on_flag = EXEC_NONLINEAR;
     _currently_computing_jacobian = true;
+    if (_displaced_problem)
+      _displaced_problem->setCurrentlyComputingJacobian(true);
 
     execTransfers(EXEC_NONLINEAR);
     execMultiApps(EXEC_NONLINEAR);
@@ -4706,6 +4723,8 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
     _current_execute_on_flag = EXEC_NONE;
     _currently_computing_jacobian = false;
+    if (_displaced_problem)
+      _displaced_problem->setCurrentlyComputingJacobian(false);
     _has_jacobian = true;
     _safe_access_tagged_matrices = true;
   }
@@ -5884,4 +5903,12 @@ FEProblemBase::addOutput(const std::string & object_type,
   // Create the object and add it to the warehouse
   std::shared_ptr<Output> output = _factory.create<Output>(object_type, object_name, parameters);
   output_warehouse.addOutput(output);
+}
+
+void
+FEProblemBase::haveADObjects(bool have_ad_objects)
+{
+  _have_ad_objects = have_ad_objects;
+  if (_displaced_problem)
+    _displaced_problem->haveADObjects(have_ad_objects);
 }

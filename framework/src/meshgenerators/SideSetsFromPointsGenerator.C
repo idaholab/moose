@@ -20,6 +20,8 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/enum_point_locator_type.h"
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/elem.h"
+#include "libmesh/fe_base.h"
 
 #include <typeinfo>
 

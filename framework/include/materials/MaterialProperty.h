@@ -12,9 +12,9 @@
 
 #include <vector>
 
+#include "MooseADWrapper.h"
 #include "MooseArray.h"
 #include "DataIO.h"
-#include "MooseADWrapper.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"

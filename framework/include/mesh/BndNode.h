@@ -11,7 +11,11 @@
 #define BNDNODE_H
 
 #include "MooseTypes.h"
-#include "libmesh/node.h"
+
+namespace libMesh
+{
+class Node;
+}
 
 struct BndNode
 {

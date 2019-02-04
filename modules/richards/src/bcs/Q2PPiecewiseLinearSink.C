@@ -81,7 +81,7 @@ Q2PPiecewiseLinearSink::Q2PPiecewiseLinearSink(const InputParameters & parameter
     _m_func(getFunction("multiplying_fcn")),
     _density(getUserObject<RichardsDensity>("fluid_density")),
     _relperm(getUserObject<RichardsRelPerm>("fluid_relperm")),
-    _other_var_nodal(coupledNodalValue("other_var")),
+    _other_var_nodal(coupledDofValues("other_var")),
     _other_var_num(coupled("other_var")),
     _var_is_pp(getParam<bool>("var_is_porepressure")),
     _viscosity(getParam<Real>("fluid_viscosity")),

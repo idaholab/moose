@@ -12,6 +12,8 @@
 
 #include "AddSideSetsBase.h" // needed for _fe_face, if restricting using normals
 
+#include "libmesh/point.h"
+
 class SideSetsAroundSubdomain;
 
 template <>

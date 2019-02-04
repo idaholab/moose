@@ -45,7 +45,7 @@ PorousFlow1PhaseMD_Gaussian::PorousFlow1PhaseMD_Gaussian(const InputParameters &
     _recip_bulk(1.0 / _al / _bulk),
     _recip_bulk2(std::pow(_recip_bulk, 2)),
 
-    _md_var(_nodal_material ? coupledNodalValue("mass_density") : coupledValue("mass_density")),
+    _md_var(_nodal_material ? coupledDofValues("mass_density") : coupledValue("mass_density")),
     _gradmd_qp_var(coupledGradient("mass_density")),
     _md_varnum(coupled("mass_density")),
     _pvar(_dictator.isPorousFlowVariable(_md_varnum) ? _dictator.porousFlowVariableNum(_md_varnum)

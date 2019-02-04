@@ -52,14 +52,29 @@ public:
   virtual int order() override { return 2; }
 
   virtual void computeTimeDerivatives() override;
+  virtual void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) override;
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
+  /**
+   * Helper function that actually does the math for computing the time derivative
+   */
+  template <typename T, typename T2>
+  void computeTimeDerivativeHelper(T & u_dot, const T2 & u_old);
+
   unsigned int _stage;
 
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_stage1;
 };
+
+template <typename T, typename T2>
+void
+ImplicitMidpoint::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old)
+{
+  u_dot -= u_old;
+  u_dot *= 1. / _dt;
+}
 
 #endif /* IMPLICITMIDPOINT_H */

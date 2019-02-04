@@ -14,6 +14,8 @@
 #include "MooseEnum.h"
 #include "MeshModifier.h"
 
+#include "libmesh/bounding_box.h"
+
 // Forward declerations
 class SubdomainBoundingBox;
 

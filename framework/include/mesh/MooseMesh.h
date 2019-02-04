@@ -20,11 +20,11 @@
 #include <memory> //std::unique_ptr
 
 // libMesh
-#include "libmesh/bounding_box.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/node_range.h"
 #include "libmesh/nanoflann.hpp"
+#include "libmesh/vector_value.h"
 
 // forward declaration
 class MooseMesh;
@@ -39,6 +39,7 @@ class QBase;
 class PeriodicBoundaries;
 class Partitioner;
 class GhostingFunctor;
+class BoundingBox;
 }
 
 // Useful typedefs

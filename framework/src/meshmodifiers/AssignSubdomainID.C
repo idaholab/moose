@@ -10,6 +10,8 @@
 #include "AssignSubdomainID.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", AssignSubdomainID);
 
 template <>

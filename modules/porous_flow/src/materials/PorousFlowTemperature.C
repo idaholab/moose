@@ -27,7 +27,7 @@ PorousFlowTemperature::PorousFlowTemperature(const InputParameters & parameters)
   : DerivativeMaterialInterface<PorousFlowMaterial>(parameters),
 
     _num_pf_vars(_dictator.numVariables()),
-    _temperature_var(_nodal_material ? coupledNodalValue("temperature")
+    _temperature_var(_nodal_material ? coupledDofValues("temperature")
                                      : coupledValue("temperature")),
     _grad_temperature_var(_nodal_material ? nullptr : &coupledGradient("temperature")),
     _temperature_is_PF(_dictator.isPorousFlowVariable(coupled("temperature"))),
