@@ -79,4 +79,10 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   ABS_TEST(_fp->molarMass(), 34.522988492890422, REL_TOL_SAVED_VALUE);
 
   ABS_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_CONSISTENCY);
+
+  REL_TEST(_fp->mu_from_p_T(p, T), 0.0, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->k_from_p_T(p, T), 0.0, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }

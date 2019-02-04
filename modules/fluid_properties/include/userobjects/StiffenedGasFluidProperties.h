@@ -75,6 +75,12 @@ public:
   virtual Real criticalTemperature() const override;
   virtual Real criticalDensity() const override;
   virtual Real criticalInternalEnergy() const override;
+  virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
+  virtual void mu_from_p_T(
+      Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+  virtual Real k_from_p_T(Real pressure, Real temperature) const override;
+  virtual void
+  k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   virtual Real c2_from_p_rho(Real pressure, Real rho) const;
 
