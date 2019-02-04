@@ -178,4 +178,11 @@
     issues = '#12769'
     design = 'porous_flow/boundaries.md porous_flow/doc/tests/sinks.tex'
   [../]
+  [./PorousFlowPiecewiseLinearSink_BC_eg1]
+    type = 'CSVDiff'
+    input = 'PorousFlowPiecewiseLinearSink_BC_eg1.i'
+    csvdiff = 'PorousFlowPiecewiseLinearSink_BC_eg1_out.csv'
+    rel_err = 1.0E-15
+    threading = '!pthreads'
+  [../]
 []

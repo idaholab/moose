@@ -84,13 +84,21 @@
     execute_on = 'timestep_end'
   [../]
   [./left_pressure]
+<<<<<<< HEAD
     type = SideAverageValue 
+=======
+    type = SideAverageValue
+>>>>>>> 32205a453b1dddf18b0cc8101b6fe414c74136da
     boundary = 'left'
     variable = porepressure
     execute_on = 'timestep_end'
   [../]
   [./right_pressure]
+<<<<<<< HEAD
     type = SideAverageValue 
+=======
+    type = SideAverageValue
+>>>>>>> 32205a453b1dddf18b0cc8101b6fe414c74136da
     boundary = 'right'
     variable = porepressure
     execute_on = 'timestep_end'
