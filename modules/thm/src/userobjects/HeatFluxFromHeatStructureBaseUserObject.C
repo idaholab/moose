@@ -1,6 +1,7 @@
 #include "HeatFluxFromHeatStructureBaseUserObject.h"
 #include "MooseMesh.h"
 #include "KDTree.h"
+#include "Assembly.h"
 
 template <>
 InputParameters
