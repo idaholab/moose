@@ -637,7 +637,7 @@ public:
   virtual void addADJacobianMaterial(const std::string & kernel_name,
                                      const std::string & name,
                                      InputParameters parameters);
-  virtual void addMaterialHelper(MaterialWarehouse & warehouse,
+  virtual void addMaterialHelper(std::vector<MaterialWarehouse *> warehouse,
                                  const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters parameters);
@@ -1378,7 +1378,6 @@ public:
   /*
    * Return a reference to the material warehouse of Material objects to be computed.
    */
-  const MaterialWarehouse & getComputeMaterialWarehouse() const { return _materials; }
   const MaterialWarehouse & getResidualMaterialsWarehouse() const { return _residual_materials; }
   const MaterialWarehouse & getJacobianMaterialsWarehouse() const { return _jacobian_materials; }
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
@@ -1671,9 +1670,10 @@ protected:
 
   ///@{
   // Material Warehouses
-  MaterialWarehouse _materials;          // Traditional materials that MOOSE computes
-  MaterialWarehouse _residual_materials; // ADMaterials for computing residuals
-  MaterialWarehouse _jacobian_materials; // ADMaterials for computing jacobians
+  MaterialWarehouse _residual_materials; // Residual materials. This is the union of traditional
+                                         // materials and the residual copy of an ADMaterial
+  MaterialWarehouse _jacobian_materials; // Jacobian materials. This is the union of traditional
+                                         // materials and the Jacobian copy of an ADMaterial
   MaterialWarehouse _discrete_materials; // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
   ///@}

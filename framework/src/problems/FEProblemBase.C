@@ -682,7 +682,8 @@ FEProblemBase::initialSetup()
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
     {
       // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
-      _materials.sort(tid);
+      _residual_materials.sort(tid);
+      _jacobian_materials.sort(tid);
 
       // Call initialSetup on both Material and Material objects
       _all_materials.initialSetup(tid);
@@ -2342,7 +2343,7 @@ FEProblemBase::addMaterial(const std::string & mat_name,
                            const std::string & name,
                            InputParameters parameters)
 {
-  addMaterialHelper(_materials, mat_name, name, parameters);
+  addMaterialHelper({&_residual_materials, &_jacobian_materials}, mat_name, name, parameters);
 }
 
 void
@@ -2350,7 +2351,7 @@ FEProblemBase::addADResidualMaterial(const std::string & mat_name,
                                      const std::string & name,
                                      InputParameters parameters)
 {
-  addMaterialHelper(_residual_materials, mat_name, name, parameters);
+  addMaterialHelper({&_residual_materials}, mat_name, name, parameters);
 }
 
 void
@@ -2358,11 +2359,11 @@ FEProblemBase::addADJacobianMaterial(const std::string & mat_name,
                                      const std::string & name,
                                      InputParameters parameters)
 {
-  addMaterialHelper(_jacobian_materials, mat_name, name, parameters);
+  addMaterialHelper({&_jacobian_materials}, mat_name, name, parameters);
 }
 
 void
-FEProblemBase::addMaterialHelper(MaterialWarehouse & warehouse,
+FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
                                  const std::string & mat_name,
                                  const std::string & name,
                                  InputParameters parameters)
@@ -2400,7 +2401,8 @@ FEProblemBase::addMaterialHelper(MaterialWarehouse & warehouse,
       if (discrete)
         _discrete_materials.addObject(material, tid);
       else
-        warehouse.addObject(material, tid);
+        for (auto && warehouse : warehouses)
+          warehouse->addObject(material, tid);
     }
 
     // Non-boundary restricted require face and neighbor objects
@@ -2435,7 +2437,8 @@ FEProblemBase::addMaterialHelper(MaterialWarehouse & warehouse,
       if (discrete)
         _discrete_materials.addObjects(material, neighbor_material, face_material, tid);
       else
-        warehouse.addObjects(material, neighbor_material, face_material, tid);
+        for (auto && warehouse : warehouses)
+          warehouse->addObjects(material, neighbor_material, face_material, tid);
 
       // link parameters of face and neighbor materials
       MooseObjectParameterName name(MooseObjectName("Material", material->name()), "*");
@@ -2464,8 +2467,6 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
   {
-    _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
-    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
     if (_currently_computing_jacobian)
     {
       _jacobian_materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
@@ -2508,9 +2509,6 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
     if (_discrete_materials.hasActiveBlockObjects(blk_id, tid))
       _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
 
-    if (_materials.hasActiveBlockObjects(blk_id, tid))
-      _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
-
     if (_jacobian_materials.hasActiveBlockObjects(blk_id, tid) && _currently_computing_jacobian)
       _material_data[tid]->reinit(_jacobian_materials.getActiveBlockObjects(blk_id, tid));
 
@@ -2536,10 +2534,6 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
     if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reset(
           _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _bnd_material_data[tid]->reinit(
-          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
     if (_jacobian_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
         _currently_computing_jacobian)
@@ -2572,10 +2566,6 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
       _neighbor_material_data[tid]->reset(
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
-      _neighbor_material_data[tid]->reinit(
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
     if (_jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
         _currently_computing_jacobian)
       _neighbor_material_data[tid]->reinit(
@@ -2604,9 +2594,6 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
     if (_discrete_materials.hasActiveBoundaryObjects(boundary_id, tid))
       _bnd_material_data[tid]->reset(
           _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
-
-    if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
 
     if (_jacobian_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
         _currently_computing_jacobian)
@@ -3293,7 +3280,6 @@ FEProblemBase::updateActiveObjects()
     _internal_side_indicators.updateActive(tid);
     _markers.updateActive(tid);
     _all_materials.updateActive(tid);
-    _materials.updateActive(tid);
     _residual_materials.updateActive(tid);
     _jacobian_materials.updateActive(tid);
     _discrete_materials.updateActive(tid);

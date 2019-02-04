@@ -54,9 +54,11 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
 
-  /// Reference to the Material object warehouses
+  /// This is populated using _fe_problem.getResidualMaterialsWarehouse because it has the union
+  /// of traditional materials and the residual version of AD materials. We don't need the Jacobian
+  /// version of the ADMaterial for doing stateful stuff
   const MaterialWarehouse & _materials;
-  const MaterialWarehouse & _ad_materials;
+
   const MaterialWarehouse & _discrete_materials;
 
   std::vector<std::unique_ptr<Assembly>> & _assembly;
