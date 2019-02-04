@@ -77,4 +77,10 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
   REL_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_CONSISTENCY);
+
+  REL_TEST(_fp->mu_from_p_T(p, T), 0.001, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->k_from_p_T(p, T), 0.6, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
