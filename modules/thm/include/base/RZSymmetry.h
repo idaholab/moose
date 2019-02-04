@@ -3,6 +3,8 @@
 
 #include "InputParameters.h"
 
+#include "libmesh/vector_value.h"
+
 class RZSymmetry;
 
 template <>
