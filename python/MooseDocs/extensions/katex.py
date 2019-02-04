@@ -39,14 +39,8 @@ class KatexExtension(components.Extension):
                                    r"the \\label content.")
         return config
 
-    def __init__(self, *args, **kwargs):
-        components.Extension.__init__(self, *args, **kwargs)
-        self.__labels = set()
-
-    @property
-    def labels(self):
-        """Set of labels used by latex."""
-        return self.__labels
+    def initMetaData(self, page, meta):
+        meta.initData('labels', set())
 
     def extend(self, reader, renderer):
         """
@@ -57,14 +51,14 @@ class KatexExtension(components.Extension):
         reader.addInline(KatexInlineEquationComponent(), location='_begin')
         renderer.add('LatexBlockEquation', RenderLatexEquation())
         renderer.add('LatexInlineEquation', RenderLatexEquation())
-        renderer.add(u'ShortcutLink', RenderEquationLink())
+        renderer.add('ShortcutLink', RenderEquationLink())
 
         if isinstance(renderer, renderers.HTMLRenderer):
             renderer.addCSS('katex', "contrib/katex/katex.min.css")
             renderer.addJavaScript('katex', "contrib/katex/katex.min.js")
 
     def postTokenize(self, ast, page, meta, reader):
-        self.__labels = set()
+        labels = set()
         count = 0
         func = lambda n: (n.name == 'LatexBlockEquation') and n['numbered']
         for node in anytree.PreOrderIter(ast, filter_=func):
@@ -72,12 +66,15 @@ class KatexExtension(components.Extension):
             node.set('number', count)
             if node['label']:
                 if isinstance(self.translator.renderer, renderers.LatexRenderer):
-                    self.labels.add(node['label'])
+                    labels.add(node['label'])
                 else:
                     core.Shortcut(ast,
                                   key=node['label'],
                                   string='{} ({})'.format(self.get('prefix'), count),
                                   link=u'#{}'.format(node['bookmark']))
+
+        meta.setData('labels', labels)
+
 
 class KatexBlockEquationComponent(components.TokenComponent):
     """
@@ -178,8 +175,9 @@ class RenderLatexEquation(components.RenderComponent):
 class RenderEquationLink(core.RenderShortcutLink):
 
     def createLatex(self, parent, token, page):
+        labels = self.translator.getMetaData(page, 'labels')
         key = token['key']
-        if key in self.extension.labels:
+        if key in labels:
             latex.String(parent, content=self.extension['prefix'] + '~', escape=False)
             latex.Command(parent, 'eqref', string=key)
             return parent
