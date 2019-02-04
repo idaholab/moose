@@ -40,7 +40,7 @@ public:
   virtual void step() override;
 
   virtual void rejectStep() override;
-  virtual bool converged() override;
+  virtual bool converged() const override;
 
 protected:
   virtual Real computeInitialDT() override;

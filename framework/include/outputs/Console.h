@@ -42,6 +42,8 @@ public:
    */
   virtual void initialSetup() override;
 
+  virtual void timestepSetup() override;
+
   /**
    * Customizes the order of output for the various components as well as adds additional
    * output such as timestep information and nonlinear/linear residual information

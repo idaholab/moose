@@ -46,12 +46,12 @@ protected:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
   virtual Real computeFailedDT() override;
-  virtual bool converged() override;
+  virtual bool converged() const override;
 
   void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
   Real computeInterpolationDT();
   void limitDTByFunction(Real & limitedDT);
-  void limitDTToPostprocessorValue(Real & limitedDT);
+  void limitDTToPostprocessorValue(Real & limitedDT) const;
 
   Real & _dt_old;
 

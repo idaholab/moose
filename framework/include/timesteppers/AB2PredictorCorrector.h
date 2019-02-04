@@ -41,7 +41,8 @@ public:
   virtual void step() override;
   virtual void preExecute() override;
   virtual void preSolve() override;
-  virtual bool converged() override;
+  virtual void postSolve() override;
+  virtual bool converged() const override;
 
 protected:
   virtual Real computeDT() override;

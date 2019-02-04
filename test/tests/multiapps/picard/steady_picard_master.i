@@ -13,10 +13,6 @@
 
 [AuxVariables]
   [./v]
-    initial_condition = 1
-  [../]
-  [./inverse_v]
-    initial_condition = 1
   [../]
 []
 
@@ -26,23 +22,10 @@
     variable = u
     coef = 0.1
   [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
-  [../]
   [./force_u]
     type = CoupledForce
     variable = u
-    v = inverse_v
-  [../]
-[]
-
-[AuxKernels]
-  [./invert_v]
-    type = QuotientAux
-    variable = inverse_v
-    denominator = v
-    numerator = 20.0
+    v = v
   [../]
 []
 
@@ -53,8 +36,8 @@
     boundary = left
     value = 0
   [../]
-  [./Neumann_right]
-    type = NeumannBC
+  [./right]
+    type = DirichletBC
     variable = u
     boundary = right
     value = 1
@@ -62,37 +45,34 @@
 []
 
 [Postprocessors]
-  [./picard_its]
-    type = NumPicardIterations
+  [./unorm]
+    type = ElementL2Norm
+    variable = u
+    execute_on = 'initial timestep_end'
+  [../]
+  [./vnorm]
+    type = ElementL2Norm
+    variable = v
     execute_on = 'initial timestep_end'
   [../]
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 4
-  dt = 0.5
-  solve_type = PJFNK
+  type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   picard_max_its = 30
-  nl_abs_tol = 1e-14
+  picard_rel_tol = 1e-6
 []
 
 [Outputs]
   exodus = true
-  execute_on = 'INITIAL TIMESTEP_END'
 []
 
 [MultiApps]
   [./sub]
-    type = TransientMultiApp
-    app_type = MooseTestApp
-    execute_on = timestep_begin
-    positions = '0 0 0'
-    input_files = sub_relaxed_sub.i
-    relaxed_variables = v
-    relaxation_factor = 0.94
+    type = FullSolveMultiApp
+    input_files = steady_picard_sub.i
   [../]
 []
 
@@ -112,4 +92,3 @@
     variable = u
   [../]
 []
-

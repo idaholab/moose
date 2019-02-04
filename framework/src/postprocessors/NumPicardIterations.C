@@ -41,5 +41,5 @@ NumPicardIterations::initialize()
 Real
 NumPicardIterations::getValue()
 {
-  return _transient_executioner->numPicardIts();
+  return _transient_executioner->picardSolve().numPicardIts();
 }

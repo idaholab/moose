@@ -272,7 +272,7 @@ IterationAdaptiveDT::computeFailedDT()
 }
 
 bool
-IterationAdaptiveDT::converged()
+IterationAdaptiveDT::converged() const
 {
   if (!_reject_large_step)
     return TimeStepper::converged();
@@ -285,11 +285,6 @@ IterationAdaptiveDT::converged()
   // in which case we can move on to the next step
   if (_dt == _dt_min || _t_step < 2)
     return true;
-
-  // we need to update the post-processor value
-  // (otherwise, _pps_value is the value computed at the previous time step)
-  if (_pps_value)
-    _fe_problem.execute(EXEC_TIMESTEP_END);
 
   // we get what the next time step should be
   Real dt_test = _dt;
@@ -309,7 +304,7 @@ IterationAdaptiveDT::converged()
 }
 
 void
-IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT)
+IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT) const
 {
   if (_pps_value && _t_step > 1)
   {

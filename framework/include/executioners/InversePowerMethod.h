@@ -27,6 +27,8 @@ public:
 
   virtual void execute() override;
 
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
+
 protected:
   virtual void takeStep();
 
@@ -46,6 +48,8 @@ protected:
   const Real & _pfactor;
   /// indicating if Chebyshev acceleration is turned on
   const bool & _cheb_on;
+  /// flag to indicate if inverse power iteration converged
+  bool _last_solve_converged;
 };
 
 #endif // INVERSEPOWERMETHOD_H

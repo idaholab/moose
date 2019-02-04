@@ -24,6 +24,7 @@
 #include "UserObject.h"
 #include "CommandLine.h"
 #include "Conversion.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -148,6 +149,15 @@ validParams<MultiApp>()
       std::vector<std::string>(),
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
+
+  params.addRangeCheckedParam<Real>("relaxation_factor",
+                                    1.0,
+                                    "relaxation_factor>0 & relaxation_factor<2",
+                                    "Fraction of newly computed value to keep."
+                                    "Set between 0 and 2.");
+  params.addParam<std::vector<std::string>>("relaxed_variables",
+                                            std::vector<std::string>(),
+                                            "List of variables to relax during Picard Iteration");
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
@@ -581,7 +591,6 @@ MultiApp::parentOutputPositionChanged()
 void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
-
   // Define the app name
   std::ostringstream multiapp_name;
   std::string full_name;
@@ -667,6 +676,17 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app->setupOptions();
   preRunInputFile();
   app->runInputFile();
+
+  auto & picard_solve = _apps[i]->getExecutioner()->picardSolve();
+  picard_solve.setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
+  picard_solve.setMultiAppRelaxationVariables(
+      getParam<std::vector<std::string>>("relaxed_variables"));
+  if (getParam<Real>("relaxation_factor") != 1.0)
+  {
+    // Store a copy of the previous solution here
+    FEProblemBase & fe_problem_base = _apps[i]->getExecutioner()->feProblem();
+    fe_problem_base.getNonlinearSystemBase().addVector("self_relax_previous", false, PARALLEL);
+  }
 }
 
 void
