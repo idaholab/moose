@@ -110,12 +110,12 @@ class TableComponent(components.TokenComponent):
     RE = re.compile(r'(?:\A|\n{2,})^(?P<table>\|.*?)(?=\Z|\n{2,})',
                     flags=re.MULTILINE|re.DOTALL|re.UNICODE)
 
-    TABLE_FORMAT_DEFAULTS = { 'color' : 'black', 'text-align' : 'left' }
+    TABLE_FORMAT_DEFAULTS = {'color' : 'black', 'text-align' : 'left'}
     # CSS styles we want to support, but otherwise do not want to set a default for
     SUPPORTED_FORMATS = ['width', 'background-color', 'vertical-align', 'border']
 
     def __replaceToken(self, md_token, css, styles):
-        if re.search(r'(^|\s)' + md_token + '($|\s)', styles):
+        if re.search(r'(^|\s)' + md_token + r'($|\s)', styles):
             return styles.replace(md_token, css, 1)
         return styles
 
@@ -145,8 +145,9 @@ class TableComponent(components.TokenComponent):
                     styles = self.__replaceToken(md_token, css, styles)
 
                 table_format[i], unknown = common.match_settings(self.TABLE_FORMAT_DEFAULTS, styles)
-                for supported_style in [x for x in self.SUPPORTED_FORMATS if x in unknown.keys()]:
-                    table_format[i][supported_style] = unknown[supported_style]
+                for style_key, value in unknown.iteritems():
+                    if style_key in self.SUPPORTED_FORMATS:
+                        table_format[i][style_key] = value
 
             row = TableRow(TableHead(table))
             for i, h in enumerate([x for x in head if x]):

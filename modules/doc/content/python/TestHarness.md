@@ -33,7 +33,7 @@ To see more options for `run_tests` you can invoke it with `-h`.  There are many
 through, but some of the important ones are:
 
 | Argument | About |
-| text-align=left width=25% | text-align-left |
+| text-align=left width=25% | text-align=left |
 | `--failed-tests` | Runs the tests that just failed.  Note: as long as you keep using the `--failed-tests` option the set of failed tests will not change. |
 | `--n-threads` *int* | Causes the tests to run with *int* number of (OpenMP/Pthread/TBB) threads. |
 | `-p` *int* | Causes the tests to run with *int* MPI processes. Useful for guaranteeing that you get the same result in parallel! |
