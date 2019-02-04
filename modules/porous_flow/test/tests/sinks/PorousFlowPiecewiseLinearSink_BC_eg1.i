@@ -8,7 +8,7 @@
 ##
 ## Problem verification (in csv output):
 ##   - The flux in and out of the domain are 1e-6 m/s (matching steady state solution)
-##   - The pressure at the left and right boundaries are set to 2e6 and 1e6 Pa, respectively 
+##   - The pressure at the left and right boundaries are set to 2e6 and 1e6 Pa, respectively
 
 [Mesh]
   type = GeneratedMesh
@@ -84,13 +84,13 @@
     execute_on = 'timestep_end'
   [../]
   [./left_pressure]
-    type = SideAverageValue 
+    type = SideAverageValue
     boundary = 'left'
     variable = porepressure
     execute_on = 'timestep_end'
   [../]
   [./right_pressure]
-    type = SideAverageValue 
+    type = SideAverageValue
     boundary = 'right'
     variable = porepressure
     execute_on = 'timestep_end'
