@@ -452,6 +452,11 @@ StiffenedGasFluidProperties::criticalInternalEnergy() const
   return _e_c;
 }
 
+Real StiffenedGasFluidProperties::cv_from_p_T(Real /* pressure */, Real /* temperature */) const
+{
+  return _cv;
+}
+
 Real StiffenedGasFluidProperties::cp_from_p_T(Real /* pressure */, Real /* temperature */) const
 {
   return _cp;

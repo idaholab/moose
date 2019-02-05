@@ -434,6 +434,11 @@ IdealGasFluidProperties::T_from_p_h(Real, Real h) const
   return h / _gamma / _cv;
 }
 
+Real IdealGasFluidProperties::cv_from_p_T(Real /* pressure */, Real /* temperature */) const
+{
+  return _cv;
+}
+
 Real IdealGasFluidProperties::cp_from_p_T(Real /* pressure */, Real /* temperature */) const
 {
   return _cp;
