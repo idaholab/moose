@@ -93,6 +93,7 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
   DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
+  DERIV_TEST(_fp->cp_from_p_T, _fp->cp_from_p_T, p, T, tol);
 
   p = 5.0E7;
   T = 90.0;
@@ -102,6 +103,7 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
   DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
+  DERIV_TEST(_fp->cp_from_p_T, _fp->cp_from_p_T, p, T, tol);
 
   Real henry, dhenry_dT;
   _fp->henryConstant_dT(T, henry, dhenry_dT);

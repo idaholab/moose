@@ -555,6 +555,17 @@ public:
   virtual Real cp_from_p_T(Real pressure, Real temperature) const;
 
   /**
+   * Isobaric specific heat capacity from pressure and temperature
+   *
+   * @param[in] pressure    fluid pressure (Pa)
+   * @param[in] temperature fluid temperature (K)
+   * @param[out] cp         isobaric specific heat (J/kg/K)
+   * @param[out] dcp_dp     derivative of isobaric specific heat capacity w.r.t. pressure (J/kg/K/Pa)
+   * @param[out] dcp_dT     derivative of isobaric specific heat capacity w.r.t. temperature (J/kg/K/K)
+   */
+  virtual void cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const;
+
+  /**
    * Isochoric specific heat
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)

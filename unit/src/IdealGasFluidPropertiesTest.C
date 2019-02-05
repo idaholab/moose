@@ -87,4 +87,5 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
   REL_TEST(_fp->cp_from_p_T(p, T), 987.13756097561, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->cp_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }

@@ -449,6 +449,14 @@ StiffenedGasFluidProperties::cp_from_p_T(Real /* pressure */, Real /* temperatur
   return _cp;
 }
 
+void
+StiffenedGasFluidProperties::cp_from_p_T(Real pressure , Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+{
+  cp = cp_from_p_T(pressure, temperature);
+  dcp_dp = 0.0;
+  dcp_dT = 0.0;
+}
+
 Real StiffenedGasFluidProperties::mu_from_p_T(Real /* pressure */, Real /* temperature */) const
 {
   return _mu;
