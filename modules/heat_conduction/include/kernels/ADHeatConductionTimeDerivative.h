@@ -9,7 +9,7 @@
 #ifndef ADHEATCONDUCTIONTIMEDERIVATIVE_H
 #define ADHEATCONDUCTIONTIMEDERIVATIVE_H
 
-#include "ADDiffusion.h"
+#include "ADTimeKernel.h"
 
 template <ComputeStage compute_stage>
 class ADHeatConductionTimeDerivative;
@@ -17,16 +17,13 @@ class ADHeatConductionTimeDerivative;
 declareADValidParams(ADHeatConductionTimeDerivative);
 
 template <ComputeStage compute_stage>
-class ADHeatConductionTimeDerivative : public ADDiffusion<compute_stage>
+class ADHeatConductionTimeDerivative : public ADTimeKernel<compute_stage>
 {
 public:
   ADHeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual ADResidual computeQpResidual() override;
-
-  /// Time derivative of u
-  const VariableValue & _u_dot;
 
   /// Specific heat material property
   const MaterialProperty<Real> & _specific_heat;

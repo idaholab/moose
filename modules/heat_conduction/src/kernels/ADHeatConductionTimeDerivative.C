@@ -12,7 +12,7 @@ registerADMooseObject("HeatConductionApp", ADHeatConductionTimeDerivative);
 
 defineADValidParams(
     ADHeatConductionTimeDerivative,
-    ADDiffusion,
+    ADTimeKernel,
     params.addClassDescription(
         "AD Time derivative term $\\rho c_p \\frac{\\partial T}{\\partial t}$ of "
         "the heat equation for quasi-constant specific heat $c_p$ and the density $\\rho$.");
@@ -27,8 +27,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 ADHeatConductionTimeDerivative<compute_stage>::ADHeatConductionTimeDerivative(
     const InputParameters & parameters)
-  : ADDiffusion<compute_stage>(parameters),
-    _u_dot(_var.uDot()),
+  : ADTimeKernel<compute_stage>(parameters),
     _specific_heat(adGetADMaterialProperty<Real>("specific_heat")),
     _density(adGetADMaterialProperty<Real>("density_name"))
 {
