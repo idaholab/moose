@@ -9,8 +9,7 @@ Renderer:
     home: /modules/solid_properties
 
 Extensions:
-    appsyntax:
-        type: MooseDocs.extensions.appsyntax
+    MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/solid_properties
         hide:
             framework: !include framework/doc/hidden.yml
@@ -18,9 +17,7 @@ Extensions:
         includes:
             - framework/include
             - modules/solid_properties/include
-    globals:
-        type: MooseDocs.extensions.panoptic
+    MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
-    acronyms:
-        type: MooseDocs.extensions.acronym
+    MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
