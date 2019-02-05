@@ -99,6 +99,18 @@ public:
   virtual Real cp_from_v_e(Real v, Real e) const;
 
   /**
+   * Isobaric (constant pressure) specific heat from specific volume and specific
+   * internal energy
+   *
+   * @param[in] v       specific volume (m$^3$/kg)
+   * @param[in] e       specific internal energy (J/kg)
+   * @param[out] cp     isobaric specific heat (J/kg/K)
+   * @param[out] dcp_dv derivative of isobaric specific heat w.r.t. specific volume (J/K/m$^3$)
+   * @param[out] dcp_de derivative of isobaric specific heat w.r.t. specific inernal energy (1/K)
+   */
+  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const;
+
+  /**
    * Isochoric (constant-volume) specific heat from specific volume and specific
    * internal energy
    *
@@ -560,10 +572,11 @@ public:
    * @param[in] pressure    fluid pressure (Pa)
    * @param[in] temperature fluid temperature (K)
    * @param[out] cp         isobaric specific heat (J/kg/K)
-   * @param[out] dcp_dp     derivative of isobaric specific heat capacity w.r.t. pressure (J/kg/K/Pa)
-   * @param[out] dcp_dT     derivative of isobaric specific heat capacity w.r.t. temperature (J/kg/K/K)
+   * @param[out] dcp_dp     derivative of isobaric specific heat w.r.t. pressure (J/kg/K/Pa)
+   * @param[out] dcp_dT     derivative of isobaric specific heat w.r.t. temperature (J/kg/K/K)
    */
-  virtual void cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const;
+  virtual void
+  cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const;
 
   /**
    * Isochoric specific heat

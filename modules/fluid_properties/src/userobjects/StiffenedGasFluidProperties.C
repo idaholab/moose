@@ -102,6 +102,15 @@ StiffenedGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, 
 
 Real StiffenedGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
 
+void
+StiffenedGasFluidProperties::cp_from_v_e(
+    Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
+{
+  cp = cp_from_v_e(v, e);
+  dcp_dv = 0.0;
+  dcp_de = 0.0;
+}
+
 Real StiffenedGasFluidProperties::cv_from_v_e(Real, Real) const { return _cv; }
 
 Real StiffenedGasFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
@@ -443,14 +452,14 @@ StiffenedGasFluidProperties::criticalInternalEnergy() const
   return _e_c;
 }
 
-Real
-StiffenedGasFluidProperties::cp_from_p_T(Real /* pressure */, Real /* temperature */) const
+Real StiffenedGasFluidProperties::cp_from_p_T(Real /* pressure */, Real /* temperature */) const
 {
   return _cp;
 }
 
 void
-StiffenedGasFluidProperties::cp_from_p_T(Real pressure , Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+StiffenedGasFluidProperties::cp_from_p_T(
+    Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
   cp = cp_from_p_T(pressure, temperature);
   dcp_dp = 0.0;

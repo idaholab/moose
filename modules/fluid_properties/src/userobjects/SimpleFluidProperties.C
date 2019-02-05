@@ -80,7 +80,8 @@ Real SimpleFluidProperties::cp_from_p_T(Real /*pressure*/, Real /*temperature*/)
 }
 
 void
-SimpleFluidProperties::cp_from_p_T(Real pressure , Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+SimpleFluidProperties::cp_from_p_T(
+    Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
   cp = cp_from_p_T(pressure, temperature);
   dcp_dp = 0.0;
