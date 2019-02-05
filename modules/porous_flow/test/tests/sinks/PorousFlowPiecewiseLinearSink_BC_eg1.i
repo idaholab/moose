@@ -123,12 +123,6 @@
     type = PorousFlowPermeabilityConst
     permeability = '1E-15 0 0   0 1E-15 0   0 0 1E-15'
   [../]
-  #### The following Material give porepressure at nodes, which is required for PorousFlowPiecewiseLienarSink
-  [./PS]
-    type = PorousFlow1PhaseFullySaturated
-    at_nodes = true
-    porepressure = porepressure
-  [../]
 []
 
 [Executioner]
