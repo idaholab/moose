@@ -31,7 +31,7 @@ protected:
   /// Density material property
   const MaterialProperty<Real> & _density;
 
-  usingKernelMembers;
+  usingTimeKernelMembers;
 };
 
 #endif // ADHEATCONDUCTIONTIMEDERIVATIVE_H
