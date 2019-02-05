@@ -107,6 +107,10 @@ dissolution of both gas phase and supercritical CO$_2$ is calculated as
 h_{dis}(T) = \frac{-58353.3 + 134.519 T}{M_{CO2}}.
 \end{equation}
 
+The calculation of brine and CO$_2$ fluid properties can take a significant proportion of each simulation,
+so it is suggested that tabulated versions of both CO$_2$ and brine proeprties are used using
+[TabulatedFluidProperties](/TabulatedFluidProperties.md).
+
 ## Implementation
 
 ### Variables
