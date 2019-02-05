@@ -1,6 +1,5 @@
 #include "GeometricalFlowComponent.h"
 #include "FluidProperties.h"
-// #include "TwoPhaseNCGFluidProperties.h"
 #include "SlopeReconstruction1DInterface.h"
 
 template <>

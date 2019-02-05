@@ -97,7 +97,8 @@ FlowConnection::init()
 
       if (hasComponentByName<PipeBase>(_connections[0]._geometrical_component_name))
       {
-        const PipeBase & pipe = getComponentByName<PipeBase>(_connections[0]._geometrical_component_name);
+        const PipeBase & pipe =
+            getComponentByName<PipeBase>(_connections[0]._geometrical_component_name);
         if (_flow_model_id == RELAP7::FM_TWO_PHASE || _flow_model_id == RELAP7::FM_TWO_PHASE_NCG)
         {
           _flow_model = pipe.getFlowModel();
