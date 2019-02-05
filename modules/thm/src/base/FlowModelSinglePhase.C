@@ -4,7 +4,7 @@
 #include "PipeBase.h"
 
 const std::string FlowModelSinglePhase::DENSITY = "rho";
-const std::string FlowModelSinglePhase::DRAG_COEFFICIENT = "Cw";
+const std::string FlowModelSinglePhase::FRICTION_FACTOR_DARCY = "f_D";
 const std::string FlowModelSinglePhase::DYNAMIC_VISCOSITY = "mu";
 const std::string FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL = "Hw";
 const std::string FlowModelSinglePhase::MOMENTUM_DENSITY = "rhou";
@@ -180,11 +180,14 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
+    params.set<std::vector<VariableName>>("D_h") = {HYDRAULIC_DIAMETER};
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
+    params.set<MaterialPropertyName>("alpha") = UNITY;
+    params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
-    params.set<MaterialPropertyName>("Cw") = "Cw";
+    params.set<MaterialPropertyName>("f_D") = FRICTION_FACTOR_DARCY;
     params.set<MaterialPropertyName>("2phase_multiplier") = UNITY;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_friction"), params);
   }

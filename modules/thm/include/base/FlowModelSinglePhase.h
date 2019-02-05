@@ -20,7 +20,7 @@ protected:
 
 public:
   static const std::string DENSITY;
-  static const std::string DRAG_COEFFICIENT;
+  static const std::string FRICTION_FACTOR_DARCY;
   static const std::string DYNAMIC_VISCOSITY;
   static const std::string HEAT_TRANSFER_COEFFICIENT_WALL;
   static const std::string MOMENTUM_DENSITY;
