@@ -152,3 +152,6 @@ ADRadialReturnStressUpdate<compute_stage>::outputIterationSummary(std::stringstr
   ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary(iter_output,
                                                                                total_it);
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADRadialReturnStressUpdate);

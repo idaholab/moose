@@ -78,15 +78,14 @@ ADComputeMultipleInelasticStress<compute_stage>::ADComputeMultipleInelasticStres
                            ? adGetParam<std::vector<Real>>("combined_inelastic_strain_weights")
                            : std::vector<Real>(_num_models, true)),
     _cycle_models(adGetParam<bool>("cycle_models")),
-    _matl_timestep_limit(adDeclareADProperty<Real>("matl_timestep_limit"))
+    _matl_timestep_limit(adDeclareProperty<Real>("matl_timestep_limit"))
 {
   if (_inelastic_weights.size() != _num_models)
-    mooseError(
-        "ADComputeMultipleInelasticStress: combined_inelastic_strain_weights must contain the same "
-        "number of entries as inelastic_models ",
-        _inelastic_weights.size(),
-        " ",
-        _num_models);
+    paramError("combined_inelastic_strain_weights",
+               "must contain the same number of entries as inelastic_models ",
+               _inelastic_weights.size(),
+               " vs. ",
+               _num_models);
 }
 
 template <ComputeStage compute_stage>
@@ -109,7 +108,7 @@ ADComputeMultipleInelasticStress<compute_stage>::initialSetup()
   for (unsigned int i = 0; i < _num_models; ++i)
   {
     ADStressUpdateBase<compute_stage> * rrr = dynamic_cast<ADStressUpdateBase<compute_stage> *>(
-        &this->template getMaterialByName(models[i]));
+        &this->template getMaterialByName<compute_stage>(models[i]));
 
     if (rrr)
     {
@@ -284,13 +283,9 @@ ADComputeMultipleInelasticStress<compute_stage>::updateQpState(
     _matl_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
 
   if (MooseUtils::absoluteFuzzyEqual(_matl_timestep_limit[_qp], 0.0))
-  {
     _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
-  }
   else
-  {
     _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
-  }
 }
 
 template <ComputeStage compute_stage>

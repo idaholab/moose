@@ -49,3 +49,6 @@ ADRadialReturnCreepStressUpdateBase<compute_stage>::computeStressFinalize(
 {
   _creep_strain[_qp] = _creep_strain_old[_qp] + plastic_strain_increment;
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADRadialReturnCreepStressUpdateBase);
