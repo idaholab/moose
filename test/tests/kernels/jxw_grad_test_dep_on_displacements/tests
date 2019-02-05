@@ -9,6 +9,7 @@
     run_sim = True
     petsc_version = '>=3.9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements"
+    max_parallel = 2 # The finite differencing in `-snes_test_jacobian` is a little finicky. This test failed **only** the distributed mesh sweep with p = 3
   [../]
   [./jxw_jacobian_2]
     type = 'PetscJacobianTester'
@@ -19,5 +20,6 @@
     petsc_version = '>=3.9'
     cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements"
+    max_parallel = 2 # The finite differencing in `-snes_test_jacobian` is a little finicky. The above test failed **only** the distributed mesh sweep with p = 3 so we'll mark this one too
   [../]
 []

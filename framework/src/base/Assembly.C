@@ -183,6 +183,18 @@ Assembly::~Assembly()
   for (auto & it : _vector_fe_shape_data_face_neighbor)
     delete it.second;
 
+  for (auto & it : _ad_grad_phi_data)
+    it.second.release();
+
+  for (auto & it : _ad_vector_grad_phi_data)
+    it.second.release();
+
+  for (auto & it : _ad_grad_phi_data_face)
+    it.second.release();
+
+  for (auto & it : _ad_vector_grad_phi_data_face)
+    it.second.release();
+
   delete _current_side_elem;
   delete _current_neighbor_side_elem;
 
@@ -195,6 +207,7 @@ Assembly::~Assembly()
   _ad_JxW_face.release();
   _ad_normals.release();
   _ad_q_points_face.release();
+  _curvatures.release();
   _ad_curvatures.release();
 }
 
