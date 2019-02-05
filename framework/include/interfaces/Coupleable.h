@@ -915,7 +915,7 @@ private:
    * @param var_name the name of the vector variable for which to retrieve a default value
    * @return a pointer to the associated VectorVariableValue.
    */
-  VectorVariableValue * getVectorDefaultValue(const std::string & var_name);
+  VectorVariableValue * getDefaultVectorValue(const std::string & var_name);
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;

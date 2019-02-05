@@ -309,7 +309,7 @@ Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp)
 }
 
 VectorVariableValue *
-Coupleable::getVectorDefaultValue(const std::string & var_name)
+Coupleable::getDefaultVectorValue(const std::string & var_name)
 {
   std::map<std::string, VectorVariableValue *>::iterator default_value_it =
       _default_vector_value.find(var_name);
@@ -334,7 +334,7 @@ template <>
 const RealVectorValue &
 Coupleable::getNodalDefaultValue<RealVectorValue>(const std::string & var_name, unsigned int)
 {
-  auto && default_variable_value = getVectorDefaultValue(var_name);
+  auto && default_variable_value = getDefaultVectorValue(var_name);
   return *default_variable_value->data();
 }
 
@@ -410,7 +410,7 @@ const VectorVariableValue &
 Coupleable::coupledVectorValue(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name))
-    return *getVectorDefaultValue(var_name);
+    return *getDefaultVectorValue(var_name);
 
   coupledCallback(var_name, false);
   VectorMooseVariable * var = getVectorVar(var_name, comp);
@@ -552,7 +552,7 @@ const VectorVariableValue &
 Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name))
-    return *getVectorDefaultValue(var_name);
+    return *getDefaultVectorValue(var_name);
 
   validateExecutionerType(var_name, "coupledVectorValueOld");
   coupledCallback(var_name, true);
@@ -582,7 +582,7 @@ const VectorVariableValue &
 Coupleable::coupledVectorValueOlder(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name))
-    return *getVectorDefaultValue(var_name);
+    return *getDefaultVectorValue(var_name);
 
   validateExecutionerType(var_name, "coupledVectorValueOlder");
   coupledCallback(var_name, true);
@@ -1520,10 +1520,24 @@ Coupleable::getADDefaultValue<RESIDUAL>(const std::string & var_name)
 }
 
 template <>
+VectorVariableValue *
+Coupleable::getADDefaultVectorValue<RESIDUAL>(const std::string & var_name)
+{
+  return getDefaultVectorValue(var_name);
+}
+
+template <>
 VariableGradient &
 Coupleable::getADDefaultGradient<RESIDUAL>()
 {
   return _default_gradient;
+}
+
+template <>
+VectorVariableGradient &
+Coupleable::getADDefaultVectorGradient<RESIDUAL>()
+{
+  return _default_vector_gradient;
 }
 
 template <>
