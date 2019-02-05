@@ -12,7 +12,7 @@ validParams<WallFriction3EqnBaseMaterial>()
   params.addRequiredCoupledVar("vel", "x-component of the velocity");
   params.addRequiredCoupledVar("D_h", "hydraulic diameter");
 
-  params.addRequiredParam<MaterialPropertyName>("Cw", "Drag coefficient material property");
+  params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
 
   params.addRequiredParam<Real>("roughness", "Surface roughness");
@@ -21,11 +21,11 @@ validParams<WallFriction3EqnBaseMaterial>()
 
 WallFriction3EqnBaseMaterial::WallFriction3EqnBaseMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterfaceTHM<Material>(parameters),
-    _Cw_name(getParam<MaterialPropertyName>("Cw")),
-    _Cw(declareProperty<Real>(_Cw_name)),
-    _dCw_drhoA(declarePropertyDerivativeTHM<Real>(_Cw_name, "rhoA")),
-    _dCw_drhouA(declarePropertyDerivativeTHM<Real>(_Cw_name, "rhouA")),
-    _dCw_drhoEA(declarePropertyDerivativeTHM<Real>(_Cw_name, "rhoEA")),
+    _f_D_name(getParam<MaterialPropertyName>("f_D")),
+    _f_D(declareProperty<Real>(_f_D_name)),
+    _df_D_drhoA(declarePropertyDerivativeTHM<Real>(_f_D_name, "rhoA")),
+    _df_D_drhouA(declarePropertyDerivativeTHM<Real>(_f_D_name, "rhouA")),
+    _df_D_drhoEA(declarePropertyDerivativeTHM<Real>(_f_D_name, "rhoEA")),
 
     _mu(getMaterialProperty<Real>("mu")),
     _rho(coupledValue("rho")),

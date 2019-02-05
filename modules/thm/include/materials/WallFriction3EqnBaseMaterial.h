@@ -10,7 +10,7 @@ template <>
 InputParameters validParams<WallFriction3EqnBaseMaterial>();
 
 /**
- * Base class for computing wall friction coefficient for 1-phase flow
+ * Base class for computing Darcy wall friction coefficient for 1-phase flow
  */
 class WallFriction3EqnBaseMaterial : public DerivativeMaterialInterfaceTHM<Material>
 {
@@ -18,12 +18,13 @@ public:
   WallFriction3EqnBaseMaterial(const InputParameters & parameters);
 
 protected:
-  /// The wall friction coefficient
-  const MaterialPropertyName _Cw_name;
-  MaterialProperty<Real> & _Cw;
-  MaterialProperty<Real> & _dCw_drhoA;
-  MaterialProperty<Real> & _dCw_drhouA;
-  MaterialProperty<Real> & _dCw_drhoEA;
+  /// Darcy wall friction coefficient
+  const MaterialPropertyName _f_D_name;
+  MaterialProperty<Real> & _f_D;
+  MaterialProperty<Real> & _df_D_drhoA;
+  MaterialProperty<Real> & _df_D_drhouA;
+  MaterialProperty<Real> & _df_D_drhoEA;
+
   const MaterialProperty<Real> & _mu;
 
   /// Density of the phase
