@@ -1,0 +1,16 @@
+[Tests]
+  design = ADKernels/index.md
+  issues = '#12836'
+  [ad_vector_couple]
+    type = Exodiff
+    input = ad_vector_couple.i
+    exodiff = ad_vector_couple_out.e
+    requirement = "The system shall support coupling of variables with automatic differentiation and vector values."
+  []
+  [ad_grad_vector_couple]
+    type = Exodiff
+    input = ad_grad_vector_couple.i
+    exodiff = ad_grad_vector_couple_out.e
+    requirement = "The system shall support coupling to the gradient of variables with automatic differentiation and vector values."
+  []
+[]
