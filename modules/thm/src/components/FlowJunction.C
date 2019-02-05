@@ -2,6 +2,7 @@
 #include "GeometricalFlowComponent.h"
 #include "RELAP7App.h"
 #include "FluidProperties.h"
+#include "RELAP7Mesh.h"
 
 template <>
 InputParameters

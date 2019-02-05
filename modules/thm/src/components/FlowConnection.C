@@ -2,6 +2,7 @@
 #include "GeometricalFlowComponent.h"
 #include "Pipe.h"
 #include "FlowModelTwoPhase.h"
+#include "RELAP7Mesh.h"
 
 const std::map<std::string, FlowConnection::EEndType> FlowConnection::_end_type_to_enum{
     {"IN", IN}, {"OUT", OUT}};
