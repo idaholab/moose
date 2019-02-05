@@ -112,6 +112,11 @@ Coupleable::~Coupleable()
     it.second->release();
     delete it.second;
   }
+  for (auto & it : _ad_default_vector_value)
+  {
+    it.second->release();
+    delete it.second;
+  }
 
   _default_value_zero.release();
   _default_gradient.release();
@@ -121,6 +126,7 @@ Coupleable::~Coupleable()
   _default_vector_curl.release();
   _ad_default_gradient.release();
   _ad_default_second.release();
+  _ad_default_vector_gradient.release();
 }
 
 void
