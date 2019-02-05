@@ -71,6 +71,7 @@ public:
   virtual Real g_from_v_e(Real v, Real e) const override;
   virtual Real T_from_p_h(Real p, Real h) const override;
   virtual Real molarMass() const override;
+  virtual Real cp_from_p_T(Real p, Real T) const override;
   virtual Real mu_from_p_T(Real p, Real T) const override;
   virtual void mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
