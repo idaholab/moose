@@ -1,16 +1,15 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include "RELAP7App.h"
 #include "RELAP7Object.h"
-#include "ActionWarehouse.h"
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "InputParameterWarehouse.h"
-#include "MooseError.h"
 
 class Component;
 class FEProblem;
+class RELAP7App;
+class RELAP7Mesh;
 
 template <>
 InputParameters validParams<Component>();

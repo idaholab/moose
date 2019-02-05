@@ -1,6 +1,4 @@
 #include "Component.h"
-#include "Simulation.h"
-#include "MooseApp.h"
 #include "ConstantFunction.h"
 #include "Numerics.h"
 

@@ -1,5 +1,4 @@
 #include "GeometricalComponent.h"
-#include "Conversion.h"
 #include "ConstantFunction.h"
 #include "RELAP7Mesh.h"
 

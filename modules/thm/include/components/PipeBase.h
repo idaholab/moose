@@ -1,10 +1,6 @@
 #ifndef PIPEBASE_H
 #define PIPEBASE_H
 
-#include "libmesh/point.h"
-#include "libmesh/vector_value.h"
-
-#include "RELAP7App.h"
 #include "GeometricalFlowComponent.h"
 
 class PipeBase;

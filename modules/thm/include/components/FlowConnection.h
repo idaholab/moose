@@ -2,7 +2,6 @@
 #define FLOWCONNECTION_H
 
 #include "Component.h"
-#include "Enums.h"
 
 class FlowConnection;
 

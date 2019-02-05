@@ -2,10 +2,6 @@
 #define GEOMETRICALCOMPONENT_H
 
 #include "Component.h"
-#include "RELAP7App.h"
-#include <map>
-#include <unordered_set>
-#include <numeric>
 
 class GeometricalComponent;
 

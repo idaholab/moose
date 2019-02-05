@@ -1,6 +1,6 @@
 #include "FlowConnection.h"
 #include "GeometricalFlowComponent.h"
-#include "Pipe.h"
+#include "PipeBase.h"
 #include "FlowModelTwoPhase.h"
 #include "RELAP7Mesh.h"
 
@@ -95,9 +95,9 @@ FlowConnection::init()
       checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
       _flow_model_id = flow_model_ids[0];
 
-      if (hasComponentByName<Pipe>(_connections[0]._geometrical_component_name))
+      if (hasComponentByName<PipeBase>(_connections[0]._geometrical_component_name))
       {
-        const Pipe & pipe = getComponentByName<Pipe>(_connections[0]._geometrical_component_name);
+        const PipeBase & pipe = getComponentByName<PipeBase>(_connections[0]._geometrical_component_name);
         if (_flow_model_id == RELAP7::FM_TWO_PHASE || _flow_model_id == RELAP7::FM_TWO_PHASE_NCG)
         {
           _flow_model = pipe.getFlowModel();
