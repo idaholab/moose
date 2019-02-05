@@ -5,7 +5,13 @@ namespace WallFriction
 {
 
 Real
-Churchill(Real Re, Real roughness, Real Dh)
+DarcyFrictionFactor(const Real & f_F)
+{
+  return 4 * f_F;
+}
+
+Real
+FanningFrictionFactorChurchill(Real Re, Real roughness, Real Dh)
 {
   Real Re_limit = std::max(Re, 10.0);
 

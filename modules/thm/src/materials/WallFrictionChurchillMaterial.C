@@ -16,7 +16,7 @@ validParams<WallFrictionChurchillMaterial>()
   params.addRequiredCoupledVar("vel", "x-component of the velocity");
   params.addRequiredCoupledVar("D_h", "hydraulic diameter");
 
-  params.addRequiredParam<MaterialPropertyName>("Cw", "Drag coefficient material property");
+  params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
 
   params.addRequiredParam<Real>("roughness", "Surface roughness");
@@ -34,8 +34,10 @@ WallFrictionChurchillMaterial::computeQpProperties()
 {
   Real Re = THM::Reynolds(1, _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
 
-  _Cw[_qp] = WallFriction::Churchill(Re, _roughness, _D_h[_qp]) * 2. * _rho[_qp] / _D_h[_qp];
-  _dCw_drhoA[_qp] = 0;
-  _dCw_drhouA[_qp] = 0;
-  _dCw_drhoEA[_qp] = 0;
+  const Real f_F = WallFriction::FanningFrictionFactorChurchill(Re, _roughness, _D_h[_qp]);
+
+  _f_D[_qp] = WallFriction::DarcyFrictionFactor(f_F);
+  _df_D_drhoA[_qp] = 0;
+  _df_D_drhouA[_qp] = 0;
+  _df_D_drhoEA[_qp] = 0;
 }
