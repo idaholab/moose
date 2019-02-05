@@ -1,7 +1,5 @@
 # ThermalSolidPropertiesMaterial
 
-!syntax description /Materials/ThermalSolidPropertiesMaterial
-
 ## Description
 
 The `ThermalSolidPropertiesMaterial` material is an
@@ -21,11 +19,5 @@ implementation of solid properties:
 - compute derivatives of thermal conductivity - `computeThermalConductivityDerivatives()`
 - compute density - `computeDensity()`
 - compute derivatives of density - `computeDensityDerivatives()`
-
-!syntax parameters /Materials/ThermalSolidPropertiesMaterial
-
-!syntax inputs /Materials/ThermalSolidPropertiesMaterial
-
-!syntax children /Materials/ThermalSolidPropertiesMaterial
 
 !bibtex bibliography
