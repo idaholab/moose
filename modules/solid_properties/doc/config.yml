@@ -11,8 +11,10 @@ Renderer:
 Extensions:
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/solid_properties
+        allow-test-objects: False
         hide:
             framework: !include framework/doc/hidden.yml
+            solid_properties: !include modules/solid_properties/doc/hidden.yml
         remove: !include framework/doc/remove.yml
         includes:
             - framework/include
