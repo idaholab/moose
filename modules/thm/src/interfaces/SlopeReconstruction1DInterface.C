@@ -2,6 +2,10 @@
 #include "MooseObject.h"
 #include "MooseEnum.h"
 
+#include "libmesh/elem.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/point.h"
+
 const std::map<std::string, SlopeReconstruction1DInterface::ESlopeReconstructionType>
     SlopeReconstruction1DInterface::_slope_reconstruction_type_to_enum{
         {"NONE", None}, {"FULL", Full}, {"MINMOD", Minmod}, {"MC", MC}, {"SUPERBEE", Superbee}};
