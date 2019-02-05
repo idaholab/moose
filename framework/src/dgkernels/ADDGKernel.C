@@ -22,8 +22,6 @@ defineADBaseValidParams(ADDGKernel, DGKernelBase, params.registerBase("ADDGKerne
 template <ComputeStage compute_stage>
 ADDGKernel<compute_stage>::ADDGKernel(const InputParameters & parameters)
   : DGKernelBase(parameters),
-    _test(_var.phi()),
-    _grad_test(_var.gradPhi()),
     _u(_var.adSln<compute_stage>()),
     _grad_u(_var.adGradSln<compute_stage>()),
     _u_neighbor(_var.adSlnNeighbor<compute_stage>()),

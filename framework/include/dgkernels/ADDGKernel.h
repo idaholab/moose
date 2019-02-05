@@ -59,12 +59,6 @@ protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
   virtual ADResidual computeQpResidual(Moose::DGResidualType type) = 0;
 
-  /// the current test function
-  const ADVariableTestValue & _test;
-
-  /// gradient of the test function
-  const ADVariableTestGradient & _grad_test;
-
   /// Holds the solution at current quadrature points
   const ADVariableValue & _u;
 
