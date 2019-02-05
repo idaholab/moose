@@ -167,8 +167,9 @@ PorousFlowBrineCO2::massFractions(Real pressure,
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  Real Xco2, dXco2_dp, dXco2_dT, dXco2_dX, Yh2o, dYh2o_dp, dYh2o_dT, dYh2o_dX;
-  Real Yco2, dYco2_dp, dYco2_dT, dYco2_dX;
+  Real Xco2 = 0.0, dXco2_dp = 0.0, dXco2_dT = 0.0, dXco2_dX = 0.0;
+  Real Yh2o = 0.0, dYh2o_dp = 0.0, dYh2o_dT = 0.0, dYh2o_dX = 0.0;
+  Real Yco2 = 0.0, dYco2_dp = 0.0, dYco2_dT = 0.0, dYco2_dX = 0.0;
 
   // If the amount of CO2 is less than the smallest solubility, then all CO2 will
   // be dissolved, and the equilibrium mass fractions do not need to be computed
