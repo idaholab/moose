@@ -9,7 +9,7 @@
 #ifndef ADHEATCONDUCTIONTIMEDERIVATIVE_H
 #define ADHEATCONDUCTIONTIMEDERIVATIVE_H
 
-#include "ADTimeKernel.h"
+#include "ADTimeDerivative.h"
 
 template <ComputeStage compute_stage>
 class ADHeatConductionTimeDerivative;
@@ -17,7 +17,7 @@ class ADHeatConductionTimeDerivative;
 declareADValidParams(ADHeatConductionTimeDerivative);
 
 template <ComputeStage compute_stage>
-class ADHeatConductionTimeDerivative : public ADTimeKernel<compute_stage>
+class ADHeatConductionTimeDerivative : public ADTimeDerivative<compute_stage>
 {
 public:
   ADHeatConductionTimeDerivative(const InputParameters & parameters);
