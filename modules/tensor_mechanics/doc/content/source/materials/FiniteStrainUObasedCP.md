@@ -86,7 +86,7 @@ vii. Residual $r=T_i-T^\prime$.
 
 i. $r=T_i-T^\prime$ and $J=\frac{\partial r}{\partial T_i}=I-\frac{\partial T^\prime}{\partial T_i}$.
 
-ii. $ T^\prime=C:E^e$ which gives $\frac{\partial T^\prime}{\partial T_i}=C: \frac{\partial E^e}{\partial T_i}$.
+ii. $T^\prime=C:E^e$ which gives $\frac{\partial T^\prime}{\partial T_i}=C: \frac{\partial E^e}{\partial T_i}$.
 
 iii. $E^e=\frac{1}{2}\left(F^{eT}F^e -I\right)$ which gives in indicial notation $\frac{\partial E^e_{ij}}{\partial F^e_{kl}}=\frac{1}{2}\left( \delta_{il}F^e_{kj}+\delta_{jl}F^e_{ki}\right)$ where $\delta_{ij}$ is the Kroneckar delta.
 
