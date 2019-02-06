@@ -21,14 +21,14 @@
 - [Jacobian Definition](/jacobian_definition.md)
 - [Hypre/BoomerAMG Preconditioning](hypre.md)
 - [C++ Utilities](utils/index.md)
-- [Modules Doxygen](http://mooseframework.org/docs/doxygen/modules/classes.html)
+- [Modules Doxygen](https://mooseframework.org/docs/doxygen/modules/classes.html)
 
 ## [Framework Development](framework_development/index.md)
 
 - [Contributing](framework_development/contributing.md)
 - [Code Standards](code_standards.md)
-- [MOOSE Doxygen](http://mooseframework.org/docs/doxygen/moose/classes.html)
-- [libMesh Doxygen](http://mooseframework.org/docs/doxygen/libmesh/classes.html)
+- [MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html)
+- [libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
 !col-end!
 
 !col! class=s12 m6 l4
@@ -44,7 +44,8 @@
 - [Build System](/build_system.md)
 - [Test System](/test_system.md)
 - [Benchmarking](/performance_benchmarking.md)
-- [Test Timing](http://mooseframework.org/docs/timing/)
+- [Test Timing](https://mooseframework.org/docs/timing/)
+- [Code Coverage](https://mooseframework.org/docs/coverage/moose/)
 
 !col-end!
 !row-end!
