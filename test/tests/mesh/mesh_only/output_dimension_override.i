@@ -24,10 +24,5 @@
   type = MeshGeneratorMesh
 []
 
-[Outputs]
-  [out]
-    type = Exodus
-    # Since this mesh is rotated into the z-plane, we need to output in 3D
-    output_dimension = 3
-  []
-[]
+# Since this mesh is rotated into the z-plane, we need to output in 3D
+# This should occur automatically

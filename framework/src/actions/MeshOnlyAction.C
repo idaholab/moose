@@ -64,12 +64,9 @@ MeshOnlyAction::act()
    */
   if (mesh_file.find(".e") + 2 == mesh_file.size())
   {
-    auto effective_spatial_dimension = mesh_ptr->effectiveSpatialDimension();
-
     ExodusII_IO exio(mesh_ptr->getMesh());
 
-    // Set the minimum output dimension to at least 2
-    exio.write_as_dimension(std::max(2, static_cast<int>(effective_spatial_dimension)));
+    Exodus::setOutputDimensionInExodusWriter(exio, *mesh_ptr);
 
     exio.write(mesh_file);
   }

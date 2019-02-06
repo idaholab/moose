@@ -65,7 +65,8 @@ AnnularMesh::AnnularMesh(const InputParameters & parameters)
                           : (_rmax - _rmin) * (1.0 - _growth_r) / (1.0 - std::pow(_growth_r, _nr))),
     _full_annulus(_tmin == 0.0 && _tmax == 2 * M_PI),
     _quad_subdomain_id(getParam<SubdomainID>("quad_subdomain_id")),
-    _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id"))
+    _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id")),
+    _dims_may_have_changed(false)
 {
   // catch likely user errors
   if (_rmax <= _rmin)
@@ -81,9 +82,22 @@ AnnularMesh::AnnularMesh(const InputParameters & parameters)
     mooseError("AnnularMesh: quad_subdomain_id must not equal tri_subdomain_id");
 }
 
+void
+AnnularMesh::prepared(bool state)
+{
+  MooseMesh::prepared(state);
+
+  // Fall back on scanning the mesh for coordinates instead of using input parameters for queries
+  if (!state)
+    _dims_may_have_changed = true;
+}
+
 Real
 AnnularMesh::getMinInDimension(unsigned int component) const
 {
+  if (_dims_may_have_changed)
+    return MooseMesh::getMinInDimension(component);
+
   switch (component)
   {
     case 0:
@@ -100,6 +114,9 @@ AnnularMesh::getMinInDimension(unsigned int component) const
 Real
 AnnularMesh::getMaxInDimension(unsigned int component) const
 {
+  if (_dims_may_have_changed)
+    return MooseMesh::getMaxInDimension(component);
+
   switch (component)
   {
     case 0:

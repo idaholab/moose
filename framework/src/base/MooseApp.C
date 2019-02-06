@@ -1398,7 +1398,7 @@ MooseApp::executeMeshModifiers()
         modifier->modifyMesh(mesh, displaced_mesh);
 
       /**
-       * Set preparation flag after modifers are run. The final preparation
+       * Set preparation flag after modifiers are run. The final preparation
        * will be handled by the SetupMeshComplete Action.
        */
       mesh->prepared(false);

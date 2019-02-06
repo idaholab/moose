@@ -286,7 +286,7 @@ public:
    * Setter/getter for the _is_prepared flag.
    */
   bool prepared() const;
-  void prepared(bool state);
+  virtual void prepared(bool state);
 
   /**
    * If this method is called, we will call libMesh's prepare_for_use method when we

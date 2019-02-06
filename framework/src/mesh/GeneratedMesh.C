@@ -92,18 +92,32 @@ GeneratedMesh::GeneratedMesh(const InputParameters & parameters)
     _gauss_lobatto_grid(getParam<bool>("gauss_lobatto_grid")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
-    _bias_z(getParam<Real>("bias_z"))
+    _bias_z(getParam<Real>("bias_z")),
+    _dims_may_have_changed(false)
 {
   if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
     mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
 
-  // All generated meshes are regular orthogonal meshes
+  // All generated meshes are regular orthogonal meshes - until they get modified ;)
   _regular_orthogonal_mesh = true;
+}
+
+void
+GeneratedMesh::prepared(bool state)
+{
+  MooseMesh::prepared(state);
+
+  // Fall back on scanning the mesh for coordinates instead of using input parameters for queries
+  if (!state)
+    _dims_may_have_changed = true;
 }
 
 Real
 GeneratedMesh::getMinInDimension(unsigned int component) const
 {
+  if (_dims_may_have_changed)
+    return MooseMesh::getMinInDimension(component);
+
   switch (component)
   {
     case 0:
@@ -120,6 +134,9 @@ GeneratedMesh::getMinInDimension(unsigned int component) const
 Real
 GeneratedMesh::getMaxInDimension(unsigned int component) const
 {
+  if (_dims_may_have_changed)
+    return MooseMesh::getMaxInDimension(component);
+
   switch (component)
   {
     case 0:

@@ -1288,7 +1288,9 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
   // Find the bounding box of our mesh
   for (const auto & node : getMesh().node_ptr_range())
-    for (unsigned int i = 0; i < dim; ++i)
+    // Check all coordinates, we don't know if this mesh might be lying in a higher dim even if the
+    // mesh dimension is lower.
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       if ((*node)(i) < min[i])
         min[i] = (*node)(i);
@@ -1308,7 +1310,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     // See if the current node is located at one of the extremes
     unsigned int coord_match = 0;
 
-    for (unsigned int i = 0; i < dim; ++i)
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       if (std::abs((*node)(i)-min[i]) < tol)
       {
@@ -1322,7 +1324,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
       }
     }
 
-    if (coord_match == dim) // Found a coordinate at one of the extremes
+    if (coord_match == LIBMESH_DIM) // Found a coordinate at one of the extremes
     {
       _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = node;
       extreme_matches[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = true;
@@ -1336,17 +1338,11 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
   // Set the bounds
   _bounds.resize(LIBMESH_DIM);
-  for (unsigned int i = 0; i < dim; ++i)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     _bounds[i].resize(2);
     _bounds[i][MIN] = min[i];
     _bounds[i][MAX] = max[i];
-  }
-  for (unsigned int i = dim; i < LIBMESH_DIM; ++i)
-  {
-    _bounds[i].resize(2);
-    _bounds[i][MIN] = 0;
-    _bounds[i][MAX] = 0;
   }
 
   return _regular_orthogonal_mesh;
@@ -2296,6 +2292,13 @@ void
 MooseMesh::prepared(bool state)
 {
   _is_prepared = state;
+
+  /**
+   * If we are explicitly setting the mesh to not prepared, then we've likely modified the mesh and
+   * can no longer make assumptions about orthogonality. We really should recheck.
+   */
+  if (!state)
+    _regular_orthogonal_mesh = false;
 }
 
 void

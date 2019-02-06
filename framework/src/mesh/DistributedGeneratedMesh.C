@@ -34,7 +34,8 @@
 #endif
 namespace Metis
 {
-extern "C" {
+extern "C"
+{
 #include "libmesh/ignore_warnings.h"
 #include "metis.h"
 #include "libmesh/restore_warnings.h"
@@ -118,15 +119,29 @@ DistributedGeneratedMesh::DistributedGeneratedMesh(const InputParameters & param
     _zmax(getParam<Real>("zmax")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
-    _bias_z(getParam<Real>("bias_z"))
+    _bias_z(getParam<Real>("bias_z")),
+    _dims_may_have_changed(false)
 {
   // All generated meshes are regular orthogonal meshes
   _regular_orthogonal_mesh = true;
 }
 
+void
+DistributedGeneratedMesh::prepared(bool state)
+{
+  MooseMesh::prepared(state);
+
+  // Fall back on scanning the mesh for coordinates instead of using input parameters for queries
+  if (!state)
+    _dims_may_have_changed = true;
+}
+
 Real
 DistributedGeneratedMesh::getMinInDimension(unsigned int component) const
 {
+  if (_dims_may_have_changed)
+    return MooseMesh::getMinInDimension(component);
+
   switch (component)
   {
     case 0:
@@ -143,6 +158,9 @@ DistributedGeneratedMesh::getMinInDimension(unsigned int component) const
 Real
 DistributedGeneratedMesh::getMaxInDimension(unsigned int component) const
 {
+  if (_dims_may_have_changed)
+    return MooseMesh::getMaxInDimension(component);
+
   switch (component)
   {
     case 0:

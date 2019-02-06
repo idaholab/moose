@@ -34,6 +34,7 @@ public:
   virtual void buildMesh() override;
   virtual Real getMinInDimension(unsigned int component) const override;
   virtual Real getMaxInDimension(unsigned int component) const override;
+  virtual void prepared(bool state) override;
 
 protected:
   /// The dimension of the mesh
@@ -58,6 +59,9 @@ protected:
   /// _bias_x==1 implies no bias (original mesh unchanged).
   /// _bias_x > 1 implies cells are growing in the x-direction.
   Real _bias_x, _bias_y, _bias_z;
+
+  /// Boolean to indicate that dimensions may have changed
+  bool _dims_may_have_changed;
 };
 
 #endif /* GENERATEDMESH_H */
