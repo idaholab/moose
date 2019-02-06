@@ -4,7 +4,7 @@
 
 ## Description
 
-The UserObject based crystal plasticity system is designed to facilitate the implementation of different constitutive laws in a modular way. Both phenomenological constitutive models and dislocation-based constitutive models can be implemented through this system. This system consists of one material class `FiniteStrainUObasedCP` and four userobject classes, namely `CrystalPlasticitySlipRate`, `CrystalPlasticitySlipResistance`, `CrystalPlasticityStateVarRateComponent` and `CrystalPlasticityStateVariable`.
+The UserObject based crystal plasticity system is designed to facilitate the implementation of different constitutive laws in a modular way. Both phenomenological constitutive models and dislocation-based constitutive models can be implemented through this system. This system consists of one material class `FiniteStrainUObasedCP` and four UserObject classes, namely `CrystalPlasticitySlipRate`, `CrystalPlasticitySlipResistance`, `CrystalPlasticityStateVarRateComponent` and `CrystalPlasticityStateVariable`.
 
 The material class is based on plastic flow on individual slip systems to obtain the inelastic deformation in materials. The present formulation considers large deformation and is based on a stress update algorithm. Some of the important functions associated with this class are outlined below.
 
