@@ -188,6 +188,12 @@ SinglePhaseFluidProperties::beta_from_p_T(Real p, Real T) const
   return -drho_dT / rho;
 }
 
+void
+SinglePhaseFluidProperties::beta_from_p_T(Real, Real, Real &, Real &, Real &) const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+}
+
 Real SinglePhaseFluidProperties::s_from_p_T(Real, Real) const
 {
   mooseError(name(), ": s_from_p_T is not implemented");
