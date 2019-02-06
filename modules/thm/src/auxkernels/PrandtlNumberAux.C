@@ -2,7 +2,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
-registerMooseObject("RELAP7App", PrandtlNumberAux);
+registerMooseObject("THMApp", PrandtlNumberAux);
 
 template <>
 InputParameters

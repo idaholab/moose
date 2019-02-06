@@ -1,6 +1,6 @@
 #include "HydraulicDiameterCircularAux.h"
 
-registerMooseObject("RELAP7App", HydraulicDiameterCircularAux);
+registerMooseObject("THMApp", HydraulicDiameterCircularAux);
 
 template <>
 InputParameters

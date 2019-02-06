@@ -1,7 +1,7 @@
 #include "PressureAux.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("RELAP7App", PressureAux);
+registerMooseObject("THMApp", PressureAux);
 
 template <>
 InputParameters

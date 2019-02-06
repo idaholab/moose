@@ -1,6 +1,6 @@
 #include "SpecificInternalEnergyAux.h"
 
-registerMooseObject("RELAP7App", SpecificInternalEnergyAux);
+registerMooseObject("THMApp", SpecificInternalEnergyAux);
 
 template <>
 InputParameters

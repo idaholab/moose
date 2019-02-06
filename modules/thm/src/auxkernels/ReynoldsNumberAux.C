@@ -2,7 +2,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
-registerMooseObject("RELAP7App", ReynoldsNumberAux);
+registerMooseObject("THMApp", ReynoldsNumberAux);
 
 template <>
 InputParameters

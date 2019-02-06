@@ -1,7 +1,7 @@
 #include "TemperatureAux.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("RELAP7App", TemperatureAux);
+registerMooseObject("THMApp", TemperatureAux);
 
 template <>
 InputParameters
