@@ -128,7 +128,6 @@
   coupling_type = ThermoHydroMechanical
   multiply_by_density = false
   add_stress_aux = true
-  simulation_type = steady
   porepressure = porepressure
   temperature = temperature
   thermal_eigenstrain_name = thermal_contribution
