@@ -23,3 +23,9 @@ Download and install one of our redistributable packages according to your versi
 
 - Mint 19: !!package name arch=ubuntu18!!
 - Mint 18: !!package name arch=ubuntu16!!
+
+Once downloaded, the package can be installed via the dpkg utility:
+
+```bash
+sudo dpkg -i moose-environment_ubuntu-*.rpm
+```
