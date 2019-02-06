@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NaClFluidPropertiesTest.h"
-#include "SinglePhaseFluidPropertiesPTTestUtils.h"
+#include "SinglePhaseFluidPropertiesTestUtils.h"
 
 /**
  * Verify that critical properties are correctly returned
@@ -100,10 +100,10 @@ TEST_F(NaClFluidPropertiesTest, derivatives)
   const Real p = 30.0e6;
   const Real T = 300.0;
 
-  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
-  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
-  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
-  DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->h_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->k_from_p_T, p, T, tol);
 }
 
 /**
@@ -124,7 +124,7 @@ TEST_F(NaClFluidPropertiesTest, combined)
 
   // Combined property methods
   Real rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT;
-  _fp->rho_e_dpT(p, T, rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT);
+  _fp->rho_e_from_p_T(p, T, rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT);
   ABS_TEST(rho, rho2, tol);
   ABS_TEST(drho_dp, drho2_dp, tol);
   ABS_TEST(drho_dT, drho2_dT, tol);
