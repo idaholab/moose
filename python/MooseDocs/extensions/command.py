@@ -29,12 +29,18 @@ class CommandExtension(components.Extension):
         # Type checking
         common.check_type('reader', reader, Reader)
         common.check_type('command', command, CommandComponent)
-        common.check_type('COMMAND', command.COMMAND, str)
+        common.check_type('COMMAND', command.COMMAND, (str, tuple))
         common.check_type('SUBCOMMAND', command.SUBCOMMAND, (type(None), str, tuple))
 
         # Initialize the component
         command.setReader(reader)
         command.setExtension(self)
+
+        # Commands can be tuples
+        if not isinstance(command.COMMAND, tuple):
+            commands = tuple([command.COMMAND])
+        else:
+            commands = command.COMMAND
 
         # Subcommands can be tuples
         if not isinstance(command.SUBCOMMAND, tuple):
@@ -43,18 +49,21 @@ class CommandExtension(components.Extension):
             subcommands = command.SUBCOMMAND
 
         # Add the command and error if it exists
-        for sub in subcommands:
-            pair = (command.COMMAND, sub)
-            if pair in CommandExtension.EXTENSION_COMMANDS:
-                msg = "A CommandComponent object exists with the command '{}' and subcommand '{}'."
-                raise common.exceptions.MooseDocsException(msg, pair[0], pair[1])
+        for cmd in commands:
+            for sub in subcommands:
+                pair = (cmd, sub)
+                if pair in CommandExtension.EXTENSION_COMMANDS:
+                    msg = "A CommandComponent object exists with the command '{}' and " \
+                          "subcommand '{}'."
+                    raise common.exceptions.MooseDocsException(msg, pair[0], pair[1])
 
-            CommandExtension.EXTENSION_COMMANDS[pair] = command
+                CommandExtension.EXTENSION_COMMANDS[pair] = command
 
     def extend(self, reader, renderer):
         self.requires(core)
         reader.addBlock(BlockBlockCommand(), location='_begin')
         reader.addBlock(BlockInlineCommand(), location='<BlockBlockCommand')
+        reader.addInline(OldInlineCommand(), location='_begin') #TODO: add deprecated message
         reader.addInline(InlineCommand(), location='_begin')
 
 class CommandComponent(components.TokenComponent): #pylint: disable=abstract-method
@@ -140,6 +149,16 @@ class BlockBlockCommand(CommandBase):
                     r'(?=\n*\Z|\n{2,})',         # ends with empty line or end of string
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
-class InlineCommand(CommandBase):
+class OldInlineCommand(CommandBase):
     RE = re.compile(r'!{2}(?P<command>\w+) *(?P<subcommand>\w+)? *(?P<settings>.*?)!{2}',
+                    flags=re.UNICODE)
+
+class InlineCommand(CommandBase):
+    """Inline commands as:
+        [!command key=value]
+        [!command!subcommand key=value]
+    """
+
+    RE = re.compile(r'\[(?P<command>\w+)!(?!(?P<subcommand>\w+)!)?(?P<inline>.*?)'
+                    r' *(?P<settings>\w+=.*?)?\]',
                     flags=re.UNICODE)

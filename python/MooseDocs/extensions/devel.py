@@ -9,11 +9,22 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import importlib
+from MooseDocs.base import LatexRenderer
 from MooseDocs.common import exceptions
+from MooseDocs.tree import tokens, latex
 from MooseDocs.extensions import core, floats, command, table
 
 def make_extension(**kwargs):
     return DevelExtension(**kwargs)
+
+ExampleFloat = tokens.newToken('ExampleFloat', floats.Float)
+
+EXAMPLE_LATEX = """
+\\newtcolorbox
+[auto counter,number within=chapter]{example}[2][]{%
+skin=bicolor,colback=black!10,colbacklower=white,colframe=black!90,fonttitle=\\bfseries,
+title=Example~\\thetcbcounter: #2,#1}
+"""
 
 class DevelExtension(command.CommandExtension):
     """
@@ -30,6 +41,13 @@ class DevelExtension(command.CommandExtension):
         self.addCommand(reader, Example())
         self.addCommand(reader, ComponentSettings())
 
+        renderer.add('ExampleFloat', RenderExampleFloat())
+
+        if isinstance(renderer, LatexRenderer):
+            renderer.addPackage('tcolorbox')
+            renderer.addPreamble('\\tcbuselibrary{skins}')
+            renderer.addPreamble(EXAMPLE_LATEX)
+
 class Example(command.CommandComponent):
     COMMAND = 'devel'
     SUBCOMMAND = 'example'
@@ -43,9 +61,13 @@ class Example(command.CommandComponent):
 
     def createToken(self, parent, info, page):
         master = floats.create_float(parent, self.extension, self.reader, page,
-                                     self.settings, **self.attributes)
+                                     self.settings, token_type=ExampleFloat)
         data = info['block'] if 'block' in info else info['inline']
-        core.Code(master, content=data)
+        code = core.Code(master, content=data)
+
+        if master is parent:
+            code.attributes.update(**self.attributes)
+
         return master
 
 class ComponentSettings(command.CommandComponent):
@@ -70,7 +92,7 @@ class ComponentSettings(command.CommandComponent):
             raise exceptions.MooseDocsException("The 'object' setting is required.")
 
         master = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                     **self.attributes)
+                                     token_type=table.TableFloat)
         try:
             mod = importlib.import_module(self.settings['module'])
         except ImportError:
@@ -96,4 +118,30 @@ class ComponentSettings(command.CommandComponent):
         rows = [[key, value[0], value[1]] for key, value in settings.iteritems()]
         tbl = table.builder(rows, headings=[u'Key', u'Default', u'Description'])
         tbl.parent = master
-        return master
+
+        if master is parent:
+            tbl.attributes.update(**self.attributes)
+
+        return parent
+
+class RenderExampleFloat(floats.RenderFloat):
+    def createLatex(self, parent, token, page):
+
+        # Create label option and render caption text
+        cap = token(0)
+        cap.parent = None
+        label = latex.create_settings(label=cap['key'])
+
+        text = tokens.String(None)
+        cap.copyToToken(text)
+        title = latex.Brace()
+        self.translator.renderer.render(title, text, page)
+
+        # Create example environment with upper and lower part
+        example = latex.Environment(parent, 'example', args=[label, title])
+
+        code = token.children[0]
+        code.parent = None
+        self.translator.renderer.render(example, code, page) # upper
+        latex.Command(example, 'tcblower', start='\n')
+        return example

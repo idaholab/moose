@@ -59,7 +59,7 @@ An animation of the results is shown in [tut04_gif_fig].
 
 !media porous_flow/tut04.gif style=width:50%;margin-left:10px caption=Displacement (magnified by 100 times) and effective hoop-stress evolution in the borehole-aquifer-caprock system.  id=tut04_gif_fig
 
-The dynamics of this model are fascinating, and readers are encouraged to pause and play with parameters to explore how they effect the final result.  In fact, this model is very similar to the "THM Rehbinder" test in PorousFlow's test suite.  Rehbinder [citep:rehbinder1995] derived analytical solutions for a similar THM problem, and MOOSE replicates his result exactly:
+The dynamics of this model are fascinating, and readers are encouraged to pause and play with parameters to explore how they effect the final result.  In fact, this model is very similar to the "THM Rehbinder" test in PorousFlow's test suite.  Rehbinder [citep!rehbinder1995] derived analytical solutions for a similar THM problem, and MOOSE replicates his result exactly:
 
 !media media/porous_flow/thm_rehbinder_temperature_fig.png style=width:60%;margin-left:10px caption=Comparison between MOOSE and Rehbinder's analytical solution.  id=fig_thm_t.fig
 

@@ -17,15 +17,19 @@ from MooseDocs.tree.base import NodeBase
 LOG = logging.getLogger(__name__)
 
 
-def newToken(name, **defaults):
+def newToken(name, parent=None, **defaults):
     """
     Function for creating Token objects with unique names and default attributes.
 
     TODO: Add a default system that has type checking and required checking (only in DEBUG)
     """
-
     if MooseDocs.LOG_LEVEL == logging.DEBUG:
         pass # Future consistency checking
+
+    if parent is not None:
+        old = defaults
+        defaults = parent(None).attributes
+        defaults.update(old)
 
     def tokenGenerator(parent, **kwargs):
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
@@ -82,7 +86,7 @@ class Token(NodeBase):
         """
         strings = []
         for node in anytree.PreOrderIter(self):
-            if node.name in ['Word', 'Number']:
+            if node.name in ['Word', 'Number', 'String']:
                 strings.append(node['content'])
         return sep.join(strings)
 
@@ -103,6 +107,11 @@ class Token(NodeBase):
             _raw[bool]: An internal flag for skipping json conversion while building containers
         """
         return json.dumps(self.toDict(), sort_keys=True, indent=4)
+
+    def copyToToken(self, token):
+        """Copy the children from this token to the supplied parent."""
+        for child in self.copy():
+            child.parent = token
 
     def toDict(self):
         """Convert tree into a dict."""

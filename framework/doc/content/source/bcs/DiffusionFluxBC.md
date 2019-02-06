@@ -16,7 +16,7 @@ The standard theory of elliptic operators requires the specification of boundary
 parts of the boundary, so "implicitly" computing a residual contribution in this manner (instead of
 replacing it with the correct "data") falls outside of this theory. That said, there are instances
 where such an approach gives reasonable results in practice, see, for example, the paper by
-[cite:griffiths1997noboundary].
+[cite!griffiths1997noboundary].
 
 As an example, consider the Poisson problem with mixed
 boundary conditions:

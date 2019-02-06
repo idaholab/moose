@@ -11,7 +11,7 @@ Here, $\mathbf{M}$ is the mass matrix, $\mathbf{C}$ is the damping matrix, $\mat
 
 ## Time integration
 
-To solve the above equation for $\mathbf{u}$, an appropriate time integration scheme needs to be chosen. Newmark [citep:newmark1959amethod] and Hilber-Hughes-Taylor (HHT) [citep:hughes2000fem] time integration schemes are two of the commonly used methods in dynamics.
+To solve the above equation for $\mathbf{u}$, an appropriate time integration scheme needs to be chosen. Newmark [citep!newmark1959amethod] and Hilber-Hughes-Taylor (HHT) [citep!hughes2000fem] time integration schemes are two of the commonly used methods in dynamics.
 
 ### Newmark time integration
 

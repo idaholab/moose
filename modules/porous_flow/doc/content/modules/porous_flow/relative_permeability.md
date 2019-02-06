@@ -29,11 +29,11 @@ choice. However, it is included as it is useful for testing purposes.
 
 [`PorousFlowRelativePermeabilityCorey`](/PorousFlowRelativePermeabilityCorey.md)
 
-The relative permeability of the phase is given by [citet:corey1954]
+The relative permeability of the phase is given by [cite!corey1954]
 \begin{equation}
 k_{\mathrm{r}} = S_{\mathrm{eff}}^{n},
 \end{equation}
-where $n$ is a user-defined quantity. Originally, [citet:corey1954] used $n = 4$ for the wetting phase, but the PorousFlow module allows an arbitrary exponent to be used.
+where $n$ is a user-defined quantity. Originally, [cite!corey1954] used $n = 4$ for the wetting phase, but the PorousFlow module allows an arbitrary exponent to be used.
 
 !media media/porous_flow/relperm_corey.png style=width:100%;margin-left:10px; caption=Corey relative permeability id=relperm_corey
 
@@ -42,7 +42,7 @@ where $n$ is a user-defined quantity. Originally, [citet:corey1954] used $n = 4$
 
 [`PorousFlowRelativePermeabilityVG`](/PorousFlowRelativePermeabilityVG.md)
 
-The relative permeability of the phase is given by [citet:vangenuchten1980]
+The relative permeability of the phase is given by [cite!vangenuchten1980]
 \begin{equation}
 k_{\mathrm{r}} = \sqrt{S_{\mathrm{eff}}} \left(1 - (1 -
 S_{\mathrm{eff}}^{1/m})^{m} \right)^{2}.
@@ -71,7 +71,7 @@ $S_{\mathrm{eff}}=1$.
 
 [`PorousFlowRelativePermeabilityBC`](/PorousFlowRelativePermeabilityBC.md)
 
-The [citet:brookscorey1966] relative permeability model is an extension of the previous  [citet:corey1954] formulation where the relative permeability of the wetting phase is given by
+The [cite!brookscorey1966] relative permeability model is an extension of the previous  [cite!corey1954] formulation where the relative permeability of the wetting phase is given by
 \begin{equation}
 k_{\mathrm{r, w}} = \left(S_{\mathrm{eff}}\right)^{(2 + 3 \lambda)/\lambda},
 \end{equation}
@@ -80,7 +80,7 @@ and the relative permeability of the non-wetting phase is
 k_{\mathrm{r, nw}} = (1 - S_{\mathrm{eff}})^2 \left[1 - \left(S_{\mathrm{eff}}\right)^{(2 + \lambda)/\lambda}\right],
 \end{equation}
 where $\lambda$ is a user-defined exponent. When $\lambda = 2$, this formulation reduces
-to the original [citet:corey1954] form.
+to the original [cite!corey1954] form.
 
 !media media/porous_flow/relperm_bc.png style=width:100%;margin-left:10px; caption=Brooks-Corey relative permeability id=relperm_bc
 
@@ -88,7 +88,7 @@ to the original [citet:corey1954] form.
 
 [`PorousFlowRelativePermeabilityBW`](/PorousFlowRelativePermeabilityBW.md)
 
-The relative permeability of a phase given by [citet:broadbridge1988] is
+The relative permeability of a phase given by [cite!broadbridge1988] is
 \begin{equation}
 k_{\mathrm{r}} = K_{n} + \frac{K_{s} - K_{n}}{(c - 1)(c -
   S_{\mathrm{eff}})}S_{\mathrm{eff}}^{2}.

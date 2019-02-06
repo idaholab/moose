@@ -1,7 +1,10 @@
 [Tests]
+  issues = '#8465'
+  design = 'level_set/index.md'
   [./copy]
     type = Exodiff
     input = master.i
     exodiff = master_out_sub0.e
+    requirement = "The level set module shall include the ability to transfer a non-linear variable between the master and a sub-application."
   [../]
 []

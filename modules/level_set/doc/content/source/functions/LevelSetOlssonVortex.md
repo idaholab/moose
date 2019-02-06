@@ -5,7 +5,7 @@
 One of the most often utilized benchmark problems for the level set equation involve a vortex
 velocity field in two-dimensions that result in a full reversal of the advected variable after some
 time. The LevelSetOlssonVortex provides the velocity in the x and y direction ($v_x$ and $v_y$)
-defined by [citet:olsson2005conservative] as:
+defined by [cite!olsson2005conservative] as:
 
 \begin{equation}
 \begin{aligned}

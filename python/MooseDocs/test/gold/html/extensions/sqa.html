@@ -1,0 +1,1300 @@
+<!DOCTYPE html><head><link href="../contrib/katex/katex.min.css" rel="stylesheet" type="text/css"></link><script src="../contrib/katex/katex.min.js" type="text/javascript"></script><script src="../contrib/plotly/plotly.min.js" type="text/javascript"></script></head><body><h1 id="sqa-extension">SQA Extension</h1><ul><li>Picard</li><li>The system shall allow transient multiapps to use Picard iterations to rerun the time step<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard:test</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/2116">#2116</a></p></li><li>The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard:iteration_adaptive</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/2116">#2116</a><a href="https://github.com/idaholab/moose/issues/10311">#10311</a></p></li><li>The system shall reject the solve if the maximum number of Picard iterations is reached without converging<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard:iteration_adaptive_picard_max_its</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/12618">#12618</a></p></li><li>The system shall allow transient multiapps with Picard iterations controlled by relative tolerances<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard:rel_tol</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/2116">#2116</a></p></li><li>The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard:abs_tol</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/2116">#2116</a></p></li><li>The system shall allow function-defined time stepping for transient multiapps<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard:function_dt</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/5800">#5800</a></p></li></ul><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps to use Picard iterations to rerun the time step&quot;
+  [../]
+  [./iteration_adaptive]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_out.e'
+    cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#2116 #10311'
+    requirement = &quot;The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances&quot;
+  [../]
+  [./iteration_adaptive_picard_max_its]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_picard_max_its.e'
+    cli_args = &quot;Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its&quot;
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#12618'
+    requirement = &quot;The system shall reject the solve if the maximum number of Picard iterations is reached without converging&quot;
+  [../]
+
+  [./rel_tol]
+    type = 'Exodiff'
+    input = 'picard_rel_tol_master.i'
+    exodiff = 'picard_rel_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by relative tolerances&quot;
+  [../]
+
+  [./abs_tol]
+    type = 'Exodiff'
+    input = 'picard_abs_tol_master.i'
+    exodiff = 'picard_abs_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances&quot;
+  [../]
+
+  [./function_dt]
+    type = 'Exodiff'
+    input = 'function_dt_master.i'
+    exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'timesteppers/FunctionDT.md'
+    issues = '#5800'
+    requirement = &quot;The system shall allow function-defined time stepping for transient multiapps&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps to use Picard iterations to rerun the time step&quot;
+  [../]
+  [./iteration_adaptive]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_out.e'
+    cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#2116 #10311'
+    requirement = &quot;The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances&quot;
+  [../]
+  [./iteration_adaptive_picard_max_its]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_picard_max_its.e'
+    cli_args = &quot;Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its&quot;
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#12618'
+    requirement = &quot;The system shall reject the solve if the maximum number of Picard iterations is reached without converging&quot;
+  [../]
+
+  [./rel_tol]
+    type = 'Exodiff'
+    input = 'picard_rel_tol_master.i'
+    exodiff = 'picard_rel_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by relative tolerances&quot;
+  [../]
+
+  [./abs_tol]
+    type = 'Exodiff'
+    input = 'picard_abs_tol_master.i'
+    exodiff = 'picard_abs_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances&quot;
+  [../]
+
+  [./function_dt]
+    type = 'Exodiff'
+    input = 'function_dt_master.i'
+    exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'timesteppers/FunctionDT.md'
+    issues = '#5800'
+    requirement = &quot;The system shall allow function-defined time stepping for transient multiapps&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps to use Picard iterations to rerun the time step&quot;
+  [../]
+  [./iteration_adaptive]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_out.e'
+    cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#2116 #10311'
+    requirement = &quot;The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances&quot;
+  [../]
+  [./iteration_adaptive_picard_max_its]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_picard_max_its.e'
+    cli_args = &quot;Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its&quot;
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#12618'
+    requirement = &quot;The system shall reject the solve if the maximum number of Picard iterations is reached without converging&quot;
+  [../]
+
+  [./rel_tol]
+    type = 'Exodiff'
+    input = 'picard_rel_tol_master.i'
+    exodiff = 'picard_rel_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by relative tolerances&quot;
+  [../]
+
+  [./abs_tol]
+    type = 'Exodiff'
+    input = 'picard_abs_tol_master.i'
+    exodiff = 'picard_abs_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances&quot;
+  [../]
+
+  [./function_dt]
+    type = 'Exodiff'
+    input = 'function_dt_master.i'
+    exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'timesteppers/FunctionDT.md'
+    issues = '#5800'
+    requirement = &quot;The system shall allow function-defined time stepping for transient multiapps&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps to use Picard iterations to rerun the time step&quot;
+  [../]
+  [./iteration_adaptive]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_out.e'
+    cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#2116 #10311'
+    requirement = &quot;The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances&quot;
+  [../]
+  [./iteration_adaptive_picard_max_its]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_picard_max_its.e'
+    cli_args = &quot;Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its&quot;
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#12618'
+    requirement = &quot;The system shall reject the solve if the maximum number of Picard iterations is reached without converging&quot;
+  [../]
+
+  [./rel_tol]
+    type = 'Exodiff'
+    input = 'picard_rel_tol_master.i'
+    exodiff = 'picard_rel_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by relative tolerances&quot;
+  [../]
+
+  [./abs_tol]
+    type = 'Exodiff'
+    input = 'picard_abs_tol_master.i'
+    exodiff = 'picard_abs_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances&quot;
+  [../]
+
+  [./function_dt]
+    type = 'Exodiff'
+    input = 'function_dt_master.i'
+    exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'timesteppers/FunctionDT.md'
+    issues = '#5800'
+    requirement = &quot;The system shall allow function-defined time stepping for transient multiapps&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps to use Picard iterations to rerun the time step&quot;
+  [../]
+  [./iteration_adaptive]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_out.e'
+    cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#2116 #10311'
+    requirement = &quot;The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances&quot;
+  [../]
+  [./iteration_adaptive_picard_max_its]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_picard_max_its.e'
+    cli_args = &quot;Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its&quot;
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#12618'
+    requirement = &quot;The system shall reject the solve if the maximum number of Picard iterations is reached without converging&quot;
+  [../]
+
+  [./rel_tol]
+    type = 'Exodiff'
+    input = 'picard_rel_tol_master.i'
+    exodiff = 'picard_rel_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by relative tolerances&quot;
+  [../]
+
+  [./abs_tol]
+    type = 'Exodiff'
+    input = 'picard_abs_tol_master.i'
+    exodiff = 'picard_abs_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances&quot;
+  [../]
+
+  [./function_dt]
+    type = 'Exodiff'
+    input = 'function_dt_master.i'
+    exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'timesteppers/FunctionDT.md'
+    issues = '#5800'
+    requirement = &quot;The system shall allow function-defined time stepping for transient multiapps&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps to use Picard iterations to rerun the time step&quot;
+  [../]
+  [./iteration_adaptive]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_out.e'
+    cli_args = 'Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4'
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#2116 #10311'
+    requirement = &quot;The system shall support adaptive time stepping for transient multiapps with Picard iterations controlled by tolerances&quot;
+  [../]
+  [./iteration_adaptive_picard_max_its]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_picard_max_its.e'
+    cli_args = &quot;Executioner/dt=1.0 Executioner/num_steps=3 Executioner/picard_max_its=3 Executioner/TimeStepper/dt=1.0 Executioner/TimeStepper/time_dt='1.0 1.0 10' Executioner/TimeStepper/time_t='0 1.0 10' Outputs/file_base=picard_adaptive_master_picard_max_its&quot;
+    design = 'timesteppers/IterationAdaptiveDT.md'
+    issues = '#12618'
+    requirement = &quot;The system shall reject the solve if the maximum number of Picard iterations is reached without converging&quot;
+  [../]
+
+  [./rel_tol]
+    type = 'Exodiff'
+    input = 'picard_rel_tol_master.i'
+    exodiff = 'picard_rel_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by relative tolerances&quot;
+  [../]
+
+  [./abs_tol]
+    type = 'Exodiff'
+    input = 'picard_abs_tol_master.i'
+    exodiff = 'picard_abs_tol_master_out.e'
+    design = 'multiapps/TransientMultiApp.md'
+    issues = '#2116'
+    requirement = &quot;The system shall allow transient multiapps with Picard iterations controlled by absolute tolerances&quot;
+  [../]
+
+  [./function_dt]
+    type = 'Exodiff'
+    input = 'function_dt_master.i'
+    exodiff = 'function_dt_master_out.e function_dt_master_out_sub_app0.e'
+    rel_err = 5e-5  # Loosened for recovery tests
+    design = 'timesteppers/FunctionDT.md'
+    issues = '#5800'
+    requirement = &quot;The system shall allow function-defined time stepping for transient multiapps&quot;
+  [../]
+[]
+</code></pre><ul><li>Picard Failure</li><li>Multiapps shall be able to be restored when a subapp encounters a solve failure.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard_failure:test</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/5126">#5126</a></p></li><li>CSV file writing should remain unaffected when a subapp encounters a solve failure.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard_failure:test_csv</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/11178">#11178</a></p></li><li>Multiapps shall be able to cut the master app time step when any subapp encounters a solve failure.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard_failure:test_2subapps</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/12477">#12477</a></p></li></ul><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out_sub0.e picard_master_out.e'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    design = '/MultiApps/index.md'
+    requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
+    issues = '#5126'
+  [../]
+
+  [./test_csv]
+    type = 'CSVDiff'
+    input = 'picard_master.i'
+    csvdiff = 'picard_master_out_sub0.csv picard_master_out.csv'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    # Turn off Exodus and turn on CSV globally
+    cli_args = ':Outputs/csv=true :Outputs/exodus=false'
+
+    design = '/MultiApps/index.md'
+    requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
+    issues = '#11178'
+  [../]
+
+  [./test_2subapps]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_2subapps_out_sub.e picard_master_2subapps_out_sub_no_fail.e picard_master_2subapps_out.e'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    cli_args = 'MultiApps/active=&quot;sub sub_no_fail&quot; Outputs/file_base=picard_master_2subapps_out sub:Outputs/file_base=picard_master_2subapps_out_sub sub_no_fail:Outputs/file_base=picard_master_2subapps_out_sub_no_fail'
+
+    design = '/MultiApps/index.md'
+    requirement = 'Multiapps shall be able to cut the master app time step when any subapp encounters a solve failure.'
+    issues = '#12477'
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out_sub0.e picard_master_out.e'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    design = '/MultiApps/index.md'
+    requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
+    issues = '#5126'
+  [../]
+
+  [./test_csv]
+    type = 'CSVDiff'
+    input = 'picard_master.i'
+    csvdiff = 'picard_master_out_sub0.csv picard_master_out.csv'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    # Turn off Exodus and turn on CSV globally
+    cli_args = ':Outputs/csv=true :Outputs/exodus=false'
+
+    design = '/MultiApps/index.md'
+    requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
+    issues = '#11178'
+  [../]
+
+  [./test_2subapps]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_2subapps_out_sub.e picard_master_2subapps_out_sub_no_fail.e picard_master_2subapps_out.e'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    cli_args = 'MultiApps/active=&quot;sub sub_no_fail&quot; Outputs/file_base=picard_master_2subapps_out sub:Outputs/file_base=picard_master_2subapps_out_sub sub_no_fail:Outputs/file_base=picard_master_2subapps_out_sub_no_fail'
+
+    design = '/MultiApps/index.md'
+    requirement = 'Multiapps shall be able to cut the master app time step when any subapp encounters a solve failure.'
+    issues = '#12477'
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out_sub0.e picard_master_out.e'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    design = '/MultiApps/index.md'
+    requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
+    issues = '#5126'
+  [../]
+
+  [./test_csv]
+    type = 'CSVDiff'
+    input = 'picard_master.i'
+    csvdiff = 'picard_master_out_sub0.csv picard_master_out.csv'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    # Turn off Exodus and turn on CSV globally
+    cli_args = ':Outputs/csv=true :Outputs/exodus=false'
+
+    design = '/MultiApps/index.md'
+    requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
+    issues = '#11178'
+  [../]
+
+  [./test_2subapps]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_2subapps_out_sub.e picard_master_2subapps_out_sub_no_fail.e picard_master_2subapps_out.e'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '&gt;=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+    compiler = '!INTEL'
+
+    cli_args = 'MultiApps/active=&quot;sub sub_no_fail&quot; Outputs/file_base=picard_master_2subapps_out sub:Outputs/file_base=picard_master_2subapps_out_sub sub_no_fail:Outputs/file_base=picard_master_2subapps_out_sub_no_fail'
+
+    design = '/MultiApps/index.md'
+    requirement = 'Multiapps shall be able to cut the master app time step when any subapp encounters a solve failure.'
+    issues = '#12477'
+  [../]
+[]
+</code></pre><ul><li>Command Line</li><li>The MultiApp system shall include the ability to set command line parameters for each sub application from the input file.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">command_line:master</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/12576">#12576</a></p></li><li>The MultiApp system shall include the ability to set common command line parameters for all sub applications from the input file.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">command_line:master_common</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/12576">#12576</a></p></li><li>The MultiApp system shall error when the number of command line arguments supplied in the input file differs from the number if sub apps.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">command_line:wrong_size</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/12576">#12576</a></p></li></ul><pre><code class="language-text">[Tests]
+  design = 'syntax/MultiApps/index.md'
+  issues = '#12576'
+  [master]
+    type = Exodiff
+    input = master.i
+    exodiff = 'master_out_sub0.e master_out_sub1.e'
+    requirement = &quot;The MultiApp system shall include the ability to set command line parameters for each sub application from the input file.&quot;
+  []
+
+  [master_common]
+    type = Exodiff
+    input = master_common.i
+    exodiff = 'master_common_out_sub0.e master_common_out_sub1.e'
+    requirement = &quot;The MultiApp system shall include the ability to set common command line parameters for all sub applications from the input file.&quot;
+  []
+
+  [wrong_size]
+    type = RunException
+    input = master_wrong_size.i
+    expect_err = 'The number of items supplied must be 1 or equal to the number of sub apps'
+    requirement = &quot;The MultiApp system shall error when the number of command line arguments supplied in the input file differs from the number if sub apps.&quot;
+  []
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = 'syntax/MultiApps/index.md'
+  issues = '#12576'
+  [master]
+    type = Exodiff
+    input = master.i
+    exodiff = 'master_out_sub0.e master_out_sub1.e'
+    requirement = &quot;The MultiApp system shall include the ability to set command line parameters for each sub application from the input file.&quot;
+  []
+
+  [master_common]
+    type = Exodiff
+    input = master_common.i
+    exodiff = 'master_common_out_sub0.e master_common_out_sub1.e'
+    requirement = &quot;The MultiApp system shall include the ability to set common command line parameters for all sub applications from the input file.&quot;
+  []
+
+  [wrong_size]
+    type = RunException
+    input = master_wrong_size.i
+    expect_err = 'The number of items supplied must be 1 or equal to the number of sub apps'
+    requirement = &quot;The MultiApp system shall error when the number of command line arguments supplied in the input file differs from the number if sub apps.&quot;
+  []
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = 'syntax/MultiApps/index.md'
+  issues = '#12576'
+  [master]
+    type = Exodiff
+    input = master.i
+    exodiff = 'master_out_sub0.e master_out_sub1.e'
+    requirement = &quot;The MultiApp system shall include the ability to set command line parameters for each sub application from the input file.&quot;
+  []
+
+  [master_common]
+    type = Exodiff
+    input = master_common.i
+    exodiff = 'master_common_out_sub0.e master_common_out_sub1.e'
+    requirement = &quot;The MultiApp system shall include the ability to set common command line parameters for all sub applications from the input file.&quot;
+  []
+
+  [wrong_size]
+    type = RunException
+    input = master_wrong_size.i
+    expect_err = 'The number of items supplied must be 1 or equal to the number of sub apps'
+    requirement = &quot;The MultiApp system shall error when the number of command line arguments supplied in the input file differs from the number if sub apps.&quot;
+  []
+[]
+</code></pre><ul><li>Check Error</li><li>The system shall detect input file problems with sub app input files.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:input_file</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/4101">#4101</a><a href="https://github.com/idaholab/moose/issues/4113">#4113</a></p></li><li>The system shall CLI argument problems related to sub app input files.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:unused_subapp_param</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/4101">#4101</a><a href="https://github.com/idaholab/moose/issues/4113">#4113</a></p></li><li>The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:positions</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/1845">#1845</a><a href="https://github.com/idaholab/moose/issues/3556">#3556</a><a href="https://github.com/idaholab/moose/issues/5784">#5784</a></p></li><li>The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:not_enough_positions</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/1845">#1845</a><a href="https://github.com/idaholab/moose/issues/3556">#3556</a><a href="https://github.com/idaholab/moose/issues/5784">#5784</a></p></li><li>The system shall error when the number of sub app input files doesn't match the number of provided positions files.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:not_enough_position_files</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/1845">#1845</a><a href="https://github.com/idaholab/moose/issues/3556">#3556</a><a href="https://github.com/idaholab/moose/issues/5784">#5784</a></p></li><li>The system shall error when both positions are provided in the input file along with a separate file of positions.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:both_positions</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/1845">#1845</a><a href="https://github.com/idaholab/moose/issues/3556">#3556</a><a href="https://github.com/idaholab/moose/issues/5784">#5784</a></p></li><li>The system shall error when the multiapp positions file is malformed.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:bad_positions</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/1845">#1845</a><a href="https://github.com/idaholab/moose/issues/3556">#3556</a><a href="https://github.com/idaholab/moose/issues/5784">#5784</a></p></li><li>The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">check_error:sub_cycling_and_catch_up</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/6127">#6127</a></p></li></ul><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+  design = &quot;MultiApps/index.md&quot;
+  [./input_file]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'missing required parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall detect input file problems with sub app input files.&quot;
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub_unused.i&quot;'
+    expect_err = 'unused parameter'
+
+    issues = &quot;#4101 #4113&quot;
+    requirement = &quot;The system shall CLI argument problems related to sub app input files.&quot;
+  [../]
+
+  [./positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions.&quot;
+  [../]
+
+  [./not_enough_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Not enough positions for the number of input files'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system show error when the number of input files is great than one and doesn't match the number of provided sub app positions when using CLI overrides.&quot;
+  [../]
+
+  [./not_enough_position_files]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of input_files for MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the number of sub app input files doesn't match the number of provided positions files.&quot;
+  [../]
+
+  [./both_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Both \'positions\' and \'positions_file\' cannot be specified simultaneously in MultiApp'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i sub2.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/positions_file=&quot;position1&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when both positions are provided in the input file along with a separate file of positions.&quot;
+  [../]
+
+  [./bad_positions]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'Number of entries in \'positions_file\''
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions_file=&quot;bad_positions.txt&quot;'
+
+    issues = &quot;#1845 #3556 #5784&quot;
+    requirement = &quot;The system shall error when the multiapp positions file is malformed.&quot;
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = '&quot;sub_cycling&quot; and &quot;catch_up&quot; cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files=&quot;sub1.i&quot; MultiApps/multi/positions=&quot;0 1 0&quot; MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
+
+    issues = &quot;#6127&quot;
+    requirement = &quot;The system shall error when the Multiapp parameter sub_cycling and catch_up are both set to true.&quot;
+  [../]
+[]
+</code></pre><ul><li>Picard Multilevel</li><li>The system shall support Picard iteration with multiple levels of Multiapps.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard_multilevel:test</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/5126">#5126</a></p></li><li>The system shall support the evaluation of TIMESTEP_BEGIN and TIMESTEP_END norms even when there are not active Multiapps on both of those execute_on times.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">picard_multilevel:test_force_norms</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/12709">#12709</a></p><p class="moose-sqa-items">Prerequisite(s): <a href="#picard_multilevel:test">F5.1</a></p></li></ul><pre><code class="language-text">[Tests]
+   design = 'multiapps/TransientMultiApp.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
+
+    issues = '#5126'
+    requirement = 'The system shall support Picard iteration with multiple levels of Multiapps.'
+  [../]
+  [./test_force_norms]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    cli_args = 'Executioner/picard_force_norms=true Outputs/file_base=picard_master_out_extra'
+
+    exodiff = 'picard_master_out_extra.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
+    prereq = test
+
+    issues = '#12709'
+    requirement = 'The system shall support the evaluation of TIMESTEP_BEGIN and TIMESTEP_END norms even when there are not active Multiapps on both of those execute_on times.'
+  [../]
+[]
+</code></pre><pre><code class="language-text">[Tests]
+   design = 'multiapps/TransientMultiApp.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    exodiff = 'picard_master_out.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
+
+    issues = '#5126'
+    requirement = 'The system shall support Picard iteration with multiple levels of Multiapps.'
+  [../]
+  [./test_force_norms]
+    type = 'Exodiff'
+    input = 'picard_master.i'
+    cli_args = 'Executioner/picard_force_norms=true Outputs/file_base=picard_master_out_extra'
+
+    exodiff = 'picard_master_out_extra.e picard_master_out_sub10.e picard_master_out_sub10_sub20.e'
+    prereq = test
+
+    issues = '#12709'
+    requirement = 'The system shall support the evaluation of TIMESTEP_BEGIN and TIMESTEP_END norms even when there are not active Multiapps on both of those execute_on times.'
+  [../]
+[]
+</code></pre><ul><li>Time Offset</li><li>The system shall support a time offset between the master and a subapp when using the Multiapp system.<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">time_offset:start_time</a></p></li></ul><pre><code class="language-text">[Tests]
+  [start_time]
+    type = Exodiff
+    input = master.i
+    exodiff = master_out_sub_app0.e
+
+    issues = #12755
+    requirement = &quot;The system shall support a time offset between the master and a subapp when using the Multiapp system.&quot;
+    design = &quot;TransientMultiApp.md&quot;
+  []
+[]
+</code></pre><ul><li>Initial Intactive</li><li>The system shall support creating a Multiapp that is not initially enabled<p>Specification: <a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">initial_intactive:initial_inactive</a></p><p class="moose-sqa-items">Issue(s): <a href="https://github.com/idaholab/moose/issues/12642">#12642</a></p></li></ul><pre><code class="language-text">[Tests]
+  [./initial_inactive]
+    type = 'Exodiff'
+    input = 'master.i'
+    exodiff = 'master_out_sub0.e'
+
+    design = 'TransientMultiApp.md'
+    issues = '#12642'
+    requirement = 'The system shall support creating a Multiapp that is not initially enabled'
+  [../]
+[]
+</code></pre></body>

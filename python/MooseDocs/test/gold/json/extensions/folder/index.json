@@ -14,14 +14,6 @@
             "children": [
                 {
                     "attributes": {
-                        "recursive": true, 
-                        "text": "Folder"
-                    }, 
-                    "children": [], 
-                    "name": "Label"
-                }, 
-                {
-                    "attributes": {
                         "content": "Folder", 
                         "recursive": true
                     }, 
@@ -133,6 +125,7 @@
             "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
@@ -151,6 +144,7 @@
             "attributes": {
                 "key": "libMesh", 
                 "link": "https://libmesh.github.io/", 
+                "prefix": "", 
                 "recursive": true
             }, 
             "children": [
