@@ -47,6 +47,7 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->c_from_v_e(v, e), 398.896207251962, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp->cp_from_v_e(v, e), 987.13756097561, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
   REL_TEST(_fp->cv_from_v_e(v, e), 700.09756097561, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp->mu_from_v_e(v, e), 0.0, 1e-15);
   REL_TEST(_fp->k_from_v_e(v, e), 0.0, 1e-15);
@@ -85,4 +86,8 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->k_from_p_T(p, T), 0.0, REL_TOL_CONSISTENCY);
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->cv_from_p_T(p, T), 700.09756097561, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->cp_from_p_T(p, T), 987.13756097561, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->cp_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }

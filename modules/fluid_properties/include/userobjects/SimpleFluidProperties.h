@@ -49,6 +49,9 @@ public:
   /// Isobaric specific heat capacity (J/kg/K)
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
 
+  virtual void cp_from_p_T(
+      Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
+
   /// Isochoric specific heat capacity (J/kg/K)
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
 

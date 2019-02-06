@@ -47,6 +47,7 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->c_from_v_e(v, e), 1.299581997797754e3, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp->cp_from_v_e(v, e), 4267.6, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
   REL_TEST(_fp->cv_from_v_e(v, e), 1816, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp->mu_from_v_e(v, e), 0.001, 1e-15);
   REL_TEST(_fp->k_from_v_e(v, e), 0.6, 1e-15);
@@ -83,4 +84,8 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->k_from_p_T(p, T), 0.6, REL_TOL_CONSISTENCY);
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->cv_from_p_T(p, T), 1816, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->cp_from_p_T(p, T), 4267.6, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->cp_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
