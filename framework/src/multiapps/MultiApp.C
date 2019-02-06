@@ -629,6 +629,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
     }
   }
 
+  _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
+           << " of level " << _app.multiAppLevel() + 1 << " and number " << _first_local_app + i
+           << ":" << COLOR_DEFAULT << std::endl;
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);

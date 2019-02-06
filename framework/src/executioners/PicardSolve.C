@@ -98,9 +98,6 @@ PicardSolve::solve()
   {
     if (_has_picard_its)
     {
-      _console << COLOR_MAGENTA << "Beginning Picard Iteration " << _picard_it << COLOR_DEFAULT
-               << '\n';
-
       if (_picard_it == 0)
       {
         // First Picard iteration - need to save off the initial nonlinear residual
@@ -110,7 +107,7 @@ PicardSolve::solve()
           _console << " MAX ";
         else
           _console << std::scientific << _picard_initial_norm;
-        _console << COLOR_DEFAULT << '\n';
+        _console << COLOR_DEFAULT << "\n\n";
       }
       else
       {
@@ -118,6 +115,9 @@ PicardSolve::solve()
         _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_END);
       }
+
+      _console << COLOR_MAGENTA << "Beginning Picard Iteration " << _picard_it << COLOR_DEFAULT
+               << '\n';
     }
 
     Real begin_norm_old = (_picard_it > 0 ? _picard_timestep_begin_norm[_picard_it - 1]

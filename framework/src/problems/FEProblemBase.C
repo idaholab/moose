@@ -802,9 +802,9 @@ FEProblemBase::initialSetup()
   // Call initialSetup on the MultiApps
   if (_multi_apps.hasObjects())
   {
-    _console << COLOR_CYAN << "Initializing MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Initializing All MultiApps" << COLOR_DEFAULT << std::endl;
     _multi_apps.initialSetup();
-    _console << COLOR_CYAN << "Finished Initializing MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Finished Initializing All MultiApps" << COLOR_DEFAULT << std::endl;
   }
 
   // Call initialSetup on the transfers
@@ -3614,14 +3614,16 @@ FEProblemBase::finishMultiAppStep(ExecFlagType type)
 
   if (multi_apps.size())
   {
-    _console << COLOR_CYAN << "\nAdvancing MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "\nAdvancing MultiApps on " << type.name() << COLOR_DEFAULT
+             << std::endl;
 
     for (const auto & multi_app : multi_apps)
       multi_app->finishStep();
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    _console << COLOR_CYAN << "Finished Advancing MultiApps\n" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Finished Advancing MultiApps on " << type.name() << "\n"
+             << COLOR_DEFAULT << std::endl;
   }
 }
 
@@ -3634,14 +3636,16 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
   {
     TIME_SECTION(_backup_multi_apps_timer);
 
-    _console << COLOR_CYAN << "\nBacking Up MultiApps" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "\nBacking Up MultiApps on " << type.name() << COLOR_DEFAULT
+             << std::endl;
 
     for (const auto & multi_app : multi_apps)
       multi_app->backup();
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    _console << COLOR_CYAN << "Finished Backing Up MultiApps\n" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Finished Backing Up MultiApps on " << type.name() << "\n"
+             << COLOR_DEFAULT << std::endl;
   }
 }
 
@@ -3653,10 +3657,11 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
   if (multi_apps.size())
   {
     if (force)
-      _console << COLOR_CYAN << "\nRestoring Multiapps because of solve failure!" << COLOR_DEFAULT
-               << std::endl;
+      _console << COLOR_CYAN << "\nRestoring Multiapps on " << type.name()
+               << " because of solve failure!" << COLOR_DEFAULT << std::endl;
     else
-      _console << COLOR_CYAN << "\nRestoring MultiApps" << COLOR_DEFAULT << std::endl;
+      _console << COLOR_CYAN << "\nRestoring MultiApps on " << type.name() << COLOR_DEFAULT
+               << std::endl;
 
     for (const auto & multi_app : multi_apps)
       if (force || multi_app->needsRestoration())
@@ -3664,7 +3669,8 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    _console << COLOR_CYAN << "Finished Restoring MultiApps\n" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Finished Restoring MultiApps on " << type.name() << "\n"
+             << COLOR_DEFAULT << std::endl;
   }
 }
 

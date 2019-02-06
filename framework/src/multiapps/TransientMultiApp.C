@@ -213,7 +213,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
   _auto_advance = auto_advance;
 
-  _console << "Solving MultiApp " << name() << std::endl;
+  _console << COLOR_CYAN << "Solving MultiApp '" << name() << "' with target time " << target_time
+           << " and dt " << dt << " with auto-advance " << (auto_advance ? "on" : "off")
+           << COLOR_DEFAULT << std::endl;
 
   // "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
