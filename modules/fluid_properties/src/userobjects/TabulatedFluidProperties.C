@@ -364,20 +364,6 @@ TabulatedFluidProperties::e_from_p_T(
     _fp.e_from_p_T(pressure, temperature, e, de_dp, de_dT);
 }
 
-void
-TabulatedFluidProperties::rho_e_dpT(Real pressure,
-                                    Real temperature,
-                                    Real & rho,
-                                    Real & drho_dp,
-                                    Real & drho_dT,
-                                    Real & e,
-                                    Real & de_dp,
-                                    Real & de_dT) const
-{
-  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
-}
-
 Real
 TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
@@ -428,27 +414,6 @@ TabulatedFluidProperties::mu_from_p_T(
   }
   else
     return _fp.mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
-}
-
-void
-TabulatedFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
-{
-  rho = this->rho_from_p_T(pressure, temperature);
-  mu = this->mu_from_p_T(pressure, temperature);
-}
-
-void
-TabulatedFluidProperties::rho_mu_dpT(Real pressure,
-                                     Real temperature,
-                                     Real & rho,
-                                     Real & drho_dp,
-                                     Real & drho_dT,
-                                     Real & mu,
-                                     Real & dmu_dp,
-                                     Real & dmu_dT) const
-{
-  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real
@@ -532,9 +497,9 @@ TabulatedFluidProperties::henryConstant(Real temperature) const
 }
 
 void
-TabulatedFluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const
+TabulatedFluidProperties::henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const
 {
-  _fp.henryConstant_dT(temperature, Kh, dKh_dT);
+  _fp.henryConstant(temperature, Kh, dKh_dT);
 }
 
 void
