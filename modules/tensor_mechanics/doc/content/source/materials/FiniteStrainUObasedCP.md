@@ -151,7 +151,7 @@ i. Variable dfedf calculates $\frac{\partial F^e}{\partial F}$.
 
 ii. Variable `deedfe` calculates $\frac{\partial E^e}{\partial F^e}$.
 
-iii. Variable dsigspk2dfe calculates $F^{eT} C:\frac{\partial E^e}{\partial F^e} F^e$.
+iii. Variable `dsigspk2dfe` calculates $F^{eT} C:\frac{\partial E^e}{\partial F^e} F^e$.
 
 
 !syntax description /Materials/FiniteStrainUObasedCP
