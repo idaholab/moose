@@ -9,7 +9,7 @@ template <>
 InputParameters
 validParams<Component>()
 {
-  InputParameters params = validParams<RELAP7Object>();
+  InputParameters params = validParams<THMObject>();
   params.addParam<RealVectorValue>(
       "gravity_vector", THM::default_gravity_vector, "Gravitational acceleration vector");
   params.addPrivateParam<Simulation *>("_sim");
@@ -85,7 +85,7 @@ Component::split(const std::string & rname)
 }
 
 Component::Component(const InputParameters & parameters)
-  : RELAP7Object(parameters),
+  : THMObject(parameters),
 
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),

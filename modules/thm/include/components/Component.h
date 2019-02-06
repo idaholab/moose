@@ -1,7 +1,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include "RELAP7Object.h"
+#include "THMObject.h"
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "InputParameterWarehouse.h"
@@ -17,7 +17,7 @@ InputParameters validParams<Component>();
 /**
  * Base class for RELAP-7 components
  */
-class Component : public RELAP7Object
+class Component : public THMObject
 {
 public:
   Component(const InputParameters & parameters);
