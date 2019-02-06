@@ -323,7 +323,7 @@ class CSVDiffer(CSVTools):
                     except:
                         rel_tol = self.rel_tol
                 if rel_diff > rel_tol:
-                    self.addError(self.files[1], "The values in column \"%s\" don't match @ t%d\n\trelative diff:   %f ~ %f = %f (%.3e)" % (key.strip(),
+                    self.addError(self.files[1], "The values in column \"%s\" don't match @ t%d\n\trelative diff:   %.3e ~ %.3e = %.3e (%.3e)" % (key.strip(),
                                                                                                                                             table2[key].index(val2),
                                                                                                                                             val1,
                                                                                                                                             val2,
