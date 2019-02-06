@@ -147,7 +147,7 @@ v. In indicial notation $\frac{\partial E^e_{ij}}{\partial F^e_{kl}}=\frac{1}{2}
 
 +Implementation+:
 
-i. Variable dfedf calculates $\frac{\partial F^e}{\partial F}$.
+i. Variable `dfedf` calculates $\frac{\partial F^e}{\partial F}$.
 
 ii. Variable `deedfe` calculates $\frac{\partial E^e}{\partial F^e}$.
 
