@@ -25,7 +25,7 @@ scalarOptions()
   return MooseEnum("VonMisesStress EffectiveStrain Hydrostatic L2norm MaxPrincipal "
                    "MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant "
                    "ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress "
-                   "Direction");
+                   "Direction MaxShear StressIntensity");
 }
 
 Real
@@ -87,6 +87,12 @@ getQuantity(const RankTwoTensor & tensor,
       break;
     case 15:
       val = directionValueTensor(tensor, direction);
+      break;
+    case 16:
+      val = maxShear(tensor);
+      break;
+    case 17:
+      val = stressIntensity(tensor);
       break;
     default:
       mooseError("RankTwoScalarAux Error: Pass valid scalar type - " +
@@ -333,5 +339,18 @@ Real
 triaxialityStress(const RankTwoTensor & stress)
 {
   return hydrostatic(stress) / vonMisesStress(stress);
+}
+
+Real
+maxShear(const RankTwoTensor & stress)
+{
+  Point dummy;
+  return (maxPrincipal(stress, dummy) - minPrincipal(stress, dummy)) / 2.;
+}
+
+Real
+stressIntensity(const RankTwoTensor & stress)
+{
+  return 2. * maxShear(stress);
 }
 }

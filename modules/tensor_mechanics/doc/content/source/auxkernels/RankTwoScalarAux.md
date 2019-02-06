@@ -193,6 +193,26 @@ The scalar type `L2Norm` calculates the L2 normal of a Rank-2 tensor, $T_{ij}$, 
 s = \sqrt{T_{ij} T_{ij}}
 \end{equation}
 
+## Maximum Shear Stress
+
+The scalar type `MaxShear` calculates the maximum shear stress for a Rank-2 tensor, as shown in
+[eq:maxshear_scalar_type].
+\begin{equation}
+\label{eq:maxshear_scalar_type}
+\sigma_{max}^{shear} = \frac{\sigma_{max}^{principal} - \sigma_{min}^{principal}}{2}
+\end{equation}
+
+#### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxKernels/max_shear
+
+An AuxVariable is required to store the AuxKernel information. Note that the name of the AuxVariable
+is used as the argument for the `variable` input parameter in the `RankTwoScalarAux` block.
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxVariables/max_shear
+
 ## Principal Values
 
 ### Maximum Principal Quantity
@@ -266,6 +286,29 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 
 !listing modules/porous_flow/test/tests/thm_rehbinder/free_outer.i
          block=AuxVariables/stress_rr
+
+## Stress Intensity
+
+The scalar type `StressIntensity` calculates the stress intensity for a Rank-2 tensor, as shown in
+[eq:sint_scalar_type].
+\begin{equation}
+\label{eq:sint_scalar_type}
+s = 2 \sigma_{max}^{shear} = \sigma_{max}^{principal} - \sigma_{min}^{principal}
+\end{equation}
+
+This quantity is useful in evaluating whether a Tresca failure criteria has
+been met and is two times the MaxShear quantity.
+
+#### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxKernels/sint
+
+An AuxVariable is required to store the AuxKernel information. Note that the name of the AuxVariable
+is used as the argument for the `variable` input parameter in the `RankTwoScalarAux` block.
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxVariables/sint
 
 ## Triaxiality Stress
 
