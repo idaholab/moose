@@ -27,17 +27,29 @@ protected:
   /// area
   const VariableValue & _A;
 
+  /// Hydraulic diameter
+  const VariableValue & _D_h;
+
+  /// Volume fraction
+  const MaterialProperty<Real> & _alpha;
+  const MaterialProperty<Real> * const _dalpha_dbeta;
+
+  /// Density
+  const MaterialProperty<Real> & _rho;
+  const MaterialProperty<Real> * const _drho_dbeta;
+  const MaterialProperty<Real> & _drho_darhoA;
+
   /// velocity
   const MaterialProperty<Real> & _vel;
   const MaterialProperty<Real> & _dvel_darhoA;
   const MaterialProperty<Real> & _dvel_darhouA;
 
-  /// drag coefficient
-  const MaterialProperty<Real> & _Cw;
-  const MaterialProperty<Real> * const _dCw_dbeta;
-  const MaterialProperty<Real> & _dCw_darhoA;
-  const MaterialProperty<Real> & _dCw_darhouA;
-  const MaterialProperty<Real> & _dCw_darhoEA;
+  /// Darcy friction factor
+  const MaterialProperty<Real> & _f_D;
+  const MaterialProperty<Real> * const _df_D_dbeta;
+  const MaterialProperty<Real> & _df_D_darhoA;
+  const MaterialProperty<Real> & _df_D_darhouA;
+  const MaterialProperty<Real> & _df_D_darhoEA;
 
   /// two-phase multiplier
   const MaterialProperty<Real> & _mult;

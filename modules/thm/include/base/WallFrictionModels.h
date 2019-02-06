@@ -9,13 +9,20 @@ namespace WallFriction
 {
 
 /**
- * Churchill's friction factor formula
+ * Computes Darcy friction factor from Fanning friction factor
+ *
+ * @param[in] f_F   Fanning friction factor
+ */
+Real DarcyFrictionFactor(const Real & f_F);
+
+/**
+ * Computes Fanning friction factor using Churchill correlation
  *
  * @param Re Reynolds number
  * @param roughness The roughness of the surface
  * @param D_h Hydraulic diameter
  */
-Real Churchill(Real Re, Real roughness, Real D_h);
+Real FanningFrictionFactorChurchill(Real Re, Real roughness, Real D_h);
 }
 
 #endif /* WALLFRICTIONMODELS_H */
