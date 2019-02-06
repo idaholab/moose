@@ -88,7 +88,8 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 AnnularMeshGenerator::generate()
 {
-  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
+  auto mesh = _mesh->buildMeshBaseObject();
 
   const Real dt = (_tmax - _tmin) / _nt;
 
