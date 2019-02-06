@@ -2552,7 +2552,8 @@ template <>
 const VariableValue &
 MooseVariableFE<Real>::adUDot<RESIDUAL>()
 {
-  return _u_dot;
+
+  return uDot();
 }
 
 template <>
@@ -2560,7 +2561,7 @@ template <>
 const VectorVariableValue &
 MooseVariableFE<RealVectorValue>::adUDot<RESIDUAL>()
 {
-  return _u_dot;
+  return uDot();
 }
 
 template <>
