@@ -122,7 +122,7 @@ protected:
 
   /**
    * updates the slip rates.
-  */
+   */
   virtual void getSlipRates();
 
   /**
@@ -194,6 +194,9 @@ protected:
 
   /// Local state variable
   std::vector<std::vector<Real>> _state_vars_old;
+
+  /// Local stored state variable (for sub-stepping)
+  std::vector<std::vector<Real>> _state_vars_old_stored;
 
   /// Local old state variable
   std::vector<std::vector<Real>> _state_vars_prev;

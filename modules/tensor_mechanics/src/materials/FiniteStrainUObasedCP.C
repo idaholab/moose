@@ -22,8 +22,7 @@ InputParameters
 validParams<FiniteStrainUObasedCP>()
 {
   InputParameters params = validParams<ComputeStressBase>();
-  params.addClassDescription(
-      "Crystal Plasticity base class: FCC system with power law flow rule implemented");
+  params.addClassDescription("UserObject based Crystal Plasticity system.");
   params.addParam<Real>("rtol", 1e-6, "Constitutive stress residue relative tolerance");
   params.addParam<Real>("abs_tol", 1e-6, "Constitutive stress residue absolute tolerance");
   params.addParam<Real>(
@@ -114,6 +113,7 @@ FiniteStrainUObasedCP::FiniteStrainUObasedCP(const InputParameters & parameters)
 
   // resize local state variables
   _state_vars_old.resize(_num_uo_state_vars);
+  _state_vars_old_stored.resize(_num_uo_state_vars);
   _state_vars_prev.resize(_num_uo_state_vars);
 
   // resize user objects
@@ -175,10 +175,8 @@ FiniteStrainUObasedCP::initQpStatefulProperties()
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
     (*_mat_prop_state_vars[i])[_qp].resize(_uo_state_vars[i]->variableSize());
-    // TODO: remove this nasty const_cast if you can figure out how
-    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp].resize(
-        _uo_state_vars[i]->variableSize());
     _state_vars_old[i].resize(_uo_state_vars[i]->variableSize());
+    _state_vars_old_stored[i].resize(_uo_state_vars[i]->variableSize());
     _state_vars_prev[i].resize(_uo_state_vars[i]->variableSize());
   }
 
@@ -194,13 +192,8 @@ FiniteStrainUObasedCP::initQpStatefulProperties()
   _update_rot[_qp].setToIdentity();
 
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-  {
     // Initializes slip system related properties
     _uo_state_vars[i]->initSlipSysProps((*_mat_prop_state_vars[i])[_qp], _q_point[_qp]);
-    // TODO: remove this nasty const_cast if you can figure out how
-    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
-        (*_mat_prop_state_vars[i])[_qp];
-  }
 }
 
 /**
@@ -267,11 +260,8 @@ FiniteStrainUObasedCP::computeQpStress()
 void
 FiniteStrainUObasedCP::preSolveQp()
 {
-  // TODO: remove this nasty const_cast if you can figure out how
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-    (*_mat_prop_state_vars[i])[_qp] =
-        const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
-            _state_vars_old[i];
+    (*_mat_prop_state_vars[i])[_qp] = _state_vars_old_stored[i] = _state_vars_old[i];
 
   _pk2[_qp] = _pk2_old[_qp];
   _fp_old_inv = _fp_old[_qp].inverse();
@@ -290,12 +280,6 @@ FiniteStrainUObasedCP::solveQp()
 void
 FiniteStrainUObasedCP::postSolveQp()
 {
-  // TODO: remove this nasty const_cast if you can figure out how
-  // Restores the the old stateful properties after a successful solve
-  for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
-        _state_vars_old[i];
-
   _stress[_qp] = _fe * _pk2[_qp] * _fe.transpose() / _fe.det();
 
   // Calculate jacobian for preconditioner
@@ -316,7 +300,7 @@ void
 FiniteStrainUObasedCP::preSolveStatevar()
 {
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-    (*_mat_prop_state_vars[i])[_qp] = (*_mat_prop_state_vars_old[i])[_qp];
+    (*_mat_prop_state_vars[i])[_qp] = _state_vars_old_stored[i];
 
   for (unsigned int i = 0; i < _num_uo_slip_resistances; ++i)
     _uo_slip_resistances[i]->calcSlipResistance(_qp, (*_mat_prop_slip_resistances[i])[_qp]);
@@ -371,10 +355,10 @@ FiniteStrainUObasedCP::isStateVariablesConverged()
     {
       diff = std::abs((*_mat_prop_state_vars[i])[_qp][j] -
                       _state_vars_prev[i][j]); // Calculate increment size
-      if (std::abs((*_mat_prop_state_vars_old[i])[_qp][j]) < _zero_tol && diff > _zero_tol)
+      if (std::abs(_state_vars_old_stored[i][j]) < _zero_tol && diff > _zero_tol)
         return true;
-      if (std::abs((*_mat_prop_state_vars_old[i])[_qp][j]) > _zero_tol &&
-          diff > _stol * std::abs((*_mat_prop_state_vars_old[i])[_qp][j]))
+      if (std::abs(_state_vars_old_stored[i][j]) > _zero_tol &&
+          diff > _stol * std::abs(_state_vars_old_stored[i][j]))
         return true;
     }
   }
@@ -384,10 +368,8 @@ FiniteStrainUObasedCP::isStateVariablesConverged()
 void
 FiniteStrainUObasedCP::postSolveStatevar()
 {
-  // TODO: remove this nasty const_cast if you can figure out how
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
-    const_cast<MaterialProperty<std::vector<Real>> &>(*_mat_prop_state_vars_old[i])[_qp] =
-        (*_mat_prop_state_vars[i])[_qp];
+    _state_vars_old_stored[i] = (*_mat_prop_state_vars[i])[_qp];
 
   _fp_old_inv = _fp_inv;
 }
@@ -484,7 +466,8 @@ FiniteStrainUObasedCP::updateSlipSystemResistanceAndStateVariable()
 
   for (unsigned int i = 0; i < _num_uo_state_vars; ++i)
   {
-    if (!_uo_state_vars[i]->updateStateVariable(_qp, _dt, (*_mat_prop_state_vars[i])[_qp]))
+    if (!_uo_state_vars[i]->updateStateVariable(
+            _qp, _dt, (*_mat_prop_state_vars[i])[_qp], _state_vars_old_stored[i]))
       _err_tol = true;
   }
 
