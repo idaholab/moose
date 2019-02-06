@@ -1,20 +1,20 @@
-#ifndef RELAP7OBJECT_H
-#define RELAP7OBJECT_H
+#ifndef THMOBJECT_H
+#define THMOBJECT_H
 
 #include "MooseObject.h"
 
-class RELAP7Object;
+class THMObject;
 
 template <>
-InputParameters validParams<RELAP7Object>();
+InputParameters validParams<THMObject>();
 
 /**
  *
  */
-class RELAP7Object : public MooseObject
+class THMObject : public MooseObject
 {
 public:
-  RELAP7Object(const InputParameters & parameters);
+  THMObject(const InputParameters & parameters);
 
 protected:
   /**
@@ -45,7 +45,7 @@ protected:
 
 template <typename T>
 void
-RELAP7Object::passParameter(const std::string & name,
+THMObject::passParameter(const std::string & name,
                             const std::string & new_name,
                             InputParameters & params) const
 {
@@ -55,9 +55,9 @@ RELAP7Object::passParameter(const std::string & name,
 
 template <typename T>
 void
-RELAP7Object::passParameter(const std::string & name, InputParameters & params) const
+THMObject::passParameter(const std::string & name, InputParameters & params) const
 {
   passParameter<T>(name, name, params);
 }
 
-#endif /* RELAP7OBJECT_H */
+#endif /* THMOBJECT_H */
