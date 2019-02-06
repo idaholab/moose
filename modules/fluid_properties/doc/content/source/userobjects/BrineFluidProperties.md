@@ -14,6 +14,15 @@ Brine vapor pressure is calculated using the formulation presented in [citet:haa
 
 Solubility of solid salt (halite) in water is given by [citet:potter1977].
 
+By default, the BrineFluidProperties UserObject uses the [Water97FluidProperties](/Water97FluidProperties.md)
+and [NaClFluidProperties](/NaClFluidProperties.md) which are constructed internally, so do not have to be
+supplied by the user.
+
+The BrineFluidProperties UserObject takes an optional parameter `water_fp` which can be used to pass
+a specific water formulation. This allows the user to use a tabulated version of the water properties
+(using [TabulatedFluidProperties](/TabulatedFluidProperties.md)), which can significantly speed up the
+calculation of brine properties. 
+
 ## Range of validity
 
 The BrineFluidProperties UserObject is valid for:

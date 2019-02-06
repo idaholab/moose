@@ -26,8 +26,9 @@ validParams<TabulatedFluidProperties>()
   params.addParam<FileName>(
       "fluid_property_file",
       "fluid_properties.csv",
-      "Name of the csv file containing the tabulated fluid property data. If no file exists, then "
-      "one will be written using the temperature and pressure range specified.");
+      "Name of the csv file containing the tabulated fluid property data. If "
+      "no file exists and save_file = true, then one will be written to "
+      "fluid_properties.csv using the temperature and pressure range specified.");
   params.addRangeCheckedParam<Real>("temperature_min",
                                     300.0,
                                     "temperature_min > 0",
@@ -46,10 +47,11 @@ validParams<TabulatedFluidProperties>()
       "num_p", 100, "num_p > 0", "Number of points to divide pressure range. Default is 100");
   params.addRequiredParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
   MultiMooseEnum properties("density enthalpy internal_energy viscosity k cv cp entropy",
-                            "density enthalpy internal_energy");
+                            "density enthalpy internal_energy viscosity");
   params.addParam<MultiMooseEnum>("interpolated_properties",
                                   properties,
                                   "Properties to interpolate if no data file is provided");
+  params.addParam<bool>("save_file", true, "Whether to save the csv fluid properties file");
   params.addClassDescription(
       "Fluid properties using bicubic interpolation on tabulated values provided");
   return params;
@@ -64,6 +66,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
+    _save_file(getParam<bool>("save_file")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fp")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
     _interpolated_properties(),
@@ -106,7 +109,7 @@ TabulatedFluidProperties::initialSetup()
   std::ifstream file(_file_name.c_str());
   if (file.good())
   {
-    _console << "Reading tabulated properties from " << _file_name << "\n";
+    _console << name() + ": Reading tabulated properties from " << _file_name << "\n";
     _csv_reader.read();
 
     const std::vector<std::string> & column_names = _csv_reader.getNames();
@@ -225,13 +228,17 @@ TabulatedFluidProperties::initialSetup()
   }
   else
   {
-    _console << "No tabulated properties file named " << _file_name << " exists.\n"
-             << "Generating tabulated data and writing output to " << _file_name << "\n";
+    _console << name() + ": No tabulated properties file named " << _file_name << " exists.\n";
+    _console << name() + ": Generating tabulated data ";
+
+    if (_save_file)
+      _console << name() + ": Writing tabulated data to " << _file_name << "\n";
 
     generateTabulatedData();
 
     // Write tabulated data to file
-    writeTabulatedData(_file_name);
+    if (_save_file)
+      writeTabulatedData(_file_name);
   }
 
   // At this point, all properties read or generated are able to be used by

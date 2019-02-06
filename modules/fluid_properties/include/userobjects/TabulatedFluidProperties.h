@@ -216,6 +216,8 @@ protected:
   unsigned int _num_T;
   /// Number of pressure points in the tabulated data
   unsigned int _num_p;
+  /// Whether to save a generated fluid properties file to disk
+  const bool _save_file;
 
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidProperties & _fp;
