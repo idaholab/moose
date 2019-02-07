@@ -12,10 +12,9 @@
 
 #include "Material.h"
 
-#include "LinearInterpolation.h"
-#include "PolynomialFit.h"
-
 class LinearInterpolationMaterial;
+class LinearInterpolation;
+class PolynomialFit;
 
 template <>
 InputParameters validParams<LinearInterpolationMaterial>();
@@ -25,14 +24,12 @@ class LinearInterpolationMaterial : public Material
 public:
   LinearInterpolationMaterial(const InputParameters & parameters);
 
-  virtual ~LinearInterpolationMaterial();
-
 protected:
   virtual void computeQpProperties();
 
   bool _use_poly_fit;
-  LinearInterpolation * _linear_interp;
-  PolynomialFit * _poly_fit;
+  std::unique_ptr<LinearInterpolation> _linear_interp;
+  std::unique_ptr<PolynomialFit> _poly_fit;
   MaterialProperty<Real> & _property;
 };
 
