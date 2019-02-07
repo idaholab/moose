@@ -43,7 +43,6 @@
   porepressure = pp
   gravity = '-1 0 0'
   fp = the_simple_fluid
-  simulation_type = steady
   van_genuchten_alpha = 1.0
   van_genuchten_m = 0.5
   relative_permeability_type = Corey

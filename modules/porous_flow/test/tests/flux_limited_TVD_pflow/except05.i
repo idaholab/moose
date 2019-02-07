@@ -39,7 +39,6 @@
   porepressure = pp
   mass_fraction_vars = tracer
   fp = the_simple_fluid
-  simulation_type = steady
 []
 
 [UserObjects]
