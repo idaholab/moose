@@ -41,8 +41,7 @@ Extensions:
     MooseDocs.extensions.template: default
     MooseDocs.extensions.sqa:
         directories:
-            - modules/level_set/test/tests
-
+            - python/MooseDocs/test
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose

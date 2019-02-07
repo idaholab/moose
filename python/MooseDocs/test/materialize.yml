@@ -43,10 +43,8 @@ Extensions:
     MooseDocs.extensions.pdf: default
     MooseDocs.extensions.template: default
     MooseDocs.extensions.sqa:
-        repo: https://github.com/idaholab/moose
         directories:
-            - test/tests/kernels/simple_diffusion
-            - test/tests/multiapps
+            - python/MooseDocs/test
     MooseDocs.extensions.navigation:
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
