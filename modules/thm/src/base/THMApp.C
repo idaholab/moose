@@ -63,6 +63,17 @@ THMApp::getFlowModelID(const FluidProperties & fp)
     raiseFlowModelError(fp, "'SinglePhaseFluidProperties'");
 }
 
+const std::string &
+THMApp::getFlowModelClassName(const THM::FlowModelID & flow_model_id)
+{
+  const auto it = _flow_model_map.find(flow_model_id);
+  if (it == _flow_model_map.end())
+    mooseError("Flow model with ID '" + Moose::stringify(flow_model_id) +
+               "' is not associated with any flow models class. Register your flow model class to "
+               "a flow model ID by calling registerFlowModel().");
+  return it->second;
+}
+
 void
 THMApp::raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf)
 {
