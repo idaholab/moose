@@ -61,8 +61,10 @@ class SQAExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['repo'] = (u"https://github.com/idaholab/moose",
-                          "Repository for linking issues and commits.")
+        config['url'] = (u"https://github.com",
+                         "Repository for linking issues and commits.")
+        config['repo'] = (u"idaholab/moose",
+                          "The default repository location to append to the given url.")
         config['directories'] = ([os.path.join(MooseDocs.ROOT_DIR, 'test', 'tests')],
                                  "List of directories used to build requirements.")
         config['specs'] = (['tests'], "List of test specification names to use for building " \
@@ -433,11 +435,16 @@ class RenderSQARequirementIssues(components.RenderComponent):
 
     def getURL(self, issue, token):
         url = None
-        repo = self.extension['repo']
-        if issue.startswith('#'):
-            url = u"{}/issues/{}".format(repo, issue[1:])
+        base = self.extension['url'].rstrip('/')
+        repo = self.extension['repo'].strip('/')
+
+        match = re.search(r"(?P<repo>\w+/\w+)#(?P<issue>[0-9]+)", issue)
+        if match:
+            url = u"{}/{}/issues/{}".format(base, match.group('repo'), match.group('issue'))
+        elif issue.startswith('#'):
+            url = u"{}/{}/issues/{}".format(base, repo, issue[1:])
         elif re.search(r'\A[0-9a-f]{10,40}\Z', issue):
-            url = u"{}/commit/{}".format(repo, issue[1:])
+            url = u"{}/{}/commit/{}".format(base, repo, issue[1:])
 
         if (url is None) and (issue != u''):
             req = token.parent['requirement']

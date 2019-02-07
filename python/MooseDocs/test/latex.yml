@@ -40,7 +40,6 @@ Extensions:
     MooseDocs.extensions.gallery: disable
     MooseDocs.extensions.template: default
     MooseDocs.extensions.sqa:
-        repo: https://github.com/idaholab/moose
         directories:
             - python/MooseDocs/test
     MooseDocs.extensions.navigation:
