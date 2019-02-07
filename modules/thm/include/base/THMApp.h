@@ -50,6 +50,14 @@ public:
    */
   virtual const THM::FlowModelID & getFlowModelID(const FluidProperties & fp);
 
+  /**
+   * Get the class name of a flow model corresponding to the flow model ID
+   *
+   * @param closure_name The name of the closure type
+   * @return The class name of a material that computes the flow regime maps
+   */
+  const std::string & getFlowModelClassName(const THM::FlowModelID & flow_model_id);
+
   Logger & log() { return _log; }
 
 protected:
