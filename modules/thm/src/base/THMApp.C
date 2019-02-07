@@ -1,9 +1,27 @@
 #include "THMApp.h"
 #include "THMSyntax.h"
-#include "Moose.h"
-#include "AppFactory.h"
+
 #include "ModulesApp.h"
-#include "MooseSyntax.h"
+#include "AppFactory.h"
+
+#include "SinglePhaseFluidProperties.h"
+
+std::map<THM::FlowModelID, std::string> THMApp::_flow_model_map;
+
+namespace THM
+{
+
+FlowModelID
+registerFlowModelID()
+{
+  static FlowModelID flow_model_id = 0;
+  flow_model_id++;
+  return flow_model_id;
+}
+
+FlowModelID FM_INVALID = registerFlowModelID();
+FlowModelID FM_SINGLE_PHASE = registerFlowModelID();
+}
 
 template <>
 InputParameters
@@ -21,13 +39,35 @@ THMApp::THMApp(InputParameters parameters) : MooseApp(parameters)
 void
 THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  ModulesApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"THMApp"});
   Registry::registerActionsTo(af, {"THMApp"});
 
-  /* register custom execute flags, action syntax, etc. here */
+  s.replaceActionSyntax(
+      "AddFluidPropertiesAction", "FluidProperties/*", "add_fluid_properties", __FILE__, __LINE__);
+
+  ModulesApp::registerAll(f, af, s);
+
   THM::associateSyntax(s);
   THM::registerActions(s);
+
+  // flow models
+  registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
+}
+
+const THM::FlowModelID &
+THMApp::getFlowModelID(const FluidProperties & fp)
+{
+  if (dynamic_cast<const SinglePhaseFluidProperties *>(&fp) != nullptr)
+    return THM::FM_SINGLE_PHASE;
+  else
+    raiseFlowModelError(fp, "'SinglePhaseFluidProperties'");
+}
+
+void
+THMApp::raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf)
+{
+  mooseError(
+      "The specified fluid properties object, '", fp.name(), "', must be derived from ", mbdf, ".");
 }
 
 void

@@ -46,8 +46,8 @@ protected:
 template <typename T>
 void
 THMObject::passParameter(const std::string & name,
-                            const std::string & new_name,
-                            InputParameters & params) const
+                         const std::string & new_name,
+                         InputParameters & params) const
 {
   if (isParamValid(name))
     params.set<T>(new_name) = _pars.get<T>(name);
