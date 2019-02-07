@@ -7,7 +7,6 @@
     requirement = 'MOOSE shall be able to create sidesets.'
     design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 
@@ -19,7 +18,6 @@
     requirement = 'MOOSE shall be able to create sidesets.'
     design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 
@@ -31,7 +29,6 @@
     requirement = 'MOOSE shall be able to create sidesets.'
     design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 
@@ -43,7 +40,6 @@
     requirement = 'MOOSE shall be able to create sidesets.'
     design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 []
