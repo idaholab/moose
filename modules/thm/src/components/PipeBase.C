@@ -26,12 +26,9 @@ PipeBase::getFlowModel() const
   return _flow_model;
 }
 
-void
-PipeBase::init()
+std::shared_ptr<FlowModel>
+PipeBase::buildFlowModel()
 {
-  GeometricalFlowComponent::init();
-
-  // create and initialize flow model
   const std::string class_name = _app.getFlowModelClassName(_model_id);
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<Simulation *>("_sim") = &_sim;
@@ -42,6 +39,14 @@ PipeBase::init()
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
   if (_model_id == RELAP7::FM_TWO_PHASE || _model_id == RELAP7::FM_TWO_PHASE_NCG)
     pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
-  _flow_model = _factory.create<FlowModel>(class_name, name(), pars, 0);
+  return _factory.create<FlowModel>(class_name, name(), pars, 0);
+}
+
+void
+PipeBase::init()
+{
+  GeometricalFlowComponent::init();
+
+  _flow_model = buildFlowModel();
   _flow_model->init();
 }

@@ -27,6 +27,7 @@ public:
   virtual bool isHorizontal() const = 0;
 
 protected:
+  virtual std::shared_ptr<FlowModel> buildFlowModel();
   virtual void init() override;
 
   /// The flow model used by this pipe
