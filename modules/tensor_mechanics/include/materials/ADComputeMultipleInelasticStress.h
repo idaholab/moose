@@ -20,7 +20,7 @@
   using ADComputeMultipleInelasticStress<compute_stage>::updateQpStateSingleModel;                 \
   using ADComputeMultipleInelasticStress<compute_stage>::computeAdmissibleState;
 
-// Forward declarations
+// Forward Declarations
 template <ComputeStage>
 class ADComputeMultipleInelasticStress;
 template <ComputeStage>

@@ -9,6 +9,8 @@
 
 #include "ADStressUpdateBase.h"
 #include "MooseMesh.h"
+#include "InputParameters.h"
+#include "Conversion.h"
 
 defineADValidParams(
     ADStressUpdateBase,

@@ -10,11 +10,7 @@
 #ifndef ADSTRESSUPDATEBASE_H
 #define ADSTRESSUPDATEBASE_H
 
-#include "Conversion.h"
-#include "InputParameters.h"
-#include "Material.h"
-#include "RankFourTensor.h"
-#include "RankTwoTensor.h"
+#include "ADMaterial.h"
 
 #define usingStressUpdateBaseMembers                                                               \
   usingMaterialMembers;                                                                            \
@@ -22,7 +18,8 @@
   using ADStressUpdateBase<compute_stage>::setQp;                                                  \
   using ADStressUpdateBase<compute_stage>::propagateQpStatefulProperties;                          \
   using ADStressUpdateBase<compute_stage>::requiresIsotropicTensor;                                \
-  using ADStressUpdateBase<compute_stage>::computeTimeStepLimit
+  using ADStressUpdateBase<compute_stage>::computeTimeStepLimit;                                   \
+  using ADStressUpdateBase<compute_stage>::_base_name
 
 // Forward declarations
 template <ComputeStage>
@@ -35,6 +32,7 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
+class InputParameters;
 
 declareADValidParams(ADStressUpdateBase);
 
@@ -65,30 +63,24 @@ public:
    * d(stress)/d(strain) (or some approximation to it).
    *
    * This method is called by ComputeMultipleInelasticStress.
-   * This method is pure virutal: all inheriting classes must overwrite this method.
+   * This method is pure virtual: all inheriting classes must overwrite this method.
    *
    * @param strain_increment Upon input: the strain increment.  Upon output: the elastic strain
    * increment
-   * @param inelastic_strain_increment The inelastic_strain resulting from the interative procedure
+   * @param inelastic_strain_increment The inelastic_strain resulting from the iterative procedure
    * @param rotation_increment The finite-strain rotation increment
    * @param stress_new Upon input: the trial stress that results from applying strain_increment as
    * an elastic strain.  Upon output: the admissible stress
    * @param stress_old The old value of stress
    * @param elasticity_tensor The elasticity tensor
-   * @param compute_full_tangent_operator The calling routine would like the full consistent tangent
-   * operator to be placed in tangent_operator, if possible.  This is irrelevant if
-   * _fe_problem.currentlyComputingJacobian() = false
-   * @param tangent_operator d(stress)/d(strain), or some approximation to it  If
-   * compute_full_tangent_operator=false, then tangent_operator=elasticity_tensor is an appropriate
-   * choice.  tangent_operator is only computed if _fe_problem.currentlyComputingJacobian() = true
    */
   virtual void updateState(ADRankTwoTensor & strain_increment,
                            ADRankTwoTensor & inelastic_strain_increment,
                            const ADRankTwoTensor & rotation_increment,
                            ADRankTwoTensor & stress_new,
-                           const ADRankTwoTensor & stress_old,
+                           const RankTwoTensor & stress_old,
                            const ADRankFourTensor & elasticity_tensor,
-                           const ADRankTwoTensor & elastic_strain_old) = 0;
+                           const RankTwoTensor & elastic_strain_old) = 0;
 
   /// Sets the value of the global variable _qp for inheriting classes
   void setQp(unsigned int qp);

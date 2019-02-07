@@ -1,0 +1,77 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef ADPOWERLAWCREEPSTRESSUPDATE_H
+#define ADPOWERLAWCREEPSTRESSUPDATE_H
+
+#include "ADRadialReturnCreepStressUpdateBase.h"
+
+template <ComputeStage compute_stage>
+class ADPowerLawCreepStressUpdate;
+
+declareADValidParams(ADPowerLawCreepStressUpdate);
+
+/**
+ * This class uses the stress update material in a radial return isotropic creep
+ * model.  This class is one of the basic radial return constitutive models; more complex
+ * constitutive models combine creep and plasticity.
+ *
+ * This class inherits from RadialReturnCreepStressUpdateBase and must be used
+ * in conjunction with ComputeMultipleInelasticStress.  This class calculates
+ * creep based on stress, temperature, and time effects.  This class also
+ * computes the creep strain as a stateful material property.
+ */
+template <ComputeStage compute_stage>
+class ADPowerLawCreepStressUpdate : public ADRadialReturnCreepStressUpdateBase<compute_stage>
+{
+public:
+  ADPowerLawCreepStressUpdate<compute_stage>(const InputParameters & parameters);
+
+protected:
+  virtual void computeStressInitialize(const ADReal & effective_trial_stress,
+                                       const ADRankFourTensor & elasticity_tensor) override;
+  virtual ADReal computeResidual(const ADReal & effective_trial_stress,
+                                 const ADReal & scalar) override;
+  virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
+                                   const ADReal & scalar) override;
+
+  /// Flag to determine if temperature is supplied by the user
+  const bool _has_temp;
+
+  /// Temperature variable value
+  const VariableValue & _temperature;
+
+  /// Leading coefficient
+  const Real _coefficient;
+
+  /// Exponent on the effective stress
+  const Real _n_exponent;
+
+  /// Exponent on time
+  const Real _m_exponent;
+
+  /// Activation energy for exp term
+  const Real _activation_energy;
+
+  /// Gas constant for exp term
+  const Real _gas_constant;
+
+  /// Simulation start time
+  const Real _start_time;
+
+  /// Exponential calculated from activiaction, gas constant, and temperature
+  ADReal _exponential;
+
+  /// Exponential calculated from current time
+  ADReal _exp_time;
+
+  usingRadialReturnCreepStressUpdateBaseMembers;
+};
+
+#endif // ADPOWERLAWCREEPSTRESSUPDATE_H

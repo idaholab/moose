@@ -14,19 +14,18 @@
 #include "InputParameters.h"
 
 #define usingSingleVariableReturnMappingSolutionMembers                                            \
-  using ADSingleVariableReturnMappingSolution<compute_stage> returnMappingSolve;                   \
-  using ADSingleVariableReturnMappingSolution<compute_stage> minimumPermissibleValue;              \
-  using ADSingleVariableReturnMappingSolution<compute_stage> maximumPermissibleValue;              \
-  using ADSingleVariableReturnMappingSolution<compute_stage> initialGuess;                         \
-  using ADSingleVariableReturnMappingSolution<compute_stage> computeResidual;                      \
-  using ADSingleVariableReturnMappingSolution<compute_stage> computeDerivative;                    \
-  using ADSingleVariableReturnMappingSolution<compute_stage> computeReferenceResidual;             \
-  using ADSingleVariableReturnMappingSolution<compute_stage> iterationFinalize;                    \
-  using ADSingleVariableReturnMappingSolution<compute_stage> outputIterationStep;                  \
-  using ADSingleVariableReturnMappingSolution<compute_stage> outputIterationSummary;               \
-  using ADSingleVariableReturnMappingSolution<compute_stage> _check_range;                         \
-  using ADSingleVariableReturnMappingSolution<compute_stage> _line_search;                         \
-  using ADSingleVariableReturnMappingSolution<compute_stage> _bracket_solution
+  using ADSingleVariableReturnMappingSolution<compute_stage>::returnMappingSolve;                  \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::minimumPermissibleValue;             \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::maximumPermissibleValue;             \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::initialGuess;                        \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::computeResidual;                     \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::computeDerivative;                   \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::computeReferenceResidual;            \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::iterationFinalize;                   \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary;              \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::_check_range;                        \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::_line_search;                        \
+  using ADSingleVariableReturnMappingSolution<compute_stage>::_bracket_solution
 
 // Forward declarations
 template <ComputeStage>
@@ -53,8 +52,8 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    * @param console                Console output
    */
-  void returnMappingSolve(const Real effective_trial_stress,
-                          Real & scalar,
+  void returnMappingSolve(const ADReal & effective_trial_stress,
+                          ADReal & scalar,
                           const ConsoleStream & console);
 
   /**
@@ -62,14 +61,14 @@ protected:
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real minimumPermissibleValue(const Real effective_trial_stress) const;
+  virtual Real minimumPermissibleValue(const ADReal & effective_trial_stress) const;
 
   /**
    * Compute the maximum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real maximumPermissibleValue(const Real effective_trial_stress) const;
+  virtual Real maximumPermissibleValue(const ADReal & effective_trial_stress) const;
 
   /**
    * Compute an initial guess for the value of the scalar. For some cases, an
@@ -78,7 +77,7 @@ protected:
    * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real initialGuess(const Real /*effective_trial_stress*/) { return 0.0; }
+  virtual ADReal initialGuess(const ADReal & /*effective_trial_stress*/) { return 0.0; }
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be
@@ -86,7 +85,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeResidual(const Real effective_trial_stress, const Real scalar) = 0;
+  virtual ADReal computeResidual(const ADReal & effective_trial_stress, const ADReal & scalar) = 0;
 
   /**
    * Compute the derivative of the residual as a function of the scalar variable.  The
@@ -94,7 +93,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeDerivative(const Real effective_trial_stress, const Real scalar) = 0;
+  virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
+                                   const ADReal & scalar) = 0;
 
   /**
    * Compute a reference quantity to be used for checking relative convergence. This should
@@ -102,29 +102,14 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeReferenceResidual(const Real effective_trial_stress, const Real scalar) = 0;
+  virtual Real computeReferenceResidual(const ADReal & effective_trial_stress,
+                                        const ADReal & scalar) = 0;
 
   /**
    * Finalize internal state variables for a model for a given iteration.
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual void iterationFinalize(Real /*scalar*/) {}
-
-  /**
-   * Output information for a single iteration step to build the convergence history of the model
-   * @param iter_output            Output stream
-   * @param it                     Current iteration count
-   * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
-   * @param residual               Current value of the residual
-   * @param reference              Current value of the reference quantity
-   */
-  virtual void outputIterationStep(std::stringstream * iter_output,
-                                   const unsigned int it,
-                                   const Real effective_trial_stress,
-                                   const Real scalar,
-                                   const Real residual,
-                                   const Real reference_residual);
+  virtual void iterationFinalize(ADReal /*scalar*/) {}
 
   /**
    * Output summary information for the convergence history of the model
@@ -184,8 +169,8 @@ private:
   unsigned int _iteration;
 
   ///@{ Residual values, kept as members to retain solver state for summary outputting
-  Real _initial_residual;
-  Real _residual;
+  ADReal _initial_residual;
+  ADReal _residual;
   ///@}
 
   /// MOOSE input name of the object performing the solve
@@ -198,8 +183,8 @@ private:
    * @param iter_output            Output stream -- if null, no output is produced
    * @return Whether the solution was successful
    */
-  SolveState internalSolve(const Real effective_trial_stress,
-                           Real & scalar,
+  SolveState internalSolve(const ADReal effective_trial_stress,
+                           ADReal & scalar,
                            std::stringstream * iter_output = nullptr);
 
   /**
@@ -208,7 +193,7 @@ private:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool converged(const Real residual, const Real reference);
+  bool converged(const ADReal & residual, const Real reference);
 
   /**
    * Check to see whether the residual is within acceptable convergence limits.
@@ -219,7 +204,7 @@ private:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool convergedAcceptable(const unsigned int it, const Real residual, const Real reference);
+  bool convergedAcceptable(const unsigned int it, const Real reference);
 
   /**
    * Check to see whether solution is within admissible range, and set it within that range
@@ -231,9 +216,9 @@ private:
    * @param max_permissible_scalar Maximum permissible value of scalar
    * @param iter_output            Output stream
    */
-  void checkPermissibleRange(Real & scalar,
-                             Real & scalar_increment,
-                             const Real scalar_old,
+  void checkPermissibleRange(ADReal & scalar,
+                             ADReal & scalar_increment,
+                             const ADReal & scalar_old,
                              const Real min_permissible_scalar,
                              const Real max_permissible_scalar,
                              std::stringstream * iter_output);
@@ -247,12 +232,26 @@ private:
    * @param scalar_lower_bound     Lower bound value of scalar
    * @param iter_output            Output stream
    */
-  void updateBounds(const Real scalar,
-                    const Real residual,
+  void updateBounds(const ADReal & scalar,
+                    const ADReal & residual,
                     const Real init_resid_sign,
                     Real & scalar_upper_bound,
                     Real & scalar_lower_bound,
                     std::stringstream * iter_output);
+
+  /**
+   * Output information for a single iteration step to build the convergence history of the model
+   * @param iter_output            Output stream
+   * @param it                     Current iteration count
+   * @param effective_trial_stress Effective trial stress
+   * @param scalar                 Inelastic strain increment magnitude being solved for
+   * @param residual               Current value of the residual
+   * @param reference              Current value of the reference quantity
+   */
+  virtual void outputIterationStep(std::stringstream * iter_output,
+                                   const ADReal & effective_trial_stress,
+                                   const ADReal & scalar,
+                                   const Real reference_residual);
 };
 
-#endif // SINGLEVARIABLERETURNMAPPINGSOLUTION_H
+#endif // ADSINGLEVARIABLERETURNMAPPINGSOLUTION_H

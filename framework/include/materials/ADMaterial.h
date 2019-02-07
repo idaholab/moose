@@ -25,6 +25,7 @@
   using ADMaterial<compute_stage>::_JxW;                                                           \
   using ADMaterial<compute_stage>::_coord;                                                         \
   using ADMaterial<compute_stage>::_q_point;                                                       \
+  using ADMaterial<compute_stage>::_current_elem;                                                  \
   using ADMaterial<compute_stage>::_fe_problem;                                                    \
   using ADMaterial<compute_stage>::_assembly;                                                      \
   using ADMaterial<compute_stage>::_mesh;                                                          \
