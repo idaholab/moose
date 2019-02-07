@@ -64,4 +64,16 @@
     issues = '#9038'
     requirement = "The system shall allow steady-state Picard iteration with multiapps"
   [../]
+
+  [./steady_with_pseudo_stransient_sub]
+    type = 'Exodiff'
+    input = 'steady_picard_master.i'
+    exodiff = 'steady_picard_master_out.e steady_picard_master_out_sub0.e'
+    cli_args = 'MultiApps/sub/input_files=steady_picard_pseudo_transient_sub.i'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#9038'
+    prereq = 'steady'
+    requirement = "The system shall allow steady-state Picard iteration with pseudo-transient multiapps"
+  [../]
 []
