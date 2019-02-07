@@ -22,12 +22,15 @@ template <>
 InputParameters
 validParams<Steady>()
 {
-  return validParams<Executioner>();
+  InputParameters params = validParams<Executioner>();
+  params.addParam<Real>("time", 0.0, "System time");
+  return params;
 }
 
 Steady::Steady(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
+    _time(_problem.time()),
     _time_step(_problem.timeStep()),
     _final_timer(registerTimedSection("final", 1))
 {
@@ -35,6 +38,8 @@ Steady::Steady(const InputParameters & parameters)
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
+
+  _time = getParam<Real>("time");
 }
 
 void

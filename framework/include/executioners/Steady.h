@@ -51,6 +51,7 @@ public:
 protected:
   FEProblemBase & _problem;
 
+  Real & _time;
   int & _time_step;
 
   PerfID _final_timer;
