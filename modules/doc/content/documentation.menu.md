@@ -1,6 +1,6 @@
 !row! class=row
 !col! small=12 medium=6 large=4
-## [Application Usage](application_usage/index.md)
+## [Application Usage !!icon link!!](application_usage/index.md)
 
 - [Examples](examples/index.md)
 - [Command-line Options](command_line_usage.md)
@@ -15,7 +15,7 @@
 !col-end!
 
 !col! small=12 medium=6 large=4
-## [Application Development](application_development/index.md)
+## [Application Development !!icon link!!](application_development/index.md)
 
 - [Source Pages](source/index.md)
 - [Jacobian Definition](/jacobian_definition.md)
@@ -23,7 +23,7 @@
 - [C++ Utilities](utils/index.md)
 - [Modules Doxygen](http://mooseframework.org/docs/doxygen/modules/classes.html)
 
-## [Framework Development](framework_development/index.md)
+## [Framework Development !!icon link!!](framework_development/index.md)
 
 - [Contributing](framework_development/contributing.md)
 - [Code Standards](code_standards.md)
@@ -32,7 +32,7 @@
 !col-end!
 
 !col! small=12 medium=6 large=4
-## [MOOSEDocs](MooseDocs/index.md)
+## [MOOSEDocs !!icon link!!](MooseDocs/index.md)
 
 - [MooseDocs/specification.md]
 - [MooseDocs/generate.md]
