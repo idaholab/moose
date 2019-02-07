@@ -5,10 +5,10 @@
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "InputParameterWarehouse.h"
+#include "RELAP7App.h"
 
 class Component;
 class FEProblem;
-class RELAP7App;
 class RELAP7Mesh;
 
 template <>
@@ -370,7 +370,7 @@ protected:
    *
    * @param[in] model   model type
    */
-  void logModelNotImplementedError(const RELAP7::FlowModelID & model) const;
+  void logModelNotImplementedError(const THM::FlowModelID & model) const;
 
   /**
    * Logs an error for the spatial discretization type not being implemented for the component

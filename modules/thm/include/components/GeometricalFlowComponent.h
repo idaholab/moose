@@ -50,7 +50,7 @@ public:
   /**
    * Gets the flow model ID
    */
-  const RELAP7::FlowModelID & getFlowModelID() const;
+  const THM::FlowModelID & getFlowModelID() const;
 
   /**
    * Gets the linear cross-sectional area variable name
@@ -94,7 +94,7 @@ protected:
   const MooseEnum _rdg_slope_reconstruction;
 
   /// Flow model type
-  RELAP7::FlowModelID _model_id;
+  THM::FlowModelID _model_id;
 };
 
 #endif /* GEOMETRICALFLOWCOMPONENT_H */

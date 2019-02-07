@@ -261,9 +261,9 @@ Component::check7EqnNCGRequiredParameter(const std::string & param) const
 }
 
 void
-Component::logModelNotImplementedError(const RELAP7::FlowModelID & model) const
+Component::logModelNotImplementedError(const THM::FlowModelID & model) const
 {
-  if (model == RELAP7::FM_SINGLE_PHASE)
+  if (model == THM::FM_SINGLE_PHASE)
     logError("This component is not implemented for single-phase flow");
   else if (model == RELAP7::FM_TWO_PHASE)
     logError("This component is not implemented for two-phase flow");

@@ -39,7 +39,7 @@ PipeBase::init()
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
-  if (_model_id == RELAP7::FM_SINGLE_PHASE)
+  if (_model_id == THM::FM_SINGLE_PHASE)
     _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);
   else if (_model_id == RELAP7::FM_TWO_PHASE)
   {

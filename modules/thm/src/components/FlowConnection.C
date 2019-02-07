@@ -23,7 +23,7 @@ validParams<FlowConnection>()
 }
 
 FlowConnection::FlowConnection(const InputParameters & params)
-  : Component(params), _flow_model_id(RELAP7::FM_INVALID)
+  : Component(params), _flow_model_id(THM::FM_INVALID)
 {
 }
 
@@ -66,7 +66,7 @@ FlowConnection::init()
   if (_connections.size() > 0)
   {
     std::vector<UserObjectName> fp_names;
-    std::vector<RELAP7::FlowModelID> flow_model_ids;
+    std::vector<THM::FlowModelID> flow_model_ids;
     for (const auto & connection : _connections)
     {
       const std::string comp_name = connection._geometrical_component_name;
@@ -92,7 +92,7 @@ FlowConnection::init()
       checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
       _fp_name = fp_names[0];
 
-      checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
+      checkAllConnectionsHaveSame<THM::FlowModelID>(flow_model_ids, "flow model ID");
       _flow_model_id = flow_model_ids[0];
 
       if (hasComponentByName<PipeBase>(_connections[0]._geometrical_component_name))

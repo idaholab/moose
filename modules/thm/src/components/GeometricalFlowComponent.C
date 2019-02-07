@@ -61,7 +61,7 @@ GeometricalFlowComponent::getConnections(FlowConnection::EEndType end_type) cons
     mooseError(name(), ": Invalid pipe end type (", end_type, ").");
 }
 
-const RELAP7::FlowModelID &
+const THM::FlowModelID &
 GeometricalFlowComponent::getFlowModelID() const
 {
   checkSetupStatus(INITIALIZED_PRIMARY);
