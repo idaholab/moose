@@ -7,7 +7,6 @@
     requirement = 'MOOSE shall be able to create a mesh based on elements.'
     design = 'meshgenerators/ElementGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   [../]
   [./test2]
@@ -18,7 +17,6 @@
     requirement = 'MOOSE shall be able to create a mesh based on elements.'
     design = 'meshgenerators/ElementGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 []
