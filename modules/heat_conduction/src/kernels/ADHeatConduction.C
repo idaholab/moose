@@ -14,7 +14,8 @@ defineADValidParams(ADHeatConduction,
                     ADDiffusion,
                     params.addRequiredParam<MaterialPropertyName>(
                         "thermal_conductivity",
-                        "the name of the thermal conductivity material property"););
+                        "the name of the thermal conductivity material property");
+                    params.set<bool>("use_displaced_mesh") = true;);
 
 template <ComputeStage compute_stage>
 ADHeatConduction<compute_stage>::ADHeatConduction(const InputParameters & parameters)
