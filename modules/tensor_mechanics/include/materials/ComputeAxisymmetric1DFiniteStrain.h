@@ -27,9 +27,9 @@ class ComputeAxisymmetric1DFiniteStrain : public Compute1DFiniteStrain
 public:
   ComputeAxisymmetric1DFiniteStrain(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
 
+protected:
   /// Computes the current dUy/dy for axisymmetric problems
   Real computeGradDispYY() override;
 

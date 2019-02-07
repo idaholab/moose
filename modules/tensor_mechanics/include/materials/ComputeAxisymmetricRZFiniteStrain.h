@@ -27,9 +27,9 @@ class ComputeAxisymmetricRZFiniteStrain : public Compute2DFiniteStrain
 public:
   ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
 
+protected:
   Real computeOutOfPlaneGradDisp() override;
 
   Real computeOutOfPlaneGradDispOld() override;

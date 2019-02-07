@@ -30,9 +30,10 @@ class ComputeGlobalStrain : public Material
 public:
   ComputeGlobalStrain(const InputParameters & parameters);
 
+  virtual void computeProperties();
+
 protected:
   virtual void initQpStatefulProperties();
-  virtual void computeProperties();
 
   ///Base name prepended to material property name
   std::string _base_name;

@@ -40,9 +40,10 @@ class ComputeMultipleInelasticStress : public ComputeFiniteStrainElasticStress
 public:
   ComputeMultipleInelasticStress(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual void initQpStatefulProperties() override;
-  virtual void initialSetup() override;
 
   virtual void computeQpStress() override;
 

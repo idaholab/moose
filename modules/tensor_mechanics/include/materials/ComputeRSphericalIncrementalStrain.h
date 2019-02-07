@@ -28,9 +28,9 @@ class ComputeRSphericalIncrementalStrain : public ComputeIncrementalSmallStrain
 public:
   ComputeRSphericalIncrementalStrain(const InputParameters & parameters);
 
-protected:
   virtual void initialSetup() override;
 
+protected:
   /// Computes the current and old deformation gradients with the assumptions for
   /// 1D spherical symmetry geometries: \f$ \epsilon_{\theta} = \epsilon_{\phi} = \frac{u_r}{r} \f$
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;

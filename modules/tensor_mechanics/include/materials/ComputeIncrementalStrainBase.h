@@ -24,10 +24,10 @@ class ComputeIncrementalStrainBase : public ComputeStrainBase
 {
 public:
   ComputeIncrementalStrainBase(const InputParameters & parameters);
-  virtual ~ComputeIncrementalStrainBase() {}
+
+  void initialSetup() override;
 
 protected:
-  void initialSetup() override;
   virtual void initQpStatefulProperties() override;
 
   void subtractEigenstrainIncrementFromStrain(RankTwoTensor & strain);

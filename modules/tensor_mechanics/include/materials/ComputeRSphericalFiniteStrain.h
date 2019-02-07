@@ -28,13 +28,13 @@ class ComputeRSphericalFiniteStrain : public ComputeFiniteStrain
 public:
   ComputeRSphericalFiniteStrain(const InputParameters & parameters);
 
-protected:
   virtual void initialSetup();
 
   /// Computes the current and old deformation gradients with the assumptions for
   /// 1D spherical symmetry geometries: \f$ \epsilon_{\theta} = \epsilon_{\phi} = \frac{u_r}{r} \f$
   virtual void computeProperties();
 
+protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 };

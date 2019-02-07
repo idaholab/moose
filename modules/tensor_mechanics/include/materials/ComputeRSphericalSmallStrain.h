@@ -28,7 +28,6 @@ class ComputeRSphericalSmallStrain : public ComputeSmallStrain
 public:
   ComputeRSphericalSmallStrain(const InputParameters & parameters);
 
-protected:
   virtual void computeProperties() override;
 };
 

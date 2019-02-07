@@ -27,9 +27,9 @@ class ComputeAxisymmetricRZIncrementalStrain : public Compute2DIncrementalStrain
 public:
   ComputeAxisymmetricRZIncrementalStrain(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
 
+protected:
   Real computeOutOfPlaneGradDisp() override;
 
   Real computeOutOfPlaneGradDispOld() override;
