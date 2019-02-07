@@ -50,9 +50,6 @@ PipeBase::init()
   else if (_model_id == RELAP7::FM_TWO_PHASE_NCG)
   {
     pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
-    const TwoPhaseNCGFluidProperties & fp =
-        _sim.getUserObject<TwoPhaseNCGFluidProperties>(_fp_name);
-    pars.set<unsigned int>("n_ncgs") = fp.getNumberOfNCGs();
 
     _flow_model = std::make_shared<FlowModelTwoPhaseNCG>(name(), pars);
   }
