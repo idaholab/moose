@@ -107,6 +107,11 @@ Coupleable::~Coupleable()
       itt->release();
       delete itt;
     }
+  for (auto & it : _default_vector_value)
+  {
+    it.second->release();
+    delete it.second;
+  }
   for (auto & it : _ad_default_value)
   {
     it.second->release();
