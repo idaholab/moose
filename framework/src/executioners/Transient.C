@@ -284,8 +284,6 @@ Transient::preExecute()
     // However, we might remove this call and regold the test in the future eventually.
     _problem.advanceState();
   }
-  else
-    incrementStepOrReject();
 }
 
 void
@@ -304,6 +302,11 @@ void
 Transient::execute()
 {
   preExecute();
+
+  // FIXME: cannot move the following into preExecute because of the way TransientMultiApp is coded.
+  //        We will need to cleanup TransientMultiApp first for the cleanup here.
+  if (_app.isRecovering())
+    incrementStepOrReject();
 
   // Start time loop...
   while (keepGoing())
