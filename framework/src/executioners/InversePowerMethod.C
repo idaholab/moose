@@ -69,10 +69,7 @@ InversePowerMethod::init()
   // Write the initial.
   // Note: We need to tempararily change the system time to make the output system work properly.
   _problem.timeStep() = 0;
-  Real t = _problem.time();
-  _problem.time() = _problem.timeStep();
   _problem.outputStep(EXEC_INITIAL);
-  _problem.time() = t;
 }
 
 void

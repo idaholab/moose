@@ -39,7 +39,7 @@ public:
    * provides
    * this time and it should be used in place of _time from Outputter.
    */
-  virtual Real time() override;
+  virtual Real time() const override;
 
 protected:
   /// Current norm returned from PETSc

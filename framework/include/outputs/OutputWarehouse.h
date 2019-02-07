@@ -192,6 +192,29 @@ public:
   /// Returns a Boolean indicating whether performance logging is requested in this application
   bool getLoggingRequested() const { return _logging_requested; }
 
+  /// Returns a reference to the output time
+  const Real & time() const { return _time; }
+  Real & time() { return _time; }
+
+  /// Returns a reference to the old output time
+  const Real & timeOld() const { return _time_old; }
+  Real & timeOld() { return _time_old; }
+
+  /// Returns a reference to the output time step
+  const int & timeStep() const { return _t_step; }
+  int & timeStep() { return _t_step; }
+
+  /// Returns a reference to the output time step size
+  const Real & dt() const { return _dt; }
+  Real & dt() { return _dt; }
+
+  /// Returns a reference to the old output time step size
+  const Real & dtOld() const { return _dt_old; }
+  Real & dtOld() { return _dt_old; }
+
+  const bool & forTransient() const { return _transient; }
+  bool & forTransient() { return _transient; }
+
 private:
   /**
    * Calls the outputStep method for each output object
@@ -344,6 +367,24 @@ private:
 
   /// Indicates that performance logging has been requested by the console or some object (PerformanceData)
   bool _logging_requested;
+
+  /// The current time for output purposes
+  Real _time;
+
+  /// The old time for output purposes
+  Real _time_old;
+
+  /// The current time step for output purposes
+  int _t_step;
+
+  /// Time step delta for output purposes
+  Real _dt;
+
+  /// Old time step delta for output purposes
+  Real _dt_old;
+
+  /// Whether or not the current output warehouse is set for transient output
+  bool _transient;
 
   // Allow complete access:
   // FEProblemBase for calling initial, timestepSetup, outputStep, etc. methods

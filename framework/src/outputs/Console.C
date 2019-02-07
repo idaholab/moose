@@ -387,7 +387,7 @@ Console::writeTimestepInformation()
   std::stringstream oss;
 
   // Write timestep data for transient executioners
-  if (_transient)
+  if (_output_warehouse->forTransient())
   {
     // Write time step and time information
     oss << "\nTime Step " << timeStep();

@@ -250,7 +250,7 @@ PetscOutput::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void_pt
 #endif
 
 Real
-PetscOutput::time()
+PetscOutput::time() const
 {
   if (_on_nonlinear_residual)
     return _nonlinear_time;

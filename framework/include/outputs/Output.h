@@ -63,7 +63,7 @@ public:
    * When the Executioner is steady this utilizes the time_step and when Transient the actual time
    * is used.
    */
-  virtual Real time();
+  virtual Real time() const { return _time; }
 
   /**
   * Get the old output time.
@@ -71,22 +71,22 @@ public:
   *
   * @see time()
   */
-  virtual Real timeOld();
+  virtual Real timeOld() const { return _time_old; }
 
   /**
    * Get the current time step size
    */
-  virtual Real dt();
+  virtual Real dt() const { return _dt; }
 
   /**
    * Get old time step size
    */
-  virtual Real dtOld();
+  virtual Real dtOld() const { return _dt_old; }
 
   /**
    * Get the current time step
    */
-  virtual int timeStep();
+  virtual int timeStep() const { return _t_step; }
 
   /**
    * Get the output interval
@@ -167,8 +167,8 @@ protected:
   /// Pointer the the FEProblemBase object for output object (use this)
   FEProblemBase * _problem_ptr;
 
-  /// Transient flag (true = transient)
-  bool _transient;
+  /// Pointer to the output warehouse
+  OutputWarehouse * _output_warehouse;
 
   /// Flag for using displaced mesh
   bool _use_displaced;
@@ -186,19 +186,19 @@ protected:
   ExecFlagEnum _execute_on;
 
   /// The current time for output purposes
-  Real & _time;
+  const Real & _time;
 
   /// The old time
-  Real & _time_old;
+  const Real & _time_old;
 
   /// The current time step
-  int & _t_step;
+  const int & _t_step;
 
   /// Time step delta
-  Real & _dt;
+  const Real & _dt;
 
   /// Old time step delta
-  Real & _dt_old;
+  const Real & _dt_old;
 
   /// The number of outputs written
   unsigned int _num;

@@ -377,10 +377,7 @@ EigenExecutionerBase::postExecute()
   if (getParam<bool>("output_before_normalization"))
   {
     _problem.timeStep()++;
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
     _problem.outputStep(EXEC_TIMESTEP_END);
-    _problem.time() = t;
   }
 
   Real s = 1.0;
@@ -400,10 +397,7 @@ EigenExecutionerBase::postExecute()
   if ((!getParam<bool>("output_before_normalization")) || !MooseUtils::absoluteFuzzyEqual(s, 1.0))
   {
     _problem.timeStep()++;
-    Real t = _problem.time();
-    _problem.time() = _problem.timeStep();
     _problem.outputStep(EXEC_TIMESTEP_END);
-    _problem.time() = t;
   }
 
   {

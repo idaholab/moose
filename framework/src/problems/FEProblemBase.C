@@ -85,6 +85,7 @@
 #include "TimeIntegrator.h"
 #include "LineSearch.h"
 #include "FloatingPointExceptionGuard.h"
+#include "Transient.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -575,6 +576,16 @@ FEProblemBase::initialSetup()
   addExtraVectors();
 
   // Perform output related setups
+  // Note: We currently have eigenvalue executioners that sets problem transient flag to true
+  //       although they are solving steady-state problems. So we have to check if the executioner
+  //       is Transient in order to perform output correctly. We should use _transient after we
+  //       remove those executioners in the future.
+  _app.getOutputWarehouse().forTransient() = dynamic_cast<Transient *>(_app.getExecutioner());
+  _app.getOutputWarehouse().time() = _time;
+  _app.getOutputWarehouse().timeOld() = _time_old;
+  _app.getOutputWarehouse().dt() = _dt;
+  _app.getOutputWarehouse().dtOld() = _dt_old;
+  _app.getOutputWarehouse().timeStep() = _t_step;
   _app.getOutputWarehouse().initialSetup();
 
   // Flush all output to _console that occur during construction and initialization of objects
@@ -916,6 +927,11 @@ FEProblemBase::timestepSetup()
     obj->timestepSetup();
 
   // Timestep setup of output objects
+  _app.getOutputWarehouse().time() = _time;
+  _app.getOutputWarehouse().timeOld() = _time_old;
+  _app.getOutputWarehouse().dt() = _dt;
+  _app.getOutputWarehouse().dtOld() = _dt_old;
+  _app.getOutputWarehouse().timeStep() = _t_step;
   _app.getOutputWarehouse().timestepSetup();
 
   if (_requires_nonlocal_coupling)
@@ -4331,7 +4347,27 @@ FEProblemBase::outputStep(ExecFlagType type)
   _aux->update();
   if (_displaced_problem != NULL)
     _displaced_problem->syncSolutions();
-  _app.getOutputWarehouse().outputStep(type);
+
+  auto & output_warehouse = _app.getOutputWarehouse();
+
+  // copy time to the output warehouse for outputting
+  if (output_warehouse.forTransient())
+  {
+    output_warehouse.time() = _time;
+    output_warehouse.timeOld() = _time_old;
+    output_warehouse.dt() = _dt;
+    output_warehouse.dtOld() = _dt_old;
+  }
+  else
+  {
+    output_warehouse.time() = _t_step;
+    output_warehouse.timeOld() = _t_step - 1;
+    output_warehouse.dt() = 1;
+    output_warehouse.dtOld() = 1;
+  }
+  output_warehouse.timeStep() = _t_step;
+
+  output_warehouse.outputStep(type);
 }
 
 void
@@ -5895,6 +5931,9 @@ FEProblemBase::addOutput(const std::string & object_type,
   InputParameters * common = output_warehouse.getCommonParameters();
   if (common != NULL)
     parameters.applyParameters(*common, exclude);
+
+  // Add a pointer to the OutputWarehouse class
+  parameters.set<OutputWarehouse *>("_output_warehouse") = &output_warehouse;
 
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")

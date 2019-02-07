@@ -65,6 +65,7 @@ validParams<Output>()
 
   // Add a private parameter for indicating if it was created with short-cut syntax
   params.addPrivateParam<bool>("_built_by_moose", false);
+  params.addPrivateParam<OutputWarehouse *>("_output_warehouse", nullptr);
 
   // Register this class as base class
   params.declareControllable("enable");
@@ -88,16 +89,16 @@ Output::Output(const InputParameters & parameters)
     SetupInterface(this),
     PerfGraphInterface(this),
     _problem_ptr(getParam<FEProblemBase *>("_fe_problem_base")),
-    _transient(_problem_ptr->isTransient()),
+    _output_warehouse(getParam<OutputWarehouse *>("_output_warehouse")),
     _use_displaced(getParam<bool>("use_displaced")),
     _es_ptr(nullptr),
     _mesh_ptr(nullptr),
     _execute_on(getParam<ExecFlagEnum>("execute_on")),
-    _time(_problem_ptr->time()),
-    _time_old(_problem_ptr->timeOld()),
-    _t_step(_problem_ptr->timeStep()),
-    _dt(_problem_ptr->dt()),
-    _dt_old(_problem_ptr->dtOld()),
+    _time(_output_warehouse->time()),
+    _time_old(_output_warehouse->timeOld()),
+    _t_step(_output_warehouse->timeStep()),
+    _dt(_output_warehouse->dt()),
+    _dt_old(_output_warehouse->dtOld()),
     _num(0),
     _interval(getParam<unsigned int>("interval")),
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
@@ -217,48 +218,6 @@ Output::onInterval()
 
   // Return the output status
   return output;
-}
-
-Real
-Output::time()
-{
-  if (_transient)
-    return _time;
-  else
-    return _t_step;
-}
-
-Real
-Output::timeOld()
-{
-  if (_transient)
-    return _time_old;
-  else
-    return _t_step - 1;
-}
-
-Real
-Output::dt()
-{
-  if (_transient)
-    return _dt;
-  else
-    return 1;
-}
-
-Real
-Output::dtOld()
-{
-  if (_transient)
-    return _dt_old;
-  else
-    return 1;
-}
-
-int
-Output::timeStep()
-{
-  return _t_step;
 }
 
 const MultiMooseEnum &
