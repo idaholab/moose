@@ -23,10 +23,17 @@ const std::string FlowModelSinglePhase::THERMAL_CONDUCTIVITY = "k";
 const std::string FlowModelSinglePhase::TOTAL_ENERGY_DENSITY = "rhoE";
 const std::string FlowModelSinglePhase::VELOCITY = "vel";
 
-FlowModelSinglePhase::FlowModelSinglePhase(const std::string & name, const InputParameters & params)
-  : FlowModel(name, params)
+template <>
+InputParameters
+validParams<FlowModelSinglePhase>()
 {
+  InputParameters params = validParams<FlowModel>();
+  return params;
 }
+
+registerMooseObject("RELAP7App", FlowModelSinglePhase);
+
+FlowModelSinglePhase::FlowModelSinglePhase(const InputParameters & params) : FlowModel(params) {}
 
 void
 FlowModelSinglePhase::init()

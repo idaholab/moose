@@ -3,13 +3,18 @@
 
 #include "FlowModel.h"
 
+class FlowModelSinglePhase;
+
+template <>
+InputParameters validParams<FlowModelSinglePhase>();
+
 /**
  * Sets up the single-phase flow model using Euler's equations
  */
 class FlowModelSinglePhase : public FlowModel
 {
 public:
-  FlowModelSinglePhase(const std::string & name, const InputParameters & params);
+  FlowModelSinglePhase(const InputParameters & params);
 
   virtual void init() override;
   virtual void addVariables() override;
