@@ -54,7 +54,7 @@ public:
 
   virtual Real henryConstant(Real temperature) const override;
 
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
+  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
   virtual Real criticalPressure() const override;
 
@@ -67,6 +67,8 @@ public:
   virtual Real triplePointTemperature() const override;
 
   virtual Real vaporPressure(Real temperature) const override;
+
+  virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
 
   /**
    * Saturated liquid density of CH4

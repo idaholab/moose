@@ -112,12 +112,12 @@ HydrogenFluidProperties::mu_from_rho_T(Real density, Real temperature) const
 }
 
 void
-HydrogenFluidProperties::mu_drhoT_from_rho_T(Real density,
-                                             Real temperature,
-                                             Real ddensity_dT,
-                                             Real & mu,
-                                             Real & dmu_drho,
-                                             Real & dmu_dT) const
+HydrogenFluidProperties::mu_from_rho_T(Real density,
+                                       Real temperature,
+                                       Real ddensity_dT,
+                                       Real & mu,
+                                       Real & dmu_drho,
+                                       Real & dmu_dT) const
 {
   // Scaled variables
   const Real Tstar = temperature / 30.41;
@@ -185,7 +185,33 @@ HydrogenFluidProperties::mu_from_p_T(
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
 
   Real dmu_drho;
-  mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  mu_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
+void
+HydrogenFluidProperties::rho_mu_from_p_T(Real pressure,
+                                         Real temperature,
+                                         Real & rho,
+                                         Real & mu) const
+{
+  rho = rho_from_p_T(pressure, temperature);
+  mu = mu_from_rho_T(rho, temperature);
+}
+
+void
+HydrogenFluidProperties::rho_mu_from_p_T(Real pressure,
+                                         Real temperature,
+                                         Real & rho,
+                                         Real & drho_dp,
+                                         Real & drho_dT,
+                                         Real & mu,
+                                         Real & dmu_dp,
+                                         Real & dmu_dT) const
+{
+  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  mu_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
   dmu_dp = dmu_drho * drho_dp;
 }
 
@@ -249,9 +275,9 @@ HydrogenFluidProperties::henryConstant(Real temperature) const
 }
 
 void
-HydrogenFluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const
+HydrogenFluidProperties::henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const
 {
-  henryConstantIAPWS_dT(temperature, Kh, dKh_dT, -4.73284, 6.08954, 6.06066);
+  henryConstantIAPWS(temperature, Kh, dKh_dT, -4.73284, 6.08954, 6.06066);
 }
 
 Real
@@ -268,6 +294,12 @@ HydrogenFluidProperties::vaporPressure(Real temperature) const
                            Tr;
 
   return _p_critical * std::exp(logpressure);
+}
+
+void
+HydrogenFluidProperties::vaporPressure(Real, Real &, Real &) const
+{
+  mooseError(name(), ": vaporPressure() is not implemented");
 }
 
 Real

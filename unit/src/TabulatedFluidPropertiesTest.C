@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TabulatedFluidPropertiesTest.h"
-#include "SinglePhaseFluidPropertiesPTTestUtils.h"
+#include "SinglePhaseFluidPropertiesTestUtils.h"
 
 #include <fstream>
 
@@ -214,6 +214,36 @@ TEST_F(TabulatedFluidPropertiesTest, combined)
 {
   const Real p = 1.0e6;
   const Real T = 300.0;
+  const Real tol = REL_TOL_CONSISTENCY;
 
-  combinedProperties(_tab_fp, p, T, REL_TOL_SAVED_VALUE);
+  // Single property methods
+  Real rho, drho_dp, drho_dT;
+  _tab_fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  Real mu, dmu_dp, dmu_dT;
+  _tab_fp->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
+  Real e, de_dp, de_dT;
+  _tab_fp->e_from_p_T(p, T, e, de_dp, de_dT);
+
+  // Combined property methods
+  Real rho2, drho2_dp, drho2_dT, mu2, dmu2_dp, dmu2_dT, e2, de2_dp, de2_dT;
+  _tab_fp->rho_mu_from_p_T(p, T, rho2, mu2);
+
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(mu, mu2, tol);
+
+  _tab_fp->rho_mu_from_p_T(p, T, rho2, drho2_dp, drho2_dT, mu2, dmu2_dp, dmu2_dT);
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(drho_dp, drho2_dp, tol);
+  ABS_TEST(drho_dT, drho2_dT, tol);
+  ABS_TEST(mu, mu2, tol);
+  ABS_TEST(dmu_dp, dmu2_dp, tol);
+  ABS_TEST(dmu_dT, dmu2_dT, tol);
+
+  _tab_fp->rho_e_from_p_T(p, T, rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT);
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(drho_dp, drho2_dp, tol);
+  ABS_TEST(drho_dT, drho2_dT, tol);
+  ABS_TEST(e, e2, tol);
+  ABS_TEST(de_dp, de2_dp, tol);
+  ABS_TEST(de_dT, de2_dT, tol);
 }

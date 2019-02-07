@@ -146,7 +146,8 @@ PorousFlowSingleComponentFluid::computeQpProperties()
   {
     // Density and viscosity, and derivatives wrt pressure and temperature
     Real rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT;
-    _fp.rho_mu_dpT(_porepressure[_qp][_phase_num], Tk, rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT);
+    _fp.rho_mu_from_p_T(
+        _porepressure[_qp][_phase_num], Tk, rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT);
     (*_density)[_qp] = rho;
     (*_ddensity_dp)[_qp] = drho_dp;
     (*_ddensity_dT)[_qp] = drho_dT;

@@ -96,29 +96,6 @@ HelmholtzFluidProperties::e_from_p_T(
           molarMass();
 }
 
-void
-HelmholtzFluidProperties::rho_e_dpT(Real pressure,
-                                    Real temperature,
-                                    Real & rho,
-                                    Real & drho_dp,
-                                    Real & drho_dT,
-                                    Real & e,
-                                    Real & de_dp,
-                                    Real & de_dT) const
-{
-  Real density, ddensity_dp, ddensity_dT;
-  rho_from_p_T(pressure, temperature, density, ddensity_dp, ddensity_dT);
-  rho = density;
-  drho_dp = ddensity_dp;
-  drho_dT = ddensity_dT;
-
-  Real energy, denergy_dp, denergy_dT;
-  e_from_p_T(pressure, temperature, energy, denergy_dp, denergy_dT);
-  e = energy;
-  de_dp = denergy_dp;
-  de_dT = denergy_dT;
-}
-
 Real
 HelmholtzFluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
@@ -167,27 +144,6 @@ HelmholtzFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
   const Real tau = criticalTemperature() / temperature;
 
   return -_R * tau * tau * d2alpha_dtau2(delta, tau) / molarMass();
-}
-
-void
-HelmholtzFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
-{
-  rho = rho_from_p_T(pressure, temperature);
-  mu = mu_from_p_T(pressure, temperature);
-}
-
-void
-HelmholtzFluidProperties::rho_mu_dpT(Real pressure,
-                                     Real temperature,
-                                     Real & rho,
-                                     Real & drho_dp,
-                                     Real & drho_dT,
-                                     Real & mu,
-                                     Real & dmu_dp,
-                                     Real & dmu_dT) const
-{
-  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real

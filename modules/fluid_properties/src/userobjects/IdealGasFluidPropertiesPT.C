@@ -164,21 +164,24 @@ IdealGasFluidPropertiesPT::mu_from_p_T(
 }
 
 void
-IdealGasFluidPropertiesPT::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
+IdealGasFluidPropertiesPT::rho_mu_from_p_T(Real pressure,
+                                           Real temperature,
+                                           Real & rho,
+                                           Real & mu) const
 {
   rho = this->rho_from_p_T(pressure, temperature);
   mu = this->mu_from_p_T(pressure, temperature);
 }
 
 void
-IdealGasFluidPropertiesPT::rho_mu_dpT(Real pressure,
-                                      Real temperature,
-                                      Real & rho,
-                                      Real & drho_dp,
-                                      Real & drho_dT,
-                                      Real & mu,
-                                      Real & dmu_dp,
-                                      Real & dmu_dT) const
+IdealGasFluidPropertiesPT::rho_mu_from_p_T(Real pressure,
+                                           Real temperature,
+                                           Real & rho,
+                                           Real & drho_dp,
+                                           Real & drho_dT,
+                                           Real & mu,
+                                           Real & dmu_dp,
+                                           Real & dmu_dT) const
 {
   this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   this->mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
@@ -205,7 +208,7 @@ Real IdealGasFluidPropertiesPT::henryConstant(Real /*temperature*/) const
 }
 
 void
-IdealGasFluidPropertiesPT::henryConstant_dT(Real /*temperature*/, Real & Kh, Real & dKh_dT) const
+IdealGasFluidPropertiesPT::henryConstant(Real /*temperature*/, Real & Kh, Real & dKh_dT) const
 {
   Kh = _henry_constant;
   dKh_dT = 0.0;

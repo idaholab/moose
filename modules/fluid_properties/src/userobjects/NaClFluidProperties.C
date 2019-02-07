@@ -133,25 +133,6 @@ NaClFluidProperties::e_from_p_T(
   de_dT = dh_dT + pressure * drho_dT / rho / rho;
 }
 
-void
-NaClFluidProperties::rho_e_dpT(Real pressure,
-                               Real temperature,
-                               Real & rho,
-                               Real & drho_dp,
-                               Real & drho_dT,
-                               Real & e,
-                               Real & de_dp,
-                               Real & de_dT) const
-{
-  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
-}
-
-Real NaClFluidProperties::c_from_p_T(Real /*pressure*/, Real /*temperature*/) const
-{
-  mooseError(name(), ": c() is not implemented");
-}
-
 Real
 NaClFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
@@ -174,28 +155,6 @@ Real
 NaClFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
   return e_from_p_T(pressure, temperature) / temperature;
-}
-
-void
-NaClFluidProperties::rho_mu(Real /*pressure*/,
-                            Real /*temperature*/,
-                            Real & /*rho*/,
-                            Real & /*mu*/) const
-{
-  mooseError(name(), ": rho_mu() is not implemented");
-}
-
-void
-NaClFluidProperties::rho_mu_dpT(Real /*pressure*/,
-                                Real /*temperature*/,
-                                Real & /*rho*/,
-                                Real & /*drho_dp*/,
-                                Real & /*drho_dT*/,
-                                Real & /*mu*/,
-                                Real & /*dmu_dp*/,
-                                Real & /*dmu_dT*/) const
-{
-  mooseError(name(), ": rho_mu_dpT() is not implemented");
 }
 
 Real

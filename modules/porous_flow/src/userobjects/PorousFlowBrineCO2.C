@@ -287,14 +287,14 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
   Real co2_density, dco2_density_dp, dco2_density_dT;
   Real co2_viscosity, dco2_viscosity_dp, dco2_viscosity_dT;
   Real co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT;
-  _co2_fp.rho_mu_dpT(pressure,
-                     temperature,
-                     co2_density,
-                     dco2_density_dp,
-                     dco2_density_dT,
-                     co2_viscosity,
-                     dco2_viscosity_dp,
-                     dco2_viscosity_dT);
+  _co2_fp.rho_mu_from_p_T(pressure,
+                          temperature,
+                          co2_density,
+                          dco2_density_dp,
+                          dco2_density_dT,
+                          co2_viscosity,
+                          dco2_viscosity_dp,
+                          dco2_viscosity_dT);
 
   _co2_fp.h_from_p_T(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
 
@@ -1469,7 +1469,7 @@ PorousFlowBrineCO2::henryConstant(
 {
   // Henry's constant for dissolution in water
   Real Kh_h2o, dKh_h2o_dT;
-  _co2_fp.henryConstant_dT(temperature, Kh_h2o, dKh_h2o_dT);
+  _co2_fp.henryConstant(temperature, Kh_h2o, dKh_h2o_dT);
 
   // The correction to salt is obtained through the salting out coefficient
   const std::vector<Real> b{1.19784e-1, -7.17823e-4, 4.93854e-6, -1.03826e-8, 1.08233e-11};

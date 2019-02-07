@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Water97FluidPropertiesTest.h"
+#include "SinglePhaseFluidPropertiesTestUtils.h"
 
 /**
  * Test that the fluid name is correctly returned
@@ -512,23 +513,23 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   // Region 1
   Real p = 3.0e6;
   Real T = 300.0;
-  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
-  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
-  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->h_from_p_T, p, T, tol);
 
   // Region 2
   p = 3.5e3;
   T = 300.0;
-  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
-  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
-  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->h_from_p_T, p, T, tol);
 
   // Region 3
   p = 26.0e6;
   T = 650.0;
-  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, 1.0e-2);
-  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, 1.0e-2);
-  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, 1.0e-2);
+  DERIV_TEST(_fp->rho_from_p_T, p, T, 1.0e-2);
+  DERIV_TEST(_fp->e_from_p_T, p, T, 1.0e-2);
+  DERIV_TEST(_fp->h_from_p_T, p, T, 1.0e-2);
 
   // Region 4 (saturation curve)
   T = 300.0;
@@ -536,16 +537,16 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
 
   Real dpSat_dT_fd = (_fp->vaporPressure(T + dT) - _fp->vaporPressure(T - dT)) / (2.0 * dT);
   Real pSat = 0.0, dpSat_dT = 0.0;
-  _fp->vaporPressure_dT(T, pSat, dpSat_dT);
+  _fp->vaporPressure(T, pSat, dpSat_dT);
 
   REL_TEST(dpSat_dT, dpSat_dT_fd, 1.0e-6);
 
   // Region 5
   p = 30.0e6;
   T = 1500.0;
-  DERIV_TEST(_fp->rho, _fp->rho_from_p_T, p, T, tol);
-  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
-  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->e_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->h_from_p_T, p, T, tol);
 
   // Viscosity
   Real rho = 998.0, drho_dp = 0.0, drho_dT = 0.0;
@@ -555,7 +556,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   Real dmu_drho_fd =
       (_fp->mu_from_rho_T(rho + drho, T) - _fp->mu_from_rho_T(rho - drho, T)) / (2.0 * drho);
   Real mu = 0.0, dmu_drho = 0.0, dmu_dT = 0.0;
-  _fp->mu_drhoT_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
+  _fp->mu_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
 
   ABS_TEST(mu, _fp->mu_from_rho_T(rho, T), 1.0e-15);
   REL_TEST(dmu_drho, dmu_drho_fd, 1.0e-6);
@@ -564,7 +565,7 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   // so that the change in density wrt temperature is included
   p = 1.0e6;
   _fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-  _fp->mu_drhoT_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
+  _fp->mu_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
   Real dmu_dT_fd = (_fp->mu_from_rho_T(_fp->rho_from_p_T(p, T + dT), T + dT) -
                     _fp->mu_from_rho_T(_fp->rho_from_p_T(p, T - dT), T - dT)) /
                    (2.0 * dT);
@@ -589,6 +590,36 @@ TEST_F(Water97FluidPropertiesTest, combined)
 {
   const Real p = 1.0e6;
   const Real T = 300.0;
+  const Real tol = REL_TOL_CONSISTENCY;
 
-  combinedProperties(_fp, p, T, REL_TOL_SAVED_VALUE);
+  // Single property methods
+  Real rho, drho_dp, drho_dT;
+  _fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  Real mu, dmu_dp, dmu_dT;
+  _fp->mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
+  Real e, de_dp, de_dT;
+  _fp->e_from_p_T(p, T, e, de_dp, de_dT);
+
+  // Combined property methods
+  Real rho2, drho2_dp, drho2_dT, mu2, dmu2_dp, dmu2_dT, e2, de2_dp, de2_dT;
+  _fp->rho_mu_from_p_T(p, T, rho2, mu2);
+
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(mu, mu2, tol);
+
+  _fp->rho_mu_from_p_T(p, T, rho2, drho2_dp, drho2_dT, mu2, dmu2_dp, dmu2_dT);
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(drho_dp, drho2_dp, tol);
+  ABS_TEST(drho_dT, drho2_dT, tol);
+  ABS_TEST(mu, mu2, tol);
+  ABS_TEST(dmu_dp, dmu2_dp, tol);
+  ABS_TEST(dmu_dT, dmu2_dT, tol);
+
+  _fp->rho_e_from_p_T(p, T, rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT);
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(drho_dp, drho2_dp, tol);
+  ABS_TEST(drho_dT, drho2_dT, tol);
+  ABS_TEST(e, e2, tol);
+  ABS_TEST(de_dp, de2_dp, tol);
+  ABS_TEST(de_dT, de2_dT, tol);
 }
