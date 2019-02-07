@@ -55,10 +55,6 @@ Steady::init()
   checkIntegrity();
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
-
-  _time = _time_step;
-  _problem.outputStep(EXEC_INITIAL);
-  _time = _system_time;
 }
 
 void
@@ -66,6 +62,11 @@ Steady::execute()
 {
   if (_app.isRecovering())
     return;
+
+  _time_step = 0;
+  _time = _time_step;
+  _problem.outputStep(EXEC_INITIAL);
+  _time = _system_time;
 
   preExecute();
 

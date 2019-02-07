@@ -658,7 +658,5 @@ void TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should
   }
 
   ex->preExecute();
-  if (!_app.isRecovering())
-    problem.advanceState();
   _transient_executioners[i] = ex;
 }
