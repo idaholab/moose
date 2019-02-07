@@ -46,6 +46,12 @@ public:
   /// Thermal expansion coefficient (1/K)
   virtual Real beta_from_p_T(Real pressure, Real temperature) const override;
 
+  virtual void beta_from_p_T(Real pressure,
+                             Real temperature,
+                             Real & beta,
+                             Real & dbeta_dp,
+                             Real & dbeta_dT) const override;
+
   /// Isobaric specific heat capacity (J/kg/K)
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
 

@@ -469,6 +469,17 @@ public:
   virtual Real beta(Real pressure, Real temperature) const;
 
   /**
+   * Thermal expansion coefficient and its derivatives from pressure and temperature
+   *
+   * @param[in] p          pressure (Pa)
+   * @param[in] T          temperature (K)
+   * @param[out] beta      beta (1/K)
+   * @param[out] dbeta_dp  derivative of the thermal expansion coefficient w.r.t. pressure
+   * @param[out] dbeta_dT  derivative of the thermal expansion coefficient w.r.t. temperature
+   */
+  virtual void beta_from_p_T(Real p, Real T, Real & beta, Real & dbeta_dp, Real & dbeta_dT) const;
+
+  /**
    * Partial pressure at saturation in a gas mixture
    *
    * @param[in] p   pressure (Pa)
