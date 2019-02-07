@@ -8,6 +8,11 @@
 - /AuxKernels/SpecificVolumeAux
 - /AuxKernels/TemperatureAux
 
+- /Controls/ControlData
+
+- /FluidProperties
+- /FluidProperties/AddFluidPropertiesAction
+
 - /HeatStructureMaterials
 - /HeatStructureMaterials/AddHeatStructureMaterialAction
 - /HeatStructureMaterials/SolidMaterialProperties
