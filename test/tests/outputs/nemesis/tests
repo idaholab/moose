@@ -55,6 +55,7 @@
     requirement = "The Nemesis Ouput object shall support writing scalar variables."
     design = 'Outputs/index.md'
     issues = '#2122'
+    recover = false
   [../]
   [./nemesis_scalar_distributed]
     type = 'Exodiff'
@@ -69,5 +70,6 @@
     requirement = "The Nemesis Ouput object shall support writing scalar variables when using DistributedMesh."
     design = 'Outputs/index.md'
     issues = '#2122'
+    recover = false
   [../]
 []
