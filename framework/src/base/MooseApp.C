@@ -38,6 +38,7 @@
 #include "PerfGraphInterface.h" // For TIME_SECTIOn
 #include "Attributes.h"
 #include "MooseApp.h"
+#include "Transient.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -809,6 +810,11 @@ MooseApp::runInputFile()
       Moose::out << name << "\n";
     Moose::out << "**END OBJECT DATA**\n" << std::endl;
   }
+
+  // set output warehouse to treat transient output
+  // Note: This happens before init of executioners, which gives executioners a chance
+  //       to change the behavior of output warehouse intentionally.
+  _output_warehouse.forTransient() = dynamic_cast<Transient *>(_executioner.get());
 }
 
 void

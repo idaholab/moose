@@ -85,7 +85,6 @@
 #include "TimeIntegrator.h"
 #include "LineSearch.h"
 #include "FloatingPointExceptionGuard.h"
-#include "Transient.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -320,7 +319,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _u_dot_old_requested(false),
     _u_dotdot_old_requested(false)
 {
-
   _time = 0.0;
   _time_old = 0.0;
   _t_step = 0;
@@ -576,11 +574,6 @@ FEProblemBase::initialSetup()
   addExtraVectors();
 
   // Perform output related setups
-  // Note: We currently have eigenvalue executioners that sets problem transient flag to true
-  //       although they are solving steady-state problems. So we have to check if the executioner
-  //       is Transient in order to perform output correctly. We should use _transient after we
-  //       remove those executioners in the future.
-  _app.getOutputWarehouse().forTransient() = dynamic_cast<Transient *>(_app.getExecutioner());
   _app.getOutputWarehouse().time() = _time;
   _app.getOutputWarehouse().timeOld() = _time_old;
   _app.getOutputWarehouse().dt() = _dt;
