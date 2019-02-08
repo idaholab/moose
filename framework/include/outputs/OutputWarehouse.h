@@ -192,6 +192,9 @@ public:
   /// Returns a Boolean indicating whether performance logging is requested in this application
   bool getLoggingRequested() const { return _logging_requested; }
 
+  /// Reset the output system
+  void reset();
+
 private:
   /**
    * Calls the outputStep method for each output object
