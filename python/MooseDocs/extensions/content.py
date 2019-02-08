@@ -52,7 +52,7 @@ class ContentExtension(command.CommandExtension):
         if isinstance(renderer, LatexRenderer):
             renderer.addPreamble(LATEX_CONTENTLIST)
 
-    def binContent(self, location=None, method=None):
+    def binContent(self, page, location=None, method=None):
         """
         Helper method for creating page bins.
 
@@ -87,7 +87,8 @@ class ContentExtension(command.CommandExtension):
                     key = parts[0] if len(parts) > 1 else u''
                 else:
                     raise exceptions.MooseDocsException("Unknown method.")
-                headings[key].append((text, label, node.local))
+                path = node.relativeDestination(page)
+                headings[key].append((text, path, label))
 
         for value in headings.itervalues():
             value.sort(key=lambda x: x[2])
@@ -131,7 +132,7 @@ class RenderContentToken(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
 
-        headings = self.extension.binContent(token['location'], ContentExtension.FOLDER)
+        headings = self.extension.binContent(page, token['location'], ContentExtension.FOLDER)
 
         # Build lists
         for head, items in headings.iteritems():
@@ -145,20 +146,17 @@ class RenderContentToken(components.RenderComponent):
             for chunk in mooseutils.make_chunks(list(items), 3):
                 col = html.Tag(row, 'div', class_='col s12 m6 l4')
                 ul = html.Tag(col, 'ul', class_='moose-a-to-z')
-                for text, href, local in chunk:
+                for text, path, _ in chunk:
                     li = html.Tag(ul, 'li')
-                    a = html.Tag(li, 'a', href=href, string=unicode(text.replace('.md', '')))
-                    a.addClass('tooltipped')
-                    a['data-position'] = 'top'
-                    a['data-tooltip'] = local
+                    html.Tag(li, 'a', href=path, string=unicode(text.replace('.md', '')))
 
     def createLatex(self, parent, token, page):
 
-        headings = self.extension.binContent(token['location'], ContentExtension.FOLDER)
+        headings = self.extension.binContent(page, token['location'], ContentExtension.FOLDER)
         latex.Command(parent, 'par', start='\n')
         for items in headings.itervalues():
-            for text, label, local in sorted(items, key=lambda x: x[2]):
-                args = [latex.Brace(string=local, escape=False),
+            for text, path, label in sorted(items, key=lambda x: x[2]):
+                args = [latex.Brace(string=path, escape=False),
                         latex.Brace(string=label, escape=False)]
                 latex.Command(parent, 'ContentItem', start='\n', args=args, string=text)
             latex.Command(parent, 'par', start='\n')
@@ -171,7 +169,7 @@ class RenderAtoZ(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
 
         # Initialized alphabetized storage
-        headings = self.extension.binContent(token['location'], ContentExtension.LETTER)
+        headings = self.extension.binContent(page, token['location'], ContentExtension.LETTER)
         for letter in 'abcdefghijklmnopqrstuvwxyz':
             if letter not in headings:
                 headings[letter] = set()
@@ -202,20 +200,17 @@ class RenderAtoZ(components.RenderComponent):
             for chunk in mooseutils.make_chunks(list(items), 3):
                 col = html.Tag(row, 'div', class_='col s12 m6 l4')
                 ul = html.Tag(col, 'ul', class_='moose-a-to-z')
-                for text, href, local in chunk:
+                for text, path, _ in chunk:
                     li = html.Tag(ul, 'li')
-                    a = html.Tag(li, 'a', href=href, string=unicode(text))
-                    a.addClass('tooltipped')
-                    a['data-position'] = 'top'
-                    a['data-tooltip'] = local
+                    html.Tag(li, 'a', href=path, string=unicode(text))
 
     def createLatex(self, parent, token, page):
 
-        headings = self.extension.binContent(token['location'], ContentExtension.LETTER)
+        headings = self.extension.binContent(page, token['location'], ContentExtension.LETTER)
         latex.Command(parent, 'par', start='\n')
         for items in headings.values():
-            for text, label, local in sorted(items, key=lambda x: x[2]):
-                args = [latex.Brace(string=local, escape=False),
+            for text, path, label in sorted(items, key=lambda x: x[2]):
+                args = [latex.Brace(string=path, escape=False),
                         latex.Brace(string=label, escape=False)]
                 latex.Command(parent, 'ContentItem', start='\n', args=args, string=text)
             latex.Command(parent, 'par', start='\n')
