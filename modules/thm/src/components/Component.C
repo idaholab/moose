@@ -95,7 +95,7 @@ Component::Component(const InputParameters & parameters)
     _id(comp_id++),
     _parent(getParam<Component *>("_parent")),
     _sim(*getCheckedPointerParam<Simulation *>("_sim")),
-    _app(dynamic_cast<RELAP7App &>(MooseObject::_app)),
+    _app(dynamic_cast<THMApp &>(MooseObject::_app)),
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
     _zero(_sim._zero),
@@ -265,9 +265,9 @@ Component::logModelNotImplementedError(const THM::FlowModelID & model) const
 {
   if (model == THM::FM_SINGLE_PHASE)
     logError("This component is not implemented for single-phase flow");
-  else if (model == RELAP7::FM_TWO_PHASE)
+  else if (model == THM::FM_TWO_PHASE)
     logError("This component is not implemented for two-phase flow");
-  else if (model == RELAP7::FM_TWO_PHASE_NCG)
+  else if (model == THM::FM_TWO_PHASE_NCG)
     logError("This component is not implemented for two-phase flow with non-condensable gases");
   else
     logError("This component is not implemented for model type '", model, "'");

@@ -48,7 +48,7 @@ FlowConnection::setupMesh()
         _boundary_ids.push_back(conn._boundary_id);
 
         // add connection's node to nodeset of all boundary nodes
-        _mesh.getMesh().boundary_info->add_node(conn._node, RELAP7::bnd_nodeset_id);
+        _mesh.getMesh().boundary_info->add_node(conn._node, THM::bnd_nodeset_id);
       }
     }
     else
@@ -99,7 +99,7 @@ FlowConnection::init()
       {
         const PipeBase & pipe =
             getComponentByName<PipeBase>(_connections[0]._geometrical_component_name);
-        if (_flow_model_id == RELAP7::FM_TWO_PHASE || _flow_model_id == RELAP7::FM_TWO_PHASE_NCG)
+        if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
         {
           _flow_model = pipe.getFlowModel();
           auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase &>(*_flow_model);

@@ -1,6 +1,4 @@
 #include "FlowModelSinglePhase.h"
-#include "Simulation.h"
-#include "Factory.h"
 #include "PipeBase.h"
 
 const std::string FlowModelSinglePhase::DENSITY = "rho";

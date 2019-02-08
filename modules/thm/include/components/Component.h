@@ -5,7 +5,7 @@
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "InputParameterWarehouse.h"
-#include "RELAP7App.h"
+#include "THMApp.h"
 
 class Component;
 class FEProblem;
@@ -397,8 +397,8 @@ protected:
   /// Simulation this component is part of
   Simulation & _sim;
 
-  /// RELAP7 App (hides _app from MooseObject)
-  RELAP7App & _app;
+  /// THM App (hides _app from MooseObject)
+  THMApp & _app;
   /// The Factory associated with the MooseApp
   Factory & _factory;
 

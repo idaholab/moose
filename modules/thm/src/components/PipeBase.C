@@ -37,7 +37,7 @@ PipeBase::buildFlowModel()
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
-  if (_model_id == RELAP7::FM_TWO_PHASE || _model_id == RELAP7::FM_TWO_PHASE_NCG)
+  if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
     pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }
