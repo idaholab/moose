@@ -33,8 +33,9 @@ protected:
 
   const unsigned int _efield_id;
   const VectorVariableValue & _efield;
-  VectorMooseVariable & _efield_var;
-  const VectorVariablePhiValue & _vector_phi;
+  const bool _efield_coupled;
+  VectorMooseVariable * _efield_var;
+  const VectorVariablePhiValue * _vector_phi;
   const Real _mobility;
   Real _sgn;
 };
