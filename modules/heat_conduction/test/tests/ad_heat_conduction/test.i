@@ -4,25 +4,18 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 3
-  ny = 3
+  nx = 5
+  ny = 5
+  xmax = 0.001
+  ymax = 0.001
 []
 
 [Variables]
   [./T]
+    initial_condition = 1.5
   [../]
   [./c]
-  [../]
-[]
-
-[ICs]
-  [./T_IC]
-    type = RandomIC
-    variable = T
-  [../]
-  [./c_IC]
-    type = RandomIC
-    variable = c
+    initial_condition = 1.5
   [../]
 []
 
@@ -32,12 +25,49 @@
     variable = T
     thermal_conductivity = thermal_conductivity
   [../]
+  [./heat_dt]
+    type = ADHeatConductionTimeDerivative
+    variable = T
+    specific_heat = thermal_conductivity
+    density_name = thermal_conductivity
+  [../]
+  [./c]
+    type = ADDiffusion
+    variable = c
+  [../]
 []
 
 [Kernels]
-  [./c]
-    type = Diffusion
+  [./c_dt]
+    type = TimeDerivative
     variable = c
+  [../]
+[]
+
+[BCs]
+  [./left_c]
+    type = DirichletBC
+    variable = c
+    boundary = left
+    value = 2
+  [../]
+  [./right_c]
+    type = DirichletBC
+    variable = c
+    boundary = right
+    value = 1
+  [../]
+  [./left_T]
+    type = DirichletBC
+    variable = T
+    boundary = top
+    value = 1
+  [../]
+  [./right_T]
+    type = DirichletBC
+    variable = T
+    boundary = bottom
+    value = 2
   [../]
 []
 

@@ -15,13 +15,36 @@
     absent_out = '3 Nonlinear'
     prereq = 'linear-hand-coded'
     requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation in the production stress divergence kernel'
-    allow_test_objects = true
+  [../]
+  [./linear-ad-reverse]
+    type = 'Exodiff'
+    input = 'linear-ad-reverse-dependency.i'
+    exodiff = 'linear-out.e'
+    absent_out = '3 Nonlinear'
+    prereq = 'linear-ad'
+    requirement = 'We shall be able to reproduce the results of the hand-coded simulation using automatic differentiation with reversed stress and strain materials'
+  [../]
+  [./linear-mixed]
+    type = 'Exodiff'
+    input = 'linear-mixed.i'
+    exodiff = 'linear-out.e'
+    absent_out = '3 Nonlinear'
+    prereq = 'linear-ad-reverse'
+    requirement = 'We shall be able to resolve dependencies between non-ad and ad material properties with one arbitrary ordering in the input file'
+  [../]
+  [./linear-mixed-reverse]
+    type = 'Exodiff'
+    input = 'linear-mixed-reverse.i'
+    exodiff = 'linear-out.e'
+    absent_out = '3 Nonlinear'
+    prereq = 'linear-mixed'
+    requirement = 'We shall be able to resolve dependencies between non-ad and ad material properties with the other ordering in the input file'
   [../]
   [./linear-hand-coded-jac]
     type = 'PetscJacobianTester'
     input = 'linear-hand-coded.i'
     run_sim = 'True'
-    prereq = 'linear-ad'
+    cli_args = 'Outputs/exodus=false'
     ratio_tol = 1e-8
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the hand-coded problem shall be perfect'
@@ -30,10 +53,36 @@
     type = 'PetscJacobianTester'
     input = 'linear-ad.i'
     run_sim = 'True'
-    prereq = 'linear-ad'
+    cli_args = 'Outputs/exodus=false'
     ratio_tol = 1e-8
     difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
     requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
-    allow_test_objects = true
+  [../]
+  [./linear-ad-jac-reverse]
+    type = 'PetscJacobianTester'
+    input = 'linear-ad-reverse-dependency.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false'
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+    requirement = 'The Jacobian for the automatic differentiation problem with reversed stress and strain materials shall be perfect'
+  [../]
+  [./linear-mixed-jac]
+    type = 'PetscJacobianTester'
+    input = 'linear-mixed.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false'
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+    requirement = 'The Jacobian for the mixed material property problem with strain first'
+  [../]
+  [./linear-mixed-reverse-jac]
+    type = 'PetscJacobianTester'
+    input = 'linear-mixed-reverse.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false'
+    ratio_tol = 1e-8
+    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+    requirement = 'The Jacobian for the mixed material property problem with stress first'
   [../]
 []

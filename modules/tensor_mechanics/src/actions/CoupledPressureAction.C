@@ -24,11 +24,11 @@ validParams<CoupledPressureAction>()
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
 
-  params.addParam<NonlinearVariableName>("disp_x", "The x displacement");
-  params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
-  params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
+  params.addParam<VariableName>("disp_x", "The x displacement");
+  params.addParam<VariableName>("disp_y", "The y displacement");
+  params.addParam<VariableName>("disp_z", "The z displacement");
 
-  params.addParam<std::vector<NonlinearVariableName>>(
+  params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
@@ -59,21 +59,21 @@ CoupledPressureAction::act()
 {
   const std::string kernel_name = "CoupledPressureBC";
 
-  std::vector<NonlinearVariableName> displacements;
+  std::vector<VariableName> displacements;
   if (isParamValid("displacements"))
-    displacements = getParam<std::vector<NonlinearVariableName>>("displacements");
+    displacements = getParam<std::vector<VariableName>>("displacements");
   else
   {
     // Legacy parameter scheme for displacements
     if (!isParamValid("disp_x"))
       mooseError("Specify displacement variables using the `displacements` parameter.");
-    displacements.push_back(getParam<NonlinearVariableName>("disp_x"));
+    displacements.push_back(getParam<VariableName>("disp_x"));
 
     if (isParamValid("disp_y"))
     {
-      displacements.push_back(getParam<NonlinearVariableName>("disp_y"));
+      displacements.push_back(getParam<VariableName>("disp_y"));
       if (isParamValid("disp_z"))
-        displacements.push_back(getParam<NonlinearVariableName>("disp_z"));
+        displacements.push_back(getParam<VariableName>("disp_z"));
     }
   }
 

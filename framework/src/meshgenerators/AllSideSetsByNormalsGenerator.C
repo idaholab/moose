@@ -12,12 +12,14 @@
 #include "InputParameters.h"
 #include "CastUniquePointer.h"
 
+#include "libmesh/fe_base.h"
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/elem.h"
 
 #include <typeinfo>
 

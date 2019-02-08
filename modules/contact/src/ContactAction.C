@@ -38,11 +38,11 @@ validParams<ContactAction>()
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
 
-  params.addParam<NonlinearVariableName>("disp_x", "The x displacement");
-  params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
-  params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
+  params.addParam<VariableName>("disp_x", "The x displacement");
+  params.addParam<VariableName>("disp_y", "The y displacement");
+  params.addParam<VariableName>("disp_z", "The z displacement");
 
-  params.addParam<std::vector<NonlinearVariableName>>(
+  params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
@@ -125,21 +125,21 @@ ContactAction::act()
 
   std::string action_name = MooseUtils::shortName(name());
 
-  std::vector<NonlinearVariableName> displacements;
+  std::vector<VariableName> displacements;
   if (isParamValid("displacements"))
-    displacements = getParam<std::vector<NonlinearVariableName>>("displacements");
+    displacements = getParam<std::vector<VariableName>>("displacements");
   else
   {
     // Legacy parameter scheme for displacements
     if (!isParamValid("disp_x"))
       mooseError("Specify displacement variables using the `displacements` parameter.");
-    displacements.push_back(getParam<NonlinearVariableName>("disp_x"));
+    displacements.push_back(getParam<VariableName>("disp_x"));
 
     if (isParamValid("disp_y"))
     {
-      displacements.push_back(getParam<NonlinearVariableName>("disp_y"));
+      displacements.push_back(getParam<VariableName>("disp_y"));
       if (isParamValid("disp_z"))
-        displacements.push_back(getParam<NonlinearVariableName>("disp_z"));
+        displacements.push_back(getParam<VariableName>("disp_z"));
     }
 
     mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
@@ -149,7 +149,7 @@ ContactAction::act()
   // Determine number of dimensions
   const unsigned int ndisp = displacements.size();
 
-  // convert vector of NonlinearVariableName to vector of VariableName
+  // convert vector of VariableName to vector of VariableName
   std::vector<VariableName> coupled_displacements(ndisp);
   for (unsigned int i = 0; i < ndisp; ++i)
     coupled_displacements[i] = displacements[i];

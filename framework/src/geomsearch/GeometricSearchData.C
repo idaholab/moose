@@ -16,6 +16,9 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
+
 static const unsigned int MORTAR_BASE_ID = 2e6;
 
 GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh)

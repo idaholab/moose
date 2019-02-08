@@ -213,12 +213,12 @@ PorousFlowAqueousPreDisChemistry::PorousFlowAqueousPreDisChemistry(
   for (unsigned i = 0; i < _num_primary; ++i)
   {
     _primary_var_num[i] = coupled("primary_concentrations", i);
-    _primary[i] = (_nodal_material ? &coupledNodalValue("primary_concentrations", i)
+    _primary[i] = (_nodal_material ? &coupledDofValues("primary_concentrations", i)
                                    : &coupledValue("primary_concentrations", i));
   }
 
   for (unsigned i = 0; i < _num_equilibrium_constants; ++i)
-    _equilibrium_constants[i] = (_nodal_material ? &coupledNodalValue("equilibrium_constants", i)
+    _equilibrium_constants[i] = (_nodal_material ? &coupledDofValues("equilibrium_constants", i)
                                                  : &coupledValue("equilibrium_constants", i));
 }
 

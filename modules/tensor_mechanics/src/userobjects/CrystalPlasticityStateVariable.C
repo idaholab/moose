@@ -51,7 +51,6 @@ CrystalPlasticityStateVariable::CrystalPlasticityStateVariable(const InputParame
     _num_mat_state_var_evol_rate_comps(
         parameters.get<std::vector<std::string>>("uo_state_var_evol_rate_comp_name").size()),
     _mat_prop_state_var(getMaterialProperty<std::vector<Real>>(_name)),
-    _mat_prop_state_var_old(getMaterialPropertyOld<std::vector<Real>>(_name)),
     _state_variable_file_name(getParam<FileName>("state_variable_file_name")),
     _intvar_read_type(getParam<MooseEnum>("intvar_read_type")),
     _groups(getParam<std::vector<unsigned int>>("groups")),
@@ -151,7 +150,8 @@ CrystalPlasticityStateVariable::provideInitialValueByUser(std::vector<Real> & /*
 bool
 CrystalPlasticityStateVariable::updateStateVariable(unsigned int qp,
                                                     Real dt,
-                                                    std::vector<Real> & val) const
+                                                    std::vector<Real> & val,
+                                                    std::vector<Real> & val_old) const
 {
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
@@ -162,10 +162,10 @@ CrystalPlasticityStateVariable::updateStateVariable(unsigned int qp,
 
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
-    if (_mat_prop_state_var_old[qp][i] < _zero && val[i] < 0.0)
-      val[i] = _mat_prop_state_var_old[qp][i];
+    if (val_old[i] < _zero && val[i] < 0.0)
+      val[i] = val_old[i];
     else
-      val[i] = _mat_prop_state_var_old[qp][i] + val[i];
+      val[i] = val_old[i] + val[i];
 
     if (val[i] < 0.0)
       return false;

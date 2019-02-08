@@ -245,7 +245,7 @@ DT2::rejectStep()
 }
 
 bool
-DT2::converged()
+DT2::converged() const
 {
   if (!_converged)
     return false;

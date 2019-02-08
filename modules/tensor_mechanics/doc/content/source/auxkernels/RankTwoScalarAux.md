@@ -127,7 +127,7 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 ### First Invariant
 
 The scalar type `FirstInvariant` calculates the first invariant of the specified Rank-2 tensor,
-$T_{ij}$, according to [eq:first_invariant_scalar_type] from [cite:malvern1969introduction].
+$T_{ij}$, according to [eq:first_invariant_scalar_type] from [cite!malvern1969introduction].
 \begin{equation}
 \label{eq:first_invariant_scalar_type}
 I_T = Tr \left( T_{ij} \right) = T_{ii}
@@ -147,7 +147,7 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 
 Similarly, the scalar type `SecondInvariant` finds the second invariant of the Rank-2 tensor,
 $T_{ij}$, as shown in [eq:second_invariant_scalar_type].
-This method is defined in [cite:hjelmstad2007fundamentals].
+This method is defined in [cite!hjelmstad2007fundamentals].
 \begin{equation}
 \label{eq:second_invariant_scalar_type}
 II_T = T_{ii} T_{jj} - \frac{1}{2} \left( T_{ij} T_{ij} + T_{ji} T_{ji} \right)
@@ -167,7 +167,7 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 ### Third Invariant
 
 The scalar type `ThirdInvariant` computes the value of the Rank-2 tensor, $T_ij$, third invariant as
-given in [eq:third_invariant_scalar_type] from [cite:malvern1969introduction].
+given in [eq:third_invariant_scalar_type] from [cite!malvern1969introduction].
 \begin{equation}
 \label{eq:third_invariant_scalar_type}
 III_T = det \left( T_{ij} \right)  = \frac{1}{6} e_{ijk} e_{pqr} T_{ip} T_{jq} T_{kr}
@@ -192,6 +192,26 @@ The scalar type `L2Norm` calculates the L2 normal of a Rank-2 tensor, $T_{ij}$, 
 \label{eq:l2_norm_scalar_type}
 s = \sqrt{T_{ij} T_{ij}}
 \end{equation}
+
+## Maximum Shear Stress
+
+The scalar type `MaxShear` calculates the maximum shear stress for a Rank-2 tensor, as shown in
+[eq:maxshear_scalar_type].
+\begin{equation}
+\label{eq:maxshear_scalar_type}
+\sigma_{max}^{shear} = \frac{\sigma_{max}^{principal} - \sigma_{min}^{principal}}{2}
+\end{equation}
+
+#### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxKernels/max_shear
+
+An AuxVariable is required to store the AuxKernel information. Note that the name of the AuxVariable
+is used as the argument for the `variable` input parameter in the `RankTwoScalarAux` block.
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxVariables/max_shear
 
 ## Principal Values
 
@@ -266,6 +286,29 @@ is used as the argument for the `variable` input parameter in the `RankTwoScalar
 
 !listing modules/porous_flow/test/tests/thm_rehbinder/free_outer.i
          block=AuxVariables/stress_rr
+
+## Stress Intensity
+
+The scalar type `StressIntensity` calculates the stress intensity for a Rank-2 tensor, as shown in
+[eq:sint_scalar_type].
+\begin{equation}
+\label{eq:sint_scalar_type}
+s = 2 \sigma_{max}^{shear} = \sigma_{max}^{principal} - \sigma_{min}^{principal}
+\end{equation}
+
+This quantity is useful in evaluating whether a Tresca failure criteria has
+been met and is two times the MaxShear quantity.
+
+#### Example Input File Syntax
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxKernels/sint
+
+An AuxVariable is required to store the AuxKernel information. Note that the name of the AuxVariable
+is used as the argument for the `variable` input parameter in the `RankTwoScalarAux` block.
+
+!listing modules/tensor_mechanics/test/tests/elastic_patch/elastic_patch.i
+         block=AuxVariables/sint
 
 ## Triaxiality Stress
 

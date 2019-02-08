@@ -26,7 +26,7 @@ public:
 protected:
   virtual void execute() override;
 
-  const DenseVector<Number> & _elemental_sln;
+  const VariableValue & _elemental_sln;
 };
 
 #endif // ELEMENTMOMENTSUM_H

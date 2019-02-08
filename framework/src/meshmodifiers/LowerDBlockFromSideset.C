@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/elem.h"
 
 #include <set>
 

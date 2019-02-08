@@ -10,6 +10,8 @@
 #include "BoundingBoxNodeSet.h"
 #include "MooseMesh.h"
 
+#include "libmesh/node.h"
+
 registerMooseObject("MooseApp", BoundingBoxNodeSet);
 
 template <>

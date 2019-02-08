@@ -18,7 +18,7 @@ import anytree
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions, mixins
-from MooseDocs.tree import html, latex, base, pages, tokens
+from MooseDocs.tree import html, latex, pages, tokens
 
 LOG = logging.getLogger(__name__)
 
@@ -80,10 +80,16 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
 
         except Exception as e: #pylint: disable=broad-except
             el = None
+            if token.info is not None:
+                line = token.info.line
+                src = token.info[0]
+            else:
+                line = None
+                src = ''
             msg = common.report_error(e.message,
                                       page.source,
-                                      token.info.line,
-                                      token.info[0],
+                                      line,
+                                      src,
                                       traceback.format_exc(),
                                       u'RENDER ERROR')
             with MooseDocs.base.translators.Translator.LOCK:
@@ -92,18 +98,6 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         if el is not None:
             for child in token.children:
                 self.render(el, child, page)
-
-    def preExecute(self, root):
-        """
-        Called by Translator prior to beginning conversion, after reading.
-        """
-        pass
-
-    def postExecute(self, result):
-        """
-        Called by Translator after all conversion is complete, prior to writing.
-        """
-        pass
 
     def preRender(self, result, page, meta):
         """
@@ -317,94 +311,35 @@ class LatexRenderer(Renderer):
     EXTENSION = '.tex'
 
     def __init__(self, *args, **kwargs):
-        self._packages = set()
+        self._packages = dict()
+        self._preamble = list()
         Renderer.__init__(self, *args, **kwargs)
 
     def getRoot(self):
         """
         Return LaTeX root node.
         """
-        return base.NodeBase(None, None)
+        return latex.LatexBase(None, None)
 
-    def postExecute(self, result):
+    def addPackage(self, pkg, *args, **kwargs):
         """
-        Combines all the LaTeX files into a single file.
-
-        Organizing the files is still a work in progress.
+        Add a LaTeX package to the list of packages for rendering (see pdf.py)
         """
-        def sort_node(node):
-            """Helper to organize nodes files then directories."""
-            files = []
-            dirs = []
-            for child in node.children:
-                child.parent = None
-                if isinstance(child, pages.Directory):
-                    dirs.append(child)
-                else:
-                    files.append(child)
-                sort_node(child)
+        self._packages[pkg] = (args, kwargs)
 
-            for child in files:
-                child.parent = node
-            for child in dirs:
-                child.parent = node
+    def getPackages(self):
+        """Return the set of packages and settings."""
+        return self._packages
 
-        #root = self.translator.root
-        #sort_node(root)
-
-        #main = self._processPages(root)
-        #loc = self.translator['destination']
-        #with open(os.path.join(loc, 'main.tex'), 'w+') as fid:
-        #    fid.write(main.write())
-
-        #main_tex = os.path.join(loc, 'main.tex')
-        #LOG.info("Building complete LaTeX document: %s", main_tex)
-        #cmd = ['pdflatex', '-halt-on-error', main_tex]
-        #try:
-        #    subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT)
-        #except subprocess.CalledProcessError as e:
-        #    msg = 'Failed to run command: {}'
-        #    raise exceptions.MooseDocsException(msg, ' '.join(cmd), error=e.output)
-
-
-    def addPackage(self, *args):
+    def addPreamble(self, node):
         """
-        Add a LaTeX package to the list of packages for rendering.
+        Add a string to the preamble (see pdf.py).
         """
-        self._packages.update(args)
+        self._preamble.append(node)
 
-    def _processPages(self, root):
-        """
-        Build a main latex file that includes the others.
-        """
-
-        main = base.NodeBase(None, None)
-        latex.Command(main, 'documentclass', string=u'report', end='')
-        for package in self._packages:
-            latex.Command(main, 'usepackage', string=package, start='\n', end='')
-
-        func = lambda n: isinstance(n, pages.Source)
-        nodes = [n for n in anytree.PreOrderIter(root, filter_=func)]
-        for node in nodes:
-
-            # If the parallel implementation was better this would not be needed.
-            node.tokenize()
-            node.render(node.ast)
-
-            if node.depth == 1:
-                title = latex.Command(main, 'title', start='\n')
-                for child in node.result.children[0]:#[0].children:
-                    child.parent = title
-                node.result.children[0].parent = None
-
-        doc = latex.Environment(main, 'document', end='\n')
-        latex.Command(doc, 'maketitle')
-        for node in nodes:
-            node.write()
-            cmd = latex.Command(doc, 'input', start='\n')
-            latex.String(cmd, content=unicode(node.destination), escape=False)
-
-        return main
+    def getPreamble(self):
+        """Return the list of preamble strings."""
+        return self._preamble
 
 class JSONRenderer(Renderer):
     """

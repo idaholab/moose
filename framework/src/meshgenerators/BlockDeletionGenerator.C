@@ -9,6 +9,8 @@
 
 #include "BlockDeletionGenerator.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", BlockDeletionGenerator);
 
 template <>

@@ -17,6 +17,7 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
+#include "libmesh/explicit_system.h"
 
 template <>
 InputParameters

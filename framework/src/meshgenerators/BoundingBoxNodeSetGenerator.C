@@ -11,6 +11,8 @@
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
+#include "libmesh/node.h"
+
 registerMooseObject("MooseApp", BoundingBoxNodeSetGenerator);
 
 template <>

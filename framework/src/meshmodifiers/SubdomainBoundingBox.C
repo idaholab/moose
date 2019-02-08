@@ -11,6 +11,8 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", SubdomainBoundingBox);
 
 template <>

@@ -77,16 +77,6 @@
     requirement = 'If tecplot api is not available, tecplot output will be given in ASCII format'
   [../]
 
-  [./dump_test]
-    type = 'RunApp'
-    input = 'IGNORED'
-    expect_out = 'type\s*=\s*ADDiffusion' 
-    cli_args = '--dump'
-    issues = '#1404 #1131'
-    design = 'command_line_usage.md'
-    requirement = 'We shall be able to dump the possible input file syntax for a given MOOSE application'
-  [../]
-
   [./gnuplot_ps_out_test]
     type = 'CheckFiles'
     input = 'output_test_gnuplot_ps.i'

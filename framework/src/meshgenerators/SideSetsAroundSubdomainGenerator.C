@@ -15,6 +15,8 @@
 
 #include "libmesh/mesh.h"
 #include "libmesh/remote_elem.h"
+#include "libmesh/point.h"
+#include "libmesh/fe_base.h"
 
 registerMooseObject("MooseApp", SideSetsAroundSubdomainGenerator);
 

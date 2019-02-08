@@ -25,7 +25,10 @@ class CrystalPlasticityStateVariable : public CrystalPlasticityUOBase
 public:
   CrystalPlasticityStateVariable(const InputParameters & parameters);
 
-  virtual bool updateStateVariable(unsigned int qp, Real dt, std::vector<Real> & val) const;
+  virtual bool updateStateVariable(unsigned int qp,
+                                   Real dt,
+                                   std::vector<Real> & val,
+                                   std::vector<Real> & val_old) const;
   virtual void initSlipSysProps(std::vector<Real> & val, const Point & q_point) const;
 
 protected:
@@ -41,7 +44,6 @@ protected:
   std::vector<const MaterialProperty<std::vector<Real>> *> _mat_prop_state_var_evol_rate_comps;
 
   const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
-  const MaterialProperty<std::vector<Real>> & _mat_prop_state_var_old;
 
   /// File should contain initial values of the state variable.
   FileName _state_variable_file_name;

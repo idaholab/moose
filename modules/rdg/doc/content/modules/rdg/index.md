@@ -192,7 +192,7 @@ severely as minmod near a discontinuity.
 ### Superbee Slope Limiter
 
 One choice of limiter that gives the sharper reconstruction, while still giving second order accuracy
-for smooth solutions, is the so-called *superbee* limiter introduced by [cite:roe1985some]:
+for smooth solutions, is the so-called *superbee* limiter introduced by [cite!roe1985some]:
 \begin{equation}
 \label{eq:superbee-limiter}
 \phi_i={\rm maxmod}(\phi^{(1)}_i,\phi^{(2)}_i),
@@ -226,7 +226,7 @@ it tends to steepen smooth transitions near inflection points.
 
 ### MC Slope Limiter
 
-Another popular choice is the *monotonized central-difference limiter* (MC limiter), which was proposed by [cite:van1977towards]:
+Another popular choice is the *monotonized central-difference limiter* (MC limiter), which was proposed by [cite!van1977towards]:
 \begin{equation}
 \label{eq:mc-limiter}
 \phi_i = {\rm minmod}

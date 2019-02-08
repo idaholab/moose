@@ -21,8 +21,8 @@ validParams<CavityPressureAction>()
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
-      "displacements", "The nonlinear displacement variables");
+  params.addRequiredParam<std::vector<VariableName>>("displacements",
+                                                     "The nonlinear displacement variables");
   params.addParam<std::vector<AuxVariableName>>(
       "save_in", "Auxiliary variables to save the displacement residuals");
   params.addParam<std::string>("output", "The name to use for the cavity pressure value");
@@ -36,7 +36,7 @@ CavityPressureAction::CavityPressureAction(const InputParameters & params) : Act
 void
 CavityPressureAction::act()
 {
-  auto displacements = getParam<std::vector<NonlinearVariableName>>("displacements");
+  auto displacements = getParam<std::vector<VariableName>>("displacements");
   auto save_in = getParam<std::vector<AuxVariableName>>("save_in");
 
   unsigned int ndisp = displacements.size();

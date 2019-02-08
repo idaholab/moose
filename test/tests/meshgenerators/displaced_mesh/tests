@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'displaced_mesh.i'
+    exodiff = 'displaced_mesh_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    requirement = "The MeshGenerator system shall work with displaced mesh"
+    design = 'MeshGenerators/index.md'
+    issues = '#12712'
+  [../]
+[]

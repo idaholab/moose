@@ -307,20 +307,6 @@ Water97FluidProperties::e_from_p_T(
   de_dT = dinternal_energy_dT;
 }
 
-void
-Water97FluidProperties::rho_e_dpT(Real pressure,
-                                  Real temperature,
-                                  Real & rho,
-                                  Real & drho_dp,
-                                  Real & drho_dT,
-                                  Real & e,
-                                  Real & de_dp,
-                                  Real & de_dT) const
-{
-  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
-  e_from_p_T(pressure, temperature, e, de_dp, de_dT);
-}
-
 Real
 Water97FluidProperties::c_from_p_T(Real pressure, Real temperature) const
 {
@@ -494,7 +480,7 @@ Water97FluidProperties::mu_from_p_T(
   Real rho, drho_dp, drho_dT;
   this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   Real dmu_drho;
-  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  this->mu_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
   dmu_dp = dmu_drho * drho_dp;
 }
 
@@ -525,12 +511,12 @@ Water97FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 }
 
 void
-Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
-                                            Real temperature,
-                                            Real ddensity_dT,
-                                            Real & mu,
-                                            Real & dmu_drho,
-                                            Real & dmu_dT) const
+Water97FluidProperties::mu_from_rho_T(Real density,
+                                      Real temperature,
+                                      Real ddensity_dT,
+                                      Real & mu,
+                                      Real & dmu_drho,
+                                      Real & dmu_dT) const
 {
   Real mu_star = 1.0e-6;
   Real rhobar = density / _rho_critical;
@@ -573,25 +559,28 @@ Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
 }
 
 void
-Water97FluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
+Water97FluidProperties::rho_mu_from_p_T(Real pressure,
+                                        Real temperature,
+                                        Real & rho,
+                                        Real & mu) const
 {
   rho = this->rho_from_p_T(pressure, temperature);
   mu = this->mu_from_rho_T(rho, temperature);
 }
 
 void
-Water97FluidProperties::rho_mu_dpT(Real pressure,
-                                   Real temperature,
-                                   Real & rho,
-                                   Real & drho_dp,
-                                   Real & drho_dT,
-                                   Real & mu,
-                                   Real & dmu_dp,
-                                   Real & dmu_dT) const
+Water97FluidProperties::rho_mu_from_p_T(Real pressure,
+                                        Real temperature,
+                                        Real & rho,
+                                        Real & drho_dp,
+                                        Real & drho_dT,
+                                        Real & mu,
+                                        Real & dmu_dp,
+                                        Real & dmu_dT) const
 {
   this->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
   Real dmu_drho;
-  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  this->mu_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
   dmu_dp = dmu_drho * drho_dp;
 }
 
@@ -603,10 +592,9 @@ Water97FluidProperties::k_from_p_T(Real pressure, Real temperature) const
 }
 
 void
-Water97FluidProperties::k_from_p_T(
-    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
+Water97FluidProperties::k_from_p_T(Real, Real, Real &, Real &, Real &) const
 {
-  mooseError(name(), "k_dpT() is not implemented");
+  mooseError(name(), ": k_from_p_T() is not implemented.");
 }
 
 Real
@@ -816,12 +804,12 @@ Water97FluidProperties::vaporPressure(Real temperature) const
 }
 
 void
-Water97FluidProperties::vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const
+Water97FluidProperties::vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const
 {
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
-    throw MooseException(name() + ": vaporPressure_dT(): Temperature is outside range 273.15 K <= "
+    throw MooseException(name() + ": vaporPressure(): Temperature is outside range 273.15 K <= "
                                   "T <= 647.096 K");
 
   Real theta, dtheta_dT, theta2, a, b, c, da_dtheta, db_dtheta, dc_dtheta;

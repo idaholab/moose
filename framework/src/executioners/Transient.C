@@ -112,39 +112,6 @@ validParams<Transient>()
                         "default) then the minimum over the master dt "
                         "and the MultiApps is used");
 
-  params.addParam<unsigned int>(
-      "picard_max_its",
-      1,
-      "Maximum number of times each timestep will be solved.  Mainly used when "
-      "wanting to do Picard iterations with MultiApps that are set to "
-      "execute_on timestep_end or timestep_begin. Setting this parameter to 1 turns off the Picard "
-      "iterations.");
-  params.addParam<Real>("picard_rel_tol",
-                        1e-8,
-                        "The relative nonlinear residual drop to shoot for "
-                        "during Picard iterations.  This check is "
-                        "performed based on the Master app's nonlinear "
-                        "residual.");
-  params.addParam<Real>("picard_abs_tol",
-                        1e-50,
-                        "The absolute nonlinear residual to shoot for "
-                        "during Picard iterations.  This check is "
-                        "performed based on the Master app's nonlinear "
-                        "residual.");
-  params.addParam<bool>(
-      "picard_force_norms",
-      false,
-      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existance of active MultiApps with those execute_on flags, default: false.");
-
-  params.addParam<Real>("relaxation_factor",
-                        1.0,
-                        "Fraction of newly computed value to keep."
-                        "Set between 0 and 2.");
-  params.addParam<std::vector<std::string>>("relaxed_variables",
-                                            std::vector<std::string>(),
-                                            "List of variables to relax during Picard Iteration");
-
   params.addParamNamesToGroup(
       "steady_state_detection steady_state_tolerance steady_state_start_time",
       "Steady State Detection");
@@ -155,19 +122,7 @@ validParams<Transient>()
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
-  params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol picard_force_norms "
-                              "relaxation_factor relaxed_variables",
-                              "Picard");
-
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
-  params.addParam<unsigned int>(
-      "max_xfem_update",
-      std::numeric_limits<unsigned int>::max(),
-      "Maximum number of times to update XFEM crack topology in a step due to evolving cracks");
-  params.addParam<bool>("update_xfem_at_timestep_begin",
-                        false,
-                        "Should XFEM update the mesh at the beginning of the timestep");
-
   return params;
 }
 
@@ -183,7 +138,6 @@ Transient::Transient(const InputParameters & parameters)
     _dt_old(_problem.dtOld()),
     _unconstrained_dt(declareRecoverableData<Real>("unconstrained_dt", -1)),
     _at_sync_point(declareRecoverableData<bool>("at_sync_point", false)),
-    _first(declareRecoverableData<bool>("first", true)),
     _multiapps_converged(declareRecoverableData<bool>("multiapps_converged", true)),
     _last_solve_converged(declareRecoverableData<bool>("last_solve_converged", true)),
     _xfem_repeat_step(false),
@@ -208,21 +162,8 @@ Transient::Transient(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -1)),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _picard_it(declareRecoverableData<unsigned int>("picard_it", 0)),
-    _picard_max_its(getParam<unsigned int>("picard_max_its")),
-    _picard_converged(declareRecoverableData<bool>("picard_converged", false)),
-    _picard_initial_norm(declareRecoverableData<Real>("picard_initial_norm", 0.0)),
-    _picard_timestep_begin_norm(
-        declareRecoverableData<std::vector<Real>>("picard_timestep_begin_norm")),
-    _picard_timestep_end_norm(
-        declareRecoverableData<std::vector<Real>>("picard_timestep_end_norm")),
-    _picard_rel_tol(getParam<Real>("picard_rel_tol")),
-    _picard_abs_tol(getParam<Real>("picard_abs_tol")),
-    _picard_force_norms(getParam<bool>("picard_force_norms")),
     _verbose(getParam<bool>("verbose")),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
-    _relax_factor(getParam<Real>("relaxation_factor")),
-    _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables")),
     _final_timer(registerTimedSection("final", 1))
 {
   // Handle deprecated parameters
@@ -263,19 +204,6 @@ Transient::Transient(const InputParameters & parameters)
     if (_num_steps == 0) // Always do one step in the first half
       _num_steps = 1;
   }
-
-  // Set up relaxation
-  if (_relax_factor != 1.0)
-  {
-    if (_relax_factor >= 2.0 || _relax_factor <= 0.0)
-      mooseError("The Picard iteration relaxation factor should be between 0.0 and 2.0");
-
-    // Store a copy of the previous solution here
-    _nl.addVector("relax_previous", false, PARALLEL);
-  }
-  // This lets us know if we are at Picard iteration > 0, works for both master- AND sub-app.
-  // Initialize such that _prev_time != _time for the first Picard iteration
-  _prev_time = _time - 1.0;
 }
 
 void
@@ -371,18 +299,12 @@ Transient::execute()
   // in the future eventually.
   if (!_app.isRecovering())
     _problem.advanceState();
+  else
+    incrementStepOrReject();
 
   // Start time loop...
-  while (true)
+  while (keepGoing())
   {
-    if (_first != true)
-      incrementStepOrReject();
-
-    _first = false;
-
-    if (!keepGoing())
-      break;
-
     preStep();
     computeDT();
     takeStep();
@@ -390,6 +312,8 @@ Transient::execute()
     postStep();
 
     _steps_taken++;
+
+    incrementStepOrReject();
   }
 
   if (!_app.halfTransient())
@@ -429,7 +353,7 @@ Transient::incrementStepOrReject()
       _problem.adaptMesh();
 #endif
 
-      _time_old = _time; // = _time_old + _dt;
+      _time_old = _time;
       _t_step++;
 
       _problem.advanceState();
@@ -440,7 +364,7 @@ Transient::incrementStepOrReject()
        * loose coupling because Transient::endStep and Transient::postStep get
        * called from TransientMultiApp::solveStep in that case.
        */
-      if (_picard_max_its > 1)
+      if (_picard_solve.hasPicardIteration())
       {
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
@@ -461,41 +385,10 @@ Transient::incrementStepOrReject()
     _time_stepper->rejectStep();
     _time = _time_old;
   }
-
-  _first = false;
 }
 
 void
 Transient::takeStep(Real input_dt)
-{
-  _picard_it = 0;
-
-  _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
-  _problem.backupMultiApps(EXEC_TIMESTEP_END);
-
-  while (_picard_it < _picard_max_its && _picard_converged == false)
-  {
-    // For every iteration other than the first, we need to restore the state of the MultiApps
-    if (_picard_it > 0)
-    {
-      _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
-      _problem.restoreMultiApps(EXEC_TIMESTEP_END);
-    }
-
-    solveStep(input_dt);
-
-    // If the last solve didn't converge then we need to exit this step completely (even in the case
-    // of Picard)
-    // So we can retry...
-    if (!lastSolveConverged())
-      return;
-
-    ++_picard_it;
-  }
-}
-
-void
-Transient::solveStep(Real input_dt)
 {
   _dt_old = _dt;
 
@@ -504,212 +397,36 @@ Transient::solveStep(Real input_dt)
   else
     _dt = input_dt;
 
-  Real current_dt = _dt;
-
-  if (_picard_it == 0)
-    _problem.onTimestepBegin();
+  _time_stepper->preSolve();
 
   // Increment time
   _time = _time_old + _dt;
 
-  if (_picard_max_its > 1)
-  {
-    _console << COLOR_MAGENTA << "Beginning Picard Iteration " << _picard_it << COLOR_DEFAULT
-             << '\n';
-
-    if (_picard_it == 0) // First Picard iteration - need to save off the initial nonlinear residual
-    {
-      _picard_timestep_begin_norm.assign(_picard_max_its, 0);
-      _picard_timestep_end_norm.assign(_picard_max_its, 0);
-
-      _picard_initial_norm = _problem.computeResidualL2Norm();
-      _console << COLOR_MAGENTA << "Initial Picard Norm: " << COLOR_DEFAULT;
-      if (_picard_initial_norm == std::numeric_limits<Real>::max())
-        _console << " MAX ";
-      else
-        _console << std::scientific << _picard_initial_norm;
-      _console << COLOR_DEFAULT << '\n';
-    }
-  }
-
-  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-  _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
-
-  if (!_multiapps_converged)
-    return;
-
-  if (_problem.haveXFEM() && _update_xfem_at_timestep_begin)
-    _problem.updateMeshXFEM();
-
-  preSolve();
-  _time_stepper->preSolve();
-
   _problem.timestepSetup();
 
-  _problem.execute(EXEC_TIMESTEP_BEGIN);
-
-  if (_picard_max_its > 1 && (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _picard_force_norms))
-  {
-    _picard_timestep_begin_norm[_picard_it] = _problem.computeResidualL2Norm();
-
-    _console << COLOR_MAGENTA << "Picard Norm after TIMESTEP_BEGIN MultiApps: "
-             << Console::outputNorm(_picard_it > 0 ? _picard_timestep_begin_norm[_picard_it - 1]
-                                                   : std::numeric_limits<Real>::max(),
-                                    _picard_timestep_begin_norm[_picard_it])
-             << '\n';
-  }
-
-  // Perform output for timestep begin
-  _problem.outputStep(EXEC_TIMESTEP_BEGIN);
-
-  // Update warehouse active objects
-  _problem.updateActiveObjects();
-
-  // Prepare to relax variables.
-  // _prev_time == _time is like _picard_it > 0, but it also works for the sub-app
-  if (_prev_time == _time && _relax_factor != 1.0)
-  {
-    NumericVector<Number> & solution = _nl.solution();
-    NumericVector<Number> & relax_previous = _nl.getVector("relax_previous");
-
-    // Save off the current solution
-    relax_previous = solution;
-
-    // Snag all of the local dof indices for all of these variables
-    System & libmesh_nl_system = _nl.system();
-    AllLocalDofIndicesThread aldit(libmesh_nl_system, _relaxed_vars);
-    ConstElemRange & elem_range = *_fe_problem.mesh().getActiveLocalElementRange();
-    Threads::parallel_reduce(elem_range, aldit);
-
-    _relaxed_dofs = aldit._all_dof_indices;
-  }
+  _problem.onTimestepBegin();
 
   _time_stepper->step();
+  _xfem_repeat_step = _picard_solve.XFEMRepeatStep();
 
-  // Relax the "relaxed_variables" if this is not the first Picard iteration of the timestep.
-  // _prev_time == _time is like _picard_it > 0, but it also works for the sub-app
-  if (_prev_time == _time && _relax_factor != 1.0)
+  _multiapps_converged = true;
+
+  if (!(_problem.haveXFEM() && _picard_solve.XFEMRepeatStep()))
   {
-    NumericVector<Number> & solution = _nl.solution();
-    NumericVector<Number> & relax_previous = _nl.getVector("relax_previous");
-    for (const auto & dof : _relaxed_dofs)
-      solution.set(dof,
-                   (relax_previous(dof) * (1.0 - _relax_factor)) + (solution(dof) * _relax_factor));
-    solution.close();
-    _nl.update();
-  }
-  // This keeps track of Picard iteration, even if this is the sub-app.
-  // It is used for relaxation logic
-  _prev_time = _time;
-
-  // We know whether or not the nonlinear solver thinks it converged, but we need to see if the
-  // executioner concurs
-  if (lastSolveConverged())
-  {
-    _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
-
-    if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
-    {
-      _console << "XFEM modifying mesh, repeating step" << std::endl;
-      _xfem_repeat_step = true;
-      ++_xfem_update_count;
-    }
+    if (lastSolveConverged())
+      _time_stepper->acceptStep();
     else
-    {
-      if (_problem.haveXFEM())
-      {
-        _xfem_repeat_step = false;
-        _xfem_update_count = 0;
-        _console << "XFEM not modifying mesh, continuing" << std::endl;
-      }
-
-      if (_picard_max_its <= 1)
-        _time_stepper->acceptStep();
-
-      _sln_diff_norm = relativeSolutionDifferenceNorm();
-      _solution_change_norm = _sln_diff_norm / _dt;
-
-      _problem.onTimestepEnd();
-      _problem.execute(EXEC_TIMESTEP_END);
-
-      _problem.execTransfers(EXEC_TIMESTEP_END);
-      _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_END, _picard_max_its == 1);
-
-      if (!_multiapps_converged)
-        return;
-    }
-  }
-  else
-  {
-    _console << COLOR_RED << " Solve Did NOT Converge!" << COLOR_DEFAULT << std::endl;
-
-    // Perform the output of the current, failed time step (this only occurs if desired)
-    _problem.outputStep(EXEC_FAILED);
+      _time_stepper->rejectStep();
   }
 
-  postSolve();
+  _time = _time_old;
+
   _time_stepper->postSolve();
 
-  if (_picard_max_its > 1 && lastSolveConverged())
-  {
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _picard_force_norms)
-    {
-      _picard_timestep_end_norm[_picard_it] = _problem.computeResidualL2Norm();
+  _sln_diff_norm = relativeSolutionDifferenceNorm();
+  _solution_change_norm = _sln_diff_norm / _dt;
 
-      _console << COLOR_MAGENTA << "Picard Norm after TIMESTEP_END MultiApps: "
-               << Console::outputNorm(_picard_it > 0 ? _picard_timestep_end_norm[_picard_it - 1]
-                                                     : std::numeric_limits<Real>::max(),
-                                      _picard_timestep_end_norm[_picard_it])
-               << '\n';
-    }
-
-    printPicardNorms();
-
-    if (picardConverged())
-    {
-      _console << COLOR_MAGENTA << "Picard converged!" << COLOR_DEFAULT << std::endl;
-
-      _picard_converged = true;
-      _time_stepper->acceptStep();
-      return;
-    }
-    else if (numPicardIts() == _picard_max_its)
-    {
-      _console << COLOR_RED << "Maximum number of Picard iterations reached! Reject time step."
-               << COLOR_DEFAULT << std::endl;
-      _time_stepper->rejectStep();
-      return;
-    }
-  }
-
-  _dt = current_dt; // _dt might be smaller than this at this point for multistep methods
-  _time = _time_old;
-}
-
-void
-Transient::printPicardNorms() const
-{
-  _console << "\n 0 Picard |R| = "
-           << Console::outputNorm(std::numeric_limits<Real>::max(), _picard_initial_norm) << '\n';
-
-  for (unsigned int i = 1; i < _picard_it; ++i)
-  {
-    Real max_norm = std::max(_picard_timestep_begin_norm[i], _picard_timestep_end_norm[i]);
-
-    _console << std::setw(2) << i
-             << " Picard |R| = " << Console::outputNorm(_picard_initial_norm, max_norm) << '\n';
-  }
-}
-
-bool
-Transient::picardConverged() const
-{
-  Real max_norm =
-      std::max(_picard_timestep_begin_norm[_picard_it], _picard_timestep_end_norm[_picard_it]);
-
-  Real max_relative_drop = max_norm / _picard_initial_norm;
-
-  return (max_norm < _picard_abs_tol || max_relative_drop < _picard_rel_tol);
+  return;
 }
 
 void
@@ -719,8 +436,6 @@ Transient::endStep(Real input_time)
     _time = _time_old + _dt;
   else
     _time = input_time;
-
-  _picard_converged = false;
 
   _last_solve_converged = lastSolveConverged();
 
@@ -875,9 +590,9 @@ Transient::estimateTimeError()
 }
 
 bool
-Transient::lastSolveConverged()
+Transient::lastSolveConverged() const
 {
-  return _multiapps_converged && _time_stepper->converged();
+  return _time_stepper->converged();
 }
 
 void

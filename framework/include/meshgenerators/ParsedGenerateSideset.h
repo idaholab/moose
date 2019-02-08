@@ -12,6 +12,7 @@
 
 #include "SideSetsGeneratorBase.h"
 #include "FunctionParserUtils.h"
+#include "libmesh/point.h"
 
 // Forward declarations
 class ParsedGenerateSideset;

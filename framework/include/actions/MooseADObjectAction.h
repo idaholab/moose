@@ -41,6 +41,8 @@ public:
    */
   const std::string & getMooseObjectType() const { return _type; }
 
+  void flagDoingAD();
+
 protected:
   /// The Object type that is being created
   std::string _type;

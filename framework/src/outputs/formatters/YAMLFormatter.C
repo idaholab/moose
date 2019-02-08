@@ -14,6 +14,9 @@
 #include "MultiMooseEnum.h"
 #include "Parser.h"
 
+#include "libmesh/vector_value.h"
+#include "libmesh/point.h"
+
 // C++ includes
 #include <sstream>
 #include <vector>

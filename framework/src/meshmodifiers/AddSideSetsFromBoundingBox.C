@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", AddSideSetsFromBoundingBox);
 
 template <>

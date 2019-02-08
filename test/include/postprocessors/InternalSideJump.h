@@ -32,8 +32,8 @@ public:
 protected:
   const Real & _current_elem_volume;
   const Real & _current_neighbor_volume;
-  const DenseVector<Number> & _sln_dofs;
-  const DenseVector<Number> & _sln_dofs_neig;
+  const VariableValue & _sln_dofs;
+  const VariableValue & _sln_dofs_neig;
   Real _integral_value;
 };
 

@@ -17,7 +17,10 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/fe_type.h"
-#include "libmesh/tensor_tools.h"
+#include "libmesh/point.h"
+
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
 
 // libMesh forward declarations
 namespace libMesh
@@ -25,6 +28,9 @@ namespace libMesh
 class DofMap;
 class CouplingMatrix;
 class Elem;
+template <typename>
+class VectorValue;
+typedef VectorValue<Real> RealVectorValue;
 template <typename T>
 class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
@@ -48,6 +54,7 @@ class MooseVariableScalar;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 class XFEMInterface;
+class SubProblem;
 
 /**
  * Keeps track of stuff related to assembling
@@ -227,6 +234,21 @@ public:
    */
   const MooseArray<Real> & JxW() { return _current_JxW; }
 
+  template <ComputeStage compute_stage>
+  const MooseArray<ADReal> & adJxW() const
+  {
+    return _ad_JxW;
+  }
+
+  template <ComputeStage compute_stage>
+  const MooseArray<ADReal> & adJxWFace() const
+  {
+    return _current_JxW_face;
+  }
+
+  template <ComputeStage compute_stage>
+  const MooseArray<ADReal> & adCurvatures() const;
+
   /**
    * Returns the reference to the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
@@ -262,6 +284,18 @@ public:
    * @return A _reference_.  Make sure to store this as a reference!
    */
   const MooseArray<Point> & normals() { return _current_normals; }
+
+  template <ComputeStage compute_stage>
+  const ADPoint & adNormals() const
+  {
+    return _current_normals;
+  }
+
+  template <ComputeStage compute_stage>
+  const ADPoint & adQPointsFace() const
+  {
+    return _current_q_points_face;
+  }
 
   /**
    * Return the current element
@@ -646,148 +680,178 @@ public:
 
   // Read-only references
   const VariablePhiValue & phi() const { return _phi; }
-  const VariablePhiValue & phi(MooseVariable &) const { return _phi; }
+  template <typename T, ComputeStage compute_stage>
+  const typename VariableTestGradientType<T, compute_stage>::type &
+  adGradPhi(const MooseVariableFE<T> & v) const
+  {
+    return gradPhi(v);
+  }
+  const VariablePhiValue & phi(const MooseVariable &) const { return _phi; }
   const VariablePhiGradient & gradPhi() const { return _grad_phi; }
-  const VariablePhiGradient & gradPhi(MooseVariable &) const { return _grad_phi; }
+  const VariablePhiGradient & gradPhi(const MooseVariable &) const { return _grad_phi; }
   const VariablePhiSecond & secondPhi() const { return _second_phi; }
-  const VariablePhiSecond & secondPhi(MooseVariable &) const { return _second_phi; }
+  const VariablePhiSecond & secondPhi(const MooseVariable &) const { return _second_phi; }
 
   const VariablePhiValue & phiFace() const { return _phi_face; }
-  const VariablePhiValue & phiFace(MooseVariable &) const { return _phi_face; }
+  const VariablePhiValue & phiFace(const MooseVariable &) const { return _phi_face; }
   const VariablePhiGradient & gradPhiFace() const { return _grad_phi_face; }
-  const VariablePhiGradient & gradPhiFace(MooseVariable &) const { return _grad_phi_face; }
-  const VariablePhiSecond & secondPhiFace(MooseVariable &) const { return _second_phi_face; }
+  const VariablePhiGradient & gradPhiFace(const MooseVariable &) const { return _grad_phi_face; }
+  const VariablePhiSecond & secondPhiFace(const MooseVariable &) const { return _second_phi_face; }
 
-  const VariablePhiValue & phiNeighbor(MooseVariable &) const { return _phi_neighbor; }
-  const VariablePhiGradient & gradPhiNeighbor(MooseVariable &) const { return _grad_phi_neighbor; }
-  const VariablePhiSecond & secondPhiNeighbor(MooseVariable &) const
+  const VariablePhiValue & phiNeighbor(const MooseVariable &) const { return _phi_neighbor; }
+  const VariablePhiGradient & gradPhiNeighbor(const MooseVariable &) const
+  {
+    return _grad_phi_neighbor;
+  }
+  const VariablePhiSecond & secondPhiNeighbor(const MooseVariable &) const
   {
     return _second_phi_neighbor;
   }
 
-  const VariablePhiValue & phiFaceNeighbor(MooseVariable &) const { return _phi_face_neighbor; }
-  const VariablePhiGradient & gradPhiFaceNeighbor(MooseVariable &) const
+  const VariablePhiValue & phiFaceNeighbor(const MooseVariable &) const
+  {
+    return _phi_face_neighbor;
+  }
+  const VariablePhiGradient & gradPhiFaceNeighbor(const MooseVariable &) const
   {
     return _grad_phi_face_neighbor;
   }
-  const VariablePhiSecond & secondPhiFaceNeighbor(MooseVariable &) const
+  const VariablePhiSecond & secondPhiFaceNeighbor(const MooseVariable &) const
   {
     return _second_phi_face_neighbor;
   }
 
-  const VectorVariablePhiValue & phi(VectorMooseVariable &) const { return _vector_phi; }
-  const VectorVariablePhiGradient & gradPhi(VectorMooseVariable &) const
+  const VectorVariablePhiValue & phi(const VectorMooseVariable &) const { return _vector_phi; }
+  const VectorVariablePhiGradient & gradPhi(const VectorMooseVariable &) const
   {
     return _vector_grad_phi;
   }
-  const VectorVariablePhiSecond & secondPhi(VectorMooseVariable &) const
+  const VectorVariablePhiSecond & secondPhi(const VectorMooseVariable &) const
   {
     return _vector_second_phi;
   }
-  const VectorVariablePhiCurl & curlPhi(VectorMooseVariable &) const { return _vector_curl_phi; }
+  const VectorVariablePhiCurl & curlPhi(const VectorMooseVariable &) const
+  {
+    return _vector_curl_phi;
+  }
 
-  const VectorVariablePhiValue & phiFace(VectorMooseVariable &) const { return _vector_phi_face; }
-  const VectorVariablePhiGradient & gradPhiFace(VectorMooseVariable &) const
+  const VectorVariablePhiValue & phiFace(const VectorMooseVariable &) const
+  {
+    return _vector_phi_face;
+  }
+  const VectorVariablePhiGradient & gradPhiFace(const VectorMooseVariable &) const
   {
     return _vector_grad_phi_face;
   }
-  const VectorVariablePhiSecond & secondPhiFace(VectorMooseVariable &) const
+  const VectorVariablePhiSecond & secondPhiFace(const VectorMooseVariable &) const
   {
     return _vector_second_phi_face;
   }
-  const VectorVariablePhiCurl & curlPhiFace(VectorMooseVariable &) const
+  const VectorVariablePhiCurl & curlPhiFace(const VectorMooseVariable &) const
   {
     return _vector_curl_phi_face;
   }
 
-  const VectorVariablePhiValue & phiNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiValue & phiNeighbor(const VectorMooseVariable &) const
   {
     return _vector_phi_neighbor;
   }
-  const VectorVariablePhiGradient & gradPhiNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiGradient & gradPhiNeighbor(const VectorMooseVariable &) const
   {
     return _vector_grad_phi_neighbor;
   }
-  const VectorVariablePhiSecond & secondPhiNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiSecond & secondPhiNeighbor(const VectorMooseVariable &) const
   {
     return _vector_second_phi_neighbor;
   }
-  const VectorVariablePhiCurl & curlPhiNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiCurl & curlPhiNeighbor(const VectorMooseVariable &) const
   {
     return _vector_curl_phi_neighbor;
   }
 
-  const VectorVariablePhiValue & phiFaceNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiValue & phiFaceNeighbor(const VectorMooseVariable &) const
   {
     return _vector_phi_face_neighbor;
   }
-  const VectorVariablePhiGradient & gradPhiFaceNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiGradient & gradPhiFaceNeighbor(const VectorMooseVariable &) const
   {
     return _vector_grad_phi_face_neighbor;
   }
-  const VectorVariablePhiSecond & secondPhiFaceNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiSecond & secondPhiFaceNeighbor(const VectorMooseVariable &) const
   {
     return _vector_second_phi_face_neighbor;
   }
-  const VectorVariablePhiCurl & curlPhiFaceNeighbor(VectorMooseVariable &) const
+  const VectorVariablePhiCurl & curlPhiFaceNeighbor(const VectorMooseVariable &) const
   {
     return _vector_curl_phi_face_neighbor;
   }
 
   // Writeable references
-  VariablePhiValue & phi(MooseVariable &) { return _phi; }
-  VariablePhiGradient & gradPhi(MooseVariable &) { return _grad_phi; }
-  VariablePhiSecond & secondPhi(MooseVariable &) { return _second_phi; }
+  VariablePhiValue & phi(const MooseVariable &) { return _phi; }
+  VariablePhiGradient & gradPhi(const MooseVariable &) { return _grad_phi; }
+  VariablePhiSecond & secondPhi(const MooseVariable &) { return _second_phi; }
 
-  VariablePhiValue & phiFace(MooseVariable &) { return _phi_face; }
-  VariablePhiGradient & gradPhiFace(MooseVariable &) { return _grad_phi_face; }
-  VariablePhiSecond & secondPhiFace(MooseVariable &) { return _second_phi_face; }
+  VariablePhiValue & phiFace(const MooseVariable &) { return _phi_face; }
+  VariablePhiGradient & gradPhiFace(const MooseVariable &) { return _grad_phi_face; }
+  VariablePhiSecond & secondPhiFace(const MooseVariable &) { return _second_phi_face; }
 
-  VariablePhiValue & phiNeighbor(MooseVariable &) { return _phi_neighbor; }
-  VariablePhiGradient & gradPhiNeighbor(MooseVariable &) { return _grad_phi_neighbor; }
-  VariablePhiSecond & secondPhiNeighbor(MooseVariable &) { return _second_phi_neighbor; }
+  VariablePhiValue & phiNeighbor(const MooseVariable &) { return _phi_neighbor; }
+  VariablePhiGradient & gradPhiNeighbor(const MooseVariable &) { return _grad_phi_neighbor; }
+  VariablePhiSecond & secondPhiNeighbor(const MooseVariable &) { return _second_phi_neighbor; }
 
-  VariablePhiValue & phiFaceNeighbor(MooseVariable &) { return _phi_face_neighbor; }
-  VariablePhiGradient & gradPhiFaceNeighbor(MooseVariable &) { return _grad_phi_face_neighbor; }
-  VariablePhiSecond & secondPhiFaceNeighbor(MooseVariable &) { return _second_phi_face_neighbor; }
+  VariablePhiValue & phiFaceNeighbor(const MooseVariable &) { return _phi_face_neighbor; }
+  VariablePhiGradient & gradPhiFaceNeighbor(const MooseVariable &)
+  {
+    return _grad_phi_face_neighbor;
+  }
+  VariablePhiSecond & secondPhiFaceNeighbor(const MooseVariable &)
+  {
+    return _second_phi_face_neighbor;
+  }
 
-  VectorVariablePhiValue & phi(VectorMooseVariable &) { return _vector_phi; }
-  VectorVariablePhiGradient & gradPhi(VectorMooseVariable &) { return _vector_grad_phi; }
-  VectorVariablePhiSecond & secondPhi(VectorMooseVariable &) { return _vector_second_phi; }
-  VectorVariablePhiCurl & curlPhi(VectorMooseVariable &) { return _vector_curl_phi; }
+  VectorVariablePhiValue & phi(const VectorMooseVariable &) { return _vector_phi; }
+  VectorVariablePhiGradient & gradPhi(const VectorMooseVariable &) { return _vector_grad_phi; }
+  VectorVariablePhiSecond & secondPhi(const VectorMooseVariable &) { return _vector_second_phi; }
+  VectorVariablePhiCurl & curlPhi(const VectorMooseVariable &) { return _vector_curl_phi; }
 
-  VectorVariablePhiValue & phiFace(VectorMooseVariable &) { return _vector_phi_face; }
-  VectorVariablePhiGradient & gradPhiFace(VectorMooseVariable &) { return _vector_grad_phi_face; }
-  VectorVariablePhiSecond & secondPhiFace(VectorMooseVariable &) { return _vector_second_phi_face; }
-  VectorVariablePhiCurl & curlPhiFace(VectorMooseVariable &) { return _vector_curl_phi_face; }
+  VectorVariablePhiValue & phiFace(const VectorMooseVariable &) { return _vector_phi_face; }
+  VectorVariablePhiGradient & gradPhiFace(const VectorMooseVariable &)
+  {
+    return _vector_grad_phi_face;
+  }
+  VectorVariablePhiSecond & secondPhiFace(const VectorMooseVariable &)
+  {
+    return _vector_second_phi_face;
+  }
+  VectorVariablePhiCurl & curlPhiFace(const VectorMooseVariable &) { return _vector_curl_phi_face; }
 
-  VectorVariablePhiValue & phiNeighbor(VectorMooseVariable &) { return _vector_phi_neighbor; }
-  VectorVariablePhiGradient & gradPhiNeighbor(VectorMooseVariable &)
+  VectorVariablePhiValue & phiNeighbor(const VectorMooseVariable &) { return _vector_phi_neighbor; }
+  VectorVariablePhiGradient & gradPhiNeighbor(const VectorMooseVariable &)
   {
     return _vector_grad_phi_neighbor;
   }
-  VectorVariablePhiSecond & secondPhiNeighbor(VectorMooseVariable &)
+  VectorVariablePhiSecond & secondPhiNeighbor(const VectorMooseVariable &)
   {
     return _vector_second_phi_neighbor;
   }
-  VectorVariablePhiCurl & curlPhiNeighbor(VectorMooseVariable &)
+  VectorVariablePhiCurl & curlPhiNeighbor(const VectorMooseVariable &)
   {
     return _vector_curl_phi_neighbor;
   }
 
-  VectorVariablePhiValue & phiFaceNeighbor(VectorMooseVariable &)
+  VectorVariablePhiValue & phiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_phi_face_neighbor;
   }
-  VectorVariablePhiGradient & gradPhiFaceNeighbor(VectorMooseVariable &)
+  VectorVariablePhiGradient & gradPhiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_grad_phi_face_neighbor;
   }
-  VectorVariablePhiSecond & secondPhiFaceNeighbor(VectorMooseVariable &)
+  VectorVariablePhiSecond & secondPhiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_second_phi_face_neighbor;
   }
-  VectorVariablePhiCurl & curlPhiFaceNeighbor(VectorMooseVariable &)
+  VectorVariablePhiCurl & curlPhiFaceNeighbor(const VectorMooseVariable &)
   {
     return _vector_curl_phi_face_neighbor;
   }
@@ -804,6 +868,13 @@ public:
   {
     buildFE(type);
     return _fe_shape_data[type]->_grad_phi;
+  }
+
+  template <typename OutputType>
+  const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
+  feADGradPhi(FEType type)
+  {
+    return _ad_grad_phi_data[type];
   }
 
   template <typename OutputType>
@@ -826,6 +897,13 @@ public:
   {
     buildFaceFE(type);
     return _fe_shape_data_face[type]->_grad_phi;
+  }
+
+  template <typename OutputType>
+  const typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type &
+  feADGradPhiFace(FEType type)
+  {
+    return _ad_grad_phi_data_face[type];
   }
 
   template <typename OutputType>
@@ -952,6 +1030,8 @@ public:
    */
   void setXFEM(std::shared_ptr<XFEMInterface> xfem) { _xfem = xfem; }
 
+  void assignDisplacements(std::vector<unsigned> && disp_numbers) { _displacements = disp_numbers; }
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -967,6 +1047,8 @@ protected:
    * @param side The side of the element we are reiniting on
    */
   void reinitFEFace(const Elem * elem, unsigned int side);
+
+  void computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem * side);
 
   void reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
@@ -1024,12 +1106,32 @@ protected:
    */
   void modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side = 0);
 
+  template <typename OutputType>
+  void computeGradPhiAD(
+      const Elem * elem,
+      unsigned int n_qp,
+      typename VariableTestGradientType<OutputType, ComputeStage::JACOBIAN>::type & grad_phi,
+      FEGenericBase<OutputType> * fe);
+  void resizeMappingObjects(unsigned int n_qp, unsigned int dim);
+  void computeAffineMapAD(const Elem * elem,
+                          const std::vector<Real> & qw,
+                          unsigned int n_qp,
+                          FEBase * fe);
+  void
+  computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
+
 protected:
   SystemBase & _sys;
+  SubProblem & _subproblem;
+
+  const bool _displaced;
 
   /// Coupling matrices
   const CouplingMatrix * _cm;
   const CouplingMatrix & _nonlocal_cm;
+
+  const bool & _computing_jacobian;
+
   /// Entries in the coupling matrix for field variables
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_ff_entry;
   /// Entries in the coupling matrix for field variables vs scalar variables
@@ -1284,6 +1386,15 @@ protected:
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_neighbor;
   std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
 
+  std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
+      _ad_grad_phi_data;
+  std::map<FEType, typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
+      _ad_vector_grad_phi_data;
+  std::map<FEType, typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type>
+      _ad_grad_phi_data_face;
+  std::map<FEType, typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type>
+      _ad_vector_grad_phi_data_face;
+
   /// Values cached by calling cacheResidual() (the first vector is for TIME vs NONTIME)
   std::vector<std::vector<Real>> _cached_residual_values;
 
@@ -1316,7 +1427,91 @@ protected:
   std::vector<std::vector<Real>> _cached_jacobian_contribution_vals;
   std::vector<std::vector<numeric_index_type>> _cached_jacobian_contribution_rows;
   std::vector<std::vector<numeric_index_type>> _cached_jacobian_contribution_cols;
+
+  /// AD quantities
+  std::vector<VectorValue<DualReal>> _ad_dxyzdxi_map;
+  std::vector<VectorValue<DualReal>> _ad_dxyzdeta_map;
+  std::vector<VectorValue<DualReal>> _ad_dxyzdzeta_map;
+  std::vector<VectorValue<DualReal>> _ad_d2xyzdxi2_map;
+  std::vector<VectorValue<DualReal>> _ad_d2xyzdxideta_map;
+  std::vector<VectorValue<DualReal>> _ad_d2xyzdeta2_map;
+  std::vector<DualReal> _ad_jac;
+  MooseArray<DualReal> _ad_JxW;
+  std::vector<DualReal> _ad_dxidx_map;
+  std::vector<DualReal> _ad_dxidy_map;
+  std::vector<DualReal> _ad_dxidz_map;
+  std::vector<DualReal> _ad_detadx_map;
+  std::vector<DualReal> _ad_detady_map;
+  std::vector<DualReal> _ad_detadz_map;
+  std::vector<DualReal> _ad_dzetadx_map;
+  std::vector<DualReal> _ad_dzetady_map;
+  std::vector<DualReal> _ad_dzetadz_map;
+
+  MooseArray<DualReal> _ad_JxW_face;
+  MooseArray<VectorValue<DualReal>> _ad_normals;
+  MooseArray<VectorValue<DualReal>> _ad_q_points_face;
+  MooseArray<Real> _curvatures;
+  MooseArray<DualReal> _ad_curvatures;
+
+  std::vector<unsigned> _displacements;
+
+  bool _calculate_face_xyz;
+  mutable bool _calculate_curvatures;
 };
+
+template <>
+inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
+Assembly::feADGradPhi<RealVectorValue>(FEType type)
+{
+  return _ad_vector_grad_phi_data[type];
+}
+
+template <>
+inline const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
+Assembly::feADGradPhiFace<RealVectorValue>(FEType type)
+{
+  return _ad_vector_grad_phi_data_face[type];
+}
+
+template <>
+inline void
+Assembly::computeGradPhiAD<RealVectorValue>(
+    const Elem *,
+    unsigned int,
+    typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &,
+    FEGenericBase<RealVectorValue> *)
+{
+  mooseError("Not implemented");
+}
+
+template <>
+inline const MooseArray<typename Moose::RealType<ComputeStage::JACOBIAN>::type> &
+Assembly::adCurvatures<ComputeStage::JACOBIAN>() const
+{
+  _calculate_curvatures = true;
+  return _ad_curvatures;
+}
+
+template <>
+inline const MooseArray<VectorValue<DualReal>> &
+Assembly::adNormals<ComputeStage::JACOBIAN>() const
+{
+  return _ad_normals;
+}
+
+template <>
+inline const typename PointType<ComputeStage::JACOBIAN>::type &
+Assembly::adQPointsFace<ComputeStage::JACOBIAN>() const
+{
+  return _ad_q_points_face;
+}
+
+template <>
+inline const MooseArray<DualReal> &
+Assembly::adJxWFace<ComputeStage::JACOBIAN>() const
+{
+  return _ad_JxW_face;
+}
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
@@ -1381,5 +1576,17 @@ Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type);
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
 Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type);
+
+template <>
+const typename VariableTestGradientType<Real, ComputeStage::JACOBIAN>::type &
+Assembly::adGradPhi<Real, ComputeStage::JACOBIAN>(const MooseVariableFE<Real> & v) const;
+
+template <>
+const typename VariableTestGradientType<RealVectorValue, ComputeStage::JACOBIAN>::type &
+Assembly::adGradPhi<RealVectorValue, ComputeStage::JACOBIAN>(
+    const MooseVariableFE<RealVectorValue> & v) const;
+
+template <>
+const MooseArray<typename Moose::RealType<RESIDUAL>::type> & Assembly::adJxW<RESIDUAL>() const;
 
 #endif /* ASSEMBLY_H */

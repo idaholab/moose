@@ -5,7 +5,6 @@
     csvdiff = 'fullsat_brine.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'
-
     requirement = "The system shall calculate proper density, viscosity, enthalpy and internal energy with the PorousFlowBrine material "
                   "when using PorousFlowFullySaturated Action."
     issues = "#10093"
@@ -16,7 +15,6 @@
     input = 'fullsat_brine_except1.i'
     expect_err = 'You need to specify at least one component in mass_fraction_vars if use_brine is true'
     threading = '!pthreads'
-
     requirement = "The system shall produce an error when attempting to create a PorousFlowBrine Material without any mass fraction variables."
     issues = "#10093"
     design = "brineco2.md"
@@ -26,7 +24,6 @@
     input = 'fullsat_brine_except2.i'
     expect_err = 'nacl_index must be less than length of mass_fraction_vars'
     threading = '!pthreads'
-
     requirement = "The system shall produce an error when attempting to create a PorousFlowBrine Material with an NaCL index greater than the number of components."
     issues = "#10093"
     design = "brineco2.md"
@@ -36,7 +33,6 @@
     input = 'fullsat_brine_except3.i'
     expect_err = 'You need to specify fp if use_brine is false'
     threading = '!pthreads'
-
     requirement = "The system shall produce an error when attempting to create a PorousFlowBrine Material without setting an fp value.."
     issues = "#10093"
     design = "brineco2.md"
@@ -45,7 +41,6 @@
     type = RunApp
     input = addjoiner.i
     threading = '!pthreads'
-
     no_error_deprecated = true
     requirement = "The system shall produce a warning when attempting to add materials to the simulation when using the PorousFlowFullySaturated Action."
     issues = "#10093"
@@ -57,7 +52,6 @@
     expect_err = 'PorousFlowJoiner materials are no longer required in the input file'
     cli_args = --error-deprecated
     threading = '!pthreads'
-
     requirement = "The system shall produce an error when attempting to add materials to the simulation when using the PorousFlowFullySaturated Action and the --error-deprecated flag is also supplied."
     issues = "#10093"
     design = "brineco2.md"
@@ -66,7 +60,6 @@
     type = RunApp
     input = addmaterials.i
     threading = '!pthreads'
-
     requirement = "The system shall handle adding materials properly when the add_nodes parameter and the at_nodes=true parameters are both active in the PorousFlowFullySaturated Action."
     issues = "#10093"
     design = "brineco2.md"
@@ -75,9 +68,48 @@
     type = RunApp
     input = addmaterials2.i
     threading = '!pthreads'
-
     requirement = "The system shall handle adding materials properly when the add_nodes parameter is supplied in the PorousFlowFullySaturated Action."
     issues = "#10093"
     design = "brineco2.md"
+  [../]
+  [./basicthm_h]
+    type = Exodiff
+    input = 'basicthm_h.i'
+    exodiff = 'basicthm_h_out.e'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = "The system shall add all required objects when using PorousFlowBasicTHM Action with coupling_type = Hydro."
+    issues = "#8574"
+    design = "PorousFlowBasicTHM.md"
+  [../]
+  [./basicthm_th]
+    type = Exodiff
+    input = 'basicthm_th.i'
+    exodiff = 'basicthm_th_out.e'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = "The system shall add all required objects when using PorousFlowBasicTHM Action with coupling_type = ThermoHydro."
+    issues = "#8574"
+    design = "PorousFlowBasicTHM.md"
+  [../]
+  [./basicthm_hm]
+    type = Exodiff
+    input = 'basicthm_hm.i'
+    exodiff = 'basicthm_hm_out.e'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = "The system shall add all required objects when using PorousFlowBasicTHM Action with coupling_type = HydroMechanical."
+    issues = "#8574"
+    design = "PorousFlowBasicTHM.md"
+  [../]
+  [./basicthm_thm]
+    type = Exodiff
+    input = 'basicthm_thm.i'
+    exodiff = 'basicthm_thm_out.e'
+    rel_err = 1.0E-5
+    threading = '!pthreads'
+    requirement = "The system shall add all required objects when using PorousFlowBasicTHM Action with coupling_type = ThermoHydroMechanical."
+    issues = "#8574"
+    design = "PorousFlowBasicTHM.md"
   [../]
 []

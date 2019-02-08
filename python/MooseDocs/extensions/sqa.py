@@ -8,8 +8,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re
 import os
+import re
+import copy
 import codecs
 import logging
 import collections
@@ -19,20 +20,51 @@ import anytree
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
-from MooseDocs.base import components
+from MooseDocs.base import components, LatexRenderer
 from MooseDocs.extensions import core, command, alert, floats, autolink, materialicon
-from MooseDocs.tree import tokens, html
+from MooseDocs.tree import tokens, html, latex
 
 LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):
     return SQAExtension(**kwargs)
 
+SQARequirementMatrix = tokens.newToken('SQARequirementMatrix')
+SQARequirementMatrixItem = tokens.newToken('SQARequirementMatrixItem', requirement=None)
+SQARequirementMatrixListItem = tokens.newToken('SQARequirementMatrixListItem', label=None)
+SQARequirementText = tokens.newToken('SQARequirementText')
+SQARequirementDesign = tokens.newToken('SQARequirementDesign', design=[])
+SQARequirementIssues = tokens.newToken('SQARequirementIssues', issues=[])
+SQARequirementSpecification = tokens.newToken('SQARequirementSpecification',
+                                              spec_name=None, spec_path=None)
+SQARequirementPrequisites = tokens.newToken('SQARequirementPrequisites', specs=[])
+
+
+SQARequirementMatrixHeading = tokens.newToken('SQARequirementMatrixHeading')
+SQAVandVMatrixItem = tokens.newToken('SQAVandVMatrixItem')
+SQARequirementCrossReference = tokens.newToken('SQARequirementCrossReference')
+
+LATEX_REQUIREMENT = """
+\\DeclareDocumentEnvironment{Requirement}{m}{%
+  \\begin{minipage}[t]{0.08\\textwidth}%
+    #1
+  \\end{minipage}
+  \\hfill
+  \\begin{minipage}[t]{0.9\\textwidth}%
+}{%
+  \\end{minipage}
+}
+"""
+
 class SQAExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
+        config['url'] = (u"https://github.com",
+                         "Repository for linking issues and commits.")
+        config['repo'] = (u"idaholab/moose",
+                          "The default repository location to append to the given url.")
         config['directories'] = ([os.path.join(MooseDocs.ROOT_DIR, 'test', 'tests')],
                                  "List of directories used to build requirements.")
         config['specs'] = (['tests'], "List of test specification names to use for building " \
@@ -43,8 +75,17 @@ class SQAExtension(command.CommandExtension):
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
-        #NOTE: This is too slow to perform on reinit()
-        self.__requirements = common.get_requirements(self.get('directories'), self.get('specs'))
+        # Build the w to perform on reinit()
+        directories = []
+        for d in self.get('directories'):
+            path = os.path.join(MooseDocs.ROOT_DIR, d)
+            if not os.path.isdir(path):
+                msg = "Input directory does not exist: %s"
+                LOG.error(msg, path)
+            directories.append(path)
+
+        # Create requirement database
+        self.__requirements = common.get_requirements(directories, self.get('specs'))
 
         # Storage for requirement matrix counting (see SQARequirementMatricCommand)
         self.__counts = collections.defaultdict(int)
@@ -66,28 +107,24 @@ class SQAExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(core, command, alert, floats, core, materialicon)
 
-        self.addCommand(reader, SQATemplateLoadCommand())
-        self.addCommand(reader, SQATemplateItemCommand())
         self.addCommand(reader, SQARequirementsCommand())
-        self.addCommand(reader, SQADocumentItemCommand())
         self.addCommand(reader, SQACrossReferenceCommand())
         self.addCommand(reader, SQARequirementsMatrixCommand())
         self.addCommand(reader, SQAVerificationCommand())
 
-        renderer.add('SQATemplateItem', RenderSQATemplateItem())
         renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
         renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
+        renderer.add('SQARequirementMatrixListItem', RenderSQARequirementMatrixListItem())
         renderer.add('SQARequirementMatrixHeading', RenderSQARequirementMatrixHeading())
+        renderer.add('SQARequirementText', RenderSQARequirementText())
+        renderer.add('SQARequirementDesign', RenderSQARequirementDesign())
+        renderer.add('SQARequirementIssues', RenderSQARequirementIssues())
+        renderer.add('SQARequirementSpecification', RenderSQARequirementSpecification())
+        renderer.add('SQARequirementPrequisites', RenderSQARequirementPrequisites())
 
-SQADocumentItem = tokens.newToken('SQADocumentItem', key=u'')
-SQATemplateItem = tokens.newToken('SQATemplateItem', key=u'')
-SQARequirementMatrix = tokens.newToken('SQARequirementMatrix')
-SQARequirementMatrixItem = tokens.newToken('SQARequirementMatrixItem',
-                                           label=u'',
-                                           satisfied=True)
-SQARequirementMatrixHeading = tokens.newToken('SQARequirementMatrixHeading')
-SQAVandVMatrixItem = tokens.newToken('SQAVandVMatrixItem')
-SQARequirementCrossReference = tokens.newToken('SQARequirementCrossReference')
+        if isinstance(renderer, LatexRenderer):
+            renderer.addPackage('xcolor')
+            renderer.addPreamble(LATEX_REQUIREMENT)
 
 class SQARequirementsCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -123,12 +160,11 @@ class SQARequirementsCommand(command.CommandComponent):
         return parent
 
     def _addRequirement(self, parent, info, page, req, requirements):
-        item = SQARequirementMatrixItem(parent,
-                                        label=unicode(req.label),
-                                        satisfied=req.satisfied,
-                                        id_=req.path)
 
-        self.reader.tokenize(item, req.text, page, MooseDocs.INLINE, info.line, report=False)
+        item = SQARequirementMatrixItem(parent, requirement=req)
+        text = SQARequirementText(item)
+
+        self.reader.tokenize(text, req.text, page, MooseDocs.INLINE, info.line, report=False)
         for token in anytree.PreOrderIter(item):
             if token.name == 'ErrorToken':
                 msg = common.report_error("Failed to tokenize SQA requirement.",
@@ -142,43 +178,29 @@ class SQARequirementsCommand(command.CommandComponent):
 
         if self.settings['link']:
             if self.settings['link-spec']:
-                p = core.Paragraph(item)
-                tokens.String(p, content=u'Specification: ')
+                p = SQARequirementSpecification(item, spec_path=req.path, spec_name=req.name)
 
                 with codecs.open(req.filename, encoding='utf-8') as fid:
                     content = fid.read()
-
                 floats.create_modal_link(p,
                                          title=req.filename,
                                          content=core.Code(None, language=u'text', content=content),
                                          string=u"{}:{}".format(req.path, req.name))
 
             if self.settings['link-design'] and req.design:
-                p = core.Paragraph(item)
-                tokens.String(p, content=u'Design: ')
-                for design in req.design:
-                    autolink.AutoLink(p, page=unicode(design))
+                p = SQARequirementDesign(item, design=req.design)
 
             if self.settings['link-issues'] and req.issues:
-                p = core.Paragraph(item)
-                tokens.String(p, content=u'Issue(s): ')
-                for issue in req.issues:
-                    if issue.startswith('#'):
-                        url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
-                    else:
-                        url = u"https://github.com/idaholab/moose/commit/{}".format(issue[1:])
-                    core.Link(p, url=url, string=unicode(issue))
-                    core.Space(p)
+                p = SQARequirementIssues(item, issues=req.issues)
 
             if self.settings['link-prerequisites'] and req.prerequisites:
                 labels = []
                 for prereq in req.prerequisites:
                     for other in requirements:
-                        if other.name == prereq:
-                            labels.append(other.label)
+                        if (other.name == prereq) and (other.path == req.path):
+                            labels.append((other.path, other.name, other.label))
 
-                p = core.Paragraph(item)
-                tokens.String(p, content=u'Prerequisites: {}'.format(' '.join(labels)))
+                SQARequirementPrequisites(item, specs=labels)
 
 class SQACrossReferenceCommand(SQARequirementsCommand):
     COMMAND = 'sqa'
@@ -252,91 +274,12 @@ class SQARequirementsMatrixCommand(command.CommandComponent):
             self.reader.tokenize(head, heading, page, MooseDocs.INLINE, info.line)
 
         for i, item in enumerate(ul.children):
-            matrix_item = SQARequirementMatrixItem(matrix, label=u'{}.{:d}'.format(label, i))
+            matrix_item = SQARequirementMatrixListItem(matrix, label=u'{}.{:d}'.format(label, i))
             for child in item:
                 child.parent = matrix_item
 
         return parent
 
-class SQATemplateLoadCommand(command.CommandComponent):
-    COMMAND = 'sqa'
-    SUBCOMMAND = 'load'
-
-    @staticmethod
-    def defaultSettings():
-        config = command.CommandComponent.defaultSettings()
-        config['template'] = (None, "The name of the template to load.")
-        return config
-
-    def createToken(self, parent, info, page):
-
-        #TODO: make root path a config item in extension
-        location = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates', 'sqa',
-                                self.settings['template'])
-
-        if not os.path.exists(location):
-            msg = "The template file does not exist: {}."
-            raise exceptions.MooseDocsException(msg, location)
-
-        with codecs.open(location, 'r', encoding='utf-8') as fid:
-            content = fid.read()
-
-
-        # Replace key/value arguments
-        template_args = info['inline'] if 'inline' in info else info['block']
-        _, key_values = common.match_settings(dict(), template_args)
-
-        def sub(match):
-            key = match.group('key')
-            if key not in key_values:
-                msg = "The template argument '{}' was not defined in the !sqa load command."
-                raise exceptions.MooseDocsException(msg, key)
-
-            return key_values[key]
-
-        content = re.sub(r'{{(?P<key>.*?)}}', sub, content)
-
-        # Tokenize the template
-        self.reader.tokenize(parent, content, page, line=info.line)
-
-        return parent
-
-class SQATemplateItemCommand(command.CommandComponent):
-    COMMAND = 'sqa'
-    SUBCOMMAND = 'template'
-
-    @staticmethod
-    def defaultSettings():
-        config = command.CommandComponent.defaultSettings()
-        config['key'] = (None, "The name of the template item which the content is to replace.")
-        config['heading'] = (None, "The section heading (optional).")
-        config['heading-level'] = (3, "The heading level, if 'heading' is used.")
-        config['required'] = (True, "The section is required.")
-        return config
-
-    def createToken(self, parent, info, page):
-        key = self.settings['key']
-        item = SQATemplateItem(parent, key=key)
-
-        heading = self.settings.get('heading', None)
-        if heading:
-            item.heading = core.Heading(None, level=int(self.settings['heading-level']), id_=key)
-            self.reader.tokenize(item.heading, heading, page, line=info.line)
-
-        return item
-
-class SQADocumentItemCommand(command.CommandComponent):
-    COMMAND = 'sqa'
-    SUBCOMMAND = 'item'
-
-    @staticmethod
-    def defaultSettings():
-        config = command.CommandComponent.defaultSettings()
-        config['key'] = (None, "The name of the template item which the content is to replace.")
-        return config
-
-    def createToken(self, parent, info, page):
-        return SQADocumentItem(parent, key=self.settings['key'])
 
 class SQAVerificationCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -358,12 +301,7 @@ class SQAVerificationCommand(command.CommandComponent):
         return parent
 
     def _addRequirement(self, parent, info, page, req):
-        item = SQARequirementMatrixItem(parent,
-                                        label=unicode(req.label),
-                                        satisfied=req.satisfied,
-                                        id_=req.path)
-
-
+        item = SQARequirementMatrixItem(parent, requirement=req)
         self.reader.tokenize(item, req.text, page, MooseDocs.INLINE, info.line, report=False)
         for token in anytree.PreOrderIter(item):
             if token.name == 'ErrorToken':
@@ -390,77 +328,180 @@ class SQAVerificationCommand(command.CommandComponent):
         filename = u'{}/{}.md'.format(req.path, req.name)
         autolink.AutoLink(p, page=unicode(filename))
 
-class RenderSQATemplateItem(components.RenderComponent):
-
-    def createHTML(self, parent, token, page):
-        pass
-
-    def createMaterialize(self, parent, token, page):
-
-        key = token['key']
-        func = lambda n: (n.name == 'SQADocumentItem') and (n['key'] == key)
-        replacement = anytree.search.find(token.root, filter_=func, maxlevel=2)
-
-        if replacement:
-
-            self.renderer.render(parent, replacement, page)
-
-            # Remove item so it doesn't render again
-            replacement.parent = None
-            for child in replacement:
-                child.parent = None
-#
-        else:
-            filename = page.local
-            err = alert.AlertToken(None, brand=u'error')
-            alert_title = alert.AlertTitle(err,
-                                           brand=u'error',
-                                           string=u'Missing Template Item "{}"'.format(key))
-            alert_content = alert.AlertContent(err, brand=u'error')
-
-            modal_content = tokens.Token(None)
-            core.Paragraph(modal_content,
-                           string=u"The document must include the \"{0}\" template item, this can "\
-                           u"be included by add adding the following to the markdown " \
-                           u"file ({1}):".format(key, filename))
-
-            core.Code(modal_content,
-                      code=u"!sqa! item key={0}\nInclude text (in MooseDocs format) " \
-                      u"regarding the \"{0}\" template item here.\n" \
-                      u"!sqa-end!".format(key))
-
-            link = floats.create_modal_link(alert_title,
-                                            title=u'Missing Template Item "{}"'.format(key),
-                                            content=modal_content)
-            materialicon.IconToken(link, icon=u'help_outline', class_=u'material-icons moose-help')
-
-
-            for child in token.children:
-                child.parent = alert_content
-
-            self.renderer.render(parent, err, page)
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
     def createMaterialize(self, parent, token, page):
         return html.Tag(parent, 'ul', class_="moose-requirements collection with-header")
 
+    def createLatex(self, parent, token, page):
+        return parent
+
 class RenderSQARequirementMatrixItem(core.RenderListItem):
     def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
-        li = html.Tag(parent, 'li', class_="collection-item", **token.attributes)
-        num = html.Tag(li, 'span', string=token['label'], class_='moose-requirement-number')
 
-        id_ = token.get('id', None)
-        if id_:
-            num.addClass('tooltipped')
-            num['data-tooltip'] = id_
+        attributes = copy.copy(token.attributes)
+        req = attributes.pop('requirement')
+        if req is None:
+            print token
 
-        if not token['satisfied']:
+        id_ = u'{}:{}'.format(req.path, req.name)
+
+        li = html.Tag(parent, 'li', class_="collection-item", **attributes)
+        num = html.Tag(li, 'span', string=req.label, id_=id_, class_='moose-requirement-number')
+        num.addClass('tooltipped')
+        num['data-tooltip'] = id_
+
+        if not req.satisfied:
             num = html.Tag(li, 'i', string=u'block',
                            class_='material-icons moose-requirement-unsatisfied')
 
         return html.Tag(li, 'span', class_='moose-requirement-content')
 
+    def createLatex(self, parent, token, page):
+        args = [latex.Brace(string=token['requirement'].label)]
+        return latex.Environment(parent, 'Requirement', args=args)
+
+class RenderSQARequirementMatrixListItem(RenderSQARequirementMatrixItem):
+    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
+
+        attributes = copy.copy(token.attributes)
+        li = html.Tag(parent, 'li', class_="collection-item", **attributes)
+        html.Tag(li, 'span', string=token['label'], class_='moose-requirement-number')
+        return html.Tag(li, 'span', class_='moose-requirement-content')
+
+    def createLatex(self, parent, token, page):
+        args = [latex.Brace(string=token['label'])]
+        return latex.Environment(parent, 'Requirement', args=args)
+
 class RenderSQARequirementMatrixHeading(core.RenderListItem):
 
     def createMaterialize(self, parent, token, page):
         return html.Tag(parent, 'li', class_='collection-header')
+
+    def createLatex(self, parent, token, page):
+        prefix = token.siblings[0]['requirement'].label.split('.')[0]
+        return latex.Command(parent, 'section*', string=prefix + ':~', escape=False)
+
+class RenderSQARequirementText(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        return parent
+
+    def createLatex(self, parent, token, page):
+        return parent
+
+class RenderSQARequirementDesign(autolink.RenderLinkBase):
+
+    def findDesign(self, design, token):
+        node = self.translator.findPage(design, throw_on_zero=False)
+        if node is None:
+            req = token.parent['requirement']
+            msg = "Unable to locate the design page: {}\n    {}:{}" \
+                  .format(design, req.filename, req.design_line)
+            LOG.error(msg)
+            return None
+        return node
+
+    def createHTML(self, parent, token, page):
+        p = html.Tag(parent, 'p', string=u'Design: ', class_='moose-sqa-items')
+        for design in token['design']:
+            node = self.findDesign(design, token.parent['requirement'])
+            if node is not None:
+                link = autolink.AutoLink(None, page=page)
+                link.info = token.info
+                self.createHTMLHelper(p, link, page, node)
+            else:
+                html.Tag(p, 'a', string=unicode(design), class_='moose-error')
+
+    def createLatex(self, parent, token, page):
+
+        latex.Command(parent, 'newline', start='\n', end='\n')
+        latex.String(parent, content='Design:~', escape=False)
+
+        no_seperator = True
+        for design in token['design']:
+            if not no_seperator:
+                latex.String(parent, content='; ')
+                no_seperator = False
+
+            node = self.findDesign(design, token)
+            if node:
+                link = autolink.AutoLink(None, page=page)
+                link.info = token.info
+                self.createLatexHelper(parent, link, page, node)
+            else:
+                latex.Command(parent, 'textcolor', args=[latex.Brace(string='red')], string=design)
+
+class RenderSQARequirementIssues(components.RenderComponent):
+
+    def getURL(self, issue, token):
+        url = None
+        base = self.extension['url'].rstrip('/')
+        repo = self.extension['repo'].strip('/')
+
+        match = re.search(r"(?P<repo>\w+/\w+)#(?P<issue>[0-9]+)", issue)
+        if match:
+            url = u"{}/{}/issues/{}".format(base, match.group('repo'), match.group('issue'))
+        elif issue.startswith('#'):
+            url = u"{}/{}/issues/{}".format(base, repo, issue[1:])
+        elif re.search(r'\A[0-9a-f]{10,40}\Z', issue):
+            url = u"{}/{}/commit/{}".format(base, repo, issue[1:])
+
+        if (url is None) and (issue != u''):
+            req = token.parent['requirement']
+            msg = "Unknown issue number or commit (commit SHA-1 must be at least 10 digits): "\
+                  "{}\n    {}:{}".format(issue, req.filename, req.issues_line)
+            LOG.error(msg)
+
+        return url
+
+    def createHTML(self, parent, token, page):
+
+        p = html.Tag(parent, 'p', string=u'Issue(s): ', class_='moose-sqa-items')
+        for issue in token['issues']:
+
+            url = self.getURL(issue, token)
+            if url is None:
+                html.Tag(p, 'a', string=issue, class_='moose-error')
+            else:
+                html.Tag(p, 'a', href=url, string=unicode(issue))
+
+    def createLatex(self, parent, token, page):
+
+        latex.Command(parent, 'newline', start='\n', end='\n')
+        latex.String(parent, content='Issue(s):~', escape=False)
+        no_seperator = True
+
+        for issue in token['issues']:
+            if not no_seperator:
+                latex.String(parent, content='; ')
+                no_seperator = False
+
+            url = self.getURL(issue, token)
+            if url is None:
+                latex.Command(parent, 'textcolor', args=[latex.Brace(string='red')], string=issue)
+            else:
+                latex.Command(parent, 'href', args=[latex.Brace(string=url)], string=unicode(issue))
+
+class RenderSQARequirementSpecification(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        return html.Tag(parent, 'p', string=u'Specification: ')
+
+    def createLatex(self, parent, token, page):
+        latex.Command(parent, 'newline', start='\n', end='\n')
+        spec = 'Specification: {}:{}'.format(token['spec_path'], token['spec_name'])
+        latex.String(parent, content=spec)
+
+class RenderSQARequirementPrequisites(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        p = html.Tag(parent, 'p', string=u'Prerequisite(s): ', class_='moose-sqa-items')
+
+        for path, name, label in token['specs']:
+            url = u'#{}:{}'.format(path, name)
+            html.Tag(p, 'a', href=url, string=label)
+
+    def createLatex(self, parent, token, page):
+        latex.Command(parent, 'newline', start='\n', end='\n')
+        latex.String(parent, content='Prerequisite(s):~', escape=False)
+
+        labels = [label for _, _, label in token['specs']]
+        latex.String(parent, content='; '.join(labels))

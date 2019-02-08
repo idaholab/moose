@@ -16,6 +16,8 @@ InputParameters
 validParams<BrineFluidProperties>()
 {
   InputParameters params = validParams<MultiComponentFluidPropertiesPT>();
+  params.addParam<UserObjectName>("water_fp",
+                                  "The name of the FluidProperties UserObject for water");
   params.addClassDescription("Fluid properties for brine");
   return params;
 }
@@ -23,19 +25,25 @@ validParams<BrineFluidProperties>()
 BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
   : MultiComponentFluidPropertiesPT(parameters), _Mnacl(58.443e-3)
 {
-  // SinglePhaseFluidPropertiesPT UserObject for water to provide to getComponent
-  std::string water_name = name() + ":water";
+  // SinglePhaseFluidPropertiesPT UserObject for water
+  if (parameters.isParamSetByUser("water_fp"))
+    _water_fp = &getUserObject<SinglePhaseFluidProperties>("water_fp");
+  else
   {
-    std::string class_name = "Water97FluidProperties";
-    InputParameters params = _app.getFactory().getValidParams(class_name);
-    _fe_problem.addUserObject(class_name, water_name, params);
+    // Construct a Water97FluidProperties UserObject
+    const std::string water_name = name() + ":water";
+    {
+      const std::string class_name = "Water97FluidProperties";
+      InputParameters params = _app.getFactory().getValidParams(class_name);
+      _fe_problem.addUserObject(class_name, water_name, params);
+    }
+    _water_fp = &_fe_problem.getUserObject<SinglePhaseFluidProperties>(water_name);
   }
-  _water_fp = &_fe_problem.getUserObject<SinglePhaseFluidProperties>(water_name);
 
-  // SinglePhaseFluidPropertiesPT UserObject for NaCl to provide to getComponent
-  std::string nacl_name = name() + ":nacl";
+  // SinglePhaseFluidPropertiesPT UserObject for NaCl
+  const std::string nacl_name = name() + ":nacl";
   {
-    std::string class_name = "NaClFluidProperties";
+    const std::string class_name = "NaClFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
     _fe_problem.addUserObject(class_name, nacl_name, params);
   }
@@ -91,37 +99,34 @@ BrineFluidProperties::molarMassH2O() const
 Real
 BrineFluidProperties::rho(Real pressure, Real temperature, Real xnacl) const
 {
-  Real n1, n2, n11, n12, n1x1, n20, n21, n22, n23, n2x1, Tv;
-  Real water_density;
-
   // The correlation requires the pressure in bar, not Pa.
   Real pbar = pressure * 1.0e-5;
   Real pbar2 = pbar * pbar;
   Real pbar3 = pbar2 * pbar;
 
   // The correlation requires mole fraction
-  Real Xnacl = massFractionToMoleFraction(xnacl);
+  const Real Xnacl = massFractionToMoleFraction(xnacl);
 
-  n11 = -54.2958 - 45.7623 * std::exp(-9.44785e-4 * pbar);
-  n21 = -2.6142 - 2.39092e-4 * pbar;
-  n22 = 0.0356828 + 4.37235e-6 * pbar + 2.0566e-9 * pbar2;
-  n1x1 = 330.47 + 0.942876 * std::sqrt(pbar) + 0.0817193 * pbar - 2.47556e-8 * pbar2 +
-         3.45052e-10 * pbar3;
-  n2x1 = -0.0370751 + 0.00237723 * std::sqrt(pbar) + 5.42049e-5 * pbar + 5.84709e-9 * pbar2 -
-         5.99373e-13 * pbar3;
-  n12 = -n1x1 - n11;
-  n20 = 1.0 - n21 * std::sqrt(n22);
-  n23 = n2x1 - n20 - n21 * std::sqrt(1.0 + n22);
+  const Real n11 = -54.2958 - 45.7623 * std::exp(-9.44785e-4 * pbar);
+  const Real n21 = -2.6142 - 2.39092e-4 * pbar;
+  const Real n22 = 0.0356828 + 4.37235e-6 * pbar + 2.0566e-9 * pbar2;
+  const Real n1x1 = 330.47 + 0.942876 * std::sqrt(pbar) + 0.0817193 * pbar - 2.47556e-8 * pbar2 +
+                    3.45052e-10 * pbar3;
+  const Real n2x1 = -0.0370751 + 0.00237723 * std::sqrt(pbar) + 5.42049e-5 * pbar +
+                    5.84709e-9 * pbar2 - 5.99373e-13 * pbar3;
+  const Real n12 = -n1x1 - n11;
+  const Real n20 = 1.0 - n21 * std::sqrt(n22);
+  const Real n23 = n2x1 - n20 - n21 * std::sqrt(1.0 + n22);
 
   // The temperature Tv where the brine has the same molar volume as pure water
   // Note: correlation uses temperature in Celcius
-  n1 = n1x1 + n11 * (1.0 - Xnacl) + n12 * (1.0 - Xnacl) * (1.0 - Xnacl);
-  n2 = n20 + n21 * std::sqrt(Xnacl + n22) + n23 * Xnacl;
-  Tv = n1 + n2 * (temperature - _T_c2k);
+  const Real n1 = n1x1 + n11 * (1.0 - Xnacl) + n12 * (1.0 - Xnacl) * (1.0 - Xnacl);
+  const Real n2 = n20 + n21 * std::sqrt(Xnacl + n22) + n23 * Xnacl;
+  const Real Tv = n1 + n2 * (temperature - _T_c2k);
 
   // The density of water at temperature Tv
   // Note: convert Tv to Kelvin to calculate water density
-  water_density = _water_fp->rho_from_p_T(pressure, Tv + _T_c2k);
+  const Real water_density = _water_fp->rho_from_p_T(pressure, Tv + _T_c2k);
 
   // The brine density is given by the water density scaled by the ratio of
   // brine molar mass to pure water molar mass
@@ -139,9 +144,9 @@ BrineFluidProperties::rho_dpTx(Real pressure,
 {
   rho = this->rho(pressure, temperature, xnacl);
   // Derivatives are calculated using finite differences due to complexity of correlation
-  Real eps = 1.0e-8;
-  Real peps = pressure * eps;
-  Real Teps = temperature * eps;
+  const Real eps = 1.0e-8;
+  const Real peps = pressure * eps;
+  const Real Teps = temperature * eps;
   drho_dp = (this->rho(pressure + peps, temperature, xnacl) - rho) / peps;
   drho_dT = (this->rho(pressure, temperature + Teps, xnacl) - rho) / Teps;
   drho_dx = (this->rho(pressure, temperature, xnacl + eps) - rho) / eps;
@@ -151,17 +156,19 @@ Real
 BrineFluidProperties::mu(Real pressure, Real temperature, Real xnacl) const
 {
   // Correlation requires molal concentration (mol/kg)
-  Real mol = massFractionToMolalConc(xnacl);
-  Real mol2 = mol * mol;
-  Real mol3 = mol2 * mol;
+  const Real mol = massFractionToMolalConc(xnacl);
+  const Real mol2 = mol * mol;
+  const Real mol3 = mol2 * mol;
 
   // Correlation requires temperature in C
-  Real Tc = temperature - _T_c2k;
+  const Real Tc = temperature - _T_c2k;
 
-  Real a = 1.0 + 0.0816 * mol + 0.0122 * mol2 + 0.128e-3 * mol3 +
-           0.629e-3 * Tc * (1.0 - std::exp(-0.7 * mol));
+  const Real a = 1.0 + 0.0816 * mol + 0.0122 * mol2 + 0.128e-3 * mol3 +
+                 0.629e-3 * Tc * (1.0 - std::exp(-0.7 * mol));
 
-  return a * _water_fp->mu_from_p_T(pressure, temperature);
+  const Real water_viscosity = _water_fp->mu_from_p_T(pressure, temperature);
+
+  return a * water_viscosity;
 }
 
 void

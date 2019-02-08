@@ -77,7 +77,7 @@ public:
    * If the time step converged
    * @return true if converged, otherwise false
    */
-  virtual bool converged();
+  virtual bool converged() const;
 
   /**
    * Get the current_dt

@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#5658 #12633'
+  design = 'ADTimeDerivative.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'ad_transient_diffusion.i'
+    exodiff = 'ad_transient_diffusion_out.e'
+    requirement = 'We shall be able to reproduce the simple_transient_diffusion results with ADTimeDerivative'
+  [../]
+  [./jac_test]
+    type = 'PetscJacobianTester'
+    input = 'ad_transient_diffusion.i'
+    cli_args = 'Outputs/exodus=false Mesh/nx=3 Mesh/ny=3 Executioner/num_steps=3'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian from ADTimeDerivative shall be perfect'
+  [../]
+[]

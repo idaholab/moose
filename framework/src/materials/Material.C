@@ -265,7 +265,7 @@ Material::computeProperties()
 void
 Material::copyDualNumbersToValues()
 {
-  if (!_fe_problem.currentlyComputingJacobian() || !_fe_problem.usingAD())
+  if (!_fe_problem.currentlyComputingJacobian() || !_fe_problem.usingADMatProps())
     return;
 
   MaterialProperties & props = _material_data->props();

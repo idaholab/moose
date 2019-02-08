@@ -105,15 +105,6 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
       _dof_values_dotdot_old.resize(1);
   }
 
-  if (_need_solution_dofs)
-    _solution_dofs.resize(1);
-
-  if (_need_solution_dofs_old)
-    _solution_dofs_old.resize(1);
-
-  if (_need_solution_dofs_older)
-    _solution_dofs_older.resize(1);
-
   const dof_id_type & idx = _dof_indices[0];
   const Real & soln = (*_sys.currentSolution())(idx);
   Real soln_old = 0;
@@ -135,9 +126,6 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
 
   if (_need_dof_values_previous_nl)
     _dof_values_previous_nl[0] = soln_previous_nl;
-
-  if (_need_solution_dofs)
-    _solution_dofs(0) = soln;
 
   if (is_transient)
   {
@@ -167,12 +155,6 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
 
     if (_need_dof_values_dotdot)
       _dof_values_dotdot[0] = u_dotdot;
-
-    if (_need_solution_dofs_old)
-      _solution_dofs_old(0) = soln_old;
-
-    if (_need_solution_dofs_older)
-      _solution_dofs_older(0) = soln_older;
   }
 
   _u[0] = phi * soln;
@@ -294,15 +276,6 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
       _dof_values_dotdot_old_neighbor.resize(1);
   }
 
-  if (_need_solution_dofs_neighbor)
-    _solution_dofs_neighbor.resize(1);
-
-  if (_need_solution_dofs_old_neighbor)
-    _solution_dofs_old_neighbor.resize(1);
-
-  if (_need_solution_dofs_older_neighbor)
-    _solution_dofs_older_neighbor.resize(1);
-
   const dof_id_type & idx = _dof_indices_neighbor[0];
   const Real & soln = (*_sys.currentSolution())(idx);
   Real soln_old = 0;
@@ -314,9 +287,6 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
 
   if (_need_dof_values_neighbor)
     _dof_values_neighbor[0] = soln;
-
-  if (_need_solution_dofs_neighbor)
-    _solution_dofs_neighbor(0) = soln;
 
   if (is_transient)
   {
@@ -351,12 +321,6 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
 
     if (_need_dof_values_dotdot_old_neighbor)
       _dof_values_dotdot_old_neighbor[0] = u_dotdot_old;
-
-    if (_need_solution_dofs_old_neighbor)
-      _solution_dofs_old_neighbor(0) = soln_old;
-
-    if (_need_solution_dofs_older_neighbor)
-      _solution_dofs_older_neighbor(0) = soln_older;
   }
 
   _u_neighbor[0] = phi * soln;

@@ -538,6 +538,9 @@ protected:
   const Real _Tlower;
   /// Temperature above which the Spycher & Pruess (2010) model is used (K)
   const Real _Tupper;
+  /// Minimum Z - below this value all CO2 will be dissolved. This reduces the
+  /// computational burden when small values of Z are present
+  const Real _Zmin;
 };
 
 #endif // POROUSFLOWBRINECO2_H

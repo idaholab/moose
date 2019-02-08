@@ -67,7 +67,7 @@ PorousFlowAqueousPreDisMineral::PorousFlowAqueousPreDisMineral(const InputParame
   _initial_conc.resize(_num_initial_conc);
   if (_initial_conc_supplied)
     for (unsigned r = 0; r < _num_reactions; ++r)
-      _initial_conc[r] = (_nodal_material ? &coupledNodalValue("initial_concentrations", r)
+      _initial_conc[r] = (_nodal_material ? &coupledDofValues("initial_concentrations", r)
                                           : &coupledValue("initial_concentrations", r));
 }
 

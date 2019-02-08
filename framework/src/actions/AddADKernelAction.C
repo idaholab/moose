@@ -27,6 +27,7 @@ AddADKernelAction::AddADKernelAction(InputParameters params) : MooseADObjectActi
 void
 AddADKernelAction::act()
 {
+  flagDoingAD();
   _problem->addKernel(_type, _name, _moose_object_pars);
   std::string to_erase = "<RESIDUAL>";
   std::string::size_type match = _type.find(to_erase);

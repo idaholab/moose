@@ -13,6 +13,7 @@
 #include "MooseApp.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/elem.h"
 
 registerMooseObject("MooseApp", GridPartitioner);
 

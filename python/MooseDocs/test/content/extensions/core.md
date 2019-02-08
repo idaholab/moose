@@ -1,4 +1,4 @@
-# Core Extension Tests
+# Core Extension
 
 ## Code Blocks
 
@@ -57,7 +57,7 @@ for i in range(10):
 
 ## Unordered Lists
 
-### Single level lists id=single-level-lists
+### Single level lists id=unordered-single-level-lists
 
 - Item 1
 - Item 2
@@ -75,7 +75,7 @@ for i in range(10):
 
 
 
-### Nested lists
+### Nested lists id=unordered-nested-lists
 
 - Item 1
 
@@ -98,7 +98,7 @@ for i in range(10):
 
 ## Ordered List
 
-### Single level lists
+### Single level lists id=ordered-single-level-lists
 
 1. One
 1. Two
@@ -124,7 +124,7 @@ for i in range(10):
 
        1. A nested item within a +huge+ number.
 
-### Nested lists
+### Nested lists id=ordered-nested-lists
 
 1. One
 
@@ -151,7 +151,7 @@ for i in range(10):
 
 A popular search engine is [google].
 
-[google]: www.google.com
+[google]: https://www.google.com
 
 ## Inline formatting
 
@@ -176,4 +176,4 @@ text with a@subscript@^*+~=, I hope you like it.
 
 ## Links id=links
 
-This is a link to [#links].
+This is a link to [google](https://www.google.com).

@@ -39,7 +39,8 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
     _Mnacl(_brine_fp.molarMassNaCl()),
     _Rbar(_R * 10.0),
     _Tlower(372.15),
-    _Tupper(382.15)
+    _Tupper(382.15),
+    _Zmin(1.0e-4)
 {
   // Check that the correct FluidProperties UserObjects have been provided
   if (_co2_fp.fluidName() != "co2")
@@ -166,27 +167,38 @@ PorousFlowBrineCO2::massFractions(Real pressure,
   FluidStateProperties & liquid = fsp[_aqueous_phase_number];
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  // Equilibrium mass fraction of CO2 in liquid and H2O in gas phases
-  Real Xco2, dXco2_dp, dXco2_dT, dXco2_dX, Yh2o, dYh2o_dp, dYh2o_dT, dYh2o_dX;
-  equilibriumMassFractions(pressure,
-                           temperature,
-                           Xnacl,
-                           Xco2,
-                           dXco2_dp,
-                           dXco2_dT,
-                           dXco2_dX,
-                           Yh2o,
-                           dYh2o_dp,
-                           dYh2o_dT,
-                           dYh2o_dX);
+  Real Xco2 = 0.0, dXco2_dp = 0.0, dXco2_dT = 0.0, dXco2_dX = 0.0;
+  Real Yh2o = 0.0, dYh2o_dp = 0.0, dYh2o_dT = 0.0, dYh2o_dX = 0.0;
+  Real Yco2 = 0.0, dYco2_dp = 0.0, dYco2_dT = 0.0, dYco2_dX = 0.0;
 
-  Real Yco2 = 1.0 - Yh2o;
-  Real dYco2_dp = -dYh2o_dp;
-  Real dYco2_dT = -dYh2o_dT;
-  Real dYco2_dX = -dYh2o_dX;
+  // If the amount of CO2 is less than the smallest solubility, then all CO2 will
+  // be dissolved, and the equilibrium mass fractions do not need to be computed
+  if (Z < _Zmin)
+    phase_state = FluidStatePhaseEnum::LIQUID;
 
-  // Determine which phases are present based on the value of z
-  phaseState(Z, Xco2, Yco2, phase_state);
+  else
+  {
+    // Equilibrium mass fraction of CO2 in liquid and H2O in gas phases
+    equilibriumMassFractions(pressure,
+                             temperature,
+                             Xnacl,
+                             Xco2,
+                             dXco2_dp,
+                             dXco2_dT,
+                             dXco2_dX,
+                             Yh2o,
+                             dYh2o_dp,
+                             dYh2o_dT,
+                             dYh2o_dX);
+
+    Yco2 = 1.0 - Yh2o;
+    dYco2_dp = -dYh2o_dp;
+    dYco2_dT = -dYh2o_dT;
+    dYco2_dX = -dYh2o_dX;
+
+    // Determine which phases are present based on the value of z
+    phaseState(Z, Xco2, Yco2, phase_state);
+  }
 
   // The equilibrium mass fractions calculated above are only correct in the two phase
   // state. If only liquid or gas phases are present, the mass fractions are given by
@@ -275,14 +287,14 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
   Real co2_density, dco2_density_dp, dco2_density_dT;
   Real co2_viscosity, dco2_viscosity_dp, dco2_viscosity_dT;
   Real co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT;
-  _co2_fp.rho_mu_dpT(pressure,
-                     temperature,
-                     co2_density,
-                     dco2_density_dp,
-                     dco2_density_dT,
-                     co2_viscosity,
-                     dco2_viscosity_dp,
-                     dco2_viscosity_dT);
+  _co2_fp.rho_mu_from_p_T(pressure,
+                          temperature,
+                          co2_density,
+                          dco2_density_dp,
+                          dco2_density_dT,
+                          co2_viscosity,
+                          dco2_viscosity_dp,
+                          dco2_viscosity_dT);
 
   _co2_fp.h_from_p_T(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
 
@@ -1457,7 +1469,7 @@ PorousFlowBrineCO2::henryConstant(
 {
   // Henry's constant for dissolution in water
   Real Kh_h2o, dKh_h2o_dT;
-  _co2_fp.henryConstant_dT(temperature, Kh_h2o, dKh_h2o_dT);
+  _co2_fp.henryConstant(temperature, Kh_h2o, dKh_h2o_dT);
 
   // The correction to salt is obtained through the salting out coefficient
   const std::vector<Real> b{1.19784e-1, -7.17823e-4, 4.93854e-6, -1.03826e-8, 1.08233e-11};

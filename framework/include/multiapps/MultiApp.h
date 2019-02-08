@@ -15,6 +15,7 @@
 #include "Restartable.h"
 
 #include "libmesh/communicator.h"
+#include "libmesh/point.h"
 
 class MultiApp;
 class UserObject;
@@ -77,13 +78,6 @@ public:
   void setupPositions();
 
   virtual void initialSetup() override;
-
-  /**
-   * Method that reports whether the application has been fully solved or not.
-   * Most transient multiapps are never fully solved, however this method can be
-   * overridden in derived classes.
-   */
-  virtual bool isSolved() const { return false; }
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp

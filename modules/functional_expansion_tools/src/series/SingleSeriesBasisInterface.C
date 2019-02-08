@@ -9,6 +9,8 @@
 
 #include "SingleSeriesBasisInterface.h"
 
+#include "libmesh/point.h"
+
 /*
  * The default constructor for a single series creates a single-term functional basis of zeroth
  * order. Although the _physical_bounds flag is set to false anyways, we need to assign some value

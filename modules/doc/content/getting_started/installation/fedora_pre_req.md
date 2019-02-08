@@ -22,3 +22,9 @@ sudo -E dnf install gcc \
 Download and install one our redistributable packages according to your version of Fedora.
 
 - Fedora: !!package name arch=fedora28!!
+
+Once downloaded, the package can be installed via the rpm utility:
+
+```bash
+sudo rpm -i moose-environment_fedora-*.rpm
+```

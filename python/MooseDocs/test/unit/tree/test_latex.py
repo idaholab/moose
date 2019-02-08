@@ -62,21 +62,9 @@ class TestLatex(unittest.TestCase):
         cmd = latex.Command(None, 'foo', start='5', end='6')
         self.assertEqual(cmd.write(), '5\\foo6')
 
-    def testCustomCommand(self):
-        cmd = latex.CustomCommand(None, 'foo')
-        self.assertEqual(cmd.write(), '\\foo')
-
-        latex.Bracket(cmd, string=u'bar')
-        latex.Brace(cmd, string=u'test')
-
-        self.assertEqual(cmd.write(), '\\foo[bar]{test}')
-
-        cmd = latex.CustomCommand(None, 'foo', start='this', end='that')
-        self.assertEqual(cmd.write(), 'this\\foothat')
-
     def testEnvironment(self):
         env = latex.Environment(None, 'foo')
-        self.assertEqual(env.write(), '\n\\begin{foo}\n\n\\end{foo}')
+        self.assertEqual(env.write(), '\n\\begin{foo}\n\n\\end{foo}\n')
 
     def testString(self):
         s = latex.String(None, content=u'foo')

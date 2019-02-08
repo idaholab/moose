@@ -17,12 +17,13 @@
 #include "KernelBase.h"
 #include "BoundaryCondition.h"
 #include "Material.h"
-#include "MaterialProperty.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
 
 // Forward declarations
 class FEProblemBase;
+template <typename>
+class MaterialProperty;
 
 /**
  * Interface class ("Veneer") to provide generator methods for derivative

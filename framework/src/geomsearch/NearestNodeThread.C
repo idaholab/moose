@@ -11,6 +11,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/threads.h"
+#include "libmesh/node.h"
 
 #include <cmath>
 

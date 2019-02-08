@@ -48,17 +48,29 @@ public:
 
   virtual Real mu_from_rho_T(Real density, Real temperature) const override;
 
-  virtual void mu_drhoT_from_rho_T(Real density,
-                                   Real temperature,
-                                   Real ddensity_dT,
-                                   Real & mu,
-                                   Real & dmu_drho,
-                                   Real & dmu_dT) const override;
+  virtual void mu_from_rho_T(Real density,
+                             Real temperature,
+                             Real ddensity_dT,
+                             Real & mu,
+                             Real & dmu_drho,
+                             Real & dmu_dT) const override;
 
   virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void mu_from_p_T(
       Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+
+  virtual void
+  rho_mu_from_p_T(Real pressure, Real temperature, Real & rho, Real & mu) const override;
+
+  virtual void rho_mu_from_p_T(Real pressure,
+                               Real temperature,
+                               Real & rho,
+                               Real & drho_dp,
+                               Real & drho_dT,
+                               Real & mu,
+                               Real & dmu_dp,
+                               Real & dmu_dT) const override;
 
   virtual Real k_from_rho_T(Real density, Real temperature) const override;
 
@@ -69,7 +81,7 @@ public:
 
   virtual Real henryConstant(Real temperature) const override;
 
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
+  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
   virtual Real criticalPressure() const override;
 
@@ -82,6 +94,8 @@ public:
   virtual Real triplePointTemperature() const override;
 
   virtual Real vaporPressure(Real temperature) const override;
+
+  virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
 
 protected:
   /**

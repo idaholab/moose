@@ -43,8 +43,17 @@ class DenseVector;
 
 #define adCoupledValue this->template adCoupledValueTemplate<compute_stage>
 #define adCoupledGradient this->template adCoupledGradientTemplate<compute_stage>
-#define adZero this->template adZeroTemplate<compute_stage>
-#define adGradZero this->template adGradZeroTemplate<compute_stage>
+#define adCoupledSecond this->template adCoupledSecondTemplate<compute_stage>
+#define adCoupledDot this->template adCoupledDotTemplate<compute_stage>
+#define adCoupledVectorValue this->template adCoupledVectorValueTemplate<compute_stage>
+#define adCoupledVectorGradient this->template adCoupledVectorGradientTemplate<compute_stage>
+#define adCoupledVectorSecond this->template adCoupledVectorSecondTemplate<compute_stage>
+#define adZeroValue this->template adZeroValueTemplate<compute_stage>
+#define adZeroGradient this->template adZeroGradientTemplate<compute_stage>
+#define adZeroSecond this->template adZeroSecondTemplate<compute_stage>
+#define adCoupledNodalValue this->template adCoupledNodalValueTemplate<Real, compute_stage>
+#define adCoupledNodalVectorValue                                                                  \
+  this->template adCoupledNodalValueTemplate<RealVectorValue, compute_stage>
 
 /**
  * Interface for objects that needs coupling capabilities
@@ -153,8 +162,19 @@ protected:
    * @see Kernel::value
    */
   template <ComputeStage compute_stage>
-  const typename VariableValueType<compute_stage>::type &
-  adCoupledValueTemplate(const std::string & var_name, unsigned int comp = 0);
+  const ADVariableValue & adCoupledValueTemplate(const std::string & var_name,
+                                                 unsigned int comp = 0);
+
+  /**
+   * Returns value of a coupled vector variable for use in Automatic Differentiation
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::value
+   */
+  template <ComputeStage compute_stage>
+  const ADVectorVariableValue & adCoupledVectorValueTemplate(const std::string & var_name,
+                                                             unsigned int comp = 0);
 
   /**
    * Returns value of a coupled variable for a given tag
@@ -267,8 +287,40 @@ protected:
    * @see Kernel::gradient
    */
   template <ComputeStage compute_stage>
-  const typename VariableGradientType<compute_stage>::type &
-  adCoupledGradientTemplate(const std::string & var_name, unsigned int comp = 0);
+  const ADVariableGradient & adCoupledGradientTemplate(const std::string & var_name,
+                                                       unsigned int comp = 0);
+
+  /**
+   * Returns gradient of a coupled vector variable for use in Automatic Differentation
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  template <ComputeStage compute_stage>
+  const ADVectorVariableGradient & adCoupledVectorGradientTemplate(const std::string & var_name,
+                                                                   unsigned int comp = 0);
+
+  /**
+   * Returns second derivatives of a coupled variable for use in Automatic Differentation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableSecond containing the second derivatives of the coupled variable
+   */
+  template <ComputeStage compute_stage>
+  const ADVariableSecond & adCoupledSecondTemplate(const std::string & var_name,
+                                                   unsigned int comp = 0);
+
+  /**
+   * Returns second derivatives of a coupled vector variable for use in Automatic Differentation
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableSecond containing the second derivatives of the coupled
+   * variable
+   */
+  template <ComputeStage compute_stage>
+  const ADVectorVariableSecond & adCoupledVectorSecondTemplate(const std::string & var_name,
+                                                               unsigned int comp = 0);
 
   /**
    * Returns an old gradient from previous time step of a coupled variable
@@ -453,6 +505,16 @@ protected:
                                                  unsigned int comp = 0);
 
   /**
+   * Time derivative of a coupled variable for ad simulations
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * @see Kernel::dot
+   */
+  template <ComputeStage compute_stage>
+  const ADVariableValue & adCoupledDotTemplate(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Time derivative of a coupled vector variable
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
@@ -517,8 +579,18 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
    */
-  virtual const VariableValue & coupledNodalValue(const std::string & var_name,
-                                                  unsigned int comp = 0);
+  template <typename T>
+  const T & coupledNodalValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns AD nodal values of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   */
+  template <typename T, ComputeStage compute_stage>
+  const typename Moose::ValueType<T, compute_stage>::type &
+  adCoupledNodalValueTemplate(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns an old nodal value from previous time step  of a coupled variable
@@ -526,8 +598,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue containing the old value of the coupled variable
    */
-  virtual const VariableValue & coupledNodalValueOld(const std::string & var_name,
-                                                     unsigned int comp = 0);
+  template <typename T>
+  const T & coupledNodalValueOld(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns an old nodal value from two time steps previous of a coupled variable
@@ -535,8 +607,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue containing the older value of the coupled variable
    */
-  virtual const VariableValue & coupledNodalValueOlder(const std::string & var_name,
-                                                       unsigned int comp = 0);
+  template <typename T>
+  const T & coupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns nodal values of a coupled variable for previous Newton iterate
@@ -544,8 +616,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
    */
-  virtual const VariableValue & coupledNodalValuePreviousNL(const std::string & var_name,
-                                                            unsigned int comp = 0);
+  template <typename T>
+  const T & coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Nodal values of time derivative of a coupled variable
@@ -554,8 +626,14 @@ protected:
    * @return Reference to a VariableValue containing the nodal values of time derivative of the
    * coupled variable
    */
-  virtual const VariableValue & coupledNodalDot(const std::string & var_name,
-                                                unsigned int comp = 0);
+  template <typename T>
+  const T & coupledNodalDot(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Get nodal default value
+   */
+  template <typename T>
+  const T & getNodalDefaultValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Nodal values of second time derivative of a coupled variable
@@ -590,42 +668,48 @@ protected:
    * Returns DoFs in the current solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a DenseVector for the DoFs of the coupled variable
+   * @return Reference to a VariableValue for the DoFs of the coupled variable
    */
-  virtual const DenseVector<Number> & coupledSolutionDoFs(const std::string & var_name,
-                                                          unsigned int comp = 0);
+  virtual const VariableValue & coupledDofValues(const std::string & var_name,
+                                                 unsigned int comp = 0);
 
   /**
    * Returns DoFs in the old solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a DenseVector for the old DoFs of the coupled variable
+   * @return Reference to a VariableValue for the old DoFs of the coupled variable
    */
-  virtual const DenseVector<Number> & coupledSolutionDoFsOld(const std::string & var_name,
-                                                             unsigned int comp = 0);
+  virtual const VariableValue & coupledDofValuesOld(const std::string & var_name,
+                                                    unsigned int comp = 0);
 
   /**
    * Returns DoFs in the older solution vector of a coupled variable for the local element
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a DenseVector for the older DoFs of the coupled variable
+   * @return Reference to a VariableValue for the older DoFs of the coupled variable
    */
-  virtual const DenseVector<Number> & coupledSolutionDoFsOlder(const std::string & var_name,
-                                                               unsigned int comp = 0);
+  virtual const VariableValue & coupledDofValuesOlder(const std::string & var_name,
+                                                      unsigned int comp = 0);
 
   /**
    * Template method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
    * computing objects
    */
   template <ComputeStage compute_stage>
-  const typename VariableValueType<compute_stage>::type & adZeroTemplate();
+  const ADVariableValue & adZeroValueTemplate();
 
   /**
    * Template method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
    * JACOBIAN computing objects
    */
   template <ComputeStage compute_stage>
-  const typename VariableGradientType<compute_stage>::type & adGradZeroTemplate();
+  const ADVariableGradient & adZeroGradientTemplate();
+
+  /**
+   * Retrieve a zero second for automatic differentiation
+   */
+  template <ComputeStage compute_stage>
+  const ADVariableSecond & adZeroSecondTemplate();
 
 protected:
   // Reference to the interface's input parameters
@@ -667,6 +751,9 @@ protected:
   /// Will hold the default value for optional vector coupled variables.
   std::map<std::string, VectorVariableValue *> _default_vector_value;
 
+  /// Will hold the default value for optional vector coupled variables for automatic differentiation.
+  std::map<std::string, MooseArray<DualRealVectorValue> *> _ad_default_vector_value;
+
   /**
    * This will always be zero because the default values for optionally coupled variables is always
    * constant and this is used for time derivative info
@@ -677,13 +764,16 @@ protected:
   VariableGradient _default_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  MooseArray<DualRealGradient> _ad_default_gradient;
+  MooseArray<DualRealVectorValue> _ad_default_gradient;
+
+  /// This will always be zero because the default values for optionally coupled vector variables is always constant
+  MooseArray<DualRealTensorValue> _ad_default_vector_gradient;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
-  MooseArray<ADRealTensor> _ad_default_second;
+  MooseArray<DualRealTensorValue> _ad_default_second;
 
   /// Zero value of a variable
   const VariableValue & _zero;
@@ -691,10 +781,11 @@ protected:
 
   /// Zero gradient of a variable
   const VariableGradient & _grad_zero;
-  const MooseArray<DualRealGradient> & _ad_grad_zero;
+  const MooseArray<DualRealVectorValue> & _ad_grad_zero;
 
   /// Zero second derivative of a variable
   const VariableSecond & _second_zero;
+  const MooseArray<DualRealTensorValue> & _ad_second_zero;
   /// Zero second derivative of a test function
   const VariablePhiSecond & _second_phi_zero;
   /// Zero value of a vector variable
@@ -728,6 +819,12 @@ protected:
    * @return Pointer to the desired variable
    */
   MooseVariableFEBase * getFEVar(const std::string & var_name, unsigned int comp);
+
+  /**
+   * Helper that segues off to either getVar of getVectorVar depending on template paramter
+   */
+  template <typename T>
+  MooseVariableFE<T> * getVarHelper(const std::string & var_name, unsigned int comp);
 
   /**
    * Extract pointer to a coupled variable
@@ -765,14 +862,24 @@ private:
    */
   VariableValue * getDefaultValue(const std::string & var_name, unsigned int comp);
 
+public:
   /**
    * Helper method to return (and insert if necessary) the default value for Automatic
    * Differentiation for an uncoupled variable.
    * @param var_name the name of the variable for which to retrieve a default value
    * @return VariableValue * a pointer to the associated VarirableValue.
    */
-  template <ComputeStage compare_stage>
-  typename VariableValueType<compare_stage>::type * getADDefaultValue(const std::string & var_name);
+  template <ComputeStage compute_stage>
+  ADVariableValue * getADDefaultValue(const std::string & var_name);
+
+  /**
+   * Helper method to return (and insert if necessary) the default vector value for Automatic
+   * Differentiation for an uncoupled variable.
+   * @param var_name the name of the vector variable for which to retrieve a default value
+   * @return VariableVectorValue * a pointer to the associated VarirableVectorValue.
+   */
+  template <ComputeStage compute_stage>
+  ADVectorVariableValue * getADDefaultVectorValue(const std::string & var_name);
 
   /**
    * Helper method to return (and insert if necessary) the default gradient for Automatic
@@ -780,16 +887,35 @@ private:
    * @param var_name the name of the variable for which to retrieve a default gradient
    * @return VariableGradient * a pointer to the associated VariableGradient.
    */
-  template <ComputeStage compare_stage>
-  typename VariableGradientType<compare_stage>::type & getADDefaultGradient();
+  template <ComputeStage compute_stage>
+  ADVariableGradient & getADDefaultGradient();
 
+  /**
+   * Helper method to return (and insert if necessary) the default gradient for Automatic
+   * Differentiation for an uncoupled vector variable.
+   * @param var_name the name of the vector variable for which to retrieve a default gradient
+   * @return VariableGradient * a pointer to the associated VectorVariableGradient.
+   */
+  template <ComputeStage compute_stage>
+  ADVectorVariableGradient & getADDefaultVectorGradient();
+
+  /**
+   * Helper method to return (and insert if necessary) the default second derivatives for Automatic
+   * Differentiation for an uncoupled variable.
+   * @param var_name the name of the variable for which to retrieve a default second derivative
+   * @return VariableSecond * a pointer to the associated VariableSecond.
+   */
+  template <ComputeStage compute_stage>
+  ADVariableSecond & getADDefaultSecond();
+
+private:
   /**
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled vector variable.
    * @param var_name the name of the vector variable for which to retrieve a default value
    * @return a pointer to the associated VectorVariableValue.
    */
-  VectorVariableValue * getVectorDefaultValue(const std::string & var_name);
+  VectorVariableValue * getDefaultVectorValue(const std::string & var_name);
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
@@ -806,7 +932,7 @@ private:
 };
 
 template <ComputeStage compute_stage>
-const typename VariableValueType<compute_stage>::type &
+const ADVariableValue &
 Coupleable::adCoupledValueTemplate(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name))
@@ -842,7 +968,7 @@ Coupleable::adCoupledValueTemplate(const std::string & var_name, unsigned int co
 }
 
 template <ComputeStage compute_stage>
-const typename VariableGradientType<compute_stage>::type &
+const ADVariableGradient &
 Coupleable::adCoupledGradientTemplate(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name)) // Return default 0
@@ -871,7 +997,138 @@ Coupleable::adCoupledGradientTemplate(const std::string & var_name, unsigned int
 }
 
 template <ComputeStage compute_stage>
-typename VariableValueType<compute_stage>::type *
+const ADVariableSecond &
+Coupleable::adCoupledSecondTemplate(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return getADDefaultSecond<compute_stage>();
+
+  coupledCallback(var_name, false);
+  if (_c_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_is_implicit)
+      return var->adSecondSln<compute_stage>();
+    else
+      mooseError("Not implemented");
+  }
+  else
+  {
+    if (_c_is_implicit)
+      return var->adSecondSlnNeighbor<compute_stage>();
+    else
+      mooseError("Not implemented");
+  }
+}
+
+template <ComputeStage compute_stage>
+const ADVectorVariableSecond &
+adCoupledVectorSecondTemplate(const std::string & /*var_name*/, unsigned int /*comp = 0*/)
+{
+  mooseError(
+      "Automatic differentiation using second derivatives of vector variables is not implemented.");
+}
+
+template <ComputeStage compute_stage>
+const ADVariableValue &
+Coupleable::adCoupledDotTemplate(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return *getADDefaultValue<compute_stage>(var_name);
+
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == nullptr)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+      return var->adUDot<compute_stage>();
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+      return var->adUDotNeighbor<compute_stage>();
+  }
+}
+
+template <ComputeStage compute_stage>
+const ADVectorVariableValue &
+Coupleable::adCoupledVectorValueTemplate(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name))
+    return *getADDefaultVectorValue<compute_stage>(var_name);
+
+  coupledCallback(var_name, false);
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+    {
+      if (_c_is_implicit)
+        return var->adSln<compute_stage>();
+      else
+        mooseError("Not implemented");
+    }
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+    {
+      if (_c_is_implicit)
+        return var->adSlnNeighbor<compute_stage>();
+      else
+        mooseError("Not implemented");
+    }
+  }
+}
+
+template <ComputeStage compute_stage>
+const ADVectorVariableGradient &
+Coupleable::adCoupledVectorGradientTemplate(const std::string & var_name, unsigned int comp)
+{
+
+  if (!isCoupled(var_name)) // Return default 0
+    return getADDefaultVectorGradient<compute_stage>();
+
+  coupledCallback(var_name, false);
+  if (_c_nodal)
+    mooseError("Nodal variables do not have gradients");
+
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_is_implicit)
+      return var->adGradSln<compute_stage>();
+    else
+      mooseError("Not implemented");
+  }
+  else
+  {
+    if (_c_is_implicit)
+      return var->adGradSlnNeighbor<compute_stage>();
+    else
+      mooseError("Not implemented");
+  }
+}
+
+template <ComputeStage compute_stage>
+ADVariableValue *
 Coupleable::getADDefaultValue(const std::string & var_name)
 {
   std::map<std::string, MooseArray<DualReal> *>::iterator default_value_it =
@@ -890,7 +1147,28 @@ template <>
 VariableValue * Coupleable::getADDefaultValue<RESIDUAL>(const std::string & var_name);
 
 template <ComputeStage compute_stage>
-typename VariableGradientType<compute_stage>::type &
+ADVectorVariableValue *
+Coupleable::getADDefaultVectorValue(const std::string & var_name)
+{
+  std::map<std::string, MooseArray<DualRealVectorValue> *>::iterator default_value_it =
+      _ad_default_vector_value.find(var_name);
+  if (default_value_it == _ad_default_vector_value.end())
+  {
+    RealVectorValue default_vec;
+    for (unsigned int i = 0; i < _c_parameters.numberDefaultCoupledValues(var_name); ++i)
+      default_vec(i) = _c_parameters.defaultCoupledValue(var_name, i);
+    ADVectorVariableValue * value = new ADVectorVariableValue(_coupleable_max_qps, default_vec);
+    default_value_it = _ad_default_vector_value.insert(std::make_pair(var_name, value)).first;
+  }
+
+  return default_value_it->second;
+}
+
+template <>
+VectorVariableValue * Coupleable::getADDefaultVectorValue<RESIDUAL>(const std::string & var_name);
+
+template <ComputeStage compute_stage>
+ADVariableGradient &
 Coupleable::getADDefaultGradient()
 {
   return _ad_default_gradient;
@@ -900,23 +1178,57 @@ template <>
 VariableGradient & Coupleable::getADDefaultGradient<RESIDUAL>();
 
 template <ComputeStage compute_stage>
-const typename VariableValueType<compute_stage>::type &
-Coupleable::adZeroTemplate()
+ADVectorVariableGradient &
+Coupleable::getADDefaultVectorGradient()
 {
-  return _zero;
+  return _ad_default_vector_gradient;
 }
 
 template <>
-const typename VariableValueType<JACOBIAN>::type & Coupleable::adZeroTemplate<JACOBIAN>();
+VectorVariableGradient & Coupleable::getADDefaultVectorGradient<RESIDUAL>();
 
 template <ComputeStage compute_stage>
-const typename VariableGradientType<compute_stage>::type &
-Coupleable::adGradZeroTemplate()
+ADVariableSecond &
+Coupleable::getADDefaultSecond()
 {
-  return _grad_zero;
+  return _ad_default_second;
 }
 
 template <>
-const typename VariableGradientType<JACOBIAN>::type & Coupleable::adGradZeroTemplate<JACOBIAN>();
+VariableSecond & Coupleable::getADDefaultSecond<RESIDUAL>();
+
+template <ComputeStage compute_stage>
+const ADVariableValue &
+Coupleable::adZeroValueTemplate()
+{
+  return _ad_zero;
+}
+
+template <ComputeStage compute_stage>
+const ADVariableGradient &
+Coupleable::adZeroGradientTemplate()
+{
+  return _ad_grad_zero;
+}
+
+template <ComputeStage compute_stage>
+const ADVariableSecond &
+Coupleable::adZeroSecondTemplate()
+{
+  return _ad_second_zero;
+}
+
+template <>
+const VariableValue & Coupleable::adZeroValueTemplate<RESIDUAL>();
+template <>
+const VariableGradient & Coupleable::adZeroGradientTemplate<RESIDUAL>();
+template <>
+const VariableSecond & Coupleable::adZeroSecondTemplate<RESIDUAL>();
+template <>
+const RealVectorValue &
+Coupleable::getNodalDefaultValue<RealVectorValue>(const std::string & var_name, unsigned int comp);
+template <>
+MooseVariableFE<RealVectorValue> *
+Coupleable::getVarHelper<RealVectorValue>(const std::string & var_name, unsigned int comp);
 
 #endif /* COUPLEABLE_H */

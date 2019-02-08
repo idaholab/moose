@@ -106,10 +106,10 @@ class ExodusSource(base.ChiggerSource):
         bnds = []
         for i in range(self.__vtkextractblock.GetOutput().GetNumberOfBlocks()):
             current = self.__vtkextractblock.GetOutput().GetBlock(i)
-            if isinstance(current, vtk.vtkCommonDataModelPython.vtkUnstructuredGrid):
+            if isinstance(current, vtk.vtkUnstructuredGrid):
                 bnds.append(current.GetBounds())
 
-            elif isinstance(current, vtk.vtkCommonDataModelPython.vtkMultiBlockDataSet):
+            elif isinstance(current, vtk.vtkMultiBlockDataSet):
                 for j in range(current.GetNumberOfBlocks()):
                     bnds.append(current.GetBlock(j).GetBounds())
 
@@ -135,12 +135,12 @@ class ExodusSource(base.ChiggerSource):
         pairs = []
         for i in range(self.__vtkextractblock.GetOutput().GetNumberOfBlocks()):
             current = self.__vtkextractblock.GetOutput().GetBlock(i)
-            if isinstance(current, vtk.vtkCommonDataModelPython.vtkUnstructuredGrid):
+            if isinstance(current, vtk.vtkUnstructuredGrid):
                 array = self.__getActiveArray(current)
                 if array:
                     pairs.append(array.GetRange(component))
 
-            elif isinstance(current, vtk.vtkCommonDataModelPython.vtkMultiBlockDataSet):
+            elif isinstance(current, vtk.vtkMultiBlockDataSet):
                 for j in range(current.GetNumberOfBlocks()):
                     array = self.__getActiveArray(current.GetBlock(j))
                     if array:

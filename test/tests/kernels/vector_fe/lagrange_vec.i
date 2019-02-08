@@ -19,23 +19,25 @@
 
 [Kernels]
   [./diff]
-    type = LinearVectorPoisson
+    type = VectorDiffusion
     variable = u
-    x_exact_sln = 'x_exact_sln'
-    y_exact_sln = 'y_exact_sln'
+  [../]
+  [./body_force]
+    type = VectorBodyForce
+    variable = u
+    function_x = 'ffx'
+    function_y = 'ffy'
   [../]
 []
 
 [BCs]
   [./bnd]
-    type = VectorPenaltyDirichletBC
+    type = LagrangeVecFunctionDirichletBC
     variable = u
-    x_exact_sln = 'x_exact_sln'
-    y_exact_sln = 'y_exact_sln'
-    z_exact_sln = '0'
-    penalty = 1e10
+    x_exact_soln = 'x_exact_sln'
+    y_exact_soln = 'y_exact_sln'
+    z_exact_soln = '0'
     boundary = 'left right top bottom'
-    linear = true
   [../]
 []
 
@@ -48,6 +50,14 @@
     type = ParsedFunction
     value = 'sin(.5*pi*x)*cos(.5*pi*y)'
   [../]
+  [./ffx]
+    type = ParsedFunction
+    value = '.5*pi*pi*cos(.5*pi*x)*sin(.5*pi*y)'
+  [../]
+  [./ffy]
+    type = ParsedFunction
+    value = '.5*pi*pi*sin(.5*pi*x)*cos(.5*pi*y)'
+  [../]
 []
 
 [Preconditioning]
@@ -58,16 +68,8 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'LINEAR'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-  petsc_options = '-ksp_converged_reason'
 []
 
 [Outputs]
   exodus = true
-  [./console]
-    type = Console
-    execute_on = 'initial timestep_begin linear failed'
-  [../]
 []

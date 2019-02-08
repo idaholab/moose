@@ -11,6 +11,7 @@
 #include "MooseError.h"
 
 #include "libmesh/nanoflann.hpp"
+#include "libmesh/point.h"
 
 KDTree::KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size)
   : _point_list_adaptor(master_points.begin(), master_points.end()),

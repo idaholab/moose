@@ -225,6 +225,17 @@ Real directionValueTensor(const RankTwoTensor & r2tensor, Point & direction);
  * Triaxiality is the ratio of the hydrostatic stress to the von Mises stress.
  */
 Real triaxialityStress(const RankTwoTensor & stress);
+
+/*
+ * maxShear is the maximum shear stress defined as the maximum principal
+ * stress minus the minimum principal stress.
+ */
+Real maxShear(const RankTwoTensor & stress);
+
+/*
+ * stressIntensity is defined as two times the maximum shear stress.
+ */
+Real stressIntensity(const RankTwoTensor & stress);
 }
 
 #endif // RANKTWOSCALARTOOLS_H

@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", BreakBoundaryOnSubdomain);
 
 template <>

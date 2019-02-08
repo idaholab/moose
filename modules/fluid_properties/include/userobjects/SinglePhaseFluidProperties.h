@@ -99,6 +99,18 @@ public:
   virtual Real cp_from_v_e(Real v, Real e) const;
 
   /**
+   * Isobaric (constant pressure) specific heat from specific volume and specific
+   * internal energy
+   *
+   * @param[in] v       specific volume (m$^3$/kg)
+   * @param[in] e       specific internal energy (J/kg)
+   * @param[out] cp     isobaric specific heat (J/kg/K)
+   * @param[out] dcp_dv derivative of isobaric specific heat w.r.t. specific volume (J/K/m$^3$)
+   * @param[out] dcp_de derivative of isobaric specific heat w.r.t. specific inernal energy (1/K)
+   */
+  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const;
+
+  /**
    * Isochoric (constant-volume) specific heat from specific volume and specific
    * internal energy
    *
@@ -457,6 +469,17 @@ public:
   virtual Real beta(Real pressure, Real temperature) const;
 
   /**
+   * Thermal expansion coefficient and its derivatives from pressure and temperature
+   *
+   * @param[in] p          pressure (Pa)
+   * @param[in] T          temperature (K)
+   * @param[out] beta      beta (1/K)
+   * @param[out] dbeta_dp  derivative of the thermal expansion coefficient w.r.t. pressure
+   * @param[out] dbeta_dT  derivative of the thermal expansion coefficient w.r.t. temperature
+   */
+  virtual void beta_from_p_T(Real p, Real T, Real & beta, Real & dbeta_dp, Real & dbeta_dT) const;
+
+  /**
    * Partial pressure at saturation in a gas mixture
    *
    * @param[in] p   pressure (Pa)
@@ -528,6 +551,15 @@ public:
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
+  virtual void rho_e_from_p_T(Real pressure,
+                              Real temperature,
+                              Real & rho,
+                              Real & drho_dp,
+                              Real & drho_dT,
+                              Real & e,
+                              Real & de_dp,
+                              Real & de_dT) const;
+
   virtual void rho_e_dpT(Real pressure,
                          Real temperature,
                          Real & rho,
@@ -553,6 +585,18 @@ public:
    * @return cp (J/kg/K)
    */
   virtual Real cp_from_p_T(Real pressure, Real temperature) const;
+
+  /**
+   * Isobaric specific heat capacity from pressure and temperature
+   *
+   * @param[in] pressure    fluid pressure (Pa)
+   * @param[in] temperature fluid temperature (K)
+   * @param[out] cp         isobaric specific heat (J/kg/K)
+   * @param[out] dcp_dp     derivative of isobaric specific heat w.r.t. pressure (J/kg/K/Pa)
+   * @param[out] dcp_dT     derivative of isobaric specific heat w.r.t. temperature (J/kg/K/K)
+   */
+  virtual void
+  cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const;
 
   /**
    * Isochoric specific heat
@@ -609,6 +653,13 @@ public:
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
+  virtual void mu_from_rho_T(Real density,
+                             Real temperature,
+                             Real ddensity_dT,
+                             Real & mu,
+                             Real & dmu_drho,
+                             Real & dmu_dT) const;
+
   virtual void mu_drhoT_from_rho_T(Real density,
                                    Real temperature,
                                    Real ddensity_dT,
@@ -624,6 +675,7 @@ public:
    * @param[out] mu viscosity (Pa.s)
    */
   virtual void rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const;
+  virtual void rho_mu_from_p_T(Real pressure, Real temperature, Real & rho, Real & mu) const;
 
   /**
    * Density and viscosity and their derivatives wrt pressure and temperature
@@ -636,6 +688,15 @@ public:
    * @param[out] dmu_dp derivative of viscosity wrt pressure
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
+  virtual void rho_mu_from_p_T(Real pressure,
+                               Real temperature,
+                               Real & rho,
+                               Real & drho_dp,
+                               Real & drho_dT,
+                               Real & mu,
+                               Real & dmu_dp,
+                               Real & dmu_dT) const;
+
   virtual void rho_mu_dpT(Real pressure,
                           Real temperature,
                           Real & rho,
@@ -686,6 +747,7 @@ public:
    * @param[out] Kh Henry's constant
    * @param[out] dKh_dT derivative of Kh wrt temperature
    */
+  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const;
   virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const;
 
   /**
@@ -707,6 +769,7 @@ public:
    * @param[out] saturation pressure (Pa)
    * @param[out] derivative of saturation pressure wrt temperature (Pa/K)
    */
+  virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const;
   virtual void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
 
 protected:
@@ -717,8 +780,8 @@ protected:
    * temperatures, IAPWS (2004)
    */
   virtual Real henryConstantIAPWS(Real temperature, Real A, Real B, Real C) const;
-
-  /// IAPWS formulation of Henry's law constant for dissolution in water and derivative wrt temperature
+  virtual void
+  henryConstantIAPWS(Real temperature, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const;
   virtual void
   henryConstantIAPWS_dT(Real temperature, Real & Kh, Real & dKh_dT, Real A, Real B, Real C) const;
 

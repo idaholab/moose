@@ -33,7 +33,7 @@ Without numerical stabilization the corresponding Jacobian is given by
 Advective flow is notoriously prone to physically-incorrect overshoots
 and undershoots, so in many simulations some numerical stabilization
 is used to reduce or eliminate this spurious behaviour.
-Full-upwinding [cite:dalen1979,adhikary2011] is an example of
+Full-upwinding [cite!dalen1979,adhikary2011] is an example of
 numerical stabilization and this essentially adds numerical diffusion
 to completely eliminate overshoots and undershoots.  Full-upwinding is
 available in `ConservativeAdvection` by setting the `upwinding_type`
@@ -125,7 +125,7 @@ same time the `OutflowBC` is removing $\langle\psi_i, \vec{v} u \cdot
 `OutflowBC` is actually adding fluid at the same rate the
 `ConservativeAdvection` Kernel is removing it. The physical interpretation
 is that something external to the model is adding fluid at exactly the
-rate specified by the initial conditions at that boundary. 
+rate specified by the initial conditions at that boundary.
 
 Instead, for $\vec{v} \cdot \vec{n} < 0$ users typically want to specify a particular value for an
 injected flux.  This is achieved by using an `InflowBC`.  This adds $\langle\psi_i, \vec{v} u_{B} \cdot

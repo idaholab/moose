@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#5658'
+  [./test]
+    type = 'Exodiff'
+    input = 'ad_bc.i'
+    exodiff = 'ad_bc_out.e'
+    requirement = 'We shall be able to produce the expected result using ADKernel, ADNodalBC, and ADIntegratedBC'
+    design = 'ADFunctionDirichletBC.md ADDiffusion.md jacobian_definition.md'
+  [../]
+  [./jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_bc.i'
+    cli_args = 'Outputs/exodus=false Mesh/nx=3 Mesh/ny=3'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'We shall be able to produce the exact Jacobian using ADKernel, ADNodalBC, and ADIntegratedBC with a first order variable'
+    design = 'ADFunctionDirichletBC.md ADDiffusion.md jacobian_definition.md'
+  [../]
+  [./2nd_order_jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_bc.i'
+    cli_args = 'Outputs/exodus=false Mesh/nx=2 Mesh/ny=2 Mesh/elem_type=QUAD9 Variables/u/order=SECOND'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'We shall be able to produce the exact Jacobian using ADKernel, ADNodalBC, and ADIntegratedBC with a second order variable'
+    design = 'ADFunctionDirichletBC.md ADDiffusion.md jacobian_definition.md'
+  [../]
+  [./vector_test]
+    type = 'Exodiff'
+    input = 'vector_ad_bc.i'
+    exodiff = 'vector_ad_bc_out.e'
+    requirement = 'We shall be able to produce the expected result using ADVectorKernel, ADVectorNodalBC, and ADVectorIntegratedBC'
+    design = 'ADLagrangeVecFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
+  [../]
+  [./vector_jac]
+    type = 'PetscJacobianTester'
+    input = 'vector_ad_bc.i'
+    cli_args = 'Outputs/exodus=false Mesh/nx=3 Mesh/ny=3'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'We shall be able to produce the exact Jacobian using ADVectorKernel, ADVectorNodalBC, and ADVectorIntegratedBC with a first order variable'
+    design = 'ADLagrangeVecFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
+  [../]
+  [./2nd_order_vector_jac]
+    type = 'PetscJacobianTester'
+    input = 'vector_ad_bc.i'
+    cli_args = 'Outputs/exodus=false Mesh/nx=2 Mesh/ny=2 Mesh/elem_type=QUAD9 Variables/u/order=SECOND'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'We shall be able to produce the exact Jacobian using ADVectorKernel, ADVectorNodalBC, and ADVectorIntegratedBC with a second order variable'
+    design = 'ADLagrangeVecFunctionDirichletBC.md ADVectorDiffusion.md jacobian_definition.md'
+  [../]
+[]

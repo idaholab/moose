@@ -75,25 +75,15 @@ Steady::execute()
   for (unsigned int r_step = 0; r_step <= steps; r_step++)
   {
 #endif // LIBMESH_ENABLE_AMR
-    preSolve();
     _problem.timestepSetup();
-    _problem.execute(EXEC_TIMESTEP_BEGIN);
-    _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
-    // Update warehouse active objects
-    _problem.updateActiveObjects();
-
-    _problem.solve();
-    postSolve();
+    _last_solve_converged = _picard_solve.solve();
 
     if (!lastSolveConverged())
     {
       _console << "Aborting as solve did not converge\n";
       break;
     }
-
-    _problem.onTimestepEnd();
-    _problem.execute(EXEC_TIMESTEP_END);
 
     _problem.computeIndicators();
     _problem.computeMarkers();

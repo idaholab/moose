@@ -14,6 +14,7 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/periodic_boundary_base.h"
 #include "libmesh/unstructured_mesh.h"
+#include "libmesh/node.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)

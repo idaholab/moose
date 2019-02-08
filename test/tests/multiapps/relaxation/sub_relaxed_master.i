@@ -91,6 +91,8 @@
     execute_on = timestep_begin
     positions = '0 0 0'
     input_files = sub_relaxed_sub.i
+    relaxed_variables = v
+    relaxation_factor = 0.94
   [../]
 []
 

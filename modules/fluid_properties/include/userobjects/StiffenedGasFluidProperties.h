@@ -33,6 +33,7 @@ public:
   virtual Real c_from_v_e(Real v, Real e) const override;
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
   virtual Real cp_from_v_e(Real v, Real e) const override;
+  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
   virtual Real cv_from_v_e(Real v, Real e) const override;
   virtual Real mu_from_v_e(Real v, Real e) const override;
   virtual Real k_from_v_e(Real v, Real e) const override;
@@ -75,6 +76,13 @@ public:
   virtual Real criticalTemperature() const override;
   virtual Real criticalDensity() const override;
   virtual Real criticalInternalEnergy() const override;
+  virtual Real cv_from_p_T(Real p, Real T) const override;
+  virtual Real cp_from_p_T(Real p, Real T) const override;
+  virtual void cp_from_p_T(Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
+  virtual Real mu_from_p_T(Real p, Real T) const override;
+  virtual void mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+  virtual Real k_from_p_T(Real p, Real T) const override;
+  virtual void k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   virtual Real c2_from_p_rho(Real pressure, Real rho) const;
 

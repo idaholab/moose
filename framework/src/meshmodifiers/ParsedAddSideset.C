@@ -13,6 +13,8 @@
 #include "MooseMesh.h"
 
 #include "libmesh/fparser_ad.hh"
+#include "libmesh/elem.h"
+#include "libmesh/fe_base.h"
 
 registerMooseObject("MooseApp", ParsedAddSideset);
 

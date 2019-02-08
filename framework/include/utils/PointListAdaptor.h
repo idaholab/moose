@@ -12,6 +12,7 @@
 
 #include "libmesh/nanoflann.hpp"
 #include "libmesh/utility.h"
+#include "libmesh/point.h"
 
 #include <iterator>
 

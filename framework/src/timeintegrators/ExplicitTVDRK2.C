@@ -53,21 +53,16 @@ ExplicitTVDRK2::computeTimeDerivatives()
 
   NumericVector<Number> & u_dot = *_sys.solutionUDot();
   u_dot = *_solution;
-  if (_stage < 3)
-  {
-    u_dot -= _solution_old;
-    u_dot *= 1. / _dt;
-  }
-  else
-  {
-    u_dot.scale(2.);
-    u_dot -= _solution_old;
-    u_dot -= _solution_older;
-    u_dot *= 0.5 / _dt;
-  }
+  computeTimeDerivativeHelper(u_dot, _solution_old, _solution_older);
 
   _du_dot_du = 1. / _dt;
   u_dot.close();
+}
+
+void
+ExplicitTVDRK2::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof)
+{
+  computeTimeDerivativeHelper(ad_u_dot, _solution_old(dof), _solution_older(dof));
 }
 
 void

@@ -65,6 +65,8 @@
 #include "AllLocalDofIndicesThread.h"
 #include "FloatingPointExceptionGuard.h"
 #include "MaxVarNDofsPerElem.h"
+#include "MaxVarNDofsPerNode.h"
+#include "ADKernel.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -196,7 +198,19 @@ NonlinearSystemBase::init()
   Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
   _max_var_n_dofs_per_elem = mvndpe.max();
   _communicator.max(_max_var_n_dofs_per_elem);
+  auto displaced_problem = _fe_problem.getDisplacedProblem();
+  if (displaced_problem)
+    displaced_problem->nlSys().assignMaxVarNDofsPerElem(_max_var_n_dofs_per_elem);
   Moose::perf_log.pop("maxVarNDofsPerElem()", "Setup");
+
+  Moose::perf_log.push("maxVarNDofsPerNode()", "Setup");
+  MaxVarNDofsPerNode mvndpn(_fe_problem, *this);
+  Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+  _max_var_n_dofs_per_node = mvndpn.max();
+  _communicator.max(_max_var_n_dofs_per_node);
+  if (displaced_problem)
+    displaced_problem->nlSys().assignMaxVarNDofsPerNode(_max_var_n_dofs_per_node);
+  Moose::perf_log.pop("maxVarNDofsPerNode()", "Setup");
 }
 
 void
@@ -241,6 +255,7 @@ NonlinearSystemBase::initialSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.initialSetup(tid);
+    _ad_jacobian_kernels.initialSetup(tid);
     _nodal_kernels.initialSetup(tid);
     _dirac_kernels.initialSetup(tid);
     if (_doing_dg)
@@ -262,6 +277,7 @@ NonlinearSystemBase::timestepSetup()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.timestepSetup(tid);
+    _ad_jacobian_kernels.timestepSetup(tid);
     _nodal_kernels.timestepSetup(tid);
     _dirac_kernels.timestepSetup(tid);
     if (_doing_dg)
@@ -324,7 +340,11 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
     // Create the kernel object via the factory and add to warehouse
     std::shared_ptr<KernelBase> kernel =
         _factory.create<KernelBase>(kernel_name, name, parameters, tid);
-    _kernels.addObject(kernel, tid);
+    if (std::dynamic_pointer_cast<ADKernel<JACOBIAN>>(kernel) ||
+        std::dynamic_pointer_cast<ADVectorKernel<JACOBIAN>>(kernel))
+      _ad_jacobian_kernels.addObject(kernel, tid);
+    else
+      _kernels.addObject(kernel, tid);
   }
 
   if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -696,6 +716,7 @@ void
 NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
   _kernels.subdomainSetup(subdomain, tid);
+  _ad_jacobian_kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
   _element_dampers.subdomainSetup(subdomain, tid);
   _nodal_dampers.subdomainSetup(subdomain, tid);
@@ -2213,6 +2234,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.jacobianSetup(tid);
+    _ad_jacobian_kernels.jacobianSetup(tid);
     _nodal_kernels.jacobianSetup(tid);
     _dirac_kernels.jacobianSetup(tid);
     if (_doing_dg)
@@ -2639,6 +2661,7 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
   _interface_kernels.updateActive(tid);
   _dirac_kernels.updateActive(tid);
   _kernels.updateActive(tid);
+  _ad_jacobian_kernels.updateActive(tid);
   _nodal_kernels.updateActive(tid);
   if (tid == 0)
   {

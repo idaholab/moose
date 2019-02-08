@@ -10,6 +10,8 @@
 #include "ElemUniqueSubdomains.h"
 #include "MooseMesh.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseTestApp", ElemUniqueSubdomains);
 
 template <>

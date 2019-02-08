@@ -16,6 +16,8 @@
 #include "MooseError.h"
 #include "VectorPostprocessor.h"
 
+#include "libmesh/point.h"
+
 template <>
 InputParameters
 validParams<SamplerBase>()

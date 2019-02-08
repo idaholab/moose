@@ -17,6 +17,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/elem.h"
 
 template <>
 InputParameters

@@ -10,8 +10,8 @@
 #ifndef MATERIALDATA_H
 #define MATERIALDATA_H
 
-#include "Moose.h"
 #include "MaterialProperty.h"
+#include "Moose.h"
 #include "MaterialPropertyStorage.h"
 
 // libMesh
@@ -180,20 +180,6 @@ private:
   declareADHelper(MaterialProperties & props, const std::string & prop_name, unsigned int prop_id);
 };
 
-// template <typename T,
-//           typename std::enable_if<!std::is_same> const MaterialProperty<T> * castToMatProp(
-//               PropertyValue const * const & prop_to_be_cast)
-// {
-//   return dynamic_cast<const MaterialProperty<T> *>(prop_to_be_cast);
-// }
-
-// template <>
-// const MaterialProperty<Real> *
-// castToMatProp<DualReal, Real>(PropertyValue const * const & prop_to_be_cast)
-// {
-//   return dynamic_cast<const MaterialProperty<Real> *>(prop_to_be_cast);
-// }
-
 template <typename T>
 inline bool
 MaterialData::haveProperty(const std::string & prop_name) const
@@ -223,6 +209,10 @@ MaterialData::resizeProps(unsigned int size, bool declared_ad)
 
   if (_props[size] == nullptr)
     _props[size] = new ADMaterialPropertyObject<T>(declared_ad);
+  // This branch is necessary in case the frist call to resizeProps for this property id was
+  // initiated through a getMaterialProperty call, which will have declared_ad = false
+  else if (declared_ad)
+    _props[size]->markAD(true);
   if (_props_old[size] == nullptr)
     _props_old[size] = new ADMaterialPropertyObject<T>;
   if (_props_older[size] == nullptr)

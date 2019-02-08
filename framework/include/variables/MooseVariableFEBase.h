@@ -12,8 +12,14 @@
 
 #include "MooseVariableBase.h"
 
-#include "libmesh/dense_vector.h"
-#include "libmesh/numeric_vector.h"
+namespace libMesh
+{
+template <typename>
+class DenseVector;
+template <typename>
+class NumericVector;
+class Point;
+}
 
 class Assembly;
 
@@ -70,13 +76,6 @@ public:
    */
   virtual bool activeOnSubdomain(SubdomainID subdomain) const = 0;
 
-  virtual const DenseVector<Number> & solutionDoFs() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOld() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOlder() = 0;
-  virtual const DenseVector<Number> & solutionDoFsNeighbor() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOldNeighbor() = 0;
-  virtual const DenseVector<Number> & solutionDoFsOlderNeighbor() = 0;
-
   /**
    * Prepare the initial condition
    */
@@ -109,7 +108,7 @@ public:
   /**
    * Set values for this variable to keep everything up to date
    */
-  virtual void setNodalValue(const DenseVector<Number> & value) = 0;
+  virtual void setDofValues(const DenseVector<Number> & value) = 0;
   /**
    * Get the value of this variable at given node
    */

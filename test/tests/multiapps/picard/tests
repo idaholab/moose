@@ -54,4 +54,14 @@
     issues = '#5800'
     requirement = "The system shall allow function-defined time stepping for transient multiapps"
   [../]
+
+  [./steady]
+    type = 'Exodiff'
+    input = 'steady_picard_master.i'
+    exodiff = 'steady_picard_master_out.e'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#9038'
+    requirement = "The system shall allow steady-state Picard iteration with multiapps"
+  [../]
 []

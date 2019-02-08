@@ -15,6 +15,7 @@
 #include "TaggingInterface.h"
 #include "Conversion.h"
 #include "FEProblem.h"
+#include "Assembly.h"
 
 #include "libmesh/dense_vector.h"
 

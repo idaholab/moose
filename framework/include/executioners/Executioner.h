@@ -15,6 +15,7 @@
 #include "PostprocessorInterface.h"
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
+#include "PicardSolve.h"
 
 // System includes
 #include <string>
@@ -107,7 +108,13 @@ public:
   /**
    * Whether or not the last solve converged.
    */
-  virtual bool lastSolveConverged();
+  virtual bool lastSolveConverged() const = 0;
+
+  /// Return underlining PicardSolve object.
+  PicardSolve & picardSolve() { return _picard_solve; }
+
+  /// Augmented Picard convergence check that can be overridden by derived executioners
+  virtual bool augmentedPicardConvergenceCheck() const { return false; }
 
 protected:
   /**
@@ -121,6 +128,8 @@ protected:
                                     const std::string execute_on = "");
 
   FEProblemBase & _fe_problem;
+
+  PicardSolve _picard_solve;
 
   /// Initial Residual Variables
   Real _initial_residual_norm;

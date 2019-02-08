@@ -34,7 +34,7 @@ FileMeshGenerator::FileMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 FileMeshGenerator::generate()
 {
-  auto mesh = libmesh_make_unique<ReplicatedMesh>(comm());
+  auto mesh = _mesh->buildMeshBaseObject();
 
   mesh->read(_file_name);
 

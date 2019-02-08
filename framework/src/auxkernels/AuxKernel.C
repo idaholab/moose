@@ -276,7 +276,7 @@ AuxKernel::compute()
       _local_sol.resize(_n_local_dofs);
       _local_ke.cholesky_solve(_local_re, _local_sol);
 
-      _var.setNodalValue(_local_sol);
+      _var.setDofValues(_local_sol);
     }
   }
 }

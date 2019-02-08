@@ -112,23 +112,24 @@ AB2PredictorCorrector::step()
 }
 
 bool
-AB2PredictorCorrector::converged()
+AB2PredictorCorrector::converged() const
 {
   if (!_converged)
-  {
-    _dt_steps_taken = 0;
     return false;
-  }
   if (_error < _e_max)
-  {
     return true;
-  }
   else
-  {
-    _console << "Marking last solve not converged " << _error << " " << _e_max << std::endl;
-    _dt_steps_taken = 0;
     return false;
-  }
+}
+
+void
+AB2PredictorCorrector::postSolve()
+{
+  if (!converged())
+    _dt_steps_taken = 0;
+
+  if (_error >= _e_max)
+    _console << "Marking last solve not converged " << _error << " " << _e_max << std::endl;
 }
 
 Real

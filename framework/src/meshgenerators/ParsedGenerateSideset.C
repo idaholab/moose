@@ -14,6 +14,8 @@
 
 #include "libmesh/fparser_ad.hh"
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/elem.h"
+#include "libmesh/fe_base.h"
 
 #include <typeinfo>
 

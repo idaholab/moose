@@ -43,7 +43,7 @@ validParams<Q2PPorepressureFlux>()
 Q2PPorepressureFlux::Q2PPorepressureFlux(const InputParameters & parameters)
   : Kernel(parameters),
     _density(getUserObject<RichardsDensity>("fluid_density")),
-    _sat(coupledNodalValue("saturation_variable")),
+    _sat(coupledDofValues("saturation_variable")),
     _sat_var(coupled("saturation_variable")),
     _relperm(getUserObject<RichardsRelPerm>("fluid_relperm")),
     _viscosity(getParam<Real>("fluid_viscosity")),

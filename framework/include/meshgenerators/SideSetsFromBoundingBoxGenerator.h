@@ -12,17 +12,13 @@
 
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
+#include "libmesh/bounding_box.h"
 
 // Forward declarations
 class SideSetsFromBoundingBoxGenerator;
 
 template <>
 InputParameters validParams<SideSetsFromBoundingBoxGenerator>();
-
-namespace libMesh
-{
-class BoundingBox;
-}
 
 /**
  * MeshGenerator for defining a Subdomain inside or outside of a bounding box

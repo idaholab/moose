@@ -12,6 +12,8 @@
 
 #include "NSAction.h"
 
+#include "libmesh/vector_value.h"
+
 class AddNavierStokesICsAction;
 
 template <>

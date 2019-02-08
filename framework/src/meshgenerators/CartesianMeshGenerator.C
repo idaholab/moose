@@ -14,6 +14,9 @@
 #include "libmesh/mesh_generation.h"
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/replicated_mesh.h"
+#include "libmesh/point.h"
+#include "libmesh/elem.h"
+#include "libmesh/node.h"
 
 registerMooseObject("MooseApp", CartesianMeshGenerator);
 

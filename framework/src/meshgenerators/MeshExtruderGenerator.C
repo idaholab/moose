@@ -13,6 +13,7 @@
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/elem.h"
 
 registerMooseObject("MooseApp", MeshExtruderGenerator);
 

@@ -8,15 +8,14 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDocs.base import components
-from MooseDocs.tree import html, tokens
-from MooseDocs.extensions import command
+from MooseDocs.base import components, LatexRenderer
+from MooseDocs.tree import html, tokens, latex
+from MooseDocs.extensions import command, core
 
 def make_extension(**kwargs):
     return MaterialIconExtension(**kwargs)
 
-IconBlockToken = tokens.newToken('IconBlockToken')
-IconToken = tokens.newToken('IconToken', icon=u'')
+Icon = tokens.newToken('Icon', icon=u'', faicon=u'')
 
 class MaterialIconExtension(command.CommandExtension):
     "Adds ability to include material icons."""
@@ -29,34 +28,37 @@ class MaterialIconExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(reader, IconCommand())
-        renderer.add('IconToken', RenderIconToken())
-        renderer.add('IconBlockToken', RenderIconBlockToken())
+        renderer.add('Icon', RenderIcon())
+
+        if isinstance(renderer, LatexRenderer):
+            renderer.addPackage('fontawesome')
 
 class IconCommand(command.CommandComponent):
     COMMAND = 'icon'
     SUBCOMMAND = '*'
 
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['faicon'] = (None, "When the LaTeX renderer is used, this will override the " \
+                                    "supplied subcommand item. The name should exist in the " \
+                                    "LaTeX fontawesome package.")
+        return settings
+
     def createToken(self, parent, info, page):
-        return IconToken(parent, icon=info['subcommand'])
+        if info.pattern not in ('InlineCommand', 'OldInlineCommand'):
+            core.Paragraph(parent)
+        return Icon(parent, icon=info['subcommand'], faicon=self.settings['faicon'])
 
-class RenderIconToken(components.RenderComponent):
+class RenderIcon(components.RenderComponent):
     def createHTML(self, parent, token, page):
         pass
 
     def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
-        i = html.Tag(parent, 'i', class_='material-icons moose-inline-icon', **token.attributes)
-        html.String(i, content=token['icon'], hide=True)
+        i = html.Tag(parent, 'i', token, string=token['icon'])
+        i.addClass('material-icons')
+        i.addClass('moose-inline-icon')
 
     def createLatex(self, parent, token, page):
-        pass
-
-class RenderIconBlockToken(components.RenderComponent):
-    def createHTML(self, parent, token, page):
-        pass
-
-    def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
-        div = html.Tag(parent, 'div', class_='icon-block')
-        return div
-
-    def createLatex(self, parent, token, page):
-        pass
+        icon = token['faicon'] or token['icon']
+        latex.Command(parent, 'faicon', string=icon, escape=False)

@@ -11,6 +11,8 @@
 #include "Conversion.h"
 #include "CastUniquePointer.h"
 
+#include "libmesh/elem.h"
+
 registerMooseObject("MooseApp", SubdomainBoundingBoxGenerator);
 
 template <>

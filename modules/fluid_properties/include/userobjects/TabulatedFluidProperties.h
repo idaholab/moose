@@ -109,15 +109,6 @@ public:
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
-  virtual void rho_e_dpT(Real pressure,
-                         Real temperature,
-                         Real & rho,
-                         Real & drho_dp,
-                         Real & drho_dT,
-                         Real & e,
-                         Real & de_dp,
-                         Real & de_dT) const override;
-
   virtual Real h_from_p_T(Real p, Real T) const override;
 
   virtual void
@@ -128,18 +119,9 @@ public:
   virtual void mu_from_p_T(
       Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
-  virtual void rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const override;
-
-  virtual void rho_mu_dpT(Real pressure,
-                          Real temperature,
-                          Real & rho,
-                          Real & drho_dp,
-                          Real & drho_dT,
-                          Real & mu,
-                          Real & dmu_dp,
-                          Real & dmu_dT) const override;
-
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
+
+  using SinglePhaseFluidProperties::cp_from_p_T;
 
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
 
@@ -155,7 +137,7 @@ public:
 
   virtual Real henryConstant(Real temperature) const override;
 
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
+  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
 protected:
   /**
@@ -214,6 +196,8 @@ protected:
   unsigned int _num_T;
   /// Number of pressure points in the tabulated data
   unsigned int _num_p;
+  /// Whether to save a generated fluid properties file to disk
+  const bool _save_file;
 
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidProperties & _fp;

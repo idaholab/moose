@@ -15,6 +15,10 @@
 // Forward declarations
 class MultiAppCopyTransfer;
 class MooseVariableFEBase;
+namespace libMesh
+{
+class DofObject;
+}
 
 template <>
 InputParameters validParams<MultiAppCopyTransfer>();

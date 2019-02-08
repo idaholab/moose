@@ -10,6 +10,8 @@
 #include "ImageSubdomainGenerator.h"
 #include "CastUniquePointer.h"
 
+#include "libmesh/elem.h"
+
 // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 #include <cmath>
 

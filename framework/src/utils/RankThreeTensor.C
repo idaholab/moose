@@ -16,7 +16,6 @@
 #include "MooseException.h"
 #include "MooseUtils.h"
 #include "MatrixTools.h"
-#include "MaterialProperty.h"
 #include "PermutationTensor.h"
 
 #include "libmesh/utility.h"

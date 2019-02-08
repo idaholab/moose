@@ -104,12 +104,12 @@ NitrogenFluidProperties::mu_from_rho_T(Real density, Real temperature) const
 }
 
 void
-NitrogenFluidProperties::mu_drhoT_from_rho_T(Real density,
-                                             Real temperature,
-                                             Real ddensity_dT,
-                                             Real & mu,
-                                             Real & dmu_drho,
-                                             Real & dmu_dT) const
+NitrogenFluidProperties::mu_from_rho_T(Real density,
+                                       Real temperature,
+                                       Real ddensity_dT,
+                                       Real & mu,
+                                       Real & dmu_drho,
+                                       Real & dmu_dT) const
 {
   // Scale the input density and temperature
   const Real delta = density / _rho_critical;
@@ -165,7 +165,33 @@ NitrogenFluidProperties::mu_from_p_T(
   rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
 
   Real dmu_drho;
-  mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  mu_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
+void
+NitrogenFluidProperties::rho_mu_from_p_T(Real pressure,
+                                         Real temperature,
+                                         Real & rho,
+                                         Real & mu) const
+{
+  rho = rho_from_p_T(pressure, temperature);
+  mu = mu_from_rho_T(rho, temperature);
+}
+
+void
+NitrogenFluidProperties::rho_mu_from_p_T(Real pressure,
+                                         Real temperature,
+                                         Real & rho,
+                                         Real & drho_dp,
+                                         Real & drho_dT,
+                                         Real & mu,
+                                         Real & dmu_dp,
+                                         Real & dmu_dT) const
+{
+  rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  mu_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
   dmu_dp = dmu_drho * drho_dp;
 }
 
@@ -219,9 +245,9 @@ NitrogenFluidProperties::henryConstant(Real temperature) const
 }
 
 void
-NitrogenFluidProperties::henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const
+NitrogenFluidProperties::henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const
 {
-  henryConstantIAPWS_dT(temperature, Kh, dKh_dT, -9.67578, 4.72162, 11.70585);
+  henryConstantIAPWS(temperature, Kh, dKh_dT, -9.67578, 4.72162, 11.70585);
 }
 
 Real
@@ -239,6 +265,12 @@ NitrogenFluidProperties::vaporPressure(Real temperature) const
       Tr;
 
   return _p_critical * std::exp(logpressure);
+}
+
+void
+NitrogenFluidProperties::vaporPressure(Real, Real &, Real &) const
+{
+  mooseError(name(), ": vaporPressure() is not implemented");
 }
 
 Real

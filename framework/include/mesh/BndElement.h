@@ -11,7 +11,11 @@
 #define BNDELEMENT_H
 
 #include "MooseTypes.h"
-#include "libmesh/elem.h"
+
+namespace libMesh
+{
+class Elem;
+}
 
 struct BndElement
 {

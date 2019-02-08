@@ -12,7 +12,6 @@
 
 #include "ParallelUniqueId.h"
 #include "FEProblemBase.h"
-#include "Assembly.h"
 #include "ThreadedElementLoopBase.h"
 
 // Forward declarations

@@ -9,10 +9,10 @@
 
 #include "Action.h"
 #include "ActionWarehouse.h"
-#include "MooseMesh.h"
 #include "MooseApp.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h" // remove when getBaseName is removed
+#include "MooseMesh.h"
 
 template <>
 InputParameters

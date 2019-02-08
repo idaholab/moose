@@ -39,9 +39,9 @@ validParams<TensorMechanicsActionBase>()
 {
   InputParameters params = validParams<Action>();
 
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
+  params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "The nonlinear displacement variables for the problem");
-  params.addParam<NonlinearVariableName>("temperature", "The temperature");
+  params.addParam<VariableName>("temperature", "The temperature");
 
   MooseEnum strainType("SMALL FINITE", "SMALL");
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
@@ -78,10 +78,10 @@ validParams<TensorMechanicsActionBase>()
                                   "NONE"); // PLANE_STRESS
   params.addParam<MooseEnum>(
       "planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
-  params.addParam<NonlinearVariableName>("scalar_out_of_plane_strain",
-                                         "Scalar variable for the out-of-plane strain (in y "
-                                         "direction for 1D Axisymmetric or in z direction for 2D "
-                                         "Cartesian problems)");
+  params.addParam<VariableName>("scalar_out_of_plane_strain",
+                                "Scalar variable for the out-of-plane strain (in y "
+                                "direction for 1D Axisymmetric or in z direction for 2D "
+                                "Cartesian problems)");
   MooseEnum outOfPlaneDirection("x y z", "z");
   params.addParam<MooseEnum>(
       "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");

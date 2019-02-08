@@ -11,6 +11,8 @@
 #include "RankTwoScalarTools.h"
 #include "RankFourTensor.h"
 
+#include "libmesh/point.h"
+
 TEST_F(RankTwoTensorTest, L2norm)
 {
   EXPECT_NEAR(0, _m0.L2norm(), 0.0001);

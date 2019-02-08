@@ -25,7 +25,11 @@ class PorousFlowFullySaturated : public PorousFlowSinglePhaseBase
 public:
   PorousFlowFullySaturated(const InputParameters & params);
 
-  virtual void act() override;
+protected:
+  virtual void addKernels() override;
+  virtual void addMaterialDependencies() override;
+  virtual void addMaterials() override;
+  virtual void addUserObjects() override;
 };
 
 #endif // POROUSFLOWFULLYSATURATED_H

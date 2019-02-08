@@ -109,18 +109,6 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         name = component.__class__.__name__
         self.__lexer.add(group, name, component.RE, component, location)
 
-    def preExecute(self, root):
-        """
-        Called by Translator prior to beginning conversion, after reading.
-        """
-        pass
-
-    def postExecute(self, root):
-        """
-        Called by Translator after all conversion is complete, prior to writing.
-        """
-        pass
-
     def preTokenize(self, ast, page, meta):
         """
         Called by Translator prior to tokenization.

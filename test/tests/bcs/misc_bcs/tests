@@ -26,6 +26,6 @@
     type = 'Exodiff'
     input = 'weak_gradient_bc_test.i'
     exodiff = 'weak_gradient_bc_test_out.e'
-    requirement = "MOOSE shall support the 'no boundary condition' type boundary condition [citep:griffiths1997noboundary]."
+    requirement = "MOOSE shall support the 'no boundary condition' type boundary condition [citep!griffiths1997noboundary]."
   [../]
 []

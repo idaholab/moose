@@ -6,6 +6,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AdvectiveFluxCalculatorConstantVelocity.h"
+#include "Assembly.h"
 
 registerMooseObject("PorousFlowApp", AdvectiveFluxCalculatorConstantVelocity);
 
@@ -27,7 +28,7 @@ AdvectiveFluxCalculatorConstantVelocity::AdvectiveFluxCalculatorConstantVelocity
     const InputParameters & parameters)
   : AdvectiveFluxCalculatorBase(parameters),
     _velocity(getParam<RealVectorValue>("velocity")),
-    _u_nodal(coupledNodalValue("u")),
+    _u_nodal(coupledDofValues("u")),
     _phi(_assembly.fePhi<Real>(getVar("u", 0)->feType())),
     _grad_phi(_assembly.feGradPhi<Real>(getVar("u", 0)->feType()))
 {

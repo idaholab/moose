@@ -14,6 +14,8 @@
 #include "AddSideSetsBase.h"
 #include "FunctionParserUtils.h"
 
+#include "libmesh/point.h"
+
 // Forward declerations
 class ParsedAddSideset;
 

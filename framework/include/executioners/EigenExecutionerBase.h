@@ -65,8 +65,9 @@ public:
    * @param tol_x Tolerance on the difference of the solution norm of two successive iterations.
    * @param k Eigenvalue, input as the initial guess.
    * @param initial_res The initial residual.
+   * @return true solve converges, otherwise false.
    */
-  virtual void inversePowerIteration(unsigned int min_iter,
+  virtual bool inversePowerIteration(unsigned int min_iter,
                                      unsigned int max_iter,
                                      Real pfactor,
                                      bool cheb_on,
@@ -109,8 +110,9 @@ public:
    * @param abs_tol Absolute tolerance on system residual.
    * @param pfactor The factor on reducing the residual norm of each linear iteration.
    * @param k Eigenvalue, input as the initial guess.
+   * @return true solve converges, otherwise false.
    */
-  virtual void nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k);
+  virtual bool nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, Real & k);
 
   /**
    * A method for returning the eigenvalue computed by the executioner

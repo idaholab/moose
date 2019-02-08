@@ -7,7 +7,6 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
 import re
 import uuid
 import logging
@@ -21,8 +20,8 @@ from pylatexenc.latex2text import LatexNodes2Text
 
 import MooseDocs
 from MooseDocs.common import exceptions
-from MooseDocs.base import components
-from MooseDocs.tree import tokens, html
+from MooseDocs.base import components, LatexRenderer
+from MooseDocs.tree import tokens, html, latex
 from MooseDocs.extensions import core, command
 
 LOG = logging.getLogger('MooseDocs.extensions.bibtex')
@@ -39,6 +38,7 @@ class BibtexExtension(command.CommandExtension):
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
         config['duplicate_warning'] = (True, "Show a warning when duplicate entries detected.")
+        config['duplicates'] = (list(), "A list of duplicates that are allowed.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -47,8 +47,15 @@ class BibtexExtension(command.CommandExtension):
         self.__database = None
         self.__citations = set()
 
+    def initMetaData(self, page, meta):
+        meta.initData('citations', set())
+
+    def addCitations(self, *args):
+        self.__citations.update(args)
+
     def preExecute(self, content):
 
+        duplicates = self.get('duplicates', list())
         self.__database = BibliographyData()
 
         bib_files = []
@@ -67,12 +74,18 @@ class BibtexExtension(command.CommandExtension):
             #      databaseadd_entries-method-not-considering
             warn = self.get('duplicate_warning')
             for key in db.entries:
-                if key in self.__database.entries:
+                duplicate_key = key in self.__database.entries
+                duplicate_key_allowed = key in duplicates
+                if duplicate_key and (not duplicate_key_allowed):
                     if warn:
                         msg = "The BibTeX entry '%s' defined in %s already exists."
                         LOG.warning(msg, key, bfile)
-                else:
+                elif not duplicate_key:
                     self.__database.add_entry(key, db.entries[key])
+
+    def postTokenize(self, ast, page, meta, reader):
+        meta.getData('citations').update(self.__citations)
+        self.__citations.clear()
 
     @property
     def database(self):
@@ -82,15 +95,28 @@ class BibtexExtension(command.CommandExtension):
         self.requires(core, command)
 
         self.addCommand(reader, BibtexCommand())
-
-        reader.addInline(BibtexReferenceComponent(), location='>FormatInline')
+        self.addCommand(reader, BibtexReferenceComponent())
+        reader.addInline(BibtexReferenceComponentDeprecated(), location='>FormatInline')
 
         renderer.add('BibtexCite', RenderBibtexCite())
         renderer.add('BibtexBiliography', RenderBibtexBibliography())
 
+        if isinstance(renderer, LatexRenderer):
+            renderer.addPackage('natbib', 'round')
+
 BibtexCite = tokens.newToken('BibtexCite', keys=[])
-BibtexBibliography = tokens.newToken('BibtexBiliography', bib_style=u'')
-class BibtexReferenceComponent(components.TokenComponent):
+BibtexBibliography = tokens.newToken('BibtexBibliography', bib_style=u'')
+class BibtexReferenceComponent(command.CommandComponent):
+    COMMAND = ('cite', 'citet', 'citep', 'nocite')
+    SUBCOMMAND = None
+
+    def createToken(self, parent, info, page):
+        keys = [key.strip() for key in info['inline'].split(',')]
+        BibtexCite(parent, keys=keys, cite=info['command'])
+        self.extension.addCitations(*keys)
+        return parent
+
+class BibtexReferenceComponentDeprecated(components.TokenComponent):
     RE = re.compile(r'\['                                 # open
                     r'(?P<cite>cite|citet|citep|nocite):' # cite prefix
                     r'(?P<keys>.*?)'                      # list of keys
@@ -137,8 +163,10 @@ class RenderBibtexCite(components.RenderComponent):
         for i, key in enumerate(token['keys']):
 
             if key not in self.extension.database.entries:
-                msg = 'Unknown BibTeX key: {}'
-                raise exceptions.MooseDocsException(msg, key)
+                LOG.error('Unknown BibTeX key: %s', key)
+                html.Tag(parent, 'span', string=key, style='color:red;')
+                continue
+
 
             entry = self.extension.database.entries[key]
             author_found = True
@@ -194,8 +222,8 @@ class RenderBibtexCite(components.RenderComponent):
         self.createHTML(parent, token, page)
 
     def createLatex(self, parent, token, page):
-        pass
-
+        latex.Command(parent, token['cite'], string=u','.join(token['keys']), escape=False)
+        return parent
 
 class RenderBibtexBibliography(components.RenderComponent):
     def createHTML(self, parent, token, page):
