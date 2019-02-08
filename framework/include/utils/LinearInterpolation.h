@@ -56,18 +56,6 @@ public:
   Real sampleDerivative(Real x) const;
 
   /**
-   * This function will dump GNUPLOT input files that can be run to show the data points and
-   * function fits
-   */
-  void dumpSampleFile(std::string base_name,
-                      std::string x_label = "X",
-                      std::string y_label = "Y",
-                      Real xmin = 0,
-                      Real xmax = 0,
-                      Real ymin = 0,
-                      Real ymax = 0);
-
-  /**
    * This function returns the size of the array holding the points, i.e. the number of sample
    * points
    */

@@ -100,9 +100,15 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
   ierr = TSGetDM(ts, &da);
   CHKERRQ(ierr);
 
+#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
   PetscOptionsSetValue(NULL, "-ts_monitor", NULL);
   PetscOptionsSetValue(NULL, "-snes_monitor", NULL);
   PetscOptionsSetValue(NULL, "-ksp_monitor", NULL);
+#else
+  PetscOptionsSetValue("-ts_monitor", NULL);
+  PetscOptionsSetValue("-snes_monitor", NULL);
+  PetscOptionsSetValue("-ksp_monitor", NULL);
+#endif
 
   /*ierr = TSSetMaxTime(ts,1.0);CHKERRQ(ierr);*/
   ierr = TSSetExactFinalTime(ts, TS_EXACTFINALTIME_STEPOVER);

@@ -6,7 +6,6 @@
     requirement = 'MOOSE shall be able to create different subdomains.'
     design = 'meshgenerators/BlockDeletionGenerator.md'
     issues = '#11640'
-    mesh_mode = 'REPLICATED'
     recover = false
   [../]
 []
