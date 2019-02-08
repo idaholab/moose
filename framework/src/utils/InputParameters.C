@@ -500,7 +500,7 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name, unsigned
                "variable added with params.addRequiredCoupledVar() \n 3. The call to get the "
                "coupled value should have been properly guarded with isCoupled()\n");
 
-  return value_it->second._coupled_default[i];
+  return value_it->second._coupled_default.at(i);
 }
 
 unsigned int

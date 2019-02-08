@@ -321,6 +321,25 @@ Coupleable::getDefaultVectorValue(const std::string & var_name)
   if (default_value_it == _default_vector_value.end())
   {
     VectorVariableValue * value = new VectorVariableValue(_coupleable_max_qps, 0);
+    bool already_warned = false;
+    for (unsigned int qp = 0; qp < _coupleable_max_qps; ++qp)
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      {
+        try
+        {
+          (*value)[qp](i) = _c_parameters.defaultCoupledValue(var_name, i);
+        }
+        catch (const std::out_of_range &)
+        {
+          already_warned = true;
+          mooseWarning(
+              "You supplied less than 3 arguments for the default vector value for variable ",
+              var_name,
+              ". Did you accidently leave something off? We are going to assign 0s, assuming this "
+              "was intentional.");
+          (*value)[qp](i) = 0;
+        }
+      }
     default_value_it = _default_vector_value.insert(std::make_pair(var_name, value)).first;
   }
 
