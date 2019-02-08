@@ -40,6 +40,7 @@
   using ADKernelTempl<type, compute_stage>::_assembly;                                             \
   using ADKernelTempl<type, compute_stage>::_current_elem;                                         \
   using ADKernelTempl<type, compute_stage>::_t;                                                    \
+  using ADKernelTempl<type, compute_stage>::_dt;                                                   \
   using ADKernelTempl<type, compute_stage>::getBlockCoordSystem;                                   \
   using ADKernelTempl<type, compute_stage>::precalculateResidual;                                  \
   using ADKernelTempl<type, compute_stage>::prepareVectorTag;                                      \
