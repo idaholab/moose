@@ -332,12 +332,14 @@ Coupleable::getDefaultVectorValue(const std::string & var_name)
         }
         catch (const std::out_of_range &)
         {
+          if (!already_warned)
+            mooseWarning(
+                "You supplied less than 3 arguments for the default vector value for variable ",
+                var_name,
+                ". Did you accidently leave something off? We are going to assign 0s, assuming "
+                "this "
+                "was intentional.");
           already_warned = true;
-          mooseWarning(
-              "You supplied less than 3 arguments for the default vector value for variable ",
-              var_name,
-              ". Did you accidently leave something off? We are going to assign 0s, assuming this "
-              "was intentional.");
           (*value)[qp](i) = 0;
         }
       }
