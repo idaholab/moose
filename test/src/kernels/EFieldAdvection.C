@@ -21,7 +21,7 @@ InputParameters
 validParams<EFieldAdvection>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredCoupledVar("efield", "The electric field responsible for charge advection");
+  params.addCoupledVar("efield", {1, 1, 1}, "The electric field responsible for charge advection");
   MooseEnum charge("positive negative", "positive");
   params.addParam<MooseEnum>(
       "charge", charge, "Whether our primary variable is positive or negatively charged.");

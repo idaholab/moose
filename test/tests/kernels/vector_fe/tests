@@ -18,25 +18,25 @@
     issues = "#10049"
     requirement = "MOOSE shall be able to couple a vector variable into a standard kernel"
   [../]
-  [./coupled_scalar_default_vector]
+  [./coupled_scalar_default_vector_source]
     type = Exodiff
     input = 'coupled_scalar_default_vector_value.i'
     exodiff = 'coupled_scalar_default_vector_value_out.e'
     design = "moose_variables.md"
     issues = '#10049'
-    requirement = "MOOSE shall be able to assign a default value for a vector variable from the input file"
+    requirement = "MOOSE shall be able to assign a default value for a vector variable from the source file"
   [../]
-  [./coupled_scalar_default_vector_warn]
+  [./coupled_scalar_default_vector_input_and_warn]
     type = Exodiff
     input = 'coupled_scalar_default_vector_value.i'
-    exodiff = 'coupled_scalar_default_vector_value_out.e'
+    exodiff = 'coupled_scalar_default_vector_value_alt_out.e'
     allow_warnings = True
-    cli_args = "Kernels/advection/efield='.3 .3'"
-    prereq = 'coupled_scalar_default_vector'
+    cli_args = "Kernels/advection/efield='.3 .3' Outputs/file_base=coupled_scalar_default_vector_value_alt_out"
     expect_out = "You supplied less than 3 arguments for the default vector value for variable efield"
     design = "moose_variables.md"
     issues = '#10049'
-    requirement = "MOOSE shall warn when assigning a default value with number of components less than LIBMESH_DIM"
+    requirement = "MOOSE shall warn when assigning a default value with number of components less than LIBMESH_DIM "
+                  "and it shall be able to assign the default value from the input file"
   [../]
   [./coupled_scalar_default_vector_jacobian]
     type = PetscJacobianTester

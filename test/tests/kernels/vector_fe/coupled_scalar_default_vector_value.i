@@ -26,7 +26,6 @@
   [./advection]
     type = EFieldAdvection
     variable = v
-    efield = '.3 .3 0'
     charge = 'positive'
     mobility = 1
   [../]
