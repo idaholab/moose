@@ -97,6 +97,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
   _default_vector_curl.resize(_coupleable_max_qps);
   _ad_default_gradient.resize(_coupleable_max_qps);
   _ad_default_second.resize(_coupleable_max_qps);
+  _ad_default_vector_gradient.resize(_coupleable_max_qps);
 }
 
 Coupleable::~Coupleable()
