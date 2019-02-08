@@ -31,9 +31,6 @@ protected:
   Real _refine;
 
   bool _invert;
-  MarkerValue _third_state;
-
-  const VariableValue & _u;
 };
 
 #endif /* VALUETHRESHOLDMARKER_H */

@@ -29,11 +29,8 @@ protected:
   Real _upper_bound;
   Real _buffer_size;
 
-  MarkerValue _third_state;
   MarkerValue _inside;
   MarkerValue _outside;
-
-  const VariableValue & _u;
 };
 
 #endif /* VALUERANGEMARKER_H */
