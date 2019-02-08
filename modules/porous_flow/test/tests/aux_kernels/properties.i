@@ -38,6 +38,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./capillary_pressure]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./saturation_water]
     order = CONSTANT
     family = MONOMIAL
@@ -98,6 +102,12 @@
     variable = pressure_gas
     property = pressure
     phase = 1
+    execute_on = timestep_end
+  [../]
+  [./capillary_pressure]
+    type = PorousFlowPropertyAux
+    variable = capillary_pressure
+    property = capillary_pressure
     execute_on = timestep_end
   [../]
   [./saturation_water]
