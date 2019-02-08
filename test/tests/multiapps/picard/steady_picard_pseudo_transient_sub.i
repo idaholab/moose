@@ -47,6 +47,13 @@
   [../]
 []
 
+[Postprocessors]
+  [./vnorm]
+    type = ElementL2Norm
+    variable = v
+  [../]
+[]
+
 [Executioner]
   type = Transient
   end_time = 10

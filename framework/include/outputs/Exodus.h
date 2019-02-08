@@ -79,6 +79,8 @@ public:
    */
   void setOutputDimension(unsigned int dim);
 
+  void clear() { _exodus_io_ptr.reset(); }
+
 protected:
   /**
    * Outputs nodal, nonlinear variables

@@ -14,6 +14,8 @@
 #include "FileOutput.h"
 #include "Checkpoint.h"
 #include "FEProblem.h"
+#include "TableOutput.h"
+#include "Exodus.h"
 
 #include <libgen.h>
 #include <sys/types.h>
@@ -313,4 +315,18 @@ void
 OutputWarehouse::forceOutput()
 {
   _force_output = true;
+}
+
+void
+OutputWarehouse::reset()
+{
+  for (const auto & pair : _object_map)
+  {
+    auto * table = dynamic_cast<TableOutput *>(pair.second);
+    if (table != NULL)
+      table->clear();
+    auto * exodus = dynamic_cast<Exodus *>(pair.second);
+    if (exodus != NULL)
+      exodus->clear();
+  }
 }

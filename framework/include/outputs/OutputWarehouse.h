@@ -215,6 +215,9 @@ public:
   const bool & forTransient() const { return _transient; }
   bool & forTransient() { return _transient; }
 
+  /// Reset the output system
+  void reset();
+
 private:
   /**
    * Calls the outputStep method for each output object

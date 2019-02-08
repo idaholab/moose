@@ -62,6 +62,7 @@ Steady::execute()
   if (_app.isRecovering())
     return;
 
+  _time_step = 0;
   _problem.outputStep(EXEC_INITIAL);
 
   preExecute();
