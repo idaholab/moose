@@ -15,12 +15,12 @@
     # different in the DistributedMesh case, so we can't reuse the
     # gold file.
     mesh_mode = replicated
-    cli_args = 'Outputs/out/file_base=nemesis_elemental_replicated'
+    cli_args = 'Outputs/file_base=nemesis_elemental_replicated'
     min_parallel = 4
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
-    requirement = "The Nemesis Ouput object shall support writing elemental variables."
+    requirement = "The Nemesis Output object shall support writing elemental variables."
     design = 'Outputs/index.md'
     issues = '#2122'
   [../]
@@ -29,12 +29,44 @@
     input = nemesis_elemental.i
     exodiff = 'nemesis_elemental_distributed.e.4.0 nemesis_elemental_distributed.e.4.1 nemesis_elemental_distributed.e.4.2 nemesis_elemental_distributed.e.4.3'
     mesh_mode = distributed
-    cli_args = 'Outputs/out/file_base=nemesis_elemental_distributed'
+    cli_args = 'Outputs/file_base=nemesis_elemental_distributed'
     min_parallel = 4
     max_parallel = 4
     # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
     petsc_version = '>=3.8.0'
-    requirement = "The Nemesis Ouput object shall support writing elemental variables."
+    requirement = "The Nemesis Output object shall support writing elemental variables with the same numbering on DistributedMesh."
+    design = 'Outputs/index.md'
+    issues = '#2122'
+  [../]
+  [./nemesis_scalar_replicated]
+    type = 'Exodiff'
+    input = nemesis_scalar.i
+    exodiff = 'nemesis_scalar_replicated.e.4.0 nemesis_scalar_replicated.e.4.1 nemesis_scalar_replicated.e.4.2 nemesis_scalar_replicated.e.4.3'
+    # We want to make sure scalar variable writing works for
+    # ReplicatedMesh too, and the node numbering/partitioning will be
+    # different in the DistributedMesh case, so we can't reuse the
+    # gold file.
+    mesh_mode = replicated
+    cli_args = 'Outputs/file_base=nemesis_scalar_replicated'
+    min_parallel = 4
+    max_parallel = 4
+    # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
+    petsc_version = '>=3.8.0'
+    requirement = "The Nemesis Ouput object shall support writing scalar variables."
+    design = 'Outputs/index.md'
+    issues = '#2122'
+  [../]
+  [./nemesis_scalar_distributed]
+    type = 'Exodiff'
+    input = nemesis_scalar.i
+    exodiff = 'nemesis_scalar_distributed.e.4.0 nemesis_scalar_distributed.e.4.1 nemesis_scalar_distributed.e.4.2 nemesis_scalar_distributed.e.4.3'
+    mesh_mode = distributed
+    cli_args = 'Outputs/file_base=nemesis_scalar_distributed'
+    min_parallel = 4
+    max_parallel = 4
+    # We require a recent version of PETSc so that a version of METIS/ParMETIS with a portable RNG is used.
+    petsc_version = '>=3.8.0'
+    requirement = "The Nemesis Ouput object shall support writing scalar variables when using DistributedMesh."
     design = 'Outputs/index.md'
     issues = '#2122'
   [../]
