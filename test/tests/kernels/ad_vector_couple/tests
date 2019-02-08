@@ -18,5 +18,6 @@
     input = ad_vector_couple_default.i
     exodiff = ad_vector_couple_default_out.e
     requirement = "The system shall support coupling of default values for variables with automatic differentiation and vector values."
+    allow_warnings = True
   []
 []
