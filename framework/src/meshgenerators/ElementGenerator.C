@@ -179,10 +179,12 @@ ElementGenerator::generate()
 
   // If there was no input mesh then let's just make a new one
   if (!mesh)
-    mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+    mesh = _mesh->buildMeshBaseObject();
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
   auto elem = getElemType(elem_type_enum);
+
+  mesh->set_mesh_dimension(std::max((unsigned int)elem->dim(), mesh->mesh_dimension()));
 
   std::vector<Node *> nodes;
 
@@ -193,6 +195,7 @@ ElementGenerator::generate()
     nodes.push_back(mesh->add_point(point));
 
   mesh->add_elem(elem);
+
   auto n = elem->n_nodes();
 
   for (dof_id_type i = 0; i < _element_connectivity.size(); i += n)
