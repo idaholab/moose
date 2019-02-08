@@ -18,7 +18,7 @@ void
 SolidWall::check() const
 {
   if ((FlowModel::getSpatialDiscretizationType() == FlowModel::rDG) &&
-      (_flow_model_id == RELAP7::FM_TWO_PHASE_NCG))
+      (_flow_model_id == THM::FM_TWO_PHASE_NCG))
     logSpatialDiscretizationNotImplementedError(FlowModel::getSpatialDiscretizationType());
 }
 
@@ -97,6 +97,6 @@ SolidWall::addMooseObjects()
 {
   if (_flow_model_id == THM::FM_SINGLE_PHASE)
     addMooseObjects1Phase();
-  else if (_flow_model_id == RELAP7::FM_TWO_PHASE || _flow_model_id == RELAP7::FM_TWO_PHASE_NCG)
+  else if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
     addMooseObjects2Phase();
 }
