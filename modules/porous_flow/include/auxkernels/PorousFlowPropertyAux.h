@@ -81,6 +81,7 @@ private:
     VISCOSITY,
     MASS_FRACTION,
     RELPERM,
+    CAPILLARY_PRESSURE,
     ENTHALPY,
     INTERNAL_ENERGY,
     SECONDARY_CONCENTRATION,
@@ -90,6 +91,12 @@ private:
 
   /// Phase index
   const unsigned int _phase;
+
+  /// Liquid phase index
+  const unsigned int _liquid_phase;
+
+  /// Gas phase index
+  const unsigned int _gas_phase;
 
   /// Fluid component index
   const unsigned int _fluid_component;

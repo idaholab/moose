@@ -1,4 +1,5 @@
 # PorousFlowPropertyAux
+
 !syntax description /AuxKernels/PorousFlowPropertyAux
 
 This `AuxKernel` provides simplified access to fluid and material properties. The
@@ -11,6 +12,7 @@ following properties are available using the `property` input parameter:
 - `viscosity`
 - `mass_fraction`
 - `relperm`
+- `capillary_pressure`
 - `enthalpy`
 - `internal_energy`
 - `secondary_concentration` (m$^{3}$(secondary species)/m$^{3}$(fluid))
