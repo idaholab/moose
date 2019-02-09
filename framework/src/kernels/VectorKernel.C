@@ -1,16 +1,11 @@
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VectorKernel.h"
 #include "Assembly.h"
@@ -41,13 +36,10 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
     _var(*mooseVariable()),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
-    _curl_test(_var.curlPhi()),
     _phi(_assembly.phi(_var)),
     _grad_phi(_assembly.gradPhi(_var)),
-    _curl_phi(_assembly.curlPhi(_var)),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _curl_u(_is_implicit ? _var.curlSln() : _var.curlSlnOld())
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld())
 {
   addMooseVariableDependency(mooseVariable());
 }

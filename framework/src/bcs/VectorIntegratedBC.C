@@ -41,11 +41,8 @@ VectorIntegratedBC::VectorIntegratedBC(const InputParameters & parameters)
     _var(*mooseVariable()),
     _normals(_var.normals()),
     _phi(_assembly.phiFace(_var)),
-    _curl_phi(_assembly.curlPhiFace(_var)),
     _test(_var.phiFace()),
-    _curl_test(_var.curlPhiFace()),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _curl_u(_is_implicit ? _var.curlSln() : _var.curlSlnOld())
+    _u(_is_implicit ? _var.sln() : _var.slnOld())
 {
   addMooseVariableDependency(mooseVariable());
 }

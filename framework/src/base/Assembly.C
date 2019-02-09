@@ -313,7 +313,8 @@ Assembly::buildVectorFE(FEType type)
 
     _vector_fe[dim][type]->get_phi();
     _vector_fe[dim][type]->get_dphi();
-    _vector_fe[dim][type]->get_curl_phi();
+    if (type.family == NEDELEC_ONE)
+      _vector_fe[dim][type]->get_curl_phi();
     // Pre-request xyz.  We have always computed xyz, but due to
     // recent optimizations in libmesh, we now need to explicity
     // request it, since apps (Yak) may rely on it being computed.
@@ -344,7 +345,8 @@ Assembly::buildVectorFaceFE(FEType type)
 
     _vector_fe_face[dim][type]->get_phi();
     _vector_fe_face[dim][type]->get_dphi();
-    _vector_fe_face[dim][type]->get_curl_phi();
+    if (type.family == NEDELEC_ONE)
+      _vector_fe_face[dim][type]->get_curl_phi();
   }
 }
 
@@ -371,7 +373,8 @@ Assembly::buildVectorNeighborFE(FEType type)
 
     _vector_fe_neighbor[dim][type]->get_phi();
     _vector_fe_neighbor[dim][type]->get_dphi();
-    _vector_fe_neighbor[dim][type]->get_curl_phi();
+    if (type.family == NEDELEC_ONE)
+      _vector_fe_neighbor[dim][type]->get_curl_phi();
   }
 }
 
@@ -399,7 +402,8 @@ Assembly::buildVectorFaceNeighborFE(FEType type)
 
     _vector_fe_face_neighbor[dim][type]->get_phi();
     _vector_fe_face_neighbor[dim][type]->get_dphi();
-    _vector_fe_face_neighbor[dim][type]->get_curl_phi();
+    if (type.family == NEDELEC_ONE)
+      _vector_fe_face_neighbor[dim][type]->get_curl_phi();
   }
 }
 

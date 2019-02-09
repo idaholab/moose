@@ -61,22 +61,16 @@ protected:
 
   /// shape function values (in QPs)
   const VectorVariablePhiValue & _phi;
-  /// curls of shape functions (in QPs)
-  const VectorVariablePhiCurl & _curl_phi;
 
   // test functions
 
   /// test function values (in QPs)
   const VectorVariableTestValue & _test;
-  /// curls of test functions  (in QPs)
-  const VectorVariableTestCurl & _curl_test;
 
   // solution variable
 
   /// the values of the unknown variable this BC is acting on
   const VectorVariableValue & _u;
-  /// the curl of the unknown variable this BC is acting on
-  const VectorVariableCurl & _curl_u;
 };
 
 #endif /* VECTORINTEGRATEDBC_H */
