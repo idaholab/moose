@@ -90,3 +90,6 @@ ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement(
 
   total_strain_increment = 0.5 * (A + A.transpose());
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeIncrementalSmallStrain);

@@ -51,6 +51,7 @@ private:
 
   const DecompMethod _decomposition_method;
 
+protected:
   usingComputeIncrementalStrainBaseMembers;
 };
 

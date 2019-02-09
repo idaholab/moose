@@ -9,10 +9,14 @@
 
 #include "ADSingleVariableReturnMappingSolution.h"
 
+#include "Moose.h"
+#include "MooseEnum.h"
+#include "MooseObject.h"
 #include "ConsoleStreamInterface.h"
 #include "Conversion.h"
-#include "MooseEnum.h"
-#include "Moose.h"
+
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
 
 #include <limits>
 #include <string>

@@ -65,3 +65,6 @@ ADComputeSmallStrain<compute_stage>::computeProperties()
 
   copyDualNumbersToValues();
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeSmallStrain);
