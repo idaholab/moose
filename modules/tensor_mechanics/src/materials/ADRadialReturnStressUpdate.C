@@ -74,7 +74,9 @@ ADRadialReturnStressUpdate<compute_stage>::updateState(
   // compute the effective trial stress
   ADReal dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
-  ADReal effective_trial_stress = std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
+  ADReal effective_trial_stress = MooseUtils::absoluteFuzzyEqual(dev_trial_stress_squared, 0.0)
+                                      ? 0.0
+                                      : std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
 
   // Set the value of 3 * shear modulus for use as a reference residual value
   _three_shear_modulus =
