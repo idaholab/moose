@@ -145,8 +145,9 @@
 [Executioner]
   type = Transient
 
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_iname = -pc_hypre_type
+  petsc_options_value = boomeramg
+
   line_search = 'none'
   nl_rel_tol = 1e-5
 
