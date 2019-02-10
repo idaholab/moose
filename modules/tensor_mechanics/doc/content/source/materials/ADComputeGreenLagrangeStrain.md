@@ -9,8 +9,8 @@ E=\frac12 \left(F^TF-1\right)
 $$
 
 Where $F$ is the deformation gradient tensor. It can be combined with
-ADComputeLinearElasticStress to compute a second Piola-Kirchhoff stress (use teh
-ADStressDivergence kernel on the *undisplaced* mesh). This combinations is
+ADComputeLinearElasticStress to compute a second Piola-Kirchhoff stress (use the
+ADStressDivergence kernel on the *undisplaced* mesh). This combination is
 called a St. Venant-Kirchhoff hyper elasticity model.
 
 !syntax parameters /ADMaterials/ADComputeGreenLagrangeStrain<RESIDUAL>

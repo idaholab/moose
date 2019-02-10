@@ -140,7 +140,7 @@ public:
   std::vector<BoundaryName> getMaterialPropertyBoundaryNames(const std::string & name);
 
   /**
-   * Check if blocka and boundary restrictions of a given material are compatible with the current
+   * Check if block and boundary restrictions of a given material are compatible with the current
    * material. Error out otherwise.
    */
   void checkBlockAndBoundaryCompatibility(std::shared_ptr<Material> discrete);
