@@ -26,6 +26,12 @@ RELAP7Mesh::dimension() const
   return _dim;
 }
 
+unsigned int
+RELAP7Mesh::effectiveSpatialDimension() const
+{
+  return _dim;
+}
+
 MooseMesh &
 RELAP7Mesh::clone() const
 {

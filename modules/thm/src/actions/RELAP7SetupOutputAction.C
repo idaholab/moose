@@ -44,13 +44,6 @@ RELAP7SetupOutputAction::act()
     //   params.set<std::vector<VariableName> >("hide") = hvars;
     // }
 
-    if (dynamic_cast<Exodus *>(o) != nullptr)
-    {
-      Exodus * exodus = dynamic_cast<Exodus *>(o);
-      // Always use 3D output files for exodus
-      exodus->setOutputDimension(3);
-    }
-
     if (dynamic_cast<Console *>(o) != nullptr)
     {
       // Do not output scalar variables on the screen.
