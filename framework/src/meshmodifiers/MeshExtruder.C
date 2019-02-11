@@ -108,6 +108,9 @@ MeshExtruder::modify()
 
   // Update the dimension
   _mesh_ptr->getMesh().set_mesh_dimension(source_mesh->getMesh().mesh_dimension() + 1);
+
+  // Redetect the mesh extents
+  _mesh_ptr->prepared(false);
 }
 
 void

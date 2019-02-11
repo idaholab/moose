@@ -7,9 +7,9 @@
     cli_args = '--mesh-only 3d_chimney.e'
     exodiff = '3d_chimney.e'
     recover = false
-    method = 'opt oprof'
+    method = '!dbg'
     issues = '#1568'
-    requirement = 'MOOSE shall allow writing out the mesh'
+    requirement = 'The system shall allow writing out the mesh without running a simulation.'
   [../]
 
   [./mesh_info]
@@ -17,10 +17,10 @@
     input = 'mesh_only.i'
     cli_args = '--mesh-only info_test.e'
     recover = false
-    method = 'opt oprof'
+    method = '!dbg'
     expect_out = 'Mesh Information'
     issues = '#11917 #11921'
-    requirement = 'MOOSE shall print out information about the mesh when writing out the mesh'
+    requirement = 'The system shall print out information about the mesh when writing out the mesh.'
   [../]
 
   [./mesh_only_warning]
@@ -31,6 +31,17 @@
     allow_warnings = true
     expect_out = 'The --mesh-only option should be followed by a file name.'
     issues = '#1568'
-    requirement = 'MOOSE shall warn when using --mesh-only and there is no clear filename to use'
+    requirement = 'The system shall warn when using --mesh-only and there is no clear filename to use'
+  [../]
+
+  [./output_dimension_override]
+    type = 'Exodiff'
+    input = 'output_dimension_override.i'
+    cli_args = '--mesh-only output_dimension.e'
+    exodiff = 'output_dimension.e'
+    recover = false
+    method = '!dbg'
+    issues = '#12757'
+    requirement = 'The system shall support overriding output dimension when necessary to store coordinates in higher planes'
   [../]
 []

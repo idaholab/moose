@@ -65,6 +65,12 @@ OversampleOutput::OversampleOutput(const InputParameters & parameters)
   // ** DEPRECATED SUPPORT **
   if (getParam<bool>("append_oversample"))
     _file_base += "_oversample";
+}
+
+void
+OversampleOutput::initialSetup()
+{
+  AdvancedOutput::initialSetup();
 
   // Creates and initializes the oversampled mesh
   initOversample();

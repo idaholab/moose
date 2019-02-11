@@ -82,7 +82,7 @@ Exodus::Exodus(const InputParameters & parameters)
     _sequence(isParamValid("sequence") ? getParam<bool>("sequence")
                                        : _use_displaced ? true : false),
     _overwrite(getParam<bool>("overwrite")),
-    _output_dimension(getParam<MooseEnum>("output_dimension")),
+    _output_dimension(getParam<MooseEnum>("output_dimension").getEnum<OutputDimension>()),
     _discontinuous(getParam<bool>("discontinuous"))
 {
   if (isParamValid("use_problem_dimension"))
@@ -90,9 +90,9 @@ Exodus::Exodus(const InputParameters & parameters)
     auto use_problem_dimension = getParam<bool>("use_problem_dimension");
 
     if (use_problem_dimension)
-      _output_dimension = "problem_dimension";
+      _output_dimension = OutputDimension::PROBLEM_DIMENSION;
     else
-      _output_dimension = "default";
+      _output_dimension = OutputDimension::DEFAULT;
   }
   // If user sets 'discontinuous = true' and 'elemental_as_nodal = false', issue an error that these
   // are incompatible states
@@ -107,20 +107,17 @@ Exodus::Exodus(const InputParameters & parameters)
 }
 
 void
-Exodus::setOutputDimension(unsigned int dim)
+Exodus::setOutputDimension(unsigned int /*dim*/)
 {
-  if (dim >= 1 && dim <= 3)
-    _output_dimension = dim;
-  else
-    mooseError(
-        name(), ": Invalid dimension (", dim, ") specified.  Allowed dimensions are 1, 2 or 3.");
+  mooseDeprecated(
+      "This method is no longer needed. We can determine output dimension programmatically");
 }
 
 void
 Exodus::initialSetup()
 {
   // Call base class setup method
-  AdvancedOutput::initialSetup();
+  OversampleOutput::initialSetup();
 
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
@@ -198,53 +195,39 @@ Exodus::outputSetup()
     _exodus_num = 1;
   }
 
-  switch (_output_dimension)
+  setOutputDimensionInExodusWriter(*_exodus_io_ptr, *_mesh_ptr, _output_dimension);
+}
+
+void
+Exodus::setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io,
+                                         const MooseMesh & mesh,
+                                         OutputDimension output_dimension)
+{
+  switch (output_dimension)
   {
-    case 0: // default
-      // If the spatial_dimension is 1 (this can only happen in recent
-      // versions of libmesh where the meaning of spatial_dimension has
-      // changed), then force the Exodus file to be written with
-      // num_dim==3.
+    case OutputDimension::DEFAULT:
+      // If the mesh_dimension is 1, we need to write out as 3D.
       //
       // This works around an issue in Paraview where 1D meshes cannot
-      // not be visualized correctly.  Note: the mesh_dimension() should
-      // get changed back to 1 the next time MeshBase::prepare_for_use()
-      // is called.
-      if (_es_ptr->get_mesh().spatial_dimension() == 1)
-        _exodus_io_ptr->write_as_dimension(3);
-
-      // If the spatial_dimension is 2 (again, only possible in recent
-      // versions of libmesh), then we need to be careful as this mesh
-      // would not have been written with num_dim==2 in the past.
-      //
-      // We *can't* simply write it with num_dim==mesh_dimension,
-      // because mesh_dimension might be 1, and as discussed above, we
-      // don't allow num_dim==1 Exodus files.  Therefore, in this
-      // particular case, we force writing with num_dim==3.  Note: the
-      // humor of writing a mesh of 1D elements which lives in 2D space
-      // as num_dim==3 is not lost on me.
-      if (_es_ptr->get_mesh().spatial_dimension() == 2 && _es_ptr->get_mesh().mesh_dimension() == 1)
-        _exodus_io_ptr->write_as_dimension(3);
-
-      // Utilize the spatial dimension.  This value of this flag is
-      // superseded by the value passed to write_as_dimension(), if any.
-      if (_es_ptr->get_mesh().mesh_dimension() != 1)
-        _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
-
+      // not be visualized correctly. Otherwise, write out based on the effectiveSpatialDimension.
+      if (mesh.getMesh().mesh_dimension() == 1)
+        exodus_io.write_as_dimension(3);
+      else
+        exodus_io.write_as_dimension(static_cast<int>(mesh.effectiveSpatialDimension()));
       break;
 
-    case 1:
-    case 2:
-    case 3:
-      _exodus_io_ptr->write_as_dimension((int)_output_dimension);
+    case OutputDimension::ONE:
+    case OutputDimension::TWO:
+    case OutputDimension::THREE:
+      exodus_io.write_as_dimension(static_cast<int>(output_dimension));
       break;
 
-    case 4: // problem_dimension
-      _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
+    case OutputDimension::PROBLEM_DIMENSION:
+      exodus_io.use_mesh_dimension_instead_of_spatial_dimension(true);
       break;
 
     default:
-      mooseError("Unknown output_dimension");
+      ::mooseError("Unknown output_dimension in Exodus writer");
   }
 }
 

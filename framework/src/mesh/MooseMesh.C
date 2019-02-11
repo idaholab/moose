@@ -292,6 +292,14 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
 
   for (const auto & node_bnd_id : node_boundaries)
     boundary_info.nodeset_name(node_bnd_id) = other_boundary_info.get_nodeset_name(node_bnd_id);
+
+  _bounds.resize(other_mesh._bounds.size());
+  for (std::size_t i = 0; i < _bounds.size(); ++i)
+  {
+    _bounds[i].resize(other_mesh._bounds[i].size());
+    for (std::size_t j = 0; j < _bounds[i].size(); ++j)
+      _bounds[i][j] = other_mesh._bounds[i][j];
+  }
 }
 
 MooseMesh::~MooseMesh()
@@ -1280,7 +1288,9 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
   // Find the bounding box of our mesh
   for (const auto & node : getMesh().node_ptr_range())
-    for (unsigned int i = 0; i < dim; ++i)
+    // Check all coordinates, we don't know if this mesh might be lying in a higher dim even if the
+    // mesh dimension is lower.
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       if ((*node)(i) < min[i])
         min[i] = (*node)(i);
@@ -1300,7 +1310,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     // See if the current node is located at one of the extremes
     unsigned int coord_match = 0;
 
-    for (unsigned int i = 0; i < dim; ++i)
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       if (std::abs((*node)(i)-min[i]) < tol)
       {
@@ -1314,7 +1324,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
       }
     }
 
-    if (coord_match == dim) // Found a coordinate at one of the extremes
+    if (coord_match == LIBMESH_DIM) // Found a coordinate at one of the extremes
     {
       _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = node;
       extreme_matches[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = true;
@@ -1328,17 +1338,11 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
   // Set the bounds
   _bounds.resize(LIBMESH_DIM);
-  for (unsigned int i = 0; i < dim; ++i)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     _bounds[i].resize(2);
     _bounds[i][MIN] = min[i];
     _bounds[i][MAX] = max[i];
-  }
-  for (unsigned int i = dim; i < LIBMESH_DIM; ++i)
-  {
-    _bounds[i].resize(2);
-    _bounds[i][MIN] = 0;
-    _bounds[i][MAX] = 0;
   }
 
   return _regular_orthogonal_mesh;
@@ -2126,6 +2130,20 @@ MooseMesh::dimension() const
   return getMesh().mesh_dimension();
 }
 
+unsigned int
+MooseMesh::effectiveSpatialDimension() const
+{
+  const Real abs_zero = 1e-12;
+
+  // See if the mesh is completely containd in the z and y planes to calculate effective spatial dim
+  for (unsigned int dim = LIBMESH_DIM; dim >= 1; --dim)
+    if (dimensionWidth(dim - 1) >= abs_zero)
+      return dim;
+
+  // If we get here, we have a 1D mesh on the x-axis.
+  return 1;
+}
+
 std::vector<BoundaryID>
 MooseMesh::getBoundaryIDs(const Elem * const elem, const unsigned short int side) const
 {
@@ -2274,6 +2292,13 @@ void
 MooseMesh::prepared(bool state)
 {
   _is_prepared = state;
+
+  /**
+   * If we are explicitly setting the mesh to not prepared, then we've likely modified the mesh and
+   * can no longer make assumptions about orthogonality. We really should recheck.
+   */
+  if (!state)
+    _regular_orthogonal_mesh = false;
 }
 
 void

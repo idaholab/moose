@@ -66,6 +66,12 @@ public:
   void addDependencySets(const std::string & action_sets);
 
   /**
+   * Deletes or removes the dependencies that this task depends on. This method does not fixup
+   * or change the graph in any other way.
+   */
+  void deleteTaskDependencies(const std::string & task);
+
+  /**
    * Clears all tasks from the system object.
    */
   void clearTaskDependencies();

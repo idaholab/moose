@@ -406,11 +406,6 @@ public:
   std::map<std::string, unsigned int> & getOutputFileNumbers() { return _output_file_numbers; }
 
   /**
-   * Return true if the output position has been set
-   */
-  bool hasOutputWarehouse() { return _output_position_set; }
-
-  /**
    * Get the OutputWarehouse objects
    */
   OutputWarehouse & getOutputWarehouse();
