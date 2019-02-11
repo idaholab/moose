@@ -18,6 +18,7 @@ public:
 
   virtual void init() override;
   virtual void addVariables() override;
+  virtual void addInitialConditions() override;
   virtual void addMooseObjects() override;
 
 protected:
