@@ -69,6 +69,8 @@ FlowModelSinglePhase::addVariables()
 void
 FlowModelSinglePhase::addInitialConditions()
 {
+  FlowModel::addCommonInitialConditions();
+
   bool ics_set = _pipe.isParamValid("initial_p") && _pipe.isParamValid("initial_T") &&
                  _pipe.isParamValid("initial_vel");
 

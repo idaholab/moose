@@ -9,12 +9,15 @@ InputParameters
 validParams<PipeBase>()
 {
   InputParameters params = validParams<GeometricalFlowComponent>();
+  params.addRequiredParam<FunctionName>("A", "Area of the pipe, can be a constant or a function");
   params.addPrivateParam<std::string>("component_type", "pipe");
   return params;
 }
 
 PipeBase::PipeBase(const InputParameters & params)
-  : GeometricalFlowComponent(params), _flow_model(nullptr)
+  : GeometricalFlowComponent(params),
+    _flow_model(nullptr),
+    _area_function(getParam<FunctionName>("A"))
 {
 }
 

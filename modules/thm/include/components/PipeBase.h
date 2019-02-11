@@ -26,12 +26,22 @@ public:
   virtual unsigned int getSubdomainID() const = 0;
   virtual bool isHorizontal() const = 0;
 
+  /**
+   * Get the name of the function describing the flow channel area
+   *
+   * @return The name of the function describing the flow channel area
+   */
+  const FunctionName & getAreaFunctionName() const { return _area_function; }
+
 protected:
   virtual std::shared_ptr<FlowModel> buildFlowModel();
   virtual void init() override;
 
   /// The flow model used by this pipe
   std::shared_ptr<FlowModel> _flow_model;
+
+  /// Function describing the flow channel area
+  const FunctionName & _area_function;
 };
 
 #endif /* PIPEBASE_H */
