@@ -535,7 +535,7 @@ Assembly::reinitFE(const Elem * elem)
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
-      if (elem->has_affine_map() && !_calculate_xyz)
+      if (elem->has_affine_map())
         computeAffineMapAD(elem, qw, n_qp, *_holder_fe_helper[dim]);
       else
         for (unsigned int qp = 0; qp != n_qp; qp++)
@@ -703,8 +703,30 @@ Assembly::computeAffineMapAD(const Elem * elem,
 {
   computeSinglePointMapAD(elem, qw, 0, fe);
 
-  for (unsigned int p = 1; p < n_qp; p++) // copy over map data for each extra quadrature point
+  for (unsigned int p = 1; p < n_qp; p++)
   {
+    // Compute xyz at all other quadrature points. Note that this map method call is only really
+    // referring to the volumetric element...face quadrature points are calculated in computeFaceMap
+    if (_calculate_xyz)
+    {
+      auto num_shapes = fe->n_shape_functions();
+      const auto & elem_nodes = elem->get_nodes();
+      const auto & phi_map = fe->get_fe_map().get_phi_map();
+      _ad_q_points[p].zero();
+      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
+      {
+        mooseAssert(elem_nodes[i], "The node is null!");
+        VectorValue<DualReal> elem_point = *elem_nodes[i];
+        unsigned dimension = 0;
+        for (const auto & disp_num : _displacements)
+          elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
+
+        _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
+      }
+    }
+
+    // Now copy over other map data for each extra quadrature point
+
     _ad_dxyzdxi_map[p] = _ad_dxyzdxi_map[0];
     _ad_dxidx_map[p] = _ad_dxidx_map[0];
     _ad_dxidy_map[p] = _ad_dxidy_map[0];
@@ -1021,7 +1043,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
       computeFaceMap(dim, qw, side_elem.get());
       std::vector<Real> dummy_qw(n_qp, 1.);
 
-      if (elem->has_affine_map() && !_calculate_face_xyz)
+      if (elem->has_affine_map())
         computeAffineMapAD(elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
       else
         for (unsigned int qp = 0; qp != n_qp; qp++)
