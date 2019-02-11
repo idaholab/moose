@@ -51,12 +51,12 @@ ADStressDivergenceRZTensors<compute_stage>::computeQpResidual()
   if (_component == 0)
   {
     div = _grad_test[_i][_qp](0) * _stress[_qp](0, 0) +
-          (_test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2, 2) +
+          (_test[_i][_qp] / _ad_q_point[_qp](0)) * _stress[_qp](2, 2) +
           _grad_test[_i][_qp](1) * _stress[_qp](0, 1); // stress_{rz}
 
     // volumetric locking correction
     if (_volumetric_locking_correction)
-      div += (_avg_grad_test[_i] - _grad_test[_i][_qp](0) - _test[_i][_qp] / _q_point[_qp](0)) *
+      div += (_avg_grad_test[_i] - _grad_test[_i][_qp](0) - _test[_i][_qp] / _ad_q_point[_qp](0)) *
              (_stress[_qp].trace()) / 3.0;
   }
   else if (_component == 1)
@@ -90,10 +90,10 @@ ADStressDivergenceRZTensors<compute_stage>::precalculateResidual()
     {
       if (_component == 0)
         _avg_grad_test[_i] +=
-            (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] *
-            _coord[_qp];
+            (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _ad_q_point[_qp](0)) *
+            _ad_JxW[_qp] * _ad_coord[_qp];
       else
-        _avg_grad_test[_i] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
+        _avg_grad_test[_i] += _grad_test[_i][_qp](_component) * _ad_JxW[_qp] * _ad_coord[_qp];
     }
     _avg_grad_test[_i] /= _current_elem_volume;
   }

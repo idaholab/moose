@@ -11,6 +11,7 @@
 #include "ElasticityTensorTools.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
+#include "Assembly.h"
 
 registerADMooseObject("TensorMechanicsApp", ADStressDivergenceRSphericalTensors);
 
@@ -44,7 +45,7 @@ template <ComputeStage compute_stage>
 ADResidual
 ADStressDivergenceRSphericalTensors<compute_stage>::computeQpResidual()
 {
-  return _grad_test[_i][_qp](0) * _stress[_qp](0, 0) +               // stress_{rr} part 1
-         +(_test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](1, 1) + // stress_{\theta \theta}
-         +(_test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2, 2);  // stress_{\phi \phi}
+  return _grad_test[_i][_qp](0) * _stress[_qp](0, 0) +                 // stress_{rr} part 1
+         (_test[_i][_qp] / _ad_q_point[_qp](0)) * _stress[_qp](1, 1) + // stress_{\theta \theta}
+         (_test[_i][_qp] / _ad_q_point[_qp](0)) * _stress[_qp](2, 2);  // stress_{\phi \phi}
 }

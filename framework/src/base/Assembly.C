@@ -72,7 +72,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _max_cached_residuals(0),
     _max_cached_jacobians(0),
     _block_diagonal_matrix(false),
-    _calculate_face_xyz(true),
+    _calculate_xyz(false),
+    _calculate_face_xyz(false),
     _calculate_curvatures(false)
 {
   Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
@@ -204,11 +205,13 @@ Assembly::~Assembly()
   _coord_neighbor.release();
 
   _ad_JxW.release();
+  _ad_q_points.release();
   _ad_JxW_face.release();
   _ad_normals.release();
   _ad_q_points_face.release();
   _curvatures.release();
   _ad_curvatures.release();
+  _ad_coord.release();
 }
 
 void
@@ -527,20 +530,24 @@ Assembly::reinitFE(const Elem * elem)
     auto n_qp = _current_qrule->n_points();
     resizeMappingObjects(n_qp, dim);
     _ad_JxW.resize(n_qp);
+    if (_calculate_xyz)
+      _ad_q_points.resize(n_qp);
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
-      if (elem->has_affine_map())
+      if (elem->has_affine_map() && !_calculate_xyz)
         computeAffineMapAD(elem, qw, n_qp, *_holder_fe_helper[dim]);
       else
-      {
         for (unsigned int qp = 0; qp != n_qp; qp++)
           computeSinglePointMapAD(elem, qw, qp, *_holder_fe_helper[dim]);
-      }
     }
     else
       for (unsigned qp = 0; qp < n_qp; ++qp)
+      {
         _ad_JxW[qp] = _current_JxW[qp];
+        if (_calculate_xyz)
+          _ad_q_points[qp] = _current_q_points[qp];
+      }
 
     for (const auto & it : _fe[dim])
     {
@@ -696,7 +703,7 @@ Assembly::computeAffineMapAD(const Elem * elem,
 {
   computeSinglePointMapAD(elem, qw, 0, fe);
 
-  for (unsigned int p = 1; p < n_qp; p++) // for each extra quadrature point
+  for (unsigned int p = 1; p < n_qp; p++) // copy over map data for each extra quadrature point
   {
     _ad_dxyzdxi_map[p] = _ad_dxyzdxi_map[0];
     _ad_dxidx_map[p] = _ad_dxidx_map[0];
@@ -732,6 +739,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   auto dim = elem->dim();
   const auto & elem_nodes = elem->get_nodes();
   auto num_shapes = fe->n_shape_functions();
+  const auto & phi_map = fe->get_fe_map().get_phi_map();
   const auto & dphidxi_map = fe->get_fe_map().get_dphidxi_map();
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
@@ -742,11 +750,16 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
     {
       _ad_jac[p] = 1.0;
       _ad_JxW[p] = qw[p];
+      if (_calculate_xyz)
+        _ad_q_points[p] = *elem_nodes[0];
       break;
     }
 
     case 1:
     {
+      if (_calculate_xyz)
+        _ad_q_points[p].zero();
+
       _ad_dxyzdxi_map[p].zero();
 
       for (std::size_t i = 0; i < num_shapes; i++)
@@ -758,6 +771,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
           elem_point(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + i] = 1.;
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
+
+        if (_calculate_xyz)
+          _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
       _ad_jac[p] = _ad_dxyzdxi_map[p].norm();
@@ -788,6 +804,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
     case 2:
     {
+      if (_calculate_xyz)
+        _ad_q_points[p].zero();
       _ad_dxyzdxi_map[p].zero();
       _ad_dxyzdeta_map[p].zero();
 
@@ -801,6 +819,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
+
+        if (_calculate_xyz)
+          _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
       const auto &dx_dxi = _ad_dxyzdxi_map[p](0), dx_deta = _ad_dxyzdeta_map[p](0),
@@ -856,6 +877,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
 
     case 3:
     {
+      if (_calculate_xyz)
+        _ad_q_points[p].zero();
       _ad_dxyzdxi_map[p].zero();
       _ad_dxyzdeta_map[p].zero();
       _ad_dxyzdzeta_map[p].zero();
@@ -871,6 +894,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         _ad_dxyzdxi_map[p].add_scaled(elem_point, dphidxi_map[i][p]);
         _ad_dxyzdeta_map[p].add_scaled(elem_point, dphideta_map[i][p]);
         _ad_dxyzdzeta_map[p].add_scaled(elem_point, dphidzeta_map[i][p]);
+
+        if (_calculate_xyz)
+          _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
       }
 
       const auto dx_dxi = _ad_dxyzdxi_map[p](0), dy_dxi = _ad_dxyzdxi_map[p](1),
@@ -994,21 +1020,19 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
       const auto & qw = _current_qrule_face->get_weights();
       computeFaceMap(dim, qw, side_elem.get());
       std::vector<Real> dummy_qw(n_qp, 1.);
-      if (elem->has_affine_map())
+
+      if (elem->has_affine_map() && !_calculate_face_xyz)
         computeAffineMapAD(elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
       else
         for (unsigned int qp = 0; qp != n_qp; qp++)
           computeSinglePointMapAD(elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
-
-      if (!_calculate_face_xyz)
-        for (unsigned qp = 0; qp < n_qp; ++qp)
-          _ad_q_points_face[qp] = _current_q_points_face[qp];
     }
     else
       for (unsigned qp = 0; qp < n_qp; ++qp)
       {
         _ad_JxW_face[qp] = _current_JxW_face[qp];
-        _ad_q_points_face[qp] = _current_q_points_face[qp];
+        if (_calculate_face_xyz)
+          _ad_q_points_face[qp] = _current_q_points_face[qp];
         _ad_normals[qp] = _current_normals[qp];
         if (_calculate_curvatures)
           _ad_curvatures[qp] = _curvatures[qp];
@@ -1447,10 +1471,13 @@ Assembly::reinit(const Elem * elem)
   computeCurrentElemVolume();
 }
 
+template <ComputeStage compute_stage>
 void
-Assembly::setCoordinateTransformation(const QBase * qrule, const MooseArray<Point> & q_points)
+Assembly::setCoordinateTransformation(const QBase * qrule,
+                                      const ADPoint & q_points,
+                                      MooseArray<ADReal> & coord)
 {
-  _coord.resize(qrule->n_points());
+  coord.resize(qrule->n_points());
   _coord_type = _subproblem.getCoordSystem(_current_elem->subdomain_id());
   unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
 
@@ -1458,17 +1485,17 @@ Assembly::setCoordinateTransformation(const QBase * qrule, const MooseArray<Poin
   {
     case Moose::COORD_XYZ:
       for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-        _coord[qp] = 1.;
+        coord[qp] = 1.;
       break;
 
     case Moose::COORD_RZ:
       for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-        _coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
+        coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
       break;
 
     case Moose::COORD_RSPHERICAL:
       for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-        _coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
+        coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
       break;
 
     default:
@@ -1477,13 +1504,20 @@ Assembly::setCoordinateTransformation(const QBase * qrule, const MooseArray<Poin
   }
 }
 
+template void Assembly::setCoordinateTransformation<ComputeStage::RESIDUAL>(
+    const QBase *, const MooseArray<Point> &, MooseArray<Real> &);
+template void Assembly::setCoordinateTransformation<ComputeStage::JACOBIAN>(
+    const QBase *, const MooseArray<VectorValue<DualReal>> &, MooseArray<DualReal> &);
+
 void
 Assembly::computeCurrentElemVolume()
 {
   if (_current_elem_volume_computed)
     return;
 
-  setCoordinateTransformation(_current_qrule, _current_q_points);
+  setCoordinateTransformation<ComputeStage::RESIDUAL>(_current_qrule, _current_q_points, _coord);
+  if (_computing_jacobian && _calculate_xyz)
+    setCoordinateTransformation<ComputeStage::JACOBIAN>(_current_qrule, _ad_q_points, _ad_coord);
 
   _current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule->n_points(); qp++)
@@ -1498,7 +1532,11 @@ Assembly::computeCurrentFaceVolume()
   if (_current_side_volume_computed)
     return;
 
-  setCoordinateTransformation(_current_qrule_face, _current_q_points_face);
+  setCoordinateTransformation<ComputeStage::RESIDUAL>(
+      _current_qrule_face, _current_q_points_face, _coord);
+  if (_computing_jacobian && _calculate_face_xyz)
+    setCoordinateTransformation<ComputeStage::JACOBIAN>(
+        _current_qrule, _ad_q_points_face, _ad_coord);
 
   _current_side_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
