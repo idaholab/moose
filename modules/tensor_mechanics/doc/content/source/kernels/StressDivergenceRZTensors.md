@@ -66,6 +66,8 @@ and only two displacement variables are provided:
 
 !syntax parameters /Kernels/StressDivergenceRZTensors
 
+!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+
 !syntax inputs /Kernels/StressDivergenceRZTensors
 
 !syntax children /Kernels/StressDivergenceRZTensors
