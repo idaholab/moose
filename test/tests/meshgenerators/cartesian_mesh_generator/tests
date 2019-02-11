@@ -1,12 +1,36 @@
 [Tests]
-  [./cartesian_mesh]
+  [./cartesian_mesh_3D]
     type = 'Exodiff'
-    input = 'cartesian_mesh.i'
-    exodiff = 'cartesian_mesh_in.e'
+    input = 'cartesian_mesh_3D.i'
+    exodiff = 'cartesian_mesh_3D_in.e'
     requirement = 'MOOSE shall generate an non-uniform mesh on a Cartesian domain.'
     design = 'meshgenerators/CartesianMeshGenerator.md'
     cli_args = "--mesh-only"
     issues = '#12693'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  [../]
+
+  [./cartesian_mesh_1D]
+    type = 'Exodiff'
+    input = 'cartesian_mesh_1D.i'
+    exodiff = 'cartesian_mesh_1D_in.e'
+    requirement = 'MOOSE shall generate an non-uniform mesh on a Cartesian domain.'
+    design = 'meshgenerators/CartesianMeshGenerator.md'
+    cli_args = "--mesh-only"
+    issues = '#12863'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  [../]
+
+  [./cartesian_mesh_2D]
+    type = 'Exodiff'
+    input = 'cartesian_mesh_2D.i'
+    exodiff = 'cartesian_mesh_2D_in.e'
+    requirement = 'MOOSE shall generate an non-uniform mesh on a Cartesian domain.'
+    design = 'meshgenerators/CartesianMeshGenerator.md'
+    cli_args = "--mesh-only"
+    issues = '#12863'
     recover = false
     mesh_mode = 'REPLICATED'
   [../]
