@@ -62,6 +62,8 @@ public:
   virtual std::string fluidName() const;
 
   // clang-format off
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
   propfunc(p, v, e)
   propfunc(T, v, e)
