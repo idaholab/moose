@@ -8,21 +8,23 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADKernelGrad.h"
+#include "MathUtils.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
 defineADValidParams(ADKernelGrad, ADKernel, );
+defineADValidParams(ADVectorKernelGrad, ADVectorKernel, );
 
-template <ComputeStage compute_stage>
-ADKernelGrad<compute_stage>::ADKernelGrad(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters)
+template <typename T, ComputeStage compute_stage>
+ADKernelGradTempl<T, compute_stage>::ADKernelGradTempl(const InputParameters & parameters)
+  : ADKernelTempl<T, compute_stage>(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
+template <typename T, ComputeStage compute_stage>
 void
-ADKernelGrad<compute_stage>::computeResidual()
+ADKernelGradTempl<T, compute_stage>::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
@@ -32,7 +34,7 @@ ADKernelGrad<compute_stage>::computeResidual()
   {
     const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
     for (_i = 0; _i < n_test; _i++) // target for auto vectorization
-      _local_re(_i) += value * _grad_test[_i][_qp];
+      _local_re(_i) += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
   }
 
   accumulateTaggedLocalResidual();
@@ -47,13 +49,19 @@ ADKernelGrad<compute_stage>::computeResidual()
 
 template <>
 void
-ADKernelGrad<JACOBIAN>::computeResidual()
+ADKernelGradTempl<Real, JACOBIAN>::computeResidual()
 {
 }
 
-template <ComputeStage compute_stage>
+template <>
 void
-ADKernelGrad<compute_stage>::computeJacobian()
+ADKernelGradTempl<RealVectorValue, JACOBIAN>::computeResidual()
+{
+}
+
+template <typename T, ComputeStage compute_stage>
+void
+ADKernelGradTempl<T, compute_stage>::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
@@ -66,7 +74,7 @@ ADKernelGrad<compute_stage>::computeJacobian()
     const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
     for (_i = 0; _i < _grad_test.size(); _i++)
     {
-      const auto residual = value * _grad_test[_i][_qp];
+      const auto residual = MathUtils::dotProduct(value, _grad_test[_i][_qp]);
       for (_j = 0; _j < _var.phiSize(); _j++)
         _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
     }
@@ -88,39 +96,54 @@ ADKernelGrad<compute_stage>::computeJacobian()
 
 template <>
 void
-ADKernelGrad<RESIDUAL>::computeJacobian()
+ADKernelGradTempl<Real, RESIDUAL>::computeJacobian()
 {
 }
 
-template <ComputeStage compute_stage>
+template <>
 void
-ADKernelGrad<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+ADKernelGradTempl<RealVectorValue, RESIDUAL>::computeJacobian()
 {
-  auto jvar_num = jvar.number();
+}
 
-  if (jvar_num == _var.number())
-    computeJacobian();
-  else
+template <typename T, ComputeStage compute_stage>
+void
+ADKernelGradTempl<T, compute_stage>::computeADOffDiagJacobian()
+{
+  std::vector<DualReal> residuals(_grad_test.size(), 0);
+
+  precalculateResidual();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    size_t ad_offset = jvar_num * _sys.getMaxVarNDofsPerElem();
+    const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
+    for (_i = 0; _i < _grad_test.size(); _i++)
+      residuals[_i] += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
+  }
 
-    prepareMatrixTag(_assembly, _var.number(), jvar_num);
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
+      _assembly.couplingEntries();
+  for (const auto & it : ce)
+  {
+    MooseVariableFEBase & ivariable = *(it.first);
+    MooseVariableFEBase & jvariable = *(it.second);
 
-    if (_local_ke.m() != _grad_test.size() || _local_ke.n() != jvar.phiSize())
-      return;
+    unsigned int ivar = ivariable.number();
+    unsigned int jvar = jvariable.number();
+
+    if (ivar != _var.number())
+      continue;
+
+    size_t ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
+
+    prepareMatrixTag(_assembly, ivar, jvar);
+
+    if (_local_ke.m() != _grad_test.size() || _local_ke.n() != jvariable.phiSize())
+      continue;
 
     precalculateResidual();
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      // This will also compute the derivative with respect to all dofs
-      const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
-      for (_i = 0; _i < _grad_test.size(); _i++)
-      {
-        const auto residual = value * _grad_test[_i][_qp];
-        for (_j = 0; _j < jvar.phiSize(); _j++)
-          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-      }
-    }
+    for (_i = 0; _i < _grad_test.size(); _i++)
+      for (_j = 0; _j < jvariable.phiSize(); _j++)
+        _local_ke(_i, _j) += residuals[_i].derivatives()[ad_offset + _j];
 
     accumulateTaggedLocalMatrix();
   }
@@ -128,16 +151,24 @@ ADKernelGrad<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
 template <>
 void
-ADKernelGrad<RESIDUAL>::computeOffDiagJacobian(MooseVariableFEBase &)
+ADKernelGradTempl<Real, RESIDUAL>::computeADOffDiagJacobian()
 {
 }
 
-template <ComputeStage compute_stage>
+template <>
+void
+ADKernelGradTempl<RealVectorValue, RESIDUAL>::computeADOffDiagJacobian()
+{
+}
+
+template <typename T, ComputeStage compute_stage>
 ADResidual
-ADKernelGrad<compute_stage>::computeQpResidual()
+ADKernelGradTempl<T, compute_stage>::computeQpResidual()
 {
   mooseError("Override precomputeQpResidual() in your ADKernelGrad derived class!");
 }
 
-// explicit instantiation is required for AD base classes
-adBaseClass(ADKernelGrad);
+template class ADKernelGradTempl<Real, RESIDUAL>;
+template class ADKernelGradTempl<Real, JACOBIAN>;
+template class ADKernelGradTempl<RealVectorValue, RESIDUAL>;
+template class ADKernelGradTempl<RealVectorValue, JACOBIAN>;

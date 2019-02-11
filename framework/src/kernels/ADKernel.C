@@ -170,12 +170,6 @@ ADKernelTempl<RealVectorValue, RESIDUAL>::computeJacobian()
 
 template <typename T, ComputeStage compute_stage>
 void
-ADKernelTempl<T, compute_stage>::computeOffDiagJacobian(MooseVariableFEBase &)
-{
-}
-
-template <typename T, ComputeStage compute_stage>
-void
 ADKernelTempl<T, compute_stage>::computeADOffDiagJacobian()
 {
   std::vector<DualReal> residuals(_test.size(), 0);

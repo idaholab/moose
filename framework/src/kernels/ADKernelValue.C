@@ -13,16 +13,17 @@
 #include "libmesh/threads.h"
 
 defineADValidParams(ADKernelValue, ADKernel, );
+defineADValidParams(ADVectorKernelValue, ADVectorKernel, );
 
-template <ComputeStage compute_stage>
-ADKernelValue<compute_stage>::ADKernelValue(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters)
+template <typename T, ComputeStage compute_stage>
+ADKernelValueTempl<T, compute_stage>::ADKernelValueTempl(const InputParameters & parameters)
+  : ADKernelTempl<T, compute_stage>(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
+template <typename T, ComputeStage compute_stage>
 void
-ADKernelValue<compute_stage>::computeResidual()
+ADKernelValueTempl<T, compute_stage>::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
@@ -47,13 +48,19 @@ ADKernelValue<compute_stage>::computeResidual()
 
 template <>
 void
-ADKernelValue<JACOBIAN>::computeResidual()
+ADKernelValueTempl<Real, JACOBIAN>::computeResidual()
 {
 }
 
-template <ComputeStage compute_stage>
+template <>
 void
-ADKernelValue<compute_stage>::computeJacobian()
+ADKernelValueTempl<RealVectorValue, JACOBIAN>::computeResidual()
+{
+}
+
+template <typename T, ComputeStage compute_stage>
+void
+ADKernelValueTempl<T, compute_stage>::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
@@ -88,39 +95,53 @@ ADKernelValue<compute_stage>::computeJacobian()
 
 template <>
 void
-ADKernelValue<RESIDUAL>::computeJacobian()
+ADKernelValueTempl<Real, RESIDUAL>::computeJacobian()
 {
 }
 
-template <ComputeStage compute_stage>
+template <>
 void
-ADKernelValue<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
+ADKernelValueTempl<RealVectorValue, RESIDUAL>::computeJacobian()
 {
-  auto jvar_num = jvar.number();
+}
 
-  if (jvar_num == _var.number())
-    computeJacobian();
-  else
+template <typename T, ComputeStage compute_stage>
+void
+ADKernelValueTempl<T, compute_stage>::computeADOffDiagJacobian()
+{
+  std::vector<DualReal> residuals(_test.size(), 0);
+
+  precalculateResidual();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    size_t ad_offset = jvar_num * _sys.getMaxVarNDofsPerElem();
+    const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
+    for (_i = 0; _i < _test.size(); _i++)
+      residuals[_i] += value * _test[_i][_qp];
+  }
 
-    prepareMatrixTag(_assembly, _var.number(), jvar_num);
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
+      _assembly.couplingEntries();
+  for (const auto & it : ce)
+  {
+    MooseVariableFEBase & ivariable = *(it.first);
+    MooseVariableFEBase & jvariable = *(it.second);
 
-    if (_local_ke.m() != _test.size() || _local_ke.n() != jvar.phiSize())
-      return;
+    unsigned int ivar = ivariable.number();
+    unsigned int jvar = jvariable.number();
 
-    precalculateResidual();
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      // This will also compute the derivative with respect to all dofs
-      const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
-      for (_i = 0; _i < _test.size(); _i++)
-      {
-        const auto residual = value * _test[_i][_qp];
-        for (_j = 0; _j < jvar.phiSize(); _j++)
-          _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
-      }
-    }
+    if (ivar != _var.number())
+      continue;
+
+    size_t ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
+
+    prepareMatrixTag(_assembly, ivar, jvar);
+
+    if (_local_ke.m() != _test.size() || _local_ke.n() != jvariable.phiSize())
+      continue;
+
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < jvariable.phiSize(); _j++)
+        _local_ke(_i, _j) += residuals[_i].derivatives()[ad_offset + _j];
 
     accumulateTaggedLocalMatrix();
   }
@@ -128,16 +149,24 @@ ADKernelValue<compute_stage>::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 
 template <>
 void
-ADKernelValue<RESIDUAL>::computeOffDiagJacobian(MooseVariableFEBase &)
+ADKernelValueTempl<Real, RESIDUAL>::computeADOffDiagJacobian()
 {
 }
 
-template <ComputeStage compute_stage>
+template <>
+void
+ADKernelValueTempl<RealVectorValue, RESIDUAL>::computeADOffDiagJacobian()
+{
+}
+
+template <typename T, ComputeStage compute_stage>
 ADResidual
-ADKernelValue<compute_stage>::computeQpResidual()
+ADKernelValueTempl<T, compute_stage>::computeQpResidual()
 {
-  mooseError("Override precomputeQpResidual() in your ADKernelValue derived class!");
+  mooseError("Override precomputeQpResidual() in your ADKernelValueTempl derived class!");
 }
 
-// explicit instantiation is required for AD base classes
-adBaseClass(ADKernelValue);
+template class ADKernelValueTempl<Real, RESIDUAL>;
+template class ADKernelValueTempl<Real, JACOBIAN>;
+template class ADKernelValueTempl<RealVectorValue, RESIDUAL>;
+template class ADKernelValueTempl<RealVectorValue, JACOBIAN>;

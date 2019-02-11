@@ -80,7 +80,7 @@ public:
   // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(MooseVariableFEBase &) override final {}
   virtual void computeADOffDiagJacobian() override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 

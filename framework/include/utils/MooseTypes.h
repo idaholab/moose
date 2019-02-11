@@ -335,6 +335,11 @@ struct PointType<JACOBIAN>
 
 #define ADResidual typename ResidualReturnType<compute_stage>::type
 #define ADGradResidual typename RealVectorValueType<compute_stage>::type
+#define ADVectorGradResidual typename RealTensorValue<compute_stage>::type
+#define ADGradResidualTempl                                                                        \
+  typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputGradient
+#define ADResidualTempl                                                                            \
+  typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputValue
 
 #define ADVariableValue typename VariableValueType<Real, compute_stage>::type
 #define ADVariableGradient typename VariableGradientType<Real, compute_stage>::type
