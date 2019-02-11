@@ -23,9 +23,9 @@
     type = 'PetscJacobianTester'
     input = 'finite_elastic.i'
     run_sim = 'True'
-    prereq = 'finite_elastic'
     ratio_tol = 1e-7
     difference_tol = 1e-4
+    cli_args = 'Outputs/exodus=false'
     requirement = 'The Jacobian for the AD finite strain elasticity problem shall be perfect'
   [../]
 
@@ -46,7 +46,7 @@
     type = 'PetscJacobianTester'
     input = 'incremental_small_elastic.i'
     run_sim = 'True'
-    prereq = 'incremental_small_elastic'
+    cli_args = 'Outputs/exodus=false'
     ratio_tol = 1e-7
     difference_tol = 1e0
     requirement = 'The Jacobian for the AD incremental small strain elasticity problem shall be perfect'
@@ -63,7 +63,7 @@
     type = 'PetscJacobianTester'
     input = 'green-lagrange.i'
     run_sim = 'True'
-    prereq = 'green-lagrange'
+    cli_args = 'Outputs/exodus=false'
     ratio_tol = 1e-7
     difference_tol = 1e-6
     requirement = 'The Jacobian for the Green-Lagrange strain calculator shall be perfect'
@@ -90,9 +90,9 @@
     type = 'PetscJacobianTester'
     input = 'rz_finite_elastic.i'
     run_sim = 'True'
-    prereq = 'rz_finite_elastic'
-    ratio_tol = 5e-2
+    ratio_tol = 1e-7
     difference_tol = 1e0
+    cli_args = 'Outputs/exodus=false'
     requirement = 'The Jacobian for the AD finite strain elasticity problem in cylindrical coordinates shall be perfect'
   [../]
 
@@ -113,10 +113,9 @@
     type = 'PetscJacobianTester'
     input = 'rz_incremental_small_elastic.i'
     run_sim = 'True'
-    prereq = 'rz_incremental_small_elastic'
-    ratio_tol = 3e-2
+    ratio_tol = 1e-7
     difference_tol = 1e0
-    cli_args = '-snes_test_err 1e-9 -mat_fd_type ds'
+    cli_args = 'Outputs/exodus=false -mat_fd_type ds'
     requirement = 'The Jacobian for the AD incremental small strain elasticity problem in cylindrical coordinates shall be perfect'
   [../]
 
@@ -137,10 +136,9 @@
     type = 'PetscJacobianTester'
     input = 'rz_small_elastic.i'
     run_sim = 'True'
-    prereq = 'rz_small_elastic'
-    ratio_tol = 3e-2
+    ratio_tol = 1e-7
     difference_tol = 1e0
-    cli_args = '-snes_test_err 1e-9 -mat_fd_type ds'
+    cli_args = 'Outputs/exodus=false -mat_fd_type ds'
     requirement = 'The Jacobian for the AD small strain elasticity problem in cylindrical coordinates shall be perfect'
   [../]
 
@@ -165,10 +163,9 @@
     type = 'PetscJacobianTester'
     input = 'rspherical_finite_elastic.i'
     run_sim = 'True'
-    prereq = 'rspherical_finite_elastic'
-    ratio_tol = 7e-2
+    ratio_tol = 1e-7
     difference_tol = 1e1
-    cli_args = '-snes_test_err 1e-12 -mat_fd_type ds'
+    cli_args = 'Outputs/exodus=false -mat_fd_type ds'
     requirement = 'The Jacobian for the AD finite strain elasticity problem in spherical coordinates shall be perfect'
   [../]
 
@@ -189,10 +186,9 @@
     type = 'PetscJacobianTester'
     input = 'rspherical_incremental_small_elastic.i'
     run_sim = 'True'
-    prereq = 'rspherical_incremental_small_elastic'
-    ratio_tol = 3e-4
+    ratio_tol = 1e-7
     difference_tol = 1e-1
-    cli_args = '-snes_test_err 1e-12 -mat_fd_type ds'
+    cli_args = 'Outputs/exodus=false -mat_fd_type ds'
     requirement = 'The Jacobian for the AD incremental small strain elasticity in spherical coordinates problem shall be perfect'
   [../]
 
@@ -213,10 +209,9 @@
     type = 'PetscJacobianTester'
     input = 'rspherical_small_elastic.i'
     run_sim = 'True'
-    prereq = 'rspherical_small_elastic'
-    ratio_tol = 3e-4
+    ratio_tol = 1e-7
     difference_tol = 1e-1
-    cli_args = '-snes_test_err 1e-12 -mat_fd_type ds'
+    cli_args = 'Outputs/exodus=false -mat_fd_type ds'
     requirement = 'The Jacobian for the AD small strain elasticity problem in spherical coordinates shall be perfect'
   [../]
 
@@ -227,7 +222,7 @@
   #    run_sim = 'True'
   #    prereq = 'rz_small_elastic'
   #    difference_tol = 1e0 # We have Young's modulus of 1e10 so finite differencing produces a large number
-  #    cli_args = '-snes_test_err 1e-9 -mat_fd_type ds'
+  #    cli_args = '-mat_fd_type ds'
   #    requirement = 'The Jacobian for the AD finite strain elasticity problem shall be perfect'
   #  [../]
 
