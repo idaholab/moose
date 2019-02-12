@@ -31,6 +31,15 @@ InputParameters validParams<Exodus>();
 class Exodus : public OversampleOutput
 {
 public:
+  enum class OutputDimension : int
+  {
+    DEFAULT,
+    ONE,
+    TWO,
+    THREE,
+    PROBLEM_DIMENSION
+  };
+
   /**
    * Class constructor
    */
@@ -78,6 +87,18 @@ public:
    * @param dim The dimension written in the output file
    */
   void setOutputDimension(unsigned int dim);
+
+  /**
+   * Helper method to change the output dimension in the passed in Exodus writer depending on
+   * the dimension and coordinates of the passed in mesh.
+   *
+   * @param exodus_io The ExodusII_IO object to modify
+   * @param mesh The MooseMesh object that is queried to determine the appropriate output dimension.
+   */
+  static void
+  setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io,
+                                   const MooseMesh & mesh,
+                                   OutputDimension output_dim = OutputDimension::DEFAULT);
 
 protected:
   /**
@@ -163,7 +184,7 @@ private:
   bool _overwrite;
 
   /// Enum for the output dimension
-  MooseEnum _output_dimension;
+  OutputDimension _output_dimension;
 
   /// Flag to output discontinuous format in Exodus
   bool _discontinuous;

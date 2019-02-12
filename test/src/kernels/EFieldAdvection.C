@@ -21,7 +21,7 @@ InputParameters
 validParams<EFieldAdvection>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredCoupledVar("efield", "The electric field responsible for charge advection");
+  params.addCoupledVar("efield", {1, 1, 1}, "The electric field responsible for charge advection");
   MooseEnum charge("positive negative", "positive");
   params.addParam<MooseEnum>(
       "charge", charge, "Whether our primary variable is positive or negatively charged.");
@@ -33,8 +33,9 @@ EFieldAdvection::EFieldAdvection(const InputParameters & parameters)
   : Kernel(parameters),
     _efield_id(coupled("efield")),
     _efield(coupledVectorValue("efield")),
-    _efield_var(*getVectorVar("efield", 0)),
-    _vector_phi(_assembly.phi(_efield_var)),
+    _efield_coupled(isCoupled("efield")),
+    _efield_var(_efield_coupled ? getVectorVar("efield", 0) : nullptr),
+    _vector_phi(_efield_coupled ? &_assembly.phi(*_efield_var) : nullptr),
     _mobility(getParam<Real>("mobility"))
 {
   MooseEnum charge = getParam<MooseEnum>("charge");
@@ -59,8 +60,8 @@ EFieldAdvection::computeQpJacobian()
 Real
 EFieldAdvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _efield_id)
-    return -_grad_test[_i][_qp] * _sgn * _mobility * _vector_phi[_j][_qp] * _u[_qp];
+  if (jvar == _efield_id && _efield_coupled)
+    return -_grad_test[_i][_qp] * _sgn * _mobility * (*_vector_phi)[_j][_qp] * _u[_qp];
   else
     return 0;
 }

@@ -82,6 +82,15 @@ Syntax::addDependencySets(const std::string & action_sets)
 }
 
 void
+Syntax::deleteTaskDependencies(const std::string & task)
+{
+  if (_registered_tasks.find(task) == _registered_tasks.end())
+    mooseError("A ", task, " is not a registered task name.");
+
+  _tasks.deleteDependenciesOfKey(task);
+}
+
+void
 Syntax::clearTaskDependencies()
 {
   _tasks.clear();

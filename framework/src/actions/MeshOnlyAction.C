@@ -11,6 +11,7 @@
 
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "Exodus.h"
 #include "libmesh/exodusII_io.h"
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
@@ -56,18 +57,16 @@ MeshOnlyAction::act()
     mesh_file = mesh_file.substr(0, pos) + "_in.e";
   }
 
-  // If we're writing an Exodus file, write the Mesh using its logical
-  // element dimension rather than the spatial dimension, unless it's
-  // a 1D Mesh.  One reason to prefer this approach is that sidesets
-  // are displayed incorrectly for 2D triangular elements in both
-  // Paraview and Cubit if num_dim==3 in the Exodus file. We do the
-  // same thing in MOOSE's Exodus Output object, so we are mimicking
-  // that behavior here.
+  /**
+   * If we're writing an Exodus file, write the Mesh using it's effective spatial dimension unless
+   * it's a 1D mesh. This is to work around a Paraview bug where 1D meshes are not visualized
+   * properly.
+   */
   if (mesh_file.find(".e") + 2 == mesh_file.size())
   {
     ExodusII_IO exio(mesh_ptr->getMesh());
-    if (mesh_ptr->getMesh().mesh_dimension() != 1)
-      exio.use_mesh_dimension_instead_of_spatial_dimension(true);
+
+    Exodus::setOutputDimensionInExodusWriter(exio, *mesh_ptr);
 
     exio.write(mesh_file);
   }
