@@ -58,7 +58,7 @@
   [./steady]
     type = 'Exodiff'
     input = 'steady_picard_master.i'
-    exodiff = 'steady_picard_master_out.e'
+    exodiff = 'steady_picard_master_out.e steady_picard_master_out_sub0.e'
     recover = false
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'

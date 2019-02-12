@@ -42,6 +42,13 @@
   [../]
 []
 
+[Postprocessors]
+  [./vnorm]
+    type = ElementL2Norm
+    variable = v
+  [../]
+[]
+
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'
