@@ -52,5 +52,13 @@
       design = 'InterfaceUO.md InterfaceUOPPS.md'
       issues = '#11647'
     [../]
+    [./element_numbering_test]
+      type = 'Exodiff'
+      input = 'test_element_numbering.i'
+      exodiff = 'test_element_numbering_out.e'
+      requirement = "still to write"
+      design = 'InterfaceUO.md InterfaceUOPPS.md'
+      issues = '#11647'
+    [../]
 
   []
