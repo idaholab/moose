@@ -1,4 +1,5 @@
 #include "CurlCurlField.h"
+#include "Assembly.h"
 
 registerMooseObject("ElkApp", CurlCurlField);
 
@@ -14,7 +15,11 @@ validParams<CurlCurlField>()
 }
 
 CurlCurlField::CurlCurlField(const InputParameters & parameters)
-  : VectorKernel(parameters), _sign(getParam<Real>("sign"))
+  : VectorKernel(parameters),
+    _curl_test(_var.curlPhi()),
+    _curl_phi(_assembly.curlPhi(_var)),
+    _curl_u(_is_implicit ? _var.curlSln() : _var.curlSlnOld()),
+    _sign(getParam<Real>("sign"))
 {
 }
 
