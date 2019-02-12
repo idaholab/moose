@@ -25,12 +25,7 @@ validParams<QuadraturePointMarker>()
       "third_state",
       third_state,
       "The Marker state to apply to values falling in-between the coarsen and refine thresholds.");
-  params.addParam<Real>("coarsen",
-                        "The threshold value for coarsening.  Elements with variable "
-                        "values beyond this will be marked for coarsening.");
-  params.addParam<Real>("refine",
-                        "The threshold value for refinement.  Elements with variable "
-                        "values beyond this will be marked for refinement.");
+
   params.addParam<bool>("invert",
                         false,
                         "If this is true then values _below_ 'refine' will be "
@@ -44,15 +39,19 @@ validParams<QuadraturePointMarker>()
 
 QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters)
   : Marker(parameters),
-    Coupleable(this, false),
+    MooseVariableInterface<Real>(this,
+                                 false,
+                                 "variable",
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
+    _u(mooseVariable()->sln()),
     _qrule(_assembly.qRule()),
     _q_point(_assembly.qPoints()),
-    _qp(0)
+    _qp(0),
+    _third_state(getParam<MooseEnum>("third_state").getEnum<MarkerValue>())
 {
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
+  addMooseVariableDependency(mooseVariable());
 }
 
 Marker::MarkerValue

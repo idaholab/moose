@@ -46,7 +46,7 @@ class UserObject : public MooseObject,
 {
 public:
   UserObject(const InputParameters & params);
-  virtual ~UserObject();
+  virtual ~UserObject() = default;
 
   /**
    * Execute method.
@@ -63,18 +63,6 @@ public:
    * you want to do MPI communication!
    */
   virtual void finalize() = 0;
-
-  /**
-   * Load user data object from a stream
-   * @param stream Stream to load from
-   */
-  virtual void load(std::ifstream & stream);
-
-  /**
-   * Store user data object to a stream
-   * @param stream Stream to store to
-   */
-  virtual void store(std::ofstream & stream);
 
   /**
    * Returns a reference to the subproblem that

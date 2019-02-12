@@ -19,7 +19,9 @@ class QuadraturePointMarker;
 template <>
 InputParameters validParams<QuadraturePointMarker>();
 
-class QuadraturePointMarker : public Marker, public Coupleable, public MaterialPropertyInterface
+class QuadraturePointMarker : public Marker,
+                              public MooseVariableInterface<Real>,
+                              public MaterialPropertyInterface
 {
 public:
   QuadraturePointMarker(const InputParameters & parameters);
@@ -37,6 +39,9 @@ protected:
    */
   virtual MarkerValue computeQpMarker() = 0;
 
+  /// Holds the solution at current quadrature points
+  const VariableValue & _u;
+
   /// The quadrature rule for the system
   QBase *& _qrule;
 
@@ -45,6 +50,9 @@ protected:
 
   /// The current quadrature point
   unsigned int _qp;
+
+  /// The behavior to use when "in-between" other states (what to do on the fringe)
+  MarkerValue _third_state;
 };
 
 #endif /* QUADRATUREPOINTMARKER_H */

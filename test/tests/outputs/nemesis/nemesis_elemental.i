@@ -55,8 +55,5 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  console = true
-  [./out]
-    type = Nemesis
-  [../]
+  nemesis = true
 []
