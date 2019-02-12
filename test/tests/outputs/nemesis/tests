@@ -5,6 +5,10 @@
     input = 'nemesis.i'
     check_files = 'nemesis_out.e.1.0'
     max_parallel = 1
+
+    requirement = "The Nemesis Output object shall output separate files per process for visualization purposes."
+    design = 'Outputs/index.md'
+    issues = '#2122'
   [../]
   [./nemesis_elemental_replicated]
     type = 'Exodiff'

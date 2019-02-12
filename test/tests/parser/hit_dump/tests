@@ -7,6 +7,10 @@
     input = 'IGNORED'
     input_switch = ''
     method = '!DBG'
+
+    requirement = "The system shall output all registered objects in HIT format."
+    design = 'command_line_usage.md'
+    issues = '#10952'
   [../]
   [./registry]
     # Make sure --registry CLI option is working
@@ -16,5 +20,9 @@
     input = 'IGNORED'
     input_switch = ''
     method = '!DBG'
+
+    requirement = "The system shall output all registered objects in single line format."
+    design = 'command_line_usage.md'
+    issues = '#10952'
   [../]
 []
