@@ -27,15 +27,16 @@ public:
   InterfaceUOPPS(const InputParameters & parameters);
   virtual ~InterfaceUOPPS();
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual Real getValue() override;
   // threadJoin is already performed in the userobject, so do nothing
   virtual void threadJoin(const UserObject & /*uo*/) override{};
 
 protected:
   const InterfaceUO & _uo;
-  Real _value;
+  Real _value_pp;
 };
 
 #endif // INTERFACEUOPPS_H

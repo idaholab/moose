@@ -58,10 +58,10 @@ InterfaceUO::finalize()
   _value = _value / _total_volume;
 }
 
-// void
-// InterfaceUO::threadJoin(const UserObject & uo)
-// {
-//   const InterfaceUO & u = dynamic_cast<const InterfaceUO &>(uo);
-//   _value += u._value;
-//   _total_volume += u._total_volume;
-// }
+void
+InterfaceUO::threadJoin(const UserObject & uo)
+{
+  const InterfaceUO & u = dynamic_cast<const InterfaceUO &>(uo);
+  _value += u._value;
+  _total_volume += u._total_volume;
+}

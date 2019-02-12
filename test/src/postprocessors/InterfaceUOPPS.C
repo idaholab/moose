@@ -23,7 +23,9 @@ validParams<InterfaceUOPPS>()
 }
 
 InterfaceUOPPS::InterfaceUOPPS(const InputParameters & parameters)
-  : InterfacePostprocessor(parameters), _uo(getUserObject<InterfaceUO>("user_object")), _value(0.)
+  : InterfacePostprocessor(parameters),
+    _uo(getUserObject<InterfaceUO>("user_object")),
+    _value_pp(0.)
 {
 }
 
@@ -32,17 +34,31 @@ InterfaceUOPPS::~InterfaceUOPPS() {}
 void
 InterfaceUOPPS::initialize()
 {
-  _value = 0;
+  _value_pp = 0;
 }
 
 void
 InterfaceUOPPS::execute()
 {
-  _value = _uo.getValue();
+  _value_pp = _uo.getValue();
+}
+
+void
+InterfaceUOPPS::finalize()
+{
+  gatherSum(_value_pp);
 }
 
 Real
 InterfaceUOPPS::getValue()
 {
-  return _value;
+  return _value_pp;
 }
+
+// void
+// InterfaceUOPPS::threadJoin(const UserObject & pps)
+// {
+//
+//   const InterfaceUO & p = dynamic_cast<const InterfaceUO &>(pps);
+//   _value_pp += p.getValue();
+// }

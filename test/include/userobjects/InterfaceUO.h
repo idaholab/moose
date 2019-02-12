@@ -26,12 +26,12 @@ public:
   InterfaceUO(const InputParameters & parameters);
   virtual ~InterfaceUO();
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & /*uo*/) override{};
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & /*uo*/) override;
 
-  Real getValue() const { return _value; }
+  Real getValue() const { return _value / _total_volume; };
 
 protected:
   const VariableValue & _u;

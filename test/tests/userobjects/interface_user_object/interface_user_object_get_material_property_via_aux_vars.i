@@ -140,11 +140,13 @@
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_1
+    block = 0
   []
   [./diffusivity_2]
     type = MaterialRealAux
     property = diffusivity
     variable = diffusivity_2
+    block = 1
   []
 []
 
