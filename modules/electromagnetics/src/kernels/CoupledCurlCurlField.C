@@ -15,7 +15,10 @@ validParams<CoupledCurlCurlField>()
 }
 
 CoupledCurlCurlField::CoupledCurlCurlField(const InputParameters & parameters)
-  : VectorKernel(parameters), _sign(getParam<Real>("sign")), _coupled_curl(coupledCurl("coupled"))
+  : VectorKernel(parameters),
+    _curl_test(_var.curlPhi()),
+    _coupled_curl(coupledCurl("coupled")),
+    _sign(getParam<Real>("sign"))
 {
 }
 
