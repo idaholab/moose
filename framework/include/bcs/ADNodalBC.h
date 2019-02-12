@@ -52,14 +52,16 @@ declareADValidParams(ADNodalBC);
 declareADValidParams(ADVectorNodalBC);
 
 #define usingTemplNodalBCMembers(type)                                                             \
+  usingMooseObjectMembers;                                                                         \
   using ADNodalBCTempl<type, compute_stage>::_u;                                                   \
   using ADNodalBCTempl<type, compute_stage>::_var;                                                 \
   using ADNodalBCTempl<type, compute_stage>::_current_node;                                        \
   using ADNodalBCTempl<type, compute_stage>::_t;                                                   \
+  using ADNodalBCTempl<type, compute_stage>::computeResidual;                                      \
+  using ADNodalBCTempl<type, compute_stage>::computeJacobian;                                      \
+  using ADNodalBCTempl<type, compute_stage>::computeOffDiagJacobian;                               \
   using ADNodalBCTempl<type, compute_stage>::getFunction;                                          \
-  using ADNodalBCTempl<type, compute_stage>::variable;                                             \
-  using ADNodalBCTempl<type, compute_stage>::paramError;                                           \
-  using ADNodalBCTempl<type, compute_stage>::isParamValid
+  using ADNodalBCTempl<type, compute_stage>::variable
 
 #define usingNodalBCMembers usingTemplNodalBCMembers(Real)
 #define usingVectorNodalBCMembers usingTemplNodalBCMembers(RealVectorValue)

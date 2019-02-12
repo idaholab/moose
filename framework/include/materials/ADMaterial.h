@@ -16,6 +16,7 @@
 #include "metaphysicl/dualnumber.h"
 
 #define usingMaterialMembers                                                                       \
+  usingMooseObjectMembers;                                                                         \
   usingCoupleableMembers;                                                                          \
   usingTransientInterfaceMembers;                                                                  \
   usingBlockRestrictableMembers;                                                                   \
@@ -31,8 +32,6 @@
   using ADMaterial<compute_stage>::_fe_problem;                                                    \
   using ADMaterial<compute_stage>::_assembly;                                                      \
   using ADMaterial<compute_stage>::_mesh;                                                          \
-  using ADMaterial<compute_stage>::isParamValid;                                                   \
-  using ADMaterial<compute_stage>::paramError;                                                     \
   using ADMaterial<compute_stage>::copyDualNumbersToValues;                                        \
   using ADMaterial<compute_stage>::_displacements
 

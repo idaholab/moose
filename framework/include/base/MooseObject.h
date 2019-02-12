@@ -16,6 +16,10 @@
 
 #include "libmesh/parallel_object.h"
 
+#define usingMooseObjectMembers                                                                    \
+  using MooseObject::isParamValid;                                                                 \
+  using MooseObject::paramError
+
 class MooseApp;
 class MooseObject;
 
