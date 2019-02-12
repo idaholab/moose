@@ -65,6 +65,59 @@ public:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
+  /**
+   * @brief Compute a fluid property given for the state defined by two given properties.
+   *
+   * For all functions, the first two arguments are the given properties that define the fluid
+   * state.  For the two-argument variants, the desired property is the return value.
+   * The five-argument variants also provide partial derivatives dx/da and dx/db where x is the desired property being
+   * computed, a is the first given property, and b is the second given property.  The desired
+   * property, dx/da, and dx/db are stored into the 3rd, 4th, and 5th arguments respectively.
+   *
+   * Properties/parameters used in these function are listed below with their units:
+   *
+   * @begincode
+   * p      pressure [Pa]
+   * T      temperature [K]
+   * e      specific internal energy [J/kg]
+   * v      specific volume [m^3/kg]
+   * rho    density [kg/m^3]
+   * h      specific enthalpy [J/kg]
+   * s      specific entropy [J/(kg*K)]
+   * mu     viscosity [Pa*s]
+   * k      thermal conductivity [W/(m*K)]
+   * c      speed of sound [m/s]
+   * cp     constant-pressure specific heat [J/K]
+   * cv     constant-volume specific heat [J/K]
+   * beta   volumetric thermal expansion coefficient [1/K]
+   * g      Gibbs free energy [J]
+   * pp_sat partial pressure at saturation [Pa]
+   * @endcode
+   *
+   * As an example:
+   *
+   * @begincode
+   * // calculate pressure given specific vol and energy:
+   * auto pressure = your_fluid_properties_object.p_from_v_e(specific_vol, specific_energy);
+   *
+   * // or use the derivative variant:
+   * Real dp_dv = 0; // derivative will be stored into here
+   * Real dp_de = 0; // derivative will be stored into here
+   * your_fluid_properties_object.p_from_v_e(specific_vol, specific_energy, pressure, dp_dv, dp_de);
+   * @endcode
+   *
+   * Automatic differentiation (AD) support is provided through x_from_a_b(DualReal a, DualReal b) versions
+   * of the functions where a and b must be ADReal/DualNumber's calculated using all AD-supporting
+   * values:
+   *
+   * @begincode
+   * auto v = 1/rho; // rho must be an AD non-linear variable.
+   * auto e = rhoE/rho - vel_energy; // rhoE and vel_energy must be AD variables/numbers also.
+   * auto pressure = your_fluid_properties_object.p_from_v_e(v, e);
+   * // pressure now contains partial derivatives w.r.t. all degrees of freedom
+   * @endcode
+   */
+  ///@{
   propfunc(p, v, e)
   propfunc(T, v, e)
   propfunc(c, v, e)
@@ -95,6 +148,7 @@ public:
   propfunc(h, p, T)
   propfunc(p, h, s)
   propfunc(g, v, e)
+  ///@}
 
 #undef propfunc
 
