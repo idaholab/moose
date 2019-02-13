@@ -1,0 +1,28 @@
+[Tests]
+  [./hit_registry]
+    # Make sure --registry-hit CLI option is working
+    type = RunApp
+    cli_args = '--registry-hit'
+    expect_out = "label =.*?type =.*?name =.*?class =.*?file =.*?"
+    input = 'IGNORED'
+    input_switch = ''
+    method = '!DBG'
+
+    requirement = "The system shall output all registered objects in HIT format."
+    design = 'command_line_usage.md'
+    issues = '#10952'
+  [../]
+  [./registry]
+    # Make sure --registry CLI option is working
+    type = RunApp
+    cli_args = '--registry'
+    expect_out = "MooseApp\s+object\s+FileMesh\s+FileMesh.*?FileMesh.C"
+    input = 'IGNORED'
+    input_switch = ''
+    method = '!DBG'
+
+    requirement = "The system shall output all registered objects in single line format."
+    design = 'command_line_usage.md'
+    issues = '#10952'
+  [../]
+[]

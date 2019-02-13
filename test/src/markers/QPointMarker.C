@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<QPointMarker>()
 {
-  InputParameters params = validParams<Marker>();
+  InputParameters params = validParams<QuadraturePointMarker>();
   return params;
 }
 

@@ -51,6 +51,7 @@
   [./Markers]
     [./marker]
       type = QPointMarker
+      variable = u
     [../]
   [../]
 []
@@ -58,4 +59,3 @@
 [Outputs]
   exodus = true
 []
-

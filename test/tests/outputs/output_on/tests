@@ -1,8 +1,21 @@
 [test]
+  issues = '#4454'
+  design = 'outputs/Console.md'
   [./postprocessor]
     # Test the the postprocessors are outputting on nonlinear residuals
     type = 'RunApp'
     input = 'postprocessors.i'
     expect_out = '\|\s*1.003000e-01\s\|'
+
+    requirement = 'The system shall allow the user to select different console output intervals.'
+  [../]
+  [./show_outputs]
+    # Test the the postprocessors are outputting on nonlinear residuals
+    type = 'RunApp'
+    input = 'postprocessors.i'
+    cli_args = '--show-outputs Outputs/exodus=true'
+    expect_out = 'Outputs.*?console.*?INITIAL.*exodus.*?INITIAL'
+
+    requirement = 'The system shall display active output information with corresponding execute flags.'
   [../]
 []

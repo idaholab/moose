@@ -62,15 +62,3 @@ UserObject::UserObject(const InputParameters & parameters)
     _duplicate_initial_execution(getParam<bool>("allow_duplicate_execution_on_initial"))
 {
 }
-
-UserObject::~UserObject() {}
-
-void
-UserObject::load(std::ifstream & /*stream*/)
-{
-}
-
-void
-UserObject::store(std::ofstream & /*stream*/)
-{
-}

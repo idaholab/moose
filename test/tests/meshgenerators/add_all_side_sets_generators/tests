@@ -1,0 +1,27 @@
+[Tests]
+  [./simple]
+    type = 'Exodiff'
+    input = 'simple.i'
+    exodiff = 'simple_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = 'REPLICATED'
+
+    requirement = "The system shall support automatic addition of sidesets based on outward facing normals of the mesh."
+    issues = '#3306'
+    design = 'AllSideSetsByNormalsGenerator.md'
+  [../]
+
+  [./less_simple]
+    type = 'Exodiff'
+    input = 'less_simple.i'
+    exodiff = 'less_simple_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = 'REPLICATED'
+
+    requirement = "The system shall group automatically added sidesets when multiple surfaces share the same outward facing normal."
+    issues = '#3306'
+    design = 'AllSideSetsByNormalsGenerator.md'
+  [../]
+[]
