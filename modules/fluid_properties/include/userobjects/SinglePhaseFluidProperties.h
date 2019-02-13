@@ -31,7 +31,7 @@ InputParameters validParams<SinglePhaseFluidProperties>();
     d##want##d2 = 0;                                                                               \
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
   }                                                                                                \
-  DualReal want##_from_##prop1##_##prop2(DualReal p1, DualReal p2) const                           \
+  DualReal want##_from_##prop1##_##prop2(const DualReal & p1, const DualReal & p2) const           \
   {                                                                                                \
     Real x = 0;                                                                                    \
     Real raw1 = p1.value();                                                                        \

@@ -152,6 +152,7 @@ struct RegistryEntry
   std::string _deprecated_time;
   /// class name for an object that replaces this object if deprecated, blank otherwise.
   std::string _replaced_by;
+  bool is_ad = false;
 };
 
 template <class T>
