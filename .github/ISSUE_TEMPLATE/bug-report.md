@@ -7,10 +7,10 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+**Bug Description**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+**Steps to Reproduce**
 Steps to reproduce the behavior (input file, or modifications to an existing input file, etc.):
 
 **Impact**
