@@ -34,7 +34,9 @@ InputParameters validParams<MooseObject>();
 MooseADObjectAction::MooseADObjectAction(InputParameters params)
   : Action(params),
     _base_type(getParam<std::string>("type")),
-    _type(_base_type + "<RESIDUAL>"),
+    _type((!Registry::isRegisteredObj(_base_type) && Registry::isADObj(_base_type + "<RESIDUAL>"))
+              ? _base_type + "<RESIDUAL>"
+              : _base_type),
     // We will create a second parameters object from the main factory unless instructed otherwise
     _moose_object_pars(!params.have_parameter<bool>("skip_param_construction") ||
                                (params.have_parameter<bool>("skip_param_construction") &&
@@ -79,5 +81,6 @@ void MooseADObjectAction::addRelationshipManagers(Moose::RelationshipManagerType
 void
 MooseADObjectAction::flagDoingAD()
 {
-  _problem->haveADObjects(true);
+  if (Registry::isADObj(_type))
+    _problem->haveADObjects(true);
 }

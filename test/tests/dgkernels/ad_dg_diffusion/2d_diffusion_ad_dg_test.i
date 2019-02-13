@@ -54,7 +54,7 @@
   [../]
 []
 
-[ADDGKernels]
+[DGKernels]
   [./dg_diff]
     type = ADDGDiffusion
     variable = u

@@ -16,13 +16,19 @@ template <>
 InputParameters
 validParams<AddDGKernelAction>()
 {
-  return validParams<MooseObjectAction>();
+  return validParams<MooseADObjectAction>();
 }
 
-AddDGKernelAction::AddDGKernelAction(InputParameters params) : MooseObjectAction(params) {}
+AddDGKernelAction::AddDGKernelAction(InputParameters params) : MooseADObjectAction(params) {}
 
 void
 AddDGKernelAction::act()
 {
-  _problem->addDGKernel(_type, _name, _moose_object_pars);
+  if (Registry::isADObj(_type))
+  {
+    _problem->addDGKernel(_base_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
+    _problem->addDGKernel(_base_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
+  }
+  else
+    _problem->addDGKernel(_type, _name, _moose_object_pars);
 }
