@@ -1,8 +1,8 @@
 [Tests]
     [./element_numbering_test]
       type = 'Exodiff'
-      input = 'test_element_numbering.i'
-      exodiff = 'test_element_numbering_out.e'
+      input = 'test_distributed_mesh.i'
+      exodiff = 'test_distributed_mesh_out.e'
       requirement = "checking if block restricted aux kernels behave properly"
       issues = '#12908'
     [../]
