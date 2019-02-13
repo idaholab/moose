@@ -41,8 +41,8 @@ protected:
   unsigned int _num_props;
 
   std::vector<MaterialProperty<Real> *> _properties;
-  std::vector<MaterialProperty<Real> *> _properties_old;
-  std::vector<MaterialProperty<Real> *> _properties_older;
+  std::vector<const MaterialProperty<Real> *> _properties_old;
+  std::vector<const MaterialProperty<Real> *> _properties_older;
   std::vector<Function *> _functions;
 
 private:
