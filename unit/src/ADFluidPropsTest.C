@@ -48,12 +48,15 @@ TEST_F(ADFluidPropsTest, error_imperfect_jacobian)
   EXPECT_THROW(_fp->g_from_v_e(v, e), std::runtime_error);
 
   // create fp with allow_imperfect_jacobians on - but warnings are errors still
-  auto & fp = buildObjects("fp2", true);
+  auto & fp = buildObj("fp2", true);
   EXPECT_THROW(fp.g_from_v_e(v, e), std::runtime_error);
 
-  // make warnings not errors
-  testing::internal::CaptureStdout();
+  // missing derivs become warnings instead of errors
+  bool wae = Moose::_warnings_are_errors;
+  bool toe = Moose::_throw_on_error;
   Moose::_warnings_are_errors = false;
   Moose::_throw_on_error = false;
   EXPECT_NO_THROW(fp.g_from_v_e(v, e));
+  Moose::_warnings_are_errors = wae;
+  Moose::_throw_on_error = toe;
 }

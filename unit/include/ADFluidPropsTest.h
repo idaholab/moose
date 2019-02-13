@@ -15,15 +15,15 @@
 class ADFluidPropsTest : public MooseObjectUnitTest
 {
 public:
-  ADFluidPropsTest() : MooseObjectUnitTest("MooseUnitApp") { buildObjects(); }
+  ADFluidPropsTest() : MooseObjectUnitTest("MooseUnitApp") { buildObj(); }
 
 protected:
-  const SinglePhaseFluidProperties & buildObjects(const std::string name = "fp",
-                                                  bool allow_imperfect_jac = false)
+  const SinglePhaseFluidProperties & buildObj(const std::string name = "fp",
+                                              bool allow_imperfect_jac = false)
   {
     InputParameters uo_pars = _factory.getValidParams("IdealGasFluidProperties");
-    uo_pars.set<Real>("gamma") = 1.4;
-    uo_pars.set<Real>("R") = 287;
+    uo_pars.set<Real>("R") = 287.04;
+    uo_pars.set<Real>("gamma") = 1.41;
     uo_pars.set<bool>("allow_imperfect_jacobians") = allow_imperfect_jac;
     _fe_problem->addUserObject("IdealGasFluidProperties", name, uo_pars);
     _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>(name);
