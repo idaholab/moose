@@ -35,6 +35,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+  volumetric_locking_correction = false
 []
 
 [Problem]

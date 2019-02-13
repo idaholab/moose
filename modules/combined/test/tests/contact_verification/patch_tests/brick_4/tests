@@ -164,7 +164,7 @@
     input = 'brick4_mu_0_2_pen.i'
     csvdiff = 'brick4_mu_0_2_pen_check.csv brick4_mu_0_2_pen_check_cont_press_0001.csv brick4_mu_0_2_pen_check_x_disp_0001.csv'
     rel_err = 1e-5
-    abs_zero = 1e-8
+    abs_zero = 2e-8
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_2_pen_sm'

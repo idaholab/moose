@@ -78,7 +78,7 @@
     hertz_cyl_half_1deg_frictionless_aug_check_cont_press_0035.csv
     hertz_cyl_half_1deg_frictionless_aug_check_x_disp_0035.csv
     hertz_cyl_half_1deg_frictionless_aug_check_y_disp_0035.csv'
-    cli_args = 'Problem/type=AugmentedLagrangianContactProblem Problem/maximum_lagrangian_update_iterations=200 
+    cli_args = 'Problem/type=AugmentedLagrangianContactProblem Problem/maximum_lagrangian_update_iterations=200
     Contact/interface/model=frictionless Contact/interface/formulation=augmented_lagrange
     Contact/interface/al_penetration_tolerance=1e-12
     Outputs/file_base=hertz_cyl_half_1deg_frictionless_aug_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_frictionless_aug_check
@@ -133,7 +133,7 @@
     type = 'CSVDiff'
     input = 'hertz_cyl_half_1deg_template1.i'
     csvdiff = 'hertz_cyl_half_1deg_mu_0_2_aug_check2.csv hertz_cyl_half_1deg_mu_0_2_aug_check_cont_press_0030.csv hertz_cyl_half_1deg_mu_0_2_aug_check_x_disp_0030.csv hertz_cyl_half_1deg_mu_0_2_aug_check_y_disp_0030.csv'
-    cli_args = 'Problem/type=AugmentedLagrangianContactProblem Problem/maximum_lagrangian_update_iterations=200 
+    cli_args = 'Problem/type=AugmentedLagrangianContactProblem Problem/maximum_lagrangian_update_iterations=200
     Contact/interface/formulation=augmented_lagrange Contact/interface/al_penetration_tolerance=1e-12
     Executioner/end_time=3.0 Contact/interface/friction_coefficient=0.2
     Outputs/file_base=hertz_cyl_half_1deg_mu_0_2_aug_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_mu_0_2_aug_check

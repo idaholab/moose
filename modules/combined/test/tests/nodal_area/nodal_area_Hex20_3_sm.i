@@ -5,6 +5,7 @@
 [GlobalParams]
   order = SECOND
   displacements = 'displ_x displ_y displ_z'
+  volumetric_locking_correction = false
 []
 
 [Functions]

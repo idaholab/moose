@@ -51,7 +51,6 @@
 []
 
 [Modules/TensorMechanics/Master/All]
-  volumetric_locking_correction = true
   strain = FINITE
   add_variables = true
   generate_output = 'stress_xx'
