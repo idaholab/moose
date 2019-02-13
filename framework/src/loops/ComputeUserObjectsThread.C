@@ -199,6 +199,8 @@ ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, Boun
   queryBoundary(Interfaces::InterfaceUserObject, bnd_id, userobjs);
   if (_interface_user_objects.size() == 0)
     return;
+  if (!(neighbor->active()))
+    return;
 
   _fe_problem.prepareFace(elem, _tid);
   _fe_problem.reinitNeighbor(elem, side, _tid);

@@ -13,5 +13,6 @@
                "a material property value on the master side of  4 "
     design = 'InterfaceIntegralVariableAveragePostprocessor.md'
     issues = '#11647'
+    max_threads = 2
   [../]
 []

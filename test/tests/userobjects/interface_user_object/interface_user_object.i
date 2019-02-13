@@ -5,6 +5,7 @@
   xmax = 2
   ny = 2
   ymax = 2
+  elem_type = QUAD4
 []
 
 [MeshModifiers]

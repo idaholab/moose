@@ -4,7 +4,7 @@
 
 Basic utility file to compute a single quantity given values on both side of an interface. The value to compute is selected via the input parameter
 average_type. This function is not registered and as such should only be used for simplifying the development of other objects.
-Some objects using it are [InterfaceUO](/InterfaceUO.md), [InterfaceUO_QP](/InterfaceUO_QP.md), and [InterfaceIntegralVariableAveragePostprocessor](/InterfaceIntegralVariableAveragePostprocessor.md).
+Amn example of an object using this utility is  [InterfaceIntegralVariableAveragePostprocessor](/InterfaceIntegralVariableAveragePostprocessor.md).
 
 Available outputs are:
 * average: (value_m-value_s)/2

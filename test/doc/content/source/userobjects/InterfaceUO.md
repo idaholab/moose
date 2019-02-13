@@ -11,9 +11,3 @@ InterfaceUO is a user object computing an average value across an interface. The
 ## Example Input File Syntax
 
 listing test/tests/userobjects/interface_user_object/interface_user_object.i block=UserObjects/interface_average
-
-!syntax parameters /UserObjects/interface_average
-
-!syntax inputs /UserObjects/interface_average
-
-!syntax children /UserObjects/interface_average

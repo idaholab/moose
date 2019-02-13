@@ -19,6 +19,8 @@ validParams<InterfaceUOPPS>()
   InputParameters params = validParams<InterfacePostprocessor>();
   params.addRequiredParam<UserObjectName>("user_object", "The name of the user object");
   params.suppressParameter<std::vector<BoundaryName>>("boundary");
+  params.addClassDescription(
+      "Test Interfae User Object postprocessor getting value from InterfaceUO");
   return params;
 }
 
@@ -43,22 +45,8 @@ InterfaceUOPPS::execute()
   _value_pp = _uo.getValue();
 }
 
-void
-InterfaceUOPPS::finalize()
-{
-  gatherSum(_value_pp);
-}
-
 Real
 InterfaceUOPPS::getValue()
 {
   return _value_pp;
 }
-
-// void
-// InterfaceUOPPS::threadJoin(const UserObject & pps)
-// {
-//
-//   const InterfaceUO & p = dynamic_cast<const InterfaceUO &>(pps);
-//   _value_pp += p.getValue();
-// }

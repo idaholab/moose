@@ -18,6 +18,8 @@ validParams<InterfaceUO_QP>()
   InputParameters params = validParams<InterfaceAverageUserObject>();
   params.addRequiredCoupledVar("var", "the variable name");
   params.addCoupledVar("var_neighbor", "the variable name");
+  params.addClassDescription("Test Interfae User Object computing and storing average values at "
+                             "each QP across an interface");
   return params;
 }
 
@@ -26,6 +28,7 @@ InterfaceUO_QP::InterfaceUO_QP(const InputParameters & parameters)
     _u(coupledValue("var")),
     _u_neighbor(parameters.isParamSetByUser("var_neighbor") ? coupledNeighborValue("var_neighbor")
                                                             : coupledNeighborValue("var"))
+
 {
 }
 

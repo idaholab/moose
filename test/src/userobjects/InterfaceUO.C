@@ -18,6 +18,8 @@ validParams<InterfaceUO>()
   InputParameters params = validParams<InterfaceAverageUserObject>();
   params.addRequiredCoupledVar("var", "the variable name");
   params.addCoupledVar("var_neighbor", "the variable name");
+  params.addClassDescription(
+      "Test Interfae User Object computing the average value of two variables across an interface");
   return params;
 }
 
@@ -43,11 +45,11 @@ InterfaceUO::initialize()
 void
 InterfaceUO::execute()
 {
+
   for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
-  {
-    _total_volume += (_current_side_volume + getNeighborElemVolume()) / 2;
-    _value += ComputeAverageType(_u[qp], _u_neighbor[qp]);
-  }
+    _value += (ComputeAverageType(_u[qp], _u_neighbor[qp])) * _JxW[qp];
+
+  _total_volume += _current_side_volume;
 }
 
 void
@@ -64,4 +66,10 @@ InterfaceUO::threadJoin(const UserObject & uo)
   const InterfaceUO & u = dynamic_cast<const InterfaceUO &>(uo);
   _value += u._value;
   _total_volume += u._total_volume;
+}
+
+Real
+InterfaceUO::getValue() const
+{
+  return _value / _total_volume;
 }

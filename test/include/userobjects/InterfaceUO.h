@@ -31,7 +31,7 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & /*uo*/) override;
 
-  Real getValue() const { return _value / _total_volume; };
+  Real getValue() const;
 
 protected:
   const VariableValue & _u;

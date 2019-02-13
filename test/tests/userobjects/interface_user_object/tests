@@ -14,6 +14,7 @@
                  "a variable value on the master side of  0 "
       design = 'InterfaceUO.md InterfaceUOPPS.md'
       issues = '#11647'
+      max_threads = 2
     [../]
     [./interface_UO_QP_test]
       type = 'Exodiff'
@@ -34,6 +35,7 @@
                  "a material property value on the master side of  4 "
       design = 'InterfaceUO_QP.md InterfaceUserObjectQpAux.md'
       issues = '#11647'
+      max_threads = 1
     [../]
     [./interface_user_object_get_material_property_via_aux_vars_test]
       type = 'Exodiff'
@@ -51,14 +53,6 @@
                  "a material property value on the master side of  4 "
       design = 'InterfaceUO.md InterfaceUOPPS.md'
       issues = '#11647'
+      max_threads = 2
     [../]
-    [./element_numbering_test]
-      type = 'Exodiff'
-      input = 'test_element_numbering.i'
-      exodiff = 'test_element_numbering_out.e'
-      requirement = "still to write"
-      design = 'InterfaceUO.md InterfaceUOPPS.md'
-      issues = '#11647'
-    [../]
-
   []

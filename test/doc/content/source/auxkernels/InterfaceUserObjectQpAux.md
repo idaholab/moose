@@ -9,9 +9,3 @@ where value_m is the value on the master side of the interface (e.g. where the b
 ## Example Input File Syntax
 
 listing test/tests/userobjects/interface_user_object/interface_user_object_QP.i block=AuxKernels/interface_avg_qp_aux
-
-!syntax parameters /AuxKernels/interface_avg_qp_aux
-
-!syntax inputs /AuxKernels/interface_avg_qp_aux
-
-!syntax children /AuxKernels/interface_avg_qp_aux
