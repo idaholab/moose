@@ -17,11 +17,9 @@ ADComputeIncrementalStrainBase<compute_stage>::ADComputeIncrementalStrainBase(
     const InputParameters & parameters)
   : ADComputeStrainBase<compute_stage>(parameters),
     _grad_disp_old(3),
-    // TODO: evaluate if all of those need to be AD!
     _strain_rate(adDeclareADProperty<RankTwoTensor>(_base_name + "strain_rate")),
     _strain_increment(adDeclareADProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(adDeclareADProperty<RankTwoTensor>(_base_name + "rotation_increment")),
-    _deformation_gradient(adDeclareADProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _mechanical_strain_old(
         adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain_old(adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
@@ -51,7 +49,6 @@ ADComputeIncrementalStrainBase<compute_stage>::initQpStatefulProperties()
 {
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
-  _deformation_gradient[_qp].setToIdentity();
 }
 
 template <ComputeStage compute_stage>

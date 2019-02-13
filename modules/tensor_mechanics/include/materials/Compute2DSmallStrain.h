@@ -28,8 +28,9 @@ class Compute2DSmallStrain : public ComputeSmallStrain
 public:
   Compute2DSmallStrain(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
+
+protected:
   virtual void computeProperties() override;
   virtual void displacementIntegrityCheck() override;
   virtual Real computeOutOfPlaneStrain() = 0;

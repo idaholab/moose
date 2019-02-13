@@ -460,6 +460,6 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
 }
 
 typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> ADRankFourTensor;
+typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
 #endif // RANKFOURTENSOR_H

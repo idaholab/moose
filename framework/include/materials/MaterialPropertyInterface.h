@@ -139,6 +139,12 @@ public:
    */
   std::vector<BoundaryName> getMaterialPropertyBoundaryNames(const std::string & name);
 
+  /**
+   * Check if block and boundary restrictions of a given material are compatible with the current
+   * material. Error out otherwise.
+   */
+  void checkBlockAndBoundaryCompatibility(std::shared_ptr<Material> discrete);
+
   ///@{
   /**
    * Return a Material reference - usable for computing directly.
@@ -149,6 +155,10 @@ public:
    * then you don't need it.
    */
   Material & getMaterial(const std::string & name);
+  Material & getMaterialByName(const std::string & name, bool no_warn = false);
+  template <ComputeStage>
+  Material & getMaterial(const std::string & name);
+  template <ComputeStage>
   Material & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 

@@ -11,11 +11,15 @@
 []
 
 [Variables]
+  # scale with one over Young's modulus
   [./disp_x]
+    scaling = 1e-10
   [../]
   [./disp_y]
+    scaling = 1e-10
   [../]
   [./disp_z]
+    scaling = 1e-10
   [../]
 []
 

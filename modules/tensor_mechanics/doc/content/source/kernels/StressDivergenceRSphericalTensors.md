@@ -53,6 +53,8 @@ and only a single displacement variable is provided:
 
 !syntax parameters /Kernels/StressDivergenceRSphericalTensors
 
+!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+
 !syntax inputs /Kernels/StressDivergenceRSphericalTensors
 
 !syntax children /Kernels/StressDivergenceRSphericalTensors

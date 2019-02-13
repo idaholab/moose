@@ -25,8 +25,9 @@ class ComputeIncrementalBeamStrain : public Material
 public:
   ComputeIncrementalBeamStrain(const InputParameters & parameters);
 
-protected:
   virtual void computeProperties() override;
+
+protected:
   virtual void initQpStatefulProperties() override;
 
   /// Computes the displacement and rotation strain increments

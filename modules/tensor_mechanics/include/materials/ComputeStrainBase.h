@@ -28,10 +28,10 @@ class ComputeStrainBase : public DerivativeMaterialInterface<Material>
 {
 public:
   ComputeStrainBase(const InputParameters & parameters);
-  virtual ~ComputeStrainBase() {}
+
+  void initialSetup() override;
 
 protected:
-  void initialSetup() override;
   virtual void initQpStatefulProperties() override;
   virtual void displacementIntegrityCheck();
 

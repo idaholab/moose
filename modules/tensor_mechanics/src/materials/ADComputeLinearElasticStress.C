@@ -29,7 +29,7 @@ ADComputeLinearElasticStress<compute_stage>::initialSetup()
 {
   if (this->template hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
     mooseError("This linear elastic stress calculation only works for small strains; use "
-               "ComputeFiniteStrainElasticStress for simulations using incremental and finite "
+               "ADComputeFiniteStrainElasticStress for simulations using incremental and finite "
                "strains.");
 }
 

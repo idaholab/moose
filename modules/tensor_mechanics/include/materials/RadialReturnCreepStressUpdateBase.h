@@ -56,7 +56,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 };
 
-template <>
-InputParameters validParams<RadialReturnCreepStressUpdateBase>();
-
 #endif // RADIALRETURNCREEPSTRESSUPDATEBASE_H

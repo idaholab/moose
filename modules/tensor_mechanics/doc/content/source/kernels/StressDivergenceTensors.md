@@ -29,6 +29,8 @@ Cartesian system.
 
 !syntax parameters /Kernels/StressDivergenceTensors
 
+!include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
+
 !syntax inputs /Kernels/StressDivergenceTensors
 
 !syntax children /Kernels/StressDivergenceTensors

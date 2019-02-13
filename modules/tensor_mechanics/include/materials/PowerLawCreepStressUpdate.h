@@ -69,7 +69,4 @@ protected:
   Real _exp_time;
 };
 
-template <>
-InputParameters validParams<PowerLawCreepStressUpdate>();
-
 #endif // POWERLAWCREEPSTRESSUPDATE_H

@@ -13,6 +13,13 @@
 #include "ADComputeStressBase.h"
 #include "GuaranteeConsumer.h"
 
+#define usingComputeFiniteStrainElasticStressMembers                                               \
+  usingComputeStressBaseMembers;                                                                   \
+  using ADComputeFiniteStrainElasticStress<compute_stage>::_strain_increment;                      \
+  using ADComputeFiniteStrainElasticStress<compute_stage>::_rotation_increment;                    \
+  using ADComputeFiniteStrainElasticStress<compute_stage>::_stress_old;                            \
+  using ADComputeFiniteStrainElasticStress<compute_stage>::_elastic_strain_old
+
 template <ComputeStage>
 class ADComputeFiniteStrainElasticStress;
 

@@ -67,7 +67,7 @@ ComputeRSphericalFiniteStrain::computeProperties()
       Fbar(1, 1) = _disp_old_0[_qp] / _q_point[_qp](0);
     }
 
-    // The polar and azimuthal strains are equalivalent in this 1D problem
+    // The polar and azimuthal strains are equivalent in this 1D problem
     A(2, 2) = A(1, 1);
     Fbar(2, 2) = Fbar(1, 1);
 

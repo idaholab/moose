@@ -201,12 +201,9 @@ MaterialPropertyInterface::getMaterial(const std::string & name)
   return getMaterialByName(_mi_params.get<MaterialName>(name));
 }
 
-Material &
-MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
+void
+MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(std::shared_ptr<Material> discrete)
 {
-  std::shared_ptr<Material> discrete =
-      _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
-
   // Check block compatibility
   if (!discrete->hasBlocks(_mi_block_ids))
   {
@@ -242,9 +239,43 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
     oss << "\n";
     mooseError(oss.str());
   }
+}
 
+Material &
+MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
+{
+  std::shared_ptr<Material> discrete =
+      _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
+  checkBlockAndBoundaryCompatibility(discrete);
   return *discrete;
 }
+
+template <ComputeStage compute_stage>
+Material &
+MaterialPropertyInterface::getMaterial(const std::string & name)
+{
+  return getMaterialByName<compute_stage>(_mi_params.get<MaterialName>(name));
+}
+
+template <>
+Material &
+MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name, bool no_warn)
+{
+  return getMaterialByName(name, no_warn);
+}
+
+template <>
+Material &
+MaterialPropertyInterface::getMaterialByName<JACOBIAN>(const std::string & name, bool no_warn)
+{
+  std::shared_ptr<Material> discrete =
+      _mi_feproblem.getMaterial(name + "_jacobian", _material_data_type, _mi_tid, no_warn);
+  checkBlockAndBoundaryCompatibility(discrete);
+  return *discrete;
+}
+
+template Material & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
+template Material & MaterialPropertyInterface::getMaterial<JACOBIAN>(const std::string &);
 
 void
 MaterialPropertyInterface::checkExecutionStage()

@@ -38,4 +38,4 @@ protected:
   RankTwoTensor _offset_tensor;
 };
 
-#endif
+#endif // COMPUTEVARIABLEBASEEIGENSTRAIN_H

@@ -87,7 +87,7 @@ ADStressDivergenceTensors<compute_stage>::precalculateResidual()
   {
     _avg_grad_test[_i] = 0.0;
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      _avg_grad_test[_i] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
+      _avg_grad_test[_i] += _grad_test[_i][_qp](_component) * _ad_JxW[_qp] * _ad_coord[_qp];
 
     _avg_grad_test[_i] /= _current_elem_volume;
   }

@@ -47,4 +47,4 @@ protected:
   RankTwoTensor _flux_grad_tensor;
 };
 
-#endif
+#endif // FLUXBASEDSTRAININCREMENT_H

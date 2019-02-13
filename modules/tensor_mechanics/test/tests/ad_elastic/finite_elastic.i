@@ -11,11 +11,15 @@
 []
 
 [Variables]
+  # scale with one over Young's modulus
   [./disp_x]
+    scaling = 1e-10
   [../]
   [./disp_y]
+    scaling = 1e-10
   [../]
   [./disp_z]
+    scaling = 1e-10
   [../]
 []
 
@@ -24,19 +28,19 @@
     type = ADStressDivergenceTensors
     component = 0
     variable = disp_x
-    # use_displaced_mesh = true
+    use_displaced_mesh = true
   [../]
   [./stress_y]
     type = ADStressDivergenceTensors
     component = 1
     variable = disp_y
-    # use_displaced_mesh = true
+    use_displaced_mesh = true
   [../]
   [./stress_z]
     type = ADStressDivergenceTensors
     component = 2
     variable = disp_z
-    # use_displaced_mesh = true
+    use_displaced_mesh = true
   [../]
 []
 
@@ -77,7 +81,7 @@
 
 [ADMaterials]
   [./strain]
-    type = ADComputeIncrementalSmallStrain
+    type = ADComputeFiniteStrain
   [../]
   [./stress]
     type = ADComputeFiniteStrainElasticStress

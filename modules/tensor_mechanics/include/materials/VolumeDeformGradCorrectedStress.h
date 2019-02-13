@@ -43,4 +43,4 @@ protected:
   MaterialProperty<RankFourTensor> * _Jacobian_mult;
 };
 
-#endif
+#endif // VOLUMEDEFORMGRADCORRECTEDSTRESS_H

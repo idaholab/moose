@@ -86,10 +86,10 @@ ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement(
                      (*_grad_disp_old[1])[_qp],
                      (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
 
-  _deformation_gradient[_qp] = A;
-  _deformation_gradient[_qp].addIa(1.0);
-
   A -= Fbar; // A = grad_disp - grad_disp_old
 
   total_strain_increment = 0.5 * (A + A.transpose());
 }
+
+// explicit instantiation is required for AD base classes
+adBaseClass(ADComputeIncrementalSmallStrain);

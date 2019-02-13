@@ -25,7 +25,6 @@ class ComputeSmallStrain : public ComputeStrainBase
 public:
   ComputeSmallStrain(const InputParameters & parameters);
 
-protected:
   virtual void computeProperties() override;
 };
 

@@ -52,4 +52,4 @@ protected:
   std::vector<std::vector<MaterialProperty<RankTwoTensor> *>> _d2elastic_strain;
 };
 
-#endif // COMPUTE_VOLUMETRIC_EIGENSTRAIN_H
+#endif // COMPUTEVOLUMETRICEIGENSTRAIN_H

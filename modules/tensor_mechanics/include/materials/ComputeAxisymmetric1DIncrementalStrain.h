@@ -28,9 +28,9 @@ class ComputeAxisymmetric1DIncrementalStrain : public Compute1DIncrementalStrain
 public:
   ComputeAxisymmetric1DIncrementalStrain(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
 
+protected:
   /// Computes the current dUy/dy for axisymmetric problems
   Real computeGradDispYY() override;
 
