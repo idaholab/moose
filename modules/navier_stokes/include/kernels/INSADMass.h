@@ -20,11 +20,11 @@ declareADValidParams(INSADMass);
 
 /**
  * This class computes the mass equation residual and Jacobian
- * contributions for the incompressible Navier-Stokes momentum
- * equation.
+ * contributions (the latter using automatic differentiation) for the incompressible Navier-Stokes
+ * equations.
  */
 template <ComputeStage compute_stage>
-class INSADMass : public INSADBase<compute_stage>
+class INSADMass : public ADKernelValue<compute_stage>
 {
 public:
   INSADMass(const InputParameters & parameters);
@@ -32,23 +32,12 @@ public:
   virtual ~INSADMass() {}
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  ADResidual precomputeQpResidual() override;
 
-  void computeQpStrongResidual();
-  void computeQpPGStrongResidual();
+  /// The strong residual of the mass equation, computed using INSADMaterial
+  const ADMaterialProperty(Real) & _mass_strong_residual;
 
-  void beforeTestLoop() override;
-  void beforeQpLoop() override;
-
-  bool _pspg;
-  Function & _x_ffn;
-  Function & _y_ffn;
-  Function & _z_ffn;
-
-  typename Moose::RealType<compute_stage>::type _strong_residual;
-  VectorValue<typename Moose::RealType<compute_stage>::type> _strong_pg_residual;
-
-  usingINSBaseMembers;
+  usingKernelValueMembers;
 };
 
 #endif // INSADMASS_H
