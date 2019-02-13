@@ -1,10 +1,30 @@
 [Tests]
-    [./element_numbering_test]
+    [./distributed_mesh_assign_element_id_test]
       type = 'Exodiff'
-      input = 'test_distributed_mesh.i'
-      exodiff = 'test_distributed_mesh_out.e'
-      requirement = "checking if block restricted aux kernels behave properly"
+      input = 'test_distributed_mesh_assign_element_id.i'
+      exodiff = 'test_distributed_mesh_assign_element_id_out.e'
+      requirement = "checking add element subdomian id"
       issues = '#12908'
     [../]
-
+    [./distributed_mesh_bounding_box_test]
+      type = 'Exodiff'
+      input = 'test_distributed_mesh_boundingbox.i'
+      exodiff = 'test_distributed_mesh_boundingbox_out.e'
+      requirement = "checking bounding box"
+      issues = '#12908'
+    [../]
+    [./distributed_mesh_read_in_test]
+      type = 'Exodiff'
+      input = 'test_distributed_mesh_read_in.i'
+      exodiff = 'test_distributed_mesh_read_in_out.e'
+      requirement = "checking behavior from reading a complete mesh file"
+      issues = '#12908'
+    [../]
+    [./test_distributed_mesh_read_in_add_sideset_est]
+      type = 'Exodiff'
+      input = 'test_distributed_mesh_read_in_add_sideset.i'
+      exodiff = 'test_distributed_mesh_read_in_add_sideset_out.e'
+      requirement = "checking behavior from reading a mesh file that adds boundary"
+      issues = '#12908'
+    [../]
   []
