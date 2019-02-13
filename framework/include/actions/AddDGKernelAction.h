@@ -10,7 +10,7 @@
 #ifndef ADDDGKERNELACTION_H
 #define ADDDGKERNELACTION_H
 
-#include "MooseObjectAction.h"
+#include "MooseADObjectAction.h"
 
 class AddDGKernelAction;
 
