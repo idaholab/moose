@@ -1,30 +1,67 @@
 [Tests]
-    [./distributed_mesh_assign_element_id_test]
+  [./distributed_mesh_assign_element_id_test]
+    type = 'Exodiff'
+    input = 'test_distributed_mesh_assign_element_id.i'
+    exodiff = 'test_distributed_mesh_assign_element_id_out.e'
+    requirement = "checking add element subdomian id"
+    issues = '#12908'
+  [../]
+  [./distributed_mesh_bounding_box_test]
+    type = 'Exodiff'
+    input = 'test_distributed_mesh_boundingbox.i'
+    exodiff = 'test_distributed_mesh_boundingbox_out.e'
+    requirement = "checking bounding box"
+    issues = '#12908'
+  [../]
+  [./distributed_mesh_assign_element_with_id_as_bb_test]
+    type = 'Exodiff'
+    input = 'test_distributed_mesh_assign_element_with_id_as_bb.i'
+    exodiff = 'test_distributed_mesh_assign_element_with_id_as_bb_out.e'
+    requirement = "checking add element subdomian id"
+    issues = '#12908'
+  [../]
+  [./distributed_mesh_assign_element_id_ONLYMESH_test]
+    type = 'Exodiff'
+    input = 'test_distributed_mesh_assign_element_id_only_mesh.i'
+    exodiff = 'test_distributed_mesh_assign_element_id_only_mesh_in.e'
+    cli_args = '--mesh-only test_distributed_mesh_assign_element_id_only_mesh_in.e'
+    requirement = "checking add element subdomian id"
+    issues = '#12908'
+  [../]
+  [./distributed_mesh_assign_element_id_nonrestricted_auxkernel_test]
+    type = 'Exodiff'
+    input = 'test_distributed_mesh_assign_element_id_nonrestricted_auxkernel.i'
+    exodiff = 'test_distributed_mesh_assign_element_id_nonrestricted_auxkernel_out.e'
+    requirement = "checking add element subdomian id"
+    issues = '#12908'
+  [../]
+  [./distributed_mesh_assign_element_id_no_aux_test]
+    type = 'Exodiff'
+    input = 'test_distributed_mesh_assign_element_id_no_aux.i'
+    exodiff = 'test_distributed_mesh_assign_element_id_no_aux_out.e'
+    requirement = "checking add element subdomian id"
+    issues = '#12908'
+  [../]
+  [./distributed_mesh_bb_same_as_assign_element_it_test]
       type = 'Exodiff'
-      input = 'test_distributed_mesh_assign_element_id.i'
-      exodiff = 'test_distributed_mesh_assign_element_id_out.e'
-      requirement = "checking add element subdomian id"
-      issues = '#12908'
-    [../]
-    [./distributed_mesh_bounding_box_test]
-      type = 'Exodiff'
-      input = 'test_distributed_mesh_boundingbox.i'
-      exodiff = 'test_distributed_mesh_boundingbox_out.e'
-      requirement = "checking bounding box"
-      issues = '#12908'
-    [../]
-    [./distributed_mesh_read_in_test]
-      type = 'Exodiff'
-      input = 'test_distributed_mesh_read_in.i'
-      exodiff = 'test_distributed_mesh_read_in_out.e'
-      requirement = "checking behavior from reading a complete mesh file"
-      issues = '#12908'
-    [../]
-    [./test_distributed_mesh_read_in_add_sideset_est]
-      type = 'Exodiff'
-      input = 'test_distributed_mesh_read_in_add_sideset.i'
-      exodiff = 'test_distributed_mesh_read_in_add_sideset_out.e'
-      requirement = "checking behavior from reading a mesh file that adds boundary"
+      input = 'test_distributed_mesh_bb_same_as_assign_element_id.i'
+      exodiff = 'test_distributed_mesh_bb_same_as_assign_element_id_out.e'
+      requirement = "same subdomian of assign subdomain id"
       issues = '#12908'
     [../]
   []
+
+  #  [./distributed_mesh_read_in_test]
+  #    type = 'Exodiff'
+  #    input = 'test_distributed_mesh_read_in.i'
+  #    exodiff = 'test_distributed_mesh_read_in_out.e'
+  #    requirement = "checking behavior from reading a complete mesh file"
+  #    issues = '#12908'
+  #  [../]
+  #  [./distributed_mesh_read_in_add_sideset_test]
+  #    type = 'Exodiff'
+  #    input = 'test_distributed_mesh_read_in_add_sideset.i'
+  #    exodiff = 'test_distributed_mesh_read_in_add_sideset_out.e'
+  #    requirement = "checking behavior from reading a mesh file that adds boundary"
+  #    issues = '#12908'
+  #  [../]
