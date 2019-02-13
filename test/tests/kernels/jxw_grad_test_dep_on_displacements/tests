@@ -25,8 +25,8 @@
   [./jxw_jacobian_cylindrical]
     type = 'PetscJacobianTester'
     input = 'jxw-cylindrical.i'
-    ratio_tol = 4e-7
-    difference_tol = 8e-5
+    ratio_tol = 7e-7
+    difference_tol = 4e-4
     run_sim = True
     petsc_version = '>=3.9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements for a cylindrical geometry"
@@ -46,8 +46,8 @@
   [./jxw_jacobian_spherical]
     type = 'PetscJacobianTester'
     input = 'jxw-spherical.i'
-    ratio_tol = 4e-7
-    difference_tol = 5e-5
+    ratio_tol = 8e-7
+    difference_tol = 1e-3
     run_sim = True
     petsc_version = '>=3.9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements for a spherical geometry"
