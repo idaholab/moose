@@ -502,6 +502,18 @@ TabulatedFluidProperties::henryConstant(Real temperature, Real & Kh, Real & dKh_
   _fp.henryConstant(temperature, Kh, dKh_dT);
 }
 
+Real
+TabulatedFluidProperties::vaporPressure(Real temperature) const
+{
+  return _fp.vaporPressure(temperature);
+}
+
+void
+TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const
+{
+  _fp.vaporPressure(temperature, psat, dpsat_dT);
+}
+
 void
 TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 {
