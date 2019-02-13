@@ -18,6 +18,9 @@ class CO2FluidProperties;
 template <>
 InputParameters validParams<CO2FluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * CO2 fluid properties
  * Most thermophysical properties taken from:
@@ -253,5 +256,7 @@ protected:
   const std::array<Real, 12> _k_a{
       {3.0, 6.70697, 0.94604, 0.3, 0.3, 0.39751, 0.33791, 0.77963, 0.79857, 0.9, 0.02, 0.2}};
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* CO2FLUIDPROPERTIES_H */

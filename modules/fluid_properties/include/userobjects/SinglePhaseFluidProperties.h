@@ -61,9 +61,9 @@ public:
    */
   virtual std::string fluidName() const;
 
-  // clang-format off
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+  // clang-format off
 
   /**
    * @brief Compute a fluid property given for the state defined by two given properties.
@@ -150,11 +150,12 @@ public:
   propfunc(g, v, e)
   ///@}
 
+  // clang-format on
+
 #undef propfunc
+#pragma GCC diagnostic pop
 
-      // clang-format on
-
-      virtual Real s(Real pressure, Real temperature) const;
+                              virtual Real s(Real pressure, Real temperature) const;
 
   /**
    * Dynamic viscosity and its derivatives wrt density and temperature

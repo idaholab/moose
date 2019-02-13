@@ -17,6 +17,9 @@ class StiffenedGasFluidProperties;
 template <>
 InputParameters validParams<StiffenedGasFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Stiffened gas fluid properties
  */
@@ -104,5 +107,7 @@ protected:
   Real _rho_c;
   Real _e_c;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* STIFFENEDGASFLUIDPROPERTIES_H */

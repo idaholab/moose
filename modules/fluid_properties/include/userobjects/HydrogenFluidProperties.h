@@ -18,6 +18,9 @@ class HydrogenFluidProperties;
 template <>
 InputParameters validParams<HydrogenFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Hydrogen (H2) fluid properties as a function of pressure (Pa)
  * and temperature (K).
@@ -202,5 +205,7 @@ protected:
   const std::array<Real, 5> _b1k{{3.63081e-2, -2.07629e-2, 3.1481e-2, -1.43097e-2, 1.7498e-3}};
   const std::array<Real, 5> _b2k{{1.8337e-3, -8.86716e-3, 1.5826e-2, -1.06283e-2, 2.80673e-3}};
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* HYDROGENFLUIDPROPERTIES_H */
