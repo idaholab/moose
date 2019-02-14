@@ -1,14 +1,14 @@
 #ifndef ADDCOMPONENTPHYSICSACTION_H
 #define ADDCOMPONENTPHYSICSACTION_H
 
-#include "RELAP7Action.h"
+#include "THMAction.h"
 
 class AddComponentPhysicsAction;
 
 template <>
 InputParameters validParams<AddComponentPhysicsAction>();
 
-class AddComponentPhysicsAction : public RELAP7Action
+class AddComponentPhysicsAction : public THMAction
 {
 public:
   AddComponentPhysicsAction(InputParameters params);

@@ -1,28 +1,26 @@
 #include "ControlDataIntegrityCheckAction.h"
-#include "RELAP7App.h"
+#include "THMApp.h"
 
-registerMooseAction("RELAP7App",
-                    ControlDataIntegrityCheckAction,
-                    "RELAP7:control_data_integrity_check");
+registerMooseAction("THMApp", ControlDataIntegrityCheckAction, "THM:control_data_integrity_check");
 
 template <>
 InputParameters
 validParams<ControlDataIntegrityCheckAction>()
 {
-  InputParameters params = validParams<RELAP7Action>();
+  InputParameters params = validParams<THMAction>();
 
   return params;
 }
 
 ControlDataIntegrityCheckAction::ControlDataIntegrityCheckAction(InputParameters parameters)
-  : RELAP7Action(parameters)
+  : THMAction(parameters)
 {
 }
 
 void
 ControlDataIntegrityCheckAction::act()
 {
-  RELAP7App & app = dynamic_cast<RELAP7App &>(_app);
+  THMApp & app = dynamic_cast<THMApp &>(_app);
 
   if (!app.checkJacobian())
     _simulation.controlDataIntegrityCheck();

@@ -1,13 +1,13 @@
 #include "TimeFunctionControl.h"
 #include "Function.h"
 
-registerMooseObject("RELAP7App", TimeFunctionControl);
+registerMooseObject("THMApp", TimeFunctionControl);
 
 template <>
 InputParameters
 validParams<TimeFunctionControl>()
 {
-  InputParameters params = validParams<RELAP7Control>();
+  InputParameters params = validParams<THMControl>();
   params.addRequiredParam<std::string>("component",
                                        "The name of the component we will be controlling.");
   params.addRequiredParam<std::string>(
@@ -18,7 +18,7 @@ validParams<TimeFunctionControl>()
 }
 
 TimeFunctionControl::TimeFunctionControl(const InputParameters & parameters)
-  : RELAP7Control(parameters),
+  : THMControl(parameters),
     _component_name(getParam<std::string>("component")),
     _param_name(getParam<std::string>("parameter")),
     _ctrl_param_name("component", _component_name, _param_name),

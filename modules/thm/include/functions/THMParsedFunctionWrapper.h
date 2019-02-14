@@ -1,5 +1,5 @@
-#ifndef RELAP7PARSEDFUNCTIONWRAPPER_H
-#define RELAP7PARSEDFUNCTIONWRAPPER_H
+#ifndef THMPARSEDFUNCTIONWRAPPER_H
+#define THMPARSEDFUNCTIONWRAPPER_H
 
 #include "MooseError.h"
 #include "MooseTypes.h"
@@ -17,7 +17,7 @@ class Function;
  * libMesh::ParsedFunction interface for fparser. It has the same capability as
  * MooseParsedFunctionWrapper but adds ability to use control data values
  */
-class RELAP7ParsedFunctionWrapper
+class THMParsedFunctionWrapper
 {
 public:
   /**
@@ -28,12 +28,12 @@ public:
    * @param vars A vector of variable names contained within the function
    * @param vals A vector of variable initial values, matching the variables defined in \c vars
    */
-  RELAP7ParsedFunctionWrapper(Simulation & sim,
-                              FEProblemBase & feproblem,
-                              const std::string & function_str,
-                              const std::vector<std::string> & vars,
-                              const std::vector<std::string> & vals,
-                              const THREAD_ID tid = 0);
+  THMParsedFunctionWrapper(Simulation & sim,
+                           FEProblemBase & feproblem,
+                           const std::string & function_str,
+                           const std::vector<std::string> & vars,
+                           const std::vector<std::string> & vals,
+                           const THREAD_ID tid = 0);
 
   /**
    * Perform the evaluation of the libMesh::ParsedFunction
@@ -124,4 +124,4 @@ private:
   void updateControlDataValues();
 };
 
-#endif // RELAP7PARSEDFUNCTIONWRAPPER_H
+#endif // THMPARSEDFUNCTIONWRAPPER_H

@@ -3,6 +3,7 @@
 
 #include "ModulesApp.h"
 #include "AppFactory.h"
+#include "Simulation.h"
 
 #include "SinglePhaseFluidProperties.h"
 #include "TwoPhaseFluidProperties.h"

@@ -1,17 +1,17 @@
 #include "AddComponentAction.h"
 #include "Simulation.h"
 
-registerMooseAction("RELAP7App", AddComponentAction, "RELAP7:add_component");
+registerMooseAction("THMApp", AddComponentAction, "THM:add_component");
 
 template <>
 InputParameters
 validParams<AddComponentAction>()
 {
-  InputParameters params = validParams<RELAP7ObjectAction>();
+  InputParameters params = validParams<THMObjectAction>();
   return params;
 }
 
-AddComponentAction::AddComponentAction(InputParameters params) : RELAP7ObjectAction(params) {}
+AddComponentAction::AddComponentAction(InputParameters params) : THMObjectAction(params) {}
 
 void
 AddComponentAction::act()

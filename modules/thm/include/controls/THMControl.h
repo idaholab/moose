@@ -1,19 +1,19 @@
-#ifndef RELAP7CONTROL_H
-#define RELAP7CONTROL_H
+#ifndef THMCONTROL_H
+#define THMCONTROL_H
 
 #include "Control.h"
 #include "ControlData.h"
 #include "Simulation.h"
 
-class RELAP7Control;
+class THMControl;
 
 template <>
-InputParameters validParams<RELAP7Control>();
+InputParameters validParams<THMControl>();
 
-class RELAP7Control : public Control
+class THMControl : public Control
 {
 public:
-  RELAP7Control(const InputParameters & parameters);
+  THMControl(const InputParameters & parameters);
 
   virtual void init() {}
 
@@ -63,7 +63,7 @@ protected:
 
 template <typename T>
 T &
-RELAP7Control::declareComponentControlData(const std::string & data_name)
+THMControl::declareComponentControlData(const std::string & data_name)
 {
   std::string full_name = name() + ":" + data_name;
   ControlData<T> * data_ptr = _sim.declareControlData<T>(full_name, this);
@@ -72,7 +72,7 @@ RELAP7Control::declareComponentControlData(const std::string & data_name)
 
 template <typename T>
 T &
-RELAP7Control::declareControlData(const std::string & data_name)
+THMControl::declareControlData(const std::string & data_name)
 {
   ControlData<T> * data_ptr = _sim.declareControlData<T>(data_name, this);
   return data_ptr->set();
@@ -80,7 +80,7 @@ RELAP7Control::declareControlData(const std::string & data_name)
 
 template <typename T>
 const T &
-RELAP7Control::getControlData(const std::string & param_name)
+THMControl::getControlData(const std::string & param_name)
 {
   std::string data_name = getParam<std::string>(param_name);
   return getControlDataByName<T>(data_name);
@@ -88,7 +88,7 @@ RELAP7Control::getControlData(const std::string & param_name)
 
 template <typename T>
 const T &
-RELAP7Control::getControlDataByName(const std::string & data_name)
+THMControl::getControlDataByName(const std::string & data_name)
 {
   ControlData<T> * data_ptr = _sim.getControlData<T>(data_name);
   if (data_ptr == nullptr)
@@ -105,4 +105,4 @@ RELAP7Control::getControlDataByName(const std::string & data_name)
   return data_ptr->get();
 }
 
-#endif // RELAP7CONTROL_H
+#endif // THMCONTROL_H

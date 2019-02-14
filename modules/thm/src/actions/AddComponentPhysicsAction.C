@@ -1,18 +1,16 @@
 #include "AddComponentPhysicsAction.h"
 
-registerMooseAction("RELAP7App", AddComponentPhysicsAction, "RELAP7:add_component_physics");
+registerMooseAction("THMApp", AddComponentPhysicsAction, "THM:add_component_physics");
 
 template <>
 InputParameters
 validParams<AddComponentPhysicsAction>()
 {
-  InputParameters params = validParams<RELAP7Action>();
+  InputParameters params = validParams<THMAction>();
   return params;
 }
 
-AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : RELAP7Action(params)
-{
-}
+AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : THMAction(params) {}
 
 void
 AddComponentPhysicsAction::act()

@@ -1,7 +1,7 @@
 #ifndef PIDCONTROL_H
 #define PIDCONTROL_H
 
-#include "RELAP7Control.h"
+#include "THMControl.h"
 
 class PIDControl;
 
@@ -14,7 +14,7 @@ InputParameters validParams<PIDControl>();
  * measured process variable and applies a correction based on proportional, integral, and
  * derivative terms.
  */
-class PIDControl : public RELAP7Control
+class PIDControl : public THMControl
 {
 public:
   PIDControl(const InputParameters & parameters);

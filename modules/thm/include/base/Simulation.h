@@ -8,7 +8,7 @@
 
 class ActionWarehouse;
 class Component;
-class RELAP7Mesh;
+class THMMesh;
 
 /**
  * Main class for simulation (the driver of the simulation)
@@ -23,7 +23,7 @@ public:
    * Get the reference to the mesh
    * @return The reference to the mesh
    */
-  RELAP7Mesh & mesh();
+  THMMesh & mesh();
 
   /**
    * Get the input parameters for the simulation
@@ -371,7 +371,7 @@ public:
    * @return Pointer to the control data of type T
    */
   template <typename T>
-  ControlData<T> * declareControlData(const std::string & name, RELAP7Control * ctrl)
+  ControlData<T> * declareControlData(const std::string & name, THMControl * ctrl)
   {
     ControlData<T> * data = getControlData<T>(name);
     if (!data->getDeclared())
@@ -418,7 +418,7 @@ protected:
     Real _scaling_factor;
   };
   ActionWarehouse & _action_warehouse;
-  std::shared_ptr<RELAP7Mesh> _mesh;
+  std::shared_ptr<THMMesh> _mesh;
 
   /// Pointer to FEProblem representing this simulation
   FEProblem * _fe_problem;

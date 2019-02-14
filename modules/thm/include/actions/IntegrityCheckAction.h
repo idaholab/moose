@@ -1,7 +1,7 @@
 #ifndef INTEGRITYCHECKACTION_H
 #define INTEGRITYCHECKACTION_H
 
-#include "RELAP7Action.h"
+#include "THMAction.h"
 
 class IntegrityCheckAction;
 
@@ -11,7 +11,7 @@ InputParameters validParams<IntegrityCheckAction>();
 /**
  * Check the integrity of the simulation
  */
-class IntegrityCheckAction : public RELAP7Action
+class IntegrityCheckAction : public THMAction
 {
 public:
   IntegrityCheckAction(InputParameters parameters);

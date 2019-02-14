@@ -1,13 +1,13 @@
 #include "UnitTripControl.h"
-#include "RELAP7ParsedFunctionWrapper.h"
+#include "THMParsedFunctionWrapper.h"
 
-registerMooseObject("RELAP7App", UnitTripControl);
+registerMooseObject("THMApp", UnitTripControl);
 
 template <>
 InputParameters
 validParams<UnitTripControl>()
 {
-  InputParameters params = validParams<RELAP7Control>();
+  InputParameters params = validParams<THMControl>();
   params += validParams<MooseParsedFunctionBase>();
   params.addRequiredCustomTypeParam<std::string>(
       "condition",
@@ -21,7 +21,7 @@ validParams<UnitTripControl>()
 }
 
 UnitTripControl::UnitTripControl(const InputParameters & parameters)
-  : RELAP7Control(parameters),
+  : THMControl(parameters),
     MooseParsedFunctionBase(parameters),
     _condition(verifyFunction(getParam<std::string>("condition"))),
     _state(declareComponentControlData<bool>("state")),
@@ -39,7 +39,7 @@ UnitTripControl::init()
     if (isParamValid("_tid"))
       tid = getParam<THREAD_ID>("_tid");
 
-    _condition_ptr = libmesh_make_unique<RELAP7ParsedFunctionWrapper>(
+    _condition_ptr = libmesh_make_unique<THMParsedFunctionWrapper>(
         _sim, _pfb_feproblem, _condition, _vars, _vals, tid);
 
     // establish dependency so that the control data graph is properly evaluated

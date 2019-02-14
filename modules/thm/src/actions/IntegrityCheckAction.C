@@ -1,23 +1,23 @@
 #include "IntegrityCheckAction.h"
-#include "RELAP7App.h"
+#include "THMApp.h"
 
-registerMooseAction("RELAP7App", IntegrityCheckAction, "RELAP7:integrity_check");
+registerMooseAction("THMApp", IntegrityCheckAction, "THM:integrity_check");
 
 template <>
 InputParameters
 validParams<IntegrityCheckAction>()
 {
-  InputParameters params = validParams<RELAP7Action>();
+  InputParameters params = validParams<THMAction>();
 
   return params;
 }
 
-IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : RELAP7Action(parameters) {}
+IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : THMAction(parameters) {}
 
 void
 IntegrityCheckAction::act()
 {
-  RELAP7App & app = dynamic_cast<RELAP7App &>(_app);
+  THMApp & app = dynamic_cast<THMApp &>(_app);
 
   if (!app.checkJacobian())
     _simulation.integrityCheck();

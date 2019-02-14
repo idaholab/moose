@@ -1,21 +1,21 @@
-#ifndef RELAP7MESH_H
-#define RELAP7MESH_H
+#ifndef THMMESH_H
+#define THMMESH_H
 
 #include "MooseMesh.h"
 
-class RELAP7Mesh;
+class THMMesh;
 
 template <>
-InputParameters validParams<RELAP7Mesh>();
+InputParameters validParams<THMMesh>();
 
 /**
- * Mesh for RELAP7
+ * Mesh for THM
  */
-class RELAP7Mesh : public MooseMesh
+class THMMesh : public MooseMesh
 {
 public:
-  RELAP7Mesh(const InputParameters & parameters);
-  RELAP7Mesh(const RELAP7Mesh & other_mesh);
+  THMMesh(const InputParameters & parameters);
+  THMMesh(const THMMesh & other_mesh);
 
   virtual unsigned int dimension() const override;
   virtual unsigned int effectiveSpatialDimension() const override;
@@ -29,4 +29,4 @@ protected:
   unsigned int _dim;
 };
 
-#endif /* RELAP7MESH_H */
+#endif /* THMMESH_H */

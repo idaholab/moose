@@ -9,13 +9,13 @@
 
 class Component;
 class FEProblem;
-class RELAP7Mesh;
+class THMMesh;
 
 template <>
 InputParameters validParams<Component>();
 
 /**
- * Base class for RELAP-7 components
+ * Base class for THM components
  */
 class Component : public THMObject
 {
@@ -195,7 +195,7 @@ protected:
    * Gets an enum parameter
    *
    * This function takes the name of a MooseEnum parameter that is tied to an
-   * enum defined in RELAP-7. If the value is invalid, an error will be logged,
+   * enum defined in THM. If the value is invalid, an error will be logged,
    * and a negative integer will be cast into the enum type.
    *
    * @tparam    T       enum type
@@ -403,7 +403,7 @@ protected:
   Factory & _factory;
 
   /// Global mesh this component works on
-  RELAP7Mesh & _mesh;
+  THMMesh & _mesh;
 
   const Real & _zero;
 

@@ -1,7 +1,7 @@
 #ifndef TERMINATE_H
 #define TERMINATE_H
 
-#include "RELAP7Control.h"
+#include "THMControl.h"
 
 class TerminateControl;
 
@@ -11,7 +11,7 @@ InputParameters validParams<TerminateControl>();
 /**
  * This control block will terminate a run if its input indicates so.
  */
-class TerminateControl : public RELAP7Control
+class TerminateControl : public THMControl
 {
 public:
   TerminateControl(const InputParameters & parameters);

@@ -7,6 +7,7 @@
 
 class THMApp;
 class FluidProperties;
+class Simulation;
 
 #define registerComponent(name) registerObject(name)
 #define registerNamedComponent(obj, name) registerNamedObject(obj, name)

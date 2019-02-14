@@ -1,16 +1,16 @@
-#include "RELAP7ObjectAction.h"
-#include "RELAP7App.h"
+#include "THMObjectAction.h"
+#include "THMApp.h"
 #include "Simulation.h"
 
 template <>
 InputParameters
-validParams<RELAP7ObjectAction>()
+validParams<THMObjectAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-RELAP7ObjectAction::RELAP7ObjectAction(InputParameters params)
+THMObjectAction::THMObjectAction(InputParameters params)
   : MooseObjectAction(params),
     _simulation(*_app.parameters().getCheckedPointerParam<Simulation *>("_sim"))
 {

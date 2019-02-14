@@ -1,7 +1,7 @@
 #ifndef GETFUNCTIONVALUECONTROL_H
 #define GETFUNCTIONVALUECONTROL_H
 
-#include "RELAP7Control.h"
+#include "THMControl.h"
 
 class GetFunctionValueControl;
 class Function;
@@ -12,7 +12,7 @@ InputParameters validParams<GetFunctionValueControl>();
 /**
  * This control takes a function and converts it into a control data
  */
-class GetFunctionValueControl : public RELAP7Control
+class GetFunctionValueControl : public THMControl
 {
 public:
   GetFunctionValueControl(const InputParameters & parameters);

@@ -1,4 +1,4 @@
-#include "RELAP7SetupOutputAction.h"
+#include "THMSetupOutputAction.h"
 #include "MooseApp.h"
 #include "Factory.h"
 #include "Simulation.h"
@@ -11,20 +11,20 @@
 #include "Exodus.h"
 #include "InputParameterWarehouse.h"
 
-registerMooseAction("RELAP7App", RELAP7SetupOutputAction, "RELAP7:setup_output");
+registerMooseAction("THMApp", THMSetupOutputAction, "THM:setup_output");
 
 template <>
 InputParameters
-validParams<RELAP7SetupOutputAction>()
+validParams<THMSetupOutputAction>()
 {
-  InputParameters params = validParams<RELAP7Action>();
+  InputParameters params = validParams<THMAction>();
   return params;
 }
 
-RELAP7SetupOutputAction::RELAP7SetupOutputAction(InputParameters params) : RELAP7Action(params) {}
+THMSetupOutputAction::THMSetupOutputAction(InputParameters params) : THMAction(params) {}
 
 void
-RELAP7SetupOutputAction::act()
+THMSetupOutputAction::act()
 {
   for (auto && o : _app.getOutputWarehouse().getOutputs<Output>())
   {

@@ -1,6 +1,6 @@
 #include "GeometricalComponent.h"
 #include "ConstantFunction.h"
-#include "RELAP7Mesh.h"
+#include "THMMesh.h"
 
 template <>
 InputParameters

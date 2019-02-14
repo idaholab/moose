@@ -7,8 +7,8 @@
 #include "FlowJunction.h"
 
 #include "FluidProperties.h"
-#include "RELAP7Control.h"
-#include "RELAP7Mesh.h"
+#include "THMControl.h"
+#include "THMMesh.h"
 
 Simulation::Simulation(ActionWarehouse & action_warehouse)
   : _action_warehouse(action_warehouse),
@@ -21,15 +21,15 @@ Simulation::Simulation(ActionWarehouse & action_warehouse)
     _zero(0)
 {
   {
-    InputParameters params = _factory.getValidParams("RELAP7Mesh");
+    InputParameters params = _factory.getValidParams("THMMesh");
     params.set<MooseEnum>("dim") = "3";
     params.set<unsigned int>("patch_size") = 1;
-    // We need to go through the Factory to create the RELAP7Mesh so
+    // We need to go through the Factory to create the THMMesh so
     // that its params object is properly added to the Warehouse.
-    _mesh = _factory.create<RELAP7Mesh>("RELAP7Mesh", "relap7:mesh", params);
+    _mesh = _factory.create<THMMesh>("THMMesh", "THM:mesh", params);
   }
 
-  // NOTE: when Simulation gets merged in RELAP7Problem, these will reside in its input parameters,
+  // NOTE: when Simulation gets merged in THMProblem, these will reside in its input parameters,
   // so this ugliness will go away
   params().set<std::vector<Real>>("scaling_factor_1phase") = {1., 1., 1.};
   params().set<std::vector<Real>>("scaling_factor_2phase") = {1., 1., 1., 1., 1., 1., 1.};
@@ -44,7 +44,7 @@ Simulation::~Simulation()
   // _mesh is destroyed by MOOSE
 }
 
-RELAP7Mesh &
+THMMesh &
 Simulation::mesh()
 {
   return *_mesh;
@@ -758,18 +758,18 @@ Simulation::controlDataIntegrityCheck()
 
   auto & ctrl_wh = _fe_problem->getControlWarehouse()[EXEC_TIMESTEP_BEGIN];
 
-  // initialize RELAP-7 control objects
+  // initialize THM control objects
   for (auto && i : ctrl_wh.getObjects())
   {
-    RELAP7Control * ctrl = dynamic_cast<RELAP7Control *>(i.get());
+    THMControl * ctrl = dynamic_cast<THMControl *>(i.get());
     if (ctrl != nullptr)
       ctrl->init();
   }
 
   for (auto && i : ctrl_wh.getObjects())
   {
-    RELAP7Control * ctrl = dynamic_cast<RELAP7Control *>(i.get());
-    // if it is a RELAP7 control
+    THMControl * ctrl = dynamic_cast<THMControl *>(i.get());
+    // if it is a THM control
     if (ctrl != nullptr)
     {
       // get its dependencies on control data

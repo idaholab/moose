@@ -1,7 +1,7 @@
 #ifndef CONTROLDATAINTEGRITYCHECKACTION_H
 #define CONTROLDATAINTEGRITYCHECKACTION_H
 
-#include "RELAP7Action.h"
+#include "THMAction.h"
 
 class ControlDataIntegrityCheckAction;
 
@@ -11,7 +11,7 @@ InputParameters validParams<ControlDataIntegrityCheckAction>();
 /**
  * Action to trigger the check of control data integrity
  */
-class ControlDataIntegrityCheckAction : public RELAP7Action
+class ControlDataIntegrityCheckAction : public THMAction
 {
 public:
   ControlDataIntegrityCheckAction(InputParameters parameters);

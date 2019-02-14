@@ -1,11 +1,11 @@
 #ifndef UNITTRIPCONTROL_H
 #define UNITTRIPCONTROL_H
 
-#include "RELAP7Control.h"
+#include "THMControl.h"
 #include "MooseParsedFunctionBase.h"
 
 class UnitTripControl;
-class RELAP7ParsedFunctionWrapper;
+class THMParsedFunctionWrapper;
 
 template <>
 InputParameters validParams<UnitTripControl>();
@@ -13,7 +13,7 @@ InputParameters validParams<UnitTripControl>();
 /**
  * This control block uses a user-defined condition to determine if a trip happened.
  */
-class UnitTripControl : public RELAP7Control, public MooseParsedFunctionBase
+class UnitTripControl : public THMControl, public MooseParsedFunctionBase
 {
 public:
   UnitTripControl(const InputParameters & parameters);
@@ -32,7 +32,7 @@ protected:
   bool _tripped;
 
   /// Pointer to the Parsed function wrapper object
-  std::unique_ptr<RELAP7ParsedFunctionWrapper> _condition_ptr;
+  std::unique_ptr<THMParsedFunctionWrapper> _condition_ptr;
 };
 
 #endif // UNITTRIPCONTROL_H

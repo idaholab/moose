@@ -1,17 +1,17 @@
 #include "BuildMeshAction.h"
 #include "Simulation.h"
 
-registerMooseAction("RELAP7App", BuildMeshAction, "RELAP7:build_mesh");
+registerMooseAction("THMApp", BuildMeshAction, "THM:build_mesh");
 
 template <>
 InputParameters
 validParams<BuildMeshAction>()
 {
-  InputParameters params = validParams<RELAP7Action>();
+  InputParameters params = validParams<THMAction>();
   return params;
 }
 
-BuildMeshAction::BuildMeshAction(InputParameters params) : RELAP7Action(params) {}
+BuildMeshAction::BuildMeshAction(InputParameters params) : THMAction(params) {}
 
 void
 BuildMeshAction::act()

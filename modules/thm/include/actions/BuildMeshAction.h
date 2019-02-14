@@ -1,14 +1,14 @@
 #ifndef BUILDMESHACTION_H
 #define BUILDMESHACTION_H
 
-#include "RELAP7Action.h"
+#include "THMAction.h"
 
 class BuildMeshAction;
 
 template <>
 InputParameters validParams<BuildMeshAction>();
 
-class BuildMeshAction : public RELAP7Action
+class BuildMeshAction : public THMAction
 {
 public:
   BuildMeshAction(InputParameters params);

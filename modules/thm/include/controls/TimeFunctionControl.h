@@ -1,7 +1,7 @@
 #ifndef TIMEFUNCTIONCONTROL_H
 #define TIMEFUNCTIONCONTROL_H
 
-#include "RELAP7Control.h"
+#include "THMControl.h"
 
 class TimeFunctionControl;
 class Function;
@@ -9,7 +9,7 @@ class Function;
 template <>
 InputParameters validParams<TimeFunctionControl>();
 
-class TimeFunctionControl : public RELAP7Control
+class TimeFunctionControl : public THMControl
 {
 public:
   TimeFunctionControl(const InputParameters & parameters);

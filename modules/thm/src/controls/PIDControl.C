@@ -1,12 +1,12 @@
 #include "PIDControl.h"
 
-registerMooseObject("RELAP7App", PIDControl);
+registerMooseObject("THMApp", PIDControl);
 
 template <>
 InputParameters
 validParams<PIDControl>()
 {
-  InputParameters params = validParams<RELAP7Control>();
+  InputParameters params = validParams<THMControl>();
   params.addRequiredParam<std::string>("input", "The name of the control data that we read in.");
   params.addRequiredParam<std::string>("set_point",
                                        "The name of the control data with the set point.");
@@ -18,7 +18,7 @@ validParams<PIDControl>()
 }
 
 PIDControl::PIDControl(const InputParameters & parameters)
-  : RELAP7Control(parameters),
+  : THMControl(parameters),
     _value(getControlData<Real>("input")),
     _set_point(getControlData<Real>("set_point")),
     _K_p(getParam<Real>("K_p")),

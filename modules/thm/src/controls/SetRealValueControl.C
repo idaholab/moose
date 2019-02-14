@@ -1,13 +1,13 @@
 #include "SetRealValueControl.h"
 #include "Function.h"
 
-registerMooseObject("RELAP7App", SetRealValueControl);
+registerMooseObject("THMApp", SetRealValueControl);
 
 template <>
 InputParameters
 validParams<SetRealValueControl>()
 {
-  InputParameters params = validParams<RELAP7Control>();
+  InputParameters params = validParams<THMControl>();
   params.addRequiredParam<std::string>("component", "The name of the component to be controlled.");
   params.addRequiredParam<std::string>(
       "parameter", "The name of the parameter in the component to be controlled.");
@@ -17,7 +17,7 @@ validParams<SetRealValueControl>()
 }
 
 SetRealValueControl::SetRealValueControl(const InputParameters & parameters)
-  : RELAP7Control(parameters),
+  : THMControl(parameters),
     _component_name(getParam<std::string>("component")),
     _param_name(getParam<std::string>("parameter")),
     _ctrl_param_name("component", _component_name, _param_name),

@@ -1,7 +1,7 @@
 #ifndef COPYPOSTPROCESSORVALUECONTROL_H
 #define COPYPOSTPROCESSORVALUECONTROL_H
 
-#include "RELAP7Control.h"
+#include "THMControl.h"
 
 class CopyPostprocessorValueControl;
 
@@ -11,7 +11,7 @@ InputParameters validParams<CopyPostprocessorValueControl>();
 /**
  * This control takes a postprocessor and copies its value into a control data value
  */
-class CopyPostprocessorValueControl : public RELAP7Control
+class CopyPostprocessorValueControl : public THMControl
 {
 public:
   CopyPostprocessorValueControl(const InputParameters & parameters);

@@ -1,20 +1,20 @@
 #include "GetFunctionValueControl.h"
 #include "Function.h"
 
-registerMooseObject("RELAP7App", GetFunctionValueControl);
+registerMooseObject("THMApp", GetFunctionValueControl);
 
 template <>
 InputParameters
 validParams<GetFunctionValueControl>()
 {
-  InputParameters params = validParams<RELAP7Control>();
+  InputParameters params = validParams<THMControl>();
   params.addRequiredParam<FunctionName>("function",
                                         "The name of the function prescribing a value.");
   return params;
 }
 
 GetFunctionValueControl::GetFunctionValueControl(const InputParameters & parameters)
-  : RELAP7Control(parameters),
+  : THMControl(parameters),
     _value(declareComponentControlData<Real>("value")),
     _function(getFunction("function"))
 {

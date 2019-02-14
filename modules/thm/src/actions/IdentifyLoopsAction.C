@@ -1,17 +1,17 @@
 #include "IdentifyLoopsAction.h"
 
-registerMooseAction("RELAP7App", IdentifyLoopsAction, "RELAP7:identify_loops");
+registerMooseAction("THMApp", IdentifyLoopsAction, "THM:identify_loops");
 
 template <>
 InputParameters
 validParams<IdentifyLoopsAction>()
 {
-  InputParameters params = validParams<RELAP7Action>();
+  InputParameters params = validParams<THMAction>();
 
   return params;
 }
 
-IdentifyLoopsAction::IdentifyLoopsAction(InputParameters parameters) : RELAP7Action(parameters) {}
+IdentifyLoopsAction::IdentifyLoopsAction(InputParameters parameters) : THMAction(parameters) {}
 
 void
 IdentifyLoopsAction::act()

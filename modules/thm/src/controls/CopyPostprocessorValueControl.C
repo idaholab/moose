@@ -1,18 +1,18 @@
 #include "CopyPostprocessorValueControl.h"
 
-registerMooseObject("RELAP7App", CopyPostprocessorValueControl);
+registerMooseObject("THMApp", CopyPostprocessorValueControl);
 
 template <>
 InputParameters
 validParams<CopyPostprocessorValueControl>()
 {
-  InputParameters params = validParams<RELAP7Control>();
+  InputParameters params = validParams<THMControl>();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor.");
   return params;
 }
 
 CopyPostprocessorValueControl::CopyPostprocessorValueControl(const InputParameters & parameters)
-  : RELAP7Control(parameters),
+  : THMControl(parameters),
     _value(declareControlData<Real>(getParam<PostprocessorName>("postprocessor"))),
     _pps_value(getPostprocessorValue("postprocessor"))
 {

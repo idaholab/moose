@@ -1,6 +1,6 @@
 #include "FlowJunction.h"
 #include "GeometricalFlowComponent.h"
-#include "RELAP7Mesh.h"
+#include "THMMesh.h"
 
 template <>
 InputParameters

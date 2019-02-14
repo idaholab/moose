@@ -1,13 +1,13 @@
 #include "TerminateControl.h"
 #include "Function.h"
 
-registerMooseObject("RELAP7App", TerminateControl);
+registerMooseObject("THMApp", TerminateControl);
 
 template <>
 InputParameters
 validParams<TerminateControl>()
 {
-  InputParameters params = validParams<RELAP7Control>();
+  InputParameters params = validParams<THMControl>();
   params.addRequiredParam<std::string>(
       "input", "The name of boolean control data indicating if simulation should be terminated.");
   params.addParam<bool>("throw_error", false, "Flag to throw an error on termination");
@@ -17,7 +17,7 @@ validParams<TerminateControl>()
 }
 
 TerminateControl::TerminateControl(const InputParameters & parameters)
-  : RELAP7Control(parameters),
+  : THMControl(parameters),
 
     _throw_error(getParam<bool>("throw_error")),
     _termination_message(getParam<std::string>("termination_message")),

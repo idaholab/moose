@@ -17,7 +17,7 @@ validParams<FlowModel>()
                                            "Linear cross-sectional area variable name");
   params.addRequiredParam<MooseEnum>("rdg_slope_reconstruction",
                                      "Slope reconstruction type for rDG");
-  params.registerBase("RELAP7:flow_model");
+  params.registerBase("THM:flow_model");
   return params;
 }
 

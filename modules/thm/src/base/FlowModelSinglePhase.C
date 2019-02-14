@@ -29,7 +29,7 @@ validParams<FlowModelSinglePhase>()
   return params;
 }
 
-registerMooseObject("RELAP7App", FlowModelSinglePhase);
+registerMooseObject("THMApp", FlowModelSinglePhase);
 
 FlowModelSinglePhase::FlowModelSinglePhase(const InputParameters & params) : FlowModel(params) {}
 

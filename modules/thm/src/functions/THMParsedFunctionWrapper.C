@@ -1,16 +1,16 @@
-#include "RELAP7ParsedFunctionWrapper.h"
+#include "THMParsedFunctionWrapper.h"
 #include "Simulation.h"
 #include "FEProblem.h"
 #include "MooseVariableScalar.h"
 #include "Function.h"
 #include "MooseUtils.h"
 
-RELAP7ParsedFunctionWrapper::RELAP7ParsedFunctionWrapper(Simulation & sim,
-                                                         FEProblemBase & feproblem,
-                                                         const std::string & function_str,
-                                                         const std::vector<std::string> & vars,
-                                                         const std::vector<std::string> & vals,
-                                                         const THREAD_ID tid)
+THMParsedFunctionWrapper::THMParsedFunctionWrapper(Simulation & sim,
+                                                   FEProblemBase & feproblem,
+                                                   const std::string & function_str,
+                                                   const std::vector<std::string> & vars,
+                                                   const std::vector<std::string> & vals,
+                                                   const THREAD_ID tid)
   : _sim(sim),
     _feproblem(feproblem),
     _function_str(function_str),
@@ -28,7 +28,7 @@ RELAP7ParsedFunctionWrapper::RELAP7ParsedFunctionWrapper(Simulation & sim,
 }
 
 Real
-RELAP7ParsedFunctionWrapper::evaluate(Real t, const Point & p)
+THMParsedFunctionWrapper::evaluate(Real t, const Point & p)
 {
   update();
   updateFunctionValues(t, p);
@@ -37,7 +37,7 @@ RELAP7ParsedFunctionWrapper::evaluate(Real t, const Point & p)
 }
 
 void
-RELAP7ParsedFunctionWrapper::initialize()
+THMParsedFunctionWrapper::initialize()
 {
   for (unsigned int i = 0; i < _vals_input.size(); ++i)
   {
@@ -78,21 +78,21 @@ RELAP7ParsedFunctionWrapper::initialize()
 }
 
 void
-RELAP7ParsedFunctionWrapper::update()
+THMParsedFunctionWrapper::update()
 {
   for (unsigned int i = 0; i < _scalar_index.size(); ++i)
     (*_addr[_scalar_index[i]]) = (*_scalar_vals[i]);
 }
 
 void
-RELAP7ParsedFunctionWrapper::updateFunctionValues(Real t, const Point & pt)
+THMParsedFunctionWrapper::updateFunctionValues(Real t, const Point & pt)
 {
   for (unsigned int i = 0; i < _function_index.size(); ++i)
     (*_addr[_function_index[i]]) = _functions[i]->value(t, pt);
 }
 
 void
-RELAP7ParsedFunctionWrapper::updateControlDataValues()
+THMParsedFunctionWrapper::updateControlDataValues()
 {
   for (unsigned int i = 0; i < _cd_real_index.size(); ++i)
     (*_addr[_cd_real_index[i]]) = _cd_real_vals[i]->get();
