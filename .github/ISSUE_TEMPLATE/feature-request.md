@@ -7,11 +7,11 @@ assignees: ''
 
 ---
 
-**Rationale**
-The reason for the enhancement.
+**Reason**
+<!--Why do you need this feature?-->
 
-**Description**
-A clear and concise description (design) of what you want to happen.
+**Design**
+<!--A concise description (design) of what you want to happen.--->
 
 **Impact**
-Will this enhancement change existing public APIs, internal APIs, or add something new?
+<!--Will the enhancement change existing public APIs, internal APIs, or add something new?-->
