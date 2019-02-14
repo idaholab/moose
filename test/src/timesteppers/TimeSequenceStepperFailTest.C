@@ -25,9 +25,11 @@ TimeSequenceStepperFailTest::TimeSequenceStepperFailTest(const InputParameters &
 {
 }
 
-bool
-TimeSequenceStepperFailTest::converged() const
+void
+TimeSequenceStepperFailTest::step()
 {
+  TimeStepper::step();
+
   // The goal is to fail exactly one timestep which matches its
   // original sequence point order, other than the initial condition.
   // This can only happen once, since after you fail, you are no
@@ -41,8 +43,9 @@ TimeSequenceStepperFailTest::converged() const
   {
     mooseDoOnce(
         Moose::out << "TimeSequenceStepperFailTest: Simulating failed solve of first timestep.\n");
-    return false;
+    _converged = false;
   }
 
-  return TimeStepper::converged();
+  if (converged())
+    _current_step++;
 }
