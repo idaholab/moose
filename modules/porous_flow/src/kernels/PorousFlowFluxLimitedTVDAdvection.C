@@ -54,7 +54,7 @@ PorousFlowFluxLimitedTVDAdvection::computeResidual()
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
     const dof_id_type node_id_i = _current_elem->node_id(i);
-    _local_re(i) = _fluo.getFluxOut(node_id_i) / _fluo.getValence(node_id_i, node_id_i);
+    _local_re(i) = _fluo.getFluxOut(node_id_i) / _fluo.getValence(node_id_i);
   }
 
   accumulateTaggedLocalResidual();
@@ -86,7 +86,7 @@ PorousFlowFluxLimitedTVDAdvection::computeJacobian()
     std::vector<dof_id_type> idof_indices(
         1, _current_elem->node_ref(i).dof_number(_sys.number(), _var.number(), 0));
     // number of times node "i" is encountered in a sweep over elements
-    const unsigned valence = _fluo.getValence(node_id_i, node_id_i);
+    const unsigned valence = _fluo.getValence(node_id_i);
 
     // retrieve the derivative information from _fluo
     const std::map<dof_id_type, std::vector<Real>> derivs = _fluo.getdFluxOut_dvars(node_id_i);

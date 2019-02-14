@@ -11,6 +11,7 @@
 #define ADVECTIVEFLUXCALCULATORBASE_H
 
 #include "ElementUserObject.h"
+#include "PorousFlowConnectedNodes.h"
 
 class AdvectiveFluxCalculatorBase;
 
@@ -76,24 +77,22 @@ public:
   const std::map<dof_id_type, Real> & getdFluxOutdu(dof_id_type node_i) const;
 
   /**
-   * Returns r where r[j] = d(flux out of global node i)/dK[global node j][global node k] used in
-   * Jacobian computations
+   * Returns r where r[j][k] = d(flux out of global node i)/dK[connected node j][connected node k]
+   * used in Jacobian computations
    * @param node_i global id of node
    * @return the derivatives (after applying the KT procedure)
    */
-  const std::map<dof_id_type, std::map<dof_id_type, Real>> &
-  getdFluxOutdKjk(dof_id_type node_i) const;
+  const std::vector<std::vector<Real>> & getdFluxOutdKjk(dof_id_type node_i) const;
 
   /**
-   * Returns the valence of the i-j edge.
-   * Valence is the number of times the edge is encountered in a loop over elements (that have
+   * Returns the valence of the global node i
+   * Valence is the number of times the node is encountered in a loop over elements (that have
    * appropriate subdomain_id, if the user has employed the "blocks=" parameter) seen by this
    * processor (including ghosted elements)
-   * @param node_i id of i^th node
-   * @param node_j id of j^th node
-   * @return valence of the i-j edge
+   * @param node_i gloal id of i^th node
+   * @return valence of the node
    */
-  unsigned getValence(dof_id_type node_i, dof_id_type node_j) const;
+  unsigned getValence(dof_id_type node_i) const;
 
 protected:
   /**
@@ -127,33 +126,26 @@ protected:
   /**
    * Returns the value of R_{i}^{+}, Eqn (49) of KT
    * @param node_i nodal id
-   * @param dlimited_du[out] dlimited_du[node_id] = d(R_{i}^{+})/du[node_id]   (Here node_id is a
-   * global node id)
-   * @param dlimited_dk[out] dlimited_dk[node_id] = d(R_{i}^{+})/d(K[i][node_id]).  Derivatives
-   * w.r.t. K[l][m] with l!=i are zero
+   * @param dlimited_du[out] dlimited_du[j] = d(R_{sequential_i}^{+})/du[sequential_j].  Here
+   * sequential_j is the j^th connection to sequential_i
+   * @param dlimited_dk[out] dlimited_dk[j] = d(R_{sequential_i}^{+})/d(K[sequential_i][j]).  Note
+   * Derivatives w.r.t. K[l][m] with l!=i are zero
    */
-  Real rPlus(dof_id_type node_i,
-             std::map<dof_id_type, Real> & dlimited_du,
-             std::map<dof_id_type, Real> & dlimited_dk) const;
+  Real rPlus(dof_id_type sequential_i,
+             std::vector<Real> & dlimited_du,
+             std::vector<Real> & dlimited_dk) const;
 
   /**
    * Returns the value of R_{i}^{-}, Eqn (49) of KT
-   * @param node_i nodal id
-   * @param dlimited_du[out] dlimited_du[node_id] = d(R_{i}^{-})/du[node_id]
-   * @param dlimited_dk[out] dlimited_dk[node_id] = d(R_{i}^{-})/d(K[i][node_id]).  Derivatives
-   * w.r.t. K[l][m] with l!=i are zero
+   * @param sequential_i Sequential nodal ID
+   * @param dlimited_du[out] dlimited_du[j] = d(R_{sequential_i}^{-})/du[sequential_j].  Here
+   * sequential_j is the j^th connection to sequential_i
+   * @param dlimited_dk[out] dlimited_dk[j] = d(R_{sequential_i}^{-})/d(K[sequential_i][j]).  Note
+   * Derivatives w.r.t. K[l][m] with l!=i are zero
    */
-  Real rMinus(dof_id_type node_i,
-              std::map<dof_id_type, Real> & dlimited_du,
-              std::map<dof_id_type, Real> & dlimited_dk) const;
-
-  /**
-   * Returns the value of k_ij as computed by KT Eqns (18)-(20).
-   * @param node_i id of i^th node
-   * @param node_j id of j^th node
-   * @return k_ij of KT
-   */
-  Real getKij(dof_id_type node_i, dof_id_type node_j) const;
+  Real rMinus(dof_id_type sequential_i,
+              std::vector<Real> & dlimited_du,
+              std::vector<Real> & dlimited_dk) const;
 
   /**
    * Determines Flux Limiter type (Page 135 of Kuzmin and Turek)
@@ -164,30 +156,40 @@ protected:
   /// Kuzmin-Turek K_ij matrix.  Along with R+ and R-, this is the key quantity computed
   /// by this UserObject.
   /// _kij[i][j] = k_ij corresponding to the i-j node pair.
-  /// Because it explicitly holds info which nodes are paired with which other nodes, it is
-  /// also used to perform: given a node_id, loop over all neighbouring nodes.
-  /// This occurs in the computation of R+ and R-.
-  std::map<dof_id_type, std::map<dof_id_type, Real>> _kij;
+  /// Here i is a sequential node numbers according to the _connections object,
+  /// and j represents the j^th node connected to i according to the _connections object.
+  std::vector<std::vector<Real>> _kij;
 
-  /// _flux_out[i] = flux of "heat" from node i
-  std::map<dof_id_type, Real> _flux_out;
+  /// _flux_out[i] = flux of "heat" from sequential node i
+  std::vector<Real> _flux_out;
 
-  /// _dflux_out_du[i][j] = d(flux_out[i])/d(u[j]).  Here j must be connected to i, or to a node that is connected to i.
-  std::map<dof_id_type, std::map<dof_id_type, Real>> _dflux_out_du;
+  /// _dflux_out_du[i][j] = d(flux_out[i])/d(u[j]).
+  /// Here i is a sequential node number according to the _connections object, and j (global ID) must be connected to i, or to a node that is connected to i.
+  std::vector<std::map<dof_id_type, Real>> _dflux_out_du;
 
-  /// _dflux_out_dKjk[i][j][k] = d(flux_out[i])/d(K[j][k]).  Here j must be connected to i (this does include j = i), and k must be connected to j (this does include k = i and k = j)
-  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>> _dflux_out_dKjk;
+  /// _dflux_out_dKjk[sequential_i][j][k] = d(flux_out[sequential_i])/d(K[j][k]).
+  /// Here sequential_i is a sequential node number according to the _connections object,
+  /// and j represents the j^th node connected to i according to the _connections object,
+  /// and k represents the k^th node connected to j according to the _connections object.
+  /// Here j must be connected to i (this does include (the sequential version of j) == i), and k must be connected to j (this does include (the sequential version of k) = i and (the sequential version of k) == (sequential version of j)))
+  std::vector<std::vector<std::vector<Real>>> _dflux_out_dKjk;
 
-  /// _valence[(i, j)] = number of times, in a loop over elements seen  by this processor
+  /// _valence[i] = number of times, in a loop over elements seen  by this processor
   /// (viz, including ghost elements) and are part of the block-restricted blocks of this
-  /// UserObject, that the i-j edge is encountered
-  std::map<std::pair<dof_id_type, dof_id_type>, unsigned> _valence;
+  /// UserObject, that the sequential node i is encountered
+  std::vector<unsigned> _valence;
 
-  /// _u_nodal[i] = value of _u at global node number i
-  std::map<dof_id_type, Real> _u_nodal;
+  /// _u_nodal[i] = value of _u at sequential node number i
+  std::vector<Real> _u_nodal;
 
-  /// _u_nodal_computed_by_thread[i] = true if _u_nodal[i] has been computed in execute() by the thread on this processor
-  std::map<dof_id_type, bool> _u_nodal_computed_by_thread;
+  /// _u_nodal_computed_by_thread(i) = true if _u_nodal[i] has been computed in execute() by the thread on this processor
+  std::vector<bool> _u_nodal_computed_by_thread;
+
+  /// Holds the sequential and global nodal IDs, and info regarding mesh connections between them
+  PorousFlowConnectedNodes _connections;
+
+  /// Number of nodes held by the _connections object
+  std::size_t _number_of_nodes;
 
   /// Signals to the PQPlusMinus method what should be computed
   enum class PQPlusMinusEnum
@@ -201,17 +203,18 @@ protected:
   /**
    * Returns the value of P_{i}^{+}, P_{i}^{-}, Q_{i}^{+} or Q_{i}^{-} (depending on pq_plus_minus)
    * which are defined in Eqns (47) and (48) of KT
-   * @param node_i global nodal id
+   * @param sequential_i sequential nodal ID
    * @param pq_plus_minus indicates whether P_{i}^{+}, P_{i}^{-}, Q_{i}^{+} or Q_{i}^{-} should be
    * returned
-   * @param derivs[out] derivs[j] = d(result)/d(u[global node j])
-   * @param dpq_dk[out] dpq_dk[j] = d(result)/d(K[node_i][global node j]).  Recall that
-   * d(result)/d(K[l][m]) are zero unless l=node_i
+   * @param derivs[out] derivs[j] = d(result)/d(u[sequential_j]).  Here sequential_j is the j^th
+   * connection to sequential_i
+   * @param dpq_dk[out] dpq_dk[j] = d(result)/d(K[node_i][j]).  Here j indexes a connection to
+   * sequential_i.  Recall that d(result)/d(K[l][m]) are zero unless l=sequential_i
    */
-  Real PQPlusMinus(dof_id_type node_i,
+  Real PQPlusMinus(dof_id_type sequential_i,
                    const PQPlusMinusEnum pq_plus_minus,
-                   std::map<dof_id_type, Real> & derivs,
-                   std::map<dof_id_type, Real> & dpq_dk) const;
+                   std::vector<Real> & derivs,
+                   std::vector<Real> & dpq_dk) const;
 
   /**
    * Clears the_map, then, using _kij, constructs the_map so that
@@ -220,21 +223,6 @@ protected:
    * @param[in] node_i nodal id
    */
   void zeroedConnection(std::map<dof_id_type, Real> & the_map, dof_id_type node_i) const;
-
-  /**
-   * Returns the value of u at the global id node_i.
-   * This is _u_nodal[node_i] that has been computed by computeU during execute()
-   * @param node_i global node id
-   */
-  Real getUnodal(dof_id_type node_i) const;
-
-  /**
-   * Returns the value of _u_nodal_computed_by_thread at the global id node_i.
-   * This will have been initialized to false in initialize() and potentially set true during
-   * execute()
-   * @param node_i global node id
-   */
-  bool getUnodalComputedByThread(dof_id_type node_i) const;
 };
 
 #endif // ADVECTIVEFLUXCALCULATORBASE_H
