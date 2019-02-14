@@ -11,6 +11,7 @@
 #include "FlowModelTwoPhase.h"
 #include "FlowModelTwoPhaseNCG.h"
 #include "HeatTransferBase.h"
+#include "ClosuresBase.h"
 
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
@@ -76,9 +77,9 @@ validParams<Pipe>()
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
 
   std::string closures;
-  for (auto && c : THMApp::closureTypes())
+  for (auto && c : THMApp::closuresOptions())
     closures += c + " ";
-  MooseEnum closures_type(closures, THMApp::defaultClosureType());
+  MooseEnum closures_type(closures, THMApp::defaultClosuresOption());
   params.addParam<MooseEnum>("closures_type", closures_type, "Closures type");
 
   std::string chf_tables;
@@ -154,6 +155,8 @@ Pipe::init()
 {
   PipeBase::init();
 
+  _closures = buildClosures();
+
   _const_A = !_sim.hasFunction(_area_function);
 
   // apply logic for parameters with one- and two-phase variants
@@ -174,6 +177,16 @@ Pipe::init()
           _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name));
       stabilization.initMooseObjects(*_flow_model);
     }
+}
+
+std::shared_ptr<ClosuresBase>
+Pipe::buildClosures()
+{
+  auto thm_app = dynamic_cast<THMApp *>(&_app);
+  const std::string class_name = thm_app->getClosuresClassName(_closures_name, _model_id);
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<Simulation *>("_sim") = &_sim;
+  return _factory.create<ClosuresBase>(class_name, genName(name(), class_name), params);
 }
 
 void
@@ -199,6 +212,8 @@ void
 Pipe::check() const
 {
   PipeBase::check();
+
+  _closures->check(*this);
 
   // check that stabilization exists
   if (!_stabilization_uo_name.empty())
@@ -1211,6 +1226,8 @@ Pipe::addMooseObjects()
   addCommonObjects();
 
   _flow_model->addMooseObjects();
+  _closures->addMooseObjects(*this);
+
   if (_model_id == THM::FM_SINGLE_PHASE)
     setup1Phase();
   else if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)

@@ -4,6 +4,7 @@
 #include "PipeBase.h"
 
 class Pipe;
+class ClosuresBase;
 
 template <>
 InputParameters validParams<Pipe>();
@@ -60,6 +61,9 @@ protected:
   virtual void init() override;
   virtual void initSecondary() override;
   virtual void check() const override;
+
+  virtual std::shared_ptr<ClosuresBase> buildClosures();
+
   virtual void buildMeshNodes();
 
   /**
@@ -69,6 +73,9 @@ protected:
 
   /// The name of used closures
   const MooseEnum & _closures_name;
+
+  /// Closures object
+  std::shared_ptr<ClosuresBase> _closures;
 
   /// True if the user provided a function describing the area of the pipe
   bool _const_A;
