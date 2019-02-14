@@ -39,8 +39,9 @@ AdvectiveFluxCalculatorBase::AdvectiveFluxCalculatorBase(const InputParameters &
     _dflux_out_du({}),
     _dflux_out_dKjk({}),
     _valence({}),
-    _u_nodal({}),
-    _u_nodal_computed_by_thread({})
+    _u_nodal(),
+    _u_nodal_computed_by_thread(),
+    _connections()
 {
   if (!_execute_enum.contains(EXEC_LINEAR))
     paramError(
@@ -57,37 +58,42 @@ AdvectiveFluxCalculatorBase::timestepSetup()
   // If needed, size and initialize quantities appropriately, and compute _valence
   if (_resizing_needed)
   {
-    _kij.clear();
-
+    _connections.clear();
     // QUERY: does this properly account for multiple processors, threading, and other things i
     // haven't thought about?
 
     /*
-     * Initialize _kij for all nodes that can be seen by this processor and on relevant blocks
+     * Populate _connections for all nodes that can be seen by this processor and on relevant blocks
      *
      * MULTIPROC NOTE: this must loop over local elements and 2 layers of ghosted elements.
-     * The Kernel will only loop over local elements, so will only use _kij for
+     * The Kernel will only loop over local elements, so will only use _kij, etc, for
      * linked node-node pairs that appear in the local elements.  Nevertheless, we
-     * need to build _kij for the nodes in the ghosted elements in order to simplify
+     * need to build _kij, etc, for the nodes in the ghosted elements in order to simplify
      * Jacobian computations
      */
     for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
-    {
       if (this->hasBlocks(elem->subdomain_id()))
-      {
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
-        {
-          const dof_id_type node_i = elem->node_id(i);
-          if (_kij.find(node_i) == _kij.end())
-            _kij[node_i] = {};
+          _connections.addGlobalNode(elem->node_id(i));
+    _connections.finalizeAddingGlobalNodes();
+    for (const auto & elem : _subproblem.mesh().getMesh().active_element_ptr_range())
+      if (this->hasBlocks(elem->subdomain_id()))
+        for (unsigned i = 0; i < elem->n_nodes(); ++i)
           for (unsigned j = 0; j < elem->n_nodes(); ++j)
-          {
-            const dof_id_type node_j = elem->node_id(j);
-            _kij[node_i][node_j] = 0.0;
-          }
-        }
+	    _connections.addConnection(elem->node_id(i), elem->node_id(j));
+    _connections.finalizeAddingConnections();
+	      
+
+    // initialize _kij
+    _kij.clear();
+    for (const auto & node_i : _connections.globalIDs())
+      if (_kij.find(node_i) == _kij.end())
+      {
+	_kij[node_i] = {};
+	for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
+	  _kij[node_i][node_j] = 0.0;
       }
-    }
+
 
     /*
      * Build _valence[i_j], which is the number of times the i_j pair is encountered when looping
@@ -125,18 +131,16 @@ AdvectiveFluxCalculatorBase::timestepSetup()
     _flux_out.clear();
     _dflux_out_du.clear();
     _dflux_out_dKjk.clear();
-    for (auto & nodes : _kij)
+    for (const auto & node_i : _connections.globalIDs())
     {
-      const dof_id_type node_i = nodes.first;
-      _u_nodal[node_i] = 0.0;
-      _u_nodal_computed_by_thread[node_i] = false;
+      _u_nodal.set(node_i, 0.0);
+      _u_nodal_computed_by_thread.set(node_i, false);
       _flux_out[node_i] = 0.0;
       _dflux_out_du[node_i] = {};
       zeroedConnection(_dflux_out_du[node_i], node_i);
       _dflux_out_dKjk[node_i] = {};
-      for (const auto & neighbour_to_i : nodes.second)
+      for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
       {
-        const dof_id_type node_j = neighbour_to_i.first;
         _dflux_out_dKjk[node_i][node_j] = {};
         zeroedConnection(_dflux_out_dKjk[node_i][node_j], node_j);
       }
@@ -159,11 +163,11 @@ AdvectiveFluxCalculatorBase::initialize()
 {
   // Zero _kij and falsify _u_nodal_computed_by_thread ready for building in execute() and
   // finalize()
-  for (auto & nodes : _kij)
+  for (const auto & node_i : _connections.globalIDs())
   {
-    _u_nodal_computed_by_thread[nodes.first] = false;
-    for (auto & neighbors : nodes.second)
-      neighbors.second = 0.0;
+    _u_nodal_computed_by_thread.set(node_i, false);
+    for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
+      _kij[node_i][node_j] = 0.0;
   }
 }
 
@@ -175,10 +179,10 @@ AdvectiveFluxCalculatorBase::execute()
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
     const dof_id_type node_i = _current_elem->node_id(i);
-    if (!_u_nodal_computed_by_thread[node_i])
+    if (!_u_nodal_computed_by_thread(node_i))
     {
-      _u_nodal[node_i] = computeU(i);
-      _u_nodal_computed_by_thread[node_i] = true;
+      _u_nodal.set(node_i, computeU(i));
+      _u_nodal_computed_by_thread.set(node_i, true);
     }
     for (unsigned j = 0; j < _current_elem->n_nodes(); ++j)
     {
@@ -202,6 +206,11 @@ AdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
 {
   const AdvectiveFluxCalculatorBase & afc = static_cast<const AdvectiveFluxCalculatorBase &>(uo);
   // add the values of _kij computed by different threads
+  /* Can do the following when kij is a std::vector, then do a similar thing for _u_nodal
+  for (const auto & node_i : _connections.globalIDs())
+    for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
+      _kij[node_i][node_j] += afc._kij[node_i][node_j];
+  */
   for (const auto & nodes : afc._kij)
   {
     const dof_id_type i = nodes.first;
@@ -212,12 +221,13 @@ AdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
       _kij[i][j] += afc_val;
     }
   }
+
   // gather the values of _u_nodal computed by different threads
   for (const auto & node_u : afc._u_nodal)
   {
     const dof_id_type i = node_u.first;
-    if (!_u_nodal_computed_by_thread[i] && afc.getUnodalComputedByThread(i))
-      _u_nodal[i] = node_u.second;
+    if (!_u_nodal_computed_by_thread(i) && afc._u_nodal_computed_by_thread(i))
+      _u_nodal.set(i, node_u.second);
   }
 }
 
@@ -257,9 +267,8 @@ AdvectiveFluxCalculatorBase::finalize()
       dDii_dKij; // dDii_dKij[i][j] = d(D[i][i])/d(K[i][j])
   std::map<dof_id_type, std::map<dof_id_type, Real>>
       dDii_dKji; // dDii_dKji[i][j] = d(D[i][i])/d(K[j][i])
-  for (auto & nodes : _kij)
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
     dij[i] = {};
     dij[i][i] = 0.0;
     dDij_dKij[i] = {};
@@ -270,9 +279,8 @@ AdvectiveFluxCalculatorBase::finalize()
     zeroedConnection(dDii_dKij[i], i);
     dDii_dKji[i] = {};
     zeroedConnection(dDii_dKji[i], i);
-    for (auto & neighbors : nodes.second)
+    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
     {
-      const dof_id_type j = neighbors.first;
       if (i == j)
         continue;
       if ((_kij[i][j] <= _kij[j][i]) && (_kij[i][j] < 0))
@@ -296,15 +304,11 @@ AdvectiveFluxCalculatorBase::finalize()
   // Calculate KuzminTurek L matrix
   // See Fig 2: L = K + D
   std::map<dof_id_type, std::map<dof_id_type, Real>> lij;
-  for (auto & nodes : _kij)
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
     lij[i] = {};
-    for (auto & neighbors : nodes.second)
-    {
-      const dof_id_type j = neighbors.first;
+    for (const auto j : _connections.globalConnectionsToGlobalID(i))
       lij[i][j] = _kij[i][j] + dij[i][j];
-    }
   }
 
   // Compute KuzminTurek R matrices
@@ -319,9 +323,8 @@ AdvectiveFluxCalculatorBase::finalize()
       drP_dk; // drP_dk[i][j] = d(rP[i])/d(K[i][j]).   Here j must be connected to i (ie _kij[i][j]
               // exists) for there to be a nonzero derivative
   std::map<dof_id_type, std::map<dof_id_type, Real>> drM_dk;
-  for (const auto & nodes : _kij)
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
     drP[i] = {};
     drP_dk[i] = {};
     rP[i] = rPlus(i, drP[i], drP_dk[i]);
@@ -342,16 +345,14 @@ AdvectiveFluxCalculatorBase::finalize()
   std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>>
       dFij_dKjk; // dFij_dKjk[i][j][k] = d(fa[i][j])/d(K[j][k]).  Here j must be connected to i, and
                  // k connected to j (including i itself)
-  for (const auto & nodes : _kij)
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
     fa[i] = {};
     dfa[i] = {};
     dFij_dKik[i] = {};
     dFij_dKjk[i] = {};
-    for (const auto & neighbors : nodes.second)
+    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
     {
-      const dof_id_type j = neighbors.first;
       fa[i][j] = 0.0;
       dfa[i][j] = {};
       dFij_dKik[i][j] = {};
@@ -359,25 +360,24 @@ AdvectiveFluxCalculatorBase::finalize()
       // The derivatives are a bit complicated.
       // If i is upwind of j then fa[i][j] depends on all nodes connected to i.
       // But if i is downwind of j then fa[i][j] depends on all nodes connected to j.
-      for (const auto & neighbor_to_i : _kij[i])
+      for (const auto & neighbor_to_i : _connections.globalConnectionsToGlobalID(i))
       {
-        dfa[i][j][neighbor_to_i.first] = 0.0;
-        dFij_dKik[i][j][neighbor_to_i.first] = 0.0;
+        dfa[i][j][neighbor_to_i] = 0.0;
+        dFij_dKik[i][j][neighbor_to_i] = 0.0;
       }
-      for (const auto & neighbor_to_j : _kij[j])
+      for (const auto & neighbor_to_j : _connections.globalConnectionsToGlobalID(j))
       {
-        dfa[i][j][neighbor_to_j.first] = 0.0;
-        dFij_dKjk[i][j][neighbor_to_j.first] = 0.0;
+        dfa[i][j][neighbor_to_j] = 0.0;
+        dFij_dKjk[i][j][neighbor_to_j] = 0.0;
       }
     }
   }
-  for (const auto & nodes : _kij)
+
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
     const Real u_i = getUnodal(i);
-    for (const auto & neighbors : nodes.second)
+    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
     {
-      const dof_id_type j = neighbors.first;
       const Real u_j = getUnodal(j);
       if (i == j)
         continue;
@@ -442,12 +442,10 @@ AdvectiveFluxCalculatorBase::finalize()
       }
     }
   }
-  for (const auto & nodes : _kij)
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
-    for (const auto & neighbors : nodes.second)
+    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
     {
-      const dof_id_type j = neighbors.first;
       if (i == j)
         continue;
       if (lij[j][i] < lij[i][j]) // node_i is downwind of node_j.
@@ -464,34 +462,30 @@ AdvectiveFluxCalculatorBase::finalize()
   }
 
   // zero _flux_out and its derivatives
-  for (const auto & nodes : _kij)
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
     _flux_out[i] = 0.0;
     // The derivatives are a bit complicated.
     // If i is upwind of a node "j" then _flux_out[i] depends on all nodes connected to i.
     // But if i is downwind of a node "j" then _flux_out depends on all nodes connected with node
     // j.
-    for (const auto & neighbors_i : nodes.second)
+    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
     {
-      const dof_id_type j = neighbors_i.first;
       _dflux_out_du[i][j] = 0.0;
-      for (const auto & neighbors_j : _kij[j])
+      for (const auto & neighbors_j : _connections.globalConnectionsToGlobalID(j))
       {
-        _dflux_out_du[i][neighbors_j.first] = 0.0;
-        _dflux_out_dKjk[i][j][neighbors_j.first] = 0.0;
+        _dflux_out_du[i][neighbors_j] = 0.0;
+        _dflux_out_dKjk[i][j][neighbors_j] = 0.0;
       }
     }
   }
 
   // Add everything together
   // See step 3 in Fig 2, noting Eqn (36)
-  for (auto & nodes : _kij)
+  for (const auto & i : _connections.globalIDs())
   {
-    const dof_id_type i = nodes.first;
-    for (const auto & neighbors : nodes.second)
+    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
     {
-      const dof_id_type j = neighbors.first;
       const Real u_j = getUnodal(j);
 
       // negative sign because residual = -Lu (KT equation (19))
@@ -756,12 +750,8 @@ AdvectiveFluxCalculatorBase::zeroedConnection(std::map<dof_id_type, Real> & the_
                                               dof_id_type node_i) const
 {
   the_map.clear();
-  const auto & row_find = _kij.find(node_i);
-  if (row_find == _kij.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij does not contain node " +
-               Moose::stringify(node_i));
-  for (const auto & nk : row_find->second)
-    the_map[nk.first] = 0.0;
+  for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
+    the_map[node_j] = 0.0;
 }
 
 Real
@@ -852,19 +842,5 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
 Real
 AdvectiveFluxCalculatorBase::getUnodal(dof_id_type node_i) const
 {
-  const auto & node_u = _u_nodal.find(node_i);
-  if (node_u == _u_nodal.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
-               " _u_nodal does not contain node " + Moose::stringify(node_i));
-  return node_u->second;
-}
-
-bool
-AdvectiveFluxCalculatorBase::getUnodalComputedByThread(dof_id_type node_i) const
-{
-  const auto & node_u = _u_nodal_computed_by_thread.find(node_i);
-  if (node_u == _u_nodal_computed_by_thread.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
-               " _u_nodal_computed_by_thread does not contain node " + Moose::stringify(node_i));
-  return node_u->second;
+  return _u_nodal(node_i);
 }

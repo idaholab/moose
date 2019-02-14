@@ -11,6 +11,8 @@
 #define ADVECTIVEFLUXCALCULATORBASE_H
 
 #include "ElementUserObject.h"
+#include "PorousFlowValueAtNodes.h"
+#include "PorousFlowConnectedNodes.h"
 
 class AdvectiveFluxCalculatorBase;
 
@@ -184,10 +186,12 @@ protected:
   std::map<std::pair<dof_id_type, dof_id_type>, unsigned> _valence;
 
   /// _u_nodal[i] = value of _u at global node number i
-  std::map<dof_id_type, Real> _u_nodal;
+  PorousFlowValueAtNodes<Real> _u_nodal;
 
-  /// _u_nodal_computed_by_thread[i] = true if _u_nodal[i] has been computed in execute() by the thread on this processor
-  std::map<dof_id_type, bool> _u_nodal_computed_by_thread;
+  /// _u_nodal_computed_by_thread(i) = true if _u_nodal[i] has been computed in execute() by the thread on this processor
+  PorousFlowValueAtNodes<bool> _u_nodal_computed_by_thread;
+
+  PorousFlowConnectedNodes _connections;
 
   /// Signals to the PQPlusMinus method what should be computed
   enum class PQPlusMinusEnum
@@ -227,14 +231,6 @@ protected:
    * @param node_i global node id
    */
   Real getUnodal(dof_id_type node_i) const;
-
-  /**
-   * Returns the value of _u_nodal_computed_by_thread at the global id node_i.
-   * This will have been initialized to false in initialize() and potentially set true during
-   * execute()
-   * @param node_i global node id
-   */
-  bool getUnodalComputedByThread(dof_id_type node_i) const;
 };
 
 #endif // ADVECTIVEFLUXCALCULATORBASE_H
