@@ -17,6 +17,9 @@ class SinglePhaseFluidPropertiesPT;
 template <>
 InputParameters validParams<SinglePhaseFluidPropertiesPT>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Common class for single phase fluid properties using a pressure
  * and temperature formulation
@@ -27,5 +30,7 @@ public:
   SinglePhaseFluidPropertiesPT(const InputParameters & parameters);
   virtual ~SinglePhaseFluidPropertiesPT();
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* SINGLEPHASEFLUIDPROPERTIESPT_H */

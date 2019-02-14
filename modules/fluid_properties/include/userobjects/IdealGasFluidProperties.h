@@ -17,6 +17,9 @@ class IdealGasFluidProperties;
 template <>
 InputParameters validParams<IdealGasFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Ideal gas fluid properties
  */
@@ -97,5 +100,7 @@ protected:
   /// Universal gas constant [J/K.mol]
   constexpr static Real R_universal = 8.3144598;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* IDEALGASFLUIDPROPERTIES_H */

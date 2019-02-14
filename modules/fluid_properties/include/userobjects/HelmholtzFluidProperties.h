@@ -17,6 +17,9 @@ class HelmholtzFluidProperties;
 template <>
 InputParameters validParams<HelmholtzFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Base class equation of state for fluids that use a Helmholtz free energy
  * alpha(delta, tau), where delta is a scaled density and tau is a scaled temperature.
@@ -120,5 +123,7 @@ protected:
    */
   virtual Real d2alpha_ddeltatau(Real delta, Real tau) const = 0;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* HELMHOLTZFLUIDPROPERTIES_H */

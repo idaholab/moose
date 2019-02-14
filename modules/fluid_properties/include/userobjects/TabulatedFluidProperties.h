@@ -20,6 +20,9 @@ class TabulatedFluidProperties;
 template <>
 InputParameters validParams<TabulatedFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Class for fluid properties read from a file.
  *
@@ -239,5 +242,7 @@ protected:
   /// The MOOSE delimited file reader.
   MooseUtils::DelimitedFileReader _csv_reader;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* TABULATEDFLUIDPROPERTIES_H */

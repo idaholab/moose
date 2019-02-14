@@ -18,6 +18,9 @@ class Water97FluidProperties;
 template <>
 InputParameters validParams<Water97FluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Water (H2O) fluid properties as a function of pressure (Pa)
  * and temperature (K) from IAPWS-IF97:
@@ -1295,5 +1298,7 @@ protected:
   /// Pressure scale for each region
   const std::array<Real, 5> _p_star{{16.53e6, 1.0e6, 1.0e6, 1.0e6, 1.0e6}};
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* WATER97FLUIDPROPERTIES_H */

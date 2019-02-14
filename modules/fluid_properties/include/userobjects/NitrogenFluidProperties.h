@@ -18,6 +18,9 @@ class NitrogenFluidProperties;
 template <>
 InputParameters validParams<NitrogenFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Nitrogen (N2) fluid properties as a function of pressure (Pa)
  * and temperature (K).
@@ -204,5 +207,7 @@ protected:
   const std::array<unsigned int, 6> _lk{{0, 0, 1, 2, 2, 2}};
   const std::array<Real, 6> _gammak{{0.0, 0.0, 1.0, 1.0, 1.0}};
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* NITROGENFLUIDPROPERTIES_H */

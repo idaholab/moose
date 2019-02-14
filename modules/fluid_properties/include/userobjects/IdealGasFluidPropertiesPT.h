@@ -17,6 +17,9 @@ class IdealGasFluidPropertiesPT;
 template <>
 InputParameters validParams<IdealGasFluidPropertiesPT>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Ideal gas fluid properties for (pressure, temperature) variables.
  * Default parameters are for air at atmospheric pressure and temperature.
@@ -108,5 +111,7 @@ protected:
   /// Henry constant
   const Real _henry_constant;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* IDEALGASFLUIDPROPERTIESPT_H */
