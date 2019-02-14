@@ -86,6 +86,9 @@ class THMApp : public MooseApp
 {
 public:
   THMApp(InputParameters parameters);
+  virtual ~THMApp();
+
+  virtual void setupOptions() override;
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
@@ -254,8 +257,16 @@ public:
   }
 
   Logger & log() { return _log; }
+  virtual bool checkJacobian() { return _check_jacobian; }
 
 protected:
+  /**
+   * Build the simulation class
+   */
+  virtual void buildSimulation();
+
+  void build();
+
   /**
    * Register a new closure type
    *
@@ -277,6 +288,8 @@ protected:
                                                 bool is_default = false);
 
   Logger _log;
+  Simulation * _sim;
+  bool _check_jacobian;
 
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
