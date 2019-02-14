@@ -239,6 +239,24 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
 
   if (is_transient)
   {
+    if (_need_u_dot_neighbor)
+      _u_dot_neighbor.resize(nqp);
+
+    if (_need_u_dotdot_neighbor)
+      _u_dotdot_neighbor.resize(nqp);
+
+    if (_need_u_dot_old_neighbor)
+      _u_dot_old_neighbor.resize(nqp);
+
+    if (_need_u_dotdot_old_neighbor)
+      _u_dotdot_old_neighbor.resize(nqp);
+
+    if (_need_du_dot_du_neighbor)
+      _du_dot_du_neighbor.resize(nqp);
+
+    if (_need_du_dotdot_du_neighbor)
+      _du_dotdot_du_neighbor.resize(nqp);
+
     if (_need_u_old_neighbor)
       _u_old_neighbor.resize(nqp);
 
@@ -284,16 +302,20 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
   Real u_dotdot = 0;
   Real u_dot_old = 0;
   Real u_dotdot_old = 0;
+  const Real & du_dot_du = _sys.duDotDu();
+  const Real & du_dotdot_du = _sys.duDotDotDu();
 
   if (_need_dof_values_neighbor)
     _dof_values_neighbor[0] = soln;
 
   if (is_transient)
   {
-    if (_need_u_old_neighbor)
+    if (_need_u_old_neighbor || _need_grad_old_neighbor || _need_second_old_neighbor ||
+        _need_dof_values_old_neighbor)
       soln_old = _sys.solutionOld()(idx);
 
-    if (_need_u_older_neighbor)
+    if (_need_u_older_neighbor || _need_grad_older_neighbor || _need_second_older_neighbor ||
+        _need_dof_values_older_neighbor)
       soln_older = _sys.solutionOlder()(idx);
 
     if (_need_dof_values_old_neighbor)
@@ -327,6 +349,24 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
 
   if (is_transient)
   {
+    if (_need_u_dot_neighbor)
+      _u_dot_neighbor[0] = phi * u_dot;
+
+    if (_need_u_dotdot_neighbor)
+      _u_dotdot_neighbor[0] = phi * u_dotdot;
+
+    if (_need_u_dot_old_neighbor)
+      _u_dot_old_neighbor[0] = phi * u_dot_old;
+
+    if (_need_u_dotdot_old_neighbor)
+      _u_dotdot_old_neighbor[0] = phi * u_dotdot_old;
+
+    if (_need_du_dot_du_neighbor)
+      _du_dot_du_neighbor[0] = du_dot_du;
+
+    if (_need_du_dotdot_du_neighbor)
+      _du_dotdot_du_neighbor[0] = du_dotdot_du;
+
     if (_need_u_old_neighbor)
       _u_old_neighbor[0] = phi * soln_old;
 
@@ -340,6 +380,24 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
 
     if (is_transient)
     {
+      if (_need_u_dot_neighbor)
+        _u_dot_neighbor[qp] = _u_dot_neighbor[0];
+
+      if (_need_u_dotdot_neighbor)
+        _u_dotdot_neighbor[qp] = _u_dotdot_neighbor[0];
+
+      if (_need_u_dot_old_neighbor)
+        _u_dot_old_neighbor[qp] = _u_dot_old_neighbor[0];
+
+      if (_need_u_dotdot_old_neighbor)
+        _u_dotdot_old_neighbor[qp] = _u_dotdot_old_neighbor[0];
+
+      if (_need_du_dot_du_neighbor)
+        _du_dot_du_neighbor[qp] = _du_dot_du_neighbor[0];
+
+      if (_need_du_dotdot_du_neighbor)
+        _du_dotdot_du_neighbor[qp] = _du_dotdot_du_neighbor[0];
+
       if (_need_u_old_neighbor)
         _u_old_neighbor[qp] = _u_old_neighbor[0];
 
