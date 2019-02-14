@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'auto_positions.i'
-    exodiff = 'auto_positions_out.e'
-    deleted = 'diffing in parallel - not ready'
-  [../]
-[]
