@@ -101,7 +101,7 @@ def compare(out_fname, out_dir, gold_dir, update_gold=False):
                                        color=True, num_lines=2)
         if diff:
             print mooseutils.colorText("DIFF: {} != {}".format(out_fname, gold_fname), 'YELLOW')
-            print diff
+            print diff.encode('utf-8')
             errno = 1
         else:
             print mooseutils.colorText("PASS: {} == {}".format(out_fname, gold_fname), 'GREEN')

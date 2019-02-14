@@ -221,6 +221,14 @@
         }, 
         {
             "attributes": {
+                "bib_style": "plain", 
+                "recursive": true
+            }, 
+            "children": [], 
+            "name": "BibtexBibliography"
+        }, 
+        {
+            "attributes": {
                 "key": "MOOSE", 
                 "link": "https:://mooseframework.org", 
                 "prefix": "", 
