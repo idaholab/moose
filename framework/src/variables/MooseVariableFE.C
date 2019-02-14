@@ -1374,7 +1374,8 @@ MooseVariableFE<OutputType>::computeAD(
     _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
 
     // NOTE!  You have to do this AFTER setting the value!
-    _ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
+    if (_var_kind == Moose::VAR_NONLINEAR)
+      _ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
 
     if (is_transient && _time_integrator)
     {
@@ -1459,7 +1460,8 @@ MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int & num_dofs,
     _neighbor_ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices_neighbor[i]);
 
     // NOTE!  You have to do this AFTER setting the value!
-    _neighbor_ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
+    if (_var_kind == Moose::VAR_NONLINEAR)
+      _neighbor_ad_dof_values[i].derivatives()[ad_offset + i] = 1.0;
 
     if (is_transient && _time_integrator)
     {
@@ -2147,7 +2149,8 @@ MooseVariableFE<OutputType>::computeNodalValues()
       for (decltype(n) i = 0; i < n; ++i)
       {
         _ad_dof_values[i] = _dof_values[i];
-        _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
+        if (_var_kind == Moose::VAR_NONLINEAR)
+          _ad_dof_values[i].derivatives()[ad_offset + i] = 1.;
         assignADNodalValue(_ad_dof_values[i], i);
       }
     }
