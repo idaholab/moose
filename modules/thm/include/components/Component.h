@@ -6,6 +6,7 @@
 #include "Simulation.h"
 #include "InputParameterWarehouse.h"
 #include "THMApp.h"
+#include "LoggingInterface.h"
 
 class Component;
 class FEProblem;
@@ -17,7 +18,7 @@ InputParameters validParams<Component>();
 /**
  * Base class for THM components
  */
-class Component : public THMObject
+class Component : public THMObject, public LoggingInterface
 {
 public:
   Component(const InputParameters & parameters);
@@ -412,24 +413,6 @@ protected:
 
   /// Gets the next nodeset or sideset ID
   virtual unsigned int getNextBoundaryId();
-
-  /**
-   * Logs an error
-   */
-  template <typename... Args>
-  void logError(Args &&... args) const
-  {
-    _app.log().add(Logger::ERROR, name(), ": ", std::forward<Args>(args)...);
-  }
-
-  /**
-   * Logs a warning
-   */
-  template <typename... Args>
-  void logWarning(Args &&... args) const
-  {
-    _app.log().add(Logger::WARNING, name(), ": ", std::forward<Args>(args)...);
-  }
 
   /**
    * Split the control logic name into "section name" and "property name"
