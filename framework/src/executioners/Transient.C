@@ -241,8 +241,6 @@ Transient::init()
   if (_app.isRestarting())
     _time_old = _time;
 
-  _problem.outputStep(EXEC_INITIAL);
-
   if (_app.isRecovering()) // Recover case
   {
     if (_t_step == 0)
@@ -251,11 +249,22 @@ Transient::init()
 
     _dt_old = _dt;
   }
-  else
+}
+
+void
+Transient::preExecute()
+{
+  _time_stepper->preExecute();
+
+  if (!_app.isRecovering())
   {
-    if (_t_step != 0)
-      mooseError("Internal error in Transient executioner: _t_step must be 0 without "
-                 "recovering in init().");
+    _t_step = 0;
+    _dt = 0;
+    _next_interval_output_time = 0.0;
+    if (!_app.isRestarting())
+      _time = _time_old = _start_time;
+
+    _problem.outputStep(EXEC_INITIAL);
 
     computeDT();
     _dt = getDT();
@@ -265,10 +274,15 @@ Transient::init()
                  "input file or report an error.\n"
                  "2. If you are developing a new time stepper, make sure that initial time step "
                  "size in your code is computed correctly.");
-
     _nl.getTimeIntegrator()->init();
-
     ++_t_step;
+
+    // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have
+    // a wrong answer and might need to be regolded. The reason is that we actually move the
+    // solution back in time before we actually start solving (which I think is wrong).  So this
+    // call here is to maintain backward compatibility and so that MOOSE is giving the same answer.
+    // However, we might remove this call and regold the test in the future eventually.
+    _problem.advanceState();
   }
 }
 
@@ -287,19 +301,11 @@ Transient::postStep()
 void
 Transient::execute()
 {
-
   preExecute();
 
-  // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a
-  // wrong answer and might need to be regolded.
-  // The reason is that we actually move the solution back in time before we actually start solving
-  // (which I think is wrong).  So this call here
-  // is to maintain backward compatibility and so that MOOSE is giving the same answer.  However, we
-  // might remove this call and regold the test
-  // in the future eventually.
-  if (!_app.isRecovering())
-    _problem.advanceState();
-  else
+  // FIXME: cannot move the following into preExecute because of the way TransientMultiApp is coded.
+  //        We will need to cleanup TransientMultiApp first for the cleanup here.
+  if (_app.isRecovering())
     incrementStepOrReject();
 
   // Start time loop...
@@ -593,12 +599,6 @@ bool
 Transient::lastSolveConverged() const
 {
   return _time_stepper->converged();
-}
-
-void
-Transient::preExecute()
-{
-  _time_stepper->preExecute();
 }
 
 void

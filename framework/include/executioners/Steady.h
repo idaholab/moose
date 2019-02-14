@@ -51,6 +51,7 @@ public:
 protected:
   FEProblemBase & _problem;
 
+  Real _system_time;
   int & _time_step;
   Real & _time;
 

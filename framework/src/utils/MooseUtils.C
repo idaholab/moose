@@ -197,6 +197,8 @@ parallelBarrierNotify(const Parallel::Communicator & comm, bool messaging)
 {
   processor_id_type slave_processor_id;
 
+  if (messaging)
+    Moose::out << "Waiting For Other Processors To Finish" << std::endl;
   if (comm.rank() == 0)
   {
     // The master process is already through, so report it

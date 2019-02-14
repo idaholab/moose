@@ -100,6 +100,9 @@ public:
                                    const MooseMesh & mesh,
                                    OutputDimension output_dim = OutputDimension::DEFAULT);
 
+  /// Reset Exodus output
+  void clear() { _exodus_io_ptr.reset(); }
+
 protected:
   /**
    * Outputs nodal, nonlinear variables

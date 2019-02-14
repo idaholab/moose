@@ -16,6 +16,11 @@
 []
 
 [Kernels]
+  [./time]
+    type = CoefTimeDerivative
+    variable = v
+    Coefficient = 0.1
+  [../]
   [./diff_v]
     type = Diffusion
     variable = v
@@ -50,7 +55,10 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  end_time = 10
+  nl_abs_tol = 1e-12
+  steady_state_detection = true
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
