@@ -18,12 +18,14 @@
 
 #define usingMaterialMembers                                                                       \
   usingCoupleableMembers;                                                                          \
-  using ADMaterial<compute_stage>::_dt;                                                            \
+  usingTransientInterfaceMembers;                                                                  \
+  using ConsoleStreamInterface::_console;                                                          \
   using ADMaterial<compute_stage>::_qp;                                                            \
   using ADMaterial<compute_stage>::_qrule;                                                         \
   using ADMaterial<compute_stage>::_JxW;                                                           \
   using ADMaterial<compute_stage>::_coord;                                                         \
   using ADMaterial<compute_stage>::_q_point;                                                       \
+  using ADMaterial<compute_stage>::_current_elem;                                                  \
   using ADMaterial<compute_stage>::_fe_problem;                                                    \
   using ADMaterial<compute_stage>::_assembly;                                                      \
   using ADMaterial<compute_stage>::_mesh;                                                          \

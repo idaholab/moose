@@ -253,7 +253,17 @@ public:
    * Returns the reference to the coordinate transformation coefficients
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const MooseArray<Real> & coordTransformation() { return _coord; }
+  const MooseArray<Real> & coordTransformation() const { return _coord; }
+
+  /**
+   * Returns the reference to the AD version of the coordinate transformation coefficients
+   * @return A _reference_.  Make sure to store this as a reference!
+   */
+  template <ComputeStage compute_stage>
+  const MooseArray<ADReal> & adCoordTransformation() const
+  {
+    return _coord;
+  }
 
   /**
    * Get the coordinate system type
@@ -289,6 +299,12 @@ public:
   const ADPoint & adNormals() const
   {
     return _current_normals;
+  }
+
+  template <ComputeStage compute_stage>
+  const ADPoint & adQPoints() const
+  {
+    return _current_q_points;
   }
 
   template <ComputeStage compute_stage>
@@ -1054,7 +1070,10 @@ protected:
 
   void reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
-  void setCoordinateTransformation(const QBase * qrule, const MooseArray<Point> & q_points);
+  template <ComputeStage compute_stage>
+  void setCoordinateTransformation(const QBase * qrule,
+                                   const ADPoint & q_points,
+                                   MooseArray<ADReal> & coord);
 
   void computeCurrentElemVolume();
 
@@ -1201,6 +1220,9 @@ protected:
   Moose::CoordinateSystemType _coord_type;
   /// The current coordinate transformation coefficients
   MooseArray<Real> _coord;
+  /// The AD version of the current coordinate transformation coefficients
+  MooseArray<DualReal> _ad_coord;
+
   /// Holds volume qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_volume;
   /// Holds arbitrary qrules for each dimension
@@ -1437,6 +1459,7 @@ protected:
   std::vector<VectorValue<DualReal>> _ad_d2xyzdeta2_map;
   std::vector<DualReal> _ad_jac;
   MooseArray<DualReal> _ad_JxW;
+  MooseArray<VectorValue<DualReal>> _ad_q_points;
   std::vector<DualReal> _ad_dxidx_map;
   std::vector<DualReal> _ad_dxidy_map;
   std::vector<DualReal> _ad_dxidz_map;
@@ -1455,7 +1478,8 @@ protected:
 
   std::vector<unsigned> _displacements;
 
-  bool _calculate_face_xyz;
+  mutable bool _calculate_xyz;
+  mutable bool _calculate_face_xyz;
   mutable bool _calculate_curvatures;
 };
 
@@ -1501,8 +1525,17 @@ Assembly::adNormals<ComputeStage::JACOBIAN>() const
 
 template <>
 inline const typename PointType<ComputeStage::JACOBIAN>::type &
+Assembly::adQPoints<ComputeStage::JACOBIAN>() const
+{
+  _calculate_xyz = true;
+  return _ad_q_points;
+}
+
+template <>
+inline const typename PointType<ComputeStage::JACOBIAN>::type &
 Assembly::adQPointsFace<ComputeStage::JACOBIAN>() const
 {
+  _calculate_face_xyz = true;
   return _ad_q_points_face;
 }
 
@@ -1511,6 +1544,14 @@ inline const MooseArray<DualReal> &
 Assembly::adJxWFace<ComputeStage::JACOBIAN>() const
 {
   return _ad_JxW_face;
+}
+
+template <>
+inline const MooseArray<DualReal> &
+Assembly::adCoordTransformation<ComputeStage::JACOBIAN>() const
+{
+  _calculate_xyz = _calculate_face_xyz = true;
+  return _ad_coord;
 }
 
 template <>

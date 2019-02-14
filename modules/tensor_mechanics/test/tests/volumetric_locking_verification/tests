@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#11220'
+  [./vol_lock_2D]
+    type = Exodiff
+    input = '42_node.i'
+    exodiff = '42_node_out.e'
+    compiler = 'CLANG GCC'
+    design = 'VolumetricLocking.md'
+    requirement = 'The mechanics system shall correctly model the deformation of a 2D membrane with nearly incompressible material when volumetric locking correction is set to true.'
+  [../]
+  [./no_vol_lock_2D]
+    type = Exodiff
+    input = '42_node.i'
+    exodiff = '42_node_no_vol_lock_out.e'
+    compiler = 'CLANG GCC'
+    cli_args = 'GlobalParams/volumetric_locking_correction=false Outputs/file_base=42_node_no_vol_lock_out'
+    prereq = 'vol_lock_2D'
+    design = 'VolumetricLocking.md'
+    requirement = 'The mechanics system shall correctly model the locking behavior of a 2D membrane with nearly incompressible material when volumetric locking correction is set to false.'
+  [../]
+[]

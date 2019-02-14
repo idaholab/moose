@@ -41,4 +41,4 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _coupled_tensor_increments;
 };
 
-#endif
+#endif // SUMTENSORINCREMENTS_H

@@ -103,6 +103,12 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
   // Error if volumetric locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)
     mooseError("Volumetric locking correction should be set to false for 1-D problems.");
+
+  // Generate warning when volumetric locking correction is used with second order elements
+  if (_mesh.hasSecondOrderElements() && _volumetric_locking_correction)
+    mooseWarning("Volumteric locking correction is not required for second order elements. Using "
+                 "volumetric locking with second order elements could cause zigzag patterns in "
+                 "stresses and strains.");
 }
 
 void

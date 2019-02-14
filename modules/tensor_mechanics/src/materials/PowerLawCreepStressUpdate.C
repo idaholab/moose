@@ -23,7 +23,7 @@ validParams<PowerLawCreepStressUpdate>()
 
   // Linear strain hardening parameters
   params.addCoupledVar("temperature", 0.0, "Coupled temperature");
-  params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
+  params.addRequiredParam<Real>("coefficient", "Leading coefficient in power-law equation");
   params.addRequiredParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
   params.addParam<Real>("m_exponent", 0.0, "Exponent on time in power-law equation");
   params.addRequiredParam<Real>("activation_energy", "Activation energy");

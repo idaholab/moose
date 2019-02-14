@@ -26,9 +26,9 @@ class ComputeIncrementalSmallStrain : public ComputeIncrementalStrainBase
 public:
   ComputeIncrementalSmallStrain(const InputParameters & parameters);
 
-protected:
   virtual void computeProperties() override;
 
+protected:
   /// Computes the current and old deformation gradients and passes back the
   /// total strain increment tensor
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);

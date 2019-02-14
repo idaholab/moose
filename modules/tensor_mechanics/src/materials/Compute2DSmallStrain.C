@@ -52,39 +52,18 @@ Compute2DSmallStrain::initialSetup()
 void
 Compute2DSmallStrain::computeProperties()
 {
+  const auto o0 = _out_of_plane_direction;
+  const auto o1 = (_out_of_plane_direction + 1) % 3;
+  const auto o2 = (_out_of_plane_direction + 2) % 3;
+
   Real volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    switch (_out_of_plane_direction)
-    {
-      case 0: // x
-      {
-        _total_strain[_qp](0, 0) = computeOutOfPlaneStrain();
-        _total_strain[_qp](1, 1) = (*_grad_disp[1])[_qp](1);
-        _total_strain[_qp](1, 2) = ((*_grad_disp[1])[_qp](2) + (*_grad_disp[2])[_qp](1)) / 2.0;
-        _total_strain[_qp](2, 1) = _total_strain[_qp](1, 2); // force the symmetrical strain tensor
-        _total_strain[_qp](2, 2) = (*_grad_disp[2])[_qp](2);
-        break;
-      }
-      case 1: // y
-      {
-        _total_strain[_qp](0, 0) = (*_grad_disp[0])[_qp](0);
-        _total_strain[_qp](0, 2) = ((*_grad_disp[0])[_qp](2) + (*_grad_disp[2])[_qp](0)) / 2.0;
-        _total_strain[_qp](1, 1) = computeOutOfPlaneStrain();
-        _total_strain[_qp](2, 0) = _total_strain[_qp](0, 2); // force the symmetrical strain tensor
-        _total_strain[_qp](2, 2) = (*_grad_disp[2])[_qp](2);
-        break;
-      }
-      default: // z
-      {
-        _total_strain[_qp](0, 0) = (*_grad_disp[0])[_qp](0);
-        _total_strain[_qp](1, 1) = (*_grad_disp[1])[_qp](1);
-        _total_strain[_qp](0, 1) = ((*_grad_disp[0])[_qp](1) + (*_grad_disp[1])[_qp](0)) / 2.0;
-        _total_strain[_qp](1, 0) = _total_strain[_qp](0, 1); // force the symmetrical strain tensor
-        _total_strain[_qp](2, 2) = computeOutOfPlaneStrain();
-        break;
-      }
-    }
+    _total_strain[_qp](o0, o0) = computeOutOfPlaneStrain();
+    _total_strain[_qp](o1, o1) = (*_grad_disp[o1])[_qp](o1);
+    _total_strain[_qp](o2, o2) = (*_grad_disp[o2])[_qp](o2);
+    _total_strain[_qp](o1, o2) = ((*_grad_disp[o1])[_qp](o2) + (*_grad_disp[o2])[_qp](o1)) / 2.0;
+    _total_strain[_qp](o2, o1) = _total_strain[_qp](o1, o2); // force the symmetrical strain tensor
 
     if (_volumetric_locking_correction)
       volumetric_strain += _total_strain[_qp].trace() * _JxW[_qp] * _coord[_qp];
@@ -97,16 +76,16 @@ Compute2DSmallStrain::computeProperties()
   {
     if (_volumetric_locking_correction)
     {
-      Real trace = _total_strain[_qp].trace();
-      _total_strain[_qp](0, 0) += (volumetric_strain - trace) / 3.0;
-      _total_strain[_qp](1, 1) += (volumetric_strain - trace) / 3.0;
-      _total_strain[_qp](2, 2) += (volumetric_strain - trace) / 3.0;
+      const Real correction = (volumetric_strain - _total_strain[_qp].trace()) / 3.0;
+      _total_strain[_qp](0, 0) += correction;
+      _total_strain[_qp](1, 1) += correction;
+      _total_strain[_qp](2, 2) += correction;
     }
 
     _mechanical_strain[_qp] = _total_strain[_qp];
 
     // Remove the eigenstrains
-    for (auto es : _eigenstrains)
+    for (const auto es : _eigenstrains)
       _mechanical_strain[_qp] -= (*es)[_qp];
   }
 }

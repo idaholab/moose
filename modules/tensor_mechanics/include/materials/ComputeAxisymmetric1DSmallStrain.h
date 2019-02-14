@@ -27,9 +27,9 @@ class ComputeAxisymmetric1DSmallStrain : public Compute1DSmallStrain
 public:
   ComputeAxisymmetric1DSmallStrain(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
 
+protected:
   /// Computes the strain_yy for axisymmetric problems
   Real computeStrainYY() override;
 

@@ -191,6 +191,10 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), tol);
   ABS_TEST(_tab_fp->henryConstant(T), _co2_fp->henryConstant(T), tol);
+
+  // Use a temperature less than the critical point
+  T = 300.0;
+  ABS_TEST(_tab_fp->vaporPressure(T), _co2_fp->vaporPressure(T), tol);
 }
 
 /**

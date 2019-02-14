@@ -18,7 +18,6 @@
   using ADComputeIncrementalStrainBase<compute_stage>::_strain_rate;                               \
   using ADComputeIncrementalStrainBase<compute_stage>::_strain_increment;                          \
   using ADComputeIncrementalStrainBase<compute_stage>::_rotation_increment;                        \
-  using ADComputeIncrementalStrainBase<compute_stage>::_deformation_gradient;                      \
   using ADComputeIncrementalStrainBase<compute_stage>::_mechanical_strain_old;                     \
   using ADComputeIncrementalStrainBase<compute_stage>::_total_strain_old;                          \
   using ADComputeIncrementalStrainBase<compute_stage>::_eigenstrains_old;                          \
@@ -39,8 +38,9 @@ class ADComputeIncrementalStrainBase : public ADComputeStrainBase<compute_stage>
 public:
   ADComputeIncrementalStrainBase(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
+
+protected:
   virtual void initQpStatefulProperties() override;
 
   void subtractEigenstrainIncrementFromStrain(ADRankTwoTensor & strain);
@@ -50,8 +50,6 @@ protected:
   ADMaterialProperty(RankTwoTensor) & _strain_rate;
   ADMaterialProperty(RankTwoTensor) & _strain_increment;
   ADMaterialProperty(RankTwoTensor) & _rotation_increment;
-
-  ADMaterialProperty(RankTwoTensor) & _deformation_gradient;
 
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
   const MaterialProperty<RankTwoTensor> & _total_strain_old;

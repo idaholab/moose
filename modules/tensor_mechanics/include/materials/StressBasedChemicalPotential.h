@@ -43,4 +43,4 @@ protected:
   bool _has_coupled_c;
 };
 
-#endif
+#endif // STRESSBASEDCHEMICALPOTENTIAL_H

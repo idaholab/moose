@@ -19,15 +19,15 @@
   usingCoupleableMembers;                                                                          \
   using ADKernelTempl<type, compute_stage>::_test;                                                 \
   using ADKernelTempl<type, compute_stage>::_qp;                                                   \
-  using ADKernelTempl<type, compute_stage>::_q_point;                                              \
+  using ADKernelTempl<type, compute_stage>::_ad_q_point;                                           \
   using ADKernelTempl<type, compute_stage>::_i;                                                    \
   using ADKernelTempl<type, compute_stage>::_j;                                                    \
   using ADKernelTempl<type, compute_stage>::_u;                                                    \
   using ADKernelTempl<type, compute_stage>::_var;                                                  \
   using ADKernelTempl<type, compute_stage>::_grad_test;                                            \
   using ADKernelTempl<type, compute_stage>::_grad_u;                                               \
-  using ADKernelTempl<type, compute_stage>::_JxW;                                                  \
-  using ADKernelTempl<type, compute_stage>::_coord;                                                \
+  using ADKernelTempl<type, compute_stage>::_ad_JxW;                                               \
+  using ADKernelTempl<type, compute_stage>::_ad_coord;                                             \
   using ADKernelTempl<type, compute_stage>::_local_re;                                             \
   using ADKernelTempl<type, compute_stage>::_local_ke;                                             \
   using ADKernelTempl<type, compute_stage>::_qrule;                                                \
@@ -105,6 +105,12 @@ protected:
 
   /// The ad version of JxW
   const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW;
+
+  /// The ad version of coord
+  const MooseArray<ADReal> & _ad_coord;
+
+  /// The ad version of q_point
+  const ADPoint & _ad_q_point;
 };
 
 #endif /* ADKERNEL_H */

@@ -35,7 +35,6 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    volumetric_locking_correction = true
     incremental = true
     save_in = 'react_x react_y react_z'
     add_variables = true

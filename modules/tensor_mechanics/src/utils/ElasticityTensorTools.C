@@ -10,6 +10,7 @@
 #include "MooseTypes.h"
 #include "PermutationTensor.h"
 #include "RankFourTensor.h"
+#include "ElasticityTensorTools.h"
 
 #include "libmesh/vector_value.h"
 
@@ -111,13 +112,6 @@ momentJacobianWC(const RankFourTensor & r4t, unsigned int i, unsigned int k, Rea
               PermutationTensor::eps(i, j, m) * r4t(j, m, l, n) * PermutationTensor::eps(l, n, k);
 
   return test * phi * sum;
-}
-
-Real
-getIsotropicShearModulus(const RankFourTensor & elasticity_tensor)
-{
-  const Real shear_modulus = elasticity_tensor(0, 1, 0, 1);
-  return shear_modulus;
 }
 
 Real

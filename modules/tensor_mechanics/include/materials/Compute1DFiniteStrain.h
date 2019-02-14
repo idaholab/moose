@@ -27,9 +27,9 @@ class Compute1DFiniteStrain : public ComputeFiniteStrain
 public:
   Compute1DFiniteStrain(const InputParameters & parameters);
 
-protected:
   void computeProperties() override;
 
+protected:
   /// Computes the current dUy/dY; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispYY() = 0;

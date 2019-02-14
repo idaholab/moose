@@ -59,7 +59,4 @@ protected:
   Real getIsotropicLameLambda(const RankFourTensor & elasticity_tensor);
 };
 
-template <>
-InputParameters validParams<IsotropicPowerLawHardeningStressUpdate>();
-
 #endif // ISOTROPICPOWERLAWHARDENINGSTRESSUPDATE_H

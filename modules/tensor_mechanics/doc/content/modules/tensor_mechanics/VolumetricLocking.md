@@ -66,4 +66,24 @@ the following pre-conditioner block may be used:
          start=Preconditioning
          end=Executioner
 
+## Verification of locking correction on Cook's membrane
+
+A 2D trapezoidal membrane [fig_cook] with Poisson's ratio of 0.4999 is fixed at the left edge and sheared at the right edge. Locking behavior of the membrane is observed with the use of first order (Quad4) elements with no volumetric locking correction. This locking results in much lower vertical displacement at Point A than that observed in other scenarios [fig_cook_results]. Locking can be avoided with the use of Quad4 elements along with volumetric locking correction or with the use of second order elements (Quad8) with or without volumetric locking correction. These results match with that presented in Fig. 6 of [cite!nakshatrala2008fem].  
+
+!row!
+
+!media media/tensor_mechanics/cook_problem.png
+      style=width:35%;margin-left:2%;
+      id=fig_cook
+      caption=2D problem to demonstrate volumetric locking.
+
+!media media/tensor_mechanics/cook_results.png
+      style=width:35%;margin-left:2%;
+      id=fig_cook_results
+      caption= Vertical displacement at Point A for different element types and mesh density. Locking behavior is observed when Quad4 elements with no volumetric locking correction are used.
+
+!row-end!
+
+Note that at least 20 nodes per edge are required to converge to the correct solution even when volumetric locking correction is used for this problem. Also, second order elements do not display locking behavior, so volumetric locking correction is not required for second order elements. Using volumetric locking correction with second order elements causes a different convergence pattern for the displacements [fig_cook_results] and it is also shown to result in noisy zigzag pattern in stress or strain profiles.
+
 !bibtex bibliography

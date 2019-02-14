@@ -37,4 +37,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _strain_increment;
 };
 
-#endif
+#endif // GBRELAXATIONSTRAININCREMENT_H

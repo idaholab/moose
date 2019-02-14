@@ -7,7 +7,6 @@
 
 [GlobalParams]
   order = SECOND
-  volumetric_locking_correction = true
   displacements = 'disp_x disp_y'
 []
 

@@ -847,7 +847,7 @@ RankTwoTensorTempl<T>::L2norm() const
     T v = this->_coords[i];
     norm += v * v;
   }
-  return std::sqrt(norm);
+  return norm == 0.0 ? 0.0 : std::sqrt(norm);
 }
 
 template <typename T>

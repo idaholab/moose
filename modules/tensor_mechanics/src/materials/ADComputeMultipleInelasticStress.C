@@ -1,0 +1,336 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADComputeMultipleInelasticStress.h"
+#include "ADStressUpdateBase.h"
+#include "MooseException.h"
+
+registerADMooseObject("TensorMechanicsApp", ADComputeMultipleInelasticStress);
+
+defineADValidParams(
+    ADComputeMultipleInelasticStress,
+    ADComputeFiniteStrainElasticStress,
+    params.addClassDescription("Compute state (stress and internal parameters such as plastic "
+                               "strains and internal parameters) using an iterative process.  "
+                               "Combinations of creep models and plastic models may be used.");
+    params.addParam<unsigned int>("max_iterations",
+                                  30,
+                                  "Maximum number of the stress update "
+                                  "iterations over the stress change after all "
+                                  "update materials are called");
+    params.addParam<Real>("relative_tolerance",
+                          1e-5,
+                          "Relative convergence tolerance for the stress "
+                          "update iterations over the stress change "
+                          "after all update materials are called");
+    params.addParam<Real>("absolute_tolerance",
+                          1e-5,
+                          "Absolute convergence tolerance for the stress "
+                          "update iterations over the stress change "
+                          "after all update materials are called");
+    params.addParam<bool>(
+        "internal_solve_full_iteration_history",
+        false,
+        "Set to true to output stress update iteration information over the stress change");
+    params.addParam<bool>("perform_finite_strain_rotations",
+                          true,
+                          "Tensors are correctly rotated in "
+                          "finite-strain simulations.  For "
+                          "optimal performance you can set "
+                          "this to 'false' if you are only "
+                          "ever using small strains");
+    params.addRequiredParam<std::vector<MaterialName>>(
+        "inelastic_models",
+        "The material objects to use to calculate stress and inelastic strains. "
+        "Note: specify creep models first and plasticity models second.");
+    params.addParam<std::vector<Real>>(
+        "combined_inelastic_strain_weights",
+        "The combined_inelastic_strain Material Property is a "
+        "weighted sum of the model inelastic strains.  This parameter "
+        "is a vector of weights, of the same length as "
+        "inelastic_models.  Default = '1 1 ... 1'.  This "
+        "parameter is set to 1 if the number of models = 1");
+    params.addParam<bool>("cycle_models",
+                          false,
+                          "At time step N use only inelastic model N % num_models."););
+
+template <ComputeStage compute_stage>
+ADComputeMultipleInelasticStress<compute_stage>::ADComputeMultipleInelasticStress(
+    const InputParameters & parameters)
+  : ADComputeFiniteStrainElasticStress<compute_stage>(parameters),
+    _max_iterations(parameters.get<unsigned int>("max_iterations")),
+    _relative_tolerance(parameters.get<Real>("relative_tolerance")),
+    _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+    _internal_solve_full_iteration_history(
+        adGetParam<bool>("internal_solve_full_iteration_history")),
+    _perform_finite_strain_rotations(adGetParam<bool>("perform_finite_strain_rotations")),
+    _inelastic_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
+    _inelastic_strain_old(
+        adGetMaterialPropertyOld<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
+    _num_models(adGetParam<std::vector<MaterialName>>("inelastic_models").size()),
+    _inelastic_weights(isParamValid("combined_inelastic_strain_weights")
+                           ? adGetParam<std::vector<Real>>("combined_inelastic_strain_weights")
+                           : std::vector<Real>(_num_models, true)),
+    _cycle_models(adGetParam<bool>("cycle_models")),
+    _matl_timestep_limit(adDeclareProperty<Real>("matl_timestep_limit"))
+{
+  if (_inelastic_weights.size() != _num_models)
+    paramError("combined_inelastic_strain_weights",
+               "must contain the same number of entries as inelastic_models ",
+               _inelastic_weights.size(),
+               " vs. ",
+               _num_models);
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::initQpStatefulProperties()
+{
+  ADComputeStressBase<compute_stage>::initQpStatefulProperties();
+  _inelastic_strain[_qp].zero();
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::initialSetup()
+{
+  _is_elasticity_tensor_guaranteed_isotropic =
+      this->hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
+
+  std::vector<MaterialName> models = adGetParam<std::vector<MaterialName>>("inelastic_models");
+
+  for (unsigned int i = 0; i < _num_models; ++i)
+  {
+    ADStressUpdateBase<compute_stage> * rrr = dynamic_cast<ADStressUpdateBase<compute_stage> *>(
+        &this->template getMaterialByName<compute_stage>(models[i]));
+
+    if (rrr)
+    {
+      _models.push_back(rrr);
+      if (rrr->requiresIsotropicTensor() && !_is_elasticity_tensor_guaranteed_isotropic)
+        mooseError("Model " + models[i] +
+                   " requires an isotropic elasticity tensor, but the one supplied is not "
+                   "guaranteed isotropic");
+    }
+    else
+      mooseError("Model " + models[i] + " is not compatible with ADComputeMultipleInelasticStress");
+  }
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::computeQpStress()
+{
+  computeQpStressIntermediateConfiguration();
+  if (_perform_finite_strain_rotations)
+    finiteStrainRotation();
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::computeQpStressIntermediateConfiguration()
+{
+  ADRankTwoTensor elastic_strain_increment;
+  ADRankTwoTensor combined_inelastic_strain_increment;
+
+  if (_num_models == 0)
+  {
+    _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
+
+    // If the elasticity tensor values have changed and the tensor is isotropic,
+    // use the old strain to calculate the old stress
+    if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+      _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+    else
+      _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+  }
+  else
+  {
+    if (_num_models == 1 || _cycle_models)
+      updateQpStateSingleModel((_t_step - 1) % _num_models,
+                               elastic_strain_increment,
+                               combined_inelastic_strain_increment);
+    else
+      updateQpState(elastic_strain_increment, combined_inelastic_strain_increment);
+
+    _elastic_strain[_qp] = _elastic_strain_old[_qp] + elastic_strain_increment;
+    _inelastic_strain[_qp] = _inelastic_strain_old[_qp] + combined_inelastic_strain_increment;
+  }
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::finiteStrainRotation()
+{
+  _elastic_strain[_qp] =
+      _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
+  _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
+  _inelastic_strain[_qp] =
+      _rotation_increment[_qp] * _inelastic_strain[_qp] * _rotation_increment[_qp].transpose();
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::updateQpState(
+    ADRankTwoTensor & elastic_strain_increment,
+    ADRankTwoTensor & combined_inelastic_strain_increment)
+{
+  if (_internal_solve_full_iteration_history == true)
+  {
+    _console << std::endl
+             << "iteration output for ADComputeMultipleInelasticStress solve:"
+             << " time=" << _t << " int_pt=" << _qp << std::endl;
+  }
+  Real l2norm_delta_stress;
+  Real first_l2norm_delta_stress = 1.0;
+  unsigned int counter = 0;
+
+  std::vector<ADRankTwoTensor> inelastic_strain_increment;
+  inelastic_strain_increment.resize(_num_models);
+
+  for (unsigned i_rmm = 0; i_rmm < _models.size(); ++i_rmm)
+    inelastic_strain_increment[i_rmm].zero();
+
+  ADRankTwoTensor stress_max, stress_min;
+
+  do
+  {
+    for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    {
+      _models[i_rmm]->setQp(_qp);
+
+      // initially assume the strain is completely elastic
+      elastic_strain_increment = _strain_increment[_qp];
+      // and subtract off all inelastic strain increments calculated so far
+      // except the one that we're about to calculate
+      for (unsigned j_rmm = 0; j_rmm < _num_models; ++j_rmm)
+        if (i_rmm != j_rmm)
+          elastic_strain_increment -= inelastic_strain_increment[j_rmm];
+
+      // form the trial stress, with the check for changed elasticity constants
+      if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+        _stress[_qp] =
+            _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+      else
+        _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+
+      // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
+      // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
+      // the strain increment into an elastic part (elastic_strain_increment) and an
+      // inelastic part (inelastic_strain_increment[i_rmm])
+      computeAdmissibleState(i_rmm, elastic_strain_increment, inelastic_strain_increment[i_rmm]);
+
+      if (i_rmm == 0)
+      {
+        stress_max = _stress[_qp];
+        stress_min = _stress[_qp];
+      }
+      else
+      {
+        for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        {
+          for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+          {
+            if (_stress[_qp](i, j) > stress_max(i, j))
+              stress_max(i, j) = _stress[_qp](i, j);
+            else if (stress_min(i, j) > _stress[_qp](i, j))
+              stress_min(i, j) = _stress[_qp](i, j);
+          }
+        }
+      }
+    }
+
+    // now check convergence in the stress:
+    // once the change in stress is within tolerance after each recompute material
+    // consider the stress to be converged
+    l2norm_delta_stress = MetaPhysicL::raw_value((stress_max - stress_min).L2norm());
+    if (counter == 0 && l2norm_delta_stress > 0.0)
+      first_l2norm_delta_stress = l2norm_delta_stress;
+
+    if (_internal_solve_full_iteration_history == true)
+    {
+      _console << "stress iteration number = " << counter << "\n"
+               << " relative l2 norm delta stress = "
+               << (0 == first_l2norm_delta_stress ? 0
+                                                  : l2norm_delta_stress / first_l2norm_delta_stress)
+               << "\n"
+               << " stress convergence relative tolerance = " << _relative_tolerance << "\n"
+               << " absolute l2 norm delta stress = " << l2norm_delta_stress << "\n"
+               << " stress convergence absolute tolerance = " << _absolute_tolerance << std::endl;
+    }
+    ++counter;
+  } while (counter < _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
+           (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance &&
+           _num_models != 1);
+
+  if (counter == _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
+      (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
+    throw MooseException("Max stress iteration hit during ADComputeMultipleInelasticStress solve!");
+
+  combined_inelastic_strain_increment.zero();
+  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    combined_inelastic_strain_increment +=
+        _inelastic_weights[i_rmm] * inelastic_strain_increment[i_rmm];
+
+  _matl_timestep_limit[_qp] = 0.0;
+  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    _matl_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
+
+  if (MooseUtils::absoluteFuzzyEqual(_matl_timestep_limit[_qp], 0.0))
+    _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
+  else
+    _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::updateQpStateSingleModel(
+    unsigned model_number,
+    ADRankTwoTensor & elastic_strain_increment,
+    ADRankTwoTensor & combined_inelastic_strain_increment)
+{
+  for (auto model : _models)
+    model->setQp(_qp);
+
+  elastic_strain_increment = _strain_increment[_qp];
+
+  // If the elasticity tensor values have changed and the tensor is isotropic,
+  // use the old strain to calculate the old stress
+  if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
+    _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
+  else
+    _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
+
+  computeAdmissibleState(
+      model_number, elastic_strain_increment, combined_inelastic_strain_increment);
+
+  _matl_timestep_limit[_qp] = _models[0]->computeTimeStepLimit();
+
+  /* propagate internal variables, etc, to this timestep for those inelastic models where
+   * "updateState" is not called */
+  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    if (i_rmm != model_number)
+      _models[i_rmm]->propagateQpStatefulProperties();
+}
+
+template <ComputeStage compute_stage>
+void
+ADComputeMultipleInelasticStress<compute_stage>::computeAdmissibleState(
+    unsigned model_number,
+    ADRankTwoTensor & elastic_strain_increment,
+    ADRankTwoTensor & inelastic_strain_increment)
+{
+  _models[model_number]->updateState(elastic_strain_increment,
+                                     inelastic_strain_increment,
+                                     _rotation_increment[_qp],
+                                     _stress[_qp],
+                                     _stress_old[_qp],
+                                     _elasticity_tensor[_qp],
+                                     _elastic_strain_old[_qp]);
+}

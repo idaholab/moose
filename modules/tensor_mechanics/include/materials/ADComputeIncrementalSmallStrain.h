@@ -12,6 +12,10 @@
 
 #include "ADComputeIncrementalStrainBase.h"
 
+#define usingComputeIncrementalSmallStrainMembers                                                  \
+  usingComputeIncrementalStrainBaseMembers;                                                        \
+  using ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement
+
 template <ComputeStage>
 class ADComputeIncrementalSmallStrain;
 
@@ -27,9 +31,9 @@ class ADComputeIncrementalSmallStrain : public ADComputeIncrementalStrainBase<co
 public:
   ADComputeIncrementalSmallStrain(const InputParameters & parameters);
 
-protected:
   virtual void computeProperties() override;
 
+protected:
   /**
    * Computes the current and old deformation gradients and passes back the
    * total strain increment tensor.

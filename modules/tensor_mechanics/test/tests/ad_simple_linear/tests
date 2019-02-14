@@ -55,7 +55,7 @@
     run_sim = 'True'
     cli_args = 'Outputs/exodus=false'
     ratio_tol = 1e-8
-    difference_tol = 1e6 # We have Young's modulus of 1e9 so finite differencing produces a large number
+    difference_tol = 1e-4
     requirement = 'The Jacobian for the automatic differentiation problem shall be perfect'
   [../]
   [./linear-ad-jac-reverse]

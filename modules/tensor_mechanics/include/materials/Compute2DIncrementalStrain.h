@@ -29,20 +29,28 @@ class Compute2DIncrementalStrain : public ComputeIncrementalSmallStrain
 public:
   Compute2DIncrementalStrain(const InputParameters & parameters);
 
-protected:
   void initialSetup() override;
+
+protected:
   virtual void displacementIntegrityCheck() override;
-  /// Computes the current and old deformation gradients with the assumptions for
-  /// 2D geometries, including plane strain, generalized plane strain, and axisymmetric,
-  /// and returns the total strain increment tensor
+  /**
+   * Computes the current and old deformation gradients with the assumptions for
+   * 2D geometries, including plane strain, generalized plane strain, and axisymmetric,
+   * and returns the total strain increment tensor
+   */
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;
 
-  /// Computes the current out-of-plane component of the displacement gradient; as a virtual function, this function is
-  /// overwritten for the specific geometries defined by inheriting classes
+  /**
+   * Computes the current out-of-plane component of the displacement gradient; as a virtual
+   * function, this function is overwritten for the specific geometries defined by inheriting
+   * classes
+   */
   virtual Real computeOutOfPlaneGradDisp() = 0;
 
-  /// Computes the old out-of-plane component of the displacement gradient; as a virtual function, this function is
-  /// overwritten for the specific geometries defined by inheriting classes
+  /**
+   * Computes the old out-of-plane component of the displacement gradient; as a virtual function,
+   * this function is overwritten for the specific geometries defined by inheriting classes
+   */
   virtual Real computeOutOfPlaneGradDispOld() = 0;
 
   const unsigned int _out_of_plane_direction;
