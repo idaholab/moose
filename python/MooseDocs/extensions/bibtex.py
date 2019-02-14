@@ -84,8 +84,18 @@ class BibtexExtension(command.CommandExtension):
                     self.__database.add_entry(key, db.entries[key])
 
     def postTokenize(self, ast, page, meta, reader):
-        meta.getData('citations').update(self.__citations)
-        self.__citations.clear()
+        if self.__citations:
+            meta.getData('citations').update(self.__citations)
+            self.__citations.clear()
+
+            has_bib = False
+            for node in anytree.PreOrderIter(ast):
+                if node.name == 'BibtexBibliography':
+                    has_bib = True
+                    break
+
+            if not has_bib:
+                BibtexBibliography(ast)
 
     @property
     def database(self):
@@ -99,7 +109,7 @@ class BibtexExtension(command.CommandExtension):
         reader.addInline(BibtexReferenceComponentDeprecated(), location='>FormatInline')
 
         renderer.add('BibtexCite', RenderBibtexCite())
-        renderer.add('BibtexBiliography', RenderBibtexBibliography())
+        renderer.add('BibtexBibliography', RenderBibtexBibliography())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage('natbib', 'round')
@@ -126,6 +136,7 @@ class BibtexReferenceComponentDeprecated(components.TokenComponent):
     def createToken(self, parent, info, page):
         keys = [key.strip() for key in info['keys'].split(',')]
         BibtexCite(parent, keys=keys, cite=info['cite'])
+        self.extension.addCitations(*keys)
         return parent
 
 class BibtexCommand(command.CommandComponent):
@@ -234,11 +245,7 @@ class RenderBibtexBibliography(components.RenderComponent):
             msg = 'Unknown bibliography style "{}".'
             raise exceptions.MooseDocsException(msg, token['bib_style'])
 
-        citations = list()
-        for tok in anytree.PreOrderIter(token.root):
-            if tok.name == 'BibtexCite':
-                citations.extend(tok['keys'])
-
+        citations = list(self.translator.getMetaData(page, 'citations'))
         formatted_bibliography = style().format_bibliography(self.extension.database, citations)
         html_backend = find_plugin('pybtex.backends', 'html')
 
