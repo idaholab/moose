@@ -4,6 +4,22 @@
 #include "FlowModelTwoPhaseNCG.h"
 #include "TwoPhaseNCGFluidProperties.h"
 
+const std::map<std::string, PipeBase::EConvHeatTransGeom> PipeBase::_heat_transfer_geom_to_enum{
+    {"PIPE", PIPE}, {"ROD_BUNDLE", ROD_BUNDLE}};
+
+MooseEnum
+PipeBase::getConvHeatTransGeometry(const std::string & name)
+{
+  return THM::getMooseEnum<EConvHeatTransGeom>(name, _heat_transfer_geom_to_enum);
+}
+
+template <>
+PipeBase::EConvHeatTransGeom
+THM::stringToEnum(const std::string & s)
+{
+  return stringToEnum<PipeBase::EConvHeatTransGeom>(s, PipeBase::_heat_transfer_geom_to_enum);
+}
+
 template <>
 InputParameters
 validParams<PipeBase>()

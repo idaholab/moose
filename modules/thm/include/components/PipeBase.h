@@ -21,6 +21,23 @@ class PipeBase : public GeometricalFlowComponent
 public:
   PipeBase(const InputParameters & params);
 
+  /// Type of convective heat transfer geometry
+  enum EConvHeatTransGeom
+  {
+    PIPE,      ///< pipe geometry
+    ROD_BUNDLE ///< rod bundle geometry
+  };
+  /// Map of convective heat transfer geometry type to enum
+  static const std::map<std::string, EConvHeatTransGeom> _heat_transfer_geom_to_enum;
+
+  /**
+   * Gets a MooseEnum for convective heat transfer geometry type
+   *
+   * @param[in] name   default value
+   * @returns MooseEnum for convective heat transfer geometry type
+   */
+  static MooseEnum getConvHeatTransGeometry(const std::string & name);
+
   // Pipe specific interface ----
   virtual std::shared_ptr<const FlowModel> getFlowModel() const;
   virtual unsigned int getSubdomainID() const = 0;
