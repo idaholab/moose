@@ -434,7 +434,8 @@
   l_max_its = 30
   nl_max_its = 15
   l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-8
+  nl_rel_tol = 1.0e-9
+  nl_abs_tol = 1e-10
   num_steps = 2
   dt = 0.5
 []
