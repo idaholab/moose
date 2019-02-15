@@ -150,7 +150,7 @@ void
 Component::connectObject(const InputParameters & params,
                          const std::string & rname,
                          const std::string & mooseName,
-                         const std::string & name)
+                         const std::string & name) const
 {
   connectObject(params, rname, mooseName, name, name);
 }
@@ -160,7 +160,7 @@ Component::connectObject(const InputParameters & params,
                          const std::string & /*rname*/,
                          const std::string & mooseName,
                          const std::string & name,
-                         const std::string & par_name)
+                         const std::string & par_name) const
 {
   MooseObjectParameterName alias("component", this->name(), name, "::");
   MooseObjectParameterName par_value(params.get<std::string>("_moose_base"), mooseName, par_name);

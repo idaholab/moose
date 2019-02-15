@@ -114,7 +114,7 @@ public:
   void connectObject(const InputParameters & params,
                      const std::string & rname,
                      const std::string & mooseName,
-                     const std::string & name);
+                     const std::string & name) const;
   /**
    * Connect with control logic
    */
@@ -122,7 +122,7 @@ public:
                      const std::string & rname,
                      const std::string & mooseName,
                      const std::string & name,
-                     const std::string & par_name);
+                     const std::string & par_name) const;
 
   /**
    * Throws an error if the supplied setup status of this component has not been reached
