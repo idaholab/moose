@@ -570,65 +570,6 @@ Pipe::setup2Phase()
 
   addFormLossObjects();
 
-  {
-    const std::vector<Real> & alpha_vapor_bounds =
-        getParam<std::vector<Real>>("alpha_vapor_bounds");
-    std::string class_name = _app.getFlowRegimeMapMaterialClassName(_closures_name);
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<UserObjectName>("fp") = _fp_name;
-    params.set<Real>("gravity_angle") = _gravity_angle;
-    params.set<bool>("horizontal") = _is_horizontal;
-    params.set<std::vector<VariableName>>("A") = cv_area;
-    params.set<std::vector<VariableName>>("beta") = cv_beta;
-    params.set<std::vector<VariableName>>("arhoA_liquid") = cv_arhoA_liquid;
-    params.set<std::vector<VariableName>>("arhoA_vapor") = cv_arhoA_vapor;
-    params.set<std::vector<VariableName>>("alpha_liquid") = cv_alpha_liquid;
-    params.set<std::vector<VariableName>>("alpha_vapor") = cv_alpha_vapor;
-    params.set<std::vector<VariableName>>("vel_liquid") = cv_vel_liquid;
-    params.set<std::vector<VariableName>>("vel_vapor") = cv_vel_vapor;
-    params.set<std::vector<VariableName>>("rho_liquid") = cv_density_liquid;
-    params.set<std::vector<VariableName>>("rho_vapor") = cv_density_vapor;
-    params.set<std::vector<VariableName>>("v_liquid") = cv_v_liquid;
-    params.set<std::vector<VariableName>>("v_vapor") = cv_v_vapor;
-    params.set<std::vector<VariableName>>("e_liquid") = cv_e_liquid;
-    params.set<std::vector<VariableName>>("e_vapor") = cv_e_vapor;
-    params.set<std::vector<VariableName>>("D_h") = cv_D_h;
-
-    params.set<MaterialPropertyName>("cp_liquid") =
-        FlowModelTwoPhase::SPECIFIC_HEAT_CONSTANT_PRESSURE_LIQUID;
-    params.set<MaterialPropertyName>("cp_vapor") =
-        FlowModelTwoPhase::SPECIFIC_HEAT_CONSTANT_PRESSURE_VAPOR;
-    params.set<MaterialPropertyName>("k_liquid") = FlowModelTwoPhase::THERMAL_CONDUCTIVITY_LIQUID;
-    params.set<MaterialPropertyName>("k_vapor") = FlowModelTwoPhase::THERMAL_CONDUCTIVITY_VAPOR;
-    params.set<MaterialPropertyName>("p_liquid") = FlowModelTwoPhase::PRESSURE_LIQUID;
-    params.set<MaterialPropertyName>("p_vapor") = FlowModelTwoPhase::PRESSURE_VAPOR;
-    params.set<MaterialPropertyName>("T_liquid") = FlowModelTwoPhase::TEMPERATURE_LIQUID;
-    params.set<MaterialPropertyName>("T_vapor") = FlowModelTwoPhase::TEMPERATURE_VAPOR;
-    params.set<MaterialPropertyName>("mu_liquid") = FlowModelTwoPhase::DYNAMIC_VISCOSITY_LIQUID;
-    params.set<MaterialPropertyName>("mu_vapor") = FlowModelTwoPhase::DYNAMIC_VISCOSITY_VAPOR;
-    params.set<MaterialPropertyName>("surface_tension") = FlowModelTwoPhase::SURFACE_TENSION;
-    params.set<MaterialPropertyName>("h_liquid") = FlowModelTwoPhase::SPECIFIC_ENTHALPY_LIQUID;
-    params.set<MaterialPropertyName>("h_vapor") = FlowModelTwoPhase::SPECIFIC_ENTHALPY_VAPOR;
-
-    if (!_temperature_mode)
-      params.set<std::vector<VariableName>>("q_wall") = {FlowModel::HEAT_FLUX_WALL};
-    params.set<MooseEnum>("ht_geom") = getParam<MooseEnum>("heat_transfer_geom");
-    params.set<Real>("alpha_v_min") = alpha_vapor_bounds[0];
-    params.set<Real>("alpha_v_max") = alpha_vapor_bounds[1];
-    params.set<UserObjectName>("chf_table") = FlowModelTwoPhase::CHF_TABLE;
-    /// The following is a placeholder for now; see issue #633
-    const bool fp_supports_phase_change = true;
-    params.set<bool>("mass_transfer") =
-        fp_supports_phase_change && getParam<bool>("wall_mass_transfer");
-
-    params.set<Real>("gravity_magnitude") = _gravity_magnitude;
-
-    if (_HT_geometry == ROD_BUNDLE)
-      params.set<Real>("PoD") = _PoD;
-    _sim.addMaterial(class_name, genName(name(), "flow_regime_mat"), params);
-  }
-
   if (!_stabilization_uo_name.empty())
   {
     InputParameters pars = emptyInputParameters();
