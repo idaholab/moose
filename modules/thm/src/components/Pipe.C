@@ -484,114 +484,6 @@ Pipe::setup1Phase()
 }
 
 void
-Pipe::setupHw2Phase()
-{
-  if (MooseUtils::toLower(_closures_name) == "simple")
-  {
-    if (_n_heat_transfer_connections > 1)
-    {
-      // liquid
-      {
-        const std::string class_name = "WeightedAverageMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("prop_name") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_LIQUID;
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::vector<MaterialPropertyName>>("values") = _Hw_liquid_names;
-        params.set<std::vector<VariableName>>("weights") = _P_hf_names;
-        _sim.addMaterial(class_name, genName(name(), "Hw_liquid_material"), params);
-      }
-      // vapor
-      {
-        const std::string class_name = "WeightedAverageMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<MaterialPropertyName>("prop_name") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_VAPOR;
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::vector<MaterialPropertyName>>("values") = _Hw_vapor_names;
-        params.set<std::vector<VariableName>>("weights") = _P_hf_names;
-        _sim.addMaterial(class_name, genName(name(), "Hw_vapor_material"), params);
-      }
-    }
-    else if (_n_heat_transfer_connections == 0)
-    // weighted average aux would result in division by zero; use zero directly instead
-    {
-      // liquid
-      {
-        const std::string class_name = "ConstantMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::string>("property_name") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_LIQUID;
-        params.set<Real>("value") = 0;
-        _sim.addMaterial(class_name, genName(name(), "Hw_liquid_mat"), params);
-      }
-      // vapor
-      {
-        const std::string class_name = "ConstantMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::string>("property_name") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_VAPOR;
-        params.set<Real>("value") = 0;
-        _sim.addMaterial(class_name, genName(name(), "Hw_vapor_mat"), params);
-      }
-    }
-  }
-  else if (MooseUtils::toLower(_closures_name) == "trace")
-  {
-    UserObjectName fp_name = getParam<UserObjectName>("fp");
-    const std::vector<Real> & alpha_vapor_bounds =
-        getParam<std::vector<Real>>("alpha_vapor_bounds");
-
-    ExecFlagEnum lin_execute_on(MooseUtils::getDefaultExecFlagEnum());
-    lin_execute_on = {EXEC_LINEAR, EXEC_INITIAL};
-
-    {
-      std::string class_name = _app.getWallHeatTransferCoefficent7EqnClassName(_closures_name);
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<MooseEnum>("ht_geom") = getParam<MooseEnum>("heat_transfer_geom");
-      if (_HT_geometry == ROD_BUNDLE)
-        params.set<Real>("PoD") = _PoD;
-      params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-      params.set<std::vector<VariableName>>("arhoA_liquid") = {
-          FlowModelTwoPhase::ALPHA_RHO_A_LIQUID};
-      params.set<std::vector<VariableName>>("arhoA_vapor") = {FlowModelTwoPhase::ALPHA_RHO_A_VAPOR};
-      params.set<std::vector<VariableName>>("D_h") = {FlowModel::HYDRAULIC_DIAMETER};
-      params.set<MaterialPropertyName>("alpha_liquid") = FlowModelTwoPhase::VOLUME_FRACTION_LIQUID;
-      params.set<MaterialPropertyName>("rho_liquid") = FlowModelTwoPhase::DENSITY_LIQUID;
-      params.set<MaterialPropertyName>("vel_liquid") = FlowModelTwoPhase::VELOCITY_LIQUID;
-      params.set<MaterialPropertyName>("v_liquid") = FlowModelTwoPhase::SPECIFIC_VOLUME_LIQUID;
-      params.set<MaterialPropertyName>("e_liquid") =
-          FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_LIQUID;
-      params.set<MaterialPropertyName>("T_liquid") = FlowModelTwoPhase::TEMPERATURE_LIQUID;
-      params.set<MaterialPropertyName>("p_liquid") = FlowModelTwoPhase::PRESSURE_LIQUID;
-      params.set<MaterialPropertyName>("T_wall") = FlowModel::TEMPERATURE_WALL;
-      params.set<MaterialPropertyName>("T_sat_liquid") =
-          FlowModelTwoPhase::TEMPERATURE_SATURATION_LIQUID;
-      params.set<MaterialPropertyName>("alpha_vapor") = FlowModelTwoPhase::VOLUME_FRACTION_VAPOR;
-      params.set<MaterialPropertyName>("rho_vapor") = FlowModelTwoPhase::DENSITY_VAPOR;
-      params.set<MaterialPropertyName>("vel_vapor") = FlowModelTwoPhase::VELOCITY_VAPOR;
-      params.set<MaterialPropertyName>("v_vapor") = FlowModelTwoPhase::SPECIFIC_VOLUME_VAPOR;
-      params.set<MaterialPropertyName>("e_vapor") =
-          FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_VAPOR;
-      params.set<MaterialPropertyName>("T_vapor") = FlowModelTwoPhase::TEMPERATURE_VAPOR;
-      params.set<MaterialPropertyName>("p_vapor") = FlowModelTwoPhase::PRESSURE_VAPOR;
-      params.set<UserObjectName>("fp") = fp_name;
-      if (!_temperature_mode)
-        params.set<std::vector<VariableName>>("q_wall") = {FlowModel::HEAT_FLUX_WALL};
-      params.set<Real>("alpha_v_min") = alpha_vapor_bounds[0];
-      params.set<Real>("alpha_v_max") = alpha_vapor_bounds[1];
-      params.set<UserObjectName>("chf_table") = FlowModelTwoPhase::CHF_TABLE;
-      params.set<Real>("gravity_magnitude") = _gravity_magnitude;
-
-      _sim.addMaterial(class_name, genName(name(), "wthc_pipe_2phase"), params);
-    }
-  }
-}
-
-void
 Pipe::setup2Phase()
 {
   std::vector<VariableName> cv_T_wall(1, FlowModel::TEMPERATURE_WALL);
@@ -675,8 +567,6 @@ Pipe::setup2Phase()
   }
 
   setupVolumeFraction();
-
-  setupHw2Phase();
 
   addFormLossObjects();
 

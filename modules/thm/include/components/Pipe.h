@@ -174,7 +174,6 @@ protected:
 
   virtual void setupVolumeFraction();
   virtual void setupDh();
-  virtual void setupHw2Phase();
   virtual void addFormLossObjects();
   virtual void addWallTemperatureObjects();
 
