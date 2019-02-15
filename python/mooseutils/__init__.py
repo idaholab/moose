@@ -14,6 +14,7 @@ from mooseutils import run_profile
 from message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from MooseException import MooseException
 from eval_path import eval_path
+from sqa_check import sqa_check, check_requirement
 from AutoPropertyMixin import AutoPropertyMixin, Property, addProperty
 import parallel
 

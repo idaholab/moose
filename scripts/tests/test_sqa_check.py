@@ -15,7 +15,7 @@ import mooseutils
 
 ROOT_DIR = mooseutils.git_root_dir()
 sys.path.insert(0, os.path.join(ROOT_DIR, 'scripts'))
-from sqa_check import check_requirement
+from mooseutils import check_requirement
 
 class Test(unittest.TestCase):
     def testScript(self):
