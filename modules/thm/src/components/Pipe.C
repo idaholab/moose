@@ -467,7 +467,6 @@ Pipe::setup1Phase()
     _sim.addMaterial(class_name, genName(name(), "fp_mat"), params);
   }
 
-  setupHw1Phase();
   addFormLossObjects();
 
   if (!_stabilization_uo_name.empty())
@@ -481,61 +480,6 @@ Pipe::setup1Phase()
     const StabilizationSettings & stabilization =
         _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name);
     stabilization.addMooseObjects(*_flow_model, pars);
-  }
-}
-
-void
-Pipe::setupHw1Phase()
-{
-  ExecFlagEnum lin_execute_on(MooseUtils::getDefaultExecFlagEnum());
-  lin_execute_on = {EXEC_INITIAL, EXEC_LINEAR};
-
-  if (_closures_name == "simple")
-  {
-    if (_n_heat_transfer_connections > 1)
-    {
-      const std::string class_name = "WeightedAverageMaterial";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<MaterialPropertyName>("prop_name") =
-          FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<std::vector<MaterialPropertyName>>("values") = _Hw_1phase_names;
-      params.set<std::vector<VariableName>>("weights") = _P_hf_names;
-      _sim.addMaterial(class_name, genName(name(), "Hw_mat"), params);
-    }
-    else if (_n_heat_transfer_connections == 0)
-    {
-      const std::string class_name = "ConstantMaterial";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<std::string>("property_name") =
-          FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-      params.set<Real>("value") = 0;
-      _sim.addMaterial(class_name, genName(name(), "Hw_mat"), params);
-    }
-  }
-  else
-  {
-    {
-      std::string class_name = _app.getWallHeatTransferCoefficent3EqnClassName(_closures_name);
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<MooseEnum>("ht_geom") = getParam<MooseEnum>("heat_transfer_geom");
-      if (_HT_geometry == ROD_BUNDLE)
-        params.set<Real>("PoD") = _PoD;
-      params.set<std::vector<VariableName>>("D_h") = {FlowModel::HYDRAULIC_DIAMETER};
-      params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
-      params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
-      params.set<MaterialPropertyName>("v") = FlowModelSinglePhase::SPECIFIC_VOLUME;
-      params.set<MaterialPropertyName>("e") = FlowModelSinglePhase::SPECIFIC_INTERNAL_ENERGY;
-      params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
-      params.set<MaterialPropertyName>("p") = FlowModelSinglePhase::PRESSURE;
-      params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
-      params.set<Real>("gravity_magnitude") = _gravity_magnitude;
-      if (!_temperature_mode)
-        params.set<std::vector<VariableName>>("q_wall") = {FlowModel::HEAT_FLUX_WALL};
-      _sim.addMaterial(class_name, genName(name(), "wthc_mat"), params);
-    }
   }
 }
 

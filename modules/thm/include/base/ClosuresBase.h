@@ -39,6 +39,27 @@ public:
   virtual void addMooseObjects(const Pipe & flow_channel) = 0;
 
 protected:
+  /**
+   * Adds an arbitrary zero-value material
+   *
+   * @param[in] flow_channel   Flow channel component
+   * @param[in] property_name   Name of the material property to create
+   */
+  void addZeroMaterial(const Pipe & flow_channel, const std::string & property_name) const;
+
+  /**
+   * Adds a weighted average material
+   *
+   * @param[in] flow_channel   Flow channel component
+   * @param[in] values   Values to average
+   * @param[in] weights   Weights for each value
+   * @param[in] property_name   Name of material property to create
+   */
+  void addWeightedAverageMaterial(const Pipe & flow_channel,
+                                  const std::vector<MaterialPropertyName> & values,
+                                  const std::vector<VariableName> & weights,
+                                  const MaterialPropertyName & property_name) const;
+
   /// Simulation
   Simulation & _sim;
 

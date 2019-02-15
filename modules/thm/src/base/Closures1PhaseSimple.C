@@ -1,4 +1,5 @@
 #include "Closures1PhaseSimple.h"
+#include "FlowModelSinglePhase.h"
 #include "Pipe.h"
 
 registerMooseObject("THMApp", Closures1PhaseSimple);
@@ -31,4 +32,14 @@ Closures1PhaseSimple::addMooseObjects(const Pipe & flow_channel)
 {
   // wall friction material
   addWallFrictionFunctionMaterial(flow_channel);
+
+  // wall heat transfer coefficient material
+  const unsigned int n_ht_connections = flow_channel.getNumberOfHeatTransferConnections();
+  if (n_ht_connections > 1)
+    addWeightedAverageMaterial(flow_channel,
+                               flow_channel.getWallHTCNames1Phase(),
+                               flow_channel.getHeatedPerimeterNames(),
+                               FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL);
+  else if (n_ht_connections == 0)
+    addZeroMaterial(flow_channel, FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL);
 }
