@@ -20,6 +20,7 @@ template <>
 InputParameters validParams<TwoMaterialPropertyInterface>();
 
 #define adGetNeighborMaterialProperty this->template getNeighborMaterialProperty
+#define adGetNeighborADMaterialProperty this->template getNeighborADMaterialProperty
 
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
@@ -33,6 +34,12 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
+
+  /**
+   * Retrieve the ADMaterialProperty named "name"
+   */
+  template <typename T>
+  const ADMaterialPropertyObject<T> & getNeighborADMaterialProperty(const std::string & name);
 
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
@@ -57,6 +64,21 @@ TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & na
     return *default_property;
   else
     return _neighbor_material_data->getProperty<T>(prop_name);
+}
+
+template <typename T>
+const ADMaterialPropertyObject<T> &
+TwoMaterialPropertyInterface::getNeighborADMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+
+  // Check if it's just a constant
+  const ADMaterialPropertyObject<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  if (default_property)
+    return *default_property;
+  else
+    return _neighbor_material_data->getADProperty<T>(prop_name);
 }
 
 template <typename T>
