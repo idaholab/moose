@@ -27,6 +27,8 @@ Closures1PhaseSimple::check(const Pipe & flow_channel) const
 }
 
 void
-Closures1PhaseSimple::addMooseObjects(const Pipe & /*flow_channel*/)
+Closures1PhaseSimple::addMooseObjects(const Pipe & flow_channel)
 {
+  // wall friction material
+  addWallFrictionFunctionMaterial(flow_channel);
 }

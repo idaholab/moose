@@ -467,7 +467,6 @@ Pipe::setup1Phase()
     _sim.addMaterial(class_name, genName(name(), "fp_mat"), params);
   }
 
-  setupWallFriction1Phase();
   setupHw1Phase();
   addFormLossObjects();
 
@@ -857,53 +856,6 @@ Pipe::setupVolumeFraction()
     params.set<FunctionName>("alpha_vapor") = getVariableFn("initial_alpha_vapor");
     params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
     _sim.addAuxKernel(class_name, genName(name(), class_name), params);
-  }
-}
-
-void
-Pipe::setupWallFriction1Phase()
-{
-  std::vector<VariableName> cv_area(1, FlowModel::AREA);
-  std::vector<VariableName> cv_rhoA(1, FlowModelSinglePhase::RHOA);
-  std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
-  std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
-  std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
-  std::vector<VariableName> cv_vel(1, FlowModelSinglePhase::VELOCITY);
-  std::vector<VariableName> cv_D_h(1, FlowModel::HYDRAULIC_DIAMETER);
-
-  // Wall friction model
-  std::string nm = genName(name(), "wallfriction_material");
-  if (isParamValid("f"))
-  {
-    const FunctionName & f_fn_name = getParam<FunctionName>("f");
-    makeFunctionControllableIfConstant(f_fn_name, "f");
-
-    std::string class_name = "WallFrictionFunctionMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
-    params.set<FunctionName>("function") = f_fn_name;
-    params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
-    params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
-    params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
-    _sim.addMaterial(class_name, nm, params);
-  }
-  else
-  {
-    std::string class_name = _app.getWallFrictionCoefficent3EqnClassName(_closures_name);
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
-    params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
-    params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
-    params.set<std::vector<VariableName>>("rho") = cv_rho;
-    params.set<std::vector<VariableName>>("vel") = cv_vel;
-    params.set<std::vector<VariableName>>("D_h") = cv_D_h;
-    params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
-    params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
-    params.set<Real>("roughness") = _roughness;
-    _sim.addMaterial(class_name, nm, params);
-    connectObject(params, "", nm, "roughness");
   }
 }
 
