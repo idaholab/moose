@@ -144,6 +144,11 @@ public:
   static std::string
   genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
 
+  /**
+   * Gets gravity magnitude
+   */
+  Real getGravityMagnitude() const { return _gravity_magnitude; }
+
 protected:
   /**
    * Initializes the component
