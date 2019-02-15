@@ -33,6 +33,46 @@ public:
   virtual bool isHorizontal() const override { return _is_horizontal; }
 
   /**
+   * Gets heat transfer geometry
+   */
+  EConvHeatTransGeom getHeatTransferGeometry() const { return _HT_geometry; }
+
+  /**
+   * Gets temperature mode flag
+   */
+  bool getTemperatureMode() const { return _temperature_mode; }
+
+  /**
+   * Gets the number of heat transfer connections
+   */
+  unsigned int getNumberOfHeatTransferConnections() const { return _n_heat_transfer_connections; }
+
+  /**
+   * Gets 1-phase wall heat transfer coefficient names for connected heat transfers
+   */
+  std::vector<MaterialPropertyName> getWallHTCNames1Phase() const { return _Hw_1phase_names; }
+
+  /**
+   * Gets liquid wall heat transfer coefficient names for connected heat transfers
+   */
+  std::vector<MaterialPropertyName> getWallHTCNamesLiquid() const { return _Hw_liquid_names; }
+
+  /**
+   * Gets vapor wall heat transfer coefficient names for connected heat transfers
+   */
+  std::vector<MaterialPropertyName> getWallHTCNamesVapor() const { return _Hw_vapor_names; }
+
+  /**
+   * Gets heated perimeter names for connected heat transfers
+   */
+  std::vector<VariableName> getHeatedPerimeterNames() const { return _P_hf_names; }
+
+  /**
+   * Gets wall temperature names for connected heat transfers
+   */
+  std::vector<VariableName> getWallTemperatureNames() const { return _T_wall_names; }
+
+  /**
    * Adds the name of a heat transfer component to the pipe's list.
    *
    * This function is called from a heat transfer component to add its name to
