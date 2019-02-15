@@ -34,14 +34,15 @@ AdvectiveFluxCalculatorBase::AdvectiveFluxCalculatorBase(const InputParameters &
   : ElementUserObject(parameters),
     _resizing_needed(true),
     _flux_limiter_type(getParam<MooseEnum>("flux_limiter_type").getEnum<FluxLimiterTypeEnum>()),
-    _kij({}),
-    _flux_out({}),
-    _dflux_out_du({}),
-    _dflux_out_dKjk({}),
-    _valence({}),
+    _kij(),
+    _flux_out(),
+    _dflux_out_du(),
+    _dflux_out_dKjk(),
+    _valence(),
     _u_nodal(),
     _u_nodal_computed_by_thread(),
-    _connections()
+    _connections(),
+    _number_of_nodes(0)
 {
   if (!_execute_enum.contains(EXEC_LINEAR))
     paramError(
@@ -59,8 +60,8 @@ AdvectiveFluxCalculatorBase::timestepSetup()
   if (_resizing_needed)
   {
     _connections.clear();
-    // QUERY: does this properly account for multiple processors, threading, and other things i
-    // haven't thought about?
+    // QUERY: does the following properly account for multiple processors, threading, and other
+    // things i haven't thought about?
 
     /*
      * Populate _connections for all nodes that can be seen by this processor and on relevant blocks
@@ -80,71 +81,60 @@ AdvectiveFluxCalculatorBase::timestepSetup()
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
           for (unsigned j = 0; j < elem->n_nodes(); ++j)
-	    _connections.addConnection(elem->node_id(i), elem->node_id(j));
+            _connections.addConnection(elem->node_id(i), elem->node_id(j));
     _connections.finalizeAddingConnections();
-	      
+
+    _number_of_nodes = _connections.numNodes();
 
     // initialize _kij
-    _kij.clear();
-    for (const auto & node_i : _connections.globalIDs())
-      if (_kij.find(node_i) == _kij.end())
-      {
-	_kij[node_i] = {};
-	for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
-	  _kij[node_i][node_j] = 0.0;
-      }
-
+    _kij.resize(_number_of_nodes);
+    for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+      _kij[sequential_i].assign(
+          _connections.sequentialConnectionsToSequentialID(sequential_i).size(), 0.0);
 
     /*
-     * Build _valence[i_j], which is the number of times the i_j pair is encountered when looping
-     * over the entire mesh (and on relevant blocks)
+     * Build _valence[i], which is the number of times the sequential node i is encountered when
+     * looping over the entire mesh (and on relevant blocks)
      *
      * MULTIPROC NOTE: this must loop over local elements and >=1 layer of ghosted elements.
      * The Kernel will only loop over local elements, so will only use _valence for
      * linked node-node pairs that appear in the local elements.  But other processors will
      * loop over neighboring elements, so avoid multiple counting of the residual and Jacobian
      * this processor must record how many times each node-node link of its local elements
-     * appears in the *global* mesh and pass that info to the Kernel
+     * appears in the local elements and >=1 layer, and pass that info to the Kernel
      */
-    _valence.clear();
+    _valence.assign(_number_of_nodes, 0);
     for (const auto & elem : _fe_problem.getEvaluableElementRange())
-    {
       if (this->hasBlocks(elem->subdomain_id()))
-      {
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
         {
           const dof_id_type node_i = elem->node_id(i);
-          for (unsigned j = 0; j < elem->n_nodes(); ++j)
-          {
-            const dof_id_type node_j = elem->node_id(j);
-            const std::pair<dof_id_type, dof_id_type> i_j(node_i, node_j);
-            if (_valence.find(i_j) == _valence.end())
-              _valence[i_j] = 0;
-            _valence[i_j] += 1;
-          }
+          const dof_id_type sequential_i = _connections.sequentialID(node_i);
+          _valence[sequential_i] += 1;
         }
+
+    _u_nodal.assign(_number_of_nodes, 0.0);
+    _u_nodal_computed_by_thread.assign(_number_of_nodes, false);
+    _flux_out.assign(_number_of_nodes, 0.0);
+    _dflux_out_du.assign(_number_of_nodes, std::map<dof_id_type, Real>());
+    for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+      zeroedConnection(_dflux_out_du[sequential_i], _connections.globalID(sequential_i));
+    _dflux_out_dKjk.resize(_number_of_nodes);
+    for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+    {
+      const std::vector<dof_id_type> con_i =
+          _connections.sequentialConnectionsToSequentialID(sequential_i);
+      const std::size_t num_con_i = con_i.size();
+      _dflux_out_dKjk[sequential_i].resize(num_con_i);
+      for (std::size_t j = 0; j < con_i.size(); ++j)
+      {
+        const dof_id_type sequential_j = con_i[j];
+        const std::size_t num_con_j =
+            _connections.sequentialConnectionsToSequentialID(sequential_j).size();
+        _dflux_out_dKjk[sequential_i][j].assign(num_con_j, 0.0);
       }
     }
 
-    _u_nodal.clear();
-    _u_nodal_computed_by_thread.clear();
-    _flux_out.clear();
-    _dflux_out_du.clear();
-    _dflux_out_dKjk.clear();
-    for (const auto & node_i : _connections.globalIDs())
-    {
-      _u_nodal.set(node_i, 0.0);
-      _u_nodal_computed_by_thread.set(node_i, false);
-      _flux_out[node_i] = 0.0;
-      _dflux_out_du[node_i] = {};
-      zeroedConnection(_dflux_out_du[node_i], node_i);
-      _dflux_out_dKjk[node_i] = {};
-      for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
-      {
-        _dflux_out_dKjk[node_i][node_j] = {};
-        zeroedConnection(_dflux_out_dKjk[node_i][node_j], node_j);
-      }
-    }
     _resizing_needed = false;
   }
 }
@@ -163,12 +153,10 @@ AdvectiveFluxCalculatorBase::initialize()
 {
   // Zero _kij and falsify _u_nodal_computed_by_thread ready for building in execute() and
   // finalize()
-  for (const auto & node_i : _connections.globalIDs())
-  {
-    _u_nodal_computed_by_thread.set(node_i, false);
-    for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
-      _kij[node_i][node_j] = 0.0;
-  }
+  _u_nodal_computed_by_thread.assign(_number_of_nodes, false);
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+    _kij[sequential_i].assign(_connections.sequentialConnectionsToSequentialID(sequential_i).size(),
+                              0.0);
 }
 
 void
@@ -179,10 +167,11 @@ AdvectiveFluxCalculatorBase::execute()
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
     const dof_id_type node_i = _current_elem->node_id(i);
-    if (!_u_nodal_computed_by_thread(node_i))
+    const dof_id_type sequential_i = _connections.sequentialID(node_i);
+    if (!_u_nodal_computed_by_thread[sequential_i])
     {
-      _u_nodal.set(node_i, computeU(i));
-      _u_nodal_computed_by_thread.set(node_i, true);
+      _u_nodal[sequential_i] = computeU(i);
+      _u_nodal_computed_by_thread[sequential_i] = true;
     }
     for (unsigned j = 0; j < _current_elem->n_nodes(); ++j)
     {
@@ -198,7 +187,9 @@ AdvectiveFluxCalculatorBase::executeOnElement(
     dof_id_type global_i, dof_id_type global_j, unsigned local_i, unsigned local_j, unsigned qp)
 {
   // KT Eqn (20)
-  _kij[global_i][global_j] += _JxW[qp] * _coord[qp] * computeVelocity(local_i, local_j, qp);
+  const dof_id_type sequential_i = _connections.sequentialID(global_i);
+  const unsigned index_i_to_j = _connections.indexOfGlobalConnection(global_i, global_j);
+  _kij[sequential_i][index_i_to_j] += _JxW[qp] * _coord[qp] * computeVelocity(local_i, local_j, qp);
 }
 
 void
@@ -206,29 +197,18 @@ AdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
 {
   const AdvectiveFluxCalculatorBase & afc = static_cast<const AdvectiveFluxCalculatorBase &>(uo);
   // add the values of _kij computed by different threads
-  /* Can do the following when kij is a std::vector, then do a similar thing for _u_nodal
-  for (const auto & node_i : _connections.globalIDs())
-    for (const auto & node_j : _connections.globalConnectionsToGlobalID(node_i))
-      _kij[node_i][node_j] += afc._kij[node_i][node_j];
-  */
-  for (const auto & nodes : afc._kij)
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    const dof_id_type i = nodes.first;
-    for (const auto & neighbors : nodes.second)
-    {
-      const dof_id_type j = neighbors.first;
-      const Real afc_val = neighbors.second;
-      _kij[i][j] += afc_val;
-    }
+    const std::size_t num_con_i =
+        _connections.sequentialConnectionsToSequentialID(sequential_i).size();
+    for (std::size_t j = 0; j < num_con_i; ++j)
+      _kij[sequential_i][j] += afc._kij[sequential_i][j];
   }
 
   // gather the values of _u_nodal computed by different threads
-  for (const auto & node_u : afc._u_nodal)
-  {
-    const dof_id_type i = node_u.first;
-    if (!_u_nodal_computed_by_thread(i) && afc._u_nodal_computed_by_thread(i))
-      _u_nodal.set(i, node_u.second);
-  }
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+    if (!_u_nodal_computed_by_thread[sequential_i] && afc._u_nodal_computed_by_thread[sequential_i])
+      _u_nodal[sequential_i] = afc._u_nodal[sequential_i];
 }
 
 void
@@ -258,331 +238,386 @@ AdvectiveFluxCalculatorBase::finalize()
   // This adds artificial diffusion, which eliminates any spurious oscillations
   // The idea is that D will remove all negative off-diagonal elements when it is added to K
   // This is identical to full upwinding
-  std::map<dof_id_type, std::map<dof_id_type, Real>> dij;
-  std::map<dof_id_type, std::map<dof_id_type, Real>>
-      dDij_dKij; // dDij_dKij[i][j] = d(D[i][j])/d(K[i][j]) for i!=j
-  std::map<dof_id_type, std::map<dof_id_type, Real>>
-      dDij_dKji; // dDij_dKji[i][j] = d(D[i][j])/d(K[j][i]) for i!=j
-  std::map<dof_id_type, std::map<dof_id_type, Real>>
-      dDii_dKij; // dDii_dKij[i][j] = d(D[i][i])/d(K[i][j])
-  std::map<dof_id_type, std::map<dof_id_type, Real>>
-      dDii_dKji; // dDii_dKji[i][j] = d(D[i][i])/d(K[j][i])
-  for (const auto & i : _connections.globalIDs())
+  std::vector<std::vector<Real>> dij(_number_of_nodes);
+  std::vector<std::vector<Real>> dDij_dKij(
+      _number_of_nodes); // dDij_dKij[i][j] = d(D[i][j])/d(K[i][j]) for i!=j
+  std::vector<std::vector<Real>> dDij_dKji(
+      _number_of_nodes); // dDij_dKji[i][j] = d(D[i][j])/d(K[j][i]) for i!=j
+  std::vector<std::vector<Real>> dDii_dKij(
+      _number_of_nodes); // dDii_dKij[i][j] = d(D[i][i])/d(K[i][j])
+  std::vector<std::vector<Real>> dDii_dKji(
+      _number_of_nodes); // dDii_dKji[i][j] = d(D[i][i])/d(K[j][i])
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    dij[i] = {};
-    dij[i][i] = 0.0;
-    dDij_dKij[i] = {};
-    zeroedConnection(dDij_dKij[i], i);
-    dDij_dKji[i] = {};
-    zeroedConnection(dDij_dKji[i], i);
-    dDii_dKij[i] = {};
-    zeroedConnection(dDii_dKij[i], i);
-    dDii_dKji[i] = {};
-    zeroedConnection(dDii_dKji[i], i);
-    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
+    const std::vector<dof_id_type> con_i =
+        _connections.sequentialConnectionsToSequentialID(sequential_i);
+    const std::size_t num_con_i = con_i.size();
+    dij[sequential_i].assign(num_con_i, 0.0);
+    dDij_dKij[sequential_i].assign(num_con_i, 0.0);
+    dDij_dKji[sequential_i].assign(num_con_i, 0.0);
+    dDii_dKij[sequential_i].assign(num_con_i, 0.0);
+    dDii_dKji[sequential_i].assign(num_con_i, 0.0);
+    const unsigned index_i_to_i =
+        _connections.indexOfSequentialConnection(sequential_i, sequential_i);
+    for (std::size_t j = 0; j < num_con_i; ++j)
     {
-      if (i == j)
+      const dof_id_type sequential_j = con_i[j];
+      if (sequential_i == sequential_j)
         continue;
-      if ((_kij[i][j] <= _kij[j][i]) && (_kij[i][j] < 0))
+      const unsigned index_j_to_i =
+          _connections.indexOfSequentialConnection(sequential_j, sequential_i);
+      const Real kij = _kij[sequential_i][j];
+      const Real kji = _kij[sequential_j][index_j_to_i];
+      if ((kij <= kji) && (kij < 0.0))
       {
-        dij[i][j] = -_kij[i][j];
-        dDij_dKij[i][j] = -1.0;
-        dDii_dKij[i][j] += 1.0;
+        dij[sequential_i][j] = -kij;
+        dDij_dKij[sequential_i][j] = -1.0;
+        dDii_dKij[sequential_i][j] += 1.0;
       }
-      else if ((_kij[j][i] <= _kij[i][j]) && (_kij[j][i] < 0))
+      else if ((kji <= kij) && (kji < 0.0))
       {
-        dij[i][j] = -_kij[j][i];
-        dDij_dKji[i][j] = -1.0;
-        dDii_dKji[i][j] += 1.0;
+        dij[sequential_i][j] = -kji;
+        dDij_dKji[sequential_i][j] = -1.0;
+        dDii_dKji[sequential_i][j] += 1.0;
       }
       else
-        dij[i][j] = 0.0;
-      dij[i][i] -= dij[i][j];
+        dij[sequential_i][j] = 0.0;
+      dij[sequential_i][index_i_to_i] -= dij[sequential_i][j];
     }
   }
 
   // Calculate KuzminTurek L matrix
   // See Fig 2: L = K + D
-  std::map<dof_id_type, std::map<dof_id_type, Real>> lij;
-  for (const auto & i : _connections.globalIDs())
+  std::vector<std::vector<Real>> lij(_number_of_nodes);
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    lij[i] = {};
-    for (const auto j : _connections.globalConnectionsToGlobalID(i))
-      lij[i][j] = _kij[i][j] + dij[i][j];
+    const std::vector<dof_id_type> con_i =
+        _connections.sequentialConnectionsToSequentialID(sequential_i);
+    const std::size_t num_con_i = con_i.size();
+    lij[sequential_i].assign(num_con_i, 0.0);
+    for (std::size_t j = 0; j < num_con_i; ++j)
+      lij[sequential_i][j] = _kij[sequential_i][j] + dij[sequential_i][j];
   }
 
   // Compute KuzminTurek R matrices
   // See Eqns (49) and (12)
-  std::map<dof_id_type, Real> rP;
-  std::map<dof_id_type, Real> rM;
-  std::map<dof_id_type, std::map<dof_id_type, Real>>
-      drP; // drP[i][j] = d(rP[i])/d(u[j]).  Here j must be connected to i (ie _kij[i][j] exists)
-           // for there to be a nonzero derivative
-  std::map<dof_id_type, std::map<dof_id_type, Real>> drM;
-  std::map<dof_id_type, std::map<dof_id_type, Real>>
-      drP_dk; // drP_dk[i][j] = d(rP[i])/d(K[i][j]).   Here j must be connected to i (ie _kij[i][j]
-              // exists) for there to be a nonzero derivative
-  std::map<dof_id_type, std::map<dof_id_type, Real>> drM_dk;
-  for (const auto & i : _connections.globalIDs())
+  std::vector<Real> rP(_number_of_nodes);
+  std::vector<Real> rM(_number_of_nodes);
+  std::vector<std::vector<Real>> drP(_number_of_nodes); // drP[i][j] = d(rP[i])/d(u[j]).  Here j
+                                                        // indexes the j^th node connected to i
+  std::vector<std::vector<Real>> drM(_number_of_nodes);
+  std::vector<std::vector<Real>> drP_dk(
+      _number_of_nodes); // drP_dk[i][j] = d(rP[i])/d(K[i][j]).  Here j indexes the j^th node
+                         // connected to i
+  std::vector<std::vector<Real>> drM_dk(_number_of_nodes);
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    drP[i] = {};
-    drP_dk[i] = {};
-    rP[i] = rPlus(i, drP[i], drP_dk[i]);
-    drM[i] = {};
-    drM_dk[i] = {};
-    rM[i] = rMinus(i, drM[i], drM_dk[i]);
+    rP[sequential_i] = rPlus(sequential_i, drP[sequential_i], drP_dk[sequential_i]);
+    rM[sequential_i] = rMinus(sequential_i, drM[sequential_i], drM_dk[sequential_i]);
   }
 
   // Calculate KuzminTurek f^{a} matrix
   // This is the antidiffusive flux
   // See Eqn (50)
-  std::map<dof_id_type, std::map<dof_id_type, Real>> fa;
-  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>>
-      dfa; // dfa[i][j][k] = d(fa[i][j])/du[k].  Here k can be a neighbour to i or a neighbour to j
-  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>>
-      dFij_dKik; // dFij_dKik[i][j][k] = d(fa[i][j])/d(K[i][k]).  Here j must be connected to i, and
-                 // k connected to i
-  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, Real>>>
-      dFij_dKjk; // dFij_dKjk[i][j][k] = d(fa[i][j])/d(K[j][k]).  Here j must be connected to i, and
-                 // k connected to j (including i itself)
-  for (const auto & i : _connections.globalIDs())
+  std::vector<std::vector<Real>> fa(
+      _number_of_nodes); // fa[sequential_i][j]  sequential_j is the j^th connection to sequential_i
+  // The derivatives are a bit complicated.
+  // If i is upwind of j then fa[i][j] depends on all nodes connected to i.
+  // But if i is downwind of j then fa[i][j] depends on all nodes connected to j.
+  std::vector<std::vector<std::map<dof_id_type, Real>>> dfa(
+      _number_of_nodes); // dfa[sequential_i][j][global_k] = d(fa[sequential_i][j])/du[global_k].
+                         // Here global_k can be a neighbor to sequential_i or a neighbour to
+                         // sequential_j (sequential_j is the j^th connection to sequential_i)
+  std::vector<std::vector<std::vector<Real>>> dFij_dKik(
+      _number_of_nodes); // dFij_dKik[sequential_i][j][k] =
+                         // d(fa[sequential_i][j])/d(K[sequential_i][k]).  Here j denotes the j^th
+                         // connection to sequential_i, while k denotes the k^th connection to
+                         // sequential_i
+  std::vector<std::vector<std::vector<Real>>> dFij_dKjk(
+      _number_of_nodes); // dFij_dKjk[sequential_i][j][k] =
+                         // d(fa[sequential_i][j])/d(K[sequential_j][k]).  Here sequential_j is the
+                         // j^th connection to sequential_i, and k denotes the k^th connection to
+                         // sequential_j (this will include sequential_i itself)
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    fa[i] = {};
-    dfa[i] = {};
-    dFij_dKik[i] = {};
-    dFij_dKjk[i] = {};
-    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
+    const std::vector<dof_id_type> con_i =
+        _connections.globalConnectionsToSequentialID(sequential_i);
+    const unsigned num_con_i = con_i.size();
+    fa[sequential_i].assign(num_con_i, 0.0);
+    dfa[sequential_i].resize(num_con_i);
+    dFij_dKik[sequential_i].resize(num_con_i);
+    dFij_dKjk[sequential_i].resize(num_con_i);
+    for (std::size_t j = 0; j < num_con_i; ++j)
     {
-      fa[i][j] = 0.0;
-      dfa[i][j] = {};
-      dFij_dKik[i][j] = {};
-      dFij_dKjk[i][j] = {};
-      // The derivatives are a bit complicated.
-      // If i is upwind of j then fa[i][j] depends on all nodes connected to i.
-      // But if i is downwind of j then fa[i][j] depends on all nodes connected to j.
-      for (const auto & neighbor_to_i : _connections.globalConnectionsToGlobalID(i))
-      {
-        dfa[i][j][neighbor_to_i] = 0.0;
-        dFij_dKik[i][j][neighbor_to_i] = 0.0;
-      }
-      for (const auto & neighbor_to_j : _connections.globalConnectionsToGlobalID(j))
-      {
-        dfa[i][j][neighbor_to_j] = 0.0;
-        dFij_dKjk[i][j][neighbor_to_j] = 0.0;
-      }
+      for (const auto & global_k : con_i)
+        dfa[sequential_i][j][global_k] = 0;
+      const dof_id_type global_j = con_i[j];
+      const std::vector<dof_id_type> con_j = _connections.globalConnectionsToGlobalID(global_j);
+      const unsigned num_con_j = con_j.size();
+      for (const auto & global_k : con_j)
+        dfa[sequential_i][j][global_k] = 0;
+      dFij_dKik[sequential_i][j].assign(num_con_i, 0.0);
+      dFij_dKjk[sequential_i][j].assign(num_con_j, 0.0);
     }
   }
 
-  for (const auto & i : _connections.globalIDs())
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    const Real u_i = getUnodal(i);
-    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
+    const dof_id_type global_i = _connections.globalID(sequential_i);
+    const Real u_i = _u_nodal[sequential_i];
+    const std::vector<dof_id_type> con_i =
+        _connections.sequentialConnectionsToSequentialID(sequential_i);
+    const std::size_t num_con_i = con_i.size();
+    for (std::size_t j = 0; j < num_con_i; ++j)
     {
-      const Real u_j = getUnodal(j);
-      if (i == j)
+      const dof_id_type sequential_j = con_i[j];
+      if (sequential_i == sequential_j)
         continue;
-      if (lij[j][i] >= lij[i][j]) // node i is upwind of node j.
+      const unsigned index_j_to_i =
+          _connections.indexOfSequentialConnection(sequential_j, sequential_i);
+      const Real Lij = lij[sequential_i][j];
+      const Real Lji = lij[sequential_j][index_j_to_i];
+      if (Lji >= Lij) // node i is upwind of node j.
       {
+        const Real Dij = dij[sequential_i][j];
+        const dof_id_type global_j = _connections.globalID(sequential_j);
+        const Real u_j = _u_nodal[sequential_j];
         Real prefactor = 0.0;
-        std::map<dof_id_type, Real>
-            dprefactor_du; // dprefactor_du[global_id] = d(prefactor)/du[global_id];
-        for (const auto & dof_deriv : drP[i])
-          dprefactor_du[dof_deriv.first] = 0.0;
-        std::map<dof_id_type, Real>
-            dprefactor_dKij; // dprefactor_dKij[global_id] = d(prefactor)/dKij[i][global_id].  Here
-                             // global_id must be connected to i for a nonzero derivative
-        zeroedConnection(dprefactor_dKij, i);
-        Real dprefactor_dKji = 0; // dprefactor_dKji = d(prefactor)/dKij[j][i]
+        std::vector<Real> dprefactor_du(num_con_i,
+                                        0.0); // dprefactor_du[j] = d(prefactor)/du[sequential_j]
+        std::vector<Real> dprefactor_dKij(
+            num_con_i, 0.0);      // dprefactor_dKij[j] = d(prefactor)/dKij[sequential_i][j].
+        Real dprefactor_dKji = 0; // dprefactor_dKji = d(prefactor)/dKij[sequential_j][index_j_to_i]
         if (u_i >= u_j)
         {
-          if (lij[j][i] <= rP[i] * dij[i][j])
+          if (Lji <= rP[sequential_i] * Dij)
           {
-            prefactor = lij[j][i];
-            dprefactor_dKij[j] += dDij_dKji[j][i];
-            dprefactor_dKji += 1.0 + dDij_dKij[j][i];
+            prefactor = Lji;
+            dprefactor_dKij[j] += dDij_dKji[sequential_j][index_j_to_i];
+            dprefactor_dKji += 1.0 + dDij_dKij[sequential_j][index_j_to_i];
           }
           else
           {
-            prefactor = rP[i] * dij[i][j];
-            for (const auto & dof_deriv : drP[i])
-              dprefactor_du[dof_deriv.first] = dof_deriv.second * dij[i][j];
-            dprefactor_dKij[j] += rP[i] * dDij_dKij[i][j];
-            dprefactor_dKji += rP[i] * dDij_dKji[i][j];
-            for (const auto & dof_deriv : drP_dk[i])
-              dprefactor_dKij[dof_deriv.first] += dof_deriv.second * dij[i][j];
+            prefactor = rP[sequential_i] * Dij;
+            for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
+              dprefactor_du[ind_j] = drP[sequential_i][ind_j] * Dij;
+            dprefactor_dKij[j] += rP[sequential_i] * dDij_dKij[sequential_i][j];
+            dprefactor_dKji += rP[sequential_i] * dDij_dKji[sequential_i][j];
+            for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
+              dprefactor_dKij[ind_j] += drP_dk[sequential_i][ind_j] * Dij;
           }
         }
         else
         {
-          if (lij[j][i] <= rM[i] * dij[i][j])
+          if (Lji <= rM[sequential_i] * Dij)
           {
-            prefactor = lij[j][i];
-            dprefactor_dKij[j] += dDij_dKji[j][i];
-            dprefactor_dKji += 1.0 + dDij_dKij[j][i];
+            prefactor = Lji;
+            dprefactor_dKij[j] += dDij_dKji[sequential_j][index_j_to_i];
+            dprefactor_dKji += 1.0 + dDij_dKij[sequential_j][index_j_to_i];
           }
           else
           {
-            prefactor = rM[i] * dij[i][j];
-            for (const auto & dof_deriv : drM[i])
-              dprefactor_du[dof_deriv.first] = dof_deriv.second * dij[i][j];
-            dprefactor_dKij[j] += rM[i] * dDij_dKij[i][j];
-            dprefactor_dKji += rM[i] * dDij_dKji[i][j];
-            for (const auto & dof_deriv : drM_dk[i])
-              dprefactor_dKij[dof_deriv.first] += dof_deriv.second * dij[i][j];
+            prefactor = rM[sequential_i] * Dij;
+            for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
+              dprefactor_du[ind_j] = drM[sequential_i][ind_j] * Dij;
+            dprefactor_dKij[j] += rM[sequential_i] * dDij_dKij[sequential_i][j];
+            dprefactor_dKji += rM[sequential_i] * dDij_dKji[sequential_i][j];
+            for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
+              dprefactor_dKij[ind_j] += drM_dk[sequential_i][ind_j] * Dij;
           }
         }
-        fa[i][j] = prefactor * (u_i - u_j);
-        dfa[i][j][i] = prefactor;
-        dfa[i][j][j] = -prefactor;
-        for (const auto & dof_deriv : dprefactor_du)
-          dfa[i][j][dof_deriv.first] += dof_deriv.second * (u_i - u_j);
-        for (const auto & dof_deriv : dprefactor_dKij)
-          dFij_dKik[i][j][dof_deriv.first] += dof_deriv.second * (u_i - u_j);
-        dFij_dKjk[i][j][i] += dprefactor_dKji * (u_i - u_j);
+        fa[sequential_i][j] = prefactor * (u_i - u_j);
+        dfa[sequential_i][j][global_i] = prefactor;
+        dfa[sequential_i][j][global_j] = -prefactor;
+        for (std::size_t ind_j = 0; ind_j < num_con_i; ++ind_j)
+        {
+          dfa[sequential_i][j][_connections.globalID(con_i[ind_j])] +=
+              dprefactor_du[ind_j] * (u_i - u_j);
+          dFij_dKik[sequential_i][j][ind_j] += dprefactor_dKij[ind_j] * (u_i - u_j);
+        }
+        dFij_dKjk[sequential_i][j][index_j_to_i] += dprefactor_dKji * (u_i - u_j);
       }
     }
   }
-  for (const auto & i : _connections.globalIDs())
+
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
+    const std::vector<dof_id_type> con_i =
+        _connections.sequentialConnectionsToSequentialID(sequential_i);
+    const std::size_t num_con_i = con_i.size();
+    for (std::size_t j = 0; j < num_con_i; ++j)
     {
-      if (i == j)
+      const dof_id_type sequential_j = con_i[j];
+      if (sequential_i == sequential_j)
         continue;
-      if (lij[j][i] < lij[i][j]) // node_i is downwind of node_j.
+      const unsigned index_j_to_i =
+          _connections.indexOfSequentialConnection(sequential_j, sequential_i);
+      if (lij[sequential_j][index_j_to_i] < lij[sequential_i][j]) // node_i is downwind of node_j.
       {
-        fa[i][j] = -fa[j][i];
-        for (const auto & dof_deriv : dfa[j][i])
-          dfa[i][j][dof_deriv.first] = -dof_deriv.second;
-        for (const auto & dof_deriv : dFij_dKjk[j][i])
-          dFij_dKik[i][j][dof_deriv.first] = -dof_deriv.second;
-        for (const auto & dof_deriv : dFij_dKik[j][i])
-          dFij_dKjk[i][j][dof_deriv.first] = -dof_deriv.second;
+        fa[sequential_i][j] = -fa[sequential_j][index_j_to_i];
+        for (const auto & dof_deriv : dfa[sequential_j][index_j_to_i])
+          dfa[sequential_i][j][dof_deriv.first] = -dof_deriv.second;
+        for (std::size_t k = 0; k < num_con_i; ++k)
+          dFij_dKik[sequential_i][j][k] = -dFij_dKjk[sequential_j][index_j_to_i][k];
+        const std::size_t num_con_j =
+            _connections.sequentialConnectionsToSequentialID(sequential_j).size();
+        for (std::size_t k = 0; k < num_con_j; ++k)
+          dFij_dKjk[sequential_i][j][k] = -dFij_dKik[sequential_j][index_j_to_i][k];
       }
     }
   }
 
   // zero _flux_out and its derivatives
-  for (const auto & i : _connections.globalIDs())
-  {
-    _flux_out[i] = 0.0;
-    // The derivatives are a bit complicated.
-    // If i is upwind of a node "j" then _flux_out[i] depends on all nodes connected to i.
-    // But if i is downwind of a node "j" then _flux_out depends on all nodes connected with node
-    // j.
-    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
+  _flux_out.assign(_number_of_nodes, 0.0);
+  // The derivatives are a bit complicated.
+  // If i is upwind of a node "j" then _flux_out[i] depends on all nodes connected to i.
+  // But if i is downwind of a node "j" then _flux_out depends on all nodes connected with node
+  // j.
+  _dflux_out_du.assign(_number_of_nodes, std::map<dof_id_type, Real>());
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+    for (const auto & j : _connections.globalConnectionsToSequentialID(sequential_i))
     {
-      _dflux_out_du[i][j] = 0.0;
+      _dflux_out_du[sequential_i][j] = 0.0;
       for (const auto & neighbors_j : _connections.globalConnectionsToGlobalID(j))
-      {
-        _dflux_out_du[i][neighbors_j] = 0.0;
-        _dflux_out_dKjk[i][j][neighbors_j] = 0.0;
-      }
+        _dflux_out_du[sequential_i][neighbors_j] = 0.0;
+    }
+  _dflux_out_dKjk.resize(_number_of_nodes);
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+  {
+    const std::vector<dof_id_type> con_i =
+        _connections.sequentialConnectionsToSequentialID(sequential_i);
+    const std::size_t num_con_i = con_i.size();
+    _dflux_out_dKjk[sequential_i].resize(num_con_i);
+    for (std::size_t j = 0; j < num_con_i; ++j)
+    {
+      const dof_id_type sequential_j = con_i[j];
+      std::vector<dof_id_type> con_j =
+          _connections.sequentialConnectionsToSequentialID(sequential_j);
+      _dflux_out_dKjk[sequential_i][j].assign(con_j.size(), 0.0);
     }
   }
 
   // Add everything together
   // See step 3 in Fig 2, noting Eqn (36)
-  for (const auto & i : _connections.globalIDs())
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
   {
-    for (const auto & j : _connections.globalConnectionsToGlobalID(i))
+    std::vector<dof_id_type> con_i = _connections.sequentialConnectionsToSequentialID(sequential_i);
+    const size_t num_con_i = con_i.size();
+    const dof_id_type index_i_to_i =
+        _connections.indexOfSequentialConnection(sequential_i, sequential_i);
+    for (std::size_t j = 0; j < num_con_i; ++j)
     {
-      const Real u_j = getUnodal(j);
+      const dof_id_type sequential_j = con_i[j];
+      const dof_id_type global_j = _connections.globalID(sequential_j);
+      const Real u_j = _u_nodal[sequential_j];
 
       // negative sign because residual = -Lu (KT equation (19))
-      _flux_out[i] -= lij[i][j] * u_j + fa[i][j];
+      _flux_out[sequential_i] -= lij[sequential_i][j] * u_j + fa[sequential_i][j];
 
-      _dflux_out_du[i][j] -= lij[i][j];
-      for (const auto & dof_deriv : dfa[i][j])
-        _dflux_out_du[i][dof_deriv.first] -= dof_deriv.second;
+      _dflux_out_du[sequential_i][global_j] -= lij[sequential_i][j];
+      for (const auto & dof_deriv : dfa[sequential_i][j])
+        _dflux_out_du[sequential_i][dof_deriv.first] -= dof_deriv.second;
 
-      _dflux_out_dKjk[i][i][j] -= 1.0 * u_j; // from the K in L = K + D
+      _dflux_out_dKjk[sequential_i][index_i_to_i][j] -= 1.0 * u_j; // from the K in L = K + D
 
-      if (j == i)
-        for (const auto & dof_deriv : dDii_dKij[i])
-          _dflux_out_dKjk[i][i][dof_deriv.first] -= dof_deriv.second * u_j;
+      if (sequential_j == sequential_i)
+        for (dof_id_type k = 0; k < num_con_i; ++k)
+          _dflux_out_dKjk[sequential_i][index_i_to_i][k] -= dDii_dKij[sequential_i][k] * u_j;
       else
-        _dflux_out_dKjk[i][i][j] -= dDij_dKij[i][j] * u_j;
-      for (const auto & dof_deriv : dFij_dKik[i][j])
-        _dflux_out_dKjk[i][i][dof_deriv.first] -= dof_deriv.second;
+        _dflux_out_dKjk[sequential_i][index_i_to_i][j] -= dDij_dKij[sequential_i][j] * u_j;
+      for (dof_id_type k = 0; k < num_con_i; ++k)
+        _dflux_out_dKjk[sequential_i][index_i_to_i][k] -= dFij_dKik[sequential_i][j][k];
 
-      if (j == i)
-        for (const auto & dof_deriv : dDii_dKji[i])
-          _dflux_out_dKjk[i][dof_deriv.first][i] -= dof_deriv.second * u_j;
+      if (sequential_j == sequential_i)
+        for (unsigned k = 0; k < con_i.size(); ++k)
+        {
+          const unsigned index_k_to_i =
+              _connections.indexOfSequentialConnection(con_i[k], sequential_i);
+          _dflux_out_dKjk[sequential_i][k][index_k_to_i] -= dDii_dKji[sequential_i][k] * u_j;
+        }
       else
-        _dflux_out_dKjk[i][j][i] -= dDij_dKji[i][j] * u_j;
-      for (const auto & dof_deriv : dFij_dKjk[i][j])
-        _dflux_out_dKjk[i][j][dof_deriv.first] -= dof_deriv.second;
+      {
+        const unsigned index_j_to_i =
+            _connections.indexOfSequentialConnection(sequential_j, sequential_i);
+        _dflux_out_dKjk[sequential_i][j][index_j_to_i] -= dDij_dKji[sequential_i][j] * u_j;
+      }
+      for (unsigned k = 0;
+           k < _connections.sequentialConnectionsToSequentialID(sequential_j).size();
+           ++k)
+        _dflux_out_dKjk[sequential_i][j][k] -= dFij_dKjk[sequential_i][j][k];
     }
   }
 }
 
 Real
-AdvectiveFluxCalculatorBase::rPlus(dof_id_type node_i,
-                                   std::map<dof_id_type, Real> & dlimited_du,
-                                   std::map<dof_id_type, Real> & dlimited_dk) const
+AdvectiveFluxCalculatorBase::rPlus(dof_id_type sequential_i,
+                                   std::vector<Real> & dlimited_du,
+                                   std::vector<Real> & dlimited_dk) const
 {
-  zeroedConnection(dlimited_du, node_i);
-  zeroedConnection(dlimited_dk, node_i);
+  const std::size_t num_con = _connections.sequentialConnectionsToSequentialID(sequential_i).size();
+  dlimited_du.assign(num_con, 0.0);
+  dlimited_dk.assign(num_con, 0.0);
   if (_flux_limiter_type == FluxLimiterTypeEnum::None)
     return 0.0;
-  std::map<dof_id_type, Real> dp_du;
-  std::map<dof_id_type, Real> dp_dk;
-  const Real p = PQPlusMinus(node_i, PQPlusMinusEnum::PPlus, dp_du, dp_dk);
+  std::vector<Real> dp_du;
+  std::vector<Real> dp_dk;
+  const Real p = PQPlusMinus(sequential_i, PQPlusMinusEnum::PPlus, dp_du, dp_dk);
   if (p == 0.0)
     // Comment after Eqn (49): if P=0 then there's no antidiffusion, so no need to remove it
     return 1.0;
-  std::map<dof_id_type, Real> dq_du;
-  std::map<dof_id_type, Real> dq_dk;
-  const Real q = PQPlusMinus(node_i, PQPlusMinusEnum::QPlus, dq_du, dq_dk);
+  std::vector<Real> dq_du;
+  std::vector<Real> dq_dk;
+  const Real q = PQPlusMinus(sequential_i, PQPlusMinusEnum::QPlus, dq_du, dq_dk);
+
   const Real r = q / p;
-  std::map<dof_id_type, Real> dr_du;
-  for (const auto & node_deriv : dp_du)
-    dr_du[node_deriv.first] = dq_du[node_deriv.first] / p - q * node_deriv.second / std::pow(p, 2);
-  std::map<dof_id_type, Real> dr_dk;
-  for (const auto & node_deriv : dp_dk)
-    dr_dk[node_deriv.first] = dq_dk[node_deriv.first] / p - q * node_deriv.second / std::pow(p, 2);
   Real limited;
   Real dlimited_dr;
   limitFlux(1.0, r, limited, dlimited_dr);
-  for (const auto & node_deriv : dr_du)
-    dlimited_du[node_deriv.first] = dlimited_dr * node_deriv.second;
-  for (const auto & node_deriv : dr_dk)
-    dlimited_dk[node_deriv.first] = dlimited_dr * node_deriv.second;
+
+  const Real p2 = std::pow(p, 2);
+  for (std::size_t j = 0; j < num_con; ++j)
+  {
+    const Real dr_du = dq_du[j] / p - q * dp_du[j] / p2;
+    const Real dr_dk = dq_dk[j] / p - q * dp_dk[j] / p2;
+    dlimited_du[j] = dlimited_dr * dr_du;
+    dlimited_dk[j] = dlimited_dr * dr_dk;
+  }
   return limited;
 }
 
 Real
-AdvectiveFluxCalculatorBase::rMinus(dof_id_type node_i,
-                                    std::map<dof_id_type, Real> & dlimited_du,
-                                    std::map<dof_id_type, Real> & dlimited_dk) const
+AdvectiveFluxCalculatorBase::rMinus(dof_id_type sequential_i,
+                                    std::vector<Real> & dlimited_du,
+                                    std::vector<Real> & dlimited_dk) const
 {
-  zeroedConnection(dlimited_du, node_i);
-  zeroedConnection(dlimited_dk, node_i);
+  const std::size_t num_con = _connections.sequentialConnectionsToSequentialID(sequential_i).size();
+  dlimited_du.assign(num_con, 0.0);
+  dlimited_dk.assign(num_con, 0.0);
   if (_flux_limiter_type == FluxLimiterTypeEnum::None)
     return 0.0;
-  std::map<dof_id_type, Real> dp_du;
-  std::map<dof_id_type, Real> dp_dk;
-  const Real p = PQPlusMinus(node_i, PQPlusMinusEnum::PMinus, dp_du, dp_dk);
+  std::vector<Real> dp_du;
+  std::vector<Real> dp_dk;
+  const Real p = PQPlusMinus(sequential_i, PQPlusMinusEnum::PMinus, dp_du, dp_dk);
   if (p == 0.0)
     // Comment after Eqn (49): if P=0 then there's no antidiffusion, so no need to remove it
     return 1.0;
-  std::map<dof_id_type, Real> dq_du;
-  std::map<dof_id_type, Real> dq_dk;
-  const Real q = PQPlusMinus(node_i, PQPlusMinusEnum::QMinus, dq_du, dq_dk);
+  std::vector<Real> dq_du;
+  std::vector<Real> dq_dk;
+  const Real q = PQPlusMinus(sequential_i, PQPlusMinusEnum::QMinus, dq_du, dq_dk);
+
   const Real r = q / p;
-  std::map<dof_id_type, Real> dr_du;
-  for (const auto & node_deriv : dp_du)
-    dr_du[node_deriv.first] = dq_du[node_deriv.first] / p - q * node_deriv.second / std::pow(p, 2);
-  std::map<dof_id_type, Real> dr_dk;
-  for (const auto & node_deriv : dp_dk)
-    dr_dk[node_deriv.first] = dq_dk[node_deriv.first] / p - q * node_deriv.second / std::pow(p, 2);
   Real limited;
   Real dlimited_dr;
   limitFlux(1.0, r, limited, dlimited_dr);
-  for (const auto & node_deriv : dr_du)
-    dlimited_du[node_deriv.first] = dlimited_dr * node_deriv.second;
-  for (const auto & node_deriv : dr_dk)
-    dlimited_dk[node_deriv.first] = dlimited_dr * node_deriv.second;
+
+  const Real p2 = std::pow(p, 2);
+  for (std::size_t j = 0; j < num_con; ++j)
+  {
+    const Real dr_du = dq_du[j] / p - q * dp_du[j] / p2;
+    const Real dr_dk = dq_dk[j] / p - q * dp_dk[j] / p2;
+    dlimited_du[j] = dlimited_dr * dr_du;
+    dlimited_dk[j] = dlimited_dr * dr_dk;
+  }
   return limited;
 }
 
@@ -686,63 +721,29 @@ AdvectiveFluxCalculatorBase::limitFlux(Real a, Real b, Real & limited, Real & dl
   }
 }
 
-Real
-AdvectiveFluxCalculatorBase::getKij(dof_id_type node_i, dof_id_type node_j) const
-{
-
-  const auto & row_find = _kij.find(node_i);
-  if (row_find == _kij.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij does not contain node " +
-               Moose::stringify(node_i));
-  const std::map<dof_id_type, Real> & kij_row = row_find->second;
-  const auto & entry_find = kij_row.find(node_j);
-  if (entry_find == kij_row.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij on row " +
-               Moose::stringify(node_i) + " does not contain node " + Moose::stringify(node_j));
-
-  return entry_find->second;
-}
 
 const std::map<dof_id_type, Real> &
 AdvectiveFluxCalculatorBase::getdFluxOutdu(dof_id_type node_i) const
 {
-  const auto & row_find = _dflux_out_du.find(node_i);
-  if (row_find == _dflux_out_du.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
-               " _dflux_out_du does not contain node " + Moose::stringify(node_i));
-  return row_find->second;
+  return _dflux_out_du[_connections.sequentialID(node_i)];
 }
 
-const std::map<dof_id_type, std::map<dof_id_type, Real>> &
+const std::vector<std::vector<Real>> &
 AdvectiveFluxCalculatorBase::getdFluxOutdKjk(dof_id_type node_i) const
 {
-  const auto & row_find = _dflux_out_dKjk.find(node_i);
-  if (row_find == _dflux_out_dKjk.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
-               " _dflux_out_dKjk does not contain node " + Moose::stringify(node_i));
-  return row_find->second;
+  return _dflux_out_dKjk[_connections.sequentialID(node_i)];
 }
 
 Real
 AdvectiveFluxCalculatorBase::getFluxOut(dof_id_type node_i) const
 {
-  const auto & entry_find = _flux_out.find(node_i);
-  if (entry_find == _flux_out.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
-               " _flux_out does not contain node " + Moose::stringify(node_i));
-  return entry_find->second;
+  return _flux_out[_connections.sequentialID(node_i)];
 }
 
 unsigned
-AdvectiveFluxCalculatorBase::getValence(dof_id_type node_i, dof_id_type node_j) const
+AdvectiveFluxCalculatorBase::getValence(dof_id_type node_i) const
 {
-  const std::pair<dof_id_type, dof_id_type> i_j(node_i, node_j);
-  const auto & entry_find = _valence.find(i_j);
-  if (entry_find == _valence.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() +
-               " Valence does not contain node-pair " + Moose::stringify(node_i) + " to " +
-               Moose::stringify(node_j));
-  return entry_find->second;
+  return _valence[_connections.sequentialID(node_i)];
 }
 
 void
@@ -755,35 +756,36 @@ AdvectiveFluxCalculatorBase::zeroedConnection(std::map<dof_id_type, Real> & the_
 }
 
 Real
-AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
+AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type sequential_i,
                                          const PQPlusMinusEnum pq_plus_minus,
-                                         std::map<dof_id_type, Real> & derivs,
-                                         std::map<dof_id_type, Real> & dpqdk) const
+                                         std::vector<Real> & derivs,
+                                         std::vector<Real> & dpqdk) const
 {
-  // Find the value of u at node_i
-  const Real u_i = getUnodal(node_i);
+  // Find the value of u at sequential_i
+  const Real u_i = _u_nodal[sequential_i];
 
-  // We're going to sum over all nodes connected with node_i
-  // These nodes are found in _kij[node_i]
-  const auto & row_find = _kij.find(node_i);
-  if (row_find == _kij.end())
-    mooseError("AdvectiveFluxCalculatorBase UserObject " + name() + " Kij does not contain node " +
-               Moose::stringify(node_i));
-  const std::map<dof_id_type, Real> nodej_and_kij = row_find->second;
+  // Connections to sequential_i
+  const std::vector<dof_id_type> con_i =
+      _connections.sequentialConnectionsToSequentialID(sequential_i);
+  const std::size_t num_con = con_i.size();
+  // The neighbor number of sequential_i to sequential_i
+  const unsigned i_index_i = _connections.indexOfSequentialConnection(sequential_i, sequential_i);
 
   // Initialize the results
   Real result = 0.0;
-  zeroedConnection(derivs, node_i);
-  zeroedConnection(dpqdk, node_i);
+  derivs.assign(num_con, 0.0);
+  dpqdk.assign(num_con, 0.0);
 
   // Sum over all nodes connected with node_i.
-  for (const auto & nk : nodej_and_kij)
+  for (std::size_t j = 0; j < num_con; ++j)
   {
-    const dof_id_type node_j = nk.first;
-    const Real kentry = nk.second;
+    const dof_id_type sequential_j = con_i[j];
+    if (sequential_j == sequential_i)
+      continue;
+    const Real kentry = _kij[sequential_i][j];
 
     // Find the value of u at node_j
-    const Real u_j = getUnodal(node_j);
+    const Real u_j = _u_nodal[sequential_j];
     const Real ujminusi = u_j - u_i;
 
     // Evaluate the i-j contribution to the result
@@ -794,9 +796,9 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
         if (ujminusi < 0.0 && kentry < 0.0)
         {
           result += kentry * ujminusi;
-          derivs[node_j] += kentry;
-          derivs[node_i] -= kentry;
-          dpqdk[node_j] += ujminusi;
+          derivs[j] += kentry;
+          derivs[i_index_i] -= kentry;
+          dpqdk[j] += ujminusi;
         }
         break;
       }
@@ -805,9 +807,9 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
         if (ujminusi > 0.0 && kentry < 0.0)
         {
           result += kentry * ujminusi;
-          derivs[node_j] += kentry;
-          derivs[node_i] -= kentry;
-          dpqdk[node_j] += ujminusi;
+          derivs[j] += kentry;
+          derivs[i_index_i] -= kentry;
+          dpqdk[j] += ujminusi;
         }
         break;
       }
@@ -816,9 +818,9 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
         if (ujminusi > 0.0 && kentry > 0.0)
         {
           result += kentry * ujminusi;
-          derivs[node_j] += kentry;
-          derivs[node_i] -= kentry;
-          dpqdk[node_j] += ujminusi;
+          derivs[j] += kentry;
+          derivs[i_index_i] -= kentry;
+          dpqdk[j] += ujminusi;
         }
         break;
       }
@@ -827,9 +829,9 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
         if (ujminusi < 0.0 && kentry > 0.0)
         {
           result += kentry * ujminusi;
-          derivs[node_j] += kentry;
-          derivs[node_i] -= kentry;
-          dpqdk[node_j] += ujminusi;
+          derivs[j] += kentry;
+          derivs[i_index_i] -= kentry;
+          dpqdk[j] += ujminusi;
         }
         break;
       }
@@ -837,10 +839,4 @@ AdvectiveFluxCalculatorBase::PQPlusMinus(dof_id_type node_i,
   }
 
   return result;
-}
-
-Real
-AdvectiveFluxCalculatorBase::getUnodal(dof_id_type node_i) const
-{
-  return _u_nodal(node_i);
 }

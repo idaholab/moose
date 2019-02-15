@@ -34,7 +34,7 @@ protected:
   RealVectorValue _velocity;
 
   /// the nodal values of u
-  const VariableValue & _u_nodal;
+  const VariableValue & _u_at_nodes;
 
   /// Kuzmin-Turek shape function
   const VariablePhiValue & _phi;

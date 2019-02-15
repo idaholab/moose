@@ -15,7 +15,7 @@
 
 class PorousFlowConnectedNodesTest : public ::testing::Test
 {
- protected:
+protected:
   void SetUp()
   {
     _n1 = PorousFlowConnectedNodes();

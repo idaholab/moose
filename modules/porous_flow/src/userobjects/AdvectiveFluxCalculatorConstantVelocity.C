@@ -28,7 +28,7 @@ AdvectiveFluxCalculatorConstantVelocity::AdvectiveFluxCalculatorConstantVelocity
     const InputParameters & parameters)
   : AdvectiveFluxCalculatorBase(parameters),
     _velocity(getParam<RealVectorValue>("velocity")),
-    _u_nodal(coupledDofValues("u")),
+    _u_at_nodes(coupledDofValues("u")),
     _phi(_assembly.fePhi<Real>(getVar("u", 0)->feType())),
     _grad_phi(_assembly.feGradPhi<Real>(getVar("u", 0)->feType()))
 {
@@ -43,5 +43,5 @@ AdvectiveFluxCalculatorConstantVelocity::computeVelocity(unsigned i, unsigned j,
 Real
 AdvectiveFluxCalculatorConstantVelocity::computeU(unsigned i) const
 {
-  return _u_nodal[i];
+  return _u_at_nodes[i];
 }

@@ -17,7 +17,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: addGlobalNode called, but _still_adding_global_nodes is false.  You possibly called finalizeAddingGlobalNodes too soon.");
+    std::size_t pos =
+        std::string(err.what())
+            .find("PorousFlowConnectedNodes: addGlobalNode called, but _still_adding_global_nodes "
+                  "is false.  You possibly called finalizeAddingGlobalNodes too soon.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -27,7 +30,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: globalID called, but _still_adding_global_nodes is true.  Probably you should have called finalizeAddingGlobalNodes.");
+    std::size_t pos =
+        std::string(err.what())
+            .find("PorousFlowConnectedNodes: globalID called, but _still_adding_global_nodes is "
+                  "true.  Probably you should have called finalizeAddingGlobalNodes.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -37,7 +43,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: globalIDs called, but _still_adding_global_nodes is true.  Probably you should have called finalizeAddingGlobalNodes.");
+    std::size_t pos =
+        std::string(err.what())
+            .find("PorousFlowConnectedNodes: globalIDs called, but _still_adding_global_nodes is "
+                  "true.  Probably you should have called finalizeAddingGlobalNodes.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -47,7 +56,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: sequentialID called, but _still_adding_global_nodes is true.  Probably you should have called finalizeAddingGlobalNodes.");
+    std::size_t pos =
+        std::string(err.what())
+            .find("PorousFlowConnectedNodes: sequentialID called, but _still_adding_global_nodes "
+                  "is true.  Probably you should have called finalizeAddingGlobalNodes.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -57,7 +69,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: addConnection called, but _still_adding_global_nodes is true.  Probably you should have called finalizeAddingGlobalNodes.");
+    std::size_t pos =
+        std::string(err.what())
+            .find("PorousFlowConnectedNodes: addConnection called, but _still_adding_global_nodes "
+                  "is true.  Probably you should have called finalizeAddingGlobalNodes.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -67,7 +82,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: addConnection called, but _still_adding_connections is false.  Probably you should have called finalizeAddingConnections.");
+    std::size_t pos =
+        std::string(err.what())
+            .find("PorousFlowConnectedNodes: addConnection called, but _still_adding_connections "
+                  "is false.  Probably you should have called finalizeAddingConnections.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -77,7 +95,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: sequentialConnectionsToGlobalID called, but _still_adding_connections is true.  Probably you should have called finalizeAddingConnections.");
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNodes: sequentialConnectionsToGlobalID called, "
+                                "but _still_adding_connections is true.  Probably you should have "
+                                "called finalizeAddingConnections.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -87,7 +108,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: sequentialConnectionsToSequentialID called, but _still_adding_connections is true.  Probably you should have called finalizeAddingConnections.");
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNodes: sequentialConnectionsToSequentialID "
+                                "called, but _still_adding_connections is true.  Probably you "
+                                "should have called finalizeAddingConnections.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -97,7 +121,10 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: globalConnectionsToGlobalID called, but _still_adding_connections is true.  Probably you should have called finalizeAddingConnections.");
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNodes: globalConnectionsToGlobalID called, but "
+                                "_still_adding_connections is true.  Probably you should have "
+                                "called finalizeAddingConnections.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 
@@ -107,7 +134,60 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
   }
   catch (const std::exception & err)
   {
-    std::size_t pos = std::string(err.what()).find("PorousFlowConnectedNodes: globalConnectionsToSequentialID called, but _still_adding_connections is true.  Probably you should have called finalizeAddingConnections.");
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNodes: globalConnectionsToSequentialID called, "
+                                "but _still_adding_connections is true.  Probably you should have "
+                                "called finalizeAddingConnections.");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+
+  try
+  {
+    _n2.indexOfSequentialConnection(0, 0);
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNodes: indexOfSequentialConnection called, but "
+                                "_still_adding_connections is true.  Probably you should have "
+                                "called finalizeAddingConnections.");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+
+  try
+  {
+    _n1.indexOfSequentialConnection(1, 0);
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNode: sequential_node_ID_from 1 has no "
+                                "connection to sequential_node_ID_to 0");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+
+  try
+  {
+    _n2.indexOfGlobalConnection(0, 0);
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNodes: indexOfGlobalConnection called, but "
+                                "_still_adding_connections is true.  Probably you should have "
+                                "called finalizeAddingConnections.");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
+
+  try
+  {
+    _n1.indexOfGlobalConnection(1, 12);
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what())
+                          .find("PorousFlowConnectedNode: global_ID_from 1 has no connection to "
+                                "global_node_ID_to 12");
     ASSERT_TRUE(pos != std::string::npos);
   }
 }
@@ -154,12 +234,26 @@ TEST_F(PorousFlowConnectedNodesTest, connections)
   EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(1)[0], 3);
   EXPECT_EQ(_n1.sequentialConnectionsToSequentialID(2)[0], 3);
 
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 0), 0);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 1), 1);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 2), 2);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(0, 3), 3);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(1, 3), 0);
+  EXPECT_EQ(_n1.indexOfSequentialConnection(2, 3), 0);
+
   EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[0], 1);
   EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[1], 12);
   EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[2], 123);
   EXPECT_EQ(_n1.globalConnectionsToGlobalID(1)[3], 1234);
   EXPECT_EQ(_n1.globalConnectionsToGlobalID(12)[0], 1234);
   EXPECT_EQ(_n1.globalConnectionsToGlobalID(123)[0], 1234);
+
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 1), 0);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 12), 1);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 123), 2);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(1, 1234), 3);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(12, 1234), 0);
+  EXPECT_EQ(_n1.indexOfGlobalConnection(123, 1234), 0);
 
   EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[0], 1);
   EXPECT_EQ(_n1.globalConnectionsToSequentialID(0)[1], 12);

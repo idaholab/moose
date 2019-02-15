@@ -1,7 +1,9 @@
 # Using flux-limited TVD advection ala Kuzmin and Turek, employing PorousFlow Kernels and UserObjects, with superbee flux-limiter
 [Mesh]
   type = GeneratedMesh
-  dim = 1
+  dim = 3
+  nz = 5
+  ny = 5
   nx = 100
   xmin = 0
   xmax = 1
@@ -189,7 +191,7 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  end_time = 6
+  end_time = 6E-2
   dt = 6E-2
   nl_abs_tol = 1E-8
   timestep_tolerance = 1E-3

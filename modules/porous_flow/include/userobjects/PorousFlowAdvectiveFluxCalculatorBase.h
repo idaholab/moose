@@ -65,22 +65,9 @@ protected:
   virtual Real computedU_dvar(unsigned i, unsigned pvar) const = 0;
 
   /**
-   * Returns _du_dvar[node_i] which is the set of derivatives d(u)/d(porous_flow_variable)
-   * This will have been computed during execute() by computedU_dvar()
-   * @param node_i global node id
-   */
-  const std::vector<Real> & getdU_dvar(dof_id_type node_i) const;
-
-  /**
-   * Returns _du_dvar_computed_by_thread[node_i]
-   * This is initialized to false in initialize() and potentially set to true during execute()
-   * @param node_i global node id
-   */
-  bool getdU_dvarComputedByThread(dof_id_type node_i) const;
-
-  /**
    * Returns, r, where r[global node k][a] = d(K[node_i][node_j])/d(porous_flow_variable[global node
-   * k][porous_flow_variable a]) param node_i global node id param node_j global node id
+   * k][porous_flow_variable a])
+   * @param node_i global node id param node_j global node id
    */
   const std::map<dof_id_type, std::vector<Real>> & getdK_dvar(dof_id_type node_i,
                                                               dof_id_type node_j) const;
@@ -130,17 +117,21 @@ protected:
   /// grad(Kuzmin-Turek shape function)
   const VariablePhiGradient & _grad_phi;
 
-  /// _du_dvar[i][a] = d(u[global node i])/d(porous_flow_variable[a])
-  std::map<dof_id_type, std::vector<Real>> _du_dvar;
+  /// _du_dvar[sequential_i][a] = d(u[global version of sequential node i])/d(porous_flow_variable[a])
+  std::vector<std::vector<Real>> _du_dvar;
 
   /// Whether _du_dvar has been computed by the local thread
-  std::map<dof_id_type, bool> _du_dvar_computed_by_thread;
+  std::vector<bool> _du_dvar_computed_by_thread;
 
-  /// _dkij_dvar[i][j][k][a] = d(K[global node i][global node j])/d(porous_flow_variable[global_node k][porous_flow_variable a])
-  std::map<dof_id_type, std::map<dof_id_type, std::map<dof_id_type, std::vector<Real>>>> _dkij_dvar;
+  /**
+   * _dkij_dvar[sequential_i][j][global_k][a] =
+   * d(K[sequential_i][j])/d(porous_flow_variable[global_k][porous_flow_variable a]) Here j is the
+   * j^th connection to sequential node sequential_i, and node k must be connected to node i
+   */
+  std::vector<std::vector<std::map<dof_id_type, std::vector<Real>>>> _dkij_dvar;
 
-  /// _dflux_out_dvars[i][j][pvar] = d(flux_out[global node i])/d(porous_flow_variable pvar at global node j)
-  std::map<dof_id_type, std::map<dof_id_type, std::vector<Real>>> _dflux_out_dvars;
+  /// _dflux_out_dvars[sequential_i][global_j][pvar] = d(flux_out[global version of sequential_i])/d(porous_flow_variable pvar at global node j)
+  std::vector<std::map<dof_id_type, std::vector<Real>>> _dflux_out_dvars;
 };
 
 #endif // POROUSFLOWADVECTIEFLUXCALCULATORBASE_H

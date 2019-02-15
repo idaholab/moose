@@ -20,13 +20,13 @@
  * - sequential, meaning that it is the number used within this class
  * The sequential numbering runs from zero to number_of_nodes - 1
  *
- * The use case of interest in PorousFlow is where a quantity is
+ * The use case of interest in PorousFlow is where many quantities are
  * recorded at each node in the mesh.  To record this, a std::vector<quantity>
  * may be used.  But if the global node IDs are sparsely distributed between
  * zero and the maximum node number, then basing the std::vector on
  * global ID is inefficient because there are many elements in the
  * std::vector that are unused.  Instead, a std::vector based on
- * the sequential node ID may be used, which is optimally efficient.
+ * the sequential node ID may be used, which is optimally memory efficient.
  * (A std::map<dof_id_type, quantity> may be used, but it is slow.)
  *
  * Nodal connectivity is defined between two global node IDs.  Note
@@ -44,7 +44,7 @@
  */
 class PorousFlowConnectedNodes
 {
- public:
+public:
   PorousFlowConnectedNodes();
 
   /// clear all data in readiness for adding global nodes and connections
@@ -61,10 +61,11 @@ class PorousFlowConnectedNodes
   void finalizeAddingGlobalNodes();
 
   /// number of nodes known by this class
-  unsigned numNodes() const;
+  std::size_t numNodes() const;
 
   /**
-   * Return the global node ID (node number in the mesh) corresponding to the provided sequential node ID
+   * Return the global node ID (node number in the mesh) corresponding to the provided sequential
+   * node ID
    * @param sequential_node_ID the sequential node ID
    */
   dof_id_type globalID(dof_id_type sequential_node_ID) const;
@@ -95,24 +96,36 @@ class PorousFlowConnectedNodes
 
   /**
    * Return all the nodes (sequential node IDs) connected to the given global node ID
-   * All elements of the returned vector are guaranteed to be unique and lie in the range [0, numNodes() - 1]
+   * All elements of the returned vector are guaranteed to be unique and lie in the range [0,
+   * numNodes() - 1]
    */
-  const std::vector<dof_id_type> & sequentialConnectionsToGlobalID(dof_id_type global_node_ID) const;
+  const std::vector<dof_id_type> &
+  sequentialConnectionsToGlobalID(dof_id_type global_node_ID) const;
 
   /**
    * Return all the nodes (sequential node IDs) connected to the given sequential node ID
-   * All elements of the returned vector are guaranteed to be unique and lie in the range [0, numNodes() - 1]
+   * All elements of the returned vector are guaranteed to be unique and lie in the range [0,
+   * numNodes() - 1]
    */
-  const std::vector<dof_id_type> & sequentialConnectionsToSequentialID(dof_id_type sequential_node_ID) const;
+  const std::vector<dof_id_type> &
+  sequentialConnectionsToSequentialID(dof_id_type sequential_node_ID) const;
 
   /// Return all the nodes (global node IDs) connected to the given global node ID
   const std::vector<dof_id_type> & globalConnectionsToGlobalID(dof_id_type global_node_ID) const;
 
   /// Return all the nodes (global node IDs) connected to the given sequential node ID
-  const std::vector<dof_id_type> & globalConnectionsToSequentialID(dof_id_type sequential_node_ID) const;
+  const std::vector<dof_id_type> &
+  globalConnectionsToSequentialID(dof_id_type sequential_node_ID) const;
 
- private:
-  
+  /// Return the index of global_node_ID_to in the globalConnectionsToGlobalID(global_node_ID_from) vector
+  unsigned indexOfGlobalConnection(dof_id_type global_node_ID_from,
+                                   dof_id_type global_node_ID_to) const;
+
+  /// Return the index of sequential_node_ID_to in the sequentialConnectionsToSequentialID(sequential_node_ID_from) vector
+  unsigned indexOfSequentialConnection(dof_id_type sequential_node_ID_from,
+                                       dof_id_type sequential_node_ID_to) const;
+
+private:
   bool _still_adding_global_nodes;
   dof_id_type _min_global_id;
   dof_id_type _max_global_id;
@@ -127,4 +140,3 @@ class PorousFlowConnectedNodes
 };
 
 #endif // POROUSFLOWCONNECTEDNODES_H
-
