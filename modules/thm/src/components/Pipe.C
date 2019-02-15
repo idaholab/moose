@@ -231,12 +231,6 @@ Pipe::check() const
                  "flux type");
     }
 
-  if (MooseUtils::toLower(_closures_name) == "simple")
-  {
-    if (!isParamValid("f"))
-      logError("When using simple closures, the parameter 'f' must be provided.");
-  }
-
   if (_model_id == THM::FM_SINGLE_PHASE)
   {
     bool ics_set =
@@ -310,13 +304,6 @@ Pipe::check() const
 
     if (!ics_set && !_app.isRestarting())
       logError("The following initial condition parameters are missing:", missing_ics_oss.str());
-
-    // check closures
-    if (MooseUtils::toLower(_closures_name) != "simple" && _is_horizontal)
-    {
-      logWarning("Horizontal closures are not available for wall heat transfer "
-                 "coefficient, so vertical closures are used instead.");
-    }
   }
 
   if (FlowModel::getSpatialDiscretizationType() == FlowModel::rDG)
@@ -331,9 +318,6 @@ Pipe::check() const
     if (_model_id == THM::FM_TWO_PHASE_NCG)
       logSpatialDiscretizationNotImplementedError(FlowModel::getSpatialDiscretizationType());
   }
-
-  if (MooseUtils::toLower(_closures_name) == "trace" && _gravity_angle_type == ZERO_GRAVITY)
-    logError("TRACE closures assume non-zero gravity.");
 }
 
 void

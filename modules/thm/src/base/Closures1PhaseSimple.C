@@ -1,4 +1,5 @@
 #include "Closures1PhaseSimple.h"
+#include "Pipe.h"
 
 registerMooseObject("THMApp", Closures1PhaseSimple);
 
@@ -19,8 +20,10 @@ Closures1PhaseSimple::Closures1PhaseSimple(const InputParameters & params)
 }
 
 void
-Closures1PhaseSimple::check(const Pipe & /*flow_channel*/) const
+Closures1PhaseSimple::check(const Pipe & flow_channel) const
 {
+  if (!flow_channel.isParamValid("f"))
+    logError("When using simple closures, the parameter 'f' must be provided.");
 }
 
 void
