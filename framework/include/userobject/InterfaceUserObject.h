@@ -45,6 +45,7 @@ protected:
   const MooseArray<Point> & _q_point;
   QBase *& _qrule;
   const MooseArray<Real> & _JxW;
+  const MooseArray<Real> & _JxW_neighbor;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _normals;
 

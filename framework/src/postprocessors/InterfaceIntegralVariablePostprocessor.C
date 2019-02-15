@@ -20,6 +20,7 @@ validParams<InterfaceIntegralVariablePostprocessor>()
   params.addCoupledVar("neighbor_variable",
                        "The name of the variable on the slave side of the itnerface. By default "
                        "the same variable name is used for the slave side");
+  params.addClassDescription("Add access to variables and their gradinet on an interface.");
   return params;
 }
 

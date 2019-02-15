@@ -17,6 +17,8 @@ validParams<InterfaceAverageUserObject>()
   InputParameters params = validParams<InterfaceUserObject>();
   params.addParam<MooseEnum>(
       "average_type", InterfaceAverageTools::InterfaceAverageOptions(), "Type of scalar output");
+  params.addClassDescription(
+      "Special subclass of interface userobject givng access to interface average utilities.");
   return params;
 }
 

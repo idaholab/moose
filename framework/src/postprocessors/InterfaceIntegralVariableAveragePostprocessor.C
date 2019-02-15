@@ -51,7 +51,7 @@ void
 InterfaceIntegralVariableAveragePostprocessor::execute()
 {
   InterfaceIntegralVariablePostprocessor::execute();
-  _volume += volume();
+  _volume += _current_side_volume;
 }
 
 Real
@@ -60,12 +60,6 @@ InterfaceIntegralVariableAveragePostprocessor::getValue()
   Real integral = InterfaceIntegralVariablePostprocessor::getValue();
   gatherSum(_volume);
   return integral / _volume;
-}
-
-Real
-InterfaceIntegralVariableAveragePostprocessor::volume()
-{
-  return _current_side_volume;
 }
 
 void

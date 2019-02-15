@@ -12,7 +12,6 @@
                  "a singed variable jump (slave-master) of 0 "
                  "a variable value on the master side of  0 "
                  "a variable value on the master side of  0 "
-      design = 'InterfaceUO.md InterfaceUOPPS.md'
       issues = '#11647'
       max_threads = 2
     [../]
@@ -33,7 +32,6 @@
                  "a singed material propertyjump (slave-master) of -6 "
                  "a material property value on the master side of  10 "
                  "a material property value on the master side of  4 "
-      design = 'InterfaceUO_QP.md InterfaceUserObjectQpAux.md'
       issues = '#11647'
       max_threads = 1
     [../]
@@ -51,7 +49,6 @@
                  "a singed material propertyjump (slave-master) of -6 "
                  "a material property value on the master side of  10 "
                  "a material property value on the master side of  4 "
-      design = 'InterfaceUO.md InterfaceUOPPS.md'
       issues = '#11647'
       max_threads = 2
     [../]

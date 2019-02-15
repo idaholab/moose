@@ -47,7 +47,7 @@ InterfaceUO::execute()
 {
 
   for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
-    _value += (ComputeAverageType(_u[qp], _u_neighbor[qp])) * _JxW[qp];
+    _value += ComputeAverageType(_u[qp], _u_neighbor[qp]) * _JxW[qp];
 
   _total_volume += _current_side_volume;
 }

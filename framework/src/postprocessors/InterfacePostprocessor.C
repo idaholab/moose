@@ -15,6 +15,9 @@ validParams<InterfacePostprocessor>()
 {
   InputParameters params = validParams<InterfaceUserObject>();
   params += validParams<Postprocessor>();
+  params.addClassDescription(
+      "Basic class for Interface Postprocessors. All InterfacePostprocessors "
+      "should be derived from this class.");
   return params;
 }
 

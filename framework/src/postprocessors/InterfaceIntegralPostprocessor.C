@@ -16,6 +16,9 @@ InputParameters
 validParams<InterfaceIntegralPostprocessor>()
 {
   InputParameters params = validParams<InterfacePostprocessor>();
+  params.addClassDescription(
+      "Postprocessor computing the intgral of a quantity on an interface. Different type of "
+      "integrals can be achieved by overriding  computeIntegral().");
   return params;
 }
 
