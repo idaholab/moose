@@ -133,7 +133,6 @@ protected:
   virtual void setup2Phase();
 
   virtual void setupVolumeFraction();
-  virtual void setupWallFriction2Phase();
   virtual void setupDh();
   virtual void setupHw1Phase();
   virtual void setupHw2Phase();
