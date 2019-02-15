@@ -195,7 +195,7 @@ protected:
    */
   void makeFunctionControllableIfConstant(const FunctionName & fn_name,
                                           const std::string & control_name,
-                                          const std::string & param = "value");
+                                          const std::string & param = "value") const;
 
   /**
    * Gets an enum parameter
