@@ -28,3 +28,20 @@ Closures1PhaseBase::addWallFrictionFunctionMaterial(const Pipe & flow_channel) c
   params.set<std::vector<VariableName>>("arhoEA") = {FlowModelSinglePhase::RHOEA};
   _sim.addMaterial(class_name, Component::genName(flow_channel.name(), class_name), params);
 }
+
+void
+Closures1PhaseBase::addAverageWallTemperatureMaterial(const Pipe & flow_channel) const
+{
+  const std::string class_name = "AverageWallTemperature3EqnMaterial";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+  params.set<std::vector<VariableName>>("T_wall_sources") = flow_channel.getWallTemperatureNames();
+  params.set<std::vector<MaterialPropertyName>>("Hw_sources") =
+      flow_channel.getWallHTCNames1Phase();
+  params.set<std::vector<VariableName>>("P_hf_sources") = flow_channel.getHeatedPerimeterNames();
+  params.set<std::vector<VariableName>>("P_hf_total") = {FlowModel::HEAT_FLUX_PERIMETER};
+  params.set<MaterialPropertyName>("Hw_average") =
+      FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
+  params.set<std::vector<VariableName>>("T_fluid") = {FlowModelSinglePhase::TEMPERATURE};
+  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), class_name), params);
+}

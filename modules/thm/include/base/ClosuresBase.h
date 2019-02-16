@@ -60,6 +60,13 @@ protected:
                                   const std::vector<VariableName> & weights,
                                   const MaterialPropertyName & property_name) const;
 
+  /**
+   * Adds a material for wall temperature from an aux variable
+   *
+   * @param[in] flow_channel   Flow channel component
+   */
+  void addWallTemperatureFromAuxMaterial(const Pipe & flow_channel) const;
+
   /// Simulation
   Simulation & _sim;
 

@@ -26,6 +26,13 @@ protected:
    * @param[in] flow_channel   Flow channel component
    */
   void addWallFrictionFunctionMaterial(const Pipe & flow_channel) const;
+
+  /**
+   * Adds average wall temperature material
+   *
+   * @param[in] flow_channel   Flow channel component
+   */
+  void addAverageWallTemperatureMaterial(const Pipe & flow_channel) const;
 };
 
 #endif /* CLOSURES1PHASEBASE_H */

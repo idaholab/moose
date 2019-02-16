@@ -18,6 +18,14 @@ public:
 
   virtual void check(const Pipe & flow_channel) const override;
   virtual void addMooseObjects(const Pipe & flow_channel) override;
+
+protected:
+  /**
+   * Adds material to compute wall temperature from heat flux
+   *
+   * @param[in] flow_channel   Flow channel component
+   */
+  void addWallTemperatureFromHeatFluxMaterial(const Pipe & flow_channel) const;
 };
 
 #endif /* CLOSURES1PHASESIMPLE_H */

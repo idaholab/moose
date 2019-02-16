@@ -50,3 +50,14 @@ ClosuresBase::addWeightedAverageMaterial(const Pipe & flow_channel,
   _sim.addMaterial(
       class_name, Component::genName(flow_channel.name(), class_name, property_name), params);
 }
+
+void
+ClosuresBase::addWallTemperatureFromAuxMaterial(const Pipe & flow_channel) const
+{
+  const std::string class_name = "CoupledVariableValueMaterial";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+  params.set<MaterialPropertyName>("prop_name") = {FlowModel::TEMPERATURE_WALL};
+  params.set<std::vector<VariableName>>("coupled_variable") = {FlowModel::TEMPERATURE_WALL};
+  _sim.addMaterial(class_name, Component::genName(flow_channel.name(), class_name), params);
+}

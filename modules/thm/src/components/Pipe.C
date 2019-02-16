@@ -912,21 +912,7 @@ Pipe::addWallTemperatureObjects()
     if (_n_heat_transfer_connections > 1)
     {
       // use weighted average wall temperature aux kernel
-      if (_model_id == THM::FM_SINGLE_PHASE)
-      {
-        const std::string class_name = "AverageWallTemperature3EqnMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::vector<VariableName>>("T_wall_sources") = _T_wall_names;
-        params.set<std::vector<MaterialPropertyName>>("Hw_sources") = _Hw_1phase_names;
-        params.set<std::vector<VariableName>>("P_hf_sources") = _P_hf_names;
-        params.set<std::vector<VariableName>>("P_hf_total") = {FlowModel::HEAT_FLUX_PERIMETER};
-        params.set<MaterialPropertyName>("Hw_average") =
-            FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-        params.set<std::vector<VariableName>>("T_fluid") = {FlowModelSinglePhase::TEMPERATURE};
-        _sim.addMaterial(class_name, genName(name(), "avg_T_wall_mat"), params);
-      }
-      else if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
+      if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
       {
         const std::string class_name = "AverageWallTemperature7EqnMaterial";
         InputParameters params = _factory.getValidParams(class_name);
@@ -949,33 +935,22 @@ Pipe::addWallTemperatureObjects()
     }
     else
     {
-      // In temperature mode T_wall is prescribed via nodal aux variable, so we need to propagate
-      // those values into the material properties, so that RELAP-7 can use them
-      const std::string class_name = "CoupledVariableValueMaterial";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<MaterialPropertyName>("prop_name") = {FlowModel::TEMPERATURE_WALL};
-      params.set<std::vector<VariableName>>("coupled_variable") = {FlowModel::TEMPERATURE_WALL};
-      _sim.addMaterial(class_name, genName(name(), "T_wall_var_material"), params);
+      if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
+      {
+        // In temperature mode T_wall is prescribed via nodal aux variable, so we need to propagate
+        // those values into the material properties, so that RELAP-7 can use them
+        const std::string class_name = "CoupledVariableValueMaterial";
+        InputParameters params = _factory.getValidParams(class_name);
+        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+        params.set<MaterialPropertyName>("prop_name") = {FlowModel::TEMPERATURE_WALL};
+        params.set<std::vector<VariableName>>("coupled_variable") = {FlowModel::TEMPERATURE_WALL};
+        _sim.addMaterial(class_name, genName(name(), "T_wall_var_material"), params);
+      }
     }
   }
   else
   {
-    if (_model_id == THM::FM_SINGLE_PHASE)
-    {
-      if (MooseUtils::toLower(_closures_name) == "simple")
-      {
-        const std::string class_name = "TemperatureWall3EqnMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
-        params.set<std::vector<VariableName>>("q_wall") = {FlowModel::HEAT_FLUX_WALL};
-        params.set<MaterialPropertyName>("Hw") =
-            FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-        _sim.addMaterial(class_name, genName(name(), "T_wall_material"), params);
-      }
-    }
-    else if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
+    if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
     {
       if (MooseUtils::toLower(_closures_name) == "simple")
       {
