@@ -157,7 +157,7 @@
   file_base = rd03
   [./exodus]
     type = Exodus
-    execute_on = final
+    execute_on = 'initial final'
   [../]
   [./along_line]
     type = CSV

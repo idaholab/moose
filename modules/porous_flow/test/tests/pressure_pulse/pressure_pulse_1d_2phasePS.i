@@ -177,7 +177,6 @@
 [VectorPostprocessors]
   [./pp]
     type = LineValueSampler
-    execute_on = timestep_end
     sort_by = x
     variable = 'ppwater ppgas'
     start_point = '0 0 0'
@@ -189,6 +188,8 @@
 [Outputs]
   file_base = pressure_pulse_1d_2phasePS
   print_linear_residuals = false
-  csv = true
-  execute_on = final
+  [./csv]
+    type = CSV
+    execute_on = final
+  [../]
 []

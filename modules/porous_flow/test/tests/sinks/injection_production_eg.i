@@ -16,7 +16,6 @@
   xmax = 20
 []
 
-
 [GlobalParams]
   PorousFlowDictator = dictator
   gravity = '0 0 0'
@@ -242,7 +241,7 @@
   solve_type = NEWTON
   nl_abs_tol = 1E-13
   nl_rel_tol = 1E-10
-  end_time = 1e8
+  end_time = 1e4
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1E4
@@ -262,9 +261,10 @@
 []
 
 [Outputs]
-  execute_on = timestep_end
   print_linear_residuals = false
   perf_graph = true
-  exodus = true
-  csv = false
+  [./out]
+    type = CSV
+    execute_on = final
+  [../]
 []

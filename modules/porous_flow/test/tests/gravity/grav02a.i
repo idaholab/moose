@@ -192,7 +192,6 @@
     fluid_component = 1
     execute_on = 'initial timestep_end'
   [../]
-
 []
 
 [Preconditioning]
@@ -211,7 +210,6 @@
   [../]
 []
 
-
 [Executioner]
   type = Transient
   solve_type = Newton
@@ -220,10 +218,9 @@
 []
 
 [Outputs]
-  execute_on = 'initial final'
-  file_base = grav02a
   [./csv]
     type = CSV
+    file_base = grav02a
+    execute_on = 'initial final'
   [../]
-  exodus = true
 []
