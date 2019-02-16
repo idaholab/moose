@@ -841,7 +841,6 @@ Pipe::addCommonObjects()
 void
 Pipe::addMooseObjects()
 {
-  addWallTemperatureObjects();
   addCommonObjects();
 
   _flow_model->addMooseObjects();
@@ -899,77 +898,6 @@ Pipe::getHeatTransferNamesSuffix(const std::string & ht_name) const
   // else, don't add a suffix; there is no need
   else
     return "";
-}
-
-void
-Pipe::addWallTemperatureObjects()
-{
-  ExecFlagEnum execute_on_initial_linear(MooseUtils::getDefaultExecFlagEnum());
-  execute_on_initial_linear = {EXEC_INITIAL, EXEC_LINEAR};
-
-  if (_temperature_mode)
-  {
-    if (_n_heat_transfer_connections > 1)
-    {
-      // use weighted average wall temperature aux kernel
-      if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
-      {
-        const std::string class_name = "AverageWallTemperature7EqnMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::vector<VariableName>>("T_wall_sources") = _T_wall_names;
-        params.set<std::vector<MaterialPropertyName>>("Hw_liquid_sources") = _Hw_liquid_names;
-        params.set<std::vector<MaterialPropertyName>>("Hw_vapor_sources") = _Hw_vapor_names;
-        params.set<std::vector<VariableName>>("P_hf_sources") = _P_hf_names;
-        params.set<MaterialPropertyName>("kappa_liquid") =
-            FlowModelTwoPhase::HEAT_FLUX_PARTITIONING_LIQUID;
-        params.set<std::vector<VariableName>>("P_hf_total") = {FlowModel::HEAT_FLUX_PERIMETER};
-        params.set<MaterialPropertyName>("Hw_liquid_average") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_LIQUID;
-        params.set<MaterialPropertyName>("Hw_vapor_average") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_VAPOR;
-        params.set<std::vector<VariableName>>("T_liquid") = {FlowModelTwoPhase::TEMPERATURE_LIQUID};
-        params.set<std::vector<VariableName>>("T_vapor") = {FlowModelTwoPhase::TEMPERATURE_VAPOR};
-        _sim.addMaterial(class_name, genName(name(), "avg_T_wall_mat"), params);
-      }
-    }
-    else
-    {
-      if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
-      {
-        // In temperature mode T_wall is prescribed via nodal aux variable, so we need to propagate
-        // those values into the material properties, so that RELAP-7 can use them
-        const std::string class_name = "CoupledVariableValueMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<MaterialPropertyName>("prop_name") = {FlowModel::TEMPERATURE_WALL};
-        params.set<std::vector<VariableName>>("coupled_variable") = {FlowModel::TEMPERATURE_WALL};
-        _sim.addMaterial(class_name, genName(name(), "T_wall_var_material"), params);
-      }
-    }
-  }
-  else
-  {
-    if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
-    {
-      if (MooseUtils::toLower(_closures_name) == "simple")
-      {
-        const std::string class_name = "TemperatureWall7EqnMaterial";
-        InputParameters params = _factory.getValidParams(class_name);
-        params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-        params.set<std::vector<VariableName>>("q_wall") = {FlowModel::HEAT_FLUX_WALL};
-        params.set<MaterialPropertyName>("kappa_liquid") =
-            FlowModelTwoPhase::HEAT_FLUX_PARTITIONING_LIQUID;
-        params.set<MaterialPropertyName>("Hw_liquid") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_LIQUID;
-        params.set<MaterialPropertyName>("Hw_vapor") =
-            FlowModelTwoPhase::HEAT_TRANSFER_COEFFICIENT_WALL_VAPOR;
-        params.set<MaterialPropertyName>("T_liquid") = FlowModelTwoPhase::TEMPERATURE_LIQUID;
-        params.set<MaterialPropertyName>("T_vapor") = FlowModelTwoPhase::TEMPERATURE_VAPOR;
-        _sim.addMaterial(class_name, genName(name(), "T_wall_material"), params);
-      }
-    }
-  }
 }
 
 const std::vector<unsigned int> &

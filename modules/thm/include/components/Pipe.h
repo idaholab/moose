@@ -175,7 +175,6 @@ protected:
   virtual void setupVolumeFraction();
   virtual void setupDh();
   virtual void addFormLossObjects();
-  virtual void addWallTemperatureObjects();
 
   /**
    * Populates heat connection variable names lists
