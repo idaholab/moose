@@ -114,8 +114,5 @@
 
 [Outputs]
   file_base = planestrain_xz_small_out
-  [./exodus]
-    type = Exodus
-    output_dimension = 3
-  [../]
+  exodus = true
 []

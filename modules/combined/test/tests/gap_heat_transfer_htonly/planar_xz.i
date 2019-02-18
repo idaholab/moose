@@ -164,8 +164,5 @@
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-    output_dimension = 3
-  [../]
+  exodus = true
 []
