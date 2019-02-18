@@ -17,6 +17,9 @@ class SimpleFluidProperties;
 template <>
 InputParameters validParams<SimpleFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Fluid properties of a simple, idealised fluid
  * density=density0 * exp(P / bulk_modulus - thermal_expansion * T)
@@ -141,5 +144,7 @@ protected:
   /// Porepressure coefficient: enthalpy = internal_energy + porepressure / density * _pp_coeff
   const Real _pp_coeff;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* SIMPLEFLUIDPROPERTIES_H */

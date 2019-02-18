@@ -314,6 +314,11 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableValueType<OutputType, compute_stage>::type & adSln()
   {
+    if (_var_kind == Moose::VAR_AUXILIARY)
+      mooseWarning("You've requested AD information from an auxiliary variable. We do not "
+                   "currently propagate derivative information through the auxiliary system, so if "
+                   "you're relying on this to get a correct Jacobian, you're out of luck. The "
+                   "derivative vector will be zero for this variable...");
     _need_ad = _need_ad_u = true;
     return _ad_u;
   }
@@ -321,6 +326,11 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln()
   {
+    if (_var_kind == Moose::VAR_AUXILIARY)
+      mooseWarning("You've requested AD information from an auxiliary variable. We do not "
+                   "currently propagate derivative information through the auxiliary system, so if "
+                   "you're relying on this to get a correct Jacobian, you're out of luck. The "
+                   "derivative vector will be zero for this variable...");
     _need_ad = _need_ad_grad_u = true;
     return _ad_grad_u;
   }
@@ -328,6 +338,11 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSln()
   {
+    if (_var_kind == Moose::VAR_AUXILIARY)
+      mooseWarning("You've requested AD information from an auxiliary variable. We do not "
+                   "currently propagate derivative information through the auxiliary system, so if "
+                   "you're relying on this to get a correct Jacobian, you're out of luck. The "
+                   "derivative vector will be zero for this variable...");
     _need_ad = _need_ad_second_u = true;
     secondPhi();
     secondPhiFace();
@@ -337,6 +352,11 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableValueType<OutputType, compute_stage>::type & adUDot()
   {
+    if (_var_kind == Moose::VAR_AUXILIARY)
+      mooseWarning("You've requested AD information from an auxiliary variable. We do not "
+                   "currently propagate derivative information through the auxiliary system, so if "
+                   "you're relying on this to get a correct Jacobian, you're out of luck. The "
+                   "derivative vector will be zero for this variable...");
     _need_ad = true;
     return _ad_u_dot;
   }
@@ -344,6 +364,11 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableValueType<OutputType, compute_stage>::type & adSlnNeighbor()
   {
+    if (_var_kind == Moose::VAR_AUXILIARY)
+      mooseWarning("You've requested AD information from an auxiliary variable. We do not "
+                   "currently propagate derivative information through the auxiliary system, so if "
+                   "you're relying on this to get a correct Jacobian, you're out of luck. The "
+                   "derivative vector will be zero for this variable...");
     _need_neighbor_ad = _need_neighbor_ad_u = true;
     return _neighbor_ad_u;
   }
@@ -351,6 +376,11 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableGradientType<OutputType, compute_stage>::type & adGradSlnNeighbor()
   {
+    if (_var_kind == Moose::VAR_AUXILIARY)
+      mooseWarning("You've requested AD information from an auxiliary variable. We do not "
+                   "currently propagate derivative information through the auxiliary system, so if "
+                   "you're relying on this to get a correct Jacobian, you're out of luck. The "
+                   "derivative vector will be zero for this variable...");
     _need_neighbor_ad = _need_neighbor_ad_grad_u = true;
     return _neighbor_ad_grad_u;
   }
@@ -358,6 +388,11 @@ public:
   template <ComputeStage compute_stage>
   const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSlnNeighbor()
   {
+    if (_var_kind == Moose::VAR_AUXILIARY)
+      mooseWarning("You've requested AD information from an auxiliary variable. We do not "
+                   "currently propagate derivative information through the auxiliary system, so if "
+                   "you're relying on this to get a correct Jacobian, you're out of luck. The "
+                   "derivative vector will be zero for this variable...");
     _need_neighbor_ad = _need_neighbor_ad_second_u = true;
     secondPhiFaceNeighbor();
     return _neighbor_ad_second_u;

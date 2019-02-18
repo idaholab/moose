@@ -147,6 +147,8 @@
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D QUAD8 axisymmetric ring geometry (NAFEMS CGS1
     contact patch test with matched nodes)."
+
+    skip = "#12923"
   [../]
   [./mu_0_2_aug_sm]
     type = 'CSVDiff'

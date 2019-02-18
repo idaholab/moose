@@ -399,8 +399,10 @@ MultiApp::postExecute()
 void
 MultiApp::backup()
 {
+  _console << "Begining backing up MultiApp " << name() << std::endl;
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
+  _console << "Finished backing up MultiApp " << name() << std::endl;
 }
 
 void
@@ -412,8 +414,10 @@ MultiApp::restore()
   if (_apps.empty())
     return;
 
+  _console << "Begining restoring MultiApp " << name() << std::endl;
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _apps[i]->restore(_backups[i]);
+  _console << "Finished restoring MultiApp " << name() << std::endl;
 }
 
 BoundingBox
@@ -629,6 +633,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
     }
   }
 
+  _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
+           << " of level " << _app.multiAppLevel() + 1 << " and number " << _first_local_app + i
+           << ":" << COLOR_DEFAULT << std::endl;
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);

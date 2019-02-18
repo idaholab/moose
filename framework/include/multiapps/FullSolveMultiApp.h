@@ -36,6 +36,9 @@ public:
     // executioner postExecute has been called and we do not need to call it again
   }
 
+  virtual void backup() override;
+  virtual void restore() override;
+
 private:
   std::vector<Executioner *> _executioners;
 };

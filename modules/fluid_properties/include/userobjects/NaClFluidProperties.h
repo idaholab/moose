@@ -17,6 +17,9 @@ class NaClFluidProperties;
 template <>
 InputParameters validParams<NaClFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * NaCl fluid properties as a function of pressure (Pa) and temperature (K).
  * Note: only solid state (halite) properties are currently implemented to
@@ -98,5 +101,7 @@ protected:
   /// Triple point temperature (K)
   const Real _T_triple;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* NACLFLUIDPROPERTIES_H */

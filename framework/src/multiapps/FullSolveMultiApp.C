@@ -21,10 +21,38 @@ InputParameters
 validParams<FullSolveMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
+  params.addParam<bool>(
+      "no_backup_and_restore",
+      false,
+      "True to turn off backup/restore for this multiapp. This is useful when doing steady-state "
+      "Picard iterations where we want to use the solution of previous Picard iteration as the "
+      "initial guess of the current Picard iteration");
+  params.addParam<bool>(
+      "keep_full_output_history",
+      false,
+      "Whether or not to keep the full output history when this multiapp has multiple entries");
   return params;
 }
 
 FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters) : MultiApp(parameters) {}
+
+void
+FullSolveMultiApp::backup()
+{
+  if (getParam<bool>("no_backup_and_restore"))
+    return;
+  else
+    MultiApp::backup();
+}
+
+void
+FullSolveMultiApp::restore()
+{
+  if (getParam<bool>("no_backup_and_restore"))
+    return;
+  else
+    MultiApp::restore();
+}
 
 void
 FullSolveMultiApp::initialSetup()
@@ -72,6 +100,10 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
   bool last_solve_converged = true;
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
+    // reset output system if desired
+    if (!getParam<bool>("keep_full_output_history"))
+      _apps[i]->getOutputWarehouse().reset();
+
     Executioner * ex = _executioners[i];
     ex->execute();
     if (!ex->lastSolveConverged())
