@@ -1,7 +1,7 @@
 #include "BoundaryFlux3EqnGhostFreeOutflow.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 
-registerMooseObject("RELAP7App", BoundaryFlux3EqnGhostFreeOutflow);
+registerMooseObject("THMApp", BoundaryFlux3EqnGhostFreeOutflow);
 
 template <>
 InputParameters
@@ -31,10 +31,10 @@ DenseMatrix<Real>
 BoundaryFlux3EqnGhostFreeOutflow::getGhostCellSolutionJacobian(
     const std::vector<Real> & /*U1*/) const
 {
-  DenseMatrix<Real> J(RELAP73Eqn::N_EQ, RELAP73Eqn::N_EQ);
-  J(RELAP73Eqn::EQ_MASS, RELAP73Eqn::EQ_MASS) = 1;
-  J(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MOMENTUM) = 1;
-  J(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_ENERGY) = 1;
+  DenseMatrix<Real> J(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
+  J(THM3Eqn::EQ_MASS, THM3Eqn::EQ_MASS) = 1;
+  J(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MOMENTUM) = 1;
+  J(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_ENERGY) = 1;
 
   return J;
 }

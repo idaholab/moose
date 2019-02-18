@@ -1,7 +1,7 @@
 #include "HeatFluxFromHeatStructure3EqnUserObject.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 
-registerMooseObject("RELAP7App", HeatFluxFromHeatStructure3EqnUserObject);
+registerMooseObject("THMApp", HeatFluxFromHeatStructure3EqnUserObject);
 
 template <>
 InputParameters
@@ -43,9 +43,9 @@ DenseVector<Real>
 HeatFluxFromHeatStructure3EqnUserObject::computeQpHeatFluxJacobian()
 {
   DenseVector<Real> jac(4);
-  jac(RELAP73Eqn::EQ_MASS) = -_Hw[_qp] * _dT_drhoA[_qp] * _P_hf[_qp];
-  jac(RELAP73Eqn::EQ_MOMENTUM) = -_Hw[_qp] * _dT_drhouA[_qp] * _P_hf[_qp];
-  jac(RELAP73Eqn::EQ_ENERGY) = -_Hw[_qp] * _dT_drhoEA[_qp] * _P_hf[_qp];
-  jac(RELAP73Eqn::EQ_ENERGY + 1) = _Hw[_qp] * _P_hf[_qp];
+  jac(THM3Eqn::EQ_MASS) = -_Hw[_qp] * _dT_drhoA[_qp] * _P_hf[_qp];
+  jac(THM3Eqn::EQ_MOMENTUM) = -_Hw[_qp] * _dT_drhouA[_qp] * _P_hf[_qp];
+  jac(THM3Eqn::EQ_ENERGY) = -_Hw[_qp] * _dT_drhoEA[_qp] * _P_hf[_qp];
+  jac(THM3Eqn::EQ_ENERGY + 1) = _Hw[_qp] * _P_hf[_qp];
   return jac;
 }

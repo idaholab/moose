@@ -69,4 +69,9 @@
 
 - /Mesh/THMMesh
 
+- /UserObjects/HeatExchangeCoefficientPartitioning
+- /UserObjects/HeatFluxFromHeatStructure3EqnUserObject
+- /UserObjects/HeatFluxFromHeatStructure7EqnUserObject
 - /UserObjects/SolidMaterialProperties
+- /UserObjects/SpecificInterfacialAreaCurve
+- /UserObjects/VolumeFractionMapper

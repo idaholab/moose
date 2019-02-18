@@ -1,7 +1,7 @@
 #include "BoundaryFlux3EqnFreeInflow.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 
-registerMooseObject("RELAP7App", BoundaryFlux3EqnFreeInflow);
+registerMooseObject("THMApp", BoundaryFlux3EqnFreeInflow);
 
 template <>
 InputParameters
@@ -39,15 +39,15 @@ BoundaryFlux3EqnFreeInflow::calcFlux(unsigned int /*iside*/,
                                      const RealVectorValue & /*normal*/,
                                      std::vector<Real> & flux) const
 {
-  const Real A = U1[RELAP73Eqn::CONS_VAR_AREA];
+  const Real A = U1[THM3Eqn::CONS_VAR_AREA];
 
   const Real e_inf = _fp.e_from_p_rho(_p_inf, _rho_inf);
   const Real E_inf = e_inf + 0.5 * _vel_inf * _vel_inf;
 
-  flux.resize(RELAP73Eqn::N_EQ);
-  flux[RELAP73Eqn::EQ_MASS] = _rho_inf * _vel_inf * A;
-  flux[RELAP73Eqn::EQ_MOMENTUM] = (_rho_inf * _vel_inf * _vel_inf + _p_inf) * A;
-  flux[RELAP73Eqn::EQ_ENERGY] = _vel_inf * (_rho_inf * E_inf + _p_inf) * A;
+  flux.resize(THM3Eqn::N_EQ);
+  flux[THM3Eqn::EQ_MASS] = _rho_inf * _vel_inf * A;
+  flux[THM3Eqn::EQ_MOMENTUM] = (_rho_inf * _vel_inf * _vel_inf + _p_inf) * A;
+  flux[THM3Eqn::EQ_ENERGY] = _vel_inf * (_rho_inf * E_inf + _p_inf) * A;
 }
 
 void
@@ -58,5 +58,5 @@ BoundaryFlux3EqnFreeInflow::calcJacobian(unsigned int /*iside*/,
                                          DenseMatrix<Real> & jac1) const
 {
   // Jacobian is zero
-  jac1.resize(RELAP73Eqn::N_EQ, RELAP73Eqn::N_EQ);
+  jac1.resize(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
 }

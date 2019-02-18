@@ -1,8 +1,8 @@
 #include "NumericalFlux3EqnCentered.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 #include "Numerics.h"
 
-registerMooseObject("RELAP7App", NumericalFlux3EqnCentered);
+registerMooseObject("THMApp", NumericalFlux3EqnCentered);
 
 template <>
 InputParameters
@@ -36,18 +36,18 @@ NumericalFlux3EqnCentered::calcFlux(const std::vector<Real> & U1,
   const std::vector<Real> flux1 = computeFlux(U1);
   const std::vector<Real> flux2 = computeFlux(U2);
 
-  flux.resize(RELAP73Eqn::N_EQ);
-  for (unsigned int i = 0; i < RELAP73Eqn::N_EQ; i++)
+  flux.resize(THM3Eqn::N_EQ);
+  for (unsigned int i = 0; i < THM3Eqn::N_EQ; i++)
     flux[i] = 0.5 * (flux1[i] + flux2[i]);
 }
 
 std::vector<Real>
 NumericalFlux3EqnCentered::computeFlux(const std::vector<Real> & U) const
 {
-  const Real rhoA = U[RELAP73Eqn::CONS_VAR_RHOA];
-  const Real rhouA = U[RELAP73Eqn::CONS_VAR_RHOUA];
-  const Real rhoEA = U[RELAP73Eqn::CONS_VAR_RHOEA];
-  const Real A = U[RELAP73Eqn::CONS_VAR_AREA];
+  const Real rhoA = U[THM3Eqn::CONS_VAR_RHOA];
+  const Real rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
+  const Real rhoEA = U[THM3Eqn::CONS_VAR_RHOEA];
+  const Real A = U[THM3Eqn::CONS_VAR_AREA];
 
   const Real rho = rhoA / A;
   const Real vel = rhouA / rhoA;
@@ -57,10 +57,10 @@ NumericalFlux3EqnCentered::computeFlux(const std::vector<Real> & U) const
   const Real p = _fp.p_from_v_e(v, e);
   const Real H = E + p / rho;
 
-  std::vector<Real> flux(RELAP73Eqn::N_EQ, 0.0);
-  flux[RELAP73Eqn::EQ_MASS] = rhouA;
-  flux[RELAP73Eqn::EQ_MOMENTUM] = (rho * vel * vel + p) * A;
-  flux[RELAP73Eqn::EQ_ENERGY] = rho * vel * H * A;
+  std::vector<Real> flux(THM3Eqn::N_EQ, 0.0);
+  flux[THM3Eqn::EQ_MASS] = rhouA;
+  flux[THM3Eqn::EQ_MOMENTUM] = (rho * vel * vel + p) * A;
+  flux[THM3Eqn::EQ_ENERGY] = rho * vel * H * A;
 
   return flux;
 }
@@ -82,10 +82,10 @@ NumericalFlux3EqnCentered::calcJacobian(const std::vector<Real> & U1,
 DenseMatrix<Real>
 NumericalFlux3EqnCentered::computeJacobian(const std::vector<Real> & U) const
 {
-  const Real rhoA = U[RELAP73Eqn::CONS_VAR_RHOA];
-  const Real rhouA = U[RELAP73Eqn::CONS_VAR_RHOUA];
-  const Real rhoEA = U[RELAP73Eqn::CONS_VAR_RHOEA];
-  const Real A = U[RELAP73Eqn::CONS_VAR_AREA];
+  const Real rhoA = U[THM3Eqn::CONS_VAR_RHOA];
+  const Real rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
+  const Real rhoEA = U[THM3Eqn::CONS_VAR_RHOEA];
+  const Real A = U[THM3Eqn::CONS_VAR_AREA];
 
   const Real v = A / rhoA;
   const Real dv_drhoA = THM::dv_darhoA(A, rhoA);
@@ -103,19 +103,17 @@ NumericalFlux3EqnCentered::computeJacobian(const std::vector<Real> & U) const
   const Real dp_drhouA = dp_de * de_drhouA;
   const Real dp_drhoEA = dp_de * de_drhoEA;
 
-  DenseMatrix<Real> jac(RELAP73Eqn::N_EQ, RELAP73Eqn::N_EQ);
+  DenseMatrix<Real> jac(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
 
-  jac(RELAP73Eqn::EQ_MASS, RELAP73Eqn::EQ_MOMENTUM) = 1.0;
+  jac(THM3Eqn::EQ_MASS, THM3Eqn::EQ_MOMENTUM) = 1.0;
 
-  jac(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MASS) = -vel * vel + dp_drhoA * A;
-  jac(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MOMENTUM) = 2.0 * vel + dp_drhouA * A;
-  jac(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_ENERGY) = dp_drhoEA * A;
+  jac(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MASS) = -vel * vel + dp_drhoA * A;
+  jac(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MOMENTUM) = 2.0 * vel + dp_drhouA * A;
+  jac(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_ENERGY) = dp_drhoEA * A;
 
-  jac(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_MASS) =
-      -vel / rhoA * (rhoEA + p * A) + vel * dp_drhoA * A;
-  jac(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_MOMENTUM) =
-      (rhoEA + p * A) / rhoA + vel * dp_drhouA * A;
-  jac(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_ENERGY) = vel * (1.0 + dp_drhoEA * A);
+  jac(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_MASS) = -vel / rhoA * (rhoEA + p * A) + vel * dp_drhoA * A;
+  jac(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_MOMENTUM) = (rhoEA + p * A) / rhoA + vel * dp_drhouA * A;
+  jac(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_ENERGY) = vel * (1.0 + dp_drhoEA * A);
 
   return jac;
 }

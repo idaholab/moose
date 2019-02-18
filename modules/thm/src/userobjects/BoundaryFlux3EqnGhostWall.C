@@ -1,7 +1,7 @@
 #include "BoundaryFlux3EqnGhostWall.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 
-registerMooseObject("RELAP7App", BoundaryFlux3EqnGhostWall);
+registerMooseObject("THMApp", BoundaryFlux3EqnGhostWall);
 
 template <>
 InputParameters
@@ -23,11 +23,11 @@ BoundaryFlux3EqnGhostWall::BoundaryFlux3EqnGhostWall(const InputParameters & par
 std::vector<Real>
 BoundaryFlux3EqnGhostWall::getGhostCellSolution(const std::vector<Real> & U1) const
 {
-  std::vector<Real> U_ghost(RELAP73Eqn::N_CONS_VAR);
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOA] = U1[RELAP73Eqn::CONS_VAR_RHOA];
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOUA] = -U1[RELAP73Eqn::CONS_VAR_RHOUA];
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOEA] = U1[RELAP73Eqn::CONS_VAR_RHOEA];
-  U_ghost[RELAP73Eqn::CONS_VAR_AREA] = U1[RELAP73Eqn::CONS_VAR_AREA];
+  std::vector<Real> U_ghost(THM3Eqn::N_CONS_VAR);
+  U_ghost[THM3Eqn::CONS_VAR_RHOA] = U1[THM3Eqn::CONS_VAR_RHOA];
+  U_ghost[THM3Eqn::CONS_VAR_RHOUA] = -U1[THM3Eqn::CONS_VAR_RHOUA];
+  U_ghost[THM3Eqn::CONS_VAR_RHOEA] = U1[THM3Eqn::CONS_VAR_RHOEA];
+  U_ghost[THM3Eqn::CONS_VAR_AREA] = U1[THM3Eqn::CONS_VAR_AREA];
 
   return U_ghost;
 }
@@ -35,10 +35,10 @@ BoundaryFlux3EqnGhostWall::getGhostCellSolution(const std::vector<Real> & U1) co
 DenseMatrix<Real>
 BoundaryFlux3EqnGhostWall::getGhostCellSolutionJacobian(const std::vector<Real> & /*U1*/) const
 {
-  DenseMatrix<Real> J(RELAP73Eqn::N_EQ, RELAP73Eqn::N_EQ);
-  J(RELAP73Eqn::EQ_MASS, RELAP73Eqn::EQ_MASS) = 1.0;
-  J(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MOMENTUM) = -1.0;
-  J(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_ENERGY) = 1.0;
+  DenseMatrix<Real> J(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
+  J(THM3Eqn::EQ_MASS, THM3Eqn::EQ_MASS) = 1.0;
+  J(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MOMENTUM) = -1.0;
+  J(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_ENERGY) = 1.0;
 
   return J;
 }

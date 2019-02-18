@@ -1,7 +1,7 @@
-#ifndef RELAP7INDICES3EQN_H
-#define RELAP7INDICES3EQN_H
+#ifndef THMINDICES3EQN_H
+#define THMINDICES3EQN_H
 
-namespace RELAP73Eqn
+namespace THM3Eqn
 {
 /// Number of solution variables, plus cross-sectional area
 static const unsigned int N_CONS_VAR = 4;
@@ -25,4 +25,4 @@ enum EquationIndex
 };
 }
 
-#endif // RELAP7INDICES3EQN_H
+#endif // THMINDICES3EQN_H

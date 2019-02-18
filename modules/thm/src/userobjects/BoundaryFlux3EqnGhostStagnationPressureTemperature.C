@@ -1,9 +1,9 @@
 #include "BoundaryFlux3EqnGhostStagnationPressureTemperature.h"
 #include "SinglePhaseFluidProperties.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 #include "Numerics.h"
 
-registerMooseObject("RELAP7App", BoundaryFlux3EqnGhostStagnationPressureTemperature);
+registerMooseObject("THMApp", BoundaryFlux3EqnGhostStagnationPressureTemperature);
 
 template <>
 InputParameters
@@ -37,9 +37,9 @@ std::vector<Real>
 BoundaryFlux3EqnGhostStagnationPressureTemperature::getGhostCellSolution(
     const std::vector<Real> & U) const
 {
-  const Real rhoA = U[RELAP73Eqn::CONS_VAR_RHOA];
-  const Real rhouA = U[RELAP73Eqn::CONS_VAR_RHOUA];
-  const Real A = U[RELAP73Eqn::CONS_VAR_AREA];
+  const Real rhoA = U[THM3Eqn::CONS_VAR_RHOA];
+  const Real rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
+  const Real A = U[THM3Eqn::CONS_VAR_AREA];
 
   const Real vel = rhouA / rhoA;
 
@@ -58,11 +58,11 @@ BoundaryFlux3EqnGhostStagnationPressureTemperature::getGhostCellSolution(
   const Real e = _fp.e_from_p_rho(p, rho);
   const Real E = e + 0.5 * vel * vel;
 
-  std::vector<Real> U_ghost(RELAP73Eqn::N_CONS_VAR);
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOA] = rho * A;
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOUA] = rho * vel * A;
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOEA] = rho * E * A;
-  U_ghost[RELAP73Eqn::CONS_VAR_AREA] = A;
+  std::vector<Real> U_ghost(THM3Eqn::N_CONS_VAR);
+  U_ghost[THM3Eqn::CONS_VAR_RHOA] = rho * A;
+  U_ghost[THM3Eqn::CONS_VAR_RHOUA] = rho * vel * A;
+  U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rho * E * A;
+  U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
 
   return U_ghost;
 }
@@ -71,9 +71,9 @@ DenseMatrix<Real>
 BoundaryFlux3EqnGhostStagnationPressureTemperature::getGhostCellSolutionJacobian(
     const std::vector<Real> & U) const
 {
-  const Real rhoA = U[RELAP73Eqn::CONS_VAR_RHOA];
-  const Real rhouA = U[RELAP73Eqn::CONS_VAR_RHOUA];
-  const Real A = U[RELAP73Eqn::CONS_VAR_AREA];
+  const Real rhoA = U[THM3Eqn::CONS_VAR_RHOA];
+  const Real rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
+  const Real A = U[THM3Eqn::CONS_VAR_AREA];
 
   Real vel, dvel_drhoA, dvel_drhouA;
   THM::vel_from_arhoA_arhouA(rhoA, rhouA, vel, dvel_drhoA, dvel_drhouA);
@@ -112,16 +112,16 @@ BoundaryFlux3EqnGhostStagnationPressureTemperature::getGhostCellSolutionJacobian
   const Real dE_drhoA = de_drhoA + vel * dvel_drhoA;
   const Real dE_drhouA = de_drhouA + vel * dvel_drhouA;
 
-  DenseMatrix<Real> J(RELAP73Eqn::N_EQ, RELAP73Eqn::N_EQ);
+  DenseMatrix<Real> J(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
 
-  J(RELAP73Eqn::EQ_MASS, RELAP73Eqn::EQ_MASS) = drho_drhoA * A;
-  J(RELAP73Eqn::EQ_MASS, RELAP73Eqn::EQ_MOMENTUM) = drho_drhouA * A;
+  J(THM3Eqn::EQ_MASS, THM3Eqn::EQ_MASS) = drho_drhoA * A;
+  J(THM3Eqn::EQ_MASS, THM3Eqn::EQ_MOMENTUM) = drho_drhouA * A;
 
-  J(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MASS) = (drho_drhoA * vel + rho * dvel_drhoA) * A;
-  J(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MOMENTUM) = (drho_drhouA * vel + rho * dvel_drhouA) * A;
+  J(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MASS) = (drho_drhoA * vel + rho * dvel_drhoA) * A;
+  J(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MOMENTUM) = (drho_drhouA * vel + rho * dvel_drhouA) * A;
 
-  J(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_MASS) = (drho_drhoA * E + rho * dE_drhoA) * A;
-  J(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_MOMENTUM) = (drho_drhouA * E + rho * dE_drhouA) * A;
+  J(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_MASS) = (drho_drhoA * E + rho * dE_drhoA) * A;
+  J(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_MOMENTUM) = (drho_drhouA * E + rho * dE_drhouA) * A;
 
   return J;
 }

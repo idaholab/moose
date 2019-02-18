@@ -1,8 +1,8 @@
 #include "BoundaryFlux3EqnFreeOutflow.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 #include "Numerics.h"
 
-registerMooseObject("RELAP7App", BoundaryFlux3EqnFreeOutflow);
+registerMooseObject("THMApp", BoundaryFlux3EqnFreeOutflow);
 
 template <>
 InputParameters
@@ -34,10 +34,10 @@ BoundaryFlux3EqnFreeOutflow::calcFlux(unsigned int /*iside*/,
                                       std::vector<Real> & flux) const
 {
   // extract the solution and area
-  const Real rhoA1 = U1[RELAP73Eqn::CONS_VAR_RHOA];
-  const Real rhouA1 = U1[RELAP73Eqn::CONS_VAR_RHOUA];
-  const Real rhoEA1 = U1[RELAP73Eqn::CONS_VAR_RHOEA];
-  const Real A1 = U1[RELAP73Eqn::CONS_VAR_AREA];
+  const Real rhoA1 = U1[THM3Eqn::CONS_VAR_RHOA];
+  const Real rhouA1 = U1[THM3Eqn::CONS_VAR_RHOUA];
+  const Real rhoEA1 = U1[THM3Eqn::CONS_VAR_RHOEA];
+  const Real A1 = U1[THM3Eqn::CONS_VAR_AREA];
 
   const Real rho1 = rhoA1 / A1;
   const Real vel1 = rhouA1 / rhoA1;
@@ -45,10 +45,10 @@ BoundaryFlux3EqnFreeOutflow::calcFlux(unsigned int /*iside*/,
   const Real e1 = rhoEA1 / rhoA1 - 0.5 * vel1 * vel1;
   const Real p1 = _fp.p_from_v_e(v1, e1);
 
-  flux.resize(RELAP73Eqn::N_EQ);
-  flux[RELAP73Eqn::EQ_MASS] = vel1 * rhoA1;
-  flux[RELAP73Eqn::EQ_MOMENTUM] = (vel1 * rhouA1 + p1 * A1);
-  flux[RELAP73Eqn::EQ_ENERGY] = vel1 * (rhoEA1 + p1 * A1);
+  flux.resize(THM3Eqn::N_EQ);
+  flux[THM3Eqn::EQ_MASS] = vel1 * rhoA1;
+  flux[THM3Eqn::EQ_MOMENTUM] = (vel1 * rhouA1 + p1 * A1);
+  flux[THM3Eqn::EQ_ENERGY] = vel1 * (rhoEA1 + p1 * A1);
 }
 
 void
@@ -58,10 +58,10 @@ BoundaryFlux3EqnFreeOutflow::calcJacobian(unsigned int /*iside*/,
                                           const RealVectorValue & /*normal*/,
                                           DenseMatrix<Real> & jac1) const
 {
-  const Real rhoA = U1[RELAP73Eqn::CONS_VAR_RHOA];
-  const Real rhouA = U1[RELAP73Eqn::CONS_VAR_RHOUA];
-  const Real rhoEA = U1[RELAP73Eqn::CONS_VAR_RHOEA];
-  const Real A = U1[RELAP73Eqn::CONS_VAR_AREA];
+  const Real rhoA = U1[THM3Eqn::CONS_VAR_RHOA];
+  const Real rhouA = U1[THM3Eqn::CONS_VAR_RHOUA];
+  const Real rhoEA = U1[THM3Eqn::CONS_VAR_RHOEA];
+  const Real A = U1[THM3Eqn::CONS_VAR_AREA];
 
   const Real v = A / rhoA;
   const Real dv_drhoA = THM::dv_darhoA(A, rhoA);
@@ -79,17 +79,15 @@ BoundaryFlux3EqnFreeOutflow::calcJacobian(unsigned int /*iside*/,
   const Real dp_drhouA = dp_de * de_drhouA;
   const Real dp_drhoEA = dp_de * de_drhoEA;
 
-  jac1.resize(RELAP73Eqn::N_EQ, RELAP73Eqn::N_EQ);
+  jac1.resize(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
 
-  jac1(RELAP73Eqn::EQ_MASS, RELAP73Eqn::EQ_MOMENTUM) = 1.0;
+  jac1(THM3Eqn::EQ_MASS, THM3Eqn::EQ_MOMENTUM) = 1.0;
 
-  jac1(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MASS) = -vel * vel + dp_drhoA * A;
-  jac1(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_MOMENTUM) = 2.0 * vel + dp_drhouA * A;
-  jac1(RELAP73Eqn::EQ_MOMENTUM, RELAP73Eqn::EQ_ENERGY) = dp_drhoEA * A;
+  jac1(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MASS) = -vel * vel + dp_drhoA * A;
+  jac1(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_MOMENTUM) = 2.0 * vel + dp_drhouA * A;
+  jac1(THM3Eqn::EQ_MOMENTUM, THM3Eqn::EQ_ENERGY) = dp_drhoEA * A;
 
-  jac1(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_MASS) =
-      -vel / rhoA * (rhoEA + p * A) + vel * dp_drhoA * A;
-  jac1(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_MOMENTUM) =
-      (rhoEA + p * A) / rhoA + vel * dp_drhouA * A;
-  jac1(RELAP73Eqn::EQ_ENERGY, RELAP73Eqn::EQ_ENERGY) = vel * (1.0 + dp_drhoEA * A);
+  jac1(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_MASS) = -vel / rhoA * (rhoEA + p * A) + vel * dp_drhoA * A;
+  jac1(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_MOMENTUM) = (rhoEA + p * A) / rhoA + vel * dp_drhouA * A;
+  jac1(THM3Eqn::EQ_ENERGY, THM3Eqn::EQ_ENERGY) = vel * (1.0 + dp_drhoEA * A);
 }

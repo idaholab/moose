@@ -1,7 +1,7 @@
 #include "BoundaryFlux3EqnGhostFreeInflow.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 
-registerMooseObject("RELAP7App", BoundaryFlux3EqnGhostFreeInflow);
+registerMooseObject("THMApp", BoundaryFlux3EqnGhostFreeInflow);
 
 template <>
 InputParameters
@@ -35,7 +35,7 @@ BoundaryFlux3EqnGhostFreeInflow::BoundaryFlux3EqnGhostFreeInflow(const InputPara
 std::vector<Real>
 BoundaryFlux3EqnGhostFreeInflow::getGhostCellSolution(const std::vector<Real> & U1) const
 {
-  const Real A = U1[RELAP73Eqn::CONS_VAR_AREA];
+  const Real A = U1[THM3Eqn::CONS_VAR_AREA];
 
   const Real e_inf = _fp.e_from_p_rho(_p_inf, _rho_inf);
   const Real E_inf = e_inf + 0.5 * _vel_inf * _vel_inf;
@@ -44,11 +44,11 @@ BoundaryFlux3EqnGhostFreeInflow::getGhostCellSolution(const std::vector<Real> & 
   const Real rhouA = rhoA * _vel_inf;
   const Real rhoEA = rhoA * E_inf;
 
-  std::vector<Real> U_ghost(RELAP73Eqn::N_CONS_VAR);
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOA] = rhoA;
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOUA] = rhouA;
-  U_ghost[RELAP73Eqn::CONS_VAR_RHOEA] = rhoEA;
-  U_ghost[RELAP73Eqn::CONS_VAR_AREA] = A;
+  std::vector<Real> U_ghost(THM3Eqn::N_CONS_VAR);
+  U_ghost[THM3Eqn::CONS_VAR_RHOA] = rhoA;
+  U_ghost[THM3Eqn::CONS_VAR_RHOUA] = rhouA;
+  U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rhoEA;
+  U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
 
   return U_ghost;
 }
@@ -57,6 +57,6 @@ DenseMatrix<Real>
 BoundaryFlux3EqnGhostFreeInflow::getGhostCellSolutionJacobian(
     const std::vector<Real> & /*U1*/) const
 {
-  DenseMatrix<Real> J(RELAP73Eqn::N_EQ, RELAP73Eqn::N_EQ);
+  DenseMatrix<Real> J(THM3Eqn::N_EQ, THM3Eqn::N_EQ);
   return J;
 }
