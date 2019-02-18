@@ -66,7 +66,7 @@ protected:
   std::shared_ptr<MultiApp> _multi_app;
 
   /// Whether we're transferring to or from the MultiApp
-  MooseEnum _direction;
+  const MooseEnum _direction;
 
   /**
    * This method will fill information into the convenience member variables
