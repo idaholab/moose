@@ -139,12 +139,8 @@
 
 [Outputs]
   file_base = s10
-  [./console]
-    type = Console
-    execute_on = 'nonlinear linear'
-  [../]
   [./exodus]
     type = Exodus
-    execute_on = 'final'
+    execute_on = 'initial final'
   [../]
 []

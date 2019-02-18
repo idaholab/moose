@@ -311,7 +311,6 @@
   [../]
 []
 
-
 [Executioner]
   type = Transient
   solve_type = Newton
@@ -323,10 +322,9 @@
 []
 
 [Outputs]
-  execute_on = 'initial final'
-  file_base = grav02d
   [./csv]
     type = CSV
+    execute_on = 'initial final'
+    file_base = grav02d
   [../]
-  exodus = true
 []

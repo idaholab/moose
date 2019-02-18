@@ -146,7 +146,9 @@
 []
 
 [Outputs]
-  file_base = bl01
-  execute_on = 'final'
-  exodus = true
+  [./exodus]
+    type = Exodus
+    file_base = bl01
+    execute_on = 'initial final'
+  [../]
 []

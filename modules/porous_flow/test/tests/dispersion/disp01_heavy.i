@@ -210,7 +210,8 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = 'final'
-  perf_graph = true
+  [./out]
+    type = CSV
+    execute_on = final
+  [../]
 []
