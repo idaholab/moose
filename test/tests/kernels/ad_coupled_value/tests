@@ -11,15 +11,9 @@
     type = 'Exodiff'
     input = 'ad_aux_coupled_value.i'
     exodiff = 'ad_aux_coupled_value_out.e'
-    requirement = "We shall be able to get aux variable values through adCoupledValue but with an "
-                  "explicit warning that there will be no derivative information"
+    requirement = "We shall be able to get aux variable values through adCoupledValue with the knowledge that the derivatives will always be zero"
     design = "jacobian_definition.md"
     issues = "#12852"
-    expect_out = "You've requested AD information from an auxiliary variable. We do not currently "
-                 "propagate derivative information through the auxiliary system, so if you're relying "
-                 "on this to get a correct Jacobian, you're out of luck. The derivative vector will be "
-                 "zero for this variable"
-    allow_warnings = true
     max_parallel = 4
   []
   [test_coupled_aux_jac]
@@ -28,7 +22,6 @@
     run_sim = True
     ratio_tol = 1e-8
     difference_tol = 1e-7
-    allow_warnings = true
     max_parallel = 4
     cli_args = 'Outputs/exodus=false'
     requirement = "Getting a *constant* aux variable through adCoupledValue shall not destroy our Jacobian"
