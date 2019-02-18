@@ -6,7 +6,7 @@
 
 // Forward declarations
 class ControlDataValue;
-class RELAP7Control;
+class THMControl;
 
 /**
  * Abstract definition of a ControlData value.
@@ -39,12 +39,12 @@ public:
   /**
    * Get the reference to the control object that declared this control data
    */
-  RELAP7Control & getControl() const { return *_control; }
+  THMControl & getControl() const { return *_control; }
 
   /**
    * Set the pointer to the control object that declared this control data
    */
-  void setControl(RELAP7Control * ctrl) { _control = ctrl; }
+  void setControl(THMControl * ctrl) { _control = ctrl; }
 
   /**
    * Mark the data as declared
@@ -62,7 +62,7 @@ protected:
   /// true if the data was declared by calling declareControlData. All data must be declared up front.
   bool _declared;
   /// The control object that declared this control data
-  RELAP7Control * _control;
+  THMControl * _control;
 };
 
 /**
