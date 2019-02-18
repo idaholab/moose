@@ -8,7 +8,21 @@
 - /AuxKernels/SpecificVolumeAux
 - /AuxKernels/TemperatureAux
 
+- /Components
+- /Components/AddComponentAction
+- /Components/Component
+- /Components/GeometricalComponent
+- /Components/PipeBase
+
 - /Controls/ControlData
+- /Controls/CopyPostprocessorValueControl
+- /Controls/GetFunctionValueControl
+- /Controls/PIDControl
+- /Controls/SetRealValueControl
+- /Controls/THMControl
+- /Controls/TerminateControl
+- /Controls/TimeFunctionControl
+- /Controls/UnitTripControl
 
 - /FluidProperties
 - /FluidProperties/AddFluidPropertiesAction
@@ -52,5 +66,7 @@
 - /Materials/WallFriction3EqnBaseMaterial
 - /Materials/WallFrictionChurchillMaterial
 - /Materials/WeightedAverageMaterial
+
+- /Mesh/THMMesh
 
 - /UserObjects/SolidMaterialProperties

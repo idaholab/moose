@@ -3,6 +3,7 @@
 
 #include "ModulesApp.h"
 #include "AppFactory.h"
+#include "Simulation.h"
 
 #include "SinglePhaseFluidProperties.h"
 #include "TwoPhaseFluidProperties.h"
@@ -47,12 +48,60 @@ InputParameters
 validParams<THMApp>()
 {
   InputParameters params = validParams<MooseApp>();
+  params.addCommandLineParam<std::string>(
+      "check_jacobian", "--check-jacobian", "To indicate we are checking jacobians");
+  params.addCommandLineParam<std::string>(
+      "print_component_loops", "--print-component-loops", "Flag to print component loops");
+  params.addCommandLineParam<std::string>(
+      "count_iterations",
+      "--count-iterations",
+      "Flag to add postprocessors for linear and nonlinear iterations");
   return params;
 }
 
-THMApp::THMApp(InputParameters parameters) : MooseApp(parameters)
+THMApp::THMApp(InputParameters parameters)
+  : MooseApp(parameters), _sim(nullptr), _check_jacobian(false)
 {
   THMApp::registerAll(_factory, _action_factory, _syntax);
+}
+
+THMApp::~THMApp() { delete _sim; }
+
+void
+THMApp::buildSimulation()
+{
+  _sim = new Simulation(_action_warehouse);
+}
+
+void
+THMApp::build()
+{
+  _action_warehouse.executeAllActions();
+  _sim->build();
+}
+
+void
+THMApp::setupOptions()
+{
+  if (isParamValid("check_jacobian"))
+    _check_jacobian = true;
+
+  buildSimulation();
+  _pars.set<Simulation *>("_sim") = _sim;
+
+  MooseApp::setupOptions();
+  if (Moose::_warnings_are_errors)
+    _log.setWarningsAsErrors();
+
+  if (isParamValid("print_component_loops"))
+  {
+    build();
+    _sim->printComponentLoops();
+    _ready_to_exit = true;
+  }
+
+  if (isParamValid("count_iterations"))
+    _sim->addIterationCountPostprocessors();
 }
 
 void
