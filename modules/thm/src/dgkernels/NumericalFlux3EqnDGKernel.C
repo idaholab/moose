@@ -1,6 +1,6 @@
 #include "NumericalFlux3EqnDGKernel.h"
 #include "MooseVariable.h"
-#include "RELAP7Indices3Eqn.h"
+#include "THMIndices3Eqn.h"
 
 registerMooseObject("RELAP7App", NumericalFlux3EqnDGKernel);
 
@@ -119,9 +119,9 @@ std::map<unsigned int, unsigned int>
 NumericalFlux3EqnDGKernel::getIndexMapping() const
 {
   std::map<unsigned int, unsigned int> jmap;
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, RELAP73Eqn::EQ_MASS));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, RELAP73Eqn::EQ_MOMENTUM));
-  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, RELAP73Eqn::EQ_ENERGY));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoA_var, THM3Eqn::EQ_MASS));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhouA_var, THM3Eqn::EQ_MOMENTUM));
+  jmap.insert(std::pair<unsigned int, unsigned int>(_rhoEA_var, THM3Eqn::EQ_ENERGY));
 
   return jmap;
 }
