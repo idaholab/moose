@@ -2,7 +2,7 @@
 #include "MooseVariable.h"
 #include "THMIndices3Eqn.h"
 
-registerMooseObject("RELAP7App", BoundaryFlux3EqnBC);
+registerMooseObject("THMApp", BoundaryFlux3EqnBC);
 
 template <>
 InputParameters
