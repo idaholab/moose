@@ -87,8 +87,9 @@
 []
 
 [Outputs]
-  exodus = true
-  csv = true
   print_linear_residuals = false
-  execute_on = 'initial final'
+  [./out]
+    type = Exodus
+    execute_on = 'initial final'
+  [../]
 []

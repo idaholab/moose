@@ -197,7 +197,8 @@
 []
 
 [Outputs]
-  csv = true
-  print_linear_residuals = false
-  execute_on = final
+  [./out]
+    type = CSV
+    execute_on = final
+  [../]
 []

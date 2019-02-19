@@ -168,11 +168,12 @@
 
 [Outputs]
   file_base = bh07
-  exodus = true
-  interval = 10000
-  execute_on = 'initial timestep_end final'
   [./along_line]
     type = CSV
     execute_on = final
+  [../]
+  [./exodus]
+    type = Exodus
+    execute_on = 'initial final'
   [../]
 []

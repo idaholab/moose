@@ -114,8 +114,10 @@
 [Outputs]
   perf_graph = true
   file_base = theis2
-  csv = true
-  execute_on = 'final'
+  [./csv]
+    type = CSV
+    execute_on = final
+  [../]
 []
 
 [ICs]

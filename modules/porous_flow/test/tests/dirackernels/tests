@@ -320,7 +320,7 @@
   [./bh07]
     type = 'CSVDiff'
     input = 'bh07.i'
-    cli_args = 'Outputs/file_base=bh07_csv Outputs/exodus=false'
+    cli_args = 'Outputs/file_base=bh07_csv'
     csvdiff = 'bh07_csv_pp_0003.csv'
     threading = '!pthreads'
     requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'

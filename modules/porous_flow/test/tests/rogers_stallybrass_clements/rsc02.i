@@ -235,21 +235,20 @@
   solve_type = Newton
   petsc_options = '-snes_converged_reason'
   end_time = 5
-
   [./TimeStepper]
     type = FunctionDT
     function = dts
   [../]
 []
 
-
 [Outputs]
   file_base = rsc02
-  interval = 10000
-  execute_on = final
-  exodus = true
   [./along_line]
     type = CSV
     execute_vector_postprocessors_on = final
+  [../]
+  [./exodus]
+    type = Exodus
+    execute_on = 'initial final'
   [../]
 []

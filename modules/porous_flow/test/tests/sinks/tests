@@ -162,7 +162,6 @@
     type = 'CSVDiff'
     input = 'injection_production_eg.i'
     csvdiff = 'injection_production_eg_out_pps_0002.csv'
-    cli_args = 'Executioner/end_time=1E4 Outputs/execute_on=final Outputs/exodus=false Outputs/csv=true'
     rel_err = 1.0E-5
     threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a free boundary condition for multi-phase, multi-component fluids, and a clear example showing how this is possible shall be given'
