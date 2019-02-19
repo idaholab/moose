@@ -138,18 +138,13 @@ Transient::Transient(const InputParameters & parameters)
     _dt_old(_problem.dtOld()),
     _unconstrained_dt(declareRecoverableData<Real>("unconstrained_dt", -1)),
     _at_sync_point(declareRecoverableData<bool>("at_sync_point", false)),
-    _multiapps_converged(declareRecoverableData<bool>("multiapps_converged", true)),
     _last_solve_converged(declareRecoverableData<bool>("last_solve_converged", true)),
     _xfem_repeat_step(false),
-    _xfem_update_count(0),
-    _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
-    _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin")),
     _end_time(getParam<Real>("end_time")),
     _dtmin(getParam<Real>("dtmin")),
     _dtmax(getParam<Real>("dtmax")),
     _num_steps(getParam<unsigned int>("num_steps")),
     _n_startup_steps(getParam<int>("n_startup_steps")),
-    _steps_taken(0),
     _steady_state_detection(getParam<bool>("steady_state_detection")),
     _steady_state_tolerance(getParam<Real>("steady_state_tolerance")),
     _steady_state_start_time(getParam<Real>("steady_state_start_time")),
@@ -275,14 +270,6 @@ Transient::preExecute()
                  "2. If you are developing a new time stepper, make sure that initial time step "
                  "size in your code is computed correctly.");
     _nl.getTimeIntegrator()->init();
-    ++_t_step;
-
-    // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have
-    // a wrong answer and might need to be regolded. The reason is that we actually move the
-    // solution back in time before we actually start solving (which I think is wrong).  So this
-    // call here is to maintain backward compatibility and so that MOOSE is giving the same answer.
-    // However, we might remove this call and regold the test in the future eventually.
-    _problem.advanceState();
   }
 }
 
@@ -303,23 +290,25 @@ Transient::execute()
 {
   preExecute();
 
-  // FIXME: cannot move the following into preExecute because of the way TransientMultiApp is coded.
-  //        We will need to cleanup TransientMultiApp first for the cleanup here.
-  if (_app.isRecovering())
-    incrementStepOrReject();
-
   // Start time loop...
   while (keepGoing())
   {
+    incrementStepOrReject();
     preStep();
     computeDT();
     takeStep();
     endStep();
     postStep();
+  }
 
-    _steps_taken++;
-
-    incrementStepOrReject();
+  if (lastSolveConverged())
+  {
+    _t_step++;
+    if (_picard_solve.hasPicardIteration())
+    {
+      _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
+      _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
+    }
   }
 
   if (!_app.halfTransient())
@@ -349,20 +338,20 @@ Transient::incrementStepOrReject()
 {
   if (lastSolveConverged())
   {
-    if (_xfem_repeat_step)
-    {
-      _time = _time_old;
-    }
-    else
+    if (!_xfem_repeat_step)
     {
 #ifdef LIBMESH_ENABLE_AMR
-      _problem.adaptMesh();
+      if (_t_step != 0)
+        _problem.adaptMesh();
 #endif
 
       _time_old = _time;
       _t_step++;
 
       _problem.advanceState();
+
+      if (_t_step == 1)
+        return;
 
       /*
        * Call the multi-app executioners endStep and
@@ -375,6 +364,7 @@ Transient::incrementStepOrReject()
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
       }
+
       /*
        * Ensure that we increment the sub-application time steps so that
        * when dt selection is made in the master application, we are using
@@ -415,7 +405,7 @@ Transient::takeStep(Real input_dt)
   _time_stepper->step();
   _xfem_repeat_step = _picard_solve.XFEMRepeatStep();
 
-  _multiapps_converged = true;
+  _last_solve_converged = _time_stepper->converged();
 
   if (!(_problem.haveXFEM() && _picard_solve.XFEMRepeatStep()))
   {
@@ -443,22 +433,25 @@ Transient::endStep(Real input_time)
   else
     _time = input_time;
 
-  _last_solve_converged = lastSolveConverged();
-
-  if (_last_solve_converged && !_xfem_repeat_step)
+  if (lastSolveConverged())
   {
-    _nl.getTimeIntegrator()->postStep();
+    if (_xfem_repeat_step)
+      _time = _time_old;
+    else
+    {
+      _nl.getTimeIntegrator()->postStep();
 
-    // Compute the Error Indicators and Markers
-    _problem.computeIndicators();
-    _problem.computeMarkers();
+      // Compute the Error Indicators and Markers
+      _problem.computeIndicators();
+      _problem.computeMarkers();
 
-    // Perform the output of the current time step
-    _problem.outputStep(EXEC_TIMESTEP_END);
+      // Perform the output of the current time step
+      _problem.outputStep(EXEC_TIMESTEP_END);
 
-    // output
-    if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
-      _next_interval_output_time += _time_interval_output_interval;
+      // output
+      if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
+        _next_interval_output_time += _time_interval_output_interval;
+    }
   }
 }
 
@@ -555,33 +548,37 @@ Transient::keepGoing()
   bool keep_going = !_problem.isSolveTerminationRequested();
 
   // Check for stop condition based upon steady-state check flag:
-  if (lastSolveConverged() && !_xfem_repeat_step && _steady_state_detection == true &&
-      _time > _steady_state_start_time)
+  if (lastSolveConverged())
   {
-    // Check solution difference relative norm against steady-state tolerance
-    if (_sln_diff_norm < _steady_state_tolerance)
+    if (!_xfem_repeat_step)
     {
-      _console << "Steady-State Solution Achieved at time: " << _time << std::endl;
-      // Output last solve if not output previously by forcing it
-      keep_going = false;
-    }
-    else // Keep going
-    {
-      // Update solution norm for next time step
-      _old_time_solution_norm = _nl.currentSolution()->l2_norm();
-      // Print steady-state relative error norm
-      _console << "Steady-State Relative Differential Norm: " << _sln_diff_norm << std::endl;
+      if (_steady_state_detection == true && _time > _steady_state_start_time)
+      {
+        // Check solution difference relative norm against steady-state tolerance
+        if (_sln_diff_norm < _steady_state_tolerance)
+        {
+          _console << "Steady-State Solution Achieved at time: " << _time << std::endl;
+          // Output last solve if not output previously by forcing it
+          keep_going = false;
+        }
+        else // Keep going
+        {
+          // Update solution norm for next time step
+          _old_time_solution_norm = _nl.currentSolution()->l2_norm();
+          // Print steady-state relative error norm
+          _console << "Steady-State Relative Differential Norm: " << _sln_diff_norm << std::endl;
+        }
+      }
+
+      // Check for stop condition based upon number of simulation steps and/or solution end time:
+      if (static_cast<unsigned int>(_t_step) >= _num_steps)
+        keep_going = false;
+
+      if ((_time >= _end_time) || (fabs(_time - _end_time) <= _timestep_tolerance))
+        keep_going = false;
     }
   }
-
-  // Check for stop condition based upon number of simulation steps and/or solution end time:
-  if (static_cast<unsigned int>(_t_step) > _num_steps)
-    keep_going = false;
-
-  if ((_time > _end_time) || (fabs(_time - _end_time) <= _timestep_tolerance))
-    keep_going = false;
-
-  if (!lastSolveConverged() && _abort)
+  else if (_abort)
   {
     _console << "Aborting as solve did not converge and input selected to abort" << std::endl;
     keep_going = false;
@@ -598,7 +595,7 @@ Transient::estimateTimeError()
 bool
 Transient::lastSolveConverged() const
 {
-  return _time_stepper->converged();
+  return _last_solve_converged;
 }
 
 void

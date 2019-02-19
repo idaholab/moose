@@ -220,27 +220,17 @@ protected:
   Real & _unconstrained_dt;
   bool & _at_sync_point;
 
-  /// Whether or not the multiapps failed during the last timestem
-  bool & _multiapps_converged;
-
   /// Whether or not the last solve converged
   bool & _last_solve_converged;
 
   /// Whether step should be repeated due to xfem modifying the mesh
   bool _xfem_repeat_step;
-  /// Counter for number of xfem updates that have been performed in the current step
-  unsigned int _xfem_update_count;
-  /// Maximum number of xfem updates per step
-  unsigned int _max_xfem_update;
-  /// Controls whether xfem should update the mesh at the beginning of the time step
-  bool _update_xfem_at_timestep_begin;
 
   Real _end_time;
   Real _dtmin;
   Real _dtmax;
   unsigned int _num_steps;
   int _n_startup_steps;
-  unsigned int _steps_taken;
 
   /**
    * Steady state detection variables:
