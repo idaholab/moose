@@ -2,8 +2,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 40
-  ny = 20
+  nx = 20
+  ny = 10
   ymax = 0.5
 []
 
@@ -21,16 +21,6 @@
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./All]
-        add_variables = true
-        strain = SMALL
-        additional_generate_output = 'strain_yy stress_yy'
-        planar_formulation = PLANE_STRAIN
-      [../]
-    [../]
-  [../]
   [./PhaseField]
     [./Nonconserved]
       [./c]
@@ -39,6 +29,23 @@
         mobility = L
       [../]
     [../]
+  [../]
+  [./TensorMechanics]
+    [./Master]
+      [./mech]
+        add_variables = true
+        strain = SMALL
+        additional_generate_output = 'stress_yy'
+        save_in = 'resid_x resid_y'
+      [../]
+    [../]
+  [../]
+[]
+
+[AuxVariables]
+  [./resid_x]
+  [../]
+  [./resid_y]
   [../]
 []
 
@@ -54,12 +61,6 @@
     variable = disp_y
     component = 1
     c = c
-  [../]
-  [./off_disp]
-    type = AllenCahnElasticEnergyOffDiag
-    variable = c
-    displacements = 'disp_x disp_y'
-    mob_name = L
   [../]
 []
 
@@ -79,7 +80,7 @@
   [./xfix]
     type = PresetBC
     variable = disp_x
-    boundary = right
+    boundary = top
     value = 0
   [../]
 []
@@ -88,15 +89,7 @@
   [./pfbulkmat]
     type = GenericConstantMaterial
     prop_names = 'gc_prop l visco'
-    prop_values = '1e-3 0.05 1e-6'
-  [../]
-  [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    C_ijkl = '127.0 70.8 70.8 127.0 70.8 127.0 73.55 73.55 73.55'
-    fill_method = symmetric9
-    euler_angle_1 = 30
-    euler_angle_2 = 0
-    euler_angle_3 = 0
+    prop_values = '1e-3 0.04 1e-4'
   [../]
   [./define_mobility]
     type = ParsedMaterial
@@ -108,16 +101,21 @@
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
     f_name = kappa_op
-    function = 'gc_prop * l'
+    function = 'gc_prop * l * 3 / 4'
   [../]
-  [./damage_stress]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    C_ijkl = '120.0 80.0'
+    fill_method = symmetric_isotropic
+  [../]
+  [./elastic]
     type = ComputeLinearElasticPFFractureStress
     c = c
     E_name = 'elastic_energy'
     D_name = 'degradation'
-    F_name = 'local_fracture_energy'
-    decomposition_type = stress_spectral
-    use_current_history_variable = true
+    F_name = 'fracture_energy'
+    barrier_energy = 'barrier'
+    decomposition_type = strain_spectral
   [../]
   [./degradation]
     type = DerivativeParsedMaterial
@@ -125,35 +123,42 @@
     args = 'c'
     function = '(1.0-c)^2*(1.0 - eta) + eta'
     constant_names       = 'eta'
-    constant_expressions = '1.0e-6'
+    constant_expressions = '0.0'
     derivative_order = 2
   [../]
-  [./local_fracture_energy]
+  [./fracture_energy]
     type = DerivativeParsedMaterial
-    f_name = local_fracture_energy
+    f_name = fracture_energy
     args = 'c'
     material_property_names = 'gc_prop l'
-    function = 'c^2 * gc_prop / 2 / l'
+    function = '3 * gc_prop / (8 * l) * c'
     derivative_order = 2
   [../]
   [./fracture_driving_energy]
     type = DerivativeSumMaterial
     args = c
-    sum_materials = 'elastic_energy local_fracture_energy'
+    sum_materials = 'elastic_energy fracture_energy'
     derivative_order = 2
     f_name = F
+  [../]
+  [./barrier_energy]
+    type = ParsedMaterial
+    f_name = barrier
+    material_property_names = 'gc_prop l'
+    function = '3 * gc_prop / 16 / l'
   [../]
 []
 
 [Postprocessors]
-  [./av_stress_yy]
-    type = ElementAverageValue
-    variable = stress_yy
+  [./resid_x]
+    type = NodalSum
+    variable = resid_x
+    boundary = 2
   [../]
-  [./av_strain_yy]
-    type = SideAverageValue
-    variable = disp_y
-    boundary = top
+  [./resid_y]
+    type = NodalSum
+    variable = resid_y
+    boundary = 2
   [../]
 []
 
@@ -168,15 +173,15 @@
   type = Transient
 
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_factor_mat_solving_package'
-  petsc_options_value = 'lu superlu_dist'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm      31                  preonly       lu           1'
 
   nl_rel_tol = 1e-8
-  l_tol = 1e-4
-  l_max_its = 100
-  nl_max_its = 10
+  l_max_its = 10
+  nl_max_its = 20
 
-  dt = 5e-5
+  dt = 1e-4
+  dtmin = 1e-4
   num_steps = 2
 []
 

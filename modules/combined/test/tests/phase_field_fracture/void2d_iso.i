@@ -20,7 +20,7 @@
   [./PhaseField]
     [./Nonconserved]
       [./c]
-        free_energy = E_el
+        free_energy = F
         mobility = L
         kappa = kappa_op
       [../]
@@ -90,11 +90,17 @@
     prop_names = 'gc_prop'
     prop_values = 'gb_prop_func'
   [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    C_ijkl = '120.0 80.0'
+    fill_method = symmetric_isotropic
+    elasticity_tensor_prefactor = void_prop_func
+  [../]
   [./define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
     f_name = L
-    function = '1/(gc_prop * visco)'
+    function = '1.0/(gc_prop * visco)'
   [../]
   [./define_kappa]
     type = ParsedMaterial
@@ -102,16 +108,37 @@
     f_name = kappa_op
     function = 'gc_prop * l'
   [../]
-  [./pf_elastic_energy]
-    type = ComputeIsotropicLinearElasticPFFractureStress
+  [./damage_stress]
+    type = ComputeLinearElasticPFFractureStress
     c = c
-    F_name = E_el
+    E_name = 'elastic_energy'
+    D_name = 'degradation'
+    F_name = 'fracture_energy'
+    decomposition_type = strain_spectral
   [../]
-  [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    C_ijkl = '120.0 80.0'
-    fill_method = symmetric_isotropic
-    elasticity_tensor_prefactor = void_prop_func
+  [./degradation]
+    type = DerivativeParsedMaterial
+    f_name = degradation
+    args = 'c'
+    function = '(1.0-c)^2*(1.0 - eta) + eta'
+    constant_names       = 'eta'
+    constant_expressions = '0.0'
+    derivative_order = 2
+  [../]
+  [./fracture_energy]
+    type = DerivativeParsedMaterial
+    f_name = fracture_energy
+    args = 'c'
+    material_property_names = 'gc_prop l'
+    function = 'c^2 * gc_prop / 2 / l'
+    derivative_order = 2
+  [../]
+  [./fracture_driving_energy]
+    type = DerivativeSumMaterial
+    args = c
+    sum_materials = 'elastic_energy fracture_energy'
+    derivative_order = 2
+    f_name = F
   [../]
 []
 

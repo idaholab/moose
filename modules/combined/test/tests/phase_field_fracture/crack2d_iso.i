@@ -24,7 +24,7 @@
   [./PhaseField]
     [./Nonconserved]
       [./c]
-        free_energy = E_el
+        free_energy = F
         kappa = kappa_op
         mobility = L
       [../]
@@ -108,11 +108,37 @@
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
   [../]
-  [./elastic]
-    type = ComputeIsotropicLinearElasticPFFractureStress
+  [./damage_stress]
+    type = ComputeLinearElasticPFFractureStress
     c = c
-    kdamage = 0
-    F_name = E_el
+    E_name = 'elastic_energy'
+    D_name = 'degradation'
+    F_name = 'local_fracture_energy'
+    decomposition_type = strain_spectral
+  [../]
+  [./degradation]
+    type = DerivativeParsedMaterial
+    f_name = degradation
+    args = 'c'
+    function = '(1.0-c)^2*(1.0 - eta) + eta'
+    constant_names       = 'eta'
+    constant_expressions = '0.0'
+    derivative_order = 2
+  [../]
+  [./local_fracture_energy]
+    type = DerivativeParsedMaterial
+    f_name = local_fracture_energy
+    args = 'c'
+    material_property_names = 'gc_prop l'
+    function = 'c^2 * gc_prop / 2 / l'
+    derivative_order = 2
+  [../]
+  [./fracture_driving_energy]
+    type = DerivativeSumMaterial
+    args = c
+    sum_materials = 'elastic_energy local_fracture_energy'
+    derivative_order = 2
+    f_name = F
   [../]
 []
 
@@ -153,6 +179,5 @@
 []
 
 [Outputs]
-  file_base = crack2d_iso_out
   exodus = true
 []
