@@ -13,6 +13,7 @@
 - /Components/Component
 - /Components/GeometricalComponent
 - /Components/PipeBase
+- /Components/SolidWall
 
 - /Controls/ControlData
 - /Controls/CopyPostprocessorValueControl
