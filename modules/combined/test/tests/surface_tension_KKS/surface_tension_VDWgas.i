@@ -283,8 +283,8 @@
     type = DerivativeParsedMaterial
     f_name = fb
     args = 'cvb cgb'
-    material_property_names = 'kToverV nQ Va b f0 kpen kvmatrix kgmatrix cvbubeq cgbubeq'
-    function = 'cgb*kToverV * (-log(nQ*((Va/cgb) - b)) - 1) + f0 + 0.5*kpen*(1.0 - cvb - cgb)^2'
+    material_property_names = 'kToverV nQ Va b f0 kpen kgbub kvbub cvbubeq cgbubeq'
+    function = '0.5*kgbub*(cvb-cvbubeq)^2 + 0.5*kvbub*(cgb-cgbubeq)^2'
   [../]
 
 # Elastic energy of the bubble
@@ -321,8 +321,8 @@
   # constant properties
   [./constants]
     type = GenericConstantMaterial
-    prop_names  = 'M   L   kappa  Va      kvmatrix  kgmatrix  f0      kpen  cvbubeq cgbubeq b      T'
-    prop_values = '0.7 0.7 0.0368 0.03629 223.16    223.16    0.0224  1.0   0.6076  0.3924  0.085  800'
+    prop_names  = 'M   L   kappa  Va      kvmatrix  kgmatrix  kgbub kvbub f0      kpen  cvbubeq cgbubeq b      T'
+    prop_values = '0.7 0.7 0.0368 0.03629 223.16    223.16    2.23  2.23  0.0224  1.0   0.6076  0.3924  0.085  800'
   [../]
   [./cvmatrixeq]
     type = ParsedMaterial
@@ -366,7 +366,7 @@
   [../]
   [./Stiffness_bub]
     type = ComputeElasticityTensor
-    C_ijkl = '0.000778 0.0007935'
+    C_ijkl = '0.0778 0.07935'
     fill_method = symmetric_isotropic
     base_name = bub
   [../]
@@ -434,8 +434,8 @@
   l_max_its = 30
   nl_max_its = 15
   l_tol = 1.0e-4
-  nl_rel_tol = 1.0e-9
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1.0e-10
+  nl_abs_tol = 1e-11
   num_steps = 2
   dt = 0.5
 []
