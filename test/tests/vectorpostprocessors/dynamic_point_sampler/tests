@@ -1,0 +1,23 @@
+[Tests]
+  [dynamic_point_sampler]
+    type = CSVDiff
+    input = dynamic_point_sampler.i
+    csvdiff = 'dynamic_point_sampler_out_dynamic_line_sampler_0001.csv dynamic_point_sampler_out_dynamic_line_sampler_0006.csv'
+
+    issues = "#12934"
+    design = "LineValueSampler.md"
+    requirement = "The system shall support dynamic numbers of sample points during the simulation."
+  []
+
+  [dynamic_point_sampler_transfer]
+    type = CSVDiff
+    input = dynamic_point_sampler.i
+    csvdiff = 'dynamic_point_sampler_out_dynamic_line_sampler_0001.csv dynamic_point_sampler_out_dynamic_line_sampler_0006.csv'
+    cli_args = 'VectorPostprocessors/dynamic_line_sampler/test_transfer_points_vector=true'
+    prereq = 'dynamic_point_sampler'
+
+    issues = "#12934"
+    design = "LineValueSampler.md"
+    requirement = "The system shall support dynamic numbers of sample points during the simulation with move semantics of the points vector."
+  []
+[]

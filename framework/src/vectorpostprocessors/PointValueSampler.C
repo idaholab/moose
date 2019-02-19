@@ -9,6 +9,8 @@
 
 #include "PointValueSampler.h"
 
+#include <numeric>
+
 registerMooseObject("MooseApp", PointValueSampler);
 
 template <>
@@ -27,9 +29,21 @@ PointValueSampler::PointValueSampler(const InputParameters & parameters)
   : PointSamplerBase(parameters)
 {
   _points = getParam<std::vector<Point>>("points");
+}
 
-  _ids.resize(_points.size());
+void
+PointValueSampler::initialize()
+{
+  // Generate new Ids if the point vector has grown (non-negative counting numbers)
+  if (_points.size() > _ids.size())
+  {
+    auto old_size = _ids.size();
+    _ids.resize(_points.size());
+    std::iota(_ids.begin() + old_size, _ids.end(), old_size);
+  }
+  // Otherwise sync the ids array to be smaller if the point vector has been shrunk
+  else if (_points.size() < _ids.size())
+    _ids.resize(_points.size());
 
-  for (unsigned int i = 0; i < _points.size(); i++)
-    _ids[i] = i;
+  PointSamplerBase::initialize();
 }

@@ -7,24 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POINTVALUESAMPLER_H
-#define POINTVALUESAMPLER_H
+#ifndef DYNAMICPOINTVALUESAMPLER_H
+#define DYNAMICPOINTVALUESAMPLER_H
 
 // MOOSE includes
-#include "PointSamplerBase.h"
+#include "LineValueSampler.h"
 
 // Forward Declarations
-class PointValueSampler;
+class DynamicPointValueSampler;
 
 template <>
-InputParameters validParams<PointValueSampler>();
+InputParameters validParams<DynamicPointValueSampler>();
 
-class PointValueSampler : public PointSamplerBase
+class DynamicPointValueSampler : public LineValueSampler
 {
 public:
-  PointValueSampler(const InputParameters & parameters);
+  DynamicPointValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;
+
+protected:
+  const unsigned int _adder;
+
+  const bool _use_transfer;
 };
 
 #endif

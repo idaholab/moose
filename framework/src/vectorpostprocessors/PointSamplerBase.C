@@ -144,6 +144,18 @@ PointSamplerBase::finalize()
   SamplerBase::finalize();
 }
 
+void
+PointSamplerBase::setPointsVector(const std::vector<Point> & points)
+{
+  _points = points;
+}
+
+void
+PointSamplerBase::transferPointsVector(std::vector<Point> && points)
+{
+  _points = std::move(points);
+}
+
 const Elem *
 PointSamplerBase::getLocalElemContainingPoint(const Point & p)
 {

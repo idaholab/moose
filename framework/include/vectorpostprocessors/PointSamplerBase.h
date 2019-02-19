@@ -36,6 +36,9 @@ public:
   virtual void execute();
   virtual void finalize();
 
+  void setPointsVector(const std::vector<Point> & points);
+  void transferPointsVector(std::vector<Point> && points);
+
 protected:
   /**
    * Find the local element that contains the point.  This will attempt to use a cached element to

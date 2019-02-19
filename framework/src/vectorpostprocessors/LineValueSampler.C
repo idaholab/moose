@@ -30,18 +30,17 @@ validParams<LineValueSampler>()
 
 LineValueSampler::LineValueSampler(const InputParameters & parameters)
   : PointSamplerBase(parameters),
-    _line_vector(getParam<Point>("end_point") - getParam<Point>("start_point")),
+    _start_point(getParam<Point>("start_point")),
+    _end_point(getParam<Point>("end_point")),
+    _num_points(
+        declareRestartableData<unsigned int>("num_points", getParam<unsigned int>("num_points"))),
+    _line_vector(_end_point - _start_point),
     _line_vector_norm(_line_vector.norm())
 {
-  Point start_point = getParam<Point>("start_point");
-  Point end_point = getParam<Point>("end_point");
-
   if (MooseUtils::absoluteFuzzyEqual(_line_vector_norm, 0.0))
     mooseError("LineValueSampler: `start_point` and `end_point` must be different.");
 
-  unsigned int num_points = getParam<unsigned int>("num_points");
-
-  generatePointsAndIDs(start_point, end_point, num_points, _points, _ids);
+  generatePointsAndIDs(_start_point, _end_point, _num_points, _points, _ids);
 }
 
 void

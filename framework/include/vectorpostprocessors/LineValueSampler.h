@@ -52,6 +52,11 @@ public:
   Real getValue(Point p) const;
 
 protected:
+  const Point _start_point;
+  const Point _end_point;
+
+  unsigned int & _num_points;
+
   /// Vector connecting the start and end points of the line segment
   const RealVectorValue _line_vector;
 
