@@ -119,8 +119,5 @@
 
 [Outputs]
   file_base = gps_yz_small_out
-  [./exodus]
-    type = Exodus
-    output_dimension = 3
-  [../]
+  exodus = true
 []

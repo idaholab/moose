@@ -122,13 +122,7 @@
 []
 
 [Outputs]
-  [./out]
-    type = Exodus
-    output_dimension = 3
-  [../]
-  [./Console]
-    type = Console
-  [../]
+  exodus = true
 []
 
 [Postprocessors]
