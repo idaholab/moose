@@ -98,7 +98,8 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    _default_ad_real_properties.emplace_back(libmesh_make_unique<ADMaterialPropertyObject<Real>>());
+    _default_ad_real_properties.emplace_back(
+        libmesh_make_unique<ADMaterialPropertyObject<Real>>(true));
     auto & default_property = _default_ad_real_properties.back();
 
     // resize to accomodate maximum number obf qpoints

@@ -60,6 +60,16 @@
     variable = u
     epsilon = -1
     sigma = 6
+    diff = diff
+  [../]
+[]
+
+[ADMaterials]
+  [./ad_coupled_mat]
+    type = ADCoupledMaterial
+    coupled_var = u
+    ad_mat_prop = diff
+    regular_mat_prop = diff_regular
   [../]
 []
 

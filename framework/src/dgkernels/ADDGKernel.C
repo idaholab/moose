@@ -199,5 +199,4 @@ ADDGKernel<compute_stage>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   accumulateTaggedLocalMatrix();
 }
 
-template class ADDGKernel<RESIDUAL>;
-template class ADDGKernel<JACOBIAN>;
+adBaseClass(ADDGKernel);

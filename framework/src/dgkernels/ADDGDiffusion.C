@@ -31,8 +31,8 @@ ADDGDiffusion<compute_stage>::ADDGDiffusion(const InputParameters & parameters)
   : ADDGKernel<compute_stage>(parameters),
     _epsilon(adGetParam<Real>("epsilon")),
     _sigma(adGetParam<Real>("sigma")),
-    _diff(adGetMaterialProperty<Real>("diff")),
-    _diff_neighbor(adGetNeighborMaterialProperty<Real>("diff"))
+    _diff(adGetADMaterialProperty<Real>("diff")),
+    _diff_neighbor(adGetNeighborADMaterialProperty<Real>("diff"))
 {
 }
 

@@ -39,10 +39,10 @@ protected:
 
   Real _epsilon;
   Real _sigma;
-  const MaterialProperty<Real> & _diff;
-  const MaterialProperty<Real> & _diff_neighbor;
+  const ADMaterialProperty(Real) & _diff;
+  const ADMaterialProperty(Real) & _diff_neighbor;
 
-  usingKernelMembers;
+  usingDGKernelMembers;
 };
 
 #endif

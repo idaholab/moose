@@ -55,8 +55,6 @@ class DGKernelBase : public MooseObject,
 public:
   /**
    * Factory constructor initializes all internal references needed for residual computation.
-   *
-   *
    * @param parameters The parameters object for holding additional parameters for kernels and
    * derived kernels
    */
@@ -113,7 +111,6 @@ protected:
   Assembly & _assembly;
   MooseVariable & _var;
   MooseMesh & _mesh;
-  //  unsigned int _dim;
 
   const Elem *& _current_elem;
 
