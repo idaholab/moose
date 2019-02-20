@@ -26,7 +26,7 @@ class TimeSequenceStepperFailTest : public TimeSequenceStepper
 public:
   TimeSequenceStepperFailTest(const InputParameters & parameters);
 
-  virtual bool converged() const override;
+  virtual void step() override;
 
 protected:
   /// stores a copy of the original sequence of time points, is not updated due to failures.

@@ -5,6 +5,29 @@
     exodiff = 'crack2d_iso_out.e'
     abs_zero = 1e-09
     use_old_floor = True
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#9741'
+    requirement = 'The phase-field fracture model shall predict damage evolution using strain spectral decomposition approach for an isotropic elastic material.'
+  [../]
+  [./crack2d_vol_dev]
+    type = 'Exodiff'
+    input = 'crack2d_vol_dev.i'
+    exodiff = 'crack2d_vol_dev_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#12868'
+    requirement = 'The phase-field fracture model shall predict damage evolution using strain volumetric/deviatoric decomposition approach for an isotropic elastic material.'
+  [../]
+  [./crack2d_linear_fracture_energy]
+    type = 'Exodiff'
+    input = 'crack2d_linear_fracture_energy.i'
+    exodiff = 'crack2d_linear_fracture_energy_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#12868'
+    requirement = 'The phase-field fracture model shall predict damage evolution using linear fracture energy for an isotropic elastic material.'
   [../]
   [./crack2d_iso_wo_time]
     type = 'Exodiff'
@@ -12,31 +35,49 @@
     exodiff = 'crack2d_iso_wo_time_out.e'
     abs_zero = 1e-09
     use_old_floor = True
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#10774'
+    requirement = 'The phase-field fracture model shall predict damage evolution for an isotropic elastic material using steady state equation for damage.'
   [../]
   [./crack2d_aniso]
     type = 'Exodiff'
     input = 'crack2d_aniso.i'
     exodiff = 'crack2d_aniso_out.e'
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#11685'
+    requirement = 'The phase-field fracture model shall predict damage evolution using stress spectral decomposition approach for an anistropic elastic material.'
   [../]
   [./crack2d_aniso_hist_false]
     type = 'Exodiff'
     input = 'crack2d_aniso_hist_false.i'
     exodiff = 'crack2d_aniso_hist_false_out.e'
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#11685'
+    requirement = 'The phase-field fracture model shall predict damage evolution using current history variable value for an isotropic elastic material.'
   [../]
   [./crack2d_computeCrackedStress_smallstrain]
     type = 'Exodiff'
     input = 'crack2d_computeCrackedStress_smallstrain.i'
     exodiff = 'crack2d_computeCrackedStress_smallstrain_out.e'
+    design = 'ComputeCrackedStress.md'
+    issues = '#11685'
+    requirement = 'The phase-field fracture model shall predict damage evolution for a small deformation problem.'
   [../]
   [./crack2d_computeCrackedStress_finitestrain_elastic]
     type = 'Exodiff'
     input = 'crack2d_computeCrackedStress_finitestrain_elastic.i'
     exodiff = 'crack2d_computeCrackedStress_finitestrain_elastic_out.e'
+    design = 'ComputeCrackedStress.md'
+    issues = '#11685'
+    requirement = 'The phase-field fracture model shall predict damage evolution for a finite deformation problem.'
   [../]
   [./crack2d_computeCrackedStress_finitestrain_plastic]
     type = 'Exodiff'
     input = 'crack2d_computeCrackedStress_finitestrain_plastic.i'
     exodiff = 'crack2d_computeCrackedStress_finitestrain_plastic_out.e'
+    design = 'ComputeCrackedStress.md'
+    issues = '#11685'
+    requirement = 'The phase-field fracture model shall predict damage evolution for a finte deformation problem with plasticity.'
   [../]
   [./void2d_iso]
     type = 'Exodiff'
@@ -44,5 +85,8 @@
     exodiff = 'void2d_iso_out.e'
     abs_zero = 1e-09
     use_old_floor = True
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#9741'
+    requirement = 'The phase-field fracture model shall predict damage evolution for an isotropic elastic material with a void.'
   [../]
 [../]

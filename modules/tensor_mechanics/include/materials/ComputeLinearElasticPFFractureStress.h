@@ -10,7 +10,9 @@
 #ifndef COMPUTELINEARELASTICPFFRACTURESTRESS_H
 #define COMPUTELINEARELASTICPFFRACTURESTRESS_H
 
-#include "ComputeStressBase.h"
+#include "ComputePFFractureStressBase.h"
+#include "MooseEnum.h"
+#include "GuaranteeConsumer.h"
 
 class ComputeLinearElasticPFFractureStress;
 
@@ -19,53 +21,49 @@ InputParameters validParams<ComputeLinearElasticPFFractureStress>();
 
 /**
  * Phase-field fracture
- * This class computes the stress and energy contribution to fracture
- * Small strain Anisotropic Elastic formulation
- * Stiffness matrix scaled for heterogeneous elasticity property
+ * This class computes the stress and energy contribution for the
+ * small strain Linear Elastic formulation of phase field fracture
  */
-class ComputeLinearElasticPFFractureStress : public ComputeStressBase
+class ComputeLinearElasticPFFractureStress : public ComputePFFractureStressBase,
+                                             public GuaranteeConsumer
 {
 public:
   ComputeLinearElasticPFFractureStress(const InputParameters & parameters);
 
+  void initialSetup() override;
+
 protected:
-  virtual void computeQpStress();
+  virtual void computeQpStress() override;
 
-  /// Use current value of history variable
-  bool _use_current_hist;
+  /**
+   * Method to split elastic energy based on strain spectral decomposition
+   * @param F_pos tensile part of total elastic energy
+   * @param F_neg compressive part of total elastic energy
+   */
+  void computeStrainSpectral(Real & F_pos, Real & F_neg);
 
-  /// Base name of the stress and strain modified to include cracks
-  const std::string _uncracked_base_name;
+  /**
+   * Method to split elastic energy based on strain volumetric/deviatoric decomposition
+   * @param F_pos tensile part of total elastic energy
+   * @param F_neg compressive part of total elastic energy
+   */
+  void computeStrainVolDev(Real & F_pos, Real & F_neg);
 
-  /// Variable defining the phase field damage parameter
-  const VariableValue & _c;
+  /**
+   * Method to split elastic energy based on stress spectral decomposition
+   * @param F_pos tensile part of total elastic energy
+   * @param F_neg compressive part of total elastic energy
+   */
+  void computeStressSpectral(Real & F_pos, Real & F_neg);
 
-  /// Critical energy release rate for fracture
-  const MaterialProperty<Real> & _gc_prop;
-
-  /// Characteristic length, controls damage zone thickness
-  const MaterialProperty<Real> & _l;
-
-  // Viscosity, defining how quickly the crack propagates
-  const MaterialProperty<Real> & _visco;
-
-  /// Small number to avoid non-positive definiteness at or near complete damage
-  Real _kdamage;
-
-  MaterialProperty<Real> & _F;
-  MaterialProperty<Real> & _dFdc;
-  MaterialProperty<Real> & _d2Fdc2;
-  MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;
-  MaterialProperty<RankTwoTensor> & _dstress_dc;
-
-  MaterialProperty<Real> & _hist;
-  const MaterialProperty<Real> & _hist_old;
-
-  /// Property where the value for kappa will be defined
-  MaterialProperty<Real> & _kappa;
-
-  /// Property where the value for L will be defined
-  MaterialProperty<Real> & _L;
+  /// Decomposittion type
+  enum class Decomposition_type
+  {
+    strain_spectral,
+    strain_vol_dev,
+    stress_spectral,
+    none
+  } _decomposition_type;
 };
 
-#endif // COMPUTELINEARELASTICPFFRACTURESTRESS_H
+#endif
