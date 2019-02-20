@@ -90,10 +90,14 @@ validParams<Executioner>()
   params.addParam<unsigned int>(
       "picard_max_its",
       1,
-      "Maximum number of times each timestep will be solved.  Mainly used when "
+      "Specifies the maximum number of Picard iterations.  Mainly used when "
       "wanting to do Picard iterations with MultiApps that are set to "
       "execute_on timestep_end or timestep_begin. Setting this parameter to 1 turns off the Picard "
       "iterations.");
+  params.addParam<bool>("disable_picard_residual_norm_check",
+                        false,
+                        "Disable the Picard residual norm evaluation thus the three parameters "
+                        "picard_rel_tol, picard_abs_tol and picard_force_norms.");
   params.addParam<Real>("picard_rel_tol",
                         1e-8,
                         "The relative nonlinear residual drop to shoot for "
@@ -121,7 +125,8 @@ validParams<Executioner>()
                                             std::vector<std::string>(),
                                             "List of variables to relax during Picard Iteration");
 
-  params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol picard_force_norms "
+  params.addParamNamesToGroup("picard_max_its disable_picard_residual_norm_check picard_rel_tol "
+                              "picard_abs_tol picard_force_norms "
                               "relaxation_factor relaxed_variables",
                               "Picard");
 

@@ -110,6 +110,8 @@ protected:
   unsigned int _picard_max_its;
   /// Whether or not we activate Picard iteration
   bool _has_picard_its;
+  /// Whether or not to use residual norm to check the Picard convergence
+  bool _has_picard_norm;
   /// Relative tolerance on residual norm
   Real _picard_rel_tol;
   /// Absolute tolerance on residual norm

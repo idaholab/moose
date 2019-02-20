@@ -25,6 +25,7 @@ PicardSolve::PicardSolve(Executioner * ex)
     _nl(_problem.getNonlinearSystemBase()),
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
     _has_picard_its(_picard_max_its > 1),
+    _has_picard_norm(!getParam<bool>("disable_picard_residual_norm_check")),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _picard_force_norms(getParam<bool>("picard_force_norms")),
@@ -50,6 +51,8 @@ PicardSolve::solve()
 
   Real current_dt = _problem.dt();
 
+  _picard_timestep_begin_norm.clear();
+  _picard_timestep_end_norm.clear();
   _picard_timestep_begin_norm.resize(_picard_max_its);
   _picard_timestep_end_norm.resize(_picard_max_its);
 
@@ -93,21 +96,23 @@ PicardSolve::solve()
     }
   }
 
-  _picard_it = 0;
   for (_picard_it = 0; _picard_it < _picard_max_its; ++_picard_it)
   {
     if (_has_picard_its)
     {
       if (_picard_it == 0)
       {
-        // First Picard iteration - need to save off the initial nonlinear residual
-        _picard_initial_norm = _problem.computeResidualL2Norm();
-        _console << COLOR_MAGENTA << "Initial Picard Norm: " << COLOR_DEFAULT;
-        if (_picard_initial_norm == std::numeric_limits<Real>::max())
-          _console << " MAX ";
-        else
-          _console << std::scientific << _picard_initial_norm;
-        _console << COLOR_DEFAULT << "\n\n";
+        if (_has_picard_norm)
+        {
+          // First Picard iteration - need to save off the initial nonlinear residual
+          _picard_initial_norm = _problem.computeResidualL2Norm();
+          _console << COLOR_MAGENTA << "Initial Picard Norm: " << COLOR_DEFAULT;
+          if (_picard_initial_norm == std::numeric_limits<Real>::max())
+            _console << " MAX ";
+          else
+            _console << std::scientific << _picard_initial_norm;
+          _console << COLOR_DEFAULT << "\n\n";
+        }
       }
       else
       {
@@ -136,32 +141,35 @@ PicardSolve::solve()
     {
       if (_has_picard_its)
       {
-        _console << "\n 0 Picard |R| = "
-                 << Console::outputNorm(std::numeric_limits<Real>::max(), _picard_initial_norm)
-                 << '\n';
-
-        for (unsigned int i = 0; i <= _picard_it; ++i)
+        if (_has_picard_norm)
         {
-          Real max_norm = std::max(_picard_timestep_begin_norm[i], _picard_timestep_end_norm[i]);
-          _console << std::setw(2) << i + 1
-                   << " Picard |R| = " << Console::outputNorm(_picard_initial_norm, max_norm)
+          _console << "\n 0 Picard |R| = "
+                   << Console::outputNorm(std::numeric_limits<Real>::max(), _picard_initial_norm)
                    << '\n';
-        }
 
-        Real max_norm = std::max(_picard_timestep_begin_norm[_picard_it],
-                                 _picard_timestep_end_norm[_picard_it]);
+          for (unsigned int i = 0; i <= _picard_it; ++i)
+          {
+            Real max_norm = std::max(_picard_timestep_begin_norm[i], _picard_timestep_end_norm[i]);
+            _console << std::setw(2) << i + 1
+                     << " Picard |R| = " << Console::outputNorm(_picard_initial_norm, max_norm)
+                     << '\n';
+          }
 
-        Real max_relative_drop = max_norm / _picard_initial_norm;
+          Real max_norm = std::max(_picard_timestep_begin_norm[_picard_it],
+                                   _picard_timestep_end_norm[_picard_it]);
 
-        if (max_norm < _picard_abs_tol)
-        {
-          _picard_status = MoosePicardConvergenceReason::CONVERGED_ABS;
-          break;
-        }
-        if (max_relative_drop < _picard_rel_tol)
-        {
-          _picard_status = MoosePicardConvergenceReason::CONVERGED_RELATIVE;
-          break;
+          Real max_relative_drop = max_norm / _picard_initial_norm;
+
+          if (max_norm < _picard_abs_tol)
+          {
+            _picard_status = MoosePicardConvergenceReason::CONVERGED_ABS;
+            break;
+          }
+          if (max_relative_drop < _picard_rel_tol)
+          {
+            _picard_status = MoosePicardConvergenceReason::CONVERGED_RELATIVE;
+            break;
+          }
         }
         if (_executioner.augmentedPicardConvergenceCheck())
         {
@@ -261,7 +269,7 @@ PicardSolve::solveStep(Real begin_norm_old,
 
   _problem.execute(EXEC_TIMESTEP_BEGIN);
 
-  if (_has_picard_its)
+  if (_has_picard_its && _has_picard_norm)
     if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _picard_force_norms)
     {
       begin_norm = _problem.computeResidualL2Norm();
@@ -342,7 +350,7 @@ PicardSolve::solveStep(Real begin_norm_old,
 
   _executioner.postSolve();
 
-  if (_has_picard_its)
+  if (_has_picard_its && _has_picard_norm)
     if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _picard_force_norms)
     {
       end_norm = _problem.computeResidualL2Norm();
