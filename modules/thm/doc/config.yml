@@ -24,6 +24,12 @@ Extensions:
             - ${MOOSE_DIR}/framework/include
         remove:
             framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
+            thm:
+              - /Modules/FluidProperties/LinearFluidProperties
+              - /Modules/FluidProperties/StiffenedGas7EqnFluidProperties
+              - /Modules/FluidProperties/StiffenedGasLiquidFluidProperties
+        alias:
+            /FluidProperties: /Modules/FluidProperties
 
     MooseDocs.extensions.common:
         shortcuts:

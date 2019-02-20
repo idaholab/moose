@@ -1,0 +1,25 @@
+#include "HeatStructureEnergyRZ.h"
+
+registerMooseObject("THMApp", HeatStructureEnergyRZ);
+
+template <>
+InputParameters
+validParams<HeatStructureEnergyRZ>()
+{
+  InputParameters params = validParams<HeatStructureEnergyBase>();
+  params += validParams<RZSymmetry>();
+  params.addClassDescription("Computes the total energy for a cylindrical heat structure.");
+  return params;
+}
+
+HeatStructureEnergyRZ::HeatStructureEnergyRZ(const InputParameters & parameters)
+  : HeatStructureEnergyBase(parameters), RZSymmetry(parameters)
+{
+}
+
+Real
+HeatStructureEnergyRZ::computeQpIntegral()
+{
+  Real r = computeRadius(_q_point[_qp]);
+  return 2. * libMesh::pi * r * HeatStructureEnergyBase::computeQpIntegral();
+}
