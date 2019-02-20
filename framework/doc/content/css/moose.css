@@ -168,6 +168,10 @@ pre[class*="language-"]
     line-height: 1.15;
 }
 
+pre.moose-pre{
+    max-height:350px;
+}
+
 code, kbd, pre, samp {
     font-family: monospace, monospace;
     font-size: 1em;
