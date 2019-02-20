@@ -55,6 +55,20 @@ public:
    */
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
 
+  /**
+   * Gets the gravity angle for this component
+   *
+   * @return gravity angle for this component
+   */
+  virtual const Real & getGravityAngle() const { return _gravity_angle; }
+
+  /**
+   * Gets the gravity angle type for this component
+   *
+   * @return gravity angle type for this component
+   */
+  virtual const EGravityAngleType & getGravityAngleType() const { return _gravity_angle_type; }
+
 protected:
   virtual void check() const override;
   virtual void computeMeshTransformation();
@@ -91,7 +105,7 @@ protected:
    *
    * @param[in] gravity_angle   Angle between orientation vector and gravity vector, in degrees
    */
-  EGravityAngleType getGravityAngleType(const Real & gravity_angle) const;
+  EGravityAngleType determineGravityAngleType(const Real & gravity_angle) const;
 
   /// Physical position in the space
   const Point & _position;

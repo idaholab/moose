@@ -3,8 +3,8 @@
 
 #include "FEProblem.h"
 #include "THMApp.h"
-#include "Logger.h"
 #include "ControlData.h"
+#include "LoggingInterface.h"
 
 class ActionWarehouse;
 class Component;
@@ -13,7 +13,7 @@ class THMMesh;
 /**
  * Main class for simulation (the driver of the simulation)
  */
-class Simulation
+class Simulation : public LoggingInterface
 {
 public:
   Simulation(ActionWarehouse & action_warehouse);
@@ -384,24 +384,6 @@ public:
       logError("Trying to declare '", name, "', but it was already declared.");
 
     return data;
-  }
-
-  /**
-   * Logs an error
-   */
-  template <typename... Args>
-  void logError(Args &&... args) const
-  {
-    _app.log().add(Logger::ERROR, std::forward<Args>(args)...);
-  }
-
-  /**
-   * Logs a warning
-   */
-  template <typename... Args>
-  void logWarning(Args &&... args) const
-  {
-    _app.log().add(Logger::WARNING, std::forward<Args>(args)...);
   }
 
   /**

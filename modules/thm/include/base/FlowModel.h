@@ -43,6 +43,11 @@ public:
    */
   static MooseEnum getFlowEquationType(const std::string & name = "");
 
+  /**
+   * Gets a vector of the solution variables
+   */
+  std::vector<VariableName> getSolutionVariables() const { return _solution_vars; }
+
   /// Spatial discretization type
   enum ESpatialDiscretizationType
   {

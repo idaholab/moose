@@ -86,6 +86,7 @@ Component::split(const std::string & rname)
 
 Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
+    LoggingInterface(dynamic_cast<THMApp &>(MooseObject::_app), name()),
 
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
@@ -149,7 +150,7 @@ void
 Component::connectObject(const InputParameters & params,
                          const std::string & rname,
                          const std::string & mooseName,
-                         const std::string & name)
+                         const std::string & name) const
 {
   connectObject(params, rname, mooseName, name, name);
 }
@@ -159,7 +160,7 @@ Component::connectObject(const InputParameters & params,
                          const std::string & /*rname*/,
                          const std::string & mooseName,
                          const std::string & name,
-                         const std::string & par_name)
+                         const std::string & par_name) const
 {
   MooseObjectParameterName alias("component", this->name(), name, "::");
   MooseObjectParameterName par_value(params.get<std::string>("_moose_base"), mooseName, par_name);
@@ -187,7 +188,7 @@ Component::addDependency(const std::string & dependency)
 void
 Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
                                               const std::string & control_name,
-                                              const std::string & param)
+                                              const std::string & param) const
 {
   Function & fn = _sim.getFunction(fn_name);
   if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
