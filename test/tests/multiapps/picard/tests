@@ -65,6 +65,16 @@
     requirement = "The system shall allow steady-state Picard iteration with multiapps"
   [../]
 
+  [./steady_with_custom_convergence_check]
+    type = 'Exodiff'
+    input = 'steady_custom_picard_master.i'
+    exodiff = 'steady_custom_picard_master_out.e steady_custom_picard_master_out_sub0.e'
+    recover = false
+    design = 'multiapps/FullSolveMultiApp.md'
+    issues = '#9038'
+    requirement = "The system shall allow custom convergence check on Picard iteration with derived executioners"
+  [../]
+
   [./steady_with_pseudo_stransient_sub]
     type = 'Exodiff'
     input = 'pseudo_transient_picard_master.i'
