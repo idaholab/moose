@@ -6,6 +6,7 @@
 #include "Simulation.h"
 #include "InputParameterWarehouse.h"
 #include "THMApp.h"
+#include "LoggingInterface.h"
 
 class Component;
 class FEProblem;
@@ -17,7 +18,7 @@ InputParameters validParams<Component>();
 /**
  * Base class for THM components
  */
-class Component : public THMObject
+class Component : public THMObject, public LoggingInterface
 {
 public:
   Component(const InputParameters & parameters);
@@ -113,7 +114,7 @@ public:
   void connectObject(const InputParameters & params,
                      const std::string & rname,
                      const std::string & mooseName,
-                     const std::string & name);
+                     const std::string & name) const;
   /**
    * Connect with control logic
    */
@@ -121,7 +122,18 @@ public:
                      const std::string & rname,
                      const std::string & mooseName,
                      const std::string & name,
-                     const std::string & par_name);
+                     const std::string & par_name) const;
+
+  /**
+   * Makes a function controllable if it is constant
+   *
+   * @param[in] fn_name  name of the function
+   * @param[in] control_name  name of control parameter
+   * @param[in] param  name of controlled parameter
+   */
+  void makeFunctionControllableIfConstant(const FunctionName & fn_name,
+                                          const std::string & control_name,
+                                          const std::string & param = "value") const;
 
   /**
    * Throws an error if the supplied setup status of this component has not been reached
@@ -142,6 +154,11 @@ public:
                              const std::string & suffix = "");
   static std::string
   genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
+
+  /**
+   * Gets gravity magnitude
+   */
+  Real getGravityMagnitude() const { return _gravity_magnitude; }
 
 protected:
   /**
@@ -179,17 +196,6 @@ protected:
    * @param[in] dependency   name of component to add to list of dependencies
    */
   void addDependency(const std::string & dependency);
-
-  /**
-   * Makes a function controllable if it is constant
-   *
-   * @param[in] fn_name  name of the function
-   * @param[in] control_name  name of control parameter
-   * @param[in] param  name of controlled parameter
-   */
-  void makeFunctionControllableIfConstant(const FunctionName & fn_name,
-                                          const std::string & control_name,
-                                          const std::string & param = "value");
 
   /**
    * Gets an enum parameter
@@ -412,24 +418,6 @@ protected:
 
   /// Gets the next nodeset or sideset ID
   virtual unsigned int getNextBoundaryId();
-
-  /**
-   * Logs an error
-   */
-  template <typename... Args>
-  void logError(Args &&... args) const
-  {
-    _app.log().add(Logger::ERROR, name(), ": ", std::forward<Args>(args)...);
-  }
-
-  /**
-   * Logs a warning
-   */
-  template <typename... Args>
-  void logWarning(Args &&... args) const
-  {
-    _app.log().add(Logger::WARNING, name(), ": ", std::forward<Args>(args)...);
-  }
 
   /**
    * Split the control logic name into "section name" and "property name"

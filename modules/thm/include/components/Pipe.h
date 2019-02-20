@@ -4,6 +4,7 @@
 #include "PipeBase.h"
 
 class Pipe;
+class ClosuresBase;
 
 template <>
 InputParameters validParams<Pipe>();
@@ -30,6 +31,46 @@ public:
   const BoundaryName & getNodesetName() const;
   unsigned int getSubdomainID() const override;
   virtual bool isHorizontal() const override { return _is_horizontal; }
+
+  /**
+   * Gets heat transfer geometry
+   */
+  EConvHeatTransGeom getHeatTransferGeometry() const { return _HT_geometry; }
+
+  /**
+   * Gets temperature mode flag
+   */
+  bool getTemperatureMode() const { return _temperature_mode; }
+
+  /**
+   * Gets the number of heat transfer connections
+   */
+  unsigned int getNumberOfHeatTransferConnections() const { return _n_heat_transfer_connections; }
+
+  /**
+   * Gets 1-phase wall heat transfer coefficient names for connected heat transfers
+   */
+  std::vector<MaterialPropertyName> getWallHTCNames1Phase() const { return _Hw_1phase_names; }
+
+  /**
+   * Gets liquid wall heat transfer coefficient names for connected heat transfers
+   */
+  std::vector<MaterialPropertyName> getWallHTCNamesLiquid() const { return _Hw_liquid_names; }
+
+  /**
+   * Gets vapor wall heat transfer coefficient names for connected heat transfers
+   */
+  std::vector<MaterialPropertyName> getWallHTCNamesVapor() const { return _Hw_vapor_names; }
+
+  /**
+   * Gets heated perimeter names for connected heat transfers
+   */
+  std::vector<VariableName> getHeatedPerimeterNames() const { return _P_hf_names; }
+
+  /**
+   * Gets wall temperature names for connected heat transfers
+   */
+  std::vector<VariableName> getWallTemperatureNames() const { return _T_wall_names; }
 
   /**
    * Adds the name of a heat transfer component to the pipe's list.
@@ -60,6 +101,9 @@ protected:
   virtual void init() override;
   virtual void initSecondary() override;
   virtual void check() const override;
+
+  virtual std::shared_ptr<ClosuresBase> buildClosures();
+
   virtual void buildMeshNodes();
 
   /**
@@ -69,6 +113,9 @@ protected:
 
   /// The name of used closures
   const MooseEnum & _closures_name;
+
+  /// Closures object
+  std::shared_ptr<ClosuresBase> _closures;
 
   /// True if the user provided a function describing the area of the pipe
   bool _const_A;
@@ -126,13 +173,8 @@ protected:
   virtual void setup2Phase();
 
   virtual void setupVolumeFraction();
-  virtual void setupWallFriction1Phase();
-  virtual void setupWallFriction2Phase();
   virtual void setupDh();
-  virtual void setupHw1Phase();
-  virtual void setupHw2Phase();
   virtual void addFormLossObjects();
-  virtual void addWallTemperatureObjects();
 
   /**
    * Populates heat connection variable names lists

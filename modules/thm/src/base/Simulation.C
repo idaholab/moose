@@ -11,7 +11,8 @@
 #include "THMMesh.h"
 
 Simulation::Simulation(ActionWarehouse & action_warehouse)
-  : _action_warehouse(action_warehouse),
+  : LoggingInterface(dynamic_cast<THMApp &>(action_warehouse.mooseApp())),
+    _action_warehouse(action_warehouse),
     _fe_problem(nullptr),
     _app(dynamic_cast<THMApp &>(_action_warehouse.mooseApp())),
     _factory(_app.getFactory()),

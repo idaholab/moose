@@ -25,6 +25,12 @@ std::set<std::string> THMApp::_chf_table_types;
 std::string THMApp::_default_chf_table_type;
 std::map<std::string, std::string> THMApp::_chf_name_map;
 
+std::set<std::string> THMApp::_closures_options;
+std::string THMApp::_default_closures_option;
+bool THMApp::_default_closures_option_has_been_set = false;
+std::map<std::string, std::string> THMApp::_closures_class_names_1phase;
+std::map<std::string, std::string> THMApp::_closures_class_names_2phase;
+
 namespace THM
 {
 
@@ -118,6 +124,8 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::associateSyntax(s);
   THM::registerActions(s);
 
+  registerClosuresOption("simple", "Closures1PhaseSimple", "Closures2PhaseSimple", true);
+
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
   registerFlowModel(THM::FM_TWO_PHASE, FlowModelTwoPhase);
@@ -192,6 +200,48 @@ THMApp::registerCriticalHeatFluxTableType(const std::string & chf_table_type, bo
   _chf_table_types.insert(chf_table_type_lc);
   if (is_default)
     _default_chf_table_type = chf_table_type_lc;
+}
+
+const std::string &
+THMApp::defaultClosuresOption()
+{
+  if (_default_closures_option_has_been_set)
+    return _default_closures_option;
+  else
+    mooseError("No default closures option has been registered.");
+}
+
+const std::string &
+THMApp::getClosuresClassName(const MooseEnum & closures_option,
+                             const THM::FlowModelID & flow_model_id) const
+{
+  const std::map<std::string, std::string> & closures_class_map =
+      flow_model_id == THM::FM_SINGLE_PHASE ? _closures_class_names_1phase
+                                            : _closures_class_names_2phase;
+
+  const std::string closures_option_lc = MooseUtils::toLower(closures_option);
+
+  if (closures_class_map.find(closures_option_lc) == closures_class_map.end())
+    mooseError("The closures option '" + closures_option_lc + "' is not registered.");
+  return closures_class_map.at(closures_option_lc);
+}
+
+void
+THMApp::registerClosuresOption(const std::string & closures_option,
+                               const std::string & class_name_1phase,
+                               const std::string & class_name_2phase,
+                               bool is_default)
+{
+  const std::string closures_option_lc = MooseUtils::toLower(closures_option);
+  _closures_options.insert(closures_option_lc);
+  if (is_default)
+  {
+    _default_closures_option = closures_option_lc;
+    _default_closures_option_has_been_set = true;
+  }
+
+  _closures_class_names_1phase[closures_option_lc] = class_name_1phase;
+  _closures_class_names_2phase[closures_option_lc] = class_name_2phase;
 }
 
 //
