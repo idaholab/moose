@@ -11,16 +11,6 @@
 
 std::map<THM::FlowModelID, std::string> THMApp::_flow_model_map;
 
-std::set<std::string> THMApp::_closure_types;
-std::string THMApp::_default_closure_type;
-std::map<std::string, std::string> THMApp::_whtc_3eqn_name_map;
-std::map<std::string, std::string> THMApp::_wfc_3eqn_name_map;
-std::map<std::string, std::string> THMApp::_whtc_7eqn_name_map;
-std::map<std::string, std::string> THMApp::_wfc_7eqn_name_map;
-std::map<std::string, std::string> THMApp::_iht_name_map;
-std::map<std::string, std::string> THMApp::_ifc_name_map;
-std::map<std::string, std::string> THMApp::_sia_name_map;
-std::map<std::string, std::string> THMApp::_frm_name_map;
 std::set<std::string> THMApp::_chf_table_types;
 std::string THMApp::_default_chf_table_type;
 std::map<std::string, std::string> THMApp::_chf_name_map;
@@ -165,32 +155,10 @@ THMApp::raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf
       "The specified fluid properties object, '", fp.name(), "', must be derived from ", mbdf, ".");
 }
 
-const std::string &
-THMApp::getClosureMapEntry(const std::map<std::string, std::string> & closure_map,
-                           const std::string & closure_name,
-                           const std::string & description) const
-{
-  const std::string closure_name_lower_case = MooseUtils::toLower(closure_name);
-
-  if (closure_map.find(closure_name_lower_case) == closure_map.end())
-    mooseError("The closure '" + closure_name_lower_case + "' has no registered class for '" +
-               description + "'");
-  return closure_map.at(closure_name_lower_case);
-}
-
 void
 THMApp::registerApps()
 {
   registerApp(THMApp);
-}
-
-void
-THMApp::registerClosureType(const std::string & closure_type, bool is_default)
-{
-  std::string closure_type_lc = MooseUtils::toLower(closure_type);
-  _closure_types.insert(closure_type_lc);
-  if (is_default)
-    _default_closure_type = closure_type_lc;
 }
 
 void
