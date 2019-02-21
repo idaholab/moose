@@ -112,7 +112,7 @@ protected:
   virtual void addCommonObjects();
 
   /// The name of used closures
-  const MooseEnum & _closures_name;
+  const std::string & _closures_name;
 
   /// Closures object
   std::shared_ptr<ClosuresBase> _closures;

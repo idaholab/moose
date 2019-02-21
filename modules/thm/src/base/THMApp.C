@@ -11,25 +11,11 @@
 
 std::map<THM::FlowModelID, std::string> THMApp::_flow_model_map;
 
-std::set<std::string> THMApp::_closure_types;
-std::string THMApp::_default_closure_type;
-std::map<std::string, std::string> THMApp::_whtc_3eqn_name_map;
-std::map<std::string, std::string> THMApp::_wfc_3eqn_name_map;
-std::map<std::string, std::string> THMApp::_whtc_7eqn_name_map;
-std::map<std::string, std::string> THMApp::_wfc_7eqn_name_map;
-std::map<std::string, std::string> THMApp::_iht_name_map;
-std::map<std::string, std::string> THMApp::_ifc_name_map;
-std::map<std::string, std::string> THMApp::_sia_name_map;
-std::map<std::string, std::string> THMApp::_frm_name_map;
 std::set<std::string> THMApp::_chf_table_types;
 std::string THMApp::_default_chf_table_type;
 std::map<std::string, std::string> THMApp::_chf_name_map;
 
-std::set<std::string> THMApp::_closures_options;
-std::string THMApp::_default_closures_option;
-bool THMApp::_default_closures_option_has_been_set = false;
-std::map<std::string, std::string> THMApp::_closures_class_names_1phase;
-std::map<std::string, std::string> THMApp::_closures_class_names_2phase;
+std::map<THM::FlowModelID, std::map<std::string, std::string>> THMApp::_closures_class_names_map;
 
 namespace THM
 {
@@ -124,7 +110,9 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::associateSyntax(s);
   THM::registerActions(s);
 
-  registerClosuresOption("simple", "Closures1PhaseSimple", "Closures2PhaseSimple", true);
+  registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_SINGLE_PHASE);
+  registerClosuresOption("simple", "Closures2PhaseSimple", THM::FM_TWO_PHASE);
+  registerClosuresOption("simple", "Closures2PhaseSimple", THM::FM_TWO_PHASE_NCG);
 
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
@@ -165,32 +153,10 @@ THMApp::raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf
       "The specified fluid properties object, '", fp.name(), "', must be derived from ", mbdf, ".");
 }
 
-const std::string &
-THMApp::getClosureMapEntry(const std::map<std::string, std::string> & closure_map,
-                           const std::string & closure_name,
-                           const std::string & description) const
-{
-  const std::string closure_name_lower_case = MooseUtils::toLower(closure_name);
-
-  if (closure_map.find(closure_name_lower_case) == closure_map.end())
-    mooseError("The closure '" + closure_name_lower_case + "' has no registered class for '" +
-               description + "'");
-  return closure_map.at(closure_name_lower_case);
-}
-
 void
 THMApp::registerApps()
 {
   registerApp(THMApp);
-}
-
-void
-THMApp::registerClosureType(const std::string & closure_type, bool is_default)
-{
-  std::string closure_type_lc = MooseUtils::toLower(closure_type);
-  _closure_types.insert(closure_type_lc);
-  if (is_default)
-    _default_closure_type = closure_type_lc;
 }
 
 void
@@ -203,45 +169,30 @@ THMApp::registerCriticalHeatFluxTableType(const std::string & chf_table_type, bo
 }
 
 const std::string &
-THMApp::defaultClosuresOption()
-{
-  if (_default_closures_option_has_been_set)
-    return _default_closures_option;
-  else
-    mooseError("No default closures option has been registered.");
-}
-
-const std::string &
-THMApp::getClosuresClassName(const MooseEnum & closures_option,
+THMApp::getClosuresClassName(const std::string & closures_option,
                              const THM::FlowModelID & flow_model_id) const
 {
-  const std::map<std::string, std::string> & closures_class_map =
-      flow_model_id == THM::FM_SINGLE_PHASE ? _closures_class_names_1phase
-                                            : _closures_class_names_2phase;
-
   const std::string closures_option_lc = MooseUtils::toLower(closures_option);
 
-  if (closures_class_map.find(closures_option_lc) == closures_class_map.end())
+  if (_closures_class_names_map.find(flow_model_id) != _closures_class_names_map.end())
+  {
+    const auto & map_for_flow_model = _closures_class_names_map.at(flow_model_id);
+    if (map_for_flow_model.find(closures_option_lc) != map_for_flow_model.end())
+      return map_for_flow_model.at(closures_option_lc);
+    else
+      mooseError("The closures option '" + closures_option_lc + "' is not registered.");
+  }
+  else
     mooseError("The closures option '" + closures_option_lc + "' is not registered.");
-  return closures_class_map.at(closures_option_lc);
 }
 
 void
 THMApp::registerClosuresOption(const std::string & closures_option,
-                               const std::string & class_name_1phase,
-                               const std::string & class_name_2phase,
-                               bool is_default)
+                               const std::string & class_name,
+                               const THM::FlowModelID & flow_model_id)
 {
   const std::string closures_option_lc = MooseUtils::toLower(closures_option);
-  _closures_options.insert(closures_option_lc);
-  if (is_default)
-  {
-    _default_closures_option = closures_option_lc;
-    _default_closures_option_has_been_set = true;
-  }
-
-  _closures_class_names_1phase[closures_option_lc] = class_name_1phase;
-  _closures_class_names_2phase[closures_option_lc] = class_name_2phase;
+  _closures_class_names_map[flow_model_id][closures_option_lc] = class_name;
 }
 
 //

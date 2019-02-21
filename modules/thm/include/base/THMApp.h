@@ -17,44 +17,9 @@ class Simulation;
 #define registerFlowModel(id, class_name)                                                          \
   _flow_model_map.insert(std::pair<THM::FlowModelID, std::string>(id, stringifyName(class_name)));
 
-#define registerClosureClass(closure_map, closure_name, class_name)                                \
-  if (closure_map.find(MooseUtils::toLower(closure_name)) != closure_map.end() &&                  \
-      closure_map[MooseUtils::toLower(closure_name)] != stringifyName(class_name))                 \
-    mooseError("Attempting to register the closure '" + MooseUtils::toLower(closure_name) +        \
-               "' with the class '" + stringifyName(class_name) +                                  \
-               "', but it has already been registered with the class '" +                          \
-               closure_map[MooseUtils::toLower(closure_name)] + "'");                              \
-  else                                                                                             \
-    closure_map.insert(std::pair<std::string, std::string>(MooseUtils::toLower(closure_name),      \
-                                                           stringifyName(class_name)));
-
-#define registerWallHeatTransferCoefficentSinglePhaseAux(closure_name, class_name)                 \
-  registerClosureClass(_whtc_3eqn_name_map, closure_name, class_name);
-
-#define registerWallHeatTransferCoefficentTwoPhaseAux(closure_name, class_name)                    \
-  registerClosureClass(_whtc_7eqn_name_map, closure_name, class_name);
-
-#define registerWallFrictionCoefficentSinglePhaseMaterial(closure_name, class_name)                \
-  registerClosureClass(_wfc_3eqn_name_map, closure_name, class_name);
-
-#define registerWallFrictionCoefficentTwoPhaseMaterial(closure_name, class_name)                   \
-  registerClosureClass(_wfc_7eqn_name_map, closure_name, class_name);
-
 #define registerCriticalHeatFluxTable(table_name, class_name)                                      \
   _chf_name_map.insert(std::pair<std::string, std::string>(MooseUtils::toLower(table_name),        \
                                                            stringifyName(class_name)));
-
-#define registerInterfacialHeatTransferMaterial(closure_name, class_name)                          \
-  registerClosureClass(_iht_name_map, closure_name, class_name);
-
-#define registerInterfacialFrictionCoefficientMaterial(closure_name, class_name)                   \
-  registerClosureClass(_ifc_name_map, closure_name, class_name);
-
-#define registerSpecificInterfacialAreaMaterial(closure_name, class_name)                          \
-  registerClosureClass(_sia_name_map, closure_name, class_name);
-
-#define registerFlowRegimeMapMaterial(closure_name, class_name)                                    \
-  registerClosureClass(_frm_name_map, closure_name, class_name);
 
 namespace THM
 {
@@ -92,22 +57,12 @@ public:
   virtual void setupOptions() override;
 
   /**
-   * Gets the set of all available closures options
-   */
-  static const std::set<std::string> & closuresOptions() { return _closures_options; }
-
-  /**
-   * Gets the default closures option
-   */
-  static const std::string & defaultClosuresOption();
-
-  /**
    * Gets the class name of the closures corresponding to the flow model and user option
    *
    * @param[in] closures_option   Closures option
    * @param[in] flow_model_id     Flow model ID
    */
-  const std::string & getClosuresClassName(const MooseEnum & closures_option,
+  const std::string & getClosuresClassName(const std::string & closures_option,
                                            const THM::FlowModelID & flow_model_id) const;
 
   static void registerApps();
@@ -120,57 +75,6 @@ public:
    * @param fp FluidProperties class to get the model ID for
    */
   virtual const THM::FlowModelID & getFlowModelID(const FluidProperties & fp);
-
-  /**
-   * Get the set of all available closures
-   *
-   * @return The set of all registered closures
-   */
-  static const std::set<std::string> & closureTypes() { return _closure_types; }
-
-  /**
-   * Get the default closure type
-   *
-   * @return The name of the default closure
-   */
-  static const std::string & defaultClosureType() { return _default_closure_type; }
-
-  /**
-   * Checks that a closure map has a registered entry before returning the registered name
-   *
-   * @param[in] closure_map   map of the closure name to the relevant class name
-   * @param[in] closure_name  name of the closures
-   * @param[in] description   description of the map
-   */
-  const std::string & getClosureMapEntry(const std::map<std::string, std::string> & closure_map,
-                                         const std::string & closure_name,
-                                         const std::string & description) const;
-
-  /**
-   * Get the class name of an auxkernel that computes the wall heat transfer coefficient for single
-   * phase
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of an auxkernel that computes the wall heat transfer coefficient
-   */
-  const std::string & getWallHeatTransferCoefficent3EqnClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(
-        _whtc_3eqn_name_map, closure_name, "1-phase wall heat transfer coefficient");
-  }
-
-  /**
-   * Get the class name of a material that computes the wall friction coefficient for single
-   * phase
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of a material that computes the wall friction coefficient
-   */
-  const std::string & getWallFrictionCoefficent3EqnClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(
-        _wfc_3eqn_name_map, closure_name, "1-phase wall friction coefficient");
-  }
 
   /**
    * Get the class name of a flow model corresponding to the flow model ID
@@ -205,77 +109,6 @@ public:
     return _chf_name_map[MooseUtils::toLower(chf_name)];
   }
 
-  /**
-   * Get the class name of a material that computes the specific interfacial area
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of a material that computes the specific interfacial area
-   */
-  const std::string & getSpecificInterfacialAreaMaterialClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(_sia_name_map, closure_name, "specific interfacial area");
-  }
-
-  /**
-   * Get the class name of an auxkernel that computes the wall heat transfer coefficient for two
-   * phase
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of an auxkernel that computes the wall heat transfer coefficient
-   */
-  const std::string & getWallHeatTransferCoefficent7EqnClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(
-        _whtc_7eqn_name_map, closure_name, "2-phase wall heat transfer coefficient");
-  }
-
-  /**
-   * Get the class name of a material that computes the wall friction coefficient for two
-   * phase
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of a material that computes the wall friction coefficient
-   */
-  const std::string & getWallFrictionCoefficent7EqnClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(
-        _wfc_7eqn_name_map, closure_name, "2-phase wall friction coefficient");
-  }
-
-  /**
-   * Get the class name of a material that computes the interfacial heat transfer coefficients
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of a material that computes the interfacial heat transfer coefficients
-   */
-  const std::string & getInterfacialHeatTransferMaterialClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(_iht_name_map, closure_name, "interfacial heat transfer coefficient");
-  }
-
-  /**
-   * Get the class name of a material that computes the interfacial friction coefficient
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of a material that computes the interfacial friction coefficients
-   */
-  const std::string &
-  getInterfacialFrictionCoefficientMaterialClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(_ifc_name_map, closure_name, "interfacial friction coefficient");
-  }
-
-  /**
-   * Get the class name of a material that computes the flow regime maps
-   *
-   * @param closure_name The name of the closure type
-   * @return The class name of a material that computes the flow regime maps
-   */
-  const std::string & getFlowRegimeMapMaterialClassName(const std::string & closure_name)
-  {
-    return getClosureMapEntry(_frm_name_map, closure_name, "flow regime map");
-  }
-
   Logger & log() { return _log; }
   virtual bool checkJacobian() { return _check_jacobian; }
 
@@ -290,24 +123,13 @@ protected:
   /**
    * Registers a closures option
    *
-   * @param[in] closures_option        Closures option string to register
-   * @param[in] closures_name_1phase   Closures class name for 1-phase flow
-   * @param[in] closures_name_2phase   Closures class name for 2-phase flow
-   * @param[in] is_default             Should this be the default option?
+   * @param[in] closures_option   Closures option string to register
+   * @param[in] closures_name     Closures class name
+   * @param[in] flow_model_id     Flow model ID
    */
   static void registerClosuresOption(const std::string & closures_option,
-                                     const std::string & class_name_1phase,
-                                     const std::string & class_name_2phase,
-                                     bool is_default = false);
-
-  /**
-   * Register a new closure type
-   *
-   * @param closure_type The name for the new closures. The name is visible to users.
-   * @param is_default True if this should be the default closure type. The last call claiming
-   * default will be the default.
-   */
-  static void registerClosureType(const std::string & closure_type, bool is_default = false);
+                                     const std::string & class_name,
+                                     const THM::FlowModelID & flow_model_id);
 
   /**
    * Register a new critical heat flux table
@@ -324,41 +146,12 @@ protected:
   Simulation * _sim;
   bool _check_jacobian;
 
-  /// Set of closures options
-  static std::set<std::string> _closures_options;
-  /// Default closures option
-  static std::string _default_closures_option;
-  /// Has a default closures option been set?
-  static bool _default_closures_option_has_been_set;
-  /// Map from closures option to its 1-phase class
-  static std::map<std::string, std::string> _closures_class_names_1phase;
-  /// Map from closures option to its 2-phase class
-  static std::map<std::string, std::string> _closures_class_names_2phase;
+  /// Map from flow model ID to map of closures option to its class
+  static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
 
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
 
-  /// The set of closure types
-  static std::set<std::string> _closure_types;
-  /// The default closure type
-  static std::string _default_closure_type;
-
-  /// The map from closure name to a wall heat transfer coefficient auxkernel class name (1-phase)
-  static std::map<std::string, std::string> _whtc_3eqn_name_map;
-  /// The map from closure name to a wall friction coefficient material class name (1-phase)
-  static std::map<std::string, std::string> _wfc_3eqn_name_map;
-  /// The map from closure name to a wall heat transfer coefficient auxkernel class name (2-phase)
-  static std::map<std::string, std::string> _whtc_7eqn_name_map;
-  /// The map from closure name to a wall friction coefficient material class name (2-phase)
-  static std::map<std::string, std::string> _wfc_7eqn_name_map;
-  /// The map from closure name to a interfacial heat transfer material class name
-  static std::map<std::string, std::string> _iht_name_map;
-  /// The map from closure name to a interfacial friction material class name
-  static std::map<std::string, std::string> _ifc_name_map;
-  /// The map from closure name to a specific interfacial area material class name
-  static std::map<std::string, std::string> _sia_name_map;
-  /// The map from closure name to a flow regime map material class name
-  static std::map<std::string, std::string> _frm_name_map;
   /// The set of critical heat flux table types
   static std::set<std::string> _chf_table_types;
   /// The default critical heat flux table type
