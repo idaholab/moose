@@ -31,7 +31,7 @@
 []
 
 
-[ADKernels]
+[Kernels]
   [./HeatDiff]
     type = ADHeatConduction
     variable = T

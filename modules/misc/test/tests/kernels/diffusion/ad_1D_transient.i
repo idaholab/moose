@@ -25,7 +25,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./diff]
     type = ADMatDiffusion
     variable = T

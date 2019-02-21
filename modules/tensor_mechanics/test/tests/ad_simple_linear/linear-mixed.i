@@ -64,7 +64,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./strain]
     type = ADComputeSmallStrain
   [../]

@@ -42,7 +42,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./soret]
     type = ADThermoDiffusion
     variable = u
@@ -82,7 +82,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./ad_soret_coefficient]
     type = ADSoretCoeffTest
     temperature = temp
