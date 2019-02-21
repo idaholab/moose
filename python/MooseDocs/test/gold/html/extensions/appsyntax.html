@@ -1,4 +1,4 @@
-<!DOCTYPE html><head><link href="../contrib/katex/katex.min.css" rel="stylesheet" type="text/css"></link><script src="../contrib/katex/katex.min.js" type="text/javascript"></script><script src="../contrib/plotly/plotly.min.js" type="text/javascript"></script></head><body><h1 id="application-syntax-extension">Application Syntax Extension</h1><p>Sets the value of a 'Real' input parameters to the value of a provided function.</p><h2 id="input-parameters">Input Parameters</h2><h2 id="input-parameters">Input Parameters</h2><h2 id="available-objects-actions-and-subsystems">Available Objects, Actions, and Subsystems</h2><h2 id="input-files">Input Files</h2><ul class="moose-list-inputs"><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/real_function_control/real_function_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/real_function_control/multi_real_function_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/dependency/test.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i</a></li></ul>test/tests/controls/real_function_control/real_function_control.i<pre><code class="language-text">[Mesh]
+<!DOCTYPE html><head><link href="../contrib/katex/katex.min.css" rel="stylesheet" type="text/css"></link><script src="../contrib/katex/katex.min.js" type="text/javascript"></script><script src="../contrib/plotly/plotly.min.js" type="text/javascript"></script></head><body><h1 id="application-syntax-extension">Application Syntax Extension</h1><p>Sets the value of a 'Real' input parameters to the value of a provided function.</p><h2 id="input-parameters">Input Parameters</h2><h2 id="input-parameters">Input Parameters</h2><h2 id="available-objects-actions-and-subsystems">Available Objects, Actions, and Subsystems</h2><h2 id="input-files">Input Files</h2><ul class="moose-list-inputs"><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/real_function_control/real_function_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/real_function_control/multi_real_function_control.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">test/tests/controls/dependency/test.i</a></li><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i</a></li></ul>test/tests/controls/real_function_control/real_function_control.i<pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -73,7 +73,7 @@
     execute_on = 'initial timestep_begin'
   [../]
 []
-</code></pre>modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i<pre><code class="language-text">[Mesh]
+</code></pre>modules/stochastic_tools/test/tests/transfers/sampler_transfer/errors/sub_wrong_control.i<pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -131,7 +131,7 @@
 [Outputs]
   exodus = true
 []
-</code></pre>test/tests/controls/real_function_control/multi_real_function_control.i<pre><code class="language-text">###########################################################
+</code></pre>test/tests/controls/real_function_control/multi_real_function_control.i<pre class="moose-pre"><code class="language-text">###########################################################
 # This is a test of the Control Logic System. This test
 # uses the RealFunctionControl to change a multiple Kernel
 # coefficients based on an analytical function at the end
@@ -230,7 +230,7 @@
     execute_on = 'timestep_begin'
   [../]
 []
-</code></pre>test/tests/controls/dependency/test.i<pre><code class="language-text">[Mesh]
+</code></pre>test/tests/controls/dependency/test.i<pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -316,7 +316,7 @@
     execute_on = 'initial timestep_begin'
   [../]
 []
-</code></pre>modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i<pre><code class="language-text">[Mesh]
+</code></pre>modules/stochastic_tools/test/tests/transfers/errors/sub_wrong_control.i<pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 10
@@ -374,7 +374,7 @@
 [Outputs]
   exodus = true
 []
-</code></pre><h2 id="child-objects">Child Objects</h2><ul class="moose-list-children"><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">framework/include/kernels/UserForcingFunction.h</a></li></ul>framework/include/kernels/UserForcingFunction.h<pre><code class="language-cpp">// This file is part of the MOOSE framework
+</code></pre><h2 id="child-objects">Child Objects</h2><ul class="moose-list-children"><li><a class="modal-trigger" href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">framework/include/kernels/UserForcingFunction.h</a></li></ul>framework/include/kernels/UserForcingFunction.h<pre class="moose-pre"><code class="language-cpp">// This file is part of the MOOSE framework
 // https://www.mooseframework.org
 //
 // All rights reserved, see COPYRIGHT for full restrictions

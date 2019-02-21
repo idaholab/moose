@@ -389,7 +389,9 @@ class RenderHeading(components.RenderComponent):
 class RenderCode(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
         language = 'language-{}'.format(token['language'])
+
         pre = html.Tag(parent, 'pre', token)
+        pre.addClass('moose-pre')
         code = html.Tag(pre, 'code', class_=language)
         html.String(code, content=token['content'], escape=token['escape'])
         return pre
