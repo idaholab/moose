@@ -1,0 +1,7 @@
+[Tests]
+  [./output_not_trimmed_on_error]
+    type = RunApp
+    input = 500_num_steps.i
+    expect_out = "Not going to find this text"
+  [../]
+[]
