@@ -17,7 +17,7 @@ validParams<FlowModelSetup1Phase>()
   params.addParam<Real>("scaling_rhouA", 1.0, "Scaling factor for rho*u*A");
   params.addParam<Real>("scaling_rhoEA", 1.0, "Scaling factor for rho*E*A");
 
-  params.addParam<UserObjectName>("fp_1phase", "Single-phase fluid properties object name");
+  params.addRequiredParam<UserObjectName>("fp_1phase", "Single-phase fluid properties object name");
 
   return params;
 }
@@ -31,8 +31,7 @@ FlowModelSetup1Phase::FlowModelSetup1Phase(InputParameters params)
     _A_fn(getParam<FunctionName>("A")),
     _D_h_fn(getParam<FunctionName>("D_h")),
 
-    _fp_1phase_name(_this_params.isParamValid("fp_1phase") ? getParam<UserObjectName>("fp_1phase")
-                                                           : "fp_1phase"),
+    _fp_1phase_name(getParam<UserObjectName>("fp_1phase")),
 
     _unity_name("unity"),
     _A_name("A"),
@@ -444,18 +443,4 @@ FlowModelSetup1Phase::addMaterials()
 void
 FlowModelSetup1Phase::addUserObjects()
 {
-  // fluid properties, if not provided
-  if (!_this_params.isParamValid("fp_1phase"))
-  {
-    const std::string class_name = "AddFluidPropertiesAction";
-    InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "IAPWS95LiquidFluidProperties";
-
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-        _this_action_factory.create(class_name, _fp_1phase_name, params));
-
-    action->getObjectParams().set<MooseEnum>("emit_on_nan") = _emit_on_nan_fp;
-
-    _this_action_warehouse.addActionBlock(action);
-  }
 }
