@@ -15,7 +15,6 @@ InputParameters
 validParams<ADMaterial<RESIDUAL>>()
 {
   InputParameters params = validParams<Material>();
-  params.registerBase("ADMaterial");
   return params;
 }
 template <>

@@ -18,10 +18,8 @@
 
 #include "libmesh/quadrature.h"
 
-defineADBaseValidParams(ADIntegratedBC, IntegratedBCBase, params.registerBase("ADIntegratedBC"););
-defineADBaseValidParams(ADVectorIntegratedBC,
-                        IntegratedBCBase,
-                        params.registerBase("ADVectorIntegratedBC"););
+defineADBaseValidParams(ADIntegratedBC, IntegratedBCBase, );
+defineADBaseValidParams(ADVectorIntegratedBC, IntegratedBCBase, );
 
 template <typename T, ComputeStage compute_stage>
 ADIntegratedBCTempl<T, compute_stage>::ADIntegratedBCTempl(const InputParameters & parameters)

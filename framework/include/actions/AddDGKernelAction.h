@@ -10,14 +10,14 @@
 #ifndef ADDDGKERNELACTION_H
 #define ADDDGKERNELACTION_H
 
-#include "MooseADObjectAction.h"
+#include "MooseObjectAction.h"
 
 class AddDGKernelAction;
 
 template <>
 InputParameters validParams<AddDGKernelAction>();
 
-class AddDGKernelAction : public MooseADObjectAction
+class AddDGKernelAction : public MooseObjectAction
 {
 public:
   AddDGKernelAction(InputParameters params);
