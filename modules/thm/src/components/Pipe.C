@@ -76,7 +76,7 @@ validParams<Pipe>()
   params.addParam<Real>("f_interface", "interface friction");
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
 
-  params.addRequiredParam<std::string>("closures_type", "Closures type");
+  params.addRequiredParam<std::string>("closures", "Closures type");
 
   std::string chf_tables;
   for (auto && c : THMApp::criticalHeatFluxTableTypes())
@@ -128,7 +128,7 @@ validParams<Pipe>()
 
 Pipe::Pipe(const InputParameters & params)
   : PipeBase(params),
-    _closures_name(getParam<std::string>("closures_type")),
+    _closures_name(getParam<std::string>("closures")),
     _const_A(false),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
     _has_Dh(isParamValid("D_h")),
