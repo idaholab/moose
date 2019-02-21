@@ -262,17 +262,16 @@ template <>
 Material &
 MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name, bool no_warn)
 {
-  return getMaterialByName(name, no_warn);
+  const std::string new_name = name + "_residual";
+  return getMaterialByName(new_name, no_warn);
 }
 
 template <>
 Material &
 MaterialPropertyInterface::getMaterialByName<JACOBIAN>(const std::string & name, bool no_warn)
 {
-  std::shared_ptr<Material> discrete =
-      _mi_feproblem.getMaterial(name + "_jacobian", _material_data_type, _mi_tid, no_warn);
-  checkBlockAndBoundaryCompatibility(discrete);
-  return *discrete;
+  const std::string new_name = name + "_jacobian";
+  return getMaterialByName(new_name, no_warn);
 }
 
 template Material & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
