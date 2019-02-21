@@ -62,7 +62,7 @@ HeatTransferBase::init()
     }
     _fp_name = pipe.getFluidPropertiesName();
     _A_fn_name = pipe.getAreaFunctionName();
-    _closures_name = MooseUtils::toLower(pipe.getParam<MooseEnum>("closures_type"));
+    _closures_name = MooseUtils::toLower(pipe.getParam<std::string>("closures_type"));
   }
 }
 

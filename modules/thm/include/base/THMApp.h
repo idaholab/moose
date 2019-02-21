@@ -57,22 +57,12 @@ public:
   virtual void setupOptions() override;
 
   /**
-   * Gets the set of all available closures options
-   */
-  static const std::set<std::string> & closuresOptions() { return _closures_options; }
-
-  /**
-   * Gets the default closures option
-   */
-  static const std::string & defaultClosuresOption();
-
-  /**
    * Gets the class name of the closures corresponding to the flow model and user option
    *
    * @param[in] closures_option   Closures option
    * @param[in] flow_model_id     Flow model ID
    */
-  const std::string & getClosuresClassName(const MooseEnum & closures_option,
+  const std::string & getClosuresClassName(const std::string & closures_option,
                                            const THM::FlowModelID & flow_model_id) const;
 
   static void registerApps();
@@ -136,12 +126,10 @@ protected:
    * @param[in] closures_option        Closures option string to register
    * @param[in] closures_name_1phase   Closures class name for 1-phase flow
    * @param[in] closures_name_2phase   Closures class name for 2-phase flow
-   * @param[in] is_default             Should this be the default option?
    */
   static void registerClosuresOption(const std::string & closures_option,
                                      const std::string & class_name_1phase,
-                                     const std::string & class_name_2phase,
-                                     bool is_default = false);
+                                     const std::string & class_name_2phase);
 
   /**
    * Register a new critical heat flux table
@@ -158,12 +146,6 @@ protected:
   Simulation * _sim;
   bool _check_jacobian;
 
-  /// Set of closures options
-  static std::set<std::string> _closures_options;
-  /// Default closures option
-  static std::string _default_closures_option;
-  /// Has a default closures option been set?
-  static bool _default_closures_option_has_been_set;
   /// Map from closures option to its 1-phase class
   static std::map<std::string, std::string> _closures_class_names_1phase;
   /// Map from closures option to its 2-phase class
