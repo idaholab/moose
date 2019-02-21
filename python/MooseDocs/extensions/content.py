@@ -135,8 +135,8 @@ class RenderContentToken(components.RenderComponent):
         headings = self.extension.binContent(page, token['location'], ContentExtension.FOLDER)
 
         # Build lists
-        for head, items in headings.iteritems():
-
+        for head in sorted(headings.keys()):
+            items = headings[head]
             if head:
                 html.Tag(parent, 'h{:d}'.format(int(token['level'])),
                          class_='moose-a-to-z',
@@ -154,7 +154,8 @@ class RenderContentToken(components.RenderComponent):
 
         headings = self.extension.binContent(page, token['location'], ContentExtension.FOLDER)
         latex.Command(parent, 'par', start='\n')
-        for items in headings.itervalues():
+        for key in sorted(headings.keys()):
+            items = headings[key]
             for text, path, label in sorted(items, key=lambda x: x[2]):
                 args = [latex.Brace(string=path, escape=False),
                         latex.Brace(string=label, escape=False)]
