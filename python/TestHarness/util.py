@@ -717,38 +717,39 @@ def getOutputFromFiles(tester, options):
     for file_path in output_files:
         with open(file_path, 'r') as f:
             file_output += "#"*80 + "\nOutput from " + file_path \
-                           + "\n" + "#"*80 + "\n" + readOutput(f, None, options, max_size=tester.specs['max_buffer_size'])
+                           + "\n" + "#"*80 + "\n" + readOutput(f, None)
     return file_output
 
-# This function reads output from the file (i.e. the test output)
-# but trims it down to the specified size.  It'll save the first two thirds
-# of the requested size and the last third trimming from the middle
-def readOutput(f, e, options, max_size=None):
-    if max_size is None:
+# Read stdout and stderr file objects, append error and return the string
+def readOutput(stdout, stderr):
+    output = ''
+    if stdout:
+        stdout.seek(0)
+        output += stdout.read()
+    if stderr:
+        stderr.seek(0)
+        output += stderr.read()
+    return output
+
+# Trimming routines for job output
+def trimOutput(job, options):
+    output = job.getOutput()
+    tester = job.getTester()
+    if ((tester.isFail() and options.no_trimmed_output_on_error)
+        or (tester.specs.isValid('max_buffer_size') and tester.specs['max_buffer_size'] == -1)
+        or options.no_trimmed_output):
+        return output
+    elif tester.specs.isValid('max_buffer_size'):
+        max_size = tester.specs['max_buffer_size']
+    else:
         max_size = 100000
+
+    if len(output) <= max_size:
+        return output
 
     first_part = int(max_size*(2.0/3.0))
     second_part = int(max_size*(1.0/3.0))
-    output = ''
-
-    f.seek(0)
-    if e:
-        e.seek(0)
-    if options.no_trimmed_output or max_size == -1:
-        output += f.read()
-        if e:
-            output += e.read()
-
-    else:
-        output = f.read(first_part)     # Limit the output to 1MB
-        if len(output) == first_part:   # This means we didn't read the whole file yet
-            output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
-            f.seek(-second_part, 2)       # Skip the middle part of the file
-
-            if (f.tell() <= first_part):  # Don't re-read some of what you've already read
-                f.seek(first_part+1, 0)
-
-        output += f.read()          # Now read the rest
-        if e:
-            output += e.read()      # Do not trim errors
-    return output
+    return "%s\n%s\n\nOutput trimmed\n\n%s\n%s" % (output[:first_part],
+                                                   "#"*80,
+                                                   "#"*80,
+                                                   output[-second_part:])
