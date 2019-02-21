@@ -39,6 +39,7 @@ public:
     CONVERGED_ABS = 2,
     CONVERGED_RELATIVE = 3,
     CONVERGED_CUSTOM = 4,
+    REACH_MAX_ITS = 5,
     DIVERGED_MAX_ITS = -1,
     DIVERGED_NONLINEAR = -2,
     DIVERGED_FAILED_MULTIAPP = -3
@@ -110,6 +111,8 @@ protected:
   unsigned int _picard_max_its;
   /// Whether or not we activate Picard iteration
   bool _has_picard_its;
+  /// Whether or not to treat reaching maximum number of Picard iteration as converged
+  bool _accept_max_it;
   /// Whether or not to use residual norm to check the Picard convergence
   bool _has_picard_norm;
   /// Relative tolerance on residual norm

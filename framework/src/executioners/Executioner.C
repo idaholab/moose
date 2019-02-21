@@ -94,6 +94,10 @@ validParams<Executioner>()
       "wanting to do Picard iterations with MultiApps that are set to "
       "execute_on timestep_end or timestep_begin. Setting this parameter to 1 turns off the Picard "
       "iterations.");
+  params.addParam<bool>(
+      "accept_on_max_picard_iteration",
+      false,
+      "True to treat reaching the maximum number of Picard iterations as converged.");
   params.addParam<bool>("disable_picard_residual_norm_check",
                         false,
                         "Disable the Picard residual norm evaluation thus the three parameters "
@@ -125,7 +129,8 @@ validParams<Executioner>()
                                             std::vector<std::string>(),
                                             "List of variables to relax during Picard Iteration");
 
-  params.addParamNamesToGroup("picard_max_its disable_picard_residual_norm_check picard_rel_tol "
+  params.addParamNamesToGroup("picard_max_its accept_on_max_picard_iteration "
+                              "disable_picard_residual_norm_check picard_rel_tol "
                               "picard_abs_tol picard_force_norms "
                               "relaxation_factor relaxed_variables",
                               "Picard");
