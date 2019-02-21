@@ -123,13 +123,13 @@ protected:
   /**
    * Registers a closures option
    *
-   * @param[in] closures_option        Closures option string to register
-   * @param[in] closures_name_1phase   Closures class name for 1-phase flow
-   * @param[in] closures_name_2phase   Closures class name for 2-phase flow
+   * @param[in] closures_option   Closures option string to register
+   * @param[in] closures_name     Closures class name
+   * @param[in] flow_model_id     Flow model ID
    */
   static void registerClosuresOption(const std::string & closures_option,
-                                     const std::string & class_name_1phase,
-                                     const std::string & class_name_2phase);
+                                     const std::string & class_name,
+                                     const THM::FlowModelID & flow_model_id);
 
   /**
    * Register a new critical heat flux table
@@ -146,10 +146,8 @@ protected:
   Simulation * _sim;
   bool _check_jacobian;
 
-  /// Map from closures option to its 1-phase class
-  static std::map<std::string, std::string> _closures_class_names_1phase;
-  /// Map from closures option to its 2-phase class
-  static std::map<std::string, std::string> _closures_class_names_2phase;
+  /// Map from flow model ID to map of closures option to its class
+  static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
 
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
