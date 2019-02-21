@@ -11,14 +11,14 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./diff]
     type = ADVectorDiffusion
     variable = u
   [../]
 []
 
-[ADBCs]
+[BCs]
   [./left]
     type = ADLagrangeVecFunctionDirichletBC
     variable = u

@@ -14,7 +14,7 @@
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
     prereq = 'test_adad'
-    cli_args = "ADKernels/diff/prop_to_use='adreg'"
+    cli_args = "Kernels/diff/prop_to_use='adreg'"
     expect_out = '14 Nonlinear'
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as regular and gotten as AD shall be inaccurate"
@@ -26,7 +26,7 @@
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
     prereq = 'test_adreg'
-    cli_args = "ADKernels/diff/prop_to_use='regad'"
+    cli_args = "Kernels/diff/prop_to_use='regad'"
     expect_out = '14 Nonlinear'
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as AD and gotten as regular shall be inaccurate"
@@ -38,7 +38,7 @@
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
     prereq = 'test_regad'
-    cli_args = "ADKernels/diff/prop_to_use='regreg'"
+    cli_args = "Kernels/diff/prop_to_use='regreg'"
     expect_out = '14 Nonlinear'
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as regular and gotten as regular shall be inaccurate"

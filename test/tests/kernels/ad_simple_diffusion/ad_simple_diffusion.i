@@ -10,7 +10,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./diff]
     type = ADDiffusion
     variable = u

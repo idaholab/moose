@@ -33,9 +33,6 @@
     variable = v
     diag_save_in = v_jac
   [../]
-[]
-
-[ADKernels]
   [./ad_value_test]
     type = ADValueTest
     variable = u
