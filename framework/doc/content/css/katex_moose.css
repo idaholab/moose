@@ -1,0 +1,25 @@
+/* Equations */
+.moose-katex-block-equation{
+  display: flex;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.moose-katex-equation{
+  flex-grow: 1;
+}
+
+.moose-katex-equation-number{
+  width: 5%;
+  text-align: right;
+  margin-bottom: : auto;
+  margin-top: auto;
+}
+
+.katex-display{
+  margin: 0;
+}
+
+.katex{
+  font-size: 1em;
+}

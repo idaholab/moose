@@ -25,3 +25,4 @@ import table
 import materialicon
 import layout
 import config
+import style

@@ -35,6 +35,7 @@ class ListingExtension(command.CommandExtension):
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
         config['prefix'] = (u'Listing', "The caption prefix (e.g., Fig.).")
+        config['modal-link'] = (True, "Insert modal links with complete files.")
         return config
 
     def extend(self, reader, renderer):
@@ -97,7 +98,7 @@ class FileListingCommand(LocalListingCommand):
     def defaultSettings():
         settings = LocalListingCommand.defaultSettings()
         settings.update(common.extractContentSettings())
-        settings['link'] = (True, "Include a link to the filename after the listing.")
+        settings['link'] = (None, "Include a link to the filename after the listing.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -112,9 +113,9 @@ class FileListingCommand(LocalListingCommand):
         lang = self.settings.get('language')
         content = self.extractContent(filename)
         lang = lang if lang else common.get_language(filename)
+
         code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
                          content=content, language=lang)
-
         if flt is parent:
             code.attributes.update(**self.attributes)
 
@@ -122,7 +123,9 @@ class FileListingCommand(LocalListingCommand):
             code.name = 'ListingCode'
 
         # Add bottom modal
-        if self.settings['link']:
+        link = self.settings['link']
+        link = link if link is not None else self.extension['modal-link']
+        if link:
             rel_filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
 
             # Get the complete file

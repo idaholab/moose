@@ -39,7 +39,13 @@ InputParametersToken = tokens.newToken('InputParametersToken',
                                        hide=set(),
                                        show=set(),
                                        visible=set())
-
+ParameterToken = tokens.newToken('ParameterToken',
+                                 inline=False,
+                                 parameter=None,
+                                 description=True,
+                                 default=True,
+                                 options=True,
+                                 cpp_type=True)
 SyntaxList = tokens.newToken('SyntaxList')
 SyntaxListItem = tokens.newToken('SyntaxListItem', syntax=u'', group=u'', header=False)
 SyntaxLink = tokens.newToken('SyntaxLink', core.Link)
@@ -216,12 +222,14 @@ class AppSyntaxExtension(command.CommandExtension):
 
         self.addCommand(reader, SyntaxDescriptionCommand())
         self.addCommand(reader, SyntaxParametersCommand())
+        self.addCommand(reader, SyntaxParameterCommand())
         self.addCommand(reader, SyntaxChildrenCommand())
         self.addCommand(reader, SyntaxInputsCommand())
         self.addCommand(reader, SyntaxListCommand())
         self.addCommand(reader, SyntaxCompleteCommand())
 
         renderer.add('InputParametersToken', RenderInputParametersToken())
+        renderer.add('ParameterToken', RenderParameterToken())
         renderer.add('SyntaxList', RenderSyntaxList())
         renderer.add('SyntaxListItem', RenderSyntaxListItem())
         renderer.add('SyntaxLink', RenderSyntaxLink())
@@ -341,6 +349,37 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
 
         return parent
 
+class SyntaxParameterCommand(SyntaxCommandHeadingBase):
+    SUBCOMMAND = 'parameter'
+    NODE_TYPE = None # allows SyntaxNode objects to report combined action parameters
+
+    @staticmethod
+    def defaultSettings():
+        settings = SyntaxCommandHeadingBase.defaultSettings()
+        settings['name'] = (None, "The name of the parameter to display.")
+        settings['description'] = (True, "Show the description.")
+        settings['default'] = (True, "Show the default value.")
+        settings['cpptype'] = (True, "Show the C++ type.")
+        settings['options'] = (True, "Show the available options.")
+        return settings
+
+    def createTokenFromSyntax(self, parent, info, page, obj):
+
+        parameters = dict()
+        if isinstance(obj, syntax.SyntaxNode):
+            for action in obj.actions():
+                parameters.update(action.parameters)
+        elif obj.parameters:
+            parameters.update(obj.parameters)
+
+        return ParameterToken(parent,
+                              description=self.settings['description'],
+                              default=self.settings['default'],
+                              cpp_type=self.settings['cpptype'],
+                              options=self.settings['options'],
+                              parameter=parameters[self.settings['name']])
+
+
 class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
     SUBCOMMAND = 'children'
     NODE_TYPE = syntax.ObjectNode
@@ -395,6 +434,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
         settings['heading'] = (u'AUTO',
                                "The heading title for the input parameters table, use 'None' to " \
                                "remove the heading.")
+        settings['group-headings'] = (True, "Display group headings.")
 
         settings['groups'] = (None, "List of groups (apps) to include in the complete syntax list.")
         settings['actions'] = (True, "Include a list of Action objects in syntax.")
@@ -404,7 +444,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
     def createTokenFromSyntax(self, parent, info, page, obj):
 
-        master = SyntaxList(None)
+        master = SyntaxList(None, **self.attributes)
 
         groups = self.settings['groups'].split() if self.settings['groups'] else list(obj.groups)
         if 'MooseApp' in groups:
@@ -412,9 +452,10 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
             groups.insert(0, 'MooseApp')
 
         for group in groups:
-            header = SyntaxListItem(master,
-                                    header=True,
-                                    string=unicode(mooseutils.camel_to_space(group)))
+            if self.settings['group-headings']:
+                header = SyntaxListItem(master,
+                                        header=True,
+                                        string=unicode(mooseutils.camel_to_space(group)))
 
             count = 0
             if self.settings['actions']:
@@ -498,9 +539,37 @@ class SyntaxCompleteCommand(SyntaxListCommand):
             super(SyntaxCompleteCommand, self).createTokenFromSyntax(parent, info, page, child)
             self._addList(parent, info, page, child, level + 1)
 
+class RenderSyntaxList(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        div = html.Tag(parent, 'div', token, class_='moose-syntax-list')
+        return div
+
+    def createMaterialize(self, parent, token, page):
+        collection = html.Tag(parent, 'ul', class_='moose-syntax-list collection with-header')
+        return collection
+
+    def createLatex(self, parent, token, page):
+        return parent
+
+    def createReveal(self, parent, token, page):
+        div = self.createHTML(parent, token, page)
+
+        arrow_div = html.Tag(div, 'div', class_='moose-arrow moose-bounce')
+        arrow_i = html.Tag(arrow_div, 'i', class_='moose-scroll-indicator',
+                           string='keyboard_arrow_down')
+        arrow_i.addClass('material-icons')
+        arrow_i['aria-hidden'] = "true"
+
+        return div
+
 class RenderSyntaxListItem(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        pass
+        token(0).parent = None
+        p = html.Tag(parent, 'p', class_='moose-syntax-list-item')
+        html.Tag(p, 'span', string=u'{}: '.format(token['syntax']),
+                 class_='moose-syntax-list-item-syntax')
+        return html.Tag(p, 'span', string=unicode(token['syntax']),
+                        class_='moose-syntax-list-item-details')
 
     def createMaterialize(self, parent, token, page):
         class_ = 'collection-header' if token['header'] else 'collection-item'
@@ -522,17 +591,6 @@ class RenderSyntaxListItem(components.RenderComponent):
         if len(token) == 0:
             latex.String(env, content="\\textcolor{red}{No Description.}", escape=False)
         return env
-
-class RenderSyntaxList(components.RenderComponent):
-    def createHTML(self, parent, token, page):
-        pass
-
-    def createMaterialize(self, parent, token, page):
-        collection = html.Tag(parent, 'ul', class_='moose-syntax-list collection with-header')
-        return collection
-
-    def createLatex(self, parent, token, page):
-        return parent
 
 class RenderInputParametersToken(components.RenderComponent):
 
@@ -625,6 +683,41 @@ class RenderInputParametersToken(components.RenderComponent):
                 latex.Environment(parent, 'InputParameter',
                                   args=args,
                                   string=param['description'])
+
+class RenderParameterToken(components.RenderComponent):
+
+    def createHTML(self, parent, token, page):
+        param = token['parameter']
+        if token['inline']:
+            html.Tag(parent, 'span', string=param['name'], class_='moose-parameter-name')
+        else:
+            div = html.Tag(parent, 'div', class_='moose-parameter')
+            html.Tag(div, 'span', string=param['name'], class_='moose-parameter-name')
+            self._addParamInfo(parent, token, 'description', param)
+            self._addParamInfo(parent, token, 'default', param)
+            self._addParamInfo(parent, token, 'cpp_type', param, title='C++ Type')
+            self._addParamInfo(parent, token, 'options', param)
+        return parent
+
+    def createMaterialize(self, parent, token, page):
+        pass
+
+    def createLatex(self, parent, token, page):
+        pass
+
+    @staticmethod
+    def _addParamInfo(parent, token, key, param, title=None):
+
+        value = param.get(key, None)
+        if value and token[key]:
+            key = key.replace('_', '')
+            title = key.title() if title is None else title
+            div = html.Tag(parent, 'div', class_='moose-parameter-{}'.format(key))
+            html.Tag(div, 'span', string='{}: '.format(title),
+                     class_='moose-parameter-{}-title'.format(key))
+            html.Tag(div, 'span', string=value,
+                     class_='moose-parameter-{}-content'.format(key))
+
 
 class RenderSyntaxLink(core.RenderLink):
     def createLatex(self, parent, token, page):

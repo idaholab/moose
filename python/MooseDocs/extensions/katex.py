@@ -55,7 +55,8 @@ class KatexExtension(components.Extension):
 
         if isinstance(renderer, renderers.HTMLRenderer):
             renderer.addCSS('katex', "contrib/katex/katex.min.css")
-            renderer.addJavaScript('katex', "contrib/katex/katex.min.js")
+            renderer.addCSS('katex_moose', "css/katex_moose.css")
+            renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True)
 
     def postTokenize(self, ast, page, meta, reader):
         labels = set()

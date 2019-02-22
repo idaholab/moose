@@ -52,6 +52,7 @@ Strikethrough = tokens.newToken(u'Strikethrough')
 Quote = tokens.newToken(u'Quote')
 Superscript = tokens.newToken(u'Superscript')
 Subscript = tokens.newToken(u'Subscript')
+LineBreak = tokens.newToken(u'LineBreak')
 
 class CoreExtension(components.Extension):
     """
@@ -82,6 +83,7 @@ class CoreExtension(components.Extension):
         reader.addInline(FormatInline())
         reader.addInline(LinkInline())
         reader.addInline(ShortcutLinkInline())
+        reader.addInline(LineBreakInline())
         reader.addInline(PunctuationInline())
         reader.addInline(NumberInline())
         reader.addInline(WordInline())
@@ -95,6 +97,7 @@ class CoreExtension(components.Extension):
         renderer.add(u'Shortcut', RenderShortcut())
         renderer.add(u'Monospace', RenderMonospace())
         renderer.add(u'Break', RenderBreak())
+        renderer.add(u'LineBreak', RenderLineBreak())
         renderer.add(u'ErrorToken', RenderError())
 
         renderer.add(u'Link', RenderLink())
@@ -308,6 +311,12 @@ class BreakInline(components.TokenComponent):
         Break(parent, count=len(info['break']))
         return parent
 
+class LineBreakInline(components.TokenComponent):
+    RE = re.compile(r'(?P<break>\\{2}$)', flags=re.MULTILINE)
+    def createToken(self, parent, info, page):
+        LineBreak(parent)
+        return parent
+
 class SpaceInline(components.TokenComponent):
     RE = re.compile(r'(?P<space> +)')
     def createToken(self, parent, info, page):
@@ -473,6 +482,12 @@ class RenderBreak(components.RenderComponent):
 
     def createLatex(self, parent, token, page): #pylint: disable=no-self-use,unused-argument
         return latex.String(parent, content=u' ')
+
+class RenderLineBreak(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        return html.Tag(parent, 'br', close=False)
+    def createLatex(self, parent, token, page):
+        return latex.String(parent, content='\\\\')
 
 class RenderLink(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use

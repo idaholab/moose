@@ -185,7 +185,9 @@ class HTMLRenderer(Renderer):
 
     def __init__(self, *args, **kwargs):
         Renderer.__init__(self, *args, **kwargs)
+        self.__head_javascript = common.Storage()
         self.__javascript = common.Storage()
+
         self.__css = common.Storage()
 
         if self.get('google_analytics', False):
@@ -197,13 +199,16 @@ class HTMLRenderer(Renderer):
         html.Tag(root, 'head')
         return html.Tag(root, 'body')
 
-    def addJavaScript(self, key, filename, **kwargs):
+    def addJavaScript(self, key, filename, location='_end', head=False, **kwargs):
         """Add a javascript dependency."""
-        self.__javascript.add(key, (filename, kwargs))
+        if head:
+            self.__head_javascript.add(key, (filename, kwargs), location)
+        else:
+            self.__javascript.add(key, (filename, kwargs), location)
 
-    def addCSS(self, key, filename, **kwargs):
+    def addCSS(self, key, filename, location='_end', **kwargs):
         """Add a CSS dependency."""
-        self.__css.add(key, (filename, kwargs))
+        self.__css.add(key, (filename, kwargs), location)
 
     def postRender(self, result, page, meta):
         """Insert CSS/JS dependencies into html node tree."""
@@ -214,12 +219,16 @@ class HTMLRenderer(Renderer):
             return os.path.relpath(path, os.path.dirname(page.local))
 
         head = anytree.search.find_by_attr(root, 'head')
+        body = anytree.search.find_by_attr(root, 'body')
 
         for name, kwargs in self.__css:
             html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
 
-        for name, kwargs in self.__javascript:
+        for name, kwargs in self.__head_javascript:
             html.Tag(head, 'script', type="text/javascript", src=rel(name), **kwargs)
+
+        for name, kwargs in self.__javascript:
+            html.Tag(body.parent, 'script', type="text/javascript", src=rel(name), **kwargs)
 
 class MaterializeRenderer(HTMLRenderer):
     """
@@ -257,13 +266,13 @@ class MaterializeRenderer(HTMLRenderer):
 
         self.addCSS('materialize', "contrib/materialize/materialize.min.css",
                     media="screen,projection")
-        self.addCSS('prisim', "contrib/prism/prism.min.css")
+        self.addCSS('prism', "contrib/prism/prism.min.css")
         self.addCSS('moose', "css/moose.css")
 
         self.addJavaScript('jquery', "contrib/jquery/jquery.min.js")
         self.addJavaScript('materialize', "contrib/materialize/materialize.min.js")
         self.addJavaScript('clipboard', "contrib/clipboard/clipboard.min.js")
-        self.addJavaScript('prisim', "contrib/prism/prism.min.js")
+        self.addJavaScript('prism', "contrib/prism/prism.min.js")
         self.addJavaScript('init', "js/init.js")
 
     def update(self, **kwargs):
@@ -340,6 +349,50 @@ class LatexRenderer(Renderer):
     def getPreamble(self):
         """Return the list of preamble strings."""
         return self._preamble
+
+class RevealRenderer(HTMLRenderer):
+    """
+    Convert AST into HTML using the materialize javascript library (http://materializecss.com).
+    """
+    METHOD = 'createReveal'
+
+    @staticmethod
+    def defaultConfig():
+        """
+        Return the default configuration.
+        """
+        config = HTMLRenderer.defaultConfig()
+        config['theme'] = ('simple', "The CSS theme to use (simple).")
+        return config
+
+    def __init__(self, *args, **kwargs):
+        HTMLRenderer.__init__(self, *args, **kwargs)
+        self.addCSS('reveal', "contrib/reveal/reveal.css")
+
+        self.addCSS('reveal_theme', "contrib/reveal/{}.css".format(self.get('theme')), id_="theme")
+        self.addCSS('prism', "contrib/prism/prism.min.css")
+        self.addCSS('reveal_css', "css/reveal_moose.css", location='>reveal_theme')
+
+        self.addJavaScript('reveal', "contrib/reveal/reveal.js")
+        self.addJavaScript('prism', "contrib/prism/prism.min.js")
+        self.addJavaScript('notes', "contrib/reveal/notes.js")
+        self.addJavaScript('reveal_init', "js/reveal_init.js")
+
+    def getRoot(self):
+        body = HTMLRenderer.getRoot(self)
+        div = html.Tag(body, 'div', class_='reveal')
+        slides = html.Tag(div, 'div', class_='slides')
+        return slides#html.Tag(slides, 'section')
+
+    def _method(self, component):
+        if hasattr(component, self.METHOD):
+            return getattr(component, self.METHOD)
+        elif hasattr(component, HTMLRenderer.METHOD):
+            return getattr(component, HTMLRenderer.METHOD)
+        else:
+            msg = "The component object {} does not have a {} method."
+            raise exceptions.MooseDocsException(msg, type(component), self.METHOD)
+
 
 class JSONRenderer(Renderer):
     """
