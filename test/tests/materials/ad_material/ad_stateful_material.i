@@ -11,7 +11,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./diff]
     type = ADMatDiffusionTest
     variable = u
@@ -50,9 +50,6 @@
     prop_names = 'unused_diffusivity'
     prop_values = '0'
   [../]
-[]
-
-[ADMaterials]
   [./ad_stateful]
     type = ADStatefulMaterial
     u = u

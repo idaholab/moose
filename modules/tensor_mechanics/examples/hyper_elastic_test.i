@@ -67,7 +67,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./x]
     type = ADStressDivergenceTensors
     variable = disp_x
@@ -95,7 +95,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./strain]
     type = ADComputeGreenLagrangeStrain
   [../]

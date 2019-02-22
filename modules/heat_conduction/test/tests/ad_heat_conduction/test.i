@@ -19,7 +19,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./HeatDiff]
     type = ADHeatConduction
     variable = T
@@ -71,7 +71,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./k]
     type = ADThermalConductivityTest
     c = c

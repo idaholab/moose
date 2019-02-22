@@ -23,7 +23,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./stress_r]
     type = ADStressDivergenceRZTensors
     component = 0
@@ -67,7 +67,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./strain]
     type = ADComputeAxisymmetricRZFiniteStrain
   [../]

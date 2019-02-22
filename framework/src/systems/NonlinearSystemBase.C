@@ -482,8 +482,7 @@ NonlinearSystemBase::addDGKernel(std::string dg_kernel_name,
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::shared_ptr<DGKernel> dg_kernel =
-        _factory.create<DGKernel>(dg_kernel_name, name, parameters, tid);
+    auto dg_kernel = _factory.create<DGKernelBase>(dg_kernel_name, name, parameters, tid);
     _dg_kernels.addObject(dg_kernel, tid);
   }
 

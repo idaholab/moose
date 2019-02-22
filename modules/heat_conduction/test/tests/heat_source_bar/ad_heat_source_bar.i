@@ -28,7 +28,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./heat]
     type = ADHeatConduction
     variable = temp

@@ -32,7 +32,7 @@ class GeometricSearchData;
 class IntegratedBCBase;
 class NodalBCBase;
 class PresetNodalBC;
-class DGKernel;
+class DGKernelBase;
 class InterfaceKernel;
 class ScalarKernel;
 class DiracKernel;
@@ -542,7 +542,7 @@ public:
   {
     return _ad_jacobian_kernels;
   }
-  MooseObjectTagWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
+  MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
   MooseObjectTagWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
     return _interface_kernels;
@@ -709,7 +709,7 @@ protected:
   MooseObjectTagWarehouse<KernelBase> _kernels;
   MooseObjectTagWarehouse<KernelBase> _ad_jacobian_kernels;
   MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
-  MooseObjectTagWarehouse<DGKernel> _dg_kernels;
+  MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernel> _interface_kernels;
 
   ///@}

@@ -25,10 +25,10 @@ Time derivative terms are ubiquitous in any transient simulation. The kernel
 block for a transient diffusion problem that demonstrates the
 `ADTimeDerivative` syntax is shown below:
 
-!listing test/tests/kernels/ad_transient_diffusion/ad_transient_diffusion.i block=ADKernels
+!listing test/tests/kernels/ad_transient_diffusion/ad_transient_diffusion.i block=Kernels
 
-!syntax parameters /ADKernels/ADTimeDerivative<RESIDUAL>
+!syntax parameters /Kernels/ADTimeDerivative<RESIDUAL>
 
-!syntax inputs /ADKernels/ADTimeDerivative<RESIDUAL>
+!syntax inputs /Kernels/ADTimeDerivative<RESIDUAL>
 
-!syntax children /ADKernels/ADTimeDerivative<RESIDUAL>
+!syntax children /Kernels/ADTimeDerivative<RESIDUAL>

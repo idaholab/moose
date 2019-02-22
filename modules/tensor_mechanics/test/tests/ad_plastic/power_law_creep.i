@@ -46,7 +46,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./stress_x]
     type = ADStressDivergenceTensors
     component = 0
@@ -65,9 +65,6 @@
     youngs_modulus = 1e10
     poissons_ratio = 0.3
   [../]
-[]
-
-[ADMaterials]
   [./strain]
     type = ADComputeIncrementalSmallStrain
   [../]

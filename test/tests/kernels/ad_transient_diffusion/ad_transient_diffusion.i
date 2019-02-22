@@ -16,9 +16,6 @@
     variable = u
     coef = 0.1
   [../]
-[]
-
-[ADKernels]
   [./time]
     type = ADTimeDerivative
     variable = u

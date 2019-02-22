@@ -10,14 +10,14 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./diff]
     type = ADDiffusion
     variable = u
   [../]
 []
 
-[ADBCs]
+[BCs]
   [./left]
     type = ADFunctionDirichletBC
     variable = u

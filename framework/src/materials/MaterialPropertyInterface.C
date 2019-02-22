@@ -98,7 +98,8 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    _default_ad_real_properties.emplace_back(libmesh_make_unique<ADMaterialPropertyObject<Real>>());
+    _default_ad_real_properties.emplace_back(
+        libmesh_make_unique<ADMaterialPropertyObject<Real>>(true));
     auto & default_property = _default_ad_real_properties.back();
 
     // resize to accomodate maximum number obf qpoints
@@ -107,7 +108,12 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
 
     // set values for all qpoints to the given default
     for (decltype(nqp) qp = 0; qp < nqp; ++qp)
+    {
+      // This sets the dual number member of the MooseADWrapper for Jacobian calculations
       (*default_property)[qp] = real_value;
+      // This sets the value member of the MooseADWrapper for residual calculations
+      default_property->set()[qp].value() = real_value;
+    }
 
     // return the raw pointer inside the shared pointer
     return default_property.get();
@@ -261,17 +267,16 @@ template <>
 Material &
 MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name, bool no_warn)
 {
-  return getMaterialByName(name, no_warn);
+  const std::string new_name = name + "_residual";
+  return getMaterialByName(new_name, no_warn);
 }
 
 template <>
 Material &
 MaterialPropertyInterface::getMaterialByName<JACOBIAN>(const std::string & name, bool no_warn)
 {
-  std::shared_ptr<Material> discrete =
-      _mi_feproblem.getMaterial(name + "_jacobian", _material_data_type, _mi_tid, no_warn);
-  checkBlockAndBoundaryCompatibility(discrete);
-  return *discrete;
+  const std::string new_name = name + "_jacobian";
+  return getMaterialByName(new_name, no_warn);
 }
 
 template Material & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);

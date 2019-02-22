@@ -1,6 +1,6 @@
 # ADComputeRSphericalFiniteStrain
 
-!syntax description /ADMaterials/ADComputeRSphericalFiniteStrain<RESIDUAL>
+!syntax description /Materials/ADComputeRSphericalFiniteStrain<RESIDUAL>
 
 ## Description
 
@@ -48,8 +48,8 @@ Once the deformation gradient is calculated for the 1D geometry, the deformation
 gradient is passed to the strain and rotation methods used by default 3D
 Cartesian simulations, as described in the [Finite Strain Class](ADComputeFiniteStrain.md) page.
 
-!syntax parameters /ADMaterials/ADComputeRSphericalFiniteStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeRSphericalFiniteStrain<RESIDUAL>
 
-!syntax inputs /ADMaterials/ADComputeRSphericalFiniteStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeRSphericalFiniteStrain<RESIDUAL>
 
-!syntax children /ADMaterials/ADComputeRSphericalFiniteStrain<RESIDUAL>
+!syntax children /Materials/ADComputeRSphericalFiniteStrain<RESIDUAL>

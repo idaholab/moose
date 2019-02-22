@@ -19,7 +19,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./stress_r]
     type = ADStressDivergenceRSphericalTensors
     component = 0
@@ -50,7 +50,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./strain]
     type = ADComputeRSphericalSmallStrain
   [../]

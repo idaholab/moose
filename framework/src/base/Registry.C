@@ -66,6 +66,8 @@ Registry::registerObjectsTo(Factory & f, const std::set<std::string> & labels)
       if (name.empty())
         name = obj._classname;
 
+      r._name_to_entry[name] = obj;
+
       f.reg(obj._label,
             name,
             obj._build_ptr,
@@ -79,6 +81,39 @@ Registry::registerObjectsTo(Factory & f, const std::set<std::string> & labels)
         f.associateNameToClass(name, obj._classname);
     }
   }
+}
+
+RegistryEntry &
+Registry::objData(const std::string & name)
+{
+  auto & r = getRegistry();
+
+  auto it = r._name_to_entry.find(name);
+
+  if (it != r._name_to_entry.end())
+    return it->second;
+  else
+    mooseError("Object ", name, " is not registered yet");
+}
+
+bool
+Registry::isRegisteredObj(const std::string & name)
+{
+  auto & r = getRegistry();
+
+  auto it = r._name_to_entry.find(name);
+
+  return it != r._name_to_entry.end();
+}
+
+bool
+Registry::isADObj(const std::string & name)
+{
+  auto & r = getRegistry();
+
+  auto it = r._name_to_entry.find(name);
+
+  return (it != r._name_to_entry.end()) && it->second._is_ad;
 }
 
 void
