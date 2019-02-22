@@ -13,4 +13,5 @@
 
 [Executioner]
   type = Steady
+  no_feproblem_solve = true
 []
