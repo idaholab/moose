@@ -1,7 +1,7 @@
 #include "TestSetupStatusComponent.h"
 #include "Pipe.h"
 
-registerMooseObject("RELAP7TestApp", TestSetupStatusComponent);
+registerMooseObject("THMTestApp", TestSetupStatusComponent);
 
 template <>
 InputParameters

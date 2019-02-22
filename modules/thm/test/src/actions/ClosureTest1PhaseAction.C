@@ -1,6 +1,6 @@
 #include "ClosureTest1PhaseAction.h"
 
-registerMooseAction("RELAP7TestApp", ClosureTest1PhaseAction, "meta_action");
+registerMooseAction("THMTestApp", ClosureTest1PhaseAction, "meta_action");
 
 template <>
 InputParameters

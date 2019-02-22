@@ -4,7 +4,7 @@
 #include "ActionWarehouse.h"
 #include "MooseEnum.h"
 
-registerMooseAction("RELAP7TestApp", JacobianTestGeneralAction, "meta_action");
+registerMooseAction("THMTestApp", JacobianTestGeneralAction, "meta_action");
 
 template <>
 InputParameters

@@ -1,6 +1,6 @@
 #include "FanningFrictionFactorMaterial.h"
 
-registerMooseObject("RELAP7TestApp", FanningFrictionFactorMaterial);
+registerMooseObject("THMTestApp", FanningFrictionFactorMaterial);
 
 template <>
 InputParameters
