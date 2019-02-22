@@ -11,12 +11,10 @@
 #define MEMORYUTILS_H
 
 #include "Moose.h"
+#include "MooseEnum.h"
 
 namespace MemoryUtils
 {
-
-/// get the total amount of physical RAM available
-std::size_t getTotalRAM();
 
 /// get the MPI hostname
 std::string getMPIProcessorName();
@@ -28,16 +26,28 @@ struct Stats
   std::size_t _page_faults;
 };
 
-enum class MemUnit
+enum class MemUnits
 {
   Bytes,
+  Kibibytes,
+  Mebibytes,
+  Gibibytes = 3,
   Kilobytes,
   Megabytes,
-  Gigabytes,
+  Gigabytes = 6,
 };
 
+/// get the moose enum for the mem_unit_prefix parameter
+MooseEnum getMemUnitsEnum();
+
+/// get the total amount of physical RAM available
+std::size_t getTotalRAM();
+
 /// get all memory stats for the current process
-void getMemoryStats(Stats & stats, MemUnit units = MemUnit::Megabytes);
+void getMemoryStats(Stats & stats);
+
+/// convert bytes to selected unit prefix
+std::size_t convertBytes(std::size_t bytes, MemUnits unit);
 
 } // namespace MemoryUtils
 
