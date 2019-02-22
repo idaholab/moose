@@ -36,7 +36,9 @@ ADKernelTempl<T, compute_stage>::ADKernelTempl(const InputParameters & parameter
     _grad_u(_var.template adGradSln<compute_stage>()),
     _ad_JxW(_assembly.adJxW<compute_stage>()),
     _ad_coord(_assembly.adCoordTransformation<compute_stage>()),
-    _ad_q_point(_assembly.template adQPoints<compute_stage>())
+    _ad_q_point(_assembly.template adQPoints<compute_stage>()),
+    _phi(_assembly.phi(_var)),
+    _grad_phi(_assembly.template adGradPhi<T, compute_stage>(_var))
 {
   addMooseVariableDependency(this->mooseVariable());
   _save_in.resize(_save_in_strings.size());

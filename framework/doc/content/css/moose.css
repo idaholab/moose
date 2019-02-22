@@ -758,6 +758,8 @@ footer.page-footer {
     margin-right:1ex;
 }
 
+.moose-html-syntax-list-item{
+    font=size:
 
 .moose-syntax-item-description{
     padding-left:10px;
@@ -787,31 +789,6 @@ footer.page-footer {
     text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
 }
 
-/* Equations */
-.moose-katex-block-equation{
-  display: flex;
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.moose-katex-equation{
-  flex-grow: 1;
-}
-
-.moose-katex-equation-number{
-  width: 5%;
-  text-align: right;
-  margin-bottom: : auto;
-  margin-top: auto;
-}
-
-.katex-display{
-  margin: 0;
-}
-
-.katex{
-  font-size: 1em;
-}
 
 li p {
   margin-top: 0;
