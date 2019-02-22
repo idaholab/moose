@@ -1,10 +1,37 @@
 Content:
-    THM:
-        root_dir: ${ROOT_DIR}/doc/content
+    thm:
+        root_dir: doc/content
+    thm_test:
+        root_dir: test/doc/content
+    framework:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+    fluid_properties:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/doc/content
+        content:
+            - /**
+            - ~syntax/Modules/index.md
+            - ~syntax/Modules/FluidProperties/index.md
+    misc:
+        root_dir: ${MOOSE_DIR}/modules/misc/doc/content
+    heat_conduction:
+        root_dir: ${MOOSE_DIR}/modules/heat_conduction/doc/content
+        content:
+            - /**
+            - ~syntax/ThermalContact/index.md
+            - ~source/actions/ThermalContactBCsAction.md
+            - ~source/actions/ThermalContactMaterialsAction.md
+            - ~source/actions/AddSlaveFluxVectorAction.md
+            - ~source/actions/ThermalContactAuxBCsAction.md
+            - ~source/actions/ThermalContactAuxVarsAction.md
+            - ~source/actions/ThermalContactDiracKernelsAction.md
+    rdg:
+        root_dir: ${MOOSE_DIR}/modules/rdg/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: THM
+    repo: https://hpcgitlab.inl.gov/idaholab/thm
+    home: https://hpcsc.inl.gov/ssl/THM/site/index.html
 
 Extensions:
     MooseDocs.extensions.navigation:
@@ -14,26 +41,64 @@ Extensions:
 
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
+        allow-test-objects: True
         hide:
             framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
             fluid_properties: !include ${MOOSE_DIR}/modules/fluid_properties/doc/hidden.yml
             heat_conduction: !include ${MOOSE_DIR}/modules/heat_conduction/doc/hidden.yml
+            misc: !include ${MOOSE_DIR}/modules/misc/doc/hidden.yml
             thm: !include ${ROOT_DIR}/doc/hidden.yml
-        includes:
-            - include
-            - ${MOOSE_DIR}/framework/include
         remove:
             framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
+            heat_conduction:
+                - /ThermalContact
             thm:
-              - /Modules/FluidProperties/LinearFluidProperties
-              - /Modules/FluidProperties/StiffenedGas7EqnFluidProperties
-              - /Modules/FluidProperties/StiffenedGasLiquidFluidProperties
+                - /Modules
+            fluid_properties_test_app:
+                - /Materials/MultiComponentFluidPropertiesMaterialPT
+                - /AuxKernels/TwoPhaseAverageDensityAux
         alias:
             /FluidProperties: /Modules/FluidProperties
+            /FluidProperties/AddFluidPropertiesAction: /Modules/FluidProperties/AddFluidPropertiesAction
+            /FluidProperties/BrineFluidProperties: /Modules/FluidProperties/BrineFluidProperties
+            /FluidProperties/CO2FluidProperties: /Modules/FluidProperties/CO2FluidProperties
+            /FluidProperties/GeneralVaporMixtureFluidProperties: /Modules/FluidProperties/GeneralVaporMixtureFluidProperties
+            /FluidProperties/IdealGasFluidProperties: /Modules/FluidProperties/IdealGasFluidProperties
+            /FluidProperties/IdealGasFluidPropertiesPT: /Modules/FluidProperties/IdealGasFluidPropertiesPT
+            /FluidProperties/MethaneFluidProperties: /Modules/FluidProperties/MethaneFluidProperties
+            /FluidProperties/NaClFluidProperties: /Modules/FluidProperties/NaClFluidProperties
+            /FluidProperties/NitrogenFluidProperties: /Modules/FluidProperties/NitrogenFluidProperties
+            /FluidProperties/HydrogenFluidProperties: /Modules/FluidProperties/HydrogenFluidProperties
+            /FluidProperties/SimpleFluidProperties: /Modules/FluidProperties/SimpleFluidProperties
+            /FluidProperties/SodiumProperties: /Modules/FluidProperties/SodiumProperties
+            /FluidProperties/StiffenedGasFluidProperties: /Modules/FluidProperties/StiffenedGasFluidProperties
+            /FluidProperties/TabulatedFluidProperties: /Modules/FluidProperties/TabulatedFluidProperties
+            /FluidProperties/TwoPhaseFluidPropertiesIndependent: /Modules/FluidProperties/TwoPhaseFluidPropertiesIndependent
+            /FluidProperties/Water97FluidProperties: /Modules/FluidProperties/Water97FluidProperties
+            /FluidProperties/IAPWS95VaporFluidProperties: /Modules/FluidProperties/IAPWS95VaporFluidProperties
+            /FluidProperties/IAPWS95LiquidFluidProperties: /Modules/FluidProperties/IAPWS95LiquidFluidProperties
+            /FluidProperties/IAPWS95HEMFluidProperties: /Modules/FluidProperties/IAPWS95HEMFluidProperties
+            /FluidProperties/IAPWS957EqnFluidProperties: /Modules/FluidProperties/IAPWS957EqnFluidProperties
+            /FluidProperties/IAPWS95TwoPhaseNCGGeneralFluidProperties: /Modules/FluidProperties/IAPWS95TwoPhaseNCGGeneralFluidProperties
+            /FluidProperties/NitrogenSBTLFluidProperties: /Modules/FluidProperties/NitrogenSBTLFluidProperties
+            /FluidProperties/IdealRealGasMixtureFluidProperties: /Modules/FluidProperties/IdealRealGasMixtureFluidProperties
+            /FluidProperties/LinearTest7EqnFluidProperties: /Modules/FluidProperties/LinearTest7EqnFluidProperties
+        includes:
+            - ${MOOSE_DIR}/framework/include
+            - ${MOOSE_DIR}/modules/fluid_properties/include
+            - ${MOOSE_DIR}/modules/heat_conduction/include
+            - ${MOOSE_DIR}/modules/misc/include
+            - include
+            - test/include
 
     MooseDocs.extensions.common:
         shortcuts:
             framework: !include ${MOOSE_DIR}/framework/doc/globals.yml
+            thm:
+                Components: systems/Components/index.md
 
     MooseDocs.extensions.acronym:
         acronyms: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
+
+    MooseDocs.extensions.bibtex:
+        duplicate_warning: False
