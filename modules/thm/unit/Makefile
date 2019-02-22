@@ -52,6 +52,7 @@ ADDITIONAL_LIBS     := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 CURRENT_DIR        := $(shell pwd)
 APPLICATION_DIR    := $(CURRENT_DIR)/..
 APPLICATION_NAME   := thm
+USE_TEST_LIBS      := yes
 include            $(FRAMEWORK_DIR)/app.mk
 
 APPLICATION_DIR    := $(CURRENT_DIR)
