@@ -26,16 +26,16 @@ validParams<VectorMemoryUsage>()
                         "If the vectorpostprocessor is executed more than once "
                         "during a time step, report the aggregated peak "
                         "value.");
-  MooseEnum mem_units("bytes kilobytes megabytes gigabytes", "megabytes");
-  params.addParam<MooseEnum>(
-      "mem_units", mem_units, "The unit used to report memory usage, default: Megabytes");
+  params.addParam<MooseEnum>("mem_units",
+                             MemoryUtils::getMemUnitsEnum(),
+                             "The unit prefix used to report memory usage, default: Mebibytes");
   return params;
 }
 
 VectorMemoryUsage::VectorMemoryUsage(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     MemoryUsageReporter(this),
-    _mem_units(getParam<MooseEnum>("mem_units").getEnum<MemoryUtils::MemUnit>()),
+    _mem_units(getParam<MooseEnum>("mem_units").getEnum<MemoryUtils::MemUnits>()),
     _col_hardware_id(declareVector("hardware_id")),
     _col_total_ram(declareVector("total_ram")),
     _col_physical_mem(declareVector("physical_mem")),
@@ -57,7 +57,8 @@ VectorMemoryUsage::VectorMemoryUsage(const InputParameters & parameters)
   {
     std::copy(_hardware_id.begin(), _hardware_id.end(), _col_hardware_id.begin());
     for (std::size_t i = 0; i < _nrank; ++i)
-      _col_total_ram[i] = _hardware_memory_total[_hardware_id[i]];
+      _col_total_ram[i] =
+          MemoryUtils::convertBytes(_hardware_memory_total[_hardware_id[i]], _mem_units);
   }
 }
 
@@ -73,7 +74,6 @@ VectorMemoryUsage::execute()
 {
   MemoryUtils::Stats stats;
   MemoryUtils::getMemoryStats(stats);
-  MemoryUtils::getMemoryStats(stats, _mem_units);
 
   if (_report_peak_value)
   {
@@ -111,5 +111,12 @@ VectorMemoryUsage::finalize()
     for (std::size_t i = 0; i < _nrank; ++i)
       _col_node_utilization[i] = physical_per_node[_hardware_id[i]] /
                                  static_cast<Real>(_hardware_memory_total[_hardware_id[i]]);
+  }
+
+  // unit prefix conversion
+  for (std::size_t i = 0; i < _nrank; ++i)
+  {
+    _col_physical_mem[i] = MemoryUtils::convertBytes(_col_physical_mem[i], _mem_units);
+    _col_virtual_mem[i] = MemoryUtils::convertBytes(_col_virtual_mem[i], _mem_units);
   }
 }

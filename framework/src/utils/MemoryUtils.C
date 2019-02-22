@@ -30,6 +30,26 @@
 namespace MemoryUtils
 {
 
+std::string
+getMPIProcessorName()
+{
+#ifdef LIBMESH_HAVE_MPI
+  int mpi_namelen;
+  char mpi_name[MPI_MAX_PROCESSOR_NAME];
+  MPI_Get_processor_name(mpi_name, &mpi_namelen);
+  return mpi_name;
+#else
+  return "serial";
+#endif
+}
+
+MooseEnum
+getMemUnitsEnum()
+{
+  return MooseEnum("bytes kibibytes mebibytes gibibytes kilobytes megabytes gigabytes",
+                   "mebibytes");
+}
+
 std::size_t
 getTotalRAM()
 {
@@ -46,21 +66,8 @@ getTotalRAM()
   return 0;
 }
 
-std::string
-getMPIProcessorName()
-{
-#ifdef LIBMESH_HAVE_MPI
-  int mpi_namelen;
-  char mpi_name[MPI_MAX_PROCESSOR_NAME];
-  MPI_Get_processor_name(mpi_name, &mpi_namelen);
-  return mpi_name;
-#else
-  return "serial";
-#endif
-}
-
 void
-getMemoryStats(Stats & stats, MemUnit units)
+getMemoryStats(Stats & stats)
 {
   enum StatItem
   {
@@ -106,17 +113,37 @@ getMemoryStats(Stats & stats, MemUnit units)
 #endif
   }
 
-  // Create the proper divisor based on the units
-  const long divisor = 1 << (static_cast<unsigned int>(units) * 10);
-
   // physical mem
-  stats._physical_memory = val[index_resident_size] / divisor;
+  stats._physical_memory = val[index_resident_size];
 
   // virtual mem
-  stats._virtual_memory = val[index_virtual_size] / divisor;
+  stats._virtual_memory = val[index_virtual_size];
 
   // page faults
   stats._page_faults = val[index_page_faults];
+}
+
+std::size_t
+convertBytes(std::size_t bytes, MemUnits unit)
+{
+  if (unit == MemUnits::Bytes)
+    return bytes;
+
+  unsigned int nunit = static_cast<unsigned int>(unit);
+
+  // kibi, mebi, gibi
+  if (nunit <= 3)
+    return bytes >> (nunit * 10);
+
+  // kilo, mega, giga
+  if (nunit <= 6)
+  {
+    while (nunit-- > 3)
+      bytes /= 1000;
+    return bytes;
+  }
+
+  mooseError("Unknown memory unit");
 }
 
 } // namespace MemoryUtils

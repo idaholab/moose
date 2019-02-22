@@ -50,8 +50,8 @@ protected:
     min_process
   } _value_type;
 
-  /// The units in which to report memory statistics (kilobyte, megabyte, etc).
-  MemoryUtils::MemUnit _mem_units;
+  /// The unit prefix for the reported memory statistics (kilobyte, megabyte, etc).
+  MemoryUtils::MemUnits _mem_units;
 
   /// memory usage metric in bytes
   Real _value;
