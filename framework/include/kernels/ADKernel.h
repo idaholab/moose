@@ -41,6 +41,8 @@
   using ADKernelTempl<type, compute_stage>::_current_elem;                                         \
   using ADKernelTempl<type, compute_stage>::_t;                                                    \
   using ADKernelTempl<type, compute_stage>::_dt;                                                   \
+  using ADKernelTempl<type, compute_stage>::_phi;                                                  \
+  using ADKernelTempl<type, compute_stage>::_grad_phi;                                             \
   using ADKernelTempl<type, compute_stage>::getBlockCoordSystem;                                   \
   using ADKernelTempl<type, compute_stage>::precalculateResidual;                                  \
   using ADKernelTempl<type, compute_stage>::prepareVectorTag;                                      \
@@ -111,6 +113,12 @@ protected:
 
   /// The ad version of q_point
   const ADPoint & _ad_q_point;
+
+  /// The current shape functions
+  const ADTemplateVariablePhiValue & _phi;
+
+  /// The current gradient of the shape functions
+  const typename VariablePhiGradientType<T, compute_stage>::type & _grad_phi;
 };
 
 #endif /* ADKERNEL_H */

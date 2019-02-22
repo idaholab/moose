@@ -256,6 +256,13 @@ struct VariableSecondType
   typedef
       typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableSecond type;
 };
+template <typename T, ComputeStage compute_stage>
+struct VariablePhiGradientType
+{
+  typedef
+      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariablePhiGradient
+          type;
+};
 
 template <ComputeStage compute_stage>
 struct RealVectorValueType
@@ -341,6 +348,9 @@ struct PointType<JACOBIAN>
 #define ADTemplateVariableGradient typename VariableGradientType<T, compute_stage>::type
 #define ADTemplateVariableSecond typename VariableSecondType<T, compute_stage>::type
 
+#define ADTemplateVariablePhiGradient typename VariablePhiGradientType<T, compute_stage>::type
+#define ADVariablePhiGradient typename VariablePhiGradientType<Real, compute_stage>::type
+
 #define ADMaterialProperty(Type) typename MaterialPropertyType<Type, compute_stage>::type
 
 typedef VariableTestValue ADVariableTestValue;
@@ -350,8 +360,8 @@ typedef VectorVariableTestValue ADVectorVariableTestValue;
 typedef VectorVariableTestGradient ADVectorVariableTestGradient;
 typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 #define ADTemplateVariableTestValue typename OutputTools<T>::VariableTestValue
-#define ADTemplateVariableTestGradient typename OutputTools<T>::VariableTestGradient
 #define ADTemplateVariableTestSecond typename OutputTools<T>::VariableTestSecond
+#define ADTemplateVariablePhiValue typename OutputTools<T>::VariablePhiValue
 
 #define declareADValidParams(ADObjectType)                                                         \
   template <>                                                                                      \

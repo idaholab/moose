@@ -29,4 +29,4 @@ protected:
   usingKernelMembers;
 };
 
-#endif /* ADDIFFUSION_H */
+#endif
