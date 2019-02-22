@@ -36,13 +36,8 @@
   [../]
 []
 
-[Problem]
-  type = FailingProblem
-  fail_step = 2
-[../]
-
 [Executioner]
-  type = Transient
+  type = FailingTransient
   num_steps = 10
   dt = 1 # This will be constrained by the master solve
 
@@ -50,6 +45,8 @@
 
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+
+  fail_step = 2
 []
 
 [Outputs]

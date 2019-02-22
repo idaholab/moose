@@ -7,29 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FAILINGPROBLEM_H
-#define FAILINGPROBLEM_H
+#ifndef FAILINGSTEADY_H
+#define FAILINGSTEADY_H
 
-#include "FEProblem.h"
+#include "Steady.h"
 
-class FailingProblem;
+class FailingSteady;
 
 template <>
-InputParameters validParams<FailingProblem>();
+InputParameters validParams<FailingSteady>();
 
 /**
- * FEProblemBase derived class that will fail a prescribed timestep for testing
+ * Steady derived class that will fail a prescribed timestep for testing
  * timestepping algorithms
  */
-class FailingProblem : public FEProblem
+class FailingSteady : public Steady
 {
 public:
-  FailingProblem(const InputParameters & params);
-  virtual bool converged();
+  FailingSteady(const InputParameters & params);
+  virtual bool augmentedFEProblemSolveFail() override;
 
 protected:
   bool _failed;
   unsigned int _fail_step;
 };
 
-#endif /* FAILINGPROBLEM_H */
+#endif /* FAILINGTRANSIENT_H */

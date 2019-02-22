@@ -117,7 +117,7 @@ public:
   PicardSolve & picardSolve() { return _picard_solve; }
 
   /// Augmented FEProblem solve failure issued by executioners
-  virtual bool augmentedFEProblemSolveFail() const { return false; }
+  virtual bool augmentedFEProblemSolveFail() { return false; }
 
   /// Augmented Picard convergence check that to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const { return false; }

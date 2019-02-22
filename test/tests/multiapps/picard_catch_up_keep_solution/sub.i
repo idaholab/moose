@@ -42,19 +42,16 @@
   [../]
 []
 
-[Problem]
-  type = FailingProblem
-  fail_step = 2
-[../]
-
 [Executioner]
-  type = Transient
+  type = FailingTransient
   num_steps = 2
   dt = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   nl_abs_tol = 1e-10
+
+  fail_step = 2
 []
 
 [Outputs]

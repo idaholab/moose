@@ -7,34 +7,34 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FailingProblem.h"
+#include "FailingTransient.h"
 
 #include "MooseApp.h"
 
-registerMooseObject("MooseTestApp", FailingProblem);
+registerMooseObject("MooseTestApp", FailingTransient);
 
 template <>
 InputParameters
-validParams<FailingProblem>()
+validParams<FailingTransient>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<Transient>();
   params.addRequiredParam<unsigned int>("fail_step", "The timestep to fail");
   return params;
 }
 
-FailingProblem::FailingProblem(const InputParameters & params)
-  : FEProblem(params), _failed(false), _fail_step(getParam<unsigned int>("fail_step"))
+FailingTransient::FailingTransient(const InputParameters & params)
+  : Transient(params), _failed(false), _fail_step(getParam<unsigned int>("fail_step"))
 {
 }
 
 bool
-FailingProblem::converged()
+FailingTransient::augmentedFEProblemSolveFail()
 {
   if (!_failed && (_t_step == static_cast<int>(_fail_step)))
   {
     _failed = true;
-    return false;
+    return true;
   }
 
-  return FEProblemBase::converged();
+  return false;
 }
