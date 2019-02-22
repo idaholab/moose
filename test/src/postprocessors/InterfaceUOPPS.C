@@ -16,18 +16,15 @@ template <>
 InputParameters
 validParams<InterfaceUOPPS>()
 {
-  InputParameters params = validParams<InterfacePostprocessor>();
+  InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("user_object", "The name of the user object");
-  params.suppressParameter<std::vector<BoundaryName>>("boundary");
   params.addClassDescription(
       "Test Interfae User Object postprocessor getting value from InterfaceUO");
   return params;
 }
 
 InterfaceUOPPS::InterfaceUOPPS(const InputParameters & parameters)
-  : InterfacePostprocessor(parameters),
-    _uo(getUserObject<InterfaceUO>("user_object")),
-    _value_pp(0.)
+  : GeneralPostprocessor(parameters), _uo(getUserObject<InterfaceUO>("user_object")), _value_pp(0.)
 {
 }
 

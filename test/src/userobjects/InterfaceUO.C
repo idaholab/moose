@@ -71,5 +71,5 @@ InterfaceUO::threadJoin(const UserObject & uo)
 Real
 InterfaceUO::getValue() const
 {
-  return _value / _total_volume;
+  return _value;
 }

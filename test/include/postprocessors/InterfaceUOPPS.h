@@ -10,7 +10,7 @@
 #ifndef INTERFACEUOPPS_H
 #define INTERFACEUOPPS_H
 
-#include "InterfacePostprocessor.h"
+#include "GeneralPostprocessor.h"
 
 class InterfaceUOPPS;
 class InterfaceUO;
@@ -21,7 +21,7 @@ InputParameters validParams<InterfaceUOPPS>();
 /**
  * This PPS just retrieves the value from InterfaceUO_MP
  */
-class InterfaceUOPPS : public InterfacePostprocessor
+class InterfaceUOPPS : public GeneralPostprocessor
 {
 public:
   InterfaceUOPPS(const InputParameters & parameters);
