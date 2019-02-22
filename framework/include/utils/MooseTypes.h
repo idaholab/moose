@@ -334,6 +334,7 @@ struct PointType<JACOBIAN>
 };
 
 #define ADResidual typename ResidualReturnType<compute_stage>::type
+#define ADVectorResidual typename ResidualReturnType<compute_stage>::type
 #define ADGradResidual typename RealVectorValueType<compute_stage>::type
 #define ADVectorGradResidual typename RealTensorValue<compute_stage>::type
 #define ADGradResidualTempl                                                                        \

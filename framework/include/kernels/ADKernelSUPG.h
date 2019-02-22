@@ -12,12 +12,12 @@
 
 #include "ADKernel.h"
 
-#define usingTemplKernelPGMembers(type)                                                            \
+#define usingTemplKernelSUPGMembers(type)                                                          \
   usingTemplKernelMembers(type);                                                                   \
   using ADKernelSUPGTempl<type, compute_stage>::_velocity;                                         \
   using ADKernelSUPGTempl<type, compute_stage>::_tau
-#define usingKernelPGMembers usingTemplKernelPGMembers(Real)
-#define usingVectorKernelSUPGMembers usingTemplKernelPGMembers(RealVectorValue)
+#define usingKernelSUPGMembers usingTemplKernelSUPGMembers(Real)
+#define usingVectorKernelSUPGMembers usingTemplKernelSUPGMembers(RealVectorValue)
 
 template <typename, ComputeStage>
 class ADKernelSUPGTempl;

@@ -7,10 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INSADMOMENTUMADVECTION}_H
-#define INSADMOMENTUMADVECTION}_H
+#ifndef INSADMOMENTUM_H
+#define INSADMOMENTUM_H
 
-#include "INSADBase.h"
+#include "ADKernelValue.h"
+#include "ADKernelGrad.h"
+#include "ADKernelSUPG.h"
+
+/****************************************************************/
+/**************** INSADMomentumAdvection ************************/
+/****************************************************************/
 
 // Forward Declarations
 template <ComputeStage>
@@ -20,42 +26,73 @@ declareADValidParams(INSADMomentumAdvection);
 
 /**
  * This class computes the momentum equation residual and Jacobian
- * contributions for the incompressible Navier-Stokes momentum
+ * contributions for the convective term of the incompressible Navier-Stokes momentum
  * equation.
  */
 template <ComputeStage compute_stage>
-class INSADMomentumAdvection : public INSADBase<compute_stage>
+class INSADMomentumAdvection : public ADKernelValue<compute_stage>
 {
 public:
   INSADMomentumAdvection(const InputParameters & parameters);
 
-  virtual ~INSADMomentumAdvection() {}
-
 protected:
-  virtual ADResidual computeQpResidual() override;
-  void beforeQpLoop() override;
-  void beforeTestLoop() override;
-  void computeTestTerms();
-  void computeGradTestTerms();
-  void computeGradTestComponentTerms();
+  virtual ADResidual precomputeQpResidual() override;
 
-  unsigned _component;
-  bool _integrate_p_by_parts;
-  bool _supg;
-  Function & _ffn;
-
-  typename Moose::RealType<compute_stage>::type _test_terms;
-  VectorValue<typename Moose::RealType<compute_stage>::type> _grad_test_terms;
-  typename Moose::RealType<compute_stage>::type _grad_test_component_terms;
-
-  usingINSBaseMembers;
+  usingKernelValueMembers;
 };
 
-#define usingINSMomentumBaseMembers                                                                \
-  usingINSBaseMembers;                                                                             \
-  using INSADMomentumAdvection<compute_stage>::_component;                                              \
-  using INSADMomentumAdvection<compute_stage>::_integrate_p_by_parts;                                   \
-  using INSADMomentumAdvection<compute_stage>::_supg;                                                   \
-  using INSADMomentumAdvection<compute_stage>::_ffn
+/****************************************************************/
+/**************** INSADMomentumViscous **************************/
+/****************************************************************/
 
-#endif // INSADMOMENTUMADVECTION}_H
+// Forward Declarations
+template <ComputeStage>
+class INSADMomentumViscous;
+
+declareADValidParams(INSADMomentumViscous);
+
+/**
+ * This class computes the momentum equation residual and Jacobian
+ * contributions for the viscous term of the incompressible Navier-Stokes momentum
+ * equation.
+ */
+template <ComputeStage compute_stage>
+class INSADMomentumViscous : public ADVectorKernelGrad<compute_stage>
+{
+public:
+  INSADMomentumViscous(const InputParameters & parameters);
+
+protected:
+  virtual ADVectorGradResidual precomputeQpResidual() override;
+
+  usingVectorKernelGradMembers;
+};
+
+/****************************************************************/
+/**************** INSADMomentumSUPG *****************************/
+/****************************************************************/
+
+// Forward Declarations
+template <ComputeStage>
+class INSADMomentumSUPG;
+
+declareADValidParams(INSADMomentumSUPG);
+
+/**
+ * This class computes the momentum equation residual and Jacobian
+ * contributions for the convective term of the incompressible Navier-Stokes momentum
+ * equation.
+ */
+template <ComputeStage compute_stage>
+class INSADMomentumSUPG : public ADVectorKernelSUPG<compute_stage>
+{
+public:
+  INSADMomentumSUPG(const InputParameters & parameters);
+
+protected:
+  virtual ADVectorResidual precomputeQpStrongResidual() override;
+
+  usingVectorKernelSUPGMembers;
+};
+
+#endif // INSADMOMENTUM_H
