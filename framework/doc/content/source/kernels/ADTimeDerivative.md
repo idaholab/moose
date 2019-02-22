@@ -27,8 +27,8 @@ block for a transient diffusion problem that demonstrates the
 
 !listing test/tests/kernels/ad_transient_diffusion/ad_transient_diffusion.i block=ADKernels
 
-!syntax parameters /ADKernels/ADTimeDerivative<RESIDUAL>
+!syntax parameters /Kernels/ADTimeDerivative<RESIDUAL>
 
-!syntax inputs /ADKernels/ADTimeDerivative<RESIDUAL>
+!syntax inputs /Kernels/ADTimeDerivative<RESIDUAL>
 
-!syntax children /ADKernels/ADTimeDerivative<RESIDUAL>
+!syntax children /Kernels/ADTimeDerivative<RESIDUAL>

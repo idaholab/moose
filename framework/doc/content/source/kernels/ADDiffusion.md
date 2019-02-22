@@ -18,8 +18,8 @@ element solution of the weak formulation.
 The Jacobian in `ADDiffusion` is computed using forward automatic
 differentiation.
 
-!syntax parameters /ADKernels/ADDiffusion<RESIDUAL>
+!syntax parameters /Kernels/ADDiffusion<RESIDUAL>
 
-!syntax inputs /ADKernels/ADDiffusion<RESIDUAL>
+!syntax inputs /Kernels/ADDiffusion<RESIDUAL>
 
-!syntax children /ADKernels/ADDiffusion<RESIDUAL>
+!syntax children /Kernels/ADDiffusion<RESIDUAL>
