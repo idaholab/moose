@@ -10,17 +10,17 @@
 #ifndef PICARDSOLVE_H
 #define PICARDSOLVE_H
 
-#include "MooseObject.h"
-#include "PerfGraphInterface.h"
+#include "SolveObject.h"
 
 // System includes
 #include <string>
 
-class Executioner;
-class FEProblemBase;
-class NonlinearSystemBase;
+class PicardSolve;
 
-class PicardSolve : public MooseObject, public PerfGraphInterface
+template <>
+InputParameters validParams<PicardSolve>();
+
+class PicardSolve : public SolveObject
 {
 public:
   PicardSolve(Executioner * ex);
@@ -29,7 +29,7 @@ public:
    * Picard solve the FEProblem.
    * @return True if solver is converged.
    */
-  bool solve();
+  virtual bool solve() override;
 
   /// Enumeration for Picard convergence reasons
   enum class MoosePicardConvergenceReason
@@ -99,13 +99,6 @@ protected:
                  Real & end_norm,
                  bool relax,
                  const std::set<dof_id_type> & relaxed_dofs);
-
-  /// Executioner used to construct this
-  Executioner & _executioner;
-  /// Reference to FEProblem
-  FEProblemBase & _problem;
-  /// Reference to nonlinear system base for faster access
-  NonlinearSystemBase & _nl;
 
   /// Maximum Picard iterations
   unsigned int _picard_max_its;
