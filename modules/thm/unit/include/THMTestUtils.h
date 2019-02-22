@@ -1,5 +1,5 @@
-#ifndef RELAP7TESTUTILS_H
-#define RELAP7TESTUTILS_H
+#ifndef THMTESTUTILS_H
+#define THMTESTUTILS_H
 
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 #include "MooseTypes.h"
@@ -14,4 +14,4 @@
 Real computeFDPerturbation(const Real & value,
                            const Real & relative_perturbation = REL_PERTURBATION);
 
-#endif // RELAP7TESTUTILS_H
+#endif // THMTESTUTILS_H

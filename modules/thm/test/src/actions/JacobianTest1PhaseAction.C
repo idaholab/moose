@@ -1,6 +1,6 @@
 #include "JacobianTest1PhaseAction.h"
 
-registerMooseAction("RELAP7TestApp", JacobianTest1PhaseAction, "meta_action");
+registerMooseAction("THMTestApp", JacobianTest1PhaseAction, "meta_action");
 
 template <>
 InputParameters

@@ -1,6 +1,6 @@
 #include "LinearTestMaterial.h"
 
-registerMooseObject("RELAP7TestApp", LinearTestMaterial);
+registerMooseObject("THMTestApp", LinearTestMaterial);
 
 template <>
 InputParameters
