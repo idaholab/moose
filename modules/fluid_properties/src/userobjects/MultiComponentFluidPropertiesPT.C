@@ -18,7 +18,7 @@ validParams<MultiComponentFluidPropertiesPT>()
 }
 
 MultiComponentFluidPropertiesPT::MultiComponentFluidPropertiesPT(const InputParameters & parameters)
-  : FluidProperties(parameters), _T_c2k(273.15)
+  : FluidProperties(parameters)
 {
 }
 

@@ -201,10 +201,6 @@ public:
    * @return reference to SinglePhaseFluidPropertiesPT UserObject for component
    */
   virtual const SinglePhaseFluidProperties & getComponent(unsigned int component) const = 0;
-
-protected:
-  /// Conversion of temperature from Celcius to Kelvin
-  const Real _T_c2k;
 };
 
 #endif /* MULTICOMPONENTFLUIDPROPERTIESPT_H */

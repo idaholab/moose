@@ -504,8 +504,6 @@ protected:
 
   /// Universal gas constant (J/mol/K)
   const Real _R;
-  /// Conversion of temperature from Celsius to Kelvin
-  const Real _T_c2k;
 
 private:
   template <typename... Args>
@@ -516,7 +514,6 @@ private:
     else
       mooseError(std::forward<Args>(args)...);
   }
-  bool _allow_imperfect_jacobians;
 };
 
 #endif /* SINGLEPHASEFLUIDPROPERTIES_H */
