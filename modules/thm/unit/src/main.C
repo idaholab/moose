@@ -1,14 +1,9 @@
-#include "THMApp.h"
 #include "gtest/gtest.h"
-
-#include "Moose.h"
-#include "MooseInit.h"
 #include "AppFactory.h"
+#include "MooseInit.h"
+#include "THMTestApp.h"
 
-#include <fstream>
-#include <string>
-
-PerfLog Moose::perf_log("thm_unit");
+PerfLog Moose::perf_log("THM unit tests");
 
 GTEST_API_ int
 main(int argc, char ** argv)
@@ -17,7 +12,7 @@ main(int argc, char ** argv)
   testing::InitGoogleTest(&argc, argv);
 
   MooseInit init(argc, argv);
-  registerApp(THMApp);
+  registerApp(THMTestApp);
   Moose::_throw_on_error = true;
 
   return RUN_ALL_TESTS();

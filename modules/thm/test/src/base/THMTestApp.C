@@ -48,6 +48,7 @@ THMTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   THMTestApp::registerAll(f, af, s);
 }
+
 extern "C" void
 THMTestApp__registerApps()
 {
