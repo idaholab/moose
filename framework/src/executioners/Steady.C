@@ -36,7 +36,7 @@ Steady::Steady(const InputParameters & parameters)
     _time(_problem.time()),
     _final_timer(registerTimedSection("final", 1))
 {
-  _problem.getNonlinearSystemBase().setDecomposition(_splitting);
+  _picard_solve.setInnerSolve(_feproblem_solve);
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
