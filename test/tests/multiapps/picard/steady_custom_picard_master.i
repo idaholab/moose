@@ -58,12 +58,13 @@
 []
 
 [Executioner]
-  type = Steady
-  nl_abs_tol = 1e-14
+  type = SteadyWithPicardCheck
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  picard_max_its = 10
-  picard_rel_tol = 1e-6
+  picard_max_its = 30
+  disable_picard_residual_norm_check = true
+  pp_name = unorm
+  pp_step_tol = 1e-4
 []
 
 [Outputs]
