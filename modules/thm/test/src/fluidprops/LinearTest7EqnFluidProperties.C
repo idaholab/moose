@@ -1,6 +1,6 @@
 #include "LinearTest7EqnFluidProperties.h"
 
-registerMooseObject("RELAP7TestApp", LinearTest7EqnFluidProperties);
+registerMooseObject("THMTestApp", LinearTest7EqnFluidProperties);
 
 template <>
 InputParameters

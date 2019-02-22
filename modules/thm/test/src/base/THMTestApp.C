@@ -5,6 +5,11 @@
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
 
+#include "HeatConductionApp.h"
+#include "MiscApp.h"
+#include "FluidPropertiesApp.h"
+#include "FluidPropertiesTestApp.h"
+
 template <>
 InputParameters
 validParams<THMTestApp>()
@@ -15,8 +20,7 @@ validParams<THMTestApp>()
 
 THMTestApp::THMTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  THMTestApp::registerAll(
-      _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
+  THMTestApp::registerAll(_factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 
 THMTestApp::~THMTestApp() {}
@@ -29,7 +33,26 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
   {
     Registry::registerObjectsTo(f, {"THMTestApp"});
     Registry::registerActionsTo(af, {"THMTestApp"});
+
+    s.registerActionSyntax("JacobianTest1PhaseAction", "JacobianTest1Phase");
+    s.registerActionSyntax("JacobianTest2PhaseAction", "JacobianTest2Phase");
+    s.registerActionSyntax("JacobianTestGeneralAction", "JacobianTestGeneral");
+    s.registerActionSyntax("JacobianTest1PhaseRDGAction", "JacobianTest1PhaseRDG");
+    s.registerActionSyntax("JacobianTest2PhaseNumericalFluxAction",
+                           "JacobianTest2PhaseNumericalFlux");
+    s.registerActionSyntax("JacobianTest2PhaseBoundaryFluxAction",
+                           "JacobianTest2PhaseBoundaryFlux");
+    s.registerActionSyntax("JacobianTest2PhaseRDGInterfacialVariablesAction",
+                           "JacobianTest2PhaseRDGInterfacialVariables");
+    s.registerActionSyntax("JacobianTest2PhaseRiemannSolverAction",
+                           "JacobianTest2PhaseRiemannSolver");
+    s.registerActionSyntax("JacobianTest2PhaseWaveSpeedsAction", "JacobianTest2PhaseWaveSpeeds");
+    s.registerActionSyntax("ClosureTest1PhaseAction", "ClosureTest1Phase");
+    s.registerActionSyntax("ClosureTest2PhaseAction", "ClosureTest2Phase");
   }
+  HeatConductionApp::registerAll(f, af, s);
+  FluidPropertiesApp::registerAll(f, af, s);
+  THMApp::registerAll(f, af, s);
 }
 
 void

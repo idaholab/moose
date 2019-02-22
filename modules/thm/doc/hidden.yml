@@ -51,6 +51,12 @@
 - /BCs/OneDVolumeFractionVaporBC
 - /BCs/VolumeJunctionOldBC
 
+- /ClosureTest1Phase
+- /ClosureTest1Phase/ClosureTest1PhaseAction
+
+- /ClosureTest2Phase
+- /ClosureTest2Phase/ClosureTest2PhaseAction
+
 - /Components
 - /Components/AddComponentAction
 - /Components/BoundaryBase
@@ -138,6 +144,20 @@
 - /ICs/SpecificVolumeIC
 - /ICs/SumIC
 - /ICs/VariableProductIC
+
+- /JacobianTest1Phase
+- /JacobianTest1Phase/JacobianTest1PhaseAction
+
+- /JacobianTest1PhaseRDG
+- /JacobianTest1PhaseRDG/JacobianTest1PhaseRDGAction
+
+- /JacobianTest2Phase
+- /JacobianTest2Phase/JacobianTest2PhaseAction
+
+- /JacobianTest2PhaseRDG
+
+- /JacobianTestGeneral
+- /JacobianTestGeneral/JacobianTestGeneralAction
 
 - /Kernels/CoupledForceRZ
 - /Kernels/OneD3EqnEnergyHeatFlux
