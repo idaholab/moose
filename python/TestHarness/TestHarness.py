@@ -449,7 +449,7 @@ class TestHarness:
         # Print what ever status the tester has at the time
         if self.options.verbose or (tester.isFail() and not self.options.quiet):
             output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
-            output += job.getOutput()
+            output += util.trimOutput(job, self.options)
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n')
 
@@ -817,6 +817,7 @@ class TestHarness:
         outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
+        outputgroup.add_argument("--no-trimmed-output-on-error", action="store_true", dest="no_trimmed_output_on_error", help="Do not trim output for tests which cause an error")
 
         queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
         queuegroup.add_argument('--pbs', nargs=1, action='store', metavar='session_name', help='Launch tests using PBS as your scheduler. You must supply a name to identify this session with')
