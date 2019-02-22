@@ -14,6 +14,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 #include "TimeIntegrator.h"
+#include "FEProblemSolve.h"
 
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -101,8 +102,7 @@ DT2::step()
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
 
   // solve the problem with full dt
-  _fe_problem.solve();
-  _converged = nl.converged();
+  _converged = _fe_problem.getFEProblemSolve().solve();
   if (_converged)
   {
     // save the solution (for time step with dt)
@@ -129,9 +129,7 @@ DT2::step()
 
     _console << "  - 1. step" << std::endl;
     Moose::setSolverDefaults(_fe_problem);
-    nl.solve();
-    _converged = nl.converged();
-
+    _converged = _fe_problem.getFEProblemSolve().solve();
     if (_converged)
     {
       nl_sys.update();
@@ -146,8 +144,7 @@ DT2::step()
 
       _console << "  - 2. step" << std::endl;
       Moose::setSolverDefaults(_fe_problem);
-      nl.solve();
-      _converged = nl.converged();
+      _converged = _fe_problem.getFEProblemSolve().solve();
       if (_converged)
       {
         nl_sys.update();

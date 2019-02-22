@@ -68,9 +68,6 @@ public:
 
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
-  virtual void solve() = 0;
-  virtual bool converged() = 0;
-
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
 
@@ -268,9 +265,6 @@ public:
   unsigned int getAxisymmetricRadialCoord() const;
 
   virtual DiracKernelInfo & diracKernelInfo();
-  virtual Real finalNonlinearResidual() const;
-  virtual unsigned int nNonlinearIterations() const;
-  virtual unsigned int nLinearIterations() const;
 
   virtual void addResidual(THREAD_ID tid) = 0;
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;

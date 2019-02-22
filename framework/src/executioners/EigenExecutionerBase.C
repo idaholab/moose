@@ -248,8 +248,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _source_integral_old = _source_integral;
 
     preIteration();
-    _problem.solve();
-    converged = _problem.converged();
+    converged = _problem.getFEProblemSolve().solve();
     if (!converged)
       break;
     postIteration();
@@ -576,7 +575,7 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real>("linear solver tolerance") = pfactor;
 
   // call nonlinear solve
-  _problem.solve();
+  bool converged = _problem.getFEProblemSolve().solve();
 
   k = _source_integral;
   _eigenvalue = k;
@@ -585,5 +584,5 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _problem.es().parameters.set<Real>("linear solver tolerance") = tol2;
   _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = tol3;
 
-  return _problem.converged();
+  return converged;
 }

@@ -16,6 +16,7 @@
 #include "AuxiliarySystem.h"
 #include "TimeIntegrator.h"
 #include "Conversion.h"
+#include "FEProblemSolve.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/numeric_vector.h"
@@ -85,8 +86,7 @@ AB2PredictorCorrector::step()
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
 
-  _fe_problem.solve();
-  _converged = _fe_problem.converged();
+  _converged = _fe_problem.getFEProblemSolve().solve();
   if (_converged)
   {
     _u1 = *nl.currentSolution();

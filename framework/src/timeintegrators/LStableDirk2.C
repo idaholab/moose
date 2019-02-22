@@ -73,7 +73,7 @@ LStableDirk2::solve()
   _n_linear_iterations = 0;
 
   // Compute first stage
-  _fe_problem.initPetscOutput();
+  _app.getExecutioner()->initPetscOutput();
   _console << "1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_stage1;
@@ -82,11 +82,11 @@ LStableDirk2::solve()
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged())
+  if (!_fe_problem.getNonlinearSystemBase().converged())
     return;
 
   // Compute second stage
-  _fe_problem.initPetscOutput();
+  _app.getExecutioner()->initPetscOutput();
   _console << "2nd stage\n";
   _stage = 2;
   _fe_problem.timeOld() = time_stage1;

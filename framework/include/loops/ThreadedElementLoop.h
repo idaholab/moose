@@ -12,6 +12,7 @@
 
 #include "ParallelUniqueId.h"
 #include "FEProblemBase.h"
+#include "Executioner.h"
 #include "ThreadedElementLoopBase.h"
 
 // Forward declarations
@@ -41,7 +42,7 @@ public:
 
   virtual void caughtMooseException(MooseException & e) override;
 
-  virtual bool keepGoing() override { return !_fe_problem.hasException(); }
+  virtual bool keepGoing() override { return !_executioner.hasException(); }
 
   virtual void preElement(const Elem * elem) override;
 
@@ -51,18 +52,21 @@ public:
 
 protected:
   FEProblemBase & _fe_problem;
+  Executioner & _executioner;
 };
 
 template <typename RangeType>
 ThreadedElementLoop<RangeType>::ThreadedElementLoop(FEProblemBase & fe_problem)
-  : ThreadedElementLoopBase<RangeType>(fe_problem.mesh()), _fe_problem(fe_problem)
+  : ThreadedElementLoopBase<RangeType>(fe_problem.mesh()),
+    _fe_problem(fe_problem),
+    _executioner(*fe_problem.getMooseApp().getExecutioner())
 {
 }
 
 template <typename RangeType>
 ThreadedElementLoop<RangeType>::ThreadedElementLoop(ThreadedElementLoop & x,
                                                     Threads::split /*split*/)
-  : ThreadedElementLoopBase<RangeType>(x), _fe_problem(x._fe_problem)
+  : ThreadedElementLoopBase<RangeType>(x), _fe_problem(x._fe_problem), _executioner(x._executioner)
 {
 }
 
@@ -78,7 +82,7 @@ ThreadedElementLoop<RangeType>::caughtMooseException(MooseException & e)
   Threads::spin_mutex::scoped_lock lock(threaded_element_mutex);
 
   std::string what(e.what());
-  _fe_problem.setException(what);
+  _executioner.setException(what);
 }
 
 template <typename RangeType>

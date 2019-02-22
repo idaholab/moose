@@ -10,11 +10,6 @@
 #include "PicardSolve.h"
 
 #include "FEProblem.h"
-#include "Executioner.h"
-#include "MooseMesh.h"
-#include "NonlinearSystem.h"
-#include "AllLocalDofIndicesThread.h"
-#include "Console.h"
 
 SolveObject::SolveObject(Executioner * ex)
   : MooseObject(ex->parameters()),
@@ -22,6 +17,11 @@ SolveObject::SolveObject(Executioner * ex)
     _executioner(*ex),
     _problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
-    _nl(_problem.getNonlinearSystemBase())
+    _displaced_problem(_problem.getDisplacedProblem()),
+    _mesh(_problem.mesh()),
+    _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
+    _nl(_problem.getNonlinearSystemBase()),
+    _aux(_problem.getAuxiliarySystem()),
+    _inner_solve(nullptr)
 {
 }

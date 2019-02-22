@@ -171,7 +171,6 @@ Transient::Transient(const InputParameters & parameters)
   if (!parameters.isParamSetByAddParam("ss_tmin"))
     _steady_state_start_time = getParam<Real>("ss_tmin");
 
-  _nl.setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;

@@ -82,12 +82,7 @@ validParams<PicardSolve>()
 }
 
 PicardSolve::PicardSolve(Executioner * ex)
-  : MooseObject(ex->parameters()),
-    PerfGraphInterface(this),
-    _executioner(*ex),
-    _problem(*getCheckedPointerParam<FEProblemBase *>(
-        "_fe_problem_base", "This might happen if you don't have a mesh")),
-    _nl(_problem.getNonlinearSystemBase()),
+  : SolveObject(ex),
     _picard_max_its(getParam<unsigned int>("picard_max_its")),
     _has_picard_its(_picard_max_its > 1),
     _accept_max_it(getParam<bool>("accept_on_max_picard_iteration")),
@@ -108,6 +103,9 @@ PicardSolve::PicardSolve(Executioner * ex)
     _xfem_repeat_step(false),
     _previous_entering_time(_problem.time() - 1)
 {
+  if (_relax_factor != 1.0)
+    // Store a copy of the previous solution here
+    _problem.getNonlinearSystemBase().addVector("relax_previous", false, PARALLEL);
 }
 
 bool
@@ -372,8 +370,7 @@ PicardSolve::solveStep(Real begin_norm_old,
 
   if (_has_picard_its)
     _console << COLOR_MAGENTA << "\nMaster solve:\n" << COLOR_DEFAULT;
-  _problem.solve();
-  if (!_problem.converged())
+  if (!_inner_solve->solve())
   {
     _picard_status = MoosePicardConvergenceReason::DIVERGED_NONLINEAR;
 

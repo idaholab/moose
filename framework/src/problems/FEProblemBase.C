@@ -85,6 +85,8 @@
 #include "TimeIntegrator.h"
 #include "LineSearch.h"
 #include "FloatingPointExceptionGuard.h"
+#include "Executioner.h"
+#include "FEProblemSolve.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -251,7 +253,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
-    _has_exception(false),
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
@@ -263,7 +264,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
-    _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
     _initial_setup_timer(registerTimedSection("initialSetup", 2)),
@@ -279,8 +279,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _exec_multi_app_transfers_timer(registerTimedSection("execMultiAppTransfers", 1)),
     _init_timer(registerTimedSection("init", 2)),
     _eq_init_timer(registerTimedSection("EquationSystems::Init", 2)),
-    _solve_timer(registerTimedSection("solve", 1)),
-    _check_exception_and_stop_solve_timer(registerTimedSection("checkExceptionAndStopSolve", 5)),
     _advance_state_timer(registerTimedSection("advanceState", 5)),
     _restore_solutions_timer(registerTimedSection("restoreSolutions", 5)),
     _save_old_solutions_timer(registerTimedSection("saveOldSolutions", 5)),
@@ -309,8 +307,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _mesh_changed_helper_timer(registerTimedSection("meshChangedHelper", 5)),
     _check_problem_integrity_timer(registerTimedSection("notifyWhenMeshChanges", 5)),
     _serialize_solution_timer(registerTimedSection("serializeSolution", 3)),
-    _check_nonlinear_convergence_timer(registerTimedSection("checkNonlinearConvergence", 5)),
-    _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence", 5)),
     _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3)),
     _exec_multi_apps_timer(registerTimedSection("execMultiApps", 1)),
     _backup_multi_apps_timer(registerTimedSection("backupMultiApps", 5)),
@@ -4147,109 +4143,16 @@ FEProblemBase::init()
   _initialized = true;
 }
 
-void
-FEProblemBase::solve()
+FEProblemSolve &
+FEProblemBase::getFEProblemSolve()
 {
-  TIME_SECTION(_solve_timer);
-
-#ifdef LIBMESH_HAVE_PETSC
-  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
-#endif
-
-  Moose::setSolverDefaults(*this);
-
-  // Setup the output system for printing linear/nonlinear iteration information
-  initPetscOutput();
-
-  possiblyRebuildGeomSearchPatches();
-
-  // reset flag so that linear solver does not use
-  // the old converged reason "DIVERGED_NANORINF", when
-  // we throw  an exception and stop solve
-  _fail_next_linear_convergence_check = false;
-
-  if (_solve)
-    _nl->solve();
-
-  if (_solve)
-    _nl->update();
-
-  // sync solutions in displaced problem
-  if (_displaced_problem)
-    _displaced_problem->syncSolutions();
-}
-
-void
-FEProblemBase::setException(const std::string & message)
-{
-  _has_exception = true;
-  _exception_message = message;
+  return _app.getExecutioner()->feProblemSolve();
 }
 
 void
 FEProblemBase::checkExceptionAndStopSolve()
 {
-  TIME_SECTION(_check_exception_and_stop_solve_timer);
-
-  // See if any processor had an exception.  If it did, get back the
-  // processor that the exception occurred on.
-  unsigned int processor_id;
-
-  _communicator.maxloc(_has_exception, processor_id);
-
-  if (_has_exception)
-  {
-    _communicator.broadcast(_exception_message, processor_id);
-
-    // Print the message
-    if (_communicator.rank() == 0)
-      Moose::err << _exception_message << std::endl;
-
-    // Stop the solve -- this entails setting
-    // SNESSetFunctionDomainError() or directly inserting NaNs in the
-    // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
-    _nl->stopSolve();
-
-    // and close Aux system (we MUST do this here; see #11525)
-    _aux->solution().close();
-
-    // We've handled this exception, so we no longer have one.
-    _has_exception = false;
-
-    // Force the next linear convergence check to fail.
-    _fail_next_linear_convergence_check = true;
-
-    // Repropagate the exception, so it can be caught at a higher level, typically
-    // this is NonlinearSystem::computeResidual().
-    throw MooseException(_exception_message);
-  }
-}
-
-bool
-FEProblemBase::converged()
-{
-  if (_solve)
-    return _nl->converged();
-  else
-    return true;
-}
-
-unsigned int
-FEProblemBase::nNonlinearIterations() const
-{
-  return _nl->nNonlinearIterations();
-}
-
-unsigned int
-FEProblemBase::nLinearIterations() const
-{
-  return _nl->nLinearIterations();
-}
-
-Real
-FEProblemBase::finalNonlinearResidual() const
-{
-  return _nl->finalNonlinearResidual();
+  getFEProblemSolve().checkExceptionAndStopSolve();
 }
 
 bool
@@ -4344,13 +4247,6 @@ void
 FEProblemBase::forceOutput()
 {
   _app.getOutputWarehouse().forceOutput();
-}
-
-void
-FEProblemBase::initPetscOutput()
-{
-  _app.getOutputWarehouse().solveSetup();
-  Moose::PetscSupport::petscSetDefaults(*this);
 }
 
 void
@@ -5018,7 +4914,7 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
         reinitBecauseOfGhostingOrNewGeomObjects();
 
         // This is needed to reinitialize PETSc output
-        initPetscOutput();
+        _app.getExecutioner()->initPetscOutput();
 
         break;
 
@@ -5048,7 +4944,7 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
         reinitBecauseOfGhostingOrNewGeomObjects();
 
         // This is needed to reinitialize PETSc output
-        initPetscOutput();
+        _app.getExecutioner()->initPetscOutput();
     }
   }
 }
@@ -5642,140 +5538,6 @@ FEProblemBase::getVariableNames()
   names.insert(names.end(), aux_var_names.begin(), aux_var_names.end());
 
   return names;
-}
-
-MooseNonlinearConvergenceReason
-FEProblemBase::checkNonlinearConvergence(std::string & msg,
-                                         const PetscInt it,
-                                         const Real xnorm,
-                                         const Real snorm,
-                                         const Real fnorm,
-                                         const Real rtol,
-                                         const Real stol,
-                                         const Real abstol,
-                                         const PetscInt nfuncs,
-                                         const PetscInt max_funcs,
-                                         const PetscBool force_iteration,
-                                         const Real initial_residual_before_preset_bcs,
-                                         const Real div_threshold)
-{
-  TIME_SECTION(_check_nonlinear_convergence_timer);
-
-  NonlinearSystemBase & system = getNonlinearSystemBase();
-  MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
-
-  // This is the first residual before any iterations have been done,
-  // but after PresetBCs (if any) have been imposed on the solution
-  // vector.  We save it, and use it to detect convergence if
-  // compute_initial_residual_before_preset_bcs=false.
-  if (it == 0)
-    system._initial_residual_after_preset_bcs = fnorm;
-
-  std::ostringstream oss;
-  if (fnorm != fnorm)
-  {
-    oss << "Failed to converge, function norm is NaN\n";
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
-  }
-  else if (fnorm < abstol && (it || !force_iteration))
-  {
-    oss << "Converged due to function norm " << fnorm << " < " << abstol << '\n';
-    reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
-  }
-  else if (nfuncs >= max_funcs)
-  {
-    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs
-        << '\n';
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
-  }
-  else if (it && fnorm > system._last_nl_rnorm && fnorm >= div_threshold)
-  {
-    oss << "Nonlinear solve was blowing up!\n";
-    reason = MooseNonlinearConvergenceReason::DIVERGED_LINE_SEARCH;
-  }
-
-  if (it && reason == MooseNonlinearConvergenceReason::ITERATING)
-  {
-    // If compute_initial_residual_before_preset_bcs==false, then use the
-    // first residual computed by Petsc to determine convergence.
-    Real the_residual = system._compute_initial_residual_before_preset_bcs
-                            ? initial_residual_before_preset_bcs
-                            : system._initial_residual_after_preset_bcs;
-    if (fnorm <= the_residual * rtol)
-    {
-      oss << "Converged due to function norm " << fnorm << " < "
-          << " (relative tolerance)\n";
-      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
-    }
-    else if (snorm < stol * xnorm)
-    {
-      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
-          << '\n';
-      reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
-    }
-  }
-
-  system._last_nl_rnorm = fnorm;
-  system._current_nl_its = static_cast<unsigned int>(it);
-
-  msg = oss.str();
-  if (_app.multiAppLevel() > 0)
-    MooseUtils::indentMessage(_app.name(), msg);
-
-  return reason;
-}
-
-MooseLinearConvergenceReason
-FEProblemBase::checkLinearConvergence(std::string & /*msg*/,
-                                      const PetscInt n,
-                                      const Real rnorm,
-                                      const Real /*rtol*/,
-                                      const Real /*atol*/,
-                                      const Real /*dtol*/,
-                                      const PetscInt maxits)
-{
-  TIME_SECTION(_check_linear_convergence_timer);
-
-  if (_fail_next_linear_convergence_check)
-  {
-    // Unset the flag
-    _fail_next_linear_convergence_check = false;
-    return MooseLinearConvergenceReason::DIVERGED_NANORINF;
-  }
-
-  // We initialize the reason to something that basically means MOOSE
-  // has not made a decision on convergence yet.
-  MooseLinearConvergenceReason reason = MooseLinearConvergenceReason::ITERATING;
-
-  // Get a reference to our Nonlinear System
-  NonlinearSystemBase & system = getNonlinearSystemBase();
-
-  // If it's the beginning of a new set of iterations, reset
-  // last_rnorm, otherwise record the most recent linear residual norm
-  // in the NonlinearSystem.
-  if (n == 0)
-    system._last_rnorm = 1e99;
-  else
-    system._last_rnorm = rnorm;
-
-  // If the linear residual norm is less than the System's linear absolute
-  // step tolerance, we consider it to be converged and set the reason as
-  // MooseLinearConvergenceReason::CONVERGED_RTOL.
-  if (std::abs(rnorm - system._last_rnorm) < system._l_abs_step_tol)
-    reason = MooseLinearConvergenceReason::CONVERGED_RTOL;
-
-  // If we hit max its, then we consider that converged (rather than
-  // KSP_DIVERGED_ITS).
-  if (n >= maxits)
-    reason = MooseLinearConvergenceReason::CONVERGED_ITS;
-
-  // If either of our convergence criteria is met, store the number of linear
-  // iterations in the System.
-  if (reason == MooseLinearConvergenceReason::CONVERGED_ITS ||
-      reason == MooseLinearConvergenceReason::CONVERGED_RTOL)
-    system._current_l_its.push_back(static_cast<unsigned int>(n));
-
-  return reason;
 }
 
 SolverParams &

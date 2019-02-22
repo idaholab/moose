@@ -2718,7 +2718,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
       }
       catch (MooseException & e)
       {
-        _fe_problem.setException(e.what());
+        _app.getExecutioner()->setException(e.what());
       }
       damping = std::min(gd_damping, damping);
     }

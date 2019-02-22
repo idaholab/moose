@@ -383,7 +383,7 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 bool
 NonlinearSystem::converged()
 {
-  if (_fe_problem.hasException())
+  if (_app.getExecutioner()->hasException())
     return false;
 
   return _transient_sys.nonlinear_solver->converged;

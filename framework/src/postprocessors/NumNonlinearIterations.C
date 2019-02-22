@@ -11,6 +11,7 @@
 
 #include "FEProblem.h"
 #include "SubProblem.h"
+#include "FEProblemSolve.h"
 
 registerMooseObject("MooseApp", NumNonlinearIterations);
 
@@ -29,22 +30,19 @@ validParams<NumNonlinearIterations>()
 
 NumNonlinearIterations::NumNonlinearIterations(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _fe_problem(dynamic_cast<FEProblemBase *>(&_subproblem)),
     _accumulate_over_step(getParam<bool>("accumulate_over_step")),
     _num_iters(0),
     _time(-std::numeric_limits<Real>::max())
 {
-  if (!_fe_problem)
-    mooseError("Couldn't cast to FEProblemBase");
 }
 
 void
 NumNonlinearIterations::timestepSetup()
 {
-  if (_fe_problem->time() != _time)
+  if (_fe_problem.time() != _time)
   {
     _num_iters = 0;
-    _time = _fe_problem->time();
+    _time = _fe_problem.time();
   }
 }
 
@@ -52,9 +50,9 @@ Real
 NumNonlinearIterations::getValue()
 {
   if (_accumulate_over_step)
-    _num_iters += _subproblem.nNonlinearIterations();
+    _num_iters += _fe_problem.getFEProblemSolve().nNonlinearIterations();
   else
-    _num_iters = _subproblem.nNonlinearIterations();
+    _num_iters = _fe_problem.getFEProblemSolve().nNonlinearIterations();
 
   return _num_iters;
 }

@@ -28,6 +28,7 @@
 #include "Executioner.h"
 #include "MooseMesh.h"
 #include "ComputeLineSearchObjectWrapper.h"
+#include "FEProblemSolve.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/linear_implicit_system.h"
@@ -331,7 +332,7 @@ petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason
   // Now do some additional MOOSE-specific tests...
   std::string msg;
   MooseLinearConvergenceReason moose_reason =
-      problem.checkLinearConvergence(msg, n, rnorm, rtol, atol, dtol, maxits);
+      problem.getFEProblemSolve().checkLinearConvergence(msg, n, rnorm, rtol, atol, dtol, maxits);
 
   switch (moose_reason)
   {
@@ -434,19 +435,20 @@ petscNonlinearConverged(SNES snes,
   // snorm: 2-norm of current step
   // fnorm: 2-norm of function at current iterate
   MooseNonlinearConvergenceReason moose_reason =
-      problem.checkNonlinearConvergence(msg,
-                                        it,
-                                        xnorm,
-                                        snorm,
-                                        fnorm,
-                                        rtol,
-                                        stol,
-                                        atol,
-                                        nfuncs,
-                                        maxf,
-                                        force_iteration,
-                                        system._initial_residual_before_preset_bcs,
-                                        std::numeric_limits<Real>::max());
+      problem.getFEProblemSolve().checkNonlinearConvergence(
+          msg,
+          it,
+          xnorm,
+          snorm,
+          fnorm,
+          rtol,
+          stol,
+          atol,
+          nfuncs,
+          maxf,
+          force_iteration,
+          system._initial_residual_before_preset_bcs,
+          std::numeric_limits<Real>::max());
 
   if (msg.length() > 0)
     PetscInfo(snes, msg.c_str());

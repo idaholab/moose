@@ -75,6 +75,7 @@ class KernelBase;
 class IntegratedBCBase;
 class LineSearch;
 class UserObject;
+class FEProblemSolve;
 
 // libMesh forward declarations
 namespace libMesh
@@ -85,48 +86,6 @@ class NonlinearImplicitSystem;
 
 template <>
 InputParameters validParams<FEProblemBase>();
-
-/// Enumeration for nonlinear convergence reasons
-enum class MooseNonlinearConvergenceReason
-{
-  ITERATING = 0,
-  CONVERGED_FNORM_ABS = 2,
-  CONVERGED_FNORM_RELATIVE = 3,
-  CONVERGED_SNORM_RELATIVE = 4,
-  DIVERGED_FUNCTION_COUNT = -2,
-  DIVERGED_FNORM_NAN = -4,
-  DIVERGED_LINE_SEARCH = -6
-};
-
-// The idea with these enums is to abstract the reasons for
-// convergence/divergence, i.e. they could be used with linear algebra
-// packages other than PETSc.  They were directly inspired by PETSc,
-// though.  This enum could also be combined with the
-// MooseNonlinearConvergenceReason enum but there might be some
-// confusion (?)
-enum class MooseLinearConvergenceReason
-{
-  ITERATING = 0,
-  // CONVERGED_RTOL_NORMAL        =  1,
-  // CONVERGED_ATOL_NORMAL        =  9,
-  CONVERGED_RTOL = 2,
-  CONVERGED_ATOL = 3,
-  CONVERGED_ITS = 4,
-  // CONVERGED_CG_NEG_CURVE       =  5,
-  // CONVERGED_CG_CONSTRAINED     =  6,
-  // CONVERGED_STEP_LENGTH        =  7,
-  // CONVERGED_HAPPY_BREAKDOWN    =  8,
-  DIVERGED_NULL = -2,
-  // DIVERGED_ITS                 = -3,
-  // DIVERGED_DTOL                = -4,
-  // DIVERGED_BREAKDOWN           = -5,
-  // DIVERGED_BREAKDOWN_BICG      = -6,
-  // DIVERGED_NONSYMMETRIC        = -7,
-  // DIVERGED_INDEFINITE_PC       = -8,
-  DIVERGED_NANORINF = -9,
-  // DIVERGED_INDEFINITE_MAT      = -10
-  DIVERGED_PCSETUP_FAILED = -11
-};
 
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
@@ -175,55 +134,6 @@ public:
   couplingEntries(THREAD_ID tid);
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   nonlocalCouplingEntries(THREAD_ID tid);
-
-  /**
-   * Check for converence of the nonlinear solution
-   * @param msg            Error message that gets sent back to the solver
-   * @param it             Iteration counter
-   * @param xnorm          Norm of the solution vector
-   * @param snorm          Norm of the change in the solution vector
-   * @param fnorm          Norm of the residual vector
-   * @param rtol           Relative residual convergence tolerance
-   * @param stol           Solution change convergence tolerance
-   * @param abstol         Absolute residual convergence tolerance
-   * @param nfuncs         Number of function evaluations
-   * @param max_funcs      Maximum Number of function evaluations
-   * @param initial_residual_before_preset_bcs      Residual norm prior to imposition of PresetBC
-   * values on solution vector
-   * @param div_threshold  Maximum value of residual before triggering divergence check
-   */
-  virtual MooseNonlinearConvergenceReason
-  checkNonlinearConvergence(std::string & msg,
-                            const PetscInt it,
-                            const Real xnorm,
-                            const Real snorm,
-                            const Real fnorm,
-                            const Real rtol,
-                            const Real stol,
-                            const Real abstol,
-                            const PetscInt nfuncs,
-                            const PetscInt max_funcs,
-                            const PetscBool force_iteration,
-                            const Real initial_residual_before_preset_bcs,
-                            const Real div_threshold);
-
-  /**
-   * Check for convergence of the linear solution
-   * @param msg            Error message that gets sent back to the solver
-   * @param n              Iteration counter
-   * @param rnorm          Norm of the residual vector
-   * @param rtol           Relative residual convergence tolerance
-   * @param atol           Absolute residual convergence tolerance
-   * @param dtol           Divergence tolerance
-   * @param maxits         Maximum number of linear iterations allowed
-   */
-  virtual MooseLinearConvergenceReason checkLinearConvergence(std::string & msg,
-                                                              const PetscInt n,
-                                                              const Real rnorm,
-                                                              const Real rtol,
-                                                              const Real atol,
-                                                              const Real dtol,
-                                                              const PetscInt maxits);
 
   virtual bool hasVariable(const std::string & var_name) const override;
   virtual MooseVariableFEBase & getVariable(
@@ -396,39 +306,12 @@ public:
   virtual void initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl);
 
   virtual void init() override;
-  virtual void solve() override;
 
   const ConstElemRange & getEvaluableElementRange();
 
-  /**
-   * Set an exception.  Usually this should not be directly called - but should be called through
-   * the mooseException() macro.
-   *
-   * @param message The error message about the exception.
-   */
-  virtual void setException(const std::string & message);
+  bool needSolve() const { return _solve; }
 
-  /**
-   * Whether or not an exception has occurred.
-   */
-  virtual bool hasException() { return _has_exception; }
-
-  /**
-   * Check to see if an exception has occurred on any processor and stop the solve.
-   *
-   * Note: Collective on MPI!  Must be called simultaneously by all processors!
-   *
-   * Also: This will throw a MooseException!
-   *
-   * Note: DO NOT CALL THIS IN A THREADED REGION!  This is meant to be called just after a threaded
-   * section.
-   */
-  virtual void checkExceptionAndStopSolve();
-
-  virtual bool converged() override;
-  virtual unsigned int nNonlinearIterations() const override;
-  virtual unsigned int nLinearIterations() const override;
-  virtual Real finalNonlinearResidual() const override;
+  FEProblemSolve & getFEProblemSolve();
   virtual bool computingInitialResidual() const override;
 
   /**
@@ -508,11 +391,6 @@ public:
    */
   void forceOutput();
 
-  /**
-   * Reinitialize petsc output for proper linear/nonlinear iteration display
-   */
-  void initPetscOutput();
-
 #ifdef LIBMESH_HAVE_PETSC
   /**
    * Retrieve a writable reference the PETSc options (used by PetscSupport)
@@ -584,6 +462,7 @@ public:
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
+  virtual void checkExceptionAndStopSolve();
   virtual void setInputParametersFEProblem(InputParameters & parameters)
   {
     parameters.set<FEProblemBase *>("_fe_problem_base") = this;
@@ -1833,14 +1712,8 @@ protected:
   /// Indicates whether or not this executioner has a time integrator (during setup)
   bool _has_time_integrator;
 
-  /// Whether or not an exception has occurred
-  bool _has_exception;
-
   /// Whether or not information about how many transfers have completed is printed
   bool _parallel_barrier_messaging;
-
-  /// The error message to go with an exception
-  std::string _exception_message;
 
   /// Current execute_on flag
   ExecFlagType _current_execute_on_flag;
@@ -1869,7 +1742,6 @@ private:
   const bool _force_restart;
   const bool _skip_additional_restart_data;
   const bool _skip_nl_system_check;
-  bool _fail_next_linear_convergence_check;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;
@@ -1890,8 +1762,6 @@ private:
   const PerfID _exec_multi_app_transfers_timer;
   const PerfID _init_timer;
   const PerfID _eq_init_timer;
-  const PerfID _solve_timer;
-  const PerfID _check_exception_and_stop_solve_timer;
   const PerfID _advance_state_timer;
   const PerfID _restore_solutions_timer;
   const PerfID _save_old_solutions_timer;
@@ -1918,8 +1788,6 @@ private:
   const PerfID _mesh_changed_helper_timer;
   const PerfID _check_problem_integrity_timer;
   const PerfID _serialize_solution_timer;
-  const PerfID _check_nonlinear_convergence_timer;
-  const PerfID _check_linear_convergence_timer;
   const PerfID _update_geometric_search_timer;
   const PerfID _exec_multi_apps_timer;
   const PerfID _backup_multi_apps_timer;

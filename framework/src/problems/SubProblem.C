@@ -550,24 +550,6 @@ SubProblem::diracKernelInfo()
   return _dirac_kernel_info;
 }
 
-Real
-SubProblem::finalNonlinearResidual() const
-{
-  return 0;
-}
-
-unsigned int
-SubProblem::nNonlinearIterations() const
-{
-  return 0;
-}
-
-unsigned int
-SubProblem::nLinearIterations() const
-{
-  return 0;
-}
-
 void
 SubProblem::meshChanged()
 {

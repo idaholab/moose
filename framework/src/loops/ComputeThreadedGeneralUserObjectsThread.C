@@ -9,6 +9,9 @@
 
 #include "ComputeThreadedGeneralUserObjectsThread.h"
 
+#include "MooseApp.h"
+#include "Executioner.h"
+
 ComputeThreadedGeneralUserObjectsThread::ComputeThreadedGeneralUserObjectsThread(
     FEProblemBase & fe_problem)
   : _fe_problem(fe_problem)
@@ -29,7 +32,7 @@ ComputeThreadedGeneralUserObjectsThread::caughtMooseException(MooseException & e
   Threads::spin_mutex::scoped_lock lock(threaded_general_user_objects_mutex);
 
   std::string what(e.what());
-  _fe_problem.setException(what);
+  _fe_problem.getMooseApp().getExecutioner()->setException(what);
 }
 
 void

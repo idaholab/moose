@@ -11,6 +11,7 @@
 #define THREADEDNODELOOP_H
 
 #include "FEProblemBase.h"
+#include "Executioner.h"
 #include "ParallelUniqueId.h"
 
 template <typename RangeType, typename IteratorType>
@@ -55,7 +56,7 @@ public:
   virtual void caughtMooseException(MooseException & e)
   {
     std::string what(e.what());
-    _fe_problem.setException(what);
+    _executioner.setException(what);
   };
 
   /**
@@ -63,23 +64,24 @@ public:
    *
    * @return true to keep going, false to stop.
    */
-  virtual bool keepGoing() { return !_fe_problem.hasException(); }
+  virtual bool keepGoing() { return !_executioner.hasException(); }
 
 protected:
   FEProblemBase & _fe_problem;
+  Executioner & _executioner;
   THREAD_ID _tid;
 };
 
 template <typename RangeType, typename IteratorType>
 ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
+  : _fe_problem(fe_problem), _executioner(*fe_problem.getMooseApp().getExecutioner())
 {
 }
 
 template <typename RangeType, typename IteratorType>
 ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(ThreadedNodeLoop & x,
                                                             Threads::split /*split*/)
-  : _fe_problem(x._fe_problem)
+  : _fe_problem(x._fe_problem), _executioner(x._executioner)
 {
 }
 

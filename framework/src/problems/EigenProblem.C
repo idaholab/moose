@@ -217,28 +217,6 @@ EigenProblem::checkProblemIntegrity()
   _nl_eigen->checkIntegrity();
 }
 
-void
-EigenProblem::solve()
-{
-  if (_solve)
-  {
-    TIME_SECTION(_solve_timer);
-
-    _nl->solve();
-    _nl->update();
-  }
-
-  // sync solutions in displaced problem
-  if (_displaced_problem)
-    _displaced_problem->syncSolutions();
-}
-
-bool
-EigenProblem::converged()
-{
-  return _nl_eigen->converged();
-}
-
 bool
 EigenProblem::isNonlinearEigenvalueSolver()
 {

@@ -852,17 +852,6 @@ DisplacedProblem::refMesh()
   return _ref_mesh;
 }
 
-void
-DisplacedProblem::solve()
-{
-}
-
-bool
-DisplacedProblem::converged()
-{
-  return _mproblem.converged();
-}
-
 bool
 DisplacedProblem::computingInitialResidual() const
 {

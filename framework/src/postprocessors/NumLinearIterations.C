@@ -9,8 +9,8 @@
 
 #include "NumLinearIterations.h"
 
-#include "FEProblem.h"
-#include "SubProblem.h"
+#include "FEProblemBase.h"
+#include "FEProblemSolve.h"
 
 registerMooseObject("MooseApp", NumLinearIterations);
 
@@ -30,5 +30,5 @@ NumLinearIterations::NumLinearIterations(const InputParameters & parameters)
 Real
 NumLinearIterations::getValue()
 {
-  return _subproblem.nLinearIterations();
+  return _fe_problem.getFEProblemSolve().nLinearIterations();
 }

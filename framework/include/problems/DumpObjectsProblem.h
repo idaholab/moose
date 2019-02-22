@@ -84,10 +84,7 @@ public:
   /// output input blocks for a given action path
   void dumpGeneratedSyntax(const std::string path);
 
-  /// output data in solve
-  virtual void solve() override;
-
-  virtual void initialSetup() override {}
+  virtual void initialSetup() override;
   virtual void advanceState() override {}
   virtual void timestepSetup() override {}
   virtual void execute(const ExecFlagType & /*exec_type*/) override {}

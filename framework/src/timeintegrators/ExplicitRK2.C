@@ -11,6 +11,7 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
+#include "Executioner.h"
 
 template <>
 InputParameters
@@ -79,7 +80,7 @@ ExplicitRK2::solve()
   // first solve therefore happens in the second stage.  Note that the
   // non-time Kernels (which should be marked implicit=false) are
   // evaluated at the old solution during this stage.
-  _fe_problem.initPetscOutput();
+  _app.getExecutioner()->initPetscOutput();
   _console << "1st solve\n";
   _stage = 2;
   _fe_problem.timeOld() = time_old;
@@ -89,7 +90,7 @@ ExplicitRK2::solve()
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Abort time step immediately on stage failure - see TimeIntegrator doc page
-  if (!_fe_problem.converged())
+  if (!_fe_problem.getNonlinearSystemBase().converged())
     return;
 
   // Advance solutions old->older, current->old.  Also moves Material
@@ -98,7 +99,7 @@ ExplicitRK2::solve()
 
   // The "update" stage (which we call stage 3) requires an additional
   // solve with the mass matrix.
-  _fe_problem.initPetscOutput();
+  _app.getExecutioner()->initPetscOutput();
   _console << "2nd solve\n";
   _stage = 3;
   _fe_problem.timeOld() = time_stage2;

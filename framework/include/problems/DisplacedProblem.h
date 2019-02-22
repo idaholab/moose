@@ -54,8 +54,6 @@ public:
   virtual void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
 
   virtual void init() override;
-  virtual void solve() override;
-  virtual bool converged() override;
 
   /**
    * Allocate vectors and save old solutions into them.

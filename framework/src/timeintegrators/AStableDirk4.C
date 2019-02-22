@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 #include "LStableDirk4.h"
+#include "Executioner.h"
 
 registerMooseObject("MooseApp", AStableDirk4);
 
@@ -129,7 +130,7 @@ AStableDirk4::solve()
       // This ensures that all the Output objects in the OutputWarehouse
       // have had solveSetup() called, and sets the default solver
       // parameters for PETSc.
-      _fe_problem.initPetscOutput();
+      _app.getExecutioner()->initPetscOutput();
 
       if (current_stage < 4)
       {
@@ -150,7 +151,7 @@ AStableDirk4::solve()
       _n_linear_iterations += getNumLinearIterationsLastSolve();
 
       // Abort time step immediately on stage failure - see TimeIntegrator doc page
-      if (!_fe_problem.converged())
+      if (!_fe_problem.getNonlinearSystemBase().converged())
         return;
     }
   }

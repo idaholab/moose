@@ -14,6 +14,7 @@
 
 // Forward Declarations
 class NumNonlinearIterations;
+class Executioner;
 
 template <>
 InputParameters validParams<NumNonlinearIterations>();
@@ -41,9 +42,6 @@ public:
   virtual Real getValue() override;
 
 protected:
-  /// Pointer to the FEProblemBase
-  FEProblemBase * _fe_problem;
-
   /// True if we should accumulate over all nonlinear solves done as part of Picard iterations in a step.
   bool _accumulate_over_step;
 
