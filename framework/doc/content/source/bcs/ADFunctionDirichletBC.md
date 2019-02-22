@@ -32,7 +32,7 @@ Note that `ADFunctionDirichletBC` computes its Jacobian using automatic differen
 
 ## Example Input Syntax
 
-!listing test/tests/bcs/ad_bcs/ad_bc.i block=ADBCs
+!listing test/tests/bcs/ad_bcs/ad_bc.i block=BCs
 
 !syntax parameters /BCs/ADFunctionDirichletBC<RESIDUAL>
 
