@@ -1,6 +1,6 @@
 # ADComputeGreenLagrangeStrain
 
-!syntax description /ADMaterials/ADComputeGreenLagrangeStrain<RESIDUAL>
+!syntax description /Materials/ADComputeGreenLagrangeStrain<RESIDUAL>
 
 The Green-Lagrange strain $E$ is a non-linear total strain
 
@@ -13,10 +13,10 @@ ADComputeLinearElasticStress to compute a second Piola-Kirchhoff stress (use the
 ADStressDivergence kernel on the *undisplaced* mesh). This combination is
 called a St. Venant-Kirchhoff hyper elasticity model.
 
-!syntax parameters /ADMaterials/ADComputeGreenLagrangeStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeGreenLagrangeStrain<RESIDUAL>
 
-!syntax inputs /ADMaterials/ADComputeGreenLagrangeStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeGreenLagrangeStrain<RESIDUAL>
 
-!syntax children /ADMaterials/ADComputeGreenLagrangeStrain<RESIDUAL>
+!syntax children /Materials/ADComputeGreenLagrangeStrain<RESIDUAL>
 
 !bibtex bibliography
