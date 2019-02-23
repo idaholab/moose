@@ -17,6 +17,18 @@
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
   [../]
+  [./ad_1D_transient_ad_mat_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_1D_transient.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = 'AD heat conduction and the Jacobian shall be beautiful'
+    design = "jacobian_definition.md"
+    issues = "#5658 #12633"
+    allow_test_objects = true
+  [../]
 
   [./2D_steady_state]
     type = 'Exodiff'
@@ -35,5 +47,17 @@
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
+  [../]
+  [./ad_2D_steady_state_ad_mat_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_2d_steady_state_final_prob.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    run_sim = True
+    petsc_version = '>=3.9'
+    requirement = 'AD heat conduction and the Jacobian shall be beautiful'
+    design = "jacobian_definition.md"
+    issues = "#5658 #12633"
+    allow_test_objects = true
   [../]
 []

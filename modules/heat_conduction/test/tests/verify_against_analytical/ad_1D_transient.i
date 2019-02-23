@@ -59,19 +59,16 @@
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '0.95' #copper in cal/(cm sec C)
-    block = 0
   [../]
   [./cp]
     type = GenericConstantMaterial
     prop_names = 'specific_heat'
     prop_values = '0.092' #copper in cal/(g C)
-    block = 0
   [../]
   [./rho]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8.92' #copper in g/(cm^3)
-    block = 0
   [../]
 []
 

@@ -67,23 +67,10 @@
 []
 
 [Materials]
-  [./k]
+  [./properties]
     type = GenericConstantMaterial
-    prop_names = thermal_conductivity
-    prop_values = 1 # this values is changed based on the material property
-    block = 0
-  [../]
-  [./cp]
-    type = GenericConstantMaterial
-    prop_names = specific_heat
-    prop_values = 1 # this value is changed based on material properties
-    block = 0
-  [../]
-  [./rho]
-    type = GenericConstantMaterial
-    prop_names = density
-    prop_values = 1 # this values is changed based on material properties
-    block = 0
+    prop_names = 'thermal_conductivity specific_heat density'
+    prop_values = '1 1 1'
   [../]
 []
 

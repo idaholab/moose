@@ -12,8 +12,8 @@ registerADMooseObject("HeatConductionApp", ADHeatConduction);
 
 defineADValidParams(ADHeatConduction,
                     ADDiffusion,
-                    params.addRequiredParam<MaterialPropertyName>(
-                        "thermal_conductivity",
+                    params.addParam<MaterialPropertyName>(
+                        "thermal_conductivity", "thermal_conductivity",
                         "the name of the thermal conductivity material property");
                     params.set<bool>("use_displaced_mesh") = true;);
 
