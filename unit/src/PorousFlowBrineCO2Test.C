@@ -569,13 +569,13 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 
   Real co2_partial_density, dco2_partial_density_dT;
   _fp->partialDensityCO2(T, co2_partial_density, dco2_partial_density_dT);
-  Real brine_density = _brine_fp->rho(p, T, Xnacl);
+  Real brine_density = _brine_fp->rho_from_p_T_X(p, T, Xnacl);
 
   Real density = 1.0 / (Z / co2_partial_density + (1.0 - Z) / brine_density);
 
-  Real viscosity = _brine_fp->mu(p, T, Xnacl);
+  Real viscosity = _brine_fp->mu_from_p_T_X(p, T, Xnacl);
 
-  Real brine_enthalpy = _brine_fp->h(p, T, Xnacl);
+  Real brine_enthalpy = _brine_fp->h_from_p_T_X(p, T, Xnacl);
   Real hdis, dhdis_dT;
   _fp->enthalpyOfDissolution(T, hdis, dhdis_dT);
   Real co2_enthalpy = _co2_fp->h_from_p_T(p, T);

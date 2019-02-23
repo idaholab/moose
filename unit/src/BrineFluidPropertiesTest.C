@@ -100,35 +100,35 @@ TEST_F(BrineFluidPropertiesTest, properties)
   Real x1 = 0.2261;
 
   // Density
-  REL_TEST(_fp->rho(p0, T0, x0), 1068.52, 1.0e-2);
-  REL_TEST(_fp->rho(p0, T1, x0), 959.27, 1.0e-2);
-  REL_TEST(_fp->rho(p1, T1, x1), 1065.58, 1.0e-2);
+  REL_TEST(_fp->rho_from_p_T_X(p0, T0, x0), 1068.52, 1.0e-2);
+  REL_TEST(_fp->rho_from_p_T_X(p0, T1, x0), 959.27, 1.0e-2);
+  REL_TEST(_fp->rho_from_p_T_X(p1, T1, x1), 1065.58, 1.0e-2);
 
   // Viscosity
-  REL_TEST(_fp->mu(p0, T0, x0), 679.8e-6, 2.0e-2);
-  REL_TEST(_fp->mu(p0, T1, x0), 180.0e-6, 2.0e-2);
-  REL_TEST(_fp->mu(p1, T1, x1), 263.1e-6, 2.0e-2);
+  REL_TEST(_fp->mu_from_p_T_X(p0, T0, x0), 679.8e-6, 2.0e-2);
+  REL_TEST(_fp->mu_from_p_T_X(p0, T1, x0), 180.0e-6, 2.0e-2);
+  REL_TEST(_fp->mu_from_p_T_X(p1, T1, x1), 263.1e-6, 2.0e-2);
 
   // Thermal conductivity
-  REL_TEST(_fp->k(p0, T0, x0), 0.630, 4.0e-2);
-  REL_TEST(_fp->k(p0, T1, x0), 0.649, 4.0e-2);
-  REL_TEST(_fp->k(p1, T1, x1), 0.633, 4.0e-2);
+  REL_TEST(_fp->k_from_p_T_X(p0, T0, x0), 0.630, 4.0e-2);
+  REL_TEST(_fp->k_from_p_T_X(p0, T1, x0), 0.649, 4.0e-2);
+  REL_TEST(_fp->k_from_p_T_X(p1, T1, x1), 0.633, 4.0e-2);
 
   // Enthalpy
   p0 = 10.0e6;
   T0 = 573.15;
 
-  REL_TEST(_fp->e(p0, T0, 0.0), 1330.0e3, 1.0e-2);
-  REL_TEST(_fp->e(p0, T0, 0.2), 1100.0e3, 1.0e-2);
-  REL_TEST(_fp->e(p0, T0, 0.364), 970.0e3, 1.0e-2);
+  REL_TEST(_fp->e_from_p_T_X(p0, T0, 0.0), 1330.0e3, 1.0e-2);
+  REL_TEST(_fp->e_from_p_T_X(p0, T0, 0.2), 1100.0e3, 1.0e-2);
+  REL_TEST(_fp->e_from_p_T_X(p0, T0, 0.364), 970.0e3, 1.0e-2);
 
   // cp
   p0 = 17.9e6;
   x0 = 0.01226;
 
-  REL_TEST(_fp->cp(p0, 323.15, x0), 4.1e3, 1.0e-2);
-  REL_TEST(_fp->cp(p0, 473.15, x0), 4.35e3, 1.0e-2);
-  REL_TEST(_fp->cp(p0, 623.15, x0), 8.1e3, 1.0e-2);
+  REL_TEST(_fp->cp_from_p_T_X(p0, 323.15, x0), 4.1e3, 1.0e-2);
+  REL_TEST(_fp->cp_from_p_T_X(p0, 473.15, x0), 4.35e3, 1.0e-2);
+  REL_TEST(_fp->cp_from_p_T_X(p0, 623.15, x0), 8.1e3, 1.0e-2);
 }
 
 /**
@@ -147,52 +147,58 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   Real dx = 1.0e-8;
 
   // Density
-  Real drho_dp_fd = (_fp->rho(p + dp, T, x) - _fp->rho(p - dp, T, x)) / (2.0 * dp);
-  Real drho_dT_fd = (_fp->rho(p, T + dT, x) - _fp->rho(p, T - dT, x)) / (2.0 * dT);
-  Real drho_dx_fd = (_fp->rho(p, T, x + dx) - _fp->rho(p, T, x - dx)) / (2.0 * dx);
+  Real drho_dp_fd =
+      (_fp->rho_from_p_T_X(p + dp, T, x) - _fp->rho_from_p_T_X(p - dp, T, x)) / (2.0 * dp);
+  Real drho_dT_fd =
+      (_fp->rho_from_p_T_X(p, T + dT, x) - _fp->rho_from_p_T_X(p, T - dT, x)) / (2.0 * dT);
+  Real drho_dx_fd =
+      (_fp->rho_from_p_T_X(p, T, x + dx) - _fp->rho_from_p_T_X(p, T, x - dx)) / (2.0 * dx);
 
   Real rho = 0.0, drho_dp = 0.0, drho_dT = 0.0, drho_dx = 0.0;
-  _fp->rho_dpTx(p, T, x, rho, drho_dp, drho_dT, drho_dx);
+  _fp->rho_from_p_T_X(p, T, x, rho, drho_dp, drho_dT, drho_dx);
 
-  ABS_TEST(rho, _fp->rho(p, T, x), REL_TOL_CONSISTENCY);
-  REL_TEST(drho_dp, drho_dp_fd, 1.0e-3);
-  REL_TEST(drho_dT, drho_dT_fd, 1.0e-3);
-  REL_TEST(drho_dx, drho_dx_fd, 1.0e-3);
+  ABS_TEST(rho, _fp->rho_from_p_T_X(p, T, x), REL_TOL_CONSISTENCY);
+  REL_TEST(drho_dp, drho_dp_fd, 1.0e-5);
+  REL_TEST(drho_dT, drho_dT_fd, 1.0e-6);
+  REL_TEST(drho_dx, drho_dx_fd, 1.0e-6);
 
   // Enthalpy
-  Real dh_dp_fd = (_fp->h(p + dp, T, x) - _fp->h(p - dp, T, x)) / (2.0 * dp);
-  Real dh_dT_fd = (_fp->h(p, T + dT, x) - _fp->h(p, T - dT, x)) / (2.0 * dT);
-  Real dh_dx_fd = (_fp->h(p, T, x + dx) - _fp->h(p, T, x - dx)) / (2.0 * dx);
+  Real dh_dp_fd = (_fp->h_from_p_T_X(p + dp, T, x) - _fp->h_from_p_T_X(p - dp, T, x)) / (2.0 * dp);
+  Real dh_dT_fd = (_fp->h_from_p_T_X(p, T + dT, x) - _fp->h_from_p_T_X(p, T - dT, x)) / (2.0 * dT);
+  Real dh_dx_fd = (_fp->h_from_p_T_X(p, T, x + dx) - _fp->h_from_p_T_X(p, T, x - dx)) / (2.0 * dx);
 
   Real h = 0.0, dh_dp = 0.0, dh_dT = 0.0, dh_dx = 0.0;
-  _fp->h_dpTx(p, T, x, h, dh_dp, dh_dT, dh_dx);
+  _fp->h_from_p_T_X(p, T, x, h, dh_dp, dh_dT, dh_dx);
 
-  ABS_TEST(h, _fp->h(p, T, x), REL_TOL_CONSISTENCY);
-  REL_TEST(dh_dp, dh_dp_fd, 1.0e-3);
-  REL_TEST(dh_dT, dh_dT_fd, 1.0e-3);
-  REL_TEST(dh_dx, dh_dx_fd, 1.0e-3);
+  ABS_TEST(h, _fp->h_from_p_T_X(p, T, x), REL_TOL_CONSISTENCY);
+  REL_TEST(dh_dp, dh_dp_fd, 1.0e-4);
+  REL_TEST(dh_dT, dh_dT_fd, 1.0e-6);
+  REL_TEST(dh_dx, dh_dx_fd, 1.0e-6);
 
   // Internal energy
-  Real de_dp_fd = (_fp->e(p + dp, T, x) - _fp->e(p - dp, T, x)) / (2.0 * dp);
-  Real de_dT_fd = (_fp->e(p, T + dT, x) - _fp->e(p, T - dT, x)) / (2.0 * dT);
-  Real de_dx_fd = (_fp->e(p, T, x + dx) - _fp->e(p, T, x - dx)) / (2.0 * dx);
+  Real de_dp_fd = (_fp->e_from_p_T_X(p + dp, T, x) - _fp->e_from_p_T_X(p - dp, T, x)) / (2.0 * dp);
+  Real de_dT_fd = (_fp->e_from_p_T_X(p, T + dT, x) - _fp->e_from_p_T_X(p, T - dT, x)) / (2.0 * dT);
+  Real de_dx_fd = (_fp->e_from_p_T_X(p, T, x + dx) - _fp->e_from_p_T_X(p, T, x - dx)) / (2.0 * dx);
 
   Real e = 0.0, de_dp = 0.0, de_dT = 0.0, de_dx = 0.0;
-  _fp->e_dpTx(p, T, x, e, de_dp, de_dT, de_dx);
+  _fp->e_from_p_T_X(p, T, x, e, de_dp, de_dT, de_dx);
 
-  ABS_TEST(e, _fp->e(p, T, x), REL_TOL_CONSISTENCY);
-  REL_TEST(de_dp, de_dp_fd, 1.0e-1);
-  REL_TEST(de_dT, de_dT_fd, 1.0e-3);
-  REL_TEST(de_dx, de_dx_fd, 1.0e-3);
+  ABS_TEST(e, _fp->e_from_p_T_X(p, T, x), REL_TOL_CONSISTENCY);
+  REL_TEST(de_dp, de_dp_fd, 1.0e-3);
+  REL_TEST(de_dT, de_dT_fd, 1.0e-6);
+  REL_TEST(de_dx, de_dx_fd, 1.0e-6);
 
   // Viscosity
-  Real dmu_dp_fd = (_fp->mu(p + dp, T, x) - _fp->mu(p - dp, T, x)) / (2.0 * dp);
-  Real dmu_dT_fd = (_fp->mu(p, T + dT, x) - _fp->mu(p, T - dT, x)) / (2.0 * dT);
-  Real dmu_dx_fd = (_fp->mu(p, T, x + dx) - _fp->mu(p, T, x - dx)) / (2.0 * dx);
+  Real dmu_dp_fd =
+      (_fp->mu_from_p_T_X(p + dp, T, x) - _fp->mu_from_p_T_X(p - dp, T, x)) / (2.0 * dp);
+  Real dmu_dT_fd =
+      (_fp->mu_from_p_T_X(p, T + dT, x) - _fp->mu_from_p_T_X(p, T - dT, x)) / (2.0 * dT);
+  Real dmu_dx_fd =
+      (_fp->mu_from_p_T_X(p, T, x + dx) - _fp->mu_from_p_T_X(p, T, x - dx)) / (2.0 * dx);
   Real mu = 0.0, dmu_dp = 0.0, dmu_dT = 0.0, dmu_dx = 0.0;
-  _fp->mu_dpTx(p, T, x, mu, dmu_dp, dmu_dT, dmu_dx);
+  _fp->mu_from_p_T_X(p, T, x, mu, dmu_dp, dmu_dT, dmu_dx);
 
-  ABS_TEST(mu, _fp->mu(p, T, x), REL_TOL_CONSISTENCY);
+  ABS_TEST(mu, _fp->mu_from_p_T_X(p, T, x), REL_TOL_CONSISTENCY);
   REL_TEST(dmu_dp, dmu_dp_fd, 1.0e-3);
   REL_TEST(dmu_dT, dmu_dT_fd, 1.0e-6);
   REL_TEST(dmu_dx, dmu_dx_fd, 1.0e-6);
@@ -201,26 +207,26 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
   x = 0.0;
 
   // Density
-  _fp->rho_dpTx(p, T, x, rho, drho_dp, drho_dT, drho_dx);
-  drho_dx_fd = (_fp->rho(p, T, x + dx) - _fp->rho(p, T, x)) / dx;
+  _fp->rho_from_p_T_X(p, T, x, rho, drho_dp, drho_dT, drho_dx);
+  drho_dx_fd = (_fp->rho_from_p_T_X(p, T, x + dx) - _fp->rho_from_p_T_X(p, T, x)) / dx;
 
   REL_TEST(drho_dx, drho_dx_fd, 1.0e-3);
 
   // Enthalpy
-  _fp->h_dpTx(p, T, x, h, dh_dp, dh_dT, dh_dx);
-  dh_dx_fd = (_fp->h(p, T, x + dx) - _fp->h(p, T, x)) / dx;
+  _fp->h_from_p_T_X(p, T, x, h, dh_dp, dh_dT, dh_dx);
+  dh_dx_fd = (_fp->h_from_p_T_X(p, T, x + dx) - _fp->h_from_p_T_X(p, T, x)) / dx;
 
   REL_TEST(dh_dx, dh_dx_fd, 1.0e-3);
 
   // Internal energy
-  _fp->e_dpTx(p, T, x, e, de_dp, de_dT, de_dx);
-  de_dx_fd = (_fp->e(p, T, x + dx) - _fp->e(p, T, x)) / dx;
+  _fp->e_from_p_T_X(p, T, x, e, de_dp, de_dT, de_dx);
+  de_dx_fd = (_fp->e_from_p_T_X(p, T, x + dx) - _fp->e_from_p_T_X(p, T, x)) / dx;
 
   REL_TEST(de_dx, de_dx_fd, 1.0e-3);
 
   // Viscosity
-  dmu_dx_fd = (_fp->mu(p, T, x + dx) - _fp->mu(p, T, x)) / dx;
-  _fp->mu_dpTx(p, T, x, mu, dmu_dp, dmu_dT, dmu_dx);
+  dmu_dx_fd = (_fp->mu_from_p_T_X(p, T, x + dx) - _fp->mu_from_p_T_X(p, T, x)) / dx;
+  _fp->mu_from_p_T_X(p, T, x, mu, dmu_dp, dmu_dT, dmu_dx);
 
   REL_TEST(dmu_dx, dmu_dx_fd, 1.0e-3);
 }
@@ -238,19 +244,20 @@ TEST_F(BrineFluidPropertiesTest, combined)
 
   // Single property methods
   Real rho, drho_dp, drho_dT, drho_dx, mu, dmu_dp, dmu_dT, dmu_dx;
-  _fp->rho_dpTx(p, T, x, rho, drho_dp, drho_dT, drho_dx);
-  _fp->mu_dpTx(p, T, x, mu, dmu_dp, dmu_dT, dmu_dx);
+  _fp->rho_from_p_T_X(p, T, x, rho, drho_dp, drho_dT, drho_dx);
+  _fp->mu_from_p_T_X(p, T, x, mu, dmu_dp, dmu_dT, dmu_dx);
 
   // Combined property methods
   Real rho2, mu2;
-  _fp->rho_mu(p, T, x, rho2, mu2);
+  _fp->rho_mu_from_p_T_X(p, T, x, rho2, mu2);
 
   ABS_TEST(rho, rho2, tol);
   ABS_TEST(mu, mu2, tol);
 
   // Combined property method with derivatives
   Real drho2_dp, drho2_dT, drho2_dx, dmu2_dp, dmu2_dT, dmu2_dx;
-  _fp->rho_mu_dpTx(p, T, x, rho2, drho2_dp, drho2_dT, drho2_dx, mu2, dmu2_dp, dmu2_dT, dmu2_dx);
+  _fp->rho_mu_from_p_T_X(
+      p, T, x, rho2, drho2_dp, drho2_dT, drho2_dx, mu2, dmu2_dp, dmu2_dT, dmu2_dx);
 
   ABS_TEST(rho, rho2, tol);
   ABS_TEST(mu, mu2, tol);

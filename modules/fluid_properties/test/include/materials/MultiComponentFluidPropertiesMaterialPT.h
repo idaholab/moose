@@ -11,7 +11,7 @@
 #define MULTICOMPONENTFLUIDPROPERTIESMATERIALPT_H
 
 #include "Material.h"
-#include "MultiComponentFluidPropertiesPT.h"
+#include "MultiComponentFluidProperties.h"
 
 class MultiComponentFluidPropertiesMaterialPT;
 
@@ -48,7 +48,7 @@ protected:
   MaterialProperty<Real> & _e;
 
   // Multicomponent fluid properties UserObject
-  const MultiComponentFluidPropertiesPT & _fp;
+  const MultiComponentFluidProperties & _fp;
 };
 
 #endif /* MULTICOMPONENTFLUIDPROPERTIESMATERIALPT_H */

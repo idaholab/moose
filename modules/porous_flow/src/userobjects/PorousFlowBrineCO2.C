@@ -325,13 +325,13 @@ PorousFlowBrineCO2::liquidProperties(Real pressure,
 
   // The liquid density includes the density increase due to dissolved CO2
   Real brine_density, dbrine_density_dp, dbrine_density_dT, dbrine_density_dX;
-  _brine_fp.rho_dpTx(pressure,
-                     temperature,
-                     Xnacl,
-                     brine_density,
-                     dbrine_density_dp,
-                     dbrine_density_dT,
-                     dbrine_density_dX);
+  _brine_fp.rho_from_p_T_X(pressure,
+                           temperature,
+                           Xnacl,
+                           brine_density,
+                           dbrine_density_dp,
+                           dbrine_density_dT,
+                           dbrine_density_dX);
 
   // Mass fraction of CO2 in liquid phase
   const Real Xco2 = liquid.mass_fraction[_gas_fluid_component];
@@ -367,23 +367,23 @@ PorousFlowBrineCO2::liquidProperties(Real pressure,
 
   // Assume that liquid viscosity is just the brine viscosity
   Real liquid_viscosity, dliquid_viscosity_dp, dliquid_viscosity_dT, dliquid_viscosity_dX;
-  _brine_fp.mu_dpTx(pressure,
-                    temperature,
-                    Xnacl,
-                    liquid_viscosity,
-                    dliquid_viscosity_dp,
-                    dliquid_viscosity_dT,
-                    dliquid_viscosity_dX);
+  _brine_fp.mu_from_p_T_X(pressure,
+                          temperature,
+                          Xnacl,
+                          liquid_viscosity,
+                          dliquid_viscosity_dp,
+                          dliquid_viscosity_dT,
+                          dliquid_viscosity_dX);
 
   // Liquid enthalpy (including contribution due to the enthalpy of dissolution)
   Real brine_enthalpy, dbrine_enthalpy_dp, dbrine_enthalpy_dT, dbrine_enthalpy_dX;
-  _brine_fp.h_dpTx(pressure,
-                   temperature,
-                   Xnacl,
-                   brine_enthalpy,
-                   dbrine_enthalpy_dp,
-                   dbrine_enthalpy_dT,
-                   dbrine_enthalpy_dX);
+  _brine_fp.h_from_p_T_X(pressure,
+                         temperature,
+                         Xnacl,
+                         brine_enthalpy,
+                         dbrine_enthalpy_dp,
+                         dbrine_enthalpy_dT,
+                         dbrine_enthalpy_dX);
 
   // Enthalpy of CO2
   Real co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT;
@@ -435,13 +435,13 @@ PorousFlowBrineCO2::saturationTwoPhase(Real pressure,
 
   // Approximate liquid density as saturation isn't known yet
   Real brine_density, dbrine_density_dp, dbrine_density_dT, dbrine_density_dX;
-  _brine_fp.rho_dpTx(pressure,
-                     temperature,
-                     Xnacl,
-                     brine_density,
-                     dbrine_density_dp,
-                     dbrine_density_dT,
-                     dbrine_density_dX);
+  _brine_fp.rho_from_p_T_X(pressure,
+                           temperature,
+                           Xnacl,
+                           brine_density,
+                           dbrine_density_dp,
+                           dbrine_density_dT,
+                           dbrine_density_dX);
 
   // Mass fraction of CO2 in liquid phase
   const Real Xco2 = liquid.mass_fraction[_gas_fluid_component];

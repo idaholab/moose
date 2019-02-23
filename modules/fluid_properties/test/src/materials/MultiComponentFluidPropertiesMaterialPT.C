@@ -37,7 +37,7 @@ MultiComponentFluidPropertiesMaterialPT::MultiComponentFluidPropertiesMaterialPT
     _cp(declareProperty<Real>("cp")),
     _e(declareProperty<Real>("e")),
 
-    _fp(getUserObject<MultiComponentFluidPropertiesPT>("fp"))
+    _fp(getUserObject<MultiComponentFluidProperties>("fp"))
 {
 }
 
