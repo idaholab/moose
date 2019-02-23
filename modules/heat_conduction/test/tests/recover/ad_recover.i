@@ -26,15 +26,15 @@
 
 [Kernels]
   [./heat]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temp
   [../]
-  [./heat_source]
-    type = BodyForce
+  [./heatsource]
+    type = ADMatHeatSource
+    material_property = volumetric_heat
     variable = temp
+    scalar = 1e3
     block = pellet_type_1
-    value = 1e3
-    function = 't'
   [../]
 []
 
@@ -64,6 +64,11 @@
 []
 
 [Materials]
+  [./volumetric_heat]
+    type = GenericFunctionMaterial
+    prop_names = 'volumetric_heat'
+    prop_values = 't'
+  [../]
   [./thermal_3]
     type = HeatConductionMaterial
     block = 3

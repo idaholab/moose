@@ -1,19 +1,21 @@
 [Tests]
+  design = "\restart_recover"
+  issues = "#10079"
   [./recover_1]
     type = Exodiff
     input = recover.i
     exodiff = recover_out.e
     superlu = true
+    requirement = 'MOOSE shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
   [../]
-
   [./recover_2]
     type = RunApp
     input = recover.i
     prereq = recover_1
     cli_args = 'Outputs/checkpoint=true Executioner/num_steps=5'
     superlu = true
+    requirement = 'MOOSE shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
   [../]
-
   [./recover_3]
     type = Exodiff
     input = recover.i
@@ -22,6 +24,32 @@
     delete_output_before_running = false
     cli_args = '--recover recover_out_cp/0005'
     superlu = true
-    skip = 'Non-deterministic on Intel compiler #10737'
+    requirement = 'MOOSE shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
+  [../]
+
+  [./ad_recover_1]
+    type = Exodiff
+    input = ad_recover.i
+    exodiff = ad_recover_out.e
+    superlu = true
+    requirement = 'MOOSE shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+  [../]
+  [./ad_recover_2]
+    type = RunApp
+    input = ad_recover.i
+    prereq = ad_recover_1
+    cli_args = 'Outputs/checkpoint=true Executioner/num_steps=5'
+    superlu = true
+    requirement = 'MOOSE shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+  [../]
+  [./ad_recover_3]
+    type = Exodiff
+    input = ad_recover.i
+    exodiff = ad_recover_out.e
+    prereq = ad_recover_2
+    delete_output_before_running = false
+    cli_args = '--recover ad_recover_out_cp/0005'
+    superlu = true
+    requirement = 'MOOSE shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
   [../]
 []
