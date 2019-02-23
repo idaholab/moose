@@ -32,13 +32,8 @@
 
 
 [Kernels]
-  active = 'HeatDiff'
   [./HeatDiff]
     type = HeatConduction
-    variable = T
-  [../]
-  [./HeatTdot]
-    type = HeatConductionTimeDerivative
     variable = T
   [../]
 []
@@ -78,7 +73,6 @@
   [../]
 []
 
-
 [Postprocessors]
   [./nodal_error]
     type = NodalL2Error
@@ -94,10 +88,6 @@
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 1e-12
-  l_tol = 1e-6
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

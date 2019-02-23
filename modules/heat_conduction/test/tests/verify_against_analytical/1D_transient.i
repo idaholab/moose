@@ -80,12 +80,9 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  nl_rel_tol = 1e-12
   l_tol = 1e-6
   dt = 2
   end_time = 100
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

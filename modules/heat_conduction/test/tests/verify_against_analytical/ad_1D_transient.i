@@ -29,13 +29,10 @@
   [./HeatDiff]
     type = ADHeatConduction
     variable = T
-    thermal_conductivity = thermal_conductivity
   [../]
-  [./heat_dt]
+  [./HeatTdot]
     type = ADHeatConductionTimeDerivative
     variable = T
-    specific_heat = specific_heat
-    density_name = density
   [../]
 []
 
@@ -83,12 +80,9 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  nl_rel_tol = 1e-12
   l_tol = 1e-6
   dt = 2
   end_time = 100
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
