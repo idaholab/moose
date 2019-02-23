@@ -1,5 +1,5 @@
 [Tests]
-  design = ADKernels/index.md
+  design = 'jacobian_definition.md'
   issues = '#12836'
   [ad_vector_couple]
     type = Exodiff

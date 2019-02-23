@@ -14,7 +14,7 @@
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
     prereq = 'test_adad'
-    cli_args = "ADKernels/diff/prop_to_use='adreg'"
+    cli_args = "Kernels/diff/prop_to_use='adreg'"
     expect_out = '14 Nonlinear'
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as regular and gotten as AD shall be inaccurate"
@@ -26,7 +26,7 @@
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
     prereq = 'test_adreg'
-    cli_args = "ADKernels/diff/prop_to_use='regad'"
+    cli_args = "Kernels/diff/prop_to_use='regad'"
     expect_out = '14 Nonlinear'
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as AD and gotten as regular shall be inaccurate"
@@ -38,7 +38,7 @@
     input = 'ad_material.i'
     exodiff = 'ad_material_out.e'
     prereq = 'test_regad'
-    cli_args = "ADKernels/diff/prop_to_use='regreg'"
+    cli_args = "Kernels/diff/prop_to_use='regreg'"
     expect_out = '14 Nonlinear'
     allow_warnings = true
     requirement = "The Jacobian from a material property declared as regular and gotten as regular shall be inaccurate"
@@ -67,4 +67,24 @@
     design = "jacobian_definition.md"
     issues = "#5658"
   [../]
+  [default_material_value]
+    type = 'Exodiff'
+    exodiff = 'default_ad_material_out.e'
+    input = 'ad_material.i'
+    cli_args = 'Kernels/diff/ad_mat_prop=1 Kernels/diff/regular_mat_prop=1 Outputs/file_base=default_ad_material_out'
+    requirement = 'We shall be able to set default values for AD material properties'
+    design = "jacobian_definition.md"
+    issues = "#5658"
+  []
+  [default_material_value_jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_material.i'
+    cli_args = 'Kernels/diff/ad_mat_prop=1 Kernels/diff/regular_mat_prop=1 Outputs/exodus=false'
+    run_sim = True
+    requirement = 'We shall have a perfect Jacobian when using default values for an AD material property'
+    design = 'jacobian_definition.md'
+    issues = '#5658'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+  []
 []

@@ -112,12 +112,12 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const MooseArray<MooseADWrapper<T>> & get() const { return _value; }
+  const std::vector<MooseADWrapper<T>> & get() const { return _value; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  MooseArray<MooseADWrapper<T>> & set() { return _value; }
+  std::vector<MooseADWrapper<T>> & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.

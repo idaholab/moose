@@ -1,6 +1,6 @@
 # ADComputeSmallStrain
 
-!syntax description /ADMaterials/ADComputeSmallStrain<RESIDUAL>
+!syntax description /Materials/ADComputeSmallStrain<RESIDUAL>
 
 ## Description
 
@@ -32,10 +32,10 @@ no old values of strain or stress from the previous timestep are stored in
 MOOSE. For a comparison of total strain vs incremental strain theories with
 experimental data, see [cite!shammamy1967incremental].
 
-!syntax parameters /ADMaterials/ADComputeSmallStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeSmallStrain<RESIDUAL>
 
-!syntax inputs /ADMaterials/ADComputeSmallStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeSmallStrain<RESIDUAL>
 
-!syntax children /ADMaterials/ADComputeSmallStrain<RESIDUAL>
+!syntax children /Materials/ADComputeSmallStrain<RESIDUAL>
 
 !bibtex bibliography

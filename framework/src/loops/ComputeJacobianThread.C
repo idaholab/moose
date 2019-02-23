@@ -9,7 +9,7 @@
 
 #include "ComputeJacobianThread.h"
 
-#include "DGKernel.h"
+#include "DGKernelBase.h"
 #include "FEProblem.h"
 #include "IntegratedBCBase.h"
 #include "InterfaceKernel.h"

@@ -21,10 +21,10 @@ the finite dimensional space $\mathcal{S}^h$ for the unknown ($u$).
 Here, $f$ is given as a material property with an optional constant scalar. The
 Jacobian is calculated automatically via automatic differentiation.
 
-!syntax parameters /ADKernels/ADMatHeatSource<RESIDUAL>
+!syntax parameters /Kernels/ADMatHeatSource<RESIDUAL>
 
-!syntax inputs /ADKernels/ADMatHeatSource<RESIDUAL>
+!syntax inputs /Kernels/ADMatHeatSource<RESIDUAL>
 
-!syntax children /ADKernels/ADMatHeatSource<RESIDUAL>
+!syntax children /Kernels/ADMatHeatSource<RESIDUAL>
 
 !bibtex bibliography

@@ -1,6 +1,6 @@
 # ADComputeFiniteStrain
 
-!syntax description /ADMaterials/ADComputeFiniteStrain<RESIDUAL>
+!syntax description /Materials/ADComputeFiniteStrain<RESIDUAL>
 
 ## Description
 
@@ -186,10 +186,10 @@ in the TensorMechanics module overview. In addition, be aware of the loading
 cycle limitations while using finite strains as outlined in the section
 [Large Strain Closed Loop Loading Cycle](/tensor_mechanics/Strains.md#large_strain_closed_loop_loading_cycle).
 
-!syntax parameters /ADMaterials/ADComputeFiniteStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeFiniteStrain<RESIDUAL>
 
-!syntax inputs /ADMaterials/ADComputeFiniteStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeFiniteStrain<RESIDUAL>
 
-!syntax children /ADMaterials/ADComputeFiniteStrain<RESIDUAL>
+!syntax children /Materials/ADComputeFiniteStrain<RESIDUAL>
 
 !bibtex bibliography

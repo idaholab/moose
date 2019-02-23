@@ -17,14 +17,11 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./diff]
     type = ADVectorDiffusion
     variable = u
   [../]
-[]
-
-[Kernels]
   [./body_force]
     type = VectorBodyForce
     variable = u
@@ -33,7 +30,7 @@
   [../]
 []
 
-[ADBCs]
+[BCs]
   [./bnd]
     type = ADLagrangeVecFunctionDirichletBC
     variable = u

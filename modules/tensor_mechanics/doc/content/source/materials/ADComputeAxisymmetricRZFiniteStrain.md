@@ -1,6 +1,6 @@
 # ADComputeAxisymmetricRZFiniteStrain
 
-!syntax description /ADMaterials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
+!syntax description /Materials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
 
 ## Description
 
@@ -16,10 +16,10 @@ default 3D Cartesian simulations, as described in the
 
 ## Example Input File
 
-!syntax parameters /ADMaterials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
 
-!syntax inputs /ADMaterials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
 
-!syntax children /ADMaterials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
+!syntax children /Materials/ADComputeAxisymmetricRZFiniteStrain<RESIDUAL>
 
 !bibtex bibliography

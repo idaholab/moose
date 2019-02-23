@@ -1430,7 +1430,8 @@ MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int & num_dofs,
     _neighbor_ad_second_u.resize(nqp);
 
   // Derivatives are offset by the variable number
-  size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+  size_t ad_offset = _var_num * _sys.getMaxVarNDofsPerElem() +
+                     (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
 
   // Hopefully this problem can go away at some point
   if (ad_offset + num_dofs > AD_MAX_DOFS_PER_ELEM)

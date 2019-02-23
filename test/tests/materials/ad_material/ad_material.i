@@ -11,7 +11,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./diff]
     type = ADMatDiffusionTest
     variable = u
@@ -36,7 +36,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./ad_coupled_mat]
     type = ADCoupledMaterial
     coupled_var = u

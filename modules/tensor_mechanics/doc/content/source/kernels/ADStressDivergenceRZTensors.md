@@ -1,6 +1,6 @@
 # ADStressDivergenceRZTensors
 
-!syntax description /ADKernels/ADStressDivergenceRZTensors<RESIDUAL>
+!syntax description /Kernels/ADStressDivergenceRZTensors<RESIDUAL>
 
 ## Description
 
@@ -39,10 +39,10 @@ input files and when adding extra stresses.
 The coordinate type in the `[Problem]` block of the input file must be set to
 `coord_type = RZ`.
 
-!syntax parameters /ADKernels/ADStressDivergenceRZTensors<RESIDUAL>
+!syntax parameters /Kernels/ADStressDivergenceRZTensors<RESIDUAL>
 
 !include modules/tensor_mechanics/common/seealsoADStressDivergenceKernels.md
 
-!syntax inputs /ADKernels/ADStressDivergenceRZTensors<RESIDUAL>
+!syntax inputs /Kernels/ADStressDivergenceRZTensors<RESIDUAL>
 
-!syntax children /ADKernels/ADStressDivergenceRZTensors<RESIDUAL>
+!syntax children /Kernels/ADStressDivergenceRZTensors<RESIDUAL>

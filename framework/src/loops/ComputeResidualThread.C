@@ -13,7 +13,7 @@
 #include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBCBase.h"
-#include "DGKernel.h"
+#include "DGKernelBase.h"
 #include "InterfaceKernel.h"
 #include "Material.h"
 #include "TimeKernel.h"

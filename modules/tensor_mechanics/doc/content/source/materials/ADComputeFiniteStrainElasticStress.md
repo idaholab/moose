@@ -1,6 +1,6 @@
 # ADComputeFiniteStrainElasticStress
 
-!syntax description /ADMaterials/ADComputeFiniteStrainElasticStress<RESIDUAL>
+!syntax description /Materials/ADComputeFiniteStrainElasticStress<RESIDUAL>
 
 ## Description
 
@@ -26,8 +26,8 @@ where $\Delta \boldsymbol{\epsilon}$ is the strain increment; this strain
 measure is also the sum of the mechanical elastic strain and any eigenstrains in
 the system.
 
-!syntax parameters /ADMaterials/ADComputeFiniteStrainElasticStress<RESIDUAL>
+!syntax parameters /Materials/ADComputeFiniteStrainElasticStress<RESIDUAL>
 
-!syntax inputs /ADMaterials/ADComputeFiniteStrainElasticStress<RESIDUAL>
+!syntax inputs /Materials/ADComputeFiniteStrainElasticStress<RESIDUAL>
 
-!syntax children /ADMaterials/ADComputeFiniteStrainElasticStress<RESIDUAL>
+!syntax children /Materials/ADComputeFiniteStrainElasticStress<RESIDUAL>

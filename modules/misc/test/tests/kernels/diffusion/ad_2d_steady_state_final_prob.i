@@ -19,7 +19,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./HeatDiff]
     type = ADMatDiffusion
     variable = T

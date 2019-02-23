@@ -17,9 +17,6 @@
     type = TimeDerivative
     variable = u
   []
-[]
-
-[ADKernels]
   [diff]
     type = ADDiffusion
     variable = u
@@ -31,7 +28,7 @@
   []
 []
 
-[ADBCs]
+[BCs]
   [left]
     type = ADFunctionDirichletBC
     variable = u

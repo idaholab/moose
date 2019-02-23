@@ -15,7 +15,6 @@
 #include "Action.h"
 #include "Factory.h"
 #include "MooseObjectAction.h"
-#include "MooseADObjectAction.h"
 #include "ActionWarehouse.h"
 #include "EmptyAction.h"
 #include "FEProblem.h"
@@ -364,21 +363,6 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
       // extract the MooseObject params if necessary
       std::shared_ptr<MooseObjectAction> object_action =
           std::dynamic_pointer_cast<MooseObjectAction>(action_obj);
-      if (object_action)
-      {
-        object_action->getObjectParams().blockLocation() = params.blockLocation();
-        object_action->getObjectParams().blockFullpath() = params.blockFullpath();
-        extractParams(curr_identifier, object_action->getObjectParams());
-        object_action->getObjectParams()
-            .set<std::vector<std::string>>("control_tags")
-            .push_back(MooseUtils::baseName(curr_identifier));
-      }
-    }
-
-    {
-      // extract the MooseObject params if necessary
-      std::shared_ptr<MooseADObjectAction> object_action =
-          std::dynamic_pointer_cast<MooseADObjectAction>(action_obj);
       if (object_action)
       {
         object_action->getObjectParams().blockLocation() = params.blockLocation();

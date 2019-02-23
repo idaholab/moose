@@ -67,7 +67,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./density]
     type = ADDensity
     density = 0.283

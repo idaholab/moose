@@ -19,7 +19,7 @@
 class FEProblemBase;
 class NonlinearSystemBase;
 class IntegratedBCBase;
-class DGKernel;
+class DGKernelBase;
 class InterfaceKernel;
 class Kernel;
 
@@ -54,9 +54,9 @@ protected:
   MooseObjectWarehouse<IntegratedBCBase> * _ibc_warehouse;
 
   // Reference to DGKernel storage structure
-  MooseObjectTagWarehouse<DGKernel> & _dg_kernels;
+  MooseObjectTagWarehouse<DGKernelBase> & _dg_kernels;
 
-  MooseObjectWarehouse<DGKernel> * _dg_warehouse;
+  MooseObjectWarehouse<DGKernelBase> * _dg_warehouse;
 
   // Reference to interface kernel storage structure
   MooseObjectTagWarehouse<InterfaceKernel> & _interface_kernels;

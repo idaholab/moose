@@ -29,9 +29,6 @@
     type = Diffusion
     variable = w
   [../]
-[]
-
-[ADKernels]
   [./ad_coupled_value]
     type = ADCoupledValueTest
     variable = u

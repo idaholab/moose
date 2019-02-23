@@ -24,5 +24,12 @@ AddMaterialAction::AddMaterialAction(InputParameters params) : MooseObjectAction
 void
 AddMaterialAction::act()
 {
-  _problem->addMaterial(_type, _name, _moose_object_pars);
+  if (Registry::isADObj(_type + "<RESIDUAL>"))
+  {
+    _problem->addADResidualMaterial(_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
+    _problem->addADJacobianMaterial(_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
+    _problem->haveADObjects(true);
+  }
+  else
+    _problem->addMaterial(_type, _name, _moose_object_pars);
 }

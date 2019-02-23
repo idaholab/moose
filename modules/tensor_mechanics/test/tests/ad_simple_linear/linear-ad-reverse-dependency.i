@@ -19,7 +19,7 @@
   [../]
 []
 
-[ADKernels]
+[Kernels]
   [./stress_x]
     type = ADStressDivergenceTensors
     component = 0
@@ -72,7 +72,7 @@
   [../]
 []
 
-[ADMaterials]
+[Materials]
   [./stress]
     type = ADComputeLinearElasticStress
   [../]

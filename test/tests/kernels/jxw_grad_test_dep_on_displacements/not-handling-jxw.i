@@ -32,9 +32,6 @@
     type = Diffusion
     variable = disp_y
   [../]
-[]
-
-[ADKernels]
   [./u]
     type = ADDiffusion
     variable = u

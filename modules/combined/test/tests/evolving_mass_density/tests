@@ -14,7 +14,7 @@
     input = 'rz_tensors.i'
     exodiff = 'rz_out.e'
     max_parallel = 1
-    cli_args = 'ADMaterials/density/type=ADDensity ADMaterials/density/block=PATCH ADMaterials/density/density=12.335297548665'
+    cli_args = 'Materials/density/type=ADDensity Materials/density/block=PATCH Materials/density/density=12.335297548665'
     prereq = 'test_rz_tm'
     design = "/Mass.md"
     issues = "#12633"
@@ -37,7 +37,7 @@
     input = 'shear_test_tensors.i'
     exodiff = 'shear_z_test_out.e'
     cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 Outputs/out/file_base=shear_z_test_out BCs/top_z/type=FunctionDirichletBC BCs/top_z/function=rampConstant1 BCs/top_z/boundary=11 BCs/top_y/boundary=11 BCs/top_y/value=0 BCs/top_y/type=DirichletBC BCs/top_x/boundary=11 BCs/top_x/value=0 BCs/top_x/type=DirichletBC
-                ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
+                Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     prereq = test_shear_z_tm
     design = "/Mass.md"
     issues = "#12633"
@@ -60,7 +60,7 @@
     input = 'shear_test_tensors.i'
     exodiff = 'shear_y_test_out.e'
     cli_args = 'BCs/bot_x/boundary=10 BCs/bot_y/boundary=10 BCs/bot_z/boundary=10 Outputs/out/file_base=shear_y_test_out BCs/top_y/type=FunctionDirichletBC BCs/top_y/function=rampConstant1 BCs/top_y/boundary=12 BCs/top_z/boundary=12 BCs/top_z/value=0 BCs/top_z/type=DirichletBC BCs/top_x/boundary=12 BCs/top_x/value=0 BCs/top_x/type=DirichletBC
-                ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
+                Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     prereq = 'test_shear_y_tm'
     design = "/Mass.md"
     issues = "#12633"
@@ -83,7 +83,7 @@
     input = 'shear_test_tensors.i'
     exodiff = 'shear_x_test_out.e'
     cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 Outputs/out/file_base=shear_x_test_out BCs/top_x/type=FunctionDirichletBC BCs/top_x/function=rampConstant1 BCs/top_x/boundary=11 BCs/top_y/boundary=11 BCs/top_y/value=0 BCs/top_y/type=DirichletBC BCs/top_z/boundary=11 BCs/top_z/value=0 BCs/top_z/type=DirichletBC
-                ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
+                Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     prereq = 'test_shear_x_tm'
     design = "/Mass.md"
     issues = "#12633"
@@ -105,7 +105,7 @@
     input = 'uniform_expand_compress_test_tensors.i'
     exodiff = 'uniform_expand_compress_test_out.e'
     prereq = 'test_uniform_tm'
-    cli_args = 'ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
+    cli_args = 'Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     design = "/Mass.md"
     issues = "#12633"
     requirement = "Mass shall remain constant"
@@ -127,7 +127,7 @@
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_z_test_out.e'
     cli_args = 'BCs/bot_x/boundary=14 BCs/bot_y/boundary=14 BCs/bot_z/boundary=14 BCs/top/variable=disp_z BCs/top/boundary=13 Outputs/out/file_base=expand_compress_z_test_out
-                ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
+                Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     prereq = 'test_z_tm'
     issues = "#12633"
     design = "/Mass.md"
@@ -150,7 +150,7 @@
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_y_test_out.e'
     cli_args = 'BCs/bot_x/boundary=9 BCs/bot_y/boundary=9 BCs/bot_z/boundary=9 BCs/top/variable=disp_y BCs/top/boundary=11 Outputs/out/file_base=expand_compress_y_test_out
-                ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
+                Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     prereq = 'test_y_tm'
     design = "/Mass.md"
     issues = "#12633"
@@ -173,7 +173,7 @@
     input = 'expand_compress_test_tensors.i'
     exodiff = 'expand_compress_x_test_out.e'
     cli_args = 'BCs/bot_x/boundary=10 BCs/bot_y/boundary=10 BCs/bot_z/boundary=10 BCs/top/variable=disp_x BCs/top/boundary=12 Outputs/out/file_base=expand_compress_x_test_out
-                ADMaterials/density/type=ADDensity ADMaterials/density/block="1 2 3 4 5 6 7" ADMaterials/density/density=1.0'
+                Materials/density/type=ADDensity Materials/density/block="1 2 3 4 5 6 7" Materials/density/density=1.0'
     prereq = 'test_x_tm'
     design = "/Mass.md"
     issues = "#12633"

@@ -1,0 +1,221 @@
+/* fallback */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../contrib/fonts/material-icons/material-icons.woff2') format('woff2');
+}
+
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Thin.woff2') format('woff2');
+    font-weight: 100;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Light.woff2') format('woff2');
+    font-weight: 200;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Regular.woff2') format('woff2');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Medium.woff2') format('woff2');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Bold.woff2') format('woff2');
+    font-weight: 500;
+}
+
+.reveal{
+    font-family: 'Roboto', sans-serif;
+    font-weight:300;
+    font-size:18pt;
+}
+
+.reveal strong{
+    font-weight: 500;
+}
+
+.reveal h1 {
+    font-size: 42pt;
+    font-weight: 500;
+    text-transform: none;
+}
+
+.reveal h2 {
+    font-size:36pt;
+    text-transform: none;
+}
+
+.reveal h3 {
+    font-size:28pt;
+}
+
+.reveal h4,
+.reveal h5,
+.reveal h6{
+    font-size:24pt;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6{
+    text-align: center;
+}
+
+.reveal section img{
+    border: none;
+    box-shadow: none;
+}
+
+.reveal li {
+    font-size:18pt;
+}
+
+.reveal .moose-katex-block-equation{
+    padding-top:10px;
+    padding-bottom:10px;
+}
+
+.reveal .slides{
+    text-align: left;
+}
+
+.reveal pre code{
+    max-height:500px;
+    font-size:medium;
+}
+
+
+.reveal .moose-syntax-list-item-syntax{
+    color: black;
+    font-weight:400;
+}
+
+.reveal .moose-syntax-list-item-details{
+    color: black;
+    font-weight:200;
+}
+
+.reveal .moose-syntax-list{
+    max-height:500px;
+    overflow-y:scroll;
+}
+
+.reveal .moose-scroll-indicator{
+    font-size: 48pt;
+    color:gray;
+}
+
+.reveal pre{
+    width:100%;
+}
+
+.reveal .moose-parameter-name{
+    font-weight:500;
+    display: block;
+}
+
+.reveal .moose-parameter-description-title,
+.reveal .moose-parameter-options-title,
+.reveal .moose-parameter-default-title,
+.reveal .moose-parameter-cpptype-title{
+    font-style:italic;
+    font-weight: 200;
+}
+
+@-moz-keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -moz-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -moz-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+  60% {
+    -moz-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+@-webkit-keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -webkit-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+  60% {
+    -webkit-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -moz-transform: translateY(-30px);
+    -ms-transform: translateY(-30px);
+    -webkit-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+  60% {
+    -moz-transform: translateY(-15px);
+    -ms-transform: translateY(-15px);
+    -webkit-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+
+.moose-arrow {
+  position: absolute;
+  bottom: -48px;
+  left: 50%;
+  margin-left: -20px;
+  width: 40px;
+  height: 60px; /*change with size of arrow to make sit on bottom */
+/*   background-image: url(); */
+/*   background-size: contain; */
+}
+
+.moose-bounce {
+  -moz-animation: bounce 2s 3;
+  -webkit-animation: bounce 2s 3;
+  animation: bounce 2s 3;
+}

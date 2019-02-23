@@ -1,6 +1,6 @@
 # ADComputeIncrementalSmallStrain
 
-!syntax description /ADMaterials/ADComputeIncrementalSmallStrain<RESIDUAL>
+!syntax description /Materials/ADComputeIncrementalSmallStrain<RESIDUAL>
 
 ## Description
 
@@ -25,8 +25,8 @@ properties, including `strain_old` and `stress_old`, are stored. This
 incremental small strain material is useful as a component of verifying more
 complex finite incremental strain-stress calculations.
 
-!syntax parameters /ADMaterials/ADComputeIncrementalSmallStrain<RESIDUAL>
+!syntax parameters /Materials/ADComputeIncrementalSmallStrain<RESIDUAL>
 
-!syntax inputs /ADMaterials/ADComputeIncrementalSmallStrain<RESIDUAL>
+!syntax inputs /Materials/ADComputeIncrementalSmallStrain<RESIDUAL>
 
-!syntax children /ADMaterials/ADComputeIncrementalSmallStrain<RESIDUAL>
+!syntax children /Materials/ADComputeIncrementalSmallStrain<RESIDUAL>

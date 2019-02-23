@@ -58,6 +58,8 @@ MemoryUsageReporter::sharedMemoryRanksBySplitCommunicator()
   // broadcast the world rank of the sub group root
   world_rank = _my_rank;
   shmem_comm.broadcast(world_rank, 0);
+
+  MPI_Comm_free(&shmem_raw_comm);
 #endif
   std::vector<processor_id_type> world_ranks(_nrank);
   _mur_communicator.gather(0, world_rank, world_ranks);
