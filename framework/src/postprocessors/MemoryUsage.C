@@ -25,9 +25,9 @@ validParams<MemoryUsage>()
   MooseEnum value_type("total average max_process min_process", "total");
   params.addParam<MooseEnum>(
       "value_type", value_type, "Aggregation method to apply to the requested memory metric.");
-  MooseEnum mem_units("bytes kilobytes megabytes gigabytes", "megabytes");
-  params.addParam<MooseEnum>(
-      "mem_units", mem_units, "The unit used to report memory usage, default: Megabytes");
+  params.addParam<MooseEnum>("mem_units",
+                             MemoryUtils::getMemUnitsEnum(),
+                             "The unit prefix used to report memory usage, default: Mebibytes");
   params.addParam<bool>("report_peak_value",
                         true,
                         "If the postprocessor is executed more than once "
@@ -41,7 +41,7 @@ MemoryUsage::MemoryUsage(const InputParameters & parameters)
     MemoryUsageReporter(this),
     _mem_type(getParam<MooseEnum>("mem_type").getEnum<MemType>()),
     _value_type(getParam<MooseEnum>("value_type").getEnum<ValueType>()),
-    _mem_units(getParam<MooseEnum>("mem_units").getEnum<MemoryUtils::MemUnit>()),
+    _mem_units(getParam<MooseEnum>("mem_units").getEnum<MemoryUtils::MemUnits>()),
     _value(0.0),
     _peak_value(0.0),
     _report_peak_value(getParam<bool>("report_peak_value"))
@@ -58,17 +58,17 @@ void
 MemoryUsage::execute()
 {
   MemoryUtils::Stats stats;
-  MemoryUtils::getMemoryStats(stats, _mem_units);
+  MemoryUtils::getMemoryStats(stats);
 
   // get the requested per core metric
   switch (_mem_type)
   {
     case MemType::physical_memory:
-      _value = stats._physical_memory;
+      _value = MemoryUtils::convertBytes(stats._physical_memory, _mem_units);
       break;
 
     case MemType::virtual_memory:
-      _value = stats._virtual_memory;
+      _value = MemoryUtils::convertBytes(stats._virtual_memory, _mem_units);
       break;
 
     case MemType::page_faults:
