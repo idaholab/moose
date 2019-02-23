@@ -27,7 +27,6 @@
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
-    allow_test_objects = true
   [../]
 
   [./2D_steady_state]
@@ -58,6 +57,5 @@
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
-    allow_test_objects = true
   [../]
 []
