@@ -46,8 +46,8 @@ MultiComponentFluidPropertiesMaterialPT::~MultiComponentFluidPropertiesMaterialP
 void
 MultiComponentFluidPropertiesMaterialPT::computeQpProperties()
 {
-  _rho[_qp] = _fp.rho(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
-  _h[_qp] = _fp.h(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
-  _cp[_qp] = _fp.cp(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
-  _e[_qp] = _fp.e(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
+  _rho[_qp] = _fp.rho_from_p_T_X(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
+  _h[_qp] = _fp.h_from_p_T_X(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
+  _cp[_qp] = _fp.cp_from_p_T_X(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
+  _e[_qp] = _fp.e_from_p_T_X(_pressure[_qp], _temperature[_qp], _xmass[_qp]);
 }

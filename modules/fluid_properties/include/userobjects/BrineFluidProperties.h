@@ -51,7 +51,7 @@ public:
    * @return average molar mass (kg/mol)
    */
   Real molarMass(Real xnacl) const;
-  DualReal molarMass(DualReal xnacl) const;
+  FPDualReal molarMass(const FPDualReal & xnacl) const;
 
   /**
    * NaCl molar mass
@@ -66,7 +66,10 @@ public:
   Real molarMassH2O() const;
 
   virtual Real rho_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
-  DualReal rho_from_p_T_X(DualReal pressure, DualReal temperature, DualReal xnacl) const;
+
+  FPDualReal rho_from_p_T_X(const FPDualReal & pressure,
+                            const FPDualReal & temperature,
+                            const FPDualReal & xnacl) const override;
 
   virtual void rho_from_p_T_X(Real pressure,
                               Real temperature,
@@ -86,22 +89,10 @@ public:
                              Real & dmu_dT,
                              Real & dmu_dx) const override;
 
-  virtual void rho_mu_from_p_T_X(
-      Real pressure, Real temperature, Real xnacl, Real & rho, Real & mu) const override;
+  FPDualReal h_from_p_T_X(const FPDualReal & pressure,
+                          const FPDualReal & temperature,
+                          const FPDualReal & xnacl) const override;
 
-  virtual void rho_mu_from_p_T_X(Real pressure,
-                                 Real temperature,
-                                 Real xnacl,
-                                 Real & rho,
-                                 Real & drho_dp,
-                                 Real & drho_dT,
-                                 Real & drho_dx,
-                                 Real & mu,
-                                 Real & dmu_dp,
-                                 Real & dmu_dT,
-                                 Real & dmu_dx) const override;
-
-  DualReal h_from_p_T_X(DualReal pressure, DualReal temperature, DualReal xnacl) const;
   virtual Real h_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
 
   virtual void h_from_p_T_X(Real pressure,
@@ -114,7 +105,10 @@ public:
 
   virtual Real cp_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
 
-  DualReal e_from_p_T_X(DualReal pressure, DualReal temperature, DualReal xnacl) const;
+  FPDualReal e_from_p_T_X(const FPDualReal & pressure,
+                          const FPDualReal & temperature,
+                          const FPDualReal & xnacl) const override;
+
   virtual Real e_from_p_T_X(Real pressure, Real temperature, Real xnacl) const override;
 
   virtual void e_from_p_T_X(Real pressure,
@@ -175,10 +169,7 @@ protected:
    * @return mole fraction (mol/mol)
    */
   Real massFractionToMoleFraction(Real xnacl) const;
-  DualReal massFractionToMoleFraction(DualReal xnacl) const;
-
-  template <typename T>
-  T massFractionToMoleFractionTemplate(T xnacl) const;
+  FPDualReal massFractionToMoleFraction(const FPDualReal & xnacl) const;
 
   /// Water97FluidProperties UserObject
   const SinglePhaseFluidProperties * _water_fp;
@@ -189,6 +180,8 @@ protected:
   Real _Mnacl;
   /// Molar mass of water (H2O) (kg/mol)
   Real _Mh2o;
+  /// Flag to indicate whether to calculate derivatives in water_fp
+  mutable bool _water_fp_derivs;
 };
 
 #endif /* BRINEFLUIDPROPERTIES_H */

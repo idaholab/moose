@@ -15,6 +15,8 @@
 // Forward Declarations
 class FluidProperties;
 
+typedef DualNumber<Real, NumberArray<3, Real>> FPDualReal;
+
 template <>
 InputParameters validParams<FluidProperties>();
 
