@@ -314,6 +314,9 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;
   const MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   const MaterialProperty<RankTwoTensor> & _crysrot;
 

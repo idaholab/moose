@@ -66,6 +66,8 @@ FiniteStrainHyperElasticViscoPlastic::FiniteStrainHyperElasticViscoPlastic(
     _fp(declareProperty<RankTwoTensor>(_base_name + "fp")),
     _fp_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "fp")),
     _ce(declareProperty<RankTwoTensor>(_base_name + "ce")),
+    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
     _deformation_gradient_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient")),

@@ -24,11 +24,9 @@ template <ComputeStage compute_stage>
 ADComputeStressBase<compute_stage>::ADComputeStressBase(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
     _base_name(isParamValid("base_name") ? adGetParam<std::string>("base_name") + "_" : ""),
-    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _mechanical_strain(adGetADMaterialProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _stress(adDeclareADProperty<RankTwoTensor>(_base_name + "stress")),
-    _elastic_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "elastic_strain")),
-    _elasticity_tensor(adGetADMaterialProperty<RankFourTensor>(_elasticity_tensor_name))
+    _elastic_strain(adDeclareADProperty<RankTwoTensor>(_base_name + "elastic_strain"))
 {
 
   if (adGetParam<bool>("use_displaced_mesh"))

@@ -15,6 +15,8 @@
 
 #define usingComputeFiniteStrainElasticStressMembers                                               \
   usingComputeStressBaseMembers;                                                                   \
+  using ADComputeFiniteStrainElasticStress<compute_stage>::_elasticity_tensor;                     \
+  using ADComputeFiniteStrainElasticStress<compute_stage>::_elasticity_tensor_name;                \
   using ADComputeFiniteStrainElasticStress<compute_stage>::_strain_increment;                      \
   using ADComputeFiniteStrainElasticStress<compute_stage>::_rotation_increment;                    \
   using ADComputeFiniteStrainElasticStress<compute_stage>::_stress_old;                            \
@@ -41,6 +43,10 @@ public:
 protected:
   virtual void computeQpStress() override;
 
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
+  const ADMaterialProperty(RankFourTensor) & _elasticity_tensor;
   const ADMaterialProperty(RankTwoTensor) & _strain_increment;
   const ADMaterialProperty(RankTwoTensor) & _rotation_increment;
   const MaterialProperty<RankTwoTensor> & _stress_old;

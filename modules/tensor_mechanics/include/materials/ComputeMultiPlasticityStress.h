@@ -98,6 +98,11 @@ protected:
   /// whether to perform the rotations necessary in finite-strain simulations
   bool _perform_finite_strain_rotations;
 
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+
   /// plastic strain
   MaterialProperty<RankTwoTensor> & _plastic_strain;
 
