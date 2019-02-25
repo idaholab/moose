@@ -1,14 +1,14 @@
 #ifndef THMTESTAPP_H
 #define THMTESTAPP_H
 
-#include "MooseApp.h"
+#include "THMApp.h"
 
 class THMTestApp;
 
 template <>
 InputParameters validParams<THMTestApp>();
 
-class THMTestApp : public MooseApp
+class THMTestApp : public THMApp
 {
 public:
   THMTestApp(InputParameters parameters);

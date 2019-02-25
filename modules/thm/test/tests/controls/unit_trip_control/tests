@@ -1,0 +1,34 @@
+[Tests]
+  [./no_latch]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'no_latch.csv'
+    cli_args = 'Outputs/file_base=no_latch'
+    group = 'controls'
+    requirement = 'The system shall provide a unit trip component that report true if the trip condition was met and false otherwise.'
+    design = 'UnitTripControl.md'
+    issues = '#619'
+  [../]
+
+  [./latch]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'latch.csv'
+    cli_args = 'Controls/trip_ctrl/latch=true Outputs/file_base=latch'
+    requirement = 'The system shall provide a unit trip component that stays in tripped state after the trip happened.'
+    design = 'UnitTripControl.md'
+    issues = '#619'
+    group = 'controls'
+  [../]
+
+  [./err:not_boolean]
+    type = 'RunException'
+    input = 'test.i'
+    cli_args = 'Controls/trip_ctrl/condition=a'
+    expect_err = 'The user-provided condition expression did not return a boolean value \(0 or 1\)'
+    requirement = 'The system shall report an error when an unit trip condition does not evaluate as boolean value.'
+    design = 'UnitTripControl.md'
+    issues = '#619'
+    group = 'controls'
+  [../]
+[]
