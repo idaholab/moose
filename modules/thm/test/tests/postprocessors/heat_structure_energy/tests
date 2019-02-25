@@ -1,0 +1,15 @@
+[Tests]
+  [./heat_structure_energy_plate]
+    type = 'CSVDiff'
+    input = 'heat_structure_energy_plate.i'
+    csvdiff = 'heat_structure_energy_plate.csv'
+    recover = false
+  [../]
+  [./heat_structure_energy_cylinder]
+    type = 'CSVDiff'
+    input = 'heat_structure_energy_cylinder.i'
+    csvdiff = 'heat_structure_energy_cylinder.csv'
+    rel_err = 1e-5
+    recover = false
+  [../]
+[]
