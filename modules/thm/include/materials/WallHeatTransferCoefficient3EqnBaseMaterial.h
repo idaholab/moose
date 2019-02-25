@@ -2,7 +2,7 @@
 #define WALLHEATTRANSFERCOEFFICIENT3EQNBASEMATERIAL_H
 
 #include "Material.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 
 class WallHeatTransferCoefficient3EqnBaseMaterial;
 class SinglePhaseFluidProperties;
@@ -21,7 +21,7 @@ public:
 
 protected:
   MaterialProperty<Real> & _Hw;
-  PipeBase::EConvHeatTransGeom _ht_geom;
+  FlowChannel::EConvHeatTransGeom _ht_geom;
   const Real & _PoD;
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _vel;

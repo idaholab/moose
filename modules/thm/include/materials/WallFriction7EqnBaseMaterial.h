@@ -3,7 +3,7 @@
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 
 class WallFriction7EqnBaseMaterial;
 
@@ -22,7 +22,7 @@ protected:
   // Pipe orientation
   const bool _is_horizontal;
   // Flow channel geometry type
-  const PipeBase::EConvHeatTransGeom _ht_geom;
+  const FlowChannel::EConvHeatTransGeom _ht_geom;
 
   MaterialProperty<Real> & _f_D_liquid;
   MaterialProperty<Real> & _df_D_liquid_dbeta;

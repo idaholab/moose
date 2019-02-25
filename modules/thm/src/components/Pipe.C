@@ -25,7 +25,7 @@ template <>
 InputParameters
 validParams<Pipe>()
 {
-  InputParameters params = validParams<PipeBase>();
+  InputParameters params = validParams<FlowChannel>();
 
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<FunctionName>("f", "Wall friction");
@@ -41,7 +41,7 @@ validParams<Pipe>()
                                         "2-phase multiplier property for form loss for vapor");
 
   params.addParam<MooseEnum>("heat_transfer_geom",
-                             PipeBase::getConvHeatTransGeometry("PIPE"),
+                             FlowChannel::getConvHeatTransGeometry("PIPE"),
                              "Convective heat transfer geometry");
   params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parallel bundle heat transfer");
 
@@ -127,7 +127,7 @@ validParams<Pipe>()
 }
 
 Pipe::Pipe(const InputParameters & params)
-  : PipeBase(params),
+  : FlowChannel(params),
     _closures_name(getParam<std::string>("closures")),
     _const_A(false),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
@@ -149,7 +149,7 @@ Pipe::Pipe(const InputParameters & params)
 void
 Pipe::init()
 {
-  PipeBase::init();
+  FlowChannel::init();
 
   _closures = buildClosures();
 
@@ -188,7 +188,7 @@ Pipe::buildClosures()
 void
 Pipe::initSecondary()
 {
-  PipeBase::initSecondary();
+  FlowChannel::initSecondary();
 
   // Determine heat transfer mode based on connected heat transfer components;
   // if at least one heat transfer component of temperature component is
@@ -207,7 +207,7 @@ Pipe::initSecondary()
 void
 Pipe::check() const
 {
-  PipeBase::check();
+  FlowChannel::check();
 
   _closures->check(*this);
 

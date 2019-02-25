@@ -1,7 +1,7 @@
 #ifndef PIPE_H
 #define PIPE_H
 
-#include "PipeBase.h"
+#include "FlowChannel.h"
 
 class Pipe;
 class ClosuresBase;
@@ -16,7 +16,7 @@ InputParameters validParams<Pipe>();
  * Mesh: mesh is generated in such a way, that the pipe starts at the origin (0, 0, 0) and is
  * aligned with x-axis. It's subdivided into _n_elems elements (of type EDGE2).
  */
-class Pipe : public PipeBase
+class Pipe : public FlowChannel
 {
 public:
   Pipe(const InputParameters & params);

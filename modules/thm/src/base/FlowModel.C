@@ -1,6 +1,6 @@
 #include "Simulation.h"
 #include "Component.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 #include "ConstantFunction.h"
 
 template <>
@@ -9,7 +9,7 @@ validParams<FlowModel>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<Simulation *>("_sim");
-  params.addPrivateParam<PipeBase *>("_pipe");
+  params.addPrivateParam<FlowChannel *>("_pipe");
   params.addRequiredParam<UserObjectName>(
       "fp", "The name of the user object that defines fluid properties");
   params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
@@ -75,7 +75,7 @@ FlowModel::FlowModel(const InputParameters & params)
     _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
     _app(_sim.getApp()),
     _factory(_app.getFactory()),
-    _pipe(*params.getCheckedPointerParam<PipeBase *>("_pipe")),
+    _pipe(*params.getCheckedPointerParam<FlowChannel *>("_pipe")),
     _fp_name(params.get<UserObjectName>("fp")),
     _comp_name(name()),
     _gravity_vector(_pipe.getParam<RealVectorValue>("gravity_vector")),

@@ -1,25 +1,22 @@
-#ifndef PIPEBASE_H
-#define PIPEBASE_H
+#ifndef FLOWCHANNEL_H
+#define FLOWCHANNEL_H
 
 #include "GeometricalFlowComponent.h"
 
-class PipeBase;
+class FlowChannel;
 
 template <>
-InputParameters validParams<PipeBase>();
+InputParameters validParams<FlowChannel>();
 
 /**
- * A base class for pipe components
+ * A class representing a flow channel
  *
- * A pipe is defined by its position, direction, length and area.
- * Mesh: mesh is generated in such a way, that the pipe starts at the origin (0, 0, 0) and is
- * aligned with x-axis. Its
- * subdivided into _n_elems elements (of type EDGE2).
+ * A flow channel is defined by its position, direction, length and area.
  */
-class PipeBase : public GeometricalFlowComponent
+class FlowChannel : public GeometricalFlowComponent
 {
 public:
-  PipeBase(const InputParameters & params);
+  FlowChannel(const InputParameters & params);
 
   /// Type of convective heat transfer geometry
   enum EConvHeatTransGeom
@@ -61,4 +58,4 @@ protected:
   const FunctionName & _area_function;
 };
 
-#endif /* PIPEBASE_H */
+#endif /* FLOWCHANNEL_H */

@@ -2,7 +2,7 @@
 #define INTERFACIALFRICTIONBASEMATERIAL_H
 
 #include "Material.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 #include "SinglePhaseFluidProperties.h"
 
 class InterfacialFrictionBaseMaterial;
@@ -22,7 +22,7 @@ protected:
   // Pipe orientation
   const bool _is_horizontal;
   // Flow channel geometry type
-  PipeBase::EConvHeatTransGeom _ht_geom;
+  FlowChannel::EConvHeatTransGeom _ht_geom;
   // pitch to diameter ratio for rod bundles
   const Real & _PoD;
 

@@ -3,7 +3,7 @@
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 
 class InterfacialHeatTransferCoefBaseMaterial;
 class HeatExchangeCoefficientPartitioning;
@@ -33,7 +33,7 @@ protected:
   /// Pipe orientation
   const bool _is_horizontal;
   /// Heat transfer geometry
-  PipeBase::EConvHeatTransGeom _ht_geom;
+  FlowChannel::EConvHeatTransGeom _ht_geom;
   /// Pitch-over-diameter ratio
   const Real & _PoD;
 

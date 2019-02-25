@@ -49,7 +49,7 @@ validParams<FlowRegimeBaseMaterial>()
 
   params.addRequiredParam<UserObjectName>("fp", "Coupled fluid properties");
   params.addRequiredParam<MooseEnum>(
-      "ht_geom", PipeBase::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
+      "ht_geom", FlowChannel::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
   params.addRequiredParam<Real>("alpha_v_min", "vapor volume fraction below which is all liquid");
   params.addRequiredParam<Real>("alpha_v_max", "vapor volume fraction above which is all vapor");
   params.addRequiredParam<Real>("gravity_angle",
@@ -71,7 +71,7 @@ FlowRegimeBaseMaterial::FlowRegimeBaseMaterial(const InputParameters & parameter
   : DerivativeMaterialInterfaceTHM<Material>(parameters),
     _area(coupledValue("A")),
     _D_h(coupledValue("D_h")),
-    _ht_geom(THM::stringToEnum<PipeBase::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
+    _ht_geom(THM::stringToEnum<FlowChannel::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
     _PoD(getParam<Real>("PoD")),
     _alpha_liquid(coupledValue("alpha_liquid")),
     _dalpha_liquid_dbeta(getMaterialPropertyDerivativeTHM<Real>("alpha_liquid", "beta")),
@@ -115,6 +115,6 @@ FlowRegimeBaseMaterial::FlowRegimeBaseMaterial(const InputParameters & parameter
     _chf_table(getUserObject<CHFTable>("chf_table")),
     _mass_transfer(getParam<bool>("mass_transfer"))
 {
-  if (_ht_geom == PipeBase::ROD_BUNDLE && _PoD == 0.)
+  if (_ht_geom == FlowChannel::ROD_BUNDLE && _PoD == 0.)
     mooseError(name(), ": When using ROD_BUNDLE geometry, you have to provide the PoD parameter.");
 }
