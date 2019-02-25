@@ -1,5 +1,5 @@
 #include "HeatTransferFromHeatStructure.h"
-#include "Pipe.h"
+#include "FlowChannel.h"
 #include "HeatStructure.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
@@ -85,7 +85,7 @@ HeatTransferFromHeatStructure::addMooseObjects1Phase()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
-  const Pipe & pipe = getComponentByName<Pipe>(_pipe_name);
+  const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
 
   const UserObjectName heat_flux_uo_name = genName(name(), "heat_flux_uo");
   {
@@ -142,7 +142,7 @@ HeatTransferFromHeatStructure::addMooseObjects2Phase()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
-  const Pipe & pipe = getComponentByName<Pipe>(_pipe_name);
+  const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
 
   std::vector<bool> is_liquid{true, false};
   std::vector<std::string> phase{"liquid", "vapor"};
@@ -232,6 +232,6 @@ HeatTransferFromHeatStructure::getMasterSideName() const
 const BoundaryName &
 HeatTransferFromHeatStructure::getSlaveSideName() const
 {
-  const Pipe & pipe = getComponentByName<Pipe>(_pipe_name);
+  const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
   return pipe.getNodesetName();
 }

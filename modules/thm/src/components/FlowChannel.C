@@ -16,6 +16,8 @@
 #include "THMMesh.h"
 #include "THMApp.h"
 
+registerMooseObject("THMApp", FlowChannel);
+
 const std::map<std::string, FlowChannel::EConvHeatTransGeom>
     FlowChannel::_heat_transfer_geom_to_enum{{"PIPE", PIPE}, {"ROD_BUNDLE", ROD_BUNDLE}};
 
