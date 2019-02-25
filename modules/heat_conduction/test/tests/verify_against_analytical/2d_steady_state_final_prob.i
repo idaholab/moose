@@ -16,20 +16,9 @@
 
 [Variables]
   [./T]
+    initial_condition = 1
   [../]
 []
-
-[Functions]
-  [./analytical_sol]
-    type = ParsedFunction
-    value = 10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)
-  [../]
-  [./top_bound]
-    type = ParsedFunction
-    value = 10*sin(pi*x*0.5)
-  [../]
-[]
-
 
 [Kernels]
   [./HeatDiff]
@@ -43,25 +32,25 @@
     type = DirichletBC
     variable = T
     boundary = left
-    value = 0
+    value = 1
   [../]
   [./right]
     type = DirichletBC
     variable = T
     boundary = right
-    value = 0
+    value = 1
   [../]
   [./bottom]
     type = DirichletBC
     variable = T
     boundary = bottom
-    value = 0
+    value = 1
   [../]
   [./top]
     type = FunctionDirichletBC
     variable = T
     boundary = top
-    function = top_bound
+    function = '1+10*sin(pi*x*0.5)'
   [../]
 []
 
@@ -76,12 +65,12 @@
 [Postprocessors]
   [./nodal_error]
     type = NodalL2Error
-    function = 'analytical_sol'
+    function = '1+10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
   [../]
   [./elemental_error]
     type = ElementL2Error
-    function = 'analytical_sol'
+    function = '1+10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
   [../]
 []
@@ -92,5 +81,4 @@
 
 [Outputs]
   exodus = true
-  perf_graph = true
 []
