@@ -69,9 +69,6 @@ protected:
 
   /// Gravitational acceleration magnitude
   const Real & _gravity_magnitude;
-
-  /// Value for "emit_on_nan" in fluid properties
-  const std::string _emit_on_nan_fp;
 };
 
 template <typename T>

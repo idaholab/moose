@@ -12,8 +12,6 @@ validParams<FlowModelSetup>()
   params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
   params.addParam<Real>(
       "gravity_magnitude", THM::gravity_const, "Gravitational acceleration magnitude");
-  params.addParam<bool>(
-      "allow_nans_in_fp", false, "Allow NaNs in fluid properties? Else, throw error.");
 
   return params;
 }
@@ -25,8 +23,7 @@ FlowModelSetup::FlowModelSetup(InputParameters params)
     _this_action_warehouse(*_this_params.getCheckedPointerParam<ActionWarehouse *>("awh")),
     _fe_family(AddVariableAction::getNonlinearVariableFamilies()),
     _fe_order(AddVariableAction::getNonlinearVariableOrders()),
-    _gravity_magnitude(getParam<Real>("gravity_magnitude")),
-    _emit_on_nan_fp(getParam<bool>("allow_nans_in_fp") ? "none" : "error")
+    _gravity_magnitude(getParam<Real>("gravity_magnitude"))
 {
   if (getParam<bool>("2nd_order_mesh"))
     _fe_order = "SECOND";
