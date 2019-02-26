@@ -14,8 +14,9 @@ defineADValidParams(
     ADMatHeatSource,
     ADKernel,
     params.addParam<Real>("scalar", 1.0, "Scalar multiplied by the body force term");
-    params.addRequiredParam<MaterialPropertyName>("material_property",
-                                                  "Material property describing the body force"););
+    params.addParam<MaterialPropertyName>("material_property",
+                                          1.0,
+                                          "Material property describing the body force"););
 
 template <ComputeStage compute_stage>
 ADMatHeatSource<compute_stage>::ADMatHeatSource(const InputParameters & parameters)

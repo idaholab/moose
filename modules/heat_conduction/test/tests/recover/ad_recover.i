@@ -29,7 +29,7 @@
     type = ADHeatConduction
     variable = temp
   [../]
-  [./heatsource]
+  [./heat_source]
     type = ADMatHeatSource
     material_property = volumetric_heat
     variable = temp
@@ -133,11 +133,9 @@
     variable = temp
     boundary = 5
     diffusivity = thermal_conductivity
-    execute_on = timestep_end
   [../]
   [./_dt]
     type = TimestepSize
-    execute_on = timestep_end
   [../]
 []
 

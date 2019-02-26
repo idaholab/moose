@@ -128,11 +128,9 @@
     variable = temp
     boundary = 5
     diffusivity = thermal_conductivity
-    execute_on = timestep_end
   [../]
   [./_dt]
     type = TimestepSize
-    execute_on = timestep_end
   [../]
 []
 

@@ -24,6 +24,8 @@
     difference_tol = 1e-5
     run_sim = True
     petsc_version = '>=3.9'
+    method = 'OPT'
+    cli_args = 'Executioner/num_steps=5'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
@@ -54,6 +56,7 @@
     difference_tol = 1e-5
     run_sim = True
     petsc_version = '>=3.9'
+    method = 'OPT'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
