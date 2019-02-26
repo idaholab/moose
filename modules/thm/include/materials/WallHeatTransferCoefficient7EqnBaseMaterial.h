@@ -2,7 +2,7 @@
 #define WALLHEATTRANSFERCOEFFICIENT7EQNBASEMATERIAL_H
 
 #include "Material.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 
 class WallHeatTransferCoefficient7EqnBaseMaterial;
 class TwoPhaseFluidProperties;
@@ -26,7 +26,7 @@ protected:
   MaterialProperty<Real> & _Hw_liquid;
   MaterialProperty<Real> & _Hw_vapor;
 
-  PipeBase::EConvHeatTransGeom _ht_geom;
+  FlowChannel::EConvHeatTransGeom _ht_geom;
   const Real & _PoD;
   /// vapor volume fraction that is all liquid
   const Real & _alpha_v_min;

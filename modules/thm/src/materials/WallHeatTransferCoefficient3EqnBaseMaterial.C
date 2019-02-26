@@ -12,7 +12,7 @@ validParams<WallHeatTransferCoefficient3EqnBaseMaterial>()
   params.addRequiredParam<UserObjectName>("fp",
                                           "The name of the user object with fluid properties");
   params.addRequiredParam<MooseEnum>(
-      "ht_geom", PipeBase::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
+      "ht_geom", FlowChannel::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
   params.addParam<Real>("PoD", 0, "Pitch-to-diameter ratio (needed for rod bundle).");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density of the liquid");
   params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the liquid velocity");
@@ -32,7 +32,7 @@ WallHeatTransferCoefficient3EqnBaseMaterial::WallHeatTransferCoefficient3EqnBase
     const InputParameters & parameters)
   : Material(parameters),
     _Hw(declareProperty<Real>("Hw")),
-    _ht_geom(THM::stringToEnum<PipeBase::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
+    _ht_geom(THM::stringToEnum<FlowChannel::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
     _PoD(getParam<Real>("PoD")),
     _rho(getMaterialProperty<Real>("rho")),
     _vel(getMaterialProperty<Real>("vel")),
@@ -46,6 +46,6 @@ WallHeatTransferCoefficient3EqnBaseMaterial::WallHeatTransferCoefficient3EqnBase
     _gravity_magnitude(getParam<Real>("gravity_magnitude")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
-  if (_ht_geom == PipeBase::ROD_BUNDLE && _PoD == 0.)
+  if (_ht_geom == FlowChannel::ROD_BUNDLE && _PoD == 0.)
     mooseError(name(), ": When using ROD_BUNDLE geometry, you have to provide the PoD parameter.");
 }

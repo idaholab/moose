@@ -1,6 +1,6 @@
 #include "Closures1PhaseSimple.h"
 #include "FlowModelSinglePhase.h"
-#include "Pipe.h"
+#include "FlowChannel.h"
 
 registerMooseObject("THMApp", Closures1PhaseSimple);
 
@@ -21,14 +21,14 @@ Closures1PhaseSimple::Closures1PhaseSimple(const InputParameters & params)
 }
 
 void
-Closures1PhaseSimple::check(const Pipe & flow_channel) const
+Closures1PhaseSimple::check(const FlowChannel & flow_channel) const
 {
   if (!flow_channel.isParamValid("f"))
     logError("When using simple closures, the parameter 'f' must be provided.");
 }
 
 void
-Closures1PhaseSimple::addMooseObjects(const Pipe & flow_channel)
+Closures1PhaseSimple::addMooseObjects(const FlowChannel & flow_channel)
 {
   // wall friction material
   addWallFrictionFunctionMaterial(flow_channel);
@@ -56,7 +56,7 @@ Closures1PhaseSimple::addMooseObjects(const Pipe & flow_channel)
 }
 
 void
-Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(const Pipe & flow_channel) const
+Closures1PhaseSimple::addWallTemperatureFromHeatFluxMaterial(const FlowChannel & flow_channel) const
 {
   const std::string class_name = "TemperatureWall3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);

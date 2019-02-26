@@ -1,5 +1,5 @@
 #include "ClosuresBase.h"
-#include "Pipe.h"
+#include "FlowChannel.h"
 
 template <>
 InputParameters
@@ -24,7 +24,8 @@ ClosuresBase::ClosuresBase(const InputParameters & params)
 }
 
 void
-ClosuresBase::addZeroMaterial(const Pipe & flow_channel, const std::string & property_name) const
+ClosuresBase::addZeroMaterial(const FlowChannel & flow_channel,
+                              const std::string & property_name) const
 {
   const std::string class_name = "ConstantMaterial";
   InputParameters params = _factory.getValidParams(class_name);
@@ -36,7 +37,7 @@ ClosuresBase::addZeroMaterial(const Pipe & flow_channel, const std::string & pro
 }
 
 void
-ClosuresBase::addWeightedAverageMaterial(const Pipe & flow_channel,
+ClosuresBase::addWeightedAverageMaterial(const FlowChannel & flow_channel,
                                          const std::vector<MaterialPropertyName> & values,
                                          const std::vector<VariableName> & weights,
                                          const MaterialPropertyName & property_name) const
@@ -52,7 +53,7 @@ ClosuresBase::addWeightedAverageMaterial(const Pipe & flow_channel,
 }
 
 void
-ClosuresBase::addWallTemperatureFromAuxMaterial(const Pipe & flow_channel) const
+ClosuresBase::addWallTemperatureFromAuxMaterial(const FlowChannel & flow_channel) const
 {
   const std::string class_name = "CoupledVariableValueMaterial";
   InputParameters params = _factory.getValidParams(class_name);

@@ -29,7 +29,7 @@ validParams<InterfacialFrictionBaseMaterial>()
 
   params.addRequiredParam<bool>("horizontal", "Is pipe horizontal");
   params.addRequiredParam<MooseEnum>(
-      "ht_geom", PipeBase::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
+      "ht_geom", FlowChannel::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
   params.addParam<Real>("PoD", 0, "Pitch-to-diameter ratio (needed for rod bundle).");
 
   params.addRequiredParam<Real>("gravity_magnitude", "Gravitational acceleration magnitude");
@@ -45,7 +45,7 @@ validParams<InterfacialFrictionBaseMaterial>()
 InterfacialFrictionBaseMaterial::InterfacialFrictionBaseMaterial(const InputParameters & parameters)
   : Material(parameters),
     _is_horizontal(getParam<bool>("horizontal")),
-    _ht_geom(THM::stringToEnum<PipeBase::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
+    _ht_geom(THM::stringToEnum<FlowChannel::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
     _PoD(getParam<Real>("PoD")),
     _surface_tension(getMaterialProperty<Real>("surface_tension")),
     _mu_l(getMaterialProperty<Real>("mu_liquid")),
@@ -66,6 +66,6 @@ InterfacialFrictionBaseMaterial::InterfacialFrictionBaseMaterial(const InputPara
     _fp_vapor(getUserObject<SinglePhaseFluidProperties>("fp_vapor")),
     _f_i(declareProperty<Real>("f_int"))
 {
-  if (_ht_geom == PipeBase::ROD_BUNDLE && _PoD == 0.)
+  if (_ht_geom == FlowChannel::ROD_BUNDLE && _PoD == 0.)
     mooseError(name(), ": When using ROD_BUNDLE geometry, you have to provide the PoD parameter.");
 }

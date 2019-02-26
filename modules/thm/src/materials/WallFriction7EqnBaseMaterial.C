@@ -36,14 +36,14 @@ validParams<WallFriction7EqnBaseMaterial>()
   params.addParam<Real>("roughness", 0.0, "Surface roughness");
   params.addRequiredParam<bool>("horizontal", "Is pipe horizontal");
   params.addRequiredParam<MooseEnum>(
-      "ht_geom", PipeBase::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
+      "ht_geom", FlowChannel::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
   return params;
 }
 
 WallFriction7EqnBaseMaterial::WallFriction7EqnBaseMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterfaceTHM<Material>(parameters),
     _is_horizontal(getParam<bool>("horizontal")),
-    _ht_geom(THM::stringToEnum<PipeBase::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
+    _ht_geom(THM::stringToEnum<FlowChannel::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
 
     _f_D_liquid(declareProperty<Real>("f_D_liquid")),
     _df_D_liquid_dbeta(declarePropertyDerivativeTHM<Real>("f_D_liquid", "beta")),

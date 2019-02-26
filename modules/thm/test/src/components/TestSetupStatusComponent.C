@@ -1,5 +1,5 @@
 #include "TestSetupStatusComponent.h"
-#include "Pipe.h"
+#include "FlowChannel.h"
 
 registerMooseObject("THMTestApp", TestSetupStatusComponent);
 
@@ -22,7 +22,7 @@ TestSetupStatusComponent::TestSetupStatusComponent(const InputParameters & param
 void
 TestSetupStatusComponent::init()
 {
-  const Pipe & pipe = getComponent<Pipe>("pipe");
+  const FlowChannel & pipe = getComponent<FlowChannel>("pipe");
 
   // This call should throw an error because Pipe initializes the data required
   // by this call in its init() function, which due to the ordering in the

@@ -16,8 +16,8 @@ class Closures1PhaseSimple : public Closures1PhaseBase
 public:
   Closures1PhaseSimple(const InputParameters & params);
 
-  virtual void check(const Pipe & flow_channel) const override;
-  virtual void addMooseObjects(const Pipe & flow_channel) override;
+  virtual void check(const FlowChannel & flow_channel) const override;
+  virtual void addMooseObjects(const FlowChannel & flow_channel) override;
 
 protected:
   /**
@@ -25,7 +25,7 @@ protected:
    *
    * @param[in] flow_channel   Flow channel component
    */
-  void addWallTemperatureFromHeatFluxMaterial(const Pipe & flow_channel) const;
+  void addWallTemperatureFromHeatFluxMaterial(const FlowChannel & flow_channel) const;
 };
 
 #endif /* CLOSURES1PHASESIMPLE_H */

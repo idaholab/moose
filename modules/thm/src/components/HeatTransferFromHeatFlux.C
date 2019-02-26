@@ -1,7 +1,7 @@
 #include "HeatTransferFromHeatFlux.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
-#include "Pipe.h"
+#include "FlowChannel.h"
 
 registerMooseObject("THMApp", HeatTransferFromHeatFlux);
 
@@ -100,7 +100,7 @@ HeatTransferFromHeatFlux::addMooseObjects2Phase()
   }
 
   // wall boiling kernel
-  const Pipe & pipe = getComponentByName<Pipe>(_pipe_name);
+  const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
   if (pipe.getParam<bool>("wall_mass_transfer"))
   {
     for (unsigned int k = 0; k < 2; k++)

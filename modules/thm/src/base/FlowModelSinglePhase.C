@@ -1,5 +1,5 @@
 #include "FlowModelSinglePhase.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 
 const std::string FlowModelSinglePhase::DENSITY = "rho";
 const std::string FlowModelSinglePhase::FRICTION_FACTOR_DARCY = "f_D";
