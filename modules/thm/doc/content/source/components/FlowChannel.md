@@ -1,18 +1,18 @@
 <!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
-# Pipe
+# FlowChannel
 
 !alert construction title=Undocumented Class
-The Pipe has not been documented. The content contained on this page includes the
+The FlowChannel has not been documented. The content contained on this page includes the
 typical automatic documentation associated with a MooseObject; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /Components/Pipe
+!syntax description /Components/FlowChannel
 
-!syntax parameters /Components/Pipe
+!syntax parameters /Components/FlowChannel
 
-!syntax inputs /Components/Pipe
+!syntax inputs /Components/FlowChannel
 
-!syntax children /Components/Pipe
+!syntax children /Components/FlowChannel
 
 !bibtex bibliography

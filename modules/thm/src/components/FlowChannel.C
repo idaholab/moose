@@ -1,15 +1,12 @@
-#include "Pipe.h"
-
-#include "TwoPhaseFluidProperties.h"
-#include "VaporMixtureFluidProperties.h"
-#include "TwoPhaseNCGFluidProperties.h"
-
-#include "InputParameterLogic.h"
-
-#include "StabilizationSettings.h"
+#include "FlowChannel.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 #include "FlowModelTwoPhaseNCG.h"
+#include "TwoPhaseFluidProperties.h"
+#include "VaporMixtureFluidProperties.h"
+#include "TwoPhaseNCGFluidProperties.h"
+#include "InputParameterLogic.h"
+#include "StabilizationSettings.h"
 #include "HeatTransferBase.h"
 #include "ClosuresBase.h"
 
@@ -19,14 +16,30 @@
 #include "THMMesh.h"
 #include "THMApp.h"
 
-registerMooseObject("THMApp", Pipe);
+registerMooseObject("THMApp", FlowChannel);
+
+const std::map<std::string, FlowChannel::EConvHeatTransGeom>
+    FlowChannel::_heat_transfer_geom_to_enum{{"PIPE", PIPE}, {"ROD_BUNDLE", ROD_BUNDLE}};
+
+MooseEnum
+FlowChannel::getConvHeatTransGeometry(const std::string & name)
+{
+  return THM::getMooseEnum<EConvHeatTransGeom>(name, _heat_transfer_geom_to_enum);
+}
+
+template <>
+FlowChannel::EConvHeatTransGeom
+THM::stringToEnum(const std::string & s)
+{
+  return stringToEnum<FlowChannel::EConvHeatTransGeom>(s, FlowChannel::_heat_transfer_geom_to_enum);
+}
 
 template <>
 InputParameters
-validParams<Pipe>()
+validParams<FlowChannel>()
 {
-  InputParameters params = validParams<PipeBase>();
-
+  InputParameters params = validParams<GeometricalFlowComponent>();
+  params.addRequiredParam<FunctionName>("A", "Area of the pipe, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<FunctionName>("f", "Wall friction");
   params.addParam<MaterialPropertyName>("f_2phase_mult_liquid",
@@ -41,7 +54,7 @@ validParams<Pipe>()
                                         "2-phase multiplier property for form loss for vapor");
 
   params.addParam<MooseEnum>("heat_transfer_geom",
-                             PipeBase::getConvHeatTransGeometry("PIPE"),
+                             FlowChannel::getConvHeatTransGeometry("PIPE"),
                              "Convective heat transfer geometry");
   params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parallel bundle heat transfer");
 
@@ -123,11 +136,14 @@ validParams<Pipe>()
   params.addParam<Real>("velocity_relaxation_rate",
                         "a user-given value for velocity relaxation rate");
 
+  params.addPrivateParam<std::string>("component_type", "pipe");
   return params;
 }
 
-Pipe::Pipe(const InputParameters & params)
-  : PipeBase(params),
+FlowChannel::FlowChannel(const InputParameters & params)
+  : GeometricalFlowComponent(params),
+    _flow_model(nullptr),
+    _area_function(getParam<FunctionName>("A")),
     _closures_name(getParam<std::string>("closures")),
     _const_A(false),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
@@ -146,10 +162,37 @@ Pipe::Pipe(const InputParameters & params)
 {
 }
 
-void
-Pipe::init()
+std::shared_ptr<const FlowModel>
+FlowChannel::getFlowModel() const
 {
-  PipeBase::init();
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  return _flow_model;
+}
+
+std::shared_ptr<FlowModel>
+FlowChannel::buildFlowModel()
+{
+  const std::string class_name = _app.getFlowModelClassName(_model_id);
+  InputParameters pars = _factory.getValidParams(class_name);
+  pars.set<Simulation *>("_sim") = &_sim;
+  pars.set<FlowChannel *>("_pipe") = this;
+  pars.set<UserObjectName>("fp") = _fp_name;
+  pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+  pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;
+  pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
+  if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
+    pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
+  return _factory.create<FlowModel>(class_name, name(), pars, 0);
+}
+
+void
+FlowChannel::init()
+{
+  GeometricalFlowComponent::init();
+
+  _flow_model = buildFlowModel();
+  _flow_model->init();
 
   _closures = buildClosures();
 
@@ -176,7 +219,7 @@ Pipe::init()
 }
 
 std::shared_ptr<ClosuresBase>
-Pipe::buildClosures()
+FlowChannel::buildClosures()
 {
   auto thm_app = dynamic_cast<THMApp *>(&_app);
   const std::string class_name = thm_app->getClosuresClassName(_closures_name, _model_id);
@@ -186,9 +229,9 @@ Pipe::buildClosures()
 }
 
 void
-Pipe::initSecondary()
+FlowChannel::initSecondary()
 {
-  PipeBase::initSecondary();
+  GeometricalFlowComponent::initSecondary();
 
   // Determine heat transfer mode based on connected heat transfer components;
   // if at least one heat transfer component of temperature component is
@@ -205,9 +248,9 @@ Pipe::initSecondary()
 }
 
 void
-Pipe::check() const
+FlowChannel::check() const
 {
-  PipeBase::check();
+  GeometricalFlowComponent::check();
 
   _closures->check(*this);
 
@@ -317,7 +360,7 @@ Pipe::check() const
 }
 
 void
-Pipe::buildMeshNodes()
+FlowChannel::buildMeshNodes()
 {
   MeshBase & the_mesh = _mesh.getMesh();
 
@@ -331,7 +374,7 @@ Pipe::buildMeshNodes()
 }
 
 void
-Pipe::buildMesh()
+FlowChannel::buildMesh()
 {
   buildMeshNodes();
 
@@ -415,7 +458,7 @@ Pipe::buildMesh()
 }
 
 void
-Pipe::addVariables()
+FlowChannel::addVariables()
 {
   // This should be called after initSecondary() because it relies on the names
   // generated in initSecondary() of heat transfer components
@@ -449,7 +492,7 @@ Pipe::addVariables()
 }
 
 void
-Pipe::setup1Phase()
+FlowChannel::setup1Phase()
 {
   {
     std::string class_name = "FluidProperties3EqnMaterial";
@@ -480,7 +523,7 @@ Pipe::setup1Phase()
 }
 
 void
-Pipe::setup2Phase()
+FlowChannel::setup2Phase()
 {
   std::vector<VariableName> cv_T_wall(1, FlowModel::TEMPERATURE_WALL);
   std::vector<VariableName> cv_temperature_liquid(1, FlowModelTwoPhase::TEMPERATURE_LIQUID);
@@ -580,7 +623,7 @@ Pipe::setup2Phase()
 }
 
 void
-Pipe::setupVolumeFraction()
+FlowChannel::setupVolumeFraction()
 {
   const FlowModelTwoPhase & fm = dynamic_cast<const FlowModelTwoPhase &>(*getFlowModel());
   bool phase_interaction = fm.getPhaseInteraction();
@@ -629,7 +672,7 @@ Pipe::setupVolumeFraction()
 }
 
 void
-Pipe::setupDh()
+FlowChannel::setupDh()
 {
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
   ExecFlagEnum ts_execute_on(MooseUtils::getDefaultExecFlagEnum());
@@ -662,7 +705,7 @@ Pipe::setupDh()
 }
 
 void
-Pipe::addFormLossObjects()
+FlowChannel::addFormLossObjects()
 {
   if (isParamValid("K_prime"))
   {
@@ -730,7 +773,7 @@ Pipe::addFormLossObjects()
 }
 
 void
-Pipe::addCommonObjects()
+FlowChannel::addCommonObjects()
 {
   // Wall friction, Dh, and Ph are common objects
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
@@ -835,7 +878,7 @@ Pipe::addCommonObjects()
 }
 
 void
-Pipe::addMooseObjects()
+FlowChannel::addMooseObjects()
 {
   addCommonObjects();
 
@@ -849,14 +892,14 @@ Pipe::addMooseObjects()
 }
 
 void
-Pipe::addHeatTransferName(const std::string & name) const
+FlowChannel::addHeatTransferName(const std::string & name) const
 {
   _heat_transfer_names.push_back(name);
   _n_heat_transfer_connections++;
 }
 
 void
-Pipe::getHeatTransferVariableNames()
+FlowChannel::getHeatTransferVariableNames()
 {
   for (unsigned int i = 0; i < _n_heat_transfer_connections; i++)
   {
@@ -873,7 +916,7 @@ Pipe::getHeatTransferVariableNames()
 }
 
 std::string
-Pipe::getHeatTransferNamesSuffix(const std::string & ht_name) const
+FlowChannel::getHeatTransferNamesSuffix(const std::string & ht_name) const
 {
   checkSetupStatus(INITIALIZED_PRIMARY);
 
@@ -897,7 +940,7 @@ Pipe::getHeatTransferNamesSuffix(const std::string & ht_name) const
 }
 
 const std::vector<unsigned int> &
-Pipe::getNodeIDs() const
+FlowChannel::getNodeIDs() const
 {
   checkSetupStatus(MESH_PREPARED);
 
@@ -905,7 +948,7 @@ Pipe::getNodeIDs() const
 }
 
 const std::vector<unsigned int> &
-Pipe::getElementIDs() const
+FlowChannel::getElementIDs() const
 {
   checkSetupStatus(MESH_PREPARED);
 
@@ -913,7 +956,7 @@ Pipe::getElementIDs() const
 }
 
 unsigned int
-Pipe::getNodesetID() const
+FlowChannel::getNodesetID() const
 {
   checkSetupStatus(MESH_PREPARED);
 
@@ -921,7 +964,7 @@ Pipe::getNodesetID() const
 }
 
 const BoundaryName &
-Pipe::getNodesetName() const
+FlowChannel::getNodesetName() const
 {
   checkSetupStatus(MESH_PREPARED);
 
@@ -929,7 +972,7 @@ Pipe::getNodesetName() const
 }
 
 unsigned int
-Pipe::getSubdomainID() const
+FlowChannel::getSubdomainID() const
 {
   checkSetupStatus(MESH_PREPARED);
 

@@ -5,7 +5,7 @@
 #include "LoggingInterface.h"
 
 class ClosuresBase;
-class Pipe;
+class FlowChannel;
 class Simulation;
 class Factory;
 
@@ -29,14 +29,14 @@ public:
    *
    * @param[in] flow_channel   Flow channel component
    */
-  virtual void check(const Pipe & flow_channel) const = 0;
+  virtual void check(const FlowChannel & flow_channel) const = 0;
 
   /**
    * Adds MOOSE objects
    *
    * @param[in] flow_channel   Flow channel component
    */
-  virtual void addMooseObjects(const Pipe & flow_channel) = 0;
+  virtual void addMooseObjects(const FlowChannel & flow_channel) = 0;
 
 protected:
   /**
@@ -45,7 +45,7 @@ protected:
    * @param[in] flow_channel   Flow channel component
    * @param[in] property_name   Name of the material property to create
    */
-  void addZeroMaterial(const Pipe & flow_channel, const std::string & property_name) const;
+  void addZeroMaterial(const FlowChannel & flow_channel, const std::string & property_name) const;
 
   /**
    * Adds a weighted average material
@@ -55,7 +55,7 @@ protected:
    * @param[in] weights   Weights for each value
    * @param[in] property_name   Name of material property to create
    */
-  void addWeightedAverageMaterial(const Pipe & flow_channel,
+  void addWeightedAverageMaterial(const FlowChannel & flow_channel,
                                   const std::vector<MaterialPropertyName> & values,
                                   const std::vector<VariableName> & weights,
                                   const MaterialPropertyName & property_name) const;
@@ -65,7 +65,7 @@ protected:
    *
    * @param[in] flow_channel   Flow channel component
    */
-  void addWallTemperatureFromAuxMaterial(const Pipe & flow_channel) const;
+  void addWallTemperatureFromAuxMaterial(const FlowChannel & flow_channel) const;
 
   /// Simulation
   Simulation & _sim;

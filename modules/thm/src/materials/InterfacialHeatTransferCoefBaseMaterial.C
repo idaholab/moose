@@ -16,7 +16,7 @@ validParams<InterfacialHeatTransferCoefBaseMaterial>()
   params.addRequiredCoupledVar("D_h", "hydraulic diameter");
   params.addRequiredParam<bool>("horizontal", "Is pipe horizontal");
   params.addRequiredParam<MooseEnum>(
-      "ht_geom", PipeBase::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
+      "ht_geom", FlowChannel::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
   params.addParam<Real>("PoD", 0, "Pitch-to-diameter ratio (needed for rod bundle).");
   params.addRequiredCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("arhoA_liquid", "Liquid mass equation variable: alpha*rho*A");
@@ -75,7 +75,7 @@ InterfacialHeatTransferCoefBaseMaterial::InterfacialHeatTransferCoefBaseMaterial
     _area(coupledValue("A")),
     _D_h(coupledValue("D_h")),
     _is_horizontal(getParam<bool>("horizontal")),
-    _ht_geom(THM::stringToEnum<PipeBase::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
+    _ht_geom(THM::stringToEnum<FlowChannel::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
     _PoD(getParam<Real>("PoD")),
 
     _beta(coupledValue("beta")),

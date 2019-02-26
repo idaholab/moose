@@ -3,7 +3,7 @@
 #include "MooseObjectAction.h"
 #include "Transient.h"
 
-#include "PipeBase.h"
+#include "FlowChannel.h"
 #include "FlowJunction.h"
 
 #include "FluidProperties.h"
@@ -173,7 +173,7 @@ Simulation::identifyLoops()
     for (const auto & component : _components)
     {
       const auto pipe_base_component =
-          MooseSharedNamespace::dynamic_pointer_cast<PipeBase>(component);
+          MooseSharedNamespace::dynamic_pointer_cast<FlowChannel>(component);
       if (pipe_base_component && (_component_name_to_loop_name[component->name()] == loop))
       {
         const UserObjectName fp_name = pipe_base_component->getFluidPropertiesName();
@@ -187,7 +187,7 @@ Simulation::identifyLoops()
     if (found_model_id)
       _loop_name_to_model_id[loop] = model_id;
     else
-      logError("No PipeBase-derived components were found in loop '", loop, "'");
+      logError("No FlowChannel-derived components were found in loop '", loop, "'");
   }
 }
 
@@ -668,7 +668,7 @@ Simulation::integrityCheck() const
   std::vector<Component *> pipes;
   for (auto && comp : _components)
   {
-    auto pipe = dynamic_cast<PipeBase *>(comp.get());
+    auto pipe = dynamic_cast<FlowChannel *>(comp.get());
     if (pipe != nullptr)
       pipes.push_back(pipe);
   }

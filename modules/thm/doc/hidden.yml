@@ -62,6 +62,7 @@
 - /Components/BoundaryBase
 - /Components/Component
 - /Components/ConnectorBase
+- /Components/FlowChannel
 - /Components/FreeBoundary
 - /Components/GeometricalComponent
 - /Components/HSAmbientHeatTransferBoundary
@@ -86,7 +87,6 @@
 - /Components/PeriodicJunction
 - /Components/Pipe
 - /Components/PipeConnectable
-- /Components/PipeBase
 - /Components/PrescribedReactorPower
 - /Components/ReactorPower
 - /Components/SimpleJunction

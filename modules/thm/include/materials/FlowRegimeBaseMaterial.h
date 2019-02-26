@@ -3,7 +3,7 @@
 
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
-#include "PipeBase.h"
+#include "FlowChannel.h"
 
 // Forward Declarations
 class FlowRegimeBaseMaterial;
@@ -28,7 +28,7 @@ protected:
   /// Hydraulic diameter
   const VariableValue & _D_h;
   /// Heat transfer geometry
-  PipeBase::EConvHeatTransGeom _ht_geom;
+  FlowChannel::EConvHeatTransGeom _ht_geom;
   /// pitch to diameter ratio for rod bundles
   const Real & _PoD;
 

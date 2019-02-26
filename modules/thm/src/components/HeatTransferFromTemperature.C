@@ -2,7 +2,7 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 #include "HeatConductionModel.h"
-#include "Pipe.h"
+#include "FlowChannel.h"
 
 template <>
 InputParameters
@@ -33,7 +33,7 @@ HeatTransferFromTemperature::addMooseObjects()
   HeatTransferBase::addMooseObjects();
 
   // wall boiling interface heat transfer
-  const Pipe & pipe = getComponentByName<Pipe>(_pipe_name);
+  const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
   if (_model_type == THM::FM_TWO_PHASE && pipe.getParam<bool>("wall_mass_transfer"))
   {
     const std::vector<bool> is_liquid{true, false};

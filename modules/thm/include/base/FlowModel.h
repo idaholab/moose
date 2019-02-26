@@ -10,7 +10,7 @@ class Simulation;
 class Factory;
 class THMApp;
 class FluidProperties;
-class PipeBase;
+class FlowChannel;
 class FlowModel;
 
 template <>
@@ -110,7 +110,7 @@ protected:
   Factory & _factory;
 
   /// The Pipe component that built this class
-  PipeBase & _pipe;
+  FlowChannel & _pipe;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;

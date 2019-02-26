@@ -1,36 +1,61 @@
-#ifndef PIPE_H
-#define PIPE_H
+#ifndef FLOWCHANNEL_H
+#define FLOWCHANNEL_H
 
-#include "PipeBase.h"
+#include "GeometricalFlowComponent.h"
 
-class Pipe;
+class FlowChannel;
 class ClosuresBase;
 
 template <>
-InputParameters validParams<Pipe>();
+InputParameters validParams<FlowChannel>();
 
 /**
- * A simple pipe component
+ * A class representing a flow channel
  *
- * A pipe is defined by its position, direction, length and area.
- * Mesh: mesh is generated in such a way, that the pipe starts at the origin (0, 0, 0) and is
- * aligned with x-axis. It's subdivided into _n_elems elements (of type EDGE2).
+ * A flow channel is defined by its position, direction, length and area.
  */
-class Pipe : public PipeBase
+class FlowChannel : public GeometricalFlowComponent
 {
 public:
-  Pipe(const InputParameters & params);
+  FlowChannel(const InputParameters & params);
+
+  /// Type of convective heat transfer geometry
+  enum EConvHeatTransGeom
+  {
+    PIPE,      ///< pipe geometry
+    ROD_BUNDLE ///< rod bundle geometry
+  };
+  /// Map of convective heat transfer geometry type to enum
+  static const std::map<std::string, EConvHeatTransGeom> _heat_transfer_geom_to_enum;
 
   virtual void buildMesh() override;
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
 
+  /**
+   * Gets a MooseEnum for convective heat transfer geometry type
+   *
+   * @param[in] name   default value
+   * @returns MooseEnum for convective heat transfer geometry type
+   */
+  static MooseEnum getConvHeatTransGeometry(const std::string & name);
+
+  // Pipe specific interface ----
+  virtual std::shared_ptr<const FlowModel> getFlowModel() const;
+
+  /**
+   * Get the name of the function describing the flow channel area
+   *
+   * @return The name of the function describing the flow channel area
+   */
+  const FunctionName & getAreaFunctionName() const { return _area_function; }
+
   const std::vector<unsigned int> & getNodeIDs() const;
   const std::vector<unsigned int> & getElementIDs() const;
   unsigned int getNodesetID() const;
   const BoundaryName & getNodesetName() const;
-  unsigned int getSubdomainID() const override;
-  virtual bool isHorizontal() const override { return _is_horizontal; }
+  unsigned int getSubdomainID() const;
+  virtual bool isHorizontal() const { return _is_horizontal; }
 
   /**
    * Gets heat transfer geometry
@@ -98,6 +123,7 @@ public:
   std::string getHeatTransferNamesSuffix(const std::string & ht_name) const;
 
 protected:
+  virtual std::shared_ptr<FlowModel> buildFlowModel();
   virtual void init() override;
   virtual void initSecondary() override;
   virtual void check() const override;
@@ -110,6 +136,24 @@ protected:
    * Adds objects which are common for single- and two-phase flow
    */
   virtual void addCommonObjects();
+
+  virtual void setup1Phase();
+  virtual void setup2Phase();
+
+  virtual void setupVolumeFraction();
+  virtual void setupDh();
+  virtual void addFormLossObjects();
+
+  /**
+   * Populates heat connection variable names lists
+   */
+  virtual void getHeatTransferVariableNames();
+
+  /// The flow model used by this pipe
+  std::shared_ptr<FlowModel> _flow_model;
+
+  /// Function describing the flow channel area
+  const FunctionName & _area_function;
 
   /// The name of used closures
   const std::string & _closures_name;
@@ -169,18 +213,6 @@ protected:
   /// Number of connected heat transfer components
   mutable unsigned int _n_heat_transfer_connections;
 
-  virtual void setup1Phase();
-  virtual void setup2Phase();
-
-  virtual void setupVolumeFraction();
-  virtual void setupDh();
-  virtual void addFormLossObjects();
-
-  /**
-   * Populates heat connection variable names lists
-   */
-  virtual void getHeatTransferVariableNames();
-
   /// 1-phase wall heat transfer coefficient names for connected heat transfers
   std::vector<MaterialPropertyName> _Hw_1phase_names;
   /// liquid wall heat transfer coefficient names for connected heat transfers
@@ -195,4 +227,4 @@ protected:
   std::vector<VariableName> _q_wall_names;
 };
 
-#endif /* PIPE_H */
+#endif /* FLOWCHANNEL_H */

@@ -10,7 +10,7 @@ validParams<WallHeatTransferCoefficient7EqnBaseMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<MooseEnum>(
-      "ht_geom", PipeBase::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
+      "ht_geom", FlowChannel::getConvHeatTransGeometry("PIPE"), "Heat transfer geometry");
   params.addParam<Real>("PoD", 0, "Pitch-to-diameter ratio (needed for rod bundle).");
   params.addRequiredParam<Real>("alpha_v_min", "vapor volume fraction below which is all liquid");
   params.addRequiredParam<Real>("alpha_v_max", "vapor volume fraction above which is all vapor");
@@ -51,7 +51,7 @@ WallHeatTransferCoefficient7EqnBaseMaterial::WallHeatTransferCoefficient7EqnBase
     _Hw_liquid(declareProperty<Real>("Hw_liquid")),
     _Hw_vapor(declareProperty<Real>("Hw_vapor")),
 
-    _ht_geom(THM::stringToEnum<PipeBase::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
+    _ht_geom(THM::stringToEnum<FlowChannel::EConvHeatTransGeom>(getParam<MooseEnum>("ht_geom"))),
     _PoD(getParam<Real>("PoD")),
     _alpha_v_min(getParam<Real>("alpha_v_min")),
     _alpha_v_max(getParam<Real>("alpha_v_max")),
@@ -84,6 +84,6 @@ WallHeatTransferCoefficient7EqnBaseMaterial::WallHeatTransferCoefficient7EqnBase
     _liquid_props(getUserObjectByName<LiquidFluidPropertiesInterface>(_fp.getLiquidName())),
     _chf_table(getUserObject<CHFTable>("chf_table"))
 {
-  if (_ht_geom == PipeBase::ROD_BUNDLE && _PoD == 0.)
+  if (_ht_geom == FlowChannel::ROD_BUNDLE && _PoD == 0.)
     mooseError(name(), ": When using ROD_BUNDLE geometry, you have to provide the PoD parameter.");
 }
