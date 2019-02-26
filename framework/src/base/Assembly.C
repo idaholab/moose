@@ -1558,7 +1558,7 @@ Assembly::computeCurrentFaceVolume()
       _current_qrule_face, _current_q_points_face, _coord);
   if (_computing_jacobian && _calculate_face_xyz)
     setCoordinateTransformation<ComputeStage::JACOBIAN>(
-        _current_qrule, _ad_q_points_face, _ad_coord);
+        _current_qrule_face, _ad_q_points_face, _ad_coord);
 
   _current_side_volume = 0.;
   for (unsigned int qp = 0; qp < _current_qrule_face->n_points(); qp++)
