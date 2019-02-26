@@ -18,6 +18,9 @@ class BrineFluidProperties;
 template <>
 InputParameters validParams<BrineFluidProperties>();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Brine (NaCl in H2O) fluid properties as a function of pressure (Pa),
  * temperature (K) and NaCl mass fraction
@@ -183,5 +186,7 @@ protected:
   /// Flag to indicate whether to calculate derivatives in water_fp
   mutable bool _water_fp_derivs;
 };
+
+#pragma GCC diagnostic pop
 
 #endif /* BRINEFLUIDPROPERTIES_H */
