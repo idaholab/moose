@@ -40,24 +40,11 @@
 []
 
 [BCs]
-  [./left]
+  [./sides]
     type = DirichletBC
     variable = T
-    boundary = left
+    boundary = 'left right'
     value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = T
-    boundary = right
-    value = 0
-  [../]
-[]
-
-[Preconditioning]
-  [./full]
-    type = SMP
-    full = true
   [../]
 []
 

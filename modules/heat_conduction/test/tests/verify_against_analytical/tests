@@ -25,7 +25,7 @@
     run_sim = True
     petsc_version = '>=3.9'
     method = 'OPT'
-    cli_args = 'Executioner/num_steps=5'
+    cli_args = 'Executioner/num_steps=5 Outputs/exodus=false'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
@@ -33,8 +33,8 @@
 
   [./2D_steady_state]
     type = 'Exodiff'
-    input = '2d_steady_state_final_prob.i'
-    exodiff = '2d_steady_state_final_prob_out.e'
+    input = '2d_steady_state.i'
+    exodiff = '2d_steady_state_out.e'
     abs_zero = 1e-8
     requirement = "Heat conduction shall match the answer from an analytical solution"
     design = "HeatConduction.md"
@@ -42,8 +42,8 @@
   [../]
   [./ad_2D_steady_state]
     type = 'Exodiff'
-    input = 'ad_2d_steady_state_final_prob.i'
-    exodiff = 'ad_2d_steady_state_final_prob_out.e'
+    input = 'ad_2d_steady_state.i'
+    exodiff = 'ad_2d_steady_state_out.e'
     abs_zero = 1e-8
     requirement = "Heat conduction from an AD kernel shall get the same answer as a traditional kernel"
     design = "jacobian_definition.md"
@@ -51,12 +51,13 @@
   [../]
   [./ad_2D_steady_state_jacobian]
     type = 'PetscJacobianTester'
-    input = 'ad_2d_steady_state_final_prob.i'
+    input = 'ad_2d_steady_state.i'
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
     petsc_version = '>=3.9'
     method = 'OPT'
+    cli_args = 'Outputs/exodus=false'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"

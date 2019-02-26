@@ -28,22 +28,10 @@
 []
 
 [BCs]
-  [./left]
+  [./one]
     type = DirichletBC
     variable = T
-    boundary = left
-    value = 1
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = T
-    boundary = right
-    value = 1
-  [../]
-  [./bottom]
-    type = DirichletBC
-    variable = T
-    boundary = bottom
+    boundary = 'right bottom left'
     value = 1
   [../]
   [./top]

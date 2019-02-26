@@ -31,9 +31,6 @@
     variable = T
     diffusivity = diffusivity
   [../]
-[]
-
-[Kernels]
   [./dt]
     type = CoefTimeDerivative
     variable = T
@@ -42,16 +39,10 @@
 []
 
 [BCs]
-  [./left]
+  [./sides]
     type = DirichletBC
     variable = T
-    boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = T
-    boundary = right
+    boundary = 'left right'
     value = 0
   [../]
 []
@@ -61,13 +52,6 @@
     type = GenericConstantMaterial
     prop_names = 'diffusivity'
     prop_values = '0.95'
-  [../]
-[]
-
-[Preconditioning]
-  [./full]
-    type = SMP
-    full = true
   [../]
 []
 

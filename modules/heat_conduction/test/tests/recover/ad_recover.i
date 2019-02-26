@@ -141,8 +141,4 @@
 
 [Outputs]
   exodus = true
-  [./console]
-    type = Console
-    max_rows = 25
-  [../]
 []

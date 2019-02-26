@@ -16,62 +16,45 @@
 
 [Variables]
   [./T]
-    initial_condition = 1
   [../]
 []
 
 [Kernels]
-  [./HeatDiff]
-    type = HeatConduction
+  [./diff]
+    type = CoefDiffusion
     variable = T
+    coef = 0.9
+    function = 0.05
   [../]
 []
 
 [BCs]
-  [./left]
+  [./zero]
     type = DirichletBC
     variable = T
-    boundary = left
-    value = 1
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = T
-    boundary = right
-    value = 1
-  [../]
-  [./bottom]
-    type = DirichletBC
-    variable = T
-    boundary = bottom
-    value = 1
+    boundary = 'left right bottom'
+    value = 0
   [../]
   [./top]
     type = FunctionDirichletBC
     variable = T
     boundary = top
-    function = '1+10*sin(pi*x*0.5)'
-  [../]
-[]
-
-[Materials]
-  [./properties]
-    type = GenericConstantMaterial
-    prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '1 1 1'
+    function = '10*sin(pi*x*0.5)'
   [../]
 []
 
 [Postprocessors]
   [./nodal_error]
     type = NodalL2Error
-    function = '1+10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
+    function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
+    outputs = console
   [../]
   [./elemental_error]
     type = ElementL2Error
-    function = '1+10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
+    function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
+    outputs = console
   [../]
 []
 

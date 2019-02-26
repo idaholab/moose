@@ -37,16 +37,10 @@
 []
 
 [BCs]
-  [./left]
+  [./sides]
     type = DirichletBC
     variable = T
-    boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = T
-    boundary = right
+    boundary = 'left right'
     value = 0
   [../]
 []
@@ -87,5 +81,4 @@
 
 [Outputs]
   exodus = true
-  perf_graph = true
 []

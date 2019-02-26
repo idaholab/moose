@@ -28,26 +28,14 @@
 []
 
 [BCs]
-  [./left]
+  [./zero]
     type = DirichletBC
     variable = T
-    boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = T
-    boundary = right
-    value = 0
-  [../]
-  [./bottom]
-    type = DirichletBC
-    variable = T
-    boundary = bottom
+    boundary = 'left right bottom'
     value = 0
   [../]
   [./top]
-    type = FunctionDirichletBC
+    type = ADFunctionDirichletBC
     variable = T
     boundary = top
     function = '10*sin(pi*x*0.5)'
@@ -75,13 +63,6 @@
     function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
     outputs = console
-  [../]
-[]
-
-[Preconditioning]
-  [./full]
-    type = SMP
-    full = true
   [../]
 []
 
