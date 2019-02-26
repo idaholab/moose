@@ -15,7 +15,13 @@
 // Forward Declarations
 class FluidProperties;
 
-typedef DualNumber<Real, NumberArray<3, Real>> FPDualReal;
+// The default DualReal size allows functions of many more variables than
+// common in the FluidProperties module. This makes the computations much
+// slower than necessary, so use a smaller definition in the FluidProperties
+// module, FPDualReal, which is suitable for up to five variables.
+// This is useful for the cases where we wish to use AD to compute the derivatives
+// rather than hand-coding them in derived classes.
+typedef DualNumber<Real, NumberArray<5, Real>> FPDualReal;
 
 template <>
 InputParameters validParams<FluidProperties>();

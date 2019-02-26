@@ -31,6 +31,22 @@ InputParameters validParams<SinglePhaseFluidProperties>();
     d##want##d2 = 0;                                                                               \
     val = want##_from_##prop1##_##prop2(prop1, prop2);                                             \
   }                                                                                                \
+                                                                                                   \
+  FPDualReal want##_from_##prop1##_##prop2(const FPDualReal & p1, const FPDualReal & p2) const     \
+  {                                                                                                \
+    Real x = 0;                                                                                    \
+    Real raw1 = p1.value();                                                                        \
+    Real raw2 = p2.value();                                                                        \
+    Real dxd1 = 0;                                                                                 \
+    Real dxd2 = 0;                                                                                 \
+    want##_from_##prop1##_##prop2(raw1, raw2, x, dxd1, dxd2);                                      \
+                                                                                                   \
+    FPDualReal result = x;                                                                         \
+    for (std::size_t i = 0; i < p1.derivatives().size(); i++)                                      \
+      result.derivatives()[i] = p1.derivatives()[i] * dxd1 + p2.derivatives()[i] * dxd2;           \
+    return result;                                                                                 \
+  }                                                                                                \
+                                                                                                   \
   DualReal want##_from_##prop1##_##prop2(const DualReal & p1, const DualReal & p2) const           \
   {                                                                                                \
     Real x = 0;                                                                                    \

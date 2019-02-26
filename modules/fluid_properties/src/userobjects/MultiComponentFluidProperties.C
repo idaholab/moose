@@ -30,23 +30,11 @@ MultiComponentFluidProperties::fluidName() const
   mooseError(name(), ": fluidName() is not implemented");
 }
 
-Real MultiComponentFluidProperties::rho_from_p_T_X(Real, Real, Real) const
-{
-  mooseError(name(), ": rho_from_p_T_X() is not implemented");
-}
-
 Real
 MultiComponentFluidProperties::rho(Real pressure, Real temperature, Real xmass) const
 {
   mooseDeprecated(name(), ": rho() is deprecated. Use rho_from_p_T_X() instead");
   return rho_from_p_T_X(pressure, temperature, xmass);
-}
-
-void
-MultiComponentFluidProperties::rho_from_p_T_X(
-    Real, Real, Real, Real &, Real &, Real &, Real &) const
-{
-  mooseError(name(), ": rho_from_p_T_X() is not implemented");
 }
 
 void
@@ -62,22 +50,11 @@ MultiComponentFluidProperties::rho_dpTx(Real pressure,
   rho_from_p_T_X(pressure, temperature, xmass, rho, drho_dp, drho_dT, drho_dx);
 }
 
-Real MultiComponentFluidProperties::mu_from_p_T_X(Real, Real, Real) const
-{
-  mooseError(name(), ": mu_from_p_T_X() is not implemented");
-}
-
 Real
 MultiComponentFluidProperties::mu(Real pressure, Real temperature, Real xmass) const
 {
   mooseDeprecated(name(), ": mu() is deprecated. Use mu_from_p_T_X() instead");
   return mu_from_p_T_X(pressure, temperature, xmass);
-}
-
-void
-MultiComponentFluidProperties::mu_from_p_T_X(Real, Real, Real, Real &, Real &, Real &, Real &) const
-{
-  mooseError(name(), ": mu_from_p_T_X() is not implemented");
 }
 
 void
@@ -94,9 +71,19 @@ MultiComponentFluidProperties::mu_dpTx(Real pressure,
 }
 
 void
-MultiComponentFluidProperties::rho_mu_from_p_T_X(Real, Real, Real, Real &, Real &) const
+MultiComponentFluidProperties::rho_mu_from_p_T_X(
+    Real pressure, Real temperature, Real xmass, Real & rho, Real & mu) const
 {
-  mooseError(name(), ": rho_mu_from_p_T_X() is not implemented");
+  rho = rho_from_p_T_X(pressure, temperature, xmass);
+  mu = mu_from_p_T_X(pressure, temperature, xmass);
+}
+
+void
+MultiComponentFluidProperties::rho_mu_from_p_T_X(
+    DualReal pressure, DualReal temperature, DualReal xmass, DualReal & rho, DualReal & mu) const
+{
+  rho = rho_from_p_T_X(pressure, temperature, xmass);
+  mu = mu_from_p_T_X(pressure, temperature, xmass);
 }
 
 void
@@ -108,10 +95,20 @@ MultiComponentFluidProperties::rho_mu(
 }
 
 void
-MultiComponentFluidProperties::rho_mu_from_p_T_X(
-    Real, Real, Real, Real &, Real &, Real &, Real &, Real &, Real &, Real &, Real &) const
+MultiComponentFluidProperties::rho_mu_from_p_T_X(Real pressure,
+                                                 Real temperature,
+                                                 Real xmass,
+                                                 Real & rho,
+                                                 Real & drho_dp,
+                                                 Real & drho_dT,
+                                                 Real & drho_dx,
+                                                 Real & mu,
+                                                 Real & dmu_dp,
+                                                 Real & dmu_dT,
+                                                 Real & dmu_dx) const
 {
-  mooseError(name(), ": rho_mu_from_p_T_X() is not implemented");
+  rho_from_p_T_X(pressure, temperature, xmass, rho, drho_dp, drho_dT, drho_dx);
+  mu_from_p_T_X(pressure, temperature, xmass, mu, dmu_dp, dmu_dT, dmu_dx);
 }
 
 void
@@ -132,22 +129,11 @@ MultiComponentFluidProperties::rho_mu_dpTx(Real pressure,
       pressure, temperature, xmass, rho, drho_dp, drho_dT, drho_dx, mu, dmu_dp, dmu_dT, dmu_dx);
 }
 
-Real MultiComponentFluidProperties::h_from_p_T_X(Real, Real, Real) const
-{
-  mooseError(name(), ": h_from_p_T_X() is not implemented");
-}
-
 Real
 MultiComponentFluidProperties::h(Real pressure, Real temperature, Real xmass) const
 {
   mooseDeprecated(name(), ": h() is deprecated. Use h_from_p_T_X() instead");
   return h_from_p_T_X(pressure, temperature, xmass);
-}
-
-void
-MultiComponentFluidProperties::h_from_p_T_X(Real, Real, Real, Real &, Real &, Real &, Real &) const
-{
-  mooseError(name(), ": h_from_p_T_X() is not implemented");
 }
 
 void
@@ -163,11 +149,6 @@ MultiComponentFluidProperties::h_dpTx(Real pressure,
   h_from_p_T_X(pressure, temperature, xmass, h, dh_dp, dh_dT, dh_dx);
 }
 
-Real MultiComponentFluidProperties::cp_from_p_T_X(Real, Real, Real) const
-{
-  mooseError(name(), ": cp_from_p_T_X() is not implemented");
-}
-
 Real
 MultiComponentFluidProperties::cp(Real pressure, Real temperature, Real xmass) const
 {
@@ -175,22 +156,11 @@ MultiComponentFluidProperties::cp(Real pressure, Real temperature, Real xmass) c
   return cp_from_p_T_X(pressure, temperature, xmass);
 }
 
-Real MultiComponentFluidProperties::e_from_p_T_X(Real, Real, Real) const
-{
-  mooseError(name(), ": e_from_p_T_X() is not implemented");
-}
-
 Real
 MultiComponentFluidProperties::e(Real pressure, Real temperature, Real xmass) const
 {
   mooseDeprecated(name(), ": e() is deprecated. Use e_from_p_T_X() instead");
   return e_from_p_T_X(pressure, temperature, xmass);
-}
-
-void
-MultiComponentFluidProperties::e_from_p_T_X(Real, Real, Real, Real &, Real &, Real &, Real &) const
-{
-  mooseError(name(), ": e_from_p_T_X() is not implemented");
 }
 
 void
@@ -204,11 +174,6 @@ MultiComponentFluidProperties::e_dpTx(Real pressure,
 {
   mooseDeprecated(name(), ": e_dpTx() is deprecated. Use e_from_p_T_X() instead");
   e_from_p_T_X(pressure, temperature, xmass, e, de_dp, de_dT, de_dx);
-}
-
-Real MultiComponentFluidProperties::k_from_p_T_X(Real, Real, Real) const
-{
-  mooseError(name(), ": k_from_p_T_X() is not implemented");
 }
 
 Real
