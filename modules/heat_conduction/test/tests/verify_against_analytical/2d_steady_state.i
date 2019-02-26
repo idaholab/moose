@@ -16,7 +16,6 @@
 
 [Variables]
   [./T]
-    initial_condition = 1
   [../]
 []
 
@@ -28,17 +27,17 @@
 []
 
 [BCs]
-  [./one]
+  [./zero]
     type = DirichletBC
     variable = T
     boundary = 'left right bottom'
-    value = 1
+    value = 0
   [../]
   [./top]
     type = FunctionDirichletBC
     variable = T
     boundary = top
-    function = '1+10*sin(pi*x*0.5)'
+    function = '10*sin(pi*x*0.5)'
   [../]
 []
 
@@ -53,12 +52,12 @@
 [Postprocessors]
   [./nodal_error]
     type = NodalL2Error
-    function = '1+10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
+    function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
   [../]
   [./elemental_error]
     type = ElementL2Error
-    function = '1+10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
+    function = '10/(sinh(pi))*sin(pi*x*0.5)*sinh(pi*y*0.5)'
     variable = T
   [../]
 []
