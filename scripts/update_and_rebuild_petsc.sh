@@ -86,13 +86,13 @@ if [ -z "$go_fast" ]; then
       --download-superlu_dist=1 \
       --download-mumps=1 \
       --download-scalapack=1 \
-      -CC=mpicc -CXX=mpicxx -FC=mpif90 -F77=mpif77 -F90=mpif90 \
-      -CFLAGS='-fPIC -fopenmp' \
-      -CXXFLAGS='-fPIC -fopenmp' \
-      -FFLAGS='-fPIC -fopenmp' \
-      -FCFLAGS='-fPIC -fopenmp' \
-      -F90FLAGS='-fPIC -fopenmp' \
-      -F77FLAGS='-fPIC -fopenmp' \
+      --CC=mpicc --CXX=mpicxx --FC=mpif90 --F77=mpif77 --F90=mpif90 \
+      --CFLAGS='-fPIC -fopenmp' \
+      --CXXFLAGS='-fPIC -fopenmp' \
+      --FFLAGS='-fPIC -fopenmp' \
+      --FCFLAGS='-fPIC -fopenmp' \
+      --F90FLAGS='-fPIC -fopenmp' \
+      --F77FLAGS='-fPIC -fopenmp' \
       $* \
 
    make all
