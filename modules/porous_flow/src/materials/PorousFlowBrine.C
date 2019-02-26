@@ -140,14 +140,14 @@ void
 PorousFlowBrine::initQpStatefulProperties()
 {
   if (_compute_rho_mu)
-    (*_density)[_qp] =
-        _brine_fp->rho(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
+    (*_density)[_qp] = _brine_fp->rho_from_p_T_X(
+        _porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
   if (_compute_internal_energy)
-    (*_internal_energy)[_qp] =
-        _brine_fp->e(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
+    (*_internal_energy)[_qp] = _brine_fp->e_from_p_T_X(
+        _porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
   if (_compute_enthalpy)
-    (*_enthalpy)[_qp] =
-        _brine_fp->h(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
+    (*_enthalpy)[_qp] = _brine_fp->h_from_p_T_X(
+        _porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
 }
 
 void
@@ -159,7 +159,7 @@ PorousFlowBrine::computeQpProperties()
   {
     // Density and derivatives wrt pressure and temperature
     Real rho, drho_dp, drho_dT, drho_dx;
-    _brine_fp->rho_dpTx(
+    _brine_fp->rho_from_p_T_X(
         _porepressure[_qp][_phase_num], Tk, _xnacl[_qp], rho, drho_dp, drho_dT, drho_dx);
     (*_density)[_qp] = rho;
     (*_ddensity_dp)[_qp] = drho_dp;
@@ -167,7 +167,8 @@ PorousFlowBrine::computeQpProperties()
 
     // Viscosity and derivatives wrt pressure and temperature
     Real mu, dmu_dp, dmu_dT, dmu_dx;
-    _brine_fp->mu_dpTx(_porepressure[_qp][_phase_num], Tk, _xnacl[_qp], mu, dmu_dp, dmu_dT, dmu_dx);
+    _brine_fp->mu_from_p_T_X(
+        _porepressure[_qp][_phase_num], Tk, _xnacl[_qp], mu, dmu_dp, dmu_dT, dmu_dx);
     (*_viscosity)[_qp] = mu;
     (*_dviscosity_dp)[_qp] = dmu_dp;
     (*_dviscosity_dT)[_qp] = dmu_dT;
@@ -177,7 +178,8 @@ PorousFlowBrine::computeQpProperties()
   if (_compute_internal_energy)
   {
     Real e, de_dp, de_dT, de_dx;
-    _brine_fp->e_dpTx(_porepressure[_qp][_phase_num], Tk, _xnacl[_qp], e, de_dp, de_dT, de_dx);
+    _brine_fp->e_from_p_T_X(
+        _porepressure[_qp][_phase_num], Tk, _xnacl[_qp], e, de_dp, de_dT, de_dx);
     (*_internal_energy)[_qp] = e;
     (*_dinternal_energy_dp)[_qp] = de_dp;
     (*_dinternal_energy_dT)[_qp] = de_dT;
@@ -187,7 +189,8 @@ PorousFlowBrine::computeQpProperties()
   if (_compute_enthalpy)
   {
     Real h, dh_dp, dh_dT, dh_dx;
-    _brine_fp->h_dpTx(_porepressure[_qp][_phase_num], Tk, _xnacl[_qp], h, dh_dp, dh_dT, dh_dx);
+    _brine_fp->h_from_p_T_X(
+        _porepressure[_qp][_phase_num], Tk, _xnacl[_qp], h, dh_dp, dh_dT, dh_dx);
     (*_enthalpy)[_qp] = h;
     (*_denthalpy_dp)[_qp] = dh_dp;
     (*_denthalpy_dT)[_qp] = dh_dT;
