@@ -1,4 +1,4 @@
-# Test IdealGasFluidPropertiesPTFluidProperties
+# Test IdealGasFluidPropertiesFluidProperties using pressure and temperature
 # Use values for Oxygen at 1 MPa and 350 K from NIST chemistry webook
 #
 # Input values:
@@ -124,7 +124,7 @@
 [Modules]
   [./FluidProperties]
     [./idealgas]
-      type = IdealGasFluidPropertiesPT
+      type = IdealGasFluidProperties
       cp = 938.75
       cv = 669.8
       molar_mass = 0.0319988

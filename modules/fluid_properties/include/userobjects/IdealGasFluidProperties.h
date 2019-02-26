@@ -22,6 +22,7 @@ InputParameters validParams<IdealGasFluidProperties>();
 
 /**
  * Ideal gas fluid properties
+ * Default parameters are for air at atmospheric pressure and temperature
  */
 class IdealGasFluidProperties : public SinglePhaseFluidProperties
 {
@@ -74,7 +75,6 @@ public:
   virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
   virtual Real T_from_p_h(Real p, Real h) const override;
-  virtual Real molarMass() const override;
   virtual Real cv_from_p_T(Real p, Real T) const override;
   virtual Real cp_from_p_T(Real p, Real T) const override;
   virtual void cp_from_p_T(Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
@@ -83,22 +83,37 @@ public:
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
   virtual void
   k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
+  virtual std::string fluidName() const override;
+  virtual Real molarMass() const override;
+  virtual Real gamma_from_v_e(Real v, Real e) const override;
+  virtual Real gamma_from_p_T(Real p, Real T) const override;
+  virtual Real c_from_p_T(Real p, Real T) const override;
 
-  virtual Real gamma() const;
-  virtual Real cv() const;
-  virtual Real cp() const;
+  virtual Real henryConstant(Real temperature) const override;
+  virtual void henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const override;
+
+  // Methods used by Navier-Stokes module
+  virtual Real gamma() const { return _gamma; };
+  virtual Real cv() const { return _cv; };
+  virtual Real cp() const { return _cp; };
 
 protected:
+  /// Adiabatic index (ratio of specific heats cp/cv)
   Real _gamma;
-  Real _R;
+  /// Specific gas constant (R / molar mass)
+  Real _R_specific;
+  /// Specific heat at constant volume
   Real _cv;
+  /// Specific heat at constant pressure
   Real _cp;
-
-  Real _mu;
-  Real _k;
-
-  /// Universal gas constant [J/K.mol]
-  constexpr static Real R_universal = 8.3144598;
+  /// Dynamic viscosity
+  const Real _mu;
+  /// Thermal conductivity
+  const Real _k;
+  /// molar mass
+  Real _molar_mass;
+  /// Henry constant
+  const Real _henry_constant;
 };
 
 #pragma GCC diagnostic pop

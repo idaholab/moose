@@ -66,9 +66,9 @@
 [Modules]
   [./FluidProperties]
     [./idealgas]
-      type = IdealGasFluidPropertiesPT
+      type = IdealGasFluidProperties
       molar_mass = 1.4
-      viscosity = 1.2
+      mu = 1.2
       cv = 1.3
     [../]
   [../]

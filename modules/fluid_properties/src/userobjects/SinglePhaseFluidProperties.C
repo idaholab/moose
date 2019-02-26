@@ -146,6 +146,12 @@ SinglePhaseFluidProperties::triplePointTemperature() const
 }
 
 Real
+SinglePhaseFluidProperties::gamma_from_v_e(Real v, Real e) const
+{
+  return cp_from_v_e(v, e) / cv_from_v_e(v, e);
+}
+
+Real
 SinglePhaseFluidProperties::gamma_from_p_T(Real p, Real T) const
 {
   return cp_from_p_T(p, T) / cv_from_p_T(p, T);
