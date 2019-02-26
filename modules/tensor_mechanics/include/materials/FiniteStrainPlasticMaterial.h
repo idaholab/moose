@@ -43,6 +43,9 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress_old;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
   Real _rtol;
   Real _ftol;

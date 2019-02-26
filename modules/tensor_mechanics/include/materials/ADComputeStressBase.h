@@ -19,8 +19,6 @@
   using ADComputeStressBase<compute_stage>::_mechanical_strain;                                    \
   using ADComputeStressBase<compute_stage>::_elastic_strain;                                       \
   using ADComputeStressBase<compute_stage>::_base_name;                                            \
-  using ADComputeStressBase<compute_stage>::_elasticity_tensor;                                    \
-  using ADComputeStressBase<compute_stage>::_elasticity_tensor_name;                               \
   using ADComputeStressBase<compute_stage>::_initial_stress_fcn
 
 // Forward Declarations
@@ -52,13 +50,10 @@ protected:
   virtual void computeQpStress() = 0;
 
   const std::string _base_name;
-  const std::string _elasticity_tensor_name;
 
   const ADMaterialProperty(RankTwoTensor) & _mechanical_strain;
   ADMaterialProperty(RankTwoTensor) & _stress;
   ADMaterialProperty(RankTwoTensor) & _elastic_strain;
-
-  const ADMaterialProperty(RankFourTensor) & _elasticity_tensor;
 
   /// initial stress components
   std::vector<Function *> _initial_stress_fcn;

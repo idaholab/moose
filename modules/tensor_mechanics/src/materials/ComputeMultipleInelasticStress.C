@@ -77,7 +77,6 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _internal_solve_full_iteration_history(getParam<bool>("internal_solve_full_iteration_history")),
     _perform_finite_strain_rotations(getParam<bool>("perform_finite_strain_rotations")),
-    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
     _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _inelastic_strain(declareProperty<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
