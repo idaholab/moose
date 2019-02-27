@@ -490,16 +490,10 @@ TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Rea
   SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
 }
 
-Real
-TabulatedFluidProperties::henryConstant(Real temperature) const
+std::vector<Real>
+TabulatedFluidProperties::henryCoefficients() const
 {
-  return _fp.henryConstant(temperature);
-}
-
-void
-TabulatedFluidProperties::henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const
-{
-  _fp.henryConstant(temperature, Kh, dKh_dT);
+  return _fp.henryCoefficients();
 }
 
 Real

@@ -165,16 +165,10 @@ MethaneFluidProperties::vaporPressure(Real, Real &, Real &) const
   mooseError(name(), ": vaporPressure() is not implemented");
 }
 
-Real
-MethaneFluidProperties::henryConstant(Real temperature) const
+std::vector<Real>
+MethaneFluidProperties::henryCoefficients() const
 {
-  return henryConstantIAPWS(temperature, -10.44708, 4.66491, 12.12986);
-}
-
-void
-MethaneFluidProperties::henryConstant(Real temperature, Real & Kh, Real & dKh_dT) const
-{
-  henryConstantIAPWS(temperature, Kh, dKh_dT, -10.44708, 4.66491, 12.12986);
+  return {-10.44708, 4.66491, 12.12986};
 }
 
 Real

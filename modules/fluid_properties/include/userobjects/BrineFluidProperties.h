@@ -151,6 +151,18 @@ public:
    */
   Real haliteSolubility(Real temperature) const;
 
+  /**
+   * IAPWS formulation of Henry's law constant for dissolution in water
+   * (implemented in water FluidProperties userobject)
+   * @param T fluid temperature (K)
+   * @param coeffs Henry's constant coefficients of gas
+   * @param[out] Kh Henry's constant
+   * @param[out] dKh_dT derivative of Kh wrt temperature
+   */
+  Real henryConstant(Real temperature, const std::vector<Real> & coeffs) const;
+  void
+  henryConstant(Real temperature, const std::vector<Real> & coeffs, Real & Kh, Real & dKh_dT) const;
+
   /// Fluid component numbers for water and NaCl
   static const unsigned int WATER = 0;
   static const unsigned int NACL = 1;
@@ -173,6 +185,8 @@ protected:
   Real massFractionToMoleFraction(Real xnacl) const;
   FPDualReal massFractionToMoleFraction(const FPDualReal & xnacl) const;
 
+  /// Water97FluidProperties UserObject (for Henry's law)
+  const Water97FluidProperties * _water97_fp;
   /// Water97FluidProperties UserObject
   const SinglePhaseFluidProperties * _water_fp;
   /// NaClFluidProperties UserObject
