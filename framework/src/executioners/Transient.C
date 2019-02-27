@@ -43,6 +43,8 @@ InputParameters
 validParams<Transient>()
 {
   InputParameters params = validParams<Executioner>();
+  params.addClassDescription("Executioner for time varying simulations.");
+
   std::vector<Real> sync_times(1);
   sync_times[0] = -std::numeric_limits<Real>::max();
 
