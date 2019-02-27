@@ -1,7 +1,23 @@
 #include "Numerics.h"
+#include "MooseUtils.h"
 
 namespace THM
 {
+
+bool
+absoluteFuzzyEqualVectors(const RealVectorValue & a, const RealVectorValue & b, const Real & tol)
+{
+  return MooseUtils::absoluteFuzzyEqual(a(0), b(0), tol) &&
+         MooseUtils::absoluteFuzzyEqual(a(1), b(1), tol) &&
+         MooseUtils::absoluteFuzzyEqual(a(2), b(2), tol);
+}
+
+bool
+areParallelVectors(const RealVectorValue & a, const RealVectorValue & b, const Real & tol)
+{
+  const RealVectorValue c = a.cross(b);
+  return absoluteFuzzyEqualVectors(c, RealVectorValue(0, 0, 0), tol);
+}
 
 Real
 applyQuotientRule(const Real & num, const Real & den, const Real & dnum_dy, const Real & dden_dy)
