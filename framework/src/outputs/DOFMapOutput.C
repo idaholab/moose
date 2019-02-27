@@ -31,6 +31,7 @@ validParams<DOFMapOutput>()
 {
   // Get the parameters from the base class
   InputParameters params = validParams<FileOutput>();
+  params.addClassDescription("Output degree-of-freedom (DOF) map.");
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", false, "Output to the screen");

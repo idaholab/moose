@@ -34,6 +34,8 @@ validParams<Console>()
 
   // Get the parameters from the base class
   InputParameters params = validParams<TableOutput>();
+  params.addClassDescription("Object for screen output.");
+
   params += TableOutput::enableOutputTypes("system_information scalar postprocessor input");
 
   // Screen and file output toggles

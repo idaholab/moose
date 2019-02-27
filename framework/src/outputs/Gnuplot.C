@@ -18,6 +18,7 @@ validParams<Gnuplot>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
+  params.addClassDescription("Output for postprocessors and scalar variables in GNU plot format.");
 
   // Set an enum for the possible file extensions
   MooseEnum ext("png ps gif", "png", true);

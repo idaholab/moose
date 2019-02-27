@@ -22,6 +22,8 @@ InputParameters
 validParams<EigenExecutionerBase>()
 {
   InputParameters params = validParams<Executioner>();
+  params.addClassDescription("Executioner for Eigen value problems.");
+
   params.addRequiredParam<PostprocessorName>("bx_norm", "To evaluate |Bx| for the eigenvalue");
   params.addParam<PostprocessorName>("normalization", "To evaluate |x| for normalization");
   params.addParam<Real>("normal_factor", "Normalize x to make |x| equal to this factor");

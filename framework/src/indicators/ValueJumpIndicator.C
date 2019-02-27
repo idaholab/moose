@@ -16,6 +16,7 @@ InputParameters
 validParams<ValueJumpIndicator>()
 {
   InputParameters params = validParams<InternalSideIndicator>();
+  params.addClassDescription("Compute the jump of the solution across element bondaries.");
   return params;
 }
 

@@ -568,7 +568,7 @@ class RenderSyntaxListItem(components.RenderComponent):
         p = html.Tag(parent, 'p', class_='moose-syntax-list-item')
         html.Tag(p, 'span', string=u'{}: '.format(token['syntax']),
                  class_='moose-syntax-list-item-syntax')
-        return html.Tag(p, 'span', string=unicode(token['syntax']),
+        return html.Tag(p, 'span',
                         class_='moose-syntax-list-item-details')
 
     def createMaterialize(self, parent, token, page):

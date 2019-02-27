@@ -22,6 +22,9 @@ validParams<ControlOutput>()
 {
   // Get the base class parameters
   InputParameters params = validParams<Output>();
+  params.addClassDescription(
+      "Output for displaying objects and parameters associated with the Control system.");
+
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
   params.addParam<bool>(
       "clear_after_output", true, "Clear the active control display after each output.");

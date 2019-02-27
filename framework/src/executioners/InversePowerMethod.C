@@ -16,6 +16,7 @@ InputParameters
 validParams<InversePowerMethod>()
 {
   InputParameters params = validParams<EigenExecutionerBase>();
+  params.addClassDescription("Inverse power method for Eigen value problems.");
   params.addParam<PostprocessorName>(
       "xdiff", "", "To evaluate |x-x_previous| for power iterations");
   params.addParam<unsigned int>(

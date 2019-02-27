@@ -23,6 +23,7 @@ InputParameters
 validParams<Steady>()
 {
   InputParameters params = validParams<Executioner>();
+  params.addClassDescription("Executioner for steady-state simulations.");
   params.addParam<Real>("time", 0.0, "System time");
   return params;
 }

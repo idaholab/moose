@@ -379,6 +379,14 @@ public:
 
   /**
    * Adiabatic index - ratio of specific heats
+   * @param v specific volume
+   * @param e specific internal energy
+   * @return gamma (-)
+   */
+  virtual Real gamma_from_v_e(Real v, Real e) const;
+
+  /**
+   * Adiabatic index - ratio of specific heats
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @return gamma (-)
