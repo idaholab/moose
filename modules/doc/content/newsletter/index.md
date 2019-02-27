@@ -6,6 +6,7 @@ monthly to the [MOOSE users](contact_us.md) as well as provided below.
 
 ## 2019
 
+- [February, 2019](2019_02.md)
 - [January, 2019](2019_01.md)
 
 ## 2018
