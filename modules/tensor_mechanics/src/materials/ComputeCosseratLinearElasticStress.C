@@ -23,7 +23,9 @@ validParams<ComputeCosseratLinearElasticStress>()
 
 ComputeCosseratLinearElasticStress::ComputeCosseratLinearElasticStress(
     const InputParameters & parameters)
-  : ComputeCosseratStressBase(parameters)
+  : ComputeCosseratStressBase(parameters),
+    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name))
 {
 }
 

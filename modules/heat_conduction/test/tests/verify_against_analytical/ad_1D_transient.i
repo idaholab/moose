@@ -29,27 +29,18 @@
   [./HeatDiff]
     type = ADHeatConduction
     variable = T
-    thermal_conductivity = thermal_conductivity
   [../]
-  [./heat_dt]
+  [./HeatTdot]
     type = ADHeatConductionTimeDerivative
     variable = T
-    specific_heat = specific_heat
-    density_name = density
   [../]
 []
 
 [BCs]
-  [./left]
+  [./sides]
     type = DirichletBC
     variable = T
-    boundary = left
-    value = 0
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = T
-    boundary = right
+    boundary = 'left right'
     value = 0
   [../]
 []
@@ -59,19 +50,16 @@
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '0.95' #copper in cal/(cm sec C)
-    block = 0
   [../]
   [./cp]
     type = GenericConstantMaterial
     prop_names = 'specific_heat'
     prop_values = '0.092' #copper in cal/(g C)
-    block = 0
   [../]
   [./rho]
     type = GenericConstantMaterial
     prop_names = 'density'
     prop_values = '8.92' #copper in g/(cm^3)
-    block = 0
   [../]
 []
 
@@ -86,15 +74,11 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  nl_rel_tol = 1e-12
   l_tol = 1e-6
   dt = 2
   end_time = 100
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   exodus = true
-  perf_graph = true
 []

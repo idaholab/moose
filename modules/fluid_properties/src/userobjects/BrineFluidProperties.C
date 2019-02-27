@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<BrineFluidProperties>()
 {
-  InputParameters params = validParams<MultiComponentFluidPropertiesPT>();
+  InputParameters params = validParams<MultiComponentFluidProperties>();
   params.addParam<UserObjectName>("water_fp",
                                   "The name of the FluidProperties UserObject for water");
   params.addClassDescription("Fluid properties for brine");
@@ -23,7 +23,7 @@ validParams<BrineFluidProperties>()
 }
 
 BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
-  : MultiComponentFluidPropertiesPT(parameters), _Mnacl(58.443e-3)
+  : MultiComponentFluidProperties(parameters), _water_fp_derivs(true)
 {
   // SinglePhaseFluidPropertiesPT UserObject for water
   if (parameters.isParamSetByUser("water_fp"))
@@ -78,6 +78,12 @@ BrineFluidProperties::fluidName() const
   return "brine";
 }
 
+FPDualReal
+BrineFluidProperties::molarMass(const FPDualReal & xnacl) const
+{
+  return 1.0 / (xnacl / _Mnacl + (1.0 - xnacl) / _Mh2o);
+}
+
 Real
 BrineFluidProperties::molarMass(Real xnacl) const
 {
@@ -96,64 +102,91 @@ BrineFluidProperties::molarMassH2O() const
   return _Mh2o;
 }
 
-Real
-BrineFluidProperties::rho(Real pressure, Real temperature, Real xnacl) const
+FPDualReal
+BrineFluidProperties::rho_from_p_T_X(const FPDualReal & pressure,
+                                     const FPDualReal & temperature,
+                                     const FPDualReal & xnacl) const
 {
   // The correlation requires the pressure in bar, not Pa.
-  Real pbar = pressure * 1.0e-5;
-  Real pbar2 = pbar * pbar;
-  Real pbar3 = pbar2 * pbar;
+  FPDualReal pbar = pressure * 1.0e-5;
+  FPDualReal pbar2 = pbar * pbar;
+  FPDualReal pbar3 = pbar2 * pbar;
 
   // The correlation requires mole fraction
-  const Real Xnacl = massFractionToMoleFraction(xnacl);
+  const FPDualReal Xnacl = massFractionToMoleFraction(xnacl);
 
-  const Real n11 = -54.2958 - 45.7623 * std::exp(-9.44785e-4 * pbar);
-  const Real n21 = -2.6142 - 2.39092e-4 * pbar;
-  const Real n22 = 0.0356828 + 4.37235e-6 * pbar + 2.0566e-9 * pbar2;
-  const Real n1x1 = 330.47 + 0.942876 * std::sqrt(pbar) + 0.0817193 * pbar - 2.47556e-8 * pbar2 +
-                    3.45052e-10 * pbar3;
-  const Real n2x1 = -0.0370751 + 0.00237723 * std::sqrt(pbar) + 5.42049e-5 * pbar +
-                    5.84709e-9 * pbar2 - 5.99373e-13 * pbar3;
-  const Real n12 = -n1x1 - n11;
-  const Real n20 = 1.0 - n21 * std::sqrt(n22);
-  const Real n23 = n2x1 - n20 - n21 * std::sqrt(1.0 + n22);
+  const FPDualReal n11 = -54.2958 - 45.7623 * std::exp(-9.44785e-4 * pbar);
+  const FPDualReal n21 = -2.6142 - 2.39092e-4 * pbar;
+  const FPDualReal n22 = 0.0356828 + 4.37235e-6 * pbar + 2.0566e-9 * pbar2;
+  const FPDualReal n1x1 = 330.47 + 0.942876 * std::sqrt(pbar) + 0.0817193 * pbar -
+                          2.47556e-8 * pbar2 + 3.45052e-10 * pbar3;
+  const FPDualReal n2x1 = -0.0370751 + 0.00237723 * std::sqrt(pbar) + 5.42049e-5 * pbar +
+                          5.84709e-9 * pbar2 - 5.99373e-13 * pbar3;
+  const FPDualReal n12 = -n1x1 - n11;
+  const FPDualReal n20 = 1.0 - n21 * std::sqrt(n22);
+  const FPDualReal n23 = n2x1 - n20 - n21 * std::sqrt(1.0 + n22);
 
   // The temperature Tv where the brine has the same molar volume as pure water
   // Note: correlation uses temperature in Celcius
-  const Real n1 = n1x1 + n11 * (1.0 - Xnacl) + n12 * (1.0 - Xnacl) * (1.0 - Xnacl);
-  const Real n2 = n20 + n21 * std::sqrt(Xnacl + n22) + n23 * Xnacl;
-  const Real Tv = n1 + n2 * (temperature - _T_c2k);
+  const FPDualReal n1 = n1x1 + n11 * (1.0 - Xnacl) + n12 * (1.0 - Xnacl) * (1.0 - Xnacl);
+  const FPDualReal n2 = n20 + n21 * std::sqrt(Xnacl + n22) + n23 * Xnacl;
+  const FPDualReal Tv = n1 + n2 * (temperature - _T_c2k);
 
   // The density of water at temperature Tv
   // Note: convert Tv to Kelvin to calculate water density
-  const Real water_density = _water_fp->rho_from_p_T(pressure, Tv + _T_c2k);
+  FPDualReal water_density;
+  if (_water_fp_derivs)
+    water_density = _water_fp->rho_from_p_T(pressure, Tv + _T_c2k);
+  else
+    water_density = _water_fp->rho_from_p_T(pressure.value(), Tv.value() + _T_c2k);
 
   // The brine density is given by the water density scaled by the ratio of
   // brine molar mass to pure water molar mass
   return water_density * molarMass(xnacl) / _Mh2o;
 }
 
-void
-BrineFluidProperties::rho_dpTx(Real pressure,
-                               Real temperature,
-                               Real xnacl,
-                               Real & rho,
-                               Real & drho_dp,
-                               Real & drho_dT,
-                               Real & drho_dx) const
+Real
+BrineFluidProperties::rho_from_p_T_X(Real pressure, Real temperature, Real xnacl) const
 {
-  rho = this->rho(pressure, temperature, xnacl);
-  // Derivatives are calculated using finite differences due to complexity of correlation
-  const Real eps = 1.0e-8;
-  const Real peps = pressure * eps;
-  const Real Teps = temperature * eps;
-  drho_dp = (this->rho(pressure + peps, temperature, xnacl) - rho) / peps;
-  drho_dT = (this->rho(pressure, temperature + Teps, xnacl) - rho) / Teps;
-  drho_dx = (this->rho(pressure, temperature, xnacl + eps) - rho) / eps;
+  // Initialise the AD value (no derivatives required)
+  FPDualReal p = pressure;
+  FPDualReal T = temperature;
+  FPDualReal x = xnacl;
+
+  _water_fp_derivs = false;
+  FPDualReal ad_rho = this->rho_from_p_T_X(p, T, x);
+
+  return ad_rho.value();
+}
+
+void
+BrineFluidProperties::rho_from_p_T_X(Real pressure,
+                                     Real temperature,
+                                     Real xnacl,
+                                     Real & rho,
+                                     Real & drho_dp,
+                                     Real & drho_dT,
+                                     Real & drho_dx) const
+{
+  // Initialise the AD value and derivatives
+  FPDualReal p = pressure;
+  p.derivatives()[0] = 1.0;
+  FPDualReal T = temperature;
+  T.derivatives()[1] = 1.0;
+  FPDualReal x = xnacl;
+  x.derivatives()[2] = 1.0;
+
+  _water_fp_derivs = true;
+  FPDualReal ad_rho = this->rho_from_p_T_X(p, T, x);
+
+  rho = ad_rho.value();
+  drho_dp = ad_rho.derivatives()[0];
+  drho_dT = ad_rho.derivatives()[1];
+  drho_dx = ad_rho.derivatives()[2];
 }
 
 Real
-BrineFluidProperties::mu(Real pressure, Real temperature, Real xnacl) const
+BrineFluidProperties::mu_from_p_T_X(Real pressure, Real temperature, Real xnacl) const
 {
   // Correlation requires molal concentration (mol/kg)
   const Real mol = massFractionToMolalConc(xnacl);
@@ -172,13 +205,13 @@ BrineFluidProperties::mu(Real pressure, Real temperature, Real xnacl) const
 }
 
 void
-BrineFluidProperties::mu_dpTx(Real pressure,
-                              Real temperature,
-                              Real xnacl,
-                              Real & mu,
-                              Real & dmu_dp,
-                              Real & dmu_dT,
-                              Real & dmu_dx) const
+BrineFluidProperties::mu_from_p_T_X(Real pressure,
+                                    Real temperature,
+                                    Real xnacl,
+                                    Real & mu,
+                                    Real & dmu_dp,
+                                    Real & dmu_dT,
+                                    Real & dmu_dx) const
 {
   // Viscosity of water and derivatives wrt pressure and temperature
   Real muw, dmuw_dp, dmuw_dT;
@@ -205,42 +238,19 @@ BrineFluidProperties::mu_dpTx(Real pressure,
   dmu_dT = da_dT * muw + a * dmuw_dT;
 }
 
-void
-BrineFluidProperties::rho_mu(
-    Real pressure, Real temperature, Real xnacl, Real & rho, Real & mu) const
+FPDualReal
+BrineFluidProperties::h_from_p_T_X(const FPDualReal & pressure,
+                                   const FPDualReal & temperature,
+                                   const FPDualReal & xnacl) const
 {
-  rho = this->rho(pressure, temperature, xnacl);
-  mu = this->mu(pressure, temperature, xnacl);
-}
-
-void
-BrineFluidProperties::rho_mu_dpTx(Real pressure,
-                                  Real temperature,
-                                  Real xnacl,
-                                  Real & rho,
-                                  Real & drho_dp,
-                                  Real & drho_dT,
-                                  Real & drho_dx,
-                                  Real & mu,
-                                  Real & dmu_dp,
-                                  Real & dmu_dT,
-                                  Real & dmu_dx) const
-{
-  this->rho_dpTx(pressure, temperature, xnacl, rho, drho_dp, drho_dT, drho_dx);
-  this->mu_dpTx(pressure, temperature, xnacl, mu, dmu_dp, dmu_dT, dmu_dx);
-}
-
-Real
-BrineFluidProperties::h(Real pressure, Real temperature, Real xnacl) const
-{
-  Real q1, q2, q10, q11, q12, q20, q21, q22, q23, q1x1, q2x1, Th;
+  FPDualReal q1, q2, q10, q11, q12, q20, q21, q22, q23, q1x1, q2x1, Th;
 
   // The correlation requires the pressure in bar, not Pa.
-  Real pbar = pressure * 1.0e-5;
-  Real pbar2 = pbar * pbar;
+  const FPDualReal pbar = pressure * 1.0e-5;
+  const FPDualReal pbar2 = pbar * pbar;
 
   // The correlation requires mole fraction
-  Real Xnacl = massFractionToMoleFraction(xnacl);
+  const FPDualReal Xnacl = massFractionToMoleFraction(xnacl);
 
   q11 = -32.1724 + 0.0621255 * pbar;
   q21 = -1.69513 - 4.52781e-4 * pbar - 6.04279e-8 * pbar2;
@@ -263,30 +273,55 @@ BrineFluidProperties::h(Real pressure, Real temperature, Real xnacl) const
 
   // The brine enthalpy is then given by the enthalpy of water at temperature Th
   // Note: water enthalpy requires temperature in Kelvin
-  return _water_fp->h_from_p_T(pressure, Th + _T_c2k);
-}
+  FPDualReal enthalpy;
+  if (_water_fp_derivs)
+    enthalpy = _water_fp->h_from_p_T(pressure, Th + _T_c2k);
+  else
+    enthalpy = _water_fp->h_from_p_T(pressure.value(), Th.value() + _T_c2k);
 
-void
-BrineFluidProperties::h_dpTx(Real pressure,
-                             Real temperature,
-                             Real xnacl,
-                             Real & h,
-                             Real & dh_dp,
-                             Real & dh_dT,
-                             Real & dh_dx) const
-{
-  h = this->h(pressure, temperature, xnacl);
-  // Derivatives are calculated using finite differences due to complexity of correlation
-  Real eps = 1.0e-8;
-  Real peps = pressure * eps;
-  Real Teps = temperature * eps;
-  dh_dp = (this->h(pressure + peps, temperature, xnacl) - h) / peps;
-  dh_dT = (this->h(pressure, temperature + Teps, xnacl) - h) / Teps;
-  dh_dx = (this->h(pressure, temperature, xnacl + eps) - h) / eps;
+  return enthalpy;
 }
 
 Real
-BrineFluidProperties::cp(Real pressure, Real temperature, Real xnacl) const
+BrineFluidProperties::h_from_p_T_X(Real pressure, Real temperature, Real xnacl) const
+{
+  // Initialise the AD value (no derivatives required)
+  FPDualReal p = pressure;
+  FPDualReal T = temperature;
+  FPDualReal x = xnacl;
+
+  _water_fp_derivs = false;
+  return h_from_p_T_X(p, T, x).value();
+}
+
+void
+BrineFluidProperties::h_from_p_T_X(Real pressure,
+                                   Real temperature,
+                                   Real xnacl,
+                                   Real & h,
+                                   Real & dh_dp,
+                                   Real & dh_dT,
+                                   Real & dh_dx) const
+{
+  // Initialise the AD value and derivatives
+  FPDualReal p = pressure;
+  p.derivatives()[0] = 1.0;
+  FPDualReal T = temperature;
+  T.derivatives()[1] = 1.0;
+  FPDualReal x = xnacl;
+  x.derivatives()[2] = 1.0;
+
+  _water_fp_derivs = true;
+  FPDualReal ad_h = h_from_p_T_X(p, T, x);
+
+  h = ad_h.value();
+  dh_dp = ad_h.derivatives()[0];
+  dh_dT = ad_h.derivatives()[1];
+  dh_dx = ad_h.derivatives()[2];
+}
+
+Real
+BrineFluidProperties::cp_from_p_T_X(Real pressure, Real temperature, Real xnacl) const
 {
   Real q1, q2, q10, q11, q12, q20, q21, q22, q23, q1x1, q2x1, Th;
 
@@ -322,36 +357,54 @@ BrineFluidProperties::cp(Real pressure, Real temperature, Real xnacl) const
   return q2 * _water_fp->cp_from_p_T(pressure, Th + _T_c2k);
 }
 
-Real
-BrineFluidProperties::e(Real pressure, Real temperature, Real xnacl) const
+FPDualReal
+BrineFluidProperties::e_from_p_T_X(const FPDualReal & pressure,
+                                   const FPDualReal & temperature,
+                                   const FPDualReal & xnacl) const
 {
-  Real enthalpy = h(pressure, temperature, xnacl);
-  Real density = rho(pressure, temperature, xnacl);
+  FPDualReal enthalpy = h_from_p_T_X(pressure, temperature, xnacl);
+  FPDualReal density = rho_from_p_T_X(pressure, temperature, xnacl);
+
+  return enthalpy - pressure / density;
+}
+
+Real
+BrineFluidProperties::e_from_p_T_X(Real pressure, Real temperature, Real xnacl) const
+{
+  Real enthalpy = h_from_p_T_X(pressure, temperature, xnacl);
+  Real density = rho_from_p_T_X(pressure, temperature, xnacl);
 
   return enthalpy - pressure / density;
 }
 
 void
-BrineFluidProperties::e_dpTx(Real pressure,
-                             Real temperature,
-                             Real xnacl,
-                             Real & e,
-                             Real & de_dp,
-                             Real & de_dT,
-                             Real & de_dx) const
+BrineFluidProperties::e_from_p_T_X(Real pressure,
+                                   Real temperature,
+                                   Real xnacl,
+                                   Real & e,
+                                   Real & de_dp,
+                                   Real & de_dT,
+                                   Real & de_dx) const
 {
-  e = this->e(pressure, temperature, xnacl);
-  // Derivatives are calculated using finite differences due to complexity of correlation
-  Real eps = 1.0e-8;
-  Real peps = pressure * eps;
-  Real Teps = temperature * eps;
-  de_dp = (this->e(pressure + peps, temperature, xnacl) - e) / peps;
-  de_dT = (this->e(pressure, temperature + Teps, xnacl) - e) / Teps;
-  de_dx = (this->e(pressure, temperature, xnacl + eps) - e) / eps;
+  // Initialise the AD value and derivatives
+  FPDualReal p = pressure;
+  p.derivatives()[0] = 1.0;
+  FPDualReal T = temperature;
+  T.derivatives()[1] = 1.0;
+  FPDualReal x = xnacl;
+  x.derivatives()[2] = 1.0;
+
+  _water_fp_derivs = true;
+  FPDualReal ad_e = e_from_p_T_X(p, T, x);
+
+  e = ad_e.value();
+  de_dp = ad_e.derivatives()[0];
+  de_dT = ad_e.derivatives()[1];
+  de_dx = ad_e.derivatives()[2];
 }
 
 Real
-BrineFluidProperties::k(Real pressure, Real temperature, Real xnacl) const
+BrineFluidProperties::k_from_p_T_X(Real pressure, Real temperature, Real xnacl) const
 {
   // Correlation requires molal concentration (mol/kg)
   Real mol = massFractionToMolalConc(xnacl);
@@ -406,6 +459,15 @@ BrineFluidProperties::massFractionToMoleFraction(Real xnacl) const
 {
   // The average molar mass of brine from the mass fraction
   Real Mbrine = molarMass(xnacl);
+  // The mole fraction is then
+  return xnacl * Mbrine / _Mnacl;
+}
+
+FPDualReal
+BrineFluidProperties::massFractionToMoleFraction(const FPDualReal & xnacl) const
+{
+  // The average molar mass of brine from the mass fraction
+  FPDualReal Mbrine = molarMass(xnacl);
   // The mole fraction is then
   return xnacl * Mbrine / _Mnacl;
 }

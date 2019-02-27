@@ -32,6 +32,8 @@ validParams<ComputePFFractureStressBase>()
 
 ComputePFFractureStressBase::ComputePFFractureStressBase(const InputParameters & parameters)
   : ComputeStressBase(parameters),
+    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_elasticity_tensor_name)),
     _c(coupledValue("c")),
     _l(getMaterialProperty<Real>("l")),
     _gc(getMaterialProperty<Real>("gc_prop")),

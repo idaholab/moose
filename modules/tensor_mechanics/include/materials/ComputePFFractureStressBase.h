@@ -28,6 +28,11 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
 
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+
   /// Coupled order parameter defining the crack
   const VariableValue & _c;
 

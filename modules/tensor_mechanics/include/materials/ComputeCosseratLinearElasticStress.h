@@ -27,10 +27,15 @@ class ComputeCosseratLinearElasticStress : public ComputeCosseratStressBase
 {
 public:
   ComputeCosseratLinearElasticStress(const InputParameters & parameters);
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
-  virtual void computeQpStress();
+  virtual void computeQpStress() override;
+
+  /// Name of the elasticity tensor material property
+  const std::string _elasticity_tensor_name;
+  /// Elasticity tensor material property
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 };
 
 #endif // COMPUTECOSSERATLINEARELASTICSTRESS_H

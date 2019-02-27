@@ -14,18 +14,11 @@ InputParameters
 validParams<SinglePhaseFluidProperties>()
 {
   InputParameters params = validParams<FluidProperties>();
-  params.addParam<bool>(
-      "allow_imperfect_jacobians",
-      false,
-      "true to allow unimplemented property derivative terms to be set to zero for the AD API");
   return params;
 }
 
 SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
-  : FluidProperties(parameters),
-    _R(8.3144598),
-    _T_c2k(273.15),
-    _allow_imperfect_jacobians(getParam<bool>("allow_imperfect_jacobians"))
+  : FluidProperties(parameters), _R(8.3144598)
 {
 }
 
