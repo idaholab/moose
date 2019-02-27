@@ -16,6 +16,8 @@ InputParameters
 validParams<LaplacianJumpIndicator>()
 {
   InputParameters params = validParams<InternalSideIndicator>();
+  params.addClassDescription(
+      "Compute the jump of the solution laplacian across element bondaries.");
   return params;
 }
 
