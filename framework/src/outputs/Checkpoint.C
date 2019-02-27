@@ -29,6 +29,7 @@ validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
   InputParameters params = validParams<FileOutput>();
+  params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
