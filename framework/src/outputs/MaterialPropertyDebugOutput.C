@@ -24,6 +24,7 @@ InputParameters
 validParams<MaterialPropertyDebugOutput>()
 {
   InputParameters params = validParams<Output>();
+  params.addClassDescription("Debug output object for displaying material property information.");
 
   // This object only outputs data once, in the constructor, so disable fine control
   params.suppressParameter<ExecFlagEnum>("execute_on");

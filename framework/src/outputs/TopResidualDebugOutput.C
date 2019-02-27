@@ -27,6 +27,7 @@ InputParameters
 validParams<TopResidualDebugOutput>()
 {
   InputParameters params = validParams<PetscOutput>();
+  params.addClassDescription("Debug output object for displaying the top contributing residuals.");
 
   // Create parameters for allowing debug outputter to be defined within the [Outputs] block
   params.addParam<unsigned int>(

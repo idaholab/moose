@@ -16,6 +16,7 @@ InputParameters
 validParams<GradientJumpIndicator>()
 {
   InputParameters params = validParams<InternalSideIndicator>();
+  params.addClassDescription("Compute the jump of the solution gradient across element bondaries.");
   return params;
 }
 

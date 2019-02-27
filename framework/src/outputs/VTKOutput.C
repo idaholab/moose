@@ -19,6 +19,7 @@ InputParameters
 validParams<VTKOutput>()
 {
   InputParameters params = validParams<OversampleOutput>();
+  params.addClassDescription("Output data using the Visualization Toolkit (VTK).");
 
   // Set default padding to 3
   params.set<unsigned int>("padding") = 3;

@@ -20,7 +20,8 @@ validParams<CSV>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
-
+  params.addClassDescription("Output for postprocessors, vector postprocessors, and scalar "
+                             "variables using comma seperated values (CSV).");
   params.addParam<bool>("sort_columns", false, "Toggle the sorting of columns alphabetically.");
 
   // Options for aligning csv output with whitespace padding
