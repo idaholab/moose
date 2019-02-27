@@ -17,10 +17,21 @@ InputParameters
 validParams<IdealGasFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidProperties>();
-  params.addRequiredParam<Real>("gamma", "gamma value (cp/cv)");
-  params.addRequiredParam<Real>("R", "Gas constant");
-  params.addParam<Real>("mu", 0, "Dynamic viscosity, Pa.s");
-  params.addParam<Real>("k", 0, "Thermal conductivity, W/(m-K)");
+  params.addRangeCheckedParam<Real>("gamma", 1.4, "gamma > 1", "gamma value (cp/cv)");
+  params.addRangeCheckedParam<Real>("R", 286.7, "R > 0", "Specific gas constant");
+  params.addParam<Real>("mu", 18.23e-6, "Dynamic viscosity, Pa.s");
+  params.addParam<Real>("k", 25.68e-3, "Thermal conductivity, W/(m-K)");
+  params.addParam<Real>("molar_mass", 29.0e-3, "Constant molar mass of the fluid (kg/mol)");
+  params.addRangeCheckedParam<Real>(
+      "cv", 0.718e3, "cv > 0", "Constant specific heat capacity at constant volume (J/kg/K)");
+  params.addParam<Real>(
+      "cp", 1.005e3, "Constant specific heat capacity at constant pressure (J/kg/K)");
+  params.addParam<Real>("henry_constant", 0.0, "Henry constant for dissolution in water");
+  params.addDeprecatedParam<Real>("viscosity", "Dynamic viscosity (Pa.s)", "Use mu instead");
+  params.addDeprecatedParam<Real>(
+      "thermal_conductivity", "Thermal conductivity, W/(m-K)", "Use k instead");
+  params.addDeprecatedParam<Real>(
+      "specific_entropy", "Constant specific entropy (J/kg/K)", "This parameter is no longer used");
   params.addClassDescription("Fluid properties for an ideal gas");
   return params;
 }
@@ -28,15 +39,37 @@ validParams<IdealGasFluidProperties>()
 IdealGasFluidProperties::IdealGasFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters),
     _gamma(getParam<Real>("gamma")),
-    _R(getParam<Real>("R")),
-    _mu(getParam<Real>("mu")),
-    _k(getParam<Real>("k"))
+    _R_specific(getParam<Real>("R")),
+    _cv(getParam<Real>("cv")),
+    _cp(getParam<Real>("cp")),
+    _mu(parameters.isParamSetByUser("viscosity") ? getParam<Real>("viscosity")
+                                                 : getParam<Real>("mu")),
+    _k(parameters.isParamSetByUser("thermal_conductivity") ? getParam<Real>("thermal_conductivity")
+                                                           : getParam<Real>("k")),
+    _molar_mass(getParam<Real>("molar_mass")),
+    _henry_constant(getParam<Real>("henry_constant"))
 {
-  _cp = _gamma * _R / (_gamma - 1.0);
-  _cv = _cp / _gamma;
+  // If gamma is provided, calculate cp and cv using this
+  if (parameters.isParamSetByUser("gamma"))
+  {
+    _cp = _gamma * _R_specific / (_gamma - 1.0);
+    _cv = _cp / _gamma;
+  }
+  else
+    _gamma = _cp / _cv;
+
+  // If R is provided, calculate molar mass using this
+  if (parameters.isParamSetByUser("R"))
+    _molar_mass = _R / _R_specific;
 }
 
 IdealGasFluidProperties::~IdealGasFluidProperties() {}
+
+std::string
+IdealGasFluidProperties::fluidName() const
+{
+  return "ideal_gas";
+}
 
 Real
 IdealGasFluidProperties::p_from_v_e(Real v, Real e) const
@@ -75,7 +108,7 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
 
-  const Real c2 = _gamma * _R * T;
+  const Real c2 = _gamma * _R_specific * T;
   if (c2 < 0)
     mooseException(name() + ": Sound speed squared (gamma * R * T) is negative: c2 = " +
                    Moose::stringify(c2) + ".");
@@ -89,11 +122,17 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real
   Real T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
 
-  c = std::sqrt(_gamma * _R * T);
+  c = std::sqrt(_gamma * _R_specific * T);
 
-  const Real dc_dT = 0.5 / c * _gamma * _R;
+  const Real dc_dT = 0.5 / c * _gamma * _R_specific;
   dc_dv = dc_dT * dT_dv;
   dc_de = dc_dT * dT_de;
+}
+
+Real
+IdealGasFluidProperties::c_from_p_T(Real /*p*/, Real T) const
+{
+  return std::sqrt(_cp * _R * T / (_cv * _molar_mass));
 }
 
 Real IdealGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
@@ -106,25 +145,11 @@ IdealGasFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, R
   dcp_de = 0.0;
 }
 
-Real
-IdealGasFluidProperties::cp() const
-{
-  return _cp;
-}
-
 Real IdealGasFluidProperties::cv_from_v_e(Real, Real) const { return _cv; }
 
-Real
-IdealGasFluidProperties::cv() const
-{
-  return _cv;
-}
+Real IdealGasFluidProperties::gamma_from_v_e(Real, Real) const { return _gamma; }
 
-Real
-IdealGasFluidProperties::gamma() const
-{
-  return _gamma;
-}
+Real IdealGasFluidProperties::gamma_from_p_T(Real, Real) const { return _gamma; }
 
 Real IdealGasFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
 
@@ -263,12 +288,7 @@ IdealGasFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real
 Real
 IdealGasFluidProperties::rho_from_p_T(Real p, Real T) const
 {
-  if ((_gamma - 1.0) * p == 0.0)
-    throw MooseException(name() +
-                         ": Invalid gamma or pressure detected in rho_from_p_T(pressure = " +
-                         Moose::stringify(p) + ", gamma = " + Moose::stringify(_gamma) + ")");
-
-  return p / (_gamma - 1.0) / _cv / T;
+  return p * _molar_mass / (_R * T);
 }
 
 void
@@ -276,8 +296,8 @@ IdealGasFluidProperties::rho_from_p_T(
     Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   rho = rho_from_p_T(p, T);
-  drho_dp = 1.0 / (_gamma - 1.0) / _cv / T;
-  drho_dT = -p / (_gamma - 1.0) / _cv / (T * T);
+  drho_dp = _molar_mass / (_R * T);
+  drho_dT = -p * _molar_mass / (_R * T * T);
 }
 
 Real
@@ -358,20 +378,17 @@ IdealGasFluidProperties::s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real
 Real IdealGasFluidProperties::cv_from_T_v(Real /*T*/, Real /*v*/) const { return _cv; }
 
 Real
-IdealGasFluidProperties::h_from_p_T(Real p, Real T) const
+IdealGasFluidProperties::h_from_p_T(Real /*p*/, Real T) const
 {
-  Real rho = rho_from_p_T(p, T);
-  Real e = T * _cv;
-  return e + p / rho;
+  return _cp * T;
 }
 
 void
 IdealGasFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   h = h_from_p_T(p, T);
-  Real rho = rho_from_p_T(p, T);
   dh_dp = 0.0;
-  dh_dT = _cv + p / rho / T;
+  dh_dT = _cp;
 }
 
 Real
@@ -384,7 +401,7 @@ void
 IdealGasFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
 {
   e = e_from_p_T(p, T);
-  de_dp = 0.;
+  de_dp = 0.0;
   de_dT = _cv;
 }
 
@@ -425,7 +442,7 @@ IdealGasFluidProperties::g_from_v_e(Real v, Real e) const
 Real
 IdealGasFluidProperties::molarMass() const
 {
-  return _R / R_universal;
+  return _molar_mass;
 }
 
 Real
@@ -445,10 +462,9 @@ Real IdealGasFluidProperties::cp_from_p_T(Real /* pressure */, Real /* temperatu
 }
 
 void
-IdealGasFluidProperties::cp_from_p_T(
-    Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+IdealGasFluidProperties::cp_from_p_T(Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
-  cp = cp_from_p_T(pressure, temperature);
+  cp = cp_from_p_T(p, T);
   dcp_dp = 0.0;
   dcp_dT = 0.0;
 }
@@ -459,10 +475,9 @@ Real IdealGasFluidProperties::mu_from_p_T(Real /* pressure */, Real /* temperatu
 }
 
 void
-IdealGasFluidProperties::mu_from_p_T(
-    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+IdealGasFluidProperties::mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  mu = this->mu_from_p_T(pressure, temperature);
+  mu = this->mu_from_p_T(p, T);
   dmu_dp = 0.0;
   dmu_dT = 0.0;
 }
@@ -473,10 +488,18 @@ Real IdealGasFluidProperties::k_from_p_T(Real /* pressure */, Real /* temperatur
 }
 
 void
-IdealGasFluidProperties::k_from_p_T(
-    Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
+IdealGasFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  k = this->k_from_p_T(pressure, temperature);
+  k = k_from_p_T(p, T);
   dk_dp = 0.0;
   dk_dT = 0.0;
+}
+
+Real IdealGasFluidProperties::henryConstant(Real /*T*/) const { return _henry_constant; }
+
+void
+IdealGasFluidProperties::henryConstant(Real /*T*/, Real & Kh, Real & dKh_dT) const
+{
+  Kh = _henry_constant;
+  dKh_dT = 0.0;
 }

@@ -38,10 +38,8 @@ TEST_F(GeneralVaporMixtureFluidPropertiesTest, test)
 
   REL_TEST(_fp_mix->cv_from_p_T(p, T, x), 911.058, REL_TOL_SAVED_VALUE);
 
-  REL_TEST(_fp_mix->mu_from_p_T(p, T, x), 9.99652260960459e-4, REL_TOL_SAVED_VALUE);
-
-  REL_TEST(_fp_mix->k_from_p_T(p, T, x), 0.599791356576275, REL_TOL_SAVED_VALUE);
-
+  REL_TEST(_fp_mix->mu_from_p_T(p, T, x), 7.12234831455e-4, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp_mix->k_from_p_T(p, T, x), 0.431661904928, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp_mix->p_from_v_e(v, e, x), p, REL_TOL_CONSISTENCY);
   VAPOR_MIX_DERIV_TEST(_fp_mix->p_from_v_e, v, e, x, REL_TOL_DERIVATIVE * 2);
 
