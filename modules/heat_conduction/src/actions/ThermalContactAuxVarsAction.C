@@ -20,8 +20,9 @@ InputParameters
 validParams<ThermalContactAuxVarsAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Action that controls the creation of the aux variables necessary for "
+                             "calculation of Thermal Contact");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
-
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 

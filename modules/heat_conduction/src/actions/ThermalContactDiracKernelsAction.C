@@ -18,6 +18,8 @@ InputParameters
 validParams<ThermalContactDiracKernelsAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Action that controls the creation of the dirac kernels necessary for "
+                             "calculation of Thermal Contact");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");

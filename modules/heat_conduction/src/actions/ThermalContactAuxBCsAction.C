@@ -21,6 +21,8 @@ InputParameters
 validParams<ThermalContactAuxBCsAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Action that controls the creation of aux kernels necessary for "
+                             "calculation of Thermal Contact");
   params.addParam<std::string>(
       "gap_aux_type",
       "GapValueAux",

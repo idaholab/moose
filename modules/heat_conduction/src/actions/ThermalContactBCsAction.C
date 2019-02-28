@@ -24,6 +24,9 @@ InputParameters
 validParams<ThermalContactBCsAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription(
+      "Action that controls the creation of the boundary conditions necessary for "
+      "calculation of Thermal Contact");
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
   params.addRequiredParam<std::string>(

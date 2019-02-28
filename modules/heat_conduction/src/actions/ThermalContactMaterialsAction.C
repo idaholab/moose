@@ -23,6 +23,9 @@ InputParameters
 validParams<ThermalContactMaterialsAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription(
+      "Action that controls the creation of the material properties necessary for "
+      "calculation of Thermal Contact");
   params.addRequiredParam<std::string>(
       "type",
       "A string representing the Moose object that will be used for heat conduction over the gap");
