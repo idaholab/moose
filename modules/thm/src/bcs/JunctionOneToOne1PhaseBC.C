@@ -99,6 +99,12 @@ JunctionOneToOne1PhaseBC::computeJacobianBlock(MooseVariableFEBase & jvar)
   _assembly.cacheJacobianBlock(jacobian_block, dofs_i, dofs_j, _var.scalingFactor());
 }
 
+void
+JunctionOneToOne1PhaseBC::computeJacobianBlock(unsigned jvar)
+{
+  mooseError(name(), ": computeJacobianBlock(unsigned jvar) is a deprecated method.");
+}
+
 std::map<unsigned int, unsigned int>
 JunctionOneToOne1PhaseBC::getIndexMapping() const
 {

@@ -24,6 +24,7 @@ protected:
 
   virtual void computeJacobian() override;
   virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
+  virtual void computeJacobianBlock(unsigned jvar) override;
 
   /**
    * Creates mapping of coupled variable index to local equation system index
