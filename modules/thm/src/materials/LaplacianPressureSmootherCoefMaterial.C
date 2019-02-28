@@ -9,7 +9,7 @@ validParams<LaplacianPressureSmootherCoefMaterial>()
   InputParameters params = validParams<Material>();
   params.addRequiredParam<Real>("Ce", "User specified constant: typically 0..2");
   params.addRequiredParam<MaterialPropertyName>("c", "The speed of sound material property");
-  params.addRequiredCoupledVar("vel", "Velocity in x-direction");
+  params.addRequiredParam<MaterialPropertyName>("vel", "Velocity in x-direction");
   params.addRequiredCoupledVar("p_bar", "Average pressure value");
   params.addRequiredCoupledVar("laplace_p", "Laplacian of pressure");
   params.addParam<Real>("p_reference", "Reference pressure for normalization");
@@ -23,7 +23,7 @@ LaplacianPressureSmootherCoefMaterial::LaplacianPressureSmootherCoefMaterial(
     const InputParameters & parameters)
   : Material(parameters),
     _Ce(getParam<Real>("Ce")),
-    _vel(coupledValue("vel")),
+    _vel(getMaterialProperty<Real>("vel")),
     _c(getMaterialProperty<Real>("c")),
     _p_bar(coupledValue("p_bar")),
     _laplace_p(coupledValue("laplace_p")),

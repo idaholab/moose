@@ -34,7 +34,7 @@ protected:
   virtual void computeQpProperties();
 
   Real _Ce;
-  const VariableValue & _vel;
+  const MaterialProperty<Real> & _vel;
   const MaterialProperty<Real> & _c;
   const VariableValue & _p_bar;
   const VariableValue & _laplace_p;

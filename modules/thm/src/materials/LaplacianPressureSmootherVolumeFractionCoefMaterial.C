@@ -11,7 +11,7 @@ validParams<LaplacianPressureSmootherVolumeFractionCoefMaterial>()
                                 "User-specified tuning parameter, typically in the range 0..2");
   params.addRequiredCoupledVar("p_bar", "Average pressure value");
   params.addRequiredCoupledVar("laplace_p", "Laplacian of pressure");
-  params.addRequiredCoupledVar("vel", "Velocity in x-direction");
+  params.addRequiredParam<MaterialPropertyName>("vel", "Velocity in x-direction");
   params.addRequiredParam<MaterialPropertyName>("c", "The speed of sound material property");
   params.addRequiredParam<MaterialPropertyName>("vel_int",
                                                 "Interfacial velocity material property");
@@ -30,7 +30,7 @@ LaplacianPressureSmootherVolumeFractionCoefMaterial::
     _p_bar(coupledValue("p_bar")),
     _laplace_p(coupledValue("laplace_p")),
     _vI(getMaterialProperty<Real>("vel_int")),
-    _vel(coupledValue("vel")),
+    _vel(getMaterialProperty<Real>("vel")),
     _c(getMaterialProperty<Real>("c")),
     _use_reference_pressure(isParamValid("p_reference")),
     _p_ref(_use_reference_pressure ? getParam<Real>("p_reference") : 0.0),

@@ -31,9 +31,9 @@ protected:
   const MaterialProperty<Real> & _mu;
 
   /// Density of the phase
-  const VariableValue & _rho;
+  const MaterialProperty<Real> & _rho;
   /// Velocity (x-component)
-  const VariableValue & _vel;
+  const MaterialProperty<Real> & _vel;
   /// Hydraulic diameter
   const VariableValue & _D_h;
   /// Roughness of the surface

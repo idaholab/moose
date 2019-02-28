@@ -8,7 +8,8 @@ InputParameters
 validParams<FlowRegimeSimpleMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredCoupledVar("alpha_liquid", "Volume fraction of the liquid phase");
+  params.addRequiredParam<MaterialPropertyName>("alpha_liquid",
+                                                "Volume fraction of the liquid phase");
   params.addRequiredCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   return params;
 }
@@ -19,7 +20,7 @@ FlowRegimeSimpleMaterial::FlowRegimeSimpleMaterial(const InputParameters & param
     _dkappa_liquid_dbeta(declarePropertyDerivativeTHM<Real>(
         FlowModelTwoPhase::HEAT_FLUX_PARTITIONING_LIQUID, "beta")),
 
-    _alpha_liquid(coupledValue("alpha_liquid")),
+    _alpha_liquid(getMaterialProperty<Real>("alpha_liquid")),
     _dalpha_liquid_dbeta(getMaterialPropertyDerivativeTHM<Real>("alpha_liquid", "beta"))
 {
 }
