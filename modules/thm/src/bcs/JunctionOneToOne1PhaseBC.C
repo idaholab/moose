@@ -100,7 +100,7 @@ JunctionOneToOne1PhaseBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 }
 
 void
-JunctionOneToOne1PhaseBC::computeJacobianBlock(unsigned jvar)
+JunctionOneToOne1PhaseBC::computeJacobianBlock(unsigned /*jvar*/)
 {
   mooseError(name(), ": computeJacobianBlock(unsigned jvar) is a deprecated method.");
 }
