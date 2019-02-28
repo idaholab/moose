@@ -7,8 +7,8 @@ The AddSlaveFluxVectorAction has not been documented. The content contained on t
 includes the basic documentation associated with an Action; however, what is contained is
 ultimately determined by what is necessary to make the documentation clear for users.
 
-!syntax description /ThermalContact/AddSlaveFluxVectorAction
+<!-- !syntax description /ThermalContact/AddSlaveFluxVectorAction -->
 
-!syntax parameters /ThermalContact/AddSlaveFluxVectorAction
+<!-- !syntax parameters /ThermalContact/AddSlaveFluxVectorAction -->
 
 !bibtex bibliography
