@@ -11,10 +11,6 @@
 
 std::map<THM::FlowModelID, std::string> THMApp::_flow_model_map;
 
-std::set<std::string> THMApp::_chf_table_types;
-std::string THMApp::_default_chf_table_type;
-std::map<std::string, std::string> THMApp::_chf_name_map;
-
 std::map<THM::FlowModelID, std::map<std::string, std::string>> THMApp::_closures_class_names_map;
 
 namespace THM
@@ -157,15 +153,6 @@ void
 THMApp::registerApps()
 {
   registerApp(THMApp);
-}
-
-void
-THMApp::registerCriticalHeatFluxTableType(const std::string & chf_table_type, bool is_default)
-{
-  std::string chf_table_type_lc = MooseUtils::toLower(chf_table_type);
-  _chf_table_types.insert(chf_table_type_lc);
-  if (is_default)
-    _default_chf_table_type = chf_table_type_lc;
 }
 
 const std::string &

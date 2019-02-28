@@ -91,12 +91,7 @@ validParams<FlowChannel>()
 
   params.addRequiredParam<std::string>("closures", "Closures type");
 
-  std::string chf_tables;
-  for (auto && c : THMApp::criticalHeatFluxTableTypes())
-    chf_tables += c + " ";
-  MooseEnum chf_table_type(chf_tables, THMApp::defaultCriticalHeatFluxTableType());
-  params.addParam<MooseEnum>(
-      "chf_table", chf_table_type, "The lookup table used for critical heat flux");
+  params.addParam<std::string>("chf_table", "The lookup table used for critical heat flux");
 
   // bounds
   std::vector<Real> alpha_vapor_bounds(2, 0);
