@@ -70,6 +70,11 @@ public:
     return _rdg_int_var_uo_name;
   }
 
+  /**
+   * Gets the slope reconstruction option used
+   */
+  const MooseEnum & getSlopeReconstruction() const { return _rdg_slope_reconstruction; }
+
 protected:
   virtual void init() override;
 
