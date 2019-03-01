@@ -63,6 +63,10 @@ Derivatives of fluid properties with respect to the primary variables are also a
 for several of the fluid properties listed above. These can be evaluated using the
 following notation: `rho_from_p_T(p, T, rho, drho_dp, drho_dT)` etc.
 
+!alert note
+Fluid properties are now available using an interface suitable for use with MOOSE's
+Automatic Differentiation capability. See example in the next section.
+
 The full list of available methods can be found in either the source code or the
 [Modules Doxygen](http://mooseframework.org/docs/doxygen/modules/classes.html) page for each
 FluidProperties class.
@@ -115,6 +119,16 @@ reference. In this material, the `computeQpProperties` method calculates a numbe
 at the quadrature points using the values of `_v[_qp]` and `_e[_qp]`.
 
 !listing modules/fluid_properties/src/materials/FluidPropertiesMaterial.C start=computeQpProperties
+
+In a similar fashion, fluid properties can be accessed using the Automatic Differentiation interface
+using the `DualReal` version which provides both the value and derivatives
+
+```
+DualReal rho = _fp.p_from_T_v(T, v);
+```
+
+where $T$ and $v$ are `DualReal`'s. The result (density `rho` in this example) then contains both the
+value of density and its derivatives with respect to the primary variables `T` and `v`.
 
 ### Input file syntax
 
