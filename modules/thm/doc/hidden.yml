@@ -222,7 +222,6 @@
 - /Materials/AverageWallTemperature7EqnMaterial
 - /Materials/EntropyViscosityCoefficients7EqnMaterial
 - /Materials/EntropyViscosityCoefficientsMaterial
-- /Materials/FlowRegimeSimpleMaterial
 - /Materials/FluidProperties7EqnMaterial
 - /Materials/GradientPressureSmootherCoefMaterial
 - /Materials/GradientPressureSmootherVolumeFractionCoefMaterial
