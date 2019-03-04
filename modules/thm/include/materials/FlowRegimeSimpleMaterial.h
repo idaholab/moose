@@ -27,7 +27,7 @@ protected:
   MaterialProperty<Real> & _dkappa_liquid_dbeta;
 
   /// Liquid volume fraction
-  const VariableValue & _alpha_liquid;
+  const MaterialProperty<Real> & _alpha_liquid;
   const MaterialProperty<Real> & _dalpha_liquid_dbeta;
 };
 
