@@ -168,7 +168,7 @@ StabilizationPressure::setup1Phase(FlowModelSinglePhase & /*fm*/, InputParameter
         params.set<std::vector<SubdomainName>>("block") = blocks;
         params.set<Real>("Ce") = _ce;
         params.set<MaterialPropertyName>("c") = "c";
-        params.set<std::vector<VariableName>>("vel") = cv_vel;
+        params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
         params.set<std::vector<VariableName>>("p_bar") = cv_p_bar;
         params.set<std::vector<VariableName>>("laplace_p") = cv_laplace_p;
         if (_use_reference_pressure)
@@ -368,7 +368,7 @@ StabilizationPressure::setup2Phase(FlowModelTwoPhase & fm, InputParameters & par
         params.set<std::vector<SubdomainName>>("block") = blocks;
         params.set<Real>("Ce") = _ce_liquid;
         params.set<MaterialPropertyName>("c") = "c_liquid";
-        params.set<std::vector<VariableName>>("vel") = cv_vel_liquid;
+        params.set<MaterialPropertyName>("vel") = FlowModelTwoPhase::VELOCITY_LIQUID;
         params.set<std::vector<VariableName>>("p_bar") = cv_p_bar_liquid;
         params.set<std::vector<VariableName>>("laplace_p") = cv_laplace_p_liquid;
         if (_use_reference_pressure)
@@ -383,7 +383,7 @@ StabilizationPressure::setup2Phase(FlowModelTwoPhase & fm, InputParameters & par
         params.set<std::vector<SubdomainName>>("block") = blocks;
         params.set<Real>("Ce") = _ce_vapor;
         params.set<MaterialPropertyName>("c") = "c_vapor";
-        params.set<std::vector<VariableName>>("vel") = cv_vel_vapor;
+        params.set<MaterialPropertyName>("vel") = FlowModelTwoPhase::VELOCITY_VAPOR;
         params.set<std::vector<VariableName>>("p_bar") = cv_p_bar_vapor;
         params.set<std::vector<VariableName>>("laplace_p") = cv_laplace_p_vapor;
         if (_use_reference_pressure)
@@ -399,7 +399,7 @@ StabilizationPressure::setup2Phase(FlowModelTwoPhase & fm, InputParameters & par
         params.set<Real>("Ce") = _ce_liquid;
         params.set<std::vector<VariableName>>("p_bar") = cv_p_bar_liquid;
         params.set<std::vector<VariableName>>("laplace_p") = cv_laplace_p_liquid;
-        params.set<std::vector<VariableName>>("vel") = cv_vel_liquid;
+        params.set<MaterialPropertyName>("vel") = {FlowModelTwoPhase::VELOCITY_LIQUID};
         params.set<MaterialPropertyName>("c") = "c_liquid";
         params.set<MaterialPropertyName>("vel_int") = FlowModelTwoPhase::VELOCITY_INTERFACIAL;
         if (_use_reference_pressure)
@@ -415,7 +415,7 @@ StabilizationPressure::setup2Phase(FlowModelTwoPhase & fm, InputParameters & par
         params.set<Real>("Ce") = _ce_liquid;
         params.set<std::vector<VariableName>>("p_bar") = cv_p_bar_vapor;
         params.set<std::vector<VariableName>>("laplace_p") = cv_laplace_p_vapor;
-        params.set<std::vector<VariableName>>("vel") = cv_vel_vapor;
+        params.set<MaterialPropertyName>("vel") = {FlowModelTwoPhase::VELOCITY_VAPOR};
         params.set<MaterialPropertyName>("c") = "c_vapor";
         params.set<MaterialPropertyName>("vel_int") = FlowModelTwoPhase::VELOCITY_INTERFACIAL;
         if (_use_reference_pressure)

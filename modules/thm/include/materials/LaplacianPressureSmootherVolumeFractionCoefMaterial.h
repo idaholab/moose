@@ -23,7 +23,7 @@ protected:
   /// interfacial velocity
   const MaterialProperty<Real> & _vI;
 
-  const VariableValue & _vel;
+  const MaterialProperty<Real> & _vel;
   const MaterialProperty<Real> & _c;
 
   const bool _use_reference_pressure;
