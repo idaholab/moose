@@ -38,9 +38,6 @@ Steady::Steady(const InputParameters & parameters)
 {
   _picard_solve.setInnerSolve(_feproblem_solve);
 
-  if (!_restart_file_base.empty())
-    _problem.setRestartFile(_restart_file_base);
-
   _time = _system_time;
 }
 

@@ -189,9 +189,6 @@ Transient::Transient(const InputParameters & parameters)
   _time = _time_old = _start_time;
   _problem.transient(true);
 
-  if (!_restart_file_base.empty())
-    _problem.setRestartFile(_restart_file_base);
-
   setupTimeIntegrator();
 
   if (_app.halfTransient()) // Cut timesteps and end_time in half...

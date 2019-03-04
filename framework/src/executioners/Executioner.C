@@ -53,6 +53,8 @@ Executioner::Executioner(const InputParameters & parameters)
     _picard_solve(this),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base"))
 {
+  if (!_restart_file_base.empty())
+    _fe_problem.setRestartFile(_restart_file_base);
 }
 
 Problem &
