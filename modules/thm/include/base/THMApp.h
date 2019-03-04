@@ -17,10 +17,6 @@ class Simulation;
 #define registerFlowModel(id, class_name)                                                          \
   _flow_model_map.insert(std::pair<THM::FlowModelID, std::string>(id, stringifyName(class_name)));
 
-#define registerCriticalHeatFluxTable(table_name, class_name)                                      \
-  _chf_name_map.insert(std::pair<std::string, std::string>(MooseUtils::toLower(table_name),        \
-                                                           stringifyName(class_name)));
-
 namespace THM
 {
 
@@ -84,31 +80,6 @@ public:
    */
   const std::string & getFlowModelClassName(const THM::FlowModelID & flow_model_id);
 
-  /**
-   * Get the set of all available critical heat flux tables
-   *
-   * @return The set of all registered critical heat flux tables
-   */
-  static const std::set<std::string> & criticalHeatFluxTableTypes() { return _chf_table_types; }
-
-  /**
-   * Get the default critical heat flux table
-   *
-   * @return The name of the default critical heat flux table
-   */
-  static const std::string & defaultCriticalHeatFluxTableType() { return _default_chf_table_type; }
-
-  /**
-   * Get the class name of a user object that represents the CHF table
-   *
-   * @param chf_name The name of the critical heat flux lookup table
-   * @return The class name of a user object that represents the CHF table
-   */
-  const std::string & getCriticalHeatFluxTableClassName(const std::string & chf_name)
-  {
-    return _chf_name_map[MooseUtils::toLower(chf_name)];
-  }
-
   Logger & log() { return _log; }
   virtual bool checkJacobian() { return _check_jacobian; }
 
@@ -131,17 +102,6 @@ protected:
                                      const std::string & class_name,
                                      const THM::FlowModelID & flow_model_id);
 
-  /**
-   * Register a new critical heat flux table
-   *
-   * @param chf_table_type The name for the new critical heat flux table. The name is visible
-   * to users.
-   * @param is_default True if this should be the default type. The last call claiming default will
-   * be the default.
-   */
-  static void registerCriticalHeatFluxTableType(const std::string & chf_table_type,
-                                                bool is_default = false);
-
   Logger _log;
   Simulation * _sim;
   bool _check_jacobian;
@@ -151,13 +111,6 @@ protected:
 
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
-
-  /// The set of critical heat flux table types
-  static std::set<std::string> _chf_table_types;
-  /// The default critical heat flux table type
-  static std::string _default_chf_table_type;
-  /// The map from CHF table name to a user object class name
-  static std::map<std::string, std::string> _chf_name_map;
 
   [[noreturn]] void raiseFlowModelError(const FluidProperties & fp, const std::string & mbdf);
 };
