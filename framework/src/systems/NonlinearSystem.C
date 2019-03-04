@@ -343,9 +343,12 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 
   MatFDColoringCreate(petsc_mat->mat(), iscoloring, &_fdcoloring);
   MatFDColoringSetFromOptions(_fdcoloring);
+  // clang-format off
   MatFDColoringSetFunction(_fdcoloring,
-                           (PetscErrorCode(*)(void)) & libMesh::libmesh_petsc_snes_fd_residual,
+                           (PetscErrorCode(*)(void))(void (*)(void)) &
+                               libMesh::libmesh_petsc_snes_fd_residual,
                            &petsc_nonlinear_solver);
+  // clang-format on
 #if !PETSC_RELEASE_LESS_THAN(3, 5, 0)
   MatFDColoringSetUp(petsc_mat->mat(), iscoloring, _fdcoloring);
 #endif

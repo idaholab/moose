@@ -331,7 +331,7 @@ int tinydir_readfile(const tinydir_dir *dir, tinydir_file *file)
 		dir->_e->d_name
 #endif
 	);
-	strncat(file->path, file->name, _TINYDIR_PATH_MAX - 1);
+  strncat(file->path, file->name, _TINYDIR_PATH_MAX - 1);
 #ifndef _MSC_VER
 	if (stat(file->path, &file->_s) == -1)
 	{
