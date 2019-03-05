@@ -17,7 +17,7 @@ validParams<PorousFlowCapillaryPressure>()
   params.addRangeCheckedParam<Real>(
       "sat_lr",
       0.0,
-      "sat_lr >= 0 & sat_lr <= 1",
+      "sat_lr >= 0 & sat_lr < 1",
       "Liquid residual saturation.  Must be between 0 and 1. Default is 0");
   params.addRangeCheckedParam<Real>("pc_max",
                                     1.0e9,
