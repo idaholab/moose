@@ -165,7 +165,7 @@ TableOutput::outputScalarVariables()
     // Make a copy rather than taking a reference to the MooseArray,
     // because if a processor can't see that scalar variable's values
     // then we'll need to do our own communication of them.
-    VariableValue value = scalar_var.sln();
+    VariableValue value(scalar_var.sln());
     auto value_size = value.size();
 
     // libMesh *does* currently guarantee that all processors can
