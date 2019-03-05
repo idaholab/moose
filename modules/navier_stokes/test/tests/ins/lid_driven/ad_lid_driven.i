@@ -1,7 +1,3 @@
-[GlobalParams]
-  gravity = '0 0 0'
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -23,19 +19,13 @@
 []
 
 [Variables]
-  [./vel_x]
+  [./velocity]
     order = SECOND
-    family = LAGRANGE
-  [../]
-
-  [./vel_y]
-    order = SECOND
-    family = LAGRANGE
+    family = LAGRANGE_VEC
   [../]
 
   [./T]
     order = SECOND
-    family = LAGRANGE
 
     [./InitialCondition]
       type = ConstantIC
@@ -44,88 +34,67 @@
   [../]
 
   [./p]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
-[ADKernels]
-  # mass
+[Kernels]
   [./mass]
     type = INSADMass
     variable = p
-    u = vel_x
-    v = vel_y
-    p = p
   [../]
 
-  # x-momentum, time
-  [./x_momentum_time]
+  [./momentum_time]
     type = INSADMomentumTimeDerivative
-    variable = vel_x
+    variable = velocity
   [../]
 
-  # x-momentum, space
-  [./x_momentum_space]
-    type = INSADMomentumBase
-    variable = vel_x
-    u = vel_x
-    v = vel_y
+  [./momentum_convection]
+    type = INSADMomentumAdvection
+    variable = velocity
+  [../]
+
+  [./momentum_viscous]
+    type = INSADMomentumViscous
+    variable = velocity
+  [../]
+
+  [./momentum_pressure]
+    type = INSADMomentumPressure
+    variable = velocity
     p = p
-    component = 0
+    integrate_p_by_parts = true
   [../]
 
-  # y-momentum, time
-  [./y_momentum_time]
-    type = INSADMomentumTimeDerivative
-    variable = vel_y
-  [../]
-
-  # y-momentum, space
-  [./y_momentum_space]
-    type = INSADMomentumBase
-    variable = vel_y
-    u = vel_x
-    v = vel_y
-    p = p
-    component = 1
-  [../]
-
- # temperature
  [./temperature_time]
    type = INSADTemperatureTimeDerivative
    variable = T
  [../]
 
- [./temperature_space]
-   type = INSADTemperature
+ [./temperature_advection]
+   type = INSADTemperatureAdvection
    variable = T
-   u = vel_x
-   v = vel_y
-   p = p
+   velocity = velocity
+ [../]
+
+ [./temperature_conduction]
+   type = ADHeatConduction
+   variable = T
+   thermal_conductivity = 'k'
  [../]
 []
 
 [BCs]
-  [./x_no_slip]
-    type = DirichletBC
-    variable = vel_x
+  [./no_slip]
+    type = LagrangeVecFunctionDirichletBC
+    variable = velocity
     boundary = 'bottom right left'
-    value = 0.0
   [../]
 
   [./lid]
-    type = FunctionDirichletBC
-    variable = vel_x
+    type = LagrangeVecFunctionDirichletBC
+    variable = velocity
     boundary = 'top'
-    function = 'lid_function'
-  [../]
-
-  [./y_no_slip]
-    type = DirichletBC
-    variable = vel_y
-    boundary = 'bottom right top left'
-    value = 0.0
+    x_exact_soln = 'lid_function'
   [../]
 
   [./T_hot]
@@ -153,10 +122,16 @@
 [Materials]
   [./const]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  .01'
   [../]
+  [ins_mat]
+    type = INSADMaterial
+    velocity = velocity
+    pressure = p
+    transient_term = true
+    integrate_p_by_parts = true
+  []
 []
 
 [Functions]
@@ -183,8 +158,9 @@
   num_steps = 5
   dt = .5
   dtmin = .5
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
-  petsc_options_value = 'asm      2               ilu          4'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       NONZERO               1e-15'
   line_search = 'none'
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-13

@@ -18,8 +18,8 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on fluid_properties module
 FLUID_PROPERTIES := yes
+HEAT_CONDUCTION  := yes
 SKIP_LOADER      := yes
 include $(MODULE_DIR)/modules.mk
 

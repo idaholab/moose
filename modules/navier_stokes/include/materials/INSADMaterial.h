@@ -31,7 +31,6 @@ public:
   INSADMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties() override;
   virtual void computeQpProperties() override;
 
   /// velocity
@@ -47,16 +46,13 @@ protected:
   const ADMaterialProperty(Real) & _mu;
 
   /// density
-  const MaterialProperty<Real> & _rho;
+  const ADMaterialProperty(Real) & _rho;
 
   /// Whether we are performing a transient or steady simulation
   const bool _transient_term;
 
   /// Time derivative of the velocity, e.g. the acceleration
   const ADVectorVariableValue * _velocity_dot;
-
-  /// The form of the visocus term in the momentum equations. Options are traction or laplace (default)
-  const MooseEnum _viscous_form;
 
   /// Whether to integrate the pressure term in the momentum equations by parts
   const bool _integrate_p_by_parts;
@@ -82,13 +78,13 @@ protected:
   ADMaterialProperty(RealVectorValue) & _td_strong_residual;
 
   /// Strong residual corresponding to the momentum gravity term
-  MaterialProperty<RealVectorValue> & _gravity_strong_residual;
+  ADMaterialProperty(RealVectorValue) & _gravity_strong_residual;
 
   /// Strong residual corresponding to the mms function term
   MaterialProperty<RealVectorValue> & _mms_function_strong_residual;
 
   /// The strong residual of the momentum equation
-  ADMaterialProperty(Real) & _momentum_strong_residual;
+  ADMaterialProperty(RealVectorValue) & _momentum_strong_residual;
 
   /// The x velocity mms forcing function
   Function & _x_vel_fn;

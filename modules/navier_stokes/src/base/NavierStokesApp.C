@@ -12,8 +12,8 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// So we can register objects from the fluid_properties module.
 #include "FluidPropertiesApp.h"
+#include "HeatConductionApp.h"
 
 template <>
 InputParameters
@@ -70,6 +70,7 @@ void
 NavierStokesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   FluidPropertiesApp::registerAll(f, af, s);
+  HeatConductionApp::registerAll(f, af, s);
   Registry::registerObjectsTo(f, {"NavierStokesApp"});
   Registry::registerActionsTo(af, {"NavierStokesApp"});
   associateSyntaxInner(s, af);

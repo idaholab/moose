@@ -25,7 +25,7 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 INSADMomentumTimeDerivative<compute_stage>::INSADMomentumTimeDerivative(
     const InputParameters & parameters)
-  : ADTimeKernel<compute_stage>(parameters), _rho(adGetADMaterialProperty<Real>("rho_name"))
+  : ADVectorTimeKernel<compute_stage>(parameters), _rho(adGetADMaterialProperty<Real>("rho_name"))
 {
 }
 

@@ -24,7 +24,7 @@ declareADValidParams(INSADMomentumTimeDerivative);
  * for this.
  */
 template <ComputeStage compute_stage>
-class INSADMomentumTimeDerivative : public ADTimeKernel<compute_stage>
+class INSADMomentumTimeDerivative : public ADVectorTimeKernel<compute_stage>
 {
 public:
   INSADMomentumTimeDerivative(const InputParameters & parameters);
@@ -36,7 +36,7 @@ protected:
 
   const ADMaterialProperty(Real) & _rho;
 
-  usingTimeKernelMembers;
+  usingVectorTimeKernelMembers;
 };
 
 #endif // INSADMOMENTUMTIMEDERIVATIVE_H

@@ -44,7 +44,10 @@ registerADMooseObject("NavierStokesApp", INSADMomentumViscous);
 defineADValidParams(
     INSADMomentumViscous,
     ADVectorKernelGrad,
-    params.addClassDescription("Adds the viscous term to the INS momentum equation"););
+    params.addClassDescription("Adds the viscous term to the INS momentum equation");
+    params.addParam<MaterialPropertyName>("mu_name",
+                                          "mu",
+                                          "The name of the viscosity material property"););
 
 template <ComputeStage compute_stage>
 INSADMomentumViscous<compute_stage>::INSADMomentumViscous(const InputParameters & parameters)

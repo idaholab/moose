@@ -10,6 +10,8 @@
 #include "INSADMaterial.h"
 #include "Function.h"
 
+registerADMooseObject("NavierStokesApp", INSADMaterial);
+
 defineADValidParams(
     INSADMaterial,
     ADMaterial,
@@ -42,15 +44,15 @@ INSADMaterial<compute_stage>::INSADMaterial(const InputParameters & parameters)
     _grad_velocity(adCoupledVectorGradient("velocity")),
     _grad_p(adCoupledGradient("pressure")),
     _mu(adGetADMaterialProperty<Real>("mu_name")),
-    _rho(adGetMaterialProperty<Real>("rho_name")),
+    _rho(adGetADMaterialProperty<Real>("rho_name")),
     _transient_term(adGetParam<bool>("transient_term")),
-    _velocity_dot(_transient_term ? adCoupledVectorDot("velocity") : nullptr),
+    _velocity_dot(_transient_term ? &adCoupledVectorDot("velocity") : nullptr),
     _integrate_p_by_parts(adGetParam<bool>("integrate_p_by_parts")),
     _include_viscous_term_in_strong_form(adGetParam<bool>("include_viscous_term_in_strong_form")),
     _mass_strong_residual(adDeclareADProperty<Real>("mass_strong_residual")),
     _convective_strong_residual(adDeclareADProperty<RealVectorValue>("convective_strong_residual")),
     _td_strong_residual(adDeclareADProperty<RealVectorValue>("td_strong_residual")),
-    _gravity_strong_residual(adDeclareProperty<RealVectorValue>("gravity_strong_residual")),
+    _gravity_strong_residual(adDeclareADProperty<RealVectorValue>("gravity_strong_residual")),
     _mms_function_strong_residual(
         adDeclareProperty<RealVectorValue>("mms_function_strong_residual")),
     _momentum_strong_residual(adDeclareADProperty<RealVectorValue>("momentum_strong_residual")),
@@ -77,8 +79,9 @@ INSADMaterial<compute_stage>::computeQpProperties()
 {
   _mass_strong_residual[_qp] = -_grad_velocity[_qp].tr();
   _convective_strong_residual[_qp] = _rho[_qp] * _grad_velocity[_qp] * _velocity[_qp];
-  _td_strong_residual[_qp] = _transient_term ? _rho[_qp] * _velocity_dot[_qp] : 0.;
-  _gravity_strong_residual[_qp] = _gravity_set ? _rho[_qp] * _gravity : 0;
+  _td_strong_residual[_qp] =
+      _transient_term ? _rho[_qp] * (*_velocity_dot)[_qp] : ADRealVectorValue(0);
+  _gravity_strong_residual[_qp] = _gravity_set ? _rho[_qp] * _gravity : ADRealVectorValue(0);
   _mms_function_strong_residual[_qp] = -RealVectorValue(_x_vel_fn.value(_t, _q_point[_qp]),
                                                         _y_vel_fn.value(_t, _q_point[_qp]),
                                                         _z_vel_fn.value(_t, _q_point[_qp]));
