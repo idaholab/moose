@@ -43,6 +43,7 @@ class DenseVector;
 #define adCoupledGradient this->template adCoupledGradientTemplate<compute_stage>
 #define adCoupledSecond this->template adCoupledSecondTemplate<compute_stage>
 #define adCoupledDot this->template adCoupledDotTemplate<compute_stage>
+#define adCoupledVectorDot this->template adCoupledVectorDotTemplate<compute_stage>
 #define adCoupledVectorValue this->template adCoupledVectorValueTemplate<compute_stage>
 #define adCoupledVectorGradient this->template adCoupledVectorGradientTemplate<compute_stage>
 #define adCoupledVectorSecond this->template adCoupledVectorSecondTemplate<compute_stage>
@@ -511,6 +512,18 @@ protected:
    */
   template <ComputeStage compute_stage>
   const ADVariableValue & adCoupledDotTemplate(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Time derivative of a vector coupled variable for ad simulations
+   * @param var_name Name of vector coupled variable
+   * @param comp Component number
+   * @return Reference to a VectorVariableValue containing the time derivative of the coupled
+   * variable
+   * @see Kernel::dot
+   */
+  template <ComputeStage compute_stage>
+  const ADVariableValue & adCoupledVectorDotTemplate(const std::string & var_name,
+                                                     unsigned int comp = 0);
 
   /**
    * Time derivative of a coupled vector variable
@@ -1042,6 +1055,34 @@ Coupleable::adCoupledDotTemplate(const std::string & var_name, unsigned int comp
   MooseVariable * var = getVar(var_name, comp);
   if (var == nullptr)
     mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+      return var->adUDot<compute_stage>();
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("Not implemented");
+    else
+      return var->adUDotNeighbor<compute_stage>();
+  }
+}
+
+template <ComputeStage compute_stage>
+const ADVectorVariableValue &
+Coupleable::adCoupledVectorDotTemplate(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return *getADDefaultVectorValue<compute_stage>(var_name);
+
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == nullptr)
+    mooseError("Try calling corresponding standard variable method");
 
   if (!_coupleable_neighbor)
   {
