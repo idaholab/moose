@@ -34,17 +34,10 @@ protected:
    */
   void buildQpPPSS();
 
-  /**
-   * Effective saturation of liquid phase
-   * @param saturation true saturation
-   * @return effective saturation
-   */
-  virtual Real effectiveSaturation(Real saturation) const;
-
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Nodal or quadpoint value of porepressure of the zero phase (eg, the gas phase)
+  /// Nodal or quadpoint value of porepressure of phase zero (eg, the liquid phase)
   const VariableValue & _phase0_porepressure;
   /// Gradient(phase0_porepressure) at the qps
   const VariableGradient & _phase0_gradp_qp;
@@ -52,7 +45,7 @@ protected:
   const unsigned int _phase0_porepressure_varnum;
   /// PorousFlow variable number of the phase0 porepressure
   const unsigned int _pvar;
-  /// Nodal or quadpoint value of saturation of the one phase (eg, the water phase)
+  /// Nodal or quadpoint value of saturation of phase one (eg, the gas phase)
   const VariableValue & _phase1_saturation;
   /// Gradient(phase1_saturation) at the qps
   const VariableGradient & _phase1_grads_qp;
@@ -60,10 +53,6 @@ protected:
   const unsigned int _phase1_saturation_varnum;
   /// PorousFlow variable number of the phase1 saturation
   const unsigned int _svar;
-  /// Liquid residual saturation
-  const Real _sat_lr;
-  /// Derivative of effective saturation with respect to saturation
-  const Real _dseff_ds;
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
 };
