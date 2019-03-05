@@ -80,8 +80,8 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
                 if token.name == 'ErrorToken':
                     msg = common.report_error(token['message'],
                                               page.source,
-                                              token.info.line,
-                                              token.info[0],
+                                              token.info.line if token.info else None,
+                                              token.info[0] if token.info else token.text(),
                                               token['traceback'],
                                               u'TOKENIZE ERROR')
                     LOG.error(msg)

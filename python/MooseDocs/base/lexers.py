@@ -253,7 +253,8 @@ class Lexer(object):
         # Produce Exception token if text remains that was not matched
         if pos < n:
             msg = u'Unprocessed text exists.'
-            tokens.ErrorToken(parent, message=msg)
+            err = tokens.ErrorToken(parent, message=msg)
+            tokens.String(err, content=text[pos:])
 
     def buildToken(self, parent, pattern, info, page): #pylint: disable=no-self-use
         """
