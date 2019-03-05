@@ -349,7 +349,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
 
   if (_group_soln_var_names.size() > 0)
   {
-    _console << "Solution, reference convergence variable norms:" << std::endl;
+    _console << "   Solution, reference convergence variable norms:\n";
     unsigned int maxwsv = 0;
     unsigned int maxwrv = 0;
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
@@ -361,9 +361,9 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     }
 
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
-      _console << std::setw(maxwsv + 2) << std::left << _group_soln_var_names[i] + ":"
+      _console << "   " << std::setw(maxwsv + 2) << std::left << _group_soln_var_names[i] + ":"
                << _group_resid[i] << "  " << std::setw(maxwrv + 2)
-               << _group_ref_resid_var_names[i] + ":" << _group_ref_resid[i] << std::endl;
+               << _group_ref_resid_var_names[i] + ":" << _group_ref_resid[i] << '\n';
   }
 
   NonlinearSystemBase & system = getNonlinearSystemBase();

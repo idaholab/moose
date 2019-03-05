@@ -318,7 +318,7 @@ Console::output(const ExecFlagType & type)
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
 
-    _console << std::setw(2) << _nonlinear_iter
+    _console << std::right << std::setw(2) << _nonlinear_iter
              << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
 
     _old_nonlinear_norm = _norm;
@@ -330,7 +330,7 @@ Console::output(const ExecFlagType & type)
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
 
-    _console << std::setw(7) << _linear_iter
+    _console << std::right << std::setw(7) << _linear_iter
              << " Linear |R| = " << outputNorm(_old_linear_norm, _norm) << '\n';
 
     _old_linear_norm = _norm;
