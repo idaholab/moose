@@ -65,7 +65,7 @@ INSADMaterial<compute_stage>::INSADMaterial(const InputParameters & parameters)
   }
   else
     _gravity_set = false;
-  if (parameters.getParam<bool>("include_viscous_term_in_strong_form"))
+  if (adGetParam<bool>("include_viscous_term_in_strong_form"))
     mooseError("Sorry no TypeNTensor operations are currently implemented, so we cannot add the "
                "strong form contribution of the viscous term. Note that for linear elements, this "
                "introduces no error, and in general for bi-linear elements, the error is small");

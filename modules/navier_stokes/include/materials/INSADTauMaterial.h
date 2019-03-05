@@ -26,11 +26,8 @@ public:
 protected:
   virtual void computeProperties() override;
   virtual void computeQpProperties() override;
+  void computeHMax();
 
-  const ADVectorVariableValue & _velocity;
-  const ADMaterialProperty(Real) & _mu;
-  const ADMaterialProperty(Real) & _rho;
-  const bool _transient_term;
   const Real _alpha;
   ADMaterialProperty(Real) & _tau;
 

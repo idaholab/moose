@@ -30,6 +30,12 @@ protected:
   /// velocity
   const ADVectorVariableValue & _velocity;
 
+  /// gradient of velocity
+  const ADVectorVariableGradient & _grad_velocity;
+
+  /// gradient of the pressure
+  const ADVariableGradient & _grad_p;
+
   /// viscosity
   const ADMaterialProperty(Real) & _mu;
 
@@ -51,7 +57,7 @@ protected:
   /// Whether to include the strong form of the viscous term in the momentum equation strong residual.
   /// The method is more consistent if set to true, but it incurs quite a bit more computational
   /// expense. Note that at present we don't actually support the `true` value of this member!
-  const bool _include_viscous_term_in_strong_residual;
+  const bool _include_viscous_term_in_strong_form;
 
   /// Whether the user set a gravity vector. If none is set, we assume there is no gravity term in the simulation
   bool _gravity_set;

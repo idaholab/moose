@@ -27,12 +27,8 @@ defineADValidParams(
 template <ComputeStage compute_stage>
 INSADTauMaterial<compute_stage>::INSADTauMaterial(const InputParameters & parameters)
   : ADMaterial<compute_stage>(parameters),
-    _velocity(adCoupledVectorValue("velocity")),
-    _mu(adGetADMaterialProperty<Real>("mu_name")),
-    _rho(adGetADMaterialProperty<Real>("rho_name")),
-    _transient_term(adGetParam<bool>("transient_term")),
     _alpha(adGetParam<Real>("alpha")),
-    _tau(adDeclareADMaterialProperty<Real>("tau"))
+    _tau(adDeclareADProperty<Real>("tau"))
 {
 }
 
