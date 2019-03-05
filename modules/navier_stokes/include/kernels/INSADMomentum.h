@@ -38,6 +38,8 @@ public:
 protected:
   virtual ADResidual precomputeQpResidual() override;
 
+  const ADMaterialProperty(RealVectorValue) & _convective_strong_residual;
+
   usingKernelValueMembers;
 };
 
@@ -65,7 +67,70 @@ public:
 protected:
   virtual ADVectorGradResidual precomputeQpResidual() override;
 
+  const ADMaterialProperty(Real) & _mu;
+
   usingVectorKernelGradMembers;
+};
+
+/****************************************************************/
+/**************** INSADMomentumPressure **************************/
+/****************************************************************/
+
+// Forward Declarations
+template <ComputeStage>
+class INSADMomentumPressure;
+
+declareADValidParams(INSADMomentumPressure);
+
+/**
+ * This class computes the momentum equation residual and Jacobian
+ * contributions for the pressure term of the incompressible Navier-Stokes momentum
+ * equation.
+ */
+template <ComputeStage compute_stage>
+class INSADMomentumPressure : public ADVectorKernel<compute_stage>
+{
+public:
+  INSADMomentumPressure(const InputParameters & parameters);
+
+protected:
+  virtual ADVectorResidual computeQpResidual() override;
+
+  const bool _integrate_p_by_parts;
+  const ADVariableValue & _p;
+  const ADVariableGradient & _grad_p;
+
+  usingVectorKernelMembers;
+};
+
+/****************************************************************/
+/**************** INSADMomentumForces **************************/
+/****************************************************************/
+
+// Forward Declarations
+template <ComputeStage>
+class INSADMomentumForces;
+
+declareADValidParams(INSADMomentumForces);
+
+/**
+ * This class computes the momentum equation residual and Jacobian
+ * contributions for force terms in the incompressible Navier-Stokes momentum
+ * equation.
+ */
+template <ComputeStage compute_stage>
+class INSADMomentumForces : public ADVectorKernelValue<compute_stage>
+{
+public:
+  INSADMomentumForces(const InputParameters & parameters);
+
+protected:
+  virtual ADVectorResidual computeQpResidual() override;
+
+  const ADMaterialProperty(RealVectorValue) & _gravity_strong_residual;
+  const ADMaterialProperty(RealVectorValue) & _mms_function_strong_residual;
+
+  usingVectorKernelValueMembers;
 };
 
 /****************************************************************/
@@ -80,7 +145,7 @@ declareADValidParams(INSADMomentumSUPG);
 
 /**
  * This class computes the momentum equation residual and Jacobian
- * contributions for the convective term of the incompressible Navier-Stokes momentum
+ * contributions for SUPG stabilization terms of the incompressible Navier-Stokes momentum
  * equation.
  */
 template <ComputeStage compute_stage>
