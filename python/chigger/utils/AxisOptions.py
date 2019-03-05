@@ -127,7 +127,7 @@ def set_options(vtkaxis, opt):
         vtkaxis.SetNotation(vtk_notation)
 
     if opt.isOptionValid('precision'):
-        if vtkaxis.GetNotation() in VTK_NOTATION_ENUM[1:2]:
+        if vtkaxis.GetNotation() in VTK_NOTATION_ENUM[1:3]:
             vtkaxis.SetPrecision(opt['precision'])
         else:
             mooseutils.mooseWarning("When using 'precision' option, 'notation' option has to be "
