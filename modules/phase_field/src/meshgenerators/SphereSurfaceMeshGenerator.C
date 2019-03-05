@@ -7,7 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SphereSurfaceMesh.h"
+#include "SphereSurfaceMeshGenerator.h"
+#include "CastUniquePointer.h"
 
 // libMesh includes
 #include "libmesh/face_tri3.h"
@@ -15,14 +16,15 @@
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/sphere.h"
 #include "libmesh/unstructured_mesh.h"
+#include "libmesh/replicated_mesh.h"
 
-registerMooseObject("PhaseFieldApp", SphereSurfaceMesh);
+registerMooseObject("PhaseFieldApp", SphereSurfaceMeshGenerator);
 
 template <>
 InputParameters
-validParams<SphereSurfaceMesh>()
+validParams<SphereSurfaceMeshGenerator>()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = validParams<MeshGenerator>();
   params.addClassDescription(
       "Generated sphere mesh - a two dimensional manifold embedded in three dimensional space");
   params.addParam<Real>("radius", 1.0, "Sphere radius");
@@ -32,29 +34,19 @@ validParams<SphereSurfaceMesh>()
   return params;
 }
 
-SphereSurfaceMesh::SphereSurfaceMesh(const InputParameters & parameters)
-  : MooseMesh(parameters),
+SphereSurfaceMeshGenerator::SphereSurfaceMeshGenerator(const InputParameters & parameters)
+  : MeshGenerator(parameters),
     _radius(getParam<Real>("radius")),
     _center(getParam<Point>("center")),
     _depth(getParam<unsigned int>("depth"))
 {
 }
 
-std::unique_ptr<MooseMesh>
-SphereSurfaceMesh::safeClone() const
+std::unique_ptr<MeshBase>
+SphereSurfaceMeshGenerator::generate()
 {
-  return libmesh_make_unique<SphereSurfaceMesh>(*this);
-}
-
-void
-SphereSurfaceMesh::buildMesh()
-{
-  // set up mesh
-  auto & umesh = dynamic_cast<UnstructuredMesh &>(getMesh());
-
-  umesh.clear();
-  umesh.set_mesh_dimension(2);
-  umesh.set_spatial_dimension(3);
+  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  mesh->set_spatial_dimension(3);
 
   const Sphere sphere(_center, _radius);
 
@@ -75,7 +67,7 @@ SphereSurfaceMesh::buildMesh()
                            {Z, -X, 0.0},
                            {-Z, -X, 0.0}};
   for (unsigned int i = 0; i < 12; ++i)
-    umesh.add_point(vdata[i] * _radius + _center, i);
+    mesh->add_point(vdata[i] * _radius + _center, i);
 
   // icosahedron faces
   const unsigned int tindices[20][3] = {{0, 4, 1},  {0, 9, 4},  {9, 5, 4},  {4, 5, 8},  {4, 8, 1},
@@ -84,24 +76,24 @@ SphereSurfaceMesh::buildMesh()
                                         {6, 1, 10}, {9, 0, 11}, {9, 11, 2}, {9, 2, 5},  {7, 2, 11}};
   for (unsigned int i = 0; i < 20; ++i)
   {
-    Elem * elem = umesh.add_elem(new Tri3);
-    elem->set_node(0) = umesh.node_ptr(tindices[i][0]);
-    elem->set_node(1) = umesh.node_ptr(tindices[i][1]);
-    elem->set_node(2) = umesh.node_ptr(tindices[i][2]);
+    Elem * elem = mesh->add_elem(new Tri3);
+    elem->set_node(0) = mesh->node_ptr(tindices[i][0]);
+    elem->set_node(1) = mesh->node_ptr(tindices[i][1]);
+    elem->set_node(2) = mesh->node_ptr(tindices[i][2]);
   }
 
   // Now we have the beginnings of a sphere.
   // Add some more elements by doing uniform refinements and
   // popping nodes to the boundary.
-  MeshRefinement mesh_refinement(umesh);
+  MeshRefinement mesh_refinement(*mesh);
 
   // Loop over the elements, refine, pop nodes to boundary.
   for (unsigned int r = 0; r < _depth; ++r)
   {
     mesh_refinement.uniformly_refine(1);
 
-    auto it = umesh.active_nodes_begin();
-    const auto end = umesh.active_nodes_end();
+    auto it = mesh->active_nodes_begin();
+    const auto end = mesh->active_nodes_end();
 
     for (; it != end; ++it)
     {
@@ -110,7 +102,8 @@ SphereSurfaceMesh::buildMesh()
     }
   }
 
-  MeshTools::Modification::flatten(umesh);
+  MeshTools::Modification::flatten(*mesh);
 
-  umesh.prepare_for_use(/*skip_renumber =*/false);
+  mesh->prepare_for_use(/*skip_renumber =*/false);
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

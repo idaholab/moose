@@ -7,32 +7,27 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPHERESURFACEMESH_H
-#define SPHERESURFACEMESH_H
+#ifndef SPHERESURFACEMESHGENERATOR_H
+#define SPHERESURFACEMESHGENERATOR_H
 
-#include "MooseMesh.h"
+#include "MeshGenerator.h"
 #include "libmesh/point.h"
 
-class SphereSurfaceMesh;
+class SphereSurfaceMeshGenerator;
 
 template <>
-InputParameters validParams<SphereSurfaceMesh>();
+InputParameters validParams<SphereSurfaceMeshGenerator>();
 
 /**
  * Create a sphere surface mesh based on the recursive subdovision of the faces
  * of a regular icosahedron.
  */
-class SphereSurfaceMesh : public MooseMesh
+class SphereSurfaceMeshGenerator : public MeshGenerator
 {
 public:
-  SphereSurfaceMesh(const InputParameters & parameters);
-  SphereSurfaceMesh(const SphereSurfaceMesh & other_mesh) = default;
+  SphereSurfaceMeshGenerator(const InputParameters & parameters);
 
-  // No copy
-  SphereSurfaceMesh & operator=(const SphereSurfaceMesh & other_mesh) = delete;
-  virtual std::unique_ptr<MooseMesh> safeClone() const override;
-
-  virtual void buildMesh() override;
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// sphere radius
@@ -45,4 +40,4 @@ protected:
   const unsigned int _depth;
 };
 
-#endif // SPHERESURFACEMESH_H
+#endif // SPHERESURFACEMESHGENERATOR_H

@@ -22,9 +22,12 @@
   [./sphere]
     type = 'Exodiff'
     input = 'sphere.i'
-    exodiff = 'sphere_out.e'
+    cli_args = '--mesh-only'
+    exodiff = 'sphere_in.e'
     requirement = "The mesh generator for 2d sphere surfaces in 3d space shall produce a correct mesh"
     design = 'mesh/SphereSurfaceMesh.md'
     issues = '#8414'
+    mesh_mode = 'REPLICATED'
+    recover = false
   [../]
 []
