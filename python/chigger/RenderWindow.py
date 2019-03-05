@@ -36,7 +36,8 @@ class RenderWindow(base.ChiggerObject):
         opt.add('test', False, "When True the interaction is disabled and the window closes "
                                "immediately after rendering.")
         opt.add('motion_factor', "Control the interaction motion rate. "
-                                 "(calls vtkInteractorStyle::SetMotionFactor)")
+                                 "(calls vtkInteractorStyle::SetMotionFactor)",
+                vtype=float)
         opt.add('offscreen', False, "Enable offscreen rendering.")
         opt.add('chigger', False, "Places a chigger logo in the lower left corner.")
         opt.add('smoothing', False, "Enable VTK render window smoothing options.")
