@@ -163,6 +163,8 @@ Transient::Transient(const InputParameters & parameters)
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _final_timer(registerTimedSection("final", 1))
 {
+  _picard_solve.setInnerSolve(_feproblem_solve);
+
   // Handle deprecated parameters
   if (!parameters.isParamSetByAddParam("trans_ss_check"))
     _steady_state_detection = getParam<bool>("trans_ss_check");
@@ -173,7 +175,6 @@ Transient::Transient(const InputParameters & parameters)
   if (!parameters.isParamSetByAddParam("ss_tmin"))
     _steady_state_start_time = getParam<Real>("ss_tmin");
 
-  _nl.setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
@@ -187,9 +188,6 @@ Transient::Transient(const InputParameters & parameters)
 
   _time = _time_old = _start_time;
   _problem.transient(true);
-
-  if (!_restart_file_base.empty())
-    _problem.setRestartFile(_restart_file_base);
 
   setupTimeIntegrator();
 
