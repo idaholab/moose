@@ -54,9 +54,12 @@
         {
             "attributes": {
                 "bottom": true, 
+                "class": "", 
                 "command": "figure", 
+                "id": "", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": "width:75%;text-align:center;"
             }, 
             "children": [
                 {
@@ -133,9 +136,12 @@
         {
             "attributes": {
                 "bottom": true, 
+                "class": "", 
                 "command": "figure", 
+                "id": "montana-flag", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": "width:75%;"
             }, 
             "children": [
                 {
@@ -212,9 +218,12 @@
         {
             "attributes": {
                 "bottom": true, 
+                "class": "", 
                 "command": "figure", 
+                "id": "newyork-flag", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": "width:75%;text-align:center;"
             }, 
             "children": [
                 {
@@ -307,9 +316,12 @@
         {
             "attributes": {
                 "bottom": true, 
+                "class": "", 
                 "command": "figure", 
+                "id": "idaho-flag", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": "width:75%;text-align:center;"
             }, 
             "children": [
                 {
@@ -563,9 +575,12 @@
         {
             "attributes": {
                 "bottom": true, 
+                "class": "", 
                 "command": "figure", 
+                "id": "", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": "width:15%;"
             }, 
             "children": [
                 {
