@@ -42,9 +42,12 @@
         {
             "attributes": {
                 "bottom": true, 
+                "class": "", 
                 "command": "figure", 
+                "id": "michigan-flag", 
                 "img": false, 
-                "recursive": true
+                "recursive": true, 
+                "style": "width:50%;text-align:center;"
             }, 
             "children": [
                 {
