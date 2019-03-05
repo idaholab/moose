@@ -16,6 +16,8 @@
 #include "MaterialData.h"
 #include "MooseObject.h"
 
+#define usingBlockRestrictableMembers using BlockRestrictable::getBlockCoordSystem
+
 // Forward declarations
 class BlockRestrictable;
 class FEProblemBase;

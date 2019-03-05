@@ -12,6 +12,10 @@
 
 #include "MooseTypes.h"
 
+#define usingFunctionInterfaceMembers                                                              \
+  using FunctionInterface::getFunction;                                                            \
+  using FunctionInterface::getFunctionByName
+
 // Forward declarations
 class Function;
 class FEProblemBase;

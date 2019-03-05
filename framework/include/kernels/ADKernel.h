@@ -17,6 +17,8 @@
 
 #define usingTemplKernelMembers(type)                                                              \
   usingCoupleableMembers;                                                                          \
+  usingBlockRestrictableMembers;                                                                   \
+  usingFunctionInterfaceMembers;                                                                   \
   using ADKernelTempl<type, compute_stage>::_test;                                                 \
   using ADKernelTempl<type, compute_stage>::_qp;                                                   \
   using ADKernelTempl<type, compute_stage>::_ad_q_point;                                           \
@@ -43,7 +45,6 @@
   using ADKernelTempl<type, compute_stage>::_dt;                                                   \
   using ADKernelTempl<type, compute_stage>::_phi;                                                  \
   using ADKernelTempl<type, compute_stage>::_grad_phi;                                             \
-  using ADKernelTempl<type, compute_stage>::getBlockCoordSystem;                                   \
   using ADKernelTempl<type, compute_stage>::precalculateResidual;                                  \
   using ADKernelTempl<type, compute_stage>::prepareVectorTag;                                      \
   using ADKernelTempl<type, compute_stage>::prepareMatrixTag;                                      \
@@ -51,8 +52,7 @@
   using ADKernelTempl<type, compute_stage>::accumulateTaggedLocalMatrix;                           \
   using ADKernelTempl<type, compute_stage>::variable;                                              \
   using ADKernelTempl<type, compute_stage>::paramError;                                            \
-  using ADKernelTempl<type, compute_stage>::isParamValid;                                          \
-  using ADKernelTempl<type, compute_stage>::getFunction
+  using ADKernelTempl<type, compute_stage>::isParamValid
 
 #define usingKernelMembers usingTemplKernelMembers(Real)
 #define usingVectorKernelMembers usingTemplKernelMembers(RealVectorValue)

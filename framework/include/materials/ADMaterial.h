@@ -19,6 +19,8 @@
 #define usingMaterialMembers                                                                       \
   usingCoupleableMembers;                                                                          \
   usingTransientInterfaceMembers;                                                                  \
+  usingBlockRestrictableMembers;                                                                   \
+  usingFunctionInterfaceMembers;                                                                   \
   using ConsoleStreamInterface::_console;                                                          \
   using ADMaterial<compute_stage>::_qp;                                                            \
   using ADMaterial<compute_stage>::_qrule;                                                         \
@@ -31,8 +33,7 @@
   using ADMaterial<compute_stage>::_mesh;                                                          \
   using ADMaterial<compute_stage>::isParamValid;                                                   \
   using ADMaterial<compute_stage>::paramError;                                                     \
-  using ADMaterial<compute_stage>::copyDualNumbersToValues;                                        \
-  using ADMaterial<compute_stage>::getBlockCoordSystem
+  using ADMaterial<compute_stage>::copyDualNumbersToValues
 
 // forward declarations
 template <ComputeStage>
