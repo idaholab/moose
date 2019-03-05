@@ -33,7 +33,8 @@
   using ADMaterial<compute_stage>::_mesh;                                                          \
   using ADMaterial<compute_stage>::isParamValid;                                                   \
   using ADMaterial<compute_stage>::paramError;                                                     \
-  using ADMaterial<compute_stage>::copyDualNumbersToValues
+  using ADMaterial<compute_stage>::copyDualNumbersToValues;                                        \
+  using ADMaterial<compute_stage>::_displacements
 
 // forward declarations
 template <ComputeStage>

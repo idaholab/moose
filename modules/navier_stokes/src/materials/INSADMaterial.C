@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// Navier-Stokes includes
 #include "INSADMaterial.h"
+#include "Function.h"
 
 defineADValidParams(
     INSADMaterial,
@@ -71,8 +71,9 @@ INSADMaterial<compute_stage>::INSADMaterial(const InputParameters & parameters)
                "introduces no error, and in general for bi-linear elements, the error is small");
 }
 
+template <ComputeStage compute_stage>
 void
-INSADMaterial::computeQpProperties()
+INSADMaterial<compute_stage>::computeQpProperties()
 {
   _mass_strong_residual[_qp] = -_grad_velocity[_qp].tr();
   _convective_strong_residual[_qp] = _rho[_qp] * _grad_velocity[_qp] * _velocity[_qp];

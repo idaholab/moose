@@ -35,7 +35,7 @@ INSADMass<compute_stage>::precomputeQpResidual()
 
 registerADMooseObject("NavierStokesApp", INSADMassPSPG);
 
-defineADValidParams(INSADMassSUPG,
+defineADValidParams(INSADMassPSPG,
                     ADKernelGrad,
                     params.addClassDescription(
                         "This class adds PSPG stabilization to the mass equation, enabling use of "

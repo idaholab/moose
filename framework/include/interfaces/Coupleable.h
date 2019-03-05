@@ -522,8 +522,8 @@ protected:
    * @see Kernel::dot
    */
   template <ComputeStage compute_stage>
-  const ADVariableValue & adCoupledVectorDotTemplate(const std::string & var_name,
-                                                     unsigned int comp = 0);
+  const ADVectorVariableValue & adCoupledVectorDotTemplate(const std::string & var_name,
+                                                           unsigned int comp = 0);
 
   /**
    * Time derivative of a coupled vector variable

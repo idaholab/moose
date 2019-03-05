@@ -9,10 +9,11 @@
 
 // Navier-Stokes includes
 #include "INSADTauMaterial.h"
+#include "NonlinearSystemBase.h"
 
 defineADValidParams(
     INSADTauMaterial,
-    ADMaterial,
+    INSADMaterial,
     params.addClassDescription(
         "This is the material class used to compute the stabilization parameter tau.");
     params.addRequiredCoupledVar("velocity", "The velocity");
@@ -26,7 +27,7 @@ defineADValidParams(
 
 template <ComputeStage compute_stage>
 INSADTauMaterial<compute_stage>::INSADTauMaterial(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+  : INSADMaterial<compute_stage>(parameters),
     _alpha(adGetParam<Real>("alpha")),
     _tau(adDeclareADProperty<Real>("tau"))
 {
@@ -54,12 +55,16 @@ INSADTauMaterial<JACOBIAN>::computeHMax()
   for (unsigned int n_outer = 0; n_outer < _current_elem->n_vertices(); n_outer++)
     for (unsigned int n_inner = n_outer + 1; n_inner < _current_elem->n_vertices(); n_inner++)
     {
-      VectorValue<ADReal> diff = (_current_elem->point(n_outer) - _current_elem->point(n_inner));
+      VectorValue<DualReal> diff = (_current_elem->point(n_outer) - _current_elem->point(n_inner));
       unsigned dimension = 0;
       for (const auto & disp_num : _displacements)
       {
-        diff(dimension).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + n_outer] = 1.;
-        diff(dimension++).derivatives()[disp_num * _sys.getMaxVarNDofsPerElem() + n_inner] = -1.;
+        diff(dimension)
+            .derivatives()[disp_num * _fe_problem.getNonlinearSystemBase().getMaxVarNDofsPerElem() +
+                           n_outer] = 1.;
+        diff(dimension++)
+            .derivatives()[disp_num * _fe_problem.getNonlinearSystemBase().getMaxVarNDofsPerElem() +
+                           n_inner] = -1.;
       }
 
       _hmax = std::max(_hmax, diff.norm_sq());
@@ -68,16 +73,18 @@ INSADTauMaterial<JACOBIAN>::computeHMax()
   _hmax = std::sqrt(_hmax);
 }
 
+template <ComputeStage compute_stage>
 void
-INSADTauMaterial::computeProperties()
+INSADTauMaterial<compute_stage>::computeProperties()
 {
   computeHMax();
 
   Material::computeProperties();
 }
 
+template <ComputeStage compute_stage>
 void
-INSADTauMaterial::computeQpProperties()
+INSADTauMaterial<compute_stage>::computeQpProperties()
 {
   auto && nu = _mu[_qp] / _rho[_qp];
   auto && transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;

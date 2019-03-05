@@ -29,10 +29,10 @@ INSADMomentumAdvection<compute_stage>::INSADMomentumAdvection(const InputParamet
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 INSADMomentumAdvection<compute_stage>::precomputeQpResidual()
 {
-  return _convective_strong_residual;
+  return _convective_strong_residual[_qp];
 }
 
 /****************************************************************/
@@ -69,7 +69,7 @@ defineADValidParams(
     INSADMomentumPressure,
     ADVectorKernel,
     params.addClassDescription("Adds the pressure term to the INS momentum equation");
-    params.addRequiredCoupledValue("p", "The pressure");
+    params.addRequiredCoupledVar("p", "The pressure");
     params.addParam<bool>("integrate_p_by_parts",
                           true,
                           "Whether to integrate the pressure term by parts"););
@@ -106,16 +106,17 @@ defineADValidParams(INSADMomentumForces,
 template <ComputeStage compute_stage>
 INSADMomentumForces<compute_stage>::INSADMomentumForces(const InputParameters & parameters)
   : ADVectorKernelValue<compute_stage>(parameters),
-    _gravity_strong_residual(adGetADMaterialProperty("gravity_strong_residual")),
-    _mms_function_strong_residual(adGetADMaterialProperty("mms_function_strong_residual")),
+    _gravity_strong_residual(adGetADMaterialProperty<RealVectorValue>("gravity_strong_residual")),
+    _mms_function_strong_residual(
+        adGetADMaterialProperty<RealVectorValue>("mms_function_strong_residual"))
 {
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 INSADMomentumForces<compute_stage>::precomputeQpResidual()
 {
-  return _gravity_strong_residual + _mms_function_strong_residual;
+  return _gravity_strong_residual[_qp] + _mms_function_strong_residual[_qp];
 }
 
 /****************************************************************/
@@ -137,8 +138,8 @@ INSADMomentumSUPG<compute_stage>::INSADMomentumSUPG(const InputParameters & para
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADRealVectorValue
 INSADMomentumSUPG<compute_stage>::precomputeQpStrongResidual()
 {
-  return _momentum_strong_residual;
+  return _momentum_strong_residual[_qp];
 }

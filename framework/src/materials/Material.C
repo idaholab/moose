@@ -63,6 +63,9 @@ validParams<Material>()
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
   params.addParamNamesToGroup("use_displaced_mesh constant_on", "Advanced");
+
+  params.addCoupledVar("displacements", "The displacements");
+
   params.registerBase("Material");
 
   return params;
@@ -120,6 +123,10 @@ Material::Material(const InputParameters & parameters)
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
+
+  auto num_disp = coupledComponents("displacements");
+  for (decltype(num_disp) i = 0; i < num_disp; ++i)
+    _displacements.push_back(coupled("displacements", i));
 }
 
 void

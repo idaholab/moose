@@ -12,6 +12,13 @@
 
 #include "ADMaterial.h"
 
+#define usingINSMaterialMembers                                                                    \
+  usingMaterialMembers;                                                                            \
+  using INSADMaterial<compute_stage>::_mu;                                                         \
+  using INSADMaterial<compute_stage>::_rho;                                                        \
+  using INSADMaterial<compute_stage>::_velocity;                                                   \
+  using INSADMaterial<compute_stage>::_transient_term
+
 template <ComputeStage>
 class INSADMaterial;
 
@@ -91,6 +98,8 @@ protected:
 
   /// The z velocity mms forcing function
   Function & _z_vel_fn;
+
+  usingMaterialMembers;
 };
 
 #endif // INSADMATERIAL_H

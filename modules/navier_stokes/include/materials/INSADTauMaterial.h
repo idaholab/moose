@@ -10,7 +10,7 @@
 #ifndef INSADTAUMATERIAL_H
 #define INSADTAUMATERIAL_H
 
-#include "ADMaterial.h"
+#include "INSADMaterial.h"
 
 template <ComputeStage>
 class INSADTauMaterial;
@@ -18,7 +18,7 @@ class INSADTauMaterial;
 declareADValidParams(INSADTauMaterial);
 
 template <ComputeStage compute_stage>
-class INSADTauMaterial : public ADMaterial<compute_stage>
+class INSADTauMaterial : public INSADMaterial<compute_stage>
 {
 public:
   INSADTauMaterial(const InputParameters & parameters);
@@ -32,6 +32,8 @@ protected:
   ADMaterialProperty(Real) & _tau;
 
   ADReal _hmax;
+
+  usingINSMaterialMembers;
 };
 
 #endif // INSADTAUMATERIAL_H

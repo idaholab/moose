@@ -30,17 +30,17 @@ declareADValidParams(INSADMomentumAdvection);
  * equation.
  */
 template <ComputeStage compute_stage>
-class INSADMomentumAdvection : public ADKernelValue<compute_stage>
+class INSADMomentumAdvection : public ADVectorKernelValue<compute_stage>
 {
 public:
   INSADMomentumAdvection(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   const ADMaterialProperty(RealVectorValue) & _convective_strong_residual;
 
-  usingKernelValueMembers;
+  usingVectorKernelValueMembers;
 };
 
 /****************************************************************/
@@ -125,7 +125,7 @@ public:
   INSADMomentumForces(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual computeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   const ADMaterialProperty(RealVectorValue) & _gravity_strong_residual;
   const ADMaterialProperty(RealVectorValue) & _mms_function_strong_residual;
@@ -155,7 +155,9 @@ public:
   INSADMomentumSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual precomputeQpStrongResidual() override;
+  virtual ADRealVectorValue precomputeQpStrongResidual() override;
+
+  const ADMaterialProperty(RealVectorValue) & _momentum_strong_residual;
 
   usingVectorKernelSUPGMembers;
 };
