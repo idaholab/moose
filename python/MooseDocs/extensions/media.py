@@ -83,11 +83,10 @@ class ImageCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
 
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  bottom=True)
+                                  bottom=True, **self.attributes)
         img = Image(flt, src=info['subcommand'], tex=self.settings['latex_src'])
         if flt is parent:
             img.attributes.update(**self.attributes)
-
         return parent
 
 class VideoCommand(command.CommandComponent):
