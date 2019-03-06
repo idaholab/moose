@@ -9,7 +9,7 @@ validParams<TemperatureWall3EqnMaterial>()
   InputParameters params = validParams<Material>();
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Heat transfer coefficient");
-  params.addRequiredCoupledVar("q_wall", "Wall heat flux");
+  params.addRequiredParam<MaterialPropertyName>("q_wall", "Wall heat flux");
 
   return params;
 }
@@ -17,7 +17,7 @@ validParams<TemperatureWall3EqnMaterial>()
 TemperatureWall3EqnMaterial::TemperatureWall3EqnMaterial(const InputParameters & parameters)
   : Material(parameters),
     _T_wall(declareProperty<Real>("T_wall")),
-    _q_wall(coupledValue("q_wall")),
+    _q_wall(getMaterialProperty<Real>("q_wall")),
     _Hw(getMaterialProperty<Real>("Hw")),
     _T(getMaterialProperty<Real>("T"))
 {

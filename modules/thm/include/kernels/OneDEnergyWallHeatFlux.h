@@ -18,8 +18,8 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// Heat flux function
-  const VariableValue & _q_wall;
+  /// Heat flux
+  const MaterialProperty<Real> & _q_wall;
   /// Heat flux perimeter
   const VariableValue & _P_hf;
 };

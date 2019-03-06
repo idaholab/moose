@@ -849,24 +849,22 @@ FlowChannel::addCommonObjects()
   {
     if (_n_heat_transfer_connections > 1)
     {
-      const std::string class_name = "WeightedAverageAux";
+      const std::string class_name = "WeightedAverageMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<AuxVariableName>("variable") = FlowModel::HEAT_FLUX_WALL;
+      params.set<MaterialPropertyName>("prop_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<std::vector<VariableName>>("values") = _q_wall_names;
+      params.set<std::vector<MaterialPropertyName>>("values") = _q_wall_names;
       params.set<std::vector<VariableName>>("weights") = _P_hf_names;
-      params.set<ExecFlagEnum>("execute_on") = execute_on_initial_linear;
-      _sim.addAuxKernel(class_name, genName(name(), "q_wall_auxkernel"), params);
+      _sim.addMaterial(class_name, genName(name(), class_name, FlowModel::HEAT_FLUX_WALL), params);
     }
     else if (_n_heat_transfer_connections == 0)
     {
-      const std::string class_name = "ConstantAux";
+      const std::string class_name = "ConstantMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<AuxVariableName>("variable") = FlowModel::HEAT_FLUX_WALL;
+      params.set<std::string>("property_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<Real>("value") = 0;
-      params.set<ExecFlagEnum>("execute_on") = execute_on_initial_linear;
-      _sim.addAuxKernel(class_name, genName(name(), "q_wall_auxkernel"), params);
+      _sim.addMaterial(class_name, genName(name(), class_name, FlowModel::HEAT_FLUX_WALL), params);
     }
   }
 }
