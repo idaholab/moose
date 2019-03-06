@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<SphereSurfaceMeshGenerator>();
 
 /**
- * Create a sphere surface mesh based on the recursive subdovision of the faces
+ * Create a sphere surface mesh based on the recursive subdivision of the faces
  * of a regular icosahedron.
  */
 class SphereSurfaceMeshGenerator : public MeshGenerator

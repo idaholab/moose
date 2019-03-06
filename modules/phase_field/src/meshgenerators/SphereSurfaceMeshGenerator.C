@@ -45,7 +45,9 @@ SphereSurfaceMeshGenerator::SphereSurfaceMeshGenerator(const InputParameters & p
 std::unique_ptr<MeshBase>
 SphereSurfaceMeshGenerator::generate()
 {
-  std::unique_ptr<ReplicatedMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm(), 2);
+  // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
+  auto mesh = _mesh->buildMeshBaseObject();
+  mesh->set_mesh_dimension(2);
   mesh->set_spatial_dimension(3);
 
   const Sphere sphere(_center, _radius);
@@ -82,6 +84,10 @@ SphereSurfaceMeshGenerator::generate()
     elem->set_node(2) = mesh->node_ptr(tindices[i][2]);
   }
 
+  // we need to prepare distributed meshes before using refinement
+  if (!mesh->is_replicated())
+    mesh->prepare_for_use(/*skip_renumber =*/false);
+
   // Now we have the beginnings of a sphere.
   // Add some more elements by doing uniform refinements and
   // popping nodes to the boundary.
@@ -102,8 +108,8 @@ SphereSurfaceMeshGenerator::generate()
     }
   }
 
+  // Flatten the AMR mesh to get rid of inactive elements
   MeshTools::Modification::flatten(*mesh);
 
-  mesh->prepare_for_use(/*skip_renumber =*/false);
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
