@@ -94,6 +94,7 @@ protected:
   // Miscellaneous aux variables
   const VariableValue & _enthalpy;
   const VariableValue & _temperature;
+  bool _has_heat_transfer;
   const MaterialProperty<Real> & _Hw;
   const VariableValue & _vel;
 
