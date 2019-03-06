@@ -418,8 +418,8 @@
     component = z
   [../]
   [./porosity]
-    type = MaterialRealAux
-    property = PorousFlow_porosity_qp
+    type = PorousFlowPropertyAux
+    property = porosity
     variable = porosity
     execute_on = timestep_end
   [../]
@@ -568,24 +568,24 @@
     execute_on = timestep_end
   [../]
   [./perm_xx]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = perm_xx
     row = 0
     column = 0
     execute_on = timestep_end
   [../]
   [./perm_yy]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = perm_yy
     row = 1
     column = 1
     execute_on = timestep_end
   [../]
   [./perm_zz]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = perm_zz
     row = 2
     column = 2

@@ -261,9 +261,9 @@
     execute_on = timestep_end
   [../]
   [./porosity]
-    type = MaterialRealAux
+    type = PorousFlowPropertyAux
     variable = porosity
-    property = PorousFlow_porosity_qp
+    property = porosity
     execute_on = timestep_end
   [../]
 []

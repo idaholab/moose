@@ -111,69 +111,69 @@
 
 [AuxKernels]
   [./poromat]
-    type = MaterialRealAux
-    property = PorousFlow_porosity_qp
+    type = PorousFlowPropertyAux
+    property = porosity
     variable = poromat
   [../]
   [./permxxmat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permxxmat
     column = 0
     row = 0
   [../]
   [./permxymat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permxymat
     column = 1
     row = 0
   [../]
   [./permxzmat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permxzmat
     column = 2
     row = 0
   [../]
   [./permyxmat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permyxmat
     column = 0
     row = 1
   [../]
   [./permyymat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permyymat
     column = 1
     row = 1
   [../]
   [./permyzmat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permyzmat
     column = 2
     row = 1
   [../]
   [./permzxmat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permzxmat
     column = 0
     row = 2
   [../]
   [./permzymat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permzymat
     column = 1
     row = 2
   [../]
   [./permzzmat]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = permzzmat
     column = 2
     row = 2
