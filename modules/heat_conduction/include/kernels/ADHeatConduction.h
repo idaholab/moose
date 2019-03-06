@@ -23,11 +23,11 @@ public:
   ADHeatConduction(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADGradResidual precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _thermal_conductivity;
 
-  usingKernelMembers;
+  usingKernelGradMembers;
 };
 
 #endif // ADHEATCONDUCTION_H

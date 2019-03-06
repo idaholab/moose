@@ -28,5 +28,5 @@ template <ComputeStage compute_stage>
 ADResidual
 ADMatDiffusion<compute_stage>::computeQpResidual()
 {
-  return _diffusivity[_qp] * ADDiffusion<compute_stage>::computeQpResidual();
+  return _diffusivity[_qp] * ADDiffusion<compute_stage>::precomputeQpResidual();
 }
