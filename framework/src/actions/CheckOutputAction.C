@@ -41,27 +41,24 @@ CheckOutputAction::act()
 void
 CheckOutputAction::checkVariableOutput(const std::string & task)
 {
-  if (_awh.hasActions(task))
+  // Loop through the actions for the given task
+  const auto & actions = _awh.getActionListByName(task);
+  for (const auto & act : actions)
   {
-    // Loop through the actions for the given task
-    const auto & actions = _awh.getActionListByName(task);
-    for (const auto & act : actions)
-    {
-      // Cast the object to AddVariableAction so that that
-      // OutputInterface::buildOutputHideVariableList may be called
-      AddVariableAction * ptr = dynamic_cast<AddVariableAction *>(act);
+    // Cast the object to AddVariableAction so that that
+    // OutputInterface::buildOutputHideVariableList may be called
+    AddVariableAction * ptr = dynamic_cast<AddVariableAction *>(act);
 
-      // If the cast fails move to the next action, this is the case with NodalNormals which is also
-      // associated with
-      // the "add_aux_variable" task.
-      if (ptr == NULL)
-        continue;
+    // If the cast fails move to the next action, this is the case with NodalNormals which is also
+    // associated with
+    // the "add_aux_variable" task.
+    if (ptr == NULL)
+      continue;
 
-      // Create the hide list for the action
-      std::set<std::string> names_set;
-      names_set.insert(ptr->name());
-      ptr->buildOutputHideVariableList(names_set);
-    }
+    // Create the hide list for the action
+    std::set<std::string> names_set;
+    names_set.insert(ptr->name());
+    ptr->buildOutputHideVariableList(names_set);
   }
 }
 
