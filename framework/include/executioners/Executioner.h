@@ -15,6 +15,7 @@
 #include "PostprocessorInterface.h"
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
+#include "FEProblemSolve.h"
 #include "PicardSolve.h"
 
 // System includes
@@ -28,12 +29,6 @@ InputParameters validParams<Executioner>();
 
 /**
  * Executioners are objects that do the actual work of solving your problem.
- *
- * In general there are two "sets" of Executioners: Steady and Transient.
- *
- * The Difference is that a Steady Executioner usually only calls "solve()"
- * for the NonlinearSystem once... where Transient Executioners call solve()
- * multiple times... i.e. once per timestep.
  */
 class Executioner : public MooseObject,
                     public UserObjectInterface,
@@ -49,12 +44,12 @@ public:
    */
   Executioner(const InputParameters & parameters);
 
-  virtual ~Executioner();
+  virtual ~Executioner() {}
 
   /**
    * Initialize the executioner
    */
-  virtual void init();
+  virtual void init() {}
 
   /**
    * Pure virtual execute function MUST be overridden by children classes.
@@ -65,22 +60,22 @@ public:
   /**
    * Override this for actions that should take place before execution
    */
-  virtual void preExecute();
+  virtual void preExecute() {}
 
   /**
    * Override this for actions that should take place after execution
    */
-  virtual void postExecute();
+  virtual void postExecute() {}
 
   /**
-   * Override this for actions that should take place before execution
+   * Override this for actions that should take place before execution, called by PicardSolve
    */
-  virtual void preSolve();
+  virtual void preSolve() {}
 
   /**
-   * Override this for actions that should take place after execution
+   * Override this for actions that should take place after execution, called by PicardSolve
    */
-  virtual void postSolve();
+  virtual void postSolve() {}
 
   /**
    * Deprecated:
@@ -97,7 +92,7 @@ public:
    * This is an empty string for non-Transient executioners
    * @return A string of giving the TimeStepper name
    */
-  virtual std::string getTimeStepperName();
+  virtual std::string getTimeStepperName() { return std::string(); }
 
   /**
    * Can be used by subsclasses to call parentOutputPositionChanged()
@@ -110,10 +105,13 @@ public:
    */
   virtual bool lastSolveConverged() const = 0;
 
+  /// Return the underlining FEProblemSolve object.
+  FEProblemSolve & feProblemSolve() { return _feproblem_solve; }
+
   /// Return underlining PicardSolve object.
   PicardSolve & picardSolve() { return _picard_solve; }
 
-  /// Augmented Picard convergence check that can be overridden by derived executioners
+  /// Augmented Picard convergence check that to be called by PicardSolve and can be overridden by derived executioners
   virtual bool augmentedPicardConvergenceCheck() const { return false; }
 
 protected:
@@ -129,17 +127,11 @@ protected:
 
   FEProblemBase & _fe_problem;
 
+  FEProblemSolve _feproblem_solve;
   PicardSolve _picard_solve;
-
-  /// Initial Residual Variables
-  Real _initial_residual_norm;
-  Real _old_initial_residual_norm;
 
   // Restart
   std::string _restart_file_base;
-
-  // Splitting
-  std::vector<std::string> _splitting;
 };
 
 #endif // EXECUTIONER_H
