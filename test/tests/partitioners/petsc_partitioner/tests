@@ -178,6 +178,23 @@
     dof_id_bytes = 8
   [../]
 
+  [./parmetis_presplit_mesh]
+    requirement = 'Parmetis shall support presplit'
+    issues = '##11628'
+    design = '/PetscExternalPartitioner.md'
+    type = 'CheckFiles'
+    input = 'petsc_partitioner.i'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Mesh/Partitioner/type=PartitionerWeightTest Mesh/parallel_type=replicated --split-file petsc_partitioner_parmetis_presplit --split-mesh 4,8'
+    check_files = 'petsc_partitioner_parmetis_presplit.cpr/4/header.cpr petsc_partitioner_parmetis_presplit.cpr/4/split-4-0.cpr petsc_partitioner_parmetis_presplit.cpr/4/split-4-3.cpr petsc_partitioner_parmetis_presplit.cpr/8/header.cpr petsc_partitioner_parmetis_presplit.cpr/8/split-8-0.cpr petsc_partitioner_parmetis_presplit.cpr/8/split-8-7.cpr'
+    recover = false
+
+    parmetis = true
+    petsc_version = '>=3.9.3'
+    min_parallel = 2
+    max_parallel = 2
+    dof_id_bytes = 4
+  [../]
+
   [./chaco]
     requirement = 'MOOSE shall support a serial partitioner Chaco'
     issues = '##11628'
@@ -209,7 +226,4 @@
     min_parallel = 4
     max_parallel = 4
   [../]
-
-
-
 []
