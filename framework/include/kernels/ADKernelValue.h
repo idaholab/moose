@@ -12,8 +12,9 @@
 
 #include "ADKernel.h"
 
-#define usingKernelValueMembers usingKernelMembers
-#define usingVectorKernelValueMembers usingVectorKernelMembers
+#define usingTemplKernelValueMembers(T) usingTemplKernelMembers(T)
+#define usingKernelValueMembers usingTemplKernelValueMembers(Real)
+#define usingVectorKernelValueMembers usingTemplKernelMembers(RealVectorValue)
 
 template <typename, ComputeStage>
 class ADKernelValueTempl;

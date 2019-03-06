@@ -13,21 +13,21 @@ registerADMooseObject("MooseApp", ADDiffusion);
 
 defineADValidParams(
     ADDiffusion,
-    ADKernel,
+    ADKernelGrad,
     params.addClassDescription("Same as `Diffusion` in terms of physics/residual, but the Jacobian "
                                "is computed using forward automatic differentiation"););
 
 template <ComputeStage compute_stage>
 ADDiffusion<compute_stage>::ADDiffusion(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters)
+  : ADKernelGrad<compute_stage>(parameters)
 {
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-ADDiffusion<compute_stage>::computeQpResidual()
+ADGradResidual
+ADDiffusion<compute_stage>::precomputeQpResidual()
 {
-  return _grad_u[_qp] * _grad_test[_i][_qp];
+  return _grad_u[_qp];
 }
 
 template class ADDiffusion<RESIDUAL>;

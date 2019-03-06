@@ -25,9 +25,9 @@ ADTimeDerivative<compute_stage>::ADTimeDerivative(const InputParameters & parame
 
 template <ComputeStage compute_stage>
 ADResidual
-ADTimeDerivative<compute_stage>::computeQpResidual()
+ADTimeDerivative<compute_stage>::precomputeQpResidual()
 {
-  return _test[_i][_qp] * _u_dot[_qp];
+  return _u_dot[_qp];
 }
 
 adBaseClass(ADTimeDerivative);
