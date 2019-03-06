@@ -201,7 +201,6 @@ FlowChannel::init()
       isTwoPhase, "initial_T", {"initial_T_liquid", "initial_T_vapor"}, *this);
   getOneOrTwoPhaseParameters<FunctionName>(
       isTwoPhase, "initial_vel", {"initial_vel_liquid", "initial_vel_vapor"}, *this);
-  getOneOrTwoPhaseParameters<FunctionName>(isTwoPhase, "Hw", {"Hw_liquid", "Hw_vapor"}, *this);
 
   // initialize the stabilization object
   if (!_stabilization_uo_name.empty())

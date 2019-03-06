@@ -1,4 +1,5 @@
 #include "HeatTransferBase.h"
+#include "InputParameterLogic.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 #include "FlowChannel.h"
@@ -63,6 +64,10 @@ HeatTransferBase::init()
     _fp_name = pipe.getFluidPropertiesName();
     _A_fn_name = pipe.getAreaFunctionName();
     _closures_name = MooseUtils::toLower(pipe.getParam<std::string>("closures"));
+
+    const THM::FlowModelID & model_id = pipe.getFlowModelID();
+    bool isTwoPhase = model_id == THM::FM_TWO_PHASE || model_id == THM::FM_TWO_PHASE_NCG;
+    getOneOrTwoPhaseParameters<FunctionName>(isTwoPhase, "Hw", {"Hw_liquid", "Hw_vapor"}, *this);
   }
 }
 
