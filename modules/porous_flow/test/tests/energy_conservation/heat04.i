@@ -258,8 +258,8 @@
     index_j = 2
   [../]
   [./porosity]
-    type = MaterialRealAux
-    property = PorousFlow_porosity_qp
+    type = PorousFlowPropertyAux
+    property = porosity
     variable = porosity
   [../]
 []
@@ -305,18 +305,6 @@
   [../]
   [./porosity]
     type = PorousFlowPorosity
-    thermal = true
-    fluid = true
-    mechanical = true
-    ensure_positive = false
-    biot_coefficient = 1.0
-    porosity_zero = 0.5
-    thermal_expansion_coeff = 0.25
-    solid_bulk = 2
-  [../]
-  [./porosity_qp]
-    type = PorousFlowPorosity
-    at_nodes = false
     thermal = true
     fluid = true
     mechanical = true

@@ -81,22 +81,22 @@
     variable = perm_var
   [../]
   [./perm_x]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = perm_x
     row = 0
     column = 0
   [../]
   [./perm_y]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = perm_y
     row = 1
     column = 1
   [../]
   [./perm_z]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     variable = perm_z
     row = 2
     column = 2

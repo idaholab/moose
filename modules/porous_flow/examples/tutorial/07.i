@@ -97,13 +97,13 @@
     variable = mineral_conc
   [../]
   [./porosity]
-    type = MaterialRealAux
-    property = PorousFlow_porosity_qp
+    type = PorousFlowPropertyAux
+    property = porosity
     variable = porosity
   [../]
   [./permeability]
-    type = MaterialRealTensorValueAux
-    property = PorousFlow_permeability_qp
+    type = PorousFlowPropertyAux
+    property = permeability
     column = 0
     row = 0
     variable = permeability
