@@ -1,5 +1,4 @@
 - /AuxKernels/CopyValueAux
-- /AuxKernels/HydraulicDiameterCircularAux
 - /AuxKernels/PrandtlNumberAux
 - /AuxKernels/PressureAux
 - /AuxKernels/ReynoldsNumberAux
@@ -214,6 +213,7 @@
 - /Materials/DerivativeMaterialInterfaceTHM
 - /Materials/DirectionMaterial
 - /Materials/FluidProperties3EqnMaterial
+- /Materials/HydraulicDiameterCircularMaterial
 - /Materials/SolidMaterial
 - /Materials/TemperatureWall3EqnMaterial
 - /Materials/WallFriction3EqnBaseMaterial

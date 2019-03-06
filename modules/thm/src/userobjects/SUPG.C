@@ -66,7 +66,6 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
   std::vector<VariableName> cv_temperature(1, FlowModelSinglePhase::TEMPERATURE);
   std::vector<VariableName> cv_T_wall(1, FlowModelSinglePhase::TEMPERATURE_WALL);
   std::vector<VariableName> cv_P_hf(1, FlowModelSinglePhase::HEAT_FLUX_PERIMETER);
-  std::vector<VariableName> cv_D_h(1, FlowModelSinglePhase::HYDRAULIC_DIAMETER);
   std::vector<VariableName> cv_rhoA(1, FlowModelSinglePhase::RHOA);
   std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
@@ -86,7 +85,7 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     params.set<std::vector<VariableName>>("rhou") = cv_rhou;
     params.set<std::vector<VariableName>>("vel") = cv_vel;
     params.set<std::vector<VariableName>>("A") = cv_area;
-    params.set<std::vector<VariableName>>("D_h") = cv_D_h;
+    params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
     params.set<std::vector<VariableName>>("rhoE") = cv_rhoE;
     params.set<std::vector<VariableName>>("H") = cv_enthalpy;
     params.set<std::vector<VariableName>>("T") = cv_temperature;

@@ -31,7 +31,7 @@ validParams<SUPGMaterial>()
   // Coupled aux variables
   params.addRequiredCoupledVar("vel", "x-velocity");
   params.addRequiredCoupledVar("A", "cross-sectional area");
-  params.addRequiredCoupledVar("D_h", "hydraulic diameter");
+  params.addRequiredParam<MaterialPropertyName>("D_h", "hydraulic diameter");
 
   // Required parameters
   params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravitational acceleration vector");
@@ -93,7 +93,7 @@ SUPGMaterial::SUPGMaterial(const InputParameters & parameters)
     _dp_drhouA(getMaterialPropertyDerivativeTHM<Real>("p", "arhouA")),
     _dp_drhoEA(getMaterialPropertyDerivativeTHM<Real>("p", "arhoEA")),
 
-    _D_h(coupledValue("D_h")),
+    _D_h(getMaterialProperty<Real>("D_h")),
     _P_hf(coupledValue("P_hf")),
 
     // Time derivative values

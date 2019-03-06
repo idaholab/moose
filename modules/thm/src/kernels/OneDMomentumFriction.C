@@ -8,7 +8,7 @@ validParams<OneDMomentumFriction>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("A", "Cross-sectional area");
-  params.addRequiredCoupledVar("D_h", "Hydraulic diameter");
+  params.addRequiredParam<MaterialPropertyName>("D_h", "Hydraulic diameter");
   params.addCoupledVar("beta", "Solution variable beta");
   params.addRequiredCoupledVar("arhoA", "Solution variable alpha*rho*A");
   params.addRequiredCoupledVar("arhouA", "Solution variable alpha*rho*u*A");
@@ -25,7 +25,7 @@ validParams<OneDMomentumFriction>()
 OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters)
   : DerivativeMaterialInterfaceTHM<Kernel>(parameters),
     _A(coupledValue("A")),
-    _D_h(coupledValue("D_h")),
+    _D_h(getMaterialProperty<Real>("D_h")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
     _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeTHM<Real>("alpha", "beta")

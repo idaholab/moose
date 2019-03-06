@@ -14,7 +14,7 @@ validParams<WallFrictionChurchillMaterial>()
   params.addRequiredCoupledVar("rhoEA", "Total energy equation variable: rho*E*A");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density");
   params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the velocity");
-  params.addRequiredCoupledVar("D_h", "hydraulic diameter");
+  params.addRequiredParam<MaterialPropertyName>("D_h", "hydraulic diameter");
 
   params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
@@ -35,7 +35,7 @@ WallFrictionChurchillMaterial::WallFrictionChurchillMaterial(const InputParamete
     _mu(getMaterialProperty<Real>("mu")),
     _rho(getMaterialProperty<Real>("rho")),
     _vel(getMaterialProperty<Real>("vel")),
-    _D_h(coupledValue("D_h")),
+    _D_h(getMaterialProperty<Real>("D_h")),
     _roughness(getParam<Real>("roughness"))
 {
 }
