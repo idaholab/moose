@@ -18,6 +18,30 @@
   [../]
 []
 
+[AuxVariables]
+  [vel_x]
+    order = SECOND
+  []
+  [vel_y]
+    order = SECOND
+  []
+[]
+
+[AuxKernels]
+  [vel_x]
+    type = VectorVariableComponent
+    variable = vel_x
+    vector_variable = velocity
+    component = 'x'
+  []
+  [vel_y]
+    type = VectorVariableComponent
+    variable = vel_y
+    vector_variable = velocity
+    component = 'y'
+  []
+[]
+
 [Variables]
   [./velocity]
     order = SECOND
@@ -26,7 +50,6 @@
 
   [./T]
     order = SECOND
-
     [./InitialCondition]
       type = ConstantIC
       value = 1.0
@@ -66,8 +89,10 @@
   [../]
 
  [./temperature_time]
-   type = INSADTemperatureTimeDerivative
+   type = ADHeatConductionTimeDerivative
    variable = T
+   specific_heat = 'cp'
+   density_name = 'rho'
  [../]
 
  [./temperature_advection]
@@ -158,9 +183,8 @@
   num_steps = 5
   dt = .5
   dtmin = .5
-  petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       NONZERO               1e-15'
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
+  petsc_options_value = 'asm      2               ilu          4'
   line_search = 'none'
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-13
@@ -172,4 +196,5 @@
 [Outputs]
   file_base = lid_driven_out
   exodus = true
+  perf_graph = true
 []
