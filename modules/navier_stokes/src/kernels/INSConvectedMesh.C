@@ -37,9 +37,9 @@ INSConvectedMesh<compute_stage>::INSConvectedMesh(const InputParameters & parame
 
 template <ComputeStage compute_stage>
 ADResidual
-INSConvectedMesh<compute_stage>::computeQpResidual()
+INSConvectedMesh<compute_stage>::precomputeQpResidual()
 {
-  return _test[_i][_qp] * -_rho[_qp] *
+  return -_rho[_qp] *
          VectorValue<typename Moose::RealType<compute_stage>::type>(
              _disp_x_dot[_qp], _disp_y_dot[_qp], _disp_z_dot[_qp]) *
          _grad_u[_qp];

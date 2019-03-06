@@ -32,7 +32,7 @@ public:
   virtual ~INSADMomentumTimeDerivative() {}
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _rho;
 

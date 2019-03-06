@@ -28,7 +28,7 @@ public:
   INSConvectedMesh(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADResidual precomputeQpResidual() override;
 
   const ADVariableValue & _disp_x_dot;
   const ADVariableValue & _disp_y_dot;

@@ -30,8 +30,8 @@ INSADMomentumTimeDerivative<compute_stage>::INSADMomentumTimeDerivative(
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-INSADMomentumTimeDerivative<compute_stage>::computeQpResidual()
+ADRealVectorValue
+INSADMomentumTimeDerivative<compute_stage>::precomputeQpResidual()
 {
-  return _test[_i][_qp] * _rho[_qp] * _u_dot[_qp];
+  return _rho[_qp] * _u_dot[_qp];
 }
