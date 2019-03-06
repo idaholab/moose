@@ -13,6 +13,8 @@
 #include "MooseApp.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/linear_partitioner.h"
+#include "libmesh/elem.h"
 
 registerMooseObject("MooseApp", PetscExternalPartitioner);
 
@@ -80,7 +82,6 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   // construct a dual graph
   Mat dual;
   PetscInt *i, *j, *values, *elem_weights, nrows, nj, ncols, local_elem_id;
-  unsigned int neighbor;
   const PetscInt * parts;
   MatPartitioning part;
   IS is;
@@ -89,7 +90,6 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   j = 0;
   values = 0;
   elem_weights = 0;
-  neighbor = 0;
 
   // We want to use a parallel partitioner that requires a distributed graph
   // Simply calling a linear partitioner provides us the distributed graph
@@ -132,13 +132,11 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   {
     auto & elem = _local_id_to_elem[local_elem_id];
     unsigned int n_neighbors = 0;
-    // We can not just loop over sides since the neighbor ordering
-    // is different from the side ordering. The distributed graph
-    // is built according to the neighbor ordering, and so here we
-    // have to use the same ordering, otherwise the side weights
-    // are just wrong.
+
     for (auto neighbor : elem->neighbor_ptr_range())
     {
+      // Skip boundary sides since they do not connect to
+      // anything.
       if (neighbor != nullptr && neighbor->active())
       {
         j[nj] = row[n_neighbors++];
@@ -153,7 +151,8 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       }
     }
     if (n_neighbors != row.size())
-      mooseError("Cannot construct dual graph correctly ");
+      mooseError(
+          "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
 
     local_elem_id++;
   }

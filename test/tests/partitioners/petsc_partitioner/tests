@@ -192,7 +192,6 @@
     petsc_version = '>=3.9.3'
     min_parallel = 2
     max_parallel = 2
-    dof_id_bytes = 4
   [../]
 
   [./chaco]
