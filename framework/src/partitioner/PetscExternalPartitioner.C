@@ -61,6 +61,19 @@ PetscExternalPartitioner::clone() const
 }
 
 void
+PetscExternalPartitioner::preLinearPartition(MeshBase & mesh)
+{
+  // Temporarily cache the old partition method
+  auto old_partitioner = std::move(mesh.partitioner());
+  // Create a linear partitioner
+  mesh.partitioner().reset(new LinearPartitioner);
+  // Partition mesh
+  mesh.partition(n_processors());
+  // Restore the old partition
+  mesh.partitioner() = std::move(old_partitioner);
+}
+
+void
 PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
 {
 #ifdef LIBMESH_HAVE_PETSC
@@ -77,6 +90,13 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   values = 0;
   elem_weights = 0;
   neighbor = 0;
+
+  // We want to use a parallel partitioner that requires a distributed graph
+  // Simply calling a linear partitioner provides us the distributed graph
+  // We shold not do anything when using a distributed mesh since the mesh itself
+  // is already distributed
+  if (mesh.is_replicated())
+    preLinearPartition(mesh);
 
   build_graph(mesh);
   nrows = _dual_graph.size();
@@ -110,21 +130,31 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   nj = 0;
   for (auto & row : _dual_graph)
   {
-    if (_apply_side_weight)
-      neighbor = 0;
-
-    for (auto adj : row)
+    auto & elem = _local_id_to_elem[local_elem_id];
+    unsigned int n_neighbors = 0;
+    // We can not just loop over sides since the neighbor ordering
+    // is different from the side ordering. The distributed graph
+    // is built according to the neighbor ordering, and so here we
+    // have to use the same ordering, otherwise the side weights
+    // are just wrong.
+    for (auto neighbor : elem->neighbor_ptr_range())
     {
-      j[nj] = adj;
-      if (_apply_side_weight)
+      if (neighbor != nullptr && neighbor->active())
       {
-        auto & elem = _local_id_to_elem[local_elem_id];
-        values[nj] = computeSideWeight(*elem, neighbor);
-        neighbor++;
-      }
+        j[nj] = row[n_neighbors++];
 
-      nj++;
+        if (_apply_side_weight)
+        {
+          auto side = elem->which_neighbor_am_i(neighbor);
+          values[nj] = computeSideWeight(*elem, side);
+        }
+
+        nj++;
+      }
     }
+    if (n_neighbors != row.size())
+      mooseError("Cannot construct dual graph correctly ");
+
     local_elem_id++;
   }
 
