@@ -73,6 +73,9 @@ extract fluid at a given rate, and therefore in a simulation that
 includes, the same sink multiplied by fluid enthalpy should be applied
 to the temperature variable.
 
+!alert warning
+When using the PorousFlow Dirac Kernels in conjunction with [`PorousFlowPorosity`](porosity.md) that depends on volumetric strain (`mechanical = true`) you should set `strain_at_nearest_qp = true` in your GlobalParams block.  This ensures the nodal Porosity Material uses the volumetric strain at the Dirac quadpoint(s).  Otherwise, a nodal Porosity Material evaluated at node $i$ in an element will attempt to use the $i^{th}$ member of volumetric strain, but volumetric strain will only be of size equal to the number of Dirac points in the element.
+
 ## Polyline sinks as functions of porepressure and/or temperature
 
 A [`PorousFlowPolyLineSink`](/PorousFlowPolyLineSink.md) is a special case of the general polyline sink.  The function, $f$ in

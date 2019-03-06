@@ -29,8 +29,12 @@ validParams<PorousFlowPolyLineSink>()
       "quad-point pressure exceeds the final pressure value, the final flux value is "
       "used.  This flux is OUT of the medium: hence positive values of flux means this "
       "will be a SINK, while negative values indicate this flux will be a SOURCE.");
-  params.addClassDescription("Approximates a polyline sink by using a number of point sinks with "
-                             "given weighting whose positions are read from a file");
+  params.addClassDescription(
+      "Approximates a polyline sink by using a number of point sinks with "
+      "given weighting whose positions are read from a file.  NOTE: if you are using "
+      "PorousFlowPorosity that depends on volumetric strain, you should set "
+      "strain_at_nearest_qp=true in your GlobalParams, to ensure the nodal Porosity Material uses "
+      "the volumetric strain at the Dirac quadpoints, and can therefore be computed");
   return params;
 }
 

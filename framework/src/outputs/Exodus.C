@@ -297,7 +297,7 @@ Exodus::outputScalarVariables()
 
     MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, out_name);
     scalar_var.reinit();
-    VariableValue value = scalar_var.sln();
+    VariableValue value(scalar_var.sln());
 
     const std::vector<dof_id_type> & dof_indices = scalar_var.dofIndices();
     const unsigned int n = dof_indices.size();

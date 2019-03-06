@@ -345,4 +345,12 @@
     design = 'PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
   [../]
+  [./strain_at_nearest_qp]
+    type = RunApp
+    input = strain_at_nearest_qp.i
+    threading = '!pthreads'
+    requirement = "If the strain at the nearest quadpoint is used when evaluating PorousFlowPorosity that is coupled to solid mechanics, all PorousFlow DiracKernels shall be usable"
+    issues = "#12541"
+    design = "sinks.md"
+  [../]
 []

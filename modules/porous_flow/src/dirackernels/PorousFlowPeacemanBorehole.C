@@ -56,9 +56,13 @@ validParams<PorousFlowPeacemanBorehole>()
                         "However, if this parameter is given as a positive number then this "
                         "number is used instead of the internal calculation.  This speeds up "
                         "computation marginally.  re_constant becomes irrelevant");
-  params.addClassDescription("Approximates a borehole in the mesh using the Peaceman approach, ie "
-                             "using a number of point sinks with given radii whose positions are "
-                             "read from a file");
+  params.addClassDescription(
+      "Approximates a borehole in the mesh using the Peaceman approach, ie "
+      "using a number of point sinks with given radii whose positions are "
+      "read from a file.  NOTE: if you are using PorousFlowPorosity that depends on volumetric "
+      "strain, you should set strain_at_nearest_qp=true in your GlobalParams, to ensure the nodal "
+      "Porosity Material uses the volumetric strain at the Dirac quadpoints, and can therefore be "
+      "computed");
   return params;
 }
 

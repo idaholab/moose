@@ -23,7 +23,7 @@ public:
   DarcyThermoMechApp(InputParameters parameters);
 
   static void registerApps();
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
+  static void registerAll(Factory & factory, ActionFactory & action_factory, Syntax & syntax);
 };
 
 #endif // DARCYTHERMOMECHAPP_H
