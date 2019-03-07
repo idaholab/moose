@@ -19,6 +19,10 @@ validParams<TestAction>()
                                              "List of constant aux variables");
   params.addParam<std::vector<Real>>("constant_aux_variable_values",
                                      "List of values of the constant aux variables");
+  params.addParam<std::vector<std::string>>("constant_mat_property_names",
+                                            "List of constant material property names");
+  params.addParam<std::vector<Real>>("constant_mat_property_values",
+                                     "List of values of the constant material properties");
 
   params.addPrivateParam<std::string>("fe_family");
   params.addPrivateParam<std::string>("fe_order");
@@ -36,15 +40,23 @@ TestAction::TestAction(InputParameters params)
     _scalar_variable_values(getParam<std::vector<Real>>("scalar_variable_values")),
     _constant_aux_variables(getParam<std::vector<VariableName>>("constant_aux_variable_names")),
     _constant_aux_variable_values(getParam<std::vector<Real>>("constant_aux_variable_values")),
+    _constant_mat_property_names(getParam<std::vector<std::string>>("constant_mat_property_names")),
+    _constant_mat_property_values(getParam<std::vector<Real>>("constant_mat_property_values")),
     _fe_family(getParam<std::string>("fe_family")),
     _fe_order(getParam<std::string>("fe_order"))
 {
   if (_scalar_variables.size() != _scalar_variable_values.size())
-    mooseError("JacobianTest: The list parameters 'scalar_variable_names' and ",
-               "'scalar_variable_values' must have the same length.");
+    mooseError(name(),
+               ": The parameters 'scalar_variable_names' and ",
+               "'scalar_variable_values' must have the same numbers of entries.");
   if (_constant_aux_variables.size() != _constant_aux_variable_values.size())
-    mooseError("JacobianTest: The list parameters 'constant_aux_variable_names' and ",
-               "'constant_aux_variable_values' must have the same length.");
+    mooseError(name(),
+               ": The parameters 'constant_aux_variable_names' and ",
+               "'constant_aux_variable_values' must have the same numbers of entries.");
+  if (_constant_mat_property_names.size() != _constant_mat_property_values.size())
+    mooseError(name(),
+               ": The parameters 'constant_mat_property_names' and ",
+               "'constant_mat_property_values' must have the same numbers of entries.");
 }
 
 void
@@ -120,6 +132,7 @@ TestAction::addObjects()
   addNonConstantAuxVariables();
   addInitialConditions();
   addUserObjects();
+  addConstantMaterials();
   addMaterials();
   addPreconditioner();
   addExecutioner();
@@ -200,6 +213,23 @@ TestAction::addConstantAuxVariables(const std::vector<VariableName> & names,
       _awh.addActionBlock(action);
     }
   }
+}
+
+void
+TestAction::addConstantMaterials()
+{
+  const std::string class_name = "AddMaterialAction";
+  InputParameters params = _action_factory.getValidParams(class_name);
+  params.set<std::string>("type") = "GenericConstantMaterial";
+
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+      _action_factory.create(class_name, "constant_material", params));
+
+  action->getObjectParams().set<std::vector<std::string>>("prop_names") =
+      _constant_mat_property_names;
+  action->getObjectParams().set<std::vector<Real>>("prop_values") = _constant_mat_property_values;
+
+  _awh.addActionBlock(action);
 }
 
 void

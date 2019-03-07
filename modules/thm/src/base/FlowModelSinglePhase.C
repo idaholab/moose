@@ -211,7 +211,6 @@ FlowModelSinglePhase::addMooseObjects()
   std::vector<VariableName> cv_rhouA(1, RHOUA);
   std::vector<VariableName> cv_rhoEA(1, RHOEA);
   std::vector<VariableName> cv_area(1, AREA);
-  std::vector<VariableName> cv_D_h(1, HYDRAULIC_DIAMETER);
 
   ////////////////////////////////////////////////////////
   // Adding kernels
@@ -294,7 +293,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = RHOUA;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
-    params.set<std::vector<VariableName>>("D_h") = {HYDRAULIC_DIAMETER};
+    params.set<MaterialPropertyName>("D_h") = HYDRAULIC_DIAMETER;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;

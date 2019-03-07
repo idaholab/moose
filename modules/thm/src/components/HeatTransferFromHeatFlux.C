@@ -22,26 +22,17 @@ HeatTransferFromHeatFlux::HeatTransferFromHeatFlux(const InputParameters & param
 }
 
 void
-HeatTransferFromHeatFlux::addVariables()
-{
-  HeatTransferBase::addVariables();
-
-  _sim.addVariable(false, _q_wall_name, FlowModel::feType(), _block_ids_pipe);
-}
-
-void
 HeatTransferFromHeatFlux::addMooseObjects()
 {
   HeatTransferBase::addMooseObjects();
 
   {
-    const std::string class_name = "FunctionAux";
+    const std::string class_name = "GenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = {_q_wall_name};
     params.set<std::vector<SubdomainName>>("block") = {_pipe_name};
-    params.set<FunctionName>("function") = _q_wall_fn_name;
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
-    _sim.addAuxKernel(class_name, genName(name(), "q_wall_auxkernel"), params);
+    params.set<std::vector<std::string>>("prop_names") = {_q_wall_name};
+    params.set<std::vector<FunctionName>>("prop_values") = {_q_wall_fn_name};
+    _sim.addMaterial(class_name, genName(name(), "q_wall_material"), params);
   }
 
   if (_model_type == THM::FM_SINGLE_PHASE)
@@ -59,7 +50,7 @@ HeatTransferFromHeatFlux::addMooseObjects1Phase()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
     params.set<std::vector<SubdomainName>>("block") = {_pipe_name};
-    params.set<std::vector<VariableName>>("q_wall") = {_q_wall_name};
+    params.set<MaterialPropertyName>("q_wall") = _q_wall_name;
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     _sim.addKernel(class_name, genName(name(), "wall_heat"), params);
   }
@@ -89,7 +80,7 @@ HeatTransferFromHeatFlux::addMooseObjects2Phase()
     params.set<NonlinearVariableName>("variable") = arhoEA_name[k];
     params.set<std::vector<SubdomainName>>("block") = {_pipe_name};
     params.set<bool>("is_liquid") = is_liquid[k];
-    params.set<std::vector<VariableName>>("q_wall") = {_q_wall_name};
+    params.set<MaterialPropertyName>("q_wall") = _q_wall_name;
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
     params.set<MaterialPropertyName>("alpha") = alpha_name[k];
@@ -115,7 +106,7 @@ HeatTransferFromHeatFlux::addMooseObjects2Phase()
       params.set<std::vector<VariableName>>("arhouA_liquid") = {arhouA_name[0]};
       params.set<std::vector<VariableName>>("arhoEA_liquid") = {arhoEA_name[0]};
       params.set<MaterialPropertyName>("alpha_liquid") = alpha_name[0];
-      params.set<std::vector<VariableName>>("q_wall") = {_q_wall_name};
+      params.set<MaterialPropertyName>("q_wall") = _q_wall_name;
       params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
       params.set<MaterialPropertyName>("kappa_liquid") =
           FlowModelTwoPhase::HEAT_FLUX_PARTITIONING_LIQUID;

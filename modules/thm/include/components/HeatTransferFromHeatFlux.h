@@ -16,7 +16,6 @@ class HeatTransferFromHeatFlux : public HeatTransferBase
 public:
   HeatTransferFromHeatFlux(const InputParameters & parameters);
 
-  virtual void addVariables() override;
   virtual void addMooseObjects() override;
 
   virtual bool isTemperatureType() const override;

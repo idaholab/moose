@@ -62,6 +62,11 @@ protected:
                                const std::string & fe_order);
 
   /**
+   * Adds constant materials
+   */
+  void addConstantMaterials();
+
+  /**
    * Adds a solution variable
    *
    * @param[in] var_name  name of the variable to add
@@ -158,6 +163,11 @@ protected:
   const std::vector<VariableName> _constant_aux_variables;
   /// List of values for the constant aux variables to add
   const std::vector<Real> _constant_aux_variable_values;
+
+  /// List of constant material properties to add
+  const std::vector<std::string> _constant_mat_property_names;
+  /// List of values for the constant material properties to add
+  const std::vector<Real> _constant_mat_property_values;
 
   /// Default FE family
   const std::string _fe_family;
