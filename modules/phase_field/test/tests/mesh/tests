@@ -4,6 +4,9 @@
     input = 'mortarperiodic.i'
     cli_args = 'Mesh/elem_type=HEX8 Outputs/file_base=mortarperiodic_hex8'
     exodiff = 'mortarperiodic_hex8.e'
+    requirement = "The mesh object for mortar based periodic BCs shall work with first order elements"
+    design = 'MortarPeriodicity/index.md'
+    issues = '#7045'
   [../]
 
   [./mortarperiodic_hex27]
@@ -11,5 +14,19 @@
     input = 'mortarperiodic.i'
     cli_args = 'Mesh/elem_type=HEX27 Outputs/file_base=mortarperiodic_hex27'
     exodiff = 'mortarperiodic_hex27.e'
+    requirement = "The mesh object for mortar based periodic BCs shall work with second order elements"
+    design = 'MortarPeriodicity/index.md'
+    issues = '#7045'
+  [../]
+
+  [./sphere]
+    type = 'Exodiff'
+    input = 'sphere.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sphere_in.e'
+    requirement = "The mesh generator for 2d sphere surfaces in 3d space shall produce a correct mesh"
+    design = 'mesh/SphereSurfaceMesh.md'
+    issues = '#8414'
+    recover = false
   [../]
 []

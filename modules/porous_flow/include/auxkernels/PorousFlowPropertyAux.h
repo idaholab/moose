@@ -69,6 +69,12 @@ private:
   /// Mineral-species reacion rate
   const MaterialProperty<std::vector<Real>> * _mineral_reaction_rate;
 
+  /// Porosity of the media
+  const MaterialProperty<Real> * _porosity;
+
+  /// Permeability of the media
+  const MaterialProperty<RealTensorValue> * _permeability;
+
   /// PorousFlowDictator UserObject
   const PorousFlowDictator & _dictator;
 
@@ -86,7 +92,9 @@ private:
     INTERNAL_ENERGY,
     SECONDARY_CONCENTRATION,
     MINERAL_CONCENTRATION,
-    MINERAL_REACTION_RATE
+    MINERAL_REACTION_RATE,
+    POROSITY,
+    PERMEABILITY
   } _property_enum;
 
   /// Phase index
@@ -106,6 +114,10 @@ private:
 
   /// Mineral species number
   const unsigned int _mineral_species;
+
+  /// Permeability tensor row and column
+  const unsigned int _k_row;
+  const unsigned int _k_col;
 };
 
 #endif // POROUSFLOWPROPERTYAUX_H

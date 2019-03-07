@@ -67,8 +67,8 @@
 
 [AuxKernels]
   [./porosity]
-    type = MaterialRealAux
-    property = PorousFlow_porosity_qp
+    type = PorousFlowPropertyAux
+    property = porosity
     variable = porosity
   [../]
 []

@@ -54,6 +54,7 @@ PorousFlowDependencies::PorousFlowDependencies()
   _deps.insertDependency("PorousFlowPropertyAux", "relative_permeability_qp");
   _deps.insertDependency("PorousFlowPropertyAux", "chemistry_qp");
   _deps.insertDependency("PorousFlowPropertyAux", "mineral_qp");
+  _deps.insertDependency("PorousFlowPropertyAux", "porosity_qp");
 
   // BC dependencies
   _deps.insertDependency("PorousFlowHalfCubicSink", "PorousFlowSink");

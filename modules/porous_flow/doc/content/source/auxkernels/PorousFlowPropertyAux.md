@@ -18,6 +18,8 @@ following properties are available using the `property` input parameter:
 - `secondary_concentration` (m$^{3}$(secondary species)/m$^{3}$(fluid))
 - `mineral_concentration` (m$^{3}$(secondary species)/m$^{3}$(porous material))
 - `mineral_reaction_rate` (m$^{3}$(secondary species).m$^{-3}$(porous material).s$^{-1}$))
+- `porosity`
+- `permeability`
 
 The fluid phase and fluid component are specified in the `phase` and
 `fluid_component` input parameters, respectively.  For properties

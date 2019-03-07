@@ -99,6 +99,7 @@ public:
 
   /**
    * Retrieve a constant list of \p Action pointers associated with the passed in task.
+   * Empty list will be returned if no actions are associated with the task.
    */
   const std::list<Action *> & getActionListByName(const std::string & task) const;
 
@@ -282,6 +283,8 @@ private:
   std::string _final_task;
 
   ActionIterator _act_iter;
+
+  const std::list<Action *> _empty_action_list;
 };
 
 #endif // ACTIONWAREHOUSE_H

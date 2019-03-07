@@ -189,9 +189,9 @@ ActionWarehouse::getActionListByName(const std::string & task) const
 {
   const auto it = _action_blocks.find(task);
   if (it == _action_blocks.end())
-    mooseError("The task ", task, " does not exist.");
-
-  return it->second;
+    return _empty_action_list;
+  else
+    return it->second;
 }
 
 bool
