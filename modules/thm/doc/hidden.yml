@@ -5,7 +5,7 @@
 - /AuxKernels/SoundSpeedAux
 - /AuxKernels/THMSpecificInternalEnergyAux
 - /AuxKernels/SpecificTotalEnthalpyAux
-- /AuxKernels/SpecificVolumeAux
+- /AuxKernels/THMSpecificVolumeAux
 - /AuxKernels/TemperatureAux
 - /AuxKernels/Quotient7EqnAux
 - /AuxKernels/SumAux

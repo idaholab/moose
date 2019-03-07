@@ -401,7 +401,7 @@ FlowModelSinglePhase::addMooseObjects()
   }
 
   {
-    std::string class_name = "SpecificVolumeAux";
+    std::string class_name = "THMSpecificVolumeAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = SPECIFIC_VOLUME;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();

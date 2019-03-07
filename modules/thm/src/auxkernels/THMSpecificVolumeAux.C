@@ -1,10 +1,10 @@
-#include "SpecificVolumeAux.h"
+#include "THMSpecificVolumeAux.h"
 
-registerMooseObject("THMApp", SpecificVolumeAux);
+registerMooseObject("THMApp", THMSpecificVolumeAux);
 
 template <>
 InputParameters
-validParams<SpecificVolumeAux>()
+validParams<THMSpecificVolumeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("rhoA",
@@ -15,7 +15,7 @@ validParams<SpecificVolumeAux>()
   return params;
 }
 
-SpecificVolumeAux::SpecificVolumeAux(const InputParameters & parameters)
+THMSpecificVolumeAux::THMSpecificVolumeAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _rhoA(coupledValue("rhoA")),
     _area(coupledValue("A")),
@@ -24,7 +24,7 @@ SpecificVolumeAux::SpecificVolumeAux(const InputParameters & parameters)
 }
 
 Real
-SpecificVolumeAux::computeValue()
+THMSpecificVolumeAux::computeValue()
 {
   mooseAssert(_rhoA[_qp] != 0, "Detected zero density.");
   return _alpha[_qp] * _area[_qp] / _rhoA[_qp];
