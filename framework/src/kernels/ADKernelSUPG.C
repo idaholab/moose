@@ -41,7 +41,7 @@ ADKernelSUPGTempl<T, compute_stage>::computeResidual()
   {
     const auto value = precomputeQpStrongResidual() * _ad_JxW[_qp] * _ad_coord[_qp] * _tau[_qp];
     for (_i = 0; _i < n_test; _i++) // target for auto vectorization
-      _local_re(_i) += _velocity[_qp] * _grad_test[_i][_qp] * value;
+      _local_re(_i) += _grad_test[_i][_qp] * _velocity[_qp] * value;
   }
 
   accumulateTaggedLocalResidual();
@@ -81,7 +81,7 @@ ADKernelSUPGTempl<T, compute_stage>::computeJacobian()
     const auto value = precomputeQpStrongResidual() * _ad_JxW[_qp] * _ad_coord[_qp] * _tau[_qp];
     for (_i = 0; _i < _grad_test.size(); _i++)
     {
-      const auto residual = _velocity[_qp] * _grad_test[_i][_qp] * value;
+      const auto residual = _grad_test[_i][_qp] * _velocity[_qp] * value;
       for (_j = 0; _j < _var.phiSize(); _j++)
         _local_ke(_i, _j) += residual.derivatives()[ad_offset + _j];
     }
@@ -124,7 +124,7 @@ ADKernelSUPGTempl<T, compute_stage>::computeADOffDiagJacobian()
   {
     const auto value = precomputeQpStrongResidual() * _ad_JxW[_qp] * _ad_coord[_qp] * _tau[_qp];
     for (_i = 0; _i < _grad_test.size(); _i++)
-      residuals[_i] += _velocity[_qp] * _grad_test[_i][_qp] * value;
+      residuals[_i] += _grad_test[_i][_qp] * _velocity[_qp] * value;
   }
 
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
