@@ -410,7 +410,7 @@ FlowModelSinglePhase::addMooseObjects()
     _sim.addAuxKernel(class_name, Component::genName(_comp_name, "v_aux"), params);
   }
   {
-    std::string class_name = "SpecificInternalEnergyAux";
+    std::string class_name = "THMSpecificInternalEnergyAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = SPECIFIC_INTERNAL_ENERGY;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
