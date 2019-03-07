@@ -7,28 +7,34 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SPHERICALAVERAGE_H
-#define SPHERICALAVERAGE_H
+#ifndef CYLINDRICALAVERAGE_H
+#define CYLINDRICALAVERAGE_H
 
 #include "SpatialAverageBase.h"
 
-class SphericalAverage;
+class CylindricalAverage;
 
 template <>
-InputParameters validParams<SphericalAverage>();
+InputParameters validParams<CylindricalAverage>();
 
 /**
- * Compute a spherical average of a variableas a function of radius throughout the
+ * Compute a cylindrical average of a variableas a function of radius throughout the
  * simulation domain.
  */
-class SphericalAverage : public SpatialAverageBase
+class CylindricalAverage : public SpatialAverageBase
 {
 public:
-  SphericalAverage(const InputParameters & parameters);
+  CylindricalAverage(const InputParameters & parameters);
 
 protected:
   /// compute the distance of the current quadarature point for binning
   virtual Real computeDistance() override;
+
+  /// vector along cylinder axis
+  const Point _cyl_axis;
+
+  /// axis norm
+  const Real _cyl_axis_norm;
 };
 
-#endif // SPHERICALAVERAGE_H
+#endif // CYLINDRICALAVERAGE_H
