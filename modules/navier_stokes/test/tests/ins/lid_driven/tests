@@ -14,6 +14,13 @@
     cli_args = 'Outputs/file_base=lid_driven_out'
     method = 'OPT'
   [../]
+  [./ad_lid_driven_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_lid_driven.i'
+    cli_args = 'Outputs/exodus=false Mesh/nx=3 Mesh/ny=3'
+    run_sim = True
+    difference_tol = 1e-7
+  [../]
   [./lid_driven_stabilized]
     type = 'Exodiff'
     input = 'lid_driven_stabilized.i'
@@ -26,6 +33,13 @@
     exodiff = 'lid_driven_stabilized_out.e'
     custom_cmp = 'lid_driven_stabilized.cmp'
     prereq = 'lid_driven_stabilized'
+  [../]
+  [./ad_lid_driven_stabilized_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_lid_driven_stabilized.i'
+    run_sim = True
+    cli_args = 'Outputs/exodus=false Mesh/nx=3 Mesh/ny=3'
+    difference_tol = 1e-7
   [../]
   [./still_unstable]
     type = 'RunApp'
