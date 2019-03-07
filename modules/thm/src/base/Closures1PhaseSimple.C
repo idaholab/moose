@@ -33,26 +33,27 @@ Closures1PhaseSimple::addMooseObjects(const FlowChannel & flow_channel)
   // wall friction material
   addWallFrictionFunctionMaterial(flow_channel);
 
-  // wall heat transfer coefficient material
   const unsigned int n_ht_connections = flow_channel.getNumberOfHeatTransferConnections();
-  if (n_ht_connections > 1)
-    addWeightedAverageMaterial(flow_channel,
-                               flow_channel.getWallHTCNames1Phase(),
-                               flow_channel.getHeatedPerimeterNames(),
-                               FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL);
-  else if (n_ht_connections == 0)
-    addZeroMaterial(flow_channel, FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL);
-
-  // wall temperature material
-  if (flow_channel.getTemperatureMode())
+  if (n_ht_connections > 0)
   {
-    if (flow_channel.getNumberOfHeatTransferConnections() > 1)
-      addAverageWallTemperatureMaterial(flow_channel);
+    // wall heat transfer coefficient material
+    if (n_ht_connections > 1)
+      addWeightedAverageMaterial(flow_channel,
+                                 flow_channel.getWallHTCNames1Phase(),
+                                 flow_channel.getHeatedPerimeterNames(),
+                                 FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL);
+
+    // wall temperature material
+    if (flow_channel.getTemperatureMode())
+    {
+      if (n_ht_connections > 1)
+        addAverageWallTemperatureMaterial(flow_channel);
+      else
+        addWallTemperatureFromAuxMaterial(flow_channel);
+    }
     else
-      addWallTemperatureFromAuxMaterial(flow_channel);
+      addWallTemperatureFromHeatFluxMaterial(flow_channel);
   }
-  else
-    addWallTemperatureFromHeatFluxMaterial(flow_channel);
 }
 
 void
