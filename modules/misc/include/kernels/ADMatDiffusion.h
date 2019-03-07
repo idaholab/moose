@@ -23,11 +23,11 @@ public:
   ADMatDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADGradResidual precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _diffusivity;
 
-  usingKernelMembers;
+  usingKernelGradMembers;
 };
 
 #endif // ADMATDIFFUSION_H
