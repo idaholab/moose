@@ -30,8 +30,8 @@
   xmax = 1.0
   ymin = 0
   ymax = 1.0
-  nx = 2
-  ny = 2
+  nx = 64
+  ny = 64
   elem_type = QUAD4
 []
 
@@ -159,5 +159,22 @@
   [dofmap]
     type = DOFMap
     execute_on = 'initial'
+  []
+[]
+
+[Postprocessors]
+  [lin]
+    type = NumLinearIterations
+  []
+  [nl]
+    type = NumNonlinearIterations
+  []
+  [lin_tot]
+    type = CumulativeValuePostprocessor
+    postprocessor = 'lin'
+  []
+  [nl_tot]
+    type = CumulativeValuePostprocessor
+    postprocessor = 'nl'
   []
 []

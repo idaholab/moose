@@ -5,8 +5,8 @@
   xmax = 1.0
   ymin = 0
   ymax = 1.0
-  nx = 2
-  ny = 2
+  nx = 64
+  ny = 64
 []
 
 [MeshModifiers]
@@ -15,6 +15,28 @@
     new_boundary = 'pinned_node'
     nodes = '0'
   [../]
+[]
+
+[AuxVariables]
+  [vel_x]
+  []
+  [vel_y]
+  []
+[]
+
+[AuxKernels]
+  [vel_x]
+    type = VectorVariableComponent
+    variable = vel_x
+    vector_variable = velocity
+    component = 'x'
+  []
+  [vel_y]
+    type = VectorVariableComponent
+    variable = vel_y
+    vector_variable = velocity
+    component = 'y'
+  []
 []
 
 [Variables]
@@ -61,11 +83,11 @@
     integrate_p_by_parts = true
   [../]
 
- [./momentum_supg]
-   type = INSADMomentumSUPG
-   variable = velocity
-   velocity = velocity
- [../]
+  [./momentum_supg]
+    type = INSADMomentumSUPG
+    variable = velocity
+    velocity = velocity
+  [../]
 []
 
 [BCs]
@@ -102,7 +124,7 @@
     pressure = p
     transient_term = false
     integrate_p_by_parts = true
-    alpha = 0.1
+    alpha = .1
   []
 []
 
@@ -126,8 +148,8 @@
 
 [Executioner]
   type = Steady
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
-  petsc_options_value = 'asm      2               ilu          4'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   line_search = 'none'
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-13
@@ -138,8 +160,26 @@
 
 [Outputs]
   exodus = true
+  file_base = lid_driven_stabilized_out
   [dofmap]
     type = DOFMap
     execute_on = 'initial'
+  []
+[]
+
+[Postprocessors]
+  [lin]
+    type = NumLinearIterations
+  []
+  [nl]
+    type = NumNonlinearIterations
+  []
+  [lin_tot]
+    type = CumulativeValuePostprocessor
+    postprocessor = 'lin'
+  []
+  [nl_tot]
+    type = CumulativeValuePostprocessor
+    postprocessor = 'nl'
   []
 []
