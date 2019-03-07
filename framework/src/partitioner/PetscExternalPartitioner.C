@@ -15,6 +15,7 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/elem.h"
+#include "libmesh/mesh_base.h"
 
 registerMooseObject("MooseApp", PetscExternalPartitioner);
 
@@ -76,6 +77,21 @@ PetscExternalPartitioner::preLinearPartition(MeshBase & mesh)
 }
 
 void
+PetscExternalPartitioner::partition(MeshBase & mesh, const unsigned int n_parts)
+{
+  // We want to use a parallel partitioner that requires a distributed graph
+  // Simply calling a linear partitioner provides us the distributed graph
+  // We shold not do anything when using a distributed mesh since the mesh itself
+  // is already distributed
+  // When n_parts=1, we do not need to run any partitioner, instead, let libmesh
+  // handle this
+  if (mesh.is_replicated() && n_parts > 1)
+    preLinearPartition(mesh);
+
+  Partitioner::partition(mesh, n_parts);
+}
+
+void
 PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
 {
 #ifdef LIBMESH_HAVE_PETSC
@@ -90,13 +106,6 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   j = 0;
   values = 0;
   elem_weights = 0;
-
-  // We want to use a parallel partitioner that requires a distributed graph
-  // Simply calling a linear partitioner provides us the distributed graph
-  // We shold not do anything when using a distributed mesh since the mesh itself
-  // is already distributed
-  if (mesh.is_replicated())
-    preLinearPartition(mesh);
 
   build_graph(mesh);
   nrows = _dual_graph.size();

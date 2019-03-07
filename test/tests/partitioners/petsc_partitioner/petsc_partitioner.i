@@ -5,7 +5,7 @@
   ny = 10
   [Partitioner]
     type = PetscExternalPartitioner
-    part_package = ptscotch
+    part_package = parmetis
   []
   parallel_type = distributed
 []

@@ -34,6 +34,10 @@ public:
 
   virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side);
 
+  using Partitioner::partition;
+
+  virtual void partition(MeshBase & mesh, const unsigned int n) override;
+
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 
