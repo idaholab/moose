@@ -46,9 +46,7 @@ ComputeExtraStressVDWGas::ComputeExtraStressVDWGas(const InputParameters & param
 void
 ComputeExtraStressVDWGas::computeQpExtraStress()
 {
-  _extra_stress[_qp](0, 0) = _extra_stress[_qp](1, 1) = _extra_stress[_qp](2, 2) =
-      -_kB * _T[_qp] / (_Va[_qp] / _cg[_qp] - _b[_qp]) * 1.0e27 / _nondim_factor;
-
-  _extra_stress[_qp](0, 1) = _extra_stress[_qp](0, 2) = _extra_stress[_qp](1, 2) =
-      _extra_stress[_qp](1, 0) = _extra_stress[_qp](2, 0) = _extra_stress[_qp](2, 1) = 0;
+  _extra_stress[_qp].zero();
+  _extra_stress[_qp].addIa(-_kB * _T[_qp] / (_Va[_qp] / _cg[_qp] - _b[_qp]) * 1.0e27 /
+                           _nondim_factor);
 }
