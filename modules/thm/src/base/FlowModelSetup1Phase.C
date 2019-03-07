@@ -341,7 +341,7 @@ FlowModelSetup1Phase::addNonConstantAuxVariables()
   {
     const std::string class_name = "AddKernelAction";
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "SpecificVolumeAux";
+    params.set<std::string>("type") = "THMSpecificVolumeAux";
     params.set<std::string>("task") = "add_aux_kernel";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
@@ -359,7 +359,7 @@ FlowModelSetup1Phase::addNonConstantAuxVariables()
   {
     const std::string class_name = "AddKernelAction";
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "SpecificInternalEnergyAux";
+    params.set<std::string>("type") = "THMSpecificInternalEnergyAux";
     params.set<std::string>("task") = "add_aux_kernel";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
