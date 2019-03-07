@@ -30,8 +30,8 @@
   xmax = 1.0
   ymin = 0
   ymax = 1.0
-  nx = 64
-  ny = 64
+  nx = 2
+  ny = 2
   elem_type = QUAD4
 []
 
@@ -156,4 +156,8 @@
 
 [Outputs]
   exodus = true
+  [dofmap]
+    type = DOFMap
+    execute_on = 'initial'
+  []
 []
