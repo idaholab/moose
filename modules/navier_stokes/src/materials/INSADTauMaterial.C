@@ -11,19 +11,16 @@
 #include "INSADTauMaterial.h"
 #include "NonlinearSystemBase.h"
 
+registerADMooseObject("NavierStokesApp", INSADTauMaterial);
+
 defineADValidParams(
     INSADTauMaterial,
     INSADMaterial,
     params.addClassDescription(
         "This is the material class used to compute the stabilization parameter tau.");
-    params.addRequiredCoupledVar("velocity", "The velocity");
-    params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
-    params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
-
-    params.addParam<Real>("alpha", 1., "Multiplicative factor on the stabilization parameter tau.");
-    params.addParam<bool>("transient_term",
-                          false,
-                          "Whether there should be a transient term in the momentum residuals."););
+    params.addParam<Real>("alpha",
+                          1.,
+                          "Multiplicative factor on the stabilization parameter tau."););
 
 template <ComputeStage compute_stage>
 INSADTauMaterial<compute_stage>::INSADTauMaterial(const InputParameters & parameters)
@@ -86,9 +83,12 @@ template <ComputeStage compute_stage>
 void
 INSADTauMaterial<compute_stage>::computeQpProperties()
 {
+  INSADMaterial<compute_stage>::computeQpProperties();
+
   auto && nu = _mu[_qp] / _rho[_qp];
   auto && transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;
   _tau[_qp] = _alpha / std::sqrt(transient_part +
-                                 (2. * _velocity.norm() / _hmax) * (2. * _velocity.norm() / _hmax) +
+                                 (2. * _velocity[_qp].norm() / _hmax) *
+                                     (2. * _velocity[_qp].norm() / _hmax) +
                                  9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
 }
