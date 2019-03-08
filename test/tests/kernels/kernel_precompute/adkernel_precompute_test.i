@@ -18,7 +18,7 @@
 
 [Kernels]
   [./diff]
-    type = ADDiffusionPrecompute
+    type = ADDiffusion
     variable = convected
   [../]
 
