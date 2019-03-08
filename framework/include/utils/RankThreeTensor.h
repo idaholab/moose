@@ -76,6 +76,12 @@ public:
   /// Default constructor; fills to zero
   RankThreeTensorTempl();
 
+  /**
+   * Construct from other class template instantiation
+   */
+  template <typename T2>
+  RankThreeTensorTempl(const RankThreeTensorTempl<T2> & copy);
+
   /// Select specific initialization pattern
   RankThreeTensorTempl(const InitMethod);
 
@@ -93,6 +99,15 @@ public:
   {
     return _vals[((i * N + j) * N + k)];
   }
+
+  /**
+   * Assignment-from-scalar operator.  Used only to zero out the tensor.
+   *
+   * \returns A reference to *this.
+   */
+  template <typename Scalar>
+  typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, RankThreeTensorTempl &>::type
+  operator=(const Scalar & libmesh_dbg_var(p));
 
   /// Zeros out the tensor.
   void zero();
@@ -201,6 +216,9 @@ protected:
   friend class RankTwoTensorTempl;
 
   template <class T2>
+  friend class RankThreeTensorTempl;
+
+  template <class T2>
   friend class RankFourTensorTempl;
 };
 
@@ -208,23 +226,21 @@ typedef RankThreeTensorTempl<Real> RankThreeTensor;
 typedef RankThreeTensorTempl<DualReal> DualRankThreeTensor;
 
 template <typename T>
-RankThreeTensorTempl<T> operator*(T a, const RankThreeTensorTempl<T> & b)
+template <typename T2>
+RankThreeTensorTempl<T>::RankThreeTensorTempl(const RankThreeTensorTempl<T2> & copy)
 {
-  return b * a;
+  for (unsigned int i = 0; i < N3; ++i)
+    _vals[i] = copy._vals[i];
 }
 
-///r=v*A where r is rank 2, v is vector and A is rank 3
 template <typename T>
-RankTwoTensorTempl<T> operator*(const VectorValue<T> & p, const RankThreeTensorTempl<T> & b)
+template <typename Scalar>
+typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, RankThreeTensorTempl<T> &>::type
+RankThreeTensorTempl<T>::operator=(const Scalar & libmesh_dbg_var(p))
 {
-  RankTwoTensorTempl<T> result;
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        result(i, j) += p(k) * b(k, i, j);
-
-  return result;
+  libmesh_assert_equal_to(p, Scalar(0));
+  this->zero();
+  return *this;
 }
 
 template <typename T>
@@ -251,6 +267,26 @@ RankThreeTensorTempl<T>::rotate(const T2 & R)
         }
         _vals[index++] = sum;
       }
+}
+
+template <typename T>
+RankThreeTensorTempl<T> operator*(T a, const RankThreeTensorTempl<T> & b)
+{
+  return b * a;
+}
+
+///r=v*A where r is rank 2, v is vector and A is rank 3
+template <typename T>
+RankTwoTensorTempl<T> operator*(const VectorValue<T> & p, const RankThreeTensorTempl<T> & b)
+{
+  RankTwoTensorTempl<T> result;
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        result(i, j) += p(k) * b(k, i, j);
+
+  return result;
 }
 
 #endif // RANKTHREETENSOR_H
