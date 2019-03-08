@@ -17,8 +17,8 @@ field is sufficiently smooth.
 For incompressible flow, we have implemented both pressure-stabilized
 Petrov-Galerkin (PSPG) and streamline-upwind Petrov-Galerkin (SUPG) methods. The
 former stabilization allows use of equal order shape functions by introducing an
-on-diagonal dependence in the pressure equation, creating a positive-definite
-problem instead of a saddle-point problem. The latter SUPG method allows
+on-diagonal dependence in the pressure equation, removing the saddle-point
+nature of the problem. The latter SUPG method allows
 simulation at much higher Reynolds numbers than if SUPG was not used. For an
 overview of the incompressible Navier-Stokes capability, please see the journal
 article

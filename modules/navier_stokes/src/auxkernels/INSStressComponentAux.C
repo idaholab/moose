@@ -18,9 +18,11 @@ validParams<INSStressComponentAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("This class computes the stress component based on "
+                             "pressure and velocity for incompressible Navier-Stokes");
   params.addCoupledVar("velocity", "The velocity component");
   params.addCoupledVar("pressure", 0, "The pressure");
-  params.addParam<unsigned>("comp", 0, "The component");
+  params.addRangeCheckedParam<unsigned int>("comp", 0, "0<=comp<=2", "The component");
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The viscosity");
 
   return params;
