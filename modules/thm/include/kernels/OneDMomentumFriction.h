@@ -28,7 +28,7 @@ protected:
   const VariableValue & _A;
 
   /// Hydraulic diameter
-  const VariableValue & _D_h;
+  const MaterialProperty<Real> & _D_h;
 
   /// Volume fraction
   const MaterialProperty<Real> & _alpha;

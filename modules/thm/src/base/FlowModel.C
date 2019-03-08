@@ -107,7 +107,6 @@ FlowModel::addCommonVariables()
   unsigned int subdomain_id = _pipe.getSubdomainID();
 
   _sim.addVariable(false, AREA, _fe_type, subdomain_id);
-  _sim.addVariable(false, HYDRAULIC_DIAMETER, _fe_type, subdomain_id);
   _sim.addVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_id);
 
   if (_spatial_discretization == rDG)

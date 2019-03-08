@@ -2,6 +2,7 @@
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "Component.h"
+#include "FlowChannel.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 
@@ -50,6 +51,11 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
   Component * comp = pars.getCheckedPointerParam<Component *>("component");
   std::string comp_name = comp->name();
 
+  FlowChannel * fch = dynamic_cast<FlowChannel *>(comp);
+  if (fch == nullptr)
+    mooseError(name(),
+               ": Trying to use SUPG stabilization with a component that is not a FlowChannel.");
+
   const auto & blocks = pars.get<std::vector<SubdomainName>>("block");
   // coupling vectors
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
@@ -60,7 +66,6 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
   std::vector<VariableName> cv_temperature(1, FlowModelSinglePhase::TEMPERATURE);
   std::vector<VariableName> cv_T_wall(1, FlowModelSinglePhase::TEMPERATURE_WALL);
   std::vector<VariableName> cv_P_hf(1, FlowModelSinglePhase::HEAT_FLUX_PERIMETER);
-  std::vector<VariableName> cv_D_h(1, FlowModelSinglePhase::HYDRAULIC_DIAMETER);
   std::vector<VariableName> cv_rhoA(1, FlowModelSinglePhase::RHOA);
   std::vector<VariableName> cv_rhouA(1, FlowModelSinglePhase::RHOUA);
   std::vector<VariableName> cv_rhoEA(1, FlowModelSinglePhase::RHOEA);
@@ -80,13 +85,16 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
     params.set<std::vector<VariableName>>("rhou") = cv_rhou;
     params.set<std::vector<VariableName>>("vel") = cv_vel;
     params.set<std::vector<VariableName>>("A") = cv_area;
-    params.set<std::vector<VariableName>>("D_h") = cv_D_h;
+    params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
     params.set<std::vector<VariableName>>("rhoE") = cv_rhoE;
     params.set<std::vector<VariableName>>("H") = cv_enthalpy;
     params.set<std::vector<VariableName>>("T") = cv_temperature;
     params.set<std::vector<VariableName>>("P_hf") = cv_P_hf;
-    params.set<MaterialPropertyName>("Hw") = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
-    params.set<MaterialPropertyName>("T_wall") = FlowModel::TEMPERATURE_WALL;
+    if (fch->getNumberOfHeatTransferConnections() > 0)
+    {
+      params.set<MaterialPropertyName>("Hw") = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL;
+      params.set<MaterialPropertyName>("T_wall") = FlowModel::TEMPERATURE_WALL;
+    }
     params.set<MaterialPropertyName>("p") = FlowModelSinglePhase::PRESSURE;
     params.set<MaterialPropertyName>("direction") = FlowModel::DIRECTION;
     params.set<RealVectorValue>("gravity_vector") = pars.get<RealVectorValue>("gravity_vector");

@@ -94,6 +94,7 @@ protected:
   // Miscellaneous aux variables
   const VariableValue & _enthalpy;
   const VariableValue & _temperature;
+  bool _has_heat_transfer;
   const MaterialProperty<Real> & _Hw;
   const VariableValue & _vel;
 
@@ -102,7 +103,7 @@ protected:
   const MaterialProperty<Real> & _dp_drhouA;
   const MaterialProperty<Real> & _dp_drhoEA;
 
-  const VariableValue & _D_h;
+  const MaterialProperty<Real> & _D_h;
 
   // Heat flux perimeter
   const VariableValue & _P_hf;

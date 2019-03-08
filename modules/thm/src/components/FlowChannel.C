@@ -201,7 +201,6 @@ FlowChannel::init()
       isTwoPhase, "initial_T", {"initial_T_liquid", "initial_T_vapor"}, *this);
   getOneOrTwoPhaseParameters<FunctionName>(
       isTwoPhase, "initial_vel", {"initial_vel_liquid", "initial_vel_vapor"}, *this);
-  getOneOrTwoPhaseParameters<FunctionName>(isTwoPhase, "Hw", {"Hw_liquid", "Hw_vapor"}, *this);
 
   // initialize the stabilization object
   if (!_stabilization_uo_name.empty())
@@ -526,7 +525,6 @@ FlowChannel::setup2Phase()
   std::vector<VariableName> cv_alpha_liquid(1, FlowModelTwoPhase::VOLUME_FRACTION_LIQUID);
   std::vector<VariableName> cv_alpha_vapor(1, FlowModelTwoPhase::VOLUME_FRACTION_VAPOR);
   std::vector<VariableName> cv_area(1, FlowModel::AREA);
-  std::vector<VariableName> cv_D_h(1, FlowModel::HYDRAULIC_DIAMETER);
   std::vector<VariableName> cv_P_hf(1, FlowModel::HEAT_FLUX_PERIMETER);
 
   std::vector<VariableName> cv_vel_liquid(1, FlowModelTwoPhase::VELOCITY_LIQUID);
@@ -669,33 +667,26 @@ FlowChannel::setupVolumeFraction()
 void
 FlowChannel::setupDh()
 {
-  std::vector<VariableName> cv_area(1, FlowModel::AREA);
-  ExecFlagEnum ts_execute_on(MooseUtils::getDefaultExecFlagEnum());
-  ts_execute_on = {EXEC_TIMESTEP_BEGIN, EXEC_INITIAL};
-
-  std::string nm = genName(name(), "D_h_auxkernel");
+  const std::string nm = genName(name(), "D_h_material");
 
   if (_has_Dh)
   {
-    std::string class_name = "FunctionAux";
+    const std::string class_name = "GenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = FlowModel::HYDRAULIC_DIAMETER;
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<FunctionName>("function") = _Dh_function;
-    params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
-    _sim.addAuxKernel(class_name, nm, params);
+    params.set<std::vector<std::string>>("prop_names") = {FlowModel::HYDRAULIC_DIAMETER};
+    params.set<std::vector<FunctionName>>("prop_values") = {_Dh_function};
+    _sim.addMaterial(class_name, nm, params);
 
     makeFunctionControllableIfConstant(_Dh_function, "D_h");
   }
   else
   {
-    std::string class_name = "HydraulicDiameterCircularAux";
+    const std::string class_name = "HydraulicDiameterCircularMaterial";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = FlowModel::HYDRAULIC_DIAMETER;
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
-    params.set<std::vector<VariableName>>("A") = cv_area;
-    _sim.addAuxKernel(class_name, nm, params);
+    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    _sim.addMaterial(class_name, nm, params);
   }
 }
 
@@ -774,7 +765,6 @@ FlowChannel::addCommonObjects()
   std::vector<VariableName> cv_rho(1, FlowModelSinglePhase::DENSITY);
   std::vector<VariableName> cv_rhou(1, FlowModelSinglePhase::MOMENTUM_DENSITY);
   std::vector<VariableName> cv_rhoE(1, FlowModelSinglePhase::TOTAL_ENERGY_DENSITY);
-  std::vector<VariableName> cv_D_h(1, FlowModelSinglePhase::HYDRAULIC_DIAMETER);
 
   ExecFlagEnum ts_execute_on(MooseUtils::getDefaultExecFlagEnum());
   ts_execute_on = {EXEC_TIMESTEP_BEGIN, EXEC_INITIAL};
@@ -850,24 +840,22 @@ FlowChannel::addCommonObjects()
   {
     if (_n_heat_transfer_connections > 1)
     {
-      const std::string class_name = "WeightedAverageAux";
+      const std::string class_name = "WeightedAverageMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<AuxVariableName>("variable") = FlowModel::HEAT_FLUX_WALL;
+      params.set<MaterialPropertyName>("prop_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-      params.set<std::vector<VariableName>>("values") = _q_wall_names;
+      params.set<std::vector<MaterialPropertyName>>("values") = _q_wall_names;
       params.set<std::vector<VariableName>>("weights") = _P_hf_names;
-      params.set<ExecFlagEnum>("execute_on") = execute_on_initial_linear;
-      _sim.addAuxKernel(class_name, genName(name(), "q_wall_auxkernel"), params);
+      _sim.addMaterial(class_name, genName(name(), class_name, FlowModel::HEAT_FLUX_WALL), params);
     }
     else if (_n_heat_transfer_connections == 0)
     {
-      const std::string class_name = "ConstantAux";
+      const std::string class_name = "ConstantMaterial";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<AuxVariableName>("variable") = FlowModel::HEAT_FLUX_WALL;
+      params.set<std::string>("property_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<Real>("value") = 0;
-      params.set<ExecFlagEnum>("execute_on") = execute_on_initial_linear;
-      _sim.addAuxKernel(class_name, genName(name(), "q_wall_auxkernel"), params);
+      _sim.addMaterial(class_name, genName(name(), class_name, FlowModel::HEAT_FLUX_WALL), params);
     }
   }
 }

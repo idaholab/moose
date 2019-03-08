@@ -224,7 +224,7 @@ protected:
   /// wall temperature names for connected heat transfers
   std::vector<VariableName> _T_wall_names;
   /// wall heat flux names for connected heat transfers
-  std::vector<VariableName> _q_wall_names;
+  std::vector<MaterialPropertyName> _q_wall_names;
 };
 
 #endif /* FLOWCHANNEL_H */

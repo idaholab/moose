@@ -31,7 +31,7 @@ validParams<SUPGMaterial>()
   // Coupled aux variables
   params.addRequiredCoupledVar("vel", "x-velocity");
   params.addRequiredCoupledVar("A", "cross-sectional area");
-  params.addRequiredCoupledVar("D_h", "hydraulic diameter");
+  params.addRequiredParam<MaterialPropertyName>("D_h", "hydraulic diameter");
 
   // Required parameters
   params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravitational acceleration vector");
@@ -43,8 +43,8 @@ validParams<SUPGMaterial>()
   params.addCoupledVar("H", "Specific total enthalpy");
   params.addCoupledVar("T", "fluid temperature aux variable");
   params.addCoupledVar("P_hf", "heat flux perimeter");
-  params.addRequiredParam<MaterialPropertyName>("T_wall", "Wall temperature");
-  params.addRequiredParam<MaterialPropertyName>("Hw", "Wall heat transfer coefficient");
+  params.addParam<MaterialPropertyName>("T_wall", "Wall temperature");
+  params.addParam<MaterialPropertyName>("Hw", "Wall heat transfer coefficient");
 
   params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factory material property");
   // optional parameters
@@ -84,7 +84,8 @@ SUPGMaterial::SUPGMaterial(const InputParameters & parameters)
     // Aux variables
     _enthalpy(coupledValue("H")),
     _temperature(coupledValue("T")),
-    _Hw(getMaterialProperty<Real>("Hw")),
+    _has_heat_transfer(isParamValid("Hw") && isParamValid("T_wall")),
+    _Hw(_has_heat_transfer ? getMaterialProperty<Real>("Hw") : getZeroMaterialProperty<Real>("Hw")),
     _vel(coupledValue("vel")),
 
     _p(getMaterialProperty<Real>("p")),
@@ -92,7 +93,7 @@ SUPGMaterial::SUPGMaterial(const InputParameters & parameters)
     _dp_drhouA(getMaterialPropertyDerivativeTHM<Real>("p", "arhouA")),
     _dp_drhoEA(getMaterialPropertyDerivativeTHM<Real>("p", "arhoEA")),
 
-    _D_h(coupledValue("D_h")),
+    _D_h(getMaterialProperty<Real>("D_h")),
     _P_hf(coupledValue("P_hf")),
 
     // Time derivative values
@@ -110,7 +111,8 @@ SUPGMaterial::SUPGMaterial(const InputParameters & parameters)
     _dir(getMaterialProperty<RealVectorValue>("direction")),
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
     _f_D(getMaterialProperty<Real>("f_D")),
-    _T_wall(getMaterialProperty<Real>("T_wall")),
+    _T_wall(_has_heat_transfer ? getMaterialProperty<Real>("T_wall")
+                               : getZeroMaterialProperty<Real>("T_wall")),
 
     // Optional parameters
     _n_iterations_before_freezing_delta(getParam<unsigned>("n_iterations_before_freezing_delta")),
@@ -269,7 +271,8 @@ SUPGMaterial::computeProperties()
 
     // Only attempt computing the heat source term if we have an
     // energy equation.
-    Real heat_source_term = _Hw[qp] * _P_hf[qp] * (_temperature[qp] - _T_wall[qp]);
+    Real heat_source_term =
+        _has_heat_transfer ? _Hw[qp] * _P_hf[qp] * (_temperature[qp] - _T_wall[qp]) : 0;
 
     // p_hat is an additional source term that appears in the
     // quasi-linear form of the variable-area governing equations.

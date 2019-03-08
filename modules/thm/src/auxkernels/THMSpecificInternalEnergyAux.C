@@ -1,10 +1,10 @@
-#include "SpecificInternalEnergyAux.h"
+#include "THMSpecificInternalEnergyAux.h"
 
-registerMooseObject("THMApp", SpecificInternalEnergyAux);
+registerMooseObject("THMApp", THMSpecificInternalEnergyAux);
 
 template <>
 InputParameters
-validParams<SpecificInternalEnergyAux>()
+validParams<THMSpecificInternalEnergyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("rhoA", "Conserved density");
@@ -13,7 +13,7 @@ validParams<SpecificInternalEnergyAux>()
   return params;
 }
 
-SpecificInternalEnergyAux::SpecificInternalEnergyAux(const InputParameters & parameters)
+THMSpecificInternalEnergyAux::THMSpecificInternalEnergyAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _rho(coupledValue("rhoA")),
     _rhou(coupledValue("rhouA")),
@@ -22,7 +22,7 @@ SpecificInternalEnergyAux::SpecificInternalEnergyAux(const InputParameters & par
 }
 
 Real
-SpecificInternalEnergyAux::computeValue()
+THMSpecificInternalEnergyAux::computeValue()
 {
   return (_rhoE[_qp] - 0.5 * _rhou[_qp] * _rhou[_qp] / _rho[_qp]) / _rho[_qp];
 }

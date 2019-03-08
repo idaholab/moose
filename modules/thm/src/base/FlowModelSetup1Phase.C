@@ -57,7 +57,6 @@ FlowModelSetup1Phase::addInitialConditions()
   const std::string class_name = "AddInitialConditionAction";
 
   addFunctionIC(_A_name, _A_fn);
-  addFunctionIC(_D_h_name, _D_h_fn);
   addFunctionIC(_p_name, _p_fn);
   addFunctionIC(_T_name, _T_fn);
   addFunctionIC(_vel_name, _vel_fn);
@@ -227,9 +226,6 @@ FlowModelSetup1Phase::addNonConstantAuxVariables()
     _this_action_warehouse.addActionBlock(action);
   }
 
-  // hydraulic diameter
-  addAuxVariable(_D_h_name);
-
   // rho
   addAuxVariable(_rho_name);
   {
@@ -345,7 +341,7 @@ FlowModelSetup1Phase::addNonConstantAuxVariables()
   {
     const std::string class_name = "AddKernelAction";
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "SpecificVolumeAux";
+    params.set<std::string>("type") = "THMSpecificVolumeAux";
     params.set<std::string>("task") = "add_aux_kernel";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
@@ -363,7 +359,7 @@ FlowModelSetup1Phase::addNonConstantAuxVariables()
   {
     const std::string class_name = "AddKernelAction";
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "SpecificInternalEnergyAux";
+    params.set<std::string>("type") = "THMSpecificInternalEnergyAux";
     params.set<std::string>("task") = "add_aux_kernel";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
@@ -435,6 +431,20 @@ FlowModelSetup1Phase::addMaterials()
     action->getObjectParams().set<std::vector<VariableName>>("rhoEA") = {_rhoEA_name};
 
     action->getObjectParams().set<UserObjectName>("fp") = _fp_1phase_name;
+
+    _this_action_warehouse.addActionBlock(action);
+  }
+
+  // hydraulic diameter
+  {
+    InputParameters params = _this_action_factory.getValidParams(class_name);
+    params.set<std::string>("type") = "GenericFunctionMaterial";
+
+    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+        _this_action_factory.create(class_name, "D_h_material", params));
+
+    action->getObjectParams().set<std::vector<std::string>>("prop_names") = {_D_h_name};
+    action->getObjectParams().set<std::vector<FunctionName>>("prop_values") = {_D_h_fn};
 
     _this_action_warehouse.addActionBlock(action);
   }

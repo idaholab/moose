@@ -35,7 +35,7 @@ protected:
   /// Velocity (x-component)
   const MaterialProperty<Real> & _vel;
   /// Hydraulic diameter
-  const VariableValue & _D_h;
+  const MaterialProperty<Real> & _D_h;
   /// Roughness of the surface
   const Real & _roughness;
 };
