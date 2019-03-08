@@ -70,6 +70,11 @@ public:
    */
   virtual Real h_lat(Real p, Real T) const;
 
+  /**
+   * Returns true if phase change is supported, otherwise false
+   */
+  virtual bool supportsPhaseChange() const = 0;
+
 protected:
   /// The name of the user object that provides liquid phase fluid properties
   const UserObjectName _liquid_name;
