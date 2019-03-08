@@ -9,6 +9,7 @@
 
 #include "ACInterfaceStress.h"
 #include "RankTwoTensor.h"
+#include "RankThreeTensor.h"
 
 registerMooseObject("PhaseFieldApp", ACInterfaceStress);
 

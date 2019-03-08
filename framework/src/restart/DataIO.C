@@ -58,6 +58,13 @@ dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
 
 template <>
 void
+dataStore(std::ostream & stream, RankThreeTensor & rtht, void * context)
+{
+  dataStore(stream, rtht._vals, context);
+}
+
+template <>
+void
 dataStore(std::ostream & stream, RankFourTensor & rft, void * context)
 {
   dataStore(stream, rft._vals, context);

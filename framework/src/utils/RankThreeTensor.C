@@ -19,6 +19,11 @@
 #include "PermutationTensor.h"
 
 #include "libmesh/utility.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
+
+#include "metaphysicl/numberarray.h"
+#include "metaphysicl/dualnumber.h"
 
 // C++ includes
 #include <iomanip>
@@ -26,32 +31,27 @@
 
 template <>
 void
-mooseSetToZero<RankThreeTensor>(RankThreeTensor & v)
+mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v)
 {
   v.zero();
 }
 
 template <>
 void
-dataStore(std::ostream & stream, RankThreeTensor & rtht, void * context)
+mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v)
 {
-  dataStore(stream, rtht._vals, context);
+  v.zero();
 }
 
-template <>
-void
-dataLoad(std::istream & stream, RankThreeTensor & rtht, void * context)
-{
-  dataLoad(stream, rtht._vals, context);
-}
-
-MooseEnum RankThreeTensor::fillMethodEnum() // TODO: Need new fillMethodEnum() -- for now we will
-                                            // just use general (at most 27 components)
+template <typename T>
+MooseEnum RankThreeTensorTempl<T>::fillMethodEnum() // TODO: Need new fillMethodEnum() -- for now we
+                                                    // will just use general (at most 27 components)
 {
   return MooseEnum("general");
 }
 
-RankThreeTensor::RankThreeTensor()
+template <typename T>
+RankThreeTensorTempl<T>::RankThreeTensorTempl()
 {
   mooseAssert(N == 3, "RankThreeTensor is currently only tested for 3 dimensions.");
 
@@ -59,7 +59,8 @@ RankThreeTensor::RankThreeTensor()
     _vals[i] = 0;
 }
 
-RankThreeTensor::RankThreeTensor(const InitMethod init)
+template <typename T>
+RankThreeTensorTempl<T>::RankThreeTensorTempl(const InitMethod init)
 {
   switch (init)
   {
@@ -71,20 +72,23 @@ RankThreeTensor::RankThreeTensor(const InitMethod init)
   }
 }
 
-RankThreeTensor::RankThreeTensor(const std::vector<Real> & input, FillMethod fill_method)
+template <typename T>
+RankThreeTensorTempl<T>::RankThreeTensorTempl(const std::vector<T> & input, FillMethod fill_method)
 {
   fillFromInputVector(input, fill_method);
 }
 
+template <typename T>
 void
-RankThreeTensor::zero()
+RankThreeTensorTempl<T>::zero()
 {
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] = 0;
 }
 
-RankThreeTensor &
-RankThreeTensor::operator=(const RankThreeTensor & a)
+template <typename T>
+RankThreeTensorTempl<T> &
+RankThreeTensorTempl<T>::operator=(const RankThreeTensorTempl<T> & a)
 {
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] = a._vals[i];
@@ -92,13 +96,14 @@ RankThreeTensor::operator=(const RankThreeTensor & a)
   return *this;
 }
 
-RealVectorValue RankThreeTensor::operator*(const RankTwoTensor & a) const
+template <typename T>
+VectorValue<T> RankThreeTensorTempl<T>::operator*(const RankTwoTensorTempl<T> & a) const
 {
-  RealVectorValue result;
+  VectorValue<T> result;
 
   for (unsigned int i = 0; i < N; ++i)
   {
-    Real sum = 0;
+    T sum = 0;
     unsigned int i1 = i * N2;
     for (unsigned int j1 = 0; j1 < N2; j1 += N)
       for (unsigned int k = 0; k < N; ++k)
@@ -109,9 +114,10 @@ RealVectorValue RankThreeTensor::operator*(const RankTwoTensor & a) const
   return result;
 }
 
-RankThreeTensor RankThreeTensor::operator*(const Real b) const
+template <typename T>
+RankThreeTensorTempl<T> RankThreeTensorTempl<T>::operator*(const T b) const
 {
-  RankThreeTensor result;
+  RankThreeTensorTempl<T> result;
 
   for (unsigned int i = 0; i < N3; ++i)
     result._vals[i] = _vals[i] * b;
@@ -119,8 +125,9 @@ RankThreeTensor RankThreeTensor::operator*(const Real b) const
   return result;
 }
 
-RankThreeTensor &
-RankThreeTensor::operator*=(const Real a)
+template <typename T>
+RankThreeTensorTempl<T> &
+RankThreeTensorTempl<T>::operator*=(const T a)
 {
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] *= a;
@@ -128,10 +135,11 @@ RankThreeTensor::operator*=(const Real a)
   return *this;
 }
 
-RankThreeTensor
-RankThreeTensor::operator/(const Real b) const
+template <typename T>
+RankThreeTensorTempl<T>
+RankThreeTensorTempl<T>::operator/(const T b) const
 {
-  RankThreeTensor result;
+  RankThreeTensorTempl<T> result;
 
   for (unsigned int i = 0; i < N3; ++i)
     result._vals[i] = _vals[i] / b;
@@ -139,8 +147,9 @@ RankThreeTensor::operator/(const Real b) const
   return result;
 }
 
-RankThreeTensor &
-RankThreeTensor::operator/=(const Real a)
+template <typename T>
+RankThreeTensorTempl<T> &
+RankThreeTensorTempl<T>::operator/=(const T a)
 {
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] /= a;
@@ -148,8 +157,9 @@ RankThreeTensor::operator/=(const Real a)
   return *this;
 }
 
-RankThreeTensor &
-RankThreeTensor::operator+=(const RankThreeTensor & a)
+template <typename T>
+RankThreeTensorTempl<T> &
+RankThreeTensorTempl<T>::operator+=(const RankThreeTensorTempl<T> & a)
 {
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] += a._vals[i];
@@ -157,10 +167,11 @@ RankThreeTensor::operator+=(const RankThreeTensor & a)
   return *this;
 }
 
-RankThreeTensor
-RankThreeTensor::operator+(const RankThreeTensor & b) const
+template <typename T>
+RankThreeTensorTempl<T>
+RankThreeTensorTempl<T>::operator+(const RankThreeTensorTempl<T> & b) const
 {
-  RankThreeTensor result;
+  RankThreeTensorTempl<T> result;
 
   for (unsigned int i = 0; i < N3; ++i)
     result._vals[i] = _vals[i] + b._vals[i];
@@ -168,8 +179,9 @@ RankThreeTensor::operator+(const RankThreeTensor & b) const
   return result;
 }
 
-RankThreeTensor &
-RankThreeTensor::operator-=(const RankThreeTensor & a)
+template <typename T>
+RankThreeTensorTempl<T> &
+RankThreeTensorTempl<T>::operator-=(const RankThreeTensorTempl<T> & a)
 {
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] -= a._vals[i];
@@ -177,10 +189,11 @@ RankThreeTensor::operator-=(const RankThreeTensor & a)
   return *this;
 }
 
-RankThreeTensor
-RankThreeTensor::operator-(const RankThreeTensor & b) const
+template <typename T>
+RankThreeTensorTempl<T>
+RankThreeTensorTempl<T>::operator-(const RankThreeTensorTempl<T> & b) const
 {
-  RankThreeTensor result;
+  RankThreeTensorTempl<T> result;
 
   for (unsigned int i = 0; i < N3; ++i)
     result._vals[i] = _vals[i] - b._vals[i];
@@ -188,10 +201,11 @@ RankThreeTensor::operator-(const RankThreeTensor & b) const
   return result;
 }
 
-RankThreeTensor
-RankThreeTensor::operator-() const
+template <typename T>
+RankThreeTensorTempl<T>
+RankThreeTensorTempl<T>::operator-() const
 {
-  RankThreeTensor result;
+  RankThreeTensorTempl<T> result;
 
   for (unsigned int i = 0; i < N3; ++i)
     result._vals[i] = -_vals[i];
@@ -199,10 +213,11 @@ RankThreeTensor::operator-() const
   return result;
 }
 
-Real
-RankThreeTensor::L2norm() const
+template <typename T>
+T
+RankThreeTensorTempl<T>::L2norm() const
 {
-  Real l2 = 0;
+  T l2 = 0;
 
   for (unsigned int i = 0; i < N3; ++i)
     l2 += Utility::pow<2>(_vals[i]);
@@ -210,8 +225,9 @@ RankThreeTensor::L2norm() const
   return std::sqrt(l2);
 }
 
+template <typename T>
 void
-RankThreeTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method)
+RankThreeTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMethod fill_method)
 {
   zero();
 
@@ -225,20 +241,21 @@ RankThreeTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod
   }
 }
 
+template <typename T>
 void
-RankThreeTensor::fillFromPlaneNormal(const RealVectorValue & input)
+RankThreeTensorTempl<T>::fillFromPlaneNormal(const VectorValue<T> & input)
 {
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
   {
-    const Real a = input(i);
+    const T a = input(i);
     for (unsigned int j = 0; j < N; ++j)
     {
-      const Real b = input(j);
+      const T b = input(j);
       for (unsigned int k = 0; k < N; ++k)
       {
-        const Real c = input(k);
-        Real sum = 0;
+        const T c = input(k);
+        T sum = 0;
         sum = -2 * a * b * c;
         if (i == j)
           sum += c;
@@ -250,10 +267,11 @@ RankThreeTensor::fillFromPlaneNormal(const RealVectorValue & input)
   }
 }
 
-RankFourTensor
-RankThreeTensor::mixedProductRankFour(const RankTwoTensor & a) const
+template <typename T>
+RankFourTensorTempl<T>
+RankThreeTensorTempl<T>::mixedProductRankFour(const RankTwoTensorTempl<T> & a) const
 {
-  RankFourTensor result;
+  RankFourTensorTempl<T> result;
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
@@ -270,24 +288,25 @@ RankThreeTensor::mixedProductRankFour(const RankTwoTensor & a) const
   return result;
 }
 
+template <typename T>
 void
-RankThreeTensor::rotate(const RealTensorValue & R)
+RankThreeTensorTempl<T>::rotate(const TensorValue<T> & R)
 {
-  RankThreeTensor old = *this;
+  RankThreeTensorTempl<T> old = *this;
 
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
       {
-        Real sum = 0.0;
+        T sum = 0.0;
         unsigned int index2 = 0;
         for (unsigned int m = 0; m < N; ++m)
         {
-          Real a = R(i, m);
+          T a = R(i, m);
           for (unsigned int n = 0; n < N; ++n)
           {
-            Real ab = a * R(j, n);
+            T ab = a * R(j, n);
             for (unsigned int o = 0; o < N; ++o)
               sum += ab * R(k, o) * old._vals[index2++];
           }
@@ -296,8 +315,9 @@ RankThreeTensor::rotate(const RealTensorValue & R)
       }
 }
 
+template <typename T>
 void
-RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
+RankThreeTensorTempl<T>::fillGeneralFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 27)
     mooseError("To use fillGeneralFromInputVector, your input must have size 27. Yours has size ",
@@ -307,9 +327,10 @@ RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
     _vals[i] = input[i];
 }
 
-RankTwoTensor operator*(const RealVectorValue & p, const RankThreeTensor & b)
+template <typename T>
+RankTwoTensorTempl<T> operator*(const VectorValue<T> & p, const RankThreeTensorTempl<T> & b)
 {
-  RankTwoTensor result;
+  RankTwoTensorTempl<T> result;
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
@@ -319,10 +340,11 @@ RankTwoTensor operator*(const RealVectorValue & p, const RankThreeTensor & b)
   return result;
 }
 
-RealVectorValue
-RankThreeTensor::doubleContraction(const RankTwoTensor & b) const
+template <typename T>
+VectorValue<T>
+RankThreeTensorTempl<T>::doubleContraction(const RankTwoTensorTempl<T> & b) const
 {
-  RealVectorValue result;
+  VectorValue<T> result;
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N2; ++j)
@@ -330,3 +352,6 @@ RankThreeTensor::doubleContraction(const RankTwoTensor & b) const
 
   return result;
 }
+
+template class RankThreeTensorTempl<Real>;
+template class RankThreeTensorTempl<DualReal>;

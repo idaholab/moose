@@ -10,22 +10,32 @@
 #ifndef RANKTHREETENSOR_H
 #define RANKTHREETENSOR_H
 
-// MOOSE includes
-#include "DataIO.h"
+#include "Moose.h"
+#include "DualReal.h"
 
-#include "libmesh/tensor_value.h"
 #include "libmesh/libmesh.h"
-#include "libmesh/vector_value.h"
+
+using libMesh::Real;
+namespace libMesh
+{
+template <typename>
+class TensorValue;
+template <typename>
+class TypeTensor;
+template <typename>
+class VectorValue;
+}
 
 // Forward declarations
 class MooseEnum;
 template <typename>
+class RankThreeTensorTempl;
+
+template <typename>
 class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-class RankThreeTensor;
+
 template <typename>
 class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
 
 template <typename T>
 void mooseSetToZero(T & v);
@@ -35,13 +45,16 @@ void mooseSetToZero(T & v);
  * Needed by DerivativeMaterialInterface
  */
 template <>
-void mooseSetToZero<RankThreeTensor>(RankThreeTensor & v);
+void mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v);
+template <>
+void mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v);
 
 /**
  * RankThreeTensor is designed to handle any N-dimensional third order tensor, r.
  *
  */
-class RankThreeTensor
+template <typename T>
+class RankThreeTensorTempl
 {
 public:
   /// Initialization method
@@ -61,22 +74,22 @@ public:
   };
 
   /// Default constructor; fills to zero
-  RankThreeTensor();
+  RankThreeTensorTempl();
 
   /// Select specific initialization pattern
-  RankThreeTensor(const InitMethod);
+  RankThreeTensorTempl(const InitMethod);
 
   /// Fill from vector
-  RankThreeTensor(const std::vector<Real> &, FillMethod);
+  RankThreeTensorTempl(const std::vector<T> &, FillMethod);
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
-  inline Real & operator()(unsigned int i, unsigned int j, unsigned int k)
+  inline T & operator()(unsigned int i, unsigned int j, unsigned int k)
   {
     return _vals[((i * N + j) * N + k)];
   }
 
   /// Gets the value for the index specified.  Takes index = 0,1,2. Used for const
-  inline Real operator()(unsigned int i, unsigned int j, unsigned int k) const
+  inline T operator()(unsigned int i, unsigned int j, unsigned int k) const
   {
     return _vals[((i * N + j) * N + k)];
   }
@@ -88,56 +101,53 @@ public:
   void print(std::ostream & stm = Moose::out) const;
 
   /// copies values from a into this tensor
-  RankThreeTensor & operator=(const RankThreeTensor & a);
-
-  /// r_ijk*a_kl
-  // RankTwoTensor operator*(const RankTwoTensor & a) const;
+  RankThreeTensorTempl<T> & operator=(const RankThreeTensorTempl<T> & a);
 
   /// b_i = r_ijk * a_jk
-  RealVectorValue operator*(const RankTwoTensor & a) const;
+  VectorValue<T> operator*(const RankTwoTensorTempl<T> & a) const;
 
   /// r_ijk*a
-  RankThreeTensor operator*(const Real a) const;
+  RankThreeTensorTempl<T> operator*(const T a) const;
 
   /// r_ijk *= a
-  RankThreeTensor & operator*=(const Real a);
+  RankThreeTensorTempl<T> & operator*=(const T a);
 
   /// r_ijk/a
-  RankThreeTensor operator/(const Real a) const;
+  RankThreeTensorTempl<T> operator/(const T a) const;
 
   /// r_ijk /= a  for all i, j, k
-  RankThreeTensor & operator/=(const Real a);
+  RankThreeTensorTempl<T> & operator/=(const T a);
 
   /// r_ijk += a_ijk  for all i, j, k
-  RankThreeTensor & operator+=(const RankThreeTensor & a);
+  RankThreeTensorTempl<T> & operator+=(const RankThreeTensorTempl<T> & a);
 
   /// r_ijkl + a_ijk
-  RankThreeTensor operator+(const RankThreeTensor & a) const;
+  RankThreeTensorTempl<T> operator+(const RankThreeTensorTempl<T> & a) const;
 
   /// r_ijk -= a_ijk
-  RankThreeTensor & operator-=(const RankThreeTensor & a);
+  RankThreeTensorTempl<T> & operator-=(const RankThreeTensorTempl<T> & a);
 
   /// r_ijk - a_ijk
-  RankThreeTensor operator-(const RankThreeTensor & a) const;
+  RankThreeTensorTempl<T> operator-(const RankThreeTensorTempl<T> & a) const;
 
   /// -r_ijk
-  RankThreeTensor operator-() const;
+  RankThreeTensorTempl<T> operator-() const;
 
   /// \sqrt(r_ijk*r_ijk)
-  Real L2norm() const;
+  T L2norm() const;
 
   /**
    * Rotate the tensor using
    * r_ijk = R_im R_in R_ko r_mno
    */
-  template <class T>
-  void rotate(const T & R);
+  template <class T2>
+  void rotate(const T2 & R);
 
   /**
    * Rotate the tensor using
    * r_ijk = R_im R_in R_ko r_mno
    */
-  void rotate(const RealTensorValue & R);
+  void rotate(const TensorValue<T> & R);
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
@@ -150,25 +160,25 @@ public:
    *             general (use fillGeneralFromInputVector)
    *             more fill_methods to be implemented soon!
    */
-  void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
+  void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method);
 
   /**
    * Fills RankThreeTensor from plane normal vectors
    * ref. Kuhl et. al. Int. J. Solids Struct. 38(2001) 2933-2952
    * @param input plane normal vector
    */
-  void fillFromPlaneNormal(const RealVectorValue & input);
+  void fillFromPlaneNormal(const VectorValue<T> & input);
 
   /**
    * Creates fourth order tensor D=A*b*A where A is rank 3 and b is rank 2
    * @param a RankTwoTensor A in the equation above
    */
-  RankFourTensor mixedProductRankFour(const RankTwoTensor & a) const;
+  RankFourTensorTempl<T> mixedProductRankFour(const RankTwoTensorTempl<T> & a) const;
 
   /**
    * Creates a vector from the double contraction of a rank three and rank two tensor.
    */
-  RealVectorValue doubleContraction(const RankTwoTensor & b) const;
+  VectorValue<T> doubleContraction(const RankTwoTensorTempl<T> & b) const;
 
 protected:
   /// Dimensionality of rank-three tensor
@@ -177,31 +187,40 @@ protected:
   static constexpr unsigned int N3 = N * N * N;
 
   /// The values of the rank-three tensor stored by index=((i * LIBMESH_DIM + j) * LIBMESH_DIM + k)
-  Real _vals[N3];
+  T _vals[N3];
 
-  void fillGeneralFromInputVector(const std::vector<Real> & input);
+  void fillGeneralFromInputVector(const std::vector<T> & input);
 
-  template <class T>
-  friend void dataStore(std::ostream &, T &, void *);
+  template <class T2>
+  friend void dataStore(std::ostream &, RankThreeTensorTempl<T2> &, void *);
 
-  template <class T>
-  friend void dataLoad(std::istream &, T &, void *);
+  template <class T2>
+  friend void dataLoad(std::istream &, RankThreeTensorTempl<T2> &, void *);
+
+  template <class T2>
+  friend class RankTwoTensorTempl;
+
+  template <class T2>
+  friend class RankFourTensorTempl;
 };
 
-template <>
-void dataStore(std::ostream &, RankThreeTensor &, void *);
+typedef RankThreeTensorTempl<Real> RankThreeTensor;
+typedef RankThreeTensorTempl<DualReal> DualRankThreeTensor;
 
-template <>
-void dataLoad(std::istream &, RankThreeTensor &, void *);
-
-inline RankThreeTensor operator*(Real a, const RankThreeTensor & b) { return b * a; }
+template <typename T>
+RankThreeTensorTempl<T> operator*(T a, const RankThreeTensorTempl<T> & b)
+{
+  return b * a;
+}
 
 ///r=v*A where r is rank 2, v is vector and A is rank 3
-RankTwoTensor operator*(const RealVectorValue &, const RankThreeTensor &);
+template <typename T>
+RankTwoTensorTempl<T> operator*(const VectorValue<T> &, const RankThreeTensorTempl<T> &);
 
-template <class T>
+template <typename T>
+template <class T2>
 void
-RankThreeTensor::rotate(const T & R)
+RankThreeTensorTempl<T>::rotate(const T2 & R)
 {
   unsigned int index = 0;
   for (unsigned int i = 0; i < N; ++i)
@@ -209,13 +228,13 @@ RankThreeTensor::rotate(const T & R)
       for (unsigned int k = 0; k < N; ++k)
       {
         unsigned int index2 = 0;
-        Real sum = 0.0;
+        T sum = 0.0;
         for (unsigned int m = 0; m < N; ++m)
         {
-          Real a = R(i, m);
+          T a = R(i, m);
           for (unsigned int n = 0; n < N; ++n)
           {
-            Real ab = a * R(j, n);
+            T ab = a * R(j, n);
             for (unsigned int o = 0; o < N; ++o)
               sum += ab * R(k, o) * _vals[index2++];
           }
