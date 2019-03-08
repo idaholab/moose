@@ -27,6 +27,8 @@ public:
   virtual Real T_sat(Real p) const override;
   virtual Real dT_sat_dp(Real p) const override;
 
+  virtual bool supportsPhaseChange() const override { return false; }
+
 protected:
   /// Derivative of saturation temperature w.r.t. pressure
   const Real _dT_sat_dp;
