@@ -1,0 +1,91 @@
+# cd '/Users/petejw/code/peterson_git/cubit'
+# play 'sphere_hybrid.jou'
+reset
+
+# {inner_r = 1}
+# {outer_r = 1.1}
+# {xmax = 4.}
+# {ymax = 4.}
+# {zmax = 10.}
+
+# Create the sphere defining the obstruction
+# and the box from which it is subtracted
+create brick width {xmax} depth {ymax} height {zmax}
+create sphere radius {outer_r}
+
+# Make big hole. result = vol 3
+subtract vol 2 from vol 1
+
+# Make shell
+create sphere radius {outer_r} # 4
+create sphere radius {inner_r} # 5
+subtract vol 5 from vol 4 # 6
+
+# Cut everything and merge it back together
+webcut vol all plane xplane
+webcut vol all plane yplane
+merge vol all
+
+# The current volumes are: 3 9 6 10 7 11 8 12
+# 3,6 are together
+# 9,10 are together
+# 7,8 are together
+# 11,12 are together
+
+# Set some common meshing intervals.
+# {half_circle_interval = 30}
+# {shell_interval = 4}
+# {half_inlet_interval = 8}
+# {outer_wall_interval = 40}
+# {fore_after_interval = 16}
+
+# Set all intervals. This is independent of the volumes since the
+# curves live in between the volumes.
+curve 92 68 58 61 68 interval {half_circle_interval}
+curve 57 59 interval {shell_interval}
+curve 18 19 20 21 27 28 29 30 38 40 41 42 44 45 52 53 54 55 72 74 76 79 86 87 interval {half_inlet_interval}
+curve 9 10 11 12 15 17 39 73 interval {outer_wall_interval}
+
+# Make the tet meshing interval match the shell element interval near the sphere.
+curve 35 scheme bias fine size .1 coarse size .25 start vertex 9
+curve 37 scheme bias fine size .1 coarse size .25 start vertex 24
+
+# Mesh sphere surfaces with trimesh
+surf 69 43 49 63 scheme trimesh
+mesh surf 69 43 49 63
+
+# Sweep trimeshes from sphere surface to outside of shell.
+vol 6 8 10 12 scheme sweep
+mesh vol 6 8 10 12
+
+# Generate tetmeshes
+vol 3 7 9 11 scheme tetmesh
+vol 3 7 9 11 tetmesh growth_factor 1.25
+mesh vol 3 7 9 11
+
+# Set up sidesets for applying BCs.
+sideset 2 surf 61 38 34 51
+sideset 2 name 'inlet'
+sideset 3 surf 58 41 54 31
+sideset 3 name 'outlet'
+sideset 4 surf 20 17 57 55 23 15 35 37 63 49 69 43
+sideset 4 name 'no_slip'
+
+# Set up different blocks for the different element types. This is
+# required for Exodus files.
+block 1 vol 3 7 9 11  # Tets
+block 2 vol 6 8 10 12 # Prisms
+block 1 name 'far_field'
+block 2 name 'near_sphere'
+block 1 element type TETRA
+block 2 element type WEDGE
+
+# Export the results
+export mesh "sphere_hybrid.e" dimension 3 overwrite
+
+# Hide enough volumes to see inside details.
+draw vol 3 9 6 8 10
+
+# Local Variables:
+# mode: shell-script
+# End:
