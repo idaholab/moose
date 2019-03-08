@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorVariableComponent.h"
+#include "VectorVariableComponentAux.h"
 
-registerMooseObject("MooseApp", VectorVariableComponent);
+registerMooseObject("MooseApp", VectorVariableComponentAux);
 
 template <>
 InputParameters
-validParams<VectorVariableComponent>()
+validParams<VectorVariableComponentAux>()
 {
   MooseEnum component("x=0 y=1 z=2");
   InputParameters params = validParams<AuxKernel>();
@@ -25,18 +25,19 @@ validParams<VectorVariableComponent>()
   return params;
 }
 
-VectorVariableComponent::VectorVariableComponent(const InputParameters & parameters)
+VectorVariableComponentAux::VectorVariableComponentAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _vector_variable_value(coupledNodalValue<RealVectorValue>("vector_variable")),
     _component(getParam<MooseEnum>("component"))
 {
   if (!isNodal())
-    mooseError("VectorVariableComponent is meant to be used with LAGRANGE_VEC variables and so the "
-               "auxiliary variable should be nodal");
+    mooseError(
+        "VectorVariableComponentAux is meant to be used with LAGRANGE_VEC variables and so the "
+        "auxiliary variable should be nodal");
 }
 
 Real
-VectorVariableComponent::computeValue()
+VectorVariableComponentAux::computeValue()
 {
   return _vector_variable_value(_component);
 }

@@ -26,13 +26,13 @@
 
 [AuxKernels]
   [vel_x]
-    type = VectorVariableComponent
+    type = VectorVariableComponentAux
     variable = vel_x
     vector_variable = velocity
     component = 'x'
   []
   [vel_y]
-    type = VectorVariableComponent
+    type = VectorVariableComponentAux
     variable = vel_y
     vector_variable = velocity
     component = 'y'

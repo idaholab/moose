@@ -7,29 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORVARIABLECOMPONENT_H
-#define VECTORVARIABLECOMPONENT_H
+#ifndef VECTORVARIABLECOMPONENTAUX_H
+#define VECTORVARIABLECOMPONENTAUX_H
 
 // MOOSE includes
 #include "AuxKernel.h"
 
 // Forward declarations
-class VectorVariableComponent;
+class VectorVariableComponentAux;
 
 template <>
-InputParameters validParams<VectorVariableComponent>();
+InputParameters validParams<VectorVariableComponentAux>();
 
 /**
  * Extract a component from a vector variable
  */
-class VectorVariableComponent : public AuxKernel
+class VectorVariableComponentAux : public AuxKernel
 {
 public:
   /**
    * Class constructor
    * @param parameters Input parameters for the object
    */
-  VectorVariableComponent(const InputParameters & parameters);
+  VectorVariableComponentAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -42,4 +42,4 @@ private:
   int _component;
 };
 
-#endif // VECTORVARIABLECOMPONENT_H
+#endif // VECTORVARIABLECOMPONENTAUX_H
