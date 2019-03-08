@@ -229,7 +229,7 @@ TabulatedFluidProperties::initialSetup()
   else
   {
     _console << name() + ": No tabulated properties file named " << _file_name << " exists.\n";
-    _console << name() + ": Generating tabulated data ";
+    _console << name() + ": Generating tabulated data\n";
 
     if (_save_file)
       _console << name() + ": Writing tabulated data to " << _file_name << "\n";
