@@ -9,6 +9,7 @@
 
 #include "ADKernelGrad.h"
 #include "MathUtils.h"
+#include "Assembly.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

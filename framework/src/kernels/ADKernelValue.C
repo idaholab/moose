@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADKernelValue.h"
+#include "Assembly.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
