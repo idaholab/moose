@@ -328,19 +328,6 @@ RankThreeTensorTempl<T>::fillGeneralFromInputVector(const std::vector<T> & input
 }
 
 template <typename T>
-RankTwoTensorTempl<T> operator*(const VectorValue<T> & p, const RankThreeTensorTempl<T> & b)
-{
-  RankTwoTensorTempl<T> result;
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        result(i, j) += p(k) * b(k, i, j);
-
-  return result;
-}
-
-template <typename T>
 VectorValue<T>
 RankThreeTensorTempl<T>::doubleContraction(const RankTwoTensorTempl<T> & b) const
 {
