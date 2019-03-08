@@ -81,7 +81,7 @@ INSADMaterial<compute_stage>::computeQpProperties()
   _convective_strong_residual[_qp] = _rho[_qp] * _grad_velocity[_qp] * _velocity[_qp];
   _td_strong_residual[_qp] =
       _transient_term ? _rho[_qp] * (*_velocity_dot)[_qp] : ADRealVectorValue(0);
-  _gravity_strong_residual[_qp] = _gravity_set ? _rho[_qp] * _gravity : ADRealVectorValue(0);
+  _gravity_strong_residual[_qp] = _gravity_set ? -_rho[_qp] * _gravity : ADRealVectorValue(0);
   _mms_function_strong_residual[_qp] = -RealVectorValue(_x_vel_fn.value(_t, _q_point[_qp]),
                                                         _y_vel_fn.value(_t, _q_point[_qp]),
                                                         _z_vel_fn.value(_t, _q_point[_qp]));
