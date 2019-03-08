@@ -1,0 +1,10 @@
+[Tests]
+  [./cyl_average]
+    type = CSVDiff
+    input = cylindrical_average.i
+    csvdiff = 'cylindrical_average_out_average_0001.csv'
+    requirement = 'MOOSE shall support the computation of averages of variables over cylindrical shells.'
+    issues = '#12979'
+    design = 'vectorpostprocessors/CylindricalAverage.md'
+  [../]
+[]
