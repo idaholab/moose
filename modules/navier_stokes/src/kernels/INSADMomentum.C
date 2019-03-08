@@ -56,7 +56,7 @@ INSADMomentumViscous<compute_stage>::INSADMomentumViscous(const InputParameters 
 }
 
 template <ComputeStage compute_stage>
-ADVectorGradResidual
+ADTensorResidual
 INSADMomentumViscous<compute_stage>::precomputeQpResidual()
 {
   return _mu[_qp] * _grad_u[_qp];
@@ -87,7 +87,7 @@ INSADMomentumPressure<compute_stage>::INSADMomentumPressure(const InputParameter
 }
 
 template <ComputeStage compute_stage>
-ADVectorResidual
+ADResidual
 INSADMomentumPressure<compute_stage>::computeQpResidual()
 {
   if (_integrate_p_by_parts)

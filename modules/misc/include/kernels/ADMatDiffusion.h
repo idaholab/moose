@@ -23,7 +23,7 @@ public:
   ADMatDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual ADGradResidual precomputeQpResidual() override;
+  virtual ADVectorResidual precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _diffusivity;
 

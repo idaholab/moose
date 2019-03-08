@@ -56,7 +56,7 @@ public:
   INSADMassPSPG(const InputParameters & parameters);
 
 protected:
-  ADGradResidual precomputeQpResidual() override;
+  ADVectorResidual precomputeQpResidual() override;
 
   /// The density
   const ADMaterialProperty(Real) & _rho;

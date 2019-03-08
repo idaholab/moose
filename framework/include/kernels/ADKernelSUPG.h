@@ -44,7 +44,8 @@ protected:
   /**
    * Called before forming the residual for an element
    */
-  virtual ADResidualTempl precomputeQpStrongResidual() = 0;
+  virtual typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputValue
+  precomputeQpStrongResidual() = 0;
 
   virtual ADResidual computeQpResidual() override final;
 

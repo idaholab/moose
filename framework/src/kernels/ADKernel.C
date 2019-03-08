@@ -86,11 +86,6 @@ ADKernelTempl<T, compute_stage>::ADKernelTempl(const InputParameters & parameter
 }
 
 template <typename T, ComputeStage compute_stage>
-ADKernelTempl<T, compute_stage>::~ADKernelTempl()
-{
-}
-
-template <typename T, ComputeStage compute_stage>
 void
 ADKernelTempl<T, compute_stage>::computeResidual()
 {

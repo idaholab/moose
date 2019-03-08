@@ -54,7 +54,7 @@ INSADMassPSPG<compute_stage>::INSADMassPSPG(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADGradResidual
+ADVectorResidual
 INSADMassPSPG<compute_stage>::precomputeQpResidual()
 {
   return -_tau[_qp] / _rho[_qp] * _momentum_strong_residual[_qp];

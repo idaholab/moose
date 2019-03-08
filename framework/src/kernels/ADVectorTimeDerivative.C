@@ -24,10 +24,10 @@ ADVectorTimeDerivative<compute_stage>::ADVectorTimeDerivative(const InputParamet
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-ADVectorTimeDerivative<compute_stage>::computeQpResidual()
+ADRealVectorValue
+ADVectorTimeDerivative<compute_stage>::precomputeQpResidual()
 {
-  return _test[_i][_qp] * _u_dot[_qp];
+  return _u_dot[_qp];
 }
 
 adBaseClass(ADVectorTimeDerivative);

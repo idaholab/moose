@@ -24,7 +24,7 @@ ADDiffusion<compute_stage>::ADDiffusion(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADGradResidual
+ADVectorResidual
 ADDiffusion<compute_stage>::precomputeQpResidual()
 {
   return _grad_u[_qp];

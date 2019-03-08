@@ -40,7 +40,8 @@ protected:
   /**
    * Called before forming the residual for an element
    */
-  virtual ADGradResidualTempl precomputeQpResidual() = 0;
+  virtual typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputGradient
+  precomputeQpResidual() = 0;
 
   virtual ADResidual computeQpResidual() override final;
 

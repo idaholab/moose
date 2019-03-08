@@ -65,7 +65,7 @@ public:
   INSADMomentumViscous(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorGradResidual precomputeQpResidual() override;
+  virtual ADTensorResidual precomputeQpResidual() override;
 
   const ADMaterialProperty(Real) & _mu;
 
@@ -94,7 +94,7 @@ public:
   INSADMomentumPressure(const InputParameters & parameters);
 
 protected:
-  virtual ADVectorResidual computeQpResidual() override;
+  virtual ADResidual computeQpResidual() override;
 
   const bool _integrate_p_by_parts;
   const ADVariableValue & _p;

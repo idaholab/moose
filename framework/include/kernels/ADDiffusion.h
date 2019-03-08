@@ -24,7 +24,7 @@ public:
   ADDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual ADGradResidual precomputeQpResidual() override;
+  virtual ADVectorResidual precomputeQpResidual() override;
 
   usingKernelGradMembers;
 };
