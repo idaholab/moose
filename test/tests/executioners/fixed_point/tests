@@ -1,0 +1,10 @@
+[Tests]
+  [./test_fixed_point]
+    type = 'Exodiff'
+    input = '2d_diffusion_fixed_point.i'
+    exodiff = '2d_diffusion_fixed_point_out.e'
+    requirement = 'MOOSE shall provide an ability to solve a problem iteratively with tagging.'
+    issues = '#9669'
+    design = '/tagging.md'
+  [../]
+[]
