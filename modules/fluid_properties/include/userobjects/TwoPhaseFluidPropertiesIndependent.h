@@ -32,6 +32,8 @@ public:
   virtual Real p_sat(Real T) const override;
   virtual Real dT_sat_dp(Real p) const override;
 
+  virtual bool supportsPhaseChange() const override { return false; }
+
   /**
    * Calls \c mooseError with a message saying that this class cannot call
    * 2-phase fluid properties.
