@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "ElemElemConstraint.h"
 #include "MortarConstraint.h"
-#include "RealMortarConstraint.h"
+#include "RealMortarConstraintBase.h"
 #include "MooseVariable.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
@@ -31,8 +31,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   // Cast the the possible Contraint types
   std::shared_ptr<NodeFaceConstraint> nfc = std::dynamic_pointer_cast<NodeFaceConstraint>(object);
   std::shared_ptr<MortarConstraint> ffc = std::dynamic_pointer_cast<MortarConstraint>(object);
-  std::shared_ptr<RealMortarConstraint> mc =
-      std::dynamic_pointer_cast<RealMortarConstraint>(object);
+  std::shared_ptr<RealMortarConstraintBase> mc =
+      std::dynamic_pointer_cast<RealMortarConstraintBase>(object);
   std::shared_ptr<NodalConstraint> nc = std::dynamic_pointer_cast<NodalConstraint>(object);
   std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
   std::shared_ptr<NodeElemConstraint> nec = std::dynamic_pointer_cast<NodeElemConstraint>(object);
@@ -138,7 +138,7 @@ ConstraintWarehouse::getActiveMortarConstraints(const std::string & interface) c
   return it->second.getActiveObjects();
 }
 
-const std::vector<std::shared_ptr<RealMortarConstraint>> &
+const std::vector<std::shared_ptr<RealMortarConstraintBase>> &
 ConstraintWarehouse::getActiveRealMortarConstraints() const
 {
   return _real_mortar_constraints.getActiveObjects();

@@ -19,31 +19,22 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("MooseApp", RealMortarConstraint);
+defineADBaseValidParams(
+    RealMortarConstraint,
+    RealMortarConstraintBase,
+    params.addRequiredParam<BoundaryID>("master_boundary_id",
+                                        "The id of the master boundary sideset.");
+    params.addRequiredParam<BoundaryID>("slave_boundary_id",
+                                        "The id of the slave boundary sideset.");
+    params.addRequiredParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
+    params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
+    params.registerRelationshipManagers("AugmentSparsityOnInterface");
+    params.addRequiredParam<NonlinearVariableName>("lm_variable",
+                                                   "The lagrange multiplier variable"););
 
-template <>
-InputParameters
-validParams<RealMortarConstraint>()
-{
-  InputParameters params = validParams<Constraint>();
-  params.addRequiredParam<BoundaryID>("master_boundary_id",
-                                      "The id of the master boundary sideset.");
-  params.addRequiredParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
-  params.addRequiredParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
-  params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
-  params.registerRelationshipManagers("AugmentSparsityOnInterface");
-  params.addRequiredParam<NonlinearVariableName>("lm_variable", "The lagrange multiplier variable");
-  return params;
-}
-
-RealMortarConstraint::RealMortarConstraint(const InputParameters & parameters)
-  : Constraint(parameters),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    MooseVariableInterface<Real>(this,
-                                 true,
-                                 "variable",
-                                 Moose::VarKindType::VAR_NONLINEAR,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+template <ComputeStage compute_stage>
+RealMortarConstraint<compute_stage>::RealMortarConstraint(const InputParameters & parameters)
+  : RealMortarConstraintBase(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
 
@@ -54,76 +45,37 @@ RealMortarConstraint::RealMortarConstraint(const InputParameters & parameters)
     _amg(_fe_problem.getMortarInterface(std::make_pair(_master_id, _slave_id),
                                         std::make_pair(_master_subdomain_id, _slave_subdomain_id))),
     _lambda_var(
-        _sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("lm_variable")))
+        _sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("lm_variable"))),
+    _primal_var_number(_var.number()),
+    _lambda_var_number(_lambda_var.number()),
+    _dof_map(_sys.dofMap()),
+    _fe_type_primal(_var.feType()),
+    _fe_type_lambda(_lambda_var.feType()),
+    _interior_dimension(_fe_problem.mesh().getMesh().mesh_dimension()),
+    _msm_dimension(_interior_dimension - 1),
+    _fe_msm_primal(FEBase::build(_msm_dimension, _fe_type_primal)),
+    _fe_msm_lambda(FEBase::build(_msm_dimension, _fe_type_lambda)),
+    _fe_slave_interior_primal(FEBase::build(_interior_dimension, _fe_type_primal)),
+    _fe_master_interior_primal(FEBase::build(_interior_dimension, _fe_type_primal)),
+    _qrule_msm(_msm_dimension, SECOND),
+    _JxW_msm(_fe_msm_primal->get_JxW()),
+    _phi_lambda(_fe_msm_lambda->get_phi()),
+    _phi_slave_interior_primal(_fe_slave_interior_primal->get_phi()),
+    _phi_master_interior_primal(_fe_master_interior_primal->get_phi()),
+    _xyz_slave_interior(_fe_slave_interior_primal->get_xyz()),
+    _xyz_master_interior(_fe_master_interior_primal->get_xyz()),
+    _lm_offset(0)
 {
+  _fe_msm_primal->attach_quadrature_rule(&_qrule_msm);
 }
 
+template <ComputeStage compute_stage>
 void
-RealMortarConstraint::computeResidual()
+RealMortarConstraint<compute_stage>::loopOverMortarMesh()
 {
-  // Get a constant reference to the mesh object.
-  const MeshBase & mesh = _fe_problem.mesh().getMesh();
-
-  // The dimension that we are running
-  const unsigned int dim = mesh.mesh_dimension();
-
-  // A reference to the DofMap object for this system.
-  const DofMap & dof_map = _sys.dofMap();
-
-  // Get a copy of the Finite Element type
-  // for the non-linear and lagrange multiplier variables
-  auto primal_var_number = _var.number();
-  auto lambda_var_number = _lambda_var.number();
-  FEType fe_type_primal = dof_map.variable_type(primal_var_number),
-         fe_type_lambda = dof_map.variable_type(lambda_var_number);
-
-  // A lower-dimensional FE object for the primal_var
-  UniquePtr<FEBase> fe_msm(FEBase::build(dim - 1, fe_type_primal));
-  QGauss qrule_msm(dim - 1, SECOND);
-  fe_msm->attach_quadrature_rule(&qrule_msm);
-
-  // Pre-request lower-dimensional element values. Only thing needed is really the JxW values.
-  const std::vector<Real> & JxW_msm = fe_msm->get_JxW();
-
-  // A lower-dimensional FE object for the _lambda_var.
-  UniquePtr<FEBase> slave_face_fe_lambda(FEBase::build(dim - 1, fe_type_lambda));
-  const std::vector<std::vector<Real>> & slave_face_phi_lambda = slave_face_fe_lambda->get_phi();
-
-  // A finite element object for the interior element associated with
-  // the temperature variable on the slave side.  This is used for computing
-  // stabilization terms that depend on the boundary flux from the
-  // interior element.
-  UniquePtr<FEBase> slave_interior_fe_primal(FEBase::build(dim, fe_type_primal));
-  const std::vector<std::vector<Real>> & slave_interior_phi_primal =
-      slave_interior_fe_primal->get_phi();
-  const std::vector<Point> & slave_interior_xyz = slave_interior_fe_primal->get_xyz();
-
-  // A finite element object for the interior element associated with
-  // the temperature variable on the master side.  This is used for computing
-  // stabilization terms that depend on the boundary flux from the
-  // interior element.
-  UniquePtr<FEBase> master_interior_fe_primal(FEBase::build(dim, fe_type_primal));
-  const std::vector<std::vector<Real>> & master_interior_phi_primal =
-      master_interior_fe_primal->get_phi();
-  const std::vector<Point> & master_interior_xyz = master_interior_fe_primal->get_xyz();
-
-  // Vector to hold lambda dofs on lower-dimensional slave side elements
-  std::vector<dof_id_type> dof_indices_slave_lambda;
-
-  // Vector to hold Temperature dofs of slave side and master side
-  // interior elements.
-  std::vector<dof_id_type> dof_indices_interior_slave_primal;
-  std::vector<dof_id_type> dof_indices_interior_master_primal;
-
-  DenseVector<Real> F_primal_slave;
-  DenseVector<Real> F_primal_master;
-  DenseVector<Real> F_lambda_slave;
-
-  DenseVector<Real> u_primal_slave;
-  DenseVector<Real> u_primal_master;
-  DenseVector<Real> u_lambda_slave;
-
-  const NumericVector<Real> & current_solution = *_sys.currentSolution();
+  _u_lambda.resize(_qrule_msm.n_points());
+  _u_primal_slave.resize(_qrule_msm.n_points());
+  _u_primal_master.resize(_qrule_msm.n_points());
 
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
@@ -153,10 +105,11 @@ RealMortarConstraint::computeResidual()
     const MortarSegmentInfo & msinfo = _amg.msm_elem_to_info.at(msm_elem);
 
     // There may be no contribution from the master side if it is not "in contact".
-    bool has_slave = msinfo.slave_elem ? true : false, has_master = msinfo.has_master();
+    bool has_slave = msinfo.slave_elem ? true : false;
+    _has_master = msinfo.has_master();
 
     if (!has_slave)
-      libmesh_error_msg("Error, mortar segment has no slave element associated with it!");
+      mooseError("Error, mortar segment has no slave element associated with it!");
 
     // Pointer to the interior parent.
     const Elem * slave_ip = msinfo.slave_elem->interior_parent();
@@ -168,18 +121,25 @@ RealMortarConstraint::computeResidual()
     // mortar segment is simply msinfo.slave_elem.
     const Elem * slave_face_elem = msinfo.slave_elem;
 
-    // Get the temperature and lambda dof indices for the slave element side.
-    dof_map.dof_indices(slave_face_elem, dof_indices_slave_lambda, lambda_var_number);
+    // Get the lambda dof indices for the slave element side.
+    _dof_map.dof_indices(slave_face_elem, _dof_indices_lambda, _lambda_var_number);
 
-    // Get temperature dof indices associated with the interior slave Elem.
-    dof_map.dof_indices(slave_ip, dof_indices_interior_slave_primal, primal_var_number);
+    // Offset the beginning of slave primal dofs by the length of the LM dof indices
+    _slave_primal_offset = _dof_indices_lambda.size();
+
+    // Get primal dof indices associated with the interior slave Elem.
+    _dof_map.dof_indices(slave_ip, _dof_indices_slave_interior_primal, _primal_var_number);
+
+    // Offset the beginning of master primal dofs by the combined length of the
+    // LM and slave primal dofs
+    _master_primal_offset = _slave_primal_offset + _dof_indices_slave_interior_primal.size();
 
     // These only get initialized if there is a master Elem associated to this segment.
     const Elem * master_ip = libmesh_nullptr;
     unsigned int master_side_id = libMesh::invalid_uint;
     Real h_master = 0.;
 
-    if (has_master)
+    if (_has_master)
     {
       // Set the master interior parent and side ids.
       master_ip = msinfo.master_elem->interior_parent();
@@ -188,27 +148,22 @@ RealMortarConstraint::computeResidual()
       // Store the length of the edge element for use in stabilization terms.
       h_master = msinfo.master_elem->volume();
 
-      // Get temperature dof indices associated with the interior master Elem.
-      dof_map.dof_indices(master_ip, dof_indices_interior_master_primal, primal_var_number);
+      // Get primal dof indices associated with the interior master Elem.
+      _dof_map.dof_indices(master_ip, _dof_indices_master_interior_primal, _primal_var_number);
     }
+    else
+      _dof_indices_master_interior_primal.clear();
 
     // Re-compute FE data on the mortar segment Elem (JxW_msm is the only thing we actually use.)
-    fe_msm->reinit(msm_elem);
+    _fe_msm_primal->reinit(msm_elem);
 
-    F_primal_slave.resize(dof_indices_interior_slave_primal.size());
-    F_primal_master.resize(dof_indices_interior_master_primal.size());
-    F_lambda_slave.resize(dof_indices_slave_lambda.size());
-
-    u_primal_slave.resize(qrule_msm.n_points());
-    u_primal_master.resize(qrule_msm.n_points());
-    u_lambda_slave.resize(qrule_msm.n_points());
-
+    // Compute custom integration points for the slave side
     {
-      custom_xi1_pts.resize(qrule_msm.n_points());
+      custom_xi1_pts.resize(_qrule_msm.n_points());
 
-      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
+      for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
       {
-        Real eta = qrule_msm.qp(qp)(0);
+        Real eta = _qrule_msm.qp(qp)(0);
         Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
         custom_xi1_pts[qp] = xi1_eta;
       }
@@ -216,382 +171,242 @@ RealMortarConstraint::computeResidual()
       // When you don't provide a weights array, the FE object uses
       // a dummy rule with all 1's. You should probably never use
       // the resulting JxW values for anything important.
-      slave_face_fe_lambda->reinit(slave_face_elem, &custom_xi1_pts);
+      _fe_msm_lambda->reinit(slave_face_elem, &custom_xi1_pts);
 
       // Reinit the slave interior FE on the side in question at the custom qps.
-      slave_interior_fe_primal->reinit(slave_ip, slave_side_id, TOLERANCE, &custom_xi1_pts);
+      _fe_slave_interior_primal->reinit(slave_ip, slave_side_id, TOLERANCE, &custom_xi1_pts);
     }
 
-    if (has_master)
+    // Compute custom integration points for the master side
+    if (_has_master)
     {
-      custom_xi2_pts.resize(qrule_msm.n_points());
-      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
+      custom_xi2_pts.resize(_qrule_msm.n_points());
+      for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
       {
-        Real eta = qrule_msm.qp(qp)(0);
+        Real eta = _qrule_msm.qp(qp)(0);
         Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
         custom_xi2_pts[qp] = xi2_eta;
       }
 
       // Reinit the master interior FE on the side in question at the custom qps.
-      master_interior_fe_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
+      _fe_master_interior_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
     }
 
-    // For the gap conductance problem, compute the gap heat
-    // transfer coefficient, which is proportional to (k/g) where k
-    // is the thermal conductivity of the air in the gap, and g is
-    // the distance between the surfaces.
-    std::vector<Real> heat_transfer_coeff(slave_interior_xyz.size());
-    if (has_master)
-    {
-      for (unsigned int qp = 0; qp < heat_transfer_coeff.size(); ++qp)
-      {
-        Real gap = (slave_interior_xyz[qp] - master_interior_xyz[qp]).norm();
+    _u_lambda.zero();
+    _u_primal_slave.zero();
+    _u_primal_master.zero();
+    computeSolutions();
 
-        // Avoid division by zero. We currently only support strictly nonzero gap sizes.
-        if (gap < TOLERANCE * TOLERANCE)
-          libmesh_error_msg("Error: gap "
-                            << gap
-                            << " is approximately zero, the gap conductance approach will "
-                               "fail.");
-
-        // TODO: Currently the numerator is a fixed constant, but it should be specifiable by the
-        // user.
-        heat_transfer_coeff[qp] = 0.03 / gap;
-      }
-    }
-
-    for (unsigned int qp = 0; qp < qrule_msm.n_points(); ++qp)
-    {
-      for (unsigned int i = 0; i < dof_indices_slave_lambda.size(); ++i)
-      {
-        auto idx = dof_indices_slave_lambda[i];
-        auto soln_local = current_solution(idx);
-
-        u_lambda_slave(qp) += soln_local * slave_face_phi_lambda[i][qp];
-      }
-      for (unsigned int i = 0; i < dof_indices_interior_slave_primal.size(); ++i)
-      {
-        auto idx = dof_indices_interior_slave_primal[i];
-        auto soln_local = current_solution(idx);
-
-        u_primal_slave(qp) += soln_local * slave_interior_phi_primal[i][qp];
-      }
-      for (unsigned int i = 0; i < dof_indices_interior_master_primal.size(); ++i)
-      {
-        auto idx = dof_indices_interior_master_primal[i];
-        auto soln_local = current_solution(idx);
-
-        u_primal_master(qp) += soln_local * master_interior_phi_primal[i][qp];
-      }
-    }
-
-    // Compute slave/slave contribution to primal equation.
-    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-      for (unsigned int i = 0; i < dof_indices_interior_slave_primal.size(); ++i)
-        F_primal_slave(i) += JxW_msm[qp] * slave_interior_phi_primal[i][qp] * u_lambda_slave(qp);
-
-    // In the continuity constrained case, the slave/slave
-    // contribution to the LM equation is just the transpose of the
-    // primal contribution. In the gap conductance case, the heat
-    // transfer coefficient shows up, and there is a minus sign.
-    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-      for (unsigned int i = 0; i < dof_indices_slave_lambda.size(); ++i)
-        F_lambda_slave(i) += JxW_msm[qp] * slave_face_phi_lambda[i][qp] *
-                             (u_lambda_slave(qp) -
-                              heat_transfer_coeff[qp] *
-                                  (u_primal_slave(qp) - (has_master ? u_primal_master(qp) : 0)));
-
-    // Compute master/slave contributions to primal equation.
-    if (has_master)
-    {
-      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-        for (unsigned int i = 0; i < dof_indices_interior_master_primal.size(); ++i)
-          F_primal_master(i) +=
-              -JxW_msm[qp] * master_interior_phi_primal[i][qp] * u_lambda_slave(qp);
-    }
-
-    _sys.getVector(_sys.residualVectorTag()).add_vector(F_lambda_slave, dof_indices_slave_lambda);
-    _sys.getVector(_sys.residualVectorTag())
-        .add_vector(F_primal_slave, dof_indices_interior_slave_primal);
-    _sys.getVector(_sys.residualVectorTag())
-        .add_vector(F_primal_master, dof_indices_interior_master_primal);
+    if (compute_stage == ComputeStage::RESIDUAL)
+      computeElementResidual();
+    else
+      computeElementJacobian();
   }
 }
 
+template <ComputeStage compute_stage>
 void
-RealMortarConstraint::computeJacobian()
+RealMortarConstraint<compute_stage>::computeSolutions()
 {
-  // Get a constant reference to the mesh object.
-  const MeshBase & mesh = _fe_problem.mesh().getMesh();
+  auto && current_solution = (*_sys.currentSolution());
 
-  // The dimension that we are running
-  const unsigned int dim = mesh.mesh_dimension();
-
-  // A reference to the DofMap object for this system.
-  const DofMap & dof_map = _sys.dofMap();
-
-  // Get a constant reference to the Finite Element type
-  // for the first (and only) variable in the system.
-  auto primal_var_number = _var.number();
-  auto lambda_var_number = _lambda_var.number();
-  FEType fe_type_primal = dof_map.variable_type(primal_var_number),
-         fe_type_lambda = dof_map.variable_type(lambda_var_number);
-
-  // A FE object for assembling on lower-dimensional elements.
-  UniquePtr<FEBase> fe_msm(FEBase::build(dim - 1, fe_type_primal));
-  QGauss qrule_msm(dim - 1, SECOND);
-  fe_msm->attach_quadrature_rule(&qrule_msm);
-
-  // Pre-request lower-dimensional element values. Only thing needed is really the JxW values.
-  const std::vector<Real> & JxW_msm = fe_msm->get_JxW();
-
-  // A lower-dimensional FE object for the _lambda_var.
-  UniquePtr<FEBase> slave_face_fe_lambda(FEBase::build(dim - 1, fe_type_lambda));
-  const std::vector<std::vector<Real>> & slave_face_phi_lambda = slave_face_fe_lambda->get_phi();
-
-  // A finite element object for the interior element associated with
-  // the temperature variable on the slave side.  This is used for computing
-  // stabilization terms that depend on the boundary flux from the
-  // interior element.
-  UniquePtr<FEBase> slave_interior_fe_primal(FEBase::build(dim, fe_type_primal));
-  const std::vector<std::vector<Real>> & slave_interior_phi_primal =
-      slave_interior_fe_primal->get_phi();
-  const std::vector<Point> & slave_interior_xyz = slave_interior_fe_primal->get_xyz();
-
-  // A finite element object for the interior element associated with
-  // the temperature variable on the master side.  This is used for computing
-  // stabilization terms that depend on the boundary flux from the
-  // interior element.
-  UniquePtr<FEBase> master_interior_fe_primal(FEBase::build(dim, fe_type_primal));
-  const std::vector<std::vector<Real>> & master_interior_phi_primal =
-      master_interior_fe_primal->get_phi();
-  const std::vector<Point> & master_interior_xyz = master_interior_fe_primal->get_xyz();
-
-  // Vector to hold lambda dofs on lower-dimensional slave side elements
-  std::vector<dof_id_type> dof_indices_slave_lambda;
-
-  // Vector to hold Temperature dofs of slave side and master side
-  // interior elements.
-  std::vector<dof_id_type> dof_indices_interior_slave_primal;
-  std::vector<dof_id_type> dof_indices_interior_master_primal;
-
-  // Place to accumulate slave/slave and master/slave mortar element stiffness matrices and their
-  // transposes.
-  DenseMatrix<Real> K_primal_slave_lambda_slave;
-  DenseMatrix<Real> K_primal_master_lambda_slave;
-
-  DenseMatrix<Real> K_lambda_slave_lambda_slave;
-  DenseMatrix<Real> K_lambda_slave_primal_slave;
-  DenseMatrix<Real> K_lambda_slave_primal_master;
-
-  // Array to hold custom quadrature point locations on the slave and master sides
-  std::vector<Point> custom_xi1_pts, custom_xi2_pts;
-
-  for (MeshBase::const_element_iterator
-           el = _amg.mortar_segment_mesh.active_local_elements_begin(),
-           end_el = _amg.mortar_segment_mesh.active_local_elements_end();
-       el != end_el;
-       ++el)
+  for (unsigned int qp = 0; qp < _qrule_msm.n_points(); ++qp)
   {
-    // Note: this is a mortar segment mesh Elem, *not* an Elem
-    // from the original mesh or the side of an Elem from the
-    // original mesh.
-    const Elem * msm_elem = *el;
-
-    // We may eventually allow zero-length segments in the
-    // MSM. They are OK connectivity-wise, and they don't
-    // contribute to the mortar segment integrals, but we don't
-    // want to do reinit() on them or there will be a negative
-    // Jacobian error.
-    Real elem_volume = msm_elem->volume();
-
-    if (elem_volume < TOLERANCE)
-      continue;
-
-    // Get a reference to the MortarSegmentInfo for this Elem.
-    const MortarSegmentInfo & msinfo = _amg.msm_elem_to_info.at(msm_elem);
-
-    // There may be no contribution from the master side if it is not "in contact".
-    bool has_slave = msinfo.slave_elem ? true : false, has_master = msinfo.has_master();
-
-    if (!has_slave)
-      libmesh_error_msg("Error, mortar segment has no slave element associated with it!");
-
-    // Pointer to the interior parent.
-    const Elem * slave_ip = msinfo.slave_elem->interior_parent();
-
-    // Look up which side of the interior parent we are.
-    auto slave_side_id = slave_ip->which_side_am_i(msinfo.slave_elem);
-
-    // The lower-dimensional slave side element associated with this
-    // mortar segment is simply msinfo.slave_elem.
-    const Elem * slave_face_elem = msinfo.slave_elem;
-
-    // Get the temperature and lambda dof indices for the slave element side.
-    dof_map.dof_indices(slave_face_elem, dof_indices_slave_lambda, lambda_var_number);
-
-    // Get temperature dof indices associated with the interior slave Elem.
-    dof_map.dof_indices(slave_ip, dof_indices_interior_slave_primal, primal_var_number);
-
-    // These only get initialized if there is a master Elem associated to this segment.
-    const Elem * master_ip = libmesh_nullptr;
-    unsigned int master_side_id = libMesh::invalid_uint;
-    Real h_master = 0.;
-
-    if (has_master)
+    for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
     {
-      // Set the master interior parent and side ids.
-      master_ip = msinfo.master_elem->interior_parent();
-      master_side_id = master_ip->which_side_am_i(msinfo.master_elem);
+      auto idx = _dof_indices_lambda[i];
+      auto soln_local = current_solution(idx);
 
-      // Store the length of the edge element for use in stabilization terms.
-      h_master = msinfo.master_elem->volume();
-
-      // Get temperature dof indices associated with the interior master Elem.
-      dof_map.dof_indices(master_ip, dof_indices_interior_master_primal, primal_var_number);
+      _u_lambda(qp) += soln_local * _phi_lambda[i][qp];
     }
-
-    // Re-compute FE data on the mortar segment Elem (JxW_msm is the only thing we actually use.)
-    fe_msm->reinit(msm_elem);
-
-    K_primal_slave_lambda_slave.resize(dof_indices_interior_slave_primal.size(),
-                                       dof_indices_slave_lambda.size());
-    K_primal_master_lambda_slave.resize(dof_indices_interior_master_primal.size(),
-                                        dof_indices_slave_lambda.size());
-
-    K_lambda_slave_lambda_slave.resize(dof_indices_slave_lambda.size(),
-                                       dof_indices_slave_lambda.size());
-    K_lambda_slave_primal_slave.resize(dof_indices_slave_lambda.size(),
-                                       dof_indices_interior_slave_primal.size());
-    K_lambda_slave_primal_master.resize(dof_indices_slave_lambda.size(),
-                                        dof_indices_interior_master_primal.size());
-
+    for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
     {
-      custom_xi1_pts.resize(qrule_msm.n_points());
-      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-      {
-        Real eta = qrule_msm.qp(qp)(0);
-        Real xi1_eta = 0.5 * (1 - eta) * msinfo.xi1_a + 0.5 * (1 + eta) * msinfo.xi1_b;
-        custom_xi1_pts[qp] = xi1_eta;
-      }
+      auto idx = _dof_indices_slave_interior_primal[i];
+      auto soln_local = current_solution(idx);
 
-      // When you don't provide a weights array, the FE object uses
-      // a dummy rule with all 1's. You should probably never use
-      // the resulting JxW values for anything important.
-      slave_face_fe_lambda->reinit(slave_face_elem, &custom_xi1_pts);
-
-      // Reinit the slave interior FE on the side in question at the custom qps.
-      slave_interior_fe_primal->reinit(slave_ip, slave_side_id, TOLERANCE, &custom_xi1_pts);
+      _u_primal_slave(qp) += soln_local * _phi_slave_interior_primal[i][qp];
     }
-
-    if (has_master)
+    for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
     {
-      custom_xi2_pts.resize(qrule_msm.n_points());
-      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-      {
-        Real eta = qrule_msm.qp(qp)(0);
-        Real xi2_eta = 0.5 * (1 - eta) * msinfo.xi2_a + 0.5 * (1 + eta) * msinfo.xi2_b;
-        custom_xi2_pts[qp] = xi2_eta;
-      }
+      auto idx = _dof_indices_master_interior_primal[i];
+      auto soln_local = current_solution(idx);
 
-      // Reinit the master interior FE on the side in question at the custom qps.
-      master_interior_fe_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
+      _u_primal_master(qp) += soln_local * _phi_master_interior_primal[i][qp];
     }
-
-    // For the gap conductance problem, compute the gap heat
-    // transfer coefficient, which is proportional to (k/g) where k
-    // is the thermal conductivity of the air in the gap, and g is
-    // the distance between the surfaces.
-    std::vector<Real> heat_transfer_coeff(slave_interior_xyz.size());
-    if (has_master)
-    {
-      for (unsigned int qp = 0; qp < heat_transfer_coeff.size(); ++qp)
-      {
-        Real gap = (slave_interior_xyz[qp] - master_interior_xyz[qp]).norm();
-
-        // Avoid division by zero. We currently only support strictly nonzero gap sizes.
-        if (gap < TOLERANCE * TOLERANCE)
-          libmesh_error_msg("Error: gap "
-                            << gap
-                            << " is approximately zero, the gap conductance approach will "
-                               "fail.");
-
-        // TODO: Currently the numerator is a fixed constant, but it should be specifiable by the
-        // user.
-        heat_transfer_coeff[qp] = 0.03 / gap;
-      }
-    }
-
-    // Compute slave/slave contribution to primal equation.
-    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-      for (unsigned int i = 0; i < K_primal_slave_lambda_slave.m(); ++i)
-        for (unsigned int j = 0; j < K_primal_slave_lambda_slave.n(); ++j)
-          K_primal_slave_lambda_slave(i, j) +=
-              JxW_msm[qp] * slave_interior_phi_primal[i][qp] * slave_face_phi_lambda[j][qp];
-
-    // In the continuity constrained case, the slave/slave
-    // contribution to the LM equation is just the transpose of the
-    // primal contribution. In the gap conductance case, the heat
-    // transfer coefficient shows up, and there is a minus sign.
-    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-      for (unsigned int i = 0; i < K_lambda_slave_primal_slave.m(); ++i)
-        for (unsigned int j = 0; j < K_lambda_slave_primal_slave.n(); ++j)
-          K_lambda_slave_primal_slave(i, j) += JxW_msm[qp] * (-heat_transfer_coeff[qp]) *
-                                               slave_interior_phi_primal[j][qp] *
-                                               slave_face_phi_lambda[i][qp];
-
-    // Compute the lambda/lambda contribution. If stailization is
-    // turned on for the continuity constrained problem, this will
-    // look like the (negative) mass matrix contribution. In the gap
-    // conductance problem, it is a positive mass matrix
-    // contribution. There are contributions from both the slave and
-    // master side in general for the continuity constrained
-    // problem, and when there is no master side Elem, h_master==0.
-    for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-      for (unsigned int i = 0; i < K_lambda_slave_lambda_slave.m(); ++i)
-        for (unsigned int j = 0; j < K_lambda_slave_lambda_slave.n(); ++j)
-          K_lambda_slave_lambda_slave(i, j) +=
-              JxW_msm[qp] * slave_face_phi_lambda[i][qp] * slave_face_phi_lambda[j][qp];
-
-    // Compute master/slave contributions to primal equation.
-    if (has_master)
-    {
-      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-        for (unsigned int i = 0; i < K_primal_master_lambda_slave.m(); ++i)
-          for (unsigned int j = 0; j < K_primal_master_lambda_slave.n(); ++j)
-            K_primal_master_lambda_slave(i, j) +=
-                -JxW_msm[qp] * master_interior_phi_primal[i][qp] * slave_face_phi_lambda[j][qp];
-
-      // In the continuity constrained case, the master/slave
-      // contribution to the LM equation is just the transpose of the
-      // primal contribution. In the gap conductance case, the heat
-      // transfer coefficient shows up, and there is a different sign.
-      for (unsigned int qp = 0; qp < qrule_msm.n_points(); qp++)
-        for (unsigned int i = 0; i < K_lambda_slave_primal_master.m(); ++i)
-          for (unsigned int j = 0; j < K_lambda_slave_primal_master.n(); ++j)
-            K_lambda_slave_primal_master(i, j) += JxW_msm[qp] * heat_transfer_coeff[qp] *
-                                                  master_interior_phi_primal[j][qp] *
-                                                  slave_face_phi_lambda[i][qp];
-    }
-
-    _sys.getMatrix(_sys.systemMatrixTag())
-        .add_matrix(K_primal_slave_lambda_slave,
-                    dof_indices_interior_slave_primal,
-                    dof_indices_slave_lambda);
-    _sys.getMatrix(_sys.systemMatrixTag())
-        .add_matrix(K_primal_master_lambda_slave,
-                    dof_indices_interior_master_primal,
-                    dof_indices_slave_lambda);
-    _sys.getMatrix(_sys.systemMatrixTag())
-        .add_matrix(
-            K_lambda_slave_lambda_slave, dof_indices_slave_lambda, dof_indices_slave_lambda);
-    _sys.getMatrix(_sys.systemMatrixTag())
-        .add_matrix(K_lambda_slave_primal_slave,
-                    dof_indices_slave_lambda,
-                    dof_indices_interior_slave_primal);
-    _sys.getMatrix(_sys.systemMatrixTag())
-        .add_matrix(K_lambda_slave_primal_master,
-                    dof_indices_slave_lambda,
-                    dof_indices_interior_master_primal);
   }
 }
+
+template <>
+void
+RealMortarConstraint<JACOBIAN>::computeSolutions()
+{
+  auto && current_solution = (*_sys.currentSolution());
+
+  for (unsigned int qp = 0; qp < _qrule_msm.n_points(); ++qp)
+  {
+    for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
+    {
+      auto idx = _dof_indices_lambda[i];
+      DualReal soln_local = current_solution(idx);
+      soln_local.derivatives()[_lm_offset + i] = 1;
+
+      _u_lambda(qp) += soln_local * _phi_lambda[i][qp];
+    }
+    for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
+    {
+      auto idx = _dof_indices_slave_interior_primal[i];
+      DualReal soln_local = current_solution(idx);
+      soln_local.derivatives()[_slave_primal_offset + i] = 1;
+
+      _u_primal_slave(qp) += soln_local * _phi_slave_interior_primal[i][qp];
+    }
+    for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
+    {
+      auto idx = _dof_indices_master_interior_primal[i];
+      DualReal soln_local = current_solution(idx);
+      soln_local.derivatives()[_master_primal_offset + i] = 1;
+
+      _u_primal_master(qp) += soln_local * _phi_master_interior_primal[i][qp];
+    }
+  }
+}
+
+template <ComputeStage compute_stage>
+void
+RealMortarConstraint<compute_stage>::computeElementResidual()
+{
+  DenseVector<Real> F_primal_slave(_dof_indices_slave_interior_primal.size());
+  DenseVector<Real> F_primal_master(_dof_indices_master_interior_primal.size());
+  DenseVector<Real> F_lambda_slave(_dof_indices_lambda.size());
+
+  // LM residuals
+  for (_qp = 0; _qp < _qrule_msm.n_points(); _qp++)
+  {
+    auto strong_residual = _JxW_msm[_qp] * computeLMQpResidual();
+    for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
+      F_lambda_slave(i) += _phi_lambda[i][_qp] * strong_residual;
+  }
+
+  // slave interior primal residuals
+  for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
+    for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
+      F_primal_slave(i) += _JxW_msm[qp] * _phi_slave_interior_primal[i][qp] * _u_lambda(qp);
+
+  // master interior primal residuals
+  if (_has_master)
+    for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
+      for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
+        F_primal_master(i) += -_JxW_msm[qp] * _phi_master_interior_primal[i][qp] * _u_lambda(qp);
+
+  _sys.getVector(_sys.residualVectorTag()).add_vector(F_lambda_slave, _dof_indices_lambda);
+  _sys.getVector(_sys.residualVectorTag())
+      .add_vector(F_primal_slave, _dof_indices_slave_interior_primal);
+  _sys.getVector(_sys.residualVectorTag())
+      .add_vector(F_primal_master, _dof_indices_master_interior_primal);
+}
+
+template <>
+void
+RealMortarConstraint<JACOBIAN>::computeElementResidual()
+{
+}
+
+template <ComputeStage compute_stage>
+void
+RealMortarConstraint<compute_stage>::computeElementJacobian()
+{
+  // Local Jacobians
+  DenseMatrix<Real> K_primal_slave_lambda_slave(_dof_indices_slave_interior_primal.size(),
+                                                _dof_indices_lambda.size());
+  DenseMatrix<Real> K_primal_master_lambda_slave(_dof_indices_master_interior_primal.size(),
+                                                 _dof_indices_lambda.size());
+
+  DenseMatrix<Real> K_lambda_slave_lambda_slave(_dof_indices_lambda.size(),
+                                                _dof_indices_lambda.size());
+  DenseMatrix<Real> K_lambda_slave_primal_slave(_dof_indices_lambda.size(),
+                                                _dof_indices_slave_interior_primal.size());
+  DenseMatrix<Real> K_lambda_slave_primal_master(_dof_indices_lambda.size(),
+                                                 _dof_indices_master_interior_primal.size());
+
+  // Derivative of slave interior primal residuals wrt LM dofs
+  for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
+    for (unsigned int i = 0; i < K_primal_slave_lambda_slave.m(); ++i)
+      for (unsigned int j = 0; j < K_primal_slave_lambda_slave.n(); ++j)
+        K_primal_slave_lambda_slave(i, j) +=
+            _JxW_msm[qp] * _phi_slave_interior_primal[i][qp] * _phi_lambda[j][qp];
+
+  // Derivative of master interior primal residuals wrt LM dofs
+  if (_has_master)
+    for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
+      for (unsigned int i = 0; i < K_primal_master_lambda_slave.m(); ++i)
+        for (unsigned int j = 0; j < K_primal_master_lambda_slave.n(); ++j)
+          K_primal_master_lambda_slave(i, j) +=
+              -_JxW_msm[qp] * _phi_master_interior_primal[i][qp] * _phi_lambda[j][qp];
+
+  // Derivative of LM residuals wrt all dofs
+  std::vector<DualReal> lm_residuals(_dof_indices_lambda.size(), 0);
+  for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
+  {
+    auto strong_residual = _JxW_msm[_qp] * computeLMQpResidual();
+    for (unsigned int i = 0; i < K_lambda_slave_primal_slave.m(); ++i)
+      lm_residuals[i] += _phi_lambda[i][_qp] * strong_residual;
+  }
+  for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
+  {
+    for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
+      K_lambda_slave_lambda_slave(i, j) = lm_residuals[i].derivatives()[_lm_offset + j];
+    for (unsigned int j = 0; j < _dof_indices_slave_interior_primal.size(); ++j)
+      K_lambda_slave_primal_slave(i, j) = lm_residuals[i].derivatives()[_slave_primal_offset + j];
+    for (unsigned int j = 0; j < _dof_indices_master_interior_primal.size(); ++j)
+      K_lambda_slave_primal_master(i, j) = lm_residuals[i].derivatives()[_master_primal_offset + j];
+  }
+
+  _sys.getMatrix(_sys.systemMatrixTag())
+      .add_matrix(
+          K_primal_slave_lambda_slave, _dof_indices_slave_interior_primal, _dof_indices_lambda);
+  _sys.getMatrix(_sys.systemMatrixTag())
+      .add_matrix(
+          K_primal_master_lambda_slave, _dof_indices_master_interior_primal, _dof_indices_lambda);
+  _sys.getMatrix(_sys.systemMatrixTag())
+      .add_matrix(K_lambda_slave_lambda_slave, _dof_indices_lambda, _dof_indices_lambda);
+  _sys.getMatrix(_sys.systemMatrixTag())
+      .add_matrix(
+          K_lambda_slave_primal_slave, _dof_indices_lambda, _dof_indices_slave_interior_primal);
+  _sys.getMatrix(_sys.systemMatrixTag())
+      .add_matrix(
+          K_lambda_slave_primal_master, _dof_indices_lambda, _dof_indices_master_interior_primal);
+}
+
+template <>
+void
+RealMortarConstraint<RESIDUAL>::computeElementJacobian()
+{
+}
+
+template <ComputeStage compute_stage>
+void
+RealMortarConstraint<compute_stage>::computeResidual()
+{
+  loopOverMortarMesh();
+}
+
+template <>
+void
+RealMortarConstraint<JACOBIAN>::computeResidual()
+{
+}
+
+template <ComputeStage compute_stage>
+void
+RealMortarConstraint<compute_stage>::computeJacobian()
+{
+  loopOverMortarMesh();
+}
+
+template <>
+void
+RealMortarConstraint<RESIDUAL>::computeJacobian()
+{
+}
+
+adBaseClass(RealMortarConstraint);
