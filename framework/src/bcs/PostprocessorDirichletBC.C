@@ -11,6 +11,7 @@
 
 registerMooseObject("MooseApp", PostprocessorDirichletBC);
 
+// Used by MOOSEDocs: syntax/Postprocessors/index.md
 template <>
 InputParameters
 validParams<PostprocessorDirichletBC>()

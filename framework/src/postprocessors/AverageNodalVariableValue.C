@@ -22,37 +22,50 @@ validParams<AverageNodalVariableValue>()
 }
 
 AverageNodalVariableValue::AverageNodalVariableValue(const InputParameters & parameters)
-  : NodalVariablePostprocessor(parameters), _avg(0), _n(0)
+  : NodalVariablePostprocessor(parameters), _sum(0), _n(0)
 {
 }
 
+// doco-init-start
 void
 AverageNodalVariableValue::initialize()
 {
-  _avg = 0;
+  _sum = 0;
   _n = 0;
 }
+// doco-init-end
 
+// doco-execute-get-start
 void
 AverageNodalVariableValue::execute()
 {
-  _avg += _u[_qp];
+  _sum += _u[_qp];
   _n++;
 }
 
 Real
 AverageNodalVariableValue::getValue()
 {
-  gatherSum(_avg);
+  return _sum / _n;
+}
+// doco-execute-get-end
+
+// doco-final-start
+void
+AverageNodalVariableValue::finalize()
+{
+  gatherSum(_sum);
   gatherSum(_n);
 
-  return _avg / _n;
 }
+// doco-final-end
 
+// doco-thread-start
 void
 AverageNodalVariableValue::threadJoin(const UserObject & y)
 {
   const AverageNodalVariableValue & pps = static_cast<const AverageNodalVariableValue &>(y);
-  _avg += pps._avg;
+  _sum += pps._sum;
   _n += pps._n;
 }
+// doco-thread-end

@@ -12,7 +12,7 @@ own parameters, will have an "execute_on" parameter that can be set to various f
 flags are listed below.
 
 | Execute Flag | Description |
-| - | - |
+| :- | :- |
 INITIAL | Prior to the first time step.
 TIMESTEP_BEGIN | Prior to the solve for each time step.
 NONLINEAR | Prior do each non-linear iteration during the solve.
