@@ -33,6 +33,8 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
   SubdomainID slave_subdomain_id = getParam<SubdomainID>("slave_subdomain_id");
   SubdomainID master_subdomain_id = getParam<SubdomainID>("master_subdomain_id");
   _subdomain_pair = std::make_pair(master_subdomain_id, slave_subdomain_id);
+
+  _rm_type = Moose::RelationshipManagerType::ALGEBRAIC;
 }
 
 void
@@ -46,7 +48,9 @@ void
 AugmentSparsityOnInterface::attachRelationshipManagersInternal(
     Moose::RelationshipManagerType rm_type)
 {
-  if (rm_type == Moose::RelationshipManagerType::Algebraic)
+  if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+    attachGeometricFunctorHelper(*this);
+  else
     attachAlgebraicFunctorHelper(*this);
 }
 

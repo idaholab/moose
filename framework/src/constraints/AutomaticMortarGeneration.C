@@ -120,6 +120,7 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     Node * new_node1 = mortar_segment_mesh.add_point(slave_elem->point(1), slave_elem->node_id(1));
 
     Elem * new_elem = mortar_segment_mesh.add_elem(new Edge2);
+    new_elem->processor_id() = slave_elem->processor_id();
 
     new_elem->set_node(0) = new_node0;
     new_elem->set_node(1) = new_node1;
@@ -214,11 +215,13 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
 
     // Make an Elem on the left
     Elem * new_elem_left = mortar_segment_mesh.add_elem(new Edge2);
+    new_elem_left->processor_id() = current_mortar_segment->processor_id();
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
     new_elem_left->set_node(1) = new_node;
 
     // Make an Elem on the right
     Elem * new_elem_right = mortar_segment_mesh.add_elem(new Edge2);
+    new_elem_right->processor_id() = current_mortar_segment->processor_id();
     new_elem_right->set_node(0) = new_node;
     new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
 
@@ -366,6 +369,7 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
 
   // Set up the the mortar segment neighbor information.
   mortar_segment_mesh.allow_renumbering(false);
+  mortar_segment_mesh.skip_partitioning(true);
   mortar_segment_mesh.prepare_for_use();
 
   // {

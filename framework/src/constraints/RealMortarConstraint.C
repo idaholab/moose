@@ -70,14 +70,14 @@ RealMortarConstraint::computeResidual()
   // A reference to the DofMap object for this system.
   const DofMap & dof_map = _sys.dofMap();
 
-  // Get a constant reference to the Finite Element type
-  // for the first (and only) variable in the system.
+  // Get a copy of the Finite Element type
+  // for the non-linear and lagrange multiplier variables
   auto primal_var_number = _var.number();
   auto lambda_var_number = _lambda_var.number();
   FEType fe_type_primal = dof_map.variable_type(primal_var_number),
          fe_type_lambda = dof_map.variable_type(lambda_var_number);
 
-  // A FE object for assembling on lower-dimensional elements.
+  // A lower-dimensional FE object for the primal_var
   UniquePtr<FEBase> fe_msm(FEBase::build(dim - 1, fe_type_primal));
   QGauss qrule_msm(dim - 1, SECOND);
   fe_msm->attach_quadrature_rule(&qrule_msm);
