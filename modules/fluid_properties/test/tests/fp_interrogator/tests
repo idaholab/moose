@@ -4,6 +4,7 @@
     input = '1ph.p_T.i'
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                              1.0000000000e\+05  Pa
@@ -32,6 +33,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     input = '1ph.rho_e.i'
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                              8.6010000000e\+04  Pa
@@ -60,6 +62,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     input = '1ph.rho_p.i'
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                              1.0000000000e\+05  Pa
@@ -88,6 +91,7 @@ Volumetric expansion coefficient:              0.002867  1/K'
     input = '1ph.rho_rhou_rhoE.i'
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                                             1  Pa
@@ -136,6 +140,7 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
     allow_test_objects = true
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -191,6 +196,7 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     allow_test_objects = true
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -244,6 +250,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     allow_test_objects = true
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_out = 'Vapor mixture STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                              9.0404345588e\+05  Pa
@@ -271,6 +278,7 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
   allow_test_objects = true
   allow_warnings = true
   method = 'OPT'
+  threading = '!pthreads'
   expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -289,6 +297,7 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
   allow_test_objects = true
   allow_warnings = true
   method = 'OPT'
+  threading = '!pthreads'
   expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -306,6 +315,7 @@ Latent heat of vaporization:           6.8896500000e\+05  J/kg'
     input = 'err.wrong_fp_type.i'
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_err = "The type of the parameter 'fp' must be derived from type 'SinglePhaseFluidProperties', 'VaporMixtureFluidProperties', or 'TwoPhaseFluidProperties'"
 
     requirement = "The fluid properties interrogator shall throw an error if an
@@ -319,6 +329,7 @@ Latent heat of vaporization:           6.8896500000e\+05  J/kg'
     input = '1ph.rho_e.i'
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_err = "fp_interrogator\: \(rho\,e\) has been specified\; T cannot be specified\."
     cli_args = "FluidPropertiesInterrogator/T=300"
 
@@ -333,6 +344,7 @@ Latent heat of vaporization:           6.8896500000e\+05  J/kg'
     input = 'err.no_params.i'
     allow_warnings = true
     method = 'OPT'
+    threading = '!pthreads'
     expect_err = "fp_interrogator\: For one-phase fluid properties\, you must provide one of the following
 combinations of thermodynamic properties:"
 
