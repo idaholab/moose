@@ -67,9 +67,13 @@
   [../]
 []
 
+[Debug]
+  show_var_residual_norms = 1
+[]
+
 [Constraints]
   [./mortar]
-    type = RealMortarConstraint
+    type = GapHeatConductanceTest
     master_boundary_id = 2
     slave_boundary_id = 1
     master_subdomain_id = 20
@@ -95,4 +99,8 @@
 
 [Outputs]
   exodus = true
+  [dofmap]
+    type = DOFMap
+    execute_on = 'initial'
+  []
 []

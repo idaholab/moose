@@ -4,4 +4,10 @@
     input = 'mortar-input.i'
     exodiff = 'mortar-input_out.e'
   [../]
+  [gap_jacobian]
+    type = PetscJacobianTester
+    run_sim = True
+    input = 'mortar-input.i'
+    difference_tol = 1e-7
+  []
 []
