@@ -98,12 +98,13 @@ the new object should inherit from one of the following C++ classes:
 The use of execution flags is discussed in the [Execute On](#execute-on) section.
 
 The getValue method is responsible for returning the value of the postprocessor object, this
-value is what is used by all objects that are coupled to the postprocessor.
+value is what is used by all objects that are coupled to the postprocessor. In some cases the
+necessary communication is performed within this method, but in general this following is preferred.
 
 ### Parallel Considerations
 
 When creating a postprocessor it is often necessary to perform some parallel communication
-to ensure that the value being computed is consistent across processes and threads. Three additional
+to ensure that the value being computed is correct across processes and threads. Three additional
 methods exists for making this process as simple as possible.
 
 - `initialize`: This is called prior to the execution of the postprocessor and should be used
