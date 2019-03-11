@@ -18,10 +18,12 @@ class StiffenedGas7EqnFluidProperties : public TwoPhaseFluidProperties
 public:
   StiffenedGas7EqnFluidProperties(const InputParameters & parameters);
 
-  virtual Real p_critical() const;
-  virtual Real T_sat(Real pressure) const;
-  virtual Real p_sat(Real temperature) const;
-  virtual Real dT_sat_dp(Real pressure) const;
+  virtual Real p_critical() const override;
+  virtual Real T_sat(Real pressure) const override;
+  virtual Real p_sat(Real temperature) const override;
+  virtual Real dT_sat_dp(Real pressure) const override;
+
+  virtual bool supportsPhaseChange() const override { return true; }
 
 protected:
   /**
