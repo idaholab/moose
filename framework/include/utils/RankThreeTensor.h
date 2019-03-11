@@ -86,7 +86,7 @@ public:
   RankThreeTensorTempl(const InitMethod);
 
   /// Fill from vector
-  RankThreeTensorTempl(const std::vector<T> &, FillMethod);
+  RankThreeTensorTempl(const std::vector<T> &, FillMethod method = general);
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   inline T & operator()(unsigned int i, unsigned int j, unsigned int k)
@@ -100,14 +100,8 @@ public:
     return _vals[((i * N + j) * N + k)];
   }
 
-  /**
-   * Assignment-from-scalar operator.  Used only to zero out the tensor.
-   *
-   * \returns A reference to *this.
-   */
-  template <typename Scalar>
-  typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, RankThreeTensorTempl &>::type
-  operator=(const Scalar & libmesh_dbg_var(p));
+  /// Assignment-from-scalar operator.
+  RankThreeTensorTempl<T> & operator=(const T & value);
 
   /// Zeros out the tensor.
   void zero();
@@ -115,7 +109,7 @@ public:
   /// Print the rank three tensor
   void print(std::ostream & stm = Moose::out) const;
 
-  /// copies values from a into this tensor
+  /// copies values from "a" into this tensor
   RankThreeTensorTempl<T> & operator=(const RankThreeTensorTempl<T> & a);
 
   /// b_i = r_ijk * a_jk
@@ -175,23 +169,18 @@ public:
    *             general (use fillGeneralFromInputVector)
    *             more fill_methods to be implemented soon!
    */
-  void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method);
+  void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method = general);
 
   /**
-   * Fills RankThreeTensor from plane normal vectors
-   * ref. Kuhl et. al. Int. J. Solids Struct. 38(2001) 2933-2952
-   * @param input plane normal vector
-   */
-  void fillFromPlaneNormal(const VectorValue<T> & input);
-
-  /**
-   * Creates fourth order tensor D=A*b*A where A is rank 3 and b is rank 2
-   * @param a RankTwoTensor A in the equation above
+   * Creates fourth order tensor D_{ijkl}=A_{mij}*b_{mn}*A_{nkl} where A is rank 3 and b is rank 2
+   * @param a RankThreeTensor A in the equation above
    */
   RankFourTensorTempl<T> mixedProductRankFour(const RankTwoTensorTempl<T> & a) const;
 
   /**
    * Creates a vector from the double contraction of a rank three and rank two tensor.
+   *
+   * c_i = A_{ijk} * b_{jk}
    */
   VectorValue<T> doubleContraction(const RankTwoTensorTempl<T> & b) const;
 
@@ -231,16 +220,6 @@ RankThreeTensorTempl<T>::RankThreeTensorTempl(const RankThreeTensorTempl<T2> & c
 {
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] = copy._vals[i];
-}
-
-template <typename T>
-template <typename Scalar>
-typename boostcopy::enable_if_c<ScalarTraits<Scalar>::value, RankThreeTensorTempl<T> &>::type
-RankThreeTensorTempl<T>::operator=(const Scalar & libmesh_dbg_var(p))
-{
-  libmesh_assert_equal_to(p, Scalar(0));
-  this->zero();
-  return *this;
 }
 
 template <typename T>

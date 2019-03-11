@@ -88,6 +88,15 @@ RankThreeTensorTempl<T>::zero()
 
 template <typename T>
 RankThreeTensorTempl<T> &
+RankThreeTensorTempl<T>::operator=(const T & value)
+{
+  for (unsigned int i = 0; i < N3; ++i)
+    _vals[i] = value;
+  return *this;
+}
+
+template <typename T>
+RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator=(const RankThreeTensorTempl<T> & a)
 {
   for (unsigned int i = 0; i < N3; ++i)
@@ -242,32 +251,6 @@ RankThreeTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillM
 }
 
 template <typename T>
-void
-RankThreeTensorTempl<T>::fillFromPlaneNormal(const VectorValue<T> & input)
-{
-  unsigned int index = 0;
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    const T a = input(i);
-    for (unsigned int j = 0; j < N; ++j)
-    {
-      const T b = input(j);
-      for (unsigned int k = 0; k < N; ++k)
-      {
-        const T c = input(k);
-        T sum = 0;
-        sum = -2 * a * b * c;
-        if (i == j)
-          sum += c;
-        if (i == k)
-          sum += b;
-        _vals[index++] = sum / 2.0;
-      }
-    }
-  }
-}
-
-template <typename T>
 RankFourTensorTempl<T>
 RankThreeTensorTempl<T>::mixedProductRankFour(const RankTwoTensorTempl<T> & a) const
 {
@@ -281,7 +264,7 @@ RankThreeTensorTempl<T>::mixedProductRankFour(const RankTwoTensorTempl<T> & a) c
         {
           for (unsigned int m = 0; m < N; ++m)
             for (unsigned int n = 0; n < N; ++n)
-              result._vals[index] += (*this)(m, i, j) * a._coords[m * N + n] * (*this)(n, k, l);
+              result._vals[index] += (*this)(m, i, j) * a(m, n) * (*this)(n, k, l);
           index++;
         }
 
@@ -338,6 +321,23 @@ RankThreeTensorTempl<T>::doubleContraction(const RankTwoTensorTempl<T> & b) cons
       result(i) += _vals[i * N2 + j] * b._coords[j];
 
   return result;
+}
+
+template <typename T>
+void
+RankThreeTensorTempl<T>::print(std::ostream & stm) const
+{
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    stm << "a(" << i << ", j, k) = \n";
+    for (unsigned int j = 0; j < N; ++j)
+    {
+      for (unsigned int k = 0; k < N; ++k)
+        stm << std::setw(15) << (*this)(i, j, k) << ' ';
+      stm << "\n";
+    }
+    stm << "\n";
+  }
 }
 
 template class RankThreeTensorTempl<Real>;
