@@ -34,10 +34,21 @@ public:
 
   virtual dof_id_type computeSideWeight(Elem & elem, unsigned int side);
 
+  using Partitioner::partition;
+
+  virtual void partition(MeshBase & mesh, const unsigned int n) override;
+
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 
 private:
+  /*
+   * Do a partition before we call the partitioner
+   * It should be used if the mesh is unpartitioned or the number of parts
+   * does not equal to the number of processors
+   */
+  void preLinearPartition(MeshBase & mesh);
+
   std::string _part_package;
   bool _apply_element_weight;
   bool _apply_side_weight;
