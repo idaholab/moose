@@ -295,6 +295,9 @@ protected:
                         Prop_State state,
                         bool is_declared_ad = false);
 
+  /// Displacement ids
+  std::vector<unsigned int> _displacements;
+
 private:
   /// Check and throw an error if the execution has progerssed past the construction stage
   void checkExecutionStage();

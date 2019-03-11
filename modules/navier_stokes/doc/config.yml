@@ -2,6 +2,7 @@ Content:
     - framework/doc/content
     - modules/navier_stokes/doc/content
     - modules/fluid_properties/doc/content
+    - modules/heat_conduction/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -16,12 +17,14 @@ Extensions:
             framework: !include framework/doc/hidden.yml
             navier_stokes: !include modules/navier_stokes/doc/hidden.yml
             fluid_properties: !include modules/fluid_properties/doc/hidden.yml
+            heat_conduction: !include modules/heat_conduction/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
         includes:
             - framework/include
             - modules/navier_stokes/include
             - modules/fluid_properties/include
+            - modules/heat_conduction/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:

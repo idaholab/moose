@@ -14,4 +14,19 @@ method to obtain non-oscillatory solutions of flow problems that contain contact
 shock waves. For compressible flow problems, users can choose the CGFE method only when the flow
 field is sufficiently smooth.
 
+For incompressible flow, we have implemented both pressure-stabilized
+Petrov-Galerkin (PSPG) and streamline-upwind Petrov-Galerkin (SUPG) methods. The
+former stabilization allows use of equal order shape functions by introducing an
+on-diagonal dependence in the pressure equation, removing the saddle-point
+nature of the problem. The latter SUPG method allows
+simulation at much higher Reynolds numbers than if SUPG was not used. For an
+overview of the incompressible Navier-Stokes capability, please see the journal
+article
+[here](https://www.sciencedirect.com/science/article/pii/S0965997817310591?via%3Dihub)
+or the pre-print [here](https://arxiv.org/pdf/1710.08898.pdf). Note that
+automatic differentiation versions of the incompressible objects have been
+created; these objects are currently not as performant as their hand-coded
+peers, but they can be used seamlessly in simulations with mesh deformation and
+are guaranteed to generate correct Jacobians.
+
 !syntax complete group=NavierStokesApp

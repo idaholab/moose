@@ -305,12 +305,6 @@ struct RankFourTensorType<JACOBIAN>
   typedef DualRankFourTensor type;
 };
 
-template <ComputeStage compute_stage>
-struct ResidualReturnType
-{
-  typedef typename Moose::RealType<compute_stage>::type type;
-};
-
 template <typename mat_prop_type, ComputeStage compute_stage>
 struct MaterialPropertyType
 {
@@ -333,8 +327,9 @@ struct PointType<JACOBIAN>
   typedef MooseArray<VectorValue<DualReal>> type;
 };
 
-#define ADResidual typename ResidualReturnType<compute_stage>::type
-#define ADGradResidual typename RealVectorValueType<compute_stage>::type
+#define ADResidual typename Moose::RealType<compute_stage>::type
+#define ADVectorResidual typename RealVectorValueType<compute_stage>::type
+#define ADTensorResidual typename RealTensorValueType<compute_stage>::type
 
 #define ADVariableValue typename VariableValueType<Real, compute_stage>::type
 #define ADVariableGradient typename VariableGradientType<Real, compute_stage>::type

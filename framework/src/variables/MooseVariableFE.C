@@ -1401,7 +1401,13 @@ MooseVariableFE<OutputType>::computeAD(
       }
 
       if (_need_ad_second_u)
-        _ad_second_u[qp] += _ad_dof_values[i] * (*second_phi)[i][qp];
+      {
+        if (_displaced)
+          mooseError("Support for second order shape function derivatives on the displaced mesh "
+                     "has not been added yet!");
+        else
+          _ad_second_u[qp] += _ad_dof_values[i] * (*second_phi)[i][qp];
+      }
 
       if (is_transient)
         _ad_u_dot[qp] += phi[i][qp] * _ad_dofs_dot[i];

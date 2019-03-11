@@ -12,32 +12,42 @@
 
 #include "ADKernel.h"
 
-#define usingKernelValueMembers usingKernelMembers
+#define usingTemplKernelValueMembers(T) usingTemplKernelMembers(T)
+#define usingKernelValueMembers usingTemplKernelValueMembers(Real)
+#define usingVectorKernelValueMembers usingTemplKernelMembers(RealVectorValue)
 
-template <ComputeStage>
-class ADKernelValue;
-
-declareADValidParams(ADKernelValue);
+template <typename, ComputeStage>
+class ADKernelValueTempl;
 
 template <ComputeStage compute_stage>
-class ADKernelValue : public ADKernel<compute_stage>
+using ADKernelValue = ADKernelValueTempl<Real, compute_stage>;
+template <ComputeStage compute_stage>
+using ADVectorKernelValue = ADKernelValueTempl<RealVectorValue, compute_stage>;
+
+declareADValidParams(ADKernelValue);
+declareADValidParams(ADVectorKernelValue);
+
+template <typename T, ComputeStage compute_stage>
+class ADKernelValueTempl : public ADKernelTempl<T, compute_stage>
 {
 public:
-  ADKernelValue(const InputParameters & parameters);
+  ADKernelValueTempl(const InputParameters & parameters);
 
+  // See KernelBase base for documentation of these overridden methods
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeADOffDiagJacobian() override;
 
 protected:
   /**
    * Called before forming the residual for an element
    */
-  virtual ADResidual precomputeQpResidual() = 0;
+  virtual typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputValue
+  precomputeQpResidual() = 0;
 
-  virtual ADResidual computeQpResidual() final;
+  virtual ADResidual computeQpResidual() override final;
 
-  usingKernelMembers;
+  usingTemplKernelMembers(T);
 };
 
 #endif /* ADKERNELVALUE_H */
