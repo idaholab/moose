@@ -158,6 +158,13 @@ New fluids can be added to the Fluid Properties module by inheriting from the ba
 overriding the methods that describe the fluid properties. These can then be used in an
 identical manner as all other Fluid Properties UserObjects.
 
+## Utilities
+
+### Fluid Properties Interrogator
+
+The [FluidPropertiesInterrogator](/FluidPropertiesInterrogator.md) is a user
+object which can be used to query eligible fluid properties objects.
+
 ## Additional objects
 
 Several additional objects such as AuxKernels and Materials are provided:

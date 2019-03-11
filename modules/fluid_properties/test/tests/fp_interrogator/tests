@@ -1,0 +1,344 @@
+[Tests]
+  [./1ph.p_T]
+    type = 'RunApp'
+    input = '1ph.p_T.i'
+    allow_warnings = true
+    method = 'OPT'
+    expect_out = 'Single-phase STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              1.0000000000e\+05  Pa
+Temperature:                                        300  K
+Density:                                    1.162655505  kg/m\^3
+Specific volume:                                 0.8601  m\^3/kg
+Specific internal energy:              2.1502500000e\+05  J/kg
+Specific enthalpy:                     3.0103500000e\+05  J/kg
+Specific entropy:                           2422.704793  J/kg
+
+Sound speed:                                347.0072045  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:             1003.45  J/\(kg-K\)
+Specific heat at constant volume:                716.75  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)
+Volumetric expansion coefficient:        0.003333333333  1/K'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "fluid properties for (p, T) input."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./1ph.rho_e]
+    type = 'RunApp'
+    input = '1ph.rho_e.i'
+    allow_warnings = true
+    method = 'OPT'
+    expect_out = 'Single-phase STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              8.6010000000e\+04  Pa
+Temperature:                                        300  K
+Density:                                              1  kg/m\^3
+Specific volume:                                      1  m\^3/kg
+Specific internal energy:              2.1502500000e\+05  J/kg
+Specific enthalpy:                     3.0103500000e\+05  J/kg
+Specific entropy:                           2465.912381  J/kg
+
+Sound speed:                                347.0072045  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:             1003.45  J/\(kg-K\)
+Specific heat at constant volume:                716.75  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)
+Volumetric expansion coefficient:        0.003333333333  1/K'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "fluid properties for (rho, e) input."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./1ph.rho_p]
+    type = 'RunApp'
+    input = '1ph.rho_p.i'
+    allow_warnings = true
+    method = 'OPT'
+    expect_out = 'Single-phase STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              1.0000000000e\+05  Pa
+Temperature:                                348.7966516  K
+Density:                                              1  kg/m\^3
+Specific volume:                                      1  m\^3/kg
+Specific internal energy:              2.5000000000e\+05  J/kg
+Specific enthalpy:                     3.5000000000e\+05  J/kg
+Specific entropy:                           2573.931349  J/kg
+
+Sound speed:                                374.1657387  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:             1003.45  J/\(kg-K\)
+Specific heat at constant volume:                716.75  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)
+Volumetric expansion coefficient:              0.002867  1/K'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "fluid properties for (rho, p) input."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./1ph.rho_rhou_rhoE]
+    type = 'RunApp'
+    input = '1ph.rho_rhou_rhoE.i'
+    allow_warnings = true
+    method = 'OPT'
+    expect_out = 'Single-phase STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                                             1  Pa
+Temperature:                                        2.8  K
+Density:                                            0.5  kg/m\^3
+Specific volume:                                      2  m\^3/kg
+Specific internal energy:                             5  J/kg
+Specific enthalpy:                                    7  J/kg
+Specific entropy:                           2.574048543  J/kg
+
+Sound speed:                                1.673320053  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:                 2.5  J/\(kg-K\)
+Specific heat at constant volume:           1.785714286  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)
+Volumetric expansion coefficient:          0.3571428571  1/K
+
+
+
+Single-phase STAGNATION properties:
+--------------------------------------------------------------------------------
+Pressure:                                    1.27312569  Pa
+Temperature:                                          3  K
+Density:                                   0.5941253221  kg/m\^3
+Specific volume:                            1.683146573  m\^3/kg
+Specific internal energy:                   5.357142857  J/kg
+Specific enthalpy:                                  7.5  J/kg
+Specific entropy:                           2.574048543  J/kg
+
+Sound speed:                                1.732050808  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:                 2.5  J/\(kg-K\)
+Specific heat at constant volume:           1.785714286  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)
+Volumetric expansion coefficient:          0.3333333333  1/K'
+
+    requirement = "The fluid properties interrogator shall output static-state "
+      "and stagnation-state fluid properties for (rho, rhou, rhoE) input with a single-phase fluid properties object."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./2ph.p_T]
+    type = 'RunApp'
+    input = '2ph.p_T.i'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    expect_out = 'TWO-PHASE properties:
+--------------------------------------------------------------------------------
+Critical pressure:                                   25  Pa
+Latent heat of vaporization:           6.8896500000e\+05  J/kg
+
+
+
+LIQUID phase STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              1.0000000000e\+05  Pa
+Temperature:                                        300  K
+Density:                                    1.162655505  kg/m\^3
+Specific volume:                                 0.8601  m\^3/kg
+Specific internal energy:              2.1502500000e\+05  J/kg
+Specific enthalpy:                     3.0103500000e\+05  J/kg
+Specific entropy:                           2422.704793  J/kg
+
+Sound speed:                                347.0072045  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:             1003.45  J/\(kg-K\)
+Specific heat at constant volume:                716.75  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)
+Volumetric expansion coefficient:        0.003333333333  1/K
+
+
+
+VAPOR phase STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              1.0000000000e\+05  Pa
+Temperature:                                        300  K
+Density:                                    1.111111111  kg/m\^3
+Specific volume:                                    0.9  m\^3/kg
+Specific internal energy:              9.0000000000e\+05  J/kg
+Specific enthalpy:                     9.9000000000e\+05  J/kg
+Specific entropy:                      1.5368604527e\+04  J/kg
+
+Sound speed:                                314.6426545  m/s
+Dynamic viscosity:                     1.7000000000e-05  Pa-s
+Specific heat at constant pressure:                3300  J/\(kg-K\)
+Specific heat at constant volume:                  3000  J/\(kg-K\)
+Thermal conductivity:                              0.05  W/\(m-K\)
+Volumetric expansion coefficient:        0.003333333333  1/K'
+
+    requirement = "The fluid properties interrogator shall output two-phase and static-state, "
+      "single-phase fluid properties for (p, T) input with a two-phase fluid properties object."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./2ph_ncg_p_T]
+    type = 'RunApp'
+    input = '2ph_ncg_p_T.i'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    expect_out = 'TWO-PHASE properties:
+--------------------------------------------------------------------------------
+Critical pressure:                                   25  Pa
+Latent heat of vaporization:           8.7784021256e\+05  J/kg
+
+
+
+LIQUID phase STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              1.0000000000e\+05  Pa
+Temperature:                                372.7559289  K
+Density:                                    0.993600213  kg/m\^3
+Specific volume:                            1.006441008  m\^3/kg
+Specific internal energy:              2.5161025201e\+05  J/kg
+Specific enthalpy:                     3.5225435281e\+05  J/kg
+Specific entropy:                           2486.783172  J/kg
+
+Sound speed:                                375.3688068  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:                 945  J/\(kg-K\)
+Specific heat at constant volume:                   675  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)
+Volumetric expansion coefficient:        0.002682720575  1/K
+
+
+
+Vapor mixture STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              1.0000000000e\+05  Pa
+Temperature:                                372.7559289  K
+Density:                                   0.8972309616  kg/m\^3
+Specific volume:                            1.114540227  m\^3/kg
+Specific internal energy:              1.0334658129e\+06  J/kg
+Specific enthalpy:                     1.1449198356e\+06  J/kg
+
+Sound speed:                                351.3883482  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:              3071.5  J/\(kg-K\)
+Specific heat at constant volume:                2772.5  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)'
+
+    requirement = "The fluid properties interrogator shall output two-phase and static-state, "
+      "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./vapor_mixture_rho_e]
+    type = 'RunApp'
+    input = 'vapor_mixture_rho_e.i'
+    allow_test_objects = true
+    allow_warnings = true
+    method = 'OPT'
+    expect_out = 'Vapor mixture STATIC properties:
+--------------------------------------------------------------------------------
+Pressure:                              9.0404345588e\+05  Pa
+Temperature:                                2547.214296  K
+Density:                                    1.187005237  kg/m\^3
+Specific volume:                           0.8424562661  m\^3/kg
+Specific internal energy:              2.4771659033e\+06  J/kg
+Specific enthalpy:                     3.2387829776e\+06  J/kg
+
+Sound speed:                                997.8878004  m/s
+Dynamic viscosity:                     1.8230000000e-05  Pa-s
+Specific heat at constant pressure:              1271.5  J/\(kg-K\)
+Specific heat at constant volume:                 972.5  J/\(kg-K\)
+Thermal conductivity:                           0.02568  W/\(m-K\)'
+
+    requirement = "The fluid properties interrogator shall output static-state, "
+      "single-phase fluid properties for (rho, e) input with a vapor mixture fluid properties object."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./2ph_p]
+  type = 'RunApp'
+  input = '2ph.p.i'
+  allow_test_objects = true
+  allow_warnings = true
+  method = 'OPT'
+  expect_out = 'TWO-PHASE properties:
+--------------------------------------------------------------------------------
+Critical pressure:                                   25  Pa
+Saturation temperature:                2.0000000000e\+05  K
+Latent heat of vaporization:           4.5931000000e\+08  J/kg'
+
+    requirement = "The fluid properties interrogator shall output two-phase "
+      "fluid properties for (p) input with a two-phase fluid properties object."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./2ph_T]
+  type = 'RunApp'
+  input = '2ph.T.i'
+  allow_test_objects = true
+  allow_warnings = true
+  method = 'OPT'
+  expect_out = 'TWO-PHASE properties:
+--------------------------------------------------------------------------------
+Critical pressure:                                   25  Pa
+Saturation pressure:                                900  Pa
+Latent heat of vaporization:           6.8896500000e\+05  J/kg'
+
+    requirement = "The fluid properties interrogator shall output two-phase "
+      "fluid properties for (T) input with a two-phase fluid properties object."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./err.wrong_fp_type]
+    type = RunException
+    input = 'err.wrong_fp_type.i'
+    allow_warnings = true
+    method = 'OPT'
+    expect_err = "The type of the parameter 'fp' must be derived from type 'SinglePhaseFluidProperties', 'VaporMixtureFluidProperties', or 'TwoPhaseFluidProperties'"
+
+    requirement = "The fluid properties interrogator shall throw an error if an
+      incompatible fluid properties object is supplied."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./err.extraneous_parameter]
+    type = RunException
+    input = '1ph.rho_e.i'
+    allow_warnings = true
+    method = 'OPT'
+    expect_err = "fp_interrogator\: \(rho\,e\) has been specified\; T cannot be specified\."
+    cli_args = "FluidPropertiesInterrogator/T=300"
+
+    requirement = "The fluid properties interrogator shall throw an error if an
+      extraneous parameter(s) are supplied."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+
+  [./err.no_params]
+    type = RunException
+    input = 'err.no_params.i'
+    allow_warnings = true
+    method = 'OPT'
+    expect_err = "fp_interrogator\: For one-phase fluid properties\, you must provide one of the following
+combinations of thermodynamic properties:"
+
+    requirement = "The fluid properties interrogator shall throw an error if an
+      no valid input sets were supplied."
+    issues = '#12995'
+    design = 'FluidPropertiesInterrogator.md'
+  [../]
+[]
