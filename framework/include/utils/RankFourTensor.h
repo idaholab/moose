@@ -34,10 +34,8 @@ class VectorValue;
 class MooseEnum;
 template <typename>
 class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
 
 template <typename T>
 void mooseSetToZero(T & v);
@@ -412,8 +410,12 @@ protected:
   friend class RankTwoTensorTempl;
   template <typename T2>
   friend class RankFourTensorTempl;
-  friend class RankThreeTensor;
+  template <typename T2>
+  friend class RankThreeTensorTempl;
 };
+
+typedef RankFourTensorTempl<Real> RankFourTensor;
+typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
 template <typename T1, typename T2>
 inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
