@@ -24,14 +24,13 @@ public:
   AverageNodalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() override;
+  virtual void finalize() override;
   virtual void execute() override;
-
   virtual Real getValue() override;
-
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  Real _avg;
+  Real _sum;
   unsigned int _n;
 };
 
