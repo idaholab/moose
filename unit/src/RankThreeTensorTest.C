@@ -23,6 +23,7 @@ TEST(RankThreeTensor, constructors)
   RankThreeTensor r2(RankThreeTensor::initNone);
   RankThreeTensor r3(std::vector<Real>(27, 1980));
   RankThreeTensor r4(r3);
+  RankThreeTensor r5(std::vector<Real>(3, 2013));
 
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
@@ -33,15 +34,49 @@ TEST(RankThreeTensor, constructors)
         EXPECT_EQ(r4(i, j, k), 1980.);
       }
 
+  // See fillFromPlaneNormal test for complete test
+  EXPECT_FLOAT_EQ(r5(0, 0, 2) / 1e9, -8.1570148);
+  EXPECT_FLOAT_EQ(r5(1, 1, 1) / 1e9, -8.1570139);
+  EXPECT_FLOAT_EQ(r5(2, 2, 0) / 1e9, -8.1570148);
+
   try
   {
-    RankThreeTensor r1(std::vector<Real>(42));
+    RankThreeTensor r6(std::vector<Real>(42));
     FAIL() << "Incorrect error message.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    EXPECT_NE(msg.find(" must have size 27. Yours has size 42"), std::string::npos)
+    EXPECT_NE(msg.find("Unsupported automatic fill method, use 27 values for 'general' and 3 for "
+                       "'plane_normal', the supplied size was 42."),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  try
+  {
+    RankThreeTensor r7(std::vector<Real>(42), RankThreeTensor::general);
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    EXPECT_NE(msg.find("To use fillGeneralFromInputVector, your input must have size 27, the "
+                       "supplied size was 42."),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  try
+  {
+    RankThreeTensor r8(std::vector<Real>(42), RankThreeTensor::plane_normal);
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    EXPECT_NE(
+        msg.find(
+            "To use fillFromPlaneNormal, your input must have size 3, the supplied size was 42."),
+        std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }
@@ -63,12 +98,18 @@ TEST(RankThreeTensor, index)
 TEST(RankThreeTensor, zero)
 {
   RankThreeTensor r1(std::vector<Real>(27, 1980));
+  RankThreeTensor r2(std::vector<Real>(27, 1980));
+
   r1.zero();
+  mooseSetToZero(r2);
 
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
       for (unsigned int k = 0; k < 3; ++k)
+      {
         EXPECT_EQ(r1(i, j, k), 0);
+        EXPECT_EQ(r2(i, j, k), 0);
+      }
 }
 
 TEST(RankThreeTensor, assignment) // operator=
@@ -271,7 +312,7 @@ TEST(RankThreeTensor, fillMethodEnum)
   RankThreeTensor r1;
   MooseEnum methods = r1.fillMethodEnum();
   EXPECT_FALSE(methods.isValid());
-  EXPECT_EQ(methods.getRawNames(), "general");
+  EXPECT_EQ(methods.getRawNames(), "general plane_normal");
 }
 
 TEST(RankThreeTensor, fillFromInputVector)
@@ -282,6 +323,42 @@ TEST(RankThreeTensor, fillFromInputVector)
     for (unsigned int j = 0; j < 3; ++j)
       for (unsigned int k = 0; k < 3; ++k)
         EXPECT_EQ(r1(i, j, k), 1954);
+}
+
+TEST(RankThreeTensor, fillFromPlaneNormal)
+{
+  RankThreeTensor r1;
+  r1.fillFromPlaneNormal(VectorValue<Real>(1, 2, 3));
+
+  EXPECT_FLOAT_EQ(r1(0, 0, 0), 0);
+  EXPECT_FLOAT_EQ(r1(0, 1, 0), -1);
+  EXPECT_FLOAT_EQ(r1(0, 2, 0), -1.5);
+  EXPECT_FLOAT_EQ(r1(0, 0, 1), -1);
+  EXPECT_FLOAT_EQ(r1(0, 1, 1), -4);
+  EXPECT_FLOAT_EQ(r1(0, 2, 1), -6);
+  EXPECT_FLOAT_EQ(r1(0, 0, 2), -1.5);
+  EXPECT_FLOAT_EQ(r1(0, 1, 2), -6);
+  EXPECT_FLOAT_EQ(r1(0, 2, 2), -9);
+
+  EXPECT_FLOAT_EQ(r1(1, 0, 0), -2);
+  EXPECT_FLOAT_EQ(r1(1, 1, 0), -3.5);
+  EXPECT_FLOAT_EQ(r1(1, 2, 0), -6);
+  EXPECT_FLOAT_EQ(r1(1, 0, 1), -3.5);
+  EXPECT_FLOAT_EQ(r1(1, 1, 1), -6);
+  EXPECT_FLOAT_EQ(r1(1, 2, 1), -10.5);
+  EXPECT_FLOAT_EQ(r1(1, 0, 2), -6);
+  EXPECT_FLOAT_EQ(r1(1, 1, 2), -10.5);
+  EXPECT_FLOAT_EQ(r1(1, 2, 2), -18);
+
+  EXPECT_FLOAT_EQ(r1(2, 0, 0), -3);
+  EXPECT_FLOAT_EQ(r1(2, 1, 0), -6);
+  EXPECT_FLOAT_EQ(r1(2, 2, 0), -8.5);
+  EXPECT_FLOAT_EQ(r1(2, 0, 1), -6);
+  EXPECT_FLOAT_EQ(r1(2, 1, 1), -12);
+  EXPECT_FLOAT_EQ(r1(2, 2, 1), -17);
+  EXPECT_FLOAT_EQ(r1(2, 0, 2), -8.5);
+  EXPECT_FLOAT_EQ(r1(2, 1, 2), -17);
+  EXPECT_FLOAT_EQ(r1(2, 2, 2), -24);
 }
 
 TEST(RankThreeTensor, mixedProductRankFour)

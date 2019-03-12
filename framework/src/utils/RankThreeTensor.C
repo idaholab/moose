@@ -47,7 +47,7 @@ template <typename T>
 MooseEnum RankThreeTensorTempl<T>::fillMethodEnum() // TODO: Need new fillMethodEnum() -- for now we
                                                     // will just use general (at most 27 components)
 {
-  return MooseEnum("general");
+  return MooseEnum("general plane_normal");
 }
 
 template <typename T>
@@ -240,13 +240,59 @@ RankThreeTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillM
 {
   zero();
 
-  switch (fill_method)
+  if (fill_method == automatic)
   {
-    case general:
-      fillGeneralFromInputVector(input);
-      break;
-    default:
-      mooseError("fillFromInputVector called with unknown fill_method of ", fill_method);
+    if (input.size() == 27)
+      fill_method = general;
+    else if (input.size() == 3)
+      fill_method = plane_normal;
+    else
+      mooseError("Unsupported automatic fill method, use 27 values for 'general' and 3 for "
+                 "'plane_normal', the supplied size was ",
+                 input.size(),
+                 ".");
+  }
+
+  if (fill_method == general)
+    fillGeneralFromInputVector(input);
+
+  else if (fill_method == plane_normal)
+  {
+    if (input.size() != 3)
+      mooseError("To use fillFromPlaneNormal, your input must have size 3, the supplied size was ",
+                 input.size(),
+                 ".");
+    fillFromPlaneNormal(VectorValue<T>(input[0], input[1], input[2]));
+  }
+
+  else
+    // This is un-reachable unless a FillMethod is added and the if statement is not updated
+    mooseError("fillFromInputVector called with unknown fill_method of ", fill_method);
+}
+
+template <typename T>
+void
+RankThreeTensorTempl<T>::fillFromPlaneNormal(const VectorValue<T> & input)
+{
+  unsigned int index = 0;
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    const T a = input(i);
+    for (unsigned int j = 0; j < N; ++j)
+    {
+      const T b = input(j);
+      for (unsigned int k = 0; k < N; ++k)
+      {
+        const T c = input(k);
+        T sum = 0;
+        sum = -2 * a * b * c;
+        if (i == j)
+          sum += c;
+        if (i == k)
+          sum += b;
+        _vals[index++] = sum / 2.0;
+      }
+    }
   }
 }
 
@@ -303,8 +349,10 @@ void
 RankThreeTensorTempl<T>::fillGeneralFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 27)
-    mooseError("To use fillGeneralFromInputVector, your input must have size 27. Yours has size ",
-               input.size());
+    mooseError(
+        "To use fillGeneralFromInputVector, your input must have size 27, the supplied size was ",
+        input.size(),
+        ".");
 
   for (unsigned int i = 0; i < N3; ++i)
     _vals[i] = input[i];

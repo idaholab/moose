@@ -70,7 +70,9 @@ public:
    */
   enum FillMethod
   {
-    general
+    automatic,
+    general,
+    plane_normal
   };
 
   /// Default constructor; fills to zero
@@ -86,7 +88,7 @@ public:
   RankThreeTensorTempl(const InitMethod);
 
   /// Fill from vector
-  RankThreeTensorTempl(const std::vector<T> &, FillMethod method = general);
+  RankThreeTensorTempl(const std::vector<T> &, FillMethod method = automatic);
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   inline T & operator()(unsigned int i, unsigned int j, unsigned int k)
@@ -169,7 +171,14 @@ public:
    *             general (use fillGeneralFromInputVector)
    *             more fill_methods to be implemented soon!
    */
-  void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method = general);
+  void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method = automatic);
+
+  /**
+   * Fills RankThreeTensor from plane normal vectors
+   * ref. Kuhl et. al. Int. J. Solids Struct. 38(2001) 2933-2952
+   * @param input plane normal vector
+   */
+  void fillFromPlaneNormal(const VectorValue<T> & input);
 
   /**
    * Creates fourth order tensor D_{ijkl}=A_{mij}*b_{mn}*A_{nkl} where A is rank 3 and b is rank 2
