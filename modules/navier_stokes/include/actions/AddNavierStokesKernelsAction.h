@@ -60,7 +60,7 @@ protected:
   void addNSEnthalpyAux();
   void addNSMachAux();
   void addNSInternalEnergyAux();
-  void addNSSpecificVolumeAux();
+  void addSpecificVolumeComputation();
 
   // Name of the FluidProperties object to pass on to Kernels
   UserObjectName _fp_name;
