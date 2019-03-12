@@ -44,8 +44,8 @@ mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & 
 }
 
 template <typename T>
-MooseEnum RankThreeTensorTempl<T>::fillMethodEnum() // TODO: Need new fillMethodEnum() -- for now we
-                                                    // will just use general (at most 27 components)
+MooseEnum
+RankThreeTensorTempl<T>::fillMethodEnum()
 {
   return MooseEnum("general plane_normal");
 }
