@@ -210,10 +210,6 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
 
-  // Deprecated tasks
-  registerTask("setup_material_output", false);
-  registerTask("setup_debug", false);
-
   /**************************/
   /****** Dependencies ******/
   /**************************/
@@ -280,11 +276,9 @@ addActionTypes(Syntax & syntax)
                            "(add_transfer)"
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
-                           "(setup_material_output)" // DEPRECATED: Remove by 12/31/2018
                            "(add_output_aux_variables)"
                            "(add_algebraic_rm)"
                            "(init_problem)"
-                           "(setup_debug)" // DEPRECATED: Remove by 12/31/2018
                            "(add_output)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
