@@ -42,18 +42,6 @@ protected:
   /// linear area
   const VariableValue & _A_linear;
 
-  // piecewise constant variable and area values in this cell
-  const VariableValue & _A1_avg;
-  const VariableValue & _rhoA1_avg;
-  const VariableValue & _rhouA1_avg;
-  const VariableValue & _rhoEA1_avg;
-
-  // piecewise constant variable and area values in neighbor cell
-  const VariableValue & _A2_avg;
-  const VariableValue & _rhoA2_avg;
-  const VariableValue & _rhouA2_avg;
-  const VariableValue & _rhoEA2_avg;
-
   // reconstructed variable values in this cell
   const MaterialProperty<Real> & _rhoA1;
   const MaterialProperty<Real> & _rhouA1;

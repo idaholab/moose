@@ -13,7 +13,6 @@ validParams<NumericalFlux3EqnDGKernel>()
   params.addClassDescription(
       "Adds side fluxes for the 1-D, 1-phase, variable-area Euler equations");
 
-  params.addRequiredCoupledVar("A", "Cross-sectional area, elemental");
   params.addRequiredCoupledVar("A_linear", "Cross-sectional area, linear");
   params.addRequiredCoupledVar("rhoA", "Conserved variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Conserved variable: rho*u*A");
@@ -28,14 +27,6 @@ NumericalFlux3EqnDGKernel::NumericalFlux3EqnDGKernel(const InputParameters & par
   : DGKernel(parameters),
 
     _A_linear(coupledValue("A_linear")),
-    _A1_avg(coupledValue("A")),
-    _rhoA1_avg(coupledValue("rhoA")),
-    _rhouA1_avg(coupledValue("rhouA")),
-    _rhoEA1_avg(coupledValue("rhoEA")),
-    _A2_avg(coupledNeighborValue("A")),
-    _rhoA2_avg(coupledNeighborValue("rhoA")),
-    _rhouA2_avg(coupledNeighborValue("rhouA")),
-    _rhoEA2_avg(coupledNeighborValue("rhoEA")),
     _rhoA1(getMaterialProperty<Real>("rhoA")),
     _rhouA1(getMaterialProperty<Real>("rhouA")),
     _rhoEA1(getMaterialProperty<Real>("rhoEA")),
@@ -86,8 +77,8 @@ Real
 NumericalFlux3EqnDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
   // construct the left and right solution vectors from the cell-average solution
-  std::vector<Real> U1 = {_rhoA1_avg[_qp], _rhouA1_avg[_qp], _rhoEA1_avg[_qp], _A1_avg[_qp]};
-  std::vector<Real> U2 = {_rhoA2_avg[_qp], _rhouA2_avg[_qp], _rhoEA2_avg[_qp], _A2_avg[_qp]};
+  std::vector<Real> U1 = {_rhoA1[_qp], _rhouA1[_qp], _rhoEA1[_qp], _A_linear[_qp]};
+  std::vector<Real> U2 = {_rhoA2[_qp], _rhouA2[_qp], _rhoEA2[_qp], _A_linear[_qp]};
 
   const DenseMatrix<Real> & fjac1 =
       _numerical_flux.getJacobian(true, _current_side, _current_elem->id(), U1, U2, _normals[_qp]);
