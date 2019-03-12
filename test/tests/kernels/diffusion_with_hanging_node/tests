@@ -40,7 +40,7 @@
     type = PetscJacobianTester
     input = 'simple_diffusion.i'
     run_sim = True
-    cli_args = 'Outputs/exodus=false -snes_test_jacobian_view'
+    cli_args = '-snes_test_jacobian_view'
     requirement = 'The SMP Jacobian shall be perfect for the hanging-node problem'
   [../]
 []

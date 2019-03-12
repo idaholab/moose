@@ -25,6 +25,7 @@ class PetscJacobianTester(RunApp):
         params.addParam('run_sim', False, "Whether to actually run the simulation, testing the Jacobian "
                                           "at every non-linear iteration of every time step. This is only "
                                           "relevant for petsc versions >= 3.9.")
+        params.addParam('turn_off_exodus_output', True, "Whether to set exodus=false in Outputs")
         return params
 
     def checkRunnable(self, options):
@@ -45,6 +46,9 @@ class PetscJacobianTester(RunApp):
             self.libmesh_dir = os.environ['LIBMESH_DIR']
         else:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
+
+        if self.specs['turn_off_exodus_output']:
+            self.specs['cli_args'][:0] = ['Outputs/exodus=false']
 
         if map(int, util.getPetscVersion(self.libmesh_dir).split(".")) < [3, 9]:
             self.old_petsc = True
