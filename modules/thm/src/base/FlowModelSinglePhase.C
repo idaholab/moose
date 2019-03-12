@@ -508,7 +508,6 @@ FlowModelSinglePhase::addRDGMooseObjects()
     params.set<NonlinearVariableName>("variable") = _rhoA_name;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A_linear") = {_A_linear_name};
-    params.set<std::vector<VariableName>>("A") = {AREA};
     params.set<std::vector<VariableName>>("rhoA") = {_rhoA_name};
     params.set<std::vector<VariableName>>("rhouA") = {_rhouA_name};
     params.set<std::vector<VariableName>>("rhoEA") = {_rhoEA_name};
