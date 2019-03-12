@@ -222,6 +222,18 @@ FlowModelSinglePhase::addMooseObjects()
   if (_spatial_discretization == rDG)
     addRDGMooseObjects();
 
+  {
+    std::string class_name = "FluidProperties3EqnMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
+    params.set<UserObjectName>("fp") = _fp_name;
+    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    _sim.addMaterial(class_name, Component::genName(_comp_name, "fp_mat"), params);
+  }
+
   ////////////////////////////////////////////////////////
   // Adding kernels
   ////////////////////////////////////////////////////////

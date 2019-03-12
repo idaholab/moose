@@ -486,185 +486,6 @@ FlowChannel::addVariables()
 }
 
 void
-FlowChannel::setup1Phase()
-{
-  {
-    std::string class_name = "FluidProperties3EqnMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
-    params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
-    params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
-    params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    _sim.addMaterial(class_name, genName(name(), "fp_mat"), params);
-  }
-
-  addFormLossObjects();
-
-  if (!_stabilization_uo_name.empty())
-  {
-    InputParameters pars = emptyInputParameters();
-    pars.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    pars.set<Component *>("component") = _parent == nullptr ? this : _parent;
-    pars.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
-    pars.set<RealVectorValue>("gravity_vector") = _gravity_vector;
-
-    const StabilizationSettings & stabilization =
-        _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name);
-    stabilization.addMooseObjects(*_flow_model, pars);
-  }
-}
-
-void
-FlowChannel::setup2Phase()
-{
-  std::vector<VariableName> cv_T_wall(1, FlowModel::TEMPERATURE_WALL);
-  std::vector<VariableName> cv_temperature_liquid(1, FlowModelTwoPhase::TEMPERATURE_LIQUID);
-  std::vector<VariableName> cv_temperature_vapor(1, FlowModelTwoPhase::TEMPERATURE_VAPOR);
-  std::vector<VariableName> cv_alpha_liquid(1, FlowModelTwoPhase::VOLUME_FRACTION_LIQUID);
-  std::vector<VariableName> cv_alpha_vapor(1, FlowModelTwoPhase::VOLUME_FRACTION_VAPOR);
-  std::vector<VariableName> cv_area(1, FlowModel::AREA);
-  std::vector<VariableName> cv_P_hf(1, FlowModel::HEAT_FLUX_PERIMETER);
-
-  std::vector<VariableName> cv_vel_liquid(1, FlowModelTwoPhase::VELOCITY_LIQUID);
-  std::vector<VariableName> cv_vel_vapor(1, FlowModelTwoPhase::VELOCITY_VAPOR);
-  std::vector<VariableName> cv_density_liquid(1, FlowModelTwoPhase::DENSITY_LIQUID);
-  std::vector<VariableName> cv_density_vapor(1, FlowModelTwoPhase::DENSITY_VAPOR);
-  std::vector<VariableName> cv_v_liquid(1, FlowModelTwoPhase::SPECIFIC_VOLUME_LIQUID);
-  std::vector<VariableName> cv_v_vapor(1, FlowModelTwoPhase::SPECIFIC_VOLUME_VAPOR);
-
-  std::vector<VariableName> cv_beta(1, FlowModelTwoPhase::BETA);
-  std::vector<VariableName> cv_arhoA_liquid(1, FlowModelTwoPhase::ALPHA_RHO_A_LIQUID);
-  std::vector<VariableName> cv_arhouA_liquid(1, FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID);
-  std::vector<VariableName> cv_arhoEA_liquid(1, FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID);
-  std::vector<VariableName> cv_arhoA_vapor(1, FlowModelTwoPhase::ALPHA_RHO_A_VAPOR);
-  std::vector<VariableName> cv_arhouA_vapor(1, FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR);
-  std::vector<VariableName> cv_arhoEA_vapor(1, FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR);
-  std::vector<VariableName> cv_enthalpy_liquid(1,
-                                               FlowModelTwoPhase::SPECIFIC_TOTAL_ENTHALPY_LIQUID);
-  std::vector<VariableName> cv_enthalpy_vapor(1, FlowModelTwoPhase::SPECIFIC_TOTAL_ENTHALPY_VAPOR);
-  std::vector<VariableName> cv_e_liquid(1, FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_LIQUID);
-  std::vector<VariableName> cv_e_vapor(1, FlowModelTwoPhase::SPECIFIC_INTERNAL_ENERGY_VAPOR);
-
-  // parameter vectors for loops over phases
-  const std::vector<NonlinearVariableName> nonlinear_variable_name{
-      FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID, FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
-  const std::vector<bool> is_liquid{true, false};
-  const std::vector<std::string> phase_name{"liquid", "vapor"};
-  const std::vector<VariableName> arhoA_name{FlowModelTwoPhase::ALPHA_RHO_A_LIQUID,
-                                             FlowModelTwoPhase::ALPHA_RHO_A_VAPOR};
-  const std::vector<VariableName> arhouA_name{FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID,
-                                              FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR};
-  const std::vector<VariableName> arhoEA_name{FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID,
-                                              FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
-  const std::vector<MaterialPropertyName> alpha_name{FlowModelTwoPhase::VOLUME_FRACTION_LIQUID,
-                                                     FlowModelTwoPhase::VOLUME_FRACTION_VAPOR};
-  const std::vector<MaterialPropertyName> T_name{FlowModelTwoPhase::TEMPERATURE_LIQUID,
-                                                 FlowModelTwoPhase::TEMPERATURE_VAPOR};
-
-  ExecFlagEnum ts_execute_on(MooseUtils::getDefaultExecFlagEnum());
-  ts_execute_on = EXEC_TIMESTEP_BEGIN;
-
-  {
-    std::string class_name;
-    if (_model_id == THM::FM_TWO_PHASE)
-      class_name = "FluidProperties7EqnMaterial";
-    else if (_model_id == THM::FM_TWO_PHASE_NCG)
-      class_name = "FluidProperties2PhaseNCGMaterial";
-
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<UserObjectName>("fp") = _fp_name;
-    params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
-
-    params.set<std::vector<VariableName>>("beta") = cv_beta;
-    params.set<std::vector<VariableName>>("arhoA_liquid") = cv_arhoA_liquid;
-    params.set<std::vector<VariableName>>("arhouA_liquid") = cv_arhouA_liquid;
-    params.set<std::vector<VariableName>>("arhoEA_liquid") = cv_arhoEA_liquid;
-    params.set<std::vector<VariableName>>("arhoA_vapor") = cv_arhoA_vapor;
-    params.set<std::vector<VariableName>>("arhouA_vapor") = cv_arhouA_vapor;
-    params.set<std::vector<VariableName>>("arhoEA_vapor") = cv_arhoEA_vapor;
-    params.set<std::vector<VariableName>>("alpha_liquid") = cv_alpha_liquid;
-    params.set<std::vector<VariableName>>("alpha_vapor") = cv_alpha_vapor;
-    params.set<std::vector<VariableName>>("A") = cv_area;
-    params.set<bool>("use_explicit_acoustic_impedance") =
-        getParam<bool>("explicit_acoustic_impedance");
-    if (_model_id == THM::FM_TWO_PHASE_NCG)
-    {
-      const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
-      params.set<std::vector<VariableName>>("aXrhoA_vapor") = fm.getNCGSolutionVars();
-    }
-    _sim.addMaterial(class_name, Component::genName(name(), "fluid_prop_uv_mat"), params);
-  }
-
-  setupVolumeFraction();
-
-  addFormLossObjects();
-
-  if (!_stabilization_uo_name.empty())
-  {
-    InputParameters pars = emptyInputParameters();
-    pars.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    pars.set<Component *>("component") = _parent == nullptr ? this : _parent;
-    pars.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
-
-    const StabilizationSettings & stabilization =
-        _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name);
-    stabilization.addMooseObjects(*_flow_model, pars);
-  }
-}
-
-void
-FlowChannel::setupVolumeFraction()
-{
-  const FlowModelTwoPhase & fm = dynamic_cast<const FlowModelTwoPhase &>(*getFlowModel());
-  bool phase_interaction = fm.getPhaseInteraction();
-
-  // materials
-  {
-    const std::string class_name = "VolumeFractionMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
-    params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
-    _sim.addMaterial(class_name, genName(name(), class_name), params);
-  }
-
-  // aux kernels
-  {
-    std::string class_name = "VolumeFractionLiquidAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = FlowModelTwoPhase::VOLUME_FRACTION_LIQUID;
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
-    params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
-    _sim.addAuxKernel(class_name, genName(name(), "alpha_liquid"), params);
-  }
-  {
-    std::string class_name = "VolumeFractionAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = FlowModelTwoPhase::VOLUME_FRACTION_VAPOR;
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<std::vector<VariableName>>("opposite_volume_fraction") = {
-        FlowModelTwoPhase::VOLUME_FRACTION_LIQUID};
-    _sim.addAuxKernel(class_name, genName(name(), "alpha_vapor"), params);
-  }
-
-  // Add aux for beta if there is no phase interaction
-  if (!phase_interaction)
-  {
-    const std::string class_name = "RemappedLiquidVolumeFractionAux";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<AuxVariableName>("variable") = FlowModelTwoPhase::BETA;
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<FunctionName>("alpha_vapor") = getVariableFn("initial_alpha_vapor");
-    params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
-    _sim.addAuxKernel(class_name, genName(name(), class_name), params);
-  }
-}
-
-void
 FlowChannel::setupDh()
 {
   const std::string nm = genName(name(), "D_h_material");
@@ -868,10 +689,20 @@ FlowChannel::addMooseObjects()
   _flow_model->addMooseObjects();
   _closures->addMooseObjects(*this);
 
-  if (_model_id == THM::FM_SINGLE_PHASE)
-    setup1Phase();
-  else if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
-    setup2Phase();
+  addFormLossObjects();
+
+  if (!_stabilization_uo_name.empty())
+  {
+    InputParameters pars = emptyInputParameters();
+    pars.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+    pars.set<Component *>("component") = _parent == nullptr ? this : _parent;
+    pars.set<UserObjectName>("fp") = getParam<UserObjectName>("fp");
+    pars.set<RealVectorValue>("gravity_vector") = _gravity_vector;
+
+    const StabilizationSettings & stabilization =
+        _sim.getUserObject<StabilizationSettings>(_stabilization_uo_name);
+    stabilization.addMooseObjects(*_flow_model, pars);
+  }
 }
 
 void

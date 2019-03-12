@@ -137,10 +137,6 @@ protected:
    */
   virtual void addCommonObjects();
 
-  virtual void setup1Phase();
-  virtual void setup2Phase();
-
-  virtual void setupVolumeFraction();
   virtual void setupDh();
   virtual void addFormLossObjects();
 
