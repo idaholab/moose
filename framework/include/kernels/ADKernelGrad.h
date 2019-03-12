@@ -13,31 +13,39 @@
 #include "ADKernel.h"
 
 #define usingKernelGradMembers usingKernelMembers
+#define usingVectorKernelGradMembers usingVectorKernelMembers
 
-template <ComputeStage>
-class ADKernelGrad;
-
-declareADValidParams(ADKernelGrad);
+template <typename, ComputeStage>
+class ADKernelGradTempl;
 
 template <ComputeStage compute_stage>
-class ADKernelGrad : public ADKernel<compute_stage>
+using ADKernelGrad = ADKernelGradTempl<Real, compute_stage>;
+template <ComputeStage compute_stage>
+using ADVectorKernelGrad = ADKernelGradTempl<RealVectorValue, compute_stage>;
+
+declareADValidParams(ADKernelGrad);
+declareADValidParams(ADVectorKernelGrad);
+
+template <typename T, ComputeStage compute_stage>
+class ADKernelGradTempl : public ADKernelTempl<T, compute_stage>
 {
 public:
-  ADKernelGrad(const InputParameters & parameters);
+  ADKernelGradTempl(const InputParameters & parameters);
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
+  virtual void computeADOffDiagJacobian() override;
 
 protected:
   /**
    * Called before forming the residual for an element
    */
-  virtual ADGradResidual precomputeQpResidual() = 0;
+  virtual typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputGradient
+  precomputeQpResidual() = 0;
 
-  virtual ADResidual computeQpResidual() final;
+  virtual ADResidual computeQpResidual() override final;
 
-  usingKernelMembers;
+  usingTemplKernelMembers(T);
 };
 
 #endif /* ADKERNELGRAD_H */

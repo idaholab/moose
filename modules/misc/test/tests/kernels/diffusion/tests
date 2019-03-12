@@ -23,7 +23,7 @@
     run_sim = True
     petsc_version = '>=3.9'
     method = 'OPT'
-    cli_args = 'Executioner/num_steps=5 Outputs/exodus=false'
+    cli_args = 'Executioner/num_steps=5'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"
@@ -53,7 +53,6 @@
     run_sim = True
     petsc_version = '>=3.9'
     method = 'OPT'
-    cli_args = 'Outputs/exodus=false'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"
     issues = "#5658 #12633"

@@ -61,7 +61,7 @@
     run_sim = True
     petsc_version = '>=3.9'
     method = 'OPT'
-    cli_args = 'Executioner/num_steps=2 Outputs/exodus=false'
+    cli_args = 'Executioner/num_steps=2'
     skip = 'AD Thermal Contact not yet implemented'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     design = "jacobian_definition.md"

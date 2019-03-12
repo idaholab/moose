@@ -16,11 +16,12 @@
     requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar using AD kernels'
     design = "\ADMatHeatSource"
     issues = "#12633"
+    custom_cmp = 'ad_heat_source_bar.cmp'
   [../]
   [./ad_heat_source_bar_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_heat_source_bar.i'
-    ratio_tol = 1e-7
+    ratio_tol = 2e-7
     difference_tol = 1e-2
     run_sim = True
     petsc_version = '>=3.9'

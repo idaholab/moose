@@ -13,6 +13,9 @@
 #include "MooseApp.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/linear_partitioner.h"
+#include "libmesh/elem.h"
+#include "libmesh/mesh_base.h"
 
 registerMooseObject("MooseApp", PetscExternalPartitioner);
 
@@ -61,28 +64,61 @@ PetscExternalPartitioner::clone() const
 }
 
 void
+PetscExternalPartitioner::preLinearPartition(MeshBase & mesh)
+{
+  // Temporarily cache the old partition method
+  auto old_partitioner = std::move(mesh.partitioner());
+  // Create a linear partitioner
+  mesh.partitioner().reset(new LinearPartitioner);
+  // Partition mesh
+  mesh.partition(n_processors());
+  // Restore the old partition
+  mesh.partitioner() = std::move(old_partitioner);
+}
+
+void
+PetscExternalPartitioner::partition(MeshBase & mesh, const unsigned int n_parts)
+{
+  // We want to use a parallel partitioner that requires a distributed graph
+  // Simply calling a linear partitioner provides us the distributed graph
+  // We shold not do anything when using a distributed mesh since the mesh itself
+  // is already distributed
+  // When n_parts=1, we do not need to run any partitioner, instead, let libmesh
+  // handle this
+  if (mesh.is_replicated() && n_parts > 1)
+    preLinearPartition(mesh);
+
+  Partitioner::partition(mesh, n_parts);
+}
+
+void
 PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // construct a dual graph
   Mat dual;
   PetscInt *i, *j, *values, *elem_weights, nrows, nj, ncols, local_elem_id;
-  unsigned int neighbor;
   const PetscInt * parts;
+  unsigned int side;
   MatPartitioning part;
   IS is;
+  // Let us check PETSc return code
+  PetscErrorCode ierr;
 
   i = 0;
   j = 0;
   values = 0;
   elem_weights = 0;
-  neighbor = 0;
 
   build_graph(mesh);
   nrows = _dual_graph.size();
-  PetscCalloc1(nrows + 1, &i);
+  ierr = PetscCalloc1(nrows + 1, &i);
+  CHKERRABORT(mesh.comm().get(), ierr);
   if (_apply_element_weight)
-    PetscCalloc1(nrows + 1, &elem_weights);
+  {
+    ierr = PetscCalloc1(nrows + 1, &elem_weights);
+    CHKERRABORT(mesh.comm().get(), ierr);
+  }
 
   // Set graph offsets and
   // compute element weight
@@ -93,53 +129,83 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
     if (_apply_element_weight)
     {
       // Get the original element
-      auto & elem = _local_id_to_elem[k];
+      mooseAssert(k < static_cast<PetscInt>(_local_id_to_elem.size()),
+                  "Local element id " << k << " is not smaller than " << _local_id_to_elem.size());
+      auto elem = _local_id_to_elem[k];
 
       elem_weights[k] = computeElementWeight(*elem);
     }
   }
 
   // Graph adjacency
-  PetscCalloc1(i[nrows], &j);
+  ierr = PetscCalloc1(i[nrows], &j);
+  CHKERRABORT(mesh.comm().get(), ierr);
 
   // Edge weights represent the communication
   if (_apply_side_weight)
-    PetscCalloc1(i[nrows], &values);
+  {
+    ierr = PetscCalloc1(i[nrows], &values);
+    CHKERRABORT(mesh.comm().get(), ierr);
+  }
 
   local_elem_id = 0;
   nj = 0;
   for (auto & row : _dual_graph)
   {
-    if (_apply_side_weight)
-      neighbor = 0;
+    mooseAssert(local_elem_id < static_cast<PetscInt>(_local_id_to_elem.size()),
+                "Local element id " << local_elem_id << " is not smaller than "
+                                    << _local_id_to_elem.size());
+    auto elem = _local_id_to_elem[local_elem_id];
+    unsigned int n_neighbors = 0;
 
-    for (auto adj : row)
+    side = 0;
+    for (auto neighbor : elem->neighbor_ptr_range())
     {
-      j[nj] = adj;
-      if (_apply_side_weight)
+      // Skip boundary sides since they do not connect to
+      // anything.
+      if (neighbor != nullptr && neighbor->active())
       {
-        auto & elem = _local_id_to_elem[local_elem_id];
-        values[nj] = computeSideWeight(*elem, neighbor);
-        neighbor++;
+        j[nj] = row[n_neighbors++];
+
+        if (_apply_side_weight)
+          values[nj] = computeSideWeight(*elem, side);
+
+        nj++;
       }
 
-      nj++;
+      side++;
     }
+    if (n_neighbors != row.size())
+      mooseError(
+          "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
+
     local_elem_id++;
   }
 
   ncols = 0;
-  for (processor_id_type pid = 0; pid < mesh.n_processors(); pid++)
-    ncols += _n_active_elem_on_proc[pid];
 
-  MatCreateMPIAdj(mesh.comm().get(), nrows, ncols, i, j, values, &dual);
-  MatPartitioningCreate(mesh.comm().get(), &part);
-  MatPartitioningSetAdjacency(part, dual);
+  for (processor_id_type pid = 0; pid < mesh.n_processors(); pid++)
+  {
+    mooseAssert(pid < _n_active_elem_on_proc.size(),
+                "Processor id " << pid << " is not smaller than " << _n_active_elem_on_proc.size());
+    ncols += _n_active_elem_on_proc[pid];
+  }
+
+  ierr = MatCreateMPIAdj(mesh.comm().get(), nrows, ncols, i, j, values, &dual);
+  CHKERRABORT(mesh.comm().get(), ierr);
+  ierr = MatPartitioningCreate(mesh.comm().get(), &part);
+  CHKERRABORT(mesh.comm().get(), ierr);
+  ierr = MatPartitioningSetAdjacency(part, dual);
+  CHKERRABORT(mesh.comm().get(), ierr);
 
   if (_apply_element_weight)
-    MatPartitioningSetVertexWeights(part, elem_weights);
+  {
+    ierr = MatPartitioningSetVertexWeights(part, elem_weights);
+    CHKERRABORT(mesh.comm().get(), ierr);
+  }
 
-  MatPartitioningSetNParts(part, n_parts);
+  ierr = MatPartitioningSetNParts(part, n_parts);
+  CHKERRABORT(mesh.comm().get(), ierr);
 #if PETSC_VERSION_LESS_THAN(3, 9, 2)
   if (_part_package == "party")
     mooseError("PETSc-3.9.3 or higher is required for using party");
@@ -148,24 +214,33 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   if (_part_package == "chaco")
     mooseError("PETSc-3.9.0 or higher is required for using chaco");
 #endif
-  MatPartitioningSetType(part, _part_package.c_str());
-  MatPartitioningSetFromOptions(part);
-  MatPartitioningApply(part, &is);
+  ierr = MatPartitioningSetType(part, _part_package.c_str());
+  CHKERRABORT(mesh.comm().get(), ierr);
+  ierr = MatPartitioningSetFromOptions(part);
+  CHKERRABORT(mesh.comm().get(), ierr);
+  ierr = MatPartitioningApply(part, &is);
+  CHKERRABORT(mesh.comm().get(), ierr);
 
-  ISGetIndices(is, &parts);
+  ierr = ISGetIndices(is, &parts);
+  CHKERRABORT(mesh.comm().get(), ierr);
 
   std::vector<dof_id_type> libmesh_parts;
   std::copy(parts, parts + nrows, std::back_inserter(libmesh_parts));
 
-  ISRestoreIndices(is, &parts);
+  ierr = ISRestoreIndices(is, &parts);
+  CHKERRABORT(mesh.comm().get(), ierr);
 
   assign_partitioning(mesh, libmesh_parts);
 
-  ISRestoreIndices(is, &parts);
+  ierr = ISRestoreIndices(is, &parts);
+  CHKERRABORT(mesh.comm().get(), ierr);
 
-  MatPartitioningDestroy(&part);
-  ISDestroy(&is);
-  MatDestroy(&dual);
+  ierr = MatPartitioningDestroy(&part);
+  CHKERRABORT(mesh.comm().get(), ierr);
+  ierr = ISDestroy(&is);
+  CHKERRABORT(mesh.comm().get(), ierr);
+  ierr = MatDestroy(&dual);
+  CHKERRABORT(mesh.comm().get(), ierr);
 #else
   mooseError("Petsc is required for this partitioner");
 #endif

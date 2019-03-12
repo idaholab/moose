@@ -74,6 +74,8 @@ public:
    */
   virtual Real h_lat(Real p, Real T) const override { return _fp_2phase->h_lat(p, T); }
 
+  virtual bool supportsPhaseChange() const override { return _fp_2phase->supportsPhaseChange(); }
+
 protected:
   /// Two-phase fluid properties user object name
   const UserObjectName _2phase_name;

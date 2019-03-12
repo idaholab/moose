@@ -26,8 +26,8 @@ ADHeatConduction<compute_stage>::ADHeatConduction(const InputParameters & parame
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-ADHeatConduction<compute_stage>::computeQpResidual()
+ADVectorResidual
+ADHeatConduction<compute_stage>::precomputeQpResidual()
 {
-  return _thermal_conductivity[_qp] * ADDiffusion<compute_stage>::computeQpResidual();
+  return _thermal_conductivity[_qp] * ADDiffusion<compute_stage>::precomputeQpResidual();
 }

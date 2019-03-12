@@ -25,7 +25,7 @@ public:
   ADVectorTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
   usingVectorTimeKernelMembers;
 };

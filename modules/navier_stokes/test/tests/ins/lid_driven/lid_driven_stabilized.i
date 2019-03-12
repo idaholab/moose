@@ -156,4 +156,25 @@
 
 [Outputs]
   exodus = true
+  [dofmap]
+    type = DOFMap
+    execute_on = 'initial'
+  []
+[]
+
+[Postprocessors]
+  [lin]
+    type = NumLinearIterations
+  []
+  [nl]
+    type = NumNonlinearIterations
+  []
+  [lin_tot]
+    type = CumulativeValuePostprocessor
+    postprocessor = 'lin'
+  []
+  [nl_tot]
+    type = CumulativeValuePostprocessor
+    postprocessor = 'nl'
+  []
 []

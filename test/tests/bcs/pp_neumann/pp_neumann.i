@@ -1,3 +1,5 @@
+# NOTE: This file is used within the documentation, so please do not change names within the file
+# without checking that associated documentation is not affected, see syntax/Postprocessors/index.md.
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -6,45 +8,45 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./aux]
+  [aux]
     initial_condition = 5
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = PostprocessorNeumannBC
     variable = u
     boundary = right
     postprocessor = right_pp
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./right_pp]
+  [right_pp]
     type = PointValue
     point = '0.5 0.5 0'
     variable = aux
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Executioner]

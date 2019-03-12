@@ -69,7 +69,7 @@ AddNavierStokesKernelsAction::act()
   addNSEnthalpyAux();
   addNSMachAux();
   addNSInternalEnergyAux();
-  addNSSpecificVolumeAux();
+  addSpecificVolumeComputation();
   for (unsigned int component = 0; component < _dim; ++component)
     addNSVelocityAux(component);
 }
@@ -125,15 +125,19 @@ AddNavierStokesKernelsAction::addNSSUPGEnergy()
 }
 
 void
-AddNavierStokesKernelsAction::addNSSpecificVolumeAux()
+AddNavierStokesKernelsAction::addSpecificVolumeComputation()
 {
-  const std::string kernel_type = "NSSpecificVolumeAux";
+  const std::string kernel_type = "ParsedAux";
 
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<AuxVariableName>("variable") = NS::specific_volume;
 
-  // coupled variables
-  params.set<CoupledName>(NS::density) = {NS::density};
+  // arguments
+  params.set<CoupledName>("args") = {NS::density};
+
+  // expression
+  std::string function = "if(" + NS::density + " = 0, 1e10, 1 / " + NS::density + ")";
+  params.set<std::string>("function") = function;
 
   _problem->addAuxKernel(kernel_type, "specific_volume_auxkernel", params);
 }

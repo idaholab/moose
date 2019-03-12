@@ -25,7 +25,7 @@ public:
   ADTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADResidual precomputeQpResidual() override;
 
   usingTimeKernelMembers;
 };

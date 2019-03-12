@@ -77,6 +77,35 @@ addScaled(const T & scalar, const NumericVector<T2> & numeric_vector, NumericVec
   result.add(scalar, numeric_vector);
 }
 
+template <
+    typename T,
+    typename T2,
+    template <typename> class W,
+    template <typename> class W2,
+    typename std::enable_if<std::is_same<typename W<T>::index_type, unsigned int>::value &&
+                                std::is_same<typename W2<T2>::index_type, unsigned int>::value,
+                            int>::type = 0>
+typename CompareTypes<T, T2>::supertype
+dotProduct(const W<T> & a, const W2<T2> & b)
+{
+  return a * b;
+}
+
+template <typename T,
+          typename T2,
+          template <typename> class W,
+          template <typename> class W2,
+          typename std::enable_if<std::is_same<typename W<T>::index_type,
+                                               std::tuple<unsigned int, unsigned int>>::value &&
+                                      std::is_same<typename W2<T2>::index_type,
+                                                   std::tuple<unsigned int, unsigned int>>::value,
+                                  int>::type = 0>
+typename CompareTypes<T, T2>::supertype
+dotProduct(const W<T> & a, const W2<T2> & b)
+{
+  return a.contract(b);
+}
+
 } // namespace MathUtils
 
 #endif // MATHUTILS_H

@@ -10,7 +10,7 @@
 #ifndef ADDIFFUSION_H
 #define ADDIFFUSION_H
 
-#include "ADKernel.h"
+#include "ADKernelGrad.h"
 
 template <ComputeStage>
 class ADDiffusion;
@@ -18,15 +18,15 @@ class ADDiffusion;
 declareADValidParams(ADDiffusion);
 
 template <ComputeStage compute_stage>
-class ADDiffusion : public ADKernel<compute_stage>
+class ADDiffusion : public ADKernelGrad<compute_stage>
 {
 public:
   ADDiffusion(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADVectorResidual precomputeQpResidual() override;
 
-  usingKernelMembers;
+  usingKernelGradMembers;
 };
 
 #endif

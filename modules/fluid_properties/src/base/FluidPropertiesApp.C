@@ -42,6 +42,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
   registerMooseObjectTask("add_fluid_properties", FluidProperties, false);
   syntax.addDependency("add_fluid_properties", "init_displaced_problem");
+
+  syntax.registerActionSyntax("AddFluidPropertiesInterrogatorAction",
+                              "FluidPropertiesInterrogator");
 }
 
 void

@@ -40,6 +40,7 @@ endif
 ifeq ($(NAVIER_STOKES),yes)
         FLUID_PROPERTIES            := yes
         RDG                         := yes
+        HEAT_CONDUCTION             := yes
 endif
 
 ifeq ($(PHASE_FIELD),yes)
@@ -108,7 +109,7 @@ ifeq ($(NAVIER_STOKES),yes)
   APPLICATION_NAME   := navier_stokes
 
   # Dependency on fluid properties and rdg
-  DEPEND_MODULES     := fluid_properties rdg
+  DEPEND_MODULES     := fluid_properties rdg heat_conduction
   SUFFIX             := ns
   include $(FRAMEWORK_DIR)/app.mk
 endif
