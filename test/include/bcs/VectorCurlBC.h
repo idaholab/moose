@@ -15,8 +15,7 @@
 class VectorCurlBC;
 
 template <>
-InputParameters
-validParams<VectorCurlBC>();
+InputParameters validParams<VectorCurlBC>();
 
 class VectorCurlBC : public VectorIntegratedBC
 {
