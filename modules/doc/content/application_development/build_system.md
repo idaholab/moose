@@ -40,6 +40,9 @@ some of the environment variables you can set and their effects:
   find it unless you have very non-standard paths.
 - `MOOSE_UNITY`: defaults to `true`, set to `false` to turn off unity builds.  For more information
   see the Build System Optimization section below.
+- `MOOSE_HEADER_SYMLINKS`: defaults to `true`, set to `false` to turn off header symlinking. This is
+  an advanced option and there are very few reasons to disable this. You will likely notice a
+  dramatic slowdown if you set this to false.
 
 ## Build Methods (Creating "debug" Builds)
 

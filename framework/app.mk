@@ -158,10 +158,6 @@ ifneq ($(wildcard $(APPLICATION_DIR)/test/include/*),)
   depend_dirs += $(APPLICATION_DIR)/test/include
 endif
 
-# header files
-include_dirs	:= $(shell find $(depend_dirs) -type d)
-include_files	:= $(shell find $(depend_dirs) -regex "[^\#~]*\.[hf]")
-
 # clang static analyzer files
 app_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(srcfiles))
 
@@ -178,18 +174,29 @@ else
   app_test_LIB     := $(APPLICATION_DIR)/test/lib/lib$(APPLICATION_NAME)_test-$(METHOD).la
 endif
 
-# all_header_directory
+#
+# header symlinks
+#
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+
+include_files	:= $(shell find $(depend_dirs) -regex "[^\#~]*\.[hf]")
 all_header_dir := $(APPLICATION_DIR)/build/header_symlinks
 
 # header file links
-
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
-
 
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
 header_symlinks:: $(all_header_dir) $(link_names)
+app_INCLUDE = -I$(all_header_dir)
+
+else # No Header Symlinks
+
+include_dirs	:= $(shell find $(depend_dirs) -type d)
+app_INCLUDE = $(foreach i, $(include_dirs), -I$(i))
+
+endif
 
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
@@ -232,7 +239,7 @@ endif
 app_LIBS       := $(app_LIB) $(app_LIBS)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
-app_INCLUDES   += -I$(all_header_dir) $(ADDITIONAL_INCLUDES)
+app_INCLUDES   += $(app_INCLUDE) $(ADDITIONAL_INCLUDES)
 app_DIRS       += $(APPLICATION_DIR)
 
 # WARNING: the += operator does NOT work here!
