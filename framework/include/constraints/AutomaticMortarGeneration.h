@@ -24,14 +24,14 @@ class Elem;
 class GetPot;
 
 // Using statements
+using libMesh::boundary_id_type;
+using libMesh::dof_id_type;
 using libMesh::Elem;
 using libMesh::Mesh;
 using libMesh::MeshBase;
 using libMesh::Node;
 using libMesh::Point;
 using libMesh::Real;
-using libMesh::boundary_id_type;
-using libMesh::dof_id_type;
 using libMesh::subdomain_id_type;
 
 typedef boundary_id_type BoundaryID;

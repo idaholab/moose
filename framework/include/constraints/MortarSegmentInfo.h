@@ -14,8 +14,8 @@ class Elem;
 #include <utility>
 
 // Using statements
-using libMesh::Real;
 using libMesh::Elem;
+using libMesh::Real;
 
 /**
  * Holds xi^(1), xi^(2), and other data for a given mortar segment.
@@ -33,8 +33,7 @@ struct MortarSegmentInfo
   /**
    * Construct a MortarSegmentInfo object with the given xi values.
    */
-  MortarSegmentInfo(Real x1a, Real x1b,
-                    Real x2a, Real x2b);
+  MortarSegmentInfo(Real x1a, Real x1b, Real x2a, Real x2b);
 
   // MortarSegmentInfo(const MortarSegmentInfo &) = default;
 

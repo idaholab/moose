@@ -8,10 +8,10 @@
 // libMesh includes
 #include "libmesh/mesh_base.h"
 
+using libMesh::boundary_id_type;
 using libMesh::Elem;
 using libMesh::GhostingFunctor;
 using libMesh::MeshBase;
-using libMesh::boundary_id_type;
 using libMesh::processor_id_type;
 
 class AugmentSparsityOnInterface;
