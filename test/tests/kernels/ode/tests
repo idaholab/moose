@@ -28,4 +28,20 @@
     input = 'coupled_ode_td.i'
     csvdiff = 'coupled_ode_td_out.csv'
   [../]
+
+  [./test_coupled_ode_td_var_ic_from_mesh]
+    type = 'CSVDiff'
+    input = 'coupled_ode_td_var_ic_from_mesh.i'
+    csvdiff = 'coupled_ode_td_var_ic_from_mesh_out.csv'
+    issues = "#13040"
+    requirement = "MOOSE shall allow scalar variable initial condition to be loaded from a file mesh"
+  [../]
+
+  [./test_coupled_ode_td_auxvar_ic_from_mesh]
+    type = 'CSVDiff'
+    input = 'coupled_ode_td_auxvar_ic_from_mesh.i'
+    csvdiff = 'coupled_ode_td_auxvar_ic_from_mesh_out.csv'
+    issues = "#13040"
+    requirement = "MOOSE shall allow auxscalar variable initial condition to be loaded from a file mesh"
+  [../]
 []
