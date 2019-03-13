@@ -311,6 +311,12 @@ InletMassFlowRateTemperature::setup2PhaseRDG()
     params.set<UserObjectName>("vfm") = FlowModelTwoPhase::VOLUME_FRACTION_MAPPER;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
+
+    connectObject(params, "", boundary_flux_name, "alpha_vapor");
+    connectObject(params, "", boundary_flux_name, "m_dot_liquid");
+    connectObject(params, "", boundary_flux_name, "m_dot_vapor");
+    connectObject(params, "", boundary_flux_name, "T_liquid");
+    connectObject(params, "", boundary_flux_name, "T_vapor");
   }
 
   // BCs
