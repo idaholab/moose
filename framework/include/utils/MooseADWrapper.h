@@ -4,6 +4,7 @@
 #include "MooseError.h"
 #include "DualReal.h"
 #include "RankTwoTensor.h"
+#include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 
 #include "libmesh/vector_value.h"
@@ -234,6 +235,44 @@ private:
   friend void dataLoad<RankTwoTensorTempl<Real>>(std::istream &,
                                                  MooseADWrapper<RankTwoTensorTempl<Real>> &,
                                                  void *);
+};
+
+template <>
+class MooseADWrapper<RankThreeTensorTempl<Real>>
+{
+public:
+  MooseADWrapper(bool use_ad = false);
+  MooseADWrapper(MooseADWrapper<RankThreeTensorTempl<Real>> &&) = default;
+
+  typedef RankThreeTensorTempl<DualReal> DNType;
+
+  const RankThreeTensorTempl<Real> & value() const { return _val; }
+
+  RankThreeTensorTempl<Real> & value() { return _val; }
+
+  const RankThreeTensorTempl<DualReal> & dn(bool = true) const;
+
+  RankThreeTensorTempl<DualReal> & dn(bool = true);
+
+  void copyDualNumberToValue();
+
+  void markAD(bool use_ad);
+
+  MooseADWrapper<RankThreeTensorTempl<Real>> &
+  operator=(const MooseADWrapper<RankThreeTensorTempl<Real>> &);
+  MooseADWrapper<RankThreeTensorTempl<Real>> &
+  operator=(MooseADWrapper<RankThreeTensorTempl<Real>> &&) = default;
+
+private:
+  bool _use_ad;
+  RankThreeTensorTempl<Real> _val;
+  mutable std::unique_ptr<RankThreeTensorTempl<DualReal>> _dual_number;
+  friend void dataStore<RankThreeTensorTempl<Real>>(std::ostream &,
+                                                    MooseADWrapper<RankThreeTensorTempl<Real>> &,
+                                                    void *);
+  friend void dataLoad<RankThreeTensorTempl<Real>>(std::istream &,
+                                                   MooseADWrapper<RankThreeTensorTempl<Real>> &,
+                                                   void *);
 };
 
 template <>

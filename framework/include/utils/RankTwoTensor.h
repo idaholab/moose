@@ -482,7 +482,8 @@ private:
   friend void dataLoad(std::istream &, RankTwoTensorTempl<T2> &, void *);
   template <class T2>
   friend class RankFourTensorTempl;
-  friend class RankThreeTensor;
+  template <class T2>
+  friend class RankThreeTensorTempl;
 };
 
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

@@ -11,12 +11,15 @@
 #define ACINTERFACESTRESS_H
 
 #include "Kernel.h"
-#include "RankThreeTensor.h"
 
 class ACInterfaceStress;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
+
+template <typename>
+class RankThreeTensorTempl;
+typedef RankThreeTensorTempl<Real> RankThreeTensor;
 
 template <>
 InputParameters validParams<ACInterfaceStress>();

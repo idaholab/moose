@@ -17,6 +17,7 @@
 #include "MooseError.h"
 #include "Backup.h"
 #include "RankTwoTensor.h"
+#include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 #include "MooseADWrapper.h"
 
@@ -398,6 +399,13 @@ dataStore(std::ostream & stream, RankTwoTensorTempl<T> & rtt, void * context)
 
 template <typename T>
 void
+dataStore(std::ostream & stream, RankThreeTensorTempl<T> & rtt, void * context)
+{
+  dataStore(stream, rtt._vals, context);
+}
+
+template <typename T>
+void
 dataStore(std::ostream & stream, RankFourTensorTempl<T> & rft, void * context)
 {
   dataStore(stream, rft._vals, context);
@@ -634,6 +642,13 @@ void
 dataLoad(std::istream & stream, RankTwoTensorTempl<T> & rtt, void * context)
 {
   dataLoad(stream, rtt._coords, context);
+}
+
+template <typename T>
+void
+dataLoad(std::istream & stream, RankThreeTensorTempl<T> & rtt, void * context)
+{
+  dataLoad(stream, rtt._vals, context);
 }
 
 template <typename T>
