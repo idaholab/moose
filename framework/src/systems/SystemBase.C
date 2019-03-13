@@ -945,10 +945,11 @@ SystemBase::copyVars(ExodusII_IO & io)
     }
     else
     {
-      if (getScalarVariable(0, vci._dest_name).isNodal())
-        mooseError("Got scalar var to copy, don't know how.");
-      else
-        mooseError("Got auxscalar var to copy, don't know how.");
+      // Read the scalar value then set that vlue in the current solution
+      std::vector<Real> global_values;
+      io.read_global_variable({vci._source_name}, timestep, global_values);
+      const unsigned int var_num = system().variable_number(vci._dest_name);
+      system().solution->set(var_num, global_values[0]);
     }
   }
 
