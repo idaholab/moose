@@ -1,5 +1,5 @@
 ---
-name: Feature request
+name: Feature Request
 about: Suggest an idea for this project
 title: ''
 labels: 'T: task, P: normal'
@@ -7,11 +7,11 @@ assignees: ''
 
 ---
 
-**Reason**
+## Reason
 <!--Why do you need this feature?-->
 
-**Design**
+## Design
 <!--A concise description (design) of what you want to happen.--->
 
-**Impact**
+## Impact
 <!--Will the enhancement change existing public APIs, internal APIs, or add something new?-->
