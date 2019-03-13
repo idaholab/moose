@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#12948'
+  design = '/MultiAppCopyTransfer.md'
+  [./conservative_transfer]
+    # Tests transfer between linear Lagrange nonlinear variable
+    type = Exodiff
+    input = master.i
+    exodiff = 'master_out.e master_out_sub0.e'
+    requirement = 'MOOSE shall support conservative transfers'
+  [../]
+[]
