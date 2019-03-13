@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VectorCurlBC.h"
+#include "Function.h"
 
 registerMooseObject("MooseTestApp", VectorCurlBC);
 
