@@ -28,7 +28,7 @@ cd tests/postprocessors/element_extreme_value
 The data from this calculation is reported in the terminal output by default and if [Exodus.md]
 output is enabled the values will automatically be included in the output file. It is also possible
 to export the data to a comma separated value (csv) file by enabling the [CSV.md]
-object within the [Outputs](Outputs/index.md) block.
+object within the [Outputs](syntax/Outputs/index.md) block.
 
 ```bash
 Postprocessor Values:
