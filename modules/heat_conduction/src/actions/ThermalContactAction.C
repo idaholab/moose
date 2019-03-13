@@ -116,9 +116,12 @@ ThermalContactAction::addAuxKernels()
   {
     InputParameters params = _factory.getValidParams(getParam<std::string>("gap_aux_type"));
 
-    params.applySpecificParameters(
-        parameters(),
-        {"tangential_tolerance", "normal_smoothing_distance", "normal_smoothing_method", "order"});
+    params.applySpecificParameters(parameters(),
+                                   {"tangential_tolerance",
+                                    "normal_smoothing_distance",
+                                    "normal_smoothing_method",
+                                    "order",
+                                    "warnings"});
     params.set<AuxVariableName>("variable") = _gap_value_name;
     params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
     params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
