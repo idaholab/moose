@@ -137,16 +137,12 @@ RealMortarConstraint<compute_stage>::loopOverMortarMesh()
     // These only get initialized if there is a master Elem associated to this segment.
     const Elem * master_ip = libmesh_nullptr;
     unsigned int master_side_id = libMesh::invalid_uint;
-    Real h_master = 0.;
 
     if (_has_master)
     {
       // Set the master interior parent and side ids.
       master_ip = msinfo.master_elem->interior_parent();
       master_side_id = master_ip->which_side_am_i(msinfo.master_elem);
-
-      // Store the length of the edge element for use in stabilization terms.
-      h_master = msinfo.master_elem->volume();
 
       // Get primal dof indices associated with the interior master Elem.
       _dof_map.dof_indices(master_ip, _dof_indices_master_interior_primal, _primal_var_number);
