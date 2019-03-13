@@ -945,11 +945,15 @@ SystemBase::copyVars(ExodusII_IO & io)
     }
     else
     {
-      // Read the scalar value then set that vlue in the current solution
-      std::vector<Real> global_values;
-      io.read_global_variable({vci._source_name}, timestep, global_values);
-      const unsigned int var_num = system().variable_number(vci._dest_name);
-      system().solution->set(var_num, global_values[0]);
+      // scalar vars live on proc 0
+      if (system().comm().rank() == 0)
+      {
+        // Read the scalar value then set that vlue in the current solution
+        std::vector<Real> global_values;
+        io.read_global_variable({vci._source_name}, timestep, global_values);
+        const unsigned int var_num = system().variable_number(vci._dest_name);
+        system().solution->set(var_num, global_values[0]);
+      }
     }
   }
 
