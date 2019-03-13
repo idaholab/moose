@@ -48,6 +48,7 @@
     type = Exodiff
     input = function_curl.i
     exodiff = 'function_curl_out.e'
+    abs_zero = 3e-09
     requirement = "The Function system shall support the creation of objects that execute a curl of a vector function defined within the input file."
     issues = '#13041'
   [../]
