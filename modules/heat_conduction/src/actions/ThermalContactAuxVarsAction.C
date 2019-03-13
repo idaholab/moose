@@ -20,14 +20,9 @@ InputParameters
 validParams<ThermalContactAuxVarsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Action that controls the creation of the aux variables necessary for "
-                             "calculation of Thermal Contact");
+  params.addClassDescription(
+      "Deprecated action that provide gap value name and gap conductivity name");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
-
-  params.addParam<bool>(
-      "quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
 
   return params;
 }
@@ -35,31 +30,4 @@ validParams<ThermalContactAuxVarsAction>()
 ThermalContactAuxVarsAction::ThermalContactAuxVarsAction(const InputParameters & params)
   : Action(params)
 {
-}
-
-void
-ThermalContactAuxVarsAction::act()
-{
-  // We need to add variables only once per variable name.  However, we don't know how many unique
-  // variable names we will have.  So, we'll always add them.
-
-  MooseEnum order = getParam<MooseEnum>("order");
-  std::string family = "LAGRANGE";
-
-  std::string penetration_var_name = "penetration";
-
-  const bool quadrature = getParam<bool>("quadrature");
-  if (quadrature)
-  {
-    order = "CONSTANT";
-    family = "MONOMIAL";
-    penetration_var_name = "qpoint_penetration";
-  }
-
-  _problem->addAuxVariable(
-      penetration_var_name,
-      FEType(Utility::string_to_enum<Order>(order), Utility::string_to_enum<FEFamily>(family)));
-  _problem->addAuxVariable(
-      getGapValueName(_pars),
-      FEType(Utility::string_to_enum<Order>(order), Utility::string_to_enum<FEFamily>(family)));
 }

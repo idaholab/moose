@@ -2,10 +2,12 @@
 
 # ThermalContactAction
 
-!alert construction title=Undocumented Class
-The ThermalContactAction has not been documented. The content contained on this page includes the
-typical automatic documentation associated with an Action; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
+!alert construction
+Documentation for the heat conduction module needs some work...
+
+## Description
+
+This action automatically builds the necessary objects to calculation gap heat conduction.
 
 !syntax description /ThermalContact/ThermalContactAction
 
