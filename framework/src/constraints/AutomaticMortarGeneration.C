@@ -1,9 +1,8 @@
-// App headers
 #include "AutomaticMortarGeneration.h"
 #include "MortarSegmentInfo.h"
 #include "NanoflannMeshAdaptor.h"
+#include "MooseError.h"
 
-// libMesh headers
 #include "libmesh/mesh_tools.h"
 #include "libmesh/getpot.h"
 #include "libmesh/explicit_system.h"
@@ -14,8 +13,12 @@
 #include "libmesh/edge_edge2.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature_gauss.h"
+#include "libmesh/quadrature_trap.h"
+
+#include "metaphysicl/dualnumber.h"
 
 using namespace libMesh;
+using MetaPhysicL::DualNumber;
 
 const std::string AutomaticMortarGeneration::system_name = "Nodal Normals";
 
@@ -51,7 +54,7 @@ AutomaticMortarGeneration::build_node_to_elem_maps()
     if (!this->slave_boundary_subdomain_ids.count(slave_elem->subdomain_id()))
       continue;
 
-    for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
+    for (unsigned int n = 0; n < slave_elem->n_vertices(); ++n)
     {
       std::vector<const Elem *> & vec = nodes_to_slave_elem_map[slave_elem->node_id(n)];
       vec.push_back(slave_elem);
@@ -69,7 +72,7 @@ AutomaticMortarGeneration::build_node_to_elem_maps()
     if (!this->master_boundary_subdomain_ids.count(master_elem->subdomain_id()))
       continue;
 
-    for (unsigned int n = 0; n < master_elem->n_nodes(); ++n)
+    for (unsigned int n = 0; n < master_elem->n_vertices(); ++n)
     {
       std::vector<const Elem *> & vec = nodes_to_master_elem_map[master_elem->node_id(n)];
       vec.push_back(master_elem);
@@ -441,10 +444,8 @@ AutomaticMortarGeneration::compute_nodal_normals()
   // Build FE objects from those types.
   UniquePtr<FEBase> nnx_fe_face(FEBase::build(dim, nnx_fe_type));
 
-  // A lower-dimensional trapezoidal quadrature rule to be used on
-  // faces.  We currently use a 1-point quadrature rule and compute a
-  // single outward normal per (flat) face.
-  QGauss qface(dim - 1, CONSTANT);
+  // A nodal lower-dimensional trapezoidal quadrature rule to be used on faces.
+  QTrap qface(dim - 1);
 
   // Tell the FE objects about the quadrature rule.
   nnx_fe_face->attach_quadrature_rule(&qface);
@@ -452,8 +453,8 @@ AutomaticMortarGeneration::compute_nodal_normals()
   // Get a reference to the normals from the face FE.
   const std::vector<Point> & face_normals = nnx_fe_face->get_normals();
 
-  // Container to store the outward normal and length of each lower-dimensional slave element.
-  std::unordered_map<const Elem *, std::pair<Point, Real>> slave_elem_to_normal_and_length;
+  // A map from the node id to the attached elemental normals evaluated at the node
+  std::map<dof_id_type, std::vector<Point>> node_to_normals_map;
 
   // First loop over lower-dimensional slave side elements and compute/save the outward normal for
   // each one. We loop over all active elements currently, but this procedure could be parallelized
@@ -476,66 +477,32 @@ AutomaticMortarGeneration::compute_nodal_normals()
     // Look up which side of the interior parent slave_elem is.
     unsigned int s = interior_parent->which_side_am_i(slave_elem);
 
-    // libMesh::out << "In compute_nodal_normal(), found lower dimensional element "
-    //              << slave_elem->id()
-    //              << " with subdomain_id "
-    //              << slave_elem->subdomain_id()
-    //              << " which is side "
-    //              << s
-    //              << " of the interior parent."
-    //              << std::endl;
-
     // Reinit the face FE object on side s.
     nnx_fe_face->reinit(interior_parent, s);
 
-    // Store the outward normal at qp 0.
-    slave_elem_to_normal_and_length[slave_elem] =
-        std::make_pair(face_normals[0], slave_elem->volume());
-  } // end 1st loop over lower-dimensional elements
-
-  // Debugging: Print the geometric normals we have computed and stored thus far.
-  // for (const auto & pr : slave_elem_to_normal_and_length)
-  //   {
-  //     const auto & value = pr.second;
-  //     libMesh::out << "Slave elem " << pr.first->id() << " has geometric normal " << value.first
-  //     << " and length " << value.second << std::endl;
-  //   }
-
-  // Now loop over the nodes_to_slave_elem_map and build the map from slave nodes to nodal normals.
-  for (const auto & pr : nodes_to_slave_elem_map)
-  {
-    const auto & node_id = pr.first;
-    const auto & nodal_neighbors = pr.second;
-    // libMesh::out << "Computing nodal normal for node " << node_id << " with neighbor elements ";
-    // for (const auto & elem : nodal_neighbors)
-    //   libMesh::out << elem->id() << " ";
-    // libMesh::out << std::endl;
-
-    Real length_product = 1.;
-    Point nodal_normal;
-
-    // We will have either 2 or 1 nodal neighbors for each node,
-    // this logic should handle either case.
-    for (const auto & elem : nodal_neighbors)
+    // We loop over n_vertices not n_nodes because we're not interested in
+    // computing normals at interior nodes
+    for (unsigned int n = 0; n < slave_elem->n_vertices(); ++n)
     {
-      // Find this elem in the slave_elem_to_normal_and_length, throwing an error if not found.
-      const std::pair<Point, Real> & data = slave_elem_to_normal_and_length.at(elem);
-
-      nodal_normal += data.second * data.first;
-      length_product *= data.second;
+      auto & normals_vec = node_to_normals_map[slave_elem->node_id(n)];
+      normals_vec.push_back(face_normals[n]);
     }
-
-    // Divide the result by product of all the lengths.
-    nodal_normal /= length_product;
-
-    // Store the unit nodal normal vector.
-    slave_node_to_nodal_normal[mesh.node_ptr(node_id)] = nodal_normal.unit();
   }
 
-  // Debugging: print the results
-  // for (const auto & pr : slave_node_to_nodal_normal)
-  //   libMesh::out << "Slave node " << pr.first->id() << " has nodal normal " << pr.second <<
-  //   std::endl;
+  // Note that contrary to the Bin Yang dissertation, we are not weighting by the face element
+  // lengths/volumes. It's not clear to me that this type of weighting is a good algorithm for cases
+  // where the face can be curved
+  for (const auto & pr : node_to_normals_map)
+  {
+    const auto & node_id = pr.first;
+    const auto & normals_vec = pr.second;
+
+    Point nodal_normal;
+    for (const auto & normals : normals_vec)
+      nodal_normal += normals;
+
+    slave_node_to_nodal_normal[mesh.node_ptr(node_id)] = nodal_normal.unit();
+  }
 }
 
 // Project slave nodes onto their corresponding master elements for each master/slave pair.
@@ -546,6 +513,105 @@ AutomaticMortarGeneration::project_slave_nodes()
   // project_slave_nodes_single_pair() helper function.
   for (const auto & pr : master_slave_subdomain_id_pairs)
     project_slave_nodes_single_pair(pr.first, pr.second);
+}
+
+// Copy in libmesh's lagrange helper functions, but we use DualNumbers as input and output
+DualNumber<Real>
+fe_lagrange_1D_shape(const Order order, const unsigned int i, const DualNumber<Real> & xi)
+{
+  switch (order)
+  {
+      // Lagrange linears
+    case FIRST:
+    {
+      libmesh_assert_less(i, 2);
+
+      switch (i)
+      {
+        case 0:
+          return .5 * (1. - xi);
+
+        case 1:
+          return .5 * (1. + xi);
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+      // Lagrange quadratics
+    case SECOND:
+    {
+      libmesh_assert_less(i, 3);
+
+      switch (i)
+      {
+        case 0:
+          return .5 * xi * (xi - 1.);
+
+        case 1:
+          return .5 * xi * (xi + 1);
+
+        case 2:
+          return (1. - xi * xi);
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+    default:
+      mooseError("Unsupported order");
+  }
+}
+
+DualNumber<Real>
+fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const DualNumber<Real> & xi)
+{
+  switch (order)
+  {
+      // Lagrange linear shape function derivatives
+    case FIRST:
+    {
+      libmesh_assert_less(i, 2);
+
+      switch (i)
+      {
+        case 0:
+          return -.5;
+
+        case 1:
+          return .5;
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+      // Lagrange quadratic shape function derivatives
+    case SECOND:
+    {
+      libmesh_assert_less(i, 3);
+
+      switch (i)
+      {
+        case 0:
+          return xi - .5;
+
+        case 1:
+          return xi + .5;
+
+        case 2:
+          return -2. * xi;
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+    default:
+      mooseError("Unsupported order");
+  }
 }
 
 void
@@ -576,7 +642,7 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
     // node on the master side using the KDTree, then
     // search in nearby elements for where it projects
     // along the nodal normal direction.
-    for (unsigned int n = 0; n < slave_side_elem->n_nodes(); ++n)
+    for (unsigned int n = 0; n < slave_side_elem->n_vertices(); ++n)
     {
       const Node * slave_node = slave_side_elem->node_ptr(n);
 
@@ -653,26 +719,29 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
           if (rejected_master_elem_candidates.count(master_elem_candidate))
             continue;
 
-          // Node positions of the potential master Elem.
-          Point master1 = master_elem_candidate->point(0),
-                master2 = master_elem_candidate->point(1);
+          // Now generically solve for xi2
+          auto && order = master_elem_candidate->default_order();
+          DualNumber<Real> xi2_dn{0, 1};
+          unsigned int current_iterate = 0, max_iterates = 10;
 
-          // Use variable names that more closely match the variable names in Bin Yang's
-          // dissertation.
-          Real master1_x = master1(0), master1_y = master1(1), master2_x = master2(0),
-               master2_y = master2(1), slave_x = (*slave_node)(0), slave_y = (*slave_node)(1);
+          // Newton loop
+          do
+          {
+            VectorValue<DualNumber<Real>> x2(0);
+            for (unsigned int n = 0; n < master_elem_candidate->n_nodes(); ++n)
+              x2 += fe_lagrange_1D_shape(order, n, xi2_dn) * master_elem_candidate->point(n);
+            auto u = x2 - (*slave_node);
+            auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
-          // Use equation 2.4.5 from Bin Yang's dissertation to try and solve for the position on
-          // the master element that the slave node projects to along the nodal normal. Note: we
-          // have made the following simplifications to that equation in order to solve for xi: 1.)
-          // Only the z (out-of-plane) component is solved for. 2.) We assume linear elements.
-          Real numerator = -(master1_x + master2_x - 2. * slave_x) * nodal_normal(1) +
-                           (master1_y + master2_y - 2. * slave_y) * nodal_normal(0);
-          Real denominator = (-master1_x + master2_x) * nodal_normal(1) -
-                             (-master1_y + master2_y) * nodal_normal(0);
+            if (std::abs(F) < TOLERANCE)
+              break;
 
-          Real xi2 = numerator / denominator;
-          // libMesh::out << "xi2=" << std::scientific << std::setprecision(16) << xi2 << std::endl;
+            Real dxi2 = -F.value() / F.derivatives();
+
+            xi2_dn += dxi2;
+          } while (++current_iterate < max_iterates);
+
+          Real xi2 = xi2_dn.value();
 
           // Check whether the projection worked.
           if (std::abs(xi2) <= 1. + TOLERANCE)
@@ -692,13 +761,14 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
 
               // Add entries to slave_node_and_elem_to_xi2_master_elem container.
               //
-              // First, determine "on left" vs. "on right" orientation of the nodal neighbors. There
-              // can be a max of 2 nodal neighbors, and we want to make sure that the slave nodal
-              // neighbor on the "left" is associated with the master nodal neighbor on the "left"
-              // and similarly for the "right".
+              // First, determine "on left" vs. "on right" orientation of the nodal neighbors.
+              // There can be a max of 2 nodal neighbors, and we want to make sure that the slave
+              // nodal neighbor on the "left" is associated with the master nodal neighbor on the
+              // "left" and similarly for the "right".
               std::vector<Real> slave_node_neighbor_cps(2), master_node_neighbor_cps(2);
 
-              // Figure out which slave side neighbor is on the "left" and which is on the "right".
+              // Figure out which slave side neighbor is on the "left" and which is on the
+              // "right".
               for (unsigned int nn = 0; nn < slave_node_neighbors.size(); ++nn)
               {
                 const Elem * slave_neigh = slave_node_neighbors[nn];
@@ -708,7 +778,8 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
                 slave_node_neighbor_cps[nn] = cp(2);
               }
 
-              // Figure out which master side neighbor is on the "left" and which is on the "right".
+              // Figure out which master side neighbor is on the "left" and which is on the
+              // "right".
               for (unsigned int nn = 0; nn < master_node_neighbors.size(); ++nn)
               {
                 const Elem * master_neigh = master_node_neighbors[nn];
@@ -741,13 +812,6 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
                     auto slave_val = std::make_pair(xi1, slave_node_neighbors[snn]);
                     master_node_and_elem_to_xi1_slave_elem.insert(
                         std::make_pair(master_key, slave_val));
-
-                    // Debugging
-                    // libMesh::out << "Associating master node neighbor " << mnn
-                    //              << " with slave node neighbor " << snn
-                    //              << " xi^(2)= " << xi2
-                    //              << ", and xi^(1)= " << xi1
-                    //              << "." << std::endl;
                   }
 
               // Sanity check
@@ -761,7 +825,7 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
               for (unsigned int nn = 0; nn < slave_node_neighbors.size(); ++nn)
               {
                 const Elem * neigh = slave_node_neighbors[nn];
-                for (unsigned int nid = 0; nid < neigh->n_nodes(); ++nid)
+                for (unsigned int nid = 0; nid < neigh->n_vertices(); ++nid)
                 {
                   const Node * neigh_node = neigh->node_ptr(nid);
                   if (slave_node == neigh_node)
@@ -795,17 +859,6 @@ AutomaticMortarGeneration::project_slave_nodes_single_pair(
       }
     } // loop over side nodes
   }   // end loop over lower-dimensional elements
-
-  // Print contents of slave_node_and_elem_to_xi2_master_elem.
-  // for (const auto & pr : slave_node_and_elem_to_xi2_master_elem)
-  //   {
-  //     auto key = pr.first;
-  //     auto val = pr.second;
-  //
-  //     libMesh::out << "Key: Slave node id=" << key.first->id() << ", Slave elem id=" <<
-  //     key.second->id() << std::endl; libMesh::out << "Val: xi^(2)=" << val.first << ", Master
-  //     elem id=" << val.second->id() << std::endl;
-  //   }
 }
 
 // Inverse map master nodes onto their corresponding slave elements for each master/slave pair.
@@ -844,7 +897,7 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
 
     // For each node on this side, find the nearest node on the master side using the KDTree, then
     // search in nearby elements for where it projects along the nodal normal direction.
-    for (unsigned int n = 0; n < master_side_elem->n_nodes(); ++n)
+    for (unsigned int n = 0; n < master_side_elem->n_vertices(); ++n)
     {
       // Get a pointer to this node.
       const Node * master_node = master_side_elem->node_ptr(n);
@@ -853,7 +906,8 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
       const std::vector<const Elem *> & master_node_neighbors =
           this->nodes_to_master_elem_map.at(master_node->id());
 
-      // Check whether we have already successfully inverse mapped this master node and skip if so.
+      // Check whether we have already successfully inverse mapped this master node and skip if
+      // so.
       auto master_key = std::make_pair(master_node, master_node_neighbors[0]);
       if (master_node_and_elem_to_xi1_slave_elem.count(master_key))
         continue;
@@ -905,19 +959,11 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
           if (rejected_slave_elem_candidates.count(slave_elem_candidate))
             continue;
 
-          Point nodal_normal0 =
-                    this->slave_node_to_nodal_normal.at(slave_elem_candidate->node_ptr(0)),
-                nodal_normal1 =
-                    this->slave_node_to_nodal_normal.at(slave_elem_candidate->node_ptr(1));
-
-          // Node positions of the candidate slave Elem.
-          Point slave0 = slave_elem_candidate->point(0), slave1 = slave_elem_candidate->point(1);
-
           // Use equation 2.4.6 from Bin Yang's dissertation to try and solve for
           // the position on the slave element where this master came from.  This
           // requires a Newton iteration in general.
-          Real xi1 = 0.; // initial guess
-
+          DualNumber<Real> xi1_dn{0, 1}; // initial guess
+          auto && order = slave_elem_candidate->default_order();
           unsigned int current_iterate = 0, max_iterates = 10;
 
           // Newton iteration loop - this to converge in 1 iteration when it
@@ -926,39 +972,35 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
           // only take 1 iteration -- the Jacobian is not constant in general...
           do
           {
-            // Compute x^(1) at the current value of xi.
-            Point x1 = 0.5 * (1 - xi1) * slave0 + 0.5 * (1 + xi1) * slave1;
+            VectorValue<DualNumber<Real>> x1(0);
+            VectorValue<DualNumber<Real>> dx1_dxi(0);
+            for (unsigned int n = 0; n < slave_elem_candidate->n_nodes(); ++n)
+            {
+              x1 += fe_lagrange_1D_shape(order, n, xi1_dn) * slave_elem_candidate->point(n);
+              dx1_dxi +=
+                  fe_lagrange_1D_shape_deriv(order, n, xi1_dn) * slave_elem_candidate->point(n);
+            }
 
-            // Compute u = x^(1) - (*master_node) and du at the current xi.
-            Point u = x1 - (*master_node);
-            Point du = -0.5 * slave0 + 0.5 * slave1;
+            // We're assuming our mesh is in the xy plane here
+            auto normals = VectorValue<DualNumber<Real>>(dx1_dxi(1), -dx1_dxi(0), 0).unit();
 
-            // Compute v = the nodal normal and dv at the current xi.
-            Point v = 0.5 * (1 - xi1) * nodal_normal0 + 0.5 * (1 + xi1) * nodal_normal1;
-            Point dv = -0.5 * nodal_normal0 + 0.5 * nodal_normal1;
+            auto u = x1 - (*master_node);
 
-            // Compute F(xi) the residual. If it's small enough, break out of the loop.
-            Real F = u(0) * v(1) - u(1) * v(0);
+            auto F = u(0) * normals(1) - u(1) * normals(0);
 
             if (std::abs(F) < TOLERANCE)
               break;
 
-            // Compute dF
-            Real dF = (u(0) * dv(1) + du(0) * v(1)) - (u(1) * dv(0) + du(1) * v(0));
+            Real dxi1 = -F.value() / F.derivatives();
 
-            // Compute Newton update
-            Real dxi1 = -F / dF;
-
-            // Update xi1
-            xi1 += dxi1;
+            xi1_dn += dxi1;
           } while (++current_iterate < max_iterates);
+
+          Real xi1 = xi1_dn.value();
 
           // Check for convergence to a valid solution...
           if (std::abs(xi1) <= 1. + TOLERANCE)
           {
-            // libMesh::out << "xi1 = " << xi1 << ", Projection successful!" << std::endl;
-            // Point on_slave_elem = slave0 * 0.5 * (1-xi1) + slave1 * 0.5 * (1+xi1);
-            // libMesh::out << "Point on slave Elem is: " << on_slave_elem << std::endl;
             if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
             {
               // Special case: xi1=+/-1.
@@ -973,11 +1015,11 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
               //
               // Note: we originally duplicated the map values for the keys (node, left_neighbor)
               // and (node, right_neighbor) but I don't think that should be necessary. Instead we
-              // just do it for neighbor 0, but really maybe we don't even need to do that since we
-              // can always look up the neighbors later given the Node... keeping it like this helps
-              // to maintain the "symmetry" of the two containers.
+              // just do it for neighbor 0, but really maybe we don't even need to do that since
+              // we can always look up the neighbors later given the Node... keeping it like this
+              // helps to maintain the "symmetry" of the two containers.
               const Elem * neigh = master_node_neighbors[0];
-              for (unsigned int nid = 0; nid < neigh->n_nodes(); ++nid)
+              for (unsigned int nid = 0; nid < neigh->n_vertices(); ++nid)
               {
                 const Node * neigh_node = neigh->node_ptr(nid);
                 if (master_node == neigh_node)
@@ -1010,17 +1052,6 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
       }
     } // loop over side nodes
   }   // end loop over elements for finding where master points would have projected from.
-
-  // Print new container entries
-  // for (const auto & pr : master_node_and_elem_to_xi1_slave_elem)
-  //   {
-  //     auto key = pr.first;
-  //     auto val = pr.second;
-  //
-  //     libMesh::out << "Key: Master node id=" << key.first->id() << ", master elem id=" <<
-  //     key.second->id() << std::endl; libMesh::out << "Val: xi^(1)=" << val.first << ", Slave elem
-  //     id=" << val.second->id() << std::endl;
-  //   }
 }
 
 void
@@ -1057,7 +1088,7 @@ AutomaticMortarGeneration::write_nodal_normals_to_file()
 
     // For each node of the Elem, if it is in the slave_node_to_nodal_normal
     // container, set the corresponding nodal normal dof values.
-    for (unsigned int n = 0; n < elem->n_nodes(); ++n)
+    for (unsigned int n = 0; n < elem->n_vertices(); ++n)
     {
       auto it = this->slave_node_to_nodal_normal.find(elem->node_ptr(n));
       if (it != this->slave_node_to_nodal_normal.end())
