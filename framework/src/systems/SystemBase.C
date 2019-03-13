@@ -935,10 +935,21 @@ SystemBase::copyVars(ExodusII_IO & io)
     }
 
     did_copy = true;
-    if (getVariable(0, vci._dest_name).isNodal())
-      io.copy_nodal_solution(system(), vci._dest_name, vci._source_name, timestep);
+
+    if (hasVariable(vci._dest_name))
+    {
+      if (getVariable(0, vci._dest_name).isNodal())
+        io.copy_nodal_solution(system(), vci._dest_name, vci._source_name, timestep);
+      else
+        io.copy_elemental_solution(system(), vci._dest_name, vci._source_name, timestep);
+    }
     else
-      io.copy_elemental_solution(system(), vci._dest_name, vci._source_name, timestep);
+    {
+      if (getScalarVariable(0, vci._dest_name).isNodal())
+        mooseError("Got scalar var to copy, don't know how.");
+      else
+        mooseError("Got auxscalar var to copy, don't know how.");
+    }
   }
 
   if (did_copy)
