@@ -44,15 +44,6 @@ validParams<ThermalContactMaterialsAction>()
   params.addParam<bool>(
       "quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
 
-  params.addParam<std::string>("conductivity_name",
-                               "thermal_conductivity",
-                               "The name of the MaterialProperty associated with conductivity "
-                               "(\"thermal_conductivity\" in the case of heat conduction)");
-  params.addParam<std::string>("conductivity_master_name",
-                               "thermal_conductivity",
-                               "The name of the MaterialProperty associated with conductivity "
-                               "(\"thermal_conductivity\" in the case of heat conduction)");
-
   params += GapConductance::actionParameters();
   return params;
 }
@@ -97,8 +88,6 @@ ThermalContactMaterialsAction::act()
   {
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
     params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
-    params.set<std::string>("conductivity_name") =
-        getParam<std::string>("conductivity_master_name");
 
     std::string master_name;
     master_name += name() + "_" + "gap_value_master";

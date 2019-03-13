@@ -59,18 +59,16 @@ validParams<ThermalContactAction>()
   params.addRequiredParam<std::string>(
       "type",
       "A string representing the Moose object that will be used for heat conduction over the gap");
-  params.addDeprecatedParam<std::vector<VariableName>>(
-      "disp_x", "The x displacement", "Use displacements instead");
-  params.addDeprecatedParam<std::vector<VariableName>>(
-      "disp_y", "The y displacement", "Use displacements instead");
-  params.addDeprecatedParam<std::vector<VariableName>>(
-      "disp_z", "The z displacement", "Use displacements instead");
+
+  params.addParam<std::vector<VariableName>>("disp_x", "The x displacement");
+  params.addParam<std::vector<VariableName>>("disp_y", "The y displacement");
+  params.addParam<std::vector<VariableName>>("disp_z", "The z displacement");
   params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
+
   params.addParam<std::vector<AuxVariableName>>(
       "save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
-
   params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
   params.addParam<FunctionName>(
       "gap_conductivity_function",
@@ -78,14 +76,6 @@ validParams<ThermalContactAction>()
   params.addParam<std::vector<VariableName>>(
       "gap_conductivity_function_variable",
       "Variable to be used in gap_conductivity_function in place of time");
-  params.addParam<std::string>("conductivity_name",
-                               "thermal_conductivity",
-                               "The name of the MaterialProperty associated with conductivity "
-                               "(\"thermal_conductivity\" in the case of heat conduction)");
-  params.addParam<std::string>("conductivity_master_name",
-                               "thermal_conductivity",
-                               "The name of the MaterialProperty associated with conductivity "
-                               "(\"thermal_conductivity\" in the case of heat conduction)");
 
   params += GapConductance::actionParameters();
 
@@ -267,8 +257,6 @@ ThermalContactAction::addMaterials()
   {
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
     params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
-    params.set<std::string>("conductivity_name") =
-        getParam<std::string>("conductivity_master_name");
 
     _problem->addMaterial(object_type, name() + "_" + "gap_value_master", params);
   }

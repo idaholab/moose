@@ -60,10 +60,6 @@ validParams<GapConductance>()
                         "are provided in the Mesh block the "
                         "undisplaced mesh will still be used.");
 
-  params.addParam<std::string>("conductivity_name",
-                               "thermal_conductivity",
-                               "The name of the MaterialProperty associated with conductivity "
-                               "(\"thermal_conductivity\" in the case of heat conduction)");
   params.addParam<bool>(
       "warnings", false, "Whether to output warning messages concerning nodes not being found");
 
