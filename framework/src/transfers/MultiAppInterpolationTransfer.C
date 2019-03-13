@@ -426,6 +426,8 @@ MultiAppInterpolationTransfer::execute()
   }
 
   _console << "Finished InterpolationTransfer " << name() << std::endl;
+
+  postExecute();
 }
 
 Node *

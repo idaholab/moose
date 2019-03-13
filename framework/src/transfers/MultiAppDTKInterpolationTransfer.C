@@ -97,6 +97,8 @@ MultiAppDTKInterpolationTransfer::execute()
           _multi_app->appProblemBase(i).es().update();
     }
   }
+
+  postExecute();
 }
 
 #endif // LIBMESH_TRILINOS_HAVE_DTK

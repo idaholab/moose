@@ -593,6 +593,8 @@ MultiAppNearestNodeTransfer::execute()
   }
 
   _console << "Finished NearestNodeTransfer " << name() << std::endl;
+
+  postExecute();
 }
 
 Node *
