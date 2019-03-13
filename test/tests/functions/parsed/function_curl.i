@@ -1,13 +1,11 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
+  dim = 2
   nx = 10
   ny = 10
-  nz = 10
   xmin = -1
   ymin = -1
-  zmin = -1
-  elem_type = HEX20
+  elem_type = QUAD9
 []
 
 [Variables]
@@ -50,7 +48,7 @@
     type = VectorCurlBC
     curl_value = field
     variable = u
-    boundary = 'left right top bottom front back'
+    boundary = 'left right top bottom'
   [../]
 []
 
