@@ -1,0 +1,19 @@
+[Tests]
+  [./real_mortar_gap_conductance]
+    type = Exodiff
+    input = 'gap-conductance.i'
+    exodiff = 'gap-conductance_out.e'
+  [../]
+  [gap_jacobian]
+    type = PetscJacobianTester
+    run_sim = True
+    input = 'gap-conductance.i'
+    difference_tol = 1e-7
+  []
+  [gap_conductance_fine]
+    type = Exodiff
+    input = 'gap-conductance.i'
+    cli_args = 'Mesh/file=nodal_normals_test_offset_nonmatching_gap_fine.e Outputs/file_base=gap-conductance-fine_out'
+    exodiff = 'gap-conductance-fine_out.e'
+  [../]
+[]
