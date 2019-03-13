@@ -10,6 +10,7 @@ InputParameters
 validParams<StiffenedGas7EqnFluidProperties>()
 {
   InputParameters params = validParams<TwoPhaseFluidProperties>();
+  params += validParams<NaNInterface>();
 
   // Default parameters for Stiffened Gas EOS (liquid phase)
   params.addParam<Real>("gamma_liquid", 2.35, "");
@@ -30,13 +31,16 @@ validParams<StiffenedGas7EqnFluidProperties>()
   params.addParam<Real>("mu_vapor", 134.4e-7, "");
   params.addParam<Real>("M_vapor", 0.01801488, "");
 
+  params.addParam<Real>("T_c", 647.096, "");
   params.addParam<Real>("rho_c", 322.0, "");
+  params.addParam<Real>("e_c", 2702979.84310559, "");
 
   return params;
 }
 
 StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputParameters & parameters)
   : TwoPhaseFluidProperties(parameters),
+    NaNInterface(this),
 
     _gamma_liquid(getParam<Real>("gamma_liquid")),
     _cv_liquid(getParam<Real>("cv_liquid")),
@@ -64,6 +68,8 @@ StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputPara
   {
     std::string class_name = "StiffenedGasFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
+    params.set<MooseEnum>("emit_on_nan") = getParam<MooseEnum>("emit_on_nan");
+    params.set<bool>("allow_nonphysical_states") = false;
     params.set<Real>("gamma") = _gamma_liquid;
     params.set<Real>("cv") = _cv_liquid;
     params.set<Real>("q") = _q_liquid;
@@ -80,6 +86,8 @@ StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputPara
   {
     std::string class_name = "StiffenedGasFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
+    params.set<MooseEnum>("emit_on_nan") = getParam<MooseEnum>("emit_on_nan");
+    params.set<bool>("allow_nonphysical_states") = false;
     params.set<Real>("gamma") = _gamma_vapor;
     params.set<Real>("cv") = _cv_vapor;
     params.set<Real>("q") = _q_vapor;
@@ -88,7 +96,9 @@ StiffenedGas7EqnFluidProperties::StiffenedGas7EqnFluidProperties(const InputPara
     params.set<Real>("k") = getParam<Real>("k_vapor");
     params.set<Real>("mu") = getParam<Real>("mu_vapor");
     params.set<Real>("M") = getParam<Real>("M_vapor");
+    params.set<Real>("T_c") = getParam<Real>("T_c");
     params.set<Real>("rho_c") = getParam<Real>("rho_c");
+    params.set<Real>("e_c") = getParam<Real>("e_c");
     _fe_problem.addUserObject(class_name, _vapor_name, params);
   }
   _fp_vapor = &_fe_problem.getUserObjectTempl<SinglePhaseFluidProperties>(_vapor_name, _tid);

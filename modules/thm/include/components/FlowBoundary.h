@@ -33,6 +33,13 @@ protected:
    */
   void addWeakBC7Eqn(const std::string & boundary_flux_name);
 
+  /**
+   * Creates the boundary condition objects for 2-phase flow with NCG
+   *
+   * @param[in] boundary_flux_name   name of the boundary flux user object
+   */
+  void addWeakBC7EqnNCG(const std::string & boundary_flux_name);
+
   /// The name of the connect flow channel
   std::string _connected_flow_channel_name;
   /// The end type of the connected flow channel

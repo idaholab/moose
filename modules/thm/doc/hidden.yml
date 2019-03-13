@@ -19,6 +19,7 @@
 - /AuxScalarKernels/TotalMassFlowRateIntoJunctionAux
 - /AuxScalarKernels/VolumeJunctionPressureAux
 
+- /BCs/BoundaryFlux7EqnNCGBC
 - /BCs/ConvectionHeatTransferBC
 - /BCs/ConvectionHeatTransferRZBC
 - /BCs/HeatFlux3EqnBC
@@ -135,12 +136,15 @@
 - /Controls/TimeFunctionControl
 - /Controls/UnitTripControl
 
+- /DGKernels/NumericalFlux7EqnNCGDGKernel
+
 - /FluidProperties
 - /FluidProperties/AddFluidPropertiesAction
 - /FluidProperties/AirWater7EqnFluidProperties
 - /FluidProperties/LinearFluidProperties
 - /FluidProperties/LinearTest7EqnFluidProperties
 - /FluidProperties/StiffenedGas7EqnFluidProperties
+- /FluidProperties/IdealRealTwoPhaseNCGFluidProperties
 
 - /Functions/ConstantTimesAreaFunction
 - /Functions/GeneralizedCircumference
@@ -259,6 +263,7 @@
 - /Materials/LinearTestMaterial
 - /Materials/MultiComponentFluidPropertiesMaterialPT
 - /Materials/PressureRelaxationRateMaterial
+- /Materials/RDG7EqnNCGMaterial
 - /Materials/SUPGMaterial
 - /Materials/SaturationTemperatureMaterial
 - /Materials/SpecificInterfacialArea7EqnMaterial
@@ -304,13 +309,17 @@
 - /Stabilizations/Rusanov
 - /Stabilizations/SUPG
 
+- /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/CHFTable
 - /UserObjects/HeatExchangeCoefficientPartitioning
 - /UserObjects/HeatFluxFromHeatStructure3EqnUserObject
 - /UserObjects/HeatFluxFromHeatStructure7EqnUserObject
 - /UserObjects/LayeredAverageRZ
+- /UserObjects/NumericalFlux7EqnNCGConservativeRiemannSolverRDG
+- /UserObjects/RDGInterfacialVariablesSideNCGHLLC
 - /UserObjects/SolidMaterialProperties
 - /UserObjects/SpecificInterfacialAreaCurve
+- /UserObjects/RiemannSolver7EqnNCGHLLC
 - /UserObjects/VolumeFractionMapper
 - /UserObjects/EntropyViscosity
 - /UserObjects/JumpGradientInterface
@@ -319,6 +328,7 @@
 - /UserObjects/Rusanov
 - /UserObjects/SUPG
 - /UserObjects/StabilizationSettings
+- /UserObjects/WaveSpeeds7EqnNCGHLLC
 
 - /VectorPostprocessors/Sampler1DBase
 - /VectorPostprocessors/Sampler1DReal
