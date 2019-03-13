@@ -1,14 +1,8 @@
-# ThermalContactAction
-
-!alert construction
-Documentation for the heat conduction module needs some work...
+# Thermal Contact Action
 
 ## Description
 
-This action automatically builds the necessary objects to calculation gap heat conduction.
-
-!syntax description /ThermalContact/ThermalContactAction
-
-!syntax parameters /ThermalContact/ThermalContactAction
-
-!bibtex bibliography
+The `ThermalContactAction` action sets up the set of models used
+to enforce thermal contact across two surfaces. See the description,
+example use, and parameters on the
+[ThermalContact](/ThermalContact/index.md) system documentation page.
