@@ -38,10 +38,12 @@ validParams<ThermalContactAction>()
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
-  params.addParam<Real>("tangential_tolerance",
-                        "Tangential distance to extend edges of contact surfaces");
-  params.addParam<Real>(
+  params.addRangeCheckedParam<Real>("tangential_tolerance",
+                                    "tangential_tolerance>=0",
+                                    "Tangential distance to extend edges of contact surfaces");
+  params.addRangeCheckedParam<Real>(
       "normal_smoothing_distance",
+      "normal_smoothing_distance>=0 & normal_smoothing_distance<=1",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method",
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
@@ -69,7 +71,10 @@ validParams<ThermalContactAction>()
 
   params.addParam<std::vector<AuxVariableName>>(
       "save_in", "The Auxiliary Variable to (optionally) save the boundary flux in");
-  params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
+  params.addRangeCheckedParam<Real>("gap_conductivity",
+                                    1.0,
+                                    "gap_conductivity>0",
+                                    "The thermal conductivity of the gap material");
   params.addParam<FunctionName>(
       "gap_conductivity_function",
       "Thermal conductivity of the gap material as a function.  Multiplied by gap_conductivity.");
