@@ -10,10 +10,10 @@
 #ifndef ADKERNELSUPG_H
 #define ADKERNELSUPG_H
 
-#include "ADKernel.h"
+#include "ADKernelStabilized.h"
 
 #define usingTemplKernelSUPGMembers(type)                                                          \
-  usingTemplKernelMembers(type);                                                                   \
+  usingTemplKernelStabilizedMembers(type);                                                         \
   using ADKernelSUPGTempl<type, compute_stage>::_velocity;                                         \
   using ADKernelSUPGTempl<type, compute_stage>::_tau
 #define usingKernelSUPGMembers usingTemplKernelSUPGMembers(Real)
@@ -31,28 +31,18 @@ declareADValidParams(ADKernelSUPG);
 declareADValidParams(ADVectorKernelSUPG);
 
 template <typename T, ComputeStage compute_stage>
-class ADKernelSUPGTempl : public ADKernelTempl<T, compute_stage>
+class ADKernelSUPGTempl : public ADKernelStabilizedTempl<T, compute_stage>
 {
 public:
   ADKernelSUPGTempl(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-  virtual void computeADOffDiagJacobian() override;
-
 protected:
-  /**
-   * Called before forming the residual for an element
-   */
-  virtual typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputValue
-  precomputeQpStrongResidual() = 0;
-
-  virtual ADResidual computeQpResidual() override final;
+  ADRealVectorValue virtual computeQpStabilization() override;
 
   const ADMaterialProperty(Real) & _tau;
   const ADVectorVariableValue & _velocity;
 
-  usingTemplKernelMembers(T);
+  usingTemplKernelStabilizedMembers(T);
 };
 
 #endif /* ADKERNELSUPG_H */

@@ -69,6 +69,7 @@ def buildCMD(options):
                         '--gcov-tool', options.cov_tool,
                         '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/src*',
                         '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/include*',
+                        '--extract', os.getcwd() + '/combined.info', '*' + options.application[0] + '/build/header_symlinks*',
                         '--output-file', options.outfile ])
 
         # Build genhtml command if --generate-html was used
