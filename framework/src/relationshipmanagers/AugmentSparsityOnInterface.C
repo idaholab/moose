@@ -70,8 +70,13 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 {
   if (!_has_attached_amg)
   {
-    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(_interface, _subdomain_pair);
-    _has_attached_amg = true;
+    if (_app.getExecutioner())
+    {
+      _amg = &_app.getExecutioner()->feProblem().getMortarInterface(_interface, _subdomain_pair);
+      _has_attached_amg = true;
+    }
+    else
+      return;
   }
 
   const CouplingMatrix * const null_mat = libmesh_nullptr;
