@@ -60,10 +60,12 @@ validParams<GapConductance>()
                         "are provided in the Mesh block the "
                         "undisplaced mesh will still be used.");
 
-  params.addParam<std::string>("conductivity_name",
-                               "thermal_conductivity",
-                               "The name of the MaterialProperty associated with conductivity "
-                               "(\"thermal_conductivity\" in the case of heat conduction)");
+  params.addParam<bool>(
+      "warnings", false, "Whether to output warning messages concerning nodes not being found");
+
+  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
+  params.addParam<MooseEnum>("order", orders, "The finite element order");
+
   return params;
 }
 
@@ -90,12 +92,6 @@ GapConductance::actionParameters()
                                     0.0,
                                     "emissivity_2>=0 & emissivity_2<=1",
                                     "The emissivity of the cladding surface");
-
-  params.addParam<bool>(
-      "warnings", false, "Whether to output warning messages concerning nodes not being found");
-
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   // Common
   params.addRangeCheckedParam<Real>(
