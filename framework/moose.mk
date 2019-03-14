@@ -1,5 +1,6 @@
 # Whether or not to do a Unity build
 MOOSE_UNITY ?= true
+MOOSE_HEADER_SYMLINKS ?= true
 
 #
 # MOOSE
@@ -60,6 +61,8 @@ gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
 #
 # header symlinks
 #
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+
 all_header_dir := $(FRAMEWORK_DIR)/build/header_symlinks
 moose_all_header_dir := $(all_header_dir)
 
@@ -93,8 +96,14 @@ $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
 header_symlinks:: $(all_header_dir) $(link_names)
-
 moose_INC_DIRS := $(all_header_dir)
+
+else # No Header Symlinks
+
+moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d)
+
+endif
+
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d)
 moose_INC_DIRS += "$(gtest_DIR)"
 moose_INC_DIRS += "$(hit_DIR)"
