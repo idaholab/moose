@@ -130,7 +130,7 @@ public:
       const Elem * elem = *el;
       if (elem->subdomain_id() == _sid)
       {
-        for (unsigned int n = 0; n < elem->n_nodes(); ++n)
+        for (unsigned int n = 0; n < elem->n_vertices(); ++n)
           _legal_point_indices.insert(elem->node_id(n));
       }
     }
