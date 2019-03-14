@@ -339,6 +339,22 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
     new_elem_left->set_node(1) = new_node;
 
+    // Now for quadratic elements, we have to determine where the interior node
+    // lies. We can imagine a new parameterizing coordinate; let's call it
+    // eta. Then for the new left element, when eta = -1 then xi = -1, and when
+    // eta = 1 then xi = xi1. We want to put the interior node where eta = 0,
+    // which will correspond to the location of the point on the pre-split
+    // element where xi = (xi1 - 1) / 2
+    if (order == SECOND)
+    {
+      Point left_interior_point(0);
+      Real left_interior_xi = (xi1 - 1.) / 2.;
+      for (unsigned int n = 0; n < current_mortar_segment->n_nodes(); ++n)
+        left_interior_point +=
+            fe_lagrange_1D_shape(order, n, left_interior_xi) * current_mortar_segment->point(n);
+      new_elem_left->set_node(2) = mortar_segment_mesh.add_point(left_interior_point);
+    }
+
     // Make an Elem on the right
     Elem * new_elem_right;
     if (order == SECOND)
@@ -348,6 +364,22 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     new_elem_right->processor_id() = current_mortar_segment->processor_id();
     new_elem_right->set_node(0) = new_node;
     new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
+
+    // Now for quadratic elements, we have to determine where the interior node
+    // lies. We can imagine a new parameterizing coordinate; let's call it
+    // eta. Then for the new right element, when eta = -1 then xi = xi1, and when
+    // eta = 1 then xi = 1. We want to put the interior node where eta = 0,
+    // which will correspond to the location of the point on the pre-split
+    // element where xi = (xi1 + 1) / 2
+    if (order == SECOND)
+    {
+      Point right_interior_point(0);
+      Real right_interior_xi = (xi1 + 1.) / 2.;
+      for (unsigned int n = 0; n < current_mortar_segment->n_nodes(); ++n)
+        right_interior_point +=
+            fe_lagrange_1D_shape(order, n, right_interior_xi) * current_mortar_segment->point(n);
+      new_elem_right->set_node(2) = mortar_segment_mesh.add_point(right_interior_point);
+    }
 
     // Reconstruct the nodal normal at xi1. This will help us
     // determine the orientation of the master elems relative to the
