@@ -12,6 +12,7 @@
 #include "Transfer.h"
 #include "MooseTypes.h"
 #include "FEProblem.h"
+#include "NonlinearSystemBase.h"
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
