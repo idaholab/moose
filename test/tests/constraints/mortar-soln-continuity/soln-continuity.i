@@ -1,5 +1,6 @@
 [Mesh]
-  file = nodal_normals_test_offset_nonmatching_gap_fine.e
+  file = nodal_normals_test_offset_nonmatching_gap.e
+  second_order = true
 []
 
 [MeshModifiers]
@@ -94,8 +95,8 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type'
-  petsc_options_value = 'lu       basic'
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       basic                 NONZERO               1e-15'
 []
 
 [Outputs]

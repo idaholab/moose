@@ -1,0 +1,19 @@
+[Tests]
+  [soln-continuity]
+    type = 'Exodiff'
+    input = 'soln-continuity.i'
+    exodiff = 'soln-continuity_out.e'
+  []
+  [soln-continuity-fine]
+    type = 'Exodiff'
+    input = 'soln-continuity.i'
+    exodiff = 'soln-continuity-fine_out.e'
+    cli_args = 'Mesh/file=nodal_normals_test_offset_nonmatching_gap_fine.e Outputs/file_base=soln-continuity-fine_out'
+  []
+  [soln-continuity-jac]
+    type = PetscJacobianTester
+    input = 'soln-continuity.i'
+    run_sim = True
+    difference_tol = 1e-7
+  []
+[]
