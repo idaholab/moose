@@ -42,13 +42,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("add_slave_flux_vector", false);
   addTaskDependency("add_slave_flux_vector", "ready_to_init");
   addTaskDependency("init_problem", "add_slave_flux_vector");
-  registerSyntax("AddSlaveFluxVectorAction", "ThermalContact/*");
-
-  registerSyntaxTask("ThermalContactAuxBCsAction", "ThermalContact/*", "add_aux_kernel");
-  registerSyntaxTask("ThermalContactAuxVarsAction", "ThermalContact/*", "add_aux_variable");
-  registerSyntaxTask("ThermalContactBCsAction", "ThermalContact/*", "add_bc");
-  registerSyntaxTask("ThermalContactDiracKernelsAction", "ThermalContact/*", "add_dirac_kernel");
-  registerSyntaxTask("ThermalContactMaterialsAction", "ThermalContact/*", "add_material");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_kernel");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_variable");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_bc");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_dirac_kernel");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_material");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_slave_flux_vector");
 }
 
 void
