@@ -85,22 +85,6 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   {
     const Elem * const elem = *elem_it;
 
-    // This code is present in both the PointNeighborCoupling class that lives
-    // in libmesh and the misc_ex9 code, so I think it's required but I don't really
-    // understand it.
-    if (elem->processor_id() != p)
-      coupled_elements.insert(std::make_pair(elem, null_mat));
-
-    // If this Elem has an interior_parent, add it to the list.
-    const Elem * elem_ip = elem->interior_parent();
-    if (elem_ip && elem_ip->processor_id() != p)
-    {
-      // libMesh::out << "Adding Elem " << elem_ip->id()
-      //              << " as coupled Elem for " << elem->id()
-      //              << "." << std::endl;
-      coupled_elements.insert(std::make_pair(elem_ip, null_mat));
-    }
-
     // Look up elem in the mortar_interface_coupling data structure.
     auto bounds = _amg->mortar_interface_coupling.equal_range(elem);
     for (const auto & pr : as_range(bounds))
