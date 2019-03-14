@@ -11,6 +11,7 @@
 #include "libmesh/node.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/edge_edge2.h"
+#include "libmesh/edge_edge3.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/quadrature_trap.h"
@@ -19,6 +20,107 @@
 
 using namespace libMesh;
 using MetaPhysicL::DualNumber;
+
+// Copy in libmesh's lagrange helper functions, but we template it
+template <typename T>
+T
+fe_lagrange_1D_shape(const Order order, const unsigned int i, const T & xi)
+{
+  switch (order)
+  {
+      // Lagrange linears
+    case FIRST:
+    {
+      libmesh_assert_less(i, 2);
+
+      switch (i)
+      {
+        case 0:
+          return .5 * (1. - xi);
+
+        case 1:
+          return .5 * (1. + xi);
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+      // Lagrange quadratics
+    case SECOND:
+    {
+      libmesh_assert_less(i, 3);
+
+      switch (i)
+      {
+        case 0:
+          return .5 * xi * (xi - 1.);
+
+        case 1:
+          return .5 * xi * (xi + 1);
+
+        case 2:
+          return (1. - xi * xi);
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+    default:
+      mooseError("Unsupported order");
+  }
+}
+
+template <typename T>
+T
+fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const T & xi)
+{
+  switch (order)
+  {
+      // Lagrange linear shape function derivatives
+    case FIRST:
+    {
+      libmesh_assert_less(i, 2);
+
+      switch (i)
+      {
+        case 0:
+          return -.5;
+
+        case 1:
+          return .5;
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+      // Lagrange quadratic shape function derivatives
+    case SECOND:
+    {
+      libmesh_assert_less(i, 3);
+
+      switch (i)
+      {
+        case 0:
+          return xi - .5;
+
+        case 1:
+          return xi + .5;
+
+        case 2:
+          return -2. * xi;
+
+        default:
+          mooseError("Invalid shape function index i = ", i);
+      }
+    }
+
+    default:
+      mooseError("Unsupported order");
+  }
+}
 
 const std::string AutomaticMortarGeneration::system_name = "Nodal Normals";
 
@@ -119,14 +221,21 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     if (!this->slave_boundary_subdomain_ids.count(slave_elem->subdomain_id()))
       continue;
 
-    Node * new_node0 = mortar_segment_mesh.add_point(slave_elem->point(0), slave_elem->node_id(0));
-    Node * new_node1 = mortar_segment_mesh.add_point(slave_elem->point(1), slave_elem->node_id(1));
+    std::vector<Node *> new_nodes;
+    for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
+      new_nodes.push_back(
+          mortar_segment_mesh.add_point(slave_elem->point(n), slave_elem->node_id(n)));
 
-    Elem * new_elem = mortar_segment_mesh.add_elem(new Edge2);
+    Elem * new_elem;
+    if (slave_elem->default_order() == SECOND)
+      new_elem = mortar_segment_mesh.add_elem(new Edge3);
+    else
+      new_elem = mortar_segment_mesh.add_elem(new Edge2);
+
     new_elem->processor_id() = slave_elem->processor_id();
 
-    new_elem->set_node(0) = new_node0;
-    new_elem->set_node(1) = new_node1;
+    for (unsigned int n = 0; n < new_elem->n_nodes(); ++n)
+      new_elem->set_node(n) = new_nodes[n];
 
     // The xi^(1) values for this mortar segment are initially -1 and 1.
     MortarSegmentInfo msinfo;
@@ -190,8 +299,12 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     if (std::abs(std::abs(xi1) - 1.) < TOLERANCE)
       continue;
 
+    auto && order = slave_elem->default_order();
+
     // Determine physical location of new point to be inserted.
-    Point new_pt = 0.5 * (1 - xi1) * slave_elem->point(0) + 0.5 * (1 + xi1) * slave_elem->point(1);
+    Point new_pt(0);
+    for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
+      new_pt += fe_lagrange_1D_shape(order, n, xi1) * slave_elem->point(n);
 
     // Find the current mortar segment that will have to be split.
     auto & mortar_segment_set = slave_elems_to_mortar_segments[slave_elem];
@@ -217,13 +330,21 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     Node * new_node = mortar_segment_mesh.add_point(new_pt);
 
     // Make an Elem on the left
-    Elem * new_elem_left = mortar_segment_mesh.add_elem(new Edge2);
+    Elem * new_elem_left;
+    if (order == SECOND)
+      new_elem_left = mortar_segment_mesh.add_elem(new Edge3);
+    else
+      new_elem_left = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_left->processor_id() = current_mortar_segment->processor_id();
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
     new_elem_left->set_node(1) = new_node;
 
     // Make an Elem on the right
-    Elem * new_elem_right = mortar_segment_mesh.add_elem(new Edge2);
+    Elem * new_elem_right;
+    if (order == SECOND)
+      new_elem_right = mortar_segment_mesh.add_elem(new Edge3);
+    else
+      new_elem_right = mortar_segment_mesh.add_elem(new Edge2);
     new_elem_right->processor_id() = current_mortar_segment->processor_id();
     new_elem_right->set_node(0) = new_node;
     new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
@@ -231,10 +352,10 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     // Reconstruct the nodal normal at xi1. This will help us
     // determine the orientation of the master elems relative to the
     // new mortar segments.
-    Point nodal_normal_left = this->slave_node_to_nodal_normal.at(slave_elem->node_ptr(0)),
-          nodal_normal_right = this->slave_node_to_nodal_normal.at(slave_elem->node_ptr(1));
-
-    Point nodal_normal = 0.5 * (1 - xi1) * nodal_normal_left + 0.5 * (1 + xi1) * nodal_normal_right;
+    Point dxyz_dxi(0);
+    for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
+      dxyz_dxi += fe_lagrange_1D_shape_deriv(order, n, xi1) * slave_elem->point(n);
+    auto normal = Point(dxyz_dxi(1), -dxyz_dxi(0), 0).unit();
 
     // Get the set of master_node neighbors.
     const std::vector<const Elem *> & master_node_neighbors =
@@ -262,14 +383,14 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
 
     // Store z-component of left and right slave node cross products with the nodal normal.
     for (unsigned int nid = 0; nid < 2; ++nid)
-      slave_node_cps[nid] = nodal_normal.cross(slave_elem->point(nid) - new_pt)(2);
+      slave_node_cps[nid] = normal.cross(slave_elem->point(nid) - new_pt)(2);
 
     for (unsigned int mnn = 0; mnn < master_node_neighbors.size(); ++mnn)
     {
       const Elem * master_neigh = master_node_neighbors[mnn];
       Point opposite = (master_neigh->node_ptr(0) == master_node) ? master_neigh->point(1)
                                                                   : master_neigh->point(0);
-      Point cp = nodal_normal.cross(opposite - new_pt);
+      Point cp = normal.cross(opposite - new_pt);
       master_node_cps[mnn] = cp(2);
     }
 
@@ -513,105 +634,6 @@ AutomaticMortarGeneration::project_slave_nodes()
   // project_slave_nodes_single_pair() helper function.
   for (const auto & pr : master_slave_subdomain_id_pairs)
     project_slave_nodes_single_pair(pr.first, pr.second);
-}
-
-// Copy in libmesh's lagrange helper functions, but we use DualNumbers as input and output
-DualNumber<Real>
-fe_lagrange_1D_shape(const Order order, const unsigned int i, const DualNumber<Real> & xi)
-{
-  switch (order)
-  {
-      // Lagrange linears
-    case FIRST:
-    {
-      libmesh_assert_less(i, 2);
-
-      switch (i)
-      {
-        case 0:
-          return .5 * (1. - xi);
-
-        case 1:
-          return .5 * (1. + xi);
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-      // Lagrange quadratics
-    case SECOND:
-    {
-      libmesh_assert_less(i, 3);
-
-      switch (i)
-      {
-        case 0:
-          return .5 * xi * (xi - 1.);
-
-        case 1:
-          return .5 * xi * (xi + 1);
-
-        case 2:
-          return (1. - xi * xi);
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-    default:
-      mooseError("Unsupported order");
-  }
-}
-
-DualNumber<Real>
-fe_lagrange_1D_shape_deriv(const Order order, const unsigned int i, const DualNumber<Real> & xi)
-{
-  switch (order)
-  {
-      // Lagrange linear shape function derivatives
-    case FIRST:
-    {
-      libmesh_assert_less(i, 2);
-
-      switch (i)
-      {
-        case 0:
-          return -.5;
-
-        case 1:
-          return .5;
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-      // Lagrange quadratic shape function derivatives
-    case SECOND:
-    {
-      libmesh_assert_less(i, 3);
-
-      switch (i)
-      {
-        case 0:
-          return xi - .5;
-
-        case 1:
-          return xi + .5;
-
-        case 2:
-          return -2. * xi;
-
-        default:
-          mooseError("Invalid shape function index i = ", i);
-      }
-    }
-
-    default:
-      mooseError("Unsupported order");
-  }
 }
 
 void
