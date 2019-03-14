@@ -1,7 +1,7 @@
 #ifndef HEATTRANSFERFROMEXTERNALAPPTEMPERATURE_H
 #define HEATTRANSFERFROMEXTERNALAPPTEMPERATURE_H
 
-#include "HeatTransferFromTemperature.h"
+#include "HeatTransferBase.h"
 
 class HeatTransferFromExternalAppTemperature;
 
@@ -9,20 +9,17 @@ template <>
 InputParameters validParams<HeatTransferFromExternalAppTemperature>();
 
 /**
- * Heat transfer connection from temperature provided by an external application
+ * Deprecated class, do not use
  */
-class HeatTransferFromExternalAppTemperature : public HeatTransferFromTemperature
+class HeatTransferFromExternalAppTemperature : public HeatTransferBase
 {
 public:
   HeatTransferFromExternalAppTemperature(const InputParameters & parameters);
 
-  virtual void check() const override;
-  virtual void addVariables() override;
-  virtual void addMooseObjects() override;
+  virtual bool isTemperatureType() const override { return true; }
 
 protected:
-  /// Name of the function specifying initial condition for wall temperature
-  const FunctionName _T_wall_fn_name;
+  virtual void check() const override;
 };
 
 #endif /* HEATTRANSFERFROMEXTERNALAPPTEMPERATURE_H */

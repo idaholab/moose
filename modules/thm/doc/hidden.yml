@@ -70,9 +70,17 @@
 - /Components/HeatGeneration
 - /Components/HeatStructure
 - /Components/HeatTransferFromExternalAppTemperature
+- /Components/HeatTransferFromExternalAppTemperature1Phase
+- /Components/HeatTransferFromExternalAppTemperature2Phase
 - /Components/HeatTransferFromHeatFlux
+- /Components/HeatTransferFromHeatFlux1Phase
+- /Components/HeatTransferFromHeatFlux2Phase
 - /Components/HeatTransferFromHeatStructure
+- /Components/HeatTransferFromHeatStructure1Phase
+- /Components/HeatTransferFromHeatStructure2Phase
 - /Components/HeatTransferFromSpecifiedTemperature
+- /Components/HeatTransferFromSpecifiedTemperature1Phase
+- /Components/HeatTransferFromSpecifiedTemperature2Phase
 - /Components/Inlet
 - /Components/InletDensityVelocity
 - /Components/InletMassFlowRateTemperature

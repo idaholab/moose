@@ -8,6 +8,8 @@
 #include "InputParameterLogic.h"
 #include "StabilizationSettings.h"
 #include "HeatTransferBase.h"
+#include "HeatTransferBase1Phase.h"
+#include "HeatTransferBase2Phase.h"
 #include "ClosuresBase.h"
 
 #include "libmesh/edge_edge2.h"
@@ -727,9 +729,15 @@ FlowChannel::getHeatTransferVariableNames()
     const HeatTransferBase & heat_transfer =
         getComponentByName<HeatTransferBase>(_heat_transfer_names[i]);
 
-    _Hw_1phase_names.push_back(heat_transfer.getWallHeatTransferCoefficient1PhaseName());
-    _Hw_liquid_names.push_back(heat_transfer.getWallHeatTransferCoefficientLiquidName());
-    _Hw_vapor_names.push_back(heat_transfer.getWallHeatTransferCoefficientVaporName());
+    const HeatTransferBase1Phase * heat_transfer_1phase = dynamic_cast<const HeatTransferBase1Phase *>(&heat_transfer);
+    const HeatTransferBase2Phase * heat_transfer_2phase = dynamic_cast<const HeatTransferBase2Phase *>(&heat_transfer);
+    if (heat_transfer_1phase != nullptr)
+      _Hw_1phase_names.push_back(heat_transfer_1phase->getWallHeatTransferCoefficient1PhaseName());
+    else if (heat_transfer_2phase != nullptr)
+    {
+      _Hw_liquid_names.push_back(heat_transfer_2phase->getWallHeatTransferCoefficientLiquidName());
+      _Hw_vapor_names.push_back(heat_transfer_2phase->getWallHeatTransferCoefficientVaporName());
+    }
     _P_hf_names.push_back(heat_transfer.getHeatedPerimeterName());
     _T_wall_names.push_back(heat_transfer.getWallTemperatureName());
     _q_wall_names.push_back(heat_transfer.getWallHeatFluxName());

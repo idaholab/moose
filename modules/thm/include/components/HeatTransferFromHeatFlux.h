@@ -9,29 +9,17 @@ template <>
 InputParameters validParams<HeatTransferFromHeatFlux>();
 
 /**
- * Base class for heat transfer connections from heat flux
+ * Deprecated class, do not use.
  */
 class HeatTransferFromHeatFlux : public HeatTransferBase
 {
 public:
   HeatTransferFromHeatFlux(const InputParameters & parameters);
 
-  virtual void addMooseObjects() override;
-
-  virtual bool isTemperatureType() const override;
+  virtual bool isTemperatureType() const override { return false; }
 
 protected:
-  /**
-   * Adds 1-phase objects
-   */
-  void addMooseObjects1Phase();
-  /**
-   * Adds 2-phase objects
-   */
-  void addMooseObjects2Phase();
-
-  /// wall heat flux function name
-  const FunctionName _q_wall_fn_name;
+  virtual void check() const override;
 };
 
 #endif /* HEATTRANSFERFROMHEATFLUX_H */

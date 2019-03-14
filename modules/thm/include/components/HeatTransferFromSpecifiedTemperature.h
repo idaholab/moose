@@ -1,7 +1,7 @@
 #ifndef HEATTRANSFERFROMSPECIFIEDTEMPERATURE_H
 #define HEATTRANSFERFROMSPECIFIEDTEMPERATURE_H
 
-#include "HeatTransferFromTemperature.h"
+#include "HeatTransferBase.h"
 
 class HeatTransferFromSpecifiedTemperature;
 
@@ -9,19 +9,17 @@ template <>
 InputParameters validParams<HeatTransferFromSpecifiedTemperature>();
 
 /**
- * Heat transfer connection from a fixed temperature function
+ * Deprecated class, do not use.
  */
-class HeatTransferFromSpecifiedTemperature : public HeatTransferFromTemperature
+class HeatTransferFromSpecifiedTemperature : public HeatTransferBase
 {
 public:
   HeatTransferFromSpecifiedTemperature(const InputParameters & parameters);
 
-  virtual void addVariables() override;
-  virtual void addMooseObjects() override;
+  virtual bool isTemperatureType() const override { return true; }
 
 protected:
-  /// wall temperature function name
-  const FunctionName _T_wall_fn_name;
+  virtual void check() const override;
 };
 
 #endif /* HEATTRANSFERFROMSPECIFIEDTEMPERATURE_H */
