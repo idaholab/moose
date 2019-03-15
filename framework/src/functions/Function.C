@@ -59,6 +59,12 @@ Function::vectorValue(Real /*t*/, const Point & /*p*/)
   return RealVectorValue(0, 0, 0);
 }
 
+RealVectorValue
+Function::vectorCurl(Real /*t*/, const Point & /*p*/)
+{
+  return RealVectorValue(0, 0, 0);
+}
+
 Real
 Function::integral()
 {

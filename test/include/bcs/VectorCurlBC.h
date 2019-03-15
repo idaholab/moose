@@ -7,28 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORCURLPENALTYDIRICHLETBC_H
-#define VECTORCURLPENALTYDIRICHLETBC_H
+#ifndef VECTORCURLBC_H
+#define VECTORCURLBC_H
 
 #include "VectorIntegratedBC.h"
 
-class VectorCurlPenaltyDirichletBC;
+class VectorCurlBC;
 
 template <>
-InputParameters validParams<VectorCurlPenaltyDirichletBC>();
+InputParameters validParams<VectorCurlBC>();
 
-class VectorCurlPenaltyDirichletBC : public VectorIntegratedBC
+class VectorCurlBC : public VectorIntegratedBC
 {
 public:
-  VectorCurlPenaltyDirichletBC(const InputParameters & parameters);
+  VectorCurlBC(const InputParameters & parameters);
 
 protected:
-  Real _penalty;
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  Function & _exact_x;
-  Function & _exact_y;
-  Function & _exact_z;
+
+  Function & _curl_value;
 };
 
-#endif // VECTORCURLPENALTYDIRICHLETBC_H
+#endif // VECTORCURLBC_H
