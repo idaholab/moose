@@ -1,0 +1,45 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef PLANEDELETIONGENERATOR_H
+#define PLANEDELETIONGENERATOR_H
+
+#include "ElementDeletionGeneratorBase.h"
+
+// Forward declarations
+class PlaneDeletionGenerator;
+
+namespace libmesh
+{
+class Point;
+}
+
+template <>
+InputParameters validParams<PlaneDeletionGenerator>();
+
+/**
+ * Deletes elements lying above a plane
+ */
+class PlaneDeletionGenerator : public ElementDeletionGeneratorBase
+{
+public:
+  PlaneDeletionGenerator(const InputParameters & parameters);
+
+protected:
+  virtual bool shouldDelete(const Elem * elem) override;
+
+private:
+  /// Point defining the plane
+  const Point & _point;
+
+  /// Normal vector
+  RealVectorValue _normal;
+};
+
+#endif // PLANEDELETIONGENERATOR_H
