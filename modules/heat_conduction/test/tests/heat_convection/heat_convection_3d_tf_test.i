@@ -114,9 +114,10 @@
     thermal_conductivity = 1.937  # this makes alpha 9.74e-7 m^2/s
   [../]
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = 1
-    density = 2405.28
+    prop_names = density
+    prop_values = 2405.28
   [../]
 []      # Materials END
 

@@ -1,43 +1,43 @@
-#
 # 1-D Gap Heat Transfer Test without mechanics
 #
 # This test exercises 1-D gap heat transfer for a constant conductivity gap.
 #
-# The mesh consists of two element blocks containing one element each.  Each
-#   element is a unit cube.  They sit next to one another with a unit between them.
+# The mesh consists of two element blocks in the y-z plane.  Each element block
+# is a square. They sit next to one another with a unit between them.
 #
 # The conductivity of both blocks is set very large to achieve a uniform temperature
-#  across each block. The temperature of the far left boundary
-#  is ramped from 100 to 200 over one time unit.  The temperature of the far right
-#  boundary is held fixed at 100.
+# across each block. The temperature of the far bottom boundary
+# is ramped from 100 to 200 over one time unit.  The temperature of the far top
+# boundary is held fixed at 100.
 #
 # A simple analytical solution is possible for the heat flux between the blocks:
 #
-#  Flux = (T_left - T_right) * (gapK/gap_width)
+# Flux = (T_left - T_right) * (gapK/gap_width)
 #
 # The gap conductivity is specified as 1, thus
 #
-#  gapK(Tavg) = 1.0*Tavg
-#
+# gapK(Tavg) = 1.0*Tavg
 #
 # The heat flux across the gap at time = 1 is then:
 #
-#  Flux(2) = 100 * (1.0/1.0) = 100
+# Flux = 100 * (1.0/1.0) = 100
 #
-# For comparison, see results from the flux post processors
-#
-# This test has been augmented with a second scalar field that solves nearly
-#   the same problem.  The conductivity has been changed to 10.  Thus, the
-#   flux for the second field is 1000.
-#
-
+# For comparison, see results from the flux post processors.  These results
+# are the same as for the unit 1-D gap heat transfer between two unit cubes.
 
 [Mesh]
-  file = gap_heat_transfer_htonly_test.e
+  file = simple_2D.e
+[]
+
+[MeshModifiers]
+  [./rotate]
+    type = Transform
+    transform = ROTATE
+    vector_value = '0 90 90'
+  [../]
 []
 
 [Functions]
-
   [./temp]
     type = PiecewiseLinear
     x = '0   1   2'
@@ -52,23 +52,10 @@
     master = 3
     slave = 2
   [../]
-  [./awesomium_contact]
-    type = GapHeatTransfer
-    variable = awesomium
-    master = 3
-    slave = 2
-    gap_conductivity = 10
-    appended_property_name = _awesomium
-  [../]
 []
 
 [Variables]
   [./temp]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 100
-  [../]
-  [./awesomium]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
@@ -80,10 +67,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./gap_cond_awesomium]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Kernels]
@@ -91,36 +74,20 @@
     type = HeatConduction
     variable = temp
   [../]
-  [./awe]
-    type = HeatConduction
-    variable = awesomium
-  [../]
 []
 
 
 [BCs]
-  [./temp_far_left]
+  [./temp_far_bottom]
     type = FunctionPresetBC
     boundary = 1
     variable = temp
     function = temp
   [../]
-  [./temp_far_right]
+  [./temp_far_top]
     type = PresetBC
     boundary = 4
     variable = temp
-    value = 100
-  [../]
-  [./awesomium_far_left]
-    type = FunctionPresetBC
-    boundary = 1
-    variable = awesomium
-    function = temp
-  [../]
-  [./awesomium_far_right]
-    type = PresetBC
-    boundary = 4
-    variable = awesomium
     value = 100
   [../]
 []
@@ -132,16 +99,9 @@
     variable = gap_cond
     boundary = 2
   [../]
-  [./conductance_awe]
-    type = MaterialRealAux
-    property = gap_conductance_awesomium
-    variable = gap_cond_awesomium
-    boundary = 2
-  [../]
 []
 
 [Materials]
-
   [./heat1]
     type = HeatConductionMaterial
     block = '1 2'
@@ -149,9 +109,10 @@
     thermal_conductivity = 100000000.0
   [../]
   [./density]
-    type = Density
+    type = GenericConstantMaterial
+    prop_names = density
+    prop_values = 1.0
     block = '1 2'
-    density = 1.0
   [../]
 []
 
@@ -172,22 +133,21 @@
 []
 
 [Postprocessors]
-
-  [./temp_left]
+  [./temp_bottom]
     type = SideAverageValue
     boundary = 2
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./temp_right]
+  [./temp_top]
     type = SideAverageValue
     boundary = 3
     variable = temp
     execute_on = 'initial timestep_end'
   [../]
 
-  [./flux_left]
+  [./flux_bottom]
     type = SideFluxIntegral
     variable = temp
     boundary = 2
@@ -195,39 +155,9 @@
     execute_on = 'initial timestep_end'
   [../]
 
-  [./flux_right]
+  [./flux_top]
     type = SideFluxIntegral
     variable = temp
-    boundary = 3
-    diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
-  [../]
-
-  [./awe_left]
-    type = SideAverageValue
-    boundary = 2
-    variable = awesomium
-    execute_on = 'initial timestep_end'
-  [../]
-
-  [./awe_right]
-    type = SideAverageValue
-    boundary = 3
-    variable = awesomium
-    execute_on = 'initial timestep_end'
-  [../]
-
-  [./awe_flux_left]
-    type = SideFluxIntegral
-    variable = awesomium
-    boundary = 2
-    diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
-  [../]
-
-  [./awe_flux_right]
-    type = SideFluxIntegral
-    variable = awesomium
     boundary = 3
     diffusivity = thermal_conductivity
     execute_on = 'initial timestep_end'

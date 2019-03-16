@@ -1,46 +1,39 @@
 #
-# 1-D spherical Gap Heat Transfer Test
+# 1-D Gap Heat Transfer Test without mechanics
 #
 # This test exercises 1-D gap heat transfer for a constant conductivity gap.
 #
-# The mesh consists of two "blocks" with a mesh biased toward the gap
-#   between them.  Each block is unit length.  The gap between them is one
-#   unit in length.
+# The mesh consists of two element blocks containing one element each.  Each
+#   element is a unit cube.  They sit next to one another with a unit between them.
 #
 # The conductivity of both blocks is set very large to achieve a uniform temperature
 #  across each block. The temperature of the far left boundary
 #  is ramped from 100 to 200 over one time unit, and then held fixed for an additional
 #  time unit.  The temperature of the far right boundary is held fixed at 100.
 #
-# A simple analytical solution is possible for the heat flux between the blocks, or spheres in the case of RSPHERICAL.:
+# A simple analytical solution is possible for the heat flux between the blocks:
 #
-#  Flux = (T_left - T_right) * (gapK/(r^2*((1/r1)-(1/r2))))
+#  Flux = (T_left - T_right) * (gapK/gap_width)
 #
-# For gapK = 1 (default value)
+# The gap conductivity is specified as 1, thus
 #
-# The area is taken as the area of the slave (inner) surface:
+#  gapK(Tavg) = 1.0*Tavg
 #
-# Area = 4 * pi * 1 * 1
 #
-# The integrated heat flux across the gap at time 2 is then:
+# The heat flux across the gap at time = 2 is then:
 #
-# 4*pi*k*delta_T/((1/r1)-(1/r2))
-# 4*pi*1*100/((1/1) - (1/2)) =  2513.3 watts
+#  Flux(2) = 100 * (1.0/1.0) = 100
 #
-# For comparison, see results from the flux post processors.
-#
+# For comparison, see results from the flux post processors
 #
 
-[Problem]
-  coord_type = RSPHERICAL
-[]
 
 [Mesh]
-  file = gap_heat_transfer_htonly_rspherical.e
-  construct_side_list_from_node_list = true
+  file = gap_heat_transfer_htonly_test.e
 []
 
 [Functions]
+
   [./temp]
     type = PiecewiseLinear
     x = '0   1   2'
@@ -62,13 +55,6 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
-  [../]
-[]
-
-[AuxVariables]
-  [./gap_cond]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
 []
 
@@ -96,47 +82,47 @@
   [../]
 []
 
-[AuxKernels]
-  [./conductance]
-    type = MaterialRealAux
-    property = gap_conductance
-    variable = gap_cond
-    boundary = 2
-  [../]
-[]
-
 [Materials]
+
   [./heat1]
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
-    thermal_conductivity = 1e6
+    thermal_conductivity = 100000000.0
   [../]
+
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = '1 2'
-    density = 1.0
+    prop_names = density
+    prop_values = 1.0
   [../]
 []
 
 [Executioner]
   type = Transient
 
+  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  # I don't know enough about this test to say why it needs such a
-  # loose nl_abs_tol... after timestep 10 the residual basically can't
-  # be reduced much beyond the initial residual.  The test probably
-  # needs to be revisited to determine why.
-  nl_abs_tol = 1e-3
-  nl_rel_tol = 1e-10
-  l_tol = 1e-6
-  l_max_its = 100
-  line_search = 'none'
-  nl_max_its = 10
 
+
+
+  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
+  petsc_options_value = '201                hypre    boomeramg      4'
+
+
+  line_search = 'none'
+
+
+  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-12
+
+  l_tol = 1e-10
+  l_max_its = 100
+
+  start_time = 0.0
   dt = 1e-1
-  dtmin = 1e-1
   end_time = 2.0
 []
 
@@ -146,14 +132,12 @@
     type = SideAverageValue
     boundary = 2
     variable = temp
-    execute_on = 'initial timestep_end'
   [../]
 
   [./temp_right]
     type = SideAverageValue
     boundary = 3
     variable = temp
-    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_left]
@@ -173,5 +157,10 @@
 
 
 [Outputs]
-  exodus = true
+  file_base = out_it_plot
+  [./exodus]
+    type = Exodus
+    execute_on = 'initial timestep_end nonlinear'
+    nonlinear_residual_dt_divisor = 100
+  [../]
 []

@@ -62,9 +62,10 @@
   [../]
 
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = 1
-    density = 0.283
+    prop_names = density
+    prop_values = 0.283
   [../]
 
 [] # Materials

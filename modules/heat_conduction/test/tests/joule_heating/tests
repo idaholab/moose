@@ -1,7 +1,12 @@
 [Tests]
-  [./test]
+  [./transient]
     type = 'Exodiff'
     input = 'transient_jouleheating.i'
     exodiff = 'transient_jouleheating_out.e'
+  [../]
+  [./test]
+    type = 'Exodiff'
+    input = 'jouleheating.i'
+    exodiff = 'jouleheating_out.e'
   [../]
 []

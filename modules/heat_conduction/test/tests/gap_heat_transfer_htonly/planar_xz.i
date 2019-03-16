@@ -2,7 +2,7 @@
 #
 # This test exercises 1-D gap heat transfer for a constant conductivity gap.
 #
-# The mesh consists of two element blocks in the y-z plane.  Each element block
+# The mesh consists of two element blocks in the x-z plane.  Each element block
 # is a square. They sit next to one another with a unit between them.
 #
 # The conductivity of both blocks is set very large to achieve a uniform temperature
@@ -33,7 +33,7 @@
   [./rotate]
     type = Transform
     transform = ROTATE
-    vector_value = '0 90 90'
+    vector_value = '0 90 0'
   [../]
 []
 
@@ -109,9 +109,10 @@
     thermal_conductivity = 100000000.0
   [../]
   [./density]
-    type = Density
+    type = GenericConstantMaterial
+    prop_names = density
+    prop_values = 1.0
     block = '1 2'
-    density = 1.0
   [../]
 []
 

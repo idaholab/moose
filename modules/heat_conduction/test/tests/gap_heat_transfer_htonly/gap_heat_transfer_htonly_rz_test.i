@@ -171,9 +171,10 @@
     thermal_conductivity = 1e6
   [../]
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = '1 2'
-    density = 1.0
+    prop_names = density
+    prop_values = 1.0
   [../]
 []
 

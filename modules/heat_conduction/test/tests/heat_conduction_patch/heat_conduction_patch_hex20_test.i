@@ -82,7 +82,7 @@
 [Kernels]
 
   [./heat_r]
-    type = AnisoHeatConduction
+    type = HeatConduction
     variable = temp
   [../]
 
@@ -102,19 +102,18 @@
 [Materials]
 
   [./heat]
-    type = AnisoHeatConductionMaterial
+    type = HeatConductionMaterial
     block = 1
 
     specific_heat = 0.116
-    thermal_conductivity_x = 4.85e-4
-    thermal_conductivity_y = 4.85e-4
-    thermal_conductivity_z = 4.85e-4
+    thermal_conductivity = 4.85e-4
   [../]
 
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = 1
-    density = 0.283
+    prop_names = density
+    prop_values = 0.283
   [../]
 
 [] # Materials

@@ -13,17 +13,17 @@
 #    2 1.00024e3 0          48
 #    3 1.00018e3 3e-2       39
 #    4 1.00004e3 2e-2       10
-#    5 1.00008e3 8e-2       24
-#    6 1e3       1.2e-1     12
-#    7 1.00016e3 8e-2       40
-#    8 1.00024e3 1.2e-1     60
+#    9 1.00008e3 8e-2       24
+#   10 1e3       1.2e-1     12
+#   14 1.00016e3 8e-2       40
+#   17 1.00024e3 1.2e-1     60
 
 [Problem]
   coord_type = RZ
 []
 
 [Mesh]#Comment
-  file = heat_conduction_patch_rz_test.e
+  file = heat_conduction_patch_rz_quad8_test.e
 [] # Mesh
 
 [Functions]
@@ -36,7 +36,7 @@
 [Variables]
 
   [./temp]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 
@@ -73,9 +73,10 @@
   [../]
 
   [./density]
-    type = Density
+    type = GenericConstantMaterial
     block = 1
-    density = 0.283
+    prop_names = density
+    prop_values = 0.283
   [../]
 
 [] # Materials
@@ -102,9 +103,13 @@
 
   l_max_its = 20
 
+  [./Quadrature]
+    order = THIRD
+  [../]
+
 [] # Executioner
 
 [Outputs]
-  file_base = out_rz
+  file_base = out_rz_quad8
   exodus = true
 [] # Outputs
