@@ -19,7 +19,7 @@ validParams<InterfaceUOPPS>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("user_object", "The name of the user object");
   params.addClassDescription(
-      "Test Interfae User Object postprocessor getting value from InterfaceUO");
+      "Test Interface User Object postprocessor getting value from InterfaceUO");
   return params;
 }
 

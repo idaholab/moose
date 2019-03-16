@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<InterfaceUserObjectQpAux>();
 
 /**
- * Self auxiliary value
+ * AuxKernel creating an AuxVariable from values stored in an InterfaceUO_QP
  */
 class InterfaceUserObjectQpAux : public AuxKernel
 {

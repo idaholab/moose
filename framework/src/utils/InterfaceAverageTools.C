@@ -50,8 +50,8 @@ getQuantity(const MooseEnum average_type, const Real value_master, const Real va
       result = value_slave;
       break;
     default:
-      mooseError("InterfaceIntegralMaterialPropertyPostprocessor: the supplied intergal "
-                 "type is not in the list. Avaialble options are: ",
+      mooseError("InterfaceIntegralMaterialPropertyPostprocessor: the supplied integral "
+                 "type is not in the list. Available options are: ",
                  InterfaceAverageOptions().getRawNames());
   }
   return result;

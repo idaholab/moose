@@ -41,7 +41,6 @@ protected:
   /// Holds the solution gradient at the current quadrature points on the
   /// neighbor side
   const VariableGradient & _grad_u_neighbor;
-  // virtual Real computeQpIntegral() override = 0;
 };
 
 #endif

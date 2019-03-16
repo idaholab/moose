@@ -17,7 +17,7 @@ validParams<InterfaceUserObjectQpAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("interface_uo_name",
-                                          "the name of the interface user object to use");
+                                          "The name of the interface user object to use");
 
   return params;
 }

@@ -24,8 +24,8 @@ namespace InterfaceAverageTools
 MooseEnum InterfaceAverageOptions();
 
 /*
- * Return scalar quantity across an interface o based on the user specified
- * _average_type. First paramter is the vaerage type, the second  the value
+ * Return scalar quantity across an interface based on the user specified
+ * _average_type. First parameter is the average type, the second the value
  * on the master surface, and the third parameter is the value on slave
  * surface of the interface
  */

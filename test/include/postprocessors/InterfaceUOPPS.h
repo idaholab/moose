@@ -29,7 +29,6 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  // virtual void finalize() override;
   virtual Real getValue() override;
   // threadJoin is already performed in the userobject, so do nothing
   virtual void threadJoin(const UserObject & /*uo*/) override{};

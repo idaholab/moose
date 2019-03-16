@@ -7,7 +7,7 @@
 !syntax description /Postprocessors/InterfaceUOPPS
 
 InterfaceUOPPS is a postprocessor for [InterfaceUO](/InterfaceUO.md).
-It create a global variable from the value computed in the linked userobject.
+It creates a global variable from the value computed in the linked userobject.
 
 ## Example Input File Syntax
 

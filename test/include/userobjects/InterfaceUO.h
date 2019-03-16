@@ -18,7 +18,8 @@ template <>
 InputParameters validParams<InterfaceAverageUserObject>();
 
 /**
- *
+ * InterfaceAverageUserObject is a super class used to compute an average value
+ * across an interface
  */
 class InterfaceUO : public InterfaceAverageUserObject
 {

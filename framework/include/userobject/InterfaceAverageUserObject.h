@@ -29,7 +29,7 @@ public:
 protected:
   /// the average type to be computed across the interface
   const MooseEnum _average_type;
-  virtual Real ComputeAverageType(const Real /*value_master*/, const Real /*value_slave*/);
+  virtual Real computeAverageType(const Real /*value_master*/, const Real /*value_slave*/);
 };
 
 #endif /* INTERFACEAVERAGEUSEROBJECT_H */

@@ -16,8 +16,8 @@ InputParameters
 validParams<InterfaceUO_QP>()
 {
   InputParameters params = validParams<InterfaceAverageUserObject>();
-  params.addRequiredCoupledVar("var", "the variable name");
-  params.addCoupledVar("var_neighbor", "the variable name");
+  params.addRequiredCoupledVar("var", "The variable name");
+  params.addCoupledVar("var_neighbor", "The variable name");
   params.addClassDescription("Test Interfae User Object computing and storing average values at "
                              "each QP across an interface");
   return params;
@@ -37,12 +37,11 @@ InterfaceUO_QP::~InterfaceUO_QP() {}
 void
 InterfaceUO_QP::initialize()
 {
-
-  // define the boundary map nad retrieve element side and boundary_ID
+  // define the boundary map and retrieve element side and boundary_ID
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> elem_side_bid =
       _mesh.buildSideList();
 
-  // retrieve on which boudnary this UO operates
+  // retrieve on which boundary this UO operates
   std::set<BoundaryID> boundaryList = boundaryIDs();
 
   // clear map values
@@ -51,11 +50,10 @@ InterfaceUO_QP::initialize()
   // initialize the map_values looping over all the element and sides
   for (unsigned int i = 0; i < elem_side_bid.size(); i++)
   {
-    // check if this boundary
-    // if this element side is part of the boundary then add elements to the map
+    // check if this element side is part of the boundary, if so add element side to the interface
+    // map
     if (boundaryList.find(std::get<2>(elem_side_bid[i])) != boundaryList.end())
     {
-
       // make pair
       std::pair<dof_id_type, unsigned int> elem_side_pair =
           std::make_pair(std::get<0>(elem_side_bid[i]), std::get<1>(elem_side_bid[i]));
@@ -71,27 +69,21 @@ InterfaceUO_QP::initialize()
 void
 InterfaceUO_QP::execute()
 {
-
   // find the entry on the map
   auto it = _map_values.find(std::make_pair(_current_elem->id(), _current_side));
   if (it != _map_values.end())
   {
-
     // insert two vector value for each qp
     auto & vec = _map_values[std::make_pair(_current_elem->id(), _current_side)];
     vec.resize(_qrule->n_points());
 
     // loop over qps and do stuff
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    {
-      // vec[qp].resize(1, 0);
-
       // compute average value at qp
-      vec[qp] = ComputeAverageType(_u[qp], _u_neighbor[qp]);
-    }
+      vec[qp] = computeAverageType(_u[qp], _u_neighbor[qp]);
   }
   else
-    mooseError("InterfaceUO_QP:: cannot fine the required element and side");
+    mooseError("InterfaceUO_QP:: cannot find the required element and side");
 }
 
 Real

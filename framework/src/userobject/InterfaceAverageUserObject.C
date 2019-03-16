@@ -28,7 +28,7 @@ InterfaceAverageUserObject::InterfaceAverageUserObject(const InputParameters & p
 }
 
 Real
-InterfaceAverageUserObject::ComputeAverageType(const Real value_master, const Real value_slave)
+InterfaceAverageUserObject::computeAverageType(const Real value_master, const Real value_slave)
 {
   return InterfaceAverageTools::getQuantity(_average_type, value_master, value_slave);
 }

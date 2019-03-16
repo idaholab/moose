@@ -2,7 +2,7 @@
 
 ## Description
 
-InterfaceUserObjectQpAux is an AuxKernel Used to collect average value collected on the interface via [InterfaceUO_QP](/InterfaceUO_QP.md) and save them into an aux variable at each quadrature point.
+InterfaceUserObjectQpAux is an AuxKernel used to collect average value collected on the interface via [InterfaceUO_QP](/InterfaceUO_QP.md) and save them into an aux variable at each quadrature point.
 
 where value_m is the value on the master side of the interface (e.g. where the boundary is defined) and value_s is the value on the slave side of the interface.
 

@@ -37,7 +37,6 @@ InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
     _JxW(_assembly.JxWFace()),
-    _JxW_neighbor(_assembly.JxWNeighbor()),
     _coord(_assembly.coordTransformation()),
     _normals(_assembly.normals()),
     _current_elem(_assembly.elem()),
@@ -56,6 +55,5 @@ InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
 const Real &
 InterfaceUserObject::getNeighborElemVolume()
 {
-
   return _assembly.neighborVolume();
 }
