@@ -9,7 +9,7 @@ class HeatStructure;
 template <>
 InputParameters validParams<HeatStructure>();
 
-class HeatStructure : public GeometricalComponent, public HeatConductionModel
+class HeatStructure : public GeometricalComponent
 {
 public:
   HeatStructure(const InputParameters & params);
@@ -86,6 +86,8 @@ public:
   Real getNumberOfUnits() const { return _num_rods; }
 
 protected:
+  virtual std::shared_ptr<HeatConductionModel> buildModel();
+  virtual void init() override;
   virtual void check() const override;
   virtual bool usingSecondOrderMesh() const override;
 
@@ -95,8 +97,8 @@ protected:
   void
   loadMaterial(InputParameters & pars, const std::string & par, const std::string & material_name);
 
-  void setupICs();
-
+  /// The heat conduction model used by this heat structure
+  std::shared_ptr<HeatConductionModel> _hc_model;
   /// Dimension of the mesh
   const unsigned int & _dim;
   /// Heat structure type: either "plate" (default) or "cylinder"
