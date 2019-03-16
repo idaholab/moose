@@ -945,7 +945,8 @@ SystemBase::copyVars(ExodusII_IO & io)
     }
     else
     {
-      // scalar vars live on proc 0
+      // can only do mesh access on the 0th processor due to the exodus helper class initializing to
+      // use just the 0th processor
       if (system().comm().rank() == 0)
       {
         // Read the scalar value then set that vlue in the current solution
