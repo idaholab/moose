@@ -99,9 +99,9 @@ FlowConnection::init()
       {
         const FlowChannel & pipe =
             getComponentByName<FlowChannel>(_connections[0]._geometrical_component_name);
+        _flow_model = pipe.getFlowModel();
         if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
         {
-          _flow_model = pipe.getFlowModel();
           auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase &>(*_flow_model);
           _phase_interaction = flow_model_2phase.getPhaseInteraction();
         }
