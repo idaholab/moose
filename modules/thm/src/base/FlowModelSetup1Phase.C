@@ -207,8 +207,6 @@ FlowModelSetup1Phase::addSolutionVariables()
 void
 FlowModelSetup1Phase::addNonConstantAuxVariables()
 {
-  const std::string class_name = "AddInitialConditionAction";
-
   // area
   addAuxVariable(_A_name);
   {
