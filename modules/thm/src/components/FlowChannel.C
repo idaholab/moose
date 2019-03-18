@@ -177,7 +177,14 @@ FlowChannel::buildFlowModel()
   pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;
   pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
   if (_model_id == THM::FM_TWO_PHASE || _model_id == THM::FM_TWO_PHASE_NCG)
+  {
+    pars.set<bool>("phase_interaction") = getParam<bool>("phase_interaction");
+    pars.set<bool>("pressure_relaxation") = getParam<bool>("pressure_relaxation");
+    pars.set<bool>("velocity_relaxation") = getParam<bool>("velocity_relaxation");
+    pars.set<bool>("interface_transfer") = getParam<bool>("interface_transfer");
+    pars.set<bool>("wall_mass_transfer") = getParam<bool>("wall_mass_transfer");
     pars.set<UserObjectName>("rdg_int_var_uo_name") = _rdg_int_var_uo_name;
+  }
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }
 
