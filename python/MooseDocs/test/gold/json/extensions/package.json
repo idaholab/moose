@@ -58,7 +58,7 @@
         }, 
         {
             "attributes": {
-                "content": "/path/to/gcc-7.3.1\n", 
+                "content": "/path/to/gcc-7.3.0\n", 
                 "escape": true, 
                 "language": "bash", 
                 "recursive": true, 
@@ -170,7 +170,7 @@
                 }, 
                 {
                     "attributes": {
-                        "content": "7.3.1", 
+                        "content": "7.3.0", 
                         "recursive": true
                     }, 
                     "children": [], 
