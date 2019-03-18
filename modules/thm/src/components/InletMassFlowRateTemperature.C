@@ -149,6 +149,8 @@ InletMassFlowRateTemperature::setup1PhaseRDG()
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
     _sim.addUserObject(class_name, boundary_flux_name, params);
+    connectObject(params, "", boundary_flux_name, "m_dot", "mass_flow_rate");
+    connectObject(params, "", boundary_flux_name, "T", "T");
   }
 
   // BCs

@@ -21,6 +21,7 @@ validParams<BoundaryFlux3EqnGhostMassFlowRateTemperature>()
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "Name of single-phase fluid properties user object");
 
+  params.declareControllable("mass_flow_rate T");
   return params;
 }
 
