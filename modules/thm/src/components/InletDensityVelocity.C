@@ -61,8 +61,9 @@ InletDensityVelocity::check() const
 
       if (isParamValid("x_ncgs"))
       {
-        const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
-        checkSizeEqualsValue<Real>("x_ncgs", fm.getNCGSolutionVars().size());
+        const FlowModelTwoPhaseNCG & fm_ncg =
+            dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
+        checkSizeEqualsValue<Real>("x_ncgs", fm_ncg.getNCGSolutionVars().size());
       }
     }
   }

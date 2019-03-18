@@ -39,9 +39,6 @@ protected:
   /// The end type of the connected pipe
   EEndType _connected_pipe_end_type;
 
-  /// Flow model
-  std::shared_ptr<const FlowModel> _flow_model;
-
   /// Node ID
   dof_id_type _node;
   /// out norm on this boundary
