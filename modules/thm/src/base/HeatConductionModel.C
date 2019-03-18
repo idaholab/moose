@@ -21,20 +21,20 @@ HeatConductionModel::HeatConductionModel(const std::string & name, const InputPa
 }
 
 void
-HeatConductionModel::addVariables(InputParameters & pars)
+HeatConductionModel::addVariables(InputParameters & cpars)
 {
   _hc_sim.addVariable(true,
                       TEMPERATURE,
                       _fe_type,
-                      pars.get<std::vector<unsigned int>>("block_ids"),
+                      cpars.get<std::vector<unsigned int>>("block_ids"),
                       _hc_sim.getParam<Real>("scaling_factor_temperature"));
 }
 
 void
-HeatConductionModel::addMaterials(InputParameters & pars)
+HeatConductionModel::addMaterials(InputParameters & cpars)
 {
-  const auto & block = pars.get<SubdomainName>("block");
-  std::string name_of_hs = pars.get<std::string>("name_of_hs");
+  const auto & block = cpars.get<SubdomainName>("block");
+  std::string name_of_hs = cpars.get<std::string>("name_of_hs");
 
   {
     std::string class_name = "SolidMaterial";
@@ -42,19 +42,19 @@ HeatConductionModel::addMaterials(InputParameters & pars)
     params.set<std::vector<SubdomainName>>("block") = {block};
     params.set<std::vector<VariableName>>("T") = std::vector<VariableName>(1, TEMPERATURE);
 
-    params.set<UserObjectName>("properties") = pars.get<UserObjectName>("properties");
+    params.set<UserObjectName>("properties") = cpars.get<UserObjectName>("properties");
     _hc_sim.addMaterial(class_name, Component::genName("mat_" + name_of_hs, block, "hs"), params);
   }
 }
 
 void
-HeatConductionModel::addHeatEquation(InputParameters & pars)
+HeatConductionModel::addHeatEquation(InputParameters & cpars)
 {
-  const auto & blocks = pars.get<std::vector<SubdomainName>>("block");
-  const auto & position = pars.get<Point>("position");
-  const auto & direction = pars.get<RealVectorValue>("direction");
+  const auto & blocks = cpars.get<std::vector<SubdomainName>>("block");
+  const auto & position = cpars.get<Point>("position");
+  const auto & direction = cpars.get<RealVectorValue>("direction");
 
-  HeatStructure::EHeatStructureType type = pars.get<HeatStructure::EHeatStructureType>("hs_type");
+  HeatStructure::EHeatStructureType type = cpars.get<HeatStructure::EHeatStructureType>("hs_type");
   switch (type)
   {
     case HeatStructure::PLATE:
