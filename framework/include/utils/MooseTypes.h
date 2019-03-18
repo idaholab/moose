@@ -64,6 +64,25 @@
                beginIndex_2(__VA_ARGS__),                                                          \
                beginIndex_1(__VA_ARGS__),                                                          \
                beginIndex_0(__VA_ARGS__))
+
+#define MooseIndex(type) decltype(_MooseIndex(type, 0))
+
+template <typename T, typename std::enable_if<std::is_integral<T>::value>::type * = nullptr>
+typename std::remove_const<T>::type
+_MooseIndex(T, int)
+{
+}
+
+template <typename T>
+decltype(((T *)nullptr)->size())
+_MooseIndex(T, int)
+{
+}
+
+template <typename T>
+decltype("NOTE: MooseIndex only works with integers and objects with size()!")
+_MooseIndex(T, double) = delete;
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
