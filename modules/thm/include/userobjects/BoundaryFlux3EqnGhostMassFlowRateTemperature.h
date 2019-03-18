@@ -24,10 +24,10 @@ protected:
   getGhostCellSolutionJacobian(const std::vector<Real> & U) const override;
 
   /// Specified mass flow rate
-  const Real _rhouA;
+  const Real & _rhouA;
 
   /// Specified temperature
-  const Real _T;
+  const Real & _T;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
