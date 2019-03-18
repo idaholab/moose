@@ -2,11 +2,11 @@
 #define HEATCONDUCTIONMODEL_H
 
 class Simulation;
-class MooseApp;
+class THMApp;
 class Factory;
 class HeatStructure;
 
-#include "InputParameters.h"
+#include "MooseObject.h"
 #include "libmesh/fe_type.h"
 
 /**
@@ -14,18 +14,35 @@ class HeatStructure;
  *
  * This is a proxy class for the MOOSE Modules' heat conduction model
  */
-class HeatConductionModel
+class HeatConductionModel : public MooseObject
 {
 public:
-  HeatConductionModel(const std::string & name, const InputParameters & params);
+  HeatConductionModel(const InputParameters & params);
 
   /**
-   * Add flow-related variables
-   * @param subdomain_id Block where the flow variables are defined
+   * Add field variables used by this model
    */
-  void addVariables(InputParameters & pars);
-  void addMaterials(InputParameters & pars);
-  void addHeatEquation(InputParameters & pars);
+  virtual void addVariables();
+
+  /**
+   * Add initial conditions
+   */
+  virtual void addInitialConditions();
+
+  /**
+   * Add materials used by this model
+   */
+  virtual void addMaterials();
+
+  /**
+   * Add heat conduction equation for cartesian coordinate system
+   */
+  virtual void addHeatEquationXYZ();
+
+  /**
+   * Add heat conduction equation for RZ coordinate system
+   */
+  virtual void addHeatEquationRZ();
 
   /**
    * Get the FE type used for heat conduction
@@ -33,18 +50,16 @@ public:
    */
   static const FEType & feType() { return _fe_type; }
 
-private:
-  /// The MOOSE application this is associated with
-  MooseApp & _hc_app;
-
-  /// The Factory associated with the MooseApp
-  Factory & _hc_factory;
-
-  Simulation & _hc_sim;
-
 protected:
+  Simulation & _sim;
+  /// The MOOSE application this is associated with
+  THMApp & _app;
+  /// The Factory associated with the MooseApp
+  Factory & _factory;
+  /// The heat structure component that built this class
+  HeatStructure & _hs;
   /// Name of the component
-  std::string _comp_name;
+  const std::string _comp_name;
 
 public:
   // variable names

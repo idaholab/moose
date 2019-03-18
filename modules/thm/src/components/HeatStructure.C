@@ -48,7 +48,6 @@ validParams<HeatStructure>()
 
 HeatStructure::HeatStructure(const InputParameters & params)
   : GeometricalComponent(params),
-    HeatConductionModel(name(), params),
     _dim(getParam<unsigned int>("dim")),
     _hs_type(getEnumParam<EHeatStructureType>("hs_type")),
     _axial_offset(getParam<Real>("axial_offset")),
@@ -110,6 +109,22 @@ HeatStructure::HeatStructure(const InputParameters & params)
 
   for (unsigned int i = 0; i < _names.size(); i++)
     _name_index[_names[i]] = i;
+}
+
+std::shared_ptr<HeatConductionModel>
+HeatStructure::buildModel()
+{
+  const std::string class_name = "HeatConductionModel";
+  InputParameters pars = _factory.getValidParams(class_name);
+  pars.set<Simulation *>("_sim") = &_sim;
+  pars.set<HeatStructure *>("_hs") = this;
+  return _factory.create<HeatConductionModel>(class_name, name(), pars, 0);
+}
+
+void
+HeatStructure::init()
+{
+  _hc_model = buildModel();
 }
 
 void
@@ -320,21 +335,9 @@ HeatStructure::buildMesh()
 void
 HeatStructure::addVariables()
 {
-  InputParameters pars = emptyInputParameters();
-  pars.set<std::vector<unsigned int>>("block_ids") = _subdomain_ids;
-  HeatConductionModel::addVariables(pars);
-  setupICs();
-}
-
-void
-HeatStructure::setupICs()
-{
+  _hc_model->addVariables();
   if (isParamValid("initial_T"))
-  {
-    const FunctionName & T_function = getVariableFn("initial_T");
-    for (unsigned int i = 0; i < _subdomain_ids.size(); i++)
-      _sim.addFunctionIC(TEMPERATURE, T_function, _subdomain_names[i]);
-  }
+    _hc_model->addInitialConditions();
 }
 
 void
@@ -342,20 +345,14 @@ HeatStructure::addMooseObjects()
 {
   if (parameters().isParamValid("materials"))
   {
-    // set materials for heat structures (this needs to be moved to material input part later).
+    _hc_model->addMaterials();
+
     for (unsigned int i = 0; i < _number_of_hs; i++)
     {
-      Component * comp = (_parent != nullptr) ? _parent : this;
-
-      InputParameters pars = emptyInputParameters();
-      pars.set<SubdomainName>("block") = _subdomain_names[i];
-      pars.set<std::string>("name_of_hs") = _names[i];
-      pars.set<UserObjectName>("properties") = _material_names[i];
-      HeatConductionModel::addMaterials(pars);
-
       const SolidMaterialProperties & smp =
           _sim.getUserObject<SolidMaterialProperties>(_material_names[i]);
 
+      Component * comp = (_parent != nullptr) ? _parent : this;
       // if the values were given as constant, allow them to be controlled
       ConstantFunction * k_fn = dynamic_cast<ConstantFunction *>(&smp.getKFunction());
       if (k_fn != nullptr)
@@ -371,26 +368,15 @@ HeatStructure::addMooseObjects()
     }
   }
 
-  // equation
+  switch (_hs_type)
   {
-    InputParameters pars = emptyInputParameters();
-    pars.set<std::vector<SubdomainName>>("block") = _subdomain_names;
-    pars.set<EHeatStructureType>("hs_type") = _hs_type;
-    pars.set<Point>("position") = getPosition();
-    pars.set<RealVectorValue>("direction") = getDirection();
-    switch (_hs_type)
-    {
-      case PLATE:
-        break;
-
-      case CYLINDER:
-      {
-        pars.set<Real>("length") = _length;
-        pars.set<unsigned int>("dim") = _dim;
-      }
+    case PLATE:
+      _hc_model->addHeatEquationXYZ();
       break;
-    }
-    HeatConductionModel::addHeatEquation(pars);
+
+    case CYLINDER:
+      _hc_model->addHeatEquationRZ();
+      break;
   }
 }
 
@@ -400,7 +386,7 @@ HeatStructure::getInitialT() const
   if (isParamValid("initial_T"))
     return getParam<FunctionName>("initial_T");
   else
-    mooseError("The parameter 'initial_T' was requested but not supplied");
+    mooseError(name(), ": The parameter 'initial_T' was requested but not supplied");
 }
 
 const std::vector<unsigned int> &
@@ -443,5 +429,5 @@ HeatStructure::getUnitPerimeter(const MooseEnum & side) const
   else if (side == "bottom")
     return _P_unit_bottom;
   else
-    mooseError("The heat structure side value '", side, "' is invalid.");
+    mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
 }

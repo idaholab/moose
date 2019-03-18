@@ -2,8 +2,21 @@
 #include "Simulation.h"
 #include "Factory.h"
 #include "Component.h"
-#include "MooseApp.h"
+#include "THMApp.h"
 #include "HeatStructure.h"
+
+template <>
+InputParameters
+validParams<HeatConductionModel>()
+{
+  InputParameters params = validParams<MooseObject>();
+  params.addPrivateParam<Simulation *>("_sim");
+  params.addPrivateParam<HeatStructure *>("_hs");
+  params.registerBase("THM:heat_conduction_model");
+  return params;
+}
+
+registerMooseObject("THMApp", HeatConductionModel);
 
 const std::string HeatConductionModel::DENSITY = "rho_solid";
 const std::string HeatConductionModel::TEMPERATURE = "T_solid";
@@ -12,101 +25,108 @@ const std::string HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE = "cp_sol
 
 FEType HeatConductionModel::_fe_type(FIRST, LAGRANGE);
 
-HeatConductionModel::HeatConductionModel(const std::string & name, const InputParameters & params)
-  : _hc_app(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    _hc_factory(_hc_app.getFactory()),
-    _hc_sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
-    _comp_name(name)
+HeatConductionModel::HeatConductionModel(const InputParameters & params)
+  : MooseObject(params),
+    _sim(*params.getCheckedPointerParam<Simulation *>("_sim")),
+    _app(_sim.getApp()),
+    _factory(_app.getFactory()),
+    _hs(*params.getCheckedPointerParam<HeatStructure *>("_hs")),
+    _comp_name(name())
 {
 }
 
 void
-HeatConductionModel::addVariables(InputParameters & cpars)
+HeatConductionModel::addVariables()
 {
-  _hc_sim.addVariable(true,
-                      TEMPERATURE,
-                      _fe_type,
-                      cpars.get<std::vector<unsigned int>>("block_ids"),
-                      _hc_sim.getParam<Real>("scaling_factor_temperature"));
+  const auto & subdomain_ids = _hs.getSubdomainIds();
+  const Real & scaling_factor = _sim.getParam<Real>("scaling_factor_temperature");
+
+  _sim.addVariable(true, TEMPERATURE, _fe_type, subdomain_ids, scaling_factor);
 }
 
 void
-HeatConductionModel::addMaterials(InputParameters & cpars)
+HeatConductionModel::addInitialConditions()
 {
-  const auto & block = cpars.get<SubdomainName>("block");
-  std::string name_of_hs = cpars.get<std::string>("name_of_hs");
+  const auto & subdomain_ids = _hs.getSubdomainNames();
+  _sim.addFunctionIC(TEMPERATURE, _hs.getInitialT(), subdomain_ids);
+}
 
+void
+HeatConductionModel::addMaterials()
+{
+  const auto & blocks = _hs.getSubdomainNames();
+  const auto & names = _hs.getParam<std::vector<std::string>>("names");
+  const auto & material_names = _hs.getParam<std::vector<std::string>>("materials");
+
+  for (std::size_t i = 0; i < names.size(); i++)
   {
     std::string class_name = "SolidMaterial";
-    InputParameters params = _hc_factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = {block};
-    params.set<std::vector<VariableName>>("T") = std::vector<VariableName>(1, TEMPERATURE);
-
-    params.set<UserObjectName>("properties") = cpars.get<UserObjectName>("properties");
-    _hc_sim.addMaterial(class_name, Component::genName("mat_" + name_of_hs, block, "hs"), params);
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = {blocks[i]};
+    params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
+    params.set<UserObjectName>("properties") = material_names[i];
+    _sim.addMaterial(class_name, Component::genName(_comp_name, names[i], "mat"), params);
   }
 }
 
 void
-HeatConductionModel::addHeatEquation(InputParameters & cpars)
+HeatConductionModel::addHeatEquationXYZ()
 {
-  const auto & blocks = cpars.get<std::vector<SubdomainName>>("block");
-  const auto & position = cpars.get<Point>("position");
-  const auto & direction = cpars.get<RealVectorValue>("direction");
+  const auto & blocks = _hs.getSubdomainNames();
 
-  HeatStructure::EHeatStructureType type = cpars.get<HeatStructure::EHeatStructureType>("hs_type");
-  switch (type)
+  // add transient term
   {
-    case HeatStructure::PLATE:
-      // add transient term
-      {
-        std::string class_name = "HeatConductionTimeDerivative";
-        InputParameters pars = _hc_factory.getValidParams(class_name);
-        pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
-        pars.set<std::vector<SubdomainName>>("block") = blocks;
-        pars.set<MaterialPropertyName>("specific_heat") = SPECIFIC_HEAT_CONSTANT_PRESSURE;
-        pars.set<MaterialPropertyName>("density_name") = DENSITY;
-        pars.set<bool>("use_displaced_mesh") = false;
-        _hc_sim.addKernel(class_name, Component::genName(_comp_name, "td"), pars);
-      }
-      // add diffusion term
-      {
-        std::string class_name = "HeatConduction";
-        InputParameters pars = _hc_factory.getValidParams(class_name);
-        pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
-        pars.set<std::vector<SubdomainName>>("block") = blocks;
-        pars.set<MaterialPropertyName>("diffusion_coefficient") = THERMAL_CONDUCTIVITY;
-        pars.set<bool>("use_displaced_mesh") = false;
-        _hc_sim.addKernel(class_name, Component::genName(_comp_name, "hc"), pars);
-      }
-      break;
+    std::string class_name = "HeatConductionTimeDerivative";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
+    pars.set<std::vector<SubdomainName>>("block") = blocks;
+    pars.set<MaterialPropertyName>("specific_heat") = SPECIFIC_HEAT_CONSTANT_PRESSURE;
+    pars.set<MaterialPropertyName>("density_name") = DENSITY;
+    pars.set<bool>("use_displaced_mesh") = false;
+    _sim.addKernel(class_name, Component::genName(_comp_name, "td"), pars);
+  }
+  // add diffusion term
+  {
+    std::string class_name = "HeatConduction";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
+    pars.set<std::vector<SubdomainName>>("block") = blocks;
+    pars.set<MaterialPropertyName>("diffusion_coefficient") = THERMAL_CONDUCTIVITY;
+    pars.set<bool>("use_displaced_mesh") = false;
+    _sim.addKernel(class_name, Component::genName(_comp_name, "hc"), pars);
+  }
+}
 
-    case HeatStructure::CYLINDER:
-      // add transient term
-      {
-        std::string class_name = "HeatConductionTimeDerivativeRZ";
-        InputParameters pars = _hc_factory.getValidParams(class_name);
-        pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
-        pars.set<std::vector<SubdomainName>>("block") = blocks;
-        pars.set<MaterialPropertyName>("specific_heat") = SPECIFIC_HEAT_CONSTANT_PRESSURE;
-        pars.set<MaterialPropertyName>("density_name") = DENSITY;
-        pars.set<bool>("use_displaced_mesh") = false;
-        pars.set<Point>("axis_point") = position;
-        pars.set<RealVectorValue>("axis_dir") = direction;
-        _hc_sim.addKernel(class_name, Component::genName(_comp_name, "td"), pars);
-      }
-      // add diffusion term
-      {
-        std::string class_name = "HeatConductionRZ";
-        InputParameters pars = _hc_factory.getValidParams(class_name);
-        pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
-        pars.set<std::vector<SubdomainName>>("block") = blocks;
-        pars.set<MaterialPropertyName>("diffusion_coefficient") = THERMAL_CONDUCTIVITY;
-        pars.set<bool>("use_displaced_mesh") = false;
-        pars.set<Point>("axis_point") = position;
-        pars.set<RealVectorValue>("axis_dir") = direction;
-        _hc_sim.addKernel(class_name, Component::genName(_comp_name, "hc"), pars);
-      }
-      break;
+void
+HeatConductionModel::addHeatEquationRZ()
+{
+  const auto & blocks = _hs.getSubdomainNames();
+  const auto & position = _hs.getPosition();
+  const auto & direction = _hs.getDirection();
+
+  // add transient term
+  {
+    std::string class_name = "HeatConductionTimeDerivativeRZ";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
+    pars.set<std::vector<SubdomainName>>("block") = blocks;
+    pars.set<MaterialPropertyName>("specific_heat") = SPECIFIC_HEAT_CONSTANT_PRESSURE;
+    pars.set<MaterialPropertyName>("density_name") = DENSITY;
+    pars.set<bool>("use_displaced_mesh") = false;
+    pars.set<Point>("axis_point") = position;
+    pars.set<RealVectorValue>("axis_dir") = direction;
+    _sim.addKernel(class_name, Component::genName(_comp_name, "td"), pars);
+  }
+  // add diffusion term
+  {
+    std::string class_name = "HeatConductionRZ";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = TEMPERATURE;
+    pars.set<std::vector<SubdomainName>>("block") = blocks;
+    pars.set<MaterialPropertyName>("diffusion_coefficient") = THERMAL_CONDUCTIVITY;
+    pars.set<bool>("use_displaced_mesh") = false;
+    pars.set<Point>("axis_point") = position;
+    pars.set<RealVectorValue>("axis_dir") = direction;
+    _sim.addKernel(class_name, Component::genName(_comp_name, "hc"), pars);
   }
 }
