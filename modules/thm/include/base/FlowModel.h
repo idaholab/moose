@@ -178,4 +178,13 @@ protected:
   friend class GlobalSimParamAction;
 };
 
+namespace THM
+{
+template <>
+FlowModel::EEquationType stringToEnum(const std::string & s);
+
+template <>
+FlowModel::ESpatialDiscretizationType stringToEnum(const std::string & s);
+}
+
 #endif /* FLOWMODEL_H */

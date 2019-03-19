@@ -193,4 +193,10 @@ FlowConnection::checkAllConnectionsHaveSame(const std::vector<T> & objects,
       logError("All connections must have the same ", description);
 }
 
+namespace THM
+{
+template <>
+FlowConnection::EEndType stringToEnum(const std::string & s);
+}
+
 #endif /* FLOWCONNECTION_H */
