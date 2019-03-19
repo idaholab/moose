@@ -59,12 +59,15 @@ RealMortarConstraint<compute_stage>::RealMortarConstraint(const InputParameters 
     _fe_master_interior_primal(FEBase::build(_interior_dimension, _fe_type_primal)),
     _qrule_msm(_msm_dimension, SECOND),
     _JxW_msm(_fe_msm_primal->get_JxW()),
-    _phi_lambda(_fe_msm_lambda->get_phi()),
-    _phi_slave_interior_primal(_fe_slave_interior_primal->get_phi()),
-    _phi_master_interior_primal(_fe_master_interior_primal->get_phi()),
+    _test(_fe_msm_lambda->get_phi()),
+    _test_slave(_fe_slave_interior_primal->get_phi()),
+    _test_master(_fe_master_interior_primal->get_phi()),
+    _grad_test_slave(_fe_slave_interior_primal->get_dphi()),
+    _grad_test_master(_fe_master_interior_primal->get_dphi()),
     _xyz_slave_interior(_fe_slave_interior_primal->get_xyz()),
     _xyz_master_interior(_fe_master_interior_primal->get_xyz()),
-    _lm_offset(0)
+    _lm_offset(0),
+    _need_primal_gradient(false)
 {
   _fe_msm_primal->attach_quadrature_rule(&_qrule_msm);
 }
@@ -73,9 +76,14 @@ template <ComputeStage compute_stage>
 void
 RealMortarConstraint<compute_stage>::loopOverMortarMesh()
 {
-  _u_lambda.resize(_qrule_msm.n_points());
-  _u_primal_slave.resize(_qrule_msm.n_points());
-  _u_primal_master.resize(_qrule_msm.n_points());
+  _lambda.resize(_qrule_msm.n_points());
+  _u_slave.resize(_qrule_msm.n_points());
+  _u_master.resize(_qrule_msm.n_points());
+  if (_need_primal_gradient)
+  {
+    _grad_u_slave.resize(_qrule_msm.n_points());
+    _grad_u_master.resize(_qrule_msm.n_points());
+  }
 
   // Array to hold custom quadrature point locations on the slave and master sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
@@ -188,9 +196,17 @@ RealMortarConstraint<compute_stage>::loopOverMortarMesh()
       _fe_master_interior_primal->reinit(master_ip, master_side_id, TOLERANCE, &custom_xi2_pts);
     }
 
-    _u_lambda.zero();
-    _u_primal_slave.zero();
-    _u_primal_master.zero();
+    for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
+    {
+      _lambda[qp] = 0;
+      _u_slave[qp] = 0;
+      _u_master[qp] = 0;
+      if (_need_primal_gradient)
+      {
+        _grad_u_slave[qp] = 0;
+        _grad_u_master[qp] = 0;
+      }
+    }
     computeSolutions();
 
     if (compute_stage == ComputeStage::RESIDUAL)
@@ -213,21 +229,25 @@ RealMortarConstraint<compute_stage>::computeSolutions()
       auto idx = _dof_indices_lambda[i];
       auto soln_local = current_solution(idx);
 
-      _u_lambda(qp) += soln_local * _phi_lambda[i][qp];
+      _lambda[qp] += soln_local * _test[i][qp];
     }
     for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
     {
       auto idx = _dof_indices_slave_interior_primal[i];
       auto soln_local = current_solution(idx);
 
-      _u_primal_slave(qp) += soln_local * _phi_slave_interior_primal[i][qp];
+      _u_slave[qp] += soln_local * _test_slave[i][qp];
+      if (_need_primal_gradient)
+        _grad_u_slave[qp] += soln_local * _grad_test_slave[i][qp];
     }
     for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
     {
       auto idx = _dof_indices_master_interior_primal[i];
       auto soln_local = current_solution(idx);
 
-      _u_primal_master(qp) += soln_local * _phi_master_interior_primal[i][qp];
+      _u_master[qp] += soln_local * _test_master[i][qp];
+      if (_need_primal_gradient)
+        _grad_u_master[qp] += soln_local * _grad_test_master[i][qp];
     }
   }
 }
@@ -246,7 +266,7 @@ RealMortarConstraint<JACOBIAN>::computeSolutions()
       DualReal soln_local = current_solution(idx);
       soln_local.derivatives()[_lm_offset + i] = 1;
 
-      _u_lambda(qp) += soln_local * _phi_lambda[i][qp];
+      _lambda[qp] += soln_local * _test[i][qp];
     }
     for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
     {
@@ -254,7 +274,9 @@ RealMortarConstraint<JACOBIAN>::computeSolutions()
       DualReal soln_local = current_solution(idx);
       soln_local.derivatives()[_slave_primal_offset + i] = 1;
 
-      _u_primal_slave(qp) += soln_local * _phi_slave_interior_primal[i][qp];
+      _u_slave[qp] += soln_local * _test_slave[i][qp];
+      if (_need_primal_gradient)
+        _grad_u_slave[qp] += soln_local * _grad_test_slave[i][qp];
     }
     for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
     {
@@ -262,7 +284,9 @@ RealMortarConstraint<JACOBIAN>::computeSolutions()
       DualReal soln_local = current_solution(idx);
       soln_local.derivatives()[_master_primal_offset + i] = 1;
 
-      _u_primal_master(qp) += soln_local * _phi_master_interior_primal[i][qp];
+      _u_master[qp] += soln_local * _test_master[i][qp];
+      if (_need_primal_gradient)
+        _grad_u_master[qp] += soln_local * _grad_test_master[i][qp];
     }
   }
 }
@@ -275,24 +299,21 @@ RealMortarConstraint<compute_stage>::computeElementResidual()
   DenseVector<Real> F_primal_master(_dof_indices_master_interior_primal.size());
   DenseVector<Real> F_lambda_slave(_dof_indices_lambda.size());
 
-  // LM residuals
-  for (_qp = 0; _qp < _qrule_msm.n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
   {
-    auto strong_residual = _JxW_msm[_qp] * computeLMQpResidual();
-    for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
-      F_lambda_slave(i) += _phi_lambda[i][_qp] * strong_residual;
+    // LM residuals
+    for (_i = 0; _i < _dof_indices_lambda.size(); ++_i)
+      F_lambda_slave(_i) += _JxW_msm[_qp] * computeQpResidual();
+
+    // slave interior primal residuals
+    for (_i = 0; _i < _dof_indices_slave_interior_primal.size(); ++_i)
+      F_primal_slave(_i) += _JxW_msm[_qp] * computeQpResidualSide(Moose::Slave);
+
+    // master interior primal residuals
+    if (_has_master)
+      for (_i = 0; _i < _dof_indices_master_interior_primal.size(); ++_i)
+        F_primal_master(_i) += _JxW_msm[_qp] * computeQpResidualSide(Moose::Master);
   }
-
-  // slave interior primal residuals
-  for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
-    for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
-      F_primal_slave(i) += _JxW_msm[qp] * _phi_slave_interior_primal[i][qp] * _u_lambda(qp);
-
-  // master interior primal residuals
-  if (_has_master)
-    for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
-      for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
-        F_primal_master(i) += -_JxW_msm[qp] * _phi_master_interior_primal[i][qp] * _u_lambda(qp);
 
   _sys.getVector(_sys.residualVectorTag()).add_vector(F_lambda_slave, _dof_indices_lambda);
   _sys.getVector(_sys.residualVectorTag())
@@ -324,29 +345,25 @@ RealMortarConstraint<compute_stage>::computeElementJacobian()
   DenseMatrix<Real> K_lambda_slave_primal_master(_dof_indices_lambda.size(),
                                                  _dof_indices_master_interior_primal.size());
 
-  // Derivative of slave interior primal residuals wrt LM dofs
-  for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
-    for (unsigned int i = 0; i < K_primal_slave_lambda_slave.m(); ++i)
-      for (unsigned int j = 0; j < K_primal_slave_lambda_slave.n(); ++j)
-        K_primal_slave_lambda_slave(i, j) +=
-            _JxW_msm[qp] * _phi_slave_interior_primal[i][qp] * _phi_lambda[j][qp];
-
-  // Derivative of master interior primal residuals wrt LM dofs
-  if (_has_master)
-    for (unsigned int qp = 0; qp < _qrule_msm.n_points(); qp++)
-      for (unsigned int i = 0; i < K_primal_master_lambda_slave.m(); ++i)
-        for (unsigned int j = 0; j < K_primal_master_lambda_slave.n(); ++j)
-          K_primal_master_lambda_slave(i, j) +=
-              -_JxW_msm[qp] * _phi_master_interior_primal[i][qp] * _phi_lambda[j][qp];
-
   // Derivative of LM residuals wrt all dofs
   std::vector<DualReal> lm_residuals(_dof_indices_lambda.size(), 0);
+  // Derivative of slave primal residuals wrt all dofs
+  std::vector<DualReal> slave_primal_residuals(_dof_indices_slave_interior_primal.size(), 0);
+  // Derivative of master primal residuals wrt all dofs
+  std::vector<DualReal> master_primal_residuals(_dof_indices_master_interior_primal.size(), 0);
+
   for (_qp = 0; _qp < _qrule_msm.n_points(); ++_qp)
   {
-    auto strong_residual = _JxW_msm[_qp] * computeLMQpResidual();
-    for (unsigned int i = 0; i < K_lambda_slave_primal_slave.m(); ++i)
-      lm_residuals[i] += _phi_lambda[i][_qp] * strong_residual;
+    for (_i = 0; _i < K_lambda_slave_primal_slave.m(); ++_i)
+      lm_residuals[_i] += _JxW_msm[_qp] * computeQpResidual();
+
+    for (_i = 0; _i < K_primal_slave_lambda_slave.m(); ++_i)
+      slave_primal_residuals[_i] += _JxW_msm[_qp] * computeQpResidualSide(Moose::Slave);
+
+    for (_i = 0; _i < K_primal_master_lambda_slave.m(); ++_i)
+      master_primal_residuals[_i] += _JxW_msm[_qp] * computeQpResidualSide(Moose::Master);
   }
+
   for (unsigned int i = 0; i < _dof_indices_lambda.size(); ++i)
   {
     for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
@@ -356,6 +373,14 @@ RealMortarConstraint<compute_stage>::computeElementJacobian()
     for (unsigned int j = 0; j < _dof_indices_master_interior_primal.size(); ++j)
       K_lambda_slave_primal_master(i, j) = lm_residuals[i].derivatives()[_master_primal_offset + j];
   }
+
+  for (unsigned int i = 0; i < _dof_indices_slave_interior_primal.size(); ++i)
+    for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
+      K_primal_slave_lambda_slave(i, j) = slave_primal_residuals[i].derivatives()[_lm_offset + j];
+
+  for (unsigned int i = 0; i < _dof_indices_master_interior_primal.size(); ++i)
+    for (unsigned int j = 0; j < _dof_indices_lambda.size(); ++j)
+      K_primal_master_lambda_slave(i, j) = master_primal_residuals[i].derivatives()[_lm_offset + j];
 
   _sys.getMatrix(_sys.systemMatrixTag())
       .add_matrix(

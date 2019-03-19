@@ -24,7 +24,9 @@ public:
   GapHeatConductanceTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeLMQpResidual() override;
+  virtual ADResidual computeQpResidual() override;
+
+  virtual ADResidual computeQpResidualSide(Moose::ConstraintType type) override;
 
   const Real _gap_conductance_constant;
 

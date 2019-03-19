@@ -35,7 +35,13 @@ protected:
   /**
    * compute the Lagrange Multipler equation at the quadrature points
    */
-  virtual ADResidual computeLMQpResidual() = 0;
+  virtual ADResidual computeQpResidual() = 0;
+
+  /**
+   * compute the primal equation at the quadrature points. `type` is either `Moose::Slave` or
+   * `Moose::Master`
+   */
+  virtual ADResidual computeQpResidualSide(Moose::ConstraintType type) = 0;
 
   /// Whether the current mortar segment projects onto a face on the master side
   bool _has_master;
@@ -106,13 +112,19 @@ protected:
   const std::vector<Real> & _JxW_msm;
 
   /// The shape functions corresponding to the lagrange multiplier variable
-  const std::vector<std::vector<Real>> & _phi_lambda;
+  const std::vector<std::vector<Real>> & _test;
 
   /// The shape functions corresponding to the slave interior primal variable
-  const std::vector<std::vector<Real>> & _phi_slave_interior_primal;
+  const std::vector<std::vector<Real>> & _test_slave;
 
   /// The shape functions corresponding to the master interior primal variable
-  const std::vector<std::vector<Real>> & _phi_master_interior_primal;
+  const std::vector<std::vector<Real>> & _test_master;
+
+  /// The shape function gradients corresponding to the slave interior primal variable
+  const std::vector<std::vector<RealVectorValue>> & _grad_test_slave;
+
+  /// The shape function gradients corresponding to the master interior primal variable
+  const std::vector<std::vector<RealVectorValue>> & _grad_test_master;
 
   /// The locations of the quadrature points on the interior slave elements
   const std::vector<Point> & _xyz_slave_interior;
@@ -133,13 +145,19 @@ protected:
   unsigned int _qp;
 
   /// The LM solution
-  DenseVector<ADReal> _u_lambda;
+  MooseArray<ADReal> _lambda;
 
   /// The primal solution on the slave side
-  DenseVector<ADReal> _u_primal_slave;
+  MooseArray<ADReal> _u_slave;
 
   /// The primal solution on the master side
-  DenseVector<ADReal> _u_primal_master;
+  MooseArray<ADReal> _u_master;
+
+  /// The primal solution gradient on the slave side
+  MooseArray<VectorValue<ADReal>> _grad_u_slave;
+
+  /// The primal solution gradient on the master side
+  MooseArray<VectorValue<ADReal>> _grad_u_master;
 
   /// The offset for LM dofs for derivative vector access
   const unsigned int _lm_offset;
@@ -149,6 +167,9 @@ protected:
 
   /// The offset for master primal dofs for derivative vector access
   unsigned int _master_primal_offset;
+
+  /// Whether we need to calculate the primal gradients
+  bool _need_primal_gradient;
 
 private:
   /**
@@ -176,10 +197,14 @@ private:
 #define usingRealMortarConstraintMembers                                                           \
   using RealMortarConstraint<compute_stage>::_xyz_slave_interior;                                  \
   using RealMortarConstraint<compute_stage>::_xyz_master_interior;                                 \
-  using RealMortarConstraint<compute_stage>::_u_lambda;                                            \
-  using RealMortarConstraint<compute_stage>::_u_primal_slave;                                      \
-  using RealMortarConstraint<compute_stage>::_u_primal_master;                                     \
+  using RealMortarConstraint<compute_stage>::_lambda;                                              \
+  using RealMortarConstraint<compute_stage>::_u_slave;                                             \
+  using RealMortarConstraint<compute_stage>::_u_master;                                            \
   using RealMortarConstraint<compute_stage>::_qp;                                                  \
-  using RealMortarConstraint<compute_stage>::_has_master
+  using RealMortarConstraint<compute_stage>::_has_master;                                          \
+  using RealMortarConstraint<compute_stage>::_i;                                                   \
+  using RealMortarConstraint<compute_stage>::_test;                                                \
+  using RealMortarConstraint<compute_stage>::_test_slave;                                          \
+  using RealMortarConstraint<compute_stage>::_test_master
 
 #endif /* REALMORTARCONSTRAINT_H */

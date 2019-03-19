@@ -24,7 +24,9 @@ public:
   SolutionContinuityTest(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeLMQpResidual() override;
+  virtual ADResidual computeQpResidual() override;
+
+  virtual ADResidual computeQpResidualSide(Moose::ConstraintType type) override;
 
   usingRealMortarConstraintMembers;
 };

@@ -25,6 +25,7 @@ validParams<EqualGradientConstraint>()
 EqualGradientConstraint::EqualGradientConstraint(const InputParameters & parameters)
   : MortarConstraint(parameters), _component(getParam<unsigned int>("component"))
 {
+  // _need_primal_gradient = true;
 }
 
 Real
