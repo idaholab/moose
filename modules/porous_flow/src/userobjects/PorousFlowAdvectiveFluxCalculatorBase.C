@@ -65,10 +65,10 @@ PorousFlowAdvectiveFluxCalculatorBase::PorousFlowAdvectiveFluxCalculatorBase(
                  : _dictator.feType()),
     _phi(_assembly.fePhi<Real>(_fe_type)),
     _grad_phi(_assembly.feGradPhi<Real>(_fe_type)),
-    _du_dvar({}),
-    _du_dvar_computed_by_thread({}),
-    _dkij_dvar({}),
-    _dflux_out_dvars({})
+    _du_dvar(),
+    _du_dvar_computed_by_thread(),
+    _dkij_dvar(),
+    _dflux_out_dvars()
 
 {
   if (_phase >= _dictator.numPhases())
@@ -94,7 +94,7 @@ PorousFlowAdvectiveFluxCalculatorBase::computeVelocity(unsigned i, unsigned j, u
   // If you change this, you will probably have to change
   // - the derivative in executeOnElement
   // - computeU
-  // - coputedU_dvar
+  // - computedU_dvar
   return -_grad_phi[i][qp] *
          (_permeability[qp] * (_grad_p[qp][_phase] - _fluid_density_qp[qp][_phase] * _gravity)) *
          _phi[j][qp];
@@ -105,6 +105,8 @@ PorousFlowAdvectiveFluxCalculatorBase::executeOnElement(
     dof_id_type global_i, dof_id_type global_j, unsigned local_i, unsigned local_j, unsigned qp)
 {
   AdvectiveFluxCalculatorBase::executeOnElement(global_i, global_j, local_i, local_j, qp);
+  const dof_id_type sequential_i = _connections.sequentialID(global_i);
+  const unsigned j = _connections.indexOfGlobalConnection(global_i, global_j);
 
   // compute d(Kij)/d(porous_flow_variables)
   for (unsigned local_k = 0; local_k < _current_elem->n_nodes(); ++local_k)
@@ -121,7 +123,7 @@ PorousFlowAdvectiveFluxCalculatorBase::executeOnElement(
                (_grad_phi[local_k][qp] * _dgrad_p_dgrad_var[qp][_phase][pvar] -
                 _phi[local_k][qp] * _dfluid_density_qp_dvar[qp][_phase][pvar] * _gravity);
       deriv += _permeability[qp] * (_dgrad_p_dvar[qp][_phase][pvar] * _phi[local_k][qp]);
-      _dkij_dvar[global_i][global_j][global_k][pvar] +=
+      _dkij_dvar[sequential_i][j][global_k][pvar] +=
           _JxW[qp] * _coord[qp] * (-_grad_phi[local_i][qp] * deriv * _phi[local_j][qp]);
     }
   }
@@ -141,32 +143,20 @@ PorousFlowAdvectiveFluxCalculatorBase::timestepSetup()
   // d(flux_out)/d(porous_flow_variables)
   if (resizing_was_needed)
   {
-    _du_dvar.clear();
-    _du_dvar_computed_by_thread.clear();
-    _dflux_out_dvars.clear();
-    for (const auto & nodes : _kij)
+    const std::size_t num_nodes = _connections.numNodes();
+    _du_dvar.assign(num_nodes, std::vector<Real>(_num_vars, 0.0));
+    _du_dvar_computed_by_thread.assign(num_nodes, false);
+    _dflux_out_dvars.assign(num_nodes, std::map<dof_id_type, std::vector<Real>>());
+    _dkij_dvar.resize(num_nodes);
+    for (dof_id_type sequential_i = 0; sequential_i < num_nodes; ++sequential_i)
     {
-      const dof_id_type node_i = nodes.first;
-      _du_dvar[node_i] = std::vector<Real>(_num_vars, 0.0);
-      _du_dvar_computed_by_thread[node_i] = false;
-      _dflux_out_dvars[node_i] = {};
-    }
-
-    _dkij_dvar.clear();
-    for (const auto & nodes : _kij)
-    {
-      const dof_id_type node_i = nodes.first;
-      _dkij_dvar[node_i] = {};
-      for (const auto & neighbours_i : nodes.second)
-      {
-        const dof_id_type node_j = neighbours_i.first;
-        _dkij_dvar[node_i][node_j] = {};
-        for (const auto & also_neighbours_i : nodes.second)
-        {
-          const dof_id_type node_k = also_neighbours_i.first;
-          _dkij_dvar[node_i][node_j][node_k] = std::vector<Real>(_num_vars, 0.0);
-        }
-      }
+      const std::vector<dof_id_type> con_i =
+          _connections.globalConnectionsToSequentialID(sequential_i);
+      const std::size_t num_con_i = con_i.size();
+      _dkij_dvar[sequential_i].assign(num_con_i, std::map<dof_id_type, std::vector<Real>>());
+      for (unsigned j = 0; j < num_con_i; ++j)
+        for (const auto & global_neighbor_to_i : con_i)
+          _dkij_dvar[sequential_i][j][global_neighbor_to_i] = std::vector<Real>(_num_vars, 0.0);
     }
   }
 }
@@ -175,12 +165,17 @@ void
 PorousFlowAdvectiveFluxCalculatorBase::initialize()
 {
   AdvectiveFluxCalculatorBase::initialize();
-  for (const auto & nodes : _kij)
-    _du_dvar_computed_by_thread[nodes.first] = false;
-  for (auto & i_and_jmap : _dkij_dvar)
-    for (auto & j_and_kmap : i_and_jmap.second)
-      for (auto & k_and_derivs : j_and_kmap.second)
-        k_and_derivs.second = std::vector<Real>(_num_vars, 0.0);
+  const std::size_t num_nodes = _connections.numNodes();
+  _du_dvar_computed_by_thread.assign(num_nodes, false);
+  for (dof_id_type sequential_i = 0; sequential_i < num_nodes; ++sequential_i)
+  {
+    const std::vector<dof_id_type> con_i =
+        _connections.globalConnectionsToSequentialID(sequential_i);
+    const std::size_t num_con_i = con_i.size();
+    for (unsigned j = 0; j < num_con_i; ++j)
+      for (const auto & global_neighbor_to_i : con_i)
+        _dkij_dvar[sequential_i][j][global_neighbor_to_i] = std::vector<Real>(_num_vars, 0.0);
+  }
 }
 
 void
@@ -193,12 +188,13 @@ PorousFlowAdvectiveFluxCalculatorBase::execute()
   // using _du_dvar_computed_by_thread
   for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
   {
-    const dof_id_type node_i = _current_elem->node_id(i);
-    if (_du_dvar_computed_by_thread[node_i])
+    const dof_id_type global_i = _current_elem->node_id(i);
+    const dof_id_type sequential_i = _connections.sequentialID(global_i);
+    if (_du_dvar_computed_by_thread[sequential_i])
       continue;
     for (unsigned pvar = 0; pvar < _num_vars; ++pvar)
-      _du_dvar[node_i][pvar] = computedU_dvar(i, pvar);
-    _du_dvar_computed_by_thread[node_i] = true;
+      _du_dvar[sequential_i][pvar] = computedU_dvar(i, pvar);
+    _du_dvar_computed_by_thread[sequential_i] = true;
   }
 }
 
@@ -209,75 +205,38 @@ PorousFlowAdvectiveFluxCalculatorBase::threadJoin(const UserObject & uo)
   const PorousFlowAdvectiveFluxCalculatorBase & pfafc =
       static_cast<const PorousFlowAdvectiveFluxCalculatorBase &>(uo);
   // add the values of _dkij_dvar computed by different threads
-  for (const auto & i_and_jmap : pfafc._dkij_dvar)
+  const std::size_t num_nodes = _connections.numNodes();
+  for (dof_id_type sequential_i = 0; sequential_i < num_nodes; ++sequential_i)
   {
-    const dof_id_type i = i_and_jmap.first;
-    for (const auto & j_and_kmap : i_and_jmap.second)
-    {
-      const dof_id_type j = j_and_kmap.first;
-      for (const auto & k_and_derivs : j_and_kmap.second)
-      {
-        const dof_id_type k = k_and_derivs.first;
-        const std::vector<Real> derivs = k_and_derivs.second;
+    const std::vector<dof_id_type> con_i =
+        _connections.globalConnectionsToSequentialID(sequential_i);
+    const std::size_t num_con_i = con_i.size();
+    for (unsigned j = 0; j < num_con_i; ++j)
+      for (const auto & global_derivs : pfafc._dkij_dvar[sequential_i][j])
         for (unsigned pvar = 0; pvar < _num_vars; ++pvar)
-          _dkij_dvar[i][j][k][pvar] += derivs[pvar];
-      }
-    }
+          _dkij_dvar[sequential_i][j][global_derivs.first][pvar] += global_derivs.second[pvar];
   }
+
   // gather the values of _du_dvar computed by different threads
-  for (const auto & node_du : pfafc._du_dvar)
-  {
-    const dof_id_type i = node_du.first;
-    if (!_du_dvar_computed_by_thread[i] && pfafc.getdU_dvarComputedByThread(i))
-      _du_dvar[i] = node_du.second;
-  }
+  for (dof_id_type sequential_i = 0; sequential_i < _number_of_nodes; ++sequential_i)
+    if (!_du_dvar_computed_by_thread[sequential_i] &&
+        pfafc._du_dvar_computed_by_thread[sequential_i])
+      _du_dvar[sequential_i] = pfafc._du_dvar[sequential_i];
 }
 
-const std::vector<Real> &
-PorousFlowAdvectiveFluxCalculatorBase::getdU_dvar(dof_id_type node_i) const
-{
-  const auto & node_du = _du_dvar.find(node_i);
-  if (node_du == _du_dvar.end())
-    mooseError("PorousFlowAdvectiveFluxCalculatorBase UserObject " + name() +
-               " _du_dvar does not contain node " + Moose::stringify(node_i));
-  return node_du->second;
-}
-
-bool
-PorousFlowAdvectiveFluxCalculatorBase::getdU_dvarComputedByThread(dof_id_type node_i) const
-{
-  const auto & node_du = _du_dvar_computed_by_thread.find(node_i);
-  if (node_du == _du_dvar_computed_by_thread.end())
-    mooseError("PorousFlowAdvectiveFluxCalculatorBase UserObject " + name() +
-               " _du_dvar_computed_by_thread does not contain node " + Moose::stringify(node_i));
-  return node_du->second;
-}
 
 const std::map<dof_id_type, std::vector<Real>> &
 PorousFlowAdvectiveFluxCalculatorBase::getdK_dvar(dof_id_type node_i, dof_id_type node_j) const
 {
-  const auto & row_find = _dkij_dvar.find(node_i);
-  if (row_find == _dkij_dvar.end())
-    mooseError("PorousFlowAdvectiveFluxCalculatorBase UserObject " + name() +
-               " _dkij_dvar does not contain node " + Moose::stringify(node_i));
-  const std::map<dof_id_type, std::map<dof_id_type, std::vector<Real>>> & dkij_dvar_row =
-      row_find->second;
-  const auto & column_find = dkij_dvar_row.find(node_j);
-  if (column_find == dkij_dvar_row.end())
-    mooseError("PorousFlowAdvectiveFluxCalculatorBase UserObject " + name() +
-               " _dkij_dvar on row " + Moose::stringify(node_i) + " does not contain node " +
-               Moose::stringify(node_j));
-  return column_find->second;
+  const dof_id_type sequential_i = _connections.sequentialID(node_i);
+  const unsigned j = _connections.indexOfGlobalConnection(node_i, node_j);
+  return _dkij_dvar[sequential_i][j];
 }
 
 const std::map<dof_id_type, std::vector<Real>> &
 PorousFlowAdvectiveFluxCalculatorBase::getdFluxOut_dvars(unsigned node_id) const
 {
-  const auto & row_find = _dflux_out_dvars.find(node_id);
-  if (row_find == _dflux_out_dvars.end())
-    mooseError("PorousFlowAdvectiveFluxCalculatorBase UserObject " + name() +
-               " _dflux_out_dvars does not contain node " + Moose::stringify(node_id));
-  return row_find->second;
+  return _dflux_out_dvars[_connections.sequentialID(node_id)];
 }
 
 void
@@ -286,10 +245,11 @@ PorousFlowAdvectiveFluxCalculatorBase::finalize()
   AdvectiveFluxCalculatorBase::finalize();
 
   // compute d(flux_out)/d(porous flow variable)
-  for (auto & nodes : _kij)
+  /// _dflux_out_dvars[sequential_i][global_j][pvar] = d(flux_out[global version of sequential_i])/d(porous_flow_variable pvar at global node j)
+  for (const auto & node_i : _connections.globalIDs())
   {
-    const dof_id_type node_i = nodes.first;
-    _dflux_out_dvars[node_i].clear();
+    const dof_id_type sequential_i = _connections.sequentialID(node_i);
+    _dflux_out_dvars[sequential_i].clear();
 
     const std::map<dof_id_type, Real> dflux_out_du =
         AdvectiveFluxCalculatorBase::getdFluxOutdu(node_i);
@@ -297,29 +257,31 @@ PorousFlowAdvectiveFluxCalculatorBase::finalize()
     {
       const dof_id_type j = node_du.first;
       const Real dflux_out_du_j = node_du.second;
-      _dflux_out_dvars[node_i][j] = getdU_dvar(j);
+      _dflux_out_dvars[sequential_i][j] = _du_dvar[_connections.sequentialID(j)];
       for (unsigned pvar = 0; pvar < _num_vars; ++pvar)
-        _dflux_out_dvars[node_i][j][pvar] *= dflux_out_du_j;
+        _dflux_out_dvars[sequential_i][j][pvar] *= dflux_out_du_j;
     }
 
     // _dflux_out_dvars is now sized correctly, because getdFluxOutdu(i) contains all nodes
     // connected to i and all nodes connected to nodes connected to i.  The
     // getdFluxOutdKij contains no extra nodes, so just += the dflux/dK terms
-    const std::map<dof_id_type, std::map<dof_id_type, Real>> dflux_out_dKjk =
+    const std::vector<std::vector<Real>> dflux_out_dKjk =
         AdvectiveFluxCalculatorBase::getdFluxOutdKjk(node_i);
-    for (const auto & nodes : dflux_out_dKjk)
+    const std::vector<dof_id_type> con_i = _connections.globalConnectionsToGlobalID(node_i);
+    for (std::size_t index_j = 0; index_j < con_i.size(); ++index_j)
     {
-      const dof_id_type j = nodes.first;
-      for (const auto & node_du : nodes.second)
+      const dof_id_type node_j = con_i[index_j];
+      const std::vector<dof_id_type> con_j = _connections.globalConnectionsToGlobalID(node_j);
+      for (std::size_t index_k = 0; index_k < con_j.size(); ++index_k)
       {
-        const dof_id_type k = node_du.first;
-        const Real dflux_out_dK_jk = node_du.second;
-        const std::map<dof_id_type, std::vector<Real>> dkj_dvarl = getdK_dvar(j, k);
+        const dof_id_type node_k = con_j[index_k];
+        const Real dflux_out_dK_jk = dflux_out_dKjk[index_j][index_k];
+        const std::map<dof_id_type, std::vector<Real>> dkj_dvarl = getdK_dvar(node_j, node_k);
         for (const auto & nodel_deriv : dkj_dvarl)
         {
           const dof_id_type l = nodel_deriv.first;
           for (unsigned pvar = 0; pvar < _num_vars; ++pvar)
-            _dflux_out_dvars[node_i][l][pvar] += dflux_out_dK_jk * nodel_deriv.second[pvar];
+            _dflux_out_dvars[sequential_i][l][pvar] += dflux_out_dK_jk * nodel_deriv.second[pvar];
         }
       }
     }
