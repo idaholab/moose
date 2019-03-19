@@ -163,4 +163,10 @@ protected:
   std::vector<std::vector<unsigned int>> _elem_ids;
 };
 
+namespace THM
+{
+template <>
+HeatStructure::EHeatStructureType stringToEnum(const std::string & s);
+}
+
 #endif /* HEATSTRUCTURE_H */
