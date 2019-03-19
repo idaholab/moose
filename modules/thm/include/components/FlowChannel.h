@@ -227,4 +227,10 @@ protected:
   std::vector<MaterialPropertyName> _q_wall_names;
 };
 
+namespace THM
+{
+template <>
+FlowChannel::EConvHeatTransGeom stringToEnum(const std::string & s);
+}
+
 #endif /* FLOWCHANNEL_H */
