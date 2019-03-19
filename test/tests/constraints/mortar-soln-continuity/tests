@@ -1,9 +1,12 @@
 [Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
   [soln-continuity]
     type = 'Exodiff'
     input = 'soln-continuity.i'
     exodiff = 'soln-continuity_out.e'
     mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
   []
   [soln-continuity-fine]
     type = 'Exodiff'
@@ -11,6 +14,7 @@
     exodiff = 'soln-continuity-fine_out.e'
     cli_args = 'Mesh/file=nodal_normals_test_offset_nonmatching_gap_fine.e Outputs/file_base=soln-continuity-fine_out'
     mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to produce the expected result for a fine mesh solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
   []
   [soln-continuity-jac]
     type = PetscJacobianTester
@@ -18,5 +22,6 @@
     run_sim = True
     difference_tol = 1e-7
     mesh_mode = 'REPLICATED'
+    requirement = 'The Jacobian for the solution continuity test case shall be perfect'
   []
 []
