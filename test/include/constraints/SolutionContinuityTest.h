@@ -10,7 +10,7 @@
 #ifndef SOLUTIONCONTINUITYTEST_H
 #define SOLUTIONCONTINUITYTEST_H
 
-#include "RealMortarConstraint.h"
+#include "MortarConstraint.h"
 
 template <ComputeStage>
 class SolutionContinuityTest;
@@ -18,7 +18,7 @@ class SolutionContinuityTest;
 declareADValidParams(SolutionContinuityTest);
 
 template <ComputeStage compute_stage>
-class SolutionContinuityTest : public RealMortarConstraint<compute_stage>
+class SolutionContinuityTest : public MortarConstraint<compute_stage>
 {
 public:
   SolutionContinuityTest(const InputParameters & parameters);
@@ -28,7 +28,7 @@ protected:
 
   virtual ADResidual computeQpResidualSide(Moose::ConstraintType type) override;
 
-  usingRealMortarConstraintMembers;
+  usingMortarConstraintMembers;
 };
 
 #endif /* SOLUTIONCONTINUITYTEST_H */

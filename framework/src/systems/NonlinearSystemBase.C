@@ -45,7 +45,6 @@
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraint.h"
-#include "RealMortarConstraint.h"
 #include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
 #include "ScalarKernel.h"
@@ -1110,49 +1109,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
   }
 
-  THREAD_ID tid = 0;
-  // go over mortar interfaces
-  auto & ifaces = _mesh.getMortarInterfaces();
-  for (const auto & iface : ifaces)
-  {
-    if (_constraints.hasActiveMortarConstraints(iface->_name))
-    {
-      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
-
-      // go over elements on that interface
-      const std::vector<Elem *> & elems = iface->_elems;
-      for (const auto & elem : elems)
-      {
-        // for each element process constraints on the
-        _fe_problem.setCurrentSubdomainID(elem, tid);
-        _fe_problem.prepare(elem, tid);
-        _fe_problem.reinitElem(elem, tid);
-
-        for (const auto & ffc : face_constraints)
-        {
-          ffc->reinit();
-          ffc->computeResidual();
-        }
-        _fe_problem.cacheResidual(tid);
-
-        // evaluate residuals that go into master and slave side
-        for (const auto & ffc : face_constraints)
-        {
-          ffc->reinitSide(Moose::Master);
-          ffc->computeResidualSide(Moose::Master);
-          _fe_problem.cacheResidual(tid);
-
-          ffc->reinitSide(Moose::Slave);
-          ffc->computeResidualSide(Moose::Slave);
-          _fe_problem.cacheResidual(tid);
-        }
-      }
-      _fe_problem.addCachedResidual(tid);
-    }
-  }
-
   // go over real mortar constraints
-  auto & mortar_constraints = _constraints.getActiveRealMortarConstraints();
+  auto & mortar_constraints = _constraints.getActiveMortarConstraints();
   for (auto & mortar_constraint : mortar_constraints)
     mortar_constraint->computeResidual();
 
@@ -1171,6 +1129,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     element_pair_locators = &displaced_geom_search_data._element_pair_locators;
   }
 
+  THREAD_ID tid = 0;
   for (const auto & it : *element_pair_locators)
   {
     ElementPairLocator & elem_pair_loc = *(it.second);
@@ -1926,50 +1885,12 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     }
   }
 
-  THREAD_ID tid = 0;
-  // go over mortar interfaces
-  auto & ifaces = _mesh.getMortarInterfaces();
-  for (const auto & iface : ifaces)
-  {
-    if (_constraints.hasActiveMortarConstraints(iface->_name))
-    {
-      // MortarConstraint objects
-      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
-
-      // go over elements on that interface
-      const std::vector<Elem *> & elems = iface->_elems;
-      for (const auto & elem : elems)
-      {
-        // for each element process constraints on the
-        for (const auto & ffc : face_constraints)
-        {
-          _fe_problem.setCurrentSubdomainID(elem, tid);
-          _fe_problem.prepare(elem, tid);
-          _fe_problem.reinitElem(elem, tid);
-          ffc->reinit();
-          ffc->subProblem().prepareShapes(ffc->variable().number(), tid);
-          ffc->computeJacobian();
-          _fe_problem.cacheJacobian(tid);
-
-          ffc->reinitSide(Moose::Master);
-          ffc->computeJacobianSide(Moose::Master);
-          _fe_problem.cacheJacobian(tid);
-
-          ffc->reinitSide(Moose::Slave);
-          ffc->computeJacobianSide(Moose::Slave);
-          _fe_problem.cacheJacobian(tid);
-        }
-
-        _fe_problem.addCachedJacobian(tid);
-      }
-    }
-  }
-
   // go over real mortar constraints
-  auto & mortar_constraints = _constraints.getActiveRealMortarConstraints();
+  auto & mortar_constraints = _constraints.getActiveMortarConstraints();
   for (auto & mortar_constraint : mortar_constraints)
     mortar_constraint->computeJacobian();
 
+  THREAD_ID tid = 0;
   // go over element-element constraint interface
   std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
 

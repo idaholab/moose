@@ -11,11 +11,11 @@
 
 registerADMooseObject("MooseTestApp", SolutionContinuityTest);
 
-defineADValidParams(SolutionContinuityTest, RealMortarConstraint, );
+defineADValidParams(SolutionContinuityTest, MortarConstraint, );
 
 template <ComputeStage compute_stage>
 SolutionContinuityTest<compute_stage>::SolutionContinuityTest(const InputParameters & parameters)
-  : RealMortarConstraint<compute_stage>(parameters)
+  : MortarConstraint<compute_stage>(parameters)
 {
 }
 

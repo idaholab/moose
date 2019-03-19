@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RealMortarConstraintBase.h"
+#include "MortarConstraintBase.h"
 
 template <>
 InputParameters
-validParams<RealMortarConstraintBase>()
+validParams<MortarConstraintBase>()
 {
   return validParams<Constraint>();
 }
 
-RealMortarConstraintBase::RealMortarConstraintBase(const InputParameters & parameters)
+MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   : Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     MooseVariableInterface<Real>(this,

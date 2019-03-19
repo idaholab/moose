@@ -11,8 +11,7 @@
 
 // MOOSE includes
 #include "ElemElemConstraint.h"
-#include "MortarConstraint.h"
-#include "RealMortarConstraintBase.h"
+#include "MortarConstraintBase.h"
 #include "MooseVariable.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
@@ -30,9 +29,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
 
   // Cast the the possible Contraint types
   std::shared_ptr<NodeFaceConstraint> nfc = std::dynamic_pointer_cast<NodeFaceConstraint>(object);
-  std::shared_ptr<MortarConstraint> ffc = std::dynamic_pointer_cast<MortarConstraint>(object);
-  std::shared_ptr<RealMortarConstraintBase> mc =
-      std::dynamic_pointer_cast<RealMortarConstraintBase>(object);
+  std::shared_ptr<MortarConstraintBase> mc =
+      std::dynamic_pointer_cast<MortarConstraintBase>(object);
   std::shared_ptr<NodalConstraint> nc = std::dynamic_pointer_cast<NodalConstraint>(object);
   std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
   std::shared_ptr<NodeElemConstraint> nec = std::dynamic_pointer_cast<NodeElemConstraint>(object);
@@ -52,15 +50,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   }
 
   // MortarConstraint
-  else if (ffc)
-  {
-    const std::string & interface = ffc->getParam<std::string>("interface");
-    _mortar_constraints[interface].addObject(ffc);
-  }
-
-  // RealMortarConstraint
   else if (mc)
-    _real_mortar_constraints.addObject(mc);
+    _mortar_constraints.addObject(mc);
 
   // ElemElemConstraint
   else if (ec)
@@ -127,21 +118,10 @@ ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
   return it->second.getActiveObjects();
 }
 
-const std::vector<std::shared_ptr<MortarConstraint>> &
-ConstraintWarehouse::getActiveMortarConstraints(const std::string & interface) const
+const std::vector<std::shared_ptr<MortarConstraintBase>> &
+ConstraintWarehouse::getActiveMortarConstraints() const
 {
-  std::map<std::string, MooseObjectWarehouse<MortarConstraint>>::const_iterator it =
-      _mortar_constraints.find(interface);
-  mooseAssert(it != _mortar_constraints.end(),
-              "Unable to locate storage for MortarConstraint objects for the given interface: "
-                  << interface);
-  return it->second.getActiveObjects();
-}
-
-const std::vector<std::shared_ptr<RealMortarConstraintBase>> &
-ConstraintWarehouse::getActiveRealMortarConstraints() const
-{
-  return _real_mortar_constraints.getActiveObjects();
+  return _mortar_constraints.getActiveObjects();
 }
 
 const std::vector<std::shared_ptr<ElemElemConstraint>> &
@@ -199,14 +179,6 @@ bool
 ConstraintWarehouse::hasActiveNodalConstraints() const
 {
   return _nodal_constraints.hasActiveObjects();
-}
-
-bool
-ConstraintWarehouse::hasActiveMortarConstraints(const std::string & interface) const
-{
-  std::map<std::string, MooseObjectWarehouse<MortarConstraint>>::const_iterator it =
-      _mortar_constraints.find(interface);
-  return (it != _mortar_constraints.end() && it->second.hasActiveObjects());
 }
 
 bool
@@ -301,16 +273,17 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
                                        std::set<std::string> & unique_variables,
                                        THREAD_ID /*tid=0*/) const
 {
-  for (const auto & it : _mortar_constraints)
+  const auto & objects = _mortar_constraints.getActiveObjects();
+  for (const auto & mc : objects)
   {
-    const auto & objects = it.second.getActiveObjects();
-    for (const auto & ffc : objects)
-    {
-      MooseVariableFEBase & var = ffc->variable();
-      unique_variables.insert(var.name());
-      const std::set<SubdomainID> & subdomains = var.activeSubdomains();
-      subdomains_covered.insert(subdomains.begin(), subdomains.end());
-    }
+    MooseVariableFEBase & lm_var = mc->variable();
+    unique_variables.insert(lm_var.name());
+    const std::set<SubdomainID> & lm_subdomains = lm_var.activeSubdomains();
+    subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
+
+    // Mortar constraints require the creation of a master lower dimensional subdomain in order to
+    // create the mortar segment mesh. We don't need any computing objects on it
+    subdomains_covered.insert(mc->masterSubdomain());
   }
 }
 

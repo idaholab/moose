@@ -11,31 +11,30 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 
-registerMooseObject("MooseApp", EqualGradientConstraint);
+registerADMooseObject("MooseApp", EqualGradientConstraint);
 
-template <>
-InputParameters
-validParams<EqualGradientConstraint>()
+defineADValidParams(EqualGradientConstraint,
+                    MortarConstraint,
+                    params.addRequiredParam<unsigned int>("component",
+                                                          "Gradient component to constrain"););
+
+template <ComputeStage compute_stage>
+EqualGradientConstraint<compute_stage>::EqualGradientConstraint(const InputParameters & parameters)
+  : MortarConstraint<compute_stage>(parameters), _component(adGetParam<unsigned int>("component"))
 {
-  InputParameters params = validParams<MortarConstraint>();
-  params.addRequiredParam<unsigned int>("component", "Gradient component to constrain");
-  return params;
+  _need_primal_gradient = true;
 }
 
-EqualGradientConstraint::EqualGradientConstraint(const InputParameters & parameters)
-  : MortarConstraint(parameters), _component(getParam<unsigned int>("component"))
-{
-  // _need_primal_gradient = true;
-}
-
-Real
-EqualGradientConstraint::computeQpResidual()
+template <ComputeStage compute_stage>
+ADReal
+EqualGradientConstraint<compute_stage>::computeQpResidual()
 {
   return (_grad_u_master[_qp](_component) - _grad_u_slave[_qp](_component)) * _test[_i][_qp];
 }
 
-Real
-EqualGradientConstraint::computeQpResidualSide(Moose::ConstraintType res_type)
+template <ComputeStage compute_stage>
+ADReal
+EqualGradientConstraint<compute_stage>::computeQpResidualSide(Moose::ConstraintType res_type)
 {
   switch (res_type)
   {
@@ -43,24 +42,6 @@ EqualGradientConstraint::computeQpResidualSide(Moose::ConstraintType res_type)
       return _lambda[_qp] * _grad_test_master[_i][_qp](_component);
     case Moose::Slave:
       return -_lambda[_qp] * _grad_test_slave[_i][_qp](_component);
-    default:
-      return 0;
-  }
-}
-
-Real
-EqualGradientConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_type)
-{
-  switch (jac_type)
-  {
-    case Moose::MasterMaster:
-    case Moose::SlaveMaster:
-      return _phi[_j][_qp] * _grad_test_master[_i][_qp](_component);
-
-    case Moose::MasterSlave:
-    case Moose::SlaveSlave:
-      return -_phi[_j][_qp] * _grad_test_slave[_i][_qp](_component);
-
     default:
       return 0;
   }

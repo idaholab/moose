@@ -10,7 +10,7 @@
 #ifndef GAPHEATCONDUCTANCETEST_H
 #define GAPHEATCONDUCTANCETEST_H
 
-#include "RealMortarConstraint.h"
+#include "MortarConstraint.h"
 
 template <ComputeStage>
 class GapHeatConductanceTest;
@@ -18,7 +18,7 @@ class GapHeatConductanceTest;
 declareADValidParams(GapHeatConductanceTest);
 
 template <ComputeStage compute_stage>
-class GapHeatConductanceTest : public RealMortarConstraint<compute_stage>
+class GapHeatConductanceTest : public MortarConstraint<compute_stage>
 {
 public:
   GapHeatConductanceTest(const InputParameters & parameters);
@@ -30,7 +30,7 @@ protected:
 
   const Real _gap_conductance_constant;
 
-  usingRealMortarConstraintMembers;
+  usingMortarConstraintMembers;
 };
 
 #endif /* GAPHEATCONDUCTANCETEST_H */

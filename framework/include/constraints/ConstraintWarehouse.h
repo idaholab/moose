@@ -16,10 +16,9 @@
 class Constraint;
 class NodalConstraint;
 class NodeFaceConstraint;
-class MortarConstraint;
 class ElemElemConstraint;
 class NodeElemConstraint;
-class RealMortarConstraintBase;
+class MortarConstraintBase;
 
 /**
  * Warehouse for storing constraints
@@ -34,17 +33,15 @@ public:
    * @param object A std::shared_ptr of the object
    * @param tid Not used.
    */
-  void addObject(std::shared_ptr<Constraint> object, THREAD_ID tid = 0, bool recurse = true);
+  void
+  addObject(std::shared_ptr<Constraint> object, THREAD_ID tid = 0, bool recurse = true) override;
 
   ///@{
   /**
    * Access methods for active objects.
    */
   const std::vector<std::shared_ptr<NodalConstraint>> & getActiveNodalConstraints() const;
-  const std::vector<std::shared_ptr<MortarConstraint>> &
-  getActiveMortarConstraints(const std::string & interface) const;
-  const std::vector<std::shared_ptr<RealMortarConstraintBase>> &
-  getActiveRealMortarConstraints() const;
+  const std::vector<std::shared_ptr<MortarConstraintBase>> & getActiveMortarConstraints() const;
   const std::vector<std::shared_ptr<ElemElemConstraint>> &
   getActiveElemElemConstraints(InterfaceID interface_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
@@ -58,7 +55,6 @@ public:
    * Deterimine if active objects exist.
    */
   bool hasActiveNodalConstraints() const;
-  bool hasActiveMortarConstraints(const std::string & interface) const;
   bool hasActiveElemElemConstraints(const InterfaceID interface_id, bool displaced) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   bool
@@ -75,7 +71,7 @@ public:
   /**
    * Update the various active lists.
    */
-  void updateActive(THREAD_ID tid = 0);
+  void updateActive(THREAD_ID tid = 0) override;
 
   virtual void residualEnd(THREAD_ID tid = 0) const;
 
@@ -90,10 +86,7 @@ protected:
   std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _displaced_node_face_constraints;
 
   /// MortarConstraints
-  std::map<std::string, MooseObjectWarehouse<MortarConstraint>> _mortar_constraints;
-
-  /// RealMortarConstraints
-  MooseObjectWarehouse<RealMortarConstraintBase> _real_mortar_constraints;
+  MooseObjectWarehouse<MortarConstraintBase> _mortar_constraints;
 
   /// ElemElemConstraints (non-displaced)
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;
