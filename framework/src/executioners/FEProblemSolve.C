@@ -59,7 +59,6 @@ validParams<FEProblemSolve>()
   params.addParam<unsigned int>("nl_max_funcs", 10000, "Max Nonlinear solver function evaluations");
   params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
   params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
-  params.addParam<Real>("nl_abs_step_tol", 1.0e-50, "Nonlinear Absolute step Tolerance");
   params.addParam<Real>("nl_rel_step_tol", 1.0e-50, "Nonlinear Relative step Tolerance");
   params.addParam<bool>(
       "snesmf_reuse_base",
@@ -71,7 +70,7 @@ validParams<FEProblemSolve>()
                         "convergence check");
 
   params.addParamNamesToGroup("l_tol l_abs_step_tol l_max_its nl_max_its nl_max_funcs "
-                              "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
+                              "nl_abs_tol nl_rel_tol nl_rel_step_tol "
                               "snesmf_reuse_base compute_initial_residual_before_preset_bcs",
                               "Solver");
   return params;
@@ -108,9 +107,6 @@ FEProblemSolve::FEProblemSolve(Executioner * ex)
 
   es.parameters.set<Real>("nonlinear solver relative residual tolerance") =
       getParam<Real>("nl_rel_tol");
-
-  es.parameters.set<Real>("nonlinear solver absolute step tolerance") =
-      getParam<Real>("nl_abs_step_tol");
 
   es.parameters.set<Real>("nonlinear solver relative step tolerance") =
       getParam<Real>("nl_rel_step_tol");
