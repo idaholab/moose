@@ -5,7 +5,7 @@
     exodiff = gravityeq_out.e
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to establish gravity equilibrium as the first part of a two-part simulation"
-    issues = '#'
+    issues = '#13071'
     design = 'porous_flow/restart.md'
   [../]
   [./gas_injection]
@@ -15,7 +15,7 @@
     prereq = gravity_eq
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to restart using a previous result"
-    issues = '#'
+    issues = '#13071'
     design = 'porous_flow/restart.md'
   [../]
   [./gas_injection_new_mesh]
@@ -25,7 +25,7 @@
     prereq = gravity_eq
     threading = '!pthreads'
     requirement = "PorousFlow shall be able to restart using a previous result"
-    issues = '#'
+    issues = '#13071'
     design = 'porous_flow/restart.md'
   [../]
 []
