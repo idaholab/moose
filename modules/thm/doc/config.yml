@@ -18,6 +18,7 @@ Content:
         content:
             - /**
             - ~syntax/ThermalContact/index.md
+            - ~source/actions/ThermalContactAction.md
             - ~source/actions/ThermalContactBCsAction.md
             - ~source/actions/ThermalContactMaterialsAction.md
             - ~source/actions/AddSlaveFluxVectorAction.md
@@ -75,12 +76,6 @@ Extensions:
             /FluidProperties/TabulatedFluidProperties: /Modules/FluidProperties/TabulatedFluidProperties
             /FluidProperties/TwoPhaseFluidPropertiesIndependent: /Modules/FluidProperties/TwoPhaseFluidPropertiesIndependent
             /FluidProperties/Water97FluidProperties: /Modules/FluidProperties/Water97FluidProperties
-            /FluidProperties/IAPWS95VaporFluidProperties: /Modules/FluidProperties/IAPWS95VaporFluidProperties
-            /FluidProperties/IAPWS95LiquidFluidProperties: /Modules/FluidProperties/IAPWS95LiquidFluidProperties
-            /FluidProperties/IAPWS95HEMFluidProperties: /Modules/FluidProperties/IAPWS95HEMFluidProperties
-            /FluidProperties/IAPWS957EqnFluidProperties: /Modules/FluidProperties/IAPWS957EqnFluidProperties
-            /FluidProperties/IAPWS95TwoPhaseNCGGeneralFluidProperties: /Modules/FluidProperties/IAPWS95TwoPhaseNCGGeneralFluidProperties
-            /FluidProperties/NitrogenSBTLFluidProperties: /Modules/FluidProperties/NitrogenSBTLFluidProperties
             /FluidProperties/IdealRealGasMixtureFluidProperties: /Modules/FluidProperties/IdealRealGasMixtureFluidProperties
             /FluidProperties/LinearTest7EqnFluidProperties: /Modules/FluidProperties/LinearTest7EqnFluidProperties
         includes:
