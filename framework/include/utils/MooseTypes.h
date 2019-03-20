@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <type_traits>
 
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr
@@ -65,8 +66,22 @@
                beginIndex_1(__VA_ARGS__),                                                          \
                beginIndex_0(__VA_ARGS__))
 
+/**
+ * MooseIndex Macro for creating an index type of the right type for loops and other places where
+ * type matching is important.
+ * Usage:
+ *
+ * Type t;
+ *
+ * Container type:
+ * for (MooseIndex(t) i = 0; i < t.size(); ++i)
+ *
+ * POD type:
+ * for (MooseIndex(t) i = 0; i < t; ++i)
+ */
 #define MooseIndex(type) decltype(_MooseIndex(type, 0))
 
+// SFINAE templates for type MooseIndex type selection
 template <typename T, typename std::enable_if<std::is_integral<T>::value>::type * = nullptr>
 typename std::remove_const<T>::type
 _MooseIndex(T, int)

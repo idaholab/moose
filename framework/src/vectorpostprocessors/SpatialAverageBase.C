@@ -47,7 +47,7 @@ SpatialAverageBase::SpatialAverageBase(const InputParameters & parameters)
   // Note: We associate the local variable "i" with nbins and "j" with nvals throughout.
 
   // couple variables initialize vectors
-  for (auto j = beginIndex(_average); j < _nvals; ++j)
+  for (MooseIndex(_average) j = 0; j < _nvals; ++j)
   {
     _values[j] = &coupledValue("variable", j);
     _average[j] = &declareVector(getVar("variable", j)->name());
@@ -55,7 +55,7 @@ SpatialAverageBase::SpatialAverageBase(const InputParameters & parameters)
 
   // initialize the bin center value vector
   _bin_center.resize(_nbins);
-  for (auto i = beginIndex(_counts); i < _nbins; ++i)
+  for (MooseIndex(_counts) i = 0; i < _nbins; ++i)
     _bin_center[i] = (i + 0.5) * _deltaR;
 }
 
@@ -82,7 +82,7 @@ SpatialAverageBase::execute()
     // add the volume contributed by the current quadrature point
     if (bin >= 0 && bin < static_cast<int>(_nbins))
     {
-      for (auto j = decltype(_nvals)(0); j < _nvals; ++j)
+      for (MooseIndex(_nvals) j = 0; j < _nvals; ++j)
         (*_average[j])[bin] += (*_values[j])[_qp];
 
       _counts[bin]++;
@@ -95,11 +95,11 @@ SpatialAverageBase::finalize()
 {
   gatherSum(_counts);
 
-  for (auto j = beginIndex(_average); j < _nvals; ++j)
+  for (MooseIndex(_average) j = 0; j < _nvals; ++j)
   {
     gatherSum(*_average[j]);
 
-    for (auto i = beginIndex(_counts); i < _nbins; ++i)
+    for (MooseIndex(_counts) i = 0; i < _nbins; ++i)
       (*_average[j])[i] =
           _counts[i] > 0 ? (*_average[j])[i] / static_cast<Real>(_counts[i]) : _empty_bin_value;
   }
@@ -110,11 +110,11 @@ SpatialAverageBase::threadJoin(const UserObject & y)
 {
   const SpatialAverageBase & uo = static_cast<const SpatialAverageBase &>(y);
 
-  for (auto i = beginIndex(_counts); i < _nbins; ++i)
+  for (MooseIndex(_counts) i = 0; i < _nbins; ++i)
   {
     _counts[i] += uo._counts[i];
 
-    for (auto j = beginIndex(_average); j < _nvals; ++j)
+    for (MooseIndex(_average) j = 0; j < _nvals; ++j)
       (*_average[j])[i] += (*uo._average[j])[i];
   }
 }
