@@ -367,3 +367,18 @@ def run_profile(function, *args, **kwargs):
     ps.print_stats()
     print(s.getvalue())
     return out
+
+def shellCommand(command, cwd=None):
+    """
+    Run a command in the shell.
+    We can ignore anything on stderr as that can potentially mess up the output
+    of an otherwise successful command.
+    """
+    with open(os.devnull, 'w') as devnull:
+        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=devnull, cwd=cwd)
+        p.wait()
+        retcode = p.returncode
+        if retcode != 0:
+            raise Exception("Exception raised while running the command: %s in directory %s" % (command, cwd))
+
+        return p.communicate()[0]
