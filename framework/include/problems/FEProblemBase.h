@@ -1478,6 +1478,13 @@ public:
    */
   virtual void computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group);
 
+  void computeUserObjectsInternal(const ExecFlagType & type, const Moose::AuxGroup & group, TheWarehouse::Query & query);
+
+  /**
+   * Compute an user object with the given name
+   */
+  virtual void computeUserObjectByName(const ExecFlagType & type, const std::string & name);
+
   /**
    * Call compute methods on AuxKernels
    */

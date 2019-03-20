@@ -321,10 +321,15 @@ MultiAppTransfer::adjustTransferedSolution(FEProblemBase & from_problem, FEProbl
   PostprocessorValue & from_adjuster =
       from_problem.getPostprocessorValue(_from_postprocessor_to_be_preserved);
   // Init problem so that to_postprocessor_to_be_preserved is set correctly
-  to_problem.execute(EXEC_INITIAL);
+  // to_problem.executeSingleUserObject(EXEC_INITIAL);
+  to_problem.computeUserObjectByName(EXEC_INITIAL, _to_postprocessor_to_be_preserved);
+  std::cout<<" to_problem.computeUserObjects "<<std::endl;
   // Now we should have the right adjuster based on the transfered solution
   PostprocessorValue & to_adjuster =
       to_problem.getPostprocessorValue(_to_postprocessor_to_be_preserved);
+
+  std::cout<<" to_adjuster "<<to_adjuster<<std::endl;
+
   // Scale the solution. Allow scale for selected variables???
   to_problem.getNonlinearSystemBase().solution().scale(from_adjuster / to_adjuster);
   // Update the local solution
