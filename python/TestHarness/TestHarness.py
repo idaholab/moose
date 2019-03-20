@@ -233,7 +233,7 @@ class TestHarness:
                 # Prune submdule paths when searching for tests
 
                 dir_name = os.path.basename(dirpath)
-                if (self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git'))) or dir_name in [".git", ".svn"]:
+                if (search_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git'))) or dir_name in [".git", ".svn"]:
                     dirnames[:] = []
                     filenames[:] = []
 
