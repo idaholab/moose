@@ -1,4 +1,5 @@
 #include "VectorPortBC.h"
+#include <complex>
 
 registerMooseObject("ElkApp", VectorPortBC);
 
@@ -7,20 +8,16 @@ InputParameters
 validParams<VectorPortBC>()
 {
   InputParameters params = validParams<VectorIntegratedBC>();
-  params.addClassDescription(
-      "First order Port BC from Jin 'Theory and Computation of Electromagnetic Fields' by JM Jin.");
-  params.addRequiredParam<FunctionName>("beta", "Waveguide propagation constant.");
+  params.addClassDescription("First order Absorbing/Port BC from Jin 'Theory and Computation of "
+                             "Electromagnetic Fields' by JM Jin.");
+  params.addParam<FunctionName>(
+      "beta", 1.0, "Scalar waveguide propagation constant (usually some k, k0).");
   MooseEnum component("real imaginary");
   params.addParam<MooseEnum>(
       "component", component, "Variable field component (real or imaginary).");
-  params.addRequiredCoupledVar("coupled", "Coupled field variable.");
-  params.addParam<FunctionName>("Inc_real_x", 0.0, "Real incoming field, x direction.");
-  params.addParam<FunctionName>("Inc_real_y", 0.0, "Real incoming field, y direction.");
-  params.addParam<FunctionName>("Inc_real_z", 0.0, "Real incoming field, z direction.");
-  params.addParam<FunctionName>("Inc_imag_x", 0.0, "Imaginary incoming field, x direction.");
-  params.addParam<FunctionName>("Inc_imag_y", 0.0, "Imaginary incoming field, y direction.");
-  params.addParam<FunctionName>("Inc_imag_z", 0.0, "Imaginary incoming field, z direction.");
-  params.addRequiredParam<Real>("sign", "Sign of term in weak form.");
+  params.addRequiredCoupledVar("coupled_field", "Coupled field variable.");
+  params.addParam<FunctionName>("real_incoming", 0.0, "Real incoming field vector.");
+  params.addParam<FunctionName>("imag_incoming", 0.0, "Imaginary incoming field vector.");
   return params;
 }
 
@@ -31,18 +28,14 @@ VectorPortBC::VectorPortBC(const InputParameters & parameters)
 
     _component(getParam<MooseEnum>("component")),
 
-    _coupled_val(coupledVectorValue("coupled")),
-    _coupled_id(coupled("coupled")),
+    _coupled_val(coupledVectorValue("coupled_field")),
+    _coupled_id(coupled("coupled_field")),
 
-    _inc_real_x(getFunction("Inc_real_x")),
-    _inc_real_y(getFunction("Inc_real_y")),
-    _inc_real_z(getFunction("Inc_real_z")),
+    _inc_real(getFunction("real_incoming")),
+    _inc_imag(getFunction("imag_incoming")),
 
-    _inc_imag_x(getFunction("Inc_imag_x")),
-    _inc_imag_y(getFunction("Inc_imag_y")),
-    _inc_imag_z(getFunction("Inc_imag_z")),
-
-    _sign(getParam<Real>("sign"))
+    // Value of complex j (can't use _j or _i due to MOOSE basis fxn conventions)
+    _jay(0, 1)
 {
 }
 
@@ -50,32 +43,75 @@ Real
 VectorPortBC::computeQpResidual()
 {
 
-  RealVectorValue incoming_real(_inc_real_x.value(_t, _q_point[_qp]),
-                                _inc_real_y.value(_t, _q_point[_qp]),
-                                _inc_real_z.value(_t, _q_point[_qp]));
-  RealVectorValue incoming_imag(_inc_imag_x.value(_t, _q_point[_qp]),
-                                _inc_imag_y.value(_t, _q_point[_qp]),
-                                _inc_imag_z.value(_t, _q_point[_qp]));
+  // Initialize E components
+  std::complex<double> E0(0, 0);
+  std::complex<double> E1(0, 0);
+  std::complex<double> E2(0, 0);
 
-  RealVectorValue Q_real = -2 * _beta.value(_t, _q_point[_qp]) * _normals[_qp].cross(incoming_imag);
-  RealVectorValue Q_imag = 2 * _beta.value(_t, _q_point[_qp]) * _normals[_qp].cross(incoming_real);
-
+  // Create E and ncrossE for residual based on component parameter
   if (_component == "real")
   {
-    return _sign * (Q_real * _normals[_qp].cross(_test[_i][_qp]) -
-                    _beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
-                        (_normals[_qp].cross(_coupled_val[_qp])));
+    E0.real(_u[_qp](0));
+    E0.imag(_coupled_val[_qp](0));
+
+    E1.real(_u[_qp](1));
+    E1.imag(_coupled_val[_qp](1));
+
+    E2.real(_u[_qp](2));
+    E2.imag(_coupled_val[_qp](2));
   }
   else
   {
-    return _sign * (Q_imag * _normals[_qp].cross(_test[_i][_qp]) +
-                    _beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
-                        (_normals[_qp].cross(_coupled_val[_qp])));
+    E0.real(_coupled_val[_qp](0));
+    E0.imag(_u[_qp](0));
+
+    E1.real(_coupled_val[_qp](1));
+    E1.imag(_u[_qp](1));
+
+    E2.real(_coupled_val[_qp](2));
+    E2.imag(_u[_qp](2));
+  }
+  VectorValue<std::complex<double>> E(E0, E1, E2);
+
+  // Creating vector, curl for E_inc before residual and Jacobian contributions
+  std::complex<double> E_inc0(_inc_real.vectorValue(_t, _q_point[_qp])(0),
+                              _inc_imag.vectorValue(_t, _q_point[_qp])(0));
+  std::complex<double> E_inc1(_inc_real.vectorValue(_t, _q_point[_qp])(1),
+                              _inc_imag.vectorValue(_t, _q_point[_qp])(1));
+  std::complex<double> E_inc2(_inc_real.vectorValue(_t, _q_point[_qp])(2),
+                              _inc_imag.vectorValue(_t, _q_point[_qp])(2));
+  VectorValue<std::complex<double>> E_inc(E_inc0, E_inc1, E_inc2);
+
+  std::complex<double> curl_inc0(_inc_real.vectorCurl(_t, _q_point[_qp])(0),
+                                 _inc_imag.vectorCurl(_t, _q_point[_qp])(0));
+  std::complex<double> curl_inc1(_inc_real.vectorCurl(_t, _q_point[_qp])(1),
+                                 _inc_imag.vectorCurl(_t, _q_point[_qp])(1));
+  std::complex<double> curl_inc2(_inc_real.vectorCurl(_t, _q_point[_qp])(2),
+                                 _inc_imag.vectorCurl(_t, _q_point[_qp])(2));
+  VectorValue<std::complex<double>> curl_inc(curl_inc0, curl_inc1, curl_inc2);
+
+  // Calculate incoming wave contribution to BC residual
+  std::complex<double> U_inc_dot_test =
+      _test[_i][_qp].cross(_normals[_qp]) * curl_inc +
+      _jay * _beta.value(_t, _q_point[_qp]) *
+          (_test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(E_inc));
+
+  // Calculate solution field contribution to BC residual (first order version)
+  std::complex<double> P_dot_test = _jay * _beta.value(_t, _q_point[_qp]) *
+                                    _test[_i][_qp].cross(_normals[_qp]) * _normals[_qp].cross(E);
+
+  std::complex<double> res = U_inc_dot_test - P_dot_test;
+
+  if (_component == "real")
+  {
+    return res.real();
+  }
+  else
+  {
+    return res.imag();
   }
 }
 
-// CURRENTLY DOESN'T SEEM TO BE CORRECT - USE PJFNK OR NEWTON PLUS FDP IF YOU
-// NEED THIS BC
 Real
 VectorPortBC::computeQpJacobian()
 {
@@ -83,20 +119,18 @@ VectorPortBC::computeQpJacobian()
 }
 
 Real
-VectorPortBC::computeQpOffDiagJacobian(unsigned jvar)
+VectorPortBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _coupled_id)
+  Real off_diag_jac = _beta.value(_t, _q_point[_qp]) * _test[_i][_qp].cross(_normals[_qp]) *
+                      _normals[_qp].cross(_phi[_j][_qp]);
+
+  if (_component == "real" && jvar == _coupled_id)
   {
-    if (_component == "real")
-    {
-      return -_beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
-             (_normals[_qp].cross(_phi[_j][_qp]));
-    }
-    else
-    {
-      return _beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
-             (_normals[_qp].cross(_phi[_j][_qp]));
-    }
+    return off_diag_jac;
+  }
+  else if (_component == "imaginary" && jvar == _coupled_id)
+  {
+    return -off_diag_jac;
   }
   else
   {

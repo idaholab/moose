@@ -2,6 +2,7 @@
 #define VECTORPORTBC_H
 
 #include "VectorIntegratedBC.h"
+#include <complex>
 
 class VectorPortBC;
 
@@ -11,6 +12,7 @@ InputParameters validParams<VectorPortBC>();
 /**
  *
  */
+
 class VectorPortBC : public VectorIntegratedBC
 {
 public:
@@ -28,15 +30,10 @@ protected:
   const VectorVariableValue & _coupled_val;
   unsigned int _coupled_id;
 
-  Function & _inc_real_x;
-  Function & _inc_real_y;
-  Function & _inc_real_z;
+  Function & _inc_real;
+  Function & _inc_imag;
 
-  Function & _inc_imag_x;
-  Function & _inc_imag_y;
-  Function & _inc_imag_z;
-
-  Real _sign;
+  std::complex<double> _jay;
 };
 
 #endif // VECTORPORTBC_H
