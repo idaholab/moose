@@ -18,14 +18,14 @@ validParams<PolycrystalEBSD>()
 {
   InputParameters params = validParams<PolycrystalUserObjectBase>();
   params.addClassDescription("Object for setting up a polycrystal structure from an EBSD Datafile");
+  params.addParam<unsigned int>("phase", "The phase to use for all queries.");
   params.addParam<UserObjectName>("ebsd_reader", "EBSD Reader for initial condition");
-  params.addParam<unsigned int>("phase", 0, "The phase to use for all queries. (Default: 0 ALL)");
   return params;
 }
 
 PolycrystalEBSD::PolycrystalEBSD(const InputParameters & parameters)
   : PolycrystalUserObjectBase(parameters),
-    _phase(getParam<unsigned int>("phase")),
+    _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : libMesh::invalid_uint),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _node_to_grain_weight_map(_ebsd_reader.getNodeToGrainWeightMap())
 {
@@ -38,7 +38,7 @@ PolycrystalEBSD::getGrainsBasedOnPoint(const Point & point,
   const EBSDAccessFunctors::EBSDPointData & d = _ebsd_reader.getData(point);
 
   // See if we are in a phase that we are actually tracking
-  if (_phase && _phase != d._phase)
+  if (_phase != libMesh::invalid_uint && _phase != d._phase)
   {
     grains.resize(0);
     return;
@@ -49,13 +49,13 @@ PolycrystalEBSD::getGrainsBasedOnPoint(const Point & point,
   const auto local_id = _ebsd_reader.getAvgData(global_id)._local_id;
 
   grains.resize(1);
-  grains[0] = _phase ? local_id : global_id;
+  grains[0] = _phase != libMesh::invalid_uint ? local_id : global_id;
 }
 
 unsigned int
 PolycrystalEBSD::getNumGrains() const
 {
-  if (_phase)
+  if (_phase != libMesh::invalid_uint)
     return _ebsd_reader.getGrainNum(_phase);
   else
     return _ebsd_reader.getGrainNum();
@@ -78,7 +78,8 @@ PolycrystalEBSD::getNodalVariableValue(unsigned int op_index, const Node & n) co
     // If the current order parameter index (_op_index) is equal to the assigned index
     // (_assigned_op),
     // set the value from node_to_grain_weight_map
-    auto grain_index = _phase ? _ebsd_reader.getGlobalID(_phase, index) : index;
+    auto grain_index =
+        _phase != libMesh::invalid_uint ? _ebsd_reader.getGlobalID(_phase, index) : index;
     mooseAssert(grain_index < it->second.size(), "grain_index out of range");
     auto value = (it->second)[grain_index];
     if (_grain_to_op[index] == op_index && value > 0.0)

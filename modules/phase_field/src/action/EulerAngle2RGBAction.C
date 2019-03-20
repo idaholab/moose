@@ -25,6 +25,7 @@ validParams<EulerAngle2RGBAction>()
   params.addParam<std::string>("auxvariable_name_base", "RGB", "Base name of the auxvariables");
   params.addClassDescription("Set up auxvariables and auxkernels to output Euler angles as RGB "
                              "values interpolated across inverse pole figure");
+  params.addParam<unsigned int>("phase", "The phase to use for all queries.");
   MooseEnum sd_enum = MooseEnum("100=1 010=2 001=3", "001");
   params.addParam<MooseEnum>("sd", sd_enum, "Reference sample direction");
   MooseEnum structure_enum = MooseEnum(
@@ -81,6 +82,8 @@ EulerAngle2RGBAction::act()
       params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
       params.set<Point>("no_grain_color") = getParam<Point>("no_grain_color");
+      if (isParamValid("phase"))
+        params.set<unsigned int>("phase") = getParam<unsigned int>("phase");
       _problem->addAuxKernel("EulerAngleProvider2RGBAux", var_name, params);
     }
     else
