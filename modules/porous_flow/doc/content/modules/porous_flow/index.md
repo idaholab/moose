@@ -100,6 +100,7 @@ We are currently in the process of building a few key examples of PorousFlow.
 - [Cold CO$_{2}$ injection into an elastic reservoir --- a THM problem](co2_example.md)
 - [Underground mining - an HM problem](coal_mining.md)
 - [CO$_2$ storage benchmark problems](co2_intercomparison.md)
+- [Restarting from a previous simulation](restart.md)
 
 ## Additional MOOSE objects
 
