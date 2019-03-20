@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEUOPPS_H
-#define INTERFACEUOPPS_H
+#ifndef INTERFACEVALUEUOPPS_H
+#define INTERFACEVALUEUOPPS_H
 
 #include "GeneralPostprocessor.h"
 
-class InterfaceUOPPS;
-class InterfaceUO;
+class InterfaceValueUOPPS;
+class InterfaceValueAverageUO;
 
 template <>
-InputParameters validParams<InterfaceUOPPS>();
+InputParameters validParams<InterfaceValueUOPPS>();
 
 /**
  * This PPS just retrieves the value from InterfaceUO_MP
  */
-class InterfaceUOPPS : public GeneralPostprocessor
+class InterfaceValueUOPPS : public GeneralPostprocessor
 {
 public:
-  InterfaceUOPPS(const InputParameters & parameters);
-  virtual ~InterfaceUOPPS();
+  InterfaceValueUOPPS(const InputParameters & parameters);
+  virtual ~InterfaceValueUOPPS();
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -34,8 +34,8 @@ public:
   virtual void threadJoin(const UserObject & /*uo*/) override{};
 
 protected:
-  const InterfaceUO & _uo;
+  const InterfaceValueAverageUO & _uo;
   Real _value_pp;
 };
 
-#endif // INTERFACEUOPPS_H
+#endif // INTERFACEVALUEUOPPS_H

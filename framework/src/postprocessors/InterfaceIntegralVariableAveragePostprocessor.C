@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceIntegralVariableAveragePostprocessor.h"
-#include "InterfaceAverageTools.h"
+#include "InterfaceValueTools.h"
 
 registerMooseObject("MooseApp", InterfaceIntegralVariableAveragePostprocessor);
 
@@ -17,8 +17,8 @@ InputParameters
 validParams<InterfaceIntegralVariableAveragePostprocessor>()
 {
   InputParameters params = validParams<InterfaceIntegralVariablePostprocessor>();
-  params.addParam<MooseEnum>("average_type",
-                             InterfaceAverageTools::InterfaceAverageOptions(),
+  params.addParam<MooseEnum>("interface_value_type",
+                             InterfaceValueTools::InterfaceAverageOptions(),
                              "Type of average we want to output");
   params.addClassDescription("Computes the average value of a variable on an "
                              "interface. Note that this cannot be used on the "
@@ -29,7 +29,7 @@ validParams<InterfaceIntegralVariableAveragePostprocessor>()
 InterfaceIntegralVariableAveragePostprocessor::InterfaceIntegralVariableAveragePostprocessor(
     const InputParameters & parameters)
   : InterfaceIntegralVariablePostprocessor(parameters),
-    _average_type(parameters.get<MooseEnum>("average_type")),
+    _interface_value_type(parameters.get<MooseEnum>("interface_value_type")),
     _volume(0)
 {
 }
@@ -37,7 +37,7 @@ InterfaceIntegralVariableAveragePostprocessor::InterfaceIntegralVariableAverageP
 Real
 InterfaceIntegralVariableAveragePostprocessor::computeQpIntegral()
 {
-  return InterfaceAverageTools::getQuantity(_average_type, _u[_qp], _u_neighbor[_qp]);
+  return InterfaceValueTools::getQuantity(_interface_value_type, _u[_qp], _u_neighbor[_qp]);
 }
 
 void

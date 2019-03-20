@@ -1,9 +1,9 @@
 [Tests]
   [./interface_average_value_postprocessor_test]
     type = 'Exodiff'
-    input = 'interface_average_value_postprocessor.i'
-    exodiff = 'interface_average_value_postprocessor_out.e'
-    requirement = "Testing the implementation of the InterfaceIntegralVariableAveragePostprocessor"
+    input = 'interface_value_average_postprocessor.i'
+    exodiff = 'interface_value_average_postprocessor_out.e'
+    requirement = "Testing the implementation of the InterfaceIntegralVariableValuePostprocessor"
                "By design at the end of the first step we should observe: "
                "an average material property of 7, "
                "an average material property absolute jump fo 6,"

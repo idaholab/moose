@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEUO_QP_H
-#define INTERFACEUO_QP_H
+#ifndef INTERFACEVALUEUO_QP
+#define INTERFACEVALUEUO_QP
 
-#include "InterfaceAverageUserObject.h"
+#include "InterfaceValueUserObject.h"
 
-class InterfaceUO_QP;
+class InterfaceValueUO_QP;
 
 template <>
-InputParameters validParams<InterfaceUO_QP>();
+InputParameters validParams<InterfaceValueUO_QP>();
 
 /**
  *
  */
-class InterfaceUO_QP : public InterfaceAverageUserObject
+class InterfaceValueUO_QP : public InterfaceValueUserObject
 {
 public:
-  InterfaceUO_QP(const InputParameters & parameters);
-  virtual ~InterfaceUO_QP();
+  InterfaceValueUO_QP(const InputParameters & parameters);
+  virtual ~InterfaceValueUO_QP();
 
   virtual void initialize();
   virtual void execute();
@@ -41,4 +41,4 @@ protected:
   const VariableValue & _u_neighbor;
 };
 
-#endif // INTERFACEUO_QP_H
+#endif // INTERFACEVALUEUO_QP

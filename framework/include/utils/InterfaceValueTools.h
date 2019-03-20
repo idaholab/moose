@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEAVERAGETOOLS_H
-#define INTERFACEAVERAGETOOLS_H
+#ifndef INTERFACEVALUEATOOLS_H
+#define INTERFACEVALUEATOOLS_H
 
 // MOOSE includes
 #include "MooseTypes.h"
@@ -16,7 +16,7 @@
 // Forward declarations
 class MooseEnum;
 
-namespace InterfaceAverageTools
+namespace InterfaceValueTools
 {
 /*
  * Return the scalar_type MooseEnum
@@ -25,13 +25,13 @@ MooseEnum InterfaceAverageOptions();
 
 /*
  * Return scalar quantity across an interface based on the user specified
- * _average_type. First parameter is the average type, the second the value
+ * _interface_value_type. First parameter is the average type, the second the value
  * on the master surface, and the third parameter is the value on slave
  * surface of the interface
  */
-Real getQuantity(const MooseEnum /*average_type*/,
+Real getQuantity(const MooseEnum /*interface_value_type*/,
                  const Real /*value_master*/,
                  const Real /*value_slave*/);
 }
 
-#endif // INTERFACEAVERAGETOOLS_H
+#endif // INTERFACEVALUEATOOLS_H

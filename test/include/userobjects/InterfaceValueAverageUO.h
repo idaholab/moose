@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEUO_H
-#define INTERFACEUO_H
+#ifndef INTERFACEVALUEAVERAGEUO_H
+#define INTERFACEVALUEAVERAGEUO_H
 
-#include "InterfaceAverageUserObject.h"
+#include "InterfaceValueUserObject.h"
 
-class InterfaceUO;
+class InterfaceValueAverageUO;
 
 template <>
-InputParameters validParams<InterfaceAverageUserObject>();
+InputParameters validParams<InterfaceValueUserObject>();
 
 /**
- * InterfaceAverageUserObject is a super class used to compute an average value
+ * InterfaceValueUserObject is a super class used to compute an average value
  * across an interface
  */
-class InterfaceUO : public InterfaceAverageUserObject
+class InterfaceValueAverageUO : public InterfaceValueUserObject
 {
 public:
-  InterfaceUO(const InputParameters & parameters);
-  virtual ~InterfaceUO();
+  InterfaceValueAverageUO(const InputParameters & parameters);
+  virtual ~InterfaceValueAverageUO();
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -42,4 +42,4 @@ protected:
   Real _total_volume;
 };
 
-#endif // INTERFACEUO_H
+#endif // INTERFACEVALUEAVERAGEUO_H

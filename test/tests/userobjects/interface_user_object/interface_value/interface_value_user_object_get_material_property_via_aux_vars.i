@@ -39,53 +39,53 @@
 []
 
 [UserObjects]
-  [./interface_average]
-    type = InterfaceUO
+  [./interface_value_type]
+    type = InterfaceValueAverageUO
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = ' timestep_end'
-    average_type = average
+    interface_value_type = average
   [../]
   [./interface_master_minus_slave]
-    type = InterfaceUO
+    type = InterfaceValueAverageUO
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = ' timestep_end'
-    average_type = jump_master_minus_slave
+    interface_value_type = jump_master_minus_slave
   [../]
   [./interface_slave_minus_master]
-    type = InterfaceUO
+    type = InterfaceValueAverageUO
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = ' timestep_end'
-    average_type = jump_slave_minus_master
+    interface_value_type = jump_slave_minus_master
   [../]
   [./interface_absolute_jump]
-    type = InterfaceUO
+    type = InterfaceValueAverageUO
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = ' timestep_end'
-    average_type = jump_abs
+    interface_value_type = jump_abs
   [../]
   [./interface_master]
-    type = InterfaceUO
+    type = InterfaceValueAverageUO
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = ' timestep_end'
-    average_type = master
+    interface_value_type = master
   [../]
   [./interface_slave]
-    type = InterfaceUO
+    type = InterfaceValueAverageUO
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = ' timestep_end'
-    average_type = slave
+    interface_value_type = slave
   [../]
 []
 
@@ -164,27 +164,27 @@
 
 [Postprocessors]
   [./interface_average_PP]
-    type = InterfaceUOPPS
-    user_object = interface_average
+    type = InterfaceValueUOPPS
+    user_object = interface_value_type
   [../]
   [./interface_master_minus_slave_PP]
-    type = InterfaceUOPPS
+    type = InterfaceValueUOPPS
     user_object = interface_master_minus_slave
   [../]
   [./interface_average_slave_minus_master_PP]
-    type = InterfaceUOPPS
+    type = InterfaceValueUOPPS
     user_object = interface_slave_minus_master
   [../]
   [./interface_average_absolute_jump_PP]
-    type = InterfaceUOPPS
+    type = InterfaceValueUOPPS
     user_object = interface_absolute_jump
   [../]
   [./interface_average_master_PP]
-    type = InterfaceUOPPS
+    type = InterfaceValueUOPPS
     user_object = interface_master
   [../]
   [./interface_average_slave_PP]
-    type = InterfaceUOPPS
+    type = InterfaceValueUOPPS
     user_object = interface_slave
   [../]
 []

@@ -108,7 +108,7 @@
 [Postprocessors]
   [./diffusivity_average]
     type = InterfaceIntegralVariableAveragePostprocessor
-    average_type = average
+    interface_value_type = average
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
@@ -116,7 +116,7 @@
   [../]
   [./diffusivity_jump_master_slave]
     type = InterfaceIntegralVariableAveragePostprocessor
-    average_type = jump_master_minus_slave
+    interface_value_type = jump_master_minus_slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
@@ -124,7 +124,7 @@
   [../]
   [./diffusivity_jump_slave_master]
     type = InterfaceIntegralVariableAveragePostprocessor
-    average_type = jump_slave_minus_master
+    interface_value_type = jump_slave_minus_master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
@@ -132,7 +132,7 @@
   [../]
   [./diffusivity_jump_abs]
     type = InterfaceIntegralVariableAveragePostprocessor
-    average_type = jump_abs
+    interface_value_type = jump_abs
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
@@ -140,7 +140,7 @@
   [../]
   [./diffusivity_master]
     type = InterfaceIntegralVariableAveragePostprocessor
-    average_type = master
+    interface_value_type = master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
@@ -148,7 +148,7 @@
   [../]
   [./diffusivity_slave]
     type = InterfaceIntegralVariableAveragePostprocessor
-    average_type = slave
+    interface_value_type = slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END

@@ -35,7 +35,7 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  const MooseEnum _average_type;
+  const MooseEnum _interface_value_type;
   Real _volume;
   virtual Real computeQpIntegral() override;
 };

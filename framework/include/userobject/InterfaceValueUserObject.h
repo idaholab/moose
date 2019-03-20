@@ -7,29 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEAVERAGEUSEROBJECT_H
-#define INTERFACEAVERAGEUSEROBJECT_H
+#ifndef INTERFACEVALUEUSEROBJECT_H
+#define INTERFACEVALUEUSEROBJECT_H
 
 #include "InterfaceUserObject.h"
 
-class InterfaceAverageUserObject;
+class InterfaceValueUserObject;
 
 template <>
-InputParameters validParams<InterfaceAverageUserObject>();
+InputParameters validParams<InterfaceValueUserObject>();
 
 /**
  *  A special InterfaceUserObject computing average values across an interface given
- *  the average type (see InterfaceAverageTools for details)
+ *  the average type (see InterfaceValueTools for details)
  */
-class InterfaceAverageUserObject : public InterfaceUserObject
+class InterfaceValueUserObject : public InterfaceUserObject
 {
 public:
-  InterfaceAverageUserObject(const InputParameters & parameters);
+  InterfaceValueUserObject(const InputParameters & parameters);
 
 protected:
   /// the average type to be computed across the interface
-  const MooseEnum _average_type;
-  virtual Real computeAverageType(const Real /*value_master*/, const Real /*value_slave*/);
+  const MooseEnum _interface_value_type;
+  virtual Real computeInterfaceValueType(const Real /*value_master*/, const Real /*value_slave*/);
 };
 
-#endif /* INTERFACEAVERAGEUSEROBJECT_H */
+#endif /* INTERFACEVALUEUSEROBJECT_H */

@@ -7,43 +7,45 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InterfaceUOPPS.h"
-#include "InterfaceUO.h"
+#include "InterfaceValueUOPPS.h"
+#include "InterfaceValueAverageUO.h"
 
-registerMooseObject("MooseTestApp", InterfaceUOPPS);
+registerMooseObject("MooseTestApp", InterfaceValueUOPPS);
 
 template <>
 InputParameters
-validParams<InterfaceUOPPS>()
+validParams<InterfaceValueUOPPS>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("user_object", "The name of the user object");
   params.addClassDescription(
-      "Test Interface User Object postprocessor getting value from InterfaceUO");
+      "Test Interface User Object postprocessor getting value from InterfaceValueAverageUO");
   return params;
 }
 
-InterfaceUOPPS::InterfaceUOPPS(const InputParameters & parameters)
-  : GeneralPostprocessor(parameters), _uo(getUserObject<InterfaceUO>("user_object")), _value_pp(0.)
+InterfaceValueUOPPS::InterfaceValueUOPPS(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
+    _uo(getUserObject<InterfaceValueAverageUO>("user_object")),
+    _value_pp(0.)
 {
 }
 
-InterfaceUOPPS::~InterfaceUOPPS() {}
+InterfaceValueUOPPS::~InterfaceValueUOPPS() {}
 
 void
-InterfaceUOPPS::initialize()
+InterfaceValueUOPPS::initialize()
 {
   _value_pp = 0;
 }
 
 void
-InterfaceUOPPS::execute()
+InterfaceValueUOPPS::execute()
 {
   _value_pp = _uo.getValue();
 }
 
 Real
-InterfaceUOPPS::getValue()
+InterfaceValueUOPPS::getValue()
 {
   return _value_pp;
 }

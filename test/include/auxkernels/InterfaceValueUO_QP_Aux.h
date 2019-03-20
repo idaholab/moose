@@ -7,33 +7,33 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef InterfaceUserObjectQpAux_H
-#define InterfaceUserObjectQpAux_H
+#ifndef INTERFACEUSEROBJECTQPAUX_H
+#define INTERFACEUSEROBJECTQPAUX_H
 
 #include "AuxKernel.h"
-#include "InterfaceUO_QP.h"
+#include "InterfaceValueUO_QP.h"
 
 // Forward Declarations
-class InterfaceUserObjectQpAux;
+class InterfaceValueUO_QP_Aux;
 
 template <>
-InputParameters validParams<InterfaceUserObjectQpAux>();
+InputParameters validParams<InterfaceValueUO_QP_Aux>();
 
 /**
- * AuxKernel creating an AuxVariable from values stored in an InterfaceUO_QP
+ * AuxKernel creating an AuxVariable from values stored in an InterfaceValueUO_QP
  */
-class InterfaceUserObjectQpAux : public AuxKernel
+class InterfaceValueUO_QP_Aux : public AuxKernel
 {
 public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  InterfaceUserObjectQpAux(const InputParameters & parameters);
+  InterfaceValueUO_QP_Aux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
-  const InterfaceUO_QP & _interface_uo;
+  const InterfaceValueUO_QP & _interface_uo;
 };
 
-#endif // InterfaceUserObjectQpAux_H
+#endif // INTERFACEUSEROBJECTQPAUX_H

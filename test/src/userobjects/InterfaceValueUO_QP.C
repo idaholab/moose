@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InterfaceUO_QP.h"
+#include "InterfaceValueUO_QP.h"
 #include "MooseMesh.h"
-registerMooseObject("MooseTestApp", InterfaceUO_QP);
+registerMooseObject("MooseTestApp", InterfaceValueUO_QP);
 
 template <>
 InputParameters
-validParams<InterfaceUO_QP>()
+validParams<InterfaceValueUO_QP>()
 {
-  InputParameters params = validParams<InterfaceAverageUserObject>();
+  InputParameters params = validParams<InterfaceValueUserObject>();
   params.addRequiredCoupledVar("var", "The variable name");
   params.addCoupledVar("var_neighbor", "The variable name");
   params.addClassDescription("Test Interfae User Object computing and storing average values at "
@@ -23,8 +23,8 @@ validParams<InterfaceUO_QP>()
   return params;
 }
 
-InterfaceUO_QP::InterfaceUO_QP(const InputParameters & parameters)
-  : InterfaceAverageUserObject(parameters),
+InterfaceValueUO_QP::InterfaceValueUO_QP(const InputParameters & parameters)
+  : InterfaceValueUserObject(parameters),
     _u(coupledValue("var")),
     _u_neighbor(parameters.isParamSetByUser("var_neighbor") ? coupledNeighborValue("var_neighbor")
                                                             : coupledNeighborValue("var"))
@@ -32,10 +32,10 @@ InterfaceUO_QP::InterfaceUO_QP(const InputParameters & parameters)
 {
 }
 
-InterfaceUO_QP::~InterfaceUO_QP() {}
+InterfaceValueUO_QP::~InterfaceValueUO_QP() {}
 
 void
-InterfaceUO_QP::initialize()
+InterfaceValueUO_QP::initialize()
 {
   // define the boundary map and retrieve element side and boundary_ID
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> elem_side_bid =
@@ -67,7 +67,7 @@ InterfaceUO_QP::initialize()
 }
 
 void
-InterfaceUO_QP::execute()
+InterfaceValueUO_QP::execute()
 {
   // find the entry on the map
   auto it = _map_values.find(std::make_pair(_current_elem->id(), _current_side));
@@ -80,14 +80,14 @@ InterfaceUO_QP::execute()
     // loop over qps and do stuff
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
       // compute average value at qp
-      vec[qp] = computeAverageType(_u[qp], _u_neighbor[qp]);
+      vec[qp] = computeInterfaceValueType(_u[qp], _u_neighbor[qp]);
   }
   else
-    mooseError("InterfaceUO_QP:: cannot find the required element and side");
+    mooseError("InterfaceValueUO_QP:: cannot find the required element and side");
 }
 
 Real
-InterfaceUO_QP::getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const
+InterfaceValueUO_QP::getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const
 {
   auto data = _map_values.find(std::make_pair(elem, side));
   if (data != _map_values.end())

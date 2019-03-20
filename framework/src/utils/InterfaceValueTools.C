@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InterfaceAverageTools.h"
+#include "InterfaceValueTools.h"
 
 // MOOSE includes
 #include "MooseEnum.h"
 #include "MooseError.h"
 
-namespace InterfaceAverageTools
+namespace InterfaceValueTools
 {
 
 MooseEnum
@@ -25,11 +25,11 @@ InterfaceAverageOptions()
 }
 
 Real
-getQuantity(const MooseEnum average_type, const Real value_master, const Real value_slave)
+getQuantity(const MooseEnum interface_value_type, const Real value_master, const Real value_slave)
 {
   Real result = 0.;
 
-  switch (average_type)
+  switch (interface_value_type)
   {
     case 0: /*average*/
       result = (value_master + value_slave) * 0.5;

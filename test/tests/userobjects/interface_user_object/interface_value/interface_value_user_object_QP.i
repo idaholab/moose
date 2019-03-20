@@ -40,52 +40,52 @@
 
 [UserObjects]
   [./interface_average_uo]
-    type = InterfaceUO_QP
+    type = InterfaceValueUO_QP
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = 'initial timestep_end'
-    average_type = average
+    interface_value_type = average
   [../]
   [./interface_master_minus_slave_uo]
-    type = InterfaceUO_QP
+    type = InterfaceValueUO_QP
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = 'initial timestep_end'
-    average_type = jump_master_minus_slave
+    interface_value_type = jump_master_minus_slave
   [../]
   [./interface_slave_minus_master_uo]
-    type = InterfaceUO_QP
+    type = InterfaceValueUO_QP
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = 'initial timestep_end'
-    average_type = jump_slave_minus_master
+    interface_value_type = jump_slave_minus_master
   [../]
   [./interface_absolute_jump_uo]
-    type = InterfaceUO_QP
+    type = InterfaceValueUO_QP
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = 'initial timestep_end'
-    average_type = jump_abs
+    interface_value_type = jump_abs
   [../]
   [./interface_master_uo]
-    type = InterfaceUO_QP
+    type = InterfaceValueUO_QP
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = 'initial timestep_end'
-    average_type = master
+    interface_value_type = master
   [../]
   [./interface_slave_uo]
-    type = InterfaceUO_QP
+    type = InterfaceValueUO_QP
     var = diffusivity_1
     var_neighbor = diffusivity_2
     boundary = 'interface'
     execute_on = 'initial timestep_end'
-    average_type = slave
+    interface_value_type = slave
   [../]
 []
 
@@ -146,37 +146,37 @@
     variable = diffusivity_2
   []
   [./interface_avg_qp_aux]
-    type = InterfaceUserObjectQpAux
+    type = InterfaceValueUO_QP_Aux
     variable = avg_qp
     boundary = 'interface'
     interface_uo_name = interface_average_uo
   []
   [./interface_master_minus_slave_qp_aux]
-    type = InterfaceUserObjectQpAux
+    type = InterfaceValueUO_QP_Aux
     variable = master_minus_slave_qp
     boundary = 'interface'
     interface_uo_name = interface_master_minus_slave_uo
   [../]
   [./interface_slave_minus_master_qp_aux]
-    type = InterfaceUserObjectQpAux
+    type = InterfaceValueUO_QP_Aux
     variable = slave_minus_master_qp
     boundary = 'interface'
     interface_uo_name = interface_slave_minus_master_uo
   [../]
   [./interface_absolute_jump_qp_aux]
-    type = InterfaceUserObjectQpAux
+    type = InterfaceValueUO_QP_Aux
     variable = abs_jump_qp
     boundary = 'interface'
     interface_uo_name = interface_absolute_jump_uo
   [../]
   [./interface_master_qp_aux]
-    type = InterfaceUserObjectQpAux
+    type = InterfaceValueUO_QP_Aux
     variable = master_qp
     boundary = 'interface'
     interface_uo_name = interface_master_uo
   [../]
   [./interface_slave_qp_aux]
-    type = InterfaceUserObjectQpAux
+    type = InterfaceValueUO_QP_Aux
     variable = slave_qp
     boundary = 'interface'
     interface_uo_name = interface_slave_uo

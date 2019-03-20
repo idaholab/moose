@@ -1,10 +1,10 @@
 [Tests]
     [./interface_UO_test]
       type = 'Exodiff'
-      input = 'interface_user_object.i'
-      exodiff = 'interface_user_object_out.e'
-      requirement = "Testing the implementation of the InterfaceUO and its"
-                 "postprocessor (InterfaceUOPPS)."
+      input = 'interface_value_user_object.i'
+      exodiff = 'interface_value_user_object_out.e'
+      requirement = "Testing the implementation of the InterfaceValueAverageUO and its"
+                 "postprocessor (InterfaceValueUOPPS)."
                  "By design at the end of the first step we should observe: "
                  "an average variable value of 0, "
                  "an average variable absolute jump fo 0, "
@@ -18,13 +18,13 @@
     [../]
     [./interface_UO_QP_test]
       type = 'Exodiff'
-      input = 'interface_user_object_QP.i'
-      exodiff = 'interface_user_object_QP_out.e'
-      requirement = "Testing the implementation of the InterfaceUO_QP and its"
-                 "postprocessor (InterfaceUOPPS). This test also shows the use of "
-                 "InterfaceUserObjectQpAux AuxKernel. InterfaceUserObjectQpAux "
+      input = 'interface_value_user_object_QP.i'
+      exodiff = 'interface_value_user_object_QP_out.e'
+      requirement = "Testing the implementation of the InterfaceValueUO_QP and its"
+                 "postprocessor (InterfaceValueUOPPS). This test also shows the use of "
+                 "InterfaceValueUO_QP_Aux AuxKernel. InterfaceValueUO_QP_Aux "
                  "use interface values computed and stored at each qp from the "
-                 "InterfaceUO_QP and does something with them."
+                 "InterfaceValueUO_QP and does something with them."
                  "Average values on the interface are then computed via SideAverageValue PP."
                  "By design at the end of the first step we should observe: "
                  "an average material property of 7, "
@@ -37,12 +37,12 @@
       design = ''
       max_threads = 1
     [../]
-    [./interface_user_object_get_material_property_via_aux_vars_test]
+    [./interface_value_user_object_get_material_property_via_aux_vars_test]
       type = 'Exodiff'
-      input = 'interface_user_object_get_material_property_via_aux_vars.i'
-      exodiff = 'interface_user_object_get_material_property_via_aux_vars_out.e'
-      requirement = "Testing the implementation of the InterfaceUO and its"
-                 "postprocessor (InterfaceUOPPS). This also test shows how to use"
+      input = 'interface_value_user_object_get_material_property_via_aux_vars.i'
+      exodiff = 'interface_value_user_object_get_material_property_via_aux_vars_out.e'
+      requirement = "Testing the implementation of the InterfaceValueAverageUO and its"
+                 "postprocessor (InterfaceValueUOPPS). This also test shows how to use"
                  "material properties in the interface user object via aux variables"
                  "By design at the end of the first step we should observe: "
                  "an average material property of 7, "
