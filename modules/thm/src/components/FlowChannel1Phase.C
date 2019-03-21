@@ -45,7 +45,7 @@ FlowChannel1Phase::FlowChannel1Phase(const InputParameters & params) : FlowChann
 std::shared_ptr<FlowModel>
 FlowChannel1Phase::buildFlowModel()
 {
-  const std::string class_name = _app.getFlowModelClassName(_model_id);
+  const std::string class_name = "FlowModelSinglePhase";
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<Simulation *>("_sim") = &_sim;
   pars.set<FlowChannelBase *>("_pipe") = this;

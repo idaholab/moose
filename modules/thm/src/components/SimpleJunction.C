@@ -51,8 +51,9 @@ SimpleJunction::addVariables()
   else if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
   {
     unsigned int n_vars = _phase_interaction ? 7 : 6;
-    const FlowModelTwoPhaseNCG & fm_ncg = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
-    n_vars += fm_ncg.getNCGSolutionVars().size();
+    auto fm_ncg = dynamic_cast<const FlowModelTwoPhaseNCG *>(_flow_model.get());
+    if (fm_ncg != nullptr)
+      n_vars += fm_ncg->getNCGSolutionVars().size();
     _sim.addVariable(true, _lm_name, FEType(n_vars, SCALAR), connected_subdomains, _scaling_factor);
   }
 }

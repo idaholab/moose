@@ -102,8 +102,9 @@ FlowConnection::init()
         _flow_model = pipe.getFlowModel();
         if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
         {
-          auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase &>(*_flow_model);
-          _phase_interaction = flow_model_2phase.getPhaseInteraction();
+          auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase *>(_flow_model.get());
+          if (flow_model_2phase != nullptr)
+            _phase_interaction = flow_model_2phase->getPhaseInteraction();
         }
       }
     }

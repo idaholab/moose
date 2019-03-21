@@ -48,12 +48,15 @@ InletDensityVelocity::check() const
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
   {
-    const FlowModelTwoPhase & fm = dynamic_cast<const FlowModelTwoPhase &>(*_flow_model);
-    bool phase_interaction = fm.getPhaseInteraction();
-    if (phase_interaction)
-      check7EqnRequiredParameter("alpha_vapor");
-    for (auto p : {"rho_liquid", "vel_liquid", "rho_vapor", "vel_vapor"})
-      check2PhaseRequiredParameter(p);
+    auto fm = dynamic_cast<const FlowModelTwoPhase *>(_flow_model.get());
+    if (fm != nullptr)
+    {
+      bool phase_interaction = fm->getPhaseInteraction();
+      if (phase_interaction)
+        check7EqnRequiredParameter("alpha_vapor");
+      for (auto p : {"rho_liquid", "vel_liquid", "rho_vapor", "vel_vapor"})
+        check2PhaseRequiredParameter(p);
+    }
 
     if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
     {
@@ -61,9 +64,9 @@ InletDensityVelocity::check() const
 
       if (isParamValid("x_ncgs"))
       {
-        const FlowModelTwoPhaseNCG & fm_ncg =
-            dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
-        checkSizeEqualsValue<Real>("x_ncgs", fm_ncg.getNCGSolutionVars().size());
+        auto fm_ncg = dynamic_cast<const FlowModelTwoPhaseNCG *>(_flow_model.get());
+        if (fm_ncg != nullptr)
+          checkSizeEqualsValue<Real>("x_ncgs", fm_ncg->getNCGSolutionVars().size());
       }
     }
   }
