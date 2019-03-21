@@ -124,21 +124,32 @@ fi
 
 # If we're not going fast, remove the build directory and reconfigure
 if [ -z "$go_fast" ]; then
-  rm -rf build
-  mkdir build
-  cd build
+  if [[ -n "$LIBMESH_BUILD_DIR" ]]; then
+    echo "INFO: LIBMESH_BUILD_DIR set - overriding default build path"
+  else
+    export LIBMESH_BUILD_DIR=$SCRIPT_DIR/../libmesh/build
+  fi
+  rm -rf $LIBMESH_BUILD_DIR
+  mkdir -p $LIBMESH_BUILD_DIR
+  cd $LIBMESH_BUILD_DIR
 
-  ../configure INSTALL="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C" \
-               --with-methods="${METHODS}" \
-               --prefix=$LIBMESH_DIR \
-               --enable-silent-rules \
-               --enable-unique-id \
-               --disable-warnings \
-               --with-thread-model=openmp \
-               --disable-maintainer-mode \
-               --enable-petsc-hypre-required \
-               --enable-metaphysicl-required \
-               $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
+  if [[ -n "$INSTALL_BINARY" ]]; then
+    echo "INFO: INSTALL_BINARY set"
+  else
+    export INSTALL_BINARY="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C"
+  fi
+
+  $SCRIPT_DIR/../libmesh/configure INSTALL="${INSTALL_BINARY}" \
+                                   --with-methods="${METHODS}" \
+                                   --prefix=$LIBMESH_DIR \
+                                   --enable-silent-rules \
+                                   --enable-unique-id \
+                                   --disable-warnings \
+                                   --with-thread-model=openmp \
+                                   --disable-maintainer-mode \
+                                   --enable-petsc-hypre-required \
+                                   --enable-metaphysicl-required \
+                                   $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.
