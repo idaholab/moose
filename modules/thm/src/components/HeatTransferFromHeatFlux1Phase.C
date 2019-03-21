@@ -1,7 +1,6 @@
 #include "HeatTransferFromHeatFlux1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
-#include "FlowChannel.h"
 
 registerMooseObject("THMApp", HeatTransferFromHeatFlux1Phase);
 

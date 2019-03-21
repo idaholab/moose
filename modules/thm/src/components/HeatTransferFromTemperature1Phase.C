@@ -2,7 +2,6 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 #include "HeatConductionModel.h"
-#include "FlowChannel.h"
 
 template <>
 InputParameters

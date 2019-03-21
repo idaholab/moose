@@ -1,6 +1,6 @@
 #include "FlowConnection.h"
 #include "GeometricalFlowComponent.h"
-#include "FlowChannel.h"
+#include "FlowChannelBase.h"
 #include "FlowModelTwoPhase.h"
 #include "THMMesh.h"
 
@@ -95,10 +95,10 @@ FlowConnection::init()
       checkAllConnectionsHaveSame<THM::FlowModelID>(flow_model_ids, "flow model ID");
       _flow_model_id = flow_model_ids[0];
 
-      if (hasComponentByName<FlowChannel>(_connections[0]._geometrical_component_name))
+      if (hasComponentByName<FlowChannelBase>(_connections[0]._geometrical_component_name))
       {
-        const FlowChannel & pipe =
-            getComponentByName<FlowChannel>(_connections[0]._geometrical_component_name);
+        const FlowChannelBase & pipe =
+            getComponentByName<FlowChannelBase>(_connections[0]._geometrical_component_name);
         _flow_model = pipe.getFlowModel();
         if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
         {

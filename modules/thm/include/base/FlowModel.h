@@ -10,7 +10,7 @@ class Simulation;
 class Factory;
 class THMApp;
 class FluidProperties;
-class FlowChannel;
+class FlowChannelBase;
 class FlowModel;
 
 template <>
@@ -109,8 +109,8 @@ protected:
   /// The Factory associated with the MooseApp
   Factory & _factory;
 
-  /// The Pipe component that built this class
-  FlowChannel & _pipe;
+  /// The flow channel component that built this class
+  FlowChannelBase & _pipe;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName _fp_name;

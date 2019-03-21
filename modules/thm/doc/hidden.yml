@@ -62,6 +62,8 @@
 - /Components/Component
 - /Components/ConnectorBase
 - /Components/FlowChannel
+- /Components/FlowChannel1Phase
+- /Components/FlowChannel2Phase
 - /Components/FreeBoundary
 - /Components/GeometricalComponent
 - /Components/HSAmbientHeatTransferBoundary

@@ -2,7 +2,7 @@
 #include "InputParameterLogic.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
-#include "FlowChannel.h"
+#include "FlowChannelBase.h"
 #include "MooseUtils.h"
 
 template <>
@@ -31,11 +31,11 @@ HeatTransferBase::init()
 {
   ConnectorBase::init();
 
-  checkComponentOfTypeExistsByName<FlowChannel>(_pipe_name);
+  checkComponentOfTypeExistsByName<FlowChannelBase>(_pipe_name);
 
-  if (hasComponentByName<FlowChannel>(_pipe_name))
+  if (hasComponentByName<FlowChannelBase>(_pipe_name))
   {
-    const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
+    const FlowChannelBase & pipe = getComponentByName<FlowChannelBase>(_pipe_name);
 
     // add the name of this heat transfer component to list for pipe
     pipe.addHeatTransferName(name());
@@ -55,9 +55,9 @@ HeatTransferBase::initSecondary()
   ConnectorBase::initSecondary();
 
   // determine names of heat transfer variables
-  if (hasComponentByName<FlowChannel>(_pipe_name))
+  if (hasComponentByName<FlowChannelBase>(_pipe_name))
   {
-    const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
+    const FlowChannelBase & pipe = getComponentByName<FlowChannelBase>(_pipe_name);
 
     const std::string suffix = pipe.getHeatTransferNamesSuffix(name());
 

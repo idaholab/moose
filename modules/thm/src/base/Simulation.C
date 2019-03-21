@@ -3,7 +3,7 @@
 #include "MooseObjectAction.h"
 #include "Transient.h"
 
-#include "FlowChannel.h"
+#include "FlowChannelBase.h"
 #include "FlowJunction.h"
 
 #include "FluidProperties.h"
@@ -172,11 +172,11 @@ Simulation::identifyLoops()
     bool found_model_id = false;
     for (const auto & component : _components)
     {
-      const auto pipe_base_component =
-          MooseSharedNamespace::dynamic_pointer_cast<FlowChannel>(component);
-      if (pipe_base_component && (_component_name_to_loop_name[component->name()] == loop))
+      const auto flow_chan_base_component =
+          MooseSharedNamespace::dynamic_pointer_cast<FlowChannelBase>(component);
+      if (flow_chan_base_component && (_component_name_to_loop_name[component->name()] == loop))
       {
-        const UserObjectName fp_name = pipe_base_component->getFluidPropertiesName();
+        const UserObjectName fp_name = flow_chan_base_component->getFluidPropertiesName();
         const FluidProperties & fp = getUserObject<FluidProperties>(fp_name);
         model_id = _app.getFlowModelID(fp);
         found_model_id = true;
@@ -187,7 +187,7 @@ Simulation::identifyLoops()
     if (found_model_id)
       _loop_name_to_model_id[loop] = model_id;
     else
-      logError("No FlowChannel-derived components were found in loop '", loop, "'");
+      logError("No FlowChannelBase-derived components were found in loop '", loop, "'");
   }
 }
 
@@ -664,19 +664,19 @@ Simulation::integrityCheck() const
   if (_components.size() == 0)
     return;
 
-  // go over components and put pipes into one "bucket"
-  std::vector<Component *> pipes;
+  // go over components and put flow channels into one "bucket"
+  std::vector<Component *> flow_channels;
   for (auto && comp : _components)
   {
-    auto pipe = dynamic_cast<FlowChannel *>(comp.get());
-    if (pipe != nullptr)
-      pipes.push_back(pipe);
+    auto flow_channel = dynamic_cast<FlowChannelBase *>(comp.get());
+    if (flow_channel != nullptr)
+      flow_channels.push_back(flow_channel);
   }
 
   // initialize number of connected pipe inlets and outlets to zero
   std::map<std::string, unsigned int> pipe_inlets;
   std::map<std::string, unsigned int> pipe_outlets;
-  for (auto && comp : pipes)
+  for (auto && comp : flow_channels)
   {
     pipe_inlets[comp->name()] = 0;
     pipe_outlets[comp->name()] = 0;
@@ -699,7 +699,7 @@ Simulation::integrityCheck() const
   }
 
   // finally, check that each pipe has exactly one input and one output
-  for (auto && comp : pipes)
+  for (auto && comp : flow_channels)
   {
     if (pipe_inlets[comp->name()] == 0)
       logError("Component '", comp->name(), "' does not have connected inlet.");

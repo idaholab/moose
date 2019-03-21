@@ -1,5 +1,5 @@
 #include "HeatTransferFromHeatStructure1Phase.h"
-#include "FlowChannel.h"
+#include "FlowChannel1Phase.h"
 #include "HeatStructure.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
@@ -63,7 +63,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
-  const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
+  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_pipe_name);
 
   const UserObjectName heat_flux_uo_name = genName(name(), "heat_flux_uo");
   {
@@ -144,6 +144,6 @@ HeatTransferFromHeatStructure1Phase::getMasterSideName() const
 const BoundaryName &
 HeatTransferFromHeatStructure1Phase::getSlaveSideName() const
 {
-  const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
+  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_pipe_name);
   return pipe.getNodesetName();
 }

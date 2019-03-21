@@ -1,7 +1,7 @@
 #include "HeatTransfer1PhaseBase.h"
 #include "InputParameterLogic.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel.h"
+#include "FlowChannel1Phase.h"
 #include "MooseUtils.h"
 
 template <>
@@ -30,9 +30,9 @@ HeatTransfer1PhaseBase::initSecondary()
   HeatTransferBase::initSecondary();
 
   // determine names of heat transfer variables
-  if (hasComponentByName<FlowChannel>(_pipe_name))
+  if (hasComponentByName<FlowChannel1Phase>(_pipe_name))
   {
-    const FlowChannel & pipe = getComponentByName<FlowChannel>(_pipe_name);
+    const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_pipe_name);
 
     const std::string suffix = pipe.getHeatTransferNamesSuffix(name());
     const std::string Hw_suffix = _closures_name == "simple" ? suffix : "";
