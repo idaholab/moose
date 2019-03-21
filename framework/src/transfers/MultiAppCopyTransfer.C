@@ -128,6 +128,4 @@ MultiAppCopyTransfer::execute()
   }
 
   _console << "Finished MultiAppCopyTransfer " << name() << std::endl;
-
-  postExecute();
 }

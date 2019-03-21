@@ -28,7 +28,7 @@ template <>
 InputParameters
 validParams<MultiAppNearestNodeTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = validParams<MultiAppFieldTransferInterface>();
 
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
@@ -50,9 +50,7 @@ validParams<MultiAppNearestNodeTransfer>()
 }
 
 MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable")),
+  : MultiAppFieldTransferInterface(parameters),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
     _node_map(declareRestartableData<std::map<dof_id_type, Node *>>("node_map")),
     _distance_map(declareRestartableData<std::map<dof_id_type, Real>>("distance_map")),

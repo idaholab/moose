@@ -24,18 +24,13 @@ template <>
 InputParameters
 validParams<MultiAppDTKInterpolationTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>(
-      "variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
+  InputParameters params = validParams<MultiAppFieldTransferInterface>();
   return params;
 }
 
 MultiAppDTKInterpolationTransfer::MultiAppDTKInterpolationTransfer(
     const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _from_var_name(getParam<VariableName>("source_variable")),
-    _to_var_name(getParam<AuxVariableName>("variable"))
+  : MultiAppFieldTransferInterface(parameters)
 {
 }
 

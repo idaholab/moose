@@ -1478,7 +1478,9 @@ public:
    */
   virtual void computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group);
 
-  void computeUserObjectsInternal(const ExecFlagType & type, const Moose::AuxGroup & group, TheWarehouse::Query & query);
+  void computeUserObjectsInternal(const ExecFlagType & type,
+                                  const Moose::AuxGroup & group,
+                                  TheWarehouse::Query & query);
 
   /**
    * Compute an user object with the given name

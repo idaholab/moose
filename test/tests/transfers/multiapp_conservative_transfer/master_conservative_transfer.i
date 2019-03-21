@@ -42,7 +42,7 @@
 [MultiApps]
   [./sub]
     type = FullSolveMultiApp
-    input_files = sub.i
+    input_files = sub_conservative_transfer.i
     execute_on = timestep_end
   [../]
 []
@@ -51,16 +51,16 @@
   [./from_postprocessor]
     type = ElementIntegralVariablePostprocessor
     variable = u
-    execute_on = 'INITIAL nonlinear  TIMESTEP_END'
+    execute_on = 'Nonlinear TIMESTEP_END'
   [../]
 []
 
 [Transfers]
   [./to_sub]
-    type = MultiAppCopyTransfer
+    type = MultiAppNearestNodeTransfer
     direction = to_multiapp
     source_variable = u
-    variable = u
+    variable = aux_u
     preserve_transfer = true
     multi_app = sub
   [../]

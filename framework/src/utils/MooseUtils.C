@@ -723,7 +723,7 @@ getDefaultExecFlagEnum()
                               EXEC_TIMESTEP_BEGIN,
                               EXEC_FINAL,
                               EXEC_CUSTOM,
-                              EXEC_POST_TRANSFER);
+                              EXEC_TRANSFER);
   return exec_enum;
 }
 

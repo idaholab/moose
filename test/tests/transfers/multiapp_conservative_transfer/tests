@@ -4,8 +4,8 @@
   [./conservative_transfer]
     # Tests transfer between linear Lagrange nonlinear variable
     type = Exodiff
-    input = master.i
-    exodiff = 'master_out.e master_out_sub0.e'
+    input = master_conservative_transfer.i
+    exodiff = 'master_conservative_transfer_out.e master_conservative_transfer_out_sub0.e'
     requirement = 'MOOSE shall support conservative transfers'
   [../]
 []

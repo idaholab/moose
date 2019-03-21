@@ -45,7 +45,7 @@ const ExecFlagType EXEC_SUBDOMAIN("SUBDOMAIN", 0x200);          // 512
 const ExecFlagType EXEC_PRE_DISPLACE("PRE_DISPLACE");
 const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP");
 const ExecFlagType EXEC_PRE_MULTIAPP_SETUP("PRE_MULTIAPP_SETUP");
-const ExecFlagType EXEC_POST_TRANSFER("POST_TRANSFER");
+const ExecFlagType EXEC_TRANSFER("TRANSFER");
 
 void
 MooseVecView(NumericVector<Number> & vector)
@@ -377,7 +377,7 @@ registerExecFlags(Factory & factory)
   registerExecFlag(EXEC_FORCED);
   registerExecFlag(EXEC_FAILED);
   registerExecFlag(EXEC_CUSTOM);
-  registerExecFlag(EXEC_POST_TRANSFER);
+  registerExecFlag(EXEC_TRANSFER);
   registerExecFlag(EXEC_SUBDOMAIN);
   registerExecFlag(EXEC_PRE_DISPLACE);
   registerExecFlag(EXEC_SAME_AS_MULTIAPP);

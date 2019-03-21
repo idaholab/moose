@@ -60,15 +60,6 @@ public:
   /// Return the execution flags, handling "same_as_multiapp"
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
-  /**
-   * Add some extra work if necessary after execute(). For example, adjust the solution
-   * to preserve some physics quality of interest.
-   */
-  virtual void postExecute();
-
-private:
-  void adjustTransferedSolution(FEProblemBase & from_problem, FEProblemBase & to_problem);
-
 protected:
   /// The MultiApp this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _multi_app;
@@ -120,13 +111,6 @@ protected:
 
   // Given local app index, returns global app index.
   std::vector<unsigned int> _local2global_map;
-
-  // If this transfer is going to conserve the physics
-  bool _preserve_transfer;
-  // Postprocessor evaluates an adjuster for the source physics
-  PostprocessorName _from_postprocessor_to_be_preserved;
-  // Postprocessor evaluates an adjuster for the target physics
-  PostprocessorName _to_postprocessor_to_be_preserved;
 };
 
   /**

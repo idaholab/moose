@@ -3071,8 +3071,11 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
 void
 FEProblemBase::computeUserObjectByName(const ExecFlagType & type, const std::string & name)
 {
-  TheWarehouse::Query query =
-      theWarehouse().query().condition<AttribSystem>("UserObject").condition<AttribExecOns>(type).condition<AttribName>(name);
+  TheWarehouse::Query query = theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("UserObject")
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribName>(name);
   computeUserObjectsInternal(type, Moose::POST_AUX, query);
 }
 
@@ -3085,7 +3088,9 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 }
 
 void
-FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, const Moose::AuxGroup & group, TheWarehouse::Query & query)
+FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
+                                          const Moose::AuxGroup & group,
+                                          TheWarehouse::Query & query)
 {
   if (group == Moose::PRE_IC)
     query.condition<AttribPreIC>(true);

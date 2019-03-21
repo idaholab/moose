@@ -48,23 +48,6 @@ validParams<MultiAppTransfer>()
   params.addParam<bool>("displaced_target_mesh",
                         false,
                         "Whether or not to use the displaced mesh for the target mesh.");
-
-  params.addParam<bool>("preserve_transfer",
-                        false,
-                        "Whether or not to conserve the transfered field, "
-                        " if true, the transfered variables will be adjusted "
-                        "according to the pps value");
-
-  params.addParam<PostprocessorName>(
-      "from_postprocessor_to_be_preserved",
-      "from_postprocessor",
-      "The name of the Postprocessor in the from-app  to evaluate an adjusting factor.");
-
-  params.addParam<PostprocessorName>(
-      "to_postprocessor_to_be_preserved",
-      "to_postprocessor",
-      "The name of the Postprocessor in the to-app to evaluate an adjusting factor.");
-
   return params;
 }
 
@@ -73,12 +56,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
     _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
     _direction(getParam<MooseEnum>("direction")),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
-    _displaced_target_mesh(getParam<bool>("displaced_target_mesh")),
-    _preserve_transfer(parameters.get<bool>("preserve_transfer")),
-    _from_postprocessor_to_be_preserved(
-        parameters.get<PostprocessorName>("from_postprocessor_to_be_preserved")),
-    _to_postprocessor_to_be_preserved(
-        parameters.get<PostprocessorName>("to_postprocessor_to_be_preserved"))
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
   if (getParam<bool>("check_multiapp_execute_on"))
     checkMultiAppExecuteOn();
@@ -286,52 +264,4 @@ MultiAppTransfer::getTransferVector(unsigned int i_local, std::string var_name)
   mooseAssert(_direction == TO_MULTIAPP, "getTransferVector only works for transfers to multiapps");
 
   return _multi_app->appTransferVector(_local2global_map[i_local], var_name);
-}
-
-void
-MultiAppTransfer::postExecute()
-{
-  if (_preserve_transfer)
-  {
-    _console << "Beginning MultiAppCopyTransfer postExecute " << name() << std::endl;
-
-    if (_direction == TO_MULTIAPP)
-    {
-      FEProblemBase & from_problem = _multi_app->problemBase();
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-        if (_multi_app->hasLocalApp(i))
-          adjustTransferedSolution(from_problem, _multi_app->appProblemBase(i));
-    }
-
-    else if (_direction == FROM_MULTIAPP)
-    {
-      FEProblemBase & to_problem = _multi_app->problemBase();
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-        if (_multi_app->hasLocalApp(i))
-          adjustTransferedSolution(_multi_app->appProblemBase(i), to_problem);
-    }
-
-    _console << "Finished MultiAppCopyTransfer postExecute " << name() << std::endl;
-  }
-}
-
-void
-MultiAppTransfer::adjustTransferedSolution(FEProblemBase & from_problem, FEProblemBase & to_problem)
-{
-  PostprocessorValue & from_adjuster =
-      from_problem.getPostprocessorValue(_from_postprocessor_to_be_preserved);
-  // Init problem so that to_postprocessor_to_be_preserved is set correctly
-  // to_problem.executeSingleUserObject(EXEC_INITIAL);
-  to_problem.computeUserObjectByName(EXEC_INITIAL, _to_postprocessor_to_be_preserved);
-  std::cout<<" to_problem.computeUserObjects "<<std::endl;
-  // Now we should have the right adjuster based on the transfered solution
-  PostprocessorValue & to_adjuster =
-      to_problem.getPostprocessorValue(_to_postprocessor_to_be_preserved);
-
-  std::cout<<" to_adjuster "<<to_adjuster<<std::endl;
-
-  // Scale the solution. Allow scale for selected variables???
-  to_problem.getNonlinearSystemBase().solution().scale(from_adjuster / to_adjuster);
-  // Update the local solution
-  to_problem.getNonlinearSystemBase().update();
 }

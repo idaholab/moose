@@ -27,13 +27,9 @@ template <>
 InputParameters
 validParams<MultiAppInterpolationTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = validParams<MultiAppFieldTransferInterface>();
   params.addClassDescription(
       "Transfers the value to the target domain from the nearest node in the source domain.");
-  params.addRequiredParam<AuxVariableName>(
-      "variable", "The auxiliary variable to store the transferred values in.");
-  params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
-
   params.addParam<unsigned int>(
       "num_points", 3, "The number of nearest points to use for interpolation.");
   params.addParam<Real>(
@@ -52,9 +48,7 @@ validParams<MultiAppInterpolationTransfer>()
 }
 
 MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable")),
+  : MultiAppFieldTransferInterface(parameters),
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
     _interp_type(getParam<MooseEnum>("interp_type")),

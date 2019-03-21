@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 40
+  ny = 40
 []
 
 [Variables]
@@ -14,6 +14,19 @@
   [./diff]
     type = Diffusion
     variable = u
+  [../]
+
+  [./coupledforce]
+    type = CoupledForce
+    variable = u
+    v = aux_u
+  [../]
+[]
+
+[AuxVariables]
+  [./aux_u]
+    family = LAGRANGE
+    order = FIRST
   [../]
 []
 
@@ -35,8 +48,8 @@
 [Postprocessors]
   [./to_postprocessor]
     type = ElementIntegralVariablePostprocessor
-    variable = u
-    execute_on = 'INITIAL nonlinear TIMESTEP_END'
+    variable = aux_u
+    execute_on = 'transfer nonlinear TIMESTEP_END'
   [../]
 []
 

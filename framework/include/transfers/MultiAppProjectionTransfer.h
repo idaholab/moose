@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppTransfer.h"
+#include "MultiAppFieldTransferInterface.h"
 
 // Forward declarations
 namespace libMesh
@@ -25,7 +25,7 @@ InputParameters validParams<MultiAppProjectionTransfer>();
 /**
  * Project values from one domain to another
  */
-class MultiAppProjectionTransfer : public MultiAppTransfer
+class MultiAppProjectionTransfer : public MultiAppFieldTransferInterface
 {
 public:
   MultiAppProjectionTransfer(const InputParameters & parameters);
@@ -41,9 +41,6 @@ protected:
   void assembleL2(EquationSystems & es, const std::string & system_name);
 
   void projectSolution(unsigned int to_problem);
-
-  AuxVariableName _to_var_name;
-  VariableName _from_var_name;
 
   MooseEnum _proj_type;
 

@@ -41,7 +41,7 @@ template <>
 InputParameters
 validParams<MultiAppProjectionTransfer>()
 {
-  InputParameters params = validParams<MultiAppTransfer>();
+  InputParameters params = validParams<MultiAppFieldTransferInterface>();
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
@@ -63,9 +63,7 @@ validParams<MultiAppProjectionTransfer>()
 }
 
 MultiAppProjectionTransfer::MultiAppProjectionTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _to_var_name(getParam<AuxVariableName>("variable")),
-    _from_var_name(getParam<VariableName>("source_variable")),
+  : MultiAppFieldTransferInterface(parameters),
     _proj_type(getParam<MooseEnum>("proj_type")),
     _compute_matrix(true),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
@@ -514,6 +512,8 @@ MultiAppProjectionTransfer::execute()
     _qps_cached = true;
 
   _console << "Finished projection transfer " << name() << std::endl;
+
+  postExecute();
 }
 
 void
