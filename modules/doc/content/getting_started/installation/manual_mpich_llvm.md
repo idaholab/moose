@@ -17,7 +17,7 @@ cd $STACK_SRC/mpich-__MPICH__/llvm-build
 ../configure --prefix=$PACKAGES_DIR/mpich-__MPICH__ \
 --enable-shared \
 --enable-sharedlibs=clang \
---enable-fast=O3 \
+--enable-fast=O2 \
 --enable-debuginfo \
 --enable-totalview \
 --enable-two-level-namespace \
