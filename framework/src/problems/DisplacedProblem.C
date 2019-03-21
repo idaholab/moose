@@ -117,19 +117,7 @@ DisplacedProblem::init()
   _displaced_nl.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_nl);
   _displaced_aux.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_aux);
 
-  std::cout << "Algebraic gfs on displaced nl: " << std::endl;
-  for (auto agf_it = _displaced_nl.dofMap().algebraic_ghosting_functors_begin();
-       agf_it != _displaced_nl.dofMap().algebraic_ghosting_functors_end();
-       ++agf_it++)
-    std::cout << "Stuff: " << (*agf_it)->get_name() << std::endl;
-
   _displaced_nl.init();
-
-  std::cout << "Algebraic gfs on displaced aux: " << std::endl;
-  for (auto agf_it = _displaced_nl.dofMap().algebraic_ghosting_functors_begin();
-       agf_it != _displaced_nl.dofMap().algebraic_ghosting_functors_end();
-       ++agf_it++)
-    std::cout << "Stuff: " << (*agf_it)->get_name() << std::endl;
 
   _displaced_aux.init();
 

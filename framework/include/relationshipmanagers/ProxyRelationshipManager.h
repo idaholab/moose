@@ -32,8 +32,8 @@ class ProxyRelationshipManager : public RelationshipManager
 public:
   ProxyRelationshipManager(const InputParameters & parameters);
 
-  virtual void operator()(const MeshBase::const_element_iterator & range_begin,
-                          const MeshBase::const_element_iterator & range_end,
+  virtual void operator()(const MeshBase::const_element_iterator & /*range_begin*/,
+                          const MeshBase::const_element_iterator & /*range_end*/,
                           processor_id_type p,
                           map_type & coupled_elements) override;
 

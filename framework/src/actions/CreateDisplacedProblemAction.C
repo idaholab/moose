@@ -128,12 +128,9 @@ CreateDisplacedProblemAction::act()
     }
 
     if (_current_task == "add_geometric_rm")
-    {
       // We can't do anything at this time because the systems haven't been created
       // but we do need to tell the mesh to hang onto extra elements just in case
       _mesh->getMesh().allow_remote_element_removal(false);
-      _displaced_mesh->getMesh().allow_remote_element_removal(false);
-    }
 
     if (_current_task == "add_algebraic_rm")
     {

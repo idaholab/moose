@@ -33,37 +33,15 @@ ProxyRelationshipManager::ProxyRelationshipManager(const InputParameters & param
 }
 
 void
-ProxyRelationshipManager::operator()(const MeshBase::const_element_iterator & range_begin,
-                                     const MeshBase::const_element_iterator & range_end,
+ProxyRelationshipManager::operator()(const MeshBase::const_element_iterator & /*range_begin*/,
+                                     const MeshBase::const_element_iterator & /*range_end*/,
                                      processor_id_type p,
                                      map_type & coupled_elements)
 {
-  std::vector<Elem *> other_system_elems;
-
   auto & other_mesh = _other_system->get_mesh();
 
-  // First, create a vector that contains all of the elements of _other_ system that correspond
-  // to the range passed in for _this_ system.
-  for (auto this_system_elem_it = range_begin; this_system_elem_it != range_end;
-       ++this_system_elem_it)
-  {
-    auto this_system_elem_ptr = *this_system_elem_it;
-
-    auto other_system_elem_ptr = other_mesh.elem_ptr(this_system_elem_ptr->id());
-
-    other_system_elems.push_back(other_system_elem_ptr);
-  }
-
-  Elem * const * elempp = other_system_elems.data();
-  Elem * const * elemend = elempp + other_system_elems.size();
-
-  // Now run the other system's ghosting functors over this new vector
-  const MeshBase::const_element_iterator other_elements_begin = MeshBase::const_element_iterator(
-                                             elempp, elemend, Predicates::NotNull<Elem *const *>()),
-                                         other_elements_end = MeshBase::const_element_iterator(
-                                             elemend,
-                                             elemend,
-                                             Predicates::NotNull<Elem *const *>());
+  auto other_elements_begin = other_mesh.active_local_elements_begin();
+  auto other_elements_end = other_mesh.active_local_elements_end();
 
   map_type other_coupled_elements;
 
@@ -89,14 +67,22 @@ ProxyRelationshipManager::operator()(const MeshBase::const_element_iterator & ra
         (*(*gf_it))(other_elements_begin, other_elements_end, p, other_coupled_elements);
   }
 
+  // Build unique_id to elem map
+  std::map<dof_id_type, const Elem *> unique_id_to_elem_map;
+
+  for (auto elem_it = _mesh.getMesh().active_elements_begin();
+       elem_it != _mesh.getMesh().active_elements_end();
+       ++elem_it)
+    unique_id_to_elem_map[(*elem_it)->unique_id()] = *elem_it;
+
   // Now translate those back into elements in this system
   for (auto other_coupled_it = other_coupled_elements.begin();
        other_coupled_it != other_coupled_elements.end();
        ++other_coupled_it)
   {
-    auto other_system_elem_it = other_coupled_it->first;
+    auto other_system_elem = other_coupled_it->first;
 
-    coupled_elements.emplace(_mesh.getMesh().elem_ptr(other_system_elem_it->id()),
+    coupled_elements.emplace(unique_id_to_elem_map[other_system_elem->unique_id()],
                              other_coupled_it->second);
   }
 }

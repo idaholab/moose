@@ -312,9 +312,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
     _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3))
 {
-  // Turn off default geometric ghosting
-  MeshBase::use_default_ghosting = false;
-
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
 
