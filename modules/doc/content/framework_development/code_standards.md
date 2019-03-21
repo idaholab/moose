@@ -150,6 +150,38 @@ have +good+ names when using auto!
 
 Do not use `auto` in any kind of function or method declaration
 
+## Index Variables in looping constructs
+
+In keeping with good `auto` practices, it would be really nice if we could use `auto` for
+loop indices in places where range loops aren't convenient or possible. Unfortunantly, the most
+natural code one would like to write yields a warning with our default compiler flags:
+
+```C++
+  for (auto i = 0; i < v.size(); ++i) // DON'T DO THIS!
+
+  warning: comparison of integers of different signs: 'int' and 'std::__1::vector<int, std::__1::allocator<int> >::size_type' (aka 'unsigned long')
+```
+
+Explanation:
+This warning stems from the fact that numeric literals in C++ are treated as "signed ints". There
+are suffixes that can be applied to literals to force the "correct" type, but are you sure you really
+know the correct type? If you are thinking "unsigned int" you are in the majority and unfortunantly also
+wrong. The right type for a container is `::size_type (aka 'unsigned long')`. See the error message once
+more above.
+
+The ideal solution would be to match the type you are looping over or to, but this is slightly more diffucult
+than just using `decltype` due to qualifiers like `const`. In MOOSE we have solved this for you with `MooseIndex`:
+
+```C++
+  // Looping to a scalar index
+  for (MooseIndex(n_nodes) i = 0; i < nodes; ++i)
+    ... Do something with index i
+
+  // Looping to a container size (where range-for isn't sufficient)
+  for (MooseIndex(vector) i = 0; i < vector.size(); ++i)
+    ... Do something with index i
+```
+
 [](---)
 
 # Lambdas
@@ -287,3 +319,4 @@ class MyClass:
 - All function definitions should be in *.C files.
     - The only exceptions are for inline functions for speed and templates.
 - Thou shall not commit accidental insertion in a std::map by using brackets in a RHS operator unless he/she can prove it can't fail.
+- Thou shall use range-based loops or MooseIndex() based loops for iteration
