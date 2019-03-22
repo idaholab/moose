@@ -225,4 +225,27 @@
     min_parallel = 4
     max_parallel = 4
   [../]
+
+  [./dof]
+    requirement = 'MOOSE shall support partitioning based on the expected element workload'
+    issues = '##13106'
+    design = '/DoFPartitioner.md'
+    type = 'Exodiff'
+    input = 'dof_partitioner.i'
+    exodiff = 'dof_partitioner_out.e'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+
+  [./dof_parallel_mesh]
+    requirement = 'MOOSE shall support partitioning based on the expected element workload'
+    issues = '##13106'
+    design = '/DoFPartitioner.md'
+    type = 'Exodiff'
+    input = 'dof_partitioner.i'
+    exodiff = 'dof_partitioner_parallel_mesh_out.e'
+    cli_args = 'Mesh/parallel_type=distributed Outputs/file_base=dof_partitioner_parallel_mesh_out'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
 []
