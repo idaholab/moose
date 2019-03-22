@@ -50,7 +50,7 @@ HeatTransferFromHeatStructure1Phase::addVariables()
   if (!_app.isRestarting())
   {
     const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
-    _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _pipe_name);
+    _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_name);
   }
 }
 
@@ -63,7 +63,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
-  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_pipe_name);
+  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
   const UserObjectName heat_flux_uo_name = genName(name(), "heat_flux_uo");
   {
@@ -144,6 +144,6 @@ HeatTransferFromHeatStructure1Phase::getMasterSideName() const
 const BoundaryName &
 HeatTransferFromHeatStructure1Phase::getSlaveSideName() const
 {
-  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_pipe_name);
+  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_flow_channel_name);
   return pipe.getNodesetName();
 }

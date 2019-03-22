@@ -10,7 +10,10 @@ InputParameters
 validParams<HeatTransferBase>()
 {
   InputParameters params = validParams<ConnectorBase>();
-  params.addRequiredParam<std::string>("pipe", "Name of pipe component to connect");
+  params.addDeprecatedParam<std::string>(
+      "pipe", "Name of pipe component to connect", "Use 'flow_channel' parameter instead.");
+  params.addRequiredParam<std::string>("flow_channel",
+                                       "Name of flow channel component to connect to");
   params.addParam<bool>(
       "P_hf_transferred", false, "Is heat flux perimeter transferred from an external source?");
   params.addParam<FunctionName>("P_hf", "Heat flux perimeter function");
@@ -19,11 +22,11 @@ validParams<HeatTransferBase>()
 
 HeatTransferBase::HeatTransferBase(const InputParameters & parameters)
   : ConnectorBase(parameters),
-    _pipe_name(getParam<std::string>("pipe")),
+    _flow_channel_name(getParam<std::string>("flow_channel")),
     _P_hf_transferred(getParam<bool>("P_hf_transferred")),
     _P_hf_provided(isParamValid("P_hf"))
 {
-  addDependency(_pipe_name);
+  addDependency(_flow_channel_name);
 }
 
 void
@@ -31,21 +34,21 @@ HeatTransferBase::init()
 {
   ConnectorBase::init();
 
-  checkComponentOfTypeExistsByName<FlowChannelBase>(_pipe_name);
+  checkComponentOfTypeExistsByName<FlowChannelBase>(_flow_channel_name);
 
-  if (hasComponentByName<FlowChannelBase>(_pipe_name))
+  if (hasComponentByName<FlowChannelBase>(_flow_channel_name))
   {
-    const FlowChannelBase & pipe = getComponentByName<FlowChannelBase>(_pipe_name);
+    const FlowChannelBase & flow_channel = getComponentByName<FlowChannelBase>(_flow_channel_name);
 
-    // add the name of this heat transfer component to list for pipe
-    pipe.addHeatTransferName(name());
+    // add the name of this heat transfer component to list for flow channel
+    flow_channel.addHeatTransferName(name());
 
-    // get various data from pipe
-    _block_ids_pipe = pipe.getSubdomainIds();
-    _model_type = pipe.getFlowModelID();
-    _fp_name = pipe.getFluidPropertiesName();
-    _A_fn_name = pipe.getAreaFunctionName();
-    _closures_name = MooseUtils::toLower(pipe.getParam<std::string>("closures"));
+    // get various data from flow channel
+    _block_ids_flow_channel = flow_channel.getSubdomainIds();
+    _model_type = flow_channel.getFlowModelID();
+    _fp_name = flow_channel.getFluidPropertiesName();
+    _A_fn_name = flow_channel.getAreaFunctionName();
+    _closures_name = MooseUtils::toLower(flow_channel.getParam<std::string>("closures"));
   }
 }
 
@@ -55,11 +58,11 @@ HeatTransferBase::initSecondary()
   ConnectorBase::initSecondary();
 
   // determine names of heat transfer variables
-  if (hasComponentByName<FlowChannelBase>(_pipe_name))
+  if (hasComponentByName<FlowChannelBase>(_flow_channel_name))
   {
-    const FlowChannelBase & pipe = getComponentByName<FlowChannelBase>(_pipe_name);
+    const FlowChannelBase & flow_channel = getComponentByName<FlowChannelBase>(_flow_channel_name);
 
-    const std::string suffix = pipe.getHeatTransferNamesSuffix(name());
+    const std::string suffix = flow_channel.getHeatTransferNamesSuffix(name());
 
     _P_hf_name = FlowModel::HEAT_FLUX_PERIMETER + suffix;
     _T_wall_name = FlowModel::TEMPERATURE_WALL + suffix;
@@ -90,7 +93,7 @@ HeatTransferBase::addMooseObjects()
     const std::string class_name = "FunctionAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = {_P_hf_name};
-    params.set<std::vector<SubdomainName>>("block") = {_pipe_name};
+    params.set<std::vector<SubdomainName>>("block") = {_flow_channel_name};
     params.set<FunctionName>("function") = _P_hf_fn_name;
 
     ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
@@ -104,7 +107,7 @@ HeatTransferBase::addMooseObjects()
 void
 HeatTransferBase::addHeatedPerimeter()
 {
-  _sim.addVariable(false, _P_hf_name, FlowModel::feType(), _block_ids_pipe);
+  _sim.addVariable(false, _P_hf_name, FlowModel::feType(), _block_ids_flow_channel);
 
   // create heat flux perimeter variable if not transferred from external app
   if (!_P_hf_transferred)
@@ -113,7 +116,7 @@ HeatTransferBase::addHeatedPerimeter()
     {
       _P_hf_fn_name = getParam<FunctionName>("P_hf");
     }
-    // create heat flux perimeter function if not provided; assume circular pipe
+    // create heat flux perimeter function if not provided; assume circular flow channel
     else
     {
       _P_hf_fn_name = genName(name(), "P_hf_fn");
@@ -126,7 +129,7 @@ HeatTransferBase::addHeatedPerimeter()
       makeFunctionControllableIfConstant(_P_hf_fn_name, "P_hf");
     }
 
-    _sim.addFunctionIC(_P_hf_name, _P_hf_fn_name, _pipe_name);
+    _sim.addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_name);
   }
 }
 
