@@ -48,10 +48,13 @@ InletMassFlowRateTemperature::check() const
   }
   else if (_flow_model_id == THM::FM_TWO_PHASE || _flow_model_id == THM::FM_TWO_PHASE_NCG)
   {
-    const FlowModelTwoPhase & fm = dynamic_cast<const FlowModelTwoPhase &>(*_flow_model);
-    bool phase_interaction = fm.getPhaseInteraction();
-    if (phase_interaction)
-      check7EqnRequiredParameter("alpha_vapor");
+    auto fm = dynamic_cast<const FlowModelTwoPhase *>(_flow_model.get());
+    if (fm != nullptr)
+    {
+      bool phase_interaction = fm->getPhaseInteraction();
+      if (phase_interaction)
+        check7EqnRequiredParameter("alpha_vapor");
+    }
 
     for (auto p : {"m_dot_liquid", "T_liquid", "m_dot_vapor", "T_vapor"})
       check2PhaseRequiredParameter(p);
@@ -62,8 +65,9 @@ InletMassFlowRateTemperature::check() const
 
       if (isParamValid("x_ncgs"))
       {
-        const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
-        checkSizeEqualsValue<Real>("x_ncgs", fm.getNCGSolutionVars().size());
+        auto fm = dynamic_cast<const FlowModelTwoPhaseNCG *>(_flow_model.get());
+        if (fm != nullptr)
+          checkSizeEqualsValue<Real>("x_ncgs", fm->getNCGSolutionVars().size());
       }
     }
   }

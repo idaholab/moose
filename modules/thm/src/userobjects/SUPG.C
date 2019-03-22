@@ -2,7 +2,7 @@
 #include "FlowModel.h"
 #include "Simulation.h"
 #include "Component.h"
-#include "FlowChannel.h"
+#include "FlowChannelBase.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 
@@ -51,10 +51,11 @@ SUPG::addMooseObjects(FlowModel & fm, InputParameters & pars) const
   Component * comp = pars.getCheckedPointerParam<Component *>("component");
   std::string comp_name = comp->name();
 
-  FlowChannel * fch = dynamic_cast<FlowChannel *>(comp);
+  FlowChannelBase * fch = dynamic_cast<FlowChannelBase *>(comp);
   if (fch == nullptr)
-    mooseError(name(),
-               ": Trying to use SUPG stabilization with a component that is not a FlowChannel.");
+    mooseError(
+        name(),
+        ": Trying to use SUPG stabilization with a component that is not a FlowChannelBase.");
 
   const auto & blocks = pars.get<std::vector<SubdomainName>>("block");
   // coupling vectors

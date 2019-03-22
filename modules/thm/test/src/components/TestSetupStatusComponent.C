@@ -22,7 +22,7 @@ TestSetupStatusComponent::TestSetupStatusComponent(const InputParameters & param
 void
 TestSetupStatusComponent::init()
 {
-  const FlowChannel & pipe = getComponent<FlowChannel>("pipe");
+  const FlowChannelBase & pipe = getComponent<FlowChannelBase>("pipe");
 
   // This call should throw an error because Pipe initializes the data required
   // by this call in its init() function, which due to the ordering in the

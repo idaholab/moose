@@ -6,41 +6,26 @@ template <>
 InputParameters
 validParams<HeatTransferFromExternalAppTemperature>()
 {
-  InputParameters params = validParams<HeatTransferFromTemperature>();
+  InputParameters params = validParams<HeatTransferBase>();
   params.addParam<FunctionName>("initial_T_wall", "Initial condition for wall temperature");
   return params;
 }
 
 HeatTransferFromExternalAppTemperature::HeatTransferFromExternalAppTemperature(
     const InputParameters & parameters)
-  : HeatTransferFromTemperature(parameters)
+  : HeatTransferBase(parameters)
 {
 }
 
 void
 HeatTransferFromExternalAppTemperature::check() const
 {
-  HeatTransferFromTemperature::check();
-
-  if (!isParamValid("initial_T_wall") && !_app.isRestarting())
-    logError("Missing initial condition for wall temperature.");
-}
-
-void
-HeatTransferFromExternalAppTemperature::addVariables()
-{
-  HeatTransferFromTemperature::addVariables();
-
-  _sim.addFunctionIC(_T_wall_name, getParam<FunctionName>("initial_T_wall"), _pipe_name);
-}
-
-void
-HeatTransferFromExternalAppTemperature::addMooseObjects()
-{
-  HeatTransferFromTemperature::addMooseObjects();
+  HeatTransferBase::check();
 
   if (_model_type == THM::FM_SINGLE_PHASE)
-    addHeatTransferKernels1Phase();
+    logError("HeatTransferFromExternalAppTemperature component is deprecated. Use 'type = "
+             "HeatTransferFromExternalAppTemperature1Phase' instead.");
   else if (_model_type == THM::FM_TWO_PHASE || _model_type == THM::FM_TWO_PHASE_NCG)
-    addHeatTransferKernels2Phase();
+    logError("HeatTransferFromExternalAppTemperature component is deprecated. Use 'type = "
+             "HeatTransferFromExternalAppTemperature2Phase' instead.");
 }

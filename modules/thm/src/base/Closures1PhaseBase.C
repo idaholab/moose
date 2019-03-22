@@ -1,6 +1,6 @@
 #include "Closures1PhaseBase.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel.h"
+#include "FlowChannel1Phase.h"
 
 template <>
 InputParameters
@@ -13,7 +13,7 @@ validParams<Closures1PhaseBase>()
 Closures1PhaseBase::Closures1PhaseBase(const InputParameters & params) : ClosuresBase(params) {}
 
 void
-Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel & flow_channel) const
+Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel1Phase & flow_channel) const
 {
   const FunctionName & f_D_fn_name = flow_channel.getParam<FunctionName>("f");
   flow_channel.makeFunctionControllableIfConstant(f_D_fn_name, "f");
@@ -30,7 +30,7 @@ Closures1PhaseBase::addWallFrictionFunctionMaterial(const FlowChannel & flow_cha
 }
 
 void
-Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannel & flow_channel) const
+Closures1PhaseBase::addAverageWallTemperatureMaterial(const FlowChannel1Phase & flow_channel) const
 {
   const std::string class_name = "AverageWallTemperature3EqnMaterial";
   InputParameters params = _factory.getValidParams(class_name);
