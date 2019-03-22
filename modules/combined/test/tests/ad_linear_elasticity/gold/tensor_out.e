@@ -1,1 +1,0 @@
-../../linear_elasticity/gold/tensor_out.e

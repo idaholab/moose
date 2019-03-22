@@ -189,6 +189,13 @@
   [../]
 []
 
+[Preconditioning]
+  [./full]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'

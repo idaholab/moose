@@ -1,0 +1,65 @@
+[Tests]
+  issues = '#13099'
+  design = 'jacobian_definitions.md'
+  [./linear_elastic_material]
+    type = 'Exodiff'
+    input = 'linear_elastic_material.i'
+    exodiff = 'linear_elastic_material_out.e'
+    max_parallel = 1
+    requirement = 'We shall be able to reproduce linear elastic stress results of the hand-coded simulation using automatic differentiation.'
+  [../]
+  [./linear_elastic_material-jac]
+    type = 'PetscJacobianTester'
+    input = 'linear_elastic_material.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    difference_tol = 1e-1
+    requirement = 'The Jacobian for the AD linear elastic stress problem shall be perfect'
+  [../]
+
+  [./applied_strain]
+    type = 'Exodiff'
+    input = 'applied_strain.i'
+    exodiff = 'applied_strain_out.e'
+    requirement = 'We shall be able to reproduce eigenstrain results of the hand-coded simulation using automatic differentiation.'
+  [../]
+  [./applied_strain-jac]
+    type = 'PetscJacobianTester'
+    input = 'applied_strain.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    difference_tol = 1e-1
+    requirement = 'The Jacobian for the AD eigenstrain problem shall be perfect'
+  [../]
+
+  [./tensor]
+    type = 'Exodiff'
+    input = 'tensor.i'
+    exodiff = 'tensor_out.e'
+    max_parallel = 1
+    requirement = 'We shall be able to reproduce small strain with specified tensors results of the hand-coded simulation using automatic differentiation.'
+  [../]
+  [./tensor-jac]
+    type = 'PetscJacobianTester'
+    input = 'tensor.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    difference_tol = 1e-4
+    requirement = 'The Jacobian for the AD small strain with specified tensors problem shall be perfect'
+  [../]
+
+  [./thermal_expansion]
+    type = 'Exodiff'
+    input = 'thermal_expansion.i'
+    exodiff = 'thermal_expansion_out.e'
+    requirement = 'We shall be able to reproduce thermal eigenstrain results of the hand-coded simulation using automatic differentiation.'
+  [../]
+  [./thermal_expansion-jac]
+    type = 'PetscJacobianTester'
+    input = 'thermal_expansion.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    difference_tol = 1e-4
+    requirement = 'The Jacobian for the AD thermal eigenstrain problem shall be perfect'
+  [../]
+[]
