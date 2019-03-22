@@ -252,7 +252,7 @@ void
 FeatureFloodCount::initialize()
 {
   // Clear the feature marking maps and region counters and other data structures
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
   {
     _feature_maps[map_num].clear();
     _partial_feature_sets[map_num].clear();
@@ -349,11 +349,11 @@ FeatureFloodCount::execute()
       else
       {
         auto n_nodes = current_elem->n_vertices();
-        for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
+        for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
         {
           const Node * current_node = current_elem->get_node(i);
 
-          for (auto var_num = beginIndex(_vars); var_num < _vars.size(); ++var_num)
+          for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
             flood(current_node, var_num);
         }
       }
@@ -400,7 +400,7 @@ FeatureFloodCount::communicateAndMerge()
     if (is_merging_processor)
       recv_buffers.reserve(_app.n_processors());
 
-    for (auto i = decltype(_n_vars)(0); i < _n_vars; ++i)
+    for (MooseIndex(_n_vars) i = 0; i < _n_vars; ++i)
     {
       serialize(send_buffers[0], i);
 
@@ -1023,7 +1023,7 @@ FeatureFloodCount::mergeSets()
   TIME_SECTION(_merge_timer);
 
   // When working with _distribute_merge_work all of the maps will be empty except for one
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
   {
     for (auto it1 = _partial_feature_sets[map_num].begin();
          it1 != _partial_feature_sets[map_num].end();
@@ -1091,7 +1091,7 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
   // Set the member feature count to zero and start counting the actual features
   _feature_count = 0;
 
-  for (auto map_num = decltype(_maps_size)(0); map_num < _maps_size; ++map_num)
+  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
   {
     for (auto & feature : _partial_feature_sets[map_num])
     {
@@ -1388,7 +1388,7 @@ FeatureFloodCount::expandPointHalos()
 
         // Get the nodes on a current element so that we can add in point neighbors
         auto n_nodes = elem->n_vertices();
-        for (auto i = decltype(n_nodes)(0); i < n_nodes; ++i)
+        for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
         {
           const Node * current_node = elem->get_node(i);
 
@@ -1436,7 +1436,7 @@ FeatureFloodCount::expandEdgeHalos(unsigned int num_layers_to_expand)
   {
     for (auto & feature : list_ref)
     {
-      for (auto halo_level = decltype(num_layers_to_expand)(0); halo_level < num_layers_to_expand;
+      for (MooseIndex(num_layers_to_expand) halo_level = 0; halo_level < num_layers_to_expand;
            ++halo_level)
       {
         /**
@@ -1493,7 +1493,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
   MeshBase & mesh = _mesh.getMesh();
 
   // Loop over all neighbors (at the the same level as the current element)
-  for (auto i = decltype(elem->n_neighbors())(0); i < elem->n_neighbors(); ++i)
+  for (MooseIndex(elem->n_neighbors()) i = 0; i < elem->n_neighbors(); ++i)
   {
     const Elem * neighbor_ancestor = nullptr;
     bool topological_neighbor = false;
@@ -1630,7 +1630,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
     {
       Elem * elem = _mesh.elemPtr(entity);
 
-      for (auto node_n = decltype(elem->n_nodes())(0); node_n < elem->n_nodes(); ++node_n)
+      for (MooseIndex(elem->n_nodes()) node_n = 0; node_n < elem->n_nodes(); ++node_n)
       {
         auto iters = _periodic_node_map.equal_range(elem->node(node_n));
 
@@ -2070,7 +2070,7 @@ updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Point & node)
 void
 updateBBoxExtremesHelper(MeshTools::BoundingBox & bbox, const Elem & elem)
 {
-  for (auto node_n = decltype(elem.n_nodes())(0); node_n < elem.n_nodes(); ++node_n)
+  for (MooseIndex(elem.n_nodes()) node_n = 0; node_n < elem.n_nodes(); ++node_n)
     updateBBoxExtremesHelper(bbox, *(elem.get_node(node_n)));
 }
 
