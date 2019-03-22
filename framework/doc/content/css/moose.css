@@ -3,9 +3,9 @@
     --inl-blue-light: rgba(0, 104, 179, 1.0);
     --dark-blue: rgba(0, 44, 78, 1.0);
     --gray: rgba(117, 117, 117);
-    --alert-error: rgba(153, 0, 0, 1);
+    --alert-error: rgba(153, 0, 0, 1.0);
     --alert-error-content: rgba(153, 0, 0, 0.1);
-    --alert-note: rgba(0, 88, 151);
+    --alert-note: rgba(0, 88, 151, 1.0);
     --alert-note-content: rgba(0, 88, 151, 0.1);
     --alert-warning: rgba(255, 255, 51, 1.0);
     --alert-warning-content: rgba(255, 255, 51, 0.1);
