@@ -2,7 +2,7 @@
     --inl-blue: rgba(0, 88, 151, 1.0);
     --inl-blue-light: rgba(0, 104, 179, 1.0);
     --dark-blue: rgba(0, 44, 78, 1.0);
-    --gray: rgba(117, 117, 117);
+    --gray: rgba(117, 117, 117, 1.0);
     --alert-error: rgba(153, 0, 0, 1.0);
     --alert-error-content: rgba(153, 0, 0, 0.1);
     --alert-note: rgba(0, 88, 151, 1.0);
