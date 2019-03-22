@@ -22,13 +22,6 @@
   elem_type = QUAD4
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   eigenstrain_names = eigenstrain

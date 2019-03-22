@@ -23,16 +23,12 @@
 [Variables]
   [./diffused]
   [../]
-
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [Modules/TensorMechanics/Master/All]
   strain = SMALL
   incremental = true
+  add_variables = true
 []
 
 [AuxVariables]

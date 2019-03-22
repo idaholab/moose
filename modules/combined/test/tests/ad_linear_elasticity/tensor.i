@@ -116,15 +116,115 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
-  strain = SMALL
-  add_variables = true
-  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+# [Modules/TensorMechanics/Master/All]
+#   strain = SMALL
+#   add_variables = true
+#   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+# []
+
+### Replaceable by action
+[Variables]
+  [./disp_x]
+  [../]
+  [./disp_y]
+  [../]
 []
 
 [Kernels]
+  [./x]
+    type = ADStressDivergenceTensors
+    variable = disp_x
+    component = 0
+  [../]
+  [./y]
+    type = ADStressDivergenceTensors
+    variable = disp_y
+    component = 1
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_xx_aux]
+    type = MaterialRankTwoTensorAux
+    variable = stress_xx
+    i = 0
+    j = 0
+    property = stress
+  [../]
+  [./stress_yy_aux]
+    type = MaterialRankTwoTensorAux
+    variable = stress_yy
+    i = 1
+    j = 1
+    property = stress
+  [../]
+  [./stress_zz_aux]
+    type = MaterialRankTwoTensorAux
+    variable = stress_zz
+    i = 2
+    j = 2
+    property = stress
+  [../]
+  [./stress_xy_aux]
+    type = MaterialRankTwoTensorAux
+    variable = stress_xy
+    i = 0
+    j = 1
+    property = stress
+  [../]
+  [./stress_yz_aux]
+    type = MaterialRankTwoTensorAux
+    variable = stress_yz
+    i = 1
+    j = 2
+    property = stress
+  [../]
+  [./stress_zx_aux]
+    type = MaterialRankTwoTensorAux
+    variable = stress_zx
+    i = 2
+    j = 0
+    property = stress
+  [../]
+[]
+
+[Materials]
+  [./strain]
+    type = ADComputeSmallStrain
+  [../]
+[]
+### Replaceable by action
+
+[Kernels]
   [./diff]
-    type = Diffusion
+    type = ADDiffusion
     variable = diffused
   [../]
 []
@@ -328,7 +428,7 @@
     C_ijkl ='1111 1122 1133 1123 1113 1112 2222 2233 2223 2213 2212 3333 3323 3313 3312 2323 2313 2312 1313 1312 1212'
   [../]
   [./stress]
-    type = ComputeLinearElasticStress
+    type = ADComputeLinearElasticStress
   [../]
 []
 

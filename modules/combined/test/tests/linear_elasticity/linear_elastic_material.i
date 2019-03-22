@@ -23,11 +23,6 @@
       type = RandomIC
      [../]
   [../]
-
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [Modules/TensorMechanics/Master/All]
