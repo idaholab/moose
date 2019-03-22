@@ -31,7 +31,7 @@
 #   generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 # []
 
-### Replaceable by action
+### Everything between here and the next ### should be replaceable by future action availability
 [Variables]
   [./disp_x]
   [../]

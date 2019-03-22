@@ -12,8 +12,6 @@
 
 #include "ADMaterial.h"
 
-#define adDeclareRestartableData this->template declareRestartableData
-
 #define usingADComputeEigenstrainBaseMembers                                                       \
   usingMaterialMembers;                                                                            \
   using ADComputeEigenstrainBase<compute_stage>::_eigenstrain

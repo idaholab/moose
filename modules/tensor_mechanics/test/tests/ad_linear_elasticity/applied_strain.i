@@ -24,7 +24,7 @@
 #   generate_output = 'strain_xx strain_yy strain_xy'
 # []
 
-### Replaceable by action
+### Everything between here and the next ### should be replaceable by future action availability
 [Variables]
   [./disp_x]
   [../]

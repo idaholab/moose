@@ -12,6 +12,7 @@
     type = 'PetscJacobianTester'
     input = 'linear_elastic_material.i'
     run_sim = 'True'
+    petsc_version = '>=3.9'
     ratio_tol = 1e-7
     difference_tol = 1e-1
     requirement = 'The Jacobian for the AD linear elastic stress problem shall be perfect'
@@ -27,6 +28,7 @@
     type = 'PetscJacobianTester'
     input = 'applied_strain.i'
     run_sim = 'True'
+    petsc_version = '>=3.9'
     ratio_tol = 1e-7
     difference_tol = 1e-1
     requirement = 'The Jacobian for the AD eigenstrain problem shall be perfect'
@@ -43,6 +45,7 @@
     type = 'PetscJacobianTester'
     input = 'tensor.i'
     run_sim = 'True'
+    petsc_version = '>=3.9'
     ratio_tol = 1e-7
     difference_tol = 1e-4
     requirement = 'The Jacobian for the AD small strain with specified tensors problem shall be perfect'
@@ -58,6 +61,7 @@
     type = 'PetscJacobianTester'
     input = 'thermal_expansion.i'
     run_sim = 'True'
+    petsc_version = '>=3.9'
     ratio_tol = 1e-7
     difference_tol = 1e-4
     requirement = 'The Jacobian for the AD thermal eigenstrain problem shall be perfect'

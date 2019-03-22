@@ -31,7 +31,7 @@
 # []
 
 
-### Replaceable by action
+### Everything between here and the next ### should be replaceable by future action availability
 [Variables]
   [./disp_x]
   [../]
