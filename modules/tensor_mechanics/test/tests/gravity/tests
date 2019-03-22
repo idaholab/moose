@@ -1,13 +1,31 @@
 [Tests]
-  [./3D]
+  [./gravity_test]
     type = Exodiff
     input = 'gravity_test.i'
     exodiff = 'gravity_test_out.e'
     requirement = 'The tensor mechanics module shall have the capability of '
                   'applying a body force term in the stress divergence '
                   'equilibrium equation that accounts for the force of gravity '
-                  'on a solid object due to its own weight.' 
+                  'on a solid object due to its own weight.'
     design = 'Gravity.md'
     issues = '#4781'
+  [../]
+  [./ad_gravity_test]
+    type = Exodiff
+    input = 'ad_gravity_test.i'
+    exodiff = 'ad_gravity_test_out.e'
+    requirement = 'We shall be able to reproduce gravity test results of the hand-coded simulation using automatic differentiation.'
+    design = 'ADGravity.md'
+    issues = '#13100'
+  [../]
+  [./ad_gravity_test-jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_gravity_test.i'
+    run_sim = 'True'
+    ratio_tol = 1e-7
+    difference_tol = 1e-4
+    requirement = 'The Jacobian for the AD gravity problem shall be perfect'
+    issues = '#13100'
+    design = 'jacobian_definitions.md'
   [../]
 []

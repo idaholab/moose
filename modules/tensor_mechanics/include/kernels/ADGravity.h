@@ -7,36 +7,35 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GRAVITY_H
-#define GRAVITY_H
+#ifndef ADGRAVITY_H
+#define ADGRAVITY_H
 
-#include "Kernel.h"
+#include "ADKernelValue.h"
 
-class Function;
-class Gravity;
+template <ComputeStage>
+class ADGravity;
 
-template <>
-InputParameters validParams<Gravity>();
+declareADValidParams(ADGravity);
 
-/**
- * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the
- * density
- */
-class Gravity : public Kernel
+template <ComputeStage compute_stage>
+class ADGravity : public ADKernelValue<compute_stage>
 {
 public:
-  Gravity(const InputParameters & parameters);
+  ADGravity(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  ADResidual precomputeQpResidual() override;
 
-  const MaterialProperty<Real> & _density;
+private:
+  const ADMaterialProperty(Real) & _density;
 
   Real _value;
   Function & _function;
 
   // _alpha parameter for HHT time integration scheme
   const Real _alpha;
+
+  usingKernelValueMembers;
 };
 
-#endif // GRAVITY_H
+#endif // ADGRAVITY_H
