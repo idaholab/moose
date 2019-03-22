@@ -1,4 +1,4 @@
-# Exception test: the incorrect number of initial stress functions are supplied
+# Exception test: the incorrect number of initial stress AuxVariables are supplied
 
 [Mesh]
   type = GeneratedMesh
@@ -46,7 +46,8 @@
   [../]
   [./ini_stress]
     type = ComputeEigenstrainFromInitialStress
-    initial_stress = '1 0 1'
+    initial_stress = '1 2 3 4 5 6 7 8 9'
+    initial_stress_aux = '1 2 3'
     eigenstrain_name = ini_stress
   [../]
   [./stress]
