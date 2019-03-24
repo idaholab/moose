@@ -6,6 +6,7 @@
 
 class ClosuresBase;
 class FlowChannelBase;
+class HeatTransferBase;
 class Simulation;
 class Factory;
 
@@ -30,6 +31,7 @@ public:
    * @param[in] flow_channel   Flow channel component
    */
   virtual void check(const FlowChannelBase & flow_channel) const = 0;
+  virtual void check(const HeatTransferBase & heat_transfer) const = 0;
 
   /**
    * Adds MOOSE objects
@@ -37,6 +39,7 @@ public:
    * @param[in] flow_channel   Flow channel component
    */
   virtual void addMooseObjects(const FlowChannelBase & flow_channel) = 0;
+  virtual void addMooseObjects(const HeatTransferBase & heat_transfer) = 0;
 
 protected:
   /**
