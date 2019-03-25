@@ -741,16 +741,16 @@ public:
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
 
-  void computeAD(const unsigned int & num_dofs,
-                 const unsigned int & nqp,
-                 const bool & is_transient,
+  void computeAD(const unsigned int num_dofs,
+                 const unsigned int nqp,
+                 const bool is_transient,
                  const FieldVariablePhiValue & phi,
                  const FieldVariablePhiGradient & grad_phi,
                  const FieldVariablePhiSecond *& second_phi,
                  const typename VariableTestGradientType<OutputType, JACOBIAN>::type & ad_grad_phi);
-  void computeADNeighbor(const unsigned int & num_dofs,
-                         const unsigned int & nqp,
-                         const bool & is_transient,
+  void computeADNeighbor(const unsigned int num_dofs,
+                         const unsigned int nqp,
+                         const bool is_transient,
                          const FieldVariablePhiValue & phi,
                          const FieldVariablePhiGradient & grad_phi,
                          const FieldVariablePhiSecond *& second_phi);

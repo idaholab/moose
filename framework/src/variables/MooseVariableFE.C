@@ -1322,9 +1322,9 @@ MooseVariableFE<OutputType>::computeValuesHelper(
 template <typename OutputType>
 void
 MooseVariableFE<OutputType>::computeAD(
-    const unsigned int & num_dofs,
-    const unsigned int & nqp,
-    const bool & is_transient,
+    const unsigned int num_dofs,
+    const unsigned int nqp,
+    const bool is_transient,
     const FieldVariablePhiValue & phi,
     const FieldVariablePhiGradient & grad_phi,
     const FieldVariablePhiSecond *& second_phi,
@@ -1421,9 +1421,9 @@ MooseVariableFE<OutputType>::computeAD(
 
 template <typename OutputType>
 void
-MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int & num_dofs,
-                                               const unsigned int & nqp,
-                                               const bool & is_transient,
+MooseVariableFE<OutputType>::computeADNeighbor(const unsigned int num_dofs,
+                                               const unsigned int nqp,
+                                               const bool is_transient,
                                                const FieldVariablePhiValue & phi,
                                                const FieldVariablePhiGradient & grad_phi,
                                                const FieldVariablePhiSecond *& second_phi)
