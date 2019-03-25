@@ -49,7 +49,7 @@
   [../]
 
   [./channel]
-    type = FlowChannel
+    type = FlowChannel1Phase
 
     fp = fp
 
