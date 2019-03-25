@@ -107,6 +107,13 @@ public:
    */
   std::string getHeatTransferNamesSuffix(const std::string & ht_name) const;
 
+  /**
+   * Get the used closures object
+   *
+   * @return The closures object
+   */
+  std::shared_ptr<ClosuresBase> getClosures() const { return _closures; }
+
 protected:
   virtual std::shared_ptr<FlowModel> buildFlowModel() = 0;
   virtual void init() override;

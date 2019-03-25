@@ -3,6 +3,7 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 #include "FlowChannelBase.h"
+#include "ClosuresBase.h"
 #include "MooseUtils.h"
 
 template <>
@@ -45,10 +46,11 @@ HeatTransferBase::init()
 
     // get various data from flow channel
     _block_ids_flow_channel = flow_channel.getSubdomainIds();
+    _flow_channel_subdomains = flow_channel.getSubdomainNames();
     _model_type = flow_channel.getFlowModelID();
     _fp_name = flow_channel.getFluidPropertiesName();
     _A_fn_name = flow_channel.getAreaFunctionName();
-    _closures_name = MooseUtils::toLower(flow_channel.getParam<std::string>("closures"));
+    _closures = flow_channel.getClosures();
   }
 }
 
