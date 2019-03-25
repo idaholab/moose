@@ -46,7 +46,7 @@
   [../]
 
   [./left_channel]
-    type = FlowChannel
+    type = FlowChannel1Phase
 
     fp = fp
 
@@ -70,7 +70,7 @@
   [../]
 
   [./right_channel]
-    type = FlowChannel
+    type = FlowChannel1Phase
 
     fp = fp
 
