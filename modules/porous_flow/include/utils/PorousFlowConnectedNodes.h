@@ -125,6 +125,13 @@ public:
   unsigned indexOfSequentialConnection(dof_id_type sequential_node_ID_from,
                                        dof_id_type sequential_node_ID_to) const;
 
+  /**
+   * Return the size of _sequential_id, for checking memory efficiency.
+   * The memory wasted by this class is (sizeSequential() - numNodes()) * (size of dof_id_type).
+   * finalizeAddingGlobalNodes() must have been called prior to calling this method
+   */
+  std::size_t sizeSequential() const;
+
 private:
   bool _still_adding_global_nodes;
   dof_id_type _min_global_id;

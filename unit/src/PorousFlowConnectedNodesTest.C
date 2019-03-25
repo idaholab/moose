@@ -190,6 +190,19 @@ TEST_F(PorousFlowConnectedNodesTest, errors)
                                 "global_node_ID_to 12");
     ASSERT_TRUE(pos != std::string::npos);
   }
+
+  try
+  {
+    _n2.sizeSequential();
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos =
+        std::string(err.what())
+            .find("PorousFlowConnectedNodes: sizeSequential called, but _still_adding_global_nodes "
+                  "is true.  Probably you should have called finalizeAddingGlobalNodes.");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
 }
 
 TEST_F(PorousFlowConnectedNodesTest, numNodes)
@@ -262,3 +275,5 @@ TEST_F(PorousFlowConnectedNodesTest, connections)
   EXPECT_EQ(_n1.globalConnectionsToSequentialID(1)[0], 1234);
   EXPECT_EQ(_n1.globalConnectionsToSequentialID(2)[0], 1234);
 }
+
+TEST_F(PorousFlowConnectedNodesTest, sizeSequential) { EXPECT_EQ(_n1.sizeSequential(), 1234); }
