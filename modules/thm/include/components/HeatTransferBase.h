@@ -55,8 +55,8 @@ protected:
    */
   void addHeatedPerimeter();
 
-  /// name of the connected pipe
-  const std::string _pipe_name;
+  /// name of the connected flow channel
+  const std::string _flow_channel_name;
 
   /// flag that heated perimeter is transferred from another application
   const bool _P_hf_transferred;
@@ -73,13 +73,13 @@ protected:
   /// wall heat flux name
   VariableName _q_wall_name;
 
-  /// block IDs corresponding to the connected pipe
-  std::vector<unsigned int> _block_ids_pipe;
+  /// block IDs corresponding to the connected flow channel
+  std::vector<unsigned int> _block_ids_flow_channel;
   /// flow model type
   THM::FlowModelID _model_type;
   /// fluid properties object name
   UserObjectName _fp_name;
-  /// area function name for the connected pipe
+  /// area function name for the connected flow channel
   FunctionName _A_fn_name;
   /// heated perimeter function name
   FunctionName _P_hf_fn_name;
