@@ -126,6 +126,10 @@ class PDFExtension(command.CommandExtension):
         for preamble in self.translator.renderer.getPreamble():
             latex.String(main, content='\n' + preamble, escape=False)
 
+        # New Commands
+        for cmd in self.translator.renderer.getNewCommands().itervalues():
+            cmd.parent = main
+
         doc = latex.Environment(main, 'document', end='\n')
         for node in anytree.PreOrderIter(root, filter_=lambda n: 'page' in n):
             page = node['page']
@@ -139,6 +143,7 @@ class PDFExtension(command.CommandExtension):
             latex.Command(doc, 'bibliographystyle', start='\n', string=u'unsrtnat')
             latex.Command(doc, 'bibliography', string=u','.join(bib_files), start='\n',
                           escape=False)
+
         return main
 
     def _reportLatexWarnings(self, lnode, content):

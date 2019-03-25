@@ -37,7 +37,12 @@ class KatexExtension(components.Extension):
         config = components.Extension.defaultConfig()
         config['prefix'] = ('Eq.', r"The prefix to used when referring to an equation by " \
                                    r"the \\label content.")
+        config['macros'] = (None, "Macro definitions to apply to equations.")
         return config
+
+    def __init__(self, *args, **kwargs):
+        super(KatexExtension, self).__init__(*args, **kwargs)
+        self.macros = None
 
     def initMetaData(self, page, meta):
         meta.initData('labels', set())
@@ -57,6 +62,16 @@ class KatexExtension(components.Extension):
             renderer.addCSS('katex', "contrib/katex/katex.min.css")
             renderer.addCSS('katex_moose', "css/katex_moose.css")
             renderer.addJavaScript('katex', "contrib/katex/katex.min.js", head=True)
+
+            if self.get('macros', None):
+                mc = ','.join('"{}":"{}"'.format(k, v) for k, v in self.get('macros').iteritems()) #pylint: disable=no-member
+                self.macros = '{' + mc + '}'
+
+        elif isinstance(renderer, renderers.LatexRenderer):
+            renderer.addPackage('amsfonts')
+            if self.get('macros', None):
+                for k, v in self.get('macros').iteritems(): #pylint: disable=no-member
+                    renderer.addNewCommand(k, v)
 
     def postTokenize(self, ast, page, meta, reader):
         labels = set()
@@ -154,9 +169,16 @@ class RenderLatexEquation(components.RenderComponent):
 
         # Build the KaTeX script
         script = html.Tag(div, 'script')
+        config = dict()
+        config['displayMode'] = display
+        config['throwOnError'] = 'false'
+        if self.extension.macros:
+            config['macros'] = self.extension.macros
+
+        config_str = ','.join('{}:{}'.format(key, value) for key, value in config.iteritems())
         content = u'var element = document.getElementById("%s");' % token['bookmark']
-        content += u'katex.render("%s", element, {displayMode:%s,throwOnError:false});' % \
-                   (token['tex'].encode('string-escape'), display)
+        content += u'katex.render("%s", element, {%s});' % \
+                   (token['tex'].encode('string-escape'), config_str.encode('string-escape'))
         html.String(script, content=content)
 
         return parent
