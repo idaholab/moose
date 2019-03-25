@@ -7,7 +7,7 @@ e.g., `[eq-heat]`.
 !devel settings module=MooseDocs.extensions.katex
                 object=KatexExtension
                 id=katex-extension-config
-                caption=Available configure options for th KatexExtension object.
+                caption=Available configure options for the KatexExtension object.
 
 
 
@@ -58,5 +58,17 @@ shown below.
 
 !devel example id=katex-inline caption=Example of an inline LaTeX equation.
 This $y=2\phi$ is inline.
+
+## Macros
+
+It is possible to define macros within extension configuration. This is done using the
+'macros' configuration parameter (see [katex-extension-config]). For example, the main configuration
+file for contains the following allowing for equation in [katex-macro] to be defined.
+
+!listing modules/doc/config.yml start=MooseDocs.extensions.katex end=MooseDocs.extensions.appsyntax
+
+!devel example id=katex-macro caption=Example use of a macro defined in configuration file.
+$\pf{T}{t} = c$
+
 
 [KaTeX]: https://khan.github.io/KaTeX
