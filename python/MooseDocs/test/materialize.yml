@@ -23,6 +23,7 @@ Extensions:
     MooseDocs.extensions.config: default
     MooseDocs.extensions.core: default
     MooseDocs.extensions.floats: default
+    MooseDocs.extensions.style: default
     MooseDocs.extensions.command: default
     MooseDocs.extensions.include: default
     MooseDocs.extensions.media: default
