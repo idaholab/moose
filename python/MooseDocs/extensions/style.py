@@ -8,14 +8,15 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseDocs.base import components
+from MooseDocs.base import components, renderers
+from MooseDocs.common import exceptions
 from MooseDocs.extensions import command
-from MooseDocs.tree import tokens, html
+from MooseDocs.tree import tokens, html, latex
 
 def make_extension(**kwargs):
     return StyleExtension(**kwargs)
 
-StyleToken = tokens.newToken('StyleToken', halign='left', border=0)
+StyleToken = tokens.newToken('StyleToken', halign='left', color=None, border=0)
 
 class StyleExtension(command.CommandExtension):
     @staticmethod
@@ -28,6 +29,10 @@ class StyleExtension(command.CommandExtension):
         self.addCommand(reader, StyleCommand())
         renderer.add('StyleToken', RenderStyleToken())
 
+        if isinstance(renderer, renderers.LatexRenderer):
+            renderer.addPackage(u'xcolor')
+
+
 class StyleCommand(command.CommandComponent):
     COMMAND = 'style'
     SUBCOMMAND = None
@@ -37,12 +42,14 @@ class StyleCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['halign'] = (None, "The horizontal alignment ('center', 'left', or 'right')")
         settings['border'] = (None, "The size of the border in pixels")
+        settings['color'] = (None, "Set the color of content.")
         return settings
 
     def createToken(self, parent, info, page):
         return StyleToken(parent,
                           halign=self.settings['halign'],
                           border=self.settings['border'],
+                          color=self.settings['color'],
                           **self.attributes)
 
 class RenderStyleToken(components.RenderComponent):
@@ -50,10 +57,36 @@ class RenderStyleToken(components.RenderComponent):
     def createHTML(self, parent, token, page):
         style = [token['style']]
         if token['halign']:
+            if token['halign'] not in ('center', 'left', 'right'):
+                msg = "The supplied string for 'halign' is '{}' but it must be " \
+                      "'center', 'left', 'right'."
+                raise exceptions.MooseDocsException(msg, token['halign'])
+
             style.append('text-align:{}'.format(token['halign']))
         if token['border']:
             style.append('border-width:{}px;border-style:solid'.format(token['border']))
-        return html.Tag(parent, 'div', token, style=';'.join(style))
+        if token['color']:
+            style.append('color:{}'.format(token['color']))
+
+        tag_type = 'span'
+        if token.info.pattern in ('BlockInlineCommand', 'BlockBlockCommand'):
+            tag_type = 'div'
+        return html.Tag(parent, tag_type, token, style=';'.join(style))
 
     def createLatex(self, parent, token, page):
-        pass
+        master = parent
+
+        if token['halign']:
+            halign = token['halign']
+            if halign != 'center':
+                halign = 'flush{}'.format(halign)
+            master = latex.Environment(master, halign)
+
+        if token['border']:
+            master = latex.Environment(master, 'fbox')
+
+        if token['color']:
+            master = latex.Brace(master)
+            latex.Command(master, 'color', string=token['color'])
+
+        return master
