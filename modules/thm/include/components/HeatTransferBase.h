@@ -4,6 +4,7 @@
 #include "ConnectorBase.h"
 
 class HeatTransferBase;
+class ClosuresBase;
 
 template <>
 InputParameters validParams<HeatTransferBase>();
@@ -45,6 +46,16 @@ public:
    */
   virtual bool isTemperatureType() const = 0;
 
+  /**
+   * Get the list of the subdomain names associated with the flow channel
+   *
+   * @return List of subdomain names associated with the flow channel
+   */
+  const std::vector<SubdomainName> & getFlowChannelSubdomains() const
+  {
+    return _flow_channel_subdomains;
+  }
+
 protected:
   virtual void init() override;
   virtual void initSecondary() override;
@@ -63,8 +74,8 @@ protected:
   /// flag that the heated perimeter was specified via an input parameter
   const bool _P_hf_provided;
 
-  /// name of the chosen closures
-  std::string _closures_name;
+  /// Used closures
+  std::shared_ptr<ClosuresBase> _closures;
 
   /// heated perimeter name
   VariableName _P_hf_name;
@@ -75,6 +86,8 @@ protected:
 
   /// block IDs corresponding to the connected flow channel
   std::vector<unsigned int> _block_ids_flow_channel;
+  /// Subdomains corresponding to the connected flow channel
+  std::vector<SubdomainName> _flow_channel_subdomains;
   /// flow model type
   THM::FlowModelID _model_type;
   /// fluid properties object name
