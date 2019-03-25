@@ -1,0 +1,1 @@
+../../../../../combined/test/tests/linear_elasticity/gold/thermal_expansion_out.e

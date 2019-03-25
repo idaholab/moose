@@ -1,0 +1,1 @@
+../../../../../combined/test/tests/linear_elasticity/gold/applied_strain_out.e
