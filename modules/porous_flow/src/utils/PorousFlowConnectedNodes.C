@@ -65,6 +65,15 @@ PorousFlowConnectedNodes::finalizeAddingGlobalNodes()
   _neighbor_sets.assign(_global_id.size(), std::set<dof_id_type>());
 }
 
+std::size_t
+PorousFlowConnectedNodes::sizeSequential() const
+{
+  if (_still_adding_global_nodes)
+    mooseError("PorousFlowConnectedNodes: sizeSequential called, but _still_adding_global_nodes is "
+               "true.  Probably you should have called finalizeAddingGlobalNodes.");
+  return _sequential_id.size();
+}
+
 dof_id_type
 PorousFlowConnectedNodes::globalID(dof_id_type sequential_node_ID) const
 {
