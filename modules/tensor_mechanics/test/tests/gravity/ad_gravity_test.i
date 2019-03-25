@@ -9,10 +9,13 @@
 # which makes it trivial to check displacements.
 #
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -25,11 +28,25 @@
 []
 
 [Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+  # [./TensorMechanics]
+  # [../]
+  [./x]
+    type = ADStressDivergenceTensors
+    variable = disp_x
+    component = 0
+  [../]
+  [./y]
+    type = ADStressDivergenceTensors
+    variable = disp_y
+    component = 1
+  [../]
+  [./z]
+    type = ADStressDivergenceTensors
+    variable = disp_z
+    component = 2
   [../]
   [./gravity_y]
-    type = Gravity
+    type = ADGravity
     variable = disp_y
     value = -9.81
   [../]
@@ -63,16 +80,23 @@
     C_ijkl = '0 0.5e6'
   [../]
   [./strain]
-    type = ComputeSmallStrain
+    type = ADComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
-    type = ComputeLinearElasticStress
+    type = ADComputeLinearElasticStress
   [../]
   [./density]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 2.0387
+  [../]
+[]
+
+[Preconditioning]
+  [./full]
+    type = SMP
+    full = true
   [../]
 []
 

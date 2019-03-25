@@ -27,15 +27,13 @@ class Gravity : public Kernel
 public:
   Gravity(const InputParameters & parameters);
 
-  virtual ~Gravity() {}
-
 protected:
   virtual Real computeQpResidual();
 
   const MaterialProperty<Real> & _density;
-
-  Real _value;
+  const Real _value;
   Function & _function;
+
   // _alpha parameter for HHT time integration scheme
   const Real _alpha;
 };
