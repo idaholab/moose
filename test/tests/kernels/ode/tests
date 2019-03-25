@@ -3,6 +3,10 @@
     type = 'Exodiff'
     input = 'ode_expl_test.i'
     exodiff = 'ode_expl_test_out.e'
+
+    design = ""
+    issues = "#726"
+    requirement = "The system shall support solving Ordinary Differential Equations in explicit form."
   [../]
 
   [./test_sys_impl]
@@ -10,7 +14,11 @@
     input = 'ode_sys_impl_test.i'
     exodiff = 'ode_sys_impl_test_out.e'
     max_parallel = 2
-		max_threads = 2
+    max_threads = 2
+
+    design = ""
+    issues = "#726"
+    requirement = "The system shall support solving Ordinary Differential Equations in implicit form."
   [../]
 
   [./test_parsed_sys_impl]
@@ -21,27 +29,42 @@
     exodiff = 'ode_sys_impl_test_out.e'
     max_parallel = 2
     max_threads = 2
+
+    design = ""
+    issues = "#726"
+    requirement = "The system shall support solving ODEs specified within the input file through parsed function syntax."
   [../]
 
   [./test_coupled_ode_td]
     type = 'CSVDiff'
     input = 'coupled_ode_td.i'
     csvdiff = 'coupled_ode_td_out.csv'
+    cli_args = 'Outputs/exodus=true' # Turn on Exodus for the Scalar IC tests
+
+    design = ""
+    issues = "#726"
+    requirement = "The system shall support solving Coupled Ordinary Differential Equations."
   [../]
 
   [./test_coupled_ode_td_var_ic_from_mesh]
     type = 'CSVDiff'
     input = 'coupled_ode_td_var_ic_from_mesh.i'
     csvdiff = 'coupled_ode_td_var_ic_from_mesh_out.csv'
+    prereq = 'test_coupled_ode_td'
+
+    design = ""
     issues = "#13040"
-    requirement = "MOOSE shall allow scalar variable initial condition to be loaded from a file mesh"
+    requirement = "The system shall allow scalar variable initial condition to be loaded from a file mesh"
   [../]
 
   [./test_coupled_ode_td_auxvar_ic_from_mesh]
     type = 'CSVDiff'
     input = 'coupled_ode_td_auxvar_ic_from_mesh.i'
     csvdiff = 'coupled_ode_td_auxvar_ic_from_mesh_out.csv'
+    prereq = 'test_coupled_ode_td'
+
+    design = ""
     issues = "#13040"
-    requirement = "MOOSE shall allow auxscalar variable initial condition to be loaded from a file mesh"
+    requirement = "The system shall allow auxscalar variable initial condition to be loaded from a file mesh"
   [../]
 []

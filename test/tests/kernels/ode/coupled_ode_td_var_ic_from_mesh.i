@@ -1,21 +1,20 @@
 [Mesh]
   type = FileMesh
-  file = 'coupled_ode_td_ic_from_mesh.e'
+  file = 'coupled_ode_td_out.e'
 []
-
 
 [Variables]
   [./f]
     family = SCALAR
     order = FIRST
     initial_from_file_var = f
-    initial_from_file_timestep = 1
+    initial_from_file_timestep = 'LATEST'
   [../]
   [./f_times_mult]
     family = SCALAR
     order = FIRST
     initial_from_file_var = f_times_mult
-    initial_from_file_timestep = 1
+    initial_from_file_timestep = 'LATEST'
   [../]
 []
 

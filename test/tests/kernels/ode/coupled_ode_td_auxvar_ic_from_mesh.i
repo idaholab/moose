@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = 'coupled_ode_td_ic_from_mesh.e'
+  file = 'coupled_ode_td_out.e'
 []
 
 [Variables]
@@ -48,7 +48,7 @@
     family = SCALAR
     order = FIRST
     initial_from_file_var = g
-    initial_from_file_timestep = 1
+    initial_from_file_timestep = 'LATEST'
   [../]
 []
 
@@ -64,7 +64,7 @@
     type = FunctionScalarAux
     function = function_g
     variable = g
-    execute_on = 'linear initial'
+    execute_on = 'timestep_end'
   [../]
 []
 
