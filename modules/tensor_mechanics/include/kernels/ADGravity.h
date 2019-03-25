@@ -29,8 +29,7 @@ protected:
 private:
   const ADMaterialProperty(Real) & _density;
 
-  Real _value;
-  Function & _function;
+  const Real _value;
 
   // _alpha parameter for HHT time integration scheme
   const Real _alpha;

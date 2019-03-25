@@ -19,7 +19,8 @@ validParams<Gravity>()
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Apply gravity. Value is in units of acceleration.");
   params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
-  params.set<Real>("value") = 0.0;
+  params.addParam<Real>(
+      "value", 0.0, "Value multiplied against the residual, e.g. gravitational acceleration");
   params.addParam<FunctionName>(
       "function", "1", "A function that describes the gravitational force");
   params.addParam<Real>("alpha", 0.0, "alpha parameter required for HHT time integration scheme");

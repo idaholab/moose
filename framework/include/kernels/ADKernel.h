@@ -22,7 +22,6 @@
   using ADKernelTempl<type, compute_stage>::_test;                                                 \
   using ADKernelTempl<type, compute_stage>::_qp;                                                   \
   using ADKernelTempl<type, compute_stage>::_ad_q_point;                                           \
-  using ADKernelTempl<type, compute_stage>::_q_point;                                              \
   using ADKernelTempl<type, compute_stage>::_i;                                                    \
   using ADKernelTempl<type, compute_stage>::_j;                                                    \
   using ADKernelTempl<type, compute_stage>::_u;                                                    \
