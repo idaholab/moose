@@ -101,4 +101,42 @@
     design = 'PorousFlowBrineCO2IC.md'
     issues = '#9377'
   [../]
+  [./water_vapor_2phase]
+    type = 'CSVDiff'
+    input = 'water_vapor.i'
+    csvdiff = 'water_vapor_twophase.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the properties of both the gas and liquid phase in a water-steam system'
+    design = 'PorousFlowWaterVapor.md'
+    issues = '#13108'
+  [../]
+  [./water_vapor_liquid]
+    type = 'CSVDiff'
+    input = 'water_vapor.i'
+    cli_args = '/Variables/h/initial_condition=5e5 /Outputs/file_base=water_vapor_liquid'
+    csvdiff = 'water_vapor_liquid.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the liquid properties in a saturated liquid system'
+    design = 'PorousFlowWaterVapor.md'
+    issues = '#13108'
+  [../]
+  [./water_vapor_gas]
+    type = 'CSVDiff'
+    input = 'water_vapor.i'
+    cli_args = '/Variables/h/initial_condition=3e6 /Outputs/file_base=water_vapor_gas'
+    csvdiff = 'water_vapor_gas.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall calculate the gas properties in a saturated gas system'
+    design = 'PorousFlowWaterVapor.md'
+    issues = '#13108'
+  [../]
+  [./water_vapor_phase_change]
+    type = 'CSVDiff'
+    input = 'water_vapor_phasechange.i'
+    csvdiff = 'water_vapor_phasechange_out.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall evolve a vapor phase as conditions enter the two phase region'
+    design = 'PorousFlowWaterVapor.md'
+    issues = '#13108'
+  [../]
 []
