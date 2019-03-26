@@ -61,6 +61,16 @@ FlowChannel1Phase::check() const
 {
   FlowChannelBase::check();
 
+  // only 1-phase flow compatible heat transfers are allowed
+  for (unsigned int i = 0; i < _heat_transfer_names.size(); i++)
+  {
+    if (!hasComponentByName<HeatTransfer1PhaseBase>(_heat_transfer_names[i]))
+      logError("Coupled heat sources '",
+               _heat_transfer_names[i],
+               "' is not compatible with single phase flow channel. Either change the type of the "
+               "flow channel or the heat transfer component.");
+  }
+
   bool ics_set =
       isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel");
 
