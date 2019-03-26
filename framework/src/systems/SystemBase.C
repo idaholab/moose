@@ -935,10 +935,36 @@ SystemBase::copyVars(ExodusII_IO & io)
     }
 
     did_copy = true;
-    if (getVariable(0, vci._dest_name).isNodal())
-      io.copy_nodal_solution(system(), vci._dest_name, vci._source_name, timestep);
-    else
-      io.copy_elemental_solution(system(), vci._dest_name, vci._source_name, timestep);
+
+    if (hasVariable(vci._dest_name))
+    {
+      if (getVariable(0, vci._dest_name).isNodal())
+        io.copy_nodal_solution(system(), vci._dest_name, vci._source_name, timestep);
+      else
+        io.copy_elemental_solution(system(), vci._dest_name, vci._source_name, timestep);
+    }
+    else if (hasScalarVariable(vci._dest_name))
+    {
+      auto rank = comm().rank();
+      auto size = comm().size();
+
+      // Read solution on rank 0 only and send data to rank "size - 1" where scalar DOFs are stored
+      std::vector<Real> global_values;
+      if (rank == 0)
+      {
+        // Read the scalar value then set that value in the current solution
+        io.read_global_variable({vci._source_name}, timestep, global_values);
+        if (size > 1)
+          comm().send(size - 1, global_values);
+      }
+      if (rank == size - 1)
+      {
+        if (size > 1)
+          comm().receive(0, global_values);
+        const unsigned int var_num = system().variable_number(vci._dest_name);
+        system().solution->set(var_num, global_values[0]);
+      }
+    }
   }
 
   if (did_copy)
