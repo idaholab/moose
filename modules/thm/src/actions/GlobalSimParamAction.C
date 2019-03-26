@@ -34,6 +34,16 @@ validParams<GlobalSimParamAction>()
                              "Spatial discretization");
   params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
 
+  // bounds
+  std::vector<Real> alpha_vapor_bounds(2, 0);
+  alpha_vapor_bounds[0] = 0.0001;
+  alpha_vapor_bounds[1] = 0.9999;
+  params.addParam<std::vector<Real>>(
+      "alpha_vapor_bounds", alpha_vapor_bounds, "Bounds imposed on the vapor volume fraction");
+  params.addParam<Real>("volume_fraction_remapper_exponential_region_width",
+                        1e-6,
+                        "Width of the exponential regions in the volume fraction remapper");
+
   return params;
 }
 
