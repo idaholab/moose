@@ -49,6 +49,9 @@ protected:
 
   /// Name of the PorousFlowDictator
   std::string _dictator_name;
+
+  /// Vector of already joined materials (to avoid joining them again)
+  std::vector<std::string> _already_joined;
 };
 
 #endif // POROUSFLOWADDMATERIALJOINER_H

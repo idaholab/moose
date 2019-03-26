@@ -44,7 +44,7 @@
     no_error_deprecated = true
     requirement = "The system shall produce a warning when attempting to add materials to the simulation when using the PorousFlowFullySaturated Action."
     issues = "#10093"
-    design = "brineco2.md"
+    design = "PorousFlowAddMaterialJoiner.md"
   [../]
   [./addjoiner_exception]
     type = RunException
@@ -54,7 +54,7 @@
     threading = '!pthreads'
     requirement = "The system shall produce an error when attempting to add materials to the simulation when using the PorousFlowFullySaturated Action and the --error-deprecated flag is also supplied."
     issues = "#10093"
-    design = "brineco2.md"
+    design = "PorousFlowAddMaterialJoiner.md"
   [../]
   [./addmaterials]
     type = RunApp
@@ -62,7 +62,7 @@
     threading = '!pthreads'
     requirement = "The system shall handle adding materials properly when the add_nodes parameter and the at_nodes=true parameters are both active in the PorousFlowFullySaturated Action."
     issues = "#10093"
-    design = "brineco2.md"
+    design = "PorousFlowAddMaterialAction.md"
   [../]
   [./addmaterials2]
     type = RunApp
@@ -70,7 +70,7 @@
     threading = '!pthreads'
     requirement = "The system shall handle adding materials properly when the add_nodes parameter is supplied in the PorousFlowFullySaturated Action."
     issues = "#10093"
-    design = "brineco2.md"
+    design = "PorousFlowAddMaterialAction.md"
   [../]
   [./basicthm_h]
     type = Exodiff
@@ -111,5 +111,14 @@
     requirement = "The system shall add all required objects when using PorousFlowBasicTHM Action with coupling_type = ThermoHydroMechanical."
     issues = "#8574"
     design = "PorousFlowBasicTHM.md"
+  [../]
+  [./block_restricted]
+    type = Exodiff
+    input = block_restricted_materials.i
+    exodiff = block_restricted_materials_out.e
+    threading = '!pthreads'
+    requirement = "The system shall handle adding materials properly when materials are block restricted"
+    issues = "#10093"
+    design = "PorousFlowAddMaterialJoiner.md PorousFlowAddMaterialAction.md"
   [../]
 []

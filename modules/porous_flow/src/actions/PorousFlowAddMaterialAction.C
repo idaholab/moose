@@ -160,6 +160,8 @@ PorousFlowAddMaterialAction::isPFMaterialRequired(std::string pf_material_type, 
 bool
 PorousFlowAddMaterialAction::isPFMaterialPresent(AddMaterialAction * material, bool at_nodes)
 {
+  bool is_present = false;
+
   // Need to check that it hasn't been added in the input file also to
   // avoid a duplicate material property error
   for (auto & ama_material : _ama_materials)
@@ -175,7 +177,7 @@ PorousFlowAddMaterialAction::isPFMaterialPresent(AddMaterialAction * material, b
       // If the material isn't related to a fluid phase, it is present if
       // its at_nodes parameter is equal to the given at_nodes
       if (mat_at_nodes == at_nodes && !pars.isParamValid("phase"))
-        return true;
+        is_present = true;
 
       // If the material is related to a fluid phase, it is present if
       // its at_nodes parameter is equal to the given at_nodes, and its
@@ -185,13 +187,18 @@ PorousFlowAddMaterialAction::isPFMaterialPresent(AddMaterialAction * material, b
         const unsigned int phase = pars.get<unsigned int>("phase");
 
         if (mat_params.isParamValid("phase") && mat_params.get<unsigned int>("phase") == phase)
-          return true;
+          is_present = true;
       }
+
+      // Finally, if the material is block restricted then it is not already
+      // present if the block parameter is not identical
+      if (mat_params.get<std::vector<SubdomainName>>("block") !=
+          pars.get<std::vector<SubdomainName>>("block"))
+        is_present = false;
     }
   }
 
-  // If all of these conditions aren't satisfied, then the material is already present
-  return false;
+  return is_present;
 }
 
 void

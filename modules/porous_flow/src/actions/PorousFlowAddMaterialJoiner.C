@@ -28,7 +28,7 @@ validParams<PorousFlowAddMaterialJoiner>()
 }
 
 PorousFlowAddMaterialJoiner::PorousFlowAddMaterialJoiner(const InputParameters & params)
-  : Action(params)
+  : Action(params), _already_joined()
 {
 }
 
@@ -142,7 +142,17 @@ PorousFlowAddMaterialJoiner::addJoiner(bool at_nodes,
                                        const std::string & material_property,
                                        const std::string & output_name)
 {
-  if (!hasJoiner(material_property))
+  bool is_joined = false;
+
+  // Check if this material is already joined
+  if (std::find(_already_joined.begin(), _already_joined.end(), material_property) !=
+      _already_joined.end())
+    is_joined = true;
+
+  if (hasJoiner(material_property))
+    is_joined = true;
+
+  if (!is_joined)
   {
     std::string material_type = "PorousFlowJoiner";
     InputParameters params = _factory.getValidParams(material_type);
@@ -150,6 +160,9 @@ PorousFlowAddMaterialJoiner::addJoiner(bool at_nodes,
     params.set<bool>("at_nodes") = at_nodes;
     params.set<std::string>("material_property") = material_property;
     _problem->addMaterial(material_type, output_name, params);
+
+    // Add material to the already joined list
+    _already_joined.push_back(material_property);
   }
 }
 

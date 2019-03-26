@@ -159,4 +159,17 @@
     issues = '#6845 #7677 #8073 #8585 #8574 #9537'
     design = 'porous_flow/governing_equations.md'
   [../]
+  [./grav01d]
+    type = 'CSVDiff'
+    input = 'grav01d.i'
+    csvdiff = 'grav01d.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+    threading = '!pthreads'
+    requirement = "PorousFlow shall be able to find steady-state and long-time transient porepressure when gravity is nonzero, when the simulation contains more than one domain, with each domain having its own capillary pressure and relative permeability function"
+    issues = '#13116'
+    design = 'porous_flow/governing_equations.md'
+  [../]
 []
