@@ -118,3 +118,15 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     }
   } // end loop over range
 }
+
+bool
+AugmentSparsityOnInterface::operator==(const RelationshipManager & other) const
+{
+  if (auto asoi = dynamic_cast<const AugmentSparsityOnInterface *>(&other))
+    if (_interface.first == asoi->_interface.first &&
+        _interface.second == asoi->_interface.second &&
+        _subdomain_pair.first == asoi->_subdomain_pair.first &&
+        _subdomain_pair.second == asoi->_subdomain_pair.second)
+      return true;
+  return false;
+}
