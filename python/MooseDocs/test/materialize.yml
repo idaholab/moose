@@ -23,6 +23,7 @@ Extensions:
     MooseDocs.extensions.config: default
     MooseDocs.extensions.core: default
     MooseDocs.extensions.floats: default
+    MooseDocs.extensions.style: default
     MooseDocs.extensions.command: default
     MooseDocs.extensions.include: default
     MooseDocs.extensions.media: default
@@ -32,7 +33,10 @@ Extensions:
     MooseDocs.extensions.devel: default
     MooseDocs.extensions.package: default
     MooseDocs.extensions.alert: default
-    MooseDocs.extensions.katex: default
+    MooseDocs.extensions.katex:
+        macros:
+            \RR: \mathbb{R}
+            \pf: "\\frac{\\partial #1}{\\partial #2}"
     MooseDocs.extensions.bibtex: default
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.layout: default

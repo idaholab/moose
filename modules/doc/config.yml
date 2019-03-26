@@ -37,7 +37,10 @@ Extensions:
     MooseDocs.extensions.bibtex:
         duplicates:
             - kim_phase-field_1999 # referenced in both Tensor Mechanics and Phase Field
-    MooseDocs.extensions.appsyntax:
+    MooseDocs.extensions.katex:
+        macros:
+            \pf: "\\frac{\\partial #1}{\\partial #2}"
+    MooseDocs.extensions.appsyntax: # WARNING: this must follow katex for doco pages to work
         executable: ${MOOSE_DIR}/modules/combined
         hide:
             framework: !include framework/doc/hidden.yml

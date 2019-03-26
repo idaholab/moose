@@ -9,6 +9,7 @@
 
 """Defines Renderer objects that convert AST (from Reader) into an output format."""
 import os
+import re
 import logging
 import traceback
 import codecs
@@ -322,6 +323,7 @@ class LatexRenderer(Renderer):
     def __init__(self, *args, **kwargs):
         self._packages = dict()
         self._preamble = list()
+        self._commands = dict()
         Renderer.__init__(self, *args, **kwargs)
 
     def getRoot(self):
@@ -329,6 +331,22 @@ class LatexRenderer(Renderer):
         Return LaTeX root node.
         """
         return latex.LatexBase(None, None)
+
+    def addNewCommand(self, cmd, content):
+        """
+        Add a NewDocumentCommand to latex preamble.
+        """
+        num = 0
+        for match in re.finditer(r'#(?P<num>[0-9]+)', content):
+            num = max(num, int(match.group('num')))
+
+        args = [latex.Brace(string=cmd, escape=False), latex.Brace(string='m'*num)]
+        self._commands[cmd] = latex.Command(None, 'NewDocumentCommand', args=args, escape=False,
+                                            string=content, start='\n')
+
+    def getNewCommands(self):
+        """Return the dict of new commands."""
+        return self._commands
 
     def addPackage(self, pkg, *args, **kwargs):
         """

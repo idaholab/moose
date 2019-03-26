@@ -529,6 +529,40 @@
                                     "attributes": {
                                         "bookmark": "", 
                                         "optional": false, 
+                                        "page": "extensions/style.md", 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "AutoLink"
+                                }, 
+                                {
+                                    "attributes": {
+                                        "count": 1, 
+                                        "recursive": true
+                                    }, 
+                                    "children": [], 
+                                    "name": "Break"
+                                }
+                            ], 
+                            "name": "Paragraph"
+                        }
+                    ], 
+                    "name": "ListItem"
+                }, 
+                {
+                    "attributes": {
+                        "recursive": true
+                    }, 
+                    "children": [
+                        {
+                            "attributes": {
+                                "recursive": true
+                            }, 
+                            "children": [
+                                {
+                                    "attributes": {
+                                        "bookmark": "", 
+                                        "optional": false, 
                                         "page": "extensions/media.md", 
                                         "recursive": true
                                     }, 

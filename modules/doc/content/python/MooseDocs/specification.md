@@ -58,6 +58,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [/acronym.md] | Provides means for defining and listing acronyms across pages. |
 | [/graph.md] | Adds [plotly](https://plot.ly) support for creating charts. |
 | [/gallery.md] | Tools for building image galleries. |
+| [/style.md] | Command for setting text styling. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |

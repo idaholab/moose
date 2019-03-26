@@ -11,6 +11,7 @@
 \usepackage{xifthen}
 \usepackage{tabulary}
 \usepackage{fontawesome}
+\usepackage{amsfonts}
 \usepackage[content={Draft mode enabled in the graph extension.}]{draftfigure}
 \usepackage{xparse}
 \usepackage{graphicx}
@@ -96,6 +97,8 @@ title=Example~\thetcbcounter: #2,#1}
   \end{minipage}
 }
 
+\NewDocumentCommand{\pf}{mm}{\frac{\partial #1}{\partial #2}}
+\NewDocumentCommand{\RR}{}{\mathbb{R}}
 \begin{document}
 
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/index.tex}
@@ -121,6 +124,7 @@ title=Example~\thetcbcounter: #2,#1}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/navigation.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/package.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/sqa.tex}
+\input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/style.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/table.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/template.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/folder/index.tex}
