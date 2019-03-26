@@ -131,10 +131,10 @@ protected:
   const std::vector<std::vector<RealVectorValue>> & _grad_test_master;
 
   /// The locations of the quadrature points on the interior slave elements
-  const std::vector<Point> & _xyz_slave_interior;
+  const std::vector<Point> & _phys_points_slave;
 
   /// The locations of the quadrature points on the interior master elements
-  const std::vector<Point> & _xyz_master_interior;
+  const std::vector<Point> & _phys_points_master;
 
   /// The dof indices for the Lagrange Multiplier variable that only lives on the mortar interface
   std::vector<dof_id_type> _dof_indices_lambda;
@@ -199,8 +199,8 @@ private:
 };
 
 #define usingMortarConstraintMembers                                                               \
-  using MortarConstraint<compute_stage>::_xyz_slave_interior;                                      \
-  using MortarConstraint<compute_stage>::_xyz_master_interior;                                     \
+  using MortarConstraint<compute_stage>::_phys_points_slave;                                       \
+  using MortarConstraint<compute_stage>::_phys_points_master;                                      \
   using MortarConstraint<compute_stage>::_lambda;                                                  \
   using MortarConstraint<compute_stage>::_u_slave;                                                 \
   using MortarConstraint<compute_stage>::_u_master;                                                \

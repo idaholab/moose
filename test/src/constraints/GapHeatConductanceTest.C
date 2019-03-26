@@ -32,7 +32,7 @@ GapHeatConductanceTest<compute_stage>::computeQpResidual()
   Real heat_transfer_coeff(0);
   if (_has_master)
   {
-    auto gap = (_xyz_slave_interior[_qp] - _xyz_master_interior[_qp]).norm();
+    auto gap = (_phys_points_slave[_qp] - _phys_points_master[_qp]).norm();
     heat_transfer_coeff = _gap_conductance_constant / gap;
   }
   return _test[_i][_qp] * (_lambda[_qp] - heat_transfer_coeff *

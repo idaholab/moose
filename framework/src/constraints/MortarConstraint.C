@@ -67,8 +67,8 @@ MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parame
     _test_master(_fe_master_interior_primal->get_phi()),
     _grad_test_slave(_fe_slave_interior_primal->get_dphi()),
     _grad_test_master(_fe_master_interior_primal->get_dphi()),
-    _xyz_slave_interior(_fe_slave_interior_primal->get_xyz()),
-    _xyz_master_interior(_fe_master_interior_primal->get_xyz()),
+    _phys_points_slave(_fe_slave_interior_primal->get_xyz()),
+    _phys_points_master(_fe_master_interior_primal->get_xyz()),
     _lm_offset(0),
     _need_primal_gradient(false)
 {
