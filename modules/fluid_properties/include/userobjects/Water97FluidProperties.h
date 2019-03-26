@@ -65,6 +65,7 @@ public:
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   virtual Real e_from_p_T(Real pressure, Real temperature) const override;
+  virtual DualReal e_from_p_T(DualReal pressure, DualReal temperature) const override;
 
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
@@ -134,7 +135,8 @@ public:
    * @param pressure water pressure (Pa)
    * @return saturation temperature (K)
    */
-  Real vaporTemperature(Real pressure) const;
+  Real vaporTemperature(Real pressure) const override;
+  DualReal vaporTemperature(DualReal pressure) const override;
 
   /**
    * Auxillary equation for the boundary between regions 2 and 3
@@ -219,7 +221,8 @@ public:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  virtual Real temperature_from_ph(Real pressure, Real enthalpy) const;
+  virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
+  virtual DualReal T_from_p_h(DualReal pressure, DualReal enthalpy) const override;
 
   /**
    * Boundary between subregions b and c in region 2.
@@ -552,7 +555,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph1(Real pressure, Real enthalpy) const;
+  DualReal temperature_from_ph1(DualReal pressure, DualReal enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2a
@@ -564,7 +567,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph2a(Real pressure, Real enthalpy) const;
+  DualReal temperature_from_ph2a(DualReal pressure, DualReal enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2b
@@ -576,7 +579,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph2b(Real pressure, Real enthalpy) const;
+  DualReal temperature_from_ph2b(DualReal pressure, DualReal enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2c
@@ -588,7 +591,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph2c(Real pressure, Real enthalpy) const;
+  DualReal temperature_from_ph2c(DualReal pressure, DualReal enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3a
@@ -601,7 +604,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph3a(Real pressure, Real enthalpy) const;
+  DualReal temperature_from_ph3a(DualReal pressure, DualReal enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3b
@@ -614,7 +617,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  Real temperature_from_ph3b(Real pressure, Real enthalpy) const;
+  DualReal temperature_from_ph3b(DualReal pressure, DualReal enthalpy) const;
 
   /// Water molar mass (kg/mol)
   const Real _Mh2o;

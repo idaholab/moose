@@ -277,6 +277,7 @@ public:
    * @return internal energy (J/kg)
    */
   virtual Real e_from_p_T(Real p, Real T) const;
+  virtual DualReal e_from_p_T(DualReal p, DualReal T) const;
   virtual Real e(Real pressure, Real temperature) const;
 
   /**
@@ -296,11 +297,12 @@ public:
   /**
    * Temperature from pressure and specific enthalpy
    *
-   * @param[in] pressure   pressure (Pa)
-   * @param[in] enthalpy   enthalpy (J/kg)
-   * @return Temperature (K)
+   * @param[in] p pressure (Pa)
+   * @param[in] h enthalpy (J/kg)
+   * @return temperature (K)
    */
-  virtual Real T_from_p_h(Real pressure, Real enthalpy) const;
+  virtual Real T_from_p_h(Real p, Real h) const;
+  virtual DualReal T_from_p_h(DualReal p, DualReal h) const;
 
   /**
    * Molar mass [kg/mol]
@@ -511,6 +513,11 @@ public:
    */
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const;
   virtual void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
+  virtual DualReal vaporPressure(DualReal temperature) const;
+
+  virtual Real vaporTemperature(Real pressure) const;
+  virtual void vaporTemperature(Real pressure, Real & Tsat, Real & dTsat_dp) const;
+  virtual DualReal vaporTemperature(DualReal pressure) const;
 
 protected:
   /**

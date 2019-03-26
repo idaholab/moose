@@ -31,6 +31,13 @@ SinglePhaseFluidProperties::e_from_p_T(Real p, Real T) const
   return e_from_p_rho(p, rho);
 }
 
+DualReal
+SinglePhaseFluidProperties::e_from_p_T(DualReal p, DualReal T) const
+{
+  const DualReal rho = rho_from_p_T(p, T);
+  return e_from_p_rho(p, rho);
+}
+
 void
 SinglePhaseFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
 {
@@ -278,6 +285,27 @@ SinglePhaseFluidProperties::vaporPressure_dT(Real T, Real & psat, Real & dpsat_d
   vaporPressure(T, psat, dpsat_dT);
 }
 
+DualReal SinglePhaseFluidProperties::vaporPressure(DualReal) const
+{
+  mooseError(name(), ": vaporPressure() is not implemented");
+}
+
+Real SinglePhaseFluidProperties::vaporTemperature(Real) const
+{
+  mooseError(name(), ": vaporTemperature() is not implemented");
+}
+
+void
+SinglePhaseFluidProperties::vaporTemperature(Real, Real &, Real &) const
+{
+  mooseError(name(), ": vaporTemperature() is not implemented");
+}
+
+DualReal SinglePhaseFluidProperties::vaporTemperature(DualReal) const
+{
+  mooseError(name(), ": vaporTemperature() is not implemented");
+}
+
 void
 SinglePhaseFluidProperties::rho_dpT(
     Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const
@@ -466,5 +494,15 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h) const
   const Real rho = rho_from_p_s(p, s);
   const Real v = 1. / rho;
   const Real e = e_from_v_h(v, h);
+  return T_from_v_e(v, e);
+}
+
+DualReal
+SinglePhaseFluidProperties::T_from_p_h(DualReal p, DualReal h) const
+{
+  const DualReal s = s_from_h_p(h, p);
+  const DualReal rho = rho_from_p_s(p, s);
+  const DualReal v = 1. / rho;
+  const DualReal e = e_from_v_h(v, h);
   return T_from_v_e(v, e);
 }
