@@ -26,10 +26,10 @@ protected:
   virtual ADResidual precomputeQpResidual() override;
 
   /// Specific heat material property
-  const MaterialProperty<Real> & _specific_heat;
+  const ADMaterialProperty(Real) & _specific_heat;
 
   /// Density material property
-  const MaterialProperty<Real> & _density;
+  const ADMaterialProperty(Real) & _density;
 
   usingTimeKernelMembers;
 };
