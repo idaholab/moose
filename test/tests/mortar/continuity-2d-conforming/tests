@@ -8,6 +8,7 @@
     custom_cmp = 'one-variable-u.cmp'
     partial = True
     map = False
+    mesh_mode = 'REPLICATED'
   [../]
 
   [./equalgradient]
@@ -19,6 +20,7 @@
     partial = True
     map = False
     custom_cmp = 'one-variable-u.cmp'
+    mesh_mode = 'REPLICATED'
   [../]
 
   [./conforming_two_var]
@@ -30,6 +32,7 @@
     partial = True
     map = False
     custom_cmp = 'two-variable-uv.cmp'
+    mesh_mode = 'REPLICATED'
   [../]
 
   [./conforming-2nd-order]
@@ -41,5 +44,6 @@
     partial = True
     map = False
     custom_cmp = 'one-variable-u.cmp'
+    mesh_mode = 'REPLICATED'
   [../]
 []

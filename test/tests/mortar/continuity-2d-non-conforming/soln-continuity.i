@@ -75,13 +75,13 @@
 
 [Constraints]
   [./mortar]
-    type = SolutionContinuityTest
+    type = EqualValueConstraint
     master_boundary_id = 2
     slave_boundary_id = 1
     master_subdomain_id = 20
     slave_subdomain_id = 10
-    variable = T
-    lm_variable = lambda
+    variable = lambda
+    master_variable = T
   [../]
 []
 
