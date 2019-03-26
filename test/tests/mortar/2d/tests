@@ -15,6 +15,9 @@
     max_parallel = 1
     max_threads = 1
     compiler = 'GCC CLANG'
+    partial = True
+    map = False
+    custom_cmp = 'equalgradient.cmp'
   [../]
 
   [./conforming_two_var]

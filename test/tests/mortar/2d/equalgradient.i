@@ -1,13 +1,20 @@
 [Mesh]
   file = 2blk-conf.e
+[]
 
-  [./MortarInterfaces]
-    [./middle]
-      master = 100
-      slave = 101
-      subdomain = 1000
-    [../]
-  [../]
+[MeshModifiers]
+  [slave]
+    type = LowerDBlockFromSideset
+    sidesets = '101'
+    new_block_id = '10001'
+    new_block_name = 'slave_lower'
+  []
+  [master]
+    type = LowerDBlockFromSideset
+    sidesets = '100'
+    new_block_id = '10000'
+    new_block_name = 'master_lower'
+  []
 []
 
 [Variables]
@@ -20,12 +27,12 @@
   [./lmx]
     order = FIRST
     family = LAGRANGE
-    block = middle
+    block = 'slave_lower'
   [../]
   [./lmy]
     order = FIRST
     family = LAGRANGE
-    block = middle
+    block = 'slave_lower'
   [../]
 []
 
@@ -58,16 +65,22 @@
 [Constraints]
   [./cedx]
     type = EqualGradientConstraint
-    variable = lmx
-    interface = middle
     master_variable = u
+    variable = lmx
+    master_boundary_id = 100
+    master_subdomain_id = 10000
+    slave_boundary_id = 101
+    slave_subdomain_id = 10001
     component = 0
   [../]
   [./cedy]
     type = EqualGradientConstraint
-    variable = lmy
-    interface = middle
     master_variable = u
+    variable = lmy
+    master_boundary_id = 100
+    master_subdomain_id = 10000
+    slave_boundary_id = 101
+    slave_subdomain_id = 10001
     component = 1
   [../]
 []
