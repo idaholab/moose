@@ -1,6 +1,0 @@
-COORDINATES absolute 1.e-6    # min separation not calculated
-
-TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:            0.15 @ t4
-
-NODAL VARIABLES relative 1.e-6 floor 0.0
-	u    # min:               0 @ t1,n5	max:             0.5 @ t1,n1

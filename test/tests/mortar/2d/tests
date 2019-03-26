@@ -3,38 +3,44 @@
     type = 'Exodiff'
     input = 'conforming.i'
     exodiff = 'conforming_out.e'
-    max_parallel = 1
-    max_threads = 1
-    compiler = 'GCC CLANG'
+    max_parallel = 2
+    max_threads = 2
+    custom_cmp = 'one-variable-u.cmp'
+    partial = True
+    map = False
   [../]
 
   [./equalgradient]
     type = 'Exodiff'
     input = 'equalgradient.i'
     exodiff = 'equalgradient_out.e'
-    max_parallel = 1
-    max_threads = 1
-    compiler = 'GCC CLANG'
+    max_parallel = 2
+    max_threads = 2
     partial = True
     map = False
-    custom_cmp = 'equalgradient.cmp'
+    custom_cmp = 'one-variable-u.cmp'
   [../]
 
   [./conforming_two_var]
     type = 'Exodiff'
     input = 'conforming_two_var.i'
     exodiff = 'conforming_two_var_out.e'
-    max_parallel = 1
-    max_threads = 1
-    compiler = 'GCC CLANG'
+    max_parallel = 2
+    max_threads = 2
+    partial = True
+    map = False
+    custom_cmp = 'two-variable-uv.cmp'
   [../]
 
   [./non-conforming]
     type = 'Exodiff'
     input = 'non-conforming.i'
     exodiff = 'non-conforming_out.e'
-    max_parallel = 1
-    max_threads = 1
+    max_parallel = 2
+    max_threads = 2
+    partial = True
+    map = False
+    custom_cmp = 'one-variable-u.cmp'
   [../]
 
   [./conforming-2nd-order]
@@ -43,7 +49,6 @@
     exodiff = 'conforming-2nd-order_out.e'
     max_parallel = 1
     max_threads = 1
-    compiler = 'GCC CLANG'
   [../]
 
   [./non-conforming-2nd-order]
