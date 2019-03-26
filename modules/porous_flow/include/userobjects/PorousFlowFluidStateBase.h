@@ -9,10 +9,18 @@
 
 #pragma once
 
-#include "PorousFlowFluidStateFlash.h"
+#include "GeneralUserObject.h"
 #include "PorousFlowCapillaryPressure.h"
 
 class PorousFlowFluidStateBase;
+
+/// Phase state enum
+enum class FluidStatePhaseEnum
+{
+  LIQUID,
+  GAS,
+  TWOPHASE
+};
 
 /// Data structure to pass calculated thermophysical properties
 struct FluidStateProperties
@@ -74,16 +82,44 @@ struct FluidStateProperties
   std::vector<Real> dmass_fraction_dX;
 };
 
+/// AD Data structure to pass calculated thermophysical properties
+struct FluidStatePropertiesAD
+{
+  FluidStatePropertiesAD(){};
+  FluidStatePropertiesAD(unsigned int n)
+    : pressure(0.0),
+      temperature(0, 0),
+      saturation(0.0),
+      density(0.0),
+      viscosity(1.0), // to guard against division by zero
+      enthalpy(0.0),
+      internal_energy(0.0),
+      mass_fraction(n, 0.0){};
+
+  DualReal pressure;
+  DualReal temperature;
+  DualReal saturation;
+  DualReal density;
+  DualReal viscosity;
+  DualReal enthalpy;
+  DualReal internal_energy;
+  std::vector<DualReal> mass_fraction;
+};
+
 template <>
 InputParameters validParams<PorousFlowFluidStateBase>();
 
 /**
  * Base class for fluid states for miscible multiphase flow in porous media.
  */
-class PorousFlowFluidStateBase : public PorousFlowFluidStateFlash
+class PorousFlowFluidStateBase : public GeneralUserObject
 {
 public:
   PorousFlowFluidStateBase(const InputParameters & parameters);
+
+  void initialize() final{};
+  void execute() final{};
+  void finalize() final{};
 
   /**
    * The maximum number of phases in this model
@@ -133,42 +169,11 @@ public:
   virtual std::string fluidStateName() const = 0;
 
   /**
-   * Determines the complete thermophysical state of the system for a given set of
-   * primary variables
-   *
-   * @param pressure gas phase pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param Xnacl mass fraction of NaCl
-   * @param Z total mass fraction of fluid component
-   * @param qp quadpoint index
-   * @param[out] fsp the FluidStateProperties struct containing all properties
-   */
-  virtual void thermophysicalProperties(Real pressure,
-                                        Real temperature,
-                                        Real Xnacl,
-                                        Real Z,
-                                        unsigned int qp,
-                                        std::vector<FluidStateProperties> & fsp) const = 0;
-
-  /**
-   * Total mass fraction of fluid component summed over all phases in the two-phase state
-   * for a specified gas saturation
-   *
-   * @param pressure gas pressure (Pa)
-   * @param temperature temperature (K)
-   * @param Xnacl NaCl mass fraction (kg/kg)
-   * @param saturation gas saturation (-)
-   * @param qp quadpoint index
-   * @return total mass fraction Z (-)
-   */
-  virtual Real totalMassFraction(
-      Real pressure, Real temperature, Real Xnacl, Real saturation, unsigned int qp) const = 0;
-
-  /**
    * Clears the contents of the FluidStateProperties data structure
    * @param[out] fsp FluidStateProperties data structure with all data initialized to 0
    */
   void clearFluidStateProperties(std::vector<FluidStateProperties> & fsp) const;
+  void clearFluidStateProperties(std::vector<FluidStatePropertiesAD> & fsp) const;
 
 protected:
   /// Number of phases
@@ -189,10 +194,6 @@ protected:
   const Real _R;
   /// Conversion from C to K
   const Real _T_c2k;
-  /// Maximum number of iterations for the Newton-Raphson iterations
-  const Real _nr_max_its;
-  /// Tolerance for Newton-Raphson iterations
-  const Real _nr_tol;
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc;
 };

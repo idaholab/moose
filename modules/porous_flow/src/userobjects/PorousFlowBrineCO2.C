@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<PorousFlowBrineCO2>()
 {
-  InputParameters params = validParams<PorousFlowFluidStateBase>();
+  InputParameters params = validParams<PorousFlowFluidStateMultiComponentBase>();
   params.addRequiredParam<UserObjectName>("brine_fp", "The name of the user object for brine");
   params.addRequiredParam<UserObjectName>("co2_fp", "The name of the user object for CO2");
   params.addParam<unsigned int>("salt_component", 2, "The component number of salt");
@@ -28,7 +28,7 @@ validParams<PorousFlowBrineCO2>()
 }
 
 PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
-  : PorousFlowFluidStateBase(parameters),
+  : PorousFlowFluidStateMultiComponentBase(parameters),
     _salt_component(getParam<unsigned int>("salt_component")),
     _brine_fp(getUserObject<BrineFluidProperties>("brine_fp")),
     _co2_fp(getUserObject<SinglePhaseFluidProperties>("co2_fp")),

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PorousFlowFluidStateBase.h"
+#include "PorousFlowFluidStateMultiComponentBase.h"
 
 class BrineFluidProperties;
 class SinglePhaseFluidProperties;
@@ -47,7 +47,7 @@ InputParameters validParams<PorousFlowBrineCO2>();
  * Yk: mass fraction of component k in the gas phase
  * Xk: mass fraction of component k in the liquid phase
  */
-class PorousFlowBrineCO2 : public PorousFlowFluidStateBase
+class PorousFlowBrineCO2 : public PorousFlowFluidStateMultiComponentBase
 {
 public:
   PorousFlowBrineCO2(const InputParameters & parameters);

@@ -9,45 +9,18 @@
 
 #include "PorousFlowFluidStateFlash.h"
 
-registerMooseObject("PorousFlowApp", PorousFlowFluidStateFlash);
-
 template <>
 InputParameters
 validParams<PorousFlowFluidStateFlash>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<PorousFlowFluidStateBase>();
   params.addClassDescription("Compositional flash calculations for use in fluid state classes");
   return params;
 }
 
 PorousFlowFluidStateFlash::PorousFlowFluidStateFlash(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _nr_max_its(42), _nr_tol(1.0e-12)
+  : PorousFlowFluidStateBase(parameters), _nr_max_its(42), _nr_tol(1.0e-12)
 {
-}
-
-void
-PorousFlowFluidStateFlash::phaseState(Real Zi,
-                                      Real Xi,
-                                      Real Yi,
-                                      FluidStatePhaseEnum & phase_state) const
-{
-  if (Zi <= Xi)
-  {
-    // In this case, there is not enough component i to form a gas phase,
-    // so only a liquid phase is present
-    phase_state = FluidStatePhaseEnum::LIQUID;
-  }
-  else if (Zi > Xi && Zi < Yi)
-  {
-    // Two phases are present
-    phase_state = FluidStatePhaseEnum::TWOPHASE;
-  }
-  else // (Zi >= Yi)
-  {
-    // In this case, there is not enough water to form a liquid
-    // phase, so only a gas phase is present
-    phase_state = FluidStatePhaseEnum::GAS;
-  }
 }
 
 Real

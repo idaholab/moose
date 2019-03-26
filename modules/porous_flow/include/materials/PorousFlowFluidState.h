@@ -10,7 +10,7 @@
 #pragma once
 
 #include "PorousFlowVariableBase.h"
-#include "PorousFlowFluidStateBase.h"
+#include "PorousFlowFluidStateMultiComponentBase.h"
 
 class PorousFlowFluidState;
 class PorousFlowCapillaryPressure;
@@ -92,7 +92,7 @@ protected:
   /// Salt mass fraction PorousFlow variable number
   const unsigned int _Xvar;
   /// FluidState UserObject
-  const PorousFlowFluidStateBase & _fs;
+  const PorousFlowFluidStateMultiComponentBase & _fs;
   /// Phase number of the aqueous phase
   const unsigned int _aqueous_phase_number;
   /// Phase number of the gas phase
