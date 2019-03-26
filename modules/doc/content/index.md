@@ -6,7 +6,8 @@
 The MOOSE team will be hosting a workshop at Idaho National Lab (INL) +June 17 to 19, 2019+
 in Idaho Falls, Idaho. The workshop will take place at the
 [INL Energy Innovation Laboratory and Meeting Center](https://goo.gl/maps/AHH3TTKDDXL2).
-The workshop will run from 8:30pm to 4:30pm each day and +lunch will be provided+.
+The workshop will run from 8:30am to 4:30pm on Monday and Tuesday +lunch provided+, and
+8:30am to noon on Wednesday.
 
 Attendance is +free+ and the workshop is open to all interested.
 
