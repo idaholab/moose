@@ -19,10 +19,6 @@ The single-source markdown files may be converted into various media forms, incl
 this one), slide shows, and pdfs (via LaTeX). Most importantly, custom markdown syntax is easily
 created so it is possible to develop syntax to meet the needs of any project.
 
-!alert warning title=LaTeX and slide show support are under development.
-Currently, the MooseDocs system only supports web-site (html) output like the site you are reading.
-However, support for the other formats will be available soon.
-
 The following links provide additional details on the MOOSE documentation system:
 
 - [MooseDocs/specification.md]

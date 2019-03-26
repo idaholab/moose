@@ -339,6 +339,66 @@
                     }, 
                     "children": [], 
                     "name": "Punctuation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "class": "", 
+                "id": "", 
+                "level": 2, 
+                "recursive": true, 
+                "style": ""
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "content": "Macros", 
+                        "recursive": true
+                    }, 
+                    "children": [], 
+                    "name": "Word"
+                }
+            ], 
+            "name": "Heading"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": 5, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "c = \\pm\\sqrt{a^2 + b^2}\\in\\RR"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
+                }
+            ], 
+            "name": "Paragraph"
+        }, 
+        {
+            "attributes": {
+                "recursive": true
+            }, 
+            "children": [
+                {
+                    "attributes": {
+                        "bookmark": "moose-equation-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+                        "label": "", 
+                        "number": 6, 
+                        "numbered": true, 
+                        "recursive": true, 
+                        "tex": "\\pf{T}{t} = c"
+                    }, 
+                    "children": [], 
+                    "name": "LatexBlockEquation"
                 }, 
                 {
                     "attributes": {
