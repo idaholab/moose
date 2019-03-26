@@ -23,6 +23,7 @@
   usingFunctionInterfaceMembers;                                                                   \
   using ConsoleStreamInterface::_console;                                                          \
   using ADMaterial<compute_stage>::_qp;                                                            \
+  using ADMaterial<compute_stage>::_name;                                                          \
   using ADMaterial<compute_stage>::_qrule;                                                         \
   using ADMaterial<compute_stage>::_JxW;                                                           \
   using ADMaterial<compute_stage>::_coord;                                                         \

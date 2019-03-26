@@ -14,6 +14,8 @@
 #include "MooseTypes.h"
 #include "RestartableData.h"
 
+#define adDeclareRestartableData this->template declareRestartableData
+
 // Forward declarations
 class PostprocessorData;
 class SubProblem;
