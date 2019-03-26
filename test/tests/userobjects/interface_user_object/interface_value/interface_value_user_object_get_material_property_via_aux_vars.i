@@ -38,56 +38,56 @@
   [../]
 []
 
-[UserObjects]
-  [./interface_value_type]
-    type = InterfaceValueAverageUO
-    var = diffusivity_1
-    var_neighbor = diffusivity_2
-    boundary = 'interface'
-    execute_on = ' timestep_end'
-    interface_value_type = average
-  [../]
-  [./interface_master_minus_slave]
-    type = InterfaceValueAverageUO
-    var = diffusivity_1
-    var_neighbor = diffusivity_2
-    boundary = 'interface'
-    execute_on = ' timestep_end'
-    interface_value_type = jump_master_minus_slave
-  [../]
-  [./interface_slave_minus_master]
-    type = InterfaceValueAverageUO
-    var = diffusivity_1
-    var_neighbor = diffusivity_2
-    boundary = 'interface'
-    execute_on = ' timestep_end'
-    interface_value_type = jump_slave_minus_master
-  [../]
-  [./interface_absolute_jump]
-    type = InterfaceValueAverageUO
-    var = diffusivity_1
-    var_neighbor = diffusivity_2
-    boundary = 'interface'
-    execute_on = ' timestep_end'
-    interface_value_type = jump_abs
-  [../]
-  [./interface_master]
-    type = InterfaceValueAverageUO
-    var = diffusivity_1
-    var_neighbor = diffusivity_2
-    boundary = 'interface'
-    execute_on = ' timestep_end'
-    interface_value_type = master
-  [../]
-  [./interface_slave]
-    type = InterfaceValueAverageUO
-    var = diffusivity_1
-    var_neighbor = diffusivity_2
-    boundary = 'interface'
-    execute_on = ' timestep_end'
-    interface_value_type = slave
-  [../]
-[]
+# [UserObjects]
+#   [./interface_value_type]
+#     type = InterfaceValueAverageUO
+#     var = diffusivity_1
+#     var_neighbor = diffusivity_2
+#     boundary = 'interface'
+#     execute_on = ' timestep_end'
+#     interface_value_type = average
+#   [../]
+#   [./interface_master_minus_slave]
+#     type = InterfaceValueAverageUO
+#     var = diffusivity_1
+#     var_neighbor = diffusivity_2
+#     boundary = 'interface'
+#     execute_on = ' timestep_end'
+#     interface_value_type = jump_master_minus_slave
+#   [../]
+#   [./interface_slave_minus_master]
+#     type = InterfaceValueAverageUO
+#     var = diffusivity_1
+#     var_neighbor = diffusivity_2
+#     boundary = 'interface'
+#     execute_on = ' timestep_end'
+#     interface_value_type = jump_slave_minus_master
+#   [../]
+#   [./interface_absolute_jump]
+#     type = InterfaceValueAverageUO
+#     var = diffusivity_1
+#     var_neighbor = diffusivity_2
+#     boundary = 'interface'
+#     execute_on = ' timestep_end'
+#     interface_value_type = jump_abs
+#   [../]
+#   [./interface_master]
+#     type = InterfaceValueAverageUO
+#     var = diffusivity_1
+#     var_neighbor = diffusivity_2
+#     boundary = 'interface'
+#     execute_on = ' timestep_end'
+#     interface_value_type = master
+#   [../]
+#   [./interface_slave]
+#     type = InterfaceValueAverageUO
+#     var = diffusivity_1
+#     var_neighbor = diffusivity_2
+#     boundary = 'interface'
+#     execute_on = ' timestep_end'
+#     interface_value_type = slave
+#   [../]
+# []
 
 [Variables]
   [./u]
@@ -164,28 +164,52 @@
 
 [Postprocessors]
   [./interface_average_PP]
-    type = InterfaceValueUOPPS
-    user_object = interface_value_type
+    type = InterfaceIntegralVariableAveragePostprocessor
+    interface_value_type = average
+    variable = diffusivity_1
+    neighbor_variable = diffusivity_2
+    execute_on = TIMESTEP_END
+    boundary = 'interface'
   [../]
   [./interface_master_minus_slave_PP]
-    type = InterfaceValueUOPPS
-    user_object = interface_master_minus_slave
+    type = InterfaceIntegralVariableAveragePostprocessor
+    interface_value_type = jump_master_minus_slave
+    variable = diffusivity_1
+    neighbor_variable = diffusivity_2
+    execute_on = TIMESTEP_END
+    boundary = 'interface'
   [../]
   [./interface_average_slave_minus_master_PP]
-    type = InterfaceValueUOPPS
-    user_object = interface_slave_minus_master
+    type = InterfaceIntegralVariableAveragePostprocessor
+    interface_value_type = jump_slave_minus_master
+    variable = diffusivity_1
+    neighbor_variable = diffusivity_2
+    execute_on = TIMESTEP_END
+    boundary = 'interface'
   [../]
   [./interface_average_absolute_jump_PP]
-    type = InterfaceValueUOPPS
-    user_object = interface_absolute_jump
+    type = InterfaceIntegralVariableAveragePostprocessor
+    interface_value_type = jump_abs
+    variable = diffusivity_1
+    neighbor_variable = diffusivity_2
+    execute_on = TIMESTEP_END
+    boundary = 'interface'
   [../]
   [./interface_average_master_PP]
-    type = InterfaceValueUOPPS
-    user_object = interface_master
+    type = InterfaceIntegralVariableAveragePostprocessor
+    interface_value_type = master
+    variable = diffusivity_1
+    neighbor_variable = diffusivity_2
+    execute_on = TIMESTEP_END
+    boundary = 'interface'
   [../]
   [./interface_average_slave_PP]
-    type = InterfaceValueUOPPS
-    user_object = interface_slave
+    type = InterfaceIntegralVariableAveragePostprocessor
+    interface_value_type = slave
+    variable = diffusivity_1
+    neighbor_variable = diffusivity_2
+    execute_on = TIMESTEP_END
+    boundary = 'interface'
   [../]
 []
 

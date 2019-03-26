@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InterfaceValueUO_QP_Aux.h"
+#include "InterfaceValueUserObjectAux.h"
 
-registerMooseObject("MooseTestApp", InterfaceValueUO_QP_Aux);
+registerMooseObject("MooseTestApp", InterfaceValueUserObjectAux);
 
 template <>
 InputParameters
-validParams<InterfaceValueUO_QP_Aux>()
+validParams<InterfaceValueUserObjectAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("interface_uo_name",
@@ -22,13 +22,13 @@ validParams<InterfaceValueUO_QP_Aux>()
   return params;
 }
 
-InterfaceValueUO_QP_Aux::InterfaceValueUO_QP_Aux(const InputParameters & parameters)
+InterfaceValueUserObjectAux::InterfaceValueUserObjectAux(const InputParameters & parameters)
   : AuxKernel(parameters), _interface_uo(getUserObject<InterfaceValueUO_QP>("interface_uo_name"))
 {
 }
 
 Real
-InterfaceValueUO_QP_Aux::computeValue()
+InterfaceValueUserObjectAux::computeValue()
 {
   return _interface_uo.getQpValue(_current_elem->id(), _current_side, _qp);
 }

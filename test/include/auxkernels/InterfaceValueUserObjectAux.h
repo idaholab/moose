@@ -14,22 +14,22 @@
 #include "InterfaceValueUO_QP.h"
 
 // Forward Declarations
-class InterfaceValueUO_QP_Aux;
+class InterfaceValueUserObjectAux;
 
 template <>
-InputParameters validParams<InterfaceValueUO_QP_Aux>();
+InputParameters validParams<InterfaceValueUserObjectAux>();
 
 /**
  * AuxKernel creating an AuxVariable from values stored in an InterfaceValueUO_QP
  */
-class InterfaceValueUO_QP_Aux : public AuxKernel
+class InterfaceValueUserObjectAux : public AuxKernel
 {
 public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  InterfaceValueUO_QP_Aux(const InputParameters & parameters);
+  InterfaceValueUserObjectAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

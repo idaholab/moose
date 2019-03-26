@@ -146,37 +146,37 @@
     variable = diffusivity_2
   []
   [./interface_avg_qp_aux]
-    type = InterfaceValueUO_QP_Aux
+    type = InterfaceValueUserObjectAux
     variable = avg_qp
     boundary = 'interface'
     interface_uo_name = interface_average_uo
   []
   [./interface_master_minus_slave_qp_aux]
-    type = InterfaceValueUO_QP_Aux
+    type = InterfaceValueUserObjectAux
     variable = master_minus_slave_qp
     boundary = 'interface'
     interface_uo_name = interface_master_minus_slave_uo
   [../]
   [./interface_slave_minus_master_qp_aux]
-    type = InterfaceValueUO_QP_Aux
+    type = InterfaceValueUserObjectAux
     variable = slave_minus_master_qp
     boundary = 'interface'
     interface_uo_name = interface_slave_minus_master_uo
   [../]
   [./interface_absolute_jump_qp_aux]
-    type = InterfaceValueUO_QP_Aux
+    type = InterfaceValueUserObjectAux
     variable = abs_jump_qp
     boundary = 'interface'
     interface_uo_name = interface_absolute_jump_uo
   [../]
   [./interface_master_qp_aux]
-    type = InterfaceValueUO_QP_Aux
+    type = InterfaceValueUserObjectAux
     variable = master_qp
     boundary = 'interface'
     interface_uo_name = interface_master_uo
   [../]
   [./interface_slave_qp_aux]
-    type = InterfaceValueUO_QP_Aux
+    type = InterfaceValueUserObjectAux
     variable = slave_qp
     boundary = 'interface'
     interface_uo_name = interface_slave_uo

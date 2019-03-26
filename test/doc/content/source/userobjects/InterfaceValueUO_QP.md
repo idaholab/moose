@@ -8,7 +8,7 @@
 
 InterfaceValueUO_QP is a user object computing and storing average values across an interface for each quadrature. The kind of average value are the one available in [InterfaceValueTools](/InterfaceValueTools.md).
 
-The stored value can be converted into an AuxVariable by using [InterfaceValueUO_QP_Aux](/InterfaceValueUO_QP_Aux.md) AuxKernel.
+The stored value can be converted into an AuxVariable by using [InterfaceValueUserObjectAux](/InterfaceValueUserObjectAux.md) AuxKernel.
 
 
 ## Example Input File Syntax
