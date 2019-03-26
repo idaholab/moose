@@ -8,14 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // StochasticTools includes
-#include "SamplerMultiApp.h"
+#include "SamplerTransientMultiApp.h"
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsApp", SamplerMultiApp);
+registerMooseObject("StochasticToolsApp", SamplerTransientMultiApp);
 
 template <>
 InputParameters
-validParams<SamplerMultiApp>()
+validParams<SamplerTransientMultiApp>()
 {
   InputParameters params = validParams<TransientMultiApp>();
   params += validParams<SamplerInterface>();
@@ -31,7 +31,7 @@ validParams<SamplerMultiApp>()
   return params;
 }
 
-SamplerMultiApp::SamplerMultiApp(const InputParameters & parameters)
+SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & parameters)
   : TransientMultiApp(parameters),
     SamplerInterface(this),
     _sampler(SamplerInterface::getSampler("sampler"))

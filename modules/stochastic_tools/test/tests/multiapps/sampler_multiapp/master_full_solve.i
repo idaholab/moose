@@ -25,19 +25,13 @@
 []
 
 [Executioner]
-  type = Transient
-  num_steps = 5
+  type = Steady
 []
 
 [MultiApps]
   [./runner]
-    type = SamplerMultiApp
+    type = SamplerFullSolveMultiApp
     sampler = mc
     input_files = 'sub.i'
-#    positions = '0 0 0
-#                 0 0 0
-#                 0 0 0
-#                 0 0 0
-#                 0 0 0'
   [../]
 []

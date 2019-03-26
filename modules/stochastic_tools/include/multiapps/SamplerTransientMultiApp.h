@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SAMPLERMULTIAPP_H
-#define SAMPLERMULTIAPP_H
+#ifndef SAMPLERTRANSIENTMULTIAPP_H
+#define SAMPLERTRANSIENTMULTIAPP_H
 
 // MOOSE includes
 #include "TransientMultiApp.h"
 #include "SamplerInterface.h"
 
-class SamplerMultiApp;
+class SamplerTransientMultiApp;
 class Sampler;
 
 template <>
-InputParameters validParams<SamplerMultiApp>();
+InputParameters validParams<SamplerTransientMultiApp>();
 
-class SamplerMultiApp : public TransientMultiApp, public SamplerInterface
+class SamplerTransientMultiApp : public TransientMultiApp, public SamplerInterface
 {
 public:
-  SamplerMultiApp(const InputParameters & parameters);
+  SamplerTransientMultiApp(const InputParameters & parameters);
 
   /**
    * Return the Sampler object for this MultiApp.

@@ -44,7 +44,7 @@
 
 [MultiApps]
   [./sub]
-    type = SamplerMultiApp
+    type = SamplerTransientMultiApp
     input_files = sub.i
     sampler = sample
     execute_on = 'initial timestep_end'

@@ -47,7 +47,7 @@ two distributions and creates the Monte Carlo samples.
 Notice, that this sampler only executes on "initial", which means that the random numbers are
 created once during the initial setup of the problem and not changed again during the simulation.
 
-Next, a [SamplerMultiApp](/SamplerMultiApp.md) object is created. This object
+Next, a [SamplerTransientMultiApp](/SamplerTransientMultiApp.md) object is created. This object
 creates and runs a sub-application for each sample provided by the sampler object.
 
 !listing modules/stochastic_tools/test/tests/transfers/monte_carlo.i block=MultiApps
