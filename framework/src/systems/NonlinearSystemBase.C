@@ -2297,6 +2297,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // included whether we are computing an ordinary Jacobian or a Jacobian for determining variable
     // scaling factors
     computeScalarKernelsJacobians(tags);
+    // Add any cached jacobians that might be hanging around
+    for (unsigned int i = 0; i < libMesh::n_threads(); i++)
+      _fe_problem.addCachedJacobian(i);
 
     // Block restricted Nodal Kernels
     if (_nodal_kernels.hasActiveBlockObjects())
