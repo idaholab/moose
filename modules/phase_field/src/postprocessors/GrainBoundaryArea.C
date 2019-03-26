@@ -44,7 +44,7 @@ GrainBoundaryArea::GrainBoundaryArea(const InputParameters & parameters)
     mooseError("Neither grains_per_side nor op_range may be zero.");
 
   // Loop over variables (ops)
-  for (auto op_index = decltype(_op_num)(0); op_index < _op_num; ++op_index)
+  for (MooseIndex(_op_num) op_index = 0; op_index < _op_num; ++op_index)
     _grads[op_index] = &coupledGradient("v", op_index);
 }
 
