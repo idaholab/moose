@@ -334,7 +334,6 @@ TensorMechanicsAction::act()
       if (_diag_save_in.size() == _ndisp)
         params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
 
-      // if (Registry::isADObj(tensor_kernel_type + "<RESIDUAL>"))
       if (_use_ad)
       {
         _problem->addKernel(
