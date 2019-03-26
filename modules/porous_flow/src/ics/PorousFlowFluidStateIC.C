@@ -9,7 +9,7 @@
 
 #include "PorousFlowFluidStateIC.h"
 #include "PorousFlowDictator.h"
-#include "PorousFlowFluidStateBase.h"
+#include "PorousFlowFluidStateMultiComponentBase.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowFluidStateIC);
 
@@ -41,7 +41,7 @@ PorousFlowFluidStateIC::PorousFlowFluidStateIC(const InputParameters & parameter
     _saturation(coupledValue("saturation")),
     _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _fs(getUserObject<PorousFlowFluidStateBase>("fluid_state"))
+    _fs(getUserObject<PorousFlowFluidStateMultiComponentBase>("fluid_state"))
 {
 }
 
