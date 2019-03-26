@@ -32,29 +32,10 @@
     custom_cmp = 'two-variable-uv.cmp'
   [../]
 
-  [./non-conforming]
-    type = 'Exodiff'
-    input = 'non-conforming.i'
-    exodiff = 'non-conforming_out.e'
-    max_parallel = 2
-    max_threads = 2
-    partial = True
-    map = False
-    custom_cmp = 'one-variable-u.cmp'
-  [../]
-
   [./conforming-2nd-order]
     type = 'Exodiff'
     input = 'conforming-2nd-order.i'
     exodiff = 'conforming-2nd-order_out.e'
-    max_parallel = 1
-    max_threads = 1
-  [../]
-
-  [./non-conforming-2nd-order]
-    type = 'Exodiff'
-    input = 'non-conforming-2nd-order.i'
-    exodiff = 'non-conforming-2nd-order_out.e'
     max_parallel = 1
     max_threads = 1
   [../]
