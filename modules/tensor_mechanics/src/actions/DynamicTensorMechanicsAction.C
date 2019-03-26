@@ -44,6 +44,8 @@ validParams<DynamicTensorMechanicsAction>()
 DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters & params)
   : TensorMechanicsAction(params)
 {
+  if (_use_ad)
+    mooseError("In ", _name, ": AD not setup for use with DynamicTensorMechanicsAction");
 }
 
 std::string
