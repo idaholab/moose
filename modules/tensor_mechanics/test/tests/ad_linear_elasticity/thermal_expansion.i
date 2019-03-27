@@ -22,82 +22,13 @@
   elem_type = QUAD4
 []
 
-### Can be used when AD is added to tensor mechanics action
-# [Modules/TensorMechanics/Master/All]
-#   strain = SMALL
-#   eigenstrain_names = eigenstrain
-#   add_variables = true
-#   generate_output = 'stress_xx stress_yy stress_xy'
-# []
-
-
-### Everything between here and the next ### should be replaceable by future action availability
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
+[Modules/TensorMechanics/Master/All]
+  strain = SMALL
+  eigenstrain_names = eigenstrain
+  add_variables = true
+  generate_output = 'stress_xx stress_yy stress_xy'
+  use_ad = true
 []
-
-[Kernels]
-  [./x]
-    type = ADStressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./y]
-    type = ADStressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx_aux]
-    type = MaterialRankTwoTensorAux
-    variable = stress_xx
-    i = 0
-    j = 0
-    property = stress
-  [../]
-  [./stress_xy_aux]
-    type = MaterialRankTwoTensorAux
-    variable = stress_xy
-    i = 0
-    j = 1
-    property = stress
-  [../]
-  [./stress_yy_aux]
-    type = MaterialRankTwoTensorAux
-    variable = stress_yy
-    i = 1
-    j = 1
-    property = stress
-  [../]
-[]
-
-[Materials]
-  [./strain]
-    type = ADComputeSmallStrain
-    eigenstrain_names = eigenstrain
-  [../]
-[]
-### Replaceable by action
 
 [Materials]
   [./elasticity_tensor]
