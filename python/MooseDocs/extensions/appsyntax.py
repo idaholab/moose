@@ -518,26 +518,31 @@ class SyntaxCompleteCommand(SyntaxListCommand):
     @staticmethod
     def defaultSettings():
         settings = SyntaxListCommand.defaultSettings()
-        settings['group'] = (None, "The group (app) to limit the complete syntax list.")
         settings['level'] = (2, "Beginning heading level.")
         settings['heading'] = (None, settings['heading'][1])
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj):
-        self._addList(parent, info, page, obj, 2)
+        self._addList(parent, info, page, obj, self.settings['level'])
         return parent
 
     def _addList(self, parent, info, page, obj, level):
-        for child in obj.syntax(group=self.settings['group']):
+
+        gs = self.settings['groups']
+        groups = set(gs.split()) if gs else set(obj.groups)
+
+        for child in obj.syntax():
             if child.removed:
                 continue
 
-            url = os.path.join('syntax', child.markdown())
-            h = core.Heading(parent, level=level)
-            autolink.AutoLink(h, page=url, string=unicode(child.fullpath.strip('/')))
+            if child.groups.intersection(groups):
+                url = os.path.join('syntax', child.markdown())
+                h = core.Heading(parent, level=level)
+                autolink.AutoLink(h, page=url, string=unicode(child.fullpath.strip('/')))
 
-            super(SyntaxCompleteCommand, self).createTokenFromSyntax(parent, info, page, child)
+            SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child)
             self._addList(parent, info, page, child, level + 1)
+
 
 class RenderSyntaxList(components.RenderComponent):
     def createHTML(self, parent, token, page):
