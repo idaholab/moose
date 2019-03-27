@@ -1,0 +1,18 @@
+[Tests]
+  [./2D]
+    type = Exodiff
+    input = 'inclined_bc_2d.i'
+    exodiff = 'inclined_bc_2d_out.e'
+    issues = '#13128'
+    design = 'PenaltyInclinedBC.md'
+    requirement = 'The TensorMechanics module shall have the capabilty to enforce inclined boundary conditions on a 2D model using penalty method.'
+  [../]
+  [./3D]
+    type = Exodiff
+    input = 'inclined_bc_3d.i'
+    exodiff = 'inclined_bc_3d_out.e'
+    issues = '#13128'
+    design = 'PenaltyInclinedBC.md'
+    requirement = 'The TensorMechanics module shall have the capabilty to enforce inclined boundary conditions on a 3D model using penalty method.'
+  [../]
+[]
