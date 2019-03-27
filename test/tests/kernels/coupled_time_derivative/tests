@@ -4,4 +4,10 @@
     input = 'coupled_time_derivative_test.i'
     exodiff = 'coupled_time_derivative_test_out.e'
   [../]
+  [./adtestdirichlet]
+    type = 'Exodiff'
+    input = 'ad_coupled_time_derivative_test.i'
+    exodiff = 'coupled_time_derivative_test_out.e'
+    prereq = testdirichlet
+  [../]
 []
