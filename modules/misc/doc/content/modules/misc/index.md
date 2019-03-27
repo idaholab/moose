@@ -5,4 +5,4 @@ Documentation for the misc module needs some work...
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=MiscApp level=3
+!syntax complete groups=MiscApp level=3

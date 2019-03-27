@@ -3,4 +3,4 @@
 !alert construction
 The XFEM module needs some documentation.
 
-!syntax complete group=XFEMApp
+!syntax complete groups=XFEMApp
