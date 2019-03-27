@@ -8,6 +8,9 @@ AutomaticMortarGeneration &
 MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                                const std::pair<SubdomainID, SubdomainID> & subdomain_key)
 {
+  _mortar_subdomain_coverage.insert(subdomain_key.first);
+  _mortar_subdomain_coverage.insert(subdomain_key.second);
+
   if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
     _mortar_interfaces.emplace(boundary_key,
                                libmesh_make_unique<AutomaticMortarGeneration>(

@@ -803,32 +803,6 @@ public:
    */
   void allowRecovery(bool allow) { _allow_recovery = allow; }
 
-  class MortarInterface
-  {
-  public:
-    /// The name of the interface
-    std::string _name;
-    /// subdomain ID of elements in this interface
-    SubdomainID _id;
-    /// List of elements on this interface
-    std::vector<Elem *> _elems;
-    /// master and slave ID of the interface
-    BoundaryName _master, _slave;
-  };
-
-  void addMortarInterface(const std::string & name,
-                          BoundaryName master,
-                          BoundaryName slave,
-                          SubdomainName domain_id);
-
-  std::vector<std::unique_ptr<MooseMesh::MortarInterface>> & getMortarInterfaces()
-  {
-    return _mortar_interface;
-  }
-
-  MooseMesh::MortarInterface * getMortarInterfaceByName(const std::string name);
-  MooseMesh::MortarInterface * getMortarInterface(BoundaryID master, BoundaryID slave);
-
   /**
    * Setter for custom partitioner
    */
@@ -1040,12 +1014,6 @@ protected:
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
 
-  /// Mortar interfaces mapped through their names
-  std::map<std::string, MortarInterface *> _mortar_interface_by_name;
-  std::vector<std::unique_ptr<MortarInterface>> _mortar_interface;
-  /// Mortar interfaces mapped though master, slave IDs pairs
-  std::map<std::pair<BoundaryID, BoundaryID>, MortarInterface *> _mortar_interface_by_ids;
-
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
@@ -1192,7 +1160,6 @@ private:
   PerfID _init_timer;
   PerfID _read_recovered_mesh_timer;
   PerfID _ghost_ghosted_boundaries_timer;
-  PerfID _add_mortar_interface_timer;
 
   /// Whether we need to delete remote elements after init'ing the EquationSystems
   bool _need_delete;

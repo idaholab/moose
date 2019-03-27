@@ -415,7 +415,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMeshModifierAction", "MeshModifiers/*");
   registerSyntax("AddMeshGeneratorAction", "MeshGenerators/*");
-  registerSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
 
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");

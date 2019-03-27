@@ -157,8 +157,6 @@
 - /Mesh/CreateDisplacedProblemAction
 - /Mesh/SetupMeshAction
 - /Mesh/SetupMeshCompleteAction
-- /Mesh/MortarInterfaces
-- /Mesh/MortarInterfaces/AddMortarInterfaceAction
 - /Mesh/Partitioner
 - /Mesh/Partitioner/PartitionerAction
 - /Mesh/Partitioner/LibmeshPartitioner

@@ -12,16 +12,36 @@ class MortarData
 public:
   MortarData(SubProblem &);
 
+  /**
+   * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
+   * subdomain keys If the AutomaticMortarGeneration object does not yet exist, then it is created
+   */
   AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                      const std::pair<SubdomainID, SubdomainID> & subdomain_key);
 
+  /**
+   * Returns the mortar covered subdomains
+   */
+  const std::set<SubdomainID> & getMortarSubdomainIDs() const { return _mortar_subdomain_coverage; }
+
+  /**
+   * Builds mortar segment meshes for each mortar interface
+   */
   void update();
 
 protected:
+  /// Map from master-slave (in that order) boundary ID pair to the corresponding
+  /// AutomaticMortarGeneration object
   std::map<std::pair<BoundaryID, BoundaryID>, std::unique_ptr<AutomaticMortarGeneration>>
       _mortar_interfaces;
 
+  /// A set containing the subdomain ids covered by all the mortar interfaces in this MortarData
+  /// object
+  std::set<SubdomainID> _mortar_subdomain_coverage;
+
+  /// A reference to the SubProblem that this MortarData object corresponds to. Note that this
+  /// SubProblem will pass its mesh to AutomaticMortarGeneration objects when they are created
   SubProblem & _subproblem;
 };
 
