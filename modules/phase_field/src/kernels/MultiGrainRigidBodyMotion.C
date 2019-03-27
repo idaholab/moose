@@ -75,7 +75,7 @@ MultiGrainRigidBodyMotion::getUserObjectJacobian(unsigned int jvar, dof_id_type 
 {
   _velocity_advection_jacobian = 0.0;
 
-  for (auto i = beginIndex(_grain_ids); i < _grain_ids.size(); ++i)
+  for (MooseIndex(_grain_ids) i = 0; i < _grain_ids.size(); ++i)
   {
     auto grain_id = _grain_ids[i];
     if (grain_id != FeatureFloodCount::invalid_id)
@@ -128,7 +128,7 @@ MultiGrainRigidBodyMotion::calculateAdvectionVelocity()
   _velocity_advection = 0.0;
   _grain_ids = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
-  for (auto i = beginIndex(_grain_ids); i < _grain_ids.size(); ++i)
+  for (MooseIndex(_grain_ids) i = 0; i < _grain_ids.size(); ++i)
   {
     auto grain_id = _grain_ids[i];
     if (grain_id != FeatureFloodCount::invalid_id)

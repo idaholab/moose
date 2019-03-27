@@ -56,14 +56,14 @@ SamplerData::execute()
   if (_sample_vectors.empty())
   {
     _sample_vectors.resize(n);
-    for (auto i = beginIndex(data); i < n; ++i)
+    for (MooseIndex(data) i = 0; i < n; ++i)
     {
       std::string name = "mat_" + std::to_string(i);
       _sample_vectors[i] = &declareVector(name);
     }
   }
 
-  for (auto i = beginIndex(data); i < n; ++i)
+  for (MooseIndex(data) i = 0; i < n; ++i)
   {
     const std::size_t offset = _output_col_row_sizes ? 2 : 0;
     const std::size_t vec_size = data[i].get_values().size() + offset;

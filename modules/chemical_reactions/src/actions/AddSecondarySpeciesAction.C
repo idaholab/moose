@@ -32,6 +32,6 @@ AddSecondarySpeciesAction::AddSecondarySpeciesAction(const InputParameters & par
 void
 AddSecondarySpeciesAction::act()
 {
-  for (auto i = beginIndex(_secondary_species); i < _secondary_species.size(); ++i)
-    _problem->addAuxVariable(_secondary_species[i], _fe_type);
+  for (auto & secondary_specimen : _secondary_species)
+    _problem->addAuxVariable(secondary_specimen, _fe_type);
 }
