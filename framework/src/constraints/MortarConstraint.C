@@ -30,7 +30,12 @@ defineADBaseValidParams(
     params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
     params.registerRelationshipManagers("AugmentSparsityOnInterface");
     params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
-    params.addParam<VariableName>("slave_variable", "Variable on master surface"););
+    params.addParam<VariableName>("slave_variable", "Variable on master surface");
+    params.addParam<bool>(
+        "periodic",
+        false,
+        "Whether this constraint is going to be used to enforce a periodic condition. This has the "
+        "effect of changing the normals vector for projection from outward to inward facing"););
 
 template <ComputeStage compute_stage>
 MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parameters)
@@ -70,9 +75,11 @@ MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parame
     _phys_points_slave(_fe_slave_interior_primal->get_xyz()),
     _phys_points_master(_fe_master_interior_primal->get_xyz()),
     _lm_offset(0),
-    _need_primal_gradient(false)
+    _need_primal_gradient(false),
+    _periodic(adGetParam<bool>("periodic"))
 {
   _fe_msm_primal->attach_quadrature_rule(&_qrule_msm);
+  _amg.periodicConstraint(_periodic);
 }
 
 template <ComputeStage compute_stage>

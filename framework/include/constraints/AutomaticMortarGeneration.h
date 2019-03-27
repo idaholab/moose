@@ -131,6 +131,14 @@ public:
    */
   void build_mortar_segment_mesh();
 
+  /**
+   * Set whether we will be using this AutomaticMortarGeneration object to enforce periodic
+   * constraints If true, then we will performing projections with inward facing normals. We won't
+   * be able to use this object to enforce both ordinary **and** periodic constraints
+   */
+  void periodicConstraint(bool periodic);
+
+public:
   // Reference to the mesh stored in equation_systems.
   MeshBase & mesh;
 
@@ -232,6 +240,13 @@ private:
    */
   void project_master_nodes_single_pair(subdomain_id_type lower_dimensional_master_subdomain_id,
                                         subdomain_id_type lower_dimensional_slave_subdomain_id);
+
+private:
+  /// Whether this object will be generating a mortar segment mesh for periodic constraints
+  bool _periodic;
+
+  /// Whether we have externally set the _periodic flag
+  bool _periodic_set_externally;
 };
 
 #endif

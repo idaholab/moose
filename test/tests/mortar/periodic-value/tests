@@ -1,0 +1,16 @@
+[Tests]
+  [exo]
+    type = Exodiff
+    input = periodic.i
+    exodiff = periodic_out.e
+    mesh_mode = replicated
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = periodic.i
+    run_sim = True
+    difference_tol = 1e-7
+    cli_args = 'Mesh/file=square_coarse.msh'
+    mesh_mode = replicated
+  []
+[]

@@ -128,7 +128,11 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     MeshBase & mesh_in,
     const std::pair<BoundaryID, BoundaryID> & boundary_key,
     const std::pair<SubdomainID, SubdomainID> & subdomain_key)
-  : mesh(mesh_in), mortar_segment_mesh(mesh_in.comm()), h_max(0.)
+  : mesh(mesh_in),
+    mortar_segment_mesh(mesh_in.comm()),
+    h_max(0.),
+    _periodic(false),
+    _periodic_set_externally(false)
 {
   master_slave_boundary_id_pairs.push_back(boundary_key);
   master_requested_boundary_ids.insert(boundary_key.first);
@@ -388,6 +392,8 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     for (unsigned int n = 0; n < slave_elem->n_nodes(); ++n)
       dxyz_dxi += fe_lagrange_1D_shape_deriv(order, n, xi1) * slave_elem->point(n);
     auto normal = Point(dxyz_dxi(1), -dxyz_dxi(0), 0).unit();
+    if (_periodic)
+      normal *= -1;
 
     // Get the set of master_node neighbors.
     const std::vector<const Elem *> & master_node_neighbors =
@@ -547,10 +553,10 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
   // }
 
   // (Optionally) Write the mortar segment mesh to file for inspection
-  {
-    ExodusII_IO mortar_segment_mesh_writer(mortar_segment_mesh);
-    mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
-  }
+  // {
+  //   ExodusII_IO mortar_segment_mesh_writer(mortar_segment_mesh);
+  //   mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
+  // }
 
   // Loop over the msm_elem_to_info object and build a bi-directional
   // multimap from slave elements to the master Elems which they are
@@ -609,6 +615,9 @@ AutomaticMortarGeneration::compute_nodal_normals()
   // A map from the node id to the attached elemental normals evaluated at the node
   std::map<dof_id_type, std::vector<Point>> node_to_normals_map;
 
+  /// The _periodic flag tells us whether we want to inward vs outward facing normals
+  Real sign = _periodic ? -1 : 1;
+
   // First loop over lower-dimensional slave side elements and compute/save the outward normal for
   // each one. We loop over all active elements currently, but this procedure could be parallelized
   // as well.
@@ -638,7 +647,7 @@ AutomaticMortarGeneration::compute_nodal_normals()
     for (unsigned int n = 0; n < slave_elem->n_vertices(); ++n)
     {
       auto & normals_vec = node_to_normals_map[slave_elem->node_id(n)];
-      normals_vec.push_back(face_normals[n]);
+      normals_vec.push_back(sign * face_normals[n]);
     }
   }
 
@@ -1037,6 +1046,8 @@ AutomaticMortarGeneration::project_master_nodes_single_pair(
 
             // We're assuming our mesh is in the xy plane here
             auto normals = VectorValue<DualNumber<Real>>(dx1_dxi(1), -dx1_dxi(0), 0).unit();
+            if (_periodic)
+              normals *= -1;
 
             auto u = x1 - (*master_node);
 
@@ -1158,4 +1169,18 @@ AutomaticMortarGeneration::write_nodal_normals_to_file()
 
   // Write the nodal normals to file
   ExodusII_IO(this->mesh).write_equation_systems("nodal_normals_only.e", nodal_normals_es);
+}
+
+void
+AutomaticMortarGeneration::periodicConstraint(bool periodic)
+{
+  if (_periodic_set_externally && periodic != _periodic)
+    mooseError("Attempting to use the same AutomaticMortarGeneration object for enforcing both "
+               "normal and periodic mortar constraints. We cannot do this because the two types of "
+               "constraints use different facing normal projection operations");
+  else
+  {
+    _periodic_set_externally = true;
+    _periodic = periodic;
+  }
 }

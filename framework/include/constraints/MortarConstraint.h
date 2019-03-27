@@ -175,6 +175,10 @@ protected:
   /// Whether we need to calculate the primal gradients
   bool _need_primal_gradient;
 
+  /// Whether this constraint is going to be used to enforce a periodic condition. This has the
+  /// effect of changing the normals vector for projection from outward to inward facing
+  bool _periodic;
+
 private:
   /**
    * Loop over the mortar mesh and compute either the residual or Jacobian depending on
