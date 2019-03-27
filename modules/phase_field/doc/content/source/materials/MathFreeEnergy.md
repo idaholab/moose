@@ -1,13 +1,12 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # MathFreeEnergy
 
-!alert construction title=Undocumented Class
-The MathFreeEnergy has not been documented. The content contained on this page
-includes the basic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+This material implements an analytical double well free energy
 
-!syntax description /Materials/MathFreeEnergy
+\begin{equation}
+F = \frac14(1 + c)^2(1 - c)^2
+\end{equation
+
+and its up to third order derivatives.
 
 !syntax parameters /Materials/MathFreeEnergy
 
