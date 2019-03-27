@@ -37,6 +37,10 @@ public:
     return _undisplaced_system.getVector(tag_id);
   }
 
+  virtual TagID residualVectorTag() override { return _undisplaced_system.residualVectorTag(); }
+
+  virtual TagID systemMatrixTag() override { return _undisplaced_system.systemMatrixTag(); }
+
   virtual TagID timeVectorTag() override { return _undisplaced_system.timeVectorTag(); }
 
   virtual TagID nonTimeVectorTag() override { return _undisplaced_system.nonTimeVectorTag(); }

@@ -60,7 +60,8 @@ MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parame
             ? getParam<SubdomainID>("master_subdomain_id")
             : _mesh.getSubdomainID(getParam<SubdomainName>("master_subdomain_name"))),
     _amg(_fe_problem.getMortarInterface(std::make_pair(_master_id, _slave_id),
-                                        std::make_pair(_master_subdomain_id, _slave_subdomain_id))),
+                                        std::make_pair(_master_subdomain_id, _slave_subdomain_id),
+                                        getParam<bool>("use_displaced_mesh"))),
     _master_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
     _slave_var(
         isParamValid("slave_variable")

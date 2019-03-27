@@ -221,7 +221,7 @@ public:
   // explicitly declared when there is no master_elem for a given
   // mortar segment and you are using e.g.  a P^1-P^0 discretization
   // which does not induce the coupling automatically.
-  std::unordered_multimap<const Elem *, const Elem *> mortar_interface_coupling;
+  std::unordered_multimap<dof_id_type, dof_id_type> mortar_interface_coupling;
 
   // Container for storing the nodal normal vector associated with each slave node.
   std::unordered_map<const Node *, Point> slave_node_to_nodal_normal;

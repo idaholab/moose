@@ -1209,6 +1209,11 @@ public:
 
   AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
+                     const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+                     bool on_displaced);
+
+  AutomaticMortarGeneration &
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
                      const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair);
 
   virtual void possiblyRebuildGeomSearchPatches();

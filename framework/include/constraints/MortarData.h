@@ -10,15 +10,26 @@ class SubProblem;
 class MortarData
 {
 public:
-  MortarData(SubProblem &);
+  MortarData();
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
-   * subdomain keys If the AutomaticMortarGeneration object does not yet exist, then it is created
+   * subdomain keys. If the AutomaticMortarGeneration object does not yet exist, then it is created
+   * using the mesh of the passed in subproblem
    */
   AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                     const std::pair<SubdomainID, SubdomainID> & subdomain_key);
+                     const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+                     SubProblem & subproblem,
+                     bool on_displaced);
+
+  /**
+   * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
+   * subdomain keys. If the AutomaticMortarGeneration object does not yet exist, then we error
+   */
+  AutomaticMortarGeneration &
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
+                     const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/);
 
   /**
    * Returns the mortar covered subdomains
@@ -30,6 +41,16 @@ public:
    */
   void update();
 
+  /**
+   * Returns whether any of the AutomaticMortarGeneration objects are running on a displaced mesh
+   */
+  bool hasDisplacedObjects() const { return _has_displaced_objects; }
+
+  /**
+   * Returns whether we have **any** active AutomaticMortarGeneration objects
+   */
+  bool hasObjects() const { return _mortar_interfaces.size(); }
+
 protected:
   /// Map from master-slave (in that order) boundary ID pair to the corresponding
   /// AutomaticMortarGeneration object
@@ -40,9 +61,8 @@ protected:
   /// object
   std::set<SubdomainID> _mortar_subdomain_coverage;
 
-  /// A reference to the SubProblem that this MortarData object corresponds to. Note that this
-  /// SubProblem will pass its mesh to AutomaticMortarGeneration objects when they are created
-  SubProblem & _subproblem;
+  /// Whether any of the AutomaticMortarGeneration objects are running on a displaced mesh
+  bool _has_displaced_objects;
 };
 
 #endif

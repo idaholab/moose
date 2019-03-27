@@ -572,19 +572,20 @@ AutomaticMortarGeneration::build_mortar_segment_mesh()
     // The interior_parent() element should also be coupled to the
     // slave_elem. The coupling in the other direction (slave_elem
     // -> slave_elem->interior_parent()) happens automatically.
-    mortar_interface_coupling.insert(std::make_pair(slave_elem->interior_parent(), slave_elem));
+    mortar_interface_coupling.insert(
+        std::make_pair(slave_elem->interior_parent()->id(), slave_elem->id()));
 
     // Insert both Elems as key and value.
     if (master_elem)
     {
-      mortar_interface_coupling.insert(std::make_pair(slave_elem, master_elem));
-      mortar_interface_coupling.insert(std::make_pair(master_elem, slave_elem));
+      mortar_interface_coupling.insert(std::make_pair(slave_elem->id(), master_elem->id()));
+      mortar_interface_coupling.insert(std::make_pair(master_elem->id(), slave_elem->id()));
 
       // Also insert both interior parents as key and value.
-      mortar_interface_coupling.insert(
-          std::make_pair(slave_elem->interior_parent(), master_elem->interior_parent()));
-      mortar_interface_coupling.insert(
-          std::make_pair(master_elem->interior_parent(), slave_elem->interior_parent()));
+      mortar_interface_coupling.insert(std::make_pair(slave_elem->interior_parent()->id(),
+                                                      master_elem->interior_parent()->id()));
+      mortar_interface_coupling.insert(std::make_pair(master_elem->interior_parent()->id(),
+                                                      slave_elem->interior_parent()->id()));
     }
   }
 }

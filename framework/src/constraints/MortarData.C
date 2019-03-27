@@ -1,20 +1,37 @@
 #include "MortarData.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "MooseError.h"
 
-MortarData::MortarData(SubProblem & subproblem) : _subproblem(subproblem) {}
+MortarData::MortarData() : _has_displaced_objects(false) {}
 
 AutomaticMortarGeneration &
 MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                               const std::pair<SubdomainID, SubdomainID> & subdomain_key)
+                               const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+                               SubProblem & subproblem,
+                               bool on_displaced)
 {
+  if (on_displaced)
+    _has_displaced_objects = true;
+
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
 
   if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
     _mortar_interfaces.emplace(boundary_key,
                                libmesh_make_unique<AutomaticMortarGeneration>(
-                                   _subproblem.mesh().getMesh(), boundary_key, subdomain_key));
+                                   subproblem.mesh().getMesh(), boundary_key, subdomain_key));
+  return *_mortar_interfaces.at(boundary_key);
+}
+
+AutomaticMortarGeneration &
+MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
+                               const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/)
+{
+  if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
+    mooseError(
+        "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
+
   return *_mortar_interfaces.at(boundary_key);
 }
 

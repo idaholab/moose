@@ -91,30 +91,20 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     const Elem * const elem = *elem_it;
 
     // Look up elem in the mortar_interface_coupling data structure.
-    auto bounds = _amg->mortar_interface_coupling.equal_range(elem);
+    auto bounds = _amg->mortar_interface_coupling.equal_range(elem->id());
     for (const auto & pr : as_range(bounds))
     {
-      const Elem * cross_interface_neighbor = pr.second;
+      const Elem * cross_interface_neighbor = _mesh.getMesh().elem_ptr(pr.second);
 
       if (cross_interface_neighbor->processor_id() != p)
-      {
-        // libMesh::out << "Adding Elem " << cross_interface_neighbor->id()
-        //              << " as coupled Elem for " << pr.first->id()
-        //              << "." << std::endl;
         coupled_elements.insert(std::make_pair(cross_interface_neighbor, null_mat));
-      }
 
       // If the cross_interface_neighbor is a lower-dimensional element with
       // an interior parent, add the interior parent to the
       // list of Elems coupled to us.
       const Elem * cross_interface_neighbor_ip = cross_interface_neighbor->interior_parent();
       if (cross_interface_neighbor_ip && cross_interface_neighbor_ip->processor_id() != p)
-      {
-        // libMesh::out << "Adding Elem " << cross_interface_neighbor_ip->id()
-        //              << " as coupled Elem for " << pr.first->id()
-        //              << "." << std::endl;
         coupled_elements.insert(std::make_pair(cross_interface_neighbor_ip, null_mat));
-      }
     }
   } // end loop over range
 }
