@@ -80,7 +80,7 @@ MultiAppScalarToAuxScalarTransfer::execute()
                        "receiving data for the "
                        "MultiAppScalarToAuxScalarTransfer!");
 
-          for (auto j = beginIndex(from_values); j < from_values.size(); ++j)
+          for (unsigned int j = 0; j < from_values.size(); ++j)
             to_variable->sys().solution().set(to_dof[j], from_values[j]);
 
           to_variable->sys().solution().close();
@@ -120,7 +120,7 @@ MultiAppScalarToAuxScalarTransfer::execute()
                        "receiving data for the "
                        "MultiAppScalarToAuxScalarTransfer!");
 
-          for (auto j = beginIndex(from_values); j < from_values.size(); ++j)
+          for (unsigned int j = 0; j < from_values.size(); ++j)
             to_variable->sys().solution().set(to_dof[j], from_values[j]);
         }
       }

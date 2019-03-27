@@ -75,9 +75,9 @@ BreakBoundaryOnSubdomainGenerator::generate()
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       boundary_info.boundary_ids(elem, side, side_boundary_ids);
-      for (auto i = beginIndex(side_boundary_ids); i < side_boundary_ids.size(); ++i)
-        if (breaking_boundary_ids.count(side_boundary_ids[i]) > 0)
-          new_boundary_name_set.emplace(boundary_info.sideset_name(side_boundary_ids[i]) + "_to_" +
+      for (auto boundary_id : side_boundary_ids)
+        if (breaking_boundary_ids.count(boundary_id) > 0)
+          new_boundary_name_set.emplace(boundary_info.sideset_name(boundary_id) + "_to_" +
                                         subdomain_name);
     }
   }
@@ -95,7 +95,7 @@ BreakBoundaryOnSubdomainGenerator::generate()
   // assign boundary names to the new boundaries
   mooseAssert(new_boundary_ids.size() == new_boundary_names.size(),
               "sizes of boundary names and boundary IDs mismatch");
-  for (auto i = beginIndex(new_boundary_ids); i < new_boundary_ids.size(); ++i)
+  for (MooseIndex(new_boundary_ids) i = 0; i < new_boundary_ids.size(); ++i)
   {
     boundary_info.sideset_name(new_boundary_ids[i]) = new_boundary_names[i];
     boundary_info.nodeset_name(new_boundary_ids[i]) = new_boundary_names[i];
@@ -108,16 +108,15 @@ BreakBoundaryOnSubdomainGenerator::generate()
     auto subdomain_name = mesh->subdomain_name(subdomain_id);
     if (subdomain_name == "")
       subdomain_name = std::to_string(subdomain_id);
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    for (MooseIndex(elem->n_sides()) side = 0; side < elem->n_sides(); ++side)
     {
       std::vector<boundary_id_type> side_boundary_ids;
       boundary_info.boundary_ids(elem, side, side_boundary_ids);
-      for (auto i = beginIndex(side_boundary_ids); i < side_boundary_ids.size(); ++i)
+      for (auto boundary_id : side_boundary_ids)
       {
-        if (breaking_boundary_ids.count(side_boundary_ids[i]) > 0)
+        if (breaking_boundary_ids.count(boundary_id) > 0)
         {
-          BoundaryName bname =
-              boundary_info.sideset_name(side_boundary_ids[i]) + "_to_" + subdomain_name;
+          BoundaryName bname = boundary_info.sideset_name(boundary_id) + "_to_" + subdomain_name;
           auto bid = boundary_info.get_id_by_name(bname);
           boundary_info.add_side(elem, side, bid);
         }

@@ -126,7 +126,7 @@ TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
   _re_blocks.resize(_vector_tags.size());
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
-  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++, ++vector_tag)
+  for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
     _re_blocks[i] = &assembly.residualBlock(ivar, *vector_tag);
 
   _local_re.resize(_re_blocks[0]->size());
@@ -139,7 +139,7 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   _re_blocks.resize(_vector_tags.size());
   mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
   auto vector_tag = _vector_tags.begin();
-  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++, ++vector_tag)
+  for (MooseIndex(_vector_tags) i = 0; i < _vector_tags.size(); i++, ++vector_tag)
     _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, *vector_tag);
 
   _local_re.resize(_re_blocks[0]->size());
@@ -152,7 +152,7 @@ TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsig
   _ke_blocks.resize(_matrix_tags.size());
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
-  for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++, ++mat_vector)
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
     _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
@@ -168,7 +168,7 @@ TaggingInterface::prepareMatrixTagNeighbor(Assembly & assembly,
   _ke_blocks.resize(_matrix_tags.size());
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
-  for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++, ++mat_vector)
+  for (MooseIndex(_matrix_tags) i = 0; i < _matrix_tags.size(); i++, ++mat_vector)
     _ke_blocks[i] = &assembly.jacobianBlockNeighbor(type, ivar, jvar, *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());

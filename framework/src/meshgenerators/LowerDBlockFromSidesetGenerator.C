@@ -98,7 +98,7 @@ LowerDBlockFromSidesetGenerator::generate()
   auto max_elems_to_add = element_sides_on_boundary.size();
   mesh->comm().max(max_elems_to_add);
 
-  for (auto i = beginIndex(element_sides_on_boundary); i < element_sides_on_boundary.size(); ++i)
+  for (MooseIndex(element_sides_on_boundary) i = 0; i < element_sides_on_boundary.size(); ++i)
   {
     Elem * elem = element_sides_on_boundary[i].elem;
     if (distributed && elem->processor_id() != processor_id())

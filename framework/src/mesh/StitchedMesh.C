@@ -60,7 +60,7 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters)
   _stitch_boundaries_pairs.reserve(_stitch_boundaries.size() / 2);
 
   // Make pairs out of the boundary names
-  for (auto i = beginIndex(_stitch_boundaries); i < _stitch_boundaries.size(); i += 2)
+  for (MooseIndex(_stitch_boundaries) i = 0; i < _stitch_boundaries.size(); i += 2)
     _stitch_boundaries_pairs.emplace_back(_stitch_boundaries[i], _stitch_boundaries[i + 1]);
 }
 
@@ -90,7 +90,7 @@ StitchedMesh::buildMesh()
   _meshes.reserve(_files.size() - 1);
 
   // Read in all of the other meshes
-  for (auto i = beginIndex(_files, 1); i < _files.size(); ++i)
+  for (MooseIndex(_files) i = 1; i < _files.size(); ++i)
   {
     _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
     auto & mesh = _meshes.back();
@@ -99,7 +99,7 @@ StitchedMesh::buildMesh()
   }
 
   // Stich 'em
-  for (auto i = beginIndex(_meshes); i < _meshes.size(); i++)
+  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); i++)
   {
     auto & boundary_pair = _stitch_boundaries_pairs[i];
 

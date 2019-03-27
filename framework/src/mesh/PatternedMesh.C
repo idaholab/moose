@@ -87,7 +87,7 @@ void
 PatternedMesh::buildMesh()
 {
   // Read in all of the meshes
-  for (auto i = beginIndex(_files); i < _files.size(); ++i)
+  for (MooseIndex(_files) i = 0; i < _files.size(); ++i)
   {
     _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
     auto & mesh = _meshes.back();
@@ -97,7 +97,7 @@ PatternedMesh::buildMesh()
 
   // Create a mesh for all n-1 rows, the first row is the original mesh
   _row_meshes.reserve(_pattern.size() - 1);
-  for (auto i = beginIndex(_pattern); i < _pattern.size() - 1; ++i)
+  for (MooseIndex(_pattern) i = 0; i < _pattern.size() - 1; ++i)
     _row_meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
 
   // Local pointers to simplify algorithm
@@ -115,8 +115,8 @@ PatternedMesh::buildMesh()
   BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
 
   // Build each row mesh
-  for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)
-    for (auto j = beginIndex(_pattern[i]); j < _pattern[i].size(); ++j)
+  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
+    for (MooseIndex(_pattern) j = 0; j < _pattern[i].size(); ++j)
     {
       Real deltax = j * _x_width, deltay = i * _y_width;
 
@@ -147,7 +147,7 @@ PatternedMesh::buildMesh()
 
   // Now stitch together the rows
   // We're going to stitch them all to row 0 (which is the real mesh)
-  for (auto i = beginIndex(_pattern, 1); i < _pattern.size(); i++)
+  for (MooseIndex(_pattern) i = 1; i < _pattern.size(); i++)
     row_meshes[0]->stitch_meshes(
         *row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
 }

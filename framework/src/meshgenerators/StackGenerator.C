@@ -58,8 +58,8 @@ StackGenerator::StackGenerator(const InputParameters & parameters)
 {
   // Grab the input meshes
   _mesh_ptrs.reserve(_input_names.size());
-  for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
-    _mesh_ptrs.push_back(&getMeshByName(_input_names[i]));
+  for (auto & input_name : _input_names)
+    _mesh_ptrs.push_back(&getMeshByName(input_name));
 }
 
 std::unique_ptr<MeshBase>
@@ -84,17 +84,17 @@ StackGenerator::generate()
   _meshes.reserve(_input_names.size() - 1);
 
   // Read in all of the other meshes
-  for (auto i = beginIndex(_input_names, 1); i < _input_names.size(); ++i)
+  for (MooseIndex(_input_names) i = 1; i < _input_names.size(); ++i)
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
 
   // Check that the casts didn't fail, and that the dimensions match
-  for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
+  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); ++i)
   {
     if (_meshes[i] == nullptr)
       mooseError("StackGenerator only works with ReplicatedMesh : mesh from Meshgenerator ",
                  _input_names[i + 1],
                  "is not a ReplicatedMesh.");
-    if (int(_meshes[i]->mesh_dimension()) != dim)
+    if (static_cast<int>(_meshes[i]->mesh_dimension()) != dim)
       mooseError("Mesh from MeshGenerator : ", _input_names[i + 1], " is not in ", _dim, "D.");
   }
 
@@ -108,12 +108,15 @@ StackGenerator::generate()
   std::vector<boundary_id_type> ids =
       MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
 
+  mooseAssert(ids.size() == boundary_names.size(),
+              "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
+
   boundary_id_type first = ids[0], second = ids[1];
 
   // Getting the width of each mesh
   std::vector<Real> heights;
   heights.push_back(computeWidth(*mesh, _dim) + _bottom_height);
-  for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
+  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); ++i)
     heights.push_back(computeWidth(*_meshes[i], _dim) + *heights.rbegin());
 
   // Move the first mesh at the provided height
@@ -128,7 +131,7 @@ StackGenerator::generate()
   }
 
   // Move all of the other meshes in the right spots then stitch them one by one to the first one
-  for (auto i = beginIndex(_meshes); i < _meshes.size(); ++i)
+  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); ++i)
   {
     switch (_dim)
     {

@@ -49,8 +49,8 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
 {
   // Grab the input meshes
   _mesh_ptrs.reserve(_input_names.size());
-  for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
-    _mesh_ptrs.push_back(&getMeshByName(_input_names[i]));
+  for (auto & input_name : _input_names)
+    _mesh_ptrs.push_back(&getMeshByName(input_name));
 }
 
 std::unique_ptr<MeshBase>
@@ -63,11 +63,11 @@ StitchedMeshGenerator::generate()
   _meshes.reserve(_input_names.size() - 1);
 
   // Read in all of the other meshes
-  for (auto i = beginIndex(_input_names, 1); i < _input_names.size(); ++i)
+  for (MooseIndex(_input_names) i = 1; i < _input_names.size(); ++i)
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
 
   // Stich all the meshes to the first one
-  for (auto i = beginIndex(_meshes); i < _meshes.size(); i++)
+  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); i++)
   {
     auto boundary_pair = _stitch_boundaries_pairs[i];
 

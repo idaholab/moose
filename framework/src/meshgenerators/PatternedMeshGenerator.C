@@ -62,8 +62,8 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
     _z_width(getParam<Real>("z_width"))
 {
   _mesh_ptrs.reserve(_input_names.size());
-  for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
-    _mesh_ptrs.push_back(&getMeshByName(_input_names[i]));
+  for (auto & input_name : _input_names)
+    _mesh_ptrs.push_back(&getMeshByName(input_name));
 }
 
 std::unique_ptr<MeshBase>
@@ -73,7 +73,7 @@ PatternedMeshGenerator::generate()
   _meshes.reserve(_input_names.size());
 
   // Read in all of the meshes
-  for (auto i = beginIndex(_input_names); i < _input_names.size(); ++i)
+  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
   {
     _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
   }
@@ -89,6 +89,9 @@ PatternedMeshGenerator::generate()
 
   std::vector<boundary_id_type> ids =
       MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
+
+  mooseAssert(ids.size() == boundary_names.size(),
+              "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
 
   boundary_id_type left = ids[0], right = ids[1], top = ids[2], bottom = ids[3];
 
@@ -113,8 +116,8 @@ PatternedMeshGenerator::generate()
     _z_width = bbox.max()(2) - bbox.min()(2);
 
   // Build each row mesh
-  for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)
-    for (auto j = beginIndex(_pattern[i]); j < _pattern[i].size(); ++j)
+  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
+    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
     {
       Real deltax = j * _x_width, deltay = i * _y_width;
 
@@ -147,7 +150,7 @@ PatternedMeshGenerator::generate()
 
   // Now stitch together the rows
   // We're going to stitch them all to row 0 (which is the real mesh)
-  for (auto i = beginIndex(_pattern) + 1; i < _pattern.size(); i++)
+  for (MooseIndex(_pattern) i = 1; i < _pattern.size(); i++)
     _row_meshes[0]->stitch_meshes(
         *_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
 
