@@ -3,14 +3,18 @@
 The relative permeability of a phase is a function of its effective
 saturation:
 \begin{equation}
-S_{\mathrm{eff}}(S) = \frac{S - S_{\mathrm{res}}^{\beta}}{1 -
+S^{\beta}_{\mathrm{eff}}(S^{\beta}) = \frac{S^{\beta} - S_{\mathrm{res}}^{\beta}}{1 -
   \sum_{\beta'}S_{\mathrm{res}}^{\beta'}}
 \end{equation}
-In this equation $S_{\mathrm{res}}^{\beta}$ is the residual
-saturation for phase $\beta$.  If $S_{\mathrm{eff}} < 0$ then the
-relative permeability is zero, while if $S_{\mathrm{eff}}>1$ then the
-relative permeability is unity.  Otherwise, the relative permeability
-is given by the expressions below.
+In this equation:
+
+- $S^{\beta}_{\mathrm{eff}}$ is the effective saturation for phase $\beta$;
+- $S^{\beta}$ is the saturation for phase $\beta$;
+- $S_{\mathrm{res}}^{\beta}$ is the residual saturation for phase $\beta$.
+
+In the MOOSE input file, $S_{\mathrm{res}}$ is termed `s_res`, and the entire sum $\sum_{\beta'}S_{\mathrm{res}}^{\beta'}$ is termed `sum_s_res`.  MOOSE deliberately does not check that `sum_s_res` equals $\sum$`s_res`, so that you may choose `sum_s_res` independently of your `s_res` quantities.
+
+If $S_{\mathrm{eff}} < 0$ then the relative permeability is zero, while if $S_{\mathrm{eff}}>1$ then the relative permeability is unity.  Otherwise, the relative permeability is given by the expressions below.
 
 ## Constant
 
@@ -42,7 +46,7 @@ where $n$ is a user-defined quantity. Originally, [cite!corey1954] used $n = 4$ 
 
 [`PorousFlowRelativePermeabilityVG`](/PorousFlowRelativePermeabilityVG.md)
 
-The relative permeability of the phase is given by [cite!vangenuchten1980]
+The relative permeability of the wetting phase is given by [cite!vangenuchten1980]
 \begin{equation}
 k_{\mathrm{r}} = \sqrt{S_{\mathrm{eff}}} \left(1 - (1 -
 S_{\mathrm{eff}}^{1/m})^{m} \right)^{2}.
@@ -64,6 +68,14 @@ k_{\mathrm{r}} =
 Here the cubic is chosen so that its value and derivative match the
 van Genuchten expression at $S=S_{c}$, and so that it is unity at
 $S_{\mathrm{eff}}=1$.
+
+For the non-wetting phase, the van-Genuchten expression is
+\begin{equation}
+k_{\mathrm{r}} = \sqrt{S_{\mathrm{eff}}} \left(1 - (1 -
+S_{\mathrm{eff}})^{1/m} \right)^{2m} \ .
+\end{equation}
+As always in this page, here $S_{\mathrm{eff}}$ is the effective saturation of the appropriate phase, which is the non-wetting phase in this case.
+
 
 !media media/porous_flow/relperm_vg.png style=width:100%;margin-left:10px; caption=van Genuchten relative permeability id=relperm_vg
 

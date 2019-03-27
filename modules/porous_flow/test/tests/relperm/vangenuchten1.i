@@ -124,6 +124,7 @@
     type = PorousFlowRelativePermeabilityVG
     phase = 1
     m = 0.5
+    wetting = false
   [../]
 []
 
