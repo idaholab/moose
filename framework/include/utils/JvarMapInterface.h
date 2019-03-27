@@ -12,6 +12,7 @@
 
 #include "MooseVariableFE.h"
 #include "NonlinearSystemBase.h"
+#include "Enumerate.h"
 
 template <class T>
 class JvarMapInterfaceBase;
@@ -21,7 +22,7 @@ class JvarMapInterfaceBase;
  * computeQpOffDiagJacobian into the _coupled_moose_vars array.
  *
  * This class is useful in conjunction with DerivativeMaterialInterface,
- * where vectors of material property derviatives with respect to all coupled
+ * where vectors of material property derivatives with respect to all coupled
  * variables (iterating over _coupled_moose_vars array) are generated.
  * The mapping enabled the look up of the correct material property derivatives
  * for the current jvar.
@@ -40,7 +41,7 @@ public:
  * computeJacobianBlock into the _coupled_moose_vars array.
  *
  * This class is useful in conjunction with DerivativeMaterialInterface,
- * where vectors of material property derviatives with respect to all coupled
+ * where vectors of material property derivatives with respect to all coupled
  * variables (iterating over _coupled_moose_vars array) are generated.
  * The mapping enabled the look up of the correct material property derivatives
  * for the current jvar.
@@ -88,16 +89,14 @@ template <class T>
 JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters)
   : T(parameters), _jvar_map(this->_fe_problem.getNonlinearSystemBase().nVariables(), -1)
 {
-  auto nvar = this->_coupled_moose_vars.size();
-
   // populate map;
-  for (auto i = beginIndex(this->_coupled_moose_vars); i < nvar; ++i)
+  for (auto it : Moose::enumerate(this->_coupled_moose_vars))
   {
-    auto number = this->_coupled_moose_vars[i]->number();
+    auto number = it.value()->number();
 
     // skip AuxVars as off-diagonal jacobian entries are not calculated for them
     if (number < _jvar_map.size())
-      _jvar_map[number] = i;
+      _jvar_map[number] = it.index();
   }
 
   // mark the kernel variable for the check in computeOffDiagJacobian
