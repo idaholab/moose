@@ -1,1 +1,1 @@
-!syntax complete group=PhaseFieldApp
+!syntax complete groups=PhaseFieldApp

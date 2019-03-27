@@ -29,4 +29,4 @@ created; these objects are currently not as performant as their hand-coded
 peers, but they can be used seamlessly in simulations with mesh deformation and
 are guaranteed to generate correct Jacobians.
 
-!syntax complete group=NavierStokesApp
+!syntax complete groups=NavierStokesApp
