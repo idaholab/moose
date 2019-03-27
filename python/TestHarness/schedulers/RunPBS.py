@@ -62,7 +62,7 @@ class RunPBS(QueueManager):
                 output_file = job_data.json_data.get(job_data.job_dir, {}).get(job_data.plugin, {}).get('QSUB_OUTPUT', "")
                 if os.path.exists(output_file):
                     with open(output_file, 'r') as f:
-                        output_string = util.readOutput(f, None, self.options)
+                        output_string = util.readOutput(f, None)
                     job_data.jobs.getJobs()[0].setOutput(output_string)
 
                 # Add a caveat to each job, explaining that one of the jobs caused a TestHarness exception
