@@ -22,12 +22,15 @@
 defineADBaseValidParams(
     MortarConstraint,
     MortarConstraintBase,
-    params.addRequiredParam<BoundaryID>("master_boundary_id",
-                                        "The id of the master boundary sideset.");
-    params.addRequiredParam<BoundaryID>("slave_boundary_id",
-                                        "The id of the slave boundary sideset.");
-    params.addRequiredParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
-    params.addRequiredParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
+    params.addParam<BoundaryID>("master_boundary_id", "The id of the master boundary sideset.");
+    params.addParam<BoundaryID>("slave_boundary_id", "The id of the slave boundary sideset.");
+    params.addParam<SubdomainID>("master_subdomain_id", "The id of the master subdomain.");
+    params.addParam<SubdomainID>("slave_subdomain_id", "The id of the slave subdomain.");
+    params.addParam<BoundaryName>("master_boundary_name",
+                                  "The name of the master boundary sideset.");
+    params.addParam<BoundaryName>("slave_boundary_name", "The name of the slave boundary sideset.");
+    params.addParam<SubdomainName>("master_subdomain_name", "The name of the master subdomain.");
+    params.addParam<SubdomainName>("slave_subdomain_name", "The name of the slave subdomain.");
     params.registerRelationshipManagers("AugmentSparsityOnInterface");
     params.addRequiredParam<VariableName>("master_variable", "Variable on master surface");
     params.addParam<VariableName>("slave_variable", "Variable on master surface");
@@ -42,11 +45,20 @@ MortarConstraint<compute_stage>::MortarConstraint(const InputParameters & parame
   : MortarConstraintBase(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-
-    _slave_id(getParam<BoundaryID>("slave_boundary_id")),
-    _master_id(getParam<BoundaryID>("master_boundary_id")),
-    _slave_subdomain_id(getParam<SubdomainID>("slave_subdomain_id")),
-    _master_subdomain_id(getParam<SubdomainID>("master_subdomain_id")),
+    _slave_id(isParamValid("slave_boundary_id")
+                  ? getParam<BoundaryID>("slave_boundary_id")
+                  : _mesh.getBoundaryID(getParam<BoundaryName>("slave_boundary_name"))),
+    _master_id(isParamValid("master_boundary_id")
+                   ? getParam<BoundaryID>("master_boundary_id")
+                   : _mesh.getBoundaryID(getParam<BoundaryName>("master_boundary_name"))),
+    _slave_subdomain_id(
+        isParamValid("slave_subdomain_id")
+            ? getParam<SubdomainID>("slave_subdomain_id")
+            : _mesh.getSubdomainID(getParam<SubdomainName>("slave_subdomain_name"))),
+    _master_subdomain_id(
+        isParamValid("master_subdomain_id")
+            ? getParam<SubdomainID>("master_subdomain_id")
+            : _mesh.getSubdomainID(getParam<SubdomainName>("master_subdomain_name"))),
     _amg(_fe_problem.getMortarInterface(std::make_pair(_master_id, _slave_id),
                                         std::make_pair(_master_subdomain_id, _slave_subdomain_id))),
     _master_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
