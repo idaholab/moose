@@ -19,9 +19,8 @@ defineADValidParams(
     ADKernelValue,
     params.addClassDescription("Apply gravity. Value is in units of acceleration.");
     params.addParam<bool>("use_displaced_mesh", true, "Displaced mesh defaults to true");
-    params.addParam<Real>("value",
-                          -9.8,
-                          "Value multiplied against the residual, e.g. gravitational acceleration");
+    params.addRequiredParam<Real>(
+        "value", "Value multiplied against the residual, e.g. gravitational acceleration");
     params.addParam<Real>("alpha",
                           0.0,
                           "alpha parameter required for HHT time integration scheme"););
