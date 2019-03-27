@@ -452,7 +452,7 @@ PorousFlowDarcyBase::harmonicMean(JacRes res_or_jac, unsigned int ph, unsigned i
 
   std::vector<Real> mob(num_nodes);
   unsigned num_zero = 0;
-  unsigned zero_mobility_node;
+  unsigned zero_mobility_node = std::numeric_limits<unsigned>::max();
   Real harmonic_mob = 0;
   for (unsigned n = 0; n < num_nodes; ++n)
   {
