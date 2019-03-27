@@ -42,6 +42,9 @@ protected:
   /// van Genuchten exponent m for the specified phase
   const Real _m;
 
+  /// Whether to use the wetting or non-wetting van Genuchten expression
+  const bool _wetting;
+
   /// Start of cubic smoothing
   const Real _cut;
 
