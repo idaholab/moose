@@ -39,19 +39,19 @@
 
 [Kernels]
   [./c_res]
-    type = SplitCHParsed
+    type = ADSplitCHParsed
     variable = c
     f_name = F
     kappa_name = kappa_c
     w = w
   [../]
   [./w_res]
-    type = SplitCHWRes
+    type = ADSplitCHWRes
     variable = w
     mob_name = M
   [../]
   [./time]
-    type = CoupledTimeDerivative
+    type = ADCoupledTimeDerivative
     variable = w
     v = c
   [../]
@@ -65,10 +65,9 @@
   [../]
 
   [./free_energy]
-    type = MathFreeEnergy
+    type = ADMathFreeEnergy
     f_name = F
     c = 'c'
-    derivative_order = 2
   [../]
 []
 
@@ -99,4 +98,5 @@
 
 [Outputs]
   exodus = true
+  file_base = SplitCahnHilliard_out
 []

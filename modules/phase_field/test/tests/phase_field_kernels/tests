@@ -9,7 +9,21 @@
     type = 'Exodiff'
     input = 'SplitCahnHilliard.i'
     exodiff = 'SplitCahnHilliard_out.e'
-    max_parallel = 1                      # -pc_type lu
+  [../]
+  [./ADSplitCahnHilliard]
+    type = 'Exodiff'
+    input = 'ADSplitCahnHilliard.i'
+    exodiff = 'SplitCahnHilliard_out.e'
+    prereq = SplitCahnHilliard
+  [../]
+  [./ADSplitCahnHilliard-jac]
+    type = 'PetscJacobianTester'
+    input = 'ADSplitCahnHilliard.i'
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false Executioner/num_steps=2'
+    ratio_tol = 1e-8
+    difference_tol = 1e-4
+    requirement = 'The Jacobian for the AD split Cahn-Hilliard problem shall be perfect'
   [../]
 
   [./AllenCahn]
