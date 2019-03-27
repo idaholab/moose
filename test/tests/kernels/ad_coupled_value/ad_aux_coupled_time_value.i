@@ -12,22 +12,31 @@
 []
 
 [Variables]
-  [./u]
-  [../]
   [./v]
   [../]
 []
 
+[AuxVariables]
+  [./u]
+  [../]
+[]
+
+[Functions]
+  [./u]
+    type = ParsedFunction
+    value = 't'
+  [../]
+[]
+
+[AuxKernels]
+  [./u]
+    type = FunctionAux
+    variable = u
+    function = u
+  [../]
+[]
+
 [Kernels]
-  [./time_u]
-    type = ADTimeDerivative
-    variable = u
-  [../]
-  [./fn_u]
-    type = BodyForce
-    variable = u
-    function = 1
-  [../]
   [./time_v]
     type = ADCoupledTimeTest
     variable = v
