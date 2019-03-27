@@ -128,3 +128,41 @@ TEST(PorousFlowVanGenuchten, d2relperm)
        eps;
   EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2RelativePermeability(0.8, 0.65), 1.0E-5);
 }
+
+TEST(PorousFlowVanGenuchten, relpermNW)
+{
+  EXPECT_NEAR(1.0, PorousFlowVanGenuchten::relativePermeabilityNW(1.0E30, 0.7), 1.0E-5);
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::relativePermeabilityNW(-1.0, 0.7), 1.0E-5);
+  EXPECT_NEAR(0.664138097, PorousFlowVanGenuchten::relativePermeabilityNW(0.5, 0.3), 1.0E-5);
+  EXPECT_NEAR(0.559879012, PorousFlowVanGenuchten::relativePermeabilityNW(0.7, 0.8), 1.0E-5);
+}
+
+TEST(PorousFlowVanGenuchten, drelpermNW)
+{
+  Real fd;
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dRelativePermeabilityNW(1.0E30, 0.7), 1.0E-5);
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::dRelativePermeabilityNW(-1.0, 0.7), 1.0E-5);
+  fd = (PorousFlowVanGenuchten::relativePermeabilityNW(0.3 + eps, 0.7) -
+        PorousFlowVanGenuchten::relativePermeabilityNW(0.3, 0.7)) /
+       eps;
+  EXPECT_NEAR(fd, PorousFlowVanGenuchten::dRelativePermeabilityNW(0.3, 0.7), 1.0E-5);
+  fd = (PorousFlowVanGenuchten::relativePermeabilityNW(0.8 + eps, 0.65) -
+        PorousFlowVanGenuchten::relativePermeabilityNW(0.8, 0.65)) /
+       eps;
+  EXPECT_NEAR(fd, PorousFlowVanGenuchten::dRelativePermeabilityNW(0.8, 0.65), 1.0E-5);
+}
+
+TEST(PorousFlowVanGenuchten, d2relpermNW)
+{
+  Real fd;
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2RelativePermeabilityNW(1.0E30, 0.7), 1.0E-5);
+  EXPECT_NEAR(0.0, PorousFlowVanGenuchten::d2RelativePermeabilityNW(-1.0, 0.7), 1.0E-5);
+  fd = (PorousFlowVanGenuchten::dRelativePermeabilityNW(0.3 + eps, 0.7) -
+        PorousFlowVanGenuchten::dRelativePermeabilityNW(0.3, 0.7)) /
+       eps;
+  EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2RelativePermeabilityNW(0.3, 0.7), 1.0E-5);
+  fd = (PorousFlowVanGenuchten::dRelativePermeabilityNW(0.8 + eps, 0.65) -
+        PorousFlowVanGenuchten::dRelativePermeabilityNW(0.8, 0.65)) /
+       eps;
+  EXPECT_NEAR(fd, PorousFlowVanGenuchten::d2RelativePermeabilityNW(0.8, 0.65), 1.0E-5);
+}

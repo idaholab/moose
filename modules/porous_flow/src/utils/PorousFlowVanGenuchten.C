@@ -156,4 +156,51 @@ d2RelativePermeability(Real seff, Real m)
   return -0.25 * std::pow(seff, -1.5) * Utility::pow<2>(b) + 2.0 * std::pow(seff, -0.5) * b * db +
          2.0 * std::sqrt(seff) * db * db + 2.0 * std::sqrt(seff) * b * d2b;
 }
+
+Real
+relativePermeabilityNW(Real seff, Real m)
+{
+  if (seff <= 0.0)
+    return 0.0;
+  else if (seff >= 1.0)
+    return 1.0;
+
+  const Real a = std::pow(1.0 - seff, 1.0 / m);
+  const Real b = std::pow(1.0 - a, 2.0 * m);
+
+  return std::sqrt(seff) * b;
+}
+
+Real
+dRelativePermeabilityNW(Real seff, Real m)
+{
+  // Guard against division by zero
+  if (seff <= 0.0 || seff >= 1.0)
+    return 0.0;
+
+  const Real a = std::pow(1.0 - seff, 1.0 / m);
+  const Real da = -1.0 / m * a / (1.0 - seff);
+  const Real b = std::pow(1.0 - a, 2.0 * m);
+  const Real db = -2.0 * m * b / (1.0 - a) * da;
+
+  return 0.5 * std::pow(seff, -0.5) * b + std::sqrt(seff) * db;
+}
+
+Real
+d2RelativePermeabilityNW(Real seff, Real m)
+{
+  // Guard against division by zero
+  if (seff <= 0.0 || seff >= 1.0)
+    return 0.0;
+
+  const Real a = std::pow(1.0 - seff, 1.0 / m);
+  const Real da = -1.0 / m * a / (1.0 - seff);
+  const Real d2a = 1.0 / m * (1.0 / m - 1) * std::pow(1.0 - seff, 1.0 / m - 2.0);
+  const Real b = std::pow(1.0 - a, 2.0 * m);
+  const Real db = -2.0 * m * b / (1.0 - a) * da;
+  const Real d2b =
+      -2.0 * m * (db / (1.0 - a) * da + b * Utility::pow<2>(da / (1.0 - a)) + b / (1.0 - a) * d2a);
+
+  return -0.25 * std::pow(seff, -1.5) * b + std::pow(seff, -0.5) * db + std::sqrt(seff) * d2b;
+}
 }
