@@ -100,6 +100,33 @@ public:
    */
   virtual Real d2EffectiveSaturation(Real pc, unsigned qp = 0) const = 0;
 
+  /**
+   * Saturation as a function of capillary pressure
+   * @param pc capillary pressure (Pa)
+   * @param qp quadpoint to use (when saturation depends on coupled variables, not just
+   * pc)
+   * @return saturation
+   */
+  Real saturation(Real pc, unsigned qp = 0) const;
+
+  /**
+   * Derivative of saturation wrt capillary pressure
+   * @param pc capillary pressure (Pa)
+   * @param qp quadpoint to use (when saturation depends on coupled variables, not just
+   * pc)
+   * @return derivative of saturation wrt capillary pressure
+   */
+  Real dSaturation(Real pc, unsigned qp = 0) const;
+
+  /**
+   * Second derivative of saturation wrt capillary pressure
+   * @param pc capillary pressure
+   * @param qp quadpoint to use (when saturation depends on coupled variables, not just
+   * pc)
+   * @return second derivative of saturation wrt capillary pressure
+   */
+  Real d2Saturation(Real pc, unsigned qp = 0) const;
+
 protected:
   /**
    * Effective saturation of liquid phase given liquid saturation and residual
