@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef INTERFACEINTEGRALVARIABLEAVERAGEPOSTPROCESSOR_H
-#define INTERFACEINTEGRALVARIABLEAVERAGEPOSTPROCESSOR_H
+#ifndef INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H
+#define INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H
 
 #include "InterfaceIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-class InterfaceIntegralVariableAveragePostprocessor;
+class InterfaceAverageVariableValuePostprocessor;
 
 template <>
-InputParameters validParams<InterfaceIntegralVariableAveragePostprocessor>();
+InputParameters validParams<InterfaceAverageVariableValuePostprocessor>();
 
 /**
  * This postprocessor computes a volume integral of the specified variable.
@@ -24,10 +24,10 @@ InputParameters validParams<InterfaceIntegralVariableAveragePostprocessor>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class InterfaceIntegralVariableAveragePostprocessor : public InterfaceIntegralVariablePostprocessor
+class InterfaceAverageVariableValuePostprocessor : public InterfaceIntegralVariablePostprocessor
 {
 public:
-  InterfaceIntegralVariableAveragePostprocessor(const InputParameters & parameters);
+  InterfaceAverageVariableValuePostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -35,9 +35,9 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  const MooseEnum _interface_value_type;
+  // const MooseEnum _interface_value_type;
   Real _volume;
-  virtual Real computeQpIntegral() override;
+  // virtual Real computeQpIntegral() override;
 };
 
-#endif
+#endif /*INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H*/

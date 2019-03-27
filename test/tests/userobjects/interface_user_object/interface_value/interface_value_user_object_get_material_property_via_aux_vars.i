@@ -164,7 +164,7 @@
 
 [Postprocessors]
   [./interface_average_PP]
-    type = InterfaceIntegralVariableAveragePostprocessor
+    type = InterfaceAverageVariableValuePostprocessor
     interface_value_type = average
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -172,7 +172,7 @@
     boundary = 'interface'
   [../]
   [./interface_master_minus_slave_PP]
-    type = InterfaceIntegralVariableAveragePostprocessor
+    type = InterfaceAverageVariableValuePostprocessor
     interface_value_type = jump_master_minus_slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -180,7 +180,7 @@
     boundary = 'interface'
   [../]
   [./interface_average_slave_minus_master_PP]
-    type = InterfaceIntegralVariableAveragePostprocessor
+    type = InterfaceAverageVariableValuePostprocessor
     interface_value_type = jump_slave_minus_master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -188,7 +188,7 @@
     boundary = 'interface'
   [../]
   [./interface_average_absolute_jump_PP]
-    type = InterfaceIntegralVariableAveragePostprocessor
+    type = InterfaceAverageVariableValuePostprocessor
     interface_value_type = jump_abs
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -196,7 +196,7 @@
     boundary = 'interface'
   [../]
   [./interface_average_master_PP]
-    type = InterfaceIntegralVariableAveragePostprocessor
+    type = InterfaceAverageVariableValuePostprocessor
     interface_value_type = master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -204,7 +204,7 @@
     boundary = 'interface'
   [../]
   [./interface_average_slave_PP]
-    type = InterfaceIntegralVariableAveragePostprocessor
+    type = InterfaceAverageVariableValuePostprocessor
     interface_value_type = slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2

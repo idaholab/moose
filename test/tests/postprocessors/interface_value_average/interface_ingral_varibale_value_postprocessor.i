@@ -2,9 +2,9 @@
   type = GeneratedMesh
   dim = 2
   nx = 4
-  xmax = 4
+  xmax = 2
   ny = 6
-  ymax = 4
+  ymax = 2
   elem_type = QUAD4
 []
 
@@ -107,7 +107,7 @@
 
 [Postprocessors]
   [./diffusivity_average]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = InterfaceIntegralVariablePostprocessor
     interface_value_type = average
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -115,7 +115,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_master_slave]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = InterfaceIntegralVariablePostprocessor
     interface_value_type = jump_master_minus_slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -123,7 +123,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_slave_master]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = InterfaceIntegralVariablePostprocessor
     interface_value_type = jump_slave_minus_master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -131,7 +131,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_abs]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = InterfaceIntegralVariablePostprocessor
     interface_value_type = jump_abs
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -139,7 +139,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_master]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = InterfaceIntegralVariablePostprocessor
     interface_value_type = master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -147,7 +147,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_slave]
-    type = InterfaceAverageVariableValuePostprocessor
+    type = InterfaceIntegralVariablePostprocessor
     interface_value_type = slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2

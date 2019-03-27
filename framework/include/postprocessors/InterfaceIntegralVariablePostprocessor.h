@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<InterfaceIntegralVariablePostprocessor>();
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
+ * This postprocessor computes a weighted integral of the specified variable.
  *
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
@@ -30,6 +30,10 @@ class InterfaceIntegralVariablePostprocessor : public InterfaceIntegralPostproce
 {
 public:
   InterfaceIntegralVariablePostprocessor(const InputParameters & parameters);
+  // virtual void initialize() override;
+  // virtual void execute() override;
+  // virtual Real getValue() override;
+  // virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Holds the solution at current quadrature points
@@ -41,6 +45,11 @@ protected:
   /// Holds the solution gradient at the current quadrature points on the
   /// neighbor side
   const VariableGradient & _grad_u_neighbor;
+
+  /// the type of interface value we want to compute
+  const MooseEnum _interface_value_type;
+  /// the contribution of a qp to the integral
+  virtual Real computeQpIntegral() override;
 };
 
 #endif

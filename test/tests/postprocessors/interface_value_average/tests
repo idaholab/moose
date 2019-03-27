@@ -11,7 +11,7 @@
                "a singed material propertyjump (slave minus master) of -6, "
                "a material property value on the master side of  10, "
                "a material property value on the master side of  4 "
-    design = 'InterfaceIntegralVariableAveragePostprocessor.md'
+    design = 'InterfaceAverageVariableValuePostprocessor.md'
     issues = '#11647'
     max_threads = 2
   [../]

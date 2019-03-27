@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceIntegralVariablePostprocessor.h"
+#include "InterfaceValueTools.h"
+
+registerMooseObject("MooseApp", InterfaceIntegralVariablePostprocessor);
 
 template <>
 InputParameters
@@ -21,6 +24,9 @@ validParams<InterfaceIntegralVariablePostprocessor>()
                        "The name of the variable on the slave side of the interface. By default "
                        "the same variable name is used for the slave side");
   params.addClassDescription("Add access to variables and their gradient on an interface.");
+  params.addParam<MooseEnum>("interface_value_type",
+                             InterfaceValueTools::InterfaceAverageOptions(),
+                             "Type of value we want to compute");
   return params;
 }
 
@@ -39,7 +45,42 @@ InterfaceIntegralVariablePostprocessor::InterfaceIntegralVariablePostprocessor(
                     : coupledNeighborValue("variable")),
     _grad_u_neighbor(parameters.isParamSetByUser("neighbor_variable")
                          ? coupledNeighborGradient("neighbor_variable")
-                         : coupledNeighborGradient("variable"))
+                         : coupledNeighborGradient("variable")),
+    _interface_value_type(parameters.get<MooseEnum>("interface_value_type"))
 {
   addMooseVariableDependency(mooseVariable());
 }
+
+Real
+InterfaceIntegralVariablePostprocessor::computeQpIntegral()
+{
+  return InterfaceValueTools::getQuantity(_interface_value_type, _u[_qp], _u_neighbor[_qp]);
+}
+
+// void
+// InterfaceIntegralVariablePostprocessor::initialize()
+// {
+//   InterfaceIntegralPostprocessor::initialize();
+// }
+
+// void
+// InterfaceIntegralVariablePostprocessor::execute()
+// {
+//   InterfaceIntegralPostprocessor::execute();
+// }
+
+// Real
+// InterfaceIntegralVariablePostprocessor::getValue()
+// {
+//   Real integral = InterfaceIntegralPostprocessor::getValue();
+//   return integral;
+// }
+//
+// void
+// InterfaceIntegralVariablePostprocessor::threadJoin(const UserObject & y)
+// {
+//   InterfaceIntegralPostprocessor::threadJoin(y);
+//   // const InterfaceIntegralVariablePostprocessor & pps =
+//   //     static_cast<const InterfaceIntegralVariablePostprocessor &>(y);
+//   // _volume += pps._volume;
+// }
