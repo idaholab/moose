@@ -24,10 +24,10 @@ At present, PorousFlow offers two types of numerical stabilization: [full upwind
 !table id=procon caption=Pros and Cons of the stabilization schemes
 |  | No stabilization | Full upwinding | KT stabilization |
 | --- | --- | --- | --- |
-| Expense | <span style="color:green">cheap</span> | <span style="color:green">cheap</span> | <span style="color:red">expensive</span> |
-| Smooth | <span style="color:green">yes</span> | <span style="color:red">no</span> | <span style="color:green">yes</span> |
-| Overshoots | <span style="color:red">yes</span> | <span style="color:green">no</span> | <span style="color:green">no</span> |
-| Diffusion | <span style="color:green">minimal</span> | <span style="color:red">maximal</span> | <span style="color:green">minimal</span> |
+| Expense | [!style color=green](cheap) | [!style color=green](cheap) | [!style color=red](expensive) |
+| Smooth | [!style color=green](yes) | [!style color=red](no) | [!style color=green](yes) |
+| Overshoots | [!style color=red](yes) | [!style color=green](no) | [!style color=green](no) |
+| Diffusion | [!style color=green](minimal) | [!style color=red](maximal) | [!style color=green](minimal) |
 
 !alert note
 The Kuzmin-Turek stabilization is new and users are strongly encouraged to experiment with it and report their findings to the moose-users google group to iron out any problems and so we can collectively gain experience.

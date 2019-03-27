@@ -28,5 +28,6 @@
     requirement = 'The Jacobian for the AD gravity problem shall be perfect'
     issues = '#13100'
     design = 'jacobian_definitions.md'
+    cli_args = "Outputs/active=''"
   [../]
 []

@@ -73,7 +73,7 @@ PolycrystalEBSD::getNodalVariableValue(unsigned int op_index, const Node & n) co
   // Increment through all grains at node_index (these are global IDs if consider_phase is false and
   // local IDs otherwise)
   const auto num_grains = getNumGrains();
-  for (auto index = decltype(num_grains)(0); index < num_grains; ++index)
+  for (MooseIndex(num_grains) index = 0; index < num_grains; ++index)
   {
     // If the current order parameter index (_op_index) is equal to the assigned index
     // (_assigned_op),
