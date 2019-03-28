@@ -711,10 +711,6 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
         // in any way by the user.
         const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
 
-        // Remove <RESIDUAL> append for AD objects
-        std::string obj_name = moose_obj->first;
-        removeSubstring(obj_name, "<RESIDUAL>");
-
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
              std::find(buildable_types.begin(), buildable_types.end(), moose_obj->first) !=
@@ -723,7 +719,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
             _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
                                           task) &&             // and that base is associated
             action_obj_params.mooseObjectSyntaxVisibility() && // and the Action says it's visible
-            obj_name.find("<JACOBIAN>") ==
+            moose_obj->first.find("<JACOBIAN>") ==
                 std::string::npos) // And it is not a Jacobian templated AD object
         {
           std::string name;
@@ -735,27 +731,27 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
             pos = act_name.size();
 
             if (!action_obj_params.collapseSyntaxNesting())
-              name = act_name.substr(0, pos - 1) + obj_name;
+              name = act_name.substr(0, pos - 1) + moose_obj->first;
             else
             {
-              name = act_name.substr(0, pos - 1) + "/<type>/" + obj_name;
+              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj->first;
               is_action_params = true;
             }
           }
           else
           {
-            name = act_name + "/<type>/" + obj_name;
+            name = act_name + "/<type>/" + moose_obj->first;
             is_type = true;
           }
 
-          moose_obj_params.set<std::string>("type") = obj_name;
+          moose_obj_params.set<std::string>("type") = moose_obj->first;
 
           auto lineinfo = _factory.getLineInfo(moose_obj->first);
           std::string classname = _factory.associatedClassName(moose_obj->first);
           root.addParameters(act_name,
                              name,
                              is_type,
-                             obj_name,
+                             moose_obj->first,
                              is_action_params,
                              &moose_obj_params,
                              lineinfo,
@@ -814,10 +810,6 @@ Parser::buildFullTree(const std::string & search_string)
          */
         const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
 
-        // Remove <RESIDUAL> append for AD objects
-        std::string obj_name = moose_obj->first;
-        removeSubstring(obj_name, "<RESIDUAL>");
-
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
              std::find(buildable_types.begin(), buildable_types.end(), moose_obj->first) !=
@@ -826,7 +818,7 @@ Parser::buildFullTree(const std::string & search_string)
             _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
                                           task) &&             // and that base is associated
             action_obj_params.mooseObjectSyntaxVisibility() && // and the Action says it's visible
-            obj_name.find("<JACOBIAN>") ==
+            moose_obj->first.find("<JACOBIAN>") ==
                 std::string::npos) // And it is not a Jacobian templated AD object
         {
           std::string name;
@@ -836,20 +828,24 @@ Parser::buildFullTree(const std::string & search_string)
           {
             pos = act_name.size();
 
+            // Remove <RESIDUAL> append for AD objects
+            std::string obj_name = moose_obj->first;
+            removeSubstring(obj_name, "<RESIDUAL>");
+
             if (!action_obj_params.collapseSyntaxNesting())
               name = act_name.substr(0, pos - 1) + obj_name;
             else
             {
-              name = act_name.substr(0, pos - 1) + "/<type>/" + obj_name;
+              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj->first;
               is_action_params = true;
             }
           }
           else
           {
-            name = act_name + "/<type>/" + obj_name;
+            name = act_name + "/<type>/" + moose_obj->first;
           }
 
-          moose_obj_params.set<std::string>("type") = obj_name;
+          moose_obj_params.set<std::string>("type") = moose_obj->first;
 
           _syntax_formatter->insertNode(
               name, moose_obj->first, is_action_params, &moose_obj_params);
