@@ -13,7 +13,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-// Forward declarations
 class ConcentricCircleMeshGenerator;
 
 template <>
@@ -36,21 +35,24 @@ protected:
   /// Radii of concentric circles
   std::vector<Real> _radii;
 
-  /// Number of rings in each circle or in the moderator
+  /// Number of rings in each circle or in the enclosing square
   std::vector<unsigned int> _rings;
 
   /// Size of inner square in relation to radius of the innermost concentric circle
   Real _inner_mesh_fraction;
 
-  /// Adding the moderator is optional
+  /// Adding the enclosing square is optional
   bool _has_outer_square;
   Real _pitch;
 
   /// Volume preserving function is optional
   bool _preserve_volumes;
 
+  /// Iteration number for Laplace smoothing
+  unsigned int _smoothing_max_it;
+
   /// Control of which portion of mesh will be developed
   MooseEnum _portion;
 };
 
-#endif // ANNULARMESHGENERATOR_H
+#endif /* CONCENTRICCIRCLEMESHGENERATOR_H */
