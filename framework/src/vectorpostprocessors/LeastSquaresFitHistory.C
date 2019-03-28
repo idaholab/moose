@@ -80,7 +80,7 @@ LeastSquaresFitHistory::execute()
   std::vector<Real> x_values(_x_values.begin(), _x_values.end());
   std::vector<Real> y_values(_y_values.begin(), _y_values.end());
 
-  for (auto i = beginIndex(_x_values); i < _x_values.size(); ++i)
+  for (MooseIndex(_x_values) i = 0; i < _x_values.size(); ++i)
   {
     x_values[i] = (x_values[i] + _x_shift) * _x_scale;
     y_values[i] = (y_values[i] + _y_shift) * _y_scale;
@@ -92,7 +92,7 @@ LeastSquaresFitHistory::execute()
   std::vector<Real> coeffs = pf.getCoefficients();
   mooseAssert(coeffs.size() == _coeffs.size(),
               "Sizes of current coefficients and vector of coefficient vectors must match");
-  for (unsigned int i = 0; i < coeffs.size(); ++i)
+  for (MooseIndex(coeffs) i = 0; i < coeffs.size(); ++i)
     _coeffs[i]->push_back(coeffs[i]);
 
   _times->push_back(_t);

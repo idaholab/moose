@@ -58,7 +58,7 @@ ComputeInterfaceStress::ComputeInterfaceStress(const InputParameters & parameter
   if (_op_range.size() != _nvar)
     paramError("op_range", "Supply either one single op_range or one per order parameter");
 
-  for (auto i = beginIndex(_grad_v); i < _nvar; ++i)
+  for (MooseIndex(_grad_v) i = 0; i < _nvar; ++i)
   {
     _grad_v[i] = &coupledGradient("v", i);
     _stress[i] /= _op_range[i];
@@ -72,7 +72,7 @@ ComputeInterfaceStress::computeQpProperties()
   S.zero();
 
   // loop over interface variables
-  for (auto i = beginIndex(_grad_v); i < _nvar; ++i)
+  for (MooseIndex(_grad_v) i = 0; i < _nvar; ++i)
   {
     // compute norm square of the order parameter gradient
     const Real grad_norm_sq = (*_grad_v[i])[_qp].norm_sq();

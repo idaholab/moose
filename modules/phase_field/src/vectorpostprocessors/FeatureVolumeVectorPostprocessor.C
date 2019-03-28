@@ -79,7 +79,7 @@ FeatureVolumeVectorPostprocessor::execute()
   // Reset the variable index and intersect bounds vectors
   _var_num.assign(num_features, -1);           // Invalid
   _intersects_bounds.assign(num_features, -1); // Invalid
-  for (auto feature_num = beginIndex(_var_num); feature_num < num_features; ++feature_num)
+  for (MooseIndex(num_features) feature_num = 0; feature_num < num_features; ++feature_num)
   {
     auto var_num = _feature_counter.getFeatureVar(feature_num);
     if (var_num != FeatureFloodCount::invalid_id)
@@ -98,7 +98,7 @@ FeatureVolumeVectorPostprocessor::execute()
     VectorPostprocessorValue & center_z = declareVector("centroid_z");
     center_z.resize(num_features);
 
-    for (auto feature_num = beginIndex(_var_num); feature_num < num_features; ++feature_num)
+    for (MooseIndex(_var_num) feature_num = 0; feature_num < num_features; ++feature_num)
     {
       auto p = _feature_counter.featureCentroid(feature_num);
       center_x[feature_num] = p(0);
@@ -149,8 +149,7 @@ FeatureVolumeVectorPostprocessor::accumulateVolumes(
   unsigned int dominant_feature_id = FeatureFloodCount::invalid_id;
   Real max_var_value = std::numeric_limits<Real>::lowest();
 
-  for (auto var_index = beginIndex(var_to_features); var_index < var_to_features.size();
-       ++var_index)
+  for (MooseIndex(var_to_features) var_index = 0; var_index < var_to_features.size(); ++var_index)
   {
     // Only sample "active" variables
     if (var_to_features[var_index] != FeatureFloodCount::invalid_id)

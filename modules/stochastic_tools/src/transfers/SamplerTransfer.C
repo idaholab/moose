@@ -47,7 +47,7 @@ SamplerTransfer::SamplerTransfer(const InputParameters & parameters)
 
   // Compute the matrix and row for each
   std::vector<DenseMatrix<Real>> out = _sampler_ptr->getSamples();
-  for (auto mat = beginIndex(out); mat < out.size(); ++mat)
+  for (MooseIndex(out) mat = 0; mat < out.size(); ++mat)
     for (unsigned int row = 0; row < out[mat].m(); ++row)
       _multi_app_matrix_row.push_back(std::make_pair(mat, row));
 }

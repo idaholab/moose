@@ -33,6 +33,6 @@ AddPrimarySpeciesAction::AddPrimarySpeciesAction(const InputParameters & params)
 void
 AddPrimarySpeciesAction::act()
 {
-  for (auto i = beginIndex(_vars); i < _vars.size(); ++i)
-    _problem->addVariable(_vars[i], _fe_type, _scaling);
+  for (auto & var : _vars)
+    _problem->addVariable(var, _fe_type, _scaling);
 }

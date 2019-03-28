@@ -60,7 +60,7 @@ PolycrystalVoronoi::getGrainsBasedOnPoint(const Point & point,
   auto min_index = n_grains;
 
   // Loops through all of the grain centers and finds the center that is closest to the point p
-  for (auto grain = beginIndex(_centerpoints); grain < n_grains; ++grain)
+  for (MooseIndex(_centerpoints) grain = 0; grain < n_grains; ++grain)
   {
     auto distance = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[grain], point);
 

@@ -52,11 +52,11 @@ NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters)
   {
     std::vector<dof_id_type> nodelist;
 
-    for (auto i = beginIndex(_boundary_names); i < _boundary_names.size(); i++)
+    for (auto & boundary_name : _boundary_names)
     {
-      nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_boundary_names[i]));
-      for (auto k = beginIndex(_boundary_names); k < nodelist.size(); k++)
-        _node_ids.push_back(nodelist[k]);
+      nodelist = _mesh.getNodeList(_mesh.getBoundaryID(boundary_name));
+      for (auto & node_id : nodelist)
+        _node_ids.push_back(node_id);
     }
   }
   else

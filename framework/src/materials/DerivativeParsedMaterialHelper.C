@@ -90,7 +90,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
             warehouse.getActiveObject(name()));
 
     // copy parsers and declare properties
-    for (auto i = beginIndex(master->_derivatives); i < master->_derivatives.size(); ++i)
+    for (MooseIndex(master->_derivatives) i = 0; i < master->_derivatives.size(); ++i)
     {
       Derivative newderivative;
       newderivative.first =
@@ -101,7 +101,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
 
     // copy coupled material properties
     auto start = _mat_prop_descriptors.size();
-    for (auto i = beginIndex(master->_mat_prop_descriptors, start);
+    for (MooseIndex(master->_mat_prop_descriptors) i = start;
          i < master->_mat_prop_descriptors.size();
          ++i)
     {
@@ -129,7 +129,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     {
       // go through list of material properties and check if derivatives are needed
       auto ndesc = _mat_prop_descriptors.size();
-      for (auto jj = beginIndex(_mat_prop_descriptors); jj < ndesc; ++jj)
+      for (MooseIndex(_mat_prop_descriptors) jj = 0; jj < ndesc; ++jj)
       {
         FunctionMaterialPropertyDescriptor * j = &_mat_prop_descriptors[jj];
 
@@ -225,7 +225,7 @@ DerivativeParsedMaterialHelper::computeProperties()
 
     // insert material property values
     auto nmat_props = _mat_prop_descriptors.size();
-    for (auto i = beginIndex(_mat_prop_descriptors); i < nmat_props; ++i)
+    for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
       _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
     // set function value

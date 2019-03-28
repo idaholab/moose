@@ -91,7 +91,7 @@ PointValueAtXFEMInterface::execute()
 
   std::vector<Point> point_vec(1);
 
-  for (auto i = beginIndex(_points); i < _points.size(); ++i)
+  for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
   {
     Point p = _points[i];
 

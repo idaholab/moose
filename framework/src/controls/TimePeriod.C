@@ -91,7 +91,7 @@ void
 TimePeriod::execute()
 {
   // ENABLE
-  for (auto i = beginIndex(_enable); i < _enable.size(); ++i)
+  for (MooseIndex(_enable) i = 0; i < _enable.size(); ++i)
   {
     // If the current time falls between the start and end time, ENABLE the object (_t >=
     // _start_time and _t < _end_time)
@@ -104,7 +104,7 @@ TimePeriod::execute()
   }
 
   // DISABLE
-  for (auto i = beginIndex(_disable); i < _disable.size(); ++i)
+  for (MooseIndex(_disable) i = 0; i < _disable.size(); ++i)
   {
     // If the current time falls between the start and end time, DISABLE the object (_t >=
     // _start_time and _t < _end_time)

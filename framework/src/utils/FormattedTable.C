@@ -174,7 +174,7 @@ FormattedTable::addData(const std::string & name, Real value, Real time)
 void
 FormattedTable::addData(const std::string & name, const std::vector<Real> & vector)
 {
-  for (auto i = beginIndex(vector); i < vector.size(); ++i)
+  for (MooseIndex(vector) i = 0; i < vector.size(); ++i)
   {
     if (i == _data.size())
       _data.emplace_back(i, std::map<std::string, Real>());
