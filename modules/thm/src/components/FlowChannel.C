@@ -111,7 +111,7 @@ FlowChannel::buildFlowModel()
   const std::string class_name = _app.getFlowModelClassName(_model_id);
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<Simulation *>("_sim") = &_sim;
-  pars.set<FlowChannelBase *>("_pipe") = this;
+  pars.set<FlowChannelBase *>("_flow_channel") = this;
   pars.set<UserObjectName>("fp") = _fp_name;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   pars.set<AuxVariableName>("A_linear_name") = _A_linear_name;
