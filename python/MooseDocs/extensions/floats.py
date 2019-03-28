@@ -148,6 +148,12 @@ class RenderFloat(components.RenderComponent):
     def createHTML(self, parent, token, page): #pylint: disable=no-self-use
         div = html.Tag(parent, 'div', token)
         div.addClass('moose-float-div')
+
+        if token['bottom']:
+            cap = token(0)
+            cap.parent = None
+            cap.parent = token
+
         return div
 
     def createMaterialize(self, parent, token, page): #pylint: disable=no-self-use
