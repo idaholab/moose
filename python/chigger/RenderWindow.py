@@ -272,6 +272,7 @@ class RenderWindow(base.ChiggerObject):
 
     def resetCameraClippingRange(self):
         """
+        Resets the clipping range, this may be needed if you see artifacts in the renderering.
         """
         for result in self._results:
             result.getVTKRenderer().ResetCameraClippingRange()

@@ -334,6 +334,12 @@ def text_unidiff(out_content, gold_content, out_fname=None, gold_fname=None, col
 
     return ''.join(diff)
 
+def is_git_repo(working_dir=os.getcwd()):
+    """
+    Return true if the repository is a git repo.
+    """
+    return os.path.isdir(os.path.join(working_dir, '.git'))
+
 def git_ls_files(working_dir=os.getcwd()):
     """
     Return a list of files via 'git ls-files'.
@@ -341,6 +347,16 @@ def git_ls_files(working_dir=os.getcwd()):
     out = set()
     for fname in subprocess.check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
         out.add(os.path.abspath(os.path.join(working_dir, fname)))
+    return out
+
+def list_files(working_dir=os.getcwd()):
+    """
+    Return a set of files, recursively, for the supplied directory.
+    """
+    out = set()
+    for root, dirs, filenames in os.walk(working_dir):
+        for fname in filenames:
+            out.add(os.path.join(root, fname))
     return out
 
 def git_root_dir(working_dir=os.getcwd()):
