@@ -127,6 +127,11 @@ protected:
   virtual void addExecutioner();
 
   /**
+   * Add output
+   */
+  virtual void addOutput();
+
+  /**
    * Adds the initial conditions
    */
   virtual void addInitialConditions() = 0;
