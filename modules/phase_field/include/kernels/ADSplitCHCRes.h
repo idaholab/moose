@@ -23,7 +23,10 @@ class ADSplitCHCRes;
 
 declareADValidParams(ADSplitCHCRes);
 
-/// The couple, ADSplitCHCRes and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
+/**
+ * The pair, ADSplitCHCRes and ADSplitCHWRes, splits the Cahn-Hilliard equation
+ * by replacing chemical potential with 'w'.
+ */
 template <ComputeStage compute_stage>
 class ADSplitCHCRes : public ADSplitCHBase<compute_stage>
 {
@@ -31,7 +34,7 @@ public:
   ADSplitCHCRes(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADReal computeQpResidual();
 
   const ADMaterialProperty(Real) & _kappa;
   const ADVariableValue & _w;

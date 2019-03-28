@@ -4,7 +4,7 @@ This material implements an analytical double well free energy
 
 \begin{equation}
 F = \frac14(1 + c)^2(1 - c)^2
-\end{equation
+\end{equation}
 
 and its first order derivatives. Both provided properties furthermore come with
 forward mode automatic derivatives with respect to all degrees of freedom on the

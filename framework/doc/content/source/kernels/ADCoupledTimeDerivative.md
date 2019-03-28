@@ -3,10 +3,10 @@
 ## Description
 
 The `ADCoupledTimeDerivative` kernel is very similar to the
-[`TimeDerivative`](/TimeDerivative.md) kernel with the
-exception that the time derivative operator is applied to a coupled variable $v$ instead
-of the variable $u$ to whom's residual the `ADCoupledTimeDerivative` kernel
-contributes. Consequently, the strong form on the the domain $\Omega$ is
+[`TimeDerivative`](/TimeDerivative.md) kernel with the exception that the time
+derivative operator is applied to a coupled variable $v$ instead of the kernel
+variable $u$ which the `ADCoupledTimeDerivative` residual is assigned to.
+Consequently, the strong form on the the domain $\Omega$ is
 
 \begin{equation}
 \underbrace{\frac{\partial v}{\partial t}}_{\textrm{ADCoupledTimeDerivative}} +
@@ -29,12 +29,12 @@ differentiation.
 
 ## Example Syntax
 
-`ADCoupledTimeDerivative` is used for example in the split Cahn Hilliard equations
-for phase field calculations. The syntax is simple, taking its type
-(`ADCoupledTimeDerivative`), the variable to that the residual the
-`ADCoupledTimeDerivative` contributes, and the coupled variable `v` that the time
-derivative operator acts upon. Example syntax can be found in the kernel block
-below:
+`ADCoupledTimeDerivative` is used for example in the split Cahn Hilliard
+equations for phase field calculations. The syntax is simple, taking its type
+(`ADCoupledTimeDerivative`), the kernel variable which the
+`ADCoupledTimeDerivative` residual is assigned to, and the coupled variable `v`
+that the time derivative operator acts upon. Example syntax can be found in the
+kernel block below:
 
 !listing
 test/tests/kernels/coupled_time_derivative/ad_coupled_time_derivative_test.i

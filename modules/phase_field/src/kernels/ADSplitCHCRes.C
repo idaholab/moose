@@ -25,7 +25,7 @@ ADSplitCHCRes<compute_stage>::ADSplitCHCRes(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADSplitCHCRes<compute_stage>::computeQpResidual()
 {
   auto residual = ADSplitCHBase<compute_stage>::computeQpResidual();

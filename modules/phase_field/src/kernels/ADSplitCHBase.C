@@ -20,7 +20,7 @@ ADSplitCHBase<compute_stage>::ADSplitCHBase(const InputParameters & parameters)
 }
 
 template <ComputeStage compute_stage>
-ADResidual
+ADReal
 ADSplitCHBase<compute_stage>::computeQpResidual()
 {
   return computeDFDC() * _test[_i][_qp];

@@ -20,10 +20,9 @@ class ADSplitCHParsed;
 declareADValidParams(ADSplitCHParsed);
 
 /**
- * CHParsed uses the Free Energy function and derivatives
- * provided by a DerivativeParsedMaterial.
- * This is the split operator variant.
- * \see CHParsed
+ * ADSplitCHParsed uses the Free Energy function and derivatives
+ * provided by an ADMaterial. Derivatives w.r.t DOFs provided by the MOOSE AD
+ * system are required for a correct Jacobian to be formed.
  */
 template <ComputeStage compute_stage>
 class ADSplitCHParsed : public ADSplitCHCRes<compute_stage>,

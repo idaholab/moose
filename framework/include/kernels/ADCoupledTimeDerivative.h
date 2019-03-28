@@ -10,7 +10,7 @@
 #ifndef ADCOUPLEDTIMEDERIVATIVE_H
 #define ADCOUPLEDTIMEDERIVATIVE_H
 
-#include "ADKernel.h"
+#include "ADKernelValue.h"
 
 // Forward Declaration
 template <ComputeStage>
@@ -22,17 +22,17 @@ declareADValidParams(ADCoupledTimeDerivative);
  * This calculates the time derivative for a coupled variable
  **/
 template <ComputeStage compute_stage>
-class ADCoupledTimeDerivative : public ADKernel<compute_stage>
+class ADCoupledTimeDerivative : public ADKernelValue<compute_stage>
 {
 public:
   ADCoupledTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
   const ADVariableValue & _v_dot;
 
-  usingKernelMembers;
+  usingKernelValueMembers;
 };
 
 #endif // ADCOUPLEDTIMEDERIVATIVE_H

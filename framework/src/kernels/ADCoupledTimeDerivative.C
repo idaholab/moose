@@ -13,20 +13,20 @@ registerADMooseObject("MooseApp", ADCoupledTimeDerivative);
 
 defineADValidParams(
     ADCoupledTimeDerivative,
-    ADKernel,
+    ADKernelValue,
     params.addClassDescription("Time derivative Kernel that acts on a coupled variable. Weak form: "
                                "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$.");
     params.addRequiredCoupledVar("v", "Coupled variable"););
 
 template <ComputeStage compute_stage>
 ADCoupledTimeDerivative<compute_stage>::ADCoupledTimeDerivative(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters), _v_dot(adCoupledDot("v"))
+  : ADKernelValue<compute_stage>(parameters), _v_dot(adCoupledDot("v"))
 {
 }
 
 template <ComputeStage compute_stage>
-ADResidual
-ADCoupledTimeDerivative<compute_stage>::computeQpResidual()
+ADReal
+ADCoupledTimeDerivative<compute_stage>::precomputeQpResidual()
 {
-  return _test[_i][_qp] * _v_dot[_qp];
+  return _v_dot[_qp];
 }

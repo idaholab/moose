@@ -125,7 +125,7 @@
     heavy = true
     issues = '#9658'
     design = '/ACInterfaceStress.md'
-    requirement = 'The free energy contribution from elastic stresses in interfaces shall shal have a perfect Jacobian'
+    requirement = 'The free energy contribution from elastic stresses in interfaces shall shall have a perfect Jacobian'
   [../]
 
   [./nonuniform_barrier_coefficient]

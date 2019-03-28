@@ -13,9 +13,8 @@
 #include "ADSplitCHWResBase.h"
 
 /**
- * ADSplitCHWResAniso creates the residual for the chemical
- * potential in the split form of the Cahn-Hilliard
- * equation with a tensor (anisotropic) mobility.
+ * ADSplitCHWResAniso creates the residual for the chemical potential in the split
+ * form of the Cahn-Hilliard equation with a tensor (anisotropic) mobility.
  */
 template <ComputeStage compute_stage>
 class ADSplitCHWResAniso : public ADSplitCHWResBase<compute_stage, RealTensorValue>

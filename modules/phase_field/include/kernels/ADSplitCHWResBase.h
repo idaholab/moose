@@ -10,7 +10,7 @@
 #ifndef ADSPLITCHWRESBASE_H
 #define ADSPLITCHWRESBASE_H
 
-#include "ADKernel.h"
+#include "ADKernelGrad.h"
 #include "DerivativeMaterialInterface.h"
 
 #define usingSplitCHWResBase                                                                       \
@@ -25,39 +25,38 @@ class ADSplitCHWResBase;
 declareADValidParams(ADSplitCHWResBase);
 
 /**
- * ADSplitCHWResBase implements the residual for the chemical
- * potential in the split form of the Cahn-Hilliard
- * equation in a general way that can be templated to a scalar or
- * tensor mobility.
+ * ADSplitCHWResBase implements the residual for the chemical potential in the
+ * split form of the Cahn-Hilliard equation in a general way that can be templated
+ * to a scalar or tensor mobility.
  */
 template <ComputeStage compute_stage, typename T>
-class ADSplitCHWResBase : public ADKernel<compute_stage>
+class ADSplitCHWResBase : public ADKernelGrad<compute_stage>
 {
 public:
   ADSplitCHWResBase(const InputParameters & parameters);
 
 protected:
-  virtual ADResidual computeQpResidual();
+  virtual ADRealVectorValue precomputeQpResidual();
 
   const MaterialPropertyName _mob_name;
   const ADMaterialProperty(T) & _mob;
 
-  usingKernelMembers;
+  usingKernelGradMembers;
 };
 
 template <ComputeStage compute_stage, typename T>
 ADSplitCHWResBase<compute_stage, T>::ADSplitCHWResBase(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+  : ADKernelGrad<compute_stage>(parameters),
     _mob_name(adGetParam<MaterialPropertyName>("mob_name")),
     _mob(adGetADMaterialProperty<T>("mob_name"))
 {
 }
 
 template <ComputeStage compute_stage, typename T>
-ADResidual
-ADSplitCHWResBase<compute_stage, T>::computeQpResidual()
+ADRealVectorValue
+ADSplitCHWResBase<compute_stage, T>::precomputeQpResidual()
 {
-  return _mob[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
+  return _mob[_qp] * _grad_u[_qp];
 }
 
 #endif // ADSPLITCHWRESBASE_H
