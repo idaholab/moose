@@ -273,19 +273,6 @@ MooseVariableScalar::reinit()
   }
 }
 
-bool
-MooseVariableScalar::isNodal() const
-{
-  // scalar variables are never nodal ;-)
-  return false;
-}
-
-bool
-MooseVariableScalar::isVector() const
-{
-  return false;
-}
-
 void
 MooseVariableScalar::setValue(unsigned int i, Number value)
 {
