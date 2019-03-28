@@ -1,4 +1,7 @@
 #include "ClosureTestAction.h"
+#include "ActionFactory.h"
+#include "ActionWarehouse.h"
+#include "MooseObjectAction.h"
 
 template <>
 InputParameters
@@ -7,6 +10,7 @@ validParams<ClosureTestAction>()
   InputParameters params = validParams<TestAction>();
 
   params.addParam<FunctionName>("T_wall", "Wall temperature function");
+  params.addParam<std::vector<std::string>>("output", "List of material properties to output");
 
   params.set<std::string>("fe_family") = "LAGRANGE";
   params.set<std::string>("fe_order") = "FIRST";
@@ -19,7 +23,8 @@ ClosureTestAction::ClosureTestAction(InputParameters params)
     _dummy_name("dummy"),
     _T_wall_name("T_wall"),
     _has_T_wall(isParamValid("T_wall")),
-    _T_wall_fn(_has_T_wall ? getParam<FunctionName>("T_wall") : "")
+    _T_wall_fn(_has_T_wall ? getParam<FunctionName>("T_wall") : ""),
+    _output_properties(getParam<std::vector<std::string>>("output"))
 {
   _default_use_transient_executioner = true;
 }
@@ -42,4 +47,58 @@ ClosureTestAction::addNonConstantAuxVariables()
 {
   if (_has_T_wall)
     addAuxVariable(_T_wall_name, _fe_family, _fe_order);
+}
+
+void
+ClosureTestAction::addOutput()
+{
+  for (auto & prop : _output_properties)
+  {
+    addAuxVariable(prop, "MONOMIAL", "CONSTANT");
+
+    {
+      const std::string class_name = "AddKernelAction";
+      InputParameters params = _action_factory.getValidParams(class_name);
+      params.set<std::string>("type") = "MaterialRealAux";
+      params.set<std::string>("task") = "add_aux_kernel";
+
+      std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+          _action_factory.create(class_name, prop + "_aux", params));
+
+      action->getObjectParams().set<AuxVariableName>("variable") = prop;
+      action->getObjectParams().set<MaterialPropertyName>("property") = prop;
+
+      _awh.addActionBlock(action);
+    }
+
+    {
+      const std::string class_name = "AddPostprocessorAction";
+      InputParameters action_params = _action_factory.getValidParams(class_name);
+      action_params.set<std::string>("type") = "ElementalVariableValue";
+
+      auto action = std::static_pointer_cast<MooseObjectAction>(
+          _action_factory.create(class_name, prop, action_params));
+
+      action->getObjectParams().set<VariableName>("variable") = prop;
+      action->getObjectParams().set<unsigned int>("elementid") = 0;
+
+      _awh.addActionBlock(action);
+    }
+  }
+
+  if (_output_properties.size() > 0)
+  {
+    const std::string class_name = "AddOutputAction";
+    InputParameters action_params = _action_factory.getValidParams(class_name);
+    action_params.set<std::string>("type") = "CSV";
+
+    auto action = std::static_pointer_cast<MooseObjectAction>(
+        _action_factory.create(class_name, "csv", action_params));
+
+    ExecFlagEnum execute_options(MooseUtils::getDefaultExecFlagEnum());
+    execute_options = EXEC_TIMESTEP_END;
+    action->getObjectParams().set<ExecFlagEnum>("execute_on") = execute_options;
+
+    _awh.addActionBlock(action);
+  }
 }
