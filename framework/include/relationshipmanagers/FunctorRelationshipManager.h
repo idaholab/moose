@@ -36,6 +36,14 @@ public:
                           processor_id_type p,
                           map_type & coupled_elements) override;
 
+  virtual void mesh_reinit() override;
+
+  virtual void dofmap_reinit() override;
+
+  virtual void redistribute() override;
+
+  virtual void delete_remote_elements() override;
+
 protected:
   std::unique_ptr<GhostingFunctor> _functor;
 };

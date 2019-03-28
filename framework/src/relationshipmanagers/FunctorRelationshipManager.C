@@ -34,3 +34,39 @@ FunctorRelationshipManager::operator()(const MeshBase::const_element_iterator & 
 
   (*_functor)(range_begin, range_end, p, coupled_elements);
 }
+
+void
+FunctorRelationshipManager::mesh_reinit()
+{
+  if (!_functor)
+    mooseError("Functor was not initialized!");
+
+  _functor->mesh_reinit();
+}
+
+void
+FunctorRelationshipManager::dofmap_reinit()
+{
+  if (!_functor)
+    mooseError("Functor was not initialized!");
+
+  _functor->dofmap_reinit();
+}
+
+void
+FunctorRelationshipManager::redistribute()
+{
+  if (!_functor)
+    mooseError("Functor was not initialized!");
+
+  _functor->redistribute();
+}
+
+void
+FunctorRelationshipManager::delete_remote_elements()
+{
+  if (!_functor)
+    mooseError("Functor was not initialized!");
+
+  _functor->delete_remote_elements();
+}
