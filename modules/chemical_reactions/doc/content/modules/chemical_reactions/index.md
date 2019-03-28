@@ -247,6 +247,6 @@ of kernels that have to be provided!
 
 ## Objects, Actions, and, Syntax
 
-!syntax complete group=ChemicalReactionsApp level=3
+!syntax complete groups=ChemicalReactionsApp level=3
 
 !bibtex bibliography

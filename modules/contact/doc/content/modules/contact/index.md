@@ -112,4 +112,4 @@ The recommended PETSc options for use with Dirac based contact are given below:
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=ContactApp level=3
+!syntax complete groups=ContactApp level=3

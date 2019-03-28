@@ -64,4 +64,4 @@ complete set of samples that could be passed to sub-applications via the
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=StochasticToolsApp
+!syntax complete groups=StochasticToolsApp

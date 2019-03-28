@@ -113,6 +113,31 @@ Real dRelativePermeability(Real seff, Real m);
  * @return second derivative of relative permeability wrt effective saturation
  */
 Real d2RelativePermeability(Real seff, Real m);
+
+/**
+ * Relative permeability for a non-wetting phase as a function of effective saturation
+ * @param seff effective saturation
+ * @param m van Genuchten exponent
+ * @return relative permeability
+ */
+Real relativePermeabilityNW(Real seff, Real m);
+
+/**
+ * Derivative of relative permeability for a non-wetting phase with respect to effective saturation
+ * @param seff effective saturation
+ * @param m van Genuchten exponent
+ * @return derivative of relative permeability wrt effective saturation
+ */
+Real dRelativePermeabilityNW(Real seff, Real m);
+
+/**
+ * Second derivative of relative permeability for a non-wetting phase with respect to effective
+ * saturation
+ * @param seff effective saturation
+ * @param m van Genuchten exponent
+ * @return second derivative of relative permeability wrt effective saturation
+ */
+Real d2RelativePermeabilityNW(Real seff, Real m);
 }
 
 #endif // POROUSFLOWVANGENUCHTEN_H

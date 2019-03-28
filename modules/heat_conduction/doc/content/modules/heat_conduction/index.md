@@ -5,4 +5,4 @@ Documentation for the heat conduction module needs some work...
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=HeatConductionApp level=3
+!syntax complete groups=HeatConductionApp level=3
