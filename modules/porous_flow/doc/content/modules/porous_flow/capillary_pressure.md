@@ -7,7 +7,7 @@ and the porous medium. Capillary pressure, $P_c$, is commonly defined as [citep!
 P_c = P_{nw} - P_w,
 \end{equation}
 where $P_{nw}$ is the pressure of the non-wetting phase (typically the gas phase), and $P_w$ is the
-pressure of the wetting phase (typically the liquid phase).
+pressure of the wetting phase (typically the liquid phase).  In the case of a single, unsaturated phase, it is common to use $P_{c} = -P_{w}$, which is the convention employed in PorousFlow.  In this case, the capillary pressure is only relevant when $P_{w}\leq 0$, and this results in $S_{\mathrm{eff}}\leq 1$ using the formulae below, otherwise, for $P_{w}>0$, $S_{\mathrm{eff}}=1$.
 
 The capillary pressure is given by the Young-Laplace equation [citep!bear1972]
 \begin{equation}
@@ -22,8 +22,14 @@ semi-impirical formulations for capillary pressure have been proposed that relat
 to effective saturation.
 
 Several capillary pressure formulations are available in the Porous Flow module suitable for either
-porepressure formulations (where effective saturation is calculated using capillary pressure), or
+porepressure formulations (where effective saturation and then saturation is calculated using capillary pressure), or
 porepressure-saturation formulations (where capillary pressure is calculated using the saturation).
+
+In the following, the effective saturation is
+\begin{equation}
+S_{\mathrm{eff}} = \frac{S - S_{\mathrm{l,res}}}{1 - S_{\mathrm{l,res}}} \ .
+\end{equation}
+This is the wetting-phase (liquid) effective saturation, and $S$ is the wetting phase saturation.  The quantity $S_{\mathrm{l,res}}$ is the wetting-phase residual saturation, and is termed `sat_lr` in MOOSE input files.  The porepressure formulations compute $S_{\mathrm{eff}}$ as a function of capillary pressure, and hence $S$ which then appears in the fluid mass, the relative permeability, etc.
 
 ## Constant
 
@@ -165,15 +171,17 @@ Only effective saturation as a function of capillary pressure is available in
 ## Logarithmic extension at low liquid saturations
 
 Several of the capillary pressure formulations have capillary pressure and its derivative approach
-infinity while the liquid saturation approaches zero. While this is desirable for calculation of
+infinity while the liquid effective saturation approaches zero. While this is desirable for calculation of
 effective saturation as a function of capillary pressure, it is undesirable when calculating the
 capillary pressure numerically using saturation, often leading to numerical convergence issues.
 
-By default, the numerical implementations of the capillary pressure curves implement a hard maximum
-when the effective saturation decreases below 0 in order to avoid unphysical values of capillary
-pressure and its derivatives. While this approach does avoid infinite values, it can lead to
-numerical difficulties for saturations close to residual due to the discontinuous derivative of
-capillary pressure with respect to saturation.
+By default, the numerical implementations of the capillary pressure
+curves implement a hard maximum when the effective saturation
+decreases below 0 in order to avoid unphysical values of capillary
+pressure and its derivatives. While this approach does avoid infinite
+values, it can lead to numerical difficulties for saturations close to
+residual (effective saturation close to zero) due to the discontinuous
+derivative of capillary pressure with respect to saturation.
 
 To overcome this, the logarithmic extension detailed by [cite!webb2000] is implemented for low
 saturations in formulations where capillary pressure approaches infinity for small liquid
@@ -184,7 +192,7 @@ P_c = P_{c,max} 10^{m(S - S^*)}
 is used for saturations less than a value $S^*$. The value of $s^*$ is calculated so that the
 capillary pressure curve is continuous and smooth up to the maximum capillary pressure $P_{c,max}$,
 see [pc_vg_logext] for an example for the van Genuchten capillary pressure, and [pc_bc_logext] for
-the Brooks-Corey capillary pressure.
+the Brooks-Corey capillary pressure.  For these figures, $S_{\mathrm{l,res}}=0.1$, and $S^{*}\approx 0.11$ (VG) or $S^{*}\approx 0.101$ (BC).
 
 !media media/porous_flow/pc_vg_logext.png
        id=pc_vg_logext
