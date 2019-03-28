@@ -180,10 +180,7 @@ TensorMechanicsAction::act()
     if (_planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
       if (_use_ad)
-        mooseError("In ",
-                   _name,
-                   ": use_ad specified, but no "
-                   "ADGeneralizedPlaneStrainAction yet available");
+        paramError("use_ad", "AD not setup for use with PlaneStrain");
       // Set the action parameters
       const std::string type = "GeneralizedPlaneStrainAction";
       auto action_params = _action_factory.getValidParams(type);
@@ -259,10 +256,7 @@ TensorMechanicsAction::act()
              _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
       if (_use_ad)
-        mooseError("In ",
-                   _name,
-                   ": use_ad specified, but no "
-                   "AD Plane strain methods available");
+        paramError("use_ad", "AD not setup for use with PlaneStrain");
 
       std::map<StrainAndIncrement, std::string> type_map = {
           {StrainAndIncrement::SmallTotal, "ComputePlaneSmallStrain"},
