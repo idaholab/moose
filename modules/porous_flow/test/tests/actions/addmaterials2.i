@@ -135,11 +135,15 @@
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
+    s_res = 0.1
+    sum_s_res = 0.11
   [../]
   [./relperm1]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
+    s_res = 0.01
+    sum_s_res = 0.11
   [../]
   [./porosity]
     type = PorousFlowPorosityConst

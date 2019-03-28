@@ -100,6 +100,8 @@
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
+    s_res = 0.1
+    sum_s_res = 0.1
   [../]
   [./darcy_velocity_qp]
     type = PorousFlowDarcyVelocityMaterial

@@ -72,13 +72,13 @@ PorousFlow2PhasePP::computeQpProperties()
   PorousFlowVariableBase::computeQpProperties();
 
   const Real pc = buildQpPPSS();
-  const Real dseff = _pc_uo.dEffectiveSaturation(pc); // d(seff)/d(pc)
+  const Real ds = _pc_uo.dSaturation(pc); // dS/d(pc)
 
   if (!_nodal_material)
   {
     (*_gradp_qp)[_qp][0] = _phase0_gradp_qp[_qp];
     (*_gradp_qp)[_qp][1] = _phase1_gradp_qp[_qp];
-    (*_grads_qp)[_qp][0] = dseff * ((*_gradp_qp)[_qp][0] - (*_gradp_qp)[_qp][1]);
+    (*_grads_qp)[_qp][0] = ds * ((*_gradp_qp)[_qp][0] - (*_gradp_qp)[_qp][1]);
     (*_grads_qp)[_qp][1] = -(*_grads_qp)[_qp][0];
   }
 
@@ -99,35 +99,31 @@ PorousFlow2PhasePP::computeQpProperties()
 
   if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
   {
-    _dsaturation_dvar[_qp][0][_p0var] = dseff;
-    _dsaturation_dvar[_qp][1][_p0var] = -dseff;
+    _dsaturation_dvar[_qp][0][_p0var] = ds;
+    _dsaturation_dvar[_qp][1][_p0var] = -ds;
   }
   if (_dictator.isPorousFlowVariable(_phase1_porepressure_varnum))
   {
-    _dsaturation_dvar[_qp][0][_p1var] = -dseff;
-    _dsaturation_dvar[_qp][1][_p1var] = dseff;
+    _dsaturation_dvar[_qp][0][_p1var] = -ds;
+    _dsaturation_dvar[_qp][1][_p1var] = ds;
   }
 
   if (!_nodal_material)
   {
-    const Real d2seff_qp = _pc_uo.d2EffectiveSaturation(pc); // d^2(seff_qp)/d(pc_qp)^2
+    const Real d2s_qp = _pc_uo.d2Saturation(pc); // d^2(S_qp)/d(pc_qp)^2
     if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
     {
-      (*_dgrads_qp_dgradv)[_qp][0][_p0var] = dseff;
-      (*_dgrads_qp_dv)[_qp][0][_p0var] =
-          d2seff_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
-      (*_dgrads_qp_dgradv)[_qp][1][_p0var] = -dseff;
-      (*_dgrads_qp_dv)[_qp][1][_p0var] =
-          -d2seff_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
+      (*_dgrads_qp_dgradv)[_qp][0][_p0var] = ds;
+      (*_dgrads_qp_dv)[_qp][0][_p0var] = d2s_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
+      (*_dgrads_qp_dgradv)[_qp][1][_p0var] = -ds;
+      (*_dgrads_qp_dv)[_qp][1][_p0var] = -d2s_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
     }
     if (_dictator.isPorousFlowVariable(_phase1_porepressure_varnum))
     {
-      (*_dgrads_qp_dgradv)[_qp][0][_p1var] = -dseff;
-      (*_dgrads_qp_dv)[_qp][0][_p1var] =
-          -d2seff_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
-      (*_dgrads_qp_dgradv)[_qp][1][_p1var] = dseff;
-      (*_dgrads_qp_dv)[_qp][1][_p1var] =
-          d2seff_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
+      (*_dgrads_qp_dgradv)[_qp][0][_p1var] = -ds;
+      (*_dgrads_qp_dv)[_qp][0][_p1var] = -d2s_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
+      (*_dgrads_qp_dgradv)[_qp][1][_p1var] = ds;
+      (*_dgrads_qp_dv)[_qp][1][_p1var] = d2s_qp * (_phase0_gradp_qp[_qp] - _phase1_gradp_qp[_qp]);
     }
   }
 }
@@ -138,8 +134,8 @@ PorousFlow2PhasePP::buildQpPPSS()
   _porepressure[_qp][0] = _phase0_porepressure[_qp];
   _porepressure[_qp][1] = _phase1_porepressure[_qp];
   const Real pc = _phase0_porepressure[_qp] - _phase1_porepressure[_qp]; // this is <= 0
-  const Real seff = _pc_uo.effectiveSaturation(pc);
-  _saturation[_qp][0] = seff;
-  _saturation[_qp][1] = 1.0 - seff;
+  const Real sat = _pc_uo.saturation(pc);
+  _saturation[_qp][0] = sat;
+  _saturation[_qp][1] = 1.0 - sat;
   return pc;
 }

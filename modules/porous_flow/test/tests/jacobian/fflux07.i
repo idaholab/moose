@@ -166,12 +166,16 @@
     at_nodes = true
     n = 2
     phase = 0
+    s_res = 0.1
+    sum_s_res = 0.1
   [../]
   [./relperm1]
     type = PorousFlowRelativePermeabilityCorey
     at_nodes = true
     n = 3
     phase = 1
+    s_res = 0.0
+    sum_s_res = 0.1
   [../]
 []
 
