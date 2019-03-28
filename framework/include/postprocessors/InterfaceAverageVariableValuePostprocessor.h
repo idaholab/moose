@@ -10,7 +10,7 @@
 #ifndef INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H
 #define INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H
 
-#include "InterfaceIntegralVariablePostprocessor.h"
+#include "InterfaceIntegralVariableValuePostprocessor.h"
 
 // Forward Declarations
 class InterfaceAverageVariableValuePostprocessor;
@@ -18,26 +18,17 @@ class InterfaceAverageVariableValuePostprocessor;
 template <>
 InputParameters validParams<InterfaceAverageVariableValuePostprocessor>();
 
-/**
- * This postprocessor computes a volume integral of the specified variable.
- *
- * Note that specializations of this integral are possible by deriving from this
- * class and overriding computeQpIntegral().
+/*
+ * This postprocessor computes a spatial average value of the specified variable value on the
+ * interface. Different kind of averages may be obtaine either by specializing the computeQpIntegral
+ * or adding a new type of interfaceValue to InterfaceValueTools class
  */
-class InterfaceAverageVariableValuePostprocessor : public InterfaceIntegralVariablePostprocessor
+class InterfaceAverageVariableValuePostprocessor
+  : public InterfaceIntegralVariableValuePostprocessor
 {
 public:
   InterfaceAverageVariableValuePostprocessor(const InputParameters & parameters);
-
-  virtual void initialize() override;
-  virtual void execute() override;
   virtual Real getValue() override;
-  virtual void threadJoin(const UserObject & y) override;
-
-protected:
-  // const MooseEnum _interface_value_type;
-  Real _volume;
-  // virtual Real computeQpIntegral() override;
 };
 
 #endif /*INTERFACEAVERAGEVARIABLEVALUEPOSTPROCESSOR_H*/

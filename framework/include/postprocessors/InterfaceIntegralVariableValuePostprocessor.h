@@ -14,22 +14,22 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
-class InterfaceIntegralVariablePostprocessor;
+class InterfaceIntegralVariableValuePostprocessor;
 
 template <>
-InputParameters validParams<InterfaceIntegralVariablePostprocessor>();
+InputParameters validParams<InterfaceIntegralVariableValuePostprocessor>();
 
 /**
- * This postprocessor computes a weighted integral of the specified variable.
- *
+ * This postprocessor computes a weighted (by area) integral of the specified variable.
+ * The type of integral is determined by the _interface_value_type input parameter
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class InterfaceIntegralVariablePostprocessor : public InterfaceIntegralPostprocessor,
-                                               public MooseVariableInterface<Real>
+class InterfaceIntegralVariableValuePostprocessor : public InterfaceIntegralPostprocessor,
+                                                    public MooseVariableInterface<Real>
 {
 public:
-  InterfaceIntegralVariablePostprocessor(const InputParameters & parameters);
+  InterfaceIntegralVariableValuePostprocessor(const InputParameters & parameters);
   // virtual void initialize() override;
   // virtual void execute() override;
   // virtual Real getValue() override;

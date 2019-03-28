@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InterfaceIntegralVariablePostprocessor.h"
+#include "InterfaceIntegralVariableValuePostprocessor.h"
 #include "InterfaceValueTools.h"
 
-registerMooseObject("MooseApp", InterfaceIntegralVariablePostprocessor);
+registerMooseObject("MooseApp", InterfaceIntegralVariableValuePostprocessor);
 
 template <>
 InputParameters
-validParams<InterfaceIntegralVariablePostprocessor>()
+validParams<InterfaceIntegralVariableValuePostprocessor>()
 {
   InputParameters params = validParams<InterfaceIntegralPostprocessor>();
 
@@ -30,7 +30,7 @@ validParams<InterfaceIntegralVariablePostprocessor>()
   return params;
 }
 
-InterfaceIntegralVariablePostprocessor::InterfaceIntegralVariablePostprocessor(
+InterfaceIntegralVariableValuePostprocessor::InterfaceIntegralVariableValuePostprocessor(
     const InputParameters & parameters)
   : InterfaceIntegralPostprocessor(parameters),
     MooseVariableInterface<Real>(this,
@@ -52,35 +52,7 @@ InterfaceIntegralVariablePostprocessor::InterfaceIntegralVariablePostprocessor(
 }
 
 Real
-InterfaceIntegralVariablePostprocessor::computeQpIntegral()
+InterfaceIntegralVariableValuePostprocessor::computeQpIntegral()
 {
   return InterfaceValueTools::getQuantity(_interface_value_type, _u[_qp], _u_neighbor[_qp]);
 }
-
-// void
-// InterfaceIntegralVariablePostprocessor::initialize()
-// {
-//   InterfaceIntegralPostprocessor::initialize();
-// }
-
-// void
-// InterfaceIntegralVariablePostprocessor::execute()
-// {
-//   InterfaceIntegralPostprocessor::execute();
-// }
-
-// Real
-// InterfaceIntegralVariablePostprocessor::getValue()
-// {
-//   Real integral = InterfaceIntegralPostprocessor::getValue();
-//   return integral;
-// }
-//
-// void
-// InterfaceIntegralVariablePostprocessor::threadJoin(const UserObject & y)
-// {
-//   InterfaceIntegralPostprocessor::threadJoin(y);
-//   // const InterfaceIntegralVariablePostprocessor & pps =
-//   //     static_cast<const InterfaceIntegralVariablePostprocessor &>(y);
-//   // _volume += pps._volume;
-// }

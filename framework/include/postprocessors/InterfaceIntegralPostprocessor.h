@@ -21,7 +21,7 @@ InputParameters validParams<InterfaceIntegralPostprocessor>();
 /**
  * This postprocessor add generel capabilities to the InterfacePostprocessor to compute an
  * integral over an interface. To actually compute an integral one must derive from this class,
- * specialize computeQpIntegral() and give acces to either a varaible or a material property
+ * specialize computeQpIntegral() and give access to either a varaible or a material property
  **/
 class InterfaceIntegralPostprocessor : public InterfacePostprocessor
 {

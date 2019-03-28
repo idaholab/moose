@@ -1,10 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 4
-  xmax = 4
-  ny = 6
-  ymax = 4
+  nx = 6
+  xmax = 3
+  ny = 9
+  ymax = 3
   elem_type = QUAD4
 []
 
@@ -12,7 +12,7 @@
   [./subdomain_id]
     type = SubdomainBoundingBox
     bottom_left = '0 0 0'
-    top_right = '1 1 0'
+    top_right = '2 1 0'
     block_id = 1
     [../]
   [./interface]

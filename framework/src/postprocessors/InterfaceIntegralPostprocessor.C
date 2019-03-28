@@ -30,18 +30,21 @@ InterfaceIntegralPostprocessor::InterfaceIntegralPostprocessor(const InputParame
 void
 InterfaceIntegralPostprocessor::initialize()
 {
+  InterfacePostprocessor::initialize();
   _integral_value = 0;
 }
 
 void
 InterfaceIntegralPostprocessor::execute()
 {
+  InterfacePostprocessor::execute();
   _integral_value += computeIntegral();
 }
 
 Real
 InterfaceIntegralPostprocessor::getValue()
 {
+  InterfacePostprocessor::getValue();
   gatherSum(_integral_value);
   return _integral_value;
 }
@@ -49,6 +52,7 @@ InterfaceIntegralPostprocessor::getValue()
 void
 InterfaceIntegralPostprocessor::threadJoin(const UserObject & y)
 {
+  InterfacePostprocessor::threadJoin(y);
   const InterfaceIntegralPostprocessor & pps =
       static_cast<const InterfaceIntegralPostprocessor &>(y);
   _integral_value += pps._integral_value;

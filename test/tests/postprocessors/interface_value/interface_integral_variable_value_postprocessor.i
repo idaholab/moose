@@ -1,10 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 4
-  xmax = 2
-  ny = 6
-  ymax = 2
+  nx = 6
+  xmax = 3
+  ny = 9
+  ymax = 3
   elem_type = QUAD4
 []
 
@@ -12,7 +12,7 @@
   [./subdomain_id]
     type = SubdomainBoundingBox
     bottom_left = '0 0 0'
-    top_right = '1 1 0'
+    top_right = '2 1 0'
     block_id = 1
     [../]
   [./interface]
@@ -107,7 +107,7 @@
 
 [Postprocessors]
   [./diffusivity_average]
-    type = InterfaceIntegralVariablePostprocessor
+    type = InterfaceIntegralVariableValuePostprocessor
     interface_value_type = average
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -115,7 +115,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_master_slave]
-    type = InterfaceIntegralVariablePostprocessor
+    type = InterfaceIntegralVariableValuePostprocessor
     interface_value_type = jump_master_minus_slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -123,7 +123,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_slave_master]
-    type = InterfaceIntegralVariablePostprocessor
+    type = InterfaceIntegralVariableValuePostprocessor
     interface_value_type = jump_slave_minus_master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -131,7 +131,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_jump_abs]
-    type = InterfaceIntegralVariablePostprocessor
+    type = InterfaceIntegralVariableValuePostprocessor
     interface_value_type = jump_abs
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -139,7 +139,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_master]
-    type = InterfaceIntegralVariablePostprocessor
+    type = InterfaceIntegralVariableValuePostprocessor
     interface_value_type = master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
@@ -147,7 +147,7 @@
     boundary = 'interface'
   [../]
   [./diffusivity_slave]
-    type = InterfaceIntegralVariablePostprocessor
+    type = InterfaceIntegralVariableValuePostprocessor
     interface_value_type = slave
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
