@@ -26,6 +26,7 @@
 
 registerMooseAction("MooseApp", AdaptivityAction, "setup_adaptivity");
 registerMooseAction("MooseApp", AdaptivityAction, "add_geometric_rm");
+registerMooseAction("MooseApp", AdaptivityAction, "add_algebraic_rm");
 
 template <>
 InputParameters
@@ -85,27 +86,63 @@ AdaptivityAction::AdaptivityAction(InputParameters params) : Action(params) {}
 void
 AdaptivityAction::act()
 {
+  // Here we are going to mostly mimic the default ghosting in libmesh
+  // By default libmesh adds:
+  // 1) GhostPointNeighbors on the mesh
+  // 2) DefaultCoupling with 1 layer as an algebraic ghosting functor on the dof_map, which also
+  //    gets added to the mesh at the time a new System is added
+  // 3) DefaultCoupling with 0 layers as a coupling functor on the dof_map, which also gets added to
+  //    the mesh at the time a new System is added
+  //
+  // What we will do differently is:
+  // - The 3rd ghosting functor adds nothing so we will not add it at all
 
-  if (_current_task == "add_geometric_rm")
+  if (_current_task == "add_algebraic_rm")
   {
     auto rm_params = _factory.getValidParams("ElementSideNeighborLayers");
 
     rm_params.set<std::string>("for_whom") = "Adaptivity";
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
     rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC;
+        Moose::RelationshipManagerType::ALGEBRAIC;
 
     if (rm_params.areAllRequiredParamsValid())
     {
       auto rm_obj = _factory.create<RelationshipManager>(
-          "ElementSideNeighborLayers", "adaptivity_ghosting", rm_params);
+          "ElementSideNeighborLayers", "adaptivity_algebraic_ghosting", rm_params);
 
+      // Delete the resources created on behalf of the RM if it ends up not being added to the
+      // App.
       if (!_app.addRelationshipManager(rm_obj))
         _factory.releaseSharedObjects(*rm_obj);
     }
     else
       mooseError("Invalid initialization of ElementSideNeighborLayers");
   }
+
+  else if (_current_task == "add_geometric_rm")
+  {
+    auto rm_params = _factory.getValidParams("MooseGhostPointNeighbors");
+
+    rm_params.set<std::string>("for_whom") = "Adaptivity";
+    rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::GEOMETRIC;
+
+    if (rm_params.areAllRequiredParamsValid())
+    {
+      auto rm_obj = _factory.create<RelationshipManager>(
+          "MooseGhostPointNeighbors", "adaptivity_geometric_ghosting", rm_params);
+
+      // Delete the resources created on behalf of the RM if it ends up not being added to the
+      // App.
+      if (!_app.addRelationshipManager(rm_obj))
+        _factory.releaseSharedObjects(*rm_obj);
+    }
+    else
+      mooseError("Invalid initialization of MooseGhostPointNeighbors");
+  }
+
   else if (_current_task == "setup_adaptivity")
   {
     NonlinearSystemBase & system = _problem->getNonlinearSystemBase();

@@ -175,7 +175,7 @@ addActionTypes(Syntax & syntax)
 
   registerTask("init_displaced_problem", false);
 
-  registerTask("add_algebraic_rm", true);
+  registerTask("add_algebraic_rm", false);
   registerTask("attach_algebraic_rm", true);
   registerTask("init_problem", true);
   registerTask("check_copy_nodal_vars", true);
