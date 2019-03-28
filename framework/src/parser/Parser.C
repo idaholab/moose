@@ -751,7 +751,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
           moose_obj_params.set<std::string>("type") = obj_name;
 
           auto lineinfo = _factory.getLineInfo(moose_obj->first);
-          std::string classname = _factory.associatedClassName(obj_name);
+          std::string classname = _factory.associatedClassName(moose_obj->first);
           root.addParameters(act_name,
                              name,
                              is_type,
