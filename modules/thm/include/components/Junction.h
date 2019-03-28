@@ -22,7 +22,7 @@ InputParameters validParams<Junction>();
  * may be found to be false; in this case, a special IC will need to be written
  * for this variable. An auxiliary computation gives the stagnation enthalpy of
  * the junction. These junction quantities may appear in the boundary flux for a
- * given connected pipe, depending on flow conditions.
+ * given connected flow channel, depending on flow conditions.
  */
 class Junction : public FlowJunction
 {

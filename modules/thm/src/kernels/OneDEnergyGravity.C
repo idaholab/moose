@@ -14,8 +14,8 @@ validParams<OneDEnergyGravity>()
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A");
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
 
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity property");

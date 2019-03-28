@@ -160,7 +160,7 @@ HeatStructure::usingSecondOrderMesh() const
 void
 HeatStructure::build2DMesh()
 {
-  // loop on pipe nodes to create heat structure nodes
+  // loop on flow channel nodes to create heat structure nodes
   unsigned int n_layers = _node_locations.size();
   _node_ids.resize(n_layers);
 
@@ -226,7 +226,7 @@ HeatStructure::build2DMesh()
 void
 HeatStructure::build2DMesh2ndOrder()
 {
-  // loop on pipe nodes to create heat structure nodes
+  // loop on flow channel nodes to create heat structure nodes
   unsigned int n_layers = _node_locations.size();
   _node_ids.resize(n_layers);
 

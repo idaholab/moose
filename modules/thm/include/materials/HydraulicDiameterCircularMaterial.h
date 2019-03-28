@@ -9,7 +9,7 @@ template <>
 InputParameters validParams<HydraulicDiameterCircularMaterial>();
 
 /**
- * Computes hydraulic diameter for a circular pipe
+ * Computes hydraulic diameter for a circular flow channel
  */
 class HydraulicDiameterCircularMaterial : public Material
 {

@@ -29,7 +29,7 @@ protected:
    */
   const BoundaryName & getMasterSideName() const;
   /**
-   * Gets the "slave side" (pipe) nodeset name for this connection
+   * Gets the "slave side" (flow channel) nodeset name for this connection
    *
    * @return The nodeset name for the slave side
    */

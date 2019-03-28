@@ -21,7 +21,7 @@ protected:
 
   const VariableGradient & _velocity_grad;
   Real _cl;
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 
   MaterialProperty<Real> & _coef;

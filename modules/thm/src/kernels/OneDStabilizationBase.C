@@ -15,8 +15,8 @@ validParams<OneDStabilizationBase>()
   // The velocity aux's gradient is required if we need to do Lapidus
   params.addRequiredCoupledVar("vel", "x-velocity");
 
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("SUPG_delta",
                                                 "Stabilization delta material property");
   params.addRequiredParam<MaterialPropertyName>("SUPG_R",

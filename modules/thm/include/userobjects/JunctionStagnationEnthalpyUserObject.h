@@ -11,7 +11,7 @@ InputParameters validParams<JunctionStagnationEnthalpyUserObject>();
 
 /**
  * Computes the stagnation enthalpy associated with a junction, as well as its
- * derivatives associated with degrees of freedom on each of the connected pipes.
+ * derivatives associated with degrees of freedom on each of the connected flow channels.
  */
 class JunctionStagnationEnthalpyUserObject
   : public DerivativeMaterialInterfaceTHM<FlowJunctionUserObject>

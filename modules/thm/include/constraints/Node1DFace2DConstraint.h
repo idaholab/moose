@@ -9,7 +9,7 @@ template <>
 InputParameters validParams<Node1DFace2DConstraint>();
 
 /**
- * Base class for constraints between 1D pipe and 2D heat structures
+ * Base class for constraints between 1D flow channel and 2D heat structures
  */
 class Node1DFace2DConstraint : public NodeFaceConstraint
 {

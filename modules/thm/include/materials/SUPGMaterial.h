@@ -130,7 +130,7 @@ protected:
   // Gradients of aux variables
   const VariableGradient & _grad_area;
 
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
   /// Gravitational acceleration vector
   const RealVectorValue & _gravity_vector;

@@ -9,7 +9,7 @@ template <>
 InputParameters validParams<FlowConnection>();
 
 /**
- * Base class for components that connect to pipes (junctions and boundaries)
+ * Base class for components that connect to flow channels (junctions and boundaries)
  */
 class FlowConnection : public Component
 {
@@ -55,9 +55,9 @@ public:
   const std::vector<Connection> & getConnections() const { return _connections; }
 
   /**
-   * Returns a list of names of pipes that are connected to this component
+   * Returns a list of names of flow channels that are connected to this component
    *
-   * @returns list of names of pipes that are connected to this component
+   * @returns list of names of flow channels that are connected to this component
    */
   const std::vector<std::string> & getConnectedComponentNames() const
   {
@@ -135,15 +135,15 @@ protected:
   void checkAllConnectionsHaveSame(const std::vector<T> & objects,
                                    const std::string & description) const;
 
-  /// Physical positions of connected pipes
+  /// Physical positions of connected flow channels
   std::vector<Point> _positions;
-  /// Boundary node IDs from connected pipes
+  /// Boundary node IDs from connected flow channels
   std::vector<dof_id_type> _nodes;
-  /// Boundary IDs of connected pipes
+  /// Boundary IDs of connected flow channels
   std::vector<unsigned int> _boundary_ids;
-  /// Boundary names of connected pipes
+  /// Boundary names of connected flow channels
   std::vector<BoundaryName> _boundary_names;
-  /// Outward normals associated with connected pipes
+  /// Outward normals associated with connected flow channels
   std::vector<Real> _normals;
 
   /// Convenience variable that stores model type

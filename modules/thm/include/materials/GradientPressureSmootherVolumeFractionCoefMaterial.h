@@ -40,7 +40,7 @@ protected:
   const Real _p_ref;
 
   const bool _use_low_mach_fix;
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 
   MaterialProperty<Real> & _coef;

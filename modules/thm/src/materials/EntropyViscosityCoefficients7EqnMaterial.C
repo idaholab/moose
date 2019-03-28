@@ -56,8 +56,8 @@ validParams<EntropyViscosityCoefficients7EqnMaterial>()
       "norm_param", "The name of the userobject used to compute the normalization parameter.");
   // Pps
   params.addRequiredParam<PostprocessorName>("vf_PPS_name", "pps for volume fraction");
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>(
       "c", "The name of material property that hold sound speed for this phase");
   params.addRequiredParam<MaterialPropertyName>("vel_int",

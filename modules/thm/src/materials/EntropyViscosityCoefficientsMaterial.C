@@ -34,8 +34,8 @@ validParams<EntropyViscosityCoefficientsMaterial>()
   params.addCoupledVar("jump_pressure", "variable storing the jump of the pressure.");
   params.addCoupledVar("jump_density", "variable storing the jump of the density.");
 
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("c", "Sound speed material property");
 
   // UserObjects

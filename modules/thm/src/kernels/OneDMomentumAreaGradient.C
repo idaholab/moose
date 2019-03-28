@@ -12,8 +12,8 @@ validParams<OneDMomentumAreaGradient>()
   params.addRequiredCoupledVar("arhoEA", "The total energy of the kth phase");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   return params;

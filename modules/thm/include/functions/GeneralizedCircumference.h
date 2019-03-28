@@ -19,8 +19,8 @@ InputParameters validParams<GeneralizedCircumference>();
  * H_w * sigma_w * (T - T_w)
  *
  * for the variable-area equations.  This class currently assumes a
- * circular pipe, but this could later be generalized for any type of
- * pipe cross section.  For a circular pipe, the generalized
+ * circular flow channel, but this could later be generalized for any type of
+ * flow channel cross section.  For a circular flow channel, the generalized
  * circumference can be shown to be:
  *
  * sigma_w = sqrt(4*pi*A + (dA/dx)^2)

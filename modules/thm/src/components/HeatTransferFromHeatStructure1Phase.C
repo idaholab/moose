@@ -63,13 +63,14 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   const HeatStructure & hs = getComponentByName<HeatStructure>(_hs_name);
-  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+  const FlowChannel1Phase & flow_channel =
+      getComponentByName<FlowChannel1Phase>(_flow_channel_name);
 
   const UserObjectName heat_flux_uo_name = genName(name(), "heat_flux_uo");
   {
     const std::string class_name = "HeatFluxFromHeatStructure3EqnUserObject";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = pipe.getSubdomainNames();
+    params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
     params.set<std::vector<BoundaryName>>("slave_boundary") = {getSlaveSideName()};
     params.set<BoundaryName>("master_boundary") = getMasterSideName();
     params.set<std::vector<VariableName>>("T_wall") = {_T_wall_name};
@@ -86,7 +87,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
   {
     const std::string class_name = "OneD3EqnEnergyHeatFlux";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = pipe.getSubdomainNames();
+    params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
@@ -112,7 +113,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     _sim.addBoundaryCondition(class_name, genName(name(), "heat_flux_bc"), params);
   }
 
-  // Transfer the temperature of the solid onto the pipe
+  // Transfer the temperature of the solid onto the flow channel
   {
     std::string class_name = "VariableValueTransferAux";
     InputParameters params = _factory.getValidParams(class_name);
@@ -144,6 +145,7 @@ HeatTransferFromHeatStructure1Phase::getMasterSideName() const
 const BoundaryName &
 HeatTransferFromHeatStructure1Phase::getSlaveSideName() const
 {
-  const FlowChannel1Phase & pipe = getComponentByName<FlowChannel1Phase>(_flow_channel_name);
-  return pipe.getNodesetName();
+  const FlowChannel1Phase & flow_channel =
+      getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+  return flow_channel.getNodesetName();
 }

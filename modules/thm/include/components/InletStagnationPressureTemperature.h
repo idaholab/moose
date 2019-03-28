@@ -9,7 +9,7 @@ template <>
 InputParameters validParams<InletStagnationPressureTemperature>();
 
 /**
- * Boundary condition with prescribed stagnation pressure and temperature for pipes
+ * Boundary condition with prescribed stagnation pressure and temperature for flow channels
  */
 class InletStagnationPressureTemperature : public FlowBoundary
 {

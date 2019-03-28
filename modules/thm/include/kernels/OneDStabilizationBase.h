@@ -82,7 +82,7 @@ protected:
   /// The gradient of the coupled velocity aux
   const VariableGradient & _grad_vel;
 
-  /// The direction of the pipe
+  /// The direction of the flow channel
   const MaterialProperty<RealVectorValue> & _dir;
 };
 

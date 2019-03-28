@@ -9,7 +9,8 @@ InputParameters
 validParams<FlowChannel>()
 {
   InputParameters params = validParams<FlowChannelBase>();
-  params.addRequiredParam<FunctionName>("A", "Area of the pipe, can be a constant or a function");
+  params.addRequiredParam<FunctionName>(
+      "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "roughness, [m]");
   params.addParam<FunctionName>("f", "Wall friction");
   params.addParam<MaterialPropertyName>("f_2phase_mult_liquid",
@@ -28,22 +29,23 @@ validParams<FlowChannel>()
                              "Convective heat transfer geometry");
   params.addParam<Real>("PoD", 1, "pitch to diameter ratio for parallel bundle heat transfer");
 
-  params.addParam<FunctionName>("initial_p", "Initial pressure in the pipe");
+  params.addParam<FunctionName>("initial_p", "Initial pressure in the flow channel");
   params.addParam<FunctionName>("initial_p_liquid",
-                                "Initial pressure in the pipe for the liquid phase");
+                                "Initial pressure in the flow channel for the liquid phase");
   params.addParam<FunctionName>("initial_p_vapor",
-                                "Initial pressure in the pipe for the vapor phase");
-  params.addParam<FunctionName>("initial_vel", "Initial velocity in the pipe");
+                                "Initial pressure in the flow channel for the vapor phase");
+  params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel");
   params.addParam<FunctionName>("initial_vel_liquid",
-                                "Initial velocity in the pipe for the liquid phase");
+                                "Initial velocity in the flow channel for the liquid phase");
   params.addParam<FunctionName>("initial_vel_vapor",
-                                "Initial velocity in the pipe for the vapor phase");
-  params.addParam<FunctionName>("initial_T", "Initial temperature in the pipe");
+                                "Initial velocity in the flow channel for the vapor phase");
+  params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel");
   params.addParam<FunctionName>("initial_T_liquid",
-                                "Initial temperature in the pipe for the liquid phase");
+                                "Initial temperature in the flow channel for the liquid phase");
   params.addParam<FunctionName>("initial_T_vapor",
-                                "Initial temperature in the pipe for the vapor phase");
-  params.addParam<FunctionName>("initial_alpha_vapor", "Initial vapor volume fraction in the pipe");
+                                "Initial temperature in the flow channel for the vapor phase");
+  params.addParam<FunctionName>("initial_alpha_vapor",
+                                "Initial vapor volume fraction in the flow channel");
   params.addParam<std::vector<FunctionName>>("initial_x_ncgs",
                                              "Initial non-condensable gas mass fractions, if any");
 

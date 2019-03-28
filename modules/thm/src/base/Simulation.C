@@ -112,12 +112,13 @@ Simulation::identifyLoops()
   // loop over junctions and boundaries (non-geometrical components)
   for (const auto & component : _components)
   {
-    const auto pipe_connectable_component =
+    const auto flow_connection =
         MooseSharedNamespace::dynamic_pointer_cast<FlowConnection>(component);
-    if (pipe_connectable_component)
+    if (flow_connection)
     {
-      // create vector of names of this component and its connected pipes, and then sort them
-      std::vector<std::string> names = pipe_connectable_component->getConnectedComponentNames();
+      // create vector of names of this component and its connected flow channels, and then sort
+      // them
+      std::vector<std::string> names = flow_connection->getConnectedComponentNames();
       names.push_back(component->name());
       std::sort(names.begin(), names.end());
 
@@ -167,7 +168,7 @@ Simulation::identifyLoops()
   // fill the map of loop name to model ID
   for (const auto & loop : loops)
   {
-    // find a pipe in this loop and get its model ID
+    // find a flow channel in this loop and get its model ID
     THM::FlowModelID model_id;
     bool found_model_id = false;
     for (const auto & component : _components)
@@ -673,16 +674,16 @@ Simulation::integrityCheck() const
       flow_channels.push_back(flow_channel);
   }
 
-  // initialize number of connected pipe inlets and outlets to zero
-  std::map<std::string, unsigned int> pipe_inlets;
-  std::map<std::string, unsigned int> pipe_outlets;
+  // initialize number of connected flow channel inlets and outlets to zero
+  std::map<std::string, unsigned int> flow_channel_inlets;
+  std::map<std::string, unsigned int> flow_channel_outlets;
   for (auto && comp : flow_channels)
   {
-    pipe_inlets[comp->name()] = 0;
-    pipe_outlets[comp->name()] = 0;
+    flow_channel_inlets[comp->name()] = 0;
+    flow_channel_outlets[comp->name()] = 0;
   }
 
-  // mark connections of any pipe-connectable components
+  // mark connections of any FlowConnection components
   for (const auto & comp : _components)
   {
     auto pc_comp = dynamic_cast<FlowConnection *>(comp.get());
@@ -691,24 +692,24 @@ Simulation::integrityCheck() const
       for (const auto & connection : pc_comp->getConnections())
       {
         if (connection._end_type == FlowConnection::IN)
-          pipe_inlets[connection._geometrical_component_name]++;
+          flow_channel_inlets[connection._geometrical_component_name]++;
         else if (connection._end_type == FlowConnection::OUT)
-          pipe_outlets[connection._geometrical_component_name]++;
+          flow_channel_outlets[connection._geometrical_component_name]++;
       }
     }
   }
 
-  // finally, check that each pipe has exactly one input and one output
+  // finally, check that each flow channel has exactly one input and one output
   for (auto && comp : flow_channels)
   {
-    if (pipe_inlets[comp->name()] == 0)
+    if (flow_channel_inlets[comp->name()] == 0)
       logError("Component '", comp->name(), "' does not have connected inlet.");
-    else if (pipe_inlets[comp->name()] > 1)
+    else if (flow_channel_inlets[comp->name()] > 1)
       logError("Multiple inlets specified for component '", comp->name(), "'.");
 
-    if (pipe_outlets[comp->name()] == 0)
+    if (flow_channel_outlets[comp->name()] == 0)
       logError("Component '", comp->name(), "' does not have connected outlet.");
-    else if (pipe_outlets[comp->name()] > 1)
+    else if (flow_channel_outlets[comp->name()] > 1)
       logError("Multiple outlets specified for component '", comp->name(), "'.");
   }
 

@@ -35,8 +35,8 @@ validParams<SUPGMaterial>()
 
   // Required parameters
   params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravitational acceleration vector");
-  params.addRequiredParam<MaterialPropertyName>("direction",
-                                                "The direction of the pipe material property");
+  params.addRequiredParam<MaterialPropertyName>(
+      "direction", "The direction of the flow channel material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure material property");
 
   // These parameters are only required if the energy equation is active

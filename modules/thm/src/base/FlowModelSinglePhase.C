@@ -265,7 +265,7 @@ FlowModelSinglePhase::addMooseObjects()
     _sim.addKernel(class_name, Component::genName(_comp_name, "rho_if", _raw_suffix), params);
   }
 
-  // Momentum equation, for 1-D pipe, x-momentum equation only
+  // Momentum equation, for 1-D flow channel, x-momentum equation only
   // (transient term + remaining terms[advection, pressure, body force, etc])
   {
     std::string class_name = "TimeDerivative";
