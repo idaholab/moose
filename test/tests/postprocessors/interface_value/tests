@@ -1,5 +1,5 @@
 [Tests]
-  [./interface_average_value_postprocessor_test]
+  [./interface_average_variable_value_postprocessor_test]
     type = 'Exodiff'
     input = 'interface_average_variable_value_postprocessor.i'
     exodiff = 'interface_average_variable_value_postprocessor_out.e'
@@ -15,7 +15,7 @@
     issues = '#11647'
     max_threads = 2
   [../]
-  [./interface_integral_value_postprocessor_test]
+  [./interface_integral_variable_value_postprocessor_test]
     type = 'Exodiff'
     input = 'interface_integral_variable_value_postprocessor.i'
     exodiff = 'interface_integral_variable_value_postprocessor_out.e'
