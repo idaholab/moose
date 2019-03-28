@@ -2,13 +2,16 @@
 
 ## Description
 
-InterfaceValueUserObjectAux is an AuxKernel used to collect average value collected on the interface via [InterfaceValueUO_QP](/InterfaceValueUO_QP.md) and save them into an aux variable at each quadrature point.
+InterfaceValueUserObjectAux is an AuxKernel used to collect values stored in a [InterfaceValueUO_QP](/InterfaceValueUO_QP.md) and save them into an aux variable at each quadrature point.
+It requires three inputs:
 
-where value_m is the value on the master side of the interface (e.g. where the boundary is defined) and value_s is the value on the slave side of the interface.
+* `variable` is the name of the output AuxVariable
+* `boundary` = the name of the boundary to which this AuxKernel applies
+* `interface_uo_name` = the name of interface UserObject where data are stored
 
 ## Example Input File Syntax
 
-listing test/tests/userobjects/interface_user_object/interface_user_object_QP.i block=AuxKernels/interface_avg_qp_aux
+listing test/tests/userobjects/interface_user_object/interface_value_user_object_QP.i block=AuxKernels/interface_avg_qp_aux
 
 !syntax description /AuxKernels/InterfaceValueUserObjectAux
 

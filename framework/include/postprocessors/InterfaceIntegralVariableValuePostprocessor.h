@@ -30,10 +30,6 @@ class InterfaceIntegralVariableValuePostprocessor : public InterfaceIntegralPost
 {
 public:
   InterfaceIntegralVariableValuePostprocessor(const InputParameters & parameters);
-  // virtual void initialize() override;
-  // virtual void execute() override;
-  // virtual Real getValue() override;
-  // virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Holds the solution at current quadrature points

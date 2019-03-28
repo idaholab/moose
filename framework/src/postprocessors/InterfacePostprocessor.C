@@ -41,7 +41,6 @@ InterfacePostprocessor::execute()
 void
 InterfacePostprocessor::threadJoin(const UserObject & y)
 {
-  // InterfacePostprocessor::threadJoin(y);
   const InterfacePostprocessor & pps = static_cast<const InterfacePostprocessor &>(y);
   _interface_master_area += pps._interface_master_area;
 }

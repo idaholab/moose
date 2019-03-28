@@ -18,7 +18,7 @@ class InterfaceAverageVariableValuePostprocessor;
 template <>
 InputParameters validParams<InterfaceAverageVariableValuePostprocessor>();
 
-/*
+/**
  * This postprocessor computes a spatial average value of the specified variable value on the
  * interface. Different kind of averages may be obtaine either by specializing the computeQpIntegral
  * or adding a new type of interfaceValue to InterfaceValueTools class

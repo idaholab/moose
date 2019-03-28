@@ -39,7 +39,7 @@
 []
 
 [UserObjects]
-  [./interface_average_uo]
+  [./interface_value_uo]
     type = InterfaceValueUO_QP
     var = diffusivity_1
     var_neighbor = diffusivity_2
@@ -149,7 +149,7 @@
     type = InterfaceValueUserObjectAux
     variable = avg_qp
     boundary = 'interface'
-    interface_uo_name = interface_average_uo
+    interface_uo_name = interface_value_uo
   []
   [./interface_master_minus_slave_qp_aux]
     type = InterfaceValueUserObjectAux

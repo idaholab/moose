@@ -18,6 +18,7 @@ validParams<InterfaceValueUserObjectAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("interface_uo_name",
                                           "The name of the interface user object to use");
+  params.addClassDescription("Get stored value from the specified InterfaceValueUO_QP.");
 
   return params;
 }

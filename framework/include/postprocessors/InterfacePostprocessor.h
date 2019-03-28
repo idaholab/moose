@@ -16,7 +16,7 @@
 // Forward Declarations
 class InterfacePostprocessor;
 
-/*
+/**
  * BASE CLASS FOR IMPLEMENTING INTERFACE POSTRPOCESSOR
  * ALL INTERFACE POSTPROCESOR SHOULD DERIVE FROM THIS CLASS
  * THIS CALSS ALASO COMPUTE THE INTERFACE AREA
@@ -49,8 +49,6 @@ public:
 
   // becasue getValue already does the work we just override to nothing
   virtual void finalize() override {}
-
-  // virtual void finalize() override { gatherSum(_interface_master_area); }
 
 protected:
   /// the area of the master side of the interface
