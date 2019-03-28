@@ -18,7 +18,9 @@ template <>
 InputParameters validParams<InterfaceValueUO_QP>();
 
 /**
- *
+ * This userobject collect values of a variable across an interface for each QP and compute a
+ * scalar. The computed scalar value depends on the given parameter _interface_value_type\
+ * _interface_value_type (see IntervafeValueTools).
  */
 class InterfaceValueUO_QP : public InterfaceValueUserObject
 {
@@ -34,8 +36,7 @@ public:
   Real getQpValue(dof_id_type elem, unsigned int side, unsigned int qp) const;
 
 protected:
-  /// this map is used for storing data at QPs.
-  /// keys<element_id, side_id>, values<vector (1 elem_per_QP)<vector<Real (_mean_mat_prop, _var_jump)>>>
+  /// this map is used to store QP data.
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
   const VariableValue & _u;
   const VariableValue & _u_neighbor;

@@ -14,3 +14,11 @@ The stored value can be converted into an AuxVariable by using [InterfaceValueUs
 ## Example Input File Syntax
 
 listing test/tests/userobjects/interface_user_object/interface_user_object_QP.i block=UserObjects/interface_average_uo
+
+!syntax description /UserObjects/InterfaceValueUO_QP
+
+!syntax parameters /UserObjects/InterfaceValueUO_QP
+
+!syntax inputs /UserObjects/InterfaceValueUO_QP
+
+!syntax children /UserObjects/InterfaceValueUO_QP

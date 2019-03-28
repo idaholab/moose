@@ -9,7 +9,7 @@
 
 #include "InterfaceValueUserObjectAux.h"
 
-registerMooseObject("MooseTestApp", InterfaceValueUserObjectAux);
+registerMooseObject("MooseApp", InterfaceValueUserObjectAux);
 
 template <>
 InputParameters

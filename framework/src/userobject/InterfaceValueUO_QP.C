@@ -9,7 +9,7 @@
 
 #include "InterfaceValueUO_QP.h"
 #include "MooseMesh.h"
-registerMooseObject("MooseTestApp", InterfaceValueUO_QP);
+registerMooseObject("MooseApp", InterfaceValueUO_QP);
 
 template <>
 InputParameters
