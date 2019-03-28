@@ -80,7 +80,7 @@
     m = 0.5
     alpha = 1
     pc_max = 10
-    sat_lr = 0.1
+    sat_lr = 0.01
   [../]
 []
 

@@ -129,11 +129,15 @@
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
+    s_res = 0.1
+    sum_s_res = 0.1
   [../]
   [./relperm1_qp]
     type = PorousFlowRelativePermeabilityCorey
     n = 3
     phase = 1
+    s_res = 0.0
+    sum_s_res = 0.1
   [../]
   [./darcy_velocity_qp]
     type = PorousFlowDarcyVelocityMaterial
