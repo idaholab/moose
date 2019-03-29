@@ -3,5 +3,17 @@
     type = 'Exodiff'
     input = 'coupled_time_derivative_test.i'
     exodiff = 'coupled_time_derivative_test_out.e'
+    issues = '#9786'
+    design = '/CoupledTimeDerivative.md'
+    requirement = 'A coupled time derivative kernel shall be provided'
+  [../]
+  [./adtestdirichlet]
+    type = 'Exodiff'
+    input = 'ad_coupled_time_derivative_test.i'
+    exodiff = 'coupled_time_derivative_test_out.e'
+    prereq = testdirichlet
+    issues = '#13138'
+    design = '/ADCoupledTimeDerivative.md'
+    requirement = 'A coupled time derivative kernel with forward mode automatic differentiation shall be provided'
   [../]
 []

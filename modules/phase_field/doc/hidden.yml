@@ -79,7 +79,6 @@
 - /Kernels/SingleGrainRigidBodyMotion
 - /Kernels/SoretDiffusion
 - /Kernels/SplitCHMath
-- /Kernels/SplitCHParsed
 - /Kernels/SwitchingFunctionConstraintEta
 - /Kernels/SwitchingFunctionConstraintLagrange
 - /Kernels/SwitchingFunctionPenalty
@@ -114,7 +113,6 @@
 - /Materials/InterfaceOrientationMaterial
 - /Materials/KKSXeVacSolidMaterial
 - /Materials/MathEBFreeEnergy
-- /Materials/MathFreeEnergy
 - /Materials/PFCRFFMaterial
 - /Materials/PFCTradMaterial
 - /Materials/PFFracBulkRateMaterial
