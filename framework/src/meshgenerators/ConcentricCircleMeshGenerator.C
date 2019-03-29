@@ -9,13 +9,14 @@
 
 #include "ConcentricCircleMeshGenerator.h"
 #include "CastUniquePointer.h"
-
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/utility.h"
+#include "libmesh/mesh_smoother_laplace.h"
+
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
@@ -26,7 +27,6 @@ InputParameters
 validParams<ConcentricCircleMeshGenerator>()
 {
   InputParameters params = validParams<MeshGenerator>();
-
   MooseEnum portion(
       "full top_right top_left bottom_left bottom_right right_half left_half top_half bottom_half",
       "full");
@@ -36,7 +36,7 @@ validParams<ConcentricCircleMeshGenerator>()
                                         "'num_sectors' must be an even number.");
   params.addRequiredParam<std::vector<Real>>("radii", "Radii of major concentric circles");
   params.addRequiredParam<std::vector<unsigned int>>(
-      "rings", "Number of rings in each circle or in the moderator");
+      "rings", "Number of rings in each circle or in the enclosing square");
   params.addRequiredParam<Real>("inner_mesh_fraction",
                                 "Length of inner square / radius of the innermost circle");
   params.addRequiredParam<bool>(
@@ -46,13 +46,15 @@ validParams<ConcentricCircleMeshGenerator>()
       "pitch",
       0.0,
       "pitch>=0.0",
-      "The moderator can be added to complete meshes for one unit cell of fuel assembly."
+      "The enclosing square can be added to the completed concentric circle mesh."
       "Elements are quad meshes.");
   params.addParam<MooseEnum>("portion", portion, "Control of which part of mesh is created");
   params.addRequiredParam<bool>(
       "preserve_volumes", "Volume of concentric circles can be preserved using this function.");
-  params.addClassDescription("This ConcentricCircleMesh source code is to generate concentric "
-                             "circle meshes.");
+  params.addParam<unsigned int>("smoothing_max_it", 1, "Number of Laplacian smoothing iterations");
+  params.addClassDescription(
+      "This ConcentricCircleMeshGenerator source code is to generate concentric "
+      "circle meshes.");
 
   return params;
 }
@@ -66,37 +68,43 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
     _has_outer_square(getParam<bool>("has_outer_square")),
     _pitch(getParam<Real>("pitch")),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
+    _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
     _portion(getParam<MooseEnum>("portion"))
 {
+
   if (_num_sectors % 2 != 0)
-    mooseError("ConcentricCircleMesh: num_sectors must be an even number.");
+    paramError("num_sectors", "must be an even number.");
 
   // radii data check
   for (unsigned i = 0; i < _radii.size() - 1; ++i)
+  {
+    if (_radii[i] == 0.0)
+      paramError("radii", "must be positive numbers.");
     if (_radii[i] > _radii[i + 1])
-      mooseError("Radii must be provided in order by starting with the smallest radius and "
-                 "providing the following gradual radii.");
-
+      paramError("radii",
+                 "must be provided in order by starting with the smallest radius providing the "
+                 "following gradual radii.");
+  }
   // condition for setting the size of inner squares.
   if (_inner_mesh_fraction > std::cos(M_PI / 4))
-    mooseError("The aspect ratio can not be larger than cos(PI/4).");
+    paramError("inner_mesh_fraction", "The aspect ratio can not be larger than cos(PI/4).");
 
   // size of 'rings' check
   if (_has_outer_square)
   {
     if (_rings.size() != _radii.size() + 1)
-      mooseError("The size of 'rings' must be equal to the size of 'radii' plus 1.");
+      paramError("rings", "The size of 'rings' must be equal to the size of 'radii' plus 1.");
   }
   else
   {
     if (_rings.size() != _radii.size())
-      mooseError("The size of 'rings' must be equal to the size of 'radii'.");
+      paramError("rings", "The size of 'rings' must be equal to the size of 'radii'.");
   }
   // pitch / 2 must be bigger than any raddi.
   if (_has_outer_square)
     for (unsigned i = 0; i < _radii.size(); ++i)
       if (_pitch / 2 < _radii[i])
-        mooseError("The pitch / 2 must be larger than any radii.");
+        paramError("pitch", "The pitch / 2 must be larger than any radii.");
 }
 
 std::unique_ptr<MeshBase>
@@ -165,15 +173,17 @@ ConcentricCircleMeshGenerator::generate()
 
   // number of total nodes
   unsigned num_total_nodes = 0;
+
   if (_has_outer_square)
     num_total_nodes = Utility::pow<2>(_num_sectors / 2 + 1) +
-                      (_num_sectors + 1) * (total_concentric_circles.size() + _rings.back()) +
-                      (_num_sectors + 1);
+                      (_num_sectors + 1) * total_concentric_circles.size() +
+                      Utility::pow<2>(_rings.back() + 2) + _num_sectors * (_rings.back() + 1) - 1;
   else
     num_total_nodes = Utility::pow<2>(_num_sectors / 2 + 1) +
                       (_num_sectors + 1) * total_concentric_circles.size();
 
   std::vector<Node *> nodes(num_total_nodes);
+
   unsigned node_id = 0;
 
   // for adding nodes for the square at the center of the circle
@@ -188,9 +198,10 @@ ConcentricCircleMeshGenerator::generate()
     }
   }
 
-  // for adding the outer nodes of the square
-  Real current_radius = 0.0;
+  // for adding the outer layers of the square
+  Real current_radius = total_concentric_circles[0];
 
+  // for adding the outer circles of the square.
   for (unsigned layers = 0; layers < total_concentric_circles.size(); ++layers)
   {
     current_radius = total_concentric_circles[layers];
@@ -203,39 +214,71 @@ ConcentricCircleMeshGenerator::generate()
     }
   }
 
-  // adding nodes for the unit cell of fuel assembly.
+  // adding nodes for the enclosing square.
+  // adding nodes for the left edge of the square.
+  // applying the method for partitioning the line segments.
+
   if (_has_outer_square)
   {
-    Real current_radius_moderator = 0.0;
-    for (unsigned i = 1; i <= _rings.back(); ++i)
+    // putting nodes for the left side of the enclosing square.
+    for (unsigned i = 0; i <= _num_sectors / 2; ++i)
     {
-      current_radius_moderator =
-          _radii.back() + i * (_pitch / 2 - _radii.back()) / (_rings.back() + 1);
-      total_concentric_circles.push_back(current_radius_moderator);
-      for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
+      const Real a1 = (_pitch / 4) * i / (_num_sectors / 2);
+      const Real b1 = _pitch / 2;
+
+      const Real a2 = total_concentric_circles.back() * std::cos(M_PI / 2 - i * d_angle);
+      const Real b2 = total_concentric_circles.back() * std::sin(M_PI / 2 - i * d_angle);
+
+      for (unsigned j = 0; j <= _rings.back(); ++j)
       {
-        const Real x = current_radius_moderator * std::cos(num_outer_nodes * d_angle);
-        const Real y = current_radius_moderator * std::sin(num_outer_nodes * d_angle);
+        Real x = ((_rings.back() + 1 - j) * a1 + j * a2) / (_rings.back() + 1);
+        Real y = ((_rings.back() + 1 - j) * b1 + j * b2) / (_rings.back() + 1);
         nodes[node_id] = mesh->add_point(Point(x, y, 0.0), node_id);
         ++node_id;
       }
     }
-
-    for (unsigned j = 0; j < _num_sectors / 2 + 1; ++j)
+    // putting nodes for the center part of the enclosing square.
+    unsigned k = 1;
+    for (unsigned i = 1; i <= _rings.back() + 1; ++i)
     {
-      const Real x = _pitch / 2;
-      const Real y = _pitch / 2 * std::tan(j * d_angle);
-      nodes[node_id] = mesh->add_point(Point(x, y, 0.0), node_id);
-      ++node_id;
+      const Real a1 = (_pitch / 4) + (_pitch / 4) * i / (_rings.back() + 1);
+      const Real b1 = _pitch / 2;
+
+      const Real a2 = _pitch / 2;
+      const Real b2 = _pitch / 4;
+
+      const Real a3 = total_concentric_circles.back() * std::cos(M_PI / 4);
+      const Real b3 = total_concentric_circles.back() * std::sin(M_PI / 4);
+
+      const Real a4 = ((_rings.back() + 1 - k) * a3 + k * a2) / (_rings.back() + 1);
+      const Real b4 = ((_rings.back() + 1 - k) * b3 + k * b2) / (_rings.back() + 1);
+
+      for (unsigned j = 0; j <= _rings.back() + 1; ++j)
+      {
+        Real x = ((_rings.back() + 1 - j) * a1 + j * a4) / (_rings.back() + 1);
+        Real y = ((_rings.back() + 1 - j) * b1 + j * b4) / (_rings.back() + 1);
+        nodes[node_id] = mesh->add_point(Point(x, y, 0.0), node_id);
+        ++node_id;
+      }
+      ++k;
     }
 
-    for (unsigned i = 0; i < _num_sectors / 2; ++i)
+    // putting nodes for the right part of the enclosing square.
+    for (unsigned i = 1; i <= _num_sectors / 2; ++i)
     {
-      const Real x = _pitch / 2 * std::cos((i + _num_sectors / 2 + 1) * d_angle) /
-                     std::sin((i + _num_sectors / 2 + 1) * d_angle);
-      const Real y = _pitch / 2;
-      nodes[node_id] = mesh->add_point(Point(x, y, 0.0), node_id);
-      ++node_id;
+      const Real a1 = _pitch / 2;
+      const Real b1 = _pitch / 4 - (_pitch / 4) * i / (_num_sectors / 2);
+
+      const Real a2 = total_concentric_circles.back() * std::cos(M_PI / 4 - i * d_angle);
+      const Real b2 = total_concentric_circles.back() * std::sin(M_PI / 4 - i * d_angle);
+
+      for (unsigned j = 0; j <= _rings.back(); ++j)
+      {
+        Real x = ((_rings.back() + 1 - j) * a1 + j * a2) / (_rings.back() + 1);
+        Real y = ((_rings.back() + 1 - j) * b1 + j * b2) / (_rings.back() + 1);
+        nodes[node_id] = mesh->add_point(Point(x, y, 0.0), node_id);
+        ++node_id;
+      }
     }
   }
 
@@ -262,12 +305,16 @@ ConcentricCircleMeshGenerator::generate()
 
   // SubdomainIDs set up
   std::vector<unsigned int> subdomainIDs;
-  for (unsigned int i = 0; i < _rings.size(); ++i)
-    for (unsigned int j = 0; j < _rings[i]; ++j)
-      subdomainIDs.push_back(i + 1);
 
   if (_has_outer_square)
-    subdomainIDs.push_back(subdomainIDs.back());
+    for (unsigned int i = 0; i < _rings.size() - 1; ++i)
+      for (unsigned int j = 0; j < _rings[i]; ++j)
+        subdomainIDs.push_back(i + 1);
+  else
+    for (unsigned int i = 0; i < _rings.size(); ++i)
+      for (unsigned int j = 0; j < _rings[i]; ++j)
+        subdomainIDs.push_back(i + 1);
+
   // adding elements in the square
   while (index <= limit)
   {
@@ -284,6 +331,8 @@ ConcentricCircleMeshGenerator::generate()
       boundary_info.add_side(elem, 0, 2);
 
     ++index;
+
+    // increment by 2 indices is necessary depending on where the index points to.
     if ((index - standard / 2) % (standard / 2 + 1) == 0)
       ++index;
   }
@@ -326,51 +375,308 @@ ConcentricCircleMeshGenerator::generate()
     ++counter;
   }
 
-  // adding elements for other concentric circles
-  index = Utility::pow<2>(_num_sectors / 2 + 1);
-  limit = static_cast<int>(num_total_nodes) - standard - 2;
-  int num_nodes_boundary = Utility::pow<2>(_num_sectors / 2 + 1) + _num_sectors + 1;
-
   counter = 0;
+  // adding elements for other concentric circles
+  index = Utility::pow<2>(standard / 2 + 1);
+  limit = Utility::pow<2>(standard / 2 + 1) +
+          (_num_sectors + 1) * (total_concentric_circles.size() - 1);
+
+  int num_nodes_boundary = Utility::pow<2>(standard / 2 + 1) + standard + 1;
+
   while (index < limit)
   {
-
     Elem * elem = mesh->add_elem(new Quad4);
     elem->set_node(0) = nodes[index];
-    elem->set_node(1) = nodes[index + _num_sectors + 1];
-    elem->set_node(2) = nodes[index + _num_sectors + 2];
+    elem->set_node(1) = nodes[index + standard + 1];
+    elem->set_node(2) = nodes[index + standard + 2];
     elem->set_node(3) = nodes[index + 1];
 
-    for (int i = 0; i < static_cast<int>(subdomainIDs.size()) - 1; ++i)
+    for (int i = 0; i < static_cast<int>(subdomainIDs.size() - 1); ++i)
       if (index < limit - (standard + 1) * i && index >= limit - (standard + 1) * (i + 1))
         elem->subdomain_id() = subdomainIDs[subdomainIDs.size() - 1 - i];
 
-    int const initial = Utility::pow<2>(standard / 2 + 1);
-    int const final = Utility::pow<2>(standard / 2 + 1) + _num_sectors - 1;
+    const int initial = Utility::pow<2>(standard / 2 + 1);
+    const int final = Utility::pow<2>(standard / 2 + 1) + standard - 1;
 
     if ((index - initial) % (standard + 1) == 0)
       boundary_info.add_side(elem, 0, 2);
     if ((index - final) % (standard + 1) == 0)
       boundary_info.add_side(elem, 2, 1);
-    if (index > limit - (standard + 1))
-    {
-      if (_has_outer_square)
-      {
-        if (index < limit - standard + standard / 2)
-          boundary_info.add_side(elem, 1, 3);
-        else
-          boundary_info.add_side(elem, 1, 4);
-      }
-      else
-      {
+    if (!_has_outer_square)
+      if (index >= limit - (standard + 1))
         boundary_info.add_side(elem, 1, 3);
-      }
-    }
+
+    // index increment is for adding nodes for a next element.
     ++index;
+
+    // increment by 2 indices may be necessary depending on where the index points to.
+    // this varies based on the algorithms provided for the specific element and node placement.
     if (index == (num_nodes_boundary + counter * (standard + 1)) - 1)
     {
       ++index;
       ++counter;
+    }
+  }
+
+  // adding elements for the enclosing square. (top left)
+  int initial =
+      Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size();
+
+  int initial2 =
+      Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size();
+
+  if (_has_outer_square)
+  {
+    if (_rings.back() != 0) // this must be condition up front.
+    {
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size();
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+              (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 3 -
+              _rings.back() * (_rings.back() + 2) - (_rings.back() + 1);
+      while (index <= limit)
+      {
+        Elem * elem = mesh->add_elem(new Quad4);
+        elem->set_node(0) = nodes[index];
+        elem->set_node(1) = nodes[index + 1];
+        elem->set_node(2) = nodes[index + 1 + _rings.back() + 1];
+        elem->set_node(3) = nodes[index + 1 + _rings.back()];
+        elem->subdomain_id() = subdomainIDs.back() + 1;
+
+        if (index < (initial2 + static_cast<int>(_rings.back())))
+          boundary_info.add_side(elem, 0, 1);
+
+        if (index == initial)
+          boundary_info.add_side(elem, 3, 4);
+
+        ++index;
+
+        // As mentioned before, increment by 2 indices may be required depending on where the index
+        // points to.
+        if ((index - initial) % static_cast<int>(_rings.back()) == 0)
+        {
+          ++index;
+          initial = initial + (static_cast<int>(_rings.back()) + 1);
+        }
+      }
+
+      // adding elements for the enclosing square. (top right)
+      initial = Utility::pow<2>(standard / 2 + 1) +
+                (standard + 1) * total_concentric_circles.size() +
+                (_rings.back() + 1) * (standard / 2 + 1);
+
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+              (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 3 -
+              (_rings.back() + 2);
+
+      while (index <= limit)
+      {
+        Elem * elem = mesh->add_elem(new Quad4);
+        elem->set_node(0) = nodes[index];
+        elem->set_node(1) = nodes[index + _rings.back() + 2];
+        elem->set_node(2) = nodes[index + _rings.back() + 3];
+        elem->set_node(3) = nodes[index + 1];
+        elem->subdomain_id() = subdomainIDs.back() + 1;
+
+        if (index >= static_cast<int>(limit - (_rings.back() + 1)))
+          boundary_info.add_side(elem, 1, 3);
+
+        if ((index - initial) % static_cast<int>(_rings.back() + 2) == 0)
+          boundary_info.add_side(elem, 0, 4);
+
+        ++index;
+
+        if ((index - initial) % static_cast<int>(_rings.back() + 1) == 0)
+        {
+          ++index;
+          initial = initial + (static_cast<int>(_rings.back()) + 2);
+        }
+      }
+
+      // adding elements for the enclosing square. (one center quad)
+      int index1 = Utility::pow<2>(standard / 2 + 1) +
+                   (standard + 1) * (total_concentric_circles.size() - 1) + standard / 2;
+
+      int index2 = Utility::pow<2>(standard / 2 + 1) +
+                   (standard + 1) * total_concentric_circles.size() +
+                   (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 3 -
+                   _rings.back() * (_rings.back() + 2) - (_rings.back() + 1);
+
+      Elem * elem = mesh->add_elem(new Quad4);
+      elem->set_node(0) = nodes[index1];
+      elem->set_node(1) = nodes[index2];
+      elem->set_node(2) = nodes[index2 + _rings.back() + 1];
+      elem->set_node(3) = nodes[index2 + _rings.back() + 2];
+      elem->subdomain_id() = subdomainIDs.back() + 1;
+
+      // adding elements for the left mid part.
+      index = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
+              (standard + 1) * (total_concentric_circles.size() - 1);
+      limit = index + standard / 2 - 1;
+
+      while (index <= limit)
+      {
+        Elem * elem = mesh->add_elem(new Quad4);
+        elem->set_node(0) = nodes[index];
+        elem->set_node(1) = nodes[index + 1];
+        elem->set_node(2) = nodes[index2 - _rings.back() - 1];
+        elem->set_node(3) = nodes[index2];
+        elem->subdomain_id() = subdomainIDs.back() + 1;
+
+        if (index == limit)
+          boundary_info.add_side(elem, 1, 1);
+
+        ++index;
+
+        // two different indices are used to add nodes for an element.
+        index2 = index2 - _rings.back() - 1;
+      }
+
+      // adding elements for the right mid part.
+      index1 = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
+               (standard + 1) * (total_concentric_circles.size() - 1);
+      index2 = Utility::pow<2>(standard / 2 + 1) +
+               (standard + 1) * total_concentric_circles.size() +
+               (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2 +
+               (_rings.back() + 1);
+      int index3 =
+          Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+          (_rings.back() + 1) * (standard / 2) - 1 + (_rings.back() + 1) + (_rings.back() + 2);
+
+      if (standard == 2)
+      {
+        Elem * elem = mesh->add_elem(new Quad4);
+        elem->set_node(0) = nodes[index1];
+        elem->set_node(1) = nodes[index1 - 1];
+        elem->set_node(2) = nodes[index2];
+        elem->set_node(3) = nodes[index3];
+        elem->subdomain_id() = subdomainIDs.back() + 1;
+
+        boundary_info.add_side(elem, 1, 2);
+      }
+      else
+      {
+        Elem * elem = mesh->add_elem(new Quad4);
+        elem->set_node(0) = nodes[index1];
+        elem->set_node(1) = nodes[index1 - 1];
+        elem->set_node(2) = nodes[index2];
+        elem->set_node(3) = nodes[index3];
+        elem->subdomain_id() = subdomainIDs.back() + 1;
+      }
+
+      // adding elements for the right mid bottom part.
+
+      index = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
+              (standard + 1) * (total_concentric_circles.size() - 1) - 2;
+      index1 = Utility::pow<2>(standard / 2 + 1) +
+               (standard + 1) * total_concentric_circles.size() +
+               (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2 +
+               (_rings.back() + 1) * 2;
+
+      limit = Utility::pow<2>(standard / 2 + 1) + standard / 2 +
+              (standard + 1) * (total_concentric_circles.size() - 1) - standard / 2;
+
+      if (standard != 2)
+      {
+        while (index >= limit)
+        {
+          Elem * elem = mesh->add_elem(new Quad4);
+          elem->set_node(0) = nodes[index];
+          elem->set_node(1) = nodes[index1];
+          elem->set_node(2) = nodes[index1 - (_rings.back() + 1)];
+          elem->set_node(3) = nodes[index + 1];
+          elem->subdomain_id() = subdomainIDs.back() + 1;
+
+          if (index == limit)
+            boundary_info.add_side(elem, 0, 2);
+          --index;
+          index1 = index1 + (_rings.back() + 1);
+        }
+      }
+
+      // adding elements for the right low part.
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+              (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2;
+
+      index1 = index - (_rings.back() + 2);
+      // dummy condition for elem definition
+      if (standard >= 2)
+      {
+        Elem * elem = mesh->add_elem(new Quad4);
+        elem->set_node(0) = nodes[index];
+        elem->set_node(1) = nodes[index + 1];
+        elem->set_node(2) = nodes[index + 2];
+        elem->set_node(3) = nodes[index1];
+        elem->subdomain_id() = subdomainIDs.back() + 1;
+
+        boundary_info.add_side(elem, 0, 3);
+
+        if (standard == 2)
+          boundary_info.add_side(elem, 1, 2);
+      }
+
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+              (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 2 -
+              (_rings.back() + 2);
+
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+              (_rings.back() + 1) * (standard / 2) + (_rings.back() + 2) * 2 - 2;
+
+      int k = 1;
+      while (index > limit)
+      {
+        Elem * elem = mesh->add_elem(new Quad4);
+        elem->set_node(0) = nodes[index];
+        elem->set_node(1) = nodes[index + (_rings.back() + 2) * k + k + 1];
+        elem->set_node(2) = nodes[index + (_rings.back() + 2) * k + k + 2];
+        elem->set_node(3) = nodes[index - _rings.back() - 2];
+        elem->subdomain_id() = subdomainIDs.back() + 1;
+        index = index - (_rings.back() + 2);
+        ++k;
+
+        if (standard == 2)
+          boundary_info.add_side(elem, 1, 2);
+      }
+
+      index = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+              (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 1;
+      initial = Utility::pow<2>(standard / 2 + 1) +
+                (standard + 1) * total_concentric_circles.size() +
+                (_rings.back() + 1) * (standard / 2) + Utility::pow<2>(_rings.back() + 2) - 1;
+      limit = Utility::pow<2>(standard / 2 + 1) + (standard + 1) * total_concentric_circles.size() +
+              (_rings.back() + 1) * (standard / 2) * 2 + Utility::pow<2>(_rings.back() + 2) - 2 -
+              _rings.back() - 1;
+
+      initial2 = Utility::pow<2>(standard / 2 + 1) +
+                 (standard + 1) * total_concentric_circles.size() +
+                 (_rings.back() + 1) * (standard / 2) * 2 + Utility::pow<2>(_rings.back() + 2) - 2 -
+                 (_rings.back() + 1) * 2;
+
+      if (standard > 2)
+      {
+        while (index < limit)
+        {
+          Elem * elem = mesh->add_elem(new Quad4);
+          elem->set_node(0) = nodes[index];
+          elem->set_node(1) = nodes[index + 1];
+          elem->set_node(2) = nodes[index + 1 + _rings.back() + 1];
+          elem->set_node(3) = nodes[index + 1 + _rings.back()];
+          elem->subdomain_id() = subdomainIDs.back() + 1;
+
+          if (index > initial2)
+            boundary_info.add_side(elem, 2, 2);
+
+          if ((index - initial) == 0)
+            boundary_info.add_side(elem, 3, 3);
+
+          ++index;
+
+          if ((index - initial) % static_cast<int>(_rings.back()) == 0)
+          {
+            ++index;
+            initial = initial + (static_cast<int>(_rings.back()) + 1);
+          }
+        }
+      }
     }
   }
 
@@ -667,9 +973,14 @@ ConcentricCircleMeshGenerator::generate()
     }
     portion_two.clear();
   }
+
   if (_portion != "top_half" && _portion != "right_half" && _portion != "left_half" &&
       _portion != "bottom_half" && _portion != "full")
     mesh->prepare_for_use(false);
+
+  // Laplace smoothing
+  LaplaceMeshSmoother lms(*mesh);
+  lms.smooth(_smoothing_max_it);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

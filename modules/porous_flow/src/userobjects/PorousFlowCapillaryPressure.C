@@ -94,6 +94,24 @@ PorousFlowCapillaryPressure::effectiveSaturationFromSaturation(Real saturation) 
 }
 
 Real
+PorousFlowCapillaryPressure::saturation(Real pc, unsigned qp) const
+{
+  return effectiveSaturation(pc, qp) * (1.0 - _sat_lr) + _sat_lr;
+}
+
+Real
+PorousFlowCapillaryPressure::dSaturation(Real pc, unsigned qp) const
+{
+  return dEffectiveSaturation(pc, qp) * (1.0 - _sat_lr);
+}
+
+Real
+PorousFlowCapillaryPressure::d2Saturation(Real pc, unsigned qp) const
+{
+  return d2EffectiveSaturation(pc, qp) * (1.0 - _sat_lr);
+}
+
+Real
 PorousFlowCapillaryPressure::capillaryPressureLogExt(Real saturation) const
 {
   return _pc_ext * std::pow(10.0, _slope_ext * (saturation - _sat_ext));
