@@ -1,5 +1,6 @@
 ###########################################################
-# This is a simple test of the ADCoupledTimeTest kernel.
+# This is a simple test of coupling an aux variable into the
+# ADCoupledTimeDerivative kernel.
 # The expected solution for the variable v is
 # v(x) = 1/2 * (x^2 + x)
 ###########################################################
@@ -38,7 +39,7 @@
 
 [Kernels]
   [./time_v]
-    type = ADCoupledTimeTest
+    type = ADCoupledTimeDerivative
     variable = v
     v = u
   [../]
