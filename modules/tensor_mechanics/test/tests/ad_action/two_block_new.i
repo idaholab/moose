@@ -34,7 +34,7 @@
   [./block1]
     # the `block` parameter is only valid insde a subblock.
     block = 1
-    use_ad = true
+    use_automatic_differentiation = true
   [../]
   [./block2]
     block = 2
@@ -42,7 +42,7 @@
     # subblock. Values specified here are appended to the `generate_output`
     # parameter values.
     additional_generate_output = 'strain_yy'
-    use_ad = true
+    use_automatic_differentiation = true
   [../]
 []
 

@@ -22,7 +22,7 @@
   eigenstrain_names = eigenstrain
   add_variables = true
   generate_output = 'strain_xx strain_yy strain_xy'
-  use_ad = true
+  use_automatic_differentiation = true
 []
 
 [Materials]

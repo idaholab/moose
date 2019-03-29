@@ -36,13 +36,13 @@
 #     strain = FINITE
 #     add_variables = true
 #     #block = 1
-#     use_ad = true
+#     use_automatic_differentiation = true
 #   [../]
 #   [./block2]
 #     strain = SMALL
 #     add_variables = true
 #     block = 2
-#     use_ad = true
+#     use_automatic_differentiation = true
 #   [../]
 # []
 

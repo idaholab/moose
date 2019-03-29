@@ -57,7 +57,9 @@ validParams<TensorMechanicsActionBase>()
   params.addParam<bool>("add_variables", false, "Add the displacement variables");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
-  params.addParam<bool>("use_ad", false, "Flag to use AD objects when possible");
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Flag to use automatic differentiation (AD) objects when possible");
   // Global Strain
   params.addParam<MaterialPropertyName>(
       "global_strain",
@@ -105,7 +107,7 @@ validParams<TensorMechanicsActionBase>()
 }
 
 TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & parameters)
-  : Action(parameters), _use_ad(getParam<bool>("use_ad"))
+  : Action(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
   // check if a container block with common parameters is found
   auto action = _awh.getActions<CommonTensorMechanicsAction>();

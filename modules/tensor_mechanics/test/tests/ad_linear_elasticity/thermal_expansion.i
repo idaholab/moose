@@ -27,7 +27,7 @@
   eigenstrain_names = eigenstrain
   add_variables = true
   generate_output = 'stress_xx stress_yy stress_xy'
-  use_ad = true
+  use_automatic_differentiation = true
 []
 
 [Materials]
